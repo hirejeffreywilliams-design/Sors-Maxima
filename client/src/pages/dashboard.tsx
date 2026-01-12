@@ -63,7 +63,7 @@ export default function Dashboard() {
                   <p className="text-sm font-medium text-muted-foreground">
                     Monte Carlo
                   </p>
-                  <p className="text-2xl font-bold font-mono">20K</p>
+                  <p className="text-2xl font-bold font-mono">100K</p>
                   <p className="text-xs text-muted-foreground">
                     simulations
                   </p>

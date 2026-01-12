@@ -26,6 +26,7 @@ A sophisticated sports betting parlay optimizer that helps users build smarter p
 - **Backend**: Express.js, TypeScript
 - **State Management**: TanStack Query (React Query)
 - **Routing**: Wouter
+- **Monte Carlo Engine**: 100,000 simulations with adaptive batching, typed arrays, caching, and convergence detection
 
 ## Project Structure
 ```

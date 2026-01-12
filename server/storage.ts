@@ -21,6 +21,25 @@ export interface IStorage {
   ): Promise<GeneratedParlay[]>;
 }
 
+const DEFAULT_SIMULATIONS = 100000;
+const BATCH_SIZE = 10000;
+const CONVERGENCE_THRESHOLD = 0.0001;
+const MIN_BATCHES = 5;
+const MAX_BATCHES = 20;
+
+const simulationCache = new Map<string, {
+  winProbability: number;
+  simulations: number;
+  timestamp: number;
+  variance: number;
+}>();
+
+const choleskyCache = new Map<string, Float64Array[]>();
+
+function getCacheKey(legs: ParlayLeg[]): string {
+  return legs.map(l => `${l.id || l.team}-${l.outcome}-${l.decimalOdds}`).join('|');
+}
+
 function clamp(x: number, lo = -0.99, hi = 0.99): number {
   return Math.max(lo, Math.min(hi, x));
 }
@@ -148,9 +167,9 @@ function buildCorrelationMatrix(legs: ParlayLeg[]): number[][] {
   return mat;
 }
 
-function cholDecomp(A: number[][]): number[][] {
+function cholDecompTyped(A: number[][]): Float64Array[] {
   const n = A.length;
-  const L: number[][] = Array.from({ length: n }, () => Array(n).fill(0));
+  const L: Float64Array[] = Array.from({ length: n }, () => new Float64Array(n));
 
   for (let i = 0; i < n; i++) {
     for (let j = 0; j <= i; j++) {
@@ -167,17 +186,34 @@ function cholDecomp(A: number[][]): number[][] {
   return L;
 }
 
-function gaussianSampleVector(n: number): number[] {
-  const out: number[] = Array(n).fill(0);
-  for (let i = 0; i < n; i += 2) {
-    const u1 = Math.random() || 1e-12;
-    const u2 = Math.random() || 1e-12;
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
-    out[i] = z0;
-    if (i + 1 < n) out[i + 1] = z1;
+class SeededRNG {
+  private seed: number;
+  
+  constructor(seed: number = Date.now()) {
+    this.seed = seed;
   }
-  return out;
+  
+  next(): number {
+    this.seed = (this.seed * 1103515245 + 12345) & 0x7fffffff;
+    return this.seed / 0x7fffffff;
+  }
+  
+  nextGaussian(): number {
+    const u1 = this.next() || 1e-12;
+    const u2 = this.next() || 1e-12;
+    return Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+  }
+}
+
+function gaussianSampleVectorTyped(n: number, out: Float64Array, rng: SeededRNG): void {
+  for (let i = 0; i < n; i += 2) {
+    const u1 = rng.next() || 1e-12;
+    const u2 = rng.next() || 1e-12;
+    const mag = Math.sqrt(-2.0 * Math.log(u1));
+    const phase = 2.0 * Math.PI * u2;
+    out[i] = mag * Math.cos(phase);
+    if (i + 1 < n) out[i + 1] = mag * Math.sin(phase);
+  }
 }
 
 function erfinv(x: number): number {
@@ -198,13 +234,50 @@ function normInv(p: number): number {
   return Math.SQRT2 * erfinv(2 * p - 1);
 }
 
-async function runMonteCarloSimulation(
+function runBatchSimulation(
+  n: number,
+  L: Float64Array[],
+  thresholds: Float64Array,
+  batchSize: number,
+  rng: SeededRNG
+): number {
+  const z = new Float64Array(n);
+  const x = new Float64Array(n);
+  let wins = 0;
+
+  for (let b = 0; b < batchSize; b++) {
+    gaussianSampleVectorTyped(n, z, rng);
+    
+    for (let i = 0; i < n; i++) {
+      let acc = 0;
+      const Li = L[i];
+      for (let k = 0; k <= i; k++) acc += Li[k] * z[k];
+      x[i] = acc;
+    }
+
+    let ok = true;
+    for (let i = 0; i < n; i++) {
+      if (x[i] > thresholds[i]) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) wins++;
+  }
+
+  return wins;
+}
+
+async function runAdaptiveMonteCarloSimulation(
   legs: ParlayLeg[],
-  simulations: number
+  targetSimulations: number
 ): Promise<{
   winProbability: number;
   method: "analytic" | "montecarlo";
   sims: number;
+  variance: number;
+  standardError: number;
+  confidenceInterval: [number, number];
 }> {
   const n = legs.length;
   const probs = legs.map(estimateLegProbability);
@@ -222,48 +295,101 @@ async function runMonteCarloSimulation(
 
   if (independent) {
     const winProb = probs.reduce((acc, p) => acc * p, 1);
-    return { winProbability: winProb, method: "analytic", sims: 0 };
+    return { 
+      winProbability: winProb, 
+      method: "analytic", 
+      sims: 0,
+      variance: 0,
+      standardError: 0,
+      confidenceInterval: [winProb, winProb]
+    };
   }
 
-  const thresholds = probs.map((p) => normInv(p));
-  const L = cholDecomp(corr);
+  const cacheKey = getCacheKey(legs);
+  const cachedResult = simulationCache.get(cacheKey);
+  if (cachedResult && cachedResult.simulations >= targetSimulations * 0.9 && 
+      Date.now() - cachedResult.timestamp < 60000) {
+    return {
+      winProbability: cachedResult.winProbability,
+      method: "montecarlo",
+      sims: cachedResult.simulations,
+      variance: cachedResult.variance,
+      standardError: Math.sqrt(cachedResult.variance / cachedResult.simulations),
+      confidenceInterval: [
+        cachedResult.winProbability - 1.96 * Math.sqrt(cachedResult.variance / cachedResult.simulations),
+        cachedResult.winProbability + 1.96 * Math.sqrt(cachedResult.variance / cachedResult.simulations)
+      ]
+    };
+  }
 
-  let wins = 0;
-  const batchSize = Math.min(5000, simulations);
-  let run = 0;
-
-  while (run < simulations) {
-    const thisBatch = Math.min(batchSize, simulations - run);
-    for (let b = 0; b < thisBatch; b++) {
-      const z = gaussianSampleVector(n);
-      const x: number[] = Array(n).fill(0);
-
-      for (let i = 0; i < n; i++) {
-        let acc = 0;
-        for (let k = 0; k <= i; k++) acc += L[i][k] * z[k];
-        x[i] = acc;
-      }
-
-      let ok = true;
-      for (let i = 0; i < n; i++) {
-        if (x[i] > thresholds[i]) {
-          ok = false;
-          break;
-        }
-      }
-      if (ok) wins++;
+  const thresholds = new Float64Array(probs.map((p) => normInv(p)));
+  
+  let L = choleskyCache.get(cacheKey);
+  if (!L) {
+    L = cholDecompTyped(corr);
+    choleskyCache.set(cacheKey, L);
+    if (choleskyCache.size > 100) {
+      const firstKey = choleskyCache.keys().next().value;
+      if (firstKey) choleskyCache.delete(firstKey);
     }
-    run += thisBatch;
+  }
 
-    if (run % 10000 === 0) {
+  const rng = new SeededRNG(Date.now() + Math.floor(Math.random() * 1000000));
+  
+  let totalWins = 0;
+  let totalRuns = 0;
+  const batchResults: number[] = [];
+  
+  const numBatches = Math.max(MIN_BATCHES, Math.min(MAX_BATCHES, Math.ceil(targetSimulations / BATCH_SIZE)));
+  const batchSize = Math.ceil(targetSimulations / numBatches);
+  
+  for (let batch = 0; batch < numBatches; batch++) {
+    const wins = runBatchSimulation(n, L, thresholds, batchSize, rng);
+    totalWins += wins;
+    totalRuns += batchSize;
+    batchResults.push(wins / batchSize);
+    
+    if (batch >= MIN_BATCHES - 1 && batch < numBatches - 1) {
+      const currentProb = totalWins / totalRuns;
+      const variance = batchResults.reduce((sum, p) => sum + Math.pow(p - currentProb, 2), 0) / batchResults.length;
+      const standardError = Math.sqrt(variance / batchResults.length);
+      
+      if (standardError < CONVERGENCE_THRESHOLD && currentProb > 0.001) {
+        break;
+      }
+    }
+    
+    if (batch % 3 === 0) {
       await new Promise((r) => setTimeout(r, 0));
     }
   }
 
+  const winProbability = totalWins / totalRuns;
+  const variance = batchResults.reduce((sum, p) => sum + Math.pow(p - winProbability, 2), 0) / batchResults.length;
+  const standardError = Math.sqrt(variance / batchResults.length);
+  
+  simulationCache.set(cacheKey, {
+    winProbability,
+    simulations: totalRuns,
+    timestamp: Date.now(),
+    variance
+  });
+  
+  if (simulationCache.size > 50) {
+    const firstKey = simulationCache.keys().next().value;
+    if (firstKey) simulationCache.delete(firstKey);
+  }
+
   return {
-    winProbability: wins / simulations,
+    winProbability,
     method: "montecarlo",
-    sims: simulations,
+    sims: totalRuns,
+    variance,
+    standardError,
+    confidenceInterval: [
+      Math.max(0, winProbability - 1.96 * standardError),
+      Math.min(1, winProbability + 1.96 * standardError)
+    ]
   };
 }
 
@@ -295,28 +421,6 @@ function combinations<T>(arr: T[], k: number): T[][] {
   }
   for (const combo of combinations(rest, k)) {
     result.push(combo);
-  }
-  
-  return result;
-}
-
-function filterConflictingLegs(legs: ParlayLeg[]): ParlayLeg[] {
-  const eventOutcomes = new Map<string, Set<string>>();
-  const result: ParlayLeg[] = [];
-  
-  for (const leg of legs) {
-    if (!leg.eventId) {
-      result.push(leg);
-      continue;
-    }
-    
-    const key = `${leg.eventId}-${leg.market}`;
-    const existing = eventOutcomes.get(key);
-    
-    if (!existing) {
-      eventOutcomes.set(key, new Set([leg.outcome]));
-      result.push(leg);
-    }
   }
   
   return result;
@@ -362,14 +466,14 @@ export class MemStorage implements IStorage {
       throw new Error("At least 2 legs required for parlay evaluation");
     }
 
+    const effectiveSimulations = Math.max(simulations, DEFAULT_SIMULATIONS);
+
     const legProbabilities = legs.map(estimateLegProbability);
     const combinedOdds = legs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
     const correlationMatrix = buildCorrelationMatrix(legs);
 
-    const { winProbability, method, sims } = await runMonteCarloSimulation(
-      legs,
-      simulations
-    );
+    const { winProbability, method, sims, standardError, confidenceInterval } = 
+      await runAdaptiveMonteCarloSimulation(legs, effectiveSimulations);
 
     const impliedWinProb = 1 / combinedOdds;
     const expectedValue = winProbability / impliedWinProb - 1;
@@ -387,6 +491,8 @@ export class MemStorage implements IStorage {
       simulations: sims,
       legProbabilities,
       correlationMatrix,
+      standardError,
+      confidenceInterval,
     };
   }
 
@@ -463,10 +569,8 @@ export class MemStorage implements IStorage {
     const results: GeneratedParlay[] = [];
 
     for (const candidate of topCandidates) {
-      const { winProbability } = await runMonteCarloSimulation(
-        candidate.legs,
-        5000
-      );
+      const { winProbability, standardError, confidenceInterval } = 
+        await runAdaptiveMonteCarloSimulation(candidate.legs, 50000);
 
       const kellyStake = calculateKellyStake(
         winProbability,
@@ -510,6 +614,8 @@ export class MemStorage implements IStorage {
         score,
         riskRating,
         sport,
+        standardError,
+        confidenceInterval,
       });
     }
 

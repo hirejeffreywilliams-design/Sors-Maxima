@@ -190,6 +190,8 @@ export const evaluationResultSchema = z.object({
   simulations: z.number().optional(),
   legProbabilities: z.array(z.number()),
   correlationMatrix: z.array(z.array(z.number())).optional(),
+  standardError: z.number().optional(),
+  confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
 });
 
 export type EvaluationResult = z.infer<typeof evaluationResultSchema>;
@@ -305,6 +307,8 @@ export const generatedParlaySchema = z.object({
   score: z.number(),
   riskRating: z.enum(["low", "medium", "high"]),
   sport: z.enum(sports),
+  standardError: z.number().optional(),
+  confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
 });
 
 export type GeneratedParlay = z.infer<typeof generatedParlaySchema>;

@@ -1,7 +1,8 @@
-import { TrendingUp, Percent, DollarSign, BarChart3, Cpu, Loader2 } from "lucide-react";
+import { TrendingUp, Percent, DollarSign, BarChart3, Cpu, Loader2, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { EvaluationResult } from "@shared/schema";
 
 interface ProbabilityResultsProps {
@@ -81,9 +82,27 @@ export function ProbabilityResults({ result, stake, isLoading }: ProbabilityResu
           <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide mb-2">
             Win Probability
           </p>
-          <div className="text-5xl font-mono font-bold mb-3" data-testid="text-win-probability">
+          <div className="text-5xl font-mono font-bold mb-1" data-testid="text-win-probability">
             {winPercent.toFixed(2)}%
           </div>
+          {result.confidenceInterval && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mb-2 cursor-help">
+                  <Target className="w-3 h-3" />
+                  <span className="font-mono">
+                    95% CI: [{(result.confidenceInterval[0] * 100).toFixed(2)}% - {(result.confidenceInterval[1] * 100).toFixed(2)}%]
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>95% confidence interval from {(result.simulations || 0).toLocaleString()} simulations</p>
+                {result.standardError && (
+                  <p className="text-xs">Standard error: ±{(result.standardError * 100).toFixed(3)}%</p>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Progress value={winPercent} className="h-2" />
         </div>
 
