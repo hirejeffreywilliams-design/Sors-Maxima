@@ -51,6 +51,7 @@ function baseCorrelationForMarkets(a: ParlayLeg, b: ParlayLeg): number {
   if (a.market === b.market && a.market === "moneyline") return 0.6;
   if (a.market === b.market && a.market === "spread") return 0.5;
   if (a.market === b.market && a.market === "total") return 0.4;
+  if (a.market === b.market && a.market === "player_prop") return 0.3;
   if (
     (a.market === "moneyline" && b.market === "spread") ||
     (b.market === "moneyline" && a.market === "spread")
@@ -60,8 +61,59 @@ function baseCorrelationForMarkets(a: ParlayLeg, b: ParlayLeg): number {
   return 0.15;
 }
 
+function estimatePlayerPropCorrelation(a: ParlayLeg, b: ParlayLeg): number {
+  if (a.market !== "player_prop" || b.market !== "player_prop") return 0;
+  
+  const samePlayer = a.playerId && b.playerId && a.playerId === b.playerId;
+  const sameTeam = a.team && b.team && a.team === b.team;
+  const sameEvent = a.eventId && b.eventId && a.eventId === b.eventId;
+  
+  const aIsOver = a.outcome.toLowerCase().includes("over");
+  const bIsOver = b.outcome.toLowerCase().includes("over");
+  const sameDirection = aIsOver === bIsOver;
+  
+  if (samePlayer && a.propCategory === b.propCategory) {
+    return sameDirection ? 0.95 : -0.95;
+  }
+  
+  if (samePlayer) {
+    return sameDirection ? 0.4 : -0.4;
+  }
+  
+  if (sameTeam && sameEvent) {
+    const passingRecvCorr = (
+      (a.propCategory === "passing_yards" && b.propCategory === "receiving_yards") ||
+      (a.propCategory === "receiving_yards" && b.propCategory === "passing_yards") ||
+      (a.propCategory === "passing_tds" && b.propCategory === "receiving_tds") ||
+      (a.propCategory === "receiving_tds" && b.propCategory === "passing_tds")
+    );
+    
+    if (passingRecvCorr) {
+      return sameDirection ? 0.55 : -0.55;
+    }
+    
+    return sameDirection ? 0.2 : -0.2;
+  }
+  
+  if (sameEvent && !sameTeam) {
+    return sameDirection ? -0.15 : 0.15;
+  }
+  
+  return 0;
+}
+
 function estimatePairCorrelation(a: ParlayLeg, b: ParlayLeg): number {
   if (!a || !b) return 0;
+
+  if (a.market === "player_prop" || b.market === "player_prop") {
+    if (a.market === "player_prop" && b.market === "player_prop") {
+      return clamp(estimatePlayerPropCorrelation(a, b));
+    }
+    if (a.eventId && b.eventId && a.eventId === b.eventId) {
+      return clamp(0.15);
+    }
+    return 0;
+  }
 
   if (a.eventId && b.eventId && a.eventId === b.eventId) {
     if (a.outcome === b.outcome) {

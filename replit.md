@@ -7,6 +7,11 @@ A sophisticated sports betting parlay optimizer that helps users build smarter p
 - **Advanced Parlay Generator**: Auto-generates optimal parlays using Monte Carlo optimization
   - Sport selection (NBA, NFL, MLB, NHL, NCAAB, NCAAF)
   - **Game-by-game selection**: View all available matchups and choose specific games to include
+  - **Player Props**: Comprehensive props similar to FanDuel/DraftKings:
+    - NFL: Passing Yards, Passing TDs, Rushing Yards, Receiving Yards, Receptions, Anytime TD
+    - NBA: Points, Rebounds, Assists, 3-Pointers, Pts+Rebs+Asts, Steals+Blocks
+    - MLB: Hits, RBIs, Runs, Total Bases, Strikeouts (Pitcher)
+    - NHL: Goals, Assists, Shots, Saves
   - Configurable risk level (conservative, moderate, aggressive)
   - Adjustable parlay size and bankroll settings
   - "Load into Builder" to customize generated parlays
@@ -66,6 +71,7 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added comprehensive player props (passing/rushing/receiving yards, TDs, points, assists, etc.) for all sports
 - January 12, 2026: Added game-by-game selection - users can now pick specific teams/matchups for their parlays
 - January 12, 2026: Added Advanced Parlay Generator with sport selection, risk levels, and optimization algorithms
 - January 12, 2026: Initial implementation with Monte Carlo engine, parlay builder UI, and dark mode support
