@@ -17,9 +17,10 @@ interface ParlayBuilderProps {
   preloadedLegs?: ParlayLeg[];
   onLegsLoaded?: () => void;
   onLegsChange?: (legs: ParlayLeg[]) => void;
+  bankroll?: number;
 }
 
-export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange }: ParlayBuilderProps) {
+export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, bankroll = 1000 }: ParlayBuilderProps) {
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
   
   useEffect(() => {
@@ -173,6 +174,7 @@ export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange }: Par
           result={result}
           stake={stake}
           isLoading={evaluateMutation.isPending}
+          bankroll={bankroll}
         />
         
         <CorrelationMatrix

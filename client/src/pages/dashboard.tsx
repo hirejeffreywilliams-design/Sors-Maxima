@@ -211,6 +211,7 @@ export default function Dashboard() {
                   preloadedLegs={preloadedLegs} 
                   onLegsLoaded={() => setPreloadedLegs([])} 
                   onLegsChange={handleLegsChange}
+                  bankroll={bankrollSettings.totalBankroll}
                 />
               </TabsContent>
             </Tabs>
@@ -218,6 +219,15 @@ export default function Dashboard() {
             <div className="mt-6">
               <EdgeFinder events={events} sport="NBA" />
             </div>
+            
+            {showSettings && (
+              <div className="xl:hidden">
+                <BettingSettings 
+                  settings={bettingEnv} 
+                  onSettingsChange={setBettingEnv} 
+                />
+              </div>
+            )}
           </div>
           
           {(showInsights || showSettings) && (
