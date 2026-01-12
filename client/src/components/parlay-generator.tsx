@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import {
   Sparkles,
-  RefreshCw,
   Loader2,
   TrendingUp,
   DollarSign,

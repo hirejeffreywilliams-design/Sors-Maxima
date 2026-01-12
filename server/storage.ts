@@ -271,18 +271,30 @@ function filterConflictingLegs(legs: ParlayLeg[]): ParlayLeg[] {
 }
 
 function hasConflictingLegs(combo: ParlayLeg[]): boolean {
-  const seen = new Map<string, string>();
+  const seenEventMarkets = new Set<string>();
+  const seenEvents = new Set<string>();
   
   for (const leg of combo) {
     if (!leg.eventId) continue;
     
-    const key = `${leg.eventId}-${leg.market}`;
-    const existingOutcome = seen.get(key);
-    
-    if (existingOutcome && existingOutcome !== leg.outcome) {
+    const eventMarketKey = `${leg.eventId}-${leg.market}`;
+    if (seenEventMarkets.has(eventMarketKey)) {
       return true;
     }
-    seen.set(key, leg.outcome);
+    seenEventMarkets.add(eventMarketKey);
+    
+    if (leg.market === "moneyline" || leg.market === "spread") {
+      if (seenEvents.has(leg.eventId)) {
+        const existingLegs = combo.filter(l => l.eventId === leg.eventId && l !== leg);
+        for (const existingLeg of existingLegs) {
+          if ((existingLeg.market === "moneyline" || existingLeg.market === "spread") 
+              && existingLeg.team !== leg.team) {
+            return true;
+          }
+        }
+      }
+    }
+    seenEvents.add(leg.eventId);
   }
   
   return false;
