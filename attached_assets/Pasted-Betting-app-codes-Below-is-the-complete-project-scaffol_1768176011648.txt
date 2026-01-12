@@ -1,0 +1,874 @@
+Betting app codes
+
+
+
+
+Below is the complete project scaffold (backend + frontend + Docker) with mathjs, improved correlation, Gaussian-copula Monte Carlo, optimizer wiring, Kelly stake sizing, and backtest endpoints. Save files with given paths. Node 18+ recommended. Add a `.env` from `.env.example`.
+
+package.json
+```json
+{
+  "name": "parlay-optimizer",
+  "version": "0.1.0",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "migrate": "node src/db/migrate.js",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "morgan": "^1.10.0",
+    "sqlite3": "^5.1.6",
+    "winston": "^3.9.0",
+    "mathjs": "^11.8.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^2.0.22",
+    "supertest": "^6.3.3"
+  }
+}
+```
+
+.env.example
+```
+PORT=3000
+JWT_SECRET=change_this_secret
+JWT_EXPIRY=1h
+DB_FILE=./data/db.sqlite
+ODDS_API_URL=https://api.the-odds-api.com/v4/sports
+BALLDONTLIE_URL=https://www.balldontlie.io/api/v1
+LOG_LEVEL=info
+MAX_PARLAY_LEGS=12
+```
+
+src/server.js
+```js
+require('dotenv').config();
+const express = require('express');
+const morgan = require('morgan');
+const { logger, requestLoggerStream } = require('./logging');
+const authRoutes = require('./routes/auth');
+const apiRoutes = require('./routes/api');
+const errorHandler = require('./middleware/errorHandler');
+const db = require('./db/db');
+
+const app = express();
+app.use(express.json());
+app.use(morgan('combined', { stream: requestLoggerStream }));
+app.use('/auth', authRoutes);
+app.use('/api', apiRoutes);
+app.use(errorHandler);
+
+const PORT = process.env.PORT || 3000;
+db.init().then(() => {
+  app.listen(PORT, () => {
+    logger.info(`Server listening on port ${PORT}`);
+  });
+}).catch(err => {
+  logger.error('DB init error', err);
+  process.exit(1);
+});
+```
+
+src/logging.js
+```js
+const winston = require('winston');
+
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: winston.format.combine(
+    winston.format.timestamp(),
+    winston.format.errors({ stack: true }),
+    winston.format.json()
+  ),
+  transports: [new winston.transports.Console()]
+});
+
+const requestLoggerStream = {
+  write: (message) => {
+    logger.info(message.trim());
+  }
+};
+
+module.exports = { logger, requestLoggerStream };
+```
+
+src/db/db.js
+```js
+const sqlite3 = require('sqlite3');
+const { open } = require('sqlite');
+const path = require('path');
+const { logger } = require('../logging');
+const DB_FILE = process.env.DB_FILE || path.join(__dirname, '../../data/db.sqlite');
+
+let db;
+async function init() {
+  db = await open({ filename: DB_FILE, driver: sqlite3.Database });
+  await migrate();
+}
+async function migrate() {
+  await db.exec(`
+    PRAGMA foreign_keys = ON;
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS events_cache (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      sport TEXT,
+      event_id TEXT,
+      payload TEXT,
+      fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+  logger.info('DB migrated/ready');
+}
+module.exports = { init, getDB: () => db };
+```
+
+src/routes/auth.js
+```js
+const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const { getDB } = require('../db/db');
+const { logger } = require('../logging');
+
+const router = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+const JWT_EXPIRY = process.env.JWT_EXPIRY || '1h';
+
+router.post('/register', async (req, res, next) => {
+  try {
+    const db = getDB();
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'username & password required' });
+    const password_hash = await bcrypt.hash(password, 10);
+    const stmt = await db.run('INSERT INTO users (username, password_hash) VALUES (?, ?)', [username, password_hash]);
+    logger.info('User registered', { userId: stmt.lastID });
+    res.status(201).json({ id: stmt.lastID, username });
+  } catch (err) {
+    if (err && err.code === 'SQLITE_CONSTRAINT') return res.status(409).json({ error: 'username_taken' });
+    next(err);
+  }
+});
+
+router.post('/login', async (req, res, next) => {
+  try {
+    const db = getDB();
+    const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'username & password required' });
+    const user = await db.get('SELECT * FROM users WHERE username = ?', [username]);
+    if (!user) return res.status(401).json({ error: 'invalid_credentials' });
+    const ok = await bcrypt.compare(password, user.password_hash);
+    if (!ok) return res.status(401).json({ error: 'invalid_credentials' });
+    const token = jwt.sign({ sub: user.id, username }, JWT_SECRET, { expiresIn: JWT_EXPIRY });
+    res.json({ token, user: { id: user.id, username } });
+  } catch (err) { next(err); }
+});
+
+module.exports = router;
+```
+
+src/middleware/auth.js
+```js
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'secret';
+
+function authenticate(req, res, next) {
+  const auth = req.headers.authorization;
+  if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'missing_token' });
+  const token = auth.slice(7);
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    req.user = payload;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: 'invalid_token' });
+  }
+}
+
+module.exports = { authenticate };
+```
+
+src/middleware/errorHandler.js
+```js
+const { logger } = require('../logging');
+
+module.exports = (err, req, res, next) => {
+  logger.error('Unhandled error', { message: err.message, stack: err.stack });
+  const status = err.status || 500;
+  res.status(status).json({ error: err.message || 'internal_server_error' });
+};
+```
+
+src/adapters/odds.js
+```js
+const axios = require('axios');
+const { logger } = require('../logging');
+
+const ODDS_API_URL = process.env.ODDS_API_URL || 'https://api.the-odds-api.com/v4/sports';
+
+async function fetchOdds(sport = 'basketball_nba') {
+  try {
+    logger.info('fetchOdds called for', sport);
+    return { sport, odds: [] };
+  } catch (err) {
+    logger.error('odds fetch error', err);
+    throw err;
+  }
+}
+
+module.exports = { fetchOdds };
+```
+
+src/adapters/balldontlie.js
+```js
+const axios = require('axios');
+const { logger } = require('../logging');
+const BASE = process.env.BALLDONTLIE_URL || 'https://www.balldontlie.io/api/v1';
+
+async function fetchUpcomingGames(page = 1) {
+  try {
+    const resp = await axios.get(`${BASE}/games`, { params: { 'per_page': 25, 'page': page }});
+    logger.info('balldontlie fetch', { count: resp.data.data?.length || resp.data.length || 0 });
+    const games = resp.data.data || resp.data;
+    return games.map(g => ({
+      id: g.id,
+      home_team: g.home_team.full_name,
+      visitor_team: g.visitor_team.full_name,
+      datetime: g.date
+    }));
+  } catch (err) {
+    logger.error('balldontlie error', err);
+    throw err;
+  }
+}
+
+module.exports = { fetchUpcomingGames };
+```
+
+src/models/probability.js
+```js
+function impliedProbabilityFromDecimal(decimalOdds) {
+  if (!decimalOdds || decimalOdds <= 1) return null;
+  return 1 / decimalOdds;
+}
+
+function calibrateProbability(rawP) {
+  if (rawP === null || rawP === undefined) return 0.5;
+  const alpha = 0.9;
+  return alpha * rawP + (1 - alpha) * 0.5;
+}
+
+function estimateLegProbability(leg) {
+  if (leg.probOverride !== undefined) return Math.max(0.001, Math.min(0.999, leg.probOverride));
+  if (leg.decimalOdds) {
+    const p = impliedProbabilityFromDecimal(leg.decimalOdds);
+    return calibrateProbability(p);
+  }
+  return 0.5;
+}
+
+module.exports = { estimateLegProbability };
+```
+
+src/models/correlation.js
+```js
+function clamp(x, lo = -0.99, hi = 0.99) {
+  return Math.max(lo, Math.min(hi, x));
+}
+
+function baseCorrelationForMarkets(a, b) {
+  if (a.market === b.market && a.market === 'moneyline') return 0.6;
+  if (a.market === b.market && a.market === 'spread') return 0.5;
+  if (a.market === b.market && a.market === 'total') return 0.4;
+  if ((a.market === 'moneyline' && b.market === 'spread') || (b.market === 'moneyline' && a.market === 'spread')) return 0.45;
+  return 0.15;
+}
+
+function estimatePairCorrelation(a, b) {
+  if (!a || !b) return 0;
+  if (a.eventId && b.eventId && a.eventId === b.eventId) {
+    if (a.outcome === b.outcome) {
+      return clamp(0.6 + 0.2 * (baseCorrelationForMarkets(a, b)));
+    }
+    return clamp(-0.85);
+  }
+
+  const teamOverlap = (a.team && b.team && a.team === b.team) || (a.home_team && b.home_team && a.home_team === b.home_team);
+  if (teamOverlap) {
+    return clamp(0.25);
+  }
+
+  const base = baseCorrelationForMarkets(a, b);
+  return clamp(base * 0.2);
+}
+
+function buildCorrelationMatrix(legs) {
+  const n = legs.length;
+  const mat = Array.from({ length: n }, () => Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) mat[i][j] = 1;
+      else mat[i][j] = estimatePairCorrelation(legs[i], legs[j]);
+    }
+  }
+  const eps = 1e-6;
+  for (let i = 0; i < n; i++) mat[i][i] += eps;
+  return mat;
+}
+
+module.exports = { buildCorrelationMatrix, estimatePairCorrelation };
+```
+
+src/montecarlo/engine.js
+```js
+const { estimateLegProbability } = require('../models/probability');
+const { buildCorrelationMatrix } = require('../models/correlation');
+const { logger } = require('../logging');
+const math = require('mathjs');
+
+function cholDecomp(A) {
+  const n = A.length;
+  const L = Array.from({ length: n }, () => Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let s = 0;
+      for (let k = 0; k < j; k++) s += L[i][k] * L[j][k];
+      if (i === j) {
+        const val = A[i][i] - s;
+        L[i][j] = Math.sqrt(Math.max(val, 1e-12));
+      } else {
+        L[i][j] = (A[i][j] - s) / L[j][j];
+      }
+    }
+  }
+  return L;
+}
+
+function gaussianSampleVector(n) {
+  const out = Array(n).fill(0);
+  for (let i = 0; i < n; i += 2) {
+    const u1 = Math.random() || 1e-12;
+    const u2 = Math.random() || 1e-12;
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    const z1 = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+    out[i] = z0;
+    if (i + 1 < n) out[i + 1] = z1;
+  }
+  return out;
+}
+
+function normInv(p) {
+  if (p <= 0) return -Infinity;
+  if (p >= 1) return Infinity;
+  return Math.sqrt(2) * math.erfinv(2 * p - 1);
+}
+
+async function evaluateParlay(legs, { sims = 20000 } = {}) {
+  const n = legs.length;
+  const probs = legs.map(estimateLegProbability);
+  const corr = buildCorrelationMatrix(legs);
+
+  let independent = true;
+  for (let i = 0; i < n && independent; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i !== j && Math.abs(corr[i][j]) > 1e-3) { independent = false; break; }
+    }
+  }
+  if (independent) {
+    const winProb = probs.reduce((acc, p) => acc * p, 1);
+    return { winProb, method: 'analytic', sims: 0 };
+  }
+
+  const thresholds = probs.map(p => normInv(p));
+  const L = cholDecomp(corr);
+
+  let wins = 0;
+  const batchSize = Math.min(5000, sims);
+  let run = 0;
+  while (run < sims) {
+    const thisBatch = Math.min(batchSize, sims - run);
+    for (let b = 0; b < thisBatch; b++) {
+      const z = gaussianSampleVector(n);
+      const x = Array(n).fill(0);
+      for (let i = 0; i < n; i++) {
+        let acc = 0;
+        for (let k = 0; k <= i; k++) acc += L[i][k] * z[k];
+        x[i] = acc;
+      }
+      let ok = true;
+      for (let i = 0; i < n; i++) {
+        if (x[i] > thresholds[i]) { ok = false; break; }
+      }
+      if (ok) wins++;
+    }
+    run += thisBatch;
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  const winProb = wins / sims;
+  logger.info('MonteCarlo done', { sims, winProb });
+  return { winProb, method: 'montecarlo', sims };
+}
+
+module.exports = { evaluateParlay };
+```
+
+src/optimizer/beamSearch.js
+```js
+const { estimateLegProbability } = require('../models/probability');
+const { evaluateParlay } = require('../montecarlo/engine');
+const { logger } = require('../logging');
+
+async function findBestParlay(candidates, { maxLegs = 6, beamWidth = 100 } = {}) {
+  let beam = [{ legs: [], analytic: 1 }];
+  for (let depth = 1; depth <= maxLegs; depth++) {
+    const expansions = [];
+    for (const state of beam) {
+      for (const cand of candidates) {
+        if (state.legs.find(l => l.id === cand.id)) continue;
+        const newLegs = state.legs.concat(cand);
+        const probs = newLegs.map(estimateLegProbability);
+        const analytic = probs.reduce((a, b) => a * b, 1);
+        expansions.push({ legs: newLegs, analytic });
+      }
+    }
+    expansions.sort((a, b) => b.analytic - a.analytic);
+    beam = expansions.slice(0, beamWidth);
+    if (beam.length === 0) break;
+  }
+
+  const scored = [];
+  for (const b of beam.slice(0, 20)) {
+    const mc = await evaluateParlay(b.legs, { sims: 5000 });
+    scored.push({ legs: b.legs, analytic: b.analytic, montecarlo: mc.winProb });
+  }
+  scored.sort((a, b) => b.montecarlo - a.montecarlo);
+  logger.info('Optimizer finished', { top: scored.length });
+  return scored.slice(0, 10);
+}
+
+module.exports = { findBestParlay };
+```
+
+src/utils/kelly.js
+```js
+function kellyFraction(p, decimalOdds) {
+  if (!p || !decimalOdds || decimalOdds <= 1) return 0;
+  const b = decimalOdds - 1;
+  const f = (p * (decimalOdds) - 1) / b;
+  return Math.max(0, f);
+}
+
+function fractionalKelly(p, decimalOdds, fraction = 0.5) {
+  return Math.max(0, Math.min(1, fraction * kellyFraction(p, decimalOdds)));
+}
+
+module.exports = { kellyFraction, fractionalKelly };
+```
+
+src/backtest/engine.js
+```js
+const { estimateLegProbability } = require('../models/probability');
+
+async function runBacktest(historicalParlays = [], strategy = {}) {
+  let bankroll = strategy.bankroll || 1000;
+  const initial = bankroll;
+  let peak = bankroll;
+  let maxDrawdown = 0;
+  let wins = 0;
+  for (const item of historicalParlays) {
+    const legs = item.legs;
+    const probs = legs.map(estimateLegProbability);
+    const p = probs.reduce((a, b) => a * b, 1);
+    let stake = 0;
+    if (strategy.stakeSizing?.type === 'fixed') {
+      stake = strategy.stakeSizing.amount;
+    } else if (strategy.stakeSizing?.type === 'kelly') {
+      const decimalOdds = item.payoutDecimal || legs.reduce((acc, l) => acc * (l.decimalOdds || 2), 1);
+      const f = require('../utils/kelly').kellyFraction(p, decimalOdds);
+      stake = bankroll * f;
+    } else if (strategy.stakeSizing?.type === 'fractionalKelly') {
+      const decimalOdds = item.payoutDecimal || legs.reduce((acc, l) => acc * (l.decimalOdds || 2), 1);
+      const frac = strategy.stakeSizing.fraction || 0.5;
+      const f = require('../utils/kelly').fractionalKelly(p, decimalOdds, frac);
+      stake = bankroll * f;
+    } else {
+      stake = bankroll * 0.01;
+    }
+    stake = Math.max(0, Math.min(bankroll, stake));
+    if (item.result === 1) {
+      const payout = (item.payoutDecimal || legs.reduce((acc, l) => acc * (l.decimalOdds || 2), 1)) * stake;
+      bankroll = bankroll - stake + payout;
+      wins++;
+    } else {
+      bankroll = bankroll - stake;
+    }
+    if (bankroll > peak) peak = bankroll;
+    maxDrawdown = Math.max(maxDrawdown, (peak - bankroll) / peak);
+  }
+  const roi = (bankroll - initial) / initial;
+  return { initialBankroll: initial, finalBankroll: bankroll, roi, maxDrawdown, winRate: historicalParlays.length ? wins / historicalParlays.length : 0 };
+}
+
+module.exports = { runBacktest };
+```
+
+src/utils/retries.js
+```js
+const { logger } = require('../logging');
+
+async function withRetries(fn, { retries = 3, backoffMs = 200 } = {}) {
+  let attempt = 0;
+  while (attempt <= retries) {
+    try {
+      return await fn();
+    } catch (err) {
+      attempt++;
+      logger.warn('Retry attempt failed', { attempt, err: err.message });
+      if (attempt > retries) throw err;
+      await new Promise(r => setTimeout(r, backoffMs * attempt));
+    }
+  }
+}
+
+module.exports = { withRetries };
+```
+
+src/routes/api.js
+```js
+const express = require('express');
+const { authenticate } = require('../middleware/auth');
+const oddsAdapter = require('../adapters/odds');
+const balldontlie = require('../adapters/balldontlie');
+const optimizer = require('../optimizer/beamSearch');
+const montecarlo = require('../montecarlo/engine');
+const backtestEngine = require('../backtest/engine');
+const { kellyFraction, fractionalKelly } = require('../utils/kelly');
+
+const router = express.Router();
+router.use(authenticate);
+
+router.get('/health', (req, res) => res.json({ ok: true }));
+
+router.get('/nba/events', async (req, res, next) => {
+  try {
+    const events = await balldontlie.fetchUpcomingGames();
+    res.json(events);
+  } catch (err) { next(err); }
+});
+
+router.get('/odds/:sport', async (req, res, next) => {
+  try {
+    const data = await oddsAdapter.fetchOdds(req.params.sport || 'basketball_nba');
+    res.json(data);
+  } catch (err) { next(err); }
+});
+
+router.post('/parlay/evaluate', async (req, res, next) => {
+  try {
+    const { legs, sims = 20000 } = req.body;
+    if (!Array.isArray(legs) || legs.length === 0) return res.status(400).json({ error: 'legs_required' });
+    const result = await montecarlo.evaluateParlay(legs, { sims });
+    res.json(result);
+  } catch (err) { next(err); }
+});
+
+router.post('/parlay/optimize', async (req, res, next) => {
+  try {
+    const { candidates = [], maxLegs = 6, beamWidth = 100 } = req.body;
+    const best = await optimizer.findBestParlay(candidates, { maxLegs, beamWidth });
+    res.json(best);
+  } catch (err) { next(err); }
+});
+
+router.post('/parlay/optimize-and-size', async (req, res, next) => {
+  try {
+    const { candidates = [], maxLegs = 6, beamWidth = 100, bankroll = 1000, kellyFraction: kellyFrac = 0.5 } = req.body;
+    const top = await optimizer.findBestParlay(candidates, { maxLegs, beamWidth });
+    const out = await Promise.all(top.map(async (t) => {
+      const evalRes = await montecarlo.evaluateParlay(t.legs, { sims: 5000 });
+      const decimalOdds = t.legs.reduce((acc, l) => acc * (l.decimalOdds || 2), 1);
+      const p = evalRes.winProb;
+      const fullKelly = kellyFraction(p, decimalOdds);
+      const fracKelly = fractionalKelly(p, decimalOdds, kellyFrac);
+      return { legs: t.legs, analytic: t.analytic, montecarlo: evalRes.winProb, decimalOdds, kellyFraction: fullKelly, fractionalKelly: fracKelly, suggestedStakeFullKelly: bankroll * fullKelly, suggestedStakeFractional: bankroll * fracKelly };
+    }));
+    res.json(out);
+  } catch (err) { next(err); }
+});
+
+router.post('/parlay/suggest-stake', async (req, res, next) => {
+  try {
+    const { legs = [], bankroll = 1000, mode = 'fractionalKelly', fraction = 0.5, sims = 5000 } = req.body;
+    const evalRes = await montecarlo.evaluateParlay(legs, { sims });
+    const p = evalRes.winProb;
+    const decimalOdds = legs.reduce((acc, l) => acc * (l.decimalOdds || 2), 1);
+    const fullKelly = kellyFraction(p, decimalOdds);
+    const fracKelly = fractionalKelly(p, decimalOdds, fraction);
+    const stake = mode === 'kelly' ? bankroll * fullKelly : bankroll * fracKelly;
+    res.json({ winProb: p, decimalOdds, suggestedStake: stake, fullKelly, fractionalKelly: fracKelly });
+  } catch (err) { next(err); }
+});
+
+router.post('/backtest/run', async (req, res, next) => {
+  try {
+    const { historicalParlays = [], strategy = {} } = req.body;
+    const stats = await backtestEngine.runBacktest(historicalParlays, strategy);
+    res.json(stats);
+  } catch (err) { next(err); }
+});
+
+module.exports = router;
+```
+
+tests/probability.test.js
+```js
+const { estimateLegProbability } = require('../src/models/probability');
+
+test('estimate from decimal odds', () => {
+  const p = estimateLegProbability({ decimalOdds: 2.0 });
+  expect(p).toBeGreaterThan(0.4);
+  expect(p).toBeLessThan(0.6);
+});
+
+test('override prob respected', () => {
+  const p = estimateLegProbability({ probOverride: 0.8 });
+  expect(p).toBeCloseTo(0.8);
+});
+```
+
+tests/montecarlo.test.js
+```js
+const { evaluateParlay } = require('../src/montecarlo/engine');
+
+test('independent analytic parlay', async () => {
+  const legs = [{ decimalOdds: 2.0 }, { decimalOdds: 2.0 }];
+  const res = await evaluateParlay(legs, { sims: 100 });
+  expect(res.method).toBe('analytic');
+  expect(res.winProb).toBeCloseTo(0.25, 1);
+});
+```
+
+Dockerfile
+```dockerfile
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --production
+COPY . .
+ENV NODE_ENV=production
+CMD ["node", "src/server.js"]
+```
+
+docker-compose.yml
+```yaml
+version: '3.8'
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+```
+
+frontend/package.json
+```json
+{
+  "name": "parlay-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-scripts": "5.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom"
+  },
+  "proxy": "http://localhost:3000"
+}
+```
+
+frontend/src/index.js
+```js
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
+```
+
+frontend/src/App.js
+```js
+import React, { useState } from 'react';
+import Login from './pages/Login';
+import ParlayBuilder from './pages/ParlayBuilder';
+
+export default function App() {
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  if (!token) return <Login onLogin={(t) => { localStorage.setItem('token', t); setToken(t); }} />;
+  return <ParlayBuilder token={token} onLogout={() => { localStorage.removeItem('token'); setToken(null); }} />;
+}
+```
+
+frontend/src/pages/Login.js
+```js
+import React, { useState } from 'react';
+import axios from 'axios';
+
+export default function Login({ onLogin }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [err, setErr] = useState(null);
+
+  async function submit(e) {
+    e.preventDefault();
+    setErr(null);
+    try {
+      const res = await axios.post('/auth/login', { username, password });
+      onLogin(res.data.token);
+    } catch (e) {
+      setErr(e.response?.data?.error || 'login_failed');
+    }
+  }
+
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>Login</h2>
+      <form onSubmit={submit}>
+        <div><input placeholder="username" value={username} onChange={e => setUsername(e.target.value)} /></div>
+        <div><input placeholder="password" type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
+        <button type="submit">Login</button>
+      </form>
+      {err && <div style={{ color: 'red' }}>{err}</div>}
+    </div>
+  );
+}
+```
+
+frontend/src/pages/ParlayBuilder.js
+```js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+export default function ParlayBuilder({ token, onLogout }) {
+  const [candidates, setCandidates] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [evalResult, setEvalResult] = useState(null);
+  const [optimizerResults, setOptimizerResults] = useState([]);
+  const [bankroll, setBankroll] = useState(1000);
+  const [fraction, setFraction] = useState(0.5);
+  const [backtestResult, setBacktestResult] = useState(null);
+  const [historicalParlaysJson, setHistoricalParlaysJson] = useState('[]');
+
+  useEffect(() => {
+    axios.get('/api/nba/events', { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => setCandidates(r.data))
+      .catch(() => setCandidates([]));
+  }, [token]);
+
+  function addLeg(event) {
+    const leg = { id: `${event.id}-${Date.now()}`, eventId: event.id, market: 'moneyline', outcome: event.home_team, decimalOdds: 2.0, home_team: event.home_team, visitor_team: event.visitor_team };
+    setSelected(s => [...s, leg]);
+  }
+
+  async function evaluate() {
+    setEvalResult(null);
+    const res = await axios.post('/api/parlay/evaluate', { legs: selected, sims: 5000 }, { headers: { Authorization: `Bearer ${token}` }});
+    setEvalResult(res.data);
+  }
+
+  async function optimizeAndSize() {
+    setOptimizerResults([]);
+    const res = await axios.post('/api/parlay/optimize-and-size', { candidates, maxLegs: 4, beamWidth: 200, bankroll, kellyFraction: fraction }, { headers: { Authorization: `Bearer ${token}` }});
+    setOptimizerResults(res.data);
+  }
+
+  async function suggestStakeForSelected() {
+    const res = await axios.post('/api/parlay/suggest-stake', { legs: selected, bankroll, mode: 'fractionalKelly', fraction }, { headers: { Authorization: `Bearer ${token}` }});
+    setEvalResult(res.data);
+  }
+
+  async function runBacktest() {
+    setBacktestResult(null);
+    let historical = [];
+    try { historical = JSON.parse(historicalParlaysJson); } catch (e) { alert('Invalid JSON'); return; }
+    const res = await axios.post('/api/backtest/run', { historicalParlays: historical, strategy: { bankroll, stakeSizing: { type: 'fractionalKelly', fraction }, bankroll } }, { headers: { Authorization: `Bearer ${token}` }});
+    setBacktestResult(res.data);
+  }
+
+  return (
+    <div style={{ padding: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <h2>Parlay Builder + Optimizer</h2>
+        <div>
+          <input type="number" value={bankroll} onChange={e => setBankroll(Number(e.target.value))} style={{ width: 120 }} /> bankroll
+          <button onClick={onLogout}>Logout</button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 20, marginTop: 10 }}>
+        <div style={{ flex: 1 }}>
+          <h3>Candidates (click Add)</h3>
+          <ul>
+            {candidates.map(c => (
+              <li key={c.id}>
+                {c.home_team} vs {c.visitor_team} <button onClick={() => addLeg(c)}>Add</button>
+              </li>
+            ))}
+          </ul>
+
+          <h4>Optimizer</h4>
+          <button onClick={optimizeAndSize}>Optimize & Size (Kelly)</button>
+          <div>
+            {optimizerResults.map((o, idx) => (
+              <div key={idx} style={{ border: '1px solid #ccc', padding: 8, marginTop: 8 }}>
+                <div>Montecarlo P(win): {o.montecarlo?.toFixed(4)} | DecimalOdds: {o.decimalOdds.toFixed(2)}</div>
+                <div>Full Kelly: {(o.kellyFraction || 0).toFixed(4)} | FractionalKelly: {(o.fractionalKelly || 0).toFixed(4)}</div>
+                <div>Suggested stake (full): {Math.round(o.suggestedStakeFullKelly*100)/100} | (fractional): {Math.round(o.suggestedStakeFractional*100)/100}</div>
+                <div>Legs: {o.legs.map(l => `${l.eventId}:${l.outcome}`).join(', ')}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ flex: 1 }}>
+          <h3>Selected Legs</h3>
+          <ol>
+            {selected.map((s, i) => <li key={i}>{s.eventId} - {s.outcome} (odds {s.decimalOdds})</li>)}
+          </ol>
+          <div style={{ marginTop: 8 }}>
+            <button onClick={evaluate} disabled={selected.length === 0}>Evaluate Parlay (MC)</button>
+            <button onClick={suggestStakeForSelected} disabled={selected.length === 0} style={{ marginLeft: 8 }}>Suggest Stake (Fractional Kelly)</button>
+          </div>
+          {evalResult && <pre style={{ marginTop: 8 }}>{JSON.stringify(evalResult, null, 2)}</pre>}
+
+          <h4 style={{ marginTop: 16 }}>Kelly Fraction</h4>
+          <input type="range" min="0" max="1" step="0.01" value={fraction} onChange={e => setFraction(Number(e.target.value))} />
+          <div>Fraction: {fraction}</div>
+
+          <h4 style={{ marginTop: 16 }}>Backtest</h4>
+          <div>
+            <textarea rows={8} cols={40} value={historicalParlays
