@@ -21,8 +21,17 @@ import { ProgressiveHedgePlanner } from "@/components/progressive-hedge-planner"
 import { PromoBoostStacker } from "@/components/promo-boost-stacker";
 import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
 import { BookLimitPlanner } from "@/components/book-limit-planner";
+import { ParlayStrategyBuilder } from "@/components/parlay-strategy-builder";
+import { Sparkles } from "lucide-react";
 
 const TOOL_CATEGORIES = [
+  {
+    id: "strategies",
+    name: "Parlay Strategies",
+    icon: Sparkles,
+    description: "Profit-maximizing parlay building strategies",
+    tools: ["strategy-builder"],
+  },
   {
     id: "sharp",
     name: "Sharp Money",
@@ -61,7 +70,7 @@ const TOOL_CATEGORIES = [
 ];
 
 export default function Tools() {
-  const [activeCategory, setActiveCategory] = useState("sharp");
+  const [activeCategory, setActiveCategory] = useState("strategies");
 
   return (
     <div className="min-h-full">
@@ -81,7 +90,7 @@ export default function Tools() {
           </p>
         </header>
 
-        <div className="grid gap-3 md:grid-cols-5">
+        <div className="grid gap-3 md:grid-cols-6">
           {TOOL_CATEGORIES.map((cat) => (
             <Card
               key={cat.id}
@@ -104,6 +113,13 @@ export default function Tools() {
         </div>
 
         <div className="space-y-6">
+          {activeCategory === "strategies" && (
+            <div className="grid gap-6 lg:grid-cols-1 xl:grid-cols-2">
+              <ParlayStrategyBuilder />
+              <AIPredictions />
+            </div>
+          )}
+
           {activeCategory === "sharp" && (
             <div className="grid gap-6 lg:grid-cols-2">
               <SharpMoneyTracker />
