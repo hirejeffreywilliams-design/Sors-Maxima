@@ -6,6 +6,47 @@ export type Sport = (typeof sports)[number];
 export const marketTypes = ["moneyline", "spread", "total", "player_prop"] as const;
 export type MarketType = (typeof marketTypes)[number];
 
+export const propCategories = {
+  NFL: ["passing_yards", "passing_tds", "rushing_yards", "rushing_tds", "receiving_yards", "receptions", "receiving_tds", "anytime_td"] as const,
+  NCAAF: ["passing_yards", "passing_tds", "rushing_yards", "rushing_tds", "receiving_yards", "receptions"] as const,
+  NBA: ["points", "rebounds", "assists", "threes", "pts_rebs_asts", "steals_blocks"] as const,
+  NCAAB: ["points", "rebounds", "assists", "threes"] as const,
+  MLB: ["hits", "rbis", "runs", "total_bases", "strikeouts_pitcher", "hits_allowed"] as const,
+  NHL: ["goals", "assists", "points", "shots", "saves"] as const,
+} as const;
+
+export type NFLPropCategory = (typeof propCategories.NFL)[number];
+export type NBAPropCategory = (typeof propCategories.NBA)[number];
+export type MLBPropCategory = (typeof propCategories.MLB)[number];
+export type NHLPropCategory = (typeof propCategories.NHL)[number];
+export type PropCategory = NFLPropCategory | NBAPropCategory | MLBPropCategory | NHLPropCategory;
+
+export const propCategoryLabels: Record<string, string> = {
+  passing_yards: "Passing Yards",
+  passing_tds: "Passing TDs",
+  rushing_yards: "Rushing Yards",
+  rushing_tds: "Rushing TDs",
+  receiving_yards: "Receiving Yards",
+  receptions: "Receptions",
+  receiving_tds: "Receiving TDs",
+  anytime_td: "Anytime TD",
+  points: "Points",
+  rebounds: "Rebounds",
+  assists: "Assists",
+  threes: "3-Pointers Made",
+  pts_rebs_asts: "Pts+Rebs+Asts",
+  steals_blocks: "Steals+Blocks",
+  hits: "Hits",
+  rbis: "RBIs",
+  runs: "Runs",
+  total_bases: "Total Bases",
+  strikeouts_pitcher: "Strikeouts (Pitcher)",
+  hits_allowed: "Hits Allowed",
+  goals: "Goals",
+  shots: "Shots on Goal",
+  saves: "Saves",
+};
+
 export const parlayLegSchema = z.object({
   id: z.string(),
   eventId: z.string().optional(),
@@ -16,6 +57,10 @@ export const parlayLegSchema = z.object({
   decimalOdds: z.number().min(1.01, "Odds must be greater than 1.01"),
   americanOdds: z.number().optional(),
   probOverride: z.number().min(0.01).max(0.99).optional(),
+  playerId: z.string().optional(),
+  playerName: z.string().optional(),
+  propCategory: z.string().optional(),
+  propLine: z.number().optional(),
 });
 
 export type ParlayLeg = z.infer<typeof parlayLegSchema>;
@@ -77,6 +122,25 @@ export const optimizeRequestSchema = z.object({
 
 export type OptimizeRequest = z.infer<typeof optimizeRequestSchema>;
 
+export const playerPropSchema = z.object({
+  playerId: z.string(),
+  playerName: z.string(),
+  team: z.string(),
+  position: z.string(),
+  category: z.string(),
+  line: z.number(),
+  overOdds: z.object({
+    americanOdds: z.number(),
+    decimalOdds: z.number(),
+  }),
+  underOdds: z.object({
+    americanOdds: z.number(),
+    decimalOdds: z.number(),
+  }),
+});
+
+export type PlayerProp = z.infer<typeof playerPropSchema>;
+
 export const sportEventSchema = z.object({
   id: z.string(),
   sport: z.enum(sports),
@@ -93,6 +157,7 @@ export const sportEventSchema = z.object({
       americanOdds: z.number(),
     })),
   })),
+  playerProps: z.array(playerPropSchema).optional(),
 });
 
 export type SportEvent = z.infer<typeof sportEventSchema>;
