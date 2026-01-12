@@ -26,7 +26,18 @@ A sophisticated sports betting parlay optimizer that helps users build smarter p
 - **Backend**: Express.js, TypeScript
 - **State Management**: TanStack Query (React Query)
 - **Routing**: Wouter
-- **Monte Carlo Engine**: 100,000 simulations with adaptive batching, typed arrays, caching, and convergence detection
+- **Monte Carlo Engine**: 100,000+ quantum-level simulations with:
+  - Mersenne Twister high-precision RNG
+  - Latin Hypercube Sampling for variance reduction
+  - Antithetic variates for doubled sample efficiency
+  - Cholesky decomposition with LRU caching
+  - Adaptive batch convergence detection
+  - Bernoulli-correct confidence intervals
+- **Advanced Kelly Criterion**: Full/half/quarter Kelly variants with:
+  - Uncertainty adjustment and correlation penalties
+  - Ruin probability estimation
+  - Growth rate and Sharpe ratio calculation
+  - Edge case protection (no division errors)
 
 ## Project Structure
 ```
