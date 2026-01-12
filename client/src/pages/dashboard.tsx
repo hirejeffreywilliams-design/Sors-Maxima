@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain } from "lucide-react";
+import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { ParlayBuilder } from "@/components/parlay-builder";
 import { ParlayGenerator } from "@/components/parlay-generator";
 import { InsightsPanel } from "@/components/insights-panel";
 import { EdgeFinder } from "@/components/edge-finder";
+import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { useQuery } from "@tanstack/react-query";
-import type { ParlayLeg, SportEvent, BankrollSettings } from "@shared/schema";
+import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment } from "@shared/schema";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("generator");
@@ -25,6 +26,8 @@ export default function Dashboard() {
     maxExposurePerPlayer: 30,
     kellyMultiplier: 0.25,
   });
+  const [bettingEnv, setBettingEnv] = useState<BettingEnvironment>(getDefaultBettingEnvironment());
+  const [showSettings, setShowSettings] = useState(false);
 
   const { data: events = [] } = useQuery<SportEvent[]>({
     queryKey: ["/api/odds", "NBA"],
@@ -144,16 +147,28 @@ export default function Dashboard() {
                     Manual Builder
                   </TabsTrigger>
                 </TabsList>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowInsights(!showInsights)}
-                  className="gap-2"
-                  data-testid="button-toggle-insights"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  {showInsights ? "Hide" : "Show"} Insights
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSettings(!showSettings)}
+                    className="gap-2"
+                    data-testid="button-toggle-settings"
+                  >
+                    <Settings className="w-4 h-4" />
+                    Settings
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowInsights(!showInsights)}
+                    className="gap-2"
+                    data-testid="button-toggle-insights"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    {showInsights ? "Hide" : "Show"} Insights
+                  </Button>
+                </div>
               </div>
 
               <TabsContent value="generator" className="space-y-6">
@@ -205,16 +220,24 @@ export default function Dashboard() {
             </div>
           </div>
           
-          {showInsights && (
+          {(showInsights || showSettings) && (
             <div className="w-96 flex-shrink-0 hidden xl:block">
-              <div className="sticky top-6">
-                <InsightsPanel
-                  events={events}
-                  selectedLegs={selectedLegs}
-                  bankrollSettings={bankrollSettings}
-                  onBankrollChange={setBankrollSettings}
-                  totalSpent={totalSpent}
-                />
+              <div className="sticky top-6 space-y-4">
+                {showSettings && (
+                  <BettingSettings 
+                    settings={bettingEnv} 
+                    onSettingsChange={setBettingEnv} 
+                  />
+                )}
+                {showInsights && (
+                  <InsightsPanel
+                    events={events}
+                    selectedLegs={selectedLegs}
+                    bankrollSettings={bankrollSettings}
+                    onBankrollChange={setBankrollSettings}
+                    totalSpent={totalSpent}
+                  />
+                )}
               </div>
             </div>
           )}
