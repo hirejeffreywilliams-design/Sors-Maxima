@@ -678,7 +678,7 @@ async function runQuantumMonteCarloSimulation(
     winProbability,
     method: "montecarlo",
     sims: totalRuns,
-    variance,
+    variance: bernoulliVariance,
     standardError,
     confidenceInterval: [
       Math.max(0, winProbability - zScore * standardError),
