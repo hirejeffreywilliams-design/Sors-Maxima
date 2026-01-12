@@ -175,7 +175,12 @@ export const generateParlaysRequestSchema = z.object({
     gameId: z.string(),
     selection: z.enum(["over", "under"]),
   })).optional(),
-  selectedProps: z.array(z.string()).optional(),
+  selectedProps: z.array(z.object({
+    gameId: z.string(),
+    playerId: z.string(),
+    category: z.string(),
+    selection: z.enum(["over", "under"]),
+  })).optional(),
 });
 
 export type GenerateParlaysRequest = z.infer<typeof generateParlaysRequestSchema>;

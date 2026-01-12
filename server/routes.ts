@@ -123,6 +123,35 @@ export async function registerRoutes(
         legs = [...totalLegs, ...legs];
       }
 
+      if (selectedProps && selectedProps.length > 0) {
+        const propLegs = [];
+        for (const propSelection of selectedProps) {
+          const { gameId, playerId, category, selection } = propSelection;
+          const event = events.find(e => e.id === gameId);
+          if (!event || !event.playerProps) continue;
+          
+          const prop = event.playerProps.find(p => 
+            p.playerId === playerId && p.category === category
+          );
+          if (!prop) continue;
+          
+          const odds = selection === "over" ? prop.overOdds : prop.underOdds;
+          const outcomeLabel = selection === "over" ? "Over" : "Under";
+          
+          propLegs.push({
+            id: `${gameId}-${playerId}-${category}-${selection}`,
+            eventId: event.id,
+            team: prop.team,
+            opponent: "",
+            market: "player_prop" as const,
+            outcome: `${prop.playerName} ${outcomeLabel} ${prop.line} ${category}`,
+            decimalOdds: odds.decimalOdds,
+            americanOdds: odds.americanOdds,
+          });
+        }
+        legs = [...propLegs, ...legs];
+      }
+
       if (legs.length < minLegs) {
         return res.status(400).json({
           error: "Not enough betting options available",

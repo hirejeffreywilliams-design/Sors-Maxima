@@ -25,7 +25,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -75,7 +74,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const [selectedGames, setSelectedGames] = useState<Set<string>>(new Set());
   const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set());
   const [marketFilter, setMarketFilter] = useState<"all" | "game" | "props">("all");
-  const [selectedProps, setSelectedProps] = useState<Set<string>>(new Set());
+  const [selectedProps, setSelectedProps] = useState<Map<string, "over" | "under">>(new Map());
   const [selectedTotals, setSelectedTotals] = useState<Map<string, "over" | "under">>(new Map());
 
   const gamesQuery = useQuery<SportEvent[]>({
@@ -97,7 +96,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
     setResults(null);
     setSelectedGames(new Set());
     setSelectedTotals(new Map());
-    setSelectedProps(new Set());
+    setSelectedProps(new Map());
   }, [sport]);
 
   const generateMutation = useMutation({
@@ -116,7 +115,10 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
         topN: 5,
         selectedEventIds: Array.from(selectedGames),
         selectedTotals: totalsArray,
-        selectedProps: Array.from(selectedProps),
+        selectedProps: Array.from(selectedProps.entries()).map(([propKey, selection]) => {
+          const [gameId, playerId, category] = propKey.split("::");
+          return { gameId, playerId, category, selection };
+        }),
       });
       const data = await response.json();
       return data;
@@ -156,7 +158,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const deselectAllGames = () => {
     setSelectedGames(new Set());
     setSelectedTotals(new Map());
-    setSelectedProps(new Set());
+    setSelectedProps(new Map());
   };
 
   const toggleGameExpanded = (gameId: string) => {
@@ -186,24 +188,24 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
     return games.reduce((sum, g) => sum + (g.playerProps?.length || 0), 0);
   };
 
-  const toggleProp = (propKey: string) => {
+  const toggleProp = (propKey: string, selection: "over" | "under") => {
     setSelectedProps(prev => {
-      const next = new Set(prev);
-      if (next.has(propKey)) {
+      const next = new Map(prev);
+      if (next.get(propKey) === selection) {
         next.delete(propKey);
       } else {
-        next.add(propKey);
+        next.set(propKey, selection);
       }
       return next;
     });
   };
 
-  const selectAllPropsForGame = (game: SportEvent) => {
+  const selectAllPropsForGame = (game: SportEvent, selection: "over" | "under" = "over") => {
     if (!game.playerProps) return;
     setSelectedProps(prev => {
-      const next = new Set(prev);
+      const next = new Map(prev);
       for (const prop of game.playerProps!) {
-        next.add(`${game.id}-${prop.playerId}-${prop.category}`);
+        next.set(`${game.id}::${prop.playerId}::${prop.category}`, selection);
       }
       return next;
     });
@@ -212,9 +214,9 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const clearPropsForGame = (game: SportEvent) => {
     if (!game.playerProps) return;
     setSelectedProps(prev => {
-      const next = new Set(prev);
+      const next = new Map(prev);
       for (const prop of game.playerProps!) {
-        next.delete(`${game.id}-${prop.playerId}-${prop.category}`);
+        next.delete(`${game.id}::${prop.playerId}::${prop.category}`);
       }
       return next;
     });
@@ -223,7 +225,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const getSelectedPropsForGame = (game: SportEvent): number => {
     if (!game.playerProps) return 0;
     return game.playerProps.filter(p => 
-      selectedProps.has(`${game.id}-${p.playerId}-${p.category}`)
+      selectedProps.has(`${game.id}::${p.playerId}::${p.category}`)
     ).length;
   };
 
@@ -365,13 +367,16 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                       >
                         <div className="p-3">
                           <div className="flex items-center gap-3">
-                            <div onClick={(e) => e.stopPropagation()}>
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleGame(game.id)}
-                                data-testid={`checkbox-game-${game.id}`}
-                              />
-                            </div>
+                            <Button
+                              variant={isSelected ? "default" : "outline"}
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); toggleGame(game.id); }}
+                              className={`text-xs ${isSelected ? "bg-primary hover:bg-primary/90" : ""}`}
+                              data-testid={`button-toggle-game-${game.id}`}
+                            >
+                              {isSelected ? <Check className="w-3 h-3" /> : null}
+                              {isSelected ? "Selected" : "Select"}
+                            </Button>
                             <div className="flex-1 min-w-0">
                               <div className="font-medium text-sm">
                                 {game.awayTeam} @ {game.homeTeam}
@@ -484,27 +489,20 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                                     <TabsContent key={category} value={category} className="mt-3">
                                       <div className="grid gap-2 md:grid-cols-2">
                                         {groupedProps[category].map((prop) => {
-                                          const propKey = `${game.id}-${prop.playerId}-${prop.category}`;
-                                          const isPropSelected = selectedProps.has(propKey);
+                                          const propKey = `${game.id}::${prop.playerId}::${prop.category}`;
+                                          const selectedPropType = selectedProps.get(propKey);
                                           return (
                                             <div 
                                               key={propKey}
-                                              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                                                isPropSelected 
+                                              className={`p-3 rounded-lg border transition-colors ${
+                                                selectedPropType 
                                                   ? "bg-primary/10 border-primary/40" 
-                                                  : "bg-background hover:bg-muted/30"
+                                                  : "bg-background"
                                               }`}
-                                              onClick={() => toggleProp(propKey)}
                                               data-testid={`prop-card-${prop.playerId}-${prop.category}`}
                                             >
                                               <div className="flex items-center justify-between mb-2">
                                                 <div className="flex items-center gap-2">
-                                                  <Checkbox
-                                                    checked={isPropSelected}
-                                                    onCheckedChange={() => toggleProp(propKey)}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    data-testid={`checkbox-prop-${prop.playerId}-${prop.category}`}
-                                                  />
                                                   <User className="w-4 h-4 text-muted-foreground" />
                                                   <span className="font-medium text-sm">{prop.playerName}</span>
                                                 </div>
@@ -516,18 +514,26 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                                                 {propCategoryLabels[prop.category] || prop.category}: {prop.line}
                                               </div>
                                               <div className="flex gap-2">
-                                                <div className="flex-1 p-2 rounded bg-muted/50 text-center">
-                                                  <div className="text-xs text-muted-foreground">Over</div>
-                                                  <div className="font-mono text-sm font-medium">
-                                                    {prop.overOdds.americanOdds > 0 ? "+" : ""}{prop.overOdds.americanOdds}
-                                                  </div>
-                                                </div>
-                                                <div className="flex-1 p-2 rounded bg-muted/50 text-center">
-                                                  <div className="text-xs text-muted-foreground">Under</div>
-                                                  <div className="font-mono text-sm font-medium">
-                                                    {prop.underOdds.americanOdds > 0 ? "+" : ""}{prop.underOdds.americanOdds}
-                                                  </div>
-                                                </div>
+                                                <Button
+                                                  variant={selectedPropType === "over" ? "default" : "outline"}
+                                                  size="sm"
+                                                  className={`flex-1 ${selectedPropType === "over" ? "bg-chart-1 hover:bg-chart-1/90" : ""}`}
+                                                  onClick={(e) => { e.stopPropagation(); toggleProp(propKey, "over"); }}
+                                                  data-testid={`button-over-prop-${prop.playerId}-${prop.category}`}
+                                                >
+                                                  <TrendingUp className="w-3 h-3 mr-1" />
+                                                  O {prop.overOdds.americanOdds > 0 ? "+" : ""}{prop.overOdds.americanOdds}
+                                                </Button>
+                                                <Button
+                                                  variant={selectedPropType === "under" ? "default" : "outline"}
+                                                  size="sm"
+                                                  className={`flex-1 ${selectedPropType === "under" ? "bg-chart-2 hover:bg-chart-2/90" : ""}`}
+                                                  onClick={(e) => { e.stopPropagation(); toggleProp(propKey, "under"); }}
+                                                  data-testid={`button-under-prop-${prop.playerId}-${prop.category}`}
+                                                >
+                                                  <TrendingDown className="w-3 h-3 mr-1" />
+                                                  U {prop.underOdds.americanOdds > 0 ? "+" : ""}{prop.underOdds.americanOdds}
+                                                </Button>
                                               </div>
                                             </div>
                                           );
