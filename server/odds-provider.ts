@@ -498,10 +498,41 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+function generateGameStartTime(gameIndex: number, totalGames: number): Date {
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  if (gameIndex < Math.ceil(totalGames * 0.5)) {
+    const startTime = new Date(now);
+    if (currentHour < 12) {
+      startTime.setHours(13 + gameIndex * 2, 0, 0, 0);
+    } else if (currentHour < 18) {
+      startTime.setHours(currentHour + 1 + gameIndex, Math.floor(Math.random() * 30) + 15, 0, 0);
+    } else {
+      startTime.setHours(19 + gameIndex, Math.floor(Math.random() * 30), 0, 0);
+    }
+    
+    if (startTime <= now) {
+      startTime.setHours(startTime.getHours() + 1);
+    }
+    return startTime;
+  } else if (gameIndex < Math.ceil(totalGames * 0.8)) {
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(12 + (gameIndex - Math.ceil(totalGames * 0.5)) * 3, Math.floor(Math.random() * 30), 0, 0);
+    return tomorrow;
+  } else {
+    const dayAfter = new Date(now);
+    dayAfter.setDate(dayAfter.getDate() + 2);
+    dayAfter.setHours(14 + (gameIndex - Math.ceil(totalGames * 0.8)) * 2, Math.floor(Math.random() * 30), 0, 0);
+    return dayAfter;
+  }
+}
+
 export function generateMockEvents(sport: Sport): SportEvent[] {
   const teams = shuffleArray(getTeamsForSport(sport));
   const events: SportEvent[] = [];
-  const numGames = Math.min(6, Math.floor(teams.length / 2));
+  const numGames = Math.min(8, Math.floor(teams.length / 2));
 
   for (let i = 0; i < numGames; i++) {
     const homeTeam = teams[i * 2];
@@ -514,8 +545,7 @@ export function generateMockEvents(sport: Sport): SportEvent[] {
     const spread = generateSpread();
     const total = generateTotal(sport);
 
-    const startTime = new Date();
-    startTime.setHours(startTime.getHours() + Math.floor(Math.random() * 48) + 1);
+    const startTime = generateGameStartTime(i, numGames);
 
     const homeProps = generatePlayerProps(homeTeam, sport);
     const awayProps = generatePlayerProps(awayTeam, sport);
@@ -675,10 +705,13 @@ export function getOddsForSport(sport: Sport): SportEvent[] {
   const now = Date.now();
 
   if (cached && now - cached.timestamp < CACHE_TTL) {
-    return cached.events;
+    return cached.events.sort((a, b) => 
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
   }
 
   const events = generateMockEvents(sport);
+  events.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   oddsCache.set(sport, { events, timestamp: now });
   return events;
 }

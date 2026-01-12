@@ -83,6 +83,13 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Enhanced app to focus on TODAY's games and upcoming matchups:
+  - **Time-Aware Odds Engine**: Games sorted by start time with today's games prioritized
+  - **Today's Best Bets Section**: Highlights top +EV opportunities from imminent games
+  - **Game Time Buckets**: Live, Starting Soon, Today, Tonight, Tomorrow, Upcoming categories
+  - **Countdown Timers**: Display time until game start (e.g., "2h 15m", "45m")
+  - **Urgency Scoring**: Algorithm weights games by proximity for optimal betting windows
+  - **Smart Prioritization**: Focuses analysis on games where odds are most reliable
 - January 12, 2026: Added 8 NEW Pro Tools for serious bettors to maximize million-dollar potential:
   - **Market Timing Alerts**: Line movement detection, sharp action indicators, value window tracking with 5-15 minute alerts
   - **Portfolio Parlay Optimizer**: Build diversified parlay portfolios with risk-adjusted returns, anchor/satellite/moonshot strategy

@@ -20,6 +20,7 @@ import { ProgressiveHedgePlanner } from "@/components/progressive-hedge-planner"
 import { PromoBoostStacker } from "@/components/promo-boost-stacker";
 import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
 import { BookLimitPlanner } from "@/components/book-limit-planner";
+import { TodaysBestBets } from "@/components/todays-best-bets";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 
@@ -159,6 +160,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        <TodaysBestBets 
+          events={events} 
+          onAddLeg={(leg) => handleAddLeg({ ...leg, id: crypto.randomUUID() })} 
+        />
 
         <div className="flex gap-6">
           <div className="flex-1 min-w-0">

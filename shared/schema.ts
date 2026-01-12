@@ -334,6 +334,61 @@ export function impliedProbability(decimalOdds: number): number {
   return 1 / decimalOdds;
 }
 
+// TIME UTILITIES FOR GAME FOCUS
+export type GameTimeBucket = "live" | "starting_soon" | "today" | "tonight" | "tomorrow" | "upcoming";
+
+export function getGameTimeBucket(startTimeStr: string): GameTimeBucket {
+  const startTime = new Date(startTimeStr);
+  const now = new Date();
+  const diffMs = startTime.getTime() - now.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  
+  if (diffMs < 0) return "live";
+  if (diffHours < 1) return "starting_soon";
+  
+  const isToday = startTime.toDateString() === now.toDateString();
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const isTomorrow = startTime.toDateString() === tomorrow.toDateString();
+  
+  if (isToday && startTime.getHours() >= 18) return "tonight";
+  if (isToday) return "today";
+  if (isTomorrow) return "tomorrow";
+  return "upcoming";
+}
+
+export function formatGameTime(startTimeStr: string): string {
+  const startTime = new Date(startTimeStr);
+  const now = new Date();
+  const diffMs = startTime.getTime() - now.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  
+  if (diffMs < 0) return "LIVE";
+  if (diffMins < 60) return `${diffMins}m`;
+  if (diffHours < 24) return `${diffHours}h ${diffMins % 60}m`;
+  
+  return startTime.toLocaleDateString('en-US', { 
+    weekday: 'short', 
+    hour: 'numeric', 
+    minute: '2-digit' 
+  });
+}
+
+export function getTimeUrgencyScore(startTimeStr: string): number {
+  const startTime = new Date(startTimeStr);
+  const now = new Date();
+  const diffHours = (startTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+  
+  if (diffHours < 0) return 0;
+  if (diffHours < 2) return 1.0;
+  if (diffHours < 6) return 0.9;
+  if (diffHours < 12) return 0.8;
+  if (diffHours < 24) return 0.7;
+  if (diffHours < 48) return 0.5;
+  return 0.3;
+}
+
 // NEW ADVANCED FEATURES
 
 export const betRecordSchema = z.object({
