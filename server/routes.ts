@@ -74,10 +74,15 @@ export async function registerRoutes(
         });
       }
 
-      const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN } =
+      const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN, selectedEventIds } =
         parseResult.data;
 
-      const events = getOddsForSport(sport);
+      let events = getOddsForSport(sport);
+      
+      if (selectedEventIds && selectedEventIds.length > 0) {
+        events = events.filter(e => selectedEventIds.includes(e.id));
+      }
+      
       const legs = eventsToLegs(events);
 
       if (legs.length < minLegs) {
@@ -85,6 +90,7 @@ export async function registerRoutes(
           error: "Not enough betting options available",
           available: legs.length,
           required: minLegs,
+          hint: selectedEventIds?.length ? "Try selecting more games" : "Try a different sport",
         });
       }
 
