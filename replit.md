@@ -83,6 +83,15 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added Mega Parlay Features for building 20+ leg tickets with million-dollar potential:
+  - **Mega Parlay Builder** with 5 feature tabs: Jackpot Scenarios, Leg Synergies, Round Robin, Progressive Breakdown, Smart Recommendations
+  - **Jackpot Scenario Calculator**: Shows potential payouts from $1 to $1000 stakes with million-dollar potential markers
+  - **Leg Synergy Scoring**: Correlation-based analysis showing strong_positive (>0.5), positive (>0.2), neutral, negative (<-0.2), strong_negative (<-0.5) synergies
+  - **Round Robin Calculator**: Breaks large parlays into 2-6 leg combinations for increased win probability
+  - **Progressive Breakdown**: Tracks cumulative odds and payout at each stage of the parlay
+  - **Smart Leg Recommendations**: AI-powered suggestions with scoring (synergy bonuses, EV boosts, confidence levels)
+  - **Hot Streak Detector**: Identifies players/teams on winning streaks with hit rates and confidence levels
+  - **Parlay Insurance Finder**: Hedge calculator with guaranteed profit scenarios and break-even analysis
 - January 12, 2026: Added Betting Intelligence System:
   - **A-F Bet Grading**: Weighted scoring (EV 35%, Probability 25%, Value 25%, Risk 15%) with visual grade badges
   - **EV Indicator**: 5 status levels (strong_positive, positive, neutral, negative, strong_negative) with visual badges

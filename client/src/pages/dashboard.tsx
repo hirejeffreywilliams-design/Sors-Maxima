@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings } from "lucide-react";
+import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings, Trophy } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,11 @@ import { ParlayGenerator } from "@/components/parlay-generator";
 import { InsightsPanel } from "@/components/insights-panel";
 import { EdgeFinder } from "@/components/edge-finder";
 import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
+import { MegaParlayBuilder } from "@/components/mega-parlay-builder";
+import { HotStreakDetector } from "@/components/hot-streak-detector";
+import { ParlayInsuranceFinder } from "@/components/parlay-insurance-finder";
 import { useQuery } from "@tanstack/react-query";
-import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment } from "@shared/schema";
+import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("generator");
@@ -18,6 +21,8 @@ export default function Dashboard() {
   const [selectedLegs, setSelectedLegs] = useState<ParlayLeg[]>([]);
   const [showInsights, setShowInsights] = useState(true);
   const [totalSpent, setTotalSpent] = useState(0);
+  const [currentStake, setCurrentStake] = useState(10);
+  const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
   const [bankrollSettings, setBankrollSettings] = useState<BankrollSettings>({
     totalBankroll: 1000,
     sessionLimit: 100,
@@ -42,6 +47,20 @@ export default function Dashboard() {
   const handleLegsChange = useCallback((legs: ParlayLeg[]) => {
     setSelectedLegs(legs);
   }, []);
+
+  const handleStakeChange = useCallback((stake: number) => {
+    setCurrentStake(stake);
+  }, []);
+
+  const handleResultChange = useCallback((result: EvaluationResult | null) => {
+    setEvaluationResult(result);
+  }, []);
+
+  const handleAddLeg = useCallback((leg: ParlayLeg) => {
+    setSelectedLegs(prev => [...prev, leg]);
+  }, []);
+
+  const combinedOdds = selectedLegs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
 
   return (
     <div className="min-h-full">
@@ -137,7 +156,7 @@ export default function Dashboard() {
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsList className="grid w-full max-w-xl grid-cols-3">
                   <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
                     <Sparkles className="w-4 h-4" />
                     Auto Generator
@@ -145,6 +164,10 @@ export default function Dashboard() {
                   <TabsTrigger value="builder" className="gap-2" data-testid="tab-builder">
                     <Wrench className="w-4 h-4" />
                     Manual Builder
+                  </TabsTrigger>
+                  <TabsTrigger value="mega" className="gap-2" data-testid="tab-mega">
+                    <Trophy className="w-4 h-4" />
+                    Mega Parlay
                   </TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-2">
@@ -211,9 +234,73 @@ export default function Dashboard() {
                   preloadedLegs={preloadedLegs} 
                   onLegsLoaded={() => setPreloadedLegs([])} 
                   onLegsChange={handleLegsChange}
+                  onStakeChange={handleStakeChange}
+                  onResultChange={handleResultChange}
                   bankroll={bankrollSettings.totalBankroll}
                   bettingEnv={bettingEnv}
                 />
+              </TabsContent>
+
+              <TabsContent value="mega" className="space-y-6">
+                <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30">
+                  <CardContent className="py-4">
+                    <div className="flex items-start gap-3">
+                      <Trophy className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm space-y-1">
+                        <span>
+                          <strong className="text-foreground">Mega Parlay Builder:</strong>{" "}
+                          Build 20+ leg parlays with million-dollar potential. Use synergy scoring, 
+                          round robin options, and smart recommendations to maximize your chances.
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <MegaParlayBuilder 
+                    legs={selectedLegs}
+                    stake={currentStake}
+                    result={evaluationResult}
+                    availableLegs={events.flatMap(e => {
+                      const mlMarket = e.markets.find(m => m.type === "moneyline");
+                      if (!mlMarket || mlMarket.outcomes.length < 2) return [];
+                      const homeOutcome = mlMarket.outcomes[0];
+                      const awayOutcome = mlMarket.outcomes[1];
+                      return [
+                        { 
+                          id: `${e.id}-home-ml`,
+                          team: e.homeTeam,
+                          market: "moneyline",
+                          outcome: "Win",
+                          americanOdds: homeOutcome.americanOdds,
+                          decimalOdds: homeOutcome.decimalOdds,
+                          impliedProbability: homeOutcome.americanOdds > 0 ? 100 / (homeOutcome.americanOdds + 100) : Math.abs(homeOutcome.americanOdds) / (Math.abs(homeOutcome.americanOdds) + 100),
+                        },
+                        {
+                          id: `${e.id}-away-ml`,
+                          team: e.awayTeam,
+                          market: "moneyline",
+                          outcome: "Win",
+                          americanOdds: awayOutcome.americanOdds,
+                          decimalOdds: awayOutcome.decimalOdds,
+                          impliedProbability: awayOutcome.americanOdds > 0 ? 100 / (awayOutcome.americanOdds + 100) : Math.abs(awayOutcome.americanOdds) / (Math.abs(awayOutcome.americanOdds) + 100),
+                        }
+                      ];
+                    })}
+                    onAddLeg={handleAddLeg}
+                  />
+                  
+                  <div className="space-y-6">
+                    <HotStreakDetector sport="NBA" />
+                    <ParlayInsuranceFinder 
+                      legs={selectedLegs}
+                      stake={currentStake}
+                      currentOdds={combinedOdds}
+                      legsRemaining={1}
+                    />
+                  </div>
+                </div>
               </TabsContent>
             </Tabs>
             

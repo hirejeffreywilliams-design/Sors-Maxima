@@ -1091,13 +1091,25 @@ export function calculateLegSynergies(
   legs: ParlayLeg[],
   correlationMatrix: number[][] | undefined
 ): LegSynergy[] {
-  if (!correlationMatrix || legs.length < 2) return [];
+  if (legs.length < 2) return [];
   
   const synergies: LegSynergy[] = [];
   
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 1; j < legs.length; j++) {
-      const corr = correlationMatrix[i]?.[j] || 0;
+      let corr = correlationMatrix?.[i]?.[j] ?? 0;
+      
+      if (!correlationMatrix) {
+        const leg1 = legs[i];
+        const leg2 = legs[j];
+        if (leg1.team === leg2.team) {
+          corr = 0.4;
+        } else if (leg1.market === leg2.market) {
+          corr = 0.1;
+        } else {
+          corr = 0;
+        }
+      }
       
       let synergyType: LegSynergy["synergyType"];
       if (corr > 0.5) synergyType = "strong_positive";

@@ -17,6 +17,8 @@ interface ParlayBuilderProps {
   preloadedLegs?: ParlayLeg[];
   onLegsLoaded?: () => void;
   onLegsChange?: (legs: ParlayLeg[]) => void;
+  onStakeChange?: (stake: number) => void;
+  onResultChange?: (result: EvaluationResult | null) => void;
   bankroll?: number;
   bettingEnv?: BettingEnvironment;
 }
@@ -33,14 +35,23 @@ const defaultBettingEnv: BettingEnvironment = {
   profileType: "balanced"
 };
 
-export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, bankroll = 1000, bettingEnv = defaultBettingEnv }: ParlayBuilderProps) {
+export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, onStakeChange, onResultChange, bankroll = 1000, bettingEnv = defaultBettingEnv }: ParlayBuilderProps) {
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
   
   useEffect(() => {
     onLegsChange?.(legs);
   }, [legs, onLegsChange]);
+  
   const [stake, setStake] = useState(10);
   const [result, setResult] = useState<EvaluationResult | null>(null);
+  
+  useEffect(() => {
+    onStakeChange?.(stake);
+  }, [stake, onStakeChange]);
+  
+  useEffect(() => {
+    onResultChange?.(result);
+  }, [result, onResultChange]);
 
   useEffect(() => {
     if (preloadedLegs && preloadedLegs.length > 0) {
