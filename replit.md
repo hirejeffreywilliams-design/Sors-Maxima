@@ -83,6 +83,14 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added Betting Intelligence System:
+  - **A-F Bet Grading**: Weighted scoring (EV 35%, Probability 25%, Value 25%, Risk 15%) with visual grade badges
+  - **EV Indicator**: 5 status levels (strong_positive, positive, neutral, negative, strong_negative) with visual badges
+  - **Risk Advisory**: 5 risk levels with 10 warning types including low_probability, negative_ev, bankroll_overexposure
+  - **Betting Environment Settings**: 4 profile presets (conservative, balanced, aggressive, sharp) with configurable Kelly multiplier, max stake %, min edge requirements
+  - Correlation penalty calculated from correlation matrix to improve bet grading
+  - Max stake warnings when stake exceeds profile limits
+  - Responsive settings panel (inline on smaller screens, sticky sidebar on larger screens)
 - January 12, 2026: Added 14 NEW edge-finding features:
   - Bet Tracking Dashboard with P/L, ROI, win rate, and CLV analysis
   - CLV (Closing Line Value) Tracker showing if bets beat closing odds

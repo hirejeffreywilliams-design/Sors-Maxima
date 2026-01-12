@@ -212,6 +212,7 @@ export default function Dashboard() {
                   onLegsLoaded={() => setPreloadedLegs([])} 
                   onLegsChange={handleLegsChange}
                   bankroll={bankrollSettings.totalBankroll}
+                  bettingEnv={bettingEnv}
                 />
               </TabsContent>
             </Tabs>

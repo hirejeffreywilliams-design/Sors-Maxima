@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { EvaluationResult, BetGrading, EVIndicator, RiskAdvisory } from "@shared/schema";
+import type { EvaluationResult, BetGrading, EVIndicator, RiskAdvisory, BettingEnvironment } from "@shared/schema";
 import { calculateBetGrade, calculateEVIndicator, generateRiskAdvisory } from "@shared/schema";
 
 interface ProbabilityResultsProps {
@@ -11,6 +11,7 @@ interface ProbabilityResultsProps {
   stake: number;
   isLoading?: boolean;
   bankroll?: number;
+  bettingEnv?: BettingEnvironment;
 }
 
 function getGradeColor(grade: string): string {
@@ -59,7 +60,19 @@ function getRiskColor(level: RiskAdvisory["level"]): string {
   }
 }
 
-export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000 }: ProbabilityResultsProps) {
+const defaultBettingEnv: BettingEnvironment = {
+  maxStakePercent: 0.05,
+  kellyMultiplier: 0.25,
+  minEdgeRequired: 0.02,
+  maxCorrelationAllowed: 0.8,
+  includeJuiceAdjustment: true,
+  juicePercent: 0.045,
+  enableRiskWarnings: true,
+  enableAutoAdjust: false,
+  profileType: "balanced"
+};
+
+export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000, bettingEnv = defaultBettingEnv }: ProbabilityResultsProps) {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
@@ -110,19 +123,39 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000 }
   const isPositiveEV = result.expectedValue > 0;
   
   const impliedProb = 1 / result.combinedOdds;
+  
+  const calculateCorrelationPenalty = (matrix: number[][] | undefined): number => {
+    if (!matrix || matrix.length === 0) return 0;
+    let maxCorr = 0;
+    for (let i = 0; i < matrix.length; i++) {
+      for (let j = 0; j < matrix[i].length; j++) {
+        if (i !== j) {
+          maxCorr = Math.max(maxCorr, Math.abs(matrix[i][j]));
+        }
+      }
+    }
+    return maxCorr;
+  };
+  const correlationPenalty = calculateCorrelationPenalty(result.correlationMatrix);
+  
+  const riskToleranceFromProfile = bettingEnv.profileType === "aggressive" ? "high" 
+    : bettingEnv.profileType === "conservative" ? "low" 
+    : "medium";
+  
   const betGrade = calculateBetGrade(
     result.winProbability,
     result.expectedValue,
-    result.kellyStake / bankroll,
-    0
+    (result.kellyStake / bankroll) * bettingEnv.kellyMultiplier,
+    correlationPenalty
   );
-  const evIndicator = calculateEVIndicator(impliedProb, result.winProbability, "high");
+  const evIndicator = calculateEVIndicator(impliedProb, result.winProbability, riskToleranceFromProfile);
   const stakePercent = stake / bankroll;
+  const maxStakeWarning = stakePercent > bettingEnv.maxStakePercent;
   const riskAdvisory = generateRiskAdvisory(
     result.winProbability,
     result.expectedValue,
     stakePercent,
-    0
+    correlationPenalty
   );
 
   return (
@@ -223,10 +256,12 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000 }
               Kelly Stake
             </div>
             <div className="text-2xl font-mono font-bold" data-testid="text-kelly-stake">
-              ${result.kellyStake.toFixed(2)}
+              ${(result.kellyStake * bettingEnv.kellyMultiplier).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Optimal bet size
+              {bettingEnv.kellyMultiplier < 1 
+                ? `${(bettingEnv.kellyMultiplier * 100).toFixed(0)}% Kelly (${bettingEnv.profileType})`
+                : "Full Kelly"}
             </p>
           </div>
           
@@ -312,6 +347,18 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000 }
             </div>
           )}
 
+          {maxStakeWarning && bettingEnv.enableRiskWarnings && (
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 mb-2">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-amber-500" />
+                <span className="text-sm font-medium">Stake Exceeds Limit</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your stake ({(stakePercent * 100).toFixed(1)}% of bankroll) exceeds your {bettingEnv.profileType} profile limit of {(bettingEnv.maxStakePercent * 100).toFixed(0)}%.
+              </p>
+            </div>
+          )}
+          
           {riskAdvisory.warnings.length > 0 && (
             <div className="p-3 rounded-lg bg-muted/50">
               <div className="flex items-center gap-2 mb-2">

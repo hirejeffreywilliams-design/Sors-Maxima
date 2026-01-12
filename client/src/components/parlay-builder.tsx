@@ -11,16 +11,29 @@ import { AddLegForm } from "./add-leg-form";
 import { ProbabilityResults } from "./probability-results";
 import { CorrelationMatrix } from "./correlation-matrix";
 import { apiRequest } from "@/lib/queryClient";
-import type { ParlayLeg, EvaluationResult, InsertParlayLeg } from "@shared/schema";
+import type { ParlayLeg, EvaluationResult, InsertParlayLeg, BettingEnvironment } from "@shared/schema";
 
 interface ParlayBuilderProps {
   preloadedLegs?: ParlayLeg[];
   onLegsLoaded?: () => void;
   onLegsChange?: (legs: ParlayLeg[]) => void;
   bankroll?: number;
+  bettingEnv?: BettingEnvironment;
 }
 
-export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, bankroll = 1000 }: ParlayBuilderProps) {
+const defaultBettingEnv: BettingEnvironment = {
+  maxStakePercent: 0.05,
+  kellyMultiplier: 0.25,
+  minEdgeRequired: 0.02,
+  maxCorrelationAllowed: 0.8,
+  includeJuiceAdjustment: true,
+  juicePercent: 0.045,
+  enableRiskWarnings: true,
+  enableAutoAdjust: false,
+  profileType: "balanced"
+};
+
+export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, bankroll = 1000, bettingEnv = defaultBettingEnv }: ParlayBuilderProps) {
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
   
   useEffect(() => {
@@ -175,6 +188,7 @@ export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, bankr
           stake={stake}
           isLoading={evaluateMutation.isPending}
           bankroll={bankroll}
+          bettingEnv={bettingEnv}
         />
         
         <CorrelationMatrix
