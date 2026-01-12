@@ -4,6 +4,7 @@ import {
   Sparkles,
   Loader2,
   TrendingUp,
+  TrendingDown,
   DollarSign,
   Target,
   ChevronRight,
@@ -16,7 +17,6 @@ import {
   RefreshCw,
   ChevronDown,
   User,
-  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,8 +76,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const [expandedGames, setExpandedGames] = useState<Set<string>>(new Set());
   const [marketFilter, setMarketFilter] = useState<"all" | "game" | "props">("all");
   const [selectedProps, setSelectedProps] = useState<Set<string>>(new Set());
-  const [includePropsInGeneration, setIncludePropsInGeneration] = useState(true);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [selectedTotals, setSelectedTotals] = useState<Map<string, "over" | "under">>(new Map());
 
   const gamesQuery = useQuery<SportEvent[]>({
     queryKey: ["/api/odds", sport],
@@ -97,10 +96,16 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   useEffect(() => {
     setResults(null);
     setSelectedGames(new Set());
+    setSelectedTotals(new Map());
+    setSelectedProps(new Set());
   }, [sport]);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
+      const totalsArray = Array.from(selectedTotals.entries()).map(([gameId, selection]) => ({
+        gameId,
+        selection,
+      }));
       const response = await apiRequest("POST", "/api/generate-parlays", {
         sport,
         stake,
@@ -110,6 +115,8 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
         riskLevel,
         topN: 5,
         selectedEventIds: Array.from(selectedGames),
+        selectedTotals: totalsArray,
+        selectedProps: Array.from(selectedProps),
       });
       const data = await response.json();
       return data;
@@ -128,6 +135,11 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
       const next = new Set(prev);
       if (next.has(gameId)) {
         next.delete(gameId);
+        setSelectedTotals(totals => {
+          const nextTotals = new Map(totals);
+          nextTotals.delete(gameId);
+          return nextTotals;
+        });
       } else {
         next.add(gameId);
       }
@@ -143,6 +155,8 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
 
   const deselectAllGames = () => {
     setSelectedGames(new Set());
+    setSelectedTotals(new Map());
+    setSelectedProps(new Set());
   };
 
   const toggleGameExpanded = (gameId: string) => {
@@ -213,6 +227,30 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
     ).length;
   };
 
+  const toggleTotal = (gameId: string, selection: "over" | "under") => {
+    setSelectedTotals(prev => {
+      const next = new Map(prev);
+      if (next.get(gameId) === selection) {
+        next.delete(gameId);
+      } else {
+        next.set(gameId, selection);
+      }
+      return next;
+    });
+  };
+
+  const getGameTotal = (game: SportEvent) => {
+    const totalMarket = game.markets.find(m => m.type === "total");
+    if (!totalMarket) return null;
+    const overOutcome = totalMarket.outcomes.find(o => o.name.includes("Over"));
+    const underOutcome = totalMarket.outcomes.find(o => o.name.includes("Under"));
+    return { 
+      line: overOutcome?.line || 0, 
+      overOdds: overOutcome?.americanOdds || 0,
+      underOdds: underOutcome?.americanOdds || 0 
+    };
+  };
+
   const games = gamesQuery.data || [];
   const allSelected = games.length > 0 && selectedGames.size === games.length;
   const noneSelected = selectedGames.size === 0;
@@ -227,114 +265,43 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-2">
-              <Label>Sport</Label>
-              <Select value={sport} onValueChange={(v) => setSport(v as Sport)}>
-                <SelectTrigger data-testid="select-sport">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {sports.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Stake</Label>
-              <Input
-                type="number"
-                min={1}
-                value={stake}
-                onChange={(e) => setStake(parseFloat(e.target.value) || 10)}
-                className="font-mono"
-                data-testid="input-generator-stake"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Risk</Label>
-              <Select
-                value={riskLevel}
-                onValueChange={(v) => setRiskLevel(v as typeof riskLevel)}
-              >
-                <SelectTrigger data-testid="select-risk-level">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="conservative">Conservative</SelectItem>
-                  <SelectItem value="moderate">Moderate</SelectItem>
-                  <SelectItem value="aggressive">Aggressive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="text-muted-foreground" data-testid="button-toggle-advanced">
-                <Settings className="w-4 h-4 mr-2" />
-                {showAdvanced ? "Hide" : "Show"} Advanced Settings
-                <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="pt-4 space-y-4">
-              <div className="space-y-3 p-4 rounded-lg bg-muted/50">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm">Parlay Size: {minLegs} - {maxLegs} legs</Label>
-                </div>
-                <div className="px-2">
-                  <Slider
-                    value={[minLegs, maxLegs]}
-                    onValueChange={([min, max]) => {
-                      setMinLegs(min);
-                      setMaxLegs(max);
-                    }}
-                    min={2}
-                    max={6}
-                    step={1}
-                    data-testid="slider-leg-count"
-                  />
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>2 legs</span>
-                  <span>6 legs</span>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label className="text-sm">Bankroll</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={bankroll}
-                    onChange={(e) => setBankroll(parseFloat(e.target.value) || 1000)}
-                    className="font-mono"
-                    data-testid="input-bankroll"
-                  />
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          <Select value={sport} onValueChange={(v) => setSport(v as Sport)}>
+            <SelectTrigger data-testid="select-sport" className="w-full">
+              <SelectValue placeholder="Select Sport" />
+            </SelectTrigger>
+            <SelectContent>
+              {sports.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <CardTitle className="text-base">
-              Select Games
-              {selectedGames.size > 0 && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  ({selectedGames.size} selected)
-                </span>
-              )}
-            </CardTitle>
+            <div>
+              <CardTitle className="text-base">
+                Select Games & Totals
+              </CardTitle>
+              <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                {selectedGames.size > 0 && (
+                  <span>{selectedGames.size} games</span>
+                )}
+                {selectedTotals.size > 0 && (
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3" />
+                    {selectedTotals.size} O/U
+                  </span>
+                )}
+                {selectedProps.size > 0 && (
+                  <span>{selectedProps.size} props</span>
+                )}
+              </div>
+            </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
@@ -379,6 +346,8 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                   const isExpanded = expandedGames.has(game.id);
                   const groupedProps = game.playerProps ? groupPropsByCategory(game.playerProps) : {};
                   const propCategories = Object.keys(groupedProps);
+                  const gameTotal = getGameTotal(game);
+                  const selectedTotal = selectedTotals.get(game.id);
                   
                   return (
                     <Collapsible 
@@ -388,16 +357,13 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                     >
                       <div
                         className={`rounded-lg border transition-colors ${
-                          isSelected
+                          isSelected || selectedTotal
                             ? "bg-primary/5 border-primary/30"
                             : "bg-muted/30 border-transparent"
                         }`}
                         data-testid={`game-card-${game.id}`}
                       >
-                        <div 
-                          className="p-3 cursor-pointer"
-                          onClick={() => toggleGame(game.id)}
-                        >
+                        <div className="p-3">
                           <div className="flex items-center gap-3">
                             <div onClick={(e) => e.stopPropagation()}>
                               <Checkbox
@@ -431,6 +397,38 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                               )}
                             </div>
                           </div>
+                          
+                          {gameTotal && (
+                            <div className="mt-3 pt-3 border-t border-border/50">
+                              <div className="flex items-center justify-between">
+                                <div className="text-xs text-muted-foreground font-medium">
+                                  Game Total: {gameTotal.line}
+                                </div>
+                                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                                  <Button
+                                    variant={selectedTotal === "over" ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => toggleTotal(game.id, "over")}
+                                    className={`text-xs ${selectedTotal === "over" ? "bg-chart-1 hover:bg-chart-1/90" : ""}`}
+                                    data-testid={`button-over-${game.id}`}
+                                  >
+                                    <TrendingUp className="w-3 h-3 mr-1" />
+                                    Over {gameTotal.overOdds > 0 ? `+${gameTotal.overOdds}` : gameTotal.overOdds}
+                                  </Button>
+                                  <Button
+                                    variant={selectedTotal === "under" ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => toggleTotal(game.id, "under")}
+                                    className={`text-xs ${selectedTotal === "under" ? "bg-chart-2 hover:bg-chart-2/90" : ""}`}
+                                    data-testid={`button-under-${game.id}`}
+                                  >
+                                    <TrendingDown className="w-3 h-3 mr-1" />
+                                    Under {gameTotal.underOdds > 0 ? `+${gameTotal.underOdds}` : gameTotal.underOdds}
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         
                         {game.playerProps && game.playerProps.length > 0 && (
@@ -554,7 +552,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
 
       <Button
         onClick={handleGenerate}
-        disabled={generateMutation.isPending || selectedGames.size === 0}
+        disabled={generateMutation.isPending || (selectedGames.size === 0 && selectedTotals.size === 0)}
         className="w-full"
         size="lg"
         data-testid="button-generate-parlays"
@@ -562,12 +560,21 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
         {generateMutation.isPending ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Analyzing {selectedGames.size} {sport} Games...
+            Analyzing selections...
           </>
         ) : (
           <>
             <Sparkles className="w-4 h-4 mr-2" />
-            Generate Optimal Parlays ({selectedGames.size} games{selectedProps.size > 0 ? `, ${selectedProps.size} props` : ""})
+            Generate Optimal Parlays
+            {(selectedGames.size > 0 || selectedTotals.size > 0 || selectedProps.size > 0) && (
+              <span className="ml-1 text-xs opacity-80">
+                ({[
+                  selectedGames.size > 0 && `${selectedGames.size} games`,
+                  selectedTotals.size > 0 && `${selectedTotals.size} O/U`,
+                  selectedProps.size > 0 && `${selectedProps.size} props`,
+                ].filter(Boolean).join(", ")})
+              </span>
+            )}
           </>
         )}
       </Button>

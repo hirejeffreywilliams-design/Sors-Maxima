@@ -171,6 +171,11 @@ export const generateParlaysRequestSchema = z.object({
   riskLevel: z.enum(["conservative", "moderate", "aggressive"]).default("moderate"),
   topN: z.number().min(1).max(10).default(5),
   selectedEventIds: z.array(z.string()).optional(),
+  selectedTotals: z.array(z.object({
+    gameId: z.string(),
+    selection: z.enum(["over", "under"]),
+  })).optional(),
+  selectedProps: z.array(z.string()).optional(),
 });
 
 export type GenerateParlaysRequest = z.infer<typeof generateParlaysRequestSchema>;

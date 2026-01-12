@@ -74,7 +74,7 @@ export async function registerRoutes(
         });
       }
 
-      const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN, selectedEventIds } =
+      const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN, selectedEventIds, selectedTotals, selectedProps } =
         parseResult.data;
 
       let events = getOddsForSport(sport);
@@ -83,7 +83,45 @@ export async function registerRoutes(
         events = events.filter(e => selectedEventIds.includes(e.id));
       }
       
-      const legs = eventsToLegs(events);
+      let legs = eventsToLegs(events);
+      
+      const selectedTotalGameIds = new Set((selectedTotals || []).map(t => t.gameId));
+      
+      if (selectedTotals && selectedTotals.length > 0) {
+        const totalLegs = [];
+        for (const total of selectedTotals) {
+          const event = events.find(e => e.id === total.gameId);
+          if (!event) continue;
+          
+          const totalMarket = event.markets.find(m => m.type === "total");
+          if (!totalMarket) continue;
+          
+          const outcome = totalMarket.outcomes.find(o => 
+            total.selection === "over" ? o.name.includes("Over") : o.name.includes("Under")
+          );
+          if (!outcome) continue;
+          
+          totalLegs.push({
+            id: `${event.id}-total-${total.selection}`,
+            eventId: event.id,
+            team: `${event.awayTeam} @ ${event.homeTeam}`,
+            opponent: "",
+            market: "total" as const,
+            outcome: outcome.name,
+            decimalOdds: outcome.decimalOdds,
+            americanOdds: outcome.americanOdds,
+          });
+        }
+        
+        legs = legs.filter(leg => {
+          if (leg.market === "total" && leg.eventId && selectedTotalGameIds.has(leg.eventId)) {
+            return false;
+          }
+          return true;
+        });
+        
+        legs = [...totalLegs, ...legs];
+      }
 
       if (legs.length < minLegs) {
         return res.status(400).json({
