@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import type { ParlayLeg, EvaluationResult } from "@shared/schema";
+import type { ParlayLeg, EvaluationResult, Sport, GeneratedParlay } from "@shared/schema";
 
 export interface IStorage {
   evaluateParlay(
@@ -7,6 +7,18 @@ export interface IStorage {
     stake: number,
     simulations: number
   ): Promise<EvaluationResult>;
+  generateOptimalParlays(
+    legs: ParlayLeg[],
+    options: {
+      minLegs: number;
+      maxLegs: number;
+      bankroll: number;
+      riskLevel: "conservative" | "moderate" | "aggressive";
+      topN: number;
+      stake: number;
+      sport: Sport;
+    }
+  ): Promise<GeneratedParlay[]>;
 }
 
 function clamp(x: number, lo = -0.99, hi = 0.99): number {
@@ -219,6 +231,63 @@ function calculateKellyStake(
   return Math.min(fractionalKelly * bankroll, bankroll * 0.1);
 }
 
+function combinations<T>(arr: T[], k: number): T[][] {
+  if (k === 0) return [[]];
+  if (arr.length < k) return [];
+  
+  const result: T[][] = [];
+  const [first, ...rest] = arr;
+  
+  for (const combo of combinations(rest, k - 1)) {
+    result.push([first, ...combo]);
+  }
+  for (const combo of combinations(rest, k)) {
+    result.push(combo);
+  }
+  
+  return result;
+}
+
+function filterConflictingLegs(legs: ParlayLeg[]): ParlayLeg[] {
+  const eventOutcomes = new Map<string, Set<string>>();
+  const result: ParlayLeg[] = [];
+  
+  for (const leg of legs) {
+    if (!leg.eventId) {
+      result.push(leg);
+      continue;
+    }
+    
+    const key = `${leg.eventId}-${leg.market}`;
+    const existing = eventOutcomes.get(key);
+    
+    if (!existing) {
+      eventOutcomes.set(key, new Set([leg.outcome]));
+      result.push(leg);
+    }
+  }
+  
+  return result;
+}
+
+function hasConflictingLegs(combo: ParlayLeg[]): boolean {
+  const seen = new Map<string, string>();
+  
+  for (const leg of combo) {
+    if (!leg.eventId) continue;
+    
+    const key = `${leg.eventId}-${leg.market}`;
+    const existingOutcome = seen.get(key);
+    
+    if (existingOutcome && existingOutcome !== leg.outcome) {
+      return true;
+    }
+    seen.set(key, leg.outcome);
+  }
+  
+  return false;
+}
+
 export class MemStorage implements IStorage {
   async evaluateParlay(
     legs: ParlayLeg[],
@@ -255,6 +324,134 @@ export class MemStorage implements IStorage {
       legProbabilities,
       correlationMatrix,
     };
+  }
+
+  async generateOptimalParlays(
+    allLegs: ParlayLeg[],
+    options: {
+      minLegs: number;
+      maxLegs: number;
+      bankroll: number;
+      riskLevel: "conservative" | "moderate" | "aggressive";
+      topN: number;
+      stake: number;
+      sport: Sport;
+    }
+  ): Promise<GeneratedParlay[]> {
+    const { minLegs, maxLegs, bankroll, riskLevel, topN, stake, sport } = options;
+
+    const legs = allLegs.sort((a, b) => {
+      const probA = estimateLegProbability(a);
+      const probB = estimateLegProbability(b);
+      const evA = probA * a.decimalOdds - 1;
+      const evB = probB * b.decimalOdds - 1;
+      return evB - evA;
+    });
+
+    const topLegs = legs.slice(0, Math.min(20, legs.length));
+
+    const candidates: Array<{
+      legs: ParlayLeg[];
+      winProb: number;
+      ev: number;
+      combinedOdds: number;
+      score: number;
+    }> = [];
+
+    for (let k = minLegs; k <= maxLegs; k++) {
+      for (const combo of combinations(topLegs, k)) {
+        if (hasConflictingLegs(combo)) continue;
+
+        const probs = combo.map(estimateLegProbability);
+        const winProb = probs.reduce((acc: number, p: number) => acc * p, 1);
+        const combinedOdds = combo.reduce((acc: number, leg: ParlayLeg) => acc * leg.decimalOdds, 1);
+        const impliedProb = 1 / combinedOdds;
+        const ev = winProb / impliedProb - 1;
+
+        let score: number;
+        switch (riskLevel) {
+          case "conservative":
+            score = winProb * 2 + ev * 0.5;
+            break;
+          case "aggressive":
+            score = ev * 2 + winProb * 0.5;
+            break;
+          default:
+            score = winProb + ev;
+        }
+
+        if (ev > -0.5) {
+          candidates.push({
+            legs: combo,
+            winProb,
+            ev,
+            combinedOdds,
+            score,
+          });
+        }
+      }
+    }
+
+    candidates.sort((a, b) => b.score - a.score);
+
+    const topCandidates = candidates.slice(0, topN);
+
+    const results: GeneratedParlay[] = [];
+
+    for (const candidate of topCandidates) {
+      const { winProbability } = await runMonteCarloSimulation(
+        candidate.legs,
+        5000
+      );
+
+      const kellyStake = calculateKellyStake(
+        winProbability,
+        candidate.combinedOdds,
+        bankroll
+      );
+
+      const potentialReturn = stake * candidate.combinedOdds;
+      const impliedProb = 1 / candidate.combinedOdds;
+      const expectedValue = winProbability / impliedProb - 1;
+
+      let riskRating: "low" | "medium" | "high";
+      if (winProbability >= 0.15) {
+        riskRating = "low";
+      } else if (winProbability >= 0.05) {
+        riskRating = "medium";
+      } else {
+        riskRating = "high";
+      }
+
+      let score: number;
+      switch (riskLevel) {
+        case "conservative":
+          score = winProbability * 2 + expectedValue * 0.5;
+          break;
+        case "aggressive":
+          score = expectedValue * 2 + winProbability * 0.5;
+          break;
+        default:
+          score = winProbability + expectedValue;
+      }
+
+      results.push({
+        id: randomUUID(),
+        legs: candidate.legs,
+        winProbability,
+        expectedValue,
+        kellyStake,
+        potentialReturn,
+        combinedOdds: candidate.combinedOdds,
+        score,
+        riskRating,
+        sport,
+      });
+    }
+
+    results.sort((a, b) => b.score - a.score);
+
+    return results;
   }
 }
 

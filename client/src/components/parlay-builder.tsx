@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Trash2, Calculator, DollarSign, ListChecks } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,10 +13,23 @@ import { CorrelationMatrix } from "./correlation-matrix";
 import { apiRequest } from "@/lib/queryClient";
 import type { ParlayLeg, EvaluationResult, InsertParlayLeg } from "@shared/schema";
 
-export function ParlayBuilder() {
+interface ParlayBuilderProps {
+  preloadedLegs?: ParlayLeg[];
+  onLegsLoaded?: () => void;
+}
+
+export function ParlayBuilder({ preloadedLegs, onLegsLoaded }: ParlayBuilderProps) {
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
   const [stake, setStake] = useState(10);
   const [result, setResult] = useState<EvaluationResult | null>(null);
+
+  useEffect(() => {
+    if (preloadedLegs && preloadedLegs.length > 0) {
+      setLegs(preloadedLegs);
+      setResult(null);
+      onLegsLoaded?.();
+    }
+  }, [preloadedLegs, onLegsLoaded]);
 
   const evaluateMutation = useMutation({
     mutationFn: async () => {

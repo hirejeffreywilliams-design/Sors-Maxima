@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+export const sports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
+export type Sport = (typeof sports)[number];
+
 export const marketTypes = ["moneyline", "spread", "total", "player_prop"] as const;
 export type MarketType = (typeof marketTypes)[number];
 
@@ -73,6 +76,53 @@ export const optimizeRequestSchema = z.object({
 });
 
 export type OptimizeRequest = z.infer<typeof optimizeRequestSchema>;
+
+export const sportEventSchema = z.object({
+  id: z.string(),
+  sport: z.enum(sports),
+  homeTeam: z.string(),
+  awayTeam: z.string(),
+  startTime: z.string(),
+  markets: z.array(z.object({
+    type: z.enum(marketTypes),
+    outcomes: z.array(z.object({
+      name: z.string(),
+      team: z.string().optional(),
+      line: z.number().optional(),
+      decimalOdds: z.number(),
+      americanOdds: z.number(),
+    })),
+  })),
+});
+
+export type SportEvent = z.infer<typeof sportEventSchema>;
+
+export const generateParlaysRequestSchema = z.object({
+  sport: z.enum(sports),
+  stake: z.number().min(1).default(10),
+  minLegs: z.number().min(2).max(6).default(2),
+  maxLegs: z.number().min(2).max(6).default(4),
+  bankroll: z.number().min(1).default(1000),
+  riskLevel: z.enum(["conservative", "moderate", "aggressive"]).default("moderate"),
+  topN: z.number().min(1).max(10).default(5),
+});
+
+export type GenerateParlaysRequest = z.infer<typeof generateParlaysRequestSchema>;
+
+export const generatedParlaySchema = z.object({
+  id: z.string(),
+  legs: z.array(parlayLegSchema),
+  winProbability: z.number(),
+  expectedValue: z.number(),
+  kellyStake: z.number(),
+  potentialReturn: z.number(),
+  combinedOdds: z.number(),
+  score: z.number(),
+  riskRating: z.enum(["low", "medium", "high"]),
+  sport: z.enum(sports),
+});
+
+export type GeneratedParlay = z.infer<typeof generatedParlaySchema>;
 
 export function americanToDecimal(american: number): number {
   if (american > 0) {

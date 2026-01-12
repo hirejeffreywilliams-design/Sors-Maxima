@@ -1,9 +1,21 @@
-import { Target, TrendingUp, Zap, Info } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useCallback } from "react";
+import { Target, TrendingUp, Zap, Info, Sparkles, Wrench } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParlayBuilder } from "@/components/parlay-builder";
+import { ParlayGenerator } from "@/components/parlay-generator";
+import type { ParlayLeg } from "@shared/schema";
 
 export default function Dashboard() {
+  const [activeTab, setActiveTab] = useState("generator");
+  const [preloadedLegs, setPreloadedLegs] = useState<ParlayLeg[]>([]);
+
+  const handleLoadParlay = useCallback((legs: ParlayLeg[]) => {
+    setPreloadedLegs(legs);
+    setActiveTab("builder");
+  }, []);
+
   return (
     <div className="min-h-full">
       <div className="max-w-screen-2xl mx-auto px-6 py-6 space-y-6">
@@ -75,26 +87,57 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        <Card className="bg-muted/30 border-dashed">
-          <CardContent className="py-4">
-            <div className="flex items-start gap-3">
-              <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>
-                  <strong className="text-foreground">How it works:</strong>{" "}
-                  Add your betting legs below, then click "Analyze" to run a Monte Carlo 
-                  simulation that accounts for correlations between outcomes.
-                </p>
-                <p>
-                  The optimizer calculates true win probability, expected value, and 
-                  recommends optimal stake sizing using the Kelly Criterion.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
+              <Sparkles className="w-4 h-4" />
+              Auto Generator
+            </TabsTrigger>
+            <TabsTrigger value="builder" className="gap-2" data-testid="tab-builder">
+              <Wrench className="w-4 h-4" />
+              Manual Builder
+            </TabsTrigger>
+          </TabsList>
 
-        <ParlayBuilder />
+          <TabsContent value="generator" className="space-y-6">
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>
+                      <strong className="text-foreground">Auto Generator:</strong>{" "}
+                      Select a sport and let the optimizer find the best parlays automatically.
+                      The algorithm analyzes all available games and runs Monte Carlo simulations
+                      to find the highest expected value combinations.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <ParlayGenerator onLoadParlay={handleLoadParlay} />
+          </TabsContent>
+
+          <TabsContent value="builder" className="space-y-6">
+            <Card className="bg-muted/30 border-dashed">
+              <CardContent className="py-4">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-muted-foreground space-y-1">
+                    <p>
+                      <strong className="text-foreground">Manual Builder:</strong>{" "}
+                      Add your own betting legs manually, then click "Analyze" to run a 
+                      Monte Carlo simulation that accounts for correlations between outcomes.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <ParlayBuilder preloadedLegs={preloadedLegs} onLegsLoaded={() => setPreloadedLegs([])} />
+          </TabsContent>
+        </Tabs>
 
         <footer className="pt-6 border-t">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
