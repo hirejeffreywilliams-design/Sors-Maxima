@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight } from "lucide-react";
+import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ParlayBuilder } from "@/components/parlay-builder";
 import { ParlayGenerator } from "@/components/parlay-generator";
 import { InsightsPanel } from "@/components/insights-panel";
+import { EdgeFinder } from "@/components/edge-finder";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings } from "@shared/schema";
 
@@ -51,49 +52,49 @@ export default function Dashboard() {
           </p>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <Card className="hover-elevate">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="hover-elevate bg-gradient-to-br from-chart-1/5 to-transparent border-chart-1/20">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-1/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-chart-1/20 flex items-center justify-center flex-shrink-0">
                   <Target className="w-5 h-5 text-chart-1" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Monte Carlo Simulation
+                    Monte Carlo
                   </p>
-                  <p className="text-2xl font-bold font-mono">20,000</p>
+                  <p className="text-2xl font-bold font-mono">20K</p>
                   <p className="text-xs text-muted-foreground">
-                    simulations per analysis
+                    simulations
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover-elevate">
+          <Card className="hover-elevate bg-gradient-to-br from-chart-2/5 to-transparent border-chart-2/20">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-2/10 flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-5 h-5 text-chart-2" />
+                <div className="w-10 h-10 rounded-lg bg-chart-2/20 flex items-center justify-center flex-shrink-0">
+                  <Brain className="w-5 h-5 text-chart-2" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Correlation Modeling
+                    AI Models
                   </p>
-                  <p className="text-2xl font-bold font-mono">Gaussian</p>
+                  <p className="text-2xl font-bold font-mono">14+</p>
                   <p className="text-xs text-muted-foreground">
-                    copula-based simulation
+                    edge finders
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="hover-elevate">
+          <Card className="hover-elevate bg-gradient-to-br from-chart-4/5 to-transparent border-chart-4/20">
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-4/10 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-chart-4/20 flex items-center justify-center flex-shrink-0">
                   <Zap className="w-5 h-5 text-chart-4" />
                 </div>
                 <div>
@@ -102,7 +103,26 @@ export default function Dashboard() {
                   </p>
                   <p className="text-2xl font-bold font-mono">Optimal</p>
                   <p className="text-xs text-muted-foreground">
-                    stake sizing strategy
+                    stake sizing
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover-elevate bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    +EV Finder
+                  </p>
+                  <p className="text-2xl font-bold font-mono text-green-500">Live</p>
+                  <p className="text-xs text-muted-foreground">
+                    scanning markets
                   </p>
                 </div>
               </div>
@@ -179,6 +199,10 @@ export default function Dashboard() {
                 />
               </TabsContent>
             </Tabs>
+            
+            <div className="mt-6">
+              <EdgeFinder events={events} sport="NBA" />
+            </div>
           </div>
           
           {showInsights && (

@@ -71,6 +71,23 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added 14 NEW edge-finding features:
+  - Bet Tracking Dashboard with P/L, ROI, win rate, and CLV analysis
+  - CLV (Closing Line Value) Tracker showing if bets beat closing odds
+  - Arbitrage Finder for guaranteed profit opportunities
+  - Middle Finder for betting both sides when lines move
+  - Key Number Alerts for NFL spreads at 3, 7, 10
+  - Same Game Parlay Optimizer with leg correlations
+  - Fade the Public system alerts when sharps disagree with public
+  - Live Bet Timing Advisor (placeholder for real-time data)
+  - Alternate Lines Calculator with EV analysis
+  - Unit Size Optimizer with edge-based dynamic sizing
+  - Streak Breaker Alerts for regression detection
+  - Player Prop Correlator for stacking opportunities
+  - Pace & Efficiency Projections for totals betting
+  - Rest/Travel Fatigue Model with performance impact scores
+- January 12, 2026: Enhanced UI with gradient cards, improved navigation, and modern styling
+- January 12, 2026: Added new pages - Optimizer (main) and Bet Tracker
 - January 12, 2026: Completed 14 advanced betting insights features:
   - +EV Finder with EV badges on game cards showing edge percentages
   - Confidence Scoring (Low/Medium/High ratings)

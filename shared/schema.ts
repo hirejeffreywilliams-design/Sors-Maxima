@@ -329,3 +329,236 @@ export function impliedProbability(decimalOdds: number): number {
   if (decimalOdds <= 1) return 0;
   return 1 / decimalOdds;
 }
+
+// NEW ADVANCED FEATURES
+
+export const betRecordSchema = z.object({
+  id: z.string(),
+  legs: z.array(parlayLegSchema),
+  stake: z.number(),
+  odds: z.number(),
+  potentialWin: z.number(),
+  result: z.enum(["pending", "won", "lost", "push"]),
+  actualReturn: z.number().optional(),
+  placedAt: z.string(),
+  settledAt: z.string().optional(),
+  closingOdds: z.number().optional(),
+  clvPercent: z.number().optional(),
+  sport: z.enum(sports),
+});
+export type BetRecord = z.infer<typeof betRecordSchema>;
+
+export const betTrackingStatsSchema = z.object({
+  totalBets: z.number(),
+  wonBets: z.number(),
+  lostBets: z.number(),
+  pendingBets: z.number(),
+  totalStaked: z.number(),
+  totalReturns: z.number(),
+  profitLoss: z.number(),
+  roi: z.number(),
+  avgOdds: z.number(),
+  winRate: z.number(),
+  clvPositive: z.number(),
+  avgCLV: z.number(),
+  statsBySport: z.record(z.object({
+    bets: z.number(),
+    won: z.number(),
+    lost: z.number(),
+    roi: z.number(),
+  })),
+  statsByMarket: z.record(z.object({
+    bets: z.number(),
+    won: z.number(),
+    lost: z.number(),
+    roi: z.number(),
+  })),
+});
+export type BetTrackingStats = z.infer<typeof betTrackingStatsSchema>;
+
+export const arbitrageOpportunitySchema = z.object({
+  id: z.string(),
+  gameId: z.string(),
+  game: z.string(),
+  market: z.string(),
+  side1: z.object({
+    book: z.string(),
+    outcome: z.string(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  side2: z.object({
+    book: z.string(),
+    outcome: z.string(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  totalStake: z.number(),
+  guaranteedProfit: z.number(),
+  profitPercent: z.number(),
+  expiresAt: z.string(),
+});
+export type ArbitrageOpportunity = z.infer<typeof arbitrageOpportunitySchema>;
+
+export const middleOpportunitySchema = z.object({
+  id: z.string(),
+  gameId: z.string(),
+  game: z.string(),
+  market: z.string(),
+  lowSide: z.object({
+    book: z.string(),
+    line: z.number(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  highSide: z.object({
+    book: z.string(),
+    line: z.number(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  middleRange: z.string(),
+  middleProbability: z.number(),
+  expectedValue: z.number(),
+  worstCase: z.number(),
+  bestCase: z.number(),
+});
+export type MiddleOpportunity = z.infer<typeof middleOpportunitySchema>;
+
+export const keyNumberAlertSchema = z.object({
+  gameId: z.string(),
+  game: z.string(),
+  currentSpread: z.number(),
+  keyNumber: z.number(),
+  pushProbability: z.number(),
+  recommendation: z.string(),
+  buyPoints: z.object({
+    newSpread: z.number(),
+    newOdds: z.number(),
+    ev: z.number(),
+  }).optional(),
+});
+export type KeyNumberAlert = z.infer<typeof keyNumberAlertSchema>;
+
+export const sgpCorrelationSchema = z.object({
+  leg1: z.object({
+    type: z.string(),
+    outcome: z.string(),
+  }),
+  leg2: z.object({
+    type: z.string(),
+    outcome: z.string(),
+  }),
+  correlation: z.number(),
+  direction: z.enum(["positive", "negative"]),
+  recommendation: z.string(),
+  evBoost: z.number(),
+});
+export type SGPCorrelation = z.infer<typeof sgpCorrelationSchema>;
+
+export const fadePublicAlertSchema = z.object({
+  gameId: z.string(),
+  game: z.string(),
+  market: z.string(),
+  publicSide: z.string(),
+  publicPercent: z.number(),
+  sharpSide: z.string(),
+  sharpPercent: z.number(),
+  lineMovement: z.string(),
+  recommendation: z.string(),
+  confidence: z.enum(["low", "medium", "high"]),
+});
+export type FadePublicAlert = z.infer<typeof fadePublicAlertSchema>;
+
+export const liveBetTimingSchema = z.object({
+  gameId: z.string(),
+  game: z.string(),
+  currentScore: z.string(),
+  timeRemaining: z.string(),
+  momentum: z.enum(["home", "away", "neutral"]),
+  recommendation: z.string(),
+  suggestedBet: z.object({
+    side: z.string(),
+    odds: z.number(),
+    edge: z.number(),
+  }).optional(),
+});
+export type LiveBetTiming = z.infer<typeof liveBetTimingSchema>;
+
+export const alternateLineSchema = z.object({
+  line: z.number(),
+  odds: z.number(),
+  impliedProb: z.number(),
+  modelProb: z.number(),
+  ev: z.number(),
+  recommendation: z.enum(["strong_buy", "buy", "fair", "avoid"]),
+});
+export type AlternateLine = z.infer<typeof alternateLineSchema>;
+
+export const unitSizeRecommendationSchema = z.object({
+  legId: z.string(),
+  edge: z.number(),
+  kellyPercent: z.number(),
+  recommendedUnits: z.number(),
+  maxUnits: z.number(),
+  confidence: z.enum(["low", "medium", "high"]),
+  reasoning: z.string(),
+});
+export type UnitSizeRecommendation = z.infer<typeof unitSizeRecommendationSchema>;
+
+export const streakBreakerAlertSchema = z.object({
+  type: z.enum(["player", "team"]),
+  name: z.string(),
+  team: z.string().optional(),
+  category: z.string(),
+  currentStreak: z.number(),
+  streakType: z.enum(["over", "under", "win", "loss", "cover", "fail_cover"]),
+  historicalAvgStreak: z.number(),
+  regressionProbability: z.number(),
+  recommendation: z.string(),
+});
+export type StreakBreakerAlert = z.infer<typeof streakBreakerAlertSchema>;
+
+export const propCorrelationSchema = z.object({
+  prop1: z.object({
+    player: z.string(),
+    category: z.string(),
+    line: z.number(),
+  }),
+  prop2: z.object({
+    player: z.string(),
+    category: z.string(),
+    line: z.number(),
+  }),
+  correlation: z.number(),
+  relationship: z.string(),
+  combinedEV: z.number(),
+});
+export type PropCorrelation = z.infer<typeof propCorrelationSchema>;
+
+export const paceProjectionSchema = z.object({
+  gameId: z.string(),
+  homeTeam: z.string(),
+  awayTeam: z.string(),
+  homePace: z.number(),
+  awayPace: z.number(),
+  projectedPace: z.number(),
+  leagueAvgPace: z.number(),
+  projectedTotal: z.number(),
+  currentLine: z.number(),
+  edge: z.number(),
+  recommendation: z.enum(["over", "under", "pass"]),
+});
+export type PaceProjection = z.infer<typeof paceProjectionSchema>;
+
+export const fatigueModelSchema = z.object({
+  team: z.string(),
+  restDays: z.number(),
+  travelMiles: z.number(),
+  timeZonesCrossed: z.number(),
+  gamesInLast7Days: z.number(),
+  fatigueScore: z.number(),
+  performanceImpact: z.number(),
+  recommendation: z.string(),
+});
+export type FatigueModel = z.infer<typeof fatigueModelSchema>;
