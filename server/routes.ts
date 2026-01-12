@@ -19,14 +19,6 @@ export async function registerRoutes(
   app.post("/api/auth/login", (req, res) => {
     const { username, password } = req.body;
     
-    // Debug: log what we're comparing (remove in production)
-    console.log("Login attempt:", { 
-      providedUser: username, 
-      expectedUser: ADMIN_USERNAME,
-      usernameMatch: username === ADMIN_USERNAME,
-      passwordMatch: password === ADMIN_PASSWORD
-    });
-    
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       req.session.isAuthenticated = true;
       req.session.username = username;
