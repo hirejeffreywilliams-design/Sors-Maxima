@@ -71,6 +71,21 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Completed 14 advanced betting insights features:
+  - +EV Finder with EV badges on game cards showing edge percentages
+  - Confidence Scoring (Low/Medium/High ratings)
+  - Historical Trend Analysis with hit rates, streaks, home/away factors
+  - Correlation Stacking Strategies and diversification warnings
+  - Injury & Lineup Alerts on game cards with impact ratings
+  - Weather Impact Analysis for outdoor sports
+  - Line Movement Tracker with steam/reverse move indicators
+  - Public vs Sharp Money indicators
+  - Situational Factors (B2B, travel, revenge games, primetime)
+  - Hot Streak Detection
+  - Bankroll Management with session/daily limits and Kelly multiplier
+  - What-If Scenario Builder for analyzing leg modifications
+  - Hedge Calculator with guaranteed profit calculations
+- January 12, 2026: Created InsightsPanel component with 6 tabs displaying all betting insights
 - January 12, 2026: Added comprehensive player props (passing/rushing/receiving yards, TDs, points, assists, etc.) for all sports
 - January 12, 2026: Added game-by-game selection - users can now pick specific teams/matchups for their parlays
 - January 12, 2026: Added Advanced Parlay Generator with sport selection, risk levels, and optimization algorithms
