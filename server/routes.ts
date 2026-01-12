@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
+import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -264,6 +265,29 @@ export async function registerRoutes(
 
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  app.get("/api/vegas/predictions", (req, res) => {
+    try {
+      const sport = req.query.sport as string | undefined;
+      const validSport = sport && sports.includes(sport as any) ? sport as any : undefined;
+      
+      const predictions = generateVegasPredictions(validSport);
+      const insights = getVegasInsights();
+      
+      return res.json({
+        predictions,
+        insights,
+        timestamp: new Date().toISOString(),
+        source: "Vegas Modeling Engine v2.0",
+      });
+    } catch (err) {
+      console.error("Vegas predictions error:", err);
+      return res.status(500).json({
+        error: "Failed to generate Vegas predictions",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
   });
 
   return httpServer;
