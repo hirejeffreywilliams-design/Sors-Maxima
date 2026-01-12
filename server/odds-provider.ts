@@ -1,6 +1,153 @@
 import { randomUUID } from "crypto";
-import type { Sport, SportEvent, ParlayLeg, PlayerProp } from "@shared/schema";
+import type { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
 import { americanToDecimal, propCategories } from "@shared/schema";
+
+function generateEVAnalysis(decimalOdds: number, outcomeId: string): EVAnalysis {
+  const impliedProbability = 1 / decimalOdds;
+  const variance = (Math.random() - 0.5) * 0.15;
+  const modelProbability = Math.min(0.95, Math.max(0.05, impliedProbability + variance));
+  const edge = (modelProbability - impliedProbability) / impliedProbability;
+  
+  let evRating: "strong" | "moderate" | "weak" | "negative";
+  if (edge > 0.08) evRating = "strong";
+  else if (edge > 0.03) evRating = "moderate";
+  else if (edge > 0) evRating = "weak";
+  else evRating = "negative";
+  
+  return {
+    legId: outcomeId,
+    impliedProbability,
+    modelProbability,
+    edge,
+    isPositiveEV: edge > 0,
+    evRating,
+  };
+}
+
+function generateLineMovement(gameId: string, market: string, outcome: string, currentOdds: number): LineMovement {
+  const movementAmount = (Math.random() - 0.5) * 30;
+  const openingOdds = currentOdds - movementAmount;
+  const sharpAction = Math.abs(movementAmount) > 10 && Math.random() > 0.6;
+  
+  let direction: "steam" | "reverse" | "stable";
+  if (Math.abs(movementAmount) < 5) direction = "stable";
+  else if (movementAmount > 0) direction = "steam";
+  else direction = "reverse";
+  
+  return {
+    gameId,
+    market,
+    outcome,
+    openingOdds,
+    currentOdds,
+    movement: movementAmount,
+    direction,
+    sharpAction,
+  };
+}
+
+function generateBettingPercentages(gameId: string, market: string, outcome: string): BettingPercentages {
+  const publicPercentage = Math.floor(Math.random() * 40) + 30;
+  const moneyPercentage = Math.floor(Math.random() * 60) + 20;
+  const sharpSide = moneyPercentage > 60 && publicPercentage < 45;
+  
+  return {
+    gameId,
+    market,
+    outcome,
+    publicPercentage,
+    moneyPercentage,
+    sharpSide,
+  };
+}
+
+function generateInjuries(homeTeam: string, awayTeam: string, sport: Sport): InjuryStatus[] {
+  const injuries: InjuryStatus[] = [];
+  const statuses: Array<"out" | "doubtful" | "questionable" | "probable" | "healthy"> = ["out", "doubtful", "questionable", "probable", "healthy"];
+  const injuryTypes = sport === "NFL" ? ["knee", "ankle", "hamstring", "concussion", "shoulder"] :
+                      sport === "NBA" ? ["ankle", "knee", "back", "hamstring", "illness"] :
+                      sport === "MLB" ? ["elbow", "shoulder", "oblique", "back", "wrist"] :
+                      ["lower body", "upper body", "illness", "undisclosed"];
+  
+  [homeTeam, awayTeam].forEach(team => {
+    if (Math.random() > 0.6) {
+      const status = statuses[Math.floor(Math.random() * 4)];
+      const impactRating = status === "out" ? -0.8 : status === "doubtful" ? -0.5 : status === "questionable" ? -0.3 : -0.1;
+      injuries.push({
+        playerId: randomUUID(),
+        playerName: `${team.split(" ").pop()} Key Player`,
+        team,
+        status,
+        injury: injuryTypes[Math.floor(Math.random() * injuryTypes.length)],
+        impactRating,
+      });
+    }
+  });
+  
+  return injuries;
+}
+
+function generateWeather(gameId: string, sport: Sport): WeatherData | undefined {
+  if (sport === "NBA" || sport === "NCAAB" || sport === "NHL") {
+    return { gameId, temperature: 70, windSpeed: 0, precipitation: 0, conditions: "dome", impactOnTotal: 0 };
+  }
+  
+  const conditions: Array<"clear" | "cloudy" | "rain" | "snow"> = ["clear", "cloudy", "rain", "snow"];
+  const condition = conditions[Math.floor(Math.random() * 4)];
+  const temperature = Math.floor(Math.random() * 50) + 30;
+  const windSpeed = Math.floor(Math.random() * 25);
+  const precipitation = condition === "rain" ? Math.random() * 0.5 : condition === "snow" ? Math.random() * 0.3 : 0;
+  
+  let impactOnTotal = 0;
+  if (windSpeed > 15) impactOnTotal -= 3;
+  if (temperature < 40) impactOnTotal -= 2;
+  if (precipitation > 0.2) impactOnTotal -= 4;
+  
+  return { gameId, temperature, windSpeed, precipitation, conditions: condition, impactOnTotal };
+}
+
+function generateSituationalFactors(gameId: string, homeTeam: string, awayTeam: string): SituationalFactor[] {
+  const factors: SituationalFactor[] = [];
+  const possibleFactors: Array<{ type: "back_to_back" | "rest_advantage" | "revenge_game" | "divisional" | "primetime" | "travel"; description: string; impactRating: number }> = [
+    { type: "back_to_back", description: "Playing second of back-to-back games", impactRating: -0.15 },
+    { type: "rest_advantage", description: "3+ days rest advantage", impactRating: 0.1 },
+    { type: "revenge_game", description: "Lost to opponent by 20+ last meeting", impactRating: 0.08 },
+    { type: "divisional", description: "Divisional rivalry matchup", impactRating: 0.05 },
+    { type: "primetime", description: "National TV primetime game", impactRating: 0.03 },
+    { type: "travel", description: "Cross-country travel (3+ time zones)", impactRating: -0.08 },
+  ];
+  
+  [homeTeam, awayTeam].forEach(team => {
+    const teamFactors = possibleFactors.filter(() => Math.random() > 0.7);
+    if (teamFactors.length > 0) {
+      factors.push({
+        gameId,
+        team,
+        factors: teamFactors,
+      });
+    }
+  });
+  
+  return factors;
+}
+
+function generateHistoricalTrends(playerId: string, playerName: string, category: string, line: number): HistoricalTrend {
+  const hitRate = Math.random() * 0.4 + 0.4;
+  const last10 = Math.floor(Math.random() * 6) + 4;
+  const streak = Math.floor(Math.random() * 8);
+  const streakType: "over" | "under" | "none" = streak > 2 ? (Math.random() > 0.5 ? "over" : "under") : "none";
+  
+  return {
+    playerId,
+    category,
+    line,
+    hitRate,
+    last10,
+    streak,
+    streakType,
+    homeAwayFactor: Math.random() * 0.2 - 0.1,
+  };
+}
 
 const nbaTeams = [
   "Los Angeles Lakers", "Boston Celtics", "Golden State Warriors", "Miami Heat",
@@ -360,6 +507,7 @@ export function generateMockEvents(sport: Sport): SportEvent[] {
     const homeTeam = teams[i * 2];
     const awayTeam = teams[i * 2 + 1];
     const homeIsFavorite = Math.random() > 0.5;
+    const gameId = randomUUID();
 
     const moneylineHome = generateRandomOdds(homeIsFavorite);
     const moneylineAway = generateRandomOdds(!homeIsFavorite);
@@ -371,9 +519,17 @@ export function generateMockEvents(sport: Sport): SportEvent[] {
 
     const homeProps = generatePlayerProps(homeTeam, sport);
     const awayProps = generatePlayerProps(awayTeam, sport);
+    
+    const injuries = generateInjuries(homeTeam, awayTeam, sport);
+    const weather = generateWeather(gameId, sport);
+    const situationalFactors = generateSituationalFactors(gameId, homeTeam, awayTeam);
+    
+    const historicalTrends: HistoricalTrend[] = [...homeProps, ...awayProps].slice(0, 6).map(prop => 
+      generateHistoricalTrends(prop.playerId, prop.playerName, prop.category, prop.line)
+    );
 
     events.push({
-      id: randomUUID(),
+      id: gameId,
       sport,
       homeTeam,
       awayTeam,
@@ -382,26 +538,74 @@ export function generateMockEvents(sport: Sport): SportEvent[] {
         {
           type: "moneyline",
           outcomes: [
-            { name: `${homeTeam} ML`, team: homeTeam, ...moneylineHome },
-            { name: `${awayTeam} ML`, team: awayTeam, ...moneylineAway },
+            { 
+              name: `${homeTeam} ML`, 
+              team: homeTeam, 
+              ...moneylineHome,
+              evAnalysis: generateEVAnalysis(moneylineHome.decimalOdds, `${gameId}-ml-home`),
+              lineMovement: generateLineMovement(gameId, "moneyline", `${homeTeam} ML`, moneylineHome.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${homeTeam} ML`),
+            },
+            { 
+              name: `${awayTeam} ML`, 
+              team: awayTeam, 
+              ...moneylineAway,
+              evAnalysis: generateEVAnalysis(moneylineAway.decimalOdds, `${gameId}-ml-away`),
+              lineMovement: generateLineMovement(gameId, "moneyline", `${awayTeam} ML`, moneylineAway.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${awayTeam} ML`),
+            },
           ],
         },
         {
           type: "spread",
           outcomes: [
-            { name: `${homeTeam} ${spread.line > 0 ? "+" : ""}${spread.line}`, team: homeTeam, line: spread.line, ...spread.homeOdds },
-            { name: `${awayTeam} ${-spread.line > 0 ? "+" : ""}${-spread.line}`, team: awayTeam, line: -spread.line, ...spread.awayOdds },
+            { 
+              name: `${homeTeam} ${spread.line > 0 ? "+" : ""}${spread.line}`, 
+              team: homeTeam, 
+              line: spread.line, 
+              ...spread.homeOdds,
+              evAnalysis: generateEVAnalysis(spread.homeOdds.decimalOdds, `${gameId}-spread-home`),
+              lineMovement: generateLineMovement(gameId, "spread", `${homeTeam} spread`, spread.homeOdds.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "spread", `${homeTeam} spread`),
+            },
+            { 
+              name: `${awayTeam} ${-spread.line > 0 ? "+" : ""}${-spread.line}`, 
+              team: awayTeam, 
+              line: -spread.line, 
+              ...spread.awayOdds,
+              evAnalysis: generateEVAnalysis(spread.awayOdds.decimalOdds, `${gameId}-spread-away`),
+              lineMovement: generateLineMovement(gameId, "spread", `${awayTeam} spread`, spread.awayOdds.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "spread", `${awayTeam} spread`),
+            },
           ],
         },
         {
           type: "total",
           outcomes: [
-            { name: `Over ${total.line}`, line: total.line, ...total.overOdds },
-            { name: `Under ${total.line}`, line: total.line, ...total.underOdds },
+            { 
+              name: `Over ${total.line}`, 
+              line: total.line, 
+              ...total.overOdds,
+              evAnalysis: generateEVAnalysis(total.overOdds.decimalOdds, `${gameId}-total-over`),
+              lineMovement: generateLineMovement(gameId, "total", `Over ${total.line}`, total.overOdds.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "total", `Over ${total.line}`),
+            },
+            { 
+              name: `Under ${total.line}`, 
+              line: total.line, 
+              ...total.underOdds,
+              evAnalysis: generateEVAnalysis(total.underOdds.decimalOdds, `${gameId}-total-under`),
+              lineMovement: generateLineMovement(gameId, "total", `Under ${total.line}`, total.underOdds.americanOdds),
+              bettingPercentages: generateBettingPercentages(gameId, "total", `Under ${total.line}`),
+            },
           ],
         },
       ],
       playerProps: [...homeProps, ...awayProps],
+      injuries,
+      weather,
+      situationalFactors,
+      historicalTrends,
     });
   }
 

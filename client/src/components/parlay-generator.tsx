@@ -44,6 +44,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ParlayGeneratorProps {
   onLoadParlay: (legs: ParlayLeg[]) => void;
+  onLegsChange?: (legs: ParlayLeg[]) => void;
 }
 
 const riskColors = {
@@ -63,7 +64,7 @@ function formatGameTime(isoString: string): string {
   });
 }
 
-export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
+export function ParlayGenerator({ onLoadParlay, onLegsChange }: ParlayGeneratorProps) {
   const [sport, setSport] = useState<Sport>("NBA");
   const [stake, setStake] = useState(10);
   const [minLegs, setMinLegs] = useState(2);
@@ -98,6 +99,54 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
     setSelectedTotals(new Map());
     setSelectedProps(new Map());
   }, [sport]);
+
+  useEffect(() => {
+    if (!gamesQuery.data || !onLegsChange) return;
+    
+    const legs: ParlayLeg[] = [];
+    const games = gamesQuery.data;
+    
+    selectedTotals.forEach((selection, gameId) => {
+      const game = games.find(g => g.id === gameId);
+      if (!game) return;
+      const totalMarket = game.markets.find(m => m.type === "total");
+      const outcome = totalMarket?.outcomes.find(o => 
+        selection === "over" ? o.name.includes("Over") : o.name.includes("Under")
+      );
+      if (outcome) {
+        legs.push({
+          id: `${gameId}-total-${selection}`,
+          team: `${game.awayTeam} @ ${game.homeTeam}`,
+          market: "total",
+          outcome: outcome.name,
+          decimalOdds: outcome.decimalOdds,
+          eventId: gameId,
+        });
+      }
+    });
+    
+    selectedProps.forEach((selection, propKey) => {
+      const [gameId, playerId, category] = propKey.split("::");
+      const game = games.find(g => g.id === gameId);
+      const prop = game?.playerProps?.find(p => p.playerId === playerId && p.category === category);
+      if (game && prop) {
+        const odds = selection === "over" ? prop.overOdds : prop.underOdds;
+        legs.push({
+          id: propKey,
+          team: prop.team,
+          market: "player_prop",
+          outcome: `${prop.playerName} ${selection === "over" ? "Over" : "Under"} ${prop.line} ${category}`,
+          decimalOdds: odds.decimalOdds,
+          eventId: gameId,
+          playerName: prop.playerName,
+          propCategory: category,
+          propLine: prop.line,
+        });
+      }
+    });
+    
+    onLegsChange(legs);
+  }, [selectedTotals, selectedProps, gamesQuery.data, onLegsChange]);
 
   const generateMutation = useMutation({
     mutationFn: async () => {
@@ -249,8 +298,20 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
     return { 
       line: overOutcome?.line || 0, 
       overOdds: overOutcome?.americanOdds || 0,
-      underOdds: underOutcome?.americanOdds || 0 
+      underOdds: underOutcome?.americanOdds || 0,
+      overEV: overOutcome?.evAnalysis,
+      underEV: underOutcome?.evAnalysis,
     };
+  };
+  
+  const getPositiveEVCount = (game: SportEvent): number => {
+    let count = 0;
+    game.markets.forEach(m => {
+      m.outcomes.forEach(o => {
+        if (o.evAnalysis?.isPositiveEV) count++;
+      });
+    });
+    return count;
   };
 
   const games = gamesQuery.data || [];
@@ -378,8 +439,15 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                               {isSelected ? "Selected" : "Select"}
                             </Button>
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-sm">
-                                {game.awayTeam} @ {game.homeTeam}
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium text-sm">
+                                  {game.awayTeam} @ {game.homeTeam}
+                                </span>
+                                {getPositiveEVCount(game) > 0 && (
+                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-[10px] px-1 py-0 no-default-hover-elevate no-default-active-elevate">
+                                    +EV ({getPositiveEVCount(game)})
+                                  </Badge>
+                                )}
                               </div>
                               <div className="text-xs text-muted-foreground mt-0.5">
                                 {formatGameTime(game.startTime)}
@@ -405,31 +473,52 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                           
                           {gameTotal && (
                             <div className="mt-3 pt-3 border-t border-border/50">
-                              <div className="flex items-center justify-between">
-                                <div className="text-xs text-muted-foreground font-medium">
-                                  Game Total: {gameTotal.line}
+                              <div className="flex items-center justify-between gap-2 flex-wrap">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-muted-foreground font-medium">
+                                    Game Total: {gameTotal.line}
+                                  </span>
+                                  {game.injuries && game.injuries.length > 0 && (
+                                    <Badge variant="outline" className="text-[10px] px-1 py-0 border-amber-500/50 text-amber-400">
+                                      {game.injuries.length} injury
+                                    </Badge>
+                                  )}
                                 </div>
                                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                                  <Button
-                                    variant={selectedTotal === "over" ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => toggleTotal(game.id, "over")}
-                                    className={`text-xs ${selectedTotal === "over" ? "bg-chart-1 hover:bg-chart-1/90" : ""}`}
-                                    data-testid={`button-over-${game.id}`}
-                                  >
-                                    <TrendingUp className="w-3 h-3 mr-1" />
-                                    Over {gameTotal.overOdds > 0 ? `+${gameTotal.overOdds}` : gameTotal.overOdds}
-                                  </Button>
-                                  <Button
-                                    variant={selectedTotal === "under" ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => toggleTotal(game.id, "under")}
-                                    className={`text-xs ${selectedTotal === "under" ? "bg-chart-2 hover:bg-chart-2/90" : ""}`}
-                                    data-testid={`button-under-${game.id}`}
-                                  >
-                                    <TrendingDown className="w-3 h-3 mr-1" />
-                                    Under {gameTotal.underOdds > 0 ? `+${gameTotal.underOdds}` : gameTotal.underOdds}
-                                  </Button>
+                                  <div className="flex flex-col items-center gap-0.5">
+                                    <Button
+                                      variant={selectedTotal === "over" ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => toggleTotal(game.id, "over")}
+                                      className={`text-xs ${selectedTotal === "over" ? "bg-chart-1 hover:bg-chart-1/90" : ""}`}
+                                      data-testid={`button-over-${game.id}`}
+                                    >
+                                      <TrendingUp className="w-3 h-3 mr-1" />
+                                      Over {gameTotal.overOdds > 0 ? `+${gameTotal.overOdds}` : gameTotal.overOdds}
+                                    </Button>
+                                    {gameTotal.overEV?.isPositiveEV && (
+                                      <span className="text-[9px] text-green-400 font-medium">
+                                        +{(gameTotal.overEV.edge * 100).toFixed(1)}% edge
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="flex flex-col items-center gap-0.5">
+                                    <Button
+                                      variant={selectedTotal === "under" ? "default" : "outline"}
+                                      size="sm"
+                                      onClick={() => toggleTotal(game.id, "under")}
+                                      className={`text-xs ${selectedTotal === "under" ? "bg-chart-2 hover:bg-chart-2/90" : ""}`}
+                                      data-testid={`button-under-${game.id}`}
+                                    >
+                                      <TrendingDown className="w-3 h-3 mr-1" />
+                                      Under {gameTotal.underOdds > 0 ? `+${gameTotal.underOdds}` : gameTotal.underOdds}
+                                    </Button>
+                                    {gameTotal.underEV?.isPositiveEV && (
+                                      <span className="text-[9px] text-green-400 font-medium">
+                                        +{(gameTotal.underEV.edge * 100).toFixed(1)}% edge
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                             </div>

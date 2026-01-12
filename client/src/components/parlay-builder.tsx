@@ -16,10 +16,15 @@ import type { ParlayLeg, EvaluationResult, InsertParlayLeg } from "@shared/schem
 interface ParlayBuilderProps {
   preloadedLegs?: ParlayLeg[];
   onLegsLoaded?: () => void;
+  onLegsChange?: (legs: ParlayLeg[]) => void;
 }
 
-export function ParlayBuilder({ preloadedLegs, onLegsLoaded }: ParlayBuilderProps) {
+export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange }: ParlayBuilderProps) {
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
+  
+  useEffect(() => {
+    onLegsChange?.(legs);
+  }, [legs, onLegsChange]);
   const [stake, setStake] = useState(10);
   const [result, setResult] = useState<EvaluationResult | null>(null);
 

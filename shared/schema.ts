@@ -3,6 +3,108 @@ import { z } from "zod";
 export const sports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 export type Sport = (typeof sports)[number];
 
+export const injuryStatusSchema = z.object({
+  playerId: z.string(),
+  playerName: z.string(),
+  team: z.string(),
+  status: z.enum(["out", "doubtful", "questionable", "probable", "healthy"]),
+  injury: z.string().optional(),
+  impactRating: z.number().min(-1).max(1),
+});
+export type InjuryStatus = z.infer<typeof injuryStatusSchema>;
+
+export const weatherDataSchema = z.object({
+  gameId: z.string(),
+  temperature: z.number(),
+  windSpeed: z.number(),
+  precipitation: z.number(),
+  conditions: z.enum(["clear", "cloudy", "rain", "snow", "dome"]),
+  impactOnTotal: z.number(),
+});
+export type WeatherData = z.infer<typeof weatherDataSchema>;
+
+export const lineMovementSchema = z.object({
+  gameId: z.string(),
+  market: z.string(),
+  outcome: z.string(),
+  openingOdds: z.number(),
+  currentOdds: z.number(),
+  movement: z.number(),
+  direction: z.enum(["steam", "reverse", "stable"]),
+  sharpAction: z.boolean(),
+});
+export type LineMovement = z.infer<typeof lineMovementSchema>;
+
+export const bettingPercentagesSchema = z.object({
+  gameId: z.string(),
+  market: z.string(),
+  outcome: z.string(),
+  publicPercentage: z.number(),
+  moneyPercentage: z.number(),
+  sharpSide: z.boolean(),
+});
+export type BettingPercentages = z.infer<typeof bettingPercentagesSchema>;
+
+export const historicalTrendSchema = z.object({
+  playerId: z.string().optional(),
+  team: z.string().optional(),
+  category: z.string(),
+  line: z.number(),
+  hitRate: z.number(),
+  last10: z.number(),
+  streak: z.number(),
+  streakType: z.enum(["over", "under", "none"]),
+  homeAwayFactor: z.number().optional(),
+});
+export type HistoricalTrend = z.infer<typeof historicalTrendSchema>;
+
+export const situationalFactorSchema = z.object({
+  gameId: z.string(),
+  team: z.string(),
+  factors: z.array(z.object({
+    type: z.enum(["back_to_back", "rest_advantage", "revenge_game", "divisional", "primetime", "travel"]),
+    description: z.string(),
+    impactRating: z.number(),
+  })),
+});
+export type SituationalFactor = z.infer<typeof situationalFactorSchema>;
+
+export const bankrollSettingsSchema = z.object({
+  totalBankroll: z.number(),
+  sessionLimit: z.number(),
+  dailyLimit: z.number(),
+  maxExposurePerTeam: z.number(),
+  maxExposurePerPlayer: z.number(),
+  kellyMultiplier: z.number().default(0.25),
+});
+export type BankrollSettings = z.infer<typeof bankrollSettingsSchema>;
+
+export const evAnalysisSchema = z.object({
+  legId: z.string(),
+  impliedProbability: z.number(),
+  modelProbability: z.number(),
+  edge: z.number(),
+  isPositiveEV: z.boolean(),
+  evRating: z.enum(["strong", "moderate", "weak", "negative"]),
+});
+export type EVAnalysis = z.infer<typeof evAnalysisSchema>;
+
+export const hedgeRecommendationSchema = z.object({
+  originalParlay: z.object({
+    potentialWin: z.number(),
+    remainingLegs: z.number(),
+    currentValue: z.number(),
+  }),
+  hedgeBet: z.object({
+    team: z.string(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  guaranteedProfit: z.number(),
+  maxProfit: z.number(),
+});
+export type HedgeRecommendation = z.infer<typeof hedgeRecommendationSchema>;
+
 export const marketTypes = ["moneyline", "spread", "total", "player_prop"] as const;
 export type MarketType = (typeof marketTypes)[number];
 
@@ -155,9 +257,16 @@ export const sportEventSchema = z.object({
       line: z.number().optional(),
       decimalOdds: z.number(),
       americanOdds: z.number(),
+      evAnalysis: evAnalysisSchema.optional(),
+      lineMovement: lineMovementSchema.optional(),
+      bettingPercentages: bettingPercentagesSchema.optional(),
     })),
   })),
   playerProps: z.array(playerPropSchema).optional(),
+  injuries: z.array(injuryStatusSchema).optional(),
+  weather: weatherDataSchema.optional(),
+  situationalFactors: z.array(situationalFactorSchema).optional(),
+  historicalTrends: z.array(historicalTrendSchema).optional(),
 });
 
 export type SportEvent = z.infer<typeof sportEventSchema>;
