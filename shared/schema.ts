@@ -905,3 +905,295 @@ export function generateRiskAdvisory(
     adjustedStake: stakePercent * adjustedStakeMultiplier,
   };
 }
+
+// Mega Parlay Features
+
+export const legSynergySchema = z.object({
+  leg1Index: z.number(),
+  leg2Index: z.number(),
+  correlation: z.number(),
+  synergyType: z.enum(["strong_positive", "positive", "neutral", "negative", "strong_negative"]),
+  reasoning: z.string(),
+  combinedBoost: z.number(),
+});
+export type LegSynergy = z.infer<typeof legSynergySchema>;
+
+export const roundRobinOptionSchema = z.object({
+  name: z.string(),
+  legsPerParlay: z.number(),
+  totalParlays: z.number(),
+  totalStake: z.number(),
+  stakePerParlay: z.number(),
+  minPayout: z.number(),
+  maxPayout: z.number(),
+  expectedPayout: z.number(),
+  winProbability: z.number(),
+  breakEvenWins: z.number(),
+});
+export type RoundRobinOption = z.infer<typeof roundRobinOptionSchema>;
+
+export const jackpotScenarioSchema = z.object({
+  stake: z.number(),
+  potentialPayout: z.number(),
+  winProbability: z.number(),
+  expectedValue: z.number(),
+  millionDollarOdds: z.string(),
+  riskLevel: z.enum(["low", "medium", "high", "extreme"]),
+});
+export type JackpotScenario = z.infer<typeof jackpotScenarioSchema>;
+
+export const smartRecommendationSchema = z.object({
+  leg: parlayLegSchema,
+  score: z.number(),
+  synergies: z.array(z.string()),
+  reasoning: z.string(),
+  evBoost: z.number(),
+  confidenceLevel: z.enum(["low", "medium", "high"]),
+});
+export type SmartRecommendation = z.infer<typeof smartRecommendationSchema>;
+
+export const parlayInsuranceSchema = z.object({
+  hedgeBet: z.object({
+    team: z.string(),
+    market: z.string(),
+    odds: z.number(),
+    stake: z.number(),
+  }),
+  guaranteedProfit: z.number(),
+  breakEvenOdds: z.number(),
+  recommendedHedge: z.boolean(),
+  legsRemaining: z.number(),
+});
+export type ParlayInsurance = z.infer<typeof parlayInsuranceSchema>;
+
+export const hotStreakSchema = z.object({
+  type: z.enum(["player", "team"]),
+  name: z.string(),
+  team: z.string().optional(),
+  sport: z.string(),
+  streakLength: z.number(),
+  streakType: z.string(),
+  hitRate: z.number(),
+  recommendation: z.string(),
+  confidence: z.enum(["low", "medium", "high"]),
+});
+export type HotStreak = z.infer<typeof hotStreakSchema>;
+
+export const megaParlayAnalysisSchema = z.object({
+  totalLegs: z.number(),
+  combinedOdds: z.number(),
+  potentialPayout: z.number(),
+  winProbability: z.number(),
+  expectedValue: z.number(),
+  synergyScore: z.number(),
+  riskLevel: z.enum(["low", "medium", "high", "extreme", "jackpot"]),
+  legSynergies: z.array(legSynergySchema),
+  roundRobinOptions: z.array(roundRobinOptionSchema),
+  jackpotScenarios: z.array(jackpotScenarioSchema),
+  smartRecommendations: z.array(smartRecommendationSchema),
+  progressiveBreakdown: z.array(z.object({
+    stage: z.number(),
+    legsCompleted: z.number(),
+    cumulativeOdds: z.number(),
+    cumulativeProbability: z.number(),
+    payoutAtStage: z.number(),
+  })),
+});
+export type MegaParlayAnalysis = z.infer<typeof megaParlayAnalysisSchema>;
+
+export function calculateJackpotScenarios(
+  combinedOdds: number,
+  winProbability: number
+): JackpotScenario[] {
+  const stakes = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+  
+  return stakes.map(stake => {
+    const potentialPayout = stake * combinedOdds;
+    const expectedValue = (potentialPayout * winProbability) - stake;
+    const evPercent = expectedValue / stake;
+    
+    let riskLevel: JackpotScenario["riskLevel"];
+    if (winProbability > 0.1) riskLevel = "low";
+    else if (winProbability > 0.01) riskLevel = "medium";
+    else if (winProbability > 0.001) riskLevel = "high";
+    else riskLevel = "extreme";
+    
+    const oddsToMillion = 1000000 / stake / combinedOdds;
+    const millionDollarOdds = oddsToMillion < 1 
+      ? `${(1/oddsToMillion).toFixed(0)}:1 chance at $1M+`
+      : `Need ${oddsToMillion.toFixed(0)}x more odds for $1M`;
+    
+    return {
+      stake,
+      potentialPayout,
+      winProbability,
+      expectedValue: evPercent,
+      millionDollarOdds,
+      riskLevel,
+    };
+  });
+}
+
+export function calculateRoundRobinOptions(
+  legs: ParlayLeg[],
+  totalStake: number,
+  legProbabilities: number[]
+): RoundRobinOption[] {
+  const n = legs.length;
+  if (n < 3) return [];
+  
+  const options: RoundRobinOption[] = [];
+  
+  for (let k = 2; k <= Math.min(n - 1, 6); k++) {
+    const totalParlays = factorial(n) / (factorial(k) * factorial(n - k));
+    const stakePerParlay = totalStake / totalParlays;
+    
+    const avgOdds = legs.reduce((sum, leg) => sum + leg.decimalOdds, 0) / legs.length;
+    const parlayOdds = Math.pow(avgOdds, k);
+    
+    const avgProb = legProbabilities.length > 0 
+      ? legProbabilities.reduce((a, b) => a + b, 0) / legProbabilities.length 
+      : 0.5;
+    const parlayProb = Math.pow(avgProb, k);
+    
+    const minWins = Math.ceil(totalStake / (stakePerParlay * parlayOdds));
+    const maxPayout = totalParlays * stakePerParlay * parlayOdds;
+    const minPayout = stakePerParlay * parlayOdds;
+    
+    const expectedWins = totalParlays * parlayProb;
+    const expectedPayout = expectedWins * stakePerParlay * parlayOdds;
+    
+    options.push({
+      name: `${k}-Leg Round Robin`,
+      legsPerParlay: k,
+      totalParlays,
+      totalStake,
+      stakePerParlay: Math.round(stakePerParlay * 100) / 100,
+      minPayout: Math.round(minPayout * 100) / 100,
+      maxPayout: Math.round(maxPayout * 100) / 100,
+      expectedPayout: Math.round(expectedPayout * 100) / 100,
+      winProbability: parlayProb,
+      breakEvenWins: minWins,
+    });
+  }
+  
+  return options;
+}
+
+function factorial(n: number): number {
+  if (n <= 1) return 1;
+  let result = 1;
+  for (let i = 2; i <= n; i++) result *= i;
+  return result;
+}
+
+export function calculateLegSynergies(
+  legs: ParlayLeg[],
+  correlationMatrix: number[][] | undefined
+): LegSynergy[] {
+  if (!correlationMatrix || legs.length < 2) return [];
+  
+  const synergies: LegSynergy[] = [];
+  
+  for (let i = 0; i < legs.length; i++) {
+    for (let j = i + 1; j < legs.length; j++) {
+      const corr = correlationMatrix[i]?.[j] || 0;
+      
+      let synergyType: LegSynergy["synergyType"];
+      if (corr > 0.5) synergyType = "strong_positive";
+      else if (corr > 0.2) synergyType = "positive";
+      else if (corr > -0.2) synergyType = "neutral";
+      else if (corr > -0.5) synergyType = "negative";
+      else synergyType = "strong_negative";
+      
+      const leg1 = legs[i];
+      const leg2 = legs[j];
+      
+      let reasoning = "";
+      if (leg1.team === leg2.team) {
+        reasoning = `Same team props tend to correlate - ${leg1.team}`;
+      } else if (leg1.market === leg2.market) {
+        reasoning = `Same market type may move together`;
+      } else if (corr > 0.3) {
+        reasoning = `Historical data shows positive correlation`;
+      } else if (corr < -0.3) {
+        reasoning = `These outcomes tend to work against each other`;
+      } else {
+        reasoning = `Independent outcomes with minimal correlation`;
+      }
+      
+      synergies.push({
+        leg1Index: i,
+        leg2Index: j,
+        correlation: corr,
+        synergyType,
+        reasoning,
+        combinedBoost: corr > 0 ? corr * 0.1 : 0,
+      });
+    }
+  }
+  
+  return synergies.sort((a, b) => b.correlation - a.correlation);
+}
+
+export function generateSmartRecommendations(
+  currentLegs: ParlayLeg[],
+  availableLegs: ParlayLeg[],
+  targetCount: number = 5
+): SmartRecommendation[] {
+  const recommendations: SmartRecommendation[] = [];
+  
+  const currentTeams = new Set(currentLegs.map(l => l.team));
+  const currentMarkets = new Set(currentLegs.map(l => l.market));
+  
+  for (const leg of availableLegs) {
+    if (currentLegs.some(cl => cl.id === leg.id)) continue;
+    
+    let score = 50;
+    const synergies: string[] = [];
+    let evBoost = 0;
+    
+    if (currentTeams.has(leg.team)) {
+      score += 15;
+      synergies.push(`Same team as existing leg (${leg.team})`);
+      evBoost += 0.02;
+    }
+    
+    if (leg.decimalOdds > 1.8 && leg.decimalOdds < 2.2) {
+      score += 10;
+      synergies.push("Near even odds - high probability");
+    }
+    
+    if (leg.market === "moneyline" && leg.decimalOdds < 1.5) {
+      score += 8;
+      synergies.push("Heavy favorite - safer leg");
+    }
+    
+    if (leg.market === "player_prop") {
+      score += 5;
+      synergies.push("Player prop - less correlated to game outcome");
+    }
+    
+    const reasoning = synergies.length > 0 
+      ? synergies.join("; ") 
+      : "Adds diversity to your parlay";
+    
+    let confidence: SmartRecommendation["confidenceLevel"];
+    if (score >= 70) confidence = "high";
+    else if (score >= 55) confidence = "medium";
+    else confidence = "low";
+    
+    recommendations.push({
+      leg,
+      score,
+      synergies,
+      reasoning,
+      evBoost,
+      confidenceLevel: confidence,
+    });
+  }
+  
+  return recommendations
+    .sort((a, b) => b.score - a.score)
+    .slice(0, targetCount);
+}
