@@ -566,3 +566,342 @@ export const fatigueModelSchema = z.object({
   recommendation: z.string(),
 });
 export type FatigueModel = z.infer<typeof fatigueModelSchema>;
+
+export const betGrades = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"] as const;
+export type BetGrade = (typeof betGrades)[number];
+
+export const betGradingSchema = z.object({
+  grade: z.enum(betGrades),
+  numericScore: z.number().min(0).max(100),
+  evScore: z.number(),
+  probabilityScore: z.number(),
+  valueScore: z.number(),
+  riskScore: z.number(),
+  recommendation: z.enum(["strong_bet", "good_bet", "fair_bet", "marginal_bet", "avoid", "strong_avoid"]),
+  reasoning: z.array(z.string()),
+});
+export type BetGrading = z.infer<typeof betGradingSchema>;
+
+export const evIndicatorSchema = z.object({
+  status: z.enum(["strong_positive", "positive", "neutral", "negative", "strong_negative"]),
+  evPercent: z.number(),
+  edge: z.number(),
+  impliedProbability: z.number(),
+  trueProbability: z.number(),
+  confidence: z.enum(["high", "medium", "low"]),
+  badge: z.enum(["fire", "thumbs_up", "neutral", "thumbs_down", "warning"]),
+});
+export type EVIndicator = z.infer<typeof evIndicatorSchema>;
+
+export const riskAdvisorySchema = z.object({
+  level: z.enum(["safe", "moderate", "elevated", "high", "extreme"]),
+  warnings: z.array(z.object({
+    type: z.enum([
+      "low_probability",
+      "negative_ev",
+      "bankroll_overexposure",
+      "high_correlation",
+      "poor_value",
+      "steam_move_against",
+      "sharp_money_against",
+      "injury_impact",
+      "fatigue_concern",
+      "weather_impact"
+    ]),
+    severity: z.enum(["info", "warning", "critical"]),
+    message: z.string(),
+    suggestion: z.string().optional(),
+  })),
+  overallRisk: z.number().min(0).max(100),
+  adjustedStake: z.number().optional(),
+});
+export type RiskAdvisory = z.infer<typeof riskAdvisorySchema>;
+
+export const bettingEnvironmentSchema = z.object({
+  maxStakePercent: z.number().default(0.05),
+  kellyMultiplier: z.number().default(0.25),
+  minEdgeRequired: z.number().default(0.02),
+  maxCorrelationAllowed: z.number().default(0.8),
+  includeJuiceAdjustment: z.boolean().default(true),
+  juicePercent: z.number().default(0.045),
+  enableRiskWarnings: z.boolean().default(true),
+  enableAutoAdjust: z.boolean().default(false),
+  profileType: z.enum(["conservative", "balanced", "aggressive", "sharp"]).default("balanced"),
+});
+export type BettingEnvironment = z.infer<typeof bettingEnvironmentSchema>;
+
+export function calculateBetGrade(
+  winProbability: number,
+  expectedValue: number,
+  kellyFraction: number,
+  correlationPenalty: number = 0
+): BetGrading {
+  const evScore = Math.min(100, Math.max(0, (expectedValue + 0.5) * 100));
+  const probabilityScore = Math.min(100, winProbability * 200);
+  const valueScore = Math.min(100, Math.max(0, kellyFraction * 500));
+  const riskScore = Math.max(0, 100 - correlationPenalty * 100);
+  
+  const numericScore = (evScore * 0.35) + (probabilityScore * 0.25) + (valueScore * 0.25) + (riskScore * 0.15);
+  
+  let grade: BetGrade;
+  let recommendation: BetGrading["recommendation"];
+  const reasoning: string[] = [];
+  
+  if (numericScore >= 90) {
+    grade = "A+";
+    recommendation = "strong_bet";
+    reasoning.push("Exceptional value opportunity");
+  } else if (numericScore >= 85) {
+    grade = "A";
+    recommendation = "strong_bet";
+    reasoning.push("Excellent betting opportunity");
+  } else if (numericScore >= 80) {
+    grade = "A-";
+    recommendation = "good_bet";
+    reasoning.push("Very good value detected");
+  } else if (numericScore >= 75) {
+    grade = "B+";
+    recommendation = "good_bet";
+    reasoning.push("Good betting opportunity");
+  } else if (numericScore >= 70) {
+    grade = "B";
+    recommendation = "good_bet";
+    reasoning.push("Solid value proposition");
+  } else if (numericScore >= 65) {
+    grade = "B-";
+    recommendation = "fair_bet";
+    reasoning.push("Decent betting opportunity");
+  } else if (numericScore >= 60) {
+    grade = "C+";
+    recommendation = "fair_bet";
+    reasoning.push("Fair value, proceed with caution");
+  } else if (numericScore >= 55) {
+    grade = "C";
+    recommendation = "marginal_bet";
+    reasoning.push("Marginal value, consider smaller stake");
+  } else if (numericScore >= 50) {
+    grade = "C-";
+    recommendation = "marginal_bet";
+    reasoning.push("Below average value");
+  } else if (numericScore >= 45) {
+    grade = "D+";
+    recommendation = "avoid";
+    reasoning.push("Poor value, recommend avoiding");
+  } else if (numericScore >= 40) {
+    grade = "D";
+    recommendation = "avoid";
+    reasoning.push("Bad betting opportunity");
+  } else if (numericScore >= 35) {
+    grade = "D-";
+    recommendation = "strong_avoid";
+    reasoning.push("Very poor value");
+  } else {
+    grade = "F";
+    recommendation = "strong_avoid";
+    reasoning.push("Terrible betting opportunity");
+  }
+  
+  if (expectedValue > 0.1) reasoning.push("+EV: Strong positive expected value");
+  else if (expectedValue > 0.02) reasoning.push("+EV: Positive expected value");
+  else if (expectedValue < -0.1) reasoning.push("-EV: Significant negative expected value");
+  else if (expectedValue < 0) reasoning.push("-EV: Negative expected value");
+  
+  if (winProbability > 0.4) reasoning.push("High win probability");
+  else if (winProbability < 0.1) reasoning.push("Very low win probability");
+  
+  if (correlationPenalty > 0.3) reasoning.push("High correlation risk between legs");
+  
+  return {
+    grade,
+    numericScore: Math.round(numericScore * 10) / 10,
+    evScore: Math.round(evScore * 10) / 10,
+    probabilityScore: Math.round(probabilityScore * 10) / 10,
+    valueScore: Math.round(valueScore * 10) / 10,
+    riskScore: Math.round(riskScore * 10) / 10,
+    recommendation,
+    reasoning,
+  };
+}
+
+export function calculateEVIndicator(
+  impliedProbability: number,
+  trueProbability: number,
+  confidence: "high" | "medium" | "low" = "medium"
+): EVIndicator {
+  const edge = trueProbability - impliedProbability;
+  const evPercent = (edge / impliedProbability) * 100;
+  
+  let status: EVIndicator["status"];
+  let badge: EVIndicator["badge"];
+  
+  if (evPercent >= 10) {
+    status = "strong_positive";
+    badge = "fire";
+  } else if (evPercent >= 3) {
+    status = "positive";
+    badge = "thumbs_up";
+  } else if (evPercent >= -3) {
+    status = "neutral";
+    badge = "neutral";
+  } else if (evPercent >= -10) {
+    status = "negative";
+    badge = "thumbs_down";
+  } else {
+    status = "strong_negative";
+    badge = "warning";
+  }
+  
+  return {
+    status,
+    evPercent: Math.round(evPercent * 100) / 100,
+    edge: Math.round(edge * 10000) / 10000,
+    impliedProbability: Math.round(impliedProbability * 10000) / 10000,
+    trueProbability: Math.round(trueProbability * 10000) / 10000,
+    confidence,
+    badge,
+  };
+}
+
+export function generateRiskAdvisory(
+  winProbability: number,
+  expectedValue: number,
+  stakePercent: number,
+  correlationLevel: number,
+  additionalFactors: {
+    sharpMoneyAgainst?: boolean;
+    steamMoveAgainst?: boolean;
+    injuryImpact?: number;
+    fatigueScore?: number;
+    weatherImpact?: number;
+  } = {}
+): RiskAdvisory {
+  const warnings: RiskAdvisory["warnings"] = [];
+  let overallRisk = 0;
+  
+  if (winProbability < 0.05) {
+    warnings.push({
+      type: "low_probability",
+      severity: "critical",
+      message: "Extremely low win probability (<5%)",
+      suggestion: "Consider reducing stake or avoiding this bet",
+    });
+    overallRisk += 30;
+  } else if (winProbability < 0.15) {
+    warnings.push({
+      type: "low_probability",
+      severity: "warning",
+      message: "Low win probability (<15%)",
+      suggestion: "Ensure potential payout justifies the risk",
+    });
+    overallRisk += 15;
+  }
+  
+  if (expectedValue < -0.15) {
+    warnings.push({
+      type: "negative_ev",
+      severity: "critical",
+      message: "Strongly negative expected value",
+      suggestion: "This bet is likely to lose money long-term",
+    });
+    overallRisk += 25;
+  } else if (expectedValue < -0.05) {
+    warnings.push({
+      type: "negative_ev",
+      severity: "warning",
+      message: "Negative expected value",
+      suggestion: "Consider finding better value elsewhere",
+    });
+    overallRisk += 15;
+  } else if (expectedValue < 0) {
+    warnings.push({
+      type: "poor_value",
+      severity: "info",
+      message: "Slightly negative expected value",
+    });
+    overallRisk += 5;
+  }
+  
+  if (stakePercent > 0.10) {
+    warnings.push({
+      type: "bankroll_overexposure",
+      severity: "critical",
+      message: "Stake exceeds 10% of bankroll",
+      suggestion: "Reduce stake to protect bankroll",
+    });
+    overallRisk += 20;
+  } else if (stakePercent > 0.05) {
+    warnings.push({
+      type: "bankroll_overexposure",
+      severity: "warning",
+      message: "Stake exceeds 5% of bankroll",
+      suggestion: "Consider reducing stake for better risk management",
+    });
+    overallRisk += 10;
+  }
+  
+  if (correlationLevel > 0.7) {
+    warnings.push({
+      type: "high_correlation",
+      severity: "warning",
+      message: "High correlation between parlay legs",
+      suggestion: "Diversify selections to reduce correlation risk",
+    });
+    overallRisk += 15;
+  }
+  
+  if (additionalFactors.sharpMoneyAgainst) {
+    warnings.push({
+      type: "sharp_money_against",
+      severity: "warning",
+      message: "Sharp money is on the opposite side",
+      suggestion: "Professional bettors disagree with this selection",
+    });
+    overallRisk += 10;
+  }
+  
+  if (additionalFactors.steamMoveAgainst) {
+    warnings.push({
+      type: "steam_move_against",
+      severity: "info",
+      message: "Line has moved against this selection",
+    });
+    overallRisk += 5;
+  }
+  
+  if (additionalFactors.injuryImpact && additionalFactors.injuryImpact < -0.2) {
+    warnings.push({
+      type: "injury_impact",
+      severity: "warning",
+      message: "Significant injury impact on this selection",
+      suggestion: "Monitor injury reports before placing bet",
+    });
+    overallRisk += 10;
+  }
+  
+  if (additionalFactors.fatigueScore && additionalFactors.fatigueScore > 0.6) {
+    warnings.push({
+      type: "fatigue_concern",
+      severity: "info",
+      message: "Team/player fatigue may impact performance",
+    });
+    overallRisk += 5;
+  }
+  
+  overallRisk = Math.min(100, overallRisk);
+  
+  let level: RiskAdvisory["level"];
+  if (overallRisk >= 70) level = "extreme";
+  else if (overallRisk >= 50) level = "high";
+  else if (overallRisk >= 30) level = "elevated";
+  else if (overallRisk >= 15) level = "moderate";
+  else level = "safe";
+  
+  const adjustedStakeMultiplier = Math.max(0.1, 1 - (overallRisk / 100));
+  
+  return {
+    level,
+    warnings,
+    overallRisk,
+    adjustedStake: stakePercent * adjustedStakeMultiplier,
+  };
+}
