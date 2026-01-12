@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings, Trophy } from "lucide-react";
+import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings, Trophy, Rocket } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,14 @@ import { BettingSettings, getDefaultBettingEnvironment } from "@/components/bett
 import { MegaParlayBuilder } from "@/components/mega-parlay-builder";
 import { HotStreakDetector } from "@/components/hot-streak-detector";
 import { ParlayInsuranceFinder } from "@/components/parlay-insurance-finder";
+import { MarketTimingAlerts } from "@/components/market-timing-alerts";
+import { PortfolioParlayOptimizer } from "@/components/portfolio-parlay-optimizer";
+import { CorrelationGraph } from "@/components/correlation-graph";
+import { ScenarioStressLab } from "@/components/scenario-stress-lab";
+import { ProgressiveHedgePlanner } from "@/components/progressive-hedge-planner";
+import { PromoBoostStacker } from "@/components/promo-boost-stacker";
+import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
+import { BookLimitPlanner } from "@/components/book-limit-planner";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 
@@ -156,7 +164,7 @@ export default function Dashboard() {
           <div className="flex-1 min-w-0">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <div className="flex items-center justify-between gap-4 flex-wrap">
-                <TabsList className="grid w-full max-w-xl grid-cols-3">
+                <TabsList className="grid w-full max-w-2xl grid-cols-4">
                   <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
                     <Sparkles className="w-4 h-4" />
                     Auto Generator
@@ -168,6 +176,10 @@ export default function Dashboard() {
                   <TabsTrigger value="mega" className="gap-2" data-testid="tab-mega">
                     <Trophy className="w-4 h-4" />
                     Mega Parlay
+                  </TabsTrigger>
+                  <TabsTrigger value="tools" className="gap-2" data-testid="tab-tools">
+                    <Rocket className="w-4 h-4" />
+                    Pro Tools
                   </TabsTrigger>
                 </TabsList>
                 <div className="flex items-center gap-2">
@@ -300,6 +312,72 @@ export default function Dashboard() {
                       legsRemaining={1}
                     />
                   </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="tools" className="space-y-6">
+                <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30">
+                  <CardContent className="py-4">
+                    <div className="flex items-start gap-3">
+                      <Rocket className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm space-y-1">
+                        <span>
+                          <strong className="text-foreground">Pro Tools:</strong>{" "}
+                          Advanced features for serious bettors. Market timing, portfolio optimization, 
+                          correlation analysis, stress testing, hedging, promo stacking, and more.
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <MarketTimingAlerts 
+                    events={events.map(e => ({
+                      id: e.id,
+                      homeTeam: e.homeTeam,
+                      awayTeam: e.awayTeam,
+                      markets: e.markets,
+                    }))} 
+                  />
+                  <PortfolioParlayOptimizer 
+                    legs={selectedLegs}
+                    bankroll={bankrollSettings.totalBankroll}
+                  />
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <CorrelationGraph legs={selectedLegs} />
+                  <ScenarioStressLab 
+                    legs={selectedLegs}
+                    stake={currentStake}
+                    winProbability={evaluationResult?.winProbability || 0.2}
+                  />
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <ProgressiveHedgePlanner 
+                    legs={selectedLegs}
+                    stake={currentStake}
+                    potentialPayout={currentStake * combinedOdds}
+                  />
+                  <PromoBoostStacker 
+                    legs={selectedLegs}
+                    currentOdds={combinedOdds}
+                  />
+                </div>
+
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <SyntheticInsuranceBuilder 
+                    legs={selectedLegs}
+                    stake={currentStake}
+                    potentialPayout={currentStake * combinedOdds}
+                    expectedValue={evaluationResult?.expectedValue || 0.02}
+                  />
+                  <BookLimitPlanner 
+                    desiredStake={currentStake}
+                    onStakeChange={handleStakeChange}
+                  />
                 </div>
               </TabsContent>
             </Tabs>

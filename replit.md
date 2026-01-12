@@ -83,6 +83,15 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added 8 NEW Pro Tools for serious bettors to maximize million-dollar potential:
+  - **Market Timing Alerts**: Line movement detection, sharp action indicators, value window tracking with 5-15 minute alerts
+  - **Portfolio Parlay Optimizer**: Build diversified parlay portfolios with risk-adjusted returns, anchor/satellite/moonshot strategy
+  - **Correlation Graph Intelligence**: Visual network showing leg correlations, double-dip warnings, diversification suggestions
+  - **Scenario Stress Lab**: Simulate injury/weather/market shocks, drawdown analysis, hedge recommendations per scenario
+  - **Progressive Hedge Planner**: Live hedge calculations as parlay progresses, cashout roadmap with vig analysis
+  - **Promo & Boost Stacker**: Track sportsbook promotions, find optimal promo stacks, EV boost calculations
+  - **Synthetic Insurance Builder**: Find opposite bets to cap downside, variance reduction analysis, protection level slider
+  - **Book Limit Planner**: Stake splitting across sportsbooks, fill probability, execution plan generation
 - January 12, 2026: Added Mega Parlay Features for building 20+ leg tickets with million-dollar potential:
   - **Mega Parlay Builder** with 5 feature tabs: Jackpot Scenarios, Leg Synergies, Round Robin, Progressive Breakdown, Smart Recommendations
   - **Jackpot Scenario Calculator**: Shows potential payouts from $1 to $1000 stakes with million-dollar potential markers
