@@ -4,7 +4,12 @@
 A sophisticated sports betting parlay optimizer that helps users build smarter parlays using advanced probability analysis, correlation modeling, and optimal stake sizing.
 
 ## Key Features
-- **Parlay Builder**: Add/remove betting legs with team, market type, and odds
+- **Advanced Parlay Generator**: Auto-generates optimal parlays using Monte Carlo optimization
+  - Sport selection (NBA, NFL, MLB, NHL)
+  - Configurable risk level (conservative, moderate, aggressive)
+  - Adjustable parlay size and bankroll settings
+  - "Load into Builder" to customize generated parlays
+- **Manual Parlay Builder**: Add/remove betting legs with team, market type, and odds
 - **Monte Carlo Simulation**: 20,000 simulations to calculate true win probability
 - **Correlation Modeling**: Gaussian copula-based correlation between leg outcomes
 - **Kelly Criterion**: Optimal stake sizing recommendations
@@ -41,6 +46,12 @@ shared/
 ```
 
 ## API Endpoints
+- `GET /api/sports` - Get available sports for betting
+- `GET /api/odds?sport=` - Get mock odds data for a sport
+- `POST /api/odds/refresh` - Refresh odds data for a sport
+- `POST /api/generate-parlays` - Generate optimal parlays using Monte Carlo optimization
+  - Request: `{ sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN }`
+  - Response: `{ parlays: GeneratedParlay[], meta: {...} }`
 - `POST /api/evaluate` - Evaluate a parlay with Monte Carlo simulation
   - Request: `{ legs: ParlayLeg[], stake: number, simulations: number }`
   - Response: `EvaluationResult` with win probability, EV, Kelly stake, etc.
@@ -54,4 +65,5 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 12, 2026: Added Advanced Parlay Generator with sport selection, risk levels, and optimization algorithms
 - January 12, 2026: Initial implementation with Monte Carlo engine, parlay builder UI, and dark mode support
