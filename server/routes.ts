@@ -1,14 +1,50 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
 
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+  console.warn("Warning: ADMIN_USERNAME and ADMIN_PASSWORD not set. Auth will fail until configured.");
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  app.post("/api/auth/login", (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      req.session.isAuthenticated = true;
+      req.session.username = username;
+      return res.json({ success: true, username });
+    }
+    
+    return res.status(401).json({ error: "Invalid username or password" });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to logout" });
+      }
+      res.clearCookie("connect.sid");
+      return res.json({ success: true });
+    });
+  });
+
+  app.get("/api/auth/check", (req, res) => {
+    if (req.session?.isAuthenticated) {
+      return res.json({ authenticated: true, username: req.session.username });
+    }
+    return res.json({ authenticated: false });
+  });
+
   app.get("/api/sports", (_req, res) => {
     const sportsList = sports.map((sport) => ({
       id: sport,
