@@ -16,6 +16,7 @@ import {
   RefreshCw,
   ChevronDown,
   User,
+  Settings,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -76,6 +77,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
   const [marketFilter, setMarketFilter] = useState<"all" | "game" | "props">("all");
   const [selectedProps, setSelectedProps] = useState<Set<string>>(new Set());
   const [includePropsInGeneration, setIncludePropsInGeneration] = useState(true);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const gamesQuery = useQuery<SportEvent[]>({
     queryKey: ["/api/odds", sport],
@@ -221,11 +223,11 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-chart-4" />
-            Advanced Parlay Generator
+            Parlay Generator
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label>Sport</Label>
               <Select value={sport} onValueChange={(v) => setSport(v as Sport)}>
@@ -243,39 +245,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label>Risk Level</Label>
-              <Select
-                value={riskLevel}
-                onValueChange={(v) => setRiskLevel(v as typeof riskLevel)}
-              >
-                <SelectTrigger data-testid="select-risk-level">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="conservative">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4" />
-                      Conservative
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="moderate">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-4 h-4" />
-                      Moderate
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="aggressive">
-                    <div className="flex items-center gap-2">
-                      <Flame className="w-4 h-4" />
-                      Aggressive
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Stake Amount</Label>
+              <Label>Stake</Label>
               <Input
                 type="number"
                 min={1}
@@ -285,64 +255,84 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                 data-testid="input-generator-stake"
               />
             </div>
-          </div>
 
-          <div className="space-y-4 p-4 rounded-lg bg-muted/50">
-            <div className="flex items-center justify-between">
-              <Label>Parlay Size: {minLegs} - {maxLegs} legs</Label>
-            </div>
-            <div className="px-2">
-              <Slider
-                value={[minLegs, maxLegs]}
-                onValueChange={([min, max]) => {
-                  setMinLegs(min);
-                  setMaxLegs(max);
-                }}
-                min={2}
-                max={6}
-                step={1}
-                data-testid="slider-leg-count"
-              />
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>2 legs (safer)</span>
-              <span>6 legs (higher payout)</span>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>Bankroll</Label>
-              <Input
-                type="number"
-                min={1}
-                value={bankroll}
-                onChange={(e) => setBankroll(parseFloat(e.target.value) || 1000)}
-                className="font-mono"
-                data-testid="input-bankroll"
-              />
-              <p className="text-xs text-muted-foreground">
-                Used for Kelly criterion stake sizing
-              </p>
+              <Label>Risk</Label>
+              <Select
+                value={riskLevel}
+                onValueChange={(v) => setRiskLevel(v as typeof riskLevel)}
+              >
+                <SelectTrigger data-testid="select-risk-level">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="conservative">Conservative</SelectItem>
+                  <SelectItem value="moderate">Moderate</SelectItem>
+                  <SelectItem value="aggressive">Aggressive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
+
+          <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-muted-foreground" data-testid="button-toggle-advanced">
+                <Settings className="w-4 h-4 mr-2" />
+                {showAdvanced ? "Hide" : "Show"} Advanced Settings
+                <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="pt-4 space-y-4">
+              <div className="space-y-3 p-4 rounded-lg bg-muted/50">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm">Parlay Size: {minLegs} - {maxLegs} legs</Label>
+                </div>
+                <div className="px-2">
+                  <Slider
+                    value={[minLegs, maxLegs]}
+                    onValueChange={([min, max]) => {
+                      setMinLegs(min);
+                      setMaxLegs(max);
+                    }}
+                    min={2}
+                    max={6}
+                    step={1}
+                    data-testid="slider-leg-count"
+                  />
+                </div>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>2 legs</span>
+                  <span>6 legs</span>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-sm">Bankroll</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={bankroll}
+                    onChange={(e) => setBankroll(parseFloat(e.target.value) || 1000)}
+                    className="font-mono"
+                    data-testid="input-bankroll"
+                  />
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between gap-4 flex-wrap">
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Select Games & Props
-              <Badge variant="secondary" className="ml-2">
-                {selectedGames.size} / {games.length} games
-              </Badge>
-              {games.length > 0 && (
-                <Badge variant="outline" className="ml-1">
-                  <User className="w-3 h-3 mr-1" />
-                  {getTotalPropsCount(games)} props
-                </Badge>
+            <CardTitle className="text-base">
+              Select Games
+              {selectedGames.size > 0 && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({selectedGames.size} selected)
+                </span>
               )}
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -353,7 +343,7 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                 disabled={allSelected || gamesQuery.isLoading}
                 data-testid="button-select-all"
               >
-                Select All
+                All
               </Button>
               <Button
                 variant="ghost"
@@ -363,15 +353,6 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                 data-testid="button-deselect-all"
               >
                 Clear
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => gamesQuery.refetch()}
-                disabled={gamesQuery.isLoading}
-                data-testid="button-refresh-games"
-              >
-                <RefreshCw className={`w-4 h-4 ${gamesQuery.isLoading ? "animate-spin" : ""}`} />
               </Button>
             </div>
           </div>
@@ -414,65 +395,37 @@ export function ParlayGenerator({ onLoadParlay }: ParlayGeneratorProps) {
                         data-testid={`game-card-${game.id}`}
                       >
                         <div 
-                          className="p-4 cursor-pointer"
+                          className="p-3 cursor-pointer"
                           onClick={() => toggleGame(game.id)}
                         >
-                          <div className="flex items-start gap-3">
+                          <div className="flex items-center gap-3">
                             <div onClick={(e) => e.stopPropagation()}>
                               <Checkbox
                                 checked={isSelected}
                                 onCheckedChange={() => toggleGame(game.id)}
-                                className="mt-1"
                                 data-testid={`checkbox-game-${game.id}`}
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="font-semibold truncate">
-                                  {game.awayTeam}
-                                </div>
-                                <Badge variant="outline" className="text-xs font-mono shrink-0">
-                                  @
-                                </Badge>
+                              <div className="font-medium text-sm">
+                                {game.awayTeam} @ {game.homeTeam}
                               </div>
-                              <div className="font-semibold truncate mt-1">
-                                {game.homeTeam}
-                              </div>
-                              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                                <Calendar className="w-3 h-3" />
+                              <div className="text-xs text-muted-foreground mt-0.5">
                                 {formatGameTime(game.startTime)}
                               </div>
-                              <div className="flex flex-wrap gap-1 mt-2">
-                                {game.markets.map((market) => (
-                                  <Badge
-                                    key={market.type}
-                                    variant="secondary"
-                                    className="text-xs capitalize"
-                                  >
-                                    {market.type}
-                                  </Badge>
-                                ))}
-                                {game.playerProps && game.playerProps.length > 0 && (
-                                  <Badge variant="outline" className="text-xs">
-                                    <User className="w-3 h-3 mr-1" />
-                                    {game.playerProps.length} props
-                                  </Badge>
-                                )}
-                              </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {isSelected && (
-                                <Check className="w-5 h-5 text-primary shrink-0" />
-                              )}
+                            <div className="flex items-center gap-1">
                               {game.playerProps && game.playerProps.length > 0 && (
                                 <CollapsibleTrigger asChild>
                                   <Button 
                                     variant="ghost" 
-                                    size="icon"
+                                    size="sm"
                                     onClick={(e) => e.stopPropagation()}
+                                    className="text-xs text-muted-foreground"
                                     data-testid={`button-expand-props-${game.id}`}
                                   >
-                                    <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                                    Props
+                                    <ChevronDown className={`w-3 h-3 ml-1 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
                                   </Button>
                                 </CollapsibleTrigger>
                               )}
