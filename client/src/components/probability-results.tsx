@@ -1,17 +1,65 @@
-import { TrendingUp, Percent, DollarSign, BarChart3, Cpu, Loader2, Target } from "lucide-react";
+import { TrendingUp, Percent, DollarSign, BarChart3, Cpu, Loader2, Target, Flame, ThumbsUp, ThumbsDown, Minus, AlertCircle, Award, AlertTriangle, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { EvaluationResult } from "@shared/schema";
+import type { EvaluationResult, BetGrading, EVIndicator, RiskAdvisory } from "@shared/schema";
+import { calculateBetGrade, calculateEVIndicator, generateRiskAdvisory } from "@shared/schema";
 
 interface ProbabilityResultsProps {
   result: EvaluationResult | null;
   stake: number;
   isLoading?: boolean;
+  bankroll?: number;
 }
 
-export function ProbabilityResults({ result, stake, isLoading }: ProbabilityResultsProps) {
+function getGradeColor(grade: string): string {
+  if (grade.startsWith("A")) return "text-emerald-500";
+  if (grade.startsWith("B")) return "text-blue-500";
+  if (grade.startsWith("C")) return "text-amber-500";
+  if (grade.startsWith("D")) return "text-orange-500";
+  return "text-red-500";
+}
+
+function getGradeBg(grade: string): string {
+  if (grade.startsWith("A")) return "bg-emerald-500/10 border-emerald-500/30";
+  if (grade.startsWith("B")) return "bg-blue-500/10 border-blue-500/30";
+  if (grade.startsWith("C")) return "bg-amber-500/10 border-amber-500/30";
+  if (grade.startsWith("D")) return "bg-orange-500/10 border-orange-500/30";
+  return "bg-red-500/10 border-red-500/30";
+}
+
+function getEVBadgeIcon(badge: EVIndicator["badge"]) {
+  switch (badge) {
+    case "fire": return <Flame className="w-3 h-3" />;
+    case "thumbs_up": return <ThumbsUp className="w-3 h-3" />;
+    case "neutral": return <Minus className="w-3 h-3" />;
+    case "thumbs_down": return <ThumbsDown className="w-3 h-3" />;
+    case "warning": return <AlertCircle className="w-3 h-3" />;
+  }
+}
+
+function getEVBadgeVariant(status: EVIndicator["status"]): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "strong_positive": return "default";
+    case "positive": return "default";
+    case "neutral": return "secondary";
+    case "negative": return "destructive";
+    case "strong_negative": return "destructive";
+  }
+}
+
+function getRiskColor(level: RiskAdvisory["level"]): string {
+  switch (level) {
+    case "safe": return "text-emerald-500";
+    case "moderate": return "text-blue-500";
+    case "elevated": return "text-amber-500";
+    case "high": return "text-orange-500";
+    case "extreme": return "text-red-500";
+  }
+}
+
+export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000 }: ProbabilityResultsProps) {
   if (isLoading) {
     return (
       <Card className="overflow-hidden">
@@ -60,21 +108,58 @@ export function ProbabilityResults({ result, stake, isLoading }: ProbabilityResu
   const winPercent = result.winProbability * 100;
   const evPercent = result.expectedValue * 100;
   const isPositiveEV = result.expectedValue > 0;
+  
+  const impliedProb = 1 / result.combinedOdds;
+  const betGrade = calculateBetGrade(
+    result.winProbability,
+    result.expectedValue,
+    result.kellyStake / bankroll,
+    0
+  );
+  const evIndicator = calculateEVIndicator(impliedProb, result.winProbability, "high");
+  const stakePercent = stake / bankroll;
+  const riskAdvisory = generateRiskAdvisory(
+    result.winProbability,
+    result.expectedValue,
+    stakePercent,
+    0
+  );
 
   return (
     <Card className="overflow-hidden" data-testid="card-probability-results">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2 text-lg">
             <BarChart3 className="w-5 h-5" />
             Analysis Results
           </CardTitle>
-          <Badge variant="outline" className="font-mono text-xs">
-            <Cpu className="w-3 h-3 mr-1" />
-            {result.method === "montecarlo" 
-              ? `${(result.simulations || 0).toLocaleString()} sims` 
-              : "Analytic"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant={getEVBadgeVariant(evIndicator.status)} 
+                  className="gap-1 cursor-help"
+                  data-testid="badge-ev-indicator"
+                >
+                  {getEVBadgeIcon(evIndicator.badge)}
+                  {evIndicator.evPercent > 0 ? "+" : ""}{evIndicator.evPercent.toFixed(1)}% EV
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <div className="text-xs space-y-1">
+                  <div>Edge: {(evIndicator.edge * 100).toFixed(2)}%</div>
+                  <div>Implied: {(evIndicator.impliedProbability * 100).toFixed(1)}%</div>
+                  <div>True: {(evIndicator.trueProbability * 100).toFixed(1)}%</div>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+            <Badge variant="outline" className="font-mono text-xs">
+              <Cpu className="w-3 h-3 mr-1" />
+              {result.method === "montecarlo" 
+                ? `${(result.simulations || 0).toLocaleString()} sims` 
+                : "Analytic"}
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="pt-4 space-y-6">
@@ -177,7 +262,108 @@ export function ProbabilityResults({ result, stake, isLoading }: ProbabilityResu
             </div>
           </div>
         )}
+
+        <div className="pt-4 border-t">
+          <div className="flex items-center gap-4 mb-4">
+            <div 
+              className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center ${getGradeBg(betGrade.grade)}`}
+              data-testid="display-bet-grade"
+            >
+              <span className={`text-2xl font-bold ${getGradeColor(betGrade.grade)}`}>
+                {betGrade.grade}
+              </span>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Award className="w-4 h-4" />
+                <span className="font-medium">Bet Grade</span>
+                <span className="text-lg font-mono font-bold">{betGrade.numericScore.toFixed(0)}</span>
+                <span className="text-sm text-muted-foreground">/ 100</span>
+              </div>
+              <Progress value={betGrade.numericScore} className="h-2 mb-2" />
+              <Badge 
+                variant={betGrade.recommendation.includes("avoid") ? "destructive" : "default"}
+                data-testid="badge-bet-recommendation"
+              >
+                {betGrade.recommendation === "strong_bet" && "Strong Bet"}
+                {betGrade.recommendation === "good_bet" && "Good Bet"}
+                {betGrade.recommendation === "fair_bet" && "Fair Bet"}
+                {betGrade.recommendation === "marginal_bet" && "Marginal"}
+                {betGrade.recommendation === "avoid" && "Avoid"}
+                {betGrade.recommendation === "strong_avoid" && "Strong Avoid"}
+              </Badge>
+            </div>
+          </div>
+          
+          {betGrade.reasoning.length > 0 && (
+            <div className="space-y-1 mb-4">
+              {betGrade.reasoning.slice(0, 3).map((reason, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  {reason.includes("+EV") ? (
+                    <TrendingUp className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+                  ) : reason.includes("-EV") ? (
+                    <TrendingDown className="w-4 h-4 text-red-500 mt-0.5 shrink-0" />
+                  ) : (
+                    <Award className="w-4 h-4 mt-0.5 shrink-0" />
+                  )}
+                  <span>{reason}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {riskAdvisory.warnings.length > 0 && (
+            <div className="p-3 rounded-lg bg-muted/50">
+              <div className="flex items-center gap-2 mb-2">
+                <AlertTriangle className={`w-4 h-4 ${getRiskColor(riskAdvisory.level)}`} />
+                <span className="text-sm font-medium">Risk Advisory</span>
+                <Badge variant="outline" className={`ml-auto ${getRiskColor(riskAdvisory.level)}`}>
+                  {riskAdvisory.level.toUpperCase()}
+                </Badge>
+              </div>
+              <div className="space-y-2">
+                {riskAdvisory.warnings.slice(0, 2).map((warning, i) => (
+                  <div 
+                    key={i} 
+                    className={`p-2 rounded text-sm ${
+                      warning.severity === "critical" 
+                        ? "bg-destructive/10" 
+                        : warning.severity === "warning"
+                        ? "bg-amber-500/10"
+                        : "bg-muted"
+                    }`}
+                  >
+                    <div className="font-medium">{warning.message}</div>
+                    {warning.suggestion && (
+                      <div className="text-xs text-muted-foreground mt-0.5">{warning.suggestion}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
+  );
+}
+
+function TrendingDown(props: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={props.className}
+    >
+      <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+      <polyline points="16 17 22 17 22 11" />
+    </svg>
   );
 }
