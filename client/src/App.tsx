@@ -12,7 +12,8 @@ import Dashboard from "@/pages/dashboard";
 import BetHistory from "@/pages/bet-history";
 import LoginPage from "@/pages/login";
 import DailyParlays from "@/pages/daily-parlays";
-import { TrendingUp, Home, History, Crown, LogOut } from "lucide-react";
+import Tools from "@/pages/tools";
+import { TrendingUp, Home, History, Crown, LogOut, Wrench } from "lucide-react";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={Dashboard} />
       <Route path="/tracker" component={BetHistory} />
       <Route path="/daily" component={DailyParlays} />
+      <Route path="/tools" component={Tools} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -75,6 +77,7 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
             <nav className="flex items-center gap-1">
               <NavLink href="/" icon={Home}>Optimizer</NavLink>
               <NavLink href="/daily" icon={Crown}>Daily Picks</NavLink>
+              <NavLink href="/tools" icon={Wrench}>Pro Tools</NavLink>
               <NavLink href="/tracker" icon={History}>Tracker</NavLink>
             </nav>
           </div>
