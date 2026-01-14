@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Layers, Brain, Shield, Zap, Sparkles } from "lucide-react";
+import { Eye, Brain, Zap, Sparkles, Users, BarChart3, DollarSign, MapPin, Scale, Link2 } from "lucide-react";
 
 import { SharpMoneyTracker } from "@/components/sharp-money-tracker";
 import { SteamMoveDetector } from "@/components/steam-move-detector";
@@ -22,21 +22,36 @@ import { PromoBoostStacker } from "@/components/promo-boost-stacker";
 import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
 import { BookLimitPlanner } from "@/components/book-limit-planner";
 import { ParlayStrategyBuilder } from "@/components/parlay-strategy-builder";
-
-import { Users } from "lucide-react";
+import { RealTimeOdds } from "@/components/real-time-odds";
+import { MLPropProjections } from "@/components/ml-prop-projections";
+import { CorrelationEngine } from "@/components/correlation-engine";
+import { SGPOptimizer } from "@/components/sgp-optimizer";
+import { BankrollSimulator } from "@/components/bankroll-simulator";
+import { CorrelationHedgeCalculator } from "@/components/correlation-hedge-calculator";
+import { BookLimitOptimizer } from "@/components/book-limit-optimizer";
+import { LegDiversification } from "@/components/leg-diversification";
+import { ConditionalEngine } from "@/components/conditional-engine";
+import { CLVPredictor } from "@/components/clv-predictor";
+import { SharpConsensus } from "@/components/sharp-consensus";
+import { SituationalSpots } from "@/components/situational-spots";
+import { RefereeAnalysis } from "@/components/referee-analysis";
+import { VenuePerformance } from "@/components/venue-performance";
 
 const TOOL_CATEGORIES = [
+  { id: "odds", name: "Live Odds", icon: DollarSign },
+  { id: "ml", name: "ML Projections", icon: Brain },
+  { id: "correlation", name: "Correlation Tools", icon: Link2 },
   { id: "matchups", name: "Player Matchups", icon: Users },
-  { id: "strategies", name: "Parlay Strategies", icon: Sparkles },
-  { id: "sharp", name: "Sharp Money", icon: Eye },
-  { id: "props", name: "Player Props", icon: Layers },
-  { id: "analysis", name: "Analysis", icon: Brain },
-  { id: "risk", name: "Risk Management", icon: Shield },
+  { id: "sharp", name: "Sharp Intel", icon: Eye },
+  { id: "situational", name: "Situational Spots", icon: MapPin },
+  { id: "bankroll", name: "Bankroll & Risk", icon: BarChart3 },
+  { id: "venue", name: "Venue & Officials", icon: Scale },
+  { id: "strategies", name: "Strategies", icon: Sparkles },
   { id: "pro", name: "Pro Tools", icon: Zap },
 ];
 
 export default function Tools() {
-  const [activeCategory, setActiveCategory] = useState("matchups");
+  const [activeCategory, setActiveCategory] = useState("odds");
   const ActiveIcon = TOOL_CATEGORIES.find(c => c.id === activeCategory)?.icon || Users;
 
   return (
@@ -68,44 +83,76 @@ export default function Tools() {
         </header>
 
         <div className="space-y-6">
+          {activeCategory === "odds" && (
+            <RealTimeOdds />
+          )}
+
+          {activeCategory === "ml" && (
+            <MLPropProjections />
+          )}
+
+          {activeCategory === "correlation" && (
+            <div className="space-y-6">
+              <CorrelationEngine />
+              <SGPOptimizer />
+              <ConditionalEngine />
+              <LegDiversification />
+            </div>
+          )}
+
           {activeCategory === "matchups" && (
-            <PlayerMatchupCenter />
+            <div className="space-y-6">
+              <PlayerMatchupCenter />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <PropComboBuilder />
+                <MatchupAnalyzer />
+              </div>
+            </div>
+          )}
+
+          {activeCategory === "sharp" && (
+            <div className="space-y-6">
+              <SharpConsensus />
+              <CLVPredictor />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <SharpMoneyTracker />
+                <SteamMoveDetector />
+              </div>
+            </div>
+          )}
+
+          {activeCategory === "situational" && (
+            <SituationalSpots />
+          )}
+
+          {activeCategory === "bankroll" && (
+            <div className="space-y-6">
+              <BankrollSimulator />
+              <div className="grid gap-6 lg:grid-cols-2">
+                <CorrelationHedgeCalculator />
+                <BookLimitOptimizer />
+              </div>
+              <div className="grid gap-6 lg:grid-cols-2">
+                <VarianceCalculator />
+                <WhatIfSimulator />
+              </div>
+            </div>
+          )}
+
+          {activeCategory === "venue" && (
+            <div className="space-y-6">
+              <VenuePerformance />
+              <RefereeAnalysis />
+              <TravelRestAnalyzer />
+            </div>
           )}
 
           {activeCategory === "strategies" && (
             <div className="space-y-6">
               <ParlayStrategyBuilder />
               <AIPredictions />
-            </div>
-          )}
-
-          {activeCategory === "sharp" && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              <SharpMoneyTracker />
-              <SteamMoveDetector />
-            </div>
-          )}
-
-          {activeCategory === "props" && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              <PropComboBuilder />
-              <MatchupAnalyzer />
-            </div>
-          )}
-
-          {activeCategory === "analysis" && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              <AIPredictions />
               <ConsensusPicks />
               <KeyNumberAnalyzer />
-            </div>
-          )}
-
-          {activeCategory === "risk" && (
-            <div className="grid gap-6 lg:grid-cols-2">
-              <VarianceCalculator />
-              <WhatIfSimulator />
-              <TravelRestAnalyzer />
             </div>
           )}
 

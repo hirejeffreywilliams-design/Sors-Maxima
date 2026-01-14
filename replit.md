@@ -83,6 +83,23 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 14, 2026: Added 14 NEW Advanced Ticket-Building Tools to produce the best possible parlays:
+  - **Real-Time Odds Comparison**: Multi-book best line finder across DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers with arbitrage detection
+  - **ML Prop Projections**: Machine learning-powered player projections with feature importance breakdown (matchup, form, weather, usage)
+  - **Correlation Engine 2.0**: Auto-stacking correlated legs with synergy scoring (strong/moderate/weak) and negative correlation warnings
+  - **Same Game Parlay Optimizer**: SGP builder with correlation impact per leg, combined EV, and A-D grading system
+  - **Bankroll Simulator**: Monte Carlo simulation (10,000 runs) projecting bankroll growth with ruin/doubling probability and percentile outcomes
+  - **Correlation-Aware Hedge Calculator**: Smart hedging that adjusts for leg correlations in live parlays
+  - **Book Limit Optimizer**: Stake splitting across sportsbooks with fill probability and optimal allocation based on available limits
+  - **Leg Diversification Score**: Parlay concentration analysis with sport/bet-type/direction diversity warnings
+  - **If-This-Then-That Conditionals**: Game script analysis identifying high-value secondary bets when primary conditions are met
+  - **CLV Predictor**: Closing line value forecasting with sharp/public money split and line movement predictions
+  - **Sharp Consensus Tracker**: Aggregated sharp picks with consensus %, 7/30-day ROI, and source breakdown
+  - **Situational Spot Finder**: Recurring profitable patterns (revenge games, B2B fades, rest advantage, lookahead spots)
+  - **Referee/Umpire Analysis**: Official tendencies affecting game totals, foul rates, and home team cover rates
+  - **Venue-Specific Performance**: Location factors including altitude, weather, surface type, and home/away records
+- January 14, 2026: Enhanced Player Matchup Center with injury status badges (color-coded by severity), L10 averages, and games played count
+- January 14, 2026: Reorganized Pro Tools into 10 categories for easier navigation
 - January 12, 2026: Enhanced app to focus on TODAY's games and upcoming matchups:
   - **Time-Aware Odds Engine**: Games sorted by start time with today's games prioritized
   - **Today's Best Bets Section**: Highlights top +EV opportunities from imminent games
