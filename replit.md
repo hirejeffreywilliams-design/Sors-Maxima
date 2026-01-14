@@ -83,6 +83,15 @@ shared/
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.
 
 ## Recent Changes
+- January 14, 2026: Added Cashout Maximizer Algorithm:
+  - **AI-Powered Cashout Eligibility Scoring**: Grades your parlay's likelihood of receiving cashout offers (A+ to F)
+  - **Multi-Platform Analysis**: Shows cashout probability for DraftKings (94%), FanDuel (91%), BetMGM (87%), Caesars (82%), PointsBet (76%), BetRivers (73%)
+  - **6-Factor Analysis**: Market Liquidity, League Popularity, Leg Count, Market Diversity, Timing Alignment, Prop Exposure
+  - **Platform-Specific Tips**: Features, limitations, and optimization strategies for each sportsbook
+  - **Smart Suggestions**: Recommends leg swaps to improve cashout eligibility with impact percentages
+  - **Best/Avoid Markets Guide**: Lists optimal markets (Moneylines, Spreads, Totals) and markets to avoid (obscure props, exotic parlays)
+  - **Configurable Preferences**: Toggle liquidity priority, major leagues focus, prop avoidance, and leg limits
+  - **Optimal Leg Count Advisor**: Recommends 3-5 legs for maximum cashout availability
 - January 14, 2026: Added 14 NEW Advanced Ticket-Building Tools to produce the best possible parlays:
   - **Real-Time Odds Comparison**: Multi-book best line finder across DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers with arbitrage detection
   - **ML Prop Projections**: Machine learning-powered player projections with feature importance breakdown (matchup, form, weather, usage)

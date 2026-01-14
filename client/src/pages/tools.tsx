@@ -36,6 +36,7 @@ import { SharpConsensus } from "@/components/sharp-consensus";
 import { SituationalSpots } from "@/components/situational-spots";
 import { RefereeAnalysis } from "@/components/referee-analysis";
 import { VenuePerformance } from "@/components/venue-performance";
+import { CashoutMaximizer } from "@/components/cashout-maximizer";
 
 const TOOL_CATEGORIES = [
   { id: "odds", name: "Live Odds", icon: DollarSign },
@@ -127,6 +128,7 @@ export default function Tools() {
 
           {activeCategory === "bankroll" && (
             <div className="space-y-6">
+              <CashoutMaximizer />
               <BankrollSimulator />
               <div className="grid gap-6 lg:grid-cols-2">
                 <CorrelationHedgeCalculator />
