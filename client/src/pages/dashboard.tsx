@@ -1,25 +1,13 @@
 import { useState, useCallback } from "react";
-import { Target, TrendingUp, Zap, Info, Sparkles, Wrench, BarChart3, ChevronRight, Flame, Shield, Brain, Settings, Trophy, Rocket } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ParlayBuilder } from "@/components/parlay-builder";
 import { ParlayGenerator } from "@/components/parlay-generator";
 import { InsightsPanel } from "@/components/insights-panel";
-import { EdgeFinder } from "@/components/edge-finder";
 import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
-import { MegaParlayBuilder } from "@/components/mega-parlay-builder";
-import { HotStreakDetector } from "@/components/hot-streak-detector";
-import { ParlayInsuranceFinder } from "@/components/parlay-insurance-finder";
-import { MarketTimingAlerts } from "@/components/market-timing-alerts";
-import { PortfolioParlayOptimizer } from "@/components/portfolio-parlay-optimizer";
-import { CorrelationGraph } from "@/components/correlation-graph";
-import { ScenarioStressLab } from "@/components/scenario-stress-lab";
-import { ProgressiveHedgePlanner } from "@/components/progressive-hedge-planner";
-import { PromoBoostStacker } from "@/components/promo-boost-stacker";
-import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
-import { BookLimitPlanner } from "@/components/book-limit-planner";
 import { TodaysBestBets } from "@/components/todays-best-bets";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
@@ -28,7 +16,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("generator");
   const [preloadedLegs, setPreloadedLegs] = useState<ParlayLeg[]>([]);
   const [selectedLegs, setSelectedLegs] = useState<ParlayLeg[]>([]);
-  const [showInsights, setShowInsights] = useState(true);
+  const [showBestBets, setShowBestBets] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [totalSpent, setTotalSpent] = useState(0);
   const [currentStake, setCurrentStake] = useState(10);
   const [evaluationResult, setEvaluationResult] = useState<EvaluationResult | null>(null);
@@ -41,7 +30,6 @@ export default function Dashboard() {
     kellyMultiplier: 0.25,
   });
   const [bettingEnv, setBettingEnv] = useState<BettingEnvironment>(getDefaultBettingEnvironment());
-  const [showSettings, setShowSettings] = useState(false);
 
   const { data: events = [] } = useQuery<SportEvent[]>({
     queryKey: ["/api/odds", "NBA"],
@@ -69,374 +57,99 @@ export default function Dashboard() {
     setSelectedLegs(prev => [...prev, leg]);
   }, []);
 
-  const combinedOdds = selectedLegs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
-
   return (
     <div className="min-h-full">
-      <div className="max-w-screen-2xl mx-auto px-6 py-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">
-            Parlay Optimizer
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <header className="text-center space-y-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Build Your Parlay
           </h1>
-          <p className="text-muted-foreground">
-            Build smarter parlays with advanced probability analysis and correlation modeling
+          <p className="text-muted-foreground text-sm sm:text-base">
+            Choose games, analyze odds, and optimize your bets
           </p>
         </header>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="hover-elevate bg-gradient-to-br from-chart-1/5 to-transparent border-chart-1/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-1/20 flex items-center justify-center flex-shrink-0">
-                  <Target className="w-5 h-5 text-chart-1" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Monte Carlo
-                  </p>
-                  <p className="text-2xl font-bold font-mono">100K</p>
-                  <p className="text-xs text-muted-foreground">
-                    simulations
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-elevate bg-gradient-to-br from-chart-2/5 to-transparent border-chart-2/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-2/20 flex items-center justify-center flex-shrink-0">
-                  <Brain className="w-5 h-5 text-chart-2" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    AI Models
-                  </p>
-                  <p className="text-2xl font-bold font-mono">14+</p>
-                  <p className="text-xs text-muted-foreground">
-                    edge finders
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-elevate bg-gradient-to-br from-chart-4/5 to-transparent border-chart-4/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-chart-4/20 flex items-center justify-center flex-shrink-0">
-                  <Zap className="w-5 h-5 text-chart-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Kelly Criterion
-                  </p>
-                  <p className="text-2xl font-bold font-mono">Optimal</p>
-                  <p className="text-xs text-muted-foreground">
-                    stake sizing
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="hover-elevate bg-gradient-to-br from-green-500/5 to-transparent border-green-500/20">
-            <CardContent className="pt-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
-                  <Flame className="w-5 h-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    +EV Finder
-                  </p>
-                  <p className="text-2xl font-bold font-mono text-green-500">Live</p>
-                  <p className="text-xs text-muted-foreground">
-                    scanning markets
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <TodaysBestBets 
-          events={events} 
-          onAddLeg={(leg) => handleAddLeg({ ...leg, id: crypto.randomUUID() })} 
-        />
-
-        <div className="flex gap-6">
-          <div className="flex-1 min-w-0">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <div className="flex items-center justify-between gap-4 flex-wrap">
-                <TabsList className="grid w-full max-w-2xl grid-cols-4">
-                  <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
-                    <Sparkles className="w-4 h-4" />
-                    Auto Generator
-                  </TabsTrigger>
-                  <TabsTrigger value="builder" className="gap-2" data-testid="tab-builder">
-                    <Wrench className="w-4 h-4" />
-                    Manual Builder
-                  </TabsTrigger>
-                  <TabsTrigger value="mega" className="gap-2" data-testid="tab-mega">
-                    <Trophy className="w-4 h-4" />
-                    Mega Parlay
-                  </TabsTrigger>
-                  <TabsTrigger value="tools" className="gap-2" data-testid="tab-tools">
-                    <Rocket className="w-4 h-4" />
-                    Pro Tools
-                  </TabsTrigger>
-                </TabsList>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="gap-2"
-                    data-testid="button-toggle-settings"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Settings
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowInsights(!showInsights)}
-                    className="gap-2"
-                    data-testid="button-toggle-insights"
-                  >
-                    <BarChart3 className="w-4 h-4" />
-                    {showInsights ? "Hide" : "Show"} Insights
-                  </Button>
-                </div>
-              </div>
-
-              <TabsContent value="generator" className="space-y-6">
-                <Card className="bg-muted/30 border-dashed">
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <span>
-                          <strong className="text-foreground">Auto Generator:</strong>{" "}
-                          Select a sport and let the optimizer find the best parlays automatically.
-                          Look for <Badge className="bg-green-500/20 text-green-400 border-green-500/30 mx-1 text-xs no-default-hover-elevate no-default-active-elevate">+EV</Badge> badges 
-                          to find value opportunities.
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <ParlayGenerator onLoadParlay={handleLoadParlay} onLegsChange={handleLegsChange} />
-              </TabsContent>
-
-              <TabsContent value="builder" className="space-y-6">
-                <Card className="bg-muted/30 border-dashed">
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <Info className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-muted-foreground space-y-1">
-                        <span>
-                          <strong className="text-foreground">Manual Builder:</strong>{" "}
-                          Add your own betting legs manually, then click "Analyze" to run a 
-                          Monte Carlo simulation that accounts for correlations between outcomes.
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <ParlayBuilder 
-                  preloadedLegs={preloadedLegs} 
-                  onLegsLoaded={() => setPreloadedLegs([])} 
-                  onLegsChange={handleLegsChange}
-                  onStakeChange={handleStakeChange}
-                  onResultChange={handleResultChange}
-                  bankroll={bankrollSettings.totalBankroll}
-                  bettingEnv={bettingEnv}
-                />
-              </TabsContent>
-
-              <TabsContent value="mega" className="space-y-6">
-                <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30">
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <Trophy className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm space-y-1">
-                        <span>
-                          <strong className="text-foreground">Mega Parlay Builder:</strong>{" "}
-                          Build 20+ leg parlays with million-dollar potential. Use synergy scoring, 
-                          round robin options, and smart recommendations to maximize your chances.
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <MegaParlayBuilder 
-                    legs={selectedLegs}
-                    stake={currentStake}
-                    result={evaluationResult}
-                    availableLegs={events.flatMap(e => {
-                      const mlMarket = e.markets.find(m => m.type === "moneyline");
-                      if (!mlMarket || mlMarket.outcomes.length < 2) return [];
-                      const homeOutcome = mlMarket.outcomes[0];
-                      const awayOutcome = mlMarket.outcomes[1];
-                      return [
-                        { 
-                          id: `${e.id}-home-ml`,
-                          team: e.homeTeam,
-                          market: "moneyline",
-                          outcome: "Win",
-                          americanOdds: homeOutcome.americanOdds,
-                          decimalOdds: homeOutcome.decimalOdds,
-                          impliedProbability: homeOutcome.americanOdds > 0 ? 100 / (homeOutcome.americanOdds + 100) : Math.abs(homeOutcome.americanOdds) / (Math.abs(homeOutcome.americanOdds) + 100),
-                        },
-                        {
-                          id: `${e.id}-away-ml`,
-                          team: e.awayTeam,
-                          market: "moneyline",
-                          outcome: "Win",
-                          americanOdds: awayOutcome.americanOdds,
-                          decimalOdds: awayOutcome.decimalOdds,
-                          impliedProbability: awayOutcome.americanOdds > 0 ? 100 / (awayOutcome.americanOdds + 100) : Math.abs(awayOutcome.americanOdds) / (Math.abs(awayOutcome.americanOdds) + 100),
-                        }
-                      ];
-                    })}
-                    onAddLeg={handleAddLeg}
-                  />
-                  
-                  <div className="space-y-6">
-                    <HotStreakDetector sport="NBA" />
-                    <ParlayInsuranceFinder 
-                      legs={selectedLegs}
-                      stake={currentStake}
-                      currentOdds={combinedOdds}
-                      legsRemaining={1}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="tools" className="space-y-6">
-                <Card className="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30">
-                  <CardContent className="py-4">
-                    <div className="flex items-start gap-3">
-                      <Rocket className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm space-y-1">
-                        <span>
-                          <strong className="text-foreground">Pro Tools:</strong>{" "}
-                          Advanced features for serious bettors. Market timing, portfolio optimization, 
-                          correlation analysis, stress testing, hedging, promo stacking, and more.
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <MarketTimingAlerts 
-                    events={events.map(e => ({
-                      id: e.id,
-                      homeTeam: e.homeTeam,
-                      awayTeam: e.awayTeam,
-                      markets: e.markets,
-                    }))} 
-                  />
-                  <PortfolioParlayOptimizer 
-                    legs={selectedLegs}
-                    bankroll={bankrollSettings.totalBankroll}
-                  />
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <CorrelationGraph legs={selectedLegs} />
-                  <ScenarioStressLab 
-                    legs={selectedLegs}
-                    stake={currentStake}
-                    winProbability={evaluationResult?.winProbability || 0.2}
-                  />
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <ProgressiveHedgePlanner 
-                    legs={selectedLegs}
-                    stake={currentStake}
-                    potentialPayout={currentStake * combinedOdds}
-                  />
-                  <PromoBoostStacker 
-                    legs={selectedLegs}
-                    currentOdds={combinedOdds}
-                  />
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-2">
-                  <SyntheticInsuranceBuilder 
-                    legs={selectedLegs}
-                    stake={currentStake}
-                    potentialPayout={currentStake * combinedOdds}
-                    expectedValue={evaluationResult?.expectedValue || 0.02}
-                  />
-                  <BookLimitPlanner 
-                    desiredStake={currentStake}
-                    onStakeChange={handleStakeChange}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-            
-            <div className="mt-6">
-              <EdgeFinder events={events} sport="NBA" />
-            </div>
-            
-            {showSettings && (
-              <div className="xl:hidden">
-                <BettingSettings 
-                  settings={bettingEnv} 
-                  onSettingsChange={setBettingEnv} 
-                />
-              </div>
-            )}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <div className="flex justify-center">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden sm:inline">Quick</span> Picks
+              </TabsTrigger>
+              <TabsTrigger value="builder" className="gap-2" data-testid="tab-builder">
+                <Wrench className="w-4 h-4" />
+                <span className="hidden sm:inline">Build</span> Custom
+              </TabsTrigger>
+            </TabsList>
           </div>
-          
-          {(showInsights || showSettings) && (
-            <div className="w-96 flex-shrink-0 hidden xl:block">
-              <div className="sticky top-6 space-y-4">
-                {showSettings && (
-                  <BettingSettings 
-                    settings={bettingEnv} 
-                    onSettingsChange={setBettingEnv} 
-                  />
-                )}
-                {showInsights && (
-                  <InsightsPanel
-                    events={events}
-                    selectedLegs={selectedLegs}
-                    bankrollSettings={bankrollSettings}
-                    onBankrollChange={setBankrollSettings}
-                    totalSpent={totalSpent}
-                  />
-                )}
-              </div>
-            </div>
-          )}
-        </div>
 
-        <footer className="pt-6 border-t">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span>Parlay Optimizer v1.0</span>
-              <Badge variant="outline" className="text-xs">
-                Beta
-              </Badge>
-            </div>
-            <p>
-              For educational purposes only. Please gamble responsibly.
-            </p>
+          <TabsContent value="generator" className="space-y-4">
+            <ParlayGenerator onLoadParlay={handleLoadParlay} onLegsChange={handleLegsChange} />
+          </TabsContent>
+
+          <TabsContent value="builder" className="space-y-4">
+            <ParlayBuilder 
+              preloadedLegs={preloadedLegs} 
+              onLegsLoaded={() => setPreloadedLegs([])} 
+              onLegsChange={handleLegsChange}
+              onStakeChange={handleStakeChange}
+              onResultChange={handleResultChange}
+              bankroll={bankrollSettings.totalBankroll}
+              bettingEnv={bettingEnv}
+            />
+          </TabsContent>
+        </Tabs>
+
+        <Collapsible open={showBestBets} onOpenChange={setShowBestBets}>
+          <div className="flex items-center justify-between mb-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2" data-testid="toggle-best-bets">
+                <Flame className="w-4 h-4 text-orange-500" />
+                Today's Hot Picks
+                <Badge variant="secondary" className="text-xs">+EV</Badge>
+                {showBestBets ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
           </div>
+          <CollapsibleContent>
+            <TodaysBestBets 
+              events={events} 
+              onAddLeg={(leg) => handleAddLeg({ ...leg, id: crypto.randomUUID() })} 
+            />
+          </CollapsibleContent>
+        </Collapsible>
+
+        <Collapsible open={showAdvanced} onOpenChange={setShowAdvanced}>
+          <div className="flex items-center justify-between mb-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2" data-testid="toggle-advanced">
+                <Settings className="w-4 h-4 text-blue-500" />
+                Analysis & Settings
+                {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </Button>
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent>
+            <div className="grid gap-4 lg:grid-cols-2">
+              <BettingSettings 
+                settings={bettingEnv} 
+                onSettingsChange={setBettingEnv} 
+              />
+              <InsightsPanel
+                events={events}
+                selectedLegs={selectedLegs}
+                bankrollSettings={bankrollSettings}
+                onBankrollChange={setBankrollSettings}
+                totalSpent={totalSpent}
+              />
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <footer className="pt-4 border-t text-center">
+          <p className="text-xs text-muted-foreground">
+            For educational purposes only. Please gamble responsibly.
+          </p>
         </footer>
       </div>
     </div>
