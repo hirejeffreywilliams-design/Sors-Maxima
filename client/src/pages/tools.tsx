@@ -7,6 +7,7 @@ import { SteamMoveDetector } from "@/components/steam-move-detector";
 import { KeyNumberAnalyzer } from "@/components/key-number-analyzer";
 import { PropComboBuilder } from "@/components/prop-combo-builder";
 import { MatchupAnalyzer } from "@/components/matchup-analyzer";
+import { PlayerMatchupCenter } from "@/components/player-matchup-center";
 import { VarianceCalculator } from "@/components/variance-calculator";
 import { AIPredictions } from "@/components/ai-predictions";
 import { ConsensusPicks } from "@/components/consensus-picks";
@@ -22,7 +23,10 @@ import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-buil
 import { BookLimitPlanner } from "@/components/book-limit-planner";
 import { ParlayStrategyBuilder } from "@/components/parlay-strategy-builder";
 
+import { Users } from "lucide-react";
+
 const TOOL_CATEGORIES = [
+  { id: "matchups", name: "Player Matchups", icon: Users },
   { id: "strategies", name: "Parlay Strategies", icon: Sparkles },
   { id: "sharp", name: "Sharp Money", icon: Eye },
   { id: "props", name: "Player Props", icon: Layers },
@@ -32,8 +36,8 @@ const TOOL_CATEGORIES = [
 ];
 
 export default function Tools() {
-  const [activeCategory, setActiveCategory] = useState("strategies");
-  const ActiveIcon = TOOL_CATEGORIES.find(c => c.id === activeCategory)?.icon || Sparkles;
+  const [activeCategory, setActiveCategory] = useState("matchups");
+  const ActiveIcon = TOOL_CATEGORIES.find(c => c.id === activeCategory)?.icon || Users;
 
   return (
     <div className="min-h-full">
@@ -64,6 +68,10 @@ export default function Tools() {
         </header>
 
         <div className="space-y-6">
+          {activeCategory === "matchups" && (
+            <PlayerMatchupCenter />
+          )}
+
           {activeCategory === "strategies" && (
             <div className="space-y-6">
               <ParlayStrategyBuilder />
