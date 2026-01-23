@@ -6,23 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { 
   AlertTriangle, 
   Shield, 
   Users, 
   Ban, 
   CheckCircle, 
-  Eye,
   Search,
   Activity,
-  Clock
+  Clock,
+  Bug,
+  AlertCircle,
+  Info,
+  Trash2,
+  RefreshCw
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface User {
   id: string;
@@ -58,11 +55,33 @@ interface FraudAlert {
   severity: 'low' | 'medium' | 'high' | 'critical';
 }
 
+interface ErrorLog {
+  id: string;
+  timestamp: string;
+  level: 'error' | 'warn' | 'info';
+  message: string;
+  stack?: string;
+  path?: string;
+  method?: string;
+  userId?: string;
+  ip?: string;
+  userAgent?: string;
+}
+
+interface ErrorStats {
+  total: number;
+  errors: number;
+  warnings: number;
+  info: number;
+  last24Hours: number;
+}
+
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [banReason, setBanReason] = useState("");
+  const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -72,6 +91,14 @@ export default function AdminDashboard() {
 
   const { data: fraudAlerts = [], isLoading: alertsLoading } = useQuery<FraudAlert[]>({
     queryKey: ['/api/admin/fraud-alerts'],
+  });
+
+  const { data: errorLogs = [], isLoading: errorsLoading, refetch: refetchErrors } = useQuery<ErrorLog[]>({
+    queryKey: ['/api/admin/error-logs'],
+  });
+
+  const { data: errorStats } = useQuery<ErrorStats>({
+    queryKey: ['/api/admin/error-stats'],
   });
 
   const banMutation = useMutation({
@@ -105,6 +132,36 @@ export default function AdminDashboard() {
     }
   });
 
+  const clearErrorsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('DELETE', '/api/admin/error-logs', {});
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/error-stats'] });
+      toast({ title: "Error logs cleared" });
+    },
+    onError: () => {
+      toast({ title: "Failed to clear logs", variant: "destructive" });
+    }
+  });
+
+  const testErrorMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/test-error', { 
+        message: "Test error from admin dashboard",
+        level: "error"
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/error-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/error-stats'] });
+      toast({ title: `Test error created: ${data.errorId}` });
+    }
+  });
+
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -120,6 +177,24 @@ export default function AdminDashboard() {
     }
   };
 
+  const getLogLevelIcon = (level: string) => {
+    switch (level) {
+      case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />;
+      case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+      case 'info': return <Info className="h-4 w-4 text-blue-500" />;
+      default: return <Bug className="h-4 w-4" />;
+    }
+  };
+
+  const getLogLevelBadge = (level: string) => {
+    switch (level) {
+      case 'error': return <Badge variant="destructive">ERROR</Badge>;
+      case 'warn': return <Badge className="bg-yellow-500 text-black">WARN</Badge>;
+      case 'info': return <Badge variant="secondary">INFO</Badge>;
+      default: return <Badge variant="outline">{level}</Badge>;
+    }
+  };
+
   const getRiskBadge = (score: number) => {
     if (score >= 75) return <Badge variant="destructive">High Risk</Badge>;
     if (score >= 50) return <Badge className="bg-orange-500">Medium Risk</Badge>;
@@ -128,87 +203,102 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-full p-6 space-y-6">
-      <header className="flex items-center justify-between">
+    <div className="min-h-full p-4 sm:p-6 space-y-4 sm:space-y-6">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Shield className="h-6 w-6 text-purple-500" />
+          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
             Admin Dashboard
           </h1>
-          <p className="text-muted-foreground">User management and fraud prevention</p>
+          <p className="text-sm text-muted-foreground">User management, fraud prevention, and error logs</p>
         </div>
       </header>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Users</CardTitle>
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Users</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
               {users.length}
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Banned Users</CardTitle>
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Banned</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <Ban className="h-5 w-5 text-red-500" />
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Ban className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
               {users.filter(u => u.isBanned).length}
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">High Risk Users</CardTitle>
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">High Risk</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500" />
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
               {users.filter(u => u.riskScore >= 50).length}
             </div>
           </CardContent>
         </Card>
         
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Fraud Alerts</CardTitle>
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Fraud Alerts</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold flex items-center gap-2">
-              <Activity className="h-5 w-5 text-purple-500" />
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
               {fraudAlerts.length}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-2 sm:col-span-1">
+          <CardHeader className="pb-2 px-3 sm:px-6">
+            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Errors (24h)</CardTitle>
+          </CardHeader>
+          <CardContent className="px-3 sm:px-6">
+            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <Bug className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              {errorStats?.last24Hours || 0}
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList>
-          <TabsTrigger value="users" data-testid="tab-users">
-            <Users className="h-4 w-4 mr-2" />
-            Users
+        <TabsList className="w-full grid grid-cols-3 h-auto">
+          <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
+            <Users className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Users</span>
           </TabsTrigger>
-          <TabsTrigger value="fraud" data-testid="tab-fraud">
-            <AlertTriangle className="h-4 w-4 mr-2" />
-            Fraud Alerts
+          <TabsTrigger value="fraud" data-testid="tab-fraud" className="text-xs sm:text-sm py-2">
+            <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Fraud</span>
+          </TabsTrigger>
+          <TabsTrigger value="errors" data-testid="tab-errors" className="text-xs sm:text-sm py-2">
+            <Bug className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Errors</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="users" className="space-y-4">
+        <TabsContent value="users" className="space-y-4 mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>View and manage all registered users</CardDescription>
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
+              <CardDescription className="text-sm">View and manage all registered users</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               <div className="mb-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -227,91 +317,70 @@ export default function AdminDashboard() {
               ) : filteredUsers.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">No users found</div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>User</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Risk</TableHead>
-                      <TableHead>Tier</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div>
-                            <div className="font-medium">{user.username}</div>
-                            <div className="text-sm text-muted-foreground">{user.email}</div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                <div className="space-y-3">
+                  {filteredUsers.map((user) => (
+                    <div 
+                      key={user.id} 
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium truncate">{user.username}</span>
+                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
                             {user.role}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.isBanned ? (
-                            <Badge variant="destructive">Banned</Badge>
+                          {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
+                        </div>
+                        <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          {getRiskBadge(user.riskScore)}
+                          <Badge variant="outline" className="text-xs">{user.subscriptionTier}</Badge>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        {user.role !== 'admin' && (
+                          user.isBanned ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => unbanMutation.mutate(user.id)}
+                              disabled={unbanMutation.isPending}
+                              data-testid={`button-unban-${user.id}`}
+                            >
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Unban
+                            </Button>
                           ) : (
-                            <Badge variant="outline" className="text-green-600 border-green-600">Active</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{getRiskBadge(user.riskScore)}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{user.subscriptionTier}</Badge>
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell>
-                          {user.role !== 'admin' && (
-                            user.isBanned ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => unbanMutation.mutate(user.id)}
-                                disabled={unbanMutation.isPending}
-                                data-testid={`button-unban-${user.id}`}
-                              >
-                                <CheckCircle className="h-4 w-4 mr-1" />
-                                Unban
-                              </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setBanDialogOpen(true);
-                                }}
-                                data-testid={`button-ban-${user.id}`}
-                              >
-                                <Ban className="h-4 w-4 mr-1" />
-                                Ban
-                              </Button>
-                            )
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setBanDialogOpen(true);
+                              }}
+                              data-testid={`button-ban-${user.id}`}
+                            >
+                              <Ban className="h-4 w-4 mr-1" />
+                              Ban
+                            </Button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="fraud" className="space-y-4">
+        <TabsContent value="fraud" className="space-y-4 mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Fraud Alerts</CardTitle>
-              <CardDescription>Suspicious activity detected by the system</CardDescription>
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">Fraud Alerts</CardTitle>
+              <CardDescription className="text-sm">Suspicious activity detected by the system</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6">
               {alertsLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading alerts...</div>
               ) : fraudAlerts.length === 0 ? (
@@ -320,23 +389,23 @@ export default function AdminDashboard() {
                   <p>No fraud alerts detected</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {fraudAlerts.map((alert, index) => (
                     <div 
                       key={index} 
-                      className="flex items-start gap-4 p-4 border rounded-lg"
+                      className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 sm:p-4 border rounded-lg"
                     >
-                      <div className={`p-2 rounded-full ${getSeverityColor(alert.severity)}`}>
+                      <div className={`p-2 rounded-full ${getSeverityColor(alert.severity)} shrink-0 self-start`}>
                         <AlertTriangle className="h-4 w-4" />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <Badge className={getSeverityColor(alert.severity)}>
                             {alert.severity.toUpperCase()}
                           </Badge>
-                          <span className="font-medium">{alert.type.replace(/_/g, ' ')}</span>
+                          <span className="font-medium text-sm">{alert.type.replace(/_/g, ' ')}</span>
                         </div>
-                        <p className="text-sm text-muted-foreground">{alert.details}</p>
+                        <p className="text-sm text-muted-foreground break-words">{alert.details}</p>
                         <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                           <Clock className="h-3 w-3" />
                           {new Date(alert.timestamp).toLocaleString()}
@@ -349,11 +418,97 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="errors" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader className="px-4 sm:px-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base sm:text-lg">Error Logs</CardTitle>
+                  <CardDescription className="text-sm">
+                    Backend errors and warnings ({errorStats?.total || 0} total)
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => refetchErrors()}
+                    data-testid="button-refresh-errors"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => testErrorMutation.mutate()}
+                    disabled={testErrorMutation.isPending}
+                    data-testid="button-test-error"
+                  >
+                    <Bug className="h-4 w-4 mr-1" />
+                    Test
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => clearErrorsMutation.mutate()}
+                    disabled={clearErrorsMutation.isPending || errorLogs.length === 0}
+                    data-testid="button-clear-errors"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              {errorsLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading error logs...</div>
+              ) : errorLogs.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
+                  <p>No errors logged</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {errorLogs.map((log) => (
+                    <div 
+                      key={log.id} 
+                      className="flex flex-col gap-2 p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                      onClick={() => setSelectedError(log)}
+                      data-testid={`error-log-${log.id}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        {getLogLevelIcon(log.level)}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            {getLogLevelBadge(log.level)}
+                            <code className="text-xs text-muted-foreground">{log.id}</code>
+                          </div>
+                          <p className="text-sm font-medium break-words">{log.message}</p>
+                          {log.path && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {log.method} {log.path}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground pl-7">
+                        <Clock className="h-3 w-3" />
+                        {new Date(log.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
 
-      {/* Ban Dialog */}
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Ban User</DialogTitle>
             <DialogDescription>
@@ -372,8 +527,8 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBanDialogOpen(false)}>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setBanDialogOpen(false)} className="w-full sm:w-auto">
               Cancel
             </Button>
             <Button 
@@ -385,8 +540,86 @@ export default function AdminDashboard() {
               }}
               disabled={!banReason || banMutation.isPending}
               data-testid="button-confirm-ban"
+              className="w-full sm:w-auto"
             >
               {banMutation.isPending ? "Banning..." : "Ban User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!selectedError} onOpenChange={() => setSelectedError(null)}>
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {selectedError && getLogLevelIcon(selectedError.level)}
+              Error Details
+            </DialogTitle>
+            <DialogDescription>
+              {selectedError?.id}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedError && (
+            <ScrollArea className="max-h-[60vh]">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Message</label>
+                  <p className="font-medium break-words">{selectedError.message}</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Level</label>
+                    <div>{getLogLevelBadge(selectedError.level)}</div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
+                    <p className="text-sm">{new Date(selectedError.timestamp).toLocaleString()}</p>
+                  </div>
+                </div>
+
+                {(selectedError.path || selectedError.method) && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Request</label>
+                    <p className="text-sm font-mono">{selectedError.method} {selectedError.path}</p>
+                  </div>
+                )}
+
+                {selectedError.ip && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">IP Address</label>
+                    <p className="text-sm font-mono">{selectedError.ip}</p>
+                  </div>
+                )}
+
+                {selectedError.userId && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">User ID</label>
+                    <p className="text-sm font-mono">{selectedError.userId}</p>
+                  </div>
+                )}
+
+                {selectedError.userAgent && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">User Agent</label>
+                    <p className="text-sm text-muted-foreground break-words">{selectedError.userAgent}</p>
+                  </div>
+                )}
+
+                {selectedError.stack && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Stack Trace</label>
+                    <pre className="mt-1 p-3 bg-muted rounded-lg text-xs overflow-x-auto whitespace-pre-wrap break-words">
+                      {selectedError.stack}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedError(null)}>
+              Close
             </Button>
           </DialogFooter>
         </DialogContent>

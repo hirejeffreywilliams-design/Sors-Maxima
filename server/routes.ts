@@ -8,6 +8,7 @@ import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
 import { authService, type User } from "./authService";
+import { errorLogger } from "./errorLogger";
 
 declare module "express-session" {
   interface SessionData {
@@ -166,6 +167,50 @@ export async function registerRoutes(
       return res.json({ success: true });
     }
     return res.status(400).json({ error: "Failed to unban user" });
+  });
+
+  // Admin: Get error logs
+  app.get("/api/admin/error-logs", requireAdmin, (req, res) => {
+    const { level, limit, since } = req.query;
+    const logs = errorLogger.getLogs({
+      level: level as 'error' | 'warn' | 'info' | undefined,
+      limit: limit ? parseInt(limit as string) : 100,
+      since: since as string | undefined
+    });
+    res.json(logs);
+  });
+
+  // Admin: Get error log stats
+  app.get("/api/admin/error-stats", requireAdmin, (_req, res) => {
+    const stats = errorLogger.getStats();
+    res.json(stats);
+  });
+
+  // Admin: Get single error log
+  app.get("/api/admin/error-logs/:id", requireAdmin, (req, res) => {
+    const log = errorLogger.getLog(req.params.id);
+    if (log) {
+      return res.json(log);
+    }
+    return res.status(404).json({ error: "Error log not found" });
+  });
+
+  // Admin: Clear error logs
+  app.delete("/api/admin/error-logs", requireAdmin, (_req, res) => {
+    errorLogger.clear();
+    res.json({ success: true });
+  });
+
+  // Log a test error (for debugging purposes)
+  app.post("/api/admin/test-error", requireAdmin, (req, res) => {
+    const { message, level } = req.body;
+    const id = errorLogger.log(level || 'error', message || 'Test error', {
+      path: '/api/admin/test-error',
+      method: 'POST',
+      userId: req.session?.userId,
+      ip: getClientIp(req)
+    });
+    res.json({ success: true, errorId: id });
   });
 
   app.get("/api/sports", (_req, res) => {

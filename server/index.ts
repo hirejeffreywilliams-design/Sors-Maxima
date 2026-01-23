@@ -3,6 +3,7 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { errorLogger } from "./errorLogger";
 
 const app = express();
 const httpServer = createServer(app);
@@ -84,12 +85,27 @@ app.use((req, res, next) => {
 (async () => {
   await registerRoutes(httpServer, app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    const errorId = errorLogger.logRequestError(
+      err instanceof Error ? err : new Error(message),
+      {
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        headers: req.headers as Record<string, string | string[] | undefined>
+      },
+      req.session?.userId
+    );
+
+    res.status(status).json({ 
+      message,
+      errorId: status >= 500 ? errorId : undefined
+    });
+    
+    console.error(`[${errorId}] ${req.method} ${req.path}:`, err);
   });
 
   // importantly only setup vite in development and after

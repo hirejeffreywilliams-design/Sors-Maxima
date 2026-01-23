@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import NotFound from "@/pages/not-found";
 import AutoGenerator from "@/pages/auto-generator";
 import Dashboard from "@/pages/dashboard";
@@ -20,7 +21,7 @@ import Bankroll from "@/pages/bankroll";
 import Live from "@/pages/live";
 import Pricing from "@/pages/pricing";
 import AdminDashboard from "@/pages/admin";
-import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity, CreditCard, Shield } from "lucide-react";
+import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X } from "lucide-react";
 
 function Router() {
   return (
@@ -41,31 +42,146 @@ function Router() {
   );
 }
 
-function NavLink({ href, icon: Icon, children, testId }: { href: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode; testId?: string }) {
-  const [location] = useLocation();
-  const isActive = location === href;
-  
-  return (
-    <Link href={href}>
-      <Button 
-        variant={isActive ? "secondary" : "ghost"} 
-        size="sm" 
-        className="gap-2"
-        data-testid={testId}
-      >
-        <Icon className="w-4 h-4" />
-        <span className="hidden sm:inline">{children}</span>
-      </Button>
-    </Link>
-  );
-}
-
 interface AuthState {
   isAdmin?: boolean;
   username?: string;
 }
 
+interface NavItem {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  testId: string;
+  adminOnly?: boolean;
+}
+
+const navItems: NavItem[] = [
+  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate" },
+  { href: "/live", icon: Activity, label: "Live", testId: "nav-live" },
+  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools" },
+  { href: "/community", icon: Users, label: "Social", testId: "nav-community" },
+  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards" },
+  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "nav-bankroll" },
+  { href: "/tracker", icon: History, label: "History", testId: "nav-tracker" },
+  { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing" },
+  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", adminOnly: true },
+];
+
+function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
+  const [location] = useLocation();
+  
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex-1 py-4">
+        <nav className="space-y-1">
+          {navItems.map((item) => {
+            if (item.adminOnly && !authState.isAdmin) return null;
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href} onClick={onClose}>
+                <div 
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
+                  }`}
+                  data-testid={`mobile-${item.testId}`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+      
+      <div className="border-t pt-4 pb-6 px-4 space-y-4">
+        {authState.username && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{authState.username}</span>
+            {authState.isAdmin && (
+              <span className="text-xs text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded">Admin</span>
+            )}
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => { onLogout(); onClose(); }}
+            className="flex-1 gap-2"
+            data-testid="mobile-button-logout"
+          >
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DesktopNav({ authState }: { authState: AuthState }) {
+  const [location] = useLocation();
+  
+  return (
+    <nav className="hidden lg:flex items-center gap-1">
+      {navItems.map((item) => {
+        if (item.adminOnly && !authState.isAdmin) return null;
+        const Icon = item.icon;
+        const isActive = location === item.href;
+        return (
+          <Link key={item.href} href={item.href}>
+            <Button 
+              variant={isActive ? "secondary" : "ghost"} 
+              size="sm" 
+              className="gap-2"
+              data-testid={item.testId}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="hidden xl:inline">{item.label}</span>
+            </Button>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+function BottomNav({ authState }: { authState: AuthState }) {
+  const [location] = useLocation();
+  
+  const mobileNavItems = navItems.slice(0, 5).filter(item => !item.adminOnly || authState.isAdmin);
+  
+  return (
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
+      <div className="flex items-center justify-around h-16">
+        {mobileNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location === item.href;
+          return (
+            <Link key={item.href} href={item.href}>
+              <div 
+                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 ${
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                }`}
+                data-testid={`bottom-${item.testId}`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
 function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { 
@@ -81,36 +197,25 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-6">
-          <div className="flex items-center gap-6">
+        <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
+          <div className="flex items-center gap-4 lg:gap-6">
             <Link href="/">
               <div className="flex items-center gap-2 cursor-pointer">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-1 flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary-foreground" />
                 </div>
-                <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
+                <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
                   Sors Maxima
                 </span>
               </div>
             </Link>
             
-            <nav className="flex items-center gap-1">
-              <NavLink href="/" icon={Zap} testId="nav-generate">Generate</NavLink>
-              <NavLink href="/live" icon={Activity} testId="nav-live">Live</NavLink>
-              <NavLink href="/tools" icon={Wrench} testId="nav-tools">Tools</NavLink>
-              <NavLink href="/community" icon={Users} testId="nav-community">Social</NavLink>
-              <NavLink href="/rewards" icon={Trophy} testId="nav-rewards">Rewards</NavLink>
-              <NavLink href="/bankroll" icon={Wallet} testId="nav-bankroll">Bankroll</NavLink>
-              <NavLink href="/tracker" icon={History} testId="nav-tracker">History</NavLink>
-              <NavLink href="/pricing" icon={CreditCard} testId="nav-pricing">Upgrade</NavLink>
-              {authState.isAdmin && (
-                <NavLink href="/admin" icon={Shield} testId="nav-admin">Admin</NavLink>
-              )}
-            </nav>
+            <DesktopNav authState={authState} />
           </div>
+          
           <div className="flex items-center gap-2">
             {authState.username && (
-              <span className="text-sm text-muted-foreground hidden md:inline">
+              <span className="text-sm text-muted-foreground hidden lg:inline">
                 {authState.username}
                 {authState.isAdmin && (
                   <span className="ml-1 text-xs text-purple-500">(Admin)</span>
@@ -122,18 +227,44 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
               variant="ghost" 
               size="sm" 
               onClick={handleLogout}
-              className="gap-2"
+              className="gap-2 hidden lg:flex"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden xl:inline">Logout</span>
             </Button>
+            
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden" data-testid="button-mobile-menu">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-72 p-0">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded bg-gradient-to-br from-primary to-chart-1 flex items-center justify-center">
+                      <TrendingUp className="w-3 h-3 text-primary-foreground" />
+                    </div>
+                    Sors Maxima
+                  </SheetTitle>
+                </SheetHeader>
+                <MobileNav 
+                  authState={authState} 
+                  onLogout={handleLogout} 
+                  onClose={() => setMobileMenuOpen(false)} 
+                />
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </header>
-      <main className="min-h-[calc(100vh-3.5rem)]">
+      
+      <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
         <Router />
       </main>
+      
+      <BottomNav authState={authState} />
     </div>
   );
 }
