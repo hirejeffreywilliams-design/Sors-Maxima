@@ -18,7 +18,10 @@ import {
   AlertCircle,
   Info,
   Trash2,
-  RefreshCw
+  RefreshCw,
+  Crown,
+  Gift,
+  XCircle
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +35,22 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface SubscriptionStats {
+  total: number;
+  free: number;
+  pro: number;
+  elite: number;
+  whale: number;
+  grantedFree: number;
+}
 
 interface User {
   id: string;
@@ -79,8 +98,10 @@ interface ErrorStats {
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
+  const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [banReason, setBanReason] = useState("");
+  const [selectedTier, setSelectedTier] = useState<'pro' | 'elite' | 'whale'>('pro');
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const [errorLevelFilter, setErrorLevelFilter] = useState<string>("all");
   const { toast } = useToast();
@@ -109,6 +130,43 @@ export default function AdminDashboard() {
 
   const { data: errorStats } = useQuery<ErrorStats>({
     queryKey: ['/api/admin/error-stats'],
+  });
+
+  const { data: subscriptionStats } = useQuery<SubscriptionStats>({
+    queryKey: ['/api/admin/subscription-stats'],
+  });
+
+  const grantAccessMutation = useMutation({
+    mutationFn: async ({ username, tier }: { username: string; tier: 'pro' | 'elite' | 'whale' }) => {
+      const response = await apiRequest('POST', '/api/admin/grant-access', { username, tier });
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/subscription-stats'] });
+      toast({ title: `Granted ${variables.tier.toUpperCase()} access to ${variables.username}` });
+      setGrantAccessDialogOpen(false);
+      setSelectedUser(null);
+      setSelectedTier('pro');
+    },
+    onError: () => {
+      toast({ title: "Failed to grant access", variant: "destructive" });
+    }
+  });
+
+  const revokeAccessMutation = useMutation({
+    mutationFn: async (username: string) => {
+      const response = await apiRequest('POST', '/api/admin/revoke-access', { username });
+      return response.json();
+    },
+    onSuccess: (_, username) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/subscription-stats'] });
+      toast({ title: `Revoked premium access from ${username}` });
+    },
+    onError: () => {
+      toast({ title: "Failed to revoke access", variant: "destructive" });
+    }
   });
 
   const banMutation = useMutation({
@@ -287,10 +345,14 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="w-full grid grid-cols-3 h-auto">
+        <TabsList className="w-full grid grid-cols-4 h-auto">
           <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
             <Users className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden xs:inline">Users</span>
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm py-2">
+            <Crown className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Subs</span>
           </TabsTrigger>
           <TabsTrigger value="fraud" data-testid="tab-fraud" className="text-xs sm:text-sm py-2">
             <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
@@ -374,6 +436,129 @@ export default function AdminDashboard() {
                               Ban
                             </Button>
                           )
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="space-y-4 mt-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Free</CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6">
+                <div className="text-xl sm:text-2xl font-bold">{subscriptionStats?.free || 0}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Pro</CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6">
+                <div className="text-xl sm:text-2xl font-bold text-blue-500">{subscriptionStats?.pro || 0}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Elite</CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6">
+                <div className="text-xl sm:text-2xl font-bold text-purple-500">{subscriptionStats?.elite || 0}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2 px-3 sm:px-6">
+                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Whale</CardTitle>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6">
+                <div className="text-xl sm:text-2xl font-bold text-amber-500">{subscriptionStats?.whale || 0}</div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card>
+            <CardHeader className="px-4 sm:px-6">
+              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                <Gift className="h-5 w-5 text-green-500" />
+                Grant Free Access
+              </CardTitle>
+              <CardDescription className="text-sm">
+                Give users free premium access without payment ({subscriptionStats?.grantedFree || 0} currently granted)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-4 sm:px-6">
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search users to grant access..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                    data-testid="input-search-grant-access"
+                  />
+                </div>
+              </div>
+
+              {usersLoading ? (
+                <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">No users found</div>
+              ) : (
+                <div className="space-y-3">
+                  {filteredUsers.filter(u => u.role !== 'admin').map((user) => (
+                    <div 
+                      key={user.id} 
+                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-medium truncate">{user.username}</span>
+                          <Badge 
+                            variant={user.subscriptionTier === 'free' ? 'secondary' : 'default'}
+                            className={
+                              user.subscriptionTier === 'whale' ? 'bg-amber-500' :
+                              user.subscriptionTier === 'elite' ? 'bg-purple-500' :
+                              user.subscriptionTier === 'pro' ? 'bg-blue-500' : ''
+                            }
+                          >
+                            {user.subscriptionTier.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        {user.subscriptionTier === 'free' ? (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setGrantAccessDialogOpen(true);
+                            }}
+                            data-testid={`button-grant-${user.id}`}
+                          >
+                            <Gift className="h-4 w-4 mr-1" />
+                            Grant Access
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => revokeAccessMutation.mutate(user.username)}
+                            disabled={revokeAccessMutation.isPending}
+                            data-testid={`button-revoke-${user.id}`}
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Revoke
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -573,6 +758,83 @@ export default function AdminDashboard() {
               className="w-full sm:w-auto"
             >
               {banMutation.isPending ? "Banning..." : "Ban User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={grantAccessDialogOpen} onOpenChange={setGrantAccessDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Gift className="h-5 w-5 text-green-500" />
+              Grant Free Access
+            </DialogTitle>
+            <DialogDescription>
+              Grant premium access to {selectedUser?.username} without payment.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Select Tier</label>
+              <Select 
+                value={selectedTier} 
+                onValueChange={(value: 'pro' | 'elite' | 'whale') => setSelectedTier(value)}
+              >
+                <SelectTrigger className="mt-2" data-testid="select-tier">
+                  <SelectValue placeholder="Select a tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pro">Pro ($29/mo value)</SelectItem>
+                  <SelectItem value="elite">Elite ($99/mo value)</SelectItem>
+                  <SelectItem value="whale">Whale ($499/mo value)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-lg bg-muted text-sm">
+              <p className="font-medium mb-1">Tier Benefits:</p>
+              {selectedTier === 'pro' && (
+                <ul className="text-muted-foreground space-y-1">
+                  <li>Unlimited tickets</li>
+                  <li>All 40+ analysis factors</li>
+                  <li>6 sports coverage</li>
+                  <li>Basic alerts</li>
+                </ul>
+              )}
+              {selectedTier === 'elite' && (
+                <ul className="text-muted-foreground space-y-1">
+                  <li>Everything in Pro</li>
+                  <li>Real-time alerts</li>
+                  <li>AI betting assistant</li>
+                  <li>CLV tracking</li>
+                  <li>ML projections</li>
+                </ul>
+              )}
+              {selectedTier === 'whale' && (
+                <ul className="text-muted-foreground space-y-1">
+                  <li>Everything in Elite</li>
+                  <li>VIP picks</li>
+                  <li>1-on-1 coaching</li>
+                  <li>Priority support</li>
+                </ul>
+              )}
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setGrantAccessDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button 
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+              onClick={() => {
+                if (selectedUser) {
+                  grantAccessMutation.mutate({ username: selectedUser.username, tier: selectedTier });
+                }
+              }}
+              disabled={grantAccessMutation.isPending}
+              data-testid="button-confirm-grant"
+            >
+              {grantAccessMutation.isPending ? "Granting..." : `Grant ${selectedTier.toUpperCase()} Access`}
             </Button>
           </DialogFooter>
         </DialogContent>
