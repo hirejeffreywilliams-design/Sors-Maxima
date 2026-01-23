@@ -48,8 +48,8 @@ const tiers: PricingTier[] = [
     description: 'Full quantum analysis for serious bettors',
     monthlyPrice: 29,
     yearlyPrice: 290,
-    monthlyPriceId: 'price_pro_monthly',
-    yearlyPriceId: 'price_pro_yearly',
+    monthlyPriceId: 'price_1SskcQIp7f8yVoSO8uj04w8T',
+    yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
     features: [
       'Unlimited ticket generations',
       'All 40+ quantum analysis factors',
@@ -70,8 +70,8 @@ const tiers: PricingTier[] = [
     description: 'Premium tools for professional edge',
     monthlyPrice: 99,
     yearlyPrice: 990,
-    monthlyPriceId: 'price_elite_monthly',
-    yearlyPriceId: 'price_elite_yearly',
+    monthlyPriceId: 'price_1SskcRIp7f8yVoSOEKOx5hde',
+    yearlyPriceId: 'price_1SskcRIp7f8yVoSOOBNZTk3V',
     features: [
       'Everything in Pro',
       'Real-time steam move alerts',
@@ -94,8 +94,8 @@ const tiers: PricingTier[] = [
     description: 'VIP access for high-volume bettors',
     monthlyPrice: 499,
     yearlyPrice: 4990,
-    monthlyPriceId: 'price_whale_monthly',
-    yearlyPriceId: 'price_whale_yearly',
+    monthlyPriceId: 'price_1SskcRIp7f8yVoSOWQe60fFw',
+    yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
     features: [
       'Everything in Elite',
       'VIP exclusive picks',

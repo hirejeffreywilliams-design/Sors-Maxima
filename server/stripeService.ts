@@ -3,29 +3,27 @@
 // For production, implement persistent storage via IStorage interface.
 import { getUncachableStripeClient, getStripePublishableKey } from './stripeClient';
 
-// Allowed price IDs - MUST be updated after running seed-products.ts
-// These placeholder IDs will be replaced with actual Stripe price IDs
+// Allowed price IDs from Stripe
 const ALLOWED_PRICE_IDS = new Set([
   // Pro tier
-  'price_pro_monthly',
-  'price_pro_yearly',
+  'price_1SskcQIp7f8yVoSO8uj04w8T', // monthly
+  'price_1SskcQIp7f8yVoSO1VDHyrWy', // yearly
   // Elite tier
-  'price_elite_monthly',
-  'price_elite_yearly',
+  'price_1SskcRIp7f8yVoSOEKOx5hde', // monthly
+  'price_1SskcRIp7f8yVoSOOBNZTk3V', // yearly
   // Whale tier
-  'price_whale_monthly',
-  'price_whale_yearly',
+  'price_1SskcRIp7f8yVoSOWQe60fFw', // monthly
+  'price_1SskcSIp7f8yVoSOxK0pY4Ki', // yearly
 ]);
 
 // Map of price IDs to subscription tiers
-// Must be updated with actual Stripe price IDs after running seed-products.ts
 const PRICE_TO_TIER: Record<string, 'pro' | 'elite' | 'whale'> = {
-  'price_pro_monthly': 'pro',
-  'price_pro_yearly': 'pro',
-  'price_elite_monthly': 'elite',
-  'price_elite_yearly': 'elite',
-  'price_whale_monthly': 'whale',
-  'price_whale_yearly': 'whale',
+  'price_1SskcQIp7f8yVoSO8uj04w8T': 'pro',
+  'price_1SskcQIp7f8yVoSO1VDHyrWy': 'pro',
+  'price_1SskcRIp7f8yVoSOEKOx5hde': 'elite',
+  'price_1SskcRIp7f8yVoSOOBNZTk3V': 'elite',
+  'price_1SskcRIp7f8yVoSOWQe60fFw': 'whale',
+  'price_1SskcSIp7f8yVoSOxK0pY4Ki': 'whale',
 };
 
 // In-memory user subscription storage
