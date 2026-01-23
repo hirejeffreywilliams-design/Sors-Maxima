@@ -53,8 +53,31 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 - **/bankroll** - Financial Tools: Multi-Book Tracker, ROI Dashboard, Tax Export
 - **/tracker** - Bet History and performance tracking
 - **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
+- **/pricing** - Subscription pricing page (Free, Pro $29, Elite $99, Whale $499)
+
+## Monetization (Stripe Integration)
+The platform uses a tiered subscription model powered by Stripe:
+- **Free**: 3 tickets/day, 2 sports, basic features
+- **Pro ($29/mo)**: Unlimited tickets, all 40+ factors, 6 sports, basic alerts
+- **Elite ($99/mo)**: All Pro + real-time alerts, AI assistant, CLV tracking, ML projections
+- **Whale ($499/mo)**: All Elite + VIP picks, 1-on-1 coaching, priority support
+
+Key files:
+- `server/stripeClient.ts` - Stripe API client initialization
+- `server/stripeService.ts` - Subscription management service
+- `server/seed-products.ts` - Product creation script (run with npx tsx)
+- `client/src/pages/pricing.tsx` - Pricing/upgrade page
+
+To set up Stripe products, run: `npx tsx server/seed-products.ts`
 
 ## Recent Changes
+- January 23, 2026: **STRIPE MONETIZATION**:
+  - Added 4-tier subscription system: Free, Pro ($29), Elite ($99), Whale ($499)
+  - Integrated Stripe for payment processing with checkout and customer portal
+  - Created pricing page with monthly/yearly toggle (17% savings for annual)
+  - Added subscription tracking for feature gating
+  - Key files: stripeClient.ts, stripeService.ts, pricing.tsx
+
 - January 23, 2026: **MASSIVE FEATURE EXPANSION**:
   - Added Social/Community features: Leaderboard, Follow Bettors, Bet Sharing
   - Added Smart Alerts: Line movement, injury, steam move, weather, sharp money alerts

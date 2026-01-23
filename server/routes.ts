@@ -6,6 +6,7 @@ import { fromError } from "zod-validation-error";
 import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
+import { WebhookHandlers } from "./webhookHandlers";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -287,6 +288,28 @@ export async function registerRoutes(
       return res.status(500).json({
         error: "Failed to generate Vegas predictions",
         message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
+  // Stripe webhook - must be registered before express.json() parses the body
+  // Note: rawBody is attached in index.ts before JSON parsing
+  app.post("/api/stripe/webhook", async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'] as string;
+      const rawBody = req.rawBody as Buffer;
+      
+      if (!rawBody || !Buffer.isBuffer(rawBody)) {
+        return res.status(400).json({ error: "Missing raw body for webhook" });
+      }
+      
+      await WebhookHandlers.processWebhook(rawBody, sig);
+      res.json({ received: true });
+    } catch (err) {
+      console.error("Webhook error:", err);
+      res.status(400).json({ 
+        error: "Webhook processing failed",
+        message: err instanceof Error ? err.message : 'Unknown error'
       });
     }
   });

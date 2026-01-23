@@ -1,5 +1,32 @@
 // Stripe Service - stripe integration
+// NOTE: This uses in-memory storage which resets on server restart.
+// For production, implement persistent storage via IStorage interface.
 import { getUncachableStripeClient, getStripePublishableKey } from './stripeClient';
+
+// Allowed price IDs - MUST be updated after running seed-products.ts
+// These placeholder IDs will be replaced with actual Stripe price IDs
+const ALLOWED_PRICE_IDS = new Set([
+  // Pro tier
+  'price_pro_monthly',
+  'price_pro_yearly',
+  // Elite tier
+  'price_elite_monthly',
+  'price_elite_yearly',
+  // Whale tier
+  'price_whale_monthly',
+  'price_whale_yearly',
+]);
+
+// Map of price IDs to subscription tiers
+// Must be updated with actual Stripe price IDs after running seed-products.ts
+const PRICE_TO_TIER: Record<string, 'pro' | 'elite' | 'whale'> = {
+  'price_pro_monthly': 'pro',
+  'price_pro_yearly': 'pro',
+  'price_elite_monthly': 'elite',
+  'price_elite_yearly': 'elite',
+  'price_whale_monthly': 'whale',
+  'price_whale_yearly': 'whale',
+};
 
 // In-memory user subscription storage
 interface UserSubscription {
@@ -34,7 +61,15 @@ export class StripeService {
     return customer;
   }
 
+  validatePriceId(priceId: string): boolean {
+    return ALLOWED_PRICE_IDS.has(priceId);
+  }
+
   async createCheckoutSession(customerId: string, priceId: string, successUrl: string, cancelUrl: string) {
+    if (!this.validatePriceId(priceId)) {
+      throw new Error(`Invalid price ID: ${priceId}`);
+    }
+    
     const stripe = await getUncachableStripeClient();
     return await stripe.checkout.sessions.create({
       customer: customerId,
@@ -121,11 +156,7 @@ export class StripeService {
   }
 
   private getPriceIdTier(priceId: string | undefined): 'free' | 'pro' | 'elite' | 'whale' {
-    // Map price IDs to tiers (these will be set after creating products)
-    const priceToTier: Record<string, 'pro' | 'elite' | 'whale'> = {
-      // Will be populated with actual price IDs after running seed script
-    };
-    return priceToTier[priceId || ''] || 'free';
+    return PRICE_TO_TIER[priceId || ''] || 'free';
   }
 }
 

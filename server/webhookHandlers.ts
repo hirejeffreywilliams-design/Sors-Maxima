@@ -1,5 +1,6 @@
 // Webhook Handlers - stripe integration
-import { getStripeSync } from './stripeClient';
+import { getUncachableStripeClient, getStripeSecretKey } from './stripeClient';
+import { stripeService } from './stripeService';
 
 export class WebhookHandlers {
   static async processWebhook(payload: Buffer, signature: string): Promise<void> {
@@ -12,7 +13,28 @@ export class WebhookHandlers {
       );
     }
 
-    const sync = await getStripeSync();
-    await sync.processWebhook(payload, signature);
+    const stripe = await getUncachableStripeClient();
+    
+    // Get webhook secret from environment or Replit connectors
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    
+    let event;
+    
+    if (webhookSecret) {
+      // Verify signature if webhook secret is configured
+      try {
+        event = stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      } catch (err) {
+        throw new Error(`Webhook signature verification failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    } else {
+      // In development without webhook secret, parse the event directly
+      // WARNING: This is insecure and should only be used in development
+      console.warn('STRIPE WEBHOOK WARNING: No webhook secret configured. Skipping signature verification.');
+      event = JSON.parse(payload.toString());
+    }
+
+    // Process the event through our service
+    await stripeService.handleWebhookEvent(event);
   }
 }
