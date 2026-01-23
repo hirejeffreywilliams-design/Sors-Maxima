@@ -37,7 +37,7 @@ function Router() {
   );
 }
 
-function NavLink({ href, icon: Icon, children }: { href: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
+function NavLink({ href, icon: Icon, children, testId }: { href: string; icon: React.ComponentType<{ className?: string }>; children: React.ReactNode; testId?: string }) {
   const [location] = useLocation();
   const isActive = location === href;
   
@@ -46,7 +46,8 @@ function NavLink({ href, icon: Icon, children }: { href: string; icon: React.Com
       <Button 
         variant={isActive ? "secondary" : "ghost"} 
         size="sm" 
-        className={`gap-2 ${isActive ? "bg-primary/10 text-primary" : ""}`}
+        className="gap-2"
+        data-testid={testId}
       >
         <Icon className="w-4 h-4" />
         <span className="hidden sm:inline">{children}</span>
@@ -85,13 +86,13 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
             </Link>
             
             <nav className="flex items-center gap-1">
-              <NavLink href="/" icon={Zap}>Generate</NavLink>
-              <NavLink href="/live" icon={Activity}>Live</NavLink>
-              <NavLink href="/tools" icon={Wrench}>Tools</NavLink>
-              <NavLink href="/community" icon={Users}>Social</NavLink>
-              <NavLink href="/rewards" icon={Trophy}>Rewards</NavLink>
-              <NavLink href="/bankroll" icon={Wallet}>Bankroll</NavLink>
-              <NavLink href="/tracker" icon={History}>History</NavLink>
+              <NavLink href="/" icon={Zap} testId="nav-generate">Generate</NavLink>
+              <NavLink href="/live" icon={Activity} testId="nav-live">Live</NavLink>
+              <NavLink href="/tools" icon={Wrench} testId="nav-tools">Tools</NavLink>
+              <NavLink href="/community" icon={Users} testId="nav-community">Social</NavLink>
+              <NavLink href="/rewards" icon={Trophy} testId="nav-rewards">Rewards</NavLink>
+              <NavLink href="/bankroll" icon={Wallet} testId="nav-bankroll">Bankroll</NavLink>
+              <NavLink href="/tracker" icon={History} testId="nav-tracker">History</NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-2">

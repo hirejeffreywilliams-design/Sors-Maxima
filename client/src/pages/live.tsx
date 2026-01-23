@@ -26,23 +26,23 @@ export default function Live() {
 
         <Tabs defaultValue="momentum" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 max-w-2xl">
-            <TabsTrigger value="momentum" className="gap-1">
+            <TabsTrigger value="momentum" className="gap-1" data-testid="tab-momentum">
               <Activity className="w-4 h-4" />
               <span className="hidden sm:inline">Momentum</span>
             </TabsTrigger>
-            <TabsTrigger value="hedge" className="gap-1">
+            <TabsTrigger value="hedge" className="gap-1" data-testid="tab-hedge">
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">Hedge</span>
             </TabsTrigger>
-            <TabsTrigger value="assistant" className="gap-1">
+            <TabsTrigger value="assistant" className="gap-1" data-testid="tab-assistant">
               <Bot className="w-4 h-4" />
               <span className="hidden sm:inline">AI</span>
             </TabsTrigger>
-            <TabsTrigger value="clv" className="gap-1">
+            <TabsTrigger value="clv" className="gap-1" data-testid="tab-clv">
               <LineChart className="w-4 h-4" />
               <span className="hidden sm:inline">CLV</span>
             </TabsTrigger>
-            <TabsTrigger value="sharp" className="gap-1">
+            <TabsTrigger value="sharp" className="gap-1" data-testid="tab-sharp">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Sharp</span>
             </TabsTrigger>

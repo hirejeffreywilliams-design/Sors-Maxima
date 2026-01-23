@@ -25,19 +25,19 @@ export default function Rewards() {
 
         <Tabs defaultValue="challenges" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 max-w-xl">
-            <TabsTrigger value="challenges" className="gap-1">
+            <TabsTrigger value="challenges" className="gap-1" data-testid="tab-challenges">
               <Target className="w-4 h-4" />
               <span className="hidden sm:inline">Challenges</span>
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="gap-1">
+            <TabsTrigger value="achievements" className="gap-1" data-testid="tab-achievements">
               <Trophy className="w-4 h-4" />
               <span className="hidden sm:inline">Achievements</span>
             </TabsTrigger>
-            <TabsTrigger value="streaks" className="gap-1">
+            <TabsTrigger value="streaks" className="gap-1" data-testid="tab-streaks">
               <Flame className="w-4 h-4" />
               <span className="hidden sm:inline">Streaks</span>
             </TabsTrigger>
-            <TabsTrigger value="practice" className="gap-1">
+            <TabsTrigger value="practice" className="gap-1" data-testid="tab-practice">
               <Gamepad2 className="w-4 h-4" />
               <span className="hidden sm:inline">Practice</span>
             </TabsTrigger>

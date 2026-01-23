@@ -25,19 +25,19 @@ export default function Community() {
 
         <Tabs defaultValue="leaderboard" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 max-w-xl">
-            <TabsTrigger value="leaderboard" className="gap-1">
+            <TabsTrigger value="leaderboard" className="gap-1" data-testid="tab-leaderboard">
               <Trophy className="w-4 h-4" />
               <span className="hidden sm:inline">Leaderboard</span>
             </TabsTrigger>
-            <TabsTrigger value="follow" className="gap-1">
+            <TabsTrigger value="follow" className="gap-1" data-testid="tab-follow">
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Follow</span>
             </TabsTrigger>
-            <TabsTrigger value="share" className="gap-1">
+            <TabsTrigger value="share" className="gap-1" data-testid="tab-share">
               <Share2 className="w-4 h-4" />
               <span className="hidden sm:inline">Share</span>
             </TabsTrigger>
-            <TabsTrigger value="alerts" className="gap-1">
+            <TabsTrigger value="alerts" className="gap-1" data-testid="tab-alerts">
               <Bell className="w-4 h-4" />
               <span className="hidden sm:inline">Alerts</span>
             </TabsTrigger>

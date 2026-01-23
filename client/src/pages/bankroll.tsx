@@ -24,15 +24,15 @@ export default function Bankroll() {
 
         <Tabs defaultValue="books" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="books" className="gap-1">
+            <TabsTrigger value="books" className="gap-1" data-testid="tab-books">
               <Wallet className="w-4 h-4" />
               <span className="hidden sm:inline">Sportsbooks</span>
             </TabsTrigger>
-            <TabsTrigger value="roi" className="gap-1">
+            <TabsTrigger value="roi" className="gap-1" data-testid="tab-roi">
               <BarChart3 className="w-4 h-4" />
               <span className="hidden sm:inline">ROI</span>
             </TabsTrigger>
-            <TabsTrigger value="tax" className="gap-1">
+            <TabsTrigger value="tax" className="gap-1" data-testid="tab-tax">
               <FileText className="w-4 h-4" />
               <span className="hidden sm:inline">Tax Export</span>
             </TabsTrigger>
