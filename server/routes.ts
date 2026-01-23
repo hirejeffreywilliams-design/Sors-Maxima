@@ -9,6 +9,7 @@ import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
 import { authService, type User } from "./authService";
 import { errorLogger } from "./errorLogger";
+import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 
 declare module "express-session" {
   interface SessionData {
@@ -569,6 +570,26 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Portal error:", err);
       res.status(500).json({ error: "Failed to create portal session" });
+    }
+  });
+
+  app.get("/api/learning/stats", requireAdmin, async (req, res) => {
+    try {
+      const stats = await getLearningStats();
+      res.json(stats);
+    } catch (err) {
+      console.error("Learning stats error:", err);
+      res.status(500).json({ error: "Failed to get learning stats" });
+    }
+  });
+
+  app.get("/api/learning/weights", async (req, res) => {
+    try {
+      const weights = await getAllFactorWeights();
+      res.json(weights);
+    } catch (err) {
+      console.error("Factor weights error:", err);
+      res.status(500).json({ error: "Failed to get factor weights" });
     }
   });
 

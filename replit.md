@@ -54,6 +54,7 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 - **/tracker** - Bet History and performance tracking
 - **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
 - **/pricing** - Subscription pricing page (Free, Pro $29, Elite $99, Whale $499)
+- **/legal** - Legal compliance (Terms of Service, Privacy Policy, Gambling Disclaimer) - PUBLIC, no auth required
 
 ## Monetization (Stripe Integration)
 The platform uses a tiered subscription model powered by Stripe:
@@ -110,3 +111,17 @@ To set up Stripe products, run: `npx tsx server/seed-products.ts`
   - Key files added:
     - client/src/lib/ticket-orchestrator.ts (unified intelligence engine)
     - client/src/pages/auto-generator.tsx (new home page)
+
+- January 23, 2026: **CONTINUOUS LEARNING ENGINE & LEGAL COMPLIANCE**:
+  - Added Quantum Learning Engine that runs every second, analyzing prediction outcomes
+  - 20 analysis factors tracked with adaptive weight adjustments (0.05 learning rate)
+  - Learning stats APIs: /api/learning/stats (admin only), /api/learning/weights (public)
+  - Added Legal page (/legal) - publicly accessible without authentication
+    - Terms of Service, Privacy Policy, Gambling Disclaimer tabs
+    - Age 21+ requirement, responsible gaming resources
+    - National Problem Gambling Helpline: 1-800-522-4700
+  - Enhanced error logging with helper functions (logError, logWarn, logInfo)
+  - Key files:
+    - server/learningEngine.ts (continuous learning engine)
+    - server/errorLogger.ts (enhanced error logging)
+    - client/src/pages/legal.tsx (legal compliance pages)

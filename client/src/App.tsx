@@ -21,7 +21,8 @@ import Bankroll from "@/pages/bankroll";
 import Live from "@/pages/live";
 import Pricing from "@/pages/pricing";
 import AdminDashboard from "@/pages/admin";
-import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X } from "lucide-react";
+import LegalPage from "@/pages/legal";
+import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText } from "lucide-react";
 
 function Router() {
   return (
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/bankroll" component={Bankroll} />
       <Route path="/live" component={Live} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/legal" component={LegalPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
@@ -269,14 +271,26 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   );
 }
 
+function PublicRoutes() {
+  const [location] = useLocation();
+  
+  if (location === '/legal') {
+    return <LegalPage />;
+  }
+  
+  return null;
+}
+
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authState, setAuthState] = useState<AuthState>({});
+  const [location] = useLocation();
 
   const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
+    enabled: location !== '/legal',
   });
 
   useEffect(() => {
@@ -295,6 +309,10 @@ function AppContent() {
     refetch();
     setIsAuthenticated(true);
   };
+
+  if (location === '/legal') {
+    return <LegalPage />;
+  }
 
   if (isLoading || isAuthenticated === null) {
     return (

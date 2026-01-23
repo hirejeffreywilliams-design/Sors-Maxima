@@ -129,3 +129,19 @@ class ErrorLogger {
 
 export const errorLogger = new ErrorLogger();
 export type { ErrorLog };
+
+export function logError(error: Error | unknown, context?: Record<string, unknown>): string {
+  const err = error instanceof Error ? error : new Error(String(error));
+  return errorLogger.log('error', err.message, {
+    stack: err.stack,
+    context
+  });
+}
+
+export function logWarn(message: string, context?: Record<string, unknown>): string {
+  return errorLogger.log('warn', message, { context });
+}
+
+export function logInfo(message: string, context?: Record<string, unknown>): string {
+  return errorLogger.log('info', message, { context });
+}
