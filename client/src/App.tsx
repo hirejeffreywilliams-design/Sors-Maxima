@@ -25,7 +25,8 @@ import AdminDiagnostics from "@/pages/admin-diagnostics";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
-import { Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain } from "lucide-react";
+import TipsterCommunities from "@/pages/tipster-communities";
+import { Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain, MessageCircle } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 function Router() {
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/admin/diagnostics" component={AdminDiagnostics} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
+      <Route path="/tipster-communities" component={TipsterCommunities} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -69,6 +71,7 @@ const navItems: NavItem[] = [
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools" },
   { href: "/community", icon: Users, label: "Social", testId: "nav-community" },
+  { href: "/tipster-communities", icon: MessageCircle, label: "Tipsters", testId: "nav-tipsters" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards" },
   { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "nav-bankroll" },
   { href: "/analytics", icon: BarChart3, label: "Analytics", testId: "nav-analytics" },

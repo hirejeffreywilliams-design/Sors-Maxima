@@ -49,6 +49,7 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 - **/live** - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant, CLV Tracker, Public vs Sharp
 - **/tools** - Pro Tools with Quantum Analysis, Odds, ML, Correlation, and more
 - **/community** - Social features: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts
+- **/tipster-communities** - Tipster Communities: Create communities, share picks, earn from tips/subscriptions (15% platform fee)
 - **/rewards** - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading
 - **/bankroll** - Financial Tools: Multi-Book Tracker, ROI Dashboard, Tax Export
 - **/analytics** - Personal Analytics: ROI, Win Rate, Streaks, Best Performing Areas, Grade Accuracy
@@ -76,6 +77,15 @@ Key files:
 To set up Stripe products, run: `npx tsx server/seed-products.ts`
 
 ## Recent Changes
+- January 23, 2026: **TIPSTER COMMUNITIES (Creator Monetization)**:
+  - Added full in-app community system for tipsters to share picks and earn money
+  - Community features: Create communities, join (free or premium), share picks with confidence levels
+  - Monetization: Tips, premium subscriptions, paid picks - creators receive 85%, platform takes 15%
+  - Discord webhook integration: Auto-post picks to Discord servers
+  - Earnings dashboard: Track total earnings, pending payouts, breakdown by source
+  - Demo communities pre-seeded: Sharp NBA Plays ($49.99/mo), NFL Underdog Hunters ($29.99/mo), Free MLB Picks
+  - Key files: server/communityService.ts, client/src/pages/tipster-communities.tsx
+
 - January 23, 2026: **SETTINGS & ANALYTICS PAGES**:
   - Added comprehensive Settings page (/settings) with 4 tabs:
     - Notifications: Toggle preferences for alerts (line movement, injury, steam moves, sharp money, bankroll)

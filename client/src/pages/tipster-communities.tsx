@@ -361,6 +361,7 @@ function TipDialog({ pick, onClose }: { pick: Pick | null; onClose: () => void }
     },
     onSuccess: () => {
       toast({ title: "Tip Sent!", description: `$${amount} sent to @${pick?.authorUsername}` });
+      queryClient.invalidateQueries({ queryKey: ["/api/creator/earnings"] });
       onClose();
       setAmount("");
       setMessage("");
@@ -441,7 +442,7 @@ export default function TipsterCommunities() {
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);
   const [tipPick, setTipPick] = useState<Pick | null>(null);
 
-  const { data: communities = [], refetch: refetchCommunities } = useQuery<Community[]>({
+  const { data: communities = [] } = useQuery<Community[]>({
     queryKey: ["/api/communities"],
   });
 
@@ -452,6 +453,11 @@ export default function TipsterCommunities() {
   const { data: myCommunities = [] } = useQuery<Community[]>({
     queryKey: ["/api/creator/communities"],
   });
+
+  const refetchAllCommunities = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/communities"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/creator/communities"] });
+  };
 
   const { data: picks = [] } = useQuery<Pick[]>({
     queryKey: ["/api/communities", selectedCommunity?.id, "picks"],
@@ -467,8 +473,7 @@ export default function TipsterCommunities() {
     },
     onSuccess: () => {
       toast({ title: "Joined!", description: "You're now a member of this community" });
-      refetchCommunities();
-      queryClient.invalidateQueries({ queryKey: ["/api/communities"] });
+      refetchAllCommunities();
     },
     onError: (error: any) => {
       toast({ 
@@ -499,7 +504,7 @@ export default function TipsterCommunities() {
             Join communities, share picks, and earn from your betting expertise
           </p>
         </div>
-        <CreateCommunityDialog onCreated={refetchCommunities} />
+        <CreateCommunityDialog onCreated={refetchAllCommunities} />
       </div>
 
       <Tabs defaultValue="discover" className="space-y-4">
@@ -589,7 +594,7 @@ export default function TipsterCommunities() {
                 <p className="text-muted-foreground mb-4">
                   Create your first tipster community and start earning!
                 </p>
-                <CreateCommunityDialog onCreated={refetchCommunities} />
+                <CreateCommunityDialog onCreated={refetchAllCommunities} />
               </CardContent>
             </Card>
           )}
