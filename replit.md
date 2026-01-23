@@ -62,10 +62,10 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 
 ## Monetization (Stripe Integration)
 The platform uses a tiered subscription model powered by Stripe:
-- **Free**: 3 tickets/day, 2 sports, basic features
-- **Pro ($29/mo)**: Unlimited tickets, all 40+ factors, 6 sports, basic alerts
-- **Elite ($99/mo)**: All Pro + real-time alerts, AI assistant, CLV tracking, ML projections
-- **Whale ($499/mo)**: All Elite + VIP picks, 1-on-1 coaching, priority support
+- **Free**: 3 tickets/day, 2 sports (NBA, NFL), basic quantum scores, standard grading
+- **Pro ($29/mo)**: Unlimited tickets, all 45 factors, 6 sports, Kelly sizing, basic alerts (5/day), paper trading
+- **Elite ($99/mo)**: All Pro + steam alerts, unlimited AI assistant, ML projections, CLV tracking, live momentum, unlimited alerts
+- **Whale ($499/mo)**: All Elite + VIP quantum algorithm, 5+ years historical data, arbitrage detection, custom alerts, priority API
 
 Key files:
 - `server/stripeClient.ts` - Stripe API client initialization
