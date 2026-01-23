@@ -71,7 +71,7 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
                   <TrendingUp className="w-4 h-4 text-primary-foreground" />
                 </div>
                 <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
-                  ParlayPro
+                  Sors Maxima
                 </span>
               </div>
             </Link>

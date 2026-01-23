@@ -50,9 +50,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             <Trophy className="h-8 w-8 text-white" />
           </div>
           <div>
-            <CardTitle className="text-2xl">ParlayPro</CardTitle>
+            <CardTitle className="text-2xl">Sors Maxima</CardTitle>
             <CardDescription>
-              Sign in to access the parlay optimizer
+              Sign in to access quantum betting intelligence
             </CardDescription>
           </div>
         </CardHeader>
