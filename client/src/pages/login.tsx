@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Lock, User, AlertCircle, Trophy, Mail, Eye, EyeOff, Shield, CheckCircle2 } from "lucide-react";
+import { Lock, User, AlertCircle, Mail, Eye, EyeOff, Shield, CheckCircle2 } from "lucide-react";
+import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -111,9 +112,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
-            <Trophy className="h-8 w-8 text-white" />
-          </div>
+          <img src={sorsMaximaLogo} alt="Sors Maxima" className="mx-auto w-16 h-16 rounded-2xl" />
           <div>
             <CardTitle className="text-2xl">Sors Maxima</CardTitle>
             <CardDescription>

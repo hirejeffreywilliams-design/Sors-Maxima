@@ -25,7 +25,8 @@ import AdminDiagnostics from "@/pages/admin-diagnostics";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
-import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain } from "lucide-react";
+import { Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain } from "lucide-react";
+import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 function Router() {
   return (
@@ -212,9 +213,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           <div className="flex items-center gap-4 lg:gap-6">
             <Link href="/">
               <div className="flex items-center gap-2 cursor-pointer">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-chart-1 flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary-foreground" />
-                </div>
+                <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
                 <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
                   Sors Maxima
                 </span>
@@ -254,9 +253,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
               <SheetContent side="right" className="w-72 p-0">
                 <SheetHeader className="p-4 border-b">
                   <SheetTitle className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-gradient-to-br from-primary to-chart-1 flex items-center justify-center">
-                      <TrendingUp className="w-3 h-3 text-primary-foreground" />
-                    </div>
+                    <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-6 h-6 rounded" />
                     Sors Maxima
                   </SheetTitle>
                 </SheetHeader>
