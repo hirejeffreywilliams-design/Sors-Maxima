@@ -7,28 +7,105 @@ import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provi
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
+import { authService, type User } from "./authService";
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+declare module "express-session" {
+  interface SessionData {
+    isAuthenticated?: boolean;
+    username?: string;
+    userId?: string;
+    isAdmin?: boolean;
+    role?: 'user' | 'admin';
+  }
+}
 
-if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
-  console.warn("Warning: ADMIN_USERNAME and ADMIN_PASSWORD not set. Auth will fail until configured.");
+// Helper to get client IP
+function getClientIp(req: Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
+// Admin-only middleware
+function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.session?.isAuthenticated || !req.session?.isAdmin) {
+    return res.status(403).json({ error: "Admin access required" });
+  }
+  next();
 }
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  app.post("/api/auth/login", (req, res) => {
-    const { username, password } = req.body;
-    
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  // User Registration
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      const { email, username, password } = req.body;
+      const ip = getClientIp(req);
+
+      if (!email || !username || !password) {
+        return res.status(400).json({ error: "Email, username, and password are required" });
+      }
+
+      const result = await authService.register(email, username, password, ip);
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      // Auto-login after registration
       req.session.isAuthenticated = true;
-      req.session.username = username;
-      return res.json({ success: true, username });
+      req.session.username = result.user!.username;
+      req.session.userId = result.user!.id;
+      req.session.isAdmin = false;
+      req.session.role = 'user';
+
+      return res.json({ 
+        success: true, 
+        username: result.user!.username,
+        email: result.user!.email
+      });
+    } catch (err) {
+      console.error("Registration error:", err);
+      return res.status(500).json({ error: "Registration failed" });
     }
-    
-    return res.status(401).json({ error: "Invalid username or password" });
+  });
+
+  // Login
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const ip = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || 'unknown';
+
+      if (!username || !password) {
+        return res.status(400).json({ error: "Username and password are required" });
+      }
+
+      const result = await authService.login(username, password, ip, userAgent);
+
+      if (!result.success) {
+        return res.status(401).json({ error: result.error });
+      }
+
+      req.session.isAuthenticated = true;
+      req.session.username = result.user!.username;
+      req.session.userId = result.user!.id;
+      req.session.isAdmin = result.isAdmin || false;
+      req.session.role = result.user!.role;
+
+      return res.json({ 
+        success: true, 
+        username: result.user!.username,
+        isAdmin: result.isAdmin || false
+      });
+    } catch (err) {
+      console.error("Login error:", err);
+      return res.status(500).json({ error: "Login failed" });
+    }
   });
 
   app.post("/api/auth/logout", (req, res) => {
@@ -43,9 +120,52 @@ export async function registerRoutes(
 
   app.get("/api/auth/check", (req, res) => {
     if (req.session?.isAuthenticated) {
-      return res.json({ authenticated: true, username: req.session.username });
+      return res.json({ 
+        authenticated: true, 
+        username: req.session.username,
+        isAdmin: req.session.isAdmin || false,
+        role: req.session.role || 'user'
+      });
     }
     return res.json({ authenticated: false });
+  });
+
+  // Admin: Get all users
+  app.get("/api/admin/users", requireAdmin, (_req, res) => {
+    const users = authService.getAllUsers();
+    res.json(users);
+  });
+
+  // Admin: Get suspicious activities
+  app.get("/api/admin/fraud-alerts", requireAdmin, (_req, res) => {
+    const activities = authService.getSuspiciousActivities();
+    res.json(activities);
+  });
+
+  // Admin: Ban user
+  app.post("/api/admin/ban-user", requireAdmin, (req, res) => {
+    const { userId, reason } = req.body;
+    if (!userId || !reason) {
+      return res.status(400).json({ error: "User ID and reason are required" });
+    }
+    const success = authService.banUser(userId, reason);
+    if (success) {
+      return res.json({ success: true });
+    }
+    return res.status(400).json({ error: "Failed to ban user" });
+  });
+
+  // Admin: Unban user
+  app.post("/api/admin/unban-user", requireAdmin, (req, res) => {
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+    const success = authService.unbanUser(userId);
+    if (success) {
+      return res.json({ success: true });
+    }
+    return res.status(400).json({ error: "Failed to unban user" });
   });
 
   app.get("/api/sports", (_req, res) => {

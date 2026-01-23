@@ -19,7 +19,8 @@ import Rewards from "@/pages/rewards";
 import Bankroll from "@/pages/bankroll";
 import Live from "@/pages/live";
 import Pricing from "@/pages/pricing";
-import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity, CreditCard } from "lucide-react";
+import AdminDashboard from "@/pages/admin";
+import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity, CreditCard, Shield } from "lucide-react";
 
 function Router() {
   return (
@@ -34,6 +35,7 @@ function Router() {
       <Route path="/bankroll" component={Bankroll} />
       <Route path="/live" component={Live} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -58,7 +60,12 @@ function NavLink({ href, icon: Icon, children, testId }: { href: string; icon: R
   );
 }
 
-function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
+interface AuthState {
+  isAdmin?: boolean;
+  username?: string;
+}
+
+function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { 
@@ -96,9 +103,20 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
               <NavLink href="/bankroll" icon={Wallet} testId="nav-bankroll">Bankroll</NavLink>
               <NavLink href="/tracker" icon={History} testId="nav-tracker">History</NavLink>
               <NavLink href="/pricing" icon={CreditCard} testId="nav-pricing">Upgrade</NavLink>
+              {authState.isAdmin && (
+                <NavLink href="/admin" icon={Shield} testId="nav-admin">Admin</NavLink>
+              )}
             </nav>
           </div>
           <div className="flex items-center gap-2">
+            {authState.username && (
+              <span className="text-sm text-muted-foreground hidden md:inline">
+                {authState.username}
+                {authState.isAdmin && (
+                  <span className="ml-1 text-xs text-purple-500">(Admin)</span>
+                )}
+              </span>
+            )}
             <ThemeToggle />
             <Button 
               variant="ghost" 
@@ -122,8 +140,9 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
 
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [authState, setAuthState] = useState<AuthState>({});
 
-  const { data: authData, isLoading } = useQuery({
+  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
@@ -131,9 +150,20 @@ function AppContent() {
 
   useEffect(() => {
     if (!isLoading && authData !== undefined) {
-      setIsAuthenticated((authData as any)?.authenticated || false);
+      setIsAuthenticated(authData?.authenticated || false);
+      if (authData?.authenticated) {
+        setAuthState({
+          isAdmin: authData.isAdmin,
+          username: authData.username
+        });
+      }
     }
   }, [authData, isLoading]);
+
+  const handleLogin = () => {
+    refetch();
+    setIsAuthenticated(true);
+  };
 
   if (isLoading || isAuthenticated === null) {
     return (
@@ -147,10 +177,10 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
+    return <LoginPage onLogin={handleLogin} />;
   }
 
-  return <AuthenticatedApp onLogout={() => setIsAuthenticated(false)} />;
+  return <AuthenticatedApp onLogout={() => setIsAuthenticated(false)} authState={authState} />;
 }
 
 function App() {
