@@ -163,7 +163,7 @@ function BottomNav({ authState }: { authState: AuthState }) {
           return (
             <Link key={item.href} href={item.href}>
               <div 
-                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 ${
+                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
                   isActive ? 'text-primary' : 'text-muted-foreground'
                 }`}
                 data-testid={`bottom-${item.testId}`}

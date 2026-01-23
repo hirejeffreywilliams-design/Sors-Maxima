@@ -82,6 +82,7 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [banReason, setBanReason] = useState("");
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
+  const [errorLevelFilter, setErrorLevelFilter] = useState<string>("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -93,8 +94,17 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/fraud-alerts'],
   });
 
+  const errorQueryUrl = errorLevelFilter === "all" 
+    ? '/api/admin/error-logs' 
+    : `/api/admin/error-logs?level=${errorLevelFilter}`;
+
   const { data: errorLogs = [], isLoading: errorsLoading, refetch: refetchErrors } = useQuery<ErrorLog[]>({
-    queryKey: ['/api/admin/error-logs'],
+    queryKey: ['/api/admin/error-logs', errorLevelFilter],
+    queryFn: async () => {
+      const res = await fetch(errorQueryUrl, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch error logs');
+      return res.json();
+    }
   });
 
   const { data: errorStats } = useQuery<ErrorStats>({
@@ -463,12 +473,32 @@ export default function AdminDashboard() {
               </div>
             </CardHeader>
             <CardContent className="px-4 sm:px-6">
+              <div className="flex items-center gap-2 mb-4 flex-wrap">
+                <span className="text-sm text-muted-foreground">Filter:</span>
+                {[
+                  { value: 'all', label: 'All', count: errorStats?.total },
+                  { value: 'error', label: 'Errors', count: errorStats?.errors },
+                  { value: 'warn', label: 'Warnings', count: errorStats?.warnings },
+                  { value: 'info', label: 'Info', count: errorStats?.info }
+                ].map(filter => (
+                  <Button
+                    key={filter.value}
+                    size="sm"
+                    variant={errorLevelFilter === filter.value ? "default" : "outline"}
+                    onClick={() => setErrorLevelFilter(filter.value)}
+                    data-testid={`button-filter-${filter.value}`}
+                  >
+                    {filter.label} ({filter.count || 0})
+                  </Button>
+                ))}
+              </div>
+              
               {errorsLoading ? (
                 <div className="text-center py-8 text-muted-foreground">Loading error logs...</div>
               ) : errorLogs.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <p>No errors logged</p>
+                  <p>No errors logged{errorLevelFilter !== 'all' ? ` for level: ${errorLevelFilter}` : ''}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
