@@ -51,7 +51,9 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 - **/community** - Social features: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts
 - **/rewards** - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading
 - **/bankroll** - Financial Tools: Multi-Book Tracker, ROI Dashboard, Tax Export
+- **/analytics** - Personal Analytics: ROI, Win Rate, Streaks, Best Performing Areas, Grade Accuracy
 - **/tracker** - Bet History and performance tracking
+- **/settings** - User Settings: Notification Preferences, Sportsbook Accounts, Responsible Gaming, Backup & Export
 - **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
 - **/pricing** - Subscription pricing page (Free, Pro $29, Elite $99, Whale $499)
 - **/legal** - Legal compliance (Terms of Service, Privacy Policy, Gambling Disclaimer) - PUBLIC, no auth required
@@ -72,6 +74,23 @@ Key files:
 To set up Stripe products, run: `npx tsx server/seed-products.ts`
 
 ## Recent Changes
+- January 23, 2026: **SETTINGS & ANALYTICS PAGES**:
+  - Added comprehensive Settings page (/settings) with 4 tabs:
+    - Notifications: Toggle preferences for alerts (line movement, injury, steam moves, sharp money, bankroll)
+    - Accounts: Multi-sportsbook account management with balance tracking
+    - Responsible Gaming: Deposit limits, bet limits, cool-off periods, self-exclusion
+    - Backup & Export: Manual/auto bet backups, restore functionality, tax export by year
+  - Added Analytics page (/analytics) with performance metrics:
+    - Performance Overview: Total Bets, ROI, Win Rate, Current Streak
+    - Win/Loss Analysis: Breakdown of wins, losses, pushes
+    - Best Performing Areas: By sport, bet type, and time of day
+    - Grade Accuracy: Prediction performance tracking
+  - Database schema expanded with 11 new tables:
+    - bankroll_alerts, bet_history, user_analytics, notification_preferences
+    - sportsbook_accounts, responsible_gaming, bet_backups, odds_snapshots, tax_records
+  - 45 prediction factors in continuous learning engine (expanded from 20)
+  - Key files: settings.tsx, analytics.tsx, featuresService.ts, shared/schema.ts
+
 - January 23, 2026: **STRIPE MONETIZATION**:
   - Added 4-tier subscription system: Free, Pro ($29), Elite ($99), Whale ($499)
   - Integrated Stripe for payment processing with checkout and customer portal

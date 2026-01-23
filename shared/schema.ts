@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { pgTable, serial, varchar, text, timestamp, boolean, real, integer, jsonb } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 
 export const sports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 export type Sport = (typeof sports)[number];
@@ -1264,3 +1267,287 @@ export function generateSmartRecommendations(
     .sort((a, b) => b.score - a.score)
     .slice(0, targetCount);
 }
+
+// ==================== DATABASE TABLES ====================
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: varchar("username", { length: 50 }).unique().notNull(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  passwordHash: text("password_hash").notNull(),
+  isAdmin: boolean("is_admin").default(false).notNull(),
+  isBanned: boolean("is_banned").default(false).notNull(),
+  banReason: text("ban_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastLoginAt: timestamp("last_login_at"),
+  loginAttempts: integer("login_attempts").default(0).notNull(),
+  lockedUntil: timestamp("locked_until"),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+  tier: varchar("tier", { length: 20 }).default("free").notNull(),
+  status: varchar("status", { length: 20 }).default("none").notNull(),
+  currentPeriodEnd: timestamp("current_period_end"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const predictions = pgTable("predictions", {
+  id: serial("id").primaryKey(),
+  ticketId: varchar("ticket_id", { length: 100 }).notNull(),
+  userId: integer("user_id").references(() => users.id),
+  sport: varchar("sport", { length: 20 }).notNull(),
+  legs: jsonb("legs").notNull(),
+  predictedWinProb: real("predicted_win_prob").notNull(),
+  predictedEv: real("predicted_ev").notNull(),
+  confidenceScore: real("confidence_score").notNull(),
+  grade: varchar("grade", { length: 5 }),
+  actualResult: varchar("actual_result", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  settledAt: timestamp("settled_at"),
+});
+
+export const modelWeights = pgTable("model_weights", {
+  id: serial("id").primaryKey(),
+  factorName: varchar("factor_name", { length: 100 }).unique().notNull(),
+  weight: real("weight").default(1.0).notNull(),
+  totalPredictions: integer("total_predictions").default(0).notNull(),
+  correctPredictions: integer("correct_predictions").default(0).notNull(),
+  accuracy: real("accuracy").default(0.5).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+});
+
+export const learningLogs = pgTable("learning_logs", {
+  id: serial("id").primaryKey(),
+  cycleNumber: integer("cycle_number").notNull(),
+  predictionsAnalyzed: integer("predictions_analyzed").default(0).notNull(),
+  weightsAdjusted: integer("weights_adjusted").default(0).notNull(),
+  overallAccuracy: real("overall_accuracy"),
+  topPerformingFactor: varchar("top_performing_factor", { length: 100 }),
+  bottomPerformingFactor: varchar("bottom_performing_factor", { length: 100 }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const bankrollAlerts = pgTable("bankroll_alerts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  alertType: varchar("alert_type", { length: 50 }).notNull(),
+  threshold: real("threshold").notNull(),
+  currentValue: real("current_value").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastTriggered: timestamp("last_triggered"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const betHistory = pgTable("bet_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  ticketId: varchar("ticket_id", { length: 100 }).notNull(),
+  sport: varchar("sport", { length: 20 }).notNull(),
+  betType: varchar("bet_type", { length: 50 }).notNull(),
+  stake: real("stake").notNull(),
+  odds: real("odds").notNull(),
+  potentialPayout: real("potential_payout").notNull(),
+  actualPayout: real("actual_payout"),
+  result: varchar("result", { length: 20 }),
+  grade: varchar("grade", { length: 5 }),
+  predictedWinProb: real("predicted_win_prob"),
+  actualOutcome: boolean("actual_outcome"),
+  factors: jsonb("factors"),
+  sportsbook: varchar("sportsbook", { length: 50 }),
+  placedAt: timestamp("placed_at").defaultNow().notNull(),
+  settledAt: timestamp("settled_at"),
+});
+
+export const userAnalytics = pgTable("user_analytics", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  totalBets: integer("total_bets").default(0).notNull(),
+  totalWins: integer("total_wins").default(0).notNull(),
+  totalLosses: integer("total_losses").default(0).notNull(),
+  totalPushes: integer("total_pushes").default(0).notNull(),
+  totalStaked: real("total_staked").default(0).notNull(),
+  totalProfit: real("total_profit").default(0).notNull(),
+  roi: real("roi").default(0).notNull(),
+  winRate: real("win_rate").default(0).notNull(),
+  avgOdds: real("avg_odds").default(0).notNull(),
+  bestSport: varchar("best_sport", { length: 20 }),
+  bestBetType: varchar("best_bet_type", { length: 50 }),
+  bestTimeOfDay: varchar("best_time_of_day", { length: 20 }),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestWinStreak: integer("longest_win_streak").default(0).notNull(),
+  longestLossStreak: integer("longest_loss_streak").default(0).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  optimalEntryAlerts: boolean("optimal_entry_alerts").default(true).notNull(),
+  lineMovementAlerts: boolean("line_movement_alerts").default(true).notNull(),
+  injuryAlerts: boolean("injury_alerts").default(true).notNull(),
+  steamMoveAlerts: boolean("steam_move_alerts").default(false).notNull(),
+  sharpMoneyAlerts: boolean("sharp_money_alerts").default(false).notNull(),
+  bankrollAlerts: boolean("bankroll_alerts").default(true).notNull(),
+  dailyRecapAlerts: boolean("daily_recap_alerts").default(true).notNull(),
+  emailNotifications: boolean("email_notifications").default(true).notNull(),
+  pushNotifications: boolean("push_notifications").default(true).notNull(),
+  quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
+  quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sportsbookAccounts = pgTable("sportsbook_accounts", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  sportsbookName: varchar("sportsbook_name", { length: 50 }).notNull(),
+  accountBalance: real("account_balance").default(0).notNull(),
+  pendingBets: real("pending_bets").default(0).notNull(),
+  totalDeposited: real("total_deposited").default(0).notNull(),
+  totalWithdrawn: real("total_withdrawn").default(0).notNull(),
+  totalProfit: real("total_profit").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const responsibleGaming = pgTable("responsible_gaming", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  dailyDepositLimit: real("daily_deposit_limit"),
+  weeklyDepositLimit: real("weekly_deposit_limit"),
+  monthlyDepositLimit: real("monthly_deposit_limit"),
+  dailyBetLimit: real("daily_bet_limit"),
+  weeklyBetLimit: real("weekly_bet_limit"),
+  lossLimit: real("loss_limit"),
+  sessionTimeLimit: integer("session_time_limit"),
+  coolOffEndDate: timestamp("cool_off_end_date"),
+  selfExclusionEndDate: timestamp("self_exclusion_end_date"),
+  realityCheckInterval: integer("reality_check_interval"),
+  lastRealityCheck: timestamp("last_reality_check"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const betBackups = pgTable("bet_backups", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  backupData: jsonb("backup_data").notNull(),
+  backupType: varchar("backup_type", { length: 20 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const oddsSnapshots = pgTable("odds_snapshots", {
+  id: serial("id").primaryKey(),
+  eventId: varchar("event_id", { length: 100 }).notNull(),
+  sport: varchar("sport", { length: 20 }).notNull(),
+  market: varchar("market", { length: 50 }).notNull(),
+  outcome: varchar("outcome", { length: 100 }).notNull(),
+  draftkingsOdds: real("draftkings_odds"),
+  fanduelOdds: real("fanduel_odds"),
+  betmgmOdds: real("betmgm_odds"),
+  caesarsOdds: real("caesars_odds"),
+  pointsbetOdds: real("pointsbet_odds"),
+  betRiversOdds: real("betrivers_odds"),
+  bestOdds: real("best_odds"),
+  bestBook: varchar("best_book", { length: 50 }),
+  capturedAt: timestamp("captured_at").defaultNow().notNull(),
+});
+
+export const taxRecords = pgTable("tax_records", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  taxYear: integer("tax_year").notNull(),
+  totalWinnings: real("total_winnings").default(0).notNull(),
+  totalLosses: real("total_losses").default(0).notNull(),
+  netProfit: real("net_profit").default(0).notNull(),
+  totalBets: integer("total_bets").default(0).notNull(),
+  reportGenerated: boolean("report_generated").default(false).notNull(),
+  reportData: jsonb("report_data"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  subscriptions: many(subscriptions),
+  predictions: many(predictions),
+}));
+
+export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
+  user: one(users, {
+    fields: [subscriptions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const predictionsRelations = relations(predictions, ({ one }) => ({
+  user: one(users, {
+    fields: [predictions.userId],
+    references: [users.id],
+  }),
+}));
+
+// Insert schemas and types
+export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+
+export const insertPredictionSchema = createInsertSchema(predictions).omit({ id: true, createdAt: true });
+export type InsertPrediction = z.infer<typeof insertPredictionSchema>;
+export type Prediction = typeof predictions.$inferSelect;
+
+export const insertModelWeightSchema = createInsertSchema(modelWeights).omit({ id: true, lastUpdated: true });
+export type InsertModelWeight = z.infer<typeof insertModelWeightSchema>;
+export type ModelWeight = typeof modelWeights.$inferSelect;
+
+export const insertLearningLogSchema = createInsertSchema(learningLogs).omit({ id: true, createdAt: true });
+export type InsertLearningLog = z.infer<typeof insertLearningLogSchema>;
+export type LearningLog = typeof learningLogs.$inferSelect;
+
+export const insertBankrollAlertSchema = createInsertSchema(bankrollAlerts).omit({ id: true, createdAt: true });
+export type InsertBankrollAlert = z.infer<typeof insertBankrollAlertSchema>;
+export type BankrollAlert = typeof bankrollAlerts.$inferSelect;
+
+export const insertBetHistorySchema = createInsertSchema(betHistory).omit({ id: true, placedAt: true });
+export type InsertBetHistory = z.infer<typeof insertBetHistorySchema>;
+export type BetHistory = typeof betHistory.$inferSelect;
+
+export const insertUserAnalyticsSchema = createInsertSchema(userAnalytics).omit({ id: true, updatedAt: true });
+export type InsertUserAnalytics = z.infer<typeof insertUserAnalyticsSchema>;
+export type UserAnalytics = typeof userAnalytics.$inferSelect;
+
+export const insertNotificationPreferencesSchema = createInsertSchema(notificationPreferences).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertNotificationPreferences = z.infer<typeof insertNotificationPreferencesSchema>;
+export type NotificationPreferences = typeof notificationPreferences.$inferSelect;
+
+export const insertSportsbookAccountSchema = createInsertSchema(sportsbookAccounts).omit({ id: true, createdAt: true, lastUpdated: true });
+export type InsertSportsbookAccount = z.infer<typeof insertSportsbookAccountSchema>;
+export type SportsbookAccount = typeof sportsbookAccounts.$inferSelect;
+
+export const insertResponsibleGamingSchema = createInsertSchema(responsibleGaming).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertResponsibleGaming = z.infer<typeof insertResponsibleGamingSchema>;
+export type ResponsibleGaming = typeof responsibleGaming.$inferSelect;
+
+export const insertBetBackupSchema = createInsertSchema(betBackups).omit({ id: true, createdAt: true });
+export type InsertBetBackup = z.infer<typeof insertBetBackupSchema>;
+export type BetBackup = typeof betBackups.$inferSelect;
+
+export const insertOddsSnapshotSchema = createInsertSchema(oddsSnapshots).omit({ id: true, capturedAt: true });
+export type InsertOddsSnapshot = z.infer<typeof insertOddsSnapshotSchema>;
+export type OddsSnapshot = typeof oddsSnapshots.$inferSelect;
+
+export const insertTaxRecordSchema = createInsertSchema(taxRecords).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertTaxRecord = z.infer<typeof insertTaxRecordSchema>;
+export type TaxRecord = typeof taxRecords.$inferSelect;

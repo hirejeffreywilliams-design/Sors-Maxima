@@ -22,7 +22,9 @@ import Live from "@/pages/live";
 import Pricing from "@/pages/pricing";
 import AdminDashboard from "@/pages/admin";
 import LegalPage from "@/pages/legal";
-import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText } from "lucide-react";
+import Settings from "@/pages/settings";
+import Analytics from "@/pages/analytics";
+import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3 } from "lucide-react";
 
 function Router() {
   return (
@@ -39,6 +41,8 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/legal" component={LegalPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/settings" component={Settings} />
+      <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -64,7 +68,9 @@ const navItems: NavItem[] = [
   { href: "/community", icon: Users, label: "Social", testId: "nav-community" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards" },
   { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "nav-bankroll" },
+  { href: "/analytics", icon: BarChart3, label: "Analytics", testId: "nav-analytics" },
   { href: "/tracker", icon: History, label: "History", testId: "nav-tracker" },
+  { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings" },
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", adminOnly: true },
 ];

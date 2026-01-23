@@ -4,6 +4,7 @@ import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
 import { logError, logInfo, logWarn } from "./errorLogger";
 
 const LEARNING_FACTORS = [
+  // Core Analysis (Original 20)
   "quantum_coherence",
   "player_analysis",
   "team_dynamics",
@@ -24,6 +25,35 @@ const LEARNING_FACTORS = [
   "closing_line_value",
   "arbitrage_detection",
   "prop_correlation",
+  // Player-Specific Factors
+  "player_prop_correlation_matrix",
+  "matchup_defensive_assignments",
+  "player_usage_distribution",
+  "minutes_fatigue_modeling",
+  "career_milestone_pressure",
+  // Game Context Factors
+  "tv_game_analysis",
+  "arena_crowd_impact",
+  "referee_assignment_patterns",
+  "rivalry_intensity_index",
+  "schedule_trap_spots",
+  // Market Intelligence Factors
+  "sportsbook_liability_exposure",
+  "clv_tracking_accuracy",
+  "early_vs_gameday_movement",
+  "cross_sport_correlation",
+  // Team Dynamics Factors
+  "team_chemistry_index",
+  "coaching_matchup_analysis",
+  "time_zone_adjustment",
+  "altitude_impact",
+  "stadium_surface_type",
+  // Performance Metrics
+  "historical_spread_performance",
+  "over_under_tendency",
+  "first_half_second_half_splits",
+  "garbage_time_adjustments",
+  "motivation_metrics",
 ];
 
 const LEARNING_RATE = 0.05;

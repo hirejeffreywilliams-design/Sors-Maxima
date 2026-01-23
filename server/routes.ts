@@ -10,6 +10,7 @@ import { WebhookHandlers } from "./webhookHandlers";
 import { authService, type User } from "./authService";
 import { errorLogger } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
+import * as featuresService from "./featuresService";
 
 declare module "express-session" {
   interface SessionData {
@@ -679,6 +680,379 @@ export async function registerRoutes(
     } catch (err) {
       console.error("Factor weights error:", err);
       res.status(500).json({ error: "Failed to get factor weights" });
+    }
+  });
+
+  // ===== NEW FEATURES API ROUTES =====
+
+  // Bankroll Alerts
+  app.get("/api/bankroll/alerts", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const alerts = await featuresService.getUserBankrollAlerts(parseInt(req.session.userId));
+      res.json(alerts);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get alerts" });
+    }
+  });
+
+  app.post("/api/bankroll/alerts", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const alert = await featuresService.createBankrollAlert({
+        userId: parseInt(req.session.userId),
+        ...req.body
+      });
+      res.json(alert);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to create alert" });
+    }
+  });
+
+  app.put("/api/bankroll/alerts/:id", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const alert = await featuresService.updateBankrollAlert(parseInt(req.params.id), req.body);
+      res.json(alert);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update alert" });
+    }
+  });
+
+  app.delete("/api/bankroll/alerts/:id", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      await featuresService.deleteBankrollAlert(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to delete alert" });
+    }
+  });
+
+  // Bet History & Grading
+  app.get("/api/bets/history", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const history = await featuresService.getUserBetHistory(parseInt(req.session.userId));
+      res.json(history);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get bet history" });
+    }
+  });
+
+  app.post("/api/bets/record", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const bet = await featuresService.recordBet({
+        userId: parseInt(req.session.userId),
+        ...req.body
+      });
+      res.json(bet);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to record bet" });
+    }
+  });
+
+  app.post("/api/bets/:id/settle", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { result, actualPayout } = req.body;
+      const bet = await featuresService.settleBet(parseInt(req.params.id), result, actualPayout);
+      res.json(bet);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to settle bet" });
+    }
+  });
+
+  app.get("/api/bets/grading-stats", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const stats = await featuresService.getBetGradingStats(parseInt(req.session.userId));
+      res.json(stats);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get grading stats" });
+    }
+  });
+
+  // User Analytics
+  app.get("/api/analytics", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const analytics = await featuresService.getUserAnalytics(parseInt(req.session.userId));
+      res.json(analytics);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get analytics" });
+    }
+  });
+
+  // Notification Preferences
+  app.get("/api/notifications/preferences", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const prefs = await featuresService.getNotificationPreferences(parseInt(req.session.userId));
+      res.json(prefs);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get preferences" });
+    }
+  });
+
+  app.put("/api/notifications/preferences", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const prefs = await featuresService.updateNotificationPreferences(
+        parseInt(req.session.userId),
+        req.body
+      );
+      res.json(prefs);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update preferences" });
+    }
+  });
+
+  // Sportsbook Accounts (Multi-book tracking)
+  app.get("/api/sportsbooks", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const accounts = await featuresService.getUserSportsbookAccounts(parseInt(req.session.userId));
+      res.json(accounts);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get sportsbook accounts" });
+    }
+  });
+
+  app.post("/api/sportsbooks", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const account = await featuresService.addSportsbookAccount({
+        userId: parseInt(req.session.userId),
+        ...req.body
+      });
+      res.json(account);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to add sportsbook account" });
+    }
+  });
+
+  app.put("/api/sportsbooks/:id", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const account = await featuresService.updateSportsbookAccount(parseInt(req.params.id), req.body);
+      res.json(account);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update sportsbook account" });
+    }
+  });
+
+  app.delete("/api/sportsbooks/:id", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      await featuresService.deleteSportsbookAccount(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to delete sportsbook account" });
+    }
+  });
+
+  app.get("/api/sportsbooks/total-bankroll", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const total = await featuresService.getTotalBankroll(parseInt(req.session.userId));
+      res.json({ total });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get total bankroll" });
+    }
+  });
+
+  // Responsible Gaming
+  app.get("/api/responsible-gaming", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const settings = await featuresService.getResponsibleGamingSettings(parseInt(req.session.userId));
+      res.json(settings);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get settings" });
+    }
+  });
+
+  app.put("/api/responsible-gaming", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const settings = await featuresService.updateResponsibleGamingSettings(
+        parseInt(req.session.userId),
+        req.body
+      );
+      res.json(settings);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update settings" });
+    }
+  });
+
+  app.post("/api/responsible-gaming/cool-off", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { days } = req.body;
+      const result = await featuresService.startCoolOffPeriod(parseInt(req.session.userId), days);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to start cool-off period" });
+    }
+  });
+
+  app.post("/api/responsible-gaming/self-exclusion", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { months } = req.body;
+      const result = await featuresService.startSelfExclusion(parseInt(req.session.userId), months);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to start self-exclusion" });
+    }
+  });
+
+  app.get("/api/responsible-gaming/can-bet", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const result = await featuresService.checkUserCanBet(parseInt(req.session.userId));
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to check betting status" });
+    }
+  });
+
+  // Bet Backup & Recovery
+  app.get("/api/backups", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const backups = await featuresService.getUserBackups(parseInt(req.session.userId));
+      res.json(backups);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get backups" });
+    }
+  });
+
+  app.post("/api/backups", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const backup = await featuresService.createBetBackup(
+        parseInt(req.session.userId),
+        req.body.type || "manual"
+      );
+      res.json(backup);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to create backup" });
+    }
+  });
+
+  app.get("/api/backups/:id/restore", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const data = await featuresService.restoreFromBackup(
+        parseInt(req.session.userId),
+        parseInt(req.params.id)
+      );
+      res.json(data);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to restore backup" });
+    }
+  });
+
+  // Tax Records
+  app.get("/api/tax/:year", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const record = await featuresService.getTaxRecord(
+        parseInt(req.session.userId),
+        parseInt(req.params.year)
+      );
+      res.json(record || { message: "No tax record found for this year" });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get tax record" });
+    }
+  });
+
+  app.post("/api/tax/:year/generate", async (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.userId) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const report = await featuresService.generateTaxReport(
+        parseInt(req.session.userId),
+        parseInt(req.params.year)
+      );
+      res.json(report);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to generate tax report" });
+    }
+  });
+
+  // Bet Slip Export
+  app.post("/api/bet-slip/export", async (req, res) => {
+    try {
+      const { legs, stake, sportsbook } = req.body;
+      const slip = await featuresService.exportBetSlip(legs, stake, sportsbook);
+      res.json(slip);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to export bet slip" });
+    }
+  });
+
+  // Odds Comparison
+  app.get("/api/odds/compare/:eventId/:market", async (req, res) => {
+    try {
+      const odds = await featuresService.getLatestOdds(req.params.eventId, req.params.market);
+      res.json(odds || { message: "No odds found" });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get odds comparison" });
     }
   });
 
