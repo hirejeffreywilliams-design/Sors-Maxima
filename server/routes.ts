@@ -214,6 +214,95 @@ export async function registerRoutes(
     res.json({ success: true, errorId: id });
   });
 
+  // Grant free premium access to a user
+  app.post("/api/admin/grant-access", requireAdmin, (req, res) => {
+    try {
+      const { username, tier } = req.body;
+      
+      if (!username || !tier) {
+        return res.status(400).json({ error: "Username and tier are required" });
+      }
+      
+      if (!['pro', 'elite', 'whale'].includes(tier)) {
+        return res.status(400).json({ error: "Invalid tier. Must be 'pro', 'elite', or 'whale'" });
+      }
+      
+      const adminUsername = req.session?.username || 'admin';
+      const subscription = stripeService.grantFreeAccess(username, tier, adminUsername);
+      
+      // Also update the user's subscriptionTier in authService
+      const user = authService.getUserById(username);
+      if (user) {
+        authService.updateUserSubscription(user.id, tier);
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Granted ${tier} access to ${username}`,
+        subscription 
+      });
+    } catch (err) {
+      console.error("Grant access error:", err);
+      res.status(500).json({ error: "Failed to grant access" });
+    }
+  });
+
+  // Revoke free premium access from a user
+  app.post("/api/admin/revoke-access", requireAdmin, (req, res) => {
+    try {
+      const { username } = req.body;
+      
+      if (!username) {
+        return res.status(400).json({ error: "Username is required" });
+      }
+      
+      const adminUsername = req.session?.username || 'admin';
+      const subscription = stripeService.revokeFreeAccess(username, adminUsername);
+      
+      // Also update the user's subscriptionTier in authService
+      const user = authService.getUserById(username);
+      if (user) {
+        authService.updateUserSubscription(user.id, 'free');
+      }
+      
+      res.json({ 
+        success: true, 
+        message: `Revoked premium access from ${username}`,
+        subscription 
+      });
+    } catch (err) {
+      console.error("Revoke access error:", err);
+      res.status(500).json({ error: "Failed to revoke access" });
+    }
+  });
+
+  // Get subscription stats for admin
+  app.get("/api/admin/subscription-stats", requireAdmin, (_req, res) => {
+    try {
+      const allSubs = stripeService.getAllSubscriptions();
+      const stats = {
+        total: allSubs.size,
+        free: 0,
+        pro: 0,
+        elite: 0,
+        whale: 0,
+        grantedFree: 0
+      };
+      
+      allSubs.forEach((sub) => {
+        stats[sub.subscriptionTier]++;
+        if ((sub as any).grantedFreeAccess) {
+          stats.grantedFree++;
+        }
+      });
+      
+      res.json(stats);
+    } catch (err) {
+      console.error("Subscription stats error:", err);
+      res.status(500).json({ error: "Failed to get subscription stats" });
+    }
+  });
+
   app.get("/api/sports", (_req, res) => {
     const sportsList = sports.map((sport) => ({
       id: sport,

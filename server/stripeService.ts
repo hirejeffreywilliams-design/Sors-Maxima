@@ -156,6 +156,50 @@ export class StripeService {
   private getPriceIdTier(priceId: string | undefined): 'free' | 'pro' | 'elite' | 'whale' {
     return PRICE_TO_TIER[priceId || ''] || 'free';
   }
+
+  grantFreeAccess(username: string, tier: 'pro' | 'elite' | 'whale', grantedBy: string): UserSubscription {
+    const existing = this.getUserSubscription(username);
+    const updated = {
+      ...existing,
+      subscriptionTier: tier,
+      subscriptionStatus: 'active' as const,
+      grantedFreeAccess: true,
+      grantedBy,
+      grantedAt: new Date().toISOString(),
+    };
+    userSubscriptions.set(username, updated as UserSubscription);
+    console.log(`[ADMIN] Free ${tier} access granted to ${username} by ${grantedBy}`);
+    return updated as UserSubscription;
+  }
+
+  revokeFreeAccess(username: string, revokedBy: string): UserSubscription {
+    const existing = this.getUserSubscription(username);
+    const updated = {
+      ...existing,
+      subscriptionTier: 'free' as const,
+      subscriptionStatus: 'none' as const,
+      grantedFreeAccess: false,
+      grantedBy: null,
+      grantedAt: null,
+    };
+    userSubscriptions.set(username, updated as UserSubscription);
+    console.log(`[ADMIN] Free access revoked from ${username} by ${revokedBy}`);
+    return updated as UserSubscription;
+  }
+
+  getAllSubscriptions(): Map<string, UserSubscription> {
+    return userSubscriptions;
+  }
+
+  getUsersByTier(tier: 'free' | 'pro' | 'elite' | 'whale'): string[] {
+    const result: string[] = [];
+    userSubscriptions.forEach((sub, username) => {
+      if (sub.subscriptionTier === tier) {
+        result.push(username);
+      }
+    });
+    return result;
+  }
 }
 
 export const stripeService = new StripeService();

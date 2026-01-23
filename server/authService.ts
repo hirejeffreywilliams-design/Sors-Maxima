@@ -417,6 +417,50 @@ class AuthService {
     if (!user) return false;
     return this.calculateRiskScore(user) >= 50;
   }
+
+  // Get user by ID or username
+  getUserById(identifier: string): User | null {
+    // Try direct lookup by ID
+    const directUser = users.get(identifier);
+    if (directUser) return directUser;
+    
+    // Search by username
+    const entries = Array.from(users.entries());
+    for (let i = 0; i < entries.length; i++) {
+      const [, user] = entries[i];
+      if (user.username === identifier) return user;
+    }
+    
+    return null;
+  }
+
+  // Update user's subscription tier
+  updateUserSubscription(userId: string, tier: 'free' | 'pro' | 'elite' | 'whale'): boolean {
+    const user = users.get(userId);
+    if (!user) {
+      // Try to find by username
+      const entries = Array.from(users.entries());
+      for (let i = 0; i < entries.length; i++) {
+        const [id, u] = entries[i];
+        if (u.username === userId) {
+          users.set(id, { ...u, subscriptionTier: tier });
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    users.set(userId, { ...user, subscriptionTier: tier });
+    return true;
+  }
+
+  // Get all users (for admin)
+  getAllUsersForAdmin(): User[] {
+    return Array.from(users.values()).map(user => ({
+      ...user,
+      passwordHash: '[HIDDEN]', // Don't expose password hashes
+    }));
+  }
 }
 
 export const authService = new AuthService();
