@@ -1,7 +1,7 @@
 # Sors Maxima - Quantum Sports Betting Intelligence
 
 ## Overview
-Sors Maxima is a sophisticated quantum-powered sports betting intelligence platform designed to help users construct more intelligent parlays. It leverages advanced probability analysis, correlation modeling, and optimal stake sizing to maximize user potential returns. The project aims to provide a competitive edge in the sports betting market by offering tools for generating, evaluating, and managing parlays with a focus on data-driven decision making.
+Sors Maxima (formerly ParlayPro) is a sophisticated quantum-powered sports betting intelligence platform designed to help users construct more intelligent parlays. Every feature in the app is enhanced with Quantum Analysis, providing coherence scores, pattern recognition, and quantum-optimized predictions. It leverages advanced probability analysis, correlation modeling, and optimal stake sizing to maximize user potential returns. The project aims to provide a competitive edge in the sports betting market by offering tools for generating, evaluating, and managing parlays with a focus on data-driven decision making.
 
 ## User Preferences
 I want iterative development.

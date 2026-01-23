@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Users, TrendingUp, Target, Award, Eye, Zap, CheckCircle } from "lucide-react";
+import { Users, TrendingUp, Target, Award, Eye, Zap, CheckCircle, Atom } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface SharpPick {
   id: string;
@@ -117,10 +118,13 @@ export function SharpConsensus() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Users className="w-5 h-5 text-primary" />
-          <span className="font-medium">Sharp Consensus Tracker</span>
-          <Badge variant="outline">Aggregated Intel</Badge>
+          <span className="font-medium">Quantum Sharp Analysis</span>
+          <Badge variant="outline" className="gap-1">
+            <Atom className="w-3 h-3" />
+            Quantum Intel
+          </Badge>
         </div>
         <Select value={sport} onValueChange={setSport}>
           <SelectTrigger className="w-32" data-testid="select-sharp-sport">
@@ -134,6 +138,8 @@ export function SharpConsensus() {
           </SelectContent>
         </Select>
       </div>
+
+      <QuantumAnalysisIndicator compact />
 
       <div className="grid gap-4">
         {filtered.map(pick => (

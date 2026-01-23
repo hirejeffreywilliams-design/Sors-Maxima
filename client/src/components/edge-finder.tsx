@@ -2,8 +2,9 @@ import { useState } from "react";
 import { 
   TrendingUp, TrendingDown, AlertTriangle, Zap, Target, 
   ArrowLeftRight, Clock, DollarSign, Activity, Flame,
-  Users, BarChart3, Percent, ChevronRight, ChevronDown
+  Users, BarChart3, Percent, ChevronRight, ChevronDown, Atom
 } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -301,12 +302,18 @@ export function EdgeFinder({ events, sport }: EdgeFinderProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
+        <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
           <Zap className="w-5 h-5 text-yellow-500" />
-          Edge Finder
+          Quantum Edge Finder
+          <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
+            <Atom className="w-3 h-3" />
+            Q-Analysis
+          </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        <QuantumAnalysisIndicator compact />
+        
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="arbs" className="text-xs">

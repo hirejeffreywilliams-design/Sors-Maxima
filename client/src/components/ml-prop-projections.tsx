@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
-import { Brain, TrendingUp, TrendingDown, Target, Sparkles, BarChart3, Zap } from "lucide-react";
+import { Brain, TrendingUp, TrendingDown, Target, Sparkles, BarChart3, Zap, Atom } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface Projection {
   id: string;
@@ -150,12 +151,12 @@ export function MLPropProjections() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Brain className="w-5 h-5 text-primary" />
-          <span className="font-medium">ML-Powered Projections</span>
+          <span className="font-medium">Quantum ML Projections</span>
           <Badge variant="outline" className="gap-1">
-            <Sparkles className="w-3 h-3" />
-            Updated Live
+            <Atom className="w-3 h-3" />
+            Quantum Enhanced
           </Badge>
         </div>
         <Select value={sport} onValueChange={setSport}>
@@ -171,6 +172,8 @@ export function MLPropProjections() {
           </SelectContent>
         </Select>
       </div>
+
+      <QuantumAnalysisIndicator compact />
 
       <div className="grid gap-4">
         {filtered.map(proj => {

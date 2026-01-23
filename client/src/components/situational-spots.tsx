@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, TrendingUp, Flame, Calendar, Plane, Clock, Zap, Target } from "lucide-react";
+import { MapPin, TrendingUp, Flame, Calendar, Plane, Clock, Zap, Target, Atom } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface SituationalSpot {
   id: string;
@@ -142,10 +143,13 @@ export function SituationalSpots() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <MapPin className="w-5 h-5 text-primary" />
-          <span className="font-medium">Situational Spot Finder</span>
-          <Badge variant="outline">Pattern Detection</Badge>
+          <span className="font-medium">Quantum Situational Analysis</span>
+          <Badge variant="outline" className="gap-1">
+            <Atom className="w-3 h-3" />
+            Pattern Detection
+          </Badge>
         </div>
         <div className="flex items-center gap-2">
           <Select value={sport} onValueChange={setSport}>
@@ -172,6 +176,8 @@ export function SituationalSpots() {
           </Select>
         </div>
       </div>
+
+      <QuantumAnalysisIndicator compact />
 
       <div className="grid gap-4">
         {filtered.map(spot => (

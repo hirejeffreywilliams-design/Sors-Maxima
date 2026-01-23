@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Sparkles, TrendingUp, Target, Zap, RefreshCw, DollarSign, AlertTriangle, CheckCircle, Activity, BarChart3 } from "lucide-react";
+import { Brain, Sparkles, TrendingUp, Target, Zap, RefreshCw, DollarSign, AlertTriangle, CheckCircle, Activity, BarChart3, Atom } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface VegasFactor {
   name: string;
@@ -114,8 +115,8 @@ export function AIPredictions() {
               <Brain className="w-5 h-5 text-purple-500" />
             </div>
             <div>
-              <CardTitle className="text-lg">Vegas AI Predictions</CardTitle>
-              <p className="text-xs text-muted-foreground">Powered by Vegas Modeling Engine v2.0</p>
+              <CardTitle className="text-lg">Quantum AI Predictions</CardTitle>
+              <p className="text-xs text-muted-foreground">Powered by Sors Maxima Quantum Engine</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -144,6 +145,8 @@ export function AIPredictions() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <QuantumAnalysisIndicator />
+        
         {insights && (
           <div className="grid grid-cols-3 gap-2 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
             <div className="text-center">

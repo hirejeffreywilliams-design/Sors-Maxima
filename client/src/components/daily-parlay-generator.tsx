@@ -8,8 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Trophy, Zap, TrendingUp, Clock, Star, Flame, Target, 
   DollarSign, BarChart3, Shield, RefreshCw, ChevronRight,
-  Sparkles, Crown, Timer
+  Sparkles, Crown, Timer, Atom
 } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 import { apiRequest } from "@/lib/queryClient";
 import type { Sport, GeneratedParlay, SportEvent } from "@shared/schema";
 import { sports, getGameTimeBucket, formatGameTime, getTimeUrgencyScore } from "@shared/schema";
@@ -158,9 +159,15 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                 <Crown className="h-6 w-6 text-white" />
               </div>
               <div>
-                <CardTitle className="text-xl">Daily Power Parlays</CardTitle>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  Quantum Daily Parlays
+                  <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
+                    <Atom className="w-3 h-3" />
+                    Q-Engine
+                  </Badge>
+                </CardTitle>
                 <CardDescription>
-                  AI-optimized 12-leg parlays for maximum winning potential
+                  Quantum-optimized 12-leg parlays for maximum winning potential
                 </CardDescription>
               </div>
             </div>
@@ -186,7 +193,9 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-3">
+          <QuantumAnalysisIndicator />
+          
+          <div className="grid gap-4 md:grid-cols-3 mt-4">
             <div className="p-4 rounded-lg bg-muted/50 text-center">
               <p className="text-3xl font-bold text-yellow-500">{sports.length}</p>
               <p className="text-sm text-muted-foreground">Sports Analyzed</p>

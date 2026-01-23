@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, TrendingUp, TrendingDown, Zap, Clock, DollarSign, ArrowRight } from "lucide-react";
+import { RefreshCw, TrendingUp, TrendingDown, Zap, Clock, DollarSign, ArrowRight, Atom } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface BookOdds {
   book: string;
@@ -141,6 +142,8 @@ export function RealTimeOdds() {
           Refresh Odds
         </Button>
       </div>
+
+      <QuantumAnalysisIndicator compact />
 
       <div className="space-y-4">
         {filteredOdds.map(game => (

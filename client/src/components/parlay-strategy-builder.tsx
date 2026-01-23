@@ -7,8 +7,9 @@ import { Slider } from "@/components/ui/slider";
 import { 
   Target, Zap, Shield, TrendingUp, Layers, DollarSign, 
   RefreshCw, Star, AlertTriangle, CheckCircle, Sparkles,
-  Trophy, Flame, BarChart3, Puzzle
+  Trophy, Flame, BarChart3, Puzzle, Atom
 } from "lucide-react";
+import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface StrategyLeg {
   sport: string;
@@ -271,12 +272,19 @@ export function ParlayStrategyBuilder() {
             <Sparkles className="w-5 h-5 text-amber-500" />
           </div>
           <div>
-            <CardTitle className="text-lg">Parlay Strategy Builder</CardTitle>
-            <p className="text-xs text-muted-foreground">Build profit-maximizing parlays with proven strategies</p>
+            <CardTitle className="text-lg flex items-center gap-2">
+              Quantum Strategy Builder
+              <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
+                <Atom className="w-3 h-3" />
+              </Badge>
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">Build quantum-optimized parlays with proven strategies</p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <QuantumAnalysisIndicator compact />
+        
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground">Strategy Type</label>
