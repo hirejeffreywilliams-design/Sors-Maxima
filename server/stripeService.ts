@@ -1,7 +1,7 @@
 // Stripe Service - stripe integration
 // NOTE: This uses in-memory storage which resets on server restart.
 // For production, implement persistent storage via IStorage interface.
-import { getUncachableStripeClient, getStripePublishableKey } from './stripeClient';
+import { getUncachableStripeClient, getStripePublishableKey, isStripeAvailable } from './stripeClient';
 
 // Allowed price IDs from Stripe
 const ALLOWED_PRICE_IDS = new Set([
@@ -47,13 +47,11 @@ const TRIAL_DAYS = 7;
 const TRIAL_TIER: 'pro' | 'elite' | 'whale' = 'pro'; // Trial gives Pro access
 
 export class StripeService {
+  async isAvailable(): Promise<boolean> {
+    return await isStripeAvailable();
+  }
+
   async createCustomer(email: string, username: string) {
-    const stripe = await getUncachableStripeClient();
-    const customer = await stripe.customers.create({
-      email,
-      metadata: { username },
-    });
-    
     // Start 7-day free trial for new users
     const now = new Date();
     const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
@@ -70,10 +68,27 @@ export class StripeService {
       trialConverted: false,
       registeredAt: now.toISOString(),
     };
-    existing.stripeCustomerId = customer.id;
-    userSubscriptions.set(username, existing);
+
+    // Try to create Stripe customer if available
+    const stripe = await getUncachableStripeClient();
+    if (stripe) {
+      try {
+        const customer = await stripe.customers.create({
+          email,
+          metadata: { username },
+        });
+        existing.stripeCustomerId = customer.id;
+        userSubscriptions.set(username, existing);
+        return customer;
+      } catch (error) {
+        console.log('[STRIPE] Failed to create customer, continuing in demo mode:', error);
+      }
+    }
     
-    return customer;
+    // Demo mode - just set up the subscription without Stripe
+    userSubscriptions.set(username, existing);
+    console.log(`[STRIPE] Demo mode - created local subscription for ${username} with 7-day trial`);
+    return { id: `demo_${username}_${Date.now()}`, email, metadata: { username } };
   }
 
   validatePriceId(priceId: string): boolean {
@@ -86,6 +101,10 @@ export class StripeService {
     }
     
     const stripe = await getUncachableStripeClient();
+    if (!stripe) {
+      throw new Error('Stripe is not available - payment processing is disabled in demo mode');
+    }
+    
     return await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -98,6 +117,10 @@ export class StripeService {
 
   async createCustomerPortalSession(customerId: string, returnUrl: string) {
     const stripe = await getUncachableStripeClient();
+    if (!stripe) {
+      throw new Error('Stripe is not available - billing portal is disabled in demo mode');
+    }
+    
     return await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: returnUrl,

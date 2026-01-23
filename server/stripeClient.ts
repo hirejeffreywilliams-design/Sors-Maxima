@@ -1,9 +1,11 @@
 // Stripe Client - stripe integration
+// Modified to gracefully handle missing credentials for beta deployment
 import Stripe from 'stripe';
 
 let connectionSettings: any;
+let stripeAvailable: boolean | null = null;
 
-async function getCredentials() {
+async function getCredentials(): Promise<{ publishableKey: string; secretKey: string } | null> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -11,64 +13,89 @@ async function getCredentials() {
       ? 'depl ' + process.env.WEB_REPL_RENEWAL
       : null;
 
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+  if (!xReplitToken || !hostname) {
+    console.log('[STRIPE] Stripe connector not available - running in demo mode');
+    stripeAvailable = false;
+    return null;
   }
 
-  const connectorName = 'stripe';
-  const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
-  const targetEnvironment = isProduction ? 'production' : 'development';
+  try {
+    const connectorName = 'stripe';
+    const isProduction = process.env.REPLIT_DEPLOYMENT === '1';
+    const targetEnvironment = isProduction ? 'production' : 'development';
 
-  const url = new URL(`https://${hostname}/api/v2/connection`);
-  url.searchParams.set('include_secrets', 'true');
-  url.searchParams.set('connector_names', connectorName);
-  url.searchParams.set('environment', targetEnvironment);
+    const url = new URL(`https://${hostname}/api/v2/connection`);
+    url.searchParams.set('include_secrets', 'true');
+    url.searchParams.set('connector_names', connectorName);
+    url.searchParams.set('environment', targetEnvironment);
 
-  const response = await fetch(url.toString(), {
-    headers: {
-      'Accept': 'application/json',
-      'X_REPLIT_TOKEN': xReplitToken
+    const response = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json',
+        'X_REPLIT_TOKEN': xReplitToken
+      }
+    });
+
+    const data = await response.json();
+    
+    connectionSettings = data.items?.[0];
+
+    if (!connectionSettings || (!connectionSettings.settings?.publishable || !connectionSettings.settings?.secret)) {
+      console.log(`[STRIPE] Stripe ${targetEnvironment} connection not configured - running in demo mode`);
+      stripeAvailable = false;
+      return null;
     }
-  });
 
-  const data = await response.json();
-  
-  connectionSettings = data.items?.[0];
-
-  if (!connectionSettings || (!connectionSettings.settings.publishable || !connectionSettings.settings.secret)) {
-    throw new Error(`Stripe ${targetEnvironment} connection not found`);
+    stripeAvailable = true;
+    return {
+      publishableKey: connectionSettings.settings.publishable,
+      secretKey: connectionSettings.settings.secret,
+    };
+  } catch (error) {
+    console.log('[STRIPE] Failed to get Stripe credentials - running in demo mode:', error);
+    stripeAvailable = false;
+    return null;
   }
-
-  return {
-    publishableKey: connectionSettings.settings.publishable,
-    secretKey: connectionSettings.settings.secret,
-  };
 }
 
-export async function getUncachableStripeClient() {
-  const { secretKey } = await getCredentials();
+export async function isStripeAvailable(): Promise<boolean> {
+  if (stripeAvailable === null) {
+    await getCredentials();
+  }
+  return stripeAvailable === true;
+}
 
-  return new Stripe(secretKey, {
+export async function getUncachableStripeClient(): Promise<Stripe | null> {
+  const credentials = await getCredentials();
+  if (!credentials) {
+    return null;
+  }
+
+  return new Stripe(credentials.secretKey, {
     apiVersion: '2025-11-17.clover' as any,
   });
 }
 
-export async function getStripePublishableKey() {
-  const { publishableKey } = await getCredentials();
-  return publishableKey;
+export async function getStripePublishableKey(): Promise<string | null> {
+  const credentials = await getCredentials();
+  return credentials?.publishableKey || null;
 }
 
-export async function getStripeSecretKey() {
-  const { secretKey } = await getCredentials();
-  return secretKey;
+export async function getStripeSecretKey(): Promise<string | null> {
+  const credentials = await getCredentials();
+  return credentials?.secretKey || null;
 }
 
 let stripeSync: any = null;
 
-export async function getStripeSync() {
+export async function getStripeSync(): Promise<any | null> {
+  const secretKey = await getStripeSecretKey();
+  if (!secretKey) {
+    return null;
+  }
+
   if (!stripeSync) {
     const { StripeSync } = await import('stripe-replit-sync');
-    const secretKey = await getStripeSecretKey();
 
     stripeSync = new StripeSync({
       poolConfig: {

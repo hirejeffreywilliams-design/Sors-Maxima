@@ -856,11 +856,23 @@ Format your response clearly with sections and bullet points.`;
   // Stripe routes
   app.get("/api/stripe/publishable-key", async (_req, res) => {
     try {
+      const isAvailable = await stripeService.isAvailable();
+      if (!isAvailable) {
+        return res.json({ 
+          publishableKey: null, 
+          demoMode: true,
+          message: "Stripe is running in demo mode. Payment processing is disabled." 
+        });
+      }
       const key = await stripeService.getPublishableKey();
-      res.json({ publishableKey: key });
+      res.json({ publishableKey: key, demoMode: false });
     } catch (err) {
       console.error("Failed to get publishable key:", err);
-      res.status(500).json({ error: "Failed to get Stripe config" });
+      res.json({ 
+        publishableKey: null, 
+        demoMode: true,
+        message: "Stripe is running in demo mode. Payment processing is disabled." 
+      });
     }
   });
 

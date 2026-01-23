@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Zap, Crown, Gem, Atom, Star, Trophy, Shield, Bot, LineChart, Bell, Users, Wallet, Target } from "lucide-react";
+import { Check, Zap, Crown, Gem, Atom, Star, Trophy, Shield, Bot, LineChart, Bell, Users, Wallet, Target, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -121,6 +121,12 @@ export default function Pricing() {
     queryKey: ['/api/subscription'],
   });
 
+  const { data: stripeConfig } = useQuery<{ publishableKey: string | null; demoMode: boolean; message?: string }>({
+    queryKey: ['/api/stripe/publishable-key'],
+  });
+
+  const isDemoMode = stripeConfig?.demoMode ?? false;
+
   const checkoutMutation = useMutation({
     mutationFn: async (priceId: string) => {
       const response = await apiRequest('POST', '/api/stripe/checkout', { priceId });
@@ -143,6 +149,14 @@ export default function Pricing() {
   const handleSubscribe = (tier: PricingTier) => {
     if (tier.id === 'free') return;
     
+    if (isDemoMode) {
+      toast({
+        title: "Demo Mode",
+        description: "Payment processing is disabled in demo mode. All features are available for testing.",
+      });
+      return;
+    }
+    
     const priceId = isYearly ? tier.yearlyPriceId : tier.monthlyPriceId;
     checkoutMutation.mutate(priceId);
   };
@@ -152,6 +166,18 @@ export default function Pricing() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 space-y-12">
+        {isDemoMode && (
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-center" data-testid="banner-demo-mode">
+            <div className="flex items-center justify-center gap-2 text-yellow-600 dark:text-yellow-400">
+              <AlertTriangle className="w-5 h-5" />
+              <span className="font-semibold">Beta Demo Mode</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Payment processing is currently disabled. All Pro features are available during beta testing with your 7-day trial.
+            </p>
+          </div>
+        )}
+
         <header className="text-center space-y-4">
           <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
             <Atom className="w-3 h-3" />
