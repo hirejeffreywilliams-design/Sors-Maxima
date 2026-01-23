@@ -21,10 +21,11 @@ import Bankroll from "@/pages/bankroll";
 import Live from "@/pages/live";
 import Pricing from "@/pages/pricing";
 import AdminDashboard from "@/pages/admin";
+import AdminDiagnostics from "@/pages/admin-diagnostics";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
-import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3 } from "lucide-react";
+import { TrendingUp, Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain } from "lucide-react";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/legal" component={LegalPage} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/diagnostics" component={AdminDiagnostics} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route component={NotFound} />
@@ -73,6 +75,7 @@ const navItems: NavItem[] = [
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings" },
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", adminOnly: true },
+  { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", adminOnly: true },
 ];
 
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {

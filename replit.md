@@ -57,6 +57,8 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 - **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
 - **/pricing** - Subscription pricing page (Free, Pro $29, Elite $99, Whale $499)
 - **/legal** - Legal compliance (Terms of Service, Privacy Policy, Gambling Disclaimer) - PUBLIC, no auth required
+- **/admin** - Admin Dashboard for user management, fraud detection, and subscription stats - ADMIN ONLY
+- **/admin/diagnostics** - AI-Powered Quantum Diagnostics with system health monitoring, issue analysis, and automated scans - ADMIN ONLY
 
 ## Monetization (Stripe Integration)
 The platform uses a tiered subscription model powered by Stripe:
