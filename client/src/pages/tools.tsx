@@ -37,8 +37,13 @@ import { SituationalSpots } from "@/components/situational-spots";
 import { RefereeAnalysis } from "@/components/referee-analysis";
 import { VenuePerformance } from "@/components/venue-performance";
 import { CashoutMaximizer } from "@/components/cashout-maximizer";
+import { QuantumCoachingAnalysis } from "@/components/quantum-coaching-analysis";
+import { QuantumPlayerPrediction } from "@/components/quantum-player-prediction";
+import { QuantumTeamDynamics } from "@/components/quantum-team-dynamics";
+import { Atom } from "lucide-react";
 
 const TOOL_CATEGORIES = [
+  { id: "quantum", name: "Quantum Analysis", icon: Atom },
   { id: "odds", name: "Live Odds", icon: DollarSign },
   { id: "ml", name: "ML Projections", icon: Brain },
   { id: "correlation", name: "Correlation Tools", icon: Link2 },
@@ -52,7 +57,7 @@ const TOOL_CATEGORIES = [
 ];
 
 export default function Tools() {
-  const [activeCategory, setActiveCategory] = useState("odds");
+  const [activeCategory, setActiveCategory] = useState("quantum");
   const ActiveIcon = TOOL_CATEGORIES.find(c => c.id === activeCategory)?.icon || Users;
 
   return (
@@ -84,6 +89,14 @@ export default function Tools() {
         </header>
 
         <div className="space-y-6">
+          {activeCategory === "quantum" && (
+            <div className="space-y-6">
+              <QuantumCoachingAnalysis />
+              <QuantumPlayerPrediction />
+              <QuantumTeamDynamics />
+            </div>
+          )}
+
           {activeCategory === "odds" && (
             <RealTimeOdds />
           )}
