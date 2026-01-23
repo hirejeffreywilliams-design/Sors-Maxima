@@ -14,7 +14,11 @@ import BetHistory from "@/pages/bet-history";
 import LoginPage from "@/pages/login";
 import DailyParlays from "@/pages/daily-parlays";
 import Tools from "@/pages/tools";
-import { TrendingUp, Zap, History, Wrench, LogOut, Settings } from "lucide-react";
+import Community from "@/pages/community";
+import Rewards from "@/pages/rewards";
+import Bankroll from "@/pages/bankroll";
+import Live from "@/pages/live";
+import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity } from "lucide-react";
 
 function Router() {
   return (
@@ -24,6 +28,10 @@ function Router() {
       <Route path="/tracker" component={BetHistory} />
       <Route path="/daily" component={DailyParlays} />
       <Route path="/tools" component={Tools} />
+      <Route path="/community" component={Community} />
+      <Route path="/rewards" component={Rewards} />
+      <Route path="/bankroll" component={Bankroll} />
+      <Route path="/live" component={Live} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -78,8 +86,11 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
             
             <nav className="flex items-center gap-1">
               <NavLink href="/" icon={Zap}>Generate</NavLink>
-              <NavLink href="/builder" icon={Settings}>Builder</NavLink>
-              <NavLink href="/tools" icon={Wrench}>Pro Tools</NavLink>
+              <NavLink href="/live" icon={Activity}>Live</NavLink>
+              <NavLink href="/tools" icon={Wrench}>Tools</NavLink>
+              <NavLink href="/community" icon={Users}>Social</NavLink>
+              <NavLink href="/rewards" icon={Trophy}>Rewards</NavLink>
+              <NavLink href="/bankroll" icon={Wallet}>Bankroll</NavLink>
               <NavLink href="/tracker" icon={History}>History</NavLink>
             </nav>
           </div>

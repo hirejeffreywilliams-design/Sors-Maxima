@@ -46,11 +46,26 @@ The app runs on port 5000 with `npm run dev`. The frontend and backend are serve
 
 ## Navigation Structure
 - **/** - Smart Ticket Generator (default landing page after login)
-- **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
+- **/live** - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant, CLV Tracker, Public vs Sharp
 - **/tools** - Pro Tools with Quantum Analysis, Odds, ML, Correlation, and more
+- **/community** - Social features: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts
+- **/rewards** - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading
+- **/bankroll** - Financial Tools: Multi-Book Tracker, ROI Dashboard, Tax Export
 - **/tracker** - Bet History and performance tracking
+- **/builder** - Manual Parlay Builder with Quick Picks and Custom Build tabs
 
 ## Recent Changes
+- January 23, 2026: **MASSIVE FEATURE EXPANSION**:
+  - Added Social/Community features: Leaderboard, Follow Bettors, Bet Sharing
+  - Added Smart Alerts: Line movement, injury, steam move, weather, sharp money alerts
+  - Added AI Betting Assistant: Conversational AI for parlay building and analysis
+  - Added Advanced Analytics: CLV Tracker, Public vs Sharp Money breakdown
+  - Added Gamification: Achievements, Daily Challenges, Streak Tracker, Paper Trading
+  - Added Financial Tools: Multi-Book Tracker, ROI Dashboard, Tax Export
+  - Added Live Betting: Momentum Tracker, Live Hedge Calculator
+  - New pages: /live, /community, /rewards, /bankroll
+  - Updated navigation with 7 main sections
+
 - January 23, 2026: **MAJOR REDESIGN - Smart Ticket Generator**:
   - Redesigned entire app for simplicity: User selects sport(s) → App generates best possible tickets
   - New default landing page: Smart Ticket Generator at / route
