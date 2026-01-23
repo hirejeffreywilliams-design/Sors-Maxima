@@ -321,8 +321,17 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               <Shield className="h-4 w-4 text-green-500" />
               <span>Your data is protected with enterprise-grade security</span>
             </div>
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+              <p className="text-xs text-yellow-600 dark:text-yellow-400 font-medium text-center">
+                For entertainment and educational purposes only. Not gambling advice. 
+                No guarantees of accuracy or profitability. Must be 21+.
+              </p>
+            </div>
             <p className="text-xs text-muted-foreground text-center">
-              By creating an account, you agree to our Terms of Service and Privacy Policy
+              By creating an account, you agree to our{" "}
+              <a href="/legal" className="text-primary hover:underline">Terms of Service</a>,{" "}
+              <a href="/legal" className="text-primary hover:underline">Privacy Policy</a>, and{" "}
+              <a href="/legal" className="text-primary hover:underline">Gambling Disclaimer</a>
             </p>
           </div>
         </CardContent>

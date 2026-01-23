@@ -275,6 +275,26 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <Router />
       </main>
       
+      <footer className="hidden lg:block border-t bg-muted/30 py-4 px-6">
+        <div className="max-w-screen-2xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-4">
+              <span>© 2026 Sors Maxima</span>
+              <Link href="/legal" className="hover:text-primary">Terms</Link>
+              <Link href="/legal" className="hover:text-primary">Privacy</Link>
+              <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
+            </div>
+            <div className="text-center md:text-right max-w-xl">
+              <p className="text-yellow-600 dark:text-yellow-500">
+                For entertainment & educational purposes only. Not gambling advice. 
+                No guarantees of profitability. Must be 21+. 
+                If you have a gambling problem, call 1-800-522-4700.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
+      
       <BottomNav authState={authState} />
     </div>
   );

@@ -280,6 +280,14 @@ export default function AutoGenerator() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
+          <p className="text-xs text-yellow-600 dark:text-yellow-400">
+            <AlertCircle className="w-3 h-3 inline mr-1" />
+            <strong>For entertainment & educational purposes only.</strong> Analysis is based on statistical models and is not guaranteed betting advice. 
+            Past performance does not guarantee future results. Please gamble responsibly.
+          </p>
+        </div>
+        
         <header className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="w-8 h-8 text-primary" />

@@ -77,6 +77,17 @@ Key files:
 To set up Stripe products, run: `npx tsx server/seed-products.ts`
 
 ## Recent Changes
+- January 23, 2026: **COMPREHENSIVE DISCLAIMERS & DATA HANDLING**:
+  - Added prominent disclaimers throughout the app for legal compliance
+  - Login page: Yellow disclaimer box with "entertainment & educational purposes only", links to legal pages
+  - Main app footer: Visible on all authenticated pages with disclaimer text and helpline number (1-800-522-4700)
+  - Auto-generator page: Yellow banner clarifying analysis is not guaranteed betting advice
+  - Legal page (/legal) contains comprehensive:
+    - Terms of Service: Age requirements (21+), liability limitations, prohibited uses
+    - Privacy Policy: Data collection, usage, sharing policies, security measures, user rights
+    - Gambling Disclaimer: Responsible gaming guidelines, warning signs, self-exclusion options
+  - Key data handling: Data is NOT sold, passwords are encrypted (bcrypt), payments via Stripe
+
 - January 23, 2026: **TIPSTER COMMUNITIES (Creator Monetization)**:
   - Added full in-app community system for tipsters to share picks and earn money
   - Community features: Create communities, join (free or premium), share picks with confidence levels
