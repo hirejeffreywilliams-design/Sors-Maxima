@@ -11,6 +11,7 @@ import { authService, type User } from "./authService";
 import { errorLogger } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import * as featuresService from "./featuresService";
+import { communityService } from "./communityService";
 
 declare module "express-session" {
   interface SessionData {
@@ -836,6 +837,261 @@ Format your response clearly with sections and bullet points.`;
     } catch (err) {
       console.error("Portal error:", err);
       res.status(500).json({ error: "Failed to create portal session" });
+    }
+  });
+
+  // ========== Community / Tipster Routes ==========
+  
+  // Get all communities
+  app.get("/api/communities", (_req, res) => {
+    try {
+      const communities = communityService.getCommunities({ publicOnly: true });
+      res.json(communities);
+    } catch (err) {
+      console.error("Get communities error:", err);
+      res.status(500).json({ error: "Failed to get communities" });
+    }
+  });
+
+  // Get single community
+  app.get("/api/communities/:id", (req, res) => {
+    try {
+      const community = communityService.getCommunity(req.params.id);
+      if (!community) {
+        return res.status(404).json({ error: "Community not found" });
+      }
+      res.json(community);
+    } catch (err) {
+      console.error("Get community error:", err);
+      res.status(500).json({ error: "Failed to get community" });
+    }
+  });
+
+  // Create community
+  app.post("/api/communities", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { name, description, isPublic, isPremium, monthlyPrice, tags, discordWebhook } = req.body;
+      
+      if (!name || !description) {
+        return res.status(400).json({ error: "Name and description required" });
+      }
+
+      const community = communityService.createCommunity({
+        name,
+        description,
+        creatorId: req.session.userId || req.session.username,
+        creatorUsername: req.session.username,
+        isPublic: isPublic ?? true,
+        isPremium: isPremium ?? false,
+        monthlyPrice: monthlyPrice ?? 0,
+        tags: tags || [],
+        discordWebhook,
+      });
+
+      res.status(201).json(community);
+    } catch (err) {
+      console.error("Create community error:", err);
+      res.status(500).json({ error: "Failed to create community" });
+    }
+  });
+
+  // Join community
+  app.post("/api/communities/:id/join", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { isPaid } = req.body;
+      const result = communityService.joinCommunity(
+        req.params.id,
+        req.session.userId || req.session.username,
+        req.session.username,
+        isPaid
+      );
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      res.json({ success: true, platformFee: result.platformFee });
+    } catch (err) {
+      console.error("Join community error:", err);
+      res.status(500).json({ error: "Failed to join community" });
+    }
+  });
+
+  // Get community picks
+  app.get("/api/communities/:id/picks", (req, res) => {
+    try {
+      const userId = req.session?.userId || req.session?.username;
+      const isMember = userId ? communityService.isMember(req.params.id, userId) : false;
+      const picks = communityService.getPicks(req.params.id, { includePremium: isMember });
+      res.json(picks);
+    } catch (err) {
+      console.error("Get picks error:", err);
+      res.status(500).json({ error: "Failed to get picks" });
+    }
+  });
+
+  // Create pick
+  app.post("/api/communities/:id/picks", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const userId = req.session.userId || req.session.username;
+      if (!communityService.isMember(req.params.id, userId)) {
+        return res.status(403).json({ error: "Must be a member to post picks" });
+      }
+
+      const { title, sport, description, odds, stake, confidence, isPremium, price } = req.body;
+      
+      const pick = communityService.createPick({
+        communityId: req.params.id,
+        authorId: userId,
+        authorUsername: req.session.username,
+        title,
+        sport,
+        description,
+        odds,
+        stake: stake || 1,
+        confidence: confidence || 'medium',
+        isPremium: isPremium || false,
+        price: price || 0,
+      });
+
+      res.status(201).json(pick);
+    } catch (err) {
+      console.error("Create pick error:", err);
+      res.status(500).json({ error: "Failed to create pick" });
+    }
+  });
+
+  // Settle pick
+  app.patch("/api/picks/:id/settle", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { status } = req.body;
+      if (!['won', 'lost', 'push', 'void'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      const pick = communityService.settlePick(req.params.id, status);
+      if (!pick) {
+        return res.status(404).json({ error: "Pick not found" });
+      }
+
+      res.json(pick);
+    } catch (err) {
+      console.error("Settle pick error:", err);
+      res.status(500).json({ error: "Failed to settle pick" });
+    }
+  });
+
+  // Send tip
+  app.post("/api/tips", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { toUserId, toUsername, amount, message, pickId } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ error: "Invalid tip amount" });
+      }
+
+      const result = communityService.sendTip({
+        fromUserId: req.session.userId || req.session.username,
+        fromUsername: req.session.username,
+        toUserId,
+        toUsername,
+        amount,
+        message,
+        pickId,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      res.json(result.tip);
+    } catch (err) {
+      console.error("Send tip error:", err);
+      res.status(500).json({ error: "Failed to send tip" });
+    }
+  });
+
+  // Get creator earnings
+  app.get("/api/creator/earnings", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const userId = req.session.userId || req.session.username || '';
+      const earnings = communityService.getCreatorEarnings(userId);
+      res.json(earnings);
+    } catch (err) {
+      console.error("Get earnings error:", err);
+      res.status(500).json({ error: "Failed to get earnings" });
+    }
+  });
+
+  // Get my communities (as creator)
+  app.get("/api/creator/communities", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const userId = req.session.userId || req.session.username;
+      const communities = communityService.getCommunities({ creatorId: userId });
+      res.json(communities);
+    } catch (err) {
+      console.error("Get creator communities error:", err);
+      res.status(500).json({ error: "Failed to get communities" });
+    }
+  });
+
+  // Platform revenue (admin only)
+  app.get("/api/admin/platform-revenue", requireAdmin, (_req, res) => {
+    try {
+      const revenue = communityService.getPlatformRevenue();
+      res.json(revenue);
+    } catch (err) {
+      console.error("Get platform revenue error:", err);
+      res.status(500).json({ error: "Failed to get revenue" });
+    }
+  });
+
+  // Update Discord webhook
+  app.patch("/api/communities/:id/discord", (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { webhook } = req.body;
+      const success = communityService.updateDiscordWebhook(req.params.id, webhook);
+      
+      if (!success) {
+        return res.status(404).json({ error: "Community not found" });
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Update Discord webhook error:", err);
+      res.status(500).json({ error: "Failed to update webhook" });
     }
   });
 
