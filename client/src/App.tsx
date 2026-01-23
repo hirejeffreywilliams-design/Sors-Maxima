@@ -284,6 +284,10 @@ function PublicRoutes() {
     return <LegalPage />;
   }
   
+  if (location === '/pricing') {
+    return <Pricing />;
+  }
+  
   return null;
 }
 
@@ -296,7 +300,7 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal',
+    enabled: location !== '/legal' && location !== '/pricing',
   });
 
   useEffect(() => {
@@ -318,6 +322,10 @@ function AppContent() {
 
   if (location === '/legal') {
     return <LegalPage />;
+  }
+
+  if (location === '/pricing') {
+    return <Pricing />;
   }
 
   if (isLoading || isAuthenticated === null) {
