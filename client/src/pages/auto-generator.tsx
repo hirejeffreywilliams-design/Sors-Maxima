@@ -1,0 +1,511 @@
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { 
+  Sparkles, 
+  TrendingUp, 
+  DollarSign, 
+  Target, 
+  Zap, 
+  ChevronDown, 
+  ChevronUp,
+  Check,
+  Brain,
+  BarChart3,
+  Shield,
+  Clock,
+  Users,
+  Activity,
+  Loader2,
+  Copy,
+  CheckCircle2,
+  AlertCircle,
+  Star
+} from "lucide-react";
+import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
+import type { Sport } from "@shared/schema";
+
+const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
+  { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
+  { id: "NFL", name: "NFL", color: "bg-green-600", icon: "" },
+  { id: "MLB", name: "MLB", color: "bg-red-500", icon: "" },
+  { id: "NHL", name: "NHL", color: "bg-blue-500", icon: "" },
+  { id: "NCAAB", name: "College Basketball", color: "bg-purple-500", icon: "" },
+  { id: "NCAAF", name: "College Football", color: "bg-amber-600", icon: "" },
+];
+
+function TicketCard({ ticket, index }: { ticket: GeneratedTicket; index: number }) {
+  const [expanded, setExpanded] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
+  const formatOdds = (american: number) => {
+    return american > 0 ? `+${american}` : `${american}`;
+  };
+  
+  const getGradeColor = (grade: string) => {
+    if (grade.startsWith("A")) return "text-green-500";
+    if (grade.startsWith("B")) return "text-blue-500";
+    if (grade.startsWith("C")) return "text-yellow-500";
+    return "text-red-500";
+  };
+  
+  const getRiskColor = (risk: string) => {
+    if (risk === "low") return "bg-green-500/20 text-green-500";
+    if (risk === "medium") return "bg-yellow-500/20 text-yellow-500";
+    return "bg-red-500/20 text-red-500";
+  };
+  
+  const copyToClipboard = () => {
+    const text = ticket.legs.map(l => `${l.outcome} @ ${formatOdds(l.americanOdds)}`).join("\n");
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  return (
+    <Card className="overflow-hidden" data-testid={`ticket-card-${ticket.id}`}>
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">{ticket.sport}</Badge>
+              <span className={`text-2xl font-bold ${getGradeColor(ticket.grade)}`} data-testid={`text-grade-${ticket.id}`}>
+                {ticket.grade}
+              </span>
+            </div>
+            <CardTitle className="text-lg" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</CardTitle>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge className={getRiskColor(ticket.riskRating)}>
+              {ticket.riskRating.charAt(0).toUpperCase() + ticket.riskRating.slice(1)} Risk
+            </Badge>
+            <Button size="icon" variant="ghost" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
+              {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="text-center p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Win Probability</p>
+            <p className="text-xl font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>
+              {(ticket.winProbability * 100).toFixed(1)}%
+            </p>
+          </div>
+          <div className="text-center p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Expected Value</p>
+            <p className={`text-xl font-bold ${ticket.expectedValue >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
+              {ticket.expectedValue >= 0 ? "+" : ""}{(ticket.expectedValue * 100).toFixed(1)}%
+            </p>
+          </div>
+          <div className="text-center p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Total Odds</p>
+            <p className="text-xl font-bold" data-testid={`text-odds-${ticket.id}`}>
+              {formatOdds(ticket.americanOdds)}
+            </p>
+          </div>
+          <div className="text-center p-3 bg-muted/50 rounded-lg">
+            <p className="text-xs text-muted-foreground mb-1">Confidence</p>
+            <div className="flex items-center justify-center gap-2">
+              <Progress value={ticket.confidenceScore * 100} className="h-2 w-16" />
+              <span className="text-sm font-semibold">{(ticket.confidenceScore * 100).toFixed(0)}%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20 flex-wrap">
+          <div>
+            <p className="text-sm text-muted-foreground">Recommended Stake</p>
+            <p className="text-2xl font-bold text-primary" data-testid={`text-stake-${ticket.id}`}>
+              ${ticket.recommendedStake.toFixed(2)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">Potential Payout</p>
+            <p className="text-2xl font-bold text-green-500" data-testid={`text-payout-${ticket.id}`}>
+              ${ticket.potentialPayout.toFixed(2)}
+            </p>
+          </div>
+        </div>
+        
+        <Collapsible open={expanded} onOpenChange={setExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between gap-2" data-testid={`button-expand-${ticket.id}`}>
+              <span className="flex items-center gap-2">
+                <Target className="w-4 h-4" />
+                {ticket.legs.length} Legs
+              </span>
+              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-3 pt-3">
+            {ticket.legs.map((leg, idx) => (
+              <div key={leg.id} className="p-3 bg-muted/30 rounded-lg space-y-2" data-testid={`leg-${leg.id}`}>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <p className="font-medium" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
+                    <p className="text-sm text-muted-foreground">{leg.team} vs {leg.opponent}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</p>
+                    <Badge variant="outline" className="text-xs">{leg.market}</Badge>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-xs flex-wrap">
+                  <Badge variant={leg.analysis.sharpAction ? "default" : "secondary"} className="text-xs">
+                    {leg.analysis.sharpAction ? "Sharp Action" : "Public Bet"}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {leg.analysis.lineMovement === "steam" ? "Steam Move" : 
+                     leg.analysis.lineMovement === "reverse" ? "Reverse Line" : "Stable Line"}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs">
+                    {leg.edgePercent >= 0 ? "+" : ""}{leg.edgePercent.toFixed(1)}% Edge
+                  </Badge>
+                </div>
+              </div>
+            ))}
+            
+            <div className="pt-3 border-t space-y-2">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-500" />
+                Analysis Rationale
+              </p>
+              <div className="space-y-1">
+                {ticket.rationale.map((reason, idx) => (
+                  <p key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
+                    {reason}
+                  </p>
+                ))}
+              </div>
+            </div>
+            
+            <div className="pt-3 border-t">
+              <p className="text-sm font-medium mb-2 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-blue-500" />
+                AI Analysis Scores
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">Quantum Coaching</span>
+                  <span className="font-medium">{(ticket.analysisFactors.quantumCoachingScore * 100).toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">Player Analysis</span>
+                  <span className="font-medium">{(ticket.analysisFactors.quantumPlayerScore * 100).toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">Team Dynamics</span>
+                  <span className="font-medium">{(ticket.analysisFactors.quantumTeamScore * 100).toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">ML Projections</span>
+                  <span className="font-medium">{(ticket.analysisFactors.mlProjectionScore * 100).toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">Sharp Money</span>
+                  <span className="font-medium">{(ticket.analysisFactors.sharpMoneyScore * 100).toFixed(0)}%</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground">Cashout Eligibility</span>
+                  <span className="font-medium">{(ticket.analysisFactors.cashoutEligibility * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function AutoGenerator() {
+  const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
+  const [bankroll, setBankroll] = useState(1000);
+  const [riskLevel, setRiskLevel] = useState<"conservative" | "moderate" | "aggressive">("moderate");
+  const [maxLegs, setMaxLegs] = useState(4);
+  const [includeProps, setIncludeProps] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [tickets, setTickets] = useState<GeneratedTicket[]>([]);
+  const [hasGenerated, setHasGenerated] = useState(false);
+  
+  const toggleSport = (sport: Sport) => {
+    setSelectedSports(prev => 
+      prev.includes(sport) 
+        ? prev.filter(s => s !== sport)
+        : [...prev, sport]
+    );
+  };
+  
+  const handleGenerate = async () => {
+    if (selectedSports.length === 0) return;
+    
+    setIsGenerating(true);
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const request: TicketRequest = {
+      sports: selectedSports,
+      bankroll,
+      riskLevel,
+      maxLegs,
+      includeProps,
+    };
+    
+    const generatedTickets = generateTickets(request);
+    setTickets(generatedTickets);
+    setHasGenerated(true);
+    setIsGenerating(false);
+  };
+  
+  const getRiskDescription = (level: string) => {
+    switch (level) {
+      case "conservative": return "Lower odds, higher win probability (2-3 legs)";
+      case "moderate": return "Balanced risk and reward (3-4 legs)";
+      case "aggressive": return "Higher odds, lower win probability (4-6 legs)";
+      default: return "";
+    }
+  };
+  
+  return (
+    <div className="min-h-full">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <header className="text-center space-y-3">
+          <div className="flex items-center justify-center gap-2">
+            <Sparkles className="w-8 h-8 text-primary" />
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              Smart Ticket Generator
+            </h1>
+          </div>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Select your sports, and our AI-powered engine will analyze 40+ factors to generate 
+            optimal betting tickets with the highest probability of winning.
+          </p>
+        </header>
+        
+        <Card>
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Target className="w-5 h-5 text-primary" />
+              Select Your Sports
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {sportConfig.map(sport => (
+                <Button
+                  key={sport.id}
+                  variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                  className={`h-auto py-4 flex-col gap-2 ${
+                    selectedSports.includes(sport.id) ? sport.color : ""
+                  }`}
+                  onClick={() => toggleSport(sport.id)}
+                  data-testid={`button-sport-${sport.id}`}
+                >
+                  <span className="text-xl font-bold">{sport.id}</span>
+                  <span className="text-xs opacity-80">{sport.name}</span>
+                </Button>
+              ))}
+            </div>
+            
+            <Collapsible open={showSettings} onOpenChange={setShowSettings}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" className="w-full justify-between gap-2" data-testid="button-toggle-settings">
+                  <span className="flex items-center gap-2">
+                    <Activity className="w-4 h-4" />
+                    Advanced Settings
+                  </span>
+                  {showSettings ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-6 pt-4">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <DollarSign className="w-4 h-4" />
+                        Bankroll
+                      </Label>
+                      <span className="font-bold" data-testid="text-bankroll">${bankroll}</span>
+                    </div>
+                    <Slider
+                      value={[bankroll]}
+                      onValueChange={([v]) => setBankroll(v)}
+                      min={100}
+                      max={10000}
+                      step={100}
+                      data-testid="slider-bankroll"
+                    />
+                    <p className="text-xs text-muted-foreground">Stakes calculated based on Kelly Criterion</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <Shield className="w-4 h-4" />
+                        Risk Level
+                      </Label>
+                      <Badge variant="outline">{riskLevel}</Badge>
+                    </div>
+                    <div className="flex gap-2">
+                      {(["conservative", "moderate", "aggressive"] as const).map(level => (
+                        <Button
+                          key={level}
+                          size="sm"
+                          variant={riskLevel === level ? "default" : "outline"}
+                          onClick={() => setRiskLevel(level)}
+                          className="flex-1 capitalize"
+                          data-testid={`button-risk-${level}`}
+                        >
+                          {level}
+                        </Button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{getRiskDescription(riskLevel)}</p>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Max Legs per Ticket
+                      </Label>
+                      <span className="font-bold" data-testid="text-max-legs">{maxLegs}</span>
+                    </div>
+                    <Slider
+                      value={[maxLegs]}
+                      onValueChange={([v]) => setMaxLegs(v)}
+                      min={2}
+                      max={8}
+                      step={1}
+                      data-testid="slider-max-legs"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Include Player Props
+                      </Label>
+                      <p className="text-xs text-muted-foreground mt-1">Add player performance bets</p>
+                    </div>
+                    <Switch
+                      checked={includeProps}
+                      onCheckedChange={setIncludeProps}
+                      data-testid="switch-include-props"
+                    />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+            
+            <Button 
+              size="lg" 
+              className="w-full gap-3 text-lg h-14"
+              disabled={selectedSports.length === 0 || isGenerating}
+              onClick={handleGenerate}
+              data-testid="button-generate"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Analyzing 40+ Factors...
+                </>
+              ) : (
+                <>
+                  <Zap className="w-5 h-5" />
+                  Generate Winning Tickets
+                </>
+              )}
+            </Button>
+            
+            {selectedSports.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground">
+                Select at least one sport to generate tickets
+              </p>
+            )}
+          </CardContent>
+        </Card>
+        
+        {isGenerating && (
+          <Card className="overflow-hidden">
+            <CardContent className="py-12">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="space-y-2">
+                  <p className="text-lg font-medium">Generating Optimal Tickets</p>
+                  <p className="text-sm text-muted-foreground">Running quantum analysis across 40+ factors...</p>
+                </div>
+                <div className="max-w-md mx-auto space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-500" />
+                    <span>Quantum Coaching Analysis</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-500" />
+                    <span>Player Performance Prediction</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span>Team Dynamics & Correlations</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="w-4 h-4" />
+                    <span>ML Projections & Sharp Money</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        
+        {hasGenerated && !isGenerating && tickets.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-500" />
+                Your Optimized Tickets
+              </h2>
+              <Badge variant="secondary" className="text-sm">
+                {tickets.length} tickets generated
+              </Badge>
+            </div>
+            
+            <div className="grid gap-4 lg:grid-cols-2">
+              {tickets.map((ticket, idx) => (
+                <TicketCard key={ticket.id} ticket={ticket} index={idx} />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {hasGenerated && !isGenerating && tickets.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center">
+              <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium">No tickets available</p>
+              <p className="text-sm text-muted-foreground">Try selecting different sports or adjusting your settings</p>
+            </CardContent>
+          </Card>
+        )}
+        
+        <footer className="pt-4 border-t text-center">
+          <p className="text-xs text-muted-foreground">
+            For educational purposes only. Please gamble responsibly.
+          </p>
+        </footer>
+      </div>
+    </div>
+  );
+}

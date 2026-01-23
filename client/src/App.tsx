@@ -8,17 +8,19 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import NotFound from "@/pages/not-found";
+import AutoGenerator from "@/pages/auto-generator";
 import Dashboard from "@/pages/dashboard";
 import BetHistory from "@/pages/bet-history";
 import LoginPage from "@/pages/login";
 import DailyParlays from "@/pages/daily-parlays";
 import Tools from "@/pages/tools";
-import { TrendingUp, Home, History, Crown, LogOut, Wrench } from "lucide-react";
+import { TrendingUp, Zap, History, Wrench, LogOut, Settings } from "lucide-react";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={AutoGenerator} />
+      <Route path="/builder" component={Dashboard} />
       <Route path="/tracker" component={BetHistory} />
       <Route path="/daily" component={DailyParlays} />
       <Route path="/tools" component={Tools} />
@@ -75,10 +77,10 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
             </Link>
             
             <nav className="flex items-center gap-1">
-              <NavLink href="/" icon={Home}>Optimizer</NavLink>
-              <NavLink href="/daily" icon={Crown}>Daily Picks</NavLink>
+              <NavLink href="/" icon={Zap}>Generate</NavLink>
+              <NavLink href="/builder" icon={Settings}>Builder</NavLink>
               <NavLink href="/tools" icon={Wrench}>Pro Tools</NavLink>
-              <NavLink href="/tracker" icon={History}>Tracker</NavLink>
+              <NavLink href="/tracker" icon={History}>History</NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-2">
