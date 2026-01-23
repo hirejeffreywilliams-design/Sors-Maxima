@@ -18,7 +18,8 @@ import Community from "@/pages/community";
 import Rewards from "@/pages/rewards";
 import Bankroll from "@/pages/bankroll";
 import Live from "@/pages/live";
-import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity } from "lucide-react";
+import Pricing from "@/pages/pricing";
+import { TrendingUp, Zap, History, Wrench, LogOut, Settings, Users, Trophy, Wallet, Activity, CreditCard } from "lucide-react";
 
 function Router() {
   return (
@@ -32,6 +33,7 @@ function Router() {
       <Route path="/rewards" component={Rewards} />
       <Route path="/bankroll" component={Bankroll} />
       <Route path="/live" component={Live} />
+      <Route path="/pricing" component={Pricing} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -93,6 +95,7 @@ function AuthenticatedApp({ onLogout }: { onLogout: () => void }) {
               <NavLink href="/rewards" icon={Trophy} testId="nav-rewards">Rewards</NavLink>
               <NavLink href="/bankroll" icon={Wallet} testId="nav-bankroll">Bankroll</NavLink>
               <NavLink href="/tracker" icon={History} testId="nav-tracker">History</NavLink>
+              <NavLink href="/pricing" icon={CreditCard} testId="nav-pricing">Upgrade</NavLink>
             </nav>
           </div>
           <div className="flex items-center gap-2">

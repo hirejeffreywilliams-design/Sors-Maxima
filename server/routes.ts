@@ -5,6 +5,7 @@ import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@sh
 import { fromError } from "zod-validation-error";
 import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
+import { stripeService } from "./stripeService";
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -287,6 +288,99 @@ export async function registerRoutes(
         error: "Failed to generate Vegas predictions",
         message: err instanceof Error ? err.message : "Unknown error",
       });
+    }
+  });
+
+  // Stripe routes
+  app.get("/api/stripe/publishable-key", async (_req, res) => {
+    try {
+      const key = await stripeService.getPublishableKey();
+      res.json({ publishableKey: key });
+    } catch (err) {
+      console.error("Failed to get publishable key:", err);
+      res.status(500).json({ error: "Failed to get Stripe config" });
+    }
+  });
+
+  app.get("/api/subscription", (req, res) => {
+    if (!req.session?.isAuthenticated || !req.session?.username) {
+      return res.json({ tier: 'free', status: 'none' });
+    }
+    
+    const subscription = stripeService.getUserSubscription(req.session.username);
+    res.json({
+      tier: subscription.subscriptionTier,
+      status: subscription.subscriptionStatus,
+      customerId: subscription.stripeCustomerId,
+    });
+  });
+
+  app.post("/api/stripe/checkout", async (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const { priceId } = req.body;
+      if (!priceId) {
+        return res.status(400).json({ error: "Price ID required" });
+      }
+
+      const username = req.session.username;
+      let subscription = stripeService.getUserSubscription(username);
+      
+      // Create customer if needed
+      let customerId = subscription.stripeCustomerId;
+      if (!customerId) {
+        const customer = await stripeService.createCustomer(
+          `${username}@sorsmaxima.com`,
+          username
+        );
+        customerId = customer.id;
+      }
+
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+
+      const session = await stripeService.createCheckoutSession(
+        customerId,
+        priceId,
+        `${baseUrl}/pricing?success=true`,
+        `${baseUrl}/pricing?cancelled=true`
+      );
+
+      res.json({ url: session.url });
+    } catch (err) {
+      console.error("Checkout error:", err);
+      res.status(500).json({ error: "Failed to create checkout session" });
+    }
+  });
+
+  app.post("/api/stripe/portal", async (req, res) => {
+    try {
+      if (!req.session?.isAuthenticated || !req.session?.username) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      const subscription = stripeService.getUserSubscription(req.session.username);
+      if (!subscription.stripeCustomerId) {
+        return res.status(400).json({ error: "No subscription found" });
+      }
+
+      const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+      const host = req.headers['x-forwarded-host'] || req.get('host');
+      const baseUrl = `${protocol}://${host}`;
+
+      const session = await stripeService.createCustomerPortalSession(
+        subscription.stripeCustomerId,
+        `${baseUrl}/pricing`
+      );
+
+      res.json({ url: session.url });
+    } catch (err) {
+      console.error("Portal error:", err);
+      res.status(500).json({ error: "Failed to create portal session" });
     }
   });
 
