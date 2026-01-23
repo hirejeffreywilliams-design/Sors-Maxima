@@ -21,8 +21,12 @@ import {
   RefreshCw,
   Crown,
   Gift,
-  XCircle
+  XCircle,
+  Brain,
+  Megaphone,
+  ChevronRight
 } from "lucide-react";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -272,13 +276,29 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-full p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
             <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
             Admin Dashboard
           </h1>
           <p className="text-sm text-muted-foreground">User management, fraud prevention, and error logs</p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <Link href="/admin/diagnostics">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-diagnostics">
+              <Brain className="w-4 h-4" />
+              Diagnostics
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/marketing">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-marketing">
+              <Megaphone className="w-4 h-4" />
+              Marketing Tools
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 

@@ -32,10 +32,19 @@ interface UserSubscription {
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
   subscriptionTier: 'free' | 'pro' | 'elite' | 'whale';
-  subscriptionStatus: 'active' | 'cancelled' | 'past_due' | 'none';
+  subscriptionStatus: 'active' | 'cancelled' | 'past_due' | 'none' | 'trialing';
+  trialStartDate: string | null;
+  trialEndDate: string | null;
+  isTrialUser: boolean;
+  trialConverted: boolean;
+  registeredAt: string;
 }
 
 const userSubscriptions = new Map<string, UserSubscription>();
+
+// Trial configuration
+const TRIAL_DAYS = 7;
+const TRIAL_TIER: 'pro' | 'elite' | 'whale' = 'pro'; // Trial gives Pro access
 
 export class StripeService {
   async createCustomer(email: string, username: string) {
@@ -45,13 +54,21 @@ export class StripeService {
       metadata: { username },
     });
     
-    // Update local storage
+    // Start 7-day free trial for new users
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+    
     const existing = userSubscriptions.get(username) || {
       username,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
-      subscriptionTier: 'free' as const,
-      subscriptionStatus: 'none' as const,
+      subscriptionTier: TRIAL_TIER as 'free' | 'pro' | 'elite' | 'whale',
+      subscriptionStatus: 'trialing' as const,
+      trialStartDate: now.toISOString(),
+      trialEndDate: trialEnd.toISOString(),
+      isTrialUser: true,
+      trialConverted: false,
+      registeredAt: now.toISOString(),
     };
     existing.stripeCustomerId = customer.id;
     userSubscriptions.set(username, existing);
@@ -92,13 +109,115 @@ export class StripeService {
   }
 
   getUserSubscription(username: string): UserSubscription {
-    return userSubscriptions.get(username) || {
+    const sub = userSubscriptions.get(username);
+    if (sub) {
+      // Check if trial has expired
+      if (sub.subscriptionStatus === 'trialing' && sub.trialEndDate && !sub.trialConverted) {
+        const trialEnd = new Date(sub.trialEndDate);
+        if (new Date() > trialEnd) {
+          // Trial expired - downgrade to free and mark trial as used
+          sub.subscriptionStatus = 'none';
+          sub.subscriptionTier = 'free';
+          sub.isTrialUser = false; // No longer on trial
+          userSubscriptions.set(username, sub);
+          console.log(`[TRIAL] Trial expired for ${username}, downgraded to free tier`);
+        }
+      }
+      return sub;
+    }
+    
+    return {
       username,
       stripeCustomerId: null,
       stripeSubscriptionId: null,
       subscriptionTier: 'free',
       subscriptionStatus: 'none',
+      trialStartDate: null,
+      trialEndDate: null,
+      isTrialUser: false,
+      trialConverted: false,
+      registeredAt: new Date().toISOString(),
     };
+  }
+
+  getTrialStatus(username: string): { 
+    isOnTrial: boolean; 
+    daysRemaining: number; 
+    trialExpired: boolean;
+    trialTier: string;
+    hadTrial: boolean;
+  } {
+    const sub = userSubscriptions.get(username);
+    
+    // No subscription record found
+    if (!sub) {
+      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: false };
+    }
+
+    // User has converted from trial to paid
+    if (sub.trialConverted) {
+      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: true };
+    }
+    
+    // No trial end date - never had a trial
+    if (!sub.trialEndDate) {
+      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: false };
+    }
+    
+    const now = new Date();
+    const trialEnd = new Date(sub.trialEndDate);
+    const msRemaining = trialEnd.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
+    const isOnTrial = sub.subscriptionStatus === 'trialing' && msRemaining > 0;
+    const trialExpired = msRemaining <= 0 && !sub.trialConverted;
+    
+    return {
+      isOnTrial,
+      daysRemaining,
+      trialExpired,
+      trialTier: isOnTrial ? TRIAL_TIER : 'none',
+      hadTrial: true,
+    };
+  }
+
+  startTrial(username: string): UserSubscription | null {
+    const trialStatus = this.getTrialStatus(username);
+    
+    // Prevent starting trial if user already had one
+    if (trialStatus.hadTrial) {
+      console.log(`[TRIAL] Cannot start trial for ${username} - trial already used`);
+      return null;
+    }
+    
+    const now = new Date();
+    const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+    
+    const existing = this.getUserSubscription(username);
+    const updated: UserSubscription = {
+      ...existing,
+      subscriptionTier: TRIAL_TIER,
+      subscriptionStatus: 'trialing',
+      trialStartDate: now.toISOString(),
+      trialEndDate: trialEnd.toISOString(),
+      isTrialUser: true,
+      trialConverted: false,
+    };
+    
+    userSubscriptions.set(username, updated);
+    console.log(`[TRIAL] Started 7-day ${TRIAL_TIER} trial for ${username}, expires ${trialEnd.toISOString()}`);
+    return updated;
+  }
+
+  convertTrialToSubscription(username: string, tier: 'pro' | 'elite' | 'whale'): void {
+    const existing = this.getUserSubscription(username);
+    if (existing.trialEndDate) {
+      existing.trialConverted = true;
+      existing.subscriptionStatus = 'active';
+      existing.subscriptionTier = tier;
+      existing.isTrialUser = false;
+      userSubscriptions.set(username, existing);
+      console.log(`[TRIAL] ${username} converted from trial to paid ${tier} subscription`);
+    }
   }
 
   updateUserSubscription(username: string, updates: Partial<UserSubscription>) {

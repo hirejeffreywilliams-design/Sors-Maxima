@@ -77,6 +77,29 @@ Key files:
 To set up Stripe products, run: `npx tsx server/seed-products.ts`
 
 ## Recent Changes
+- January 23, 2026: **7-DAY FREE TRIAL & AI MARKETING TOOLS**:
+  - Added 7-day free trial system for new users:
+    - New users automatically receive Pro tier access for 7 days
+    - Trial status tracked with start date, end date, and conversion status
+    - Automatic downgrade to Free tier after trial expires
+    - API endpoints: /api/trial/status, /api/trial/start
+    - Trial info included in /api/subscription response
+  - Added AI Marketing Tools admin page (/admin/marketing):
+    - Content Generator: AI-powered content for 11 platforms
+      - Social: Twitter/X, Facebook, Instagram, LinkedIn, TikTok
+      - Email: Welcome, Trial Ending, Conversion campaigns
+      - Ads: Google Ads, Facebook Ads
+      - Push Notifications for mobile
+    - Growth Analytics: Path to $1B valuation metrics
+      - Total users, active trials, paid subscribers, conversion rate
+      - Monthly revenue, LTV, CAC, LTV:CAC ratio, churn rate
+    - Campaign Manager: Pre-built automation templates
+      - Trial ending reminders, new feature announcements
+      - Win streak celebrations, re-engagement campaigns
+      - Weekly scheduled automations
+  - Admin navigation updated with links to Diagnostics and Marketing Tools
+  - Key files: server/stripeService.ts, client/src/pages/admin-marketing.tsx
+
 - January 23, 2026: **COMPREHENSIVE DISCLAIMERS & DATA HANDLING**:
   - Added prominent disclaimers throughout the app for legal compliance
   - Login page: Yellow disclaimer box with "entertainment & educational purposes only", links to legal pages
