@@ -219,6 +219,14 @@ class AuthService {
     }
 
     // Check if admin login
+    console.log('[AUTH DEBUG] Login attempt:', { 
+      inputUsername: emailOrUsername, 
+      envUsername: ADMIN_USERNAME,
+      usernameMatch: emailOrUsername === ADMIN_USERNAME,
+      passwordMatch: password === ADMIN_PASSWORD,
+      envUsernameExists: !!ADMIN_USERNAME,
+      envPasswordExists: !!ADMIN_PASSWORD
+    });
     if (emailOrUsername === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       this.recordLoginAttempt(ip, emailOrUsername, true, userAgent);
       return { 
