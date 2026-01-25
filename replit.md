@@ -41,3 +41,33 @@ Key features include:
 - **Data Validation**: Zod
 - **Payment Processing**: Stripe
 - **Sportsbook Data**: DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers (for multi-platform analysis and odds comparison)
+
+## Navigation Structure (Consolidated - 8 main items + admin)
+Main navigation items:
+1. **Generate** (/) - Smart Ticket Generator (default home page)
+2. **Live** (/live) - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant
+3. **Tools** (/tools) - Pro Tools with Quantum Analysis, Odds, ML, Correlation
+4. **Community** (/community) - Unified community page with 2 main tabs:
+   - Social: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts
+   - Tipsters: Discover communities, create your own, earn from tips/subscriptions (15% platform fee)
+5. **Rewards** (/rewards) - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading
+6. **Finance** (/bankroll) - All financial tools in 5 tabs:
+   - Bets: Bet history and tracking
+   - Books: Multi-sportsbook balance tracker
+   - Stats: Performance analytics
+   - ROI: Return on investment dashboard
+   - Tax: Tax export and reports
+7. **Settings** (/settings) - User Settings (3 tabs): Notifications, Responsible Gaming, Backup
+8. **Upgrade** (/pricing) - Subscription pricing page
+
+Admin-only pages:
+- /admin - Admin Dashboard for user management, fraud detection, subscription stats
+- /admin/diagnostics - AI-Powered Quantum Diagnostics
+- /admin/marketing - AI Marketing Tools for content generation and growth analytics
+
+Other routes (accessible but not in main nav):
+- /builder - Manual Parlay Builder
+- /legal - Legal compliance (Terms, Privacy, Gambling Disclaimer) - PUBLIC
+
+## Running the App
+The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.

@@ -1,10 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Wallet, BarChart3, FileText, TrendingUp } from "lucide-react";
+import { Wallet, BarChart3, FileText, TrendingUp, History } from "lucide-react";
 import { MultiBookTracker } from "@/components/financial/multi-book-tracker";
 import { ROIDashboard } from "@/components/financial/roi-dashboard";
 import { TaxExport } from "@/components/financial/tax-export";
 import { Badge } from "@/components/ui/badge";
 import { PerformanceAnalytics } from "@/components/financial/performance-analytics";
+import { BetTracker } from "@/components/bet-tracker";
 
 export default function Bankroll() {
   return (
@@ -12,17 +13,21 @@ export default function Bankroll() {
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <header>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
-            Bankroll & Analytics
+            Finance
             <Badge variant="outline" className="gap-1 bg-green-500/10 border-green-500/30 text-green-500">
               <Wallet className="w-3 h-3" />
-              Financial
+              Tracking
             </Badge>
           </h1>
-          <p className="text-sm text-muted-foreground">Track balances, performance, and tax reports</p>
+          <p className="text-sm text-muted-foreground">Track bets, balances, performance, and tax reports</p>
         </header>
 
-        <Tabs defaultValue="books" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+        <Tabs defaultValue="history" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5 max-w-xl">
+            <TabsTrigger value="history" className="gap-1 text-xs sm:text-sm" data-testid="tab-history">
+              <History className="w-4 h-4" />
+              <span className="hidden sm:inline">Bets</span>
+            </TabsTrigger>
             <TabsTrigger value="books" className="gap-1 text-xs sm:text-sm" data-testid="tab-books">
               <Wallet className="w-4 h-4" />
               <span className="hidden sm:inline">Books</span>
@@ -40,6 +45,10 @@ export default function Bankroll() {
               <span className="hidden sm:inline">Tax</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="history" className="space-y-6">
+            <BetTracker />
+          </TabsContent>
 
           <TabsContent value="books" className="space-y-6">
             <MultiBookTracker />
