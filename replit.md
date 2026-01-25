@@ -26,6 +26,8 @@ Key features include:
 - **Betting Intelligence System**: Provides A-F grading for bets, EV indicators, risk advisories, and configurable betting environment presets.
 - **Pro Tools**: Offers advanced features like real-time odds comparison, ML prop projections, an advanced correlation engine, same-game parlay optimizer, bankroll simulator, and various calculators.
 - **Continuous Learning Engine**: Analyzes prediction outcomes and adapts weights of 45 analysis factors to improve accuracy.
+- **Quantum Fusion Engine**: Unified algorithm that integrates 12 analysis factors (scheme recognition, Monte Carlo simulations, sharp money, coaching patterns, correlations, momentum, weather, player projections, line movement, tipster consensus) with synergy detection and self-learning weight optimization.
+- **Algorithm Training Center**: Backtesting system that runs predictions against simulated historical data, tracks accuracy, generates report cards with grades (A+ to F), and determines launch readiness with confidence scores.
 - **Tipster Communities**: Allows users to create or join communities, share picks, and monetize their insights (platform takes 15% of earnings).
 - **Gamification**: Includes daily challenges, achievements, streaks, and paper trading.
 - **Financial Tools**: Multi-book tracker, ROI dashboard, and tax export.
@@ -65,6 +67,7 @@ Admin-only pages:
 - /admin - Admin Dashboard for user management, fraud detection, subscription stats
 - /admin/diagnostics - AI-Powered Quantum Diagnostics
 - /admin/marketing - AI Marketing Tools for content generation and growth analytics
+- /training - Algorithm Training Center for backtesting and evaluation before launch
 
 Other routes (accessible but not in main nav):
 - /builder - Manual Parlay Builder

@@ -27,7 +27,8 @@ import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
 import TipsterCommunities from "@/pages/tipster-communities";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain } from "lucide-react";
+import TrainingCenter from "@/pages/training-center";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
+      <Route path="/training" component={TrainingCenter} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -80,6 +82,7 @@ const navItems: NavItem[] = [
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing", tooltip: "Upgrade to Pro for unlimited features" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin dashboard - User management and stats", adminOnly: true },
   { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", tooltip: "AI-powered system diagnostics", adminOnly: true },
+  { href: "/training", icon: GraduationCap, label: "Training", testId: "nav-training", tooltip: "Algorithm Training Center - Test predictions before launch", adminOnly: true },
 ];
 
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
