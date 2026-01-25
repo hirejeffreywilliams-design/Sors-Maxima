@@ -467,53 +467,6 @@ export default function Settings() {
         </Tabs>
       </div>
 
-      {/* Add Sportsbook Account Dialog */}
-      <Dialog open={addAccountDialogOpen} onOpenChange={setAddAccountDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add Sportsbook Account</DialogTitle>
-            <DialogDescription>Track your balance across multiple sportsbooks</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Sportsbook</Label>
-              <Select
-                value={newAccount.sportsbookName}
-                onValueChange={(value) => setNewAccount({ ...newAccount, sportsbookName: value })}
-              >
-                <SelectTrigger data-testid="select-sportsbook">
-                  <SelectValue placeholder="Select sportsbook" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SPORTSBOOKS.map((book) => (
-                    <SelectItem key={book} value={book}>{book}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label>Current Balance ($)</Label>
-              <Input
-                type="number"
-                value={newAccount.accountBalance}
-                onChange={(e) => setNewAccount({ ...newAccount, accountBalance: parseFloat(e.target.value) || 0 })}
-                data-testid="input-account-balance"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setAddAccountDialogOpen(false)}>Cancel</Button>
-            <Button 
-              onClick={() => addAccountMutation.mutate(newAccount)}
-              disabled={!newAccount.sportsbookName}
-              data-testid="button-confirm-add-account"
-            >
-              Add Account
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
       {/* Add Alert Dialog */}
       <Dialog open={addAlertDialogOpen} onOpenChange={setAddAlertDialogOpen}>
         <DialogContent>
