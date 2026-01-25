@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,11 +28,14 @@ import {
   AlertCircle,
   Star,
   Radio,
-  RefreshCw
+  RefreshCw,
+  HelpCircle,
+  Bell
 } from "lucide-react";
 import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
 import type { Sport } from "@shared/schema";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
+import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -241,8 +244,22 @@ export default function AutoGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [tickets, setTickets] = useState<GeneratedTicket[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [reminderSet, setReminderSet] = useState(false);
   
   const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
+  
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem("sors_tutorial_complete");
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
+  }, []);
+  
+  const handleTutorialComplete = () => {
+    setShowTutorial(false);
+    localStorage.setItem("sors_tutorial_complete", "true");
+  };
   
   const toggleSport = (sport: Sport) => {
     setSelectedSports(prev => 
@@ -250,6 +267,48 @@ export default function AutoGenerator() {
         ? prev.filter(s => s !== sport)
         : [...prev, sport]
     );
+  };
+  
+  const handleQuickPick = async () => {
+    setIsGenerating(true);
+    
+    const quickSports: Sport[] = ["NBA", "NFL", "MLB"];
+    setSelectedSports(quickSports);
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const request: TicketRequest = {
+      sports: quickSports,
+      bankroll: 500,
+      riskLevel: "moderate",
+      maxLegs: 3,
+      includeProps: true,
+    };
+    
+    const generatedTickets = generateTickets(request);
+    setTickets(generatedTickets);
+    setHasGenerated(true);
+    setIsGenerating(false);
+  };
+  
+  const handleSetReminder = () => {
+    if ("Notification" in window) {
+      Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+          setReminderSet(true);
+          setTimeout(() => {
+            new Notification("Sors Maxima", {
+              body: "Time to check today's best betting opportunities!",
+              icon: "/favicon.ico"
+            });
+          }, 4 * 60 * 60 * 1000);
+        } else {
+          setReminderSet(true);
+        }
+      });
+    } else {
+      setReminderSet(true);
+    }
   };
   
   const handleGenerate = async () => {
@@ -284,6 +343,8 @@ export default function AutoGenerator() {
   
   return (
     <div className="min-h-full">
+      <OnboardingTutorial isOpen={showTutorial} onComplete={handleTutorialComplete} />
+      
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
           <p className="text-xs text-yellow-600 dark:text-yellow-400">
@@ -305,7 +366,7 @@ export default function AutoGenerator() {
             optimal betting tickets with the highest probability of winning.
           </p>
           
-          <div className="flex items-center justify-center gap-4 pt-2">
+          <div className="flex items-center justify-center gap-4 pt-2 flex-wrap">
             <div className="flex items-center gap-2">
               <Radio className={`w-4 h-4 ${liveStatus?.available ? 'text-green-500 animate-pulse' : 'text-yellow-500'}`} />
               <span className="text-sm">
@@ -330,6 +391,28 @@ export default function AutoGenerator() {
             >
               <RefreshCw className="w-3 h-3" />
             </Button>
+          </div>
+          
+          <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
+            <Button
+              onClick={handleQuickPick}
+              disabled={isGenerating}
+              data-testid="button-quick-pick"
+            >
+              <Zap className="w-4 h-4" />
+              Quick Pick
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleSetReminder}
+              disabled={reminderSet}
+              className="gap-2"
+              data-testid="button-set-reminder"
+            >
+              <Bell className="w-4 h-4" />
+              {reminderSet ? "Reminder Set" : "Remind Me Later"}
+            </Button>
+            <TutorialButton onClick={() => setShowTutorial(true)} />
           </div>
         </header>
         
