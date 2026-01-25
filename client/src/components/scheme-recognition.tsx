@@ -423,8 +423,8 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
     <Card className="w-full" data-testid="scheme-recognition-card">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Brain className="w-5 h-5 text-primary" />
+          <CardTitle className="flex items-center gap-2 text-lg" data-testid="scheme-recognition-title">
+            <Brain className="w-5 h-5" />
             Scheme Recognition Engine
           </CardTitle>
           <Badge variant={mode === "live" ? "default" : "secondary"}>
@@ -649,7 +649,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                   <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-primary" />
+                    <Eye className="w-4 h-4" />
                     <span className="font-medium">{analysis.matchup}</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -667,7 +667,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                   <ul className="space-y-1">
                     {analysis.keyFactors.map((factor, j) => (
                       <li key={j} className="flex items-start gap-2 text-sm">
-                        <Target className="w-3 h-3 mt-0.5 text-primary shrink-0" />
+                        <Target className="w-3 h-3 mt-0.5 text-green-500 shrink-0" />
                         <span>{factor}</span>
                       </li>
                     ))}
@@ -689,9 +689,9 @@ export function SchemeAlertBanner() {
   if (highImpactAlerts.length === 0) return null;
   
   return (
-    <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 mb-4" data-testid="scheme-alert-banner">
+    <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-3 mb-4" data-testid="scheme-alert-banner">
       <div className="flex items-center gap-2 mb-2">
-        <Brain className="w-4 h-4 text-primary" />
+        <Brain className="w-4 h-4 text-green-500" />
         <span className="font-medium text-sm">Scheme Intelligence Detected</span>
         <Badge className="text-xs">{highImpactAlerts.length} high-impact</Badge>
       </div>
