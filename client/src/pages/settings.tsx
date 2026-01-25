@@ -19,11 +19,10 @@ import {
   AlertTriangle,
   CheckCircle,
   Ban,
-  FileText,
-  Wallet,
   Plus,
   Trash2,
-  Save
+  Save,
+  FileText
 } from "lucide-react";
 import {
   Dialog,
@@ -41,23 +40,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const SPORTSBOOKS = [
-  "DraftKings",
-  "FanDuel",
-  "BetMGM",
-  "Caesars",
-  "PointsBet",
-  "BetRivers",
-  "Barstool",
-  "Betway",
-  "Unibet",
-  "WynnBET",
-];
-
 export default function Settings() {
   const { toast } = useToast();
-  const [addAccountDialogOpen, setAddAccountDialogOpen] = useState(false);
-  const [newAccount, setNewAccount] = useState({ sportsbookName: "", accountBalance: 0 });
   const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
   const [newAlert, setNewAlert] = useState({ alertType: "daily_limit", threshold: 100 });
 
@@ -92,28 +76,6 @@ export default function Settings() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/responsible-gaming"] });
       toast({ title: "Cool-off period started" });
-    },
-  });
-
-  // Sportsbook Accounts
-  const { data: sportsbookAccounts = [] } = useQuery<any[]>({
-    queryKey: ["/api/sportsbooks"],
-  });
-
-  const addAccountMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/sportsbooks", data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sportsbooks"] });
-      setAddAccountDialogOpen(false);
-      toast({ title: "Account added" });
-    },
-  });
-
-  const deleteAccountMutation = useMutation({
-    mutationFn: (id: number) => apiRequest("DELETE", `/api/sportsbooks/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sportsbooks"] });
-      toast({ title: "Account removed" });
     },
   });
 
@@ -152,8 +114,6 @@ export default function Settings() {
     },
   });
 
-  const totalBankroll = sportsbookAccounts.reduce((sum: number, acc: any) => sum + (acc.accountBalance || 0), 0);
-
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6">
       <div className="max-w-4xl mx-auto space-y-6">
@@ -163,21 +123,17 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="notifications">
-          <TabsList className="w-full grid grid-cols-4 h-auto">
-            <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2" data-testid="tab-notifications">
-              <Bell className="h-4 w-4 mr-1" />
+          <TabsList className="w-full grid grid-cols-3 h-auto">
+            <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-notifications">
+              <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Alerts</span>
             </TabsTrigger>
-            <TabsTrigger value="accounts" className="text-xs sm:text-sm py-2" data-testid="tab-accounts">
-              <Wallet className="h-4 w-4 mr-1" />
-              <span className="hidden sm:inline">Books</span>
-            </TabsTrigger>
-            <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2" data-testid="tab-responsible">
-              <Shield className="h-4 w-4 mr-1" />
+            <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-responsible">
+              <Shield className="h-4 w-4" />
               <span className="hidden sm:inline">Limits</span>
             </TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs sm:text-sm py-2" data-testid="tab-backup">
-              <Download className="h-4 w-4 mr-1" />
+            <TabsTrigger value="backup" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-backup">
+              <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Backup</span>
             </TabsTrigger>
           </TabsList>
@@ -311,60 +267,6 @@ export default function Settings() {
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Alert
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="accounts" className="space-y-4 mt-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" />
-                  Sportsbook Accounts
-                </CardTitle>
-                <CardDescription>Track your balances across multiple sportsbooks</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="mb-4 p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">Total Bankroll</p>
-                  <p className="text-2xl font-bold text-green-500" data-testid="text-total-bankroll">
-                    ${totalBankroll.toLocaleString()}
-                  </p>
-                </div>
-
-                {sportsbookAccounts.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">No accounts added</p>
-                ) : (
-                  <div className="space-y-2">
-                    {sportsbookAccounts.map((account: any) => (
-                      <div key={account.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <span className="font-medium">{account.sportsbookName}</span>
-                          <p className="text-sm text-muted-foreground">
-                            Balance: ${account.accountBalance?.toLocaleString() || 0}
-                          </p>
-                        </div>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => deleteAccountMutation.mutate(account.id)}
-                          data-testid={`button-delete-account-${account.id}`}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <Button 
-                  className="w-full mt-4" 
-                  variant="outline"
-                  onClick={() => setAddAccountDialogOpen(true)}
-                  data-testid="button-add-account"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Sportsbook Account
                 </Button>
               </CardContent>
             </Card>

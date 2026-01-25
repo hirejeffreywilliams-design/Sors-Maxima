@@ -27,7 +27,7 @@ import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
 import TipsterCommunities from "@/pages/tipster-communities";
-import { Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, BarChart3, Brain, MessageCircle } from "lucide-react";
+import { Zap, History, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, FileText, Settings as SettingsIcon, Brain, MessageCircle } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 function Router() {
@@ -75,8 +75,7 @@ const navItems: NavItem[] = [
   { href: "/community", icon: Users, label: "Social", testId: "nav-community" },
   { href: "/tipster-communities", icon: MessageCircle, label: "Tipsters", testId: "nav-tipsters" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards" },
-  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "nav-bankroll" },
-  { href: "/analytics", icon: BarChart3, label: "Analytics", testId: "nav-analytics" },
+  { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-bankroll" },
   { href: "/tracker", icon: History, label: "History", testId: "nav-tracker" },
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings" },
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing" },
