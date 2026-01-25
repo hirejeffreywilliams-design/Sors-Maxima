@@ -29,7 +29,8 @@ Key features include:
 - **Tipster Communities**: Allows users to create or join communities, share picks, and monetize their insights (platform takes 15% of earnings).
 - **Gamification**: Includes daily challenges, achievements, streaks, and paper trading.
 - **Financial Tools**: Multi-book tracker, ROI dashboard, and tax export.
-- **Live Center**: Features a momentum tracker, hedge calculator, AI assistant, CLV tracker, and public vs. sharp money insights.
+- **Scheme Recognition Engine**: AI-powered analysis of team offensive/defensive schemes and coaching patterns from historical data. Identifies scheme mismatches, coaching tendencies (risk tolerance, tempo, aggression), and situational patterns (home/away, primetime, underdog/favorite) that affect betting outcomes. Available in both pre-game and live modes.
+- **Live Center**: Features a momentum tracker, scheme recognition (live mode), hedge calculator, AI assistant, CLV tracker, and public vs. sharp money insights.
 - **Admin Dashboards**: For user management, fraud detection, subscription stats, AI-powered quantum diagnostics, and AI marketing tools.
 
 ## External Dependencies
