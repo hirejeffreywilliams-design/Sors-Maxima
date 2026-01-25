@@ -33,11 +33,13 @@ import {
   Bell
 } from "lucide-react";
 import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
+import { analyzeTicket, type TicketFusion } from "@/lib/quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { BettingInsights } from "@/components/betting-insights";
 import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recognition";
+import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/quantum-fusion-display";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -245,6 +247,7 @@ export default function AutoGenerator() {
   const [showSettings, setShowSettings] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [tickets, setTickets] = useState<GeneratedTicket[]>([]);
+  const [ticketFusions, setTicketFusions] = useState<TicketFusion[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
@@ -289,6 +292,20 @@ export default function AutoGenerator() {
     
     const generatedTickets = generateTickets(request);
     setTickets(generatedTickets);
+    
+    const fusions = generatedTickets.map(ticket => 
+      analyzeTicket(
+        ticket.legs.map((leg, i) => ({
+          id: `leg-${i}`,
+          sport: ticket.sport,
+          description: `${leg.team} ${leg.market} ${leg.outcome}`,
+          odds: leg.americanOdds
+        })),
+        "moderate"
+      )
+    );
+    setTicketFusions(fusions);
+    
     setHasGenerated(true);
     setIsGenerating(false);
   };
@@ -330,6 +347,20 @@ export default function AutoGenerator() {
     
     const generatedTickets = generateTickets(request);
     setTickets(generatedTickets);
+    
+    const fusions = generatedTickets.map(ticket => 
+      analyzeTicket(
+        ticket.legs.map((leg, i) => ({
+          id: `leg-${i}`,
+          sport: ticket.sport,
+          description: `${leg.team} ${leg.market} ${leg.outcome}`,
+          odds: leg.americanOdds
+        })),
+        riskLevel as "conservative" | "moderate" | "aggressive"
+      )
+    );
+    setTicketFusions(fusions);
+    
     setHasGenerated(true);
     setIsGenerating(false);
   };
@@ -597,6 +628,8 @@ export default function AutoGenerator() {
         
         {hasGenerated && !isGenerating && tickets.length > 0 && (
           <div className="space-y-4">
+            <QuantumFusionEngineBanner />
+            
             <SchemeAlertBanner />
             
             <div className="flex items-center justify-between flex-wrap gap-2">
@@ -614,6 +647,18 @@ export default function AutoGenerator() {
                 <TicketCard key={ticket.id} ticket={ticket} index={idx} />
               ))}
             </div>
+            
+            {ticketFusions.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Brain className="w-5 h-5" />
+                  Quantum Fusion Analysis
+                </h3>
+                {ticketFusions.map((fusion, idx) => (
+                  <TicketFusionDisplay key={fusion.ticketId} ticketFusion={fusion} />
+                ))}
+              </div>
+            )}
           </div>
         )}
         
