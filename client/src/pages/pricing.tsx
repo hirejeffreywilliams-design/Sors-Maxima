@@ -305,13 +305,6 @@ export default function Pricing() {
           </div>
         </div>
 
-        <div className="text-center space-y-4">
-          <h2 className="text-xl font-semibold">Money-Back Guarantee</h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Try any premium plan risk-free for 7 days. If you're not completely satisfied, 
-            we'll refund your payment in full - no questions asked.
-          </p>
-        </div>
       </div>
     </div>
   );
