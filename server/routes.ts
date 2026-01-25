@@ -12,6 +12,7 @@ import { errorLogger } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
+import { sportsDataService } from "./sportsDataService";
 
 declare module "express-session" {
   interface SessionData {
@@ -1640,6 +1641,65 @@ Format your response clearly with sections and bullet points.`;
     } catch (err) {
       res.status(500).json({ error: "Failed to get odds comparison" });
     }
+  });
+
+  // ========== LIVE SPORTS DATA API ==========
+  
+  // Get live odds for a specific sport
+  app.get("/api/live/odds/:sport", async (req, res) => {
+    try {
+      const { sport } = req.params;
+      const odds = await sportsDataService.fetchOdds(sport);
+      res.json({
+        sport,
+        games: odds,
+        apiStatus: sportsDataService.getApiStatus(),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('[Routes] Error fetching live odds:', err);
+      res.status(500).json({ error: "Failed to fetch live odds" });
+    }
+  });
+
+  // Get live odds for all sports
+  app.get("/api/live/odds", async (_req, res) => {
+    try {
+      const allOdds = await sportsDataService.fetchAllSportsOdds();
+      res.json({
+        sports: allOdds,
+        apiStatus: sportsDataService.getApiStatus(),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('[Routes] Error fetching all odds:', err);
+      res.status(500).json({ error: "Failed to fetch live odds" });
+    }
+  });
+
+  // Get available sports
+  app.get("/api/live/sports", async (_req, res) => {
+    try {
+      const sports = await sportsDataService.getAvailableSports();
+      res.json({
+        sports,
+        apiStatus: sportsDataService.getApiStatus(),
+      });
+    } catch (err) {
+      console.error('[Routes] Error fetching sports:', err);
+      res.status(500).json({ error: "Failed to fetch sports list" });
+    }
+  });
+
+  // Get API status
+  app.get("/api/live/status", (_req, res) => {
+    res.json(sportsDataService.getApiStatus());
+  });
+
+  // Admin: Clear cache to force fresh data
+  app.post("/api/admin/live/clear-cache", requireAdmin, (_req, res) => {
+    sportsDataService.clearCache();
+    res.json({ success: true, message: "Sports data cache cleared" });
   });
 
   return httpServer;

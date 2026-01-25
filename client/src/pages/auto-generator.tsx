@@ -26,10 +26,13 @@ import {
   Copy,
   CheckCircle2,
   AlertCircle,
-  Star
+  Star,
+  Radio,
+  RefreshCw
 } from "lucide-react";
 import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
 import type { Sport } from "@shared/schema";
+import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -239,6 +242,8 @@ export default function AutoGenerator() {
   const [tickets, setTickets] = useState<GeneratedTicket[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
   
+  const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
+  
   const toggleSport = (sport: Sport) => {
     setSelectedSports(prev => 
       prev.includes(sport) 
@@ -299,6 +304,33 @@ export default function AutoGenerator() {
             Select your sports, and our AI-powered engine will analyze 40+ factors to generate 
             optimal betting tickets with the highest probability of winning.
           </p>
+          
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <div className="flex items-center gap-2">
+              <Radio className={`w-4 h-4 ${liveStatus?.available ? 'text-green-500 animate-pulse' : 'text-yellow-500'}`} />
+              <span className="text-sm">
+                {liveStatus?.available ? (
+                  <span className="text-green-600 dark:text-green-400">Live Odds Connected</span>
+                ) : (
+                  <span className="text-yellow-600 dark:text-yellow-400">Demo Mode</span>
+                )}
+              </span>
+            </div>
+            {liveStatus?.requestsRemaining !== null && liveStatus?.requestsRemaining !== undefined && (
+              <Badge variant="outline" className="text-xs">
+                {liveStatus.requestsRemaining} API calls remaining
+              </Badge>
+            )}
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              onClick={() => refetchStatus()}
+              className="h-7"
+              data-testid="button-refresh-status"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
+          </div>
         </header>
         
         <Card>
