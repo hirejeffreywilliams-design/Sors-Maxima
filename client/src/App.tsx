@@ -3,7 +3,7 @@ import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -65,20 +65,21 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   testId: string;
+  tooltip: string;
   adminOnly?: boolean;
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate" },
-  { href: "/live", icon: Activity, label: "Live", testId: "nav-live" },
-  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools" },
-  { href: "/community", icon: Users, label: "Community", testId: "nav-community" },
-  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards" },
-  { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance" },
-  { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings" },
-  { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing" },
-  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", adminOnly: true },
-  { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", adminOnly: true },
+  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "AI-powered Smart Ticket Generator - Create optimized parlays" },
+  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
+  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, ML projections" },
+  { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },
+  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },
+  { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance", tooltip: "Track bets, ROI, multi-book balances, and taxes" },
+  { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings", tooltip: "Notifications, responsible gaming, and backup" },
+  { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing", tooltip: "Upgrade to Pro for unlimited features" },
+  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin dashboard - User management and stats", adminOnly: true },
+  { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", tooltip: "AI-powered system diagnostics", adminOnly: true },
 ];
 
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
@@ -99,6 +100,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
                     isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
                   }`}
                   data-testid={`mobile-${item.testId}`}
+                  title={item.tooltip}
                 >
                   <Icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
@@ -146,17 +148,27 @@ function DesktopNav({ authState }: { authState: AuthState }) {
         const Icon = item.icon;
         const isActive = location === item.href;
         return (
-          <Link key={item.href} href={item.href}>
-            <Button 
-              variant={isActive ? "secondary" : "ghost"} 
-              size="sm" 
-              className="gap-2"
-              data-testid={item.testId}
-            >
-              <Icon className="w-4 h-4" />
-              <span className="hidden xl:inline">{item.label}</span>
-            </Button>
-          </Link>
+          <Tooltip key={item.href}>
+            <TooltipTrigger asChild>
+              <div>
+                <Link href={item.href}>
+                  <Button 
+                    variant={isActive ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="gap-2"
+                    data-testid={item.testId}
+                    title={item.tooltip}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden xl:inline">{item.label}</span>
+                  </Button>
+                </Link>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs">
+              <p>{item.tooltip}</p>
+            </TooltipContent>
+          </Tooltip>
         );
       })}
     </nav>

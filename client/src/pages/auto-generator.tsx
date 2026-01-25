@@ -36,6 +36,7 @@ import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib
 import type { Sport } from "@shared/schema";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
+import { BettingInsights } from "@/components/betting-insights";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -622,6 +623,8 @@ export default function AutoGenerator() {
             </CardContent>
           </Card>
         )}
+        
+        <BettingInsights />
         
         <footer className="pt-4 border-t text-center">
           <p className="text-xs text-muted-foreground">
