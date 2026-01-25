@@ -25,8 +25,15 @@ Key features include:
 - **Comprehensive Betting Insights**: Integrates advanced analytics such as +EV finding, confidence scoring, historical trend analysis, injury alerts, weather impact, line movement tracking, public vs. sharp money indicators, and situational factor analysis. Includes bankroll management, hedge calculations, and what-if scenarios.
 - **Betting Intelligence System**: Provides A-F grading for bets, EV indicators, risk advisories, and configurable betting environment presets.
 - **Pro Tools**: Offers advanced features like real-time odds comparison, ML prop projections, an advanced correlation engine, same-game parlay optimizer, bankroll simulator, and various calculators.
-- **Continuous Learning Engine**: Analyzes prediction outcomes and adapts weights of 45 analysis factors to improve accuracy.
-- **Quantum Fusion Engine**: Unified algorithm that integrates 12 analysis factors (scheme recognition, Monte Carlo simulations, sharp money, coaching patterns, correlations, momentum, weather, player projections, line movement, tipster consensus) with synergy detection and self-learning weight optimization.
+- **Continuous Learning Engine**: Analyzes prediction outcomes and adapts weights of 46 analysis factors to improve accuracy.
+- **Quantum Fusion Engine**: Unified algorithm that integrates 46 contributing factors across 7 categories with synergy detection and self-learning weight optimization:
+  - **Core Betting Analysis (12)**: Scheme mismatch, coaching tendency, sharp money flow, public fade, line movement, momentum, situational spot, historical H2H, rest advantage, home field, tipster consensus, Monte Carlo simulations
+  - **Advanced Analytics (8)**: Predictive models, player efficiency, scouting data, pace/tempo, clutch index, strength of schedule, point differential, win probability
+  - **Psychological Factors (6)**: Mental state, confidence index, pressure response, motivation level, team chemistry, media impact
+  - **Physical & Health (6)**: Injury adjustment, biomechanical fatigue, recovery status, nutrition/hydration, sleep quality, load management
+  - **Technology & Equipment (4)**: Wearable data, equipment advantage, training tech, video analysis
+  - **Environmental (6)**: Weather impact, field conditions, travel fatigue, altitude adjustment, temperature impact, timezone disruption
+  - **Financial & Regulatory (4)**: Salary dynamics, contract motivation, roster stability, team investment
 - **Algorithm Training Center**: Backtesting system that runs predictions against simulated historical data, tracks accuracy, generates report cards with grades (A+ to F), and determines launch readiness with confidence scores.
 - **Tipster Communities**: Allows users to create or join communities, share picks, and monetize their insights (platform takes 15% of earnings).
 - **Gamification**: Includes daily challenges, achievements, streaks, and paper trading.

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Atom,
   Brain,
@@ -19,10 +20,14 @@ import {
   BarChart3,
   Lightbulb,
   Link2,
-  Gauge
+  Gauge,
+  Heart,
+  Cpu,
+  Cloud,
+  DollarSign
 } from "lucide-react";
-import type { FusionAnalysis, TicketFusion, SynergyEffect } from "@/lib/quantum-fusion-engine";
-import { getEngineStats } from "@/lib/quantum-fusion-engine";
+import type { FusionAnalysis, TicketFusion, SynergyEffect, FusionSignal } from "@/lib/quantum-fusion-engine";
+import { getEngineStats, getSignalsByCategory, FACTOR_CATEGORIES } from "@/lib/quantum-fusion-engine";
 
 interface QuantumStateDisplayProps {
   quantumState: FusionAnalysis["quantumState"];
@@ -100,6 +105,94 @@ function SignalBar({ source, direction, strength, confidence }: SignalBarProps) 
         <span className="text-xs text-muted-foreground w-8">{strength}%</span>
         <Badge variant="outline" className="text-xs">{confidence}%</Badge>
       </div>
+    </div>
+  );
+}
+
+// Category icon mapping
+function getCategoryIcon(iconName: string) {
+  switch (iconName) {
+    case "TrendingUp": return <TrendingUp className="w-4 h-4" />;
+    case "BarChart3": return <BarChart3 className="w-4 h-4" />;
+    case "Brain": return <Brain className="w-4 h-4" />;
+    case "Heart": return <Heart className="w-4 h-4" />;
+    case "Cpu": return <Cpu className="w-4 h-4" />;
+    case "Cloud": return <Cloud className="w-4 h-4" />;
+    case "DollarSign": return <DollarSign className="w-4 h-4" />;
+    default: return <Activity className="w-4 h-4" />;
+  }
+}
+
+interface CategorySignalsProps {
+  signals: FusionSignal[];
+}
+
+function CategorySignals({ signals }: CategorySignalsProps) {
+  const groupedSignals = getSignalsByCategory(signals);
+  const [expandedCat, setExpandedCat] = useState<string | null>(null);
+  
+  // Calculate category scores
+  const categoryScores = Object.entries(groupedSignals).map(([catKey, catSignals]) => {
+    const catInfo = FACTOR_CATEGORIES[catKey as keyof typeof FACTOR_CATEGORIES];
+    const avgStrength = catSignals.length > 0 
+      ? Math.round(catSignals.reduce((sum, s) => sum + s.strength, 0) / catSignals.length)
+      : 0;
+    const bullishCount = catSignals.filter(s => s.direction === "bullish").length;
+    const bearishCount = catSignals.filter(s => s.direction === "bearish").length;
+    const sentiment = bullishCount > bearishCount ? "bullish" : bearishCount > bullishCount ? "bearish" : "neutral";
+    
+    return {
+      key: catKey,
+      name: catInfo.name,
+      icon: catInfo.icon,
+      description: catInfo.description,
+      signals: catSignals,
+      avgStrength,
+      sentiment,
+      factorCount: catSignals.length
+    };
+  }).filter(cat => cat.signals.length > 0);
+  
+  return (
+    <div className="space-y-2" data-testid="category-signals">
+      {categoryScores.map(cat => (
+        <Collapsible 
+          key={cat.key} 
+          open={expandedCat === cat.key}
+          onOpenChange={(open) => setExpandedCat(open ? cat.key : null)}
+        >
+          <CollapsibleTrigger asChild>
+            <div className="flex items-center gap-2 p-2 rounded bg-card border hover-elevate cursor-pointer" data-testid={`category-${cat.key}`}>
+              <div className={`${cat.sentiment === "bullish" ? "text-green-500" : cat.sentiment === "bearish" ? "text-red-500" : "text-muted-foreground"}`}>
+                {getCategoryIcon(cat.icon)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-sm truncate">{cat.name}</span>
+                  <Badge variant="outline" className="text-xs shrink-0">{cat.factorCount} factors</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground truncate">{cat.description}</p>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                <Progress value={cat.avgStrength} className="w-16 h-2" />
+                <span className="text-sm font-medium w-10 text-right">{cat.avgStrength}%</span>
+                {expandedCat === cat.key ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </div>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="pl-6 pt-2 space-y-1">
+            {cat.signals.map((signal, i) => (
+              <SignalBar 
+                key={i}
+                source={signal.source}
+                direction={signal.direction}
+                strength={signal.strength}
+                confidence={signal.confidence}
+              />
+            ))}
+          </CollapsibleContent>
+        </Collapsible>
+      ))}
     </div>
   );
 }
@@ -231,19 +324,9 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
             <div>
               <div className="flex items-center gap-1 text-sm font-medium mb-2">
                 <BarChart3 className="w-4 h-4" />
-                <span>Signal Analysis ({fusion.signals.length} factors)</span>
+                <span>Contributing Factors ({fusion.signals.length} total across 7 categories)</span>
               </div>
-              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                {fusion.signals.map((signal, i) => (
-                  <SignalBar 
-                    key={i} 
-                    source={signal.source} 
-                    direction={signal.direction} 
-                    strength={signal.strength}
-                    confidence={signal.confidence}
-                  />
-                ))}
-              </div>
+              <CategorySignals signals={fusion.signals} />
             </div>
             
             <SynergyDisplay synergies={fusion.synergies} />
