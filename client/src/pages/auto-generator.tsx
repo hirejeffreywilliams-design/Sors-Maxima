@@ -37,6 +37,7 @@ import type { Sport } from "@shared/schema";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { BettingInsights } from "@/components/betting-insights";
+import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recognition";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -596,6 +597,8 @@ export default function AutoGenerator() {
         
         {hasGenerated && !isGenerating && tickets.length > 0 && (
           <div className="space-y-4">
+            <SchemeAlertBanner />
+            
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Star className="w-5 h-5 text-yellow-500" />
@@ -623,6 +626,11 @@ export default function AutoGenerator() {
             </CardContent>
           </Card>
         )}
+        
+        <SchemeRecognition 
+          mode="pre-game" 
+          selectedSports={selectedSports.length > 0 ? selectedSports : ["NBA", "NFL", "MLB"]} 
+        />
         
         <BettingInsights />
         
