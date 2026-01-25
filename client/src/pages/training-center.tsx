@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   backtestingEngine, 
   type PerformanceMetrics, 
@@ -11,6 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { apiRequest } from "@/lib/queryClient";
 import { 
   Brain, 
   Play, 
@@ -31,8 +34,42 @@ import {
   Lightbulb,
   Clock,
   Award,
-  Sparkles
+  Sparkles,
+  Radio,
+  RefreshCw,
+  Pause,
+  CircleDot
 } from "lucide-react";
+
+interface LiveGame {
+  id: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  status: "scheduled" | "in_progress" | "final" | "postponed";
+  startTime: string;
+  period?: string;
+  timeRemaining?: string;
+  odds?: {
+    homeMoneyline: number;
+    awayMoneyline: number;
+    spread: number;
+    total: number;
+  };
+}
+
+interface GameResult {
+  gameId: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  winner: "home" | "away" | "tie";
+  completedAt: string;
+}
 
 export default function TrainingCenter() {
   const [isTraining, setIsTraining] = useState(false);
@@ -41,6 +78,33 @@ export default function TrainingCenter() {
   const [reportCard, setReportCard] = useState<ReportCard | null>(null);
   const [eventCount, setEventCount] = useState(500);
   const [results, setResults] = useState<BacktestResult[]>([]);
+  const [activeTab, setActiveTab] = useState("simulation");
+  const queryClient = useQueryClient();
+
+  const { data: liveGamesData, refetch: refetchLiveGames, isLoading: isLoadingGames } = useQuery<{
+    games: LiveGame[];
+    totalGames: number;
+    inProgress: number;
+    scheduled: number;
+  }>({
+    queryKey: ["/api/training/live-games"],
+    refetchInterval: 10000,
+  });
+
+  const { data: gameResultsData, refetch: refetchResults, isLoading: isLoadingResults } = useQuery<{
+    results: GameResult[];
+    totalCompleted: number;
+  }>({
+    queryKey: ["/api/training/results"],
+    refetchInterval: 15000,
+  });
+
+  const refreshGamesMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/training/refresh"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/training/live-games"] });
+    },
+  });
 
   useEffect(() => {
     const unsubscribe = backtestingEngine.subscribe(() => {
@@ -104,6 +168,191 @@ export default function TrainingCenter() {
         </Badge>
       </div>
 
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="simulation" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            Simulation Training
+          </TabsTrigger>
+          <TabsTrigger value="live" className="flex items-center gap-2">
+            <Radio className="w-4 h-4" />
+            Live Games
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="live" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Radio className="w-5 h-5 text-red-500 animate-pulse" />
+                    Live Game Tracking
+                  </CardTitle>
+                  <CardDescription>
+                    Watch real-time games and learn from actual outcomes
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => refetchLiveGames()}
+                    data-testid="button-refresh-live"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => refreshGamesMutation.mutate()}
+                    disabled={refreshGamesMutation.isPending}
+                    data-testid="button-new-games"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    New Games
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isLoadingGames ? (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="p-3 rounded-lg bg-muted/50 text-center animate-pulse">
+                        <div className="h-8 w-16 bg-muted rounded mx-auto mb-1" />
+                        <div className="h-3 w-20 bg-muted rounded mx-auto" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {[1, 2, 3, 4, 5, 6].map(i => (
+                      <Card key={i} className="animate-pulse">
+                        <CardContent className="pt-4">
+                          <div className="h-4 w-16 bg-muted rounded mb-3" />
+                          <div className="space-y-2">
+                            <div className="h-5 w-full bg-muted rounded" />
+                            <div className="h-5 w-full bg-muted rounded" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : !liveGamesData || liveGamesData.games.length === 0 ? (
+                <div className="text-center py-8">
+                  <Radio className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">No live games available</p>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="mt-3"
+                    onClick={() => refreshGamesMutation.mutate()}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Generate Games
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="p-3 rounded-lg bg-muted/50 text-center">
+                      <p className="text-2xl font-bold">{liveGamesData.totalGames}</p>
+                      <p className="text-xs text-muted-foreground">Total Games</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-green-500/10 text-center">
+                      <p className="text-2xl font-bold text-green-500">{liveGamesData.inProgress}</p>
+                      <p className="text-xs text-muted-foreground">In Progress</p>
+                    </div>
+                    <div className="p-3 rounded-lg bg-blue-500/10 text-center">
+                      <p className="text-2xl font-bold text-blue-500">{liveGamesData.scheduled}</p>
+                      <p className="text-xs text-muted-foreground">Scheduled</p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                    {liveGamesData.games.map((game) => (
+                      <Card key={game.id} className={game.status === "in_progress" ? "border-green-500/50" : ""}>
+                        <CardContent className="pt-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge variant="outline" className="text-xs">{game.sport}</Badge>
+                            {game.status === "in_progress" ? (
+                              <Badge className="bg-green-500 text-xs">
+                                <CircleDot className="w-3 h-3 mr-1 animate-pulse" />
+                                LIVE {game.period}
+                              </Badge>
+                            ) : game.status === "scheduled" ? (
+                              <Badge variant="secondary" className="text-xs">
+                                <Clock className="w-3 h-3 mr-1" />
+                                Scheduled
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="text-xs">Final</Badge>
+                            )}
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{game.homeTeam}</span>
+                              <span className="text-lg font-bold">{game.homeScore}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{game.awayTeam}</span>
+                              <span className="text-lg font-bold">{game.awayScore}</span>
+                            </div>
+                          </div>
+                          {game.odds && (
+                            <div className="mt-3 pt-3 border-t text-xs text-muted-foreground">
+                              <div className="flex justify-between">
+                                <span>ML: {game.odds.homeMoneyline > 0 ? "+" : ""}{game.odds.homeMoneyline}</span>
+                                <span>Spread: {game.odds.spread > 0 ? "+" : ""}{game.odds.spread}</span>
+                                <span>O/U: {game.odds.total}</span>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {gameResultsData && gameResultsData.results.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-500" />
+                  Completed Games ({gameResultsData.totalCompleted})
+                </CardTitle>
+                <CardDescription>
+                  Games that have finished - used to train the algorithm
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {gameResultsData.results.slice().reverse().map((result) => (
+                    <div key={result.gameId} className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
+                      <div className="flex items-center gap-3">
+                        <Badge variant="outline" className="text-xs">{result.sport}</Badge>
+                        <span className="text-sm">
+                          {result.homeTeam} {result.homeScore} - {result.awayScore} {result.awayTeam}
+                        </span>
+                      </div>
+                      <Badge className={result.winner === "home" ? "bg-green-500" : result.winner === "away" ? "bg-blue-500" : "bg-gray-500"}>
+                        {result.winner === "home" ? result.homeTeam : result.winner === "away" ? result.awayTeam : "Tie"} Won
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="simulation" className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -485,6 +734,8 @@ export default function TrainingCenter() {
           </CardContent>
         </Card>
       )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

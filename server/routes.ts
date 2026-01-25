@@ -1702,5 +1702,89 @@ Format your response clearly with sections and bullet points.`;
     res.json({ success: true, message: "Sports data cache cleared" });
   });
 
+  // === Live Sports Simulation for Training ===
+  const { liveSportsData } = await import("./live-sports-data");
+
+  // Get all live games
+  app.get("/api/training/live-games", (_req, res) => {
+    try {
+      const games = liveSportsData.getLiveGames();
+      res.json({ 
+        games,
+        totalGames: games.length,
+        inProgress: games.filter(g => g.status === "in_progress").length,
+        scheduled: games.filter(g => g.status === "scheduled").length,
+      });
+    } catch (err) {
+      console.error('[Routes] Error fetching live games:', err);
+      res.status(500).json({ error: "Failed to fetch live games" });
+    }
+  });
+
+  // Get completed game results
+  app.get("/api/training/results", (_req, res) => {
+    try {
+      const results = liveSportsData.getRecentResults(50);
+      res.json({ 
+        results,
+        totalCompleted: results.length,
+      });
+    } catch (err) {
+      console.error('[Routes] Error fetching results:', err);
+      res.status(500).json({ error: "Failed to fetch game results" });
+    }
+  });
+
+  // Start/stop game simulation
+  app.post("/api/training/simulation/start", requireAdmin, (_req, res) => {
+    try {
+      liveSportsData.startSimulation();
+      res.json({ success: true, message: "Live game simulation started" });
+    } catch (err) {
+      console.error('[Routes] Error starting simulation:', err);
+      res.status(500).json({ error: "Failed to start simulation" });
+    }
+  });
+
+  app.post("/api/training/simulation/stop", requireAdmin, (_req, res) => {
+    try {
+      liveSportsData.stopSimulation();
+      res.json({ success: true, message: "Live game simulation stopped" });
+    } catch (err) {
+      console.error('[Routes] Error stopping simulation:', err);
+      res.status(500).json({ error: "Failed to stop simulation" });
+    }
+  });
+
+  // Refresh games (generate new set)
+  app.post("/api/training/refresh", requireAdmin, (_req, res) => {
+    try {
+      liveSportsData.refreshGames();
+      const games = liveSportsData.getLiveGames();
+      res.json({ 
+        success: true, 
+        message: "Games refreshed",
+        games,
+      });
+    } catch (err) {
+      console.error('[Routes] Error refreshing games:', err);
+      res.status(500).json({ error: "Failed to refresh games" });
+    }
+  });
+
+  // Clear completed results
+  app.post("/api/training/clear-results", requireAdmin, (_req, res) => {
+    try {
+      liveSportsData.clearCompletedGames();
+      res.json({ success: true, message: "Completed games cleared" });
+    } catch (err) {
+      console.error('[Routes] Error clearing results:', err);
+      res.status(500).json({ error: "Failed to clear results" });
+    }
+  });
+
+  // Start simulation automatically
+  liveSportsData.startSimulation();
+
   return httpServer;
 }
