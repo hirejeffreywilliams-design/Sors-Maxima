@@ -1,5 +1,68 @@
-import { analyzeTicket, recordOutcome, getEngineStats, type TicketFusion, type FusionAnalysis } from "./quantum-fusion-engine";
+import { analyzeTicket, recordOutcome, getEngineStats, getAllFactors, getFactorCategories, applyOptimizedWeights, type TicketFusion, type FusionAnalysis, type FusionWeight } from "./quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
+
+// Launch criteria thresholds
+export const LAUNCH_CRITERIA = {
+  minAccuracy: 54,
+  minROI: 2,
+  minCalibration: 65,
+  minPredictions: 500,
+  minSportAccuracy: 48,
+  minHighConfidenceAccuracy: 58,
+  minLearningTrend: 45,
+} as const;
+
+export interface LaunchReadiness {
+  overallReady: boolean;
+  readinessScore: number;
+  criteria: {
+    name: string;
+    description: string;
+    threshold: number;
+    current: number;
+    passed: boolean;
+    priority: "critical" | "important" | "recommended";
+  }[];
+  daysToLaunch: number;
+  launchDate: Date;
+}
+
+export interface FactorAnalysis {
+  factor: string;
+  category: string;
+  weight: number;
+  accuracy: number;
+  contribution: number;
+  trend: "improving" | "stable" | "declining";
+  rank: number;
+  recommendation: string | null;
+}
+
+export interface StressTestResult {
+  scenario: string;
+  description: string;
+  predictions: number;
+  accuracy: number;
+  roi: number;
+  passed: boolean;
+  issues: string[];
+}
+
+export interface TrainingReport {
+  generatedAt: Date;
+  sessionId: string;
+  summary: {
+    totalPredictions: number;
+    accuracy: number;
+    roi: number;
+    grade: string;
+    readyForLaunch: boolean;
+  };
+  metrics: PerformanceMetrics;
+  factorAnalysis: FactorAnalysis[];
+  launchReadiness: LaunchReadiness;
+  recommendations: string[];
+}
 
 export interface HistoricalEvent {
   id: string;
@@ -472,6 +535,348 @@ class BacktestingEngine {
     this.trainingProgress = 0;
     this.isRunning = false;
     this.notify();
+  }
+
+  // Launch Readiness Assessment
+  getLaunchReadiness(launchDate: Date = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)): LaunchReadiness {
+    const metrics = this.getMetrics();
+    const sportAccuracies = Object.values(metrics.bySport);
+    const minSportAcc = sportAccuracies.length > 0 
+      ? Math.min(...sportAccuracies.map(s => s.accuracy)) 
+      : 0;
+    
+    const learningTrend = metrics.learningCurve.length >= 3
+      ? (() => {
+          const recent = metrics.learningCurve.slice(-2);
+          const older = metrics.learningCurve.slice(0, 2);
+          const recentAvg = recent.reduce((s, w) => s + w.accuracy, 0) / Math.max(1, recent.length);
+          const olderAvg = older.reduce((s, w) => s + w.accuracy, 0) / Math.max(1, older.length);
+          return 50 + (recentAvg - olderAvg);
+        })()
+      : 50;
+
+    const criteria = [
+      {
+        name: "Overall Accuracy",
+        description: `Prediction accuracy must be at least ${LAUNCH_CRITERIA.minAccuracy}%`,
+        threshold: LAUNCH_CRITERIA.minAccuracy,
+        current: metrics.accuracy,
+        passed: metrics.accuracy >= LAUNCH_CRITERIA.minAccuracy,
+        priority: "critical" as const,
+      },
+      {
+        name: "Return on Investment",
+        description: `ROI must be at least ${LAUNCH_CRITERIA.minROI}%`,
+        threshold: LAUNCH_CRITERIA.minROI,
+        current: metrics.roi,
+        passed: metrics.roi >= LAUNCH_CRITERIA.minROI,
+        priority: "critical" as const,
+      },
+      {
+        name: "Confidence Calibration",
+        description: `Calibration score must be at least ${LAUNCH_CRITERIA.minCalibration}`,
+        threshold: LAUNCH_CRITERIA.minCalibration,
+        current: metrics.confidenceCalibration,
+        passed: metrics.confidenceCalibration >= LAUNCH_CRITERIA.minCalibration,
+        priority: "important" as const,
+      },
+      {
+        name: "Training Volume",
+        description: `At least ${LAUNCH_CRITERIA.minPredictions} predictions required`,
+        threshold: LAUNCH_CRITERIA.minPredictions,
+        current: metrics.totalPredictions,
+        passed: metrics.totalPredictions >= LAUNCH_CRITERIA.minPredictions,
+        priority: "critical" as const,
+      },
+      {
+        name: "Sport Coverage",
+        description: `No sport below ${LAUNCH_CRITERIA.minSportAccuracy}% accuracy`,
+        threshold: LAUNCH_CRITERIA.minSportAccuracy,
+        current: minSportAcc,
+        passed: minSportAcc >= LAUNCH_CRITERIA.minSportAccuracy,
+        priority: "important" as const,
+      },
+      {
+        name: "High Confidence Picks",
+        description: `High confidence picks must be ${LAUNCH_CRITERIA.minHighConfidenceAccuracy}%+ accurate`,
+        threshold: LAUNCH_CRITERIA.minHighConfidenceAccuracy,
+        current: metrics.byConfidenceLevel.high.accuracy,
+        passed: metrics.byConfidenceLevel.high.accuracy >= LAUNCH_CRITERIA.minHighConfidenceAccuracy,
+        priority: "important" as const,
+      },
+      {
+        name: "Learning Trend",
+        description: `Algorithm must show positive learning`,
+        threshold: LAUNCH_CRITERIA.minLearningTrend,
+        current: learningTrend,
+        passed: learningTrend >= LAUNCH_CRITERIA.minLearningTrend,
+        priority: "recommended" as const,
+      },
+    ];
+
+    const criticalPassed = criteria.filter(c => c.priority === "critical" && c.passed).length;
+    const criticalTotal = criteria.filter(c => c.priority === "critical").length;
+    const importantPassed = criteria.filter(c => c.priority === "important" && c.passed).length;
+    const importantTotal = criteria.filter(c => c.priority === "important").length;
+    
+    const readinessScore = (criticalPassed / criticalTotal * 60) + (importantPassed / importantTotal * 30) + 
+      (criteria.filter(c => c.priority === "recommended" && c.passed).length / 
+       criteria.filter(c => c.priority === "recommended").length * 10);
+
+    const daysToLaunch = Math.max(0, Math.ceil((launchDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+
+    return {
+      overallReady: criticalPassed === criticalTotal && importantPassed >= importantTotal - 1,
+      readinessScore,
+      criteria,
+      daysToLaunch,
+      launchDate,
+    };
+  }
+
+  // Factor Performance Analysis
+  getFactorAnalysis(): FactorAnalysis[] {
+    const factors = getAllFactors();
+    const categories = getFactorCategories();
+    const engineStats = getEngineStats();
+    
+    const categoryMap: Record<string, string> = {};
+    for (const [catKey, catData] of Object.entries(categories)) {
+      for (const factor of catData.factors) {
+        categoryMap[factor] = catKey;
+      }
+    }
+
+    const factorAnalysis: FactorAnalysis[] = factors.map((f, index) => {
+      const category = categoryMap[f.factor] || "unknown";
+      const contribution = f.weight * f.historicalAccuracy;
+      
+      let recommendation: string | null = null;
+      if (f.historicalAccuracy < 0.52) {
+        recommendation = "Consider reducing weight or improving data sources";
+      } else if (f.recentTrend === "declining" && f.historicalAccuracy > 0.6) {
+        recommendation = "Monitor closely - previously strong but declining";
+      } else if (f.recentTrend === "improving" && f.weight < 0.02) {
+        recommendation = "Consider increasing weight - showing improvement";
+      }
+
+      return {
+        factor: f.factor,
+        category,
+        weight: f.weight,
+        accuracy: f.historicalAccuracy * 100,
+        contribution,
+        trend: f.recentTrend,
+        rank: 0,
+        recommendation,
+      };
+    });
+
+    // Sort by contribution and assign ranks
+    factorAnalysis.sort((a, b) => b.contribution - a.contribution);
+    factorAnalysis.forEach((f, i) => f.rank = i + 1);
+
+    return factorAnalysis;
+  }
+
+  // Stress Testing
+  async runStressTest(scenario: "extreme_odds" | "high_volume" | "volatile_market" | "underdog_heavy"): Promise<StressTestResult> {
+    const scenarios = {
+      extreme_odds: {
+        name: "Extreme Odds",
+        description: "Testing with heavy favorites (-300+) and long shots (+500+)",
+        oddsRange: { min: -400, max: 600 },
+        count: 100,
+      },
+      high_volume: {
+        name: "High Volume",
+        description: "Rapid-fire predictions under load",
+        oddsRange: { min: -150, max: 150 },
+        count: 200,
+      },
+      volatile_market: {
+        name: "Volatile Market",
+        description: "Simulating rapid line movements and uncertain conditions",
+        oddsRange: { min: -200, max: 200 },
+        count: 100,
+      },
+      underdog_heavy: {
+        name: "Underdog Heavy",
+        description: "Majority underdog picks (+150 to +400)",
+        oddsRange: { min: 150, max: 400 },
+        count: 100,
+      },
+    };
+
+    const config = scenarios[scenario];
+    const testEvents: HistoricalEvent[] = [];
+    const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+    
+    for (let i = 0; i < config.count; i++) {
+      const sport = sports[Math.floor(Math.random() * sports.length)];
+      const odds = config.oddsRange.min + Math.floor(Math.random() * (config.oddsRange.max - config.oddsRange.min));
+      const adjustedOdds = odds === 0 ? 100 : odds;
+      
+      testEvents.push({
+        id: `stress-${scenario}-${i}`,
+        date: new Date(),
+        sport,
+        homeTeam: "Test Home",
+        awayTeam: "Test Away",
+        market: "Moneyline",
+        odds: adjustedOdds,
+        outcome: Math.random() > 0.5 ? "win" : "loss",
+      });
+    }
+
+    let correct = 0;
+    let totalProfit = 0;
+    const issues: string[] = [];
+
+    for (const event of testEvents) {
+      const prediction = analyzeTicket(
+        [{ id: event.id, sport: event.sport, description: `Stress test ${event.sport}`, odds: event.odds }],
+        "moderate"
+      );
+      
+      const predictedWin = prediction.combinedFusion.overallScore >= 55;
+      const isCorrect = (predictedWin && event.outcome === "win") || (!predictedWin && event.outcome === "loss");
+      
+      if (isCorrect) correct++;
+      const profit = isCorrect 
+        ? (event.odds > 0 ? event.odds / 100 : 100 / Math.abs(event.odds)) 
+        : -1;
+      totalProfit += profit;
+    }
+
+    const accuracy = (correct / testEvents.length) * 100;
+    const roi = (totalProfit / testEvents.length) * 100;
+    
+    if (accuracy < 48) issues.push("Accuracy below acceptable threshold");
+    if (roi < -5) issues.push("Significant losses in this scenario");
+    if (scenario === "high_volume" && accuracy < 50) issues.push("Performance degrades under load");
+
+    return {
+      scenario: config.name,
+      description: config.description,
+      predictions: testEvents.length,
+      accuracy,
+      roi,
+      passed: accuracy >= 48 && roi >= -10,
+      issues,
+    };
+  }
+
+  // Weight Optimization
+  optimizeWeights(): { before: FusionWeight[]; after: FusionWeight[]; improvement: number } {
+    const currentFactors = getAllFactors();
+    const beforeSnapshot = currentFactors.map(f => ({ ...f }));
+    
+    // Calculate optimized weights based on historical accuracy and learning rate
+    const totalAccuracy = currentFactors.reduce((sum, f) => sum + f.historicalAccuracy, 0);
+    const optimizedFactors = currentFactors.map(f => {
+      let newWeight = f.weight;
+      
+      // Increase weight for high-accuracy factors
+      if (f.historicalAccuracy > 0.65) {
+        newWeight *= 1.1;
+      } else if (f.historicalAccuracy > 0.60) {
+        newWeight *= 1.05;
+      } else if (f.historicalAccuracy < 0.52) {
+        newWeight *= 0.9;
+      } else if (f.historicalAccuracy < 0.48) {
+        newWeight *= 0.8;
+      }
+      
+      // Boost improving factors
+      if (f.recentTrend === "improving") {
+        newWeight *= 1.05;
+      } else if (f.recentTrend === "declining") {
+        newWeight *= 0.95;
+      }
+      
+      return { ...f, weight: newWeight };
+    });
+
+    // Normalize to sum to 1.0
+    const totalWeight = optimizedFactors.reduce((sum, f) => sum + f.weight, 0);
+    optimizedFactors.forEach(f => f.weight = f.weight / totalWeight);
+
+    // Calculate theoretical improvement
+    const beforeScore = beforeSnapshot.reduce((sum, f) => sum + f.weight * f.historicalAccuracy, 0);
+    const afterScore = optimizedFactors.reduce((sum, f) => sum + f.weight * f.historicalAccuracy, 0);
+    const improvement = ((afterScore - beforeScore) / beforeScore) * 100;
+
+    return {
+      before: beforeSnapshot,
+      after: optimizedFactors,
+      improvement,
+    };
+  }
+
+  // Apply the optimized weights to the fusion engine
+  applyOptimization(optimizedWeights: FusionWeight[]): void {
+    applyOptimizedWeights(optimizedWeights);
+  }
+
+  // Generate Training Report
+  generateTrainingReport(): TrainingReport {
+    const metrics = this.getMetrics();
+    const reportCard = this.generateReportCard();
+    const factorAnalysis = this.getFactorAnalysis();
+    const launchReadiness = this.getLaunchReadiness();
+
+    return {
+      generatedAt: new Date(),
+      sessionId: `training-${Date.now()}`,
+      summary: {
+        totalPredictions: metrics.totalPredictions,
+        accuracy: metrics.accuracy,
+        roi: metrics.roi,
+        grade: reportCard.overallGrade,
+        readyForLaunch: reportCard.readyForLaunch,
+      },
+      metrics,
+      factorAnalysis,
+      launchReadiness,
+      recommendations: reportCard.recommendations,
+    };
+  }
+
+  // Export report as JSON string
+  exportReportJSON(): string {
+    const report = this.generateTrainingReport();
+    return JSON.stringify(report, null, 2);
+  }
+
+  // Export report as CSV
+  exportReportCSV(): string {
+    const metrics = this.getMetrics();
+    const factorAnalysis = this.getFactorAnalysis();
+    
+    let csv = "Sors Maxima Training Report\n";
+    csv += `Generated,${new Date().toISOString()}\n\n`;
+    
+    csv += "Summary Metrics\n";
+    csv += `Total Predictions,${metrics.totalPredictions}\n`;
+    csv += `Accuracy,${metrics.accuracy.toFixed(2)}%\n`;
+    csv += `ROI,${metrics.roi.toFixed(2)}%\n`;
+    csv += `Confidence Calibration,${metrics.confidenceCalibration.toFixed(2)}\n\n`;
+    
+    csv += "Performance by Sport\n";
+    csv += "Sport,Predictions,Correct,Accuracy\n";
+    for (const [sport, data] of Object.entries(metrics.bySport)) {
+      csv += `${sport},${data.predictions},${data.correct},${data.accuracy.toFixed(2)}%\n`;
+    }
+    csv += "\n";
+    
+    csv += "Top 10 Factors by Contribution\n";
+    csv += "Rank,Factor,Category,Weight,Accuracy,Trend\n";
+    factorAnalysis.slice(0, 10).forEach(f => {
+      csv += `${f.rank},${f.factor},${f.category},${(f.weight * 100).toFixed(2)}%,${f.accuracy.toFixed(1)}%,${f.trend}\n`;
+    });
+    
+    return csv;
   }
 }
 

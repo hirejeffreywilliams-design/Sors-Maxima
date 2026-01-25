@@ -282,6 +282,20 @@ export function getTotalFactorCount(): number {
   return FUSION_WEIGHTS.length;
 }
 
+export function applyOptimizedWeights(optimizedWeights: FusionWeight[]): void {
+  for (const optimized of optimizedWeights) {
+    const existing = FUSION_WEIGHTS.find(w => w.factor === optimized.factor);
+    if (existing) {
+      existing.weight = optimized.weight;
+    }
+  }
+  // Re-normalize to ensure sum is exactly 1.0
+  const totalWeight = FUSION_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
+  FUSION_WEIGHTS.forEach(w => {
+    w.weight = w.weight / totalWeight;
+  });
+}
+
 // Synergy detection rules - expanded for all factor categories
 const SYNERGY_RULES = [
   // CORE BETTING SYNERGIES
