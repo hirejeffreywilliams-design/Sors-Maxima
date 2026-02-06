@@ -1,0 +1,136 @@
+Operational & infrastructure
+
+- Cost monitoring & alerts: set budgets, cloud cost dashboards, and alerts for runaway infra costs.
+
+- Backups & disaster recovery: automated DB & object-store backups, restore drills, RTO/RPO targets.
+
+- Rate limits & quotas: throttle external APIs and user requests; graceful degradation strategies.
+
+- Auto-scaling policies & limits: avoid runaway scale causing cost spikes; set max nodes and scale-down windows.
+
+- Feature flags: rollout, rollback, A/B testing, and emergency kill-switch for risky features.
+
+
+
+Data & model ops
+
+- Model versioning & registry: record model versions, training data snapshot IDs, and hyperparameters.
+
+- Data lineage & reproducibility: store raw data snapshots, preprocessing steps, and seed for random ops.
+
+- Drift detection & alerts: monitor model calibration, prediction distribution shifts, and label delays.
+
+- Model rollback plan: quick revert to previous model if performance degrades.
+
+- Training & inference cost tracking: monitor GPU/CPU usage and latency.
+
+
+
+Security, privacy & compliance (extra)
+
+- Secure development lifecycle: SAST/DAST in CI, dependency scanning, and secrets scanning.
+
+- Least-privilege IAM: narrow roles for services and humans; rotate keys regularly.
+
+- PII minimization: avoid storing more user data than necessary; anonymize when possible.
+
+- Jurisdictional logging & data residency: ensure legal storage locations per target markets.
+
+- Fraud detection & anti‑abuse: bot detection, multi-account detection, and staking pattern anomalies.
+
+
+
+UX & product details often missed
+
+- Empty states & error states: helpful messaging for no-data, slow connections, and failures.
+
+- Rate of information: prevent information overload on a single screen; progressive disclosure.
+
+- Onboarding for probability literacy: quick tutorial/tooltips explaining EV, variance, and bankroll concepts.
+
+- Undo/confirm UX for ticket submission: double-confirm stakes with estimated loss scenarios.
+
+- Internationalization (i18n) & localization (L10n): currency formats, timezones, translations, and local regulations.
+
+
+
+Legal & responsible gambling extras
+
+- Prebuilt disclaimers & consent flows: explicit risk acknowledgment before first suggested ticket.
+
+- Audit trail for user decisions: record versioned suggested tickets and user edits (for disputes/regression).
+
+- Affiliate & partner disclosure: show if linking to sportsbooks yields revenue share.
+
+- Age and geolocation spoofing defenses: detect VPN/proxy misuse.
+
+
+
+Testing & QA edge cases
+
+- Fake-data sandbox & replay: deterministic test data and ability to replay historical odds for debugging.
+
+- Simulation of extreme events: odds gap spikes, API outages, mass unlocks, and simultaneous high-volume backtests.
+
+- End-to-end tests for third-party failures: simulate odds provider downtime, payment failures, or KYC provider lag.
+
+- Accessibility (a11y) testing: screen reader support, color contrast, and keyboard navigation.
+
+
+
+Performance & reliability
+
+- Idempotency keys for mutation endpoints: prevent duplicate orders/tickets on retries.
+
+- Graceful degradation: fallback UI when model service or odds feed is down (show last-known or explain outage).
+
+- Caching strategy: invalidate caches properly for fast-changing odds; TTLs tuned per market.
+
+- Latency SLAs and monitoring: synthetic checks for odds freshness and end-to-end trade flow.
+
+
+
+Business & monetization details
+
+- Clear fee & commission model: display any fees before bet placement.
+
+- Partner integrations & contractual limits: rate limits and SLAs with odds providers; fallback providers list.
+
+- Revenue accounting & reconciliation: daily reconciliation for payouts/affiliate revenues.
+
+
+
+Support, documentation & team processes
+
+- Runbooks & on-call playbooks: step-by-step remediation for common incidents.
+
+- Customer support flows & templates: dispute handling, refund policy, and escalation paths.
+
+- Internal docs: API contracts, data schema docs, model docs, runbooks in a searchable wiki.
+
+- SLAs for feature delivery and bug fixes: define response/resolve times per severity.
+
+
+
+Analytics & product improvement
+
+- Instrumentation plan: events for every user action (generate, edit, accept, stake, cancel).
+
+- Cohort and funnel tracking: measure conversion from generate→stake and retention post-win/loss.
+
+- Experimentation plan: define KPIs for A/B tests before launching.
+
+
+
+Ethics & messaging
+
+- No guarantees language everywhere: clear repeated warnings that suggestions are probabilistic, not guarantees.
+
+- Responsible marketing: avoid targeting vulnerable users or promising “get rich” narratives.
+
+
+
+Quick insertion text for your agent prompt
+
+- Add the following checklist to the Requirements section: cost monitoring, backups/DR, rate limits, model versioning & drift detection, idempotency keys, anti‑fraud, UX error/empty states, i18n/timezones, runbooks, legal disclaimers, and access controls. Ensure all are included in acceptance criteria and QA plans.
+
