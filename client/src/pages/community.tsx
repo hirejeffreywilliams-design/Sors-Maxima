@@ -1,9 +1,11 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Share2, Bell, MessageCircle } from "lucide-react";
+import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy } from "lucide-react";
 import { BetSharing } from "@/components/social/bet-sharing";
 import { Leaderboard } from "@/components/social/leaderboard";
 import { FollowBettors } from "@/components/social/follow-bettors";
 import { SmartAlerts } from "@/components/alerts/smart-alerts";
+import { SocialFeed } from "@/components/social/social-feed";
+import { CopyBetting } from "@/components/social/copy-betting";
 import { Badge } from "@/components/ui/badge";
 import { TipsterContent } from "@/components/community/tipster-content";
 
@@ -36,7 +38,7 @@ export default function Community() {
 
           <TabsContent value="social" className="space-y-6">
             <Tabs defaultValue="leaderboard" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-4 max-w-lg">
+              <TabsList className="grid w-full grid-cols-6 max-w-2xl">
                 <TabsTrigger value="leaderboard" className="gap-1 text-xs sm:text-sm" data-testid="tab-leaderboard">
                   <Trophy className="w-4 h-4" />
                   <span className="hidden sm:inline">Leaders</span>
@@ -52,6 +54,14 @@ export default function Community() {
                 <TabsTrigger value="alerts" className="gap-1 text-xs sm:text-sm" data-testid="tab-alerts">
                   <Bell className="w-4 h-4" />
                   <span className="hidden sm:inline">Alerts</span>
+                </TabsTrigger>
+                <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm" data-testid="tab-feed">
+                  <Rss className="w-4 h-4" />
+                  <span className="hidden sm:inline">Feed</span>
+                </TabsTrigger>
+                <TabsTrigger value="copy" className="gap-1 text-xs sm:text-sm" data-testid="tab-copy">
+                  <Copy className="w-4 h-4" />
+                  <span className="hidden sm:inline">Copy</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -69,6 +79,14 @@ export default function Community() {
 
               <TabsContent value="alerts">
                 <SmartAlerts />
+              </TabsContent>
+
+              <TabsContent value="feed">
+                <SocialFeed />
+              </TabsContent>
+
+              <TabsContent value="copy">
+                <CopyBetting />
               </TabsContent>
             </Tabs>
           </TabsContent>

@@ -1,9 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Target, Flame, Gamepad2, Atom } from "lucide-react";
+import { Trophy, Target, Flame, Gamepad2, Atom, Swords } from "lucide-react";
 import { Achievements } from "@/components/gamification/achievements";
 import { DailyChallenges } from "@/components/gamification/daily-challenges";
 import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { PaperTrading } from "@/components/gamification/paper-trading";
+import { PickCompetitions } from "@/components/gamification/pick-competitions";
 import { Badge } from "@/components/ui/badge";
 
 export default function Rewards() {
@@ -24,7 +25,7 @@ export default function Rewards() {
         </header>
 
         <Tabs defaultValue="challenges" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="challenges" className="gap-1" data-testid="tab-challenges">
               <Target className="w-4 h-4" />
               <span className="hidden sm:inline">Challenges</span>
@@ -40,6 +41,10 @@ export default function Rewards() {
             <TabsTrigger value="practice" className="gap-1" data-testid="tab-practice">
               <Gamepad2 className="w-4 h-4" />
               <span className="hidden sm:inline">Practice</span>
+            </TabsTrigger>
+            <TabsTrigger value="compete" className="gap-1" data-testid="tab-compete">
+              <Swords className="w-4 h-4" />
+              <span className="hidden sm:inline">Compete</span>
             </TabsTrigger>
           </TabsList>
 
@@ -57,6 +62,10 @@ export default function Rewards() {
 
           <TabsContent value="practice" className="space-y-6">
             <PaperTrading />
+          </TabsContent>
+
+          <TabsContent value="compete" className="space-y-6">
+            <PickCompetitions />
           </TabsContent>
         </Tabs>
       </div>

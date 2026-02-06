@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Zap, Crown, Gem, Atom, Star, Trophy, Shield, Bot, LineChart, Bell, Users, Wallet, Target, AlertTriangle } from "lucide-react";
+import { Check, Zap, Crown, Gem, Atom, Star, Trophy, Shield, Bot, LineChart, Bell, Users, Wallet, Target, AlertTriangle, Sparkles } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -33,6 +34,7 @@ const tiers: PricingTier[] = [
     monthlyPriceId: '',
     yearlyPriceId: '',
     features: [
+      '5 AI credits/day',
       '3 ticket generations per day',
       'Basic quantum coherence scores',
       '2 sports coverage (NBA, NFL)',
@@ -51,6 +53,7 @@ const tiers: PricingTier[] = [
     monthlyPriceId: 'price_1SskcQIp7f8yVoSO8uj04w8T',
     yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
     features: [
+      '50 AI credits/day',
       'Unlimited ticket generations',
       'All 45 quantum analysis factors',
       'All 6 sports coverage',
@@ -73,6 +76,7 @@ const tiers: PricingTier[] = [
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOEKOx5hde',
     yearlyPriceId: 'price_1SskcRIp7f8yVoSOOBNZTk3V',
     features: [
+      '200 AI credits/day',
       'Everything in Pro',
       'Real-time steam move alerts',
       'AI Betting Assistant (unlimited)',
@@ -97,6 +101,7 @@ const tiers: PricingTier[] = [
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOWQe60fFw',
     yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
     features: [
+      'Unlimited AI credits',
       'Everything in Elite',
       'VIP quantum algorithm (deeper analysis)',
       'Extended historical data (5+ years)',
@@ -161,7 +166,14 @@ export default function Pricing() {
     checkoutMutation.mutate(priceId);
   };
 
+  const { data: credits } = useQuery<{ used: number; total: number; tier: string; resetsAt: string }>({
+    queryKey: ['/api/credits'],
+  });
+
   const currentTier = subscription?.tier || 'free';
+  const creditsRemaining = credits ? credits.total - credits.used : 3;
+  const creditsTotal = credits?.total || 5;
+  const creditsUsedPercent = credits ? (credits.used / credits.total) * 100 : 40;
 
   return (
     <div className="min-h-full">
@@ -271,6 +283,44 @@ export default function Pricing() {
             </Card>
           ))}
         </div>
+
+        <Card data-testid="card-credits-usage">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              AI Credits Usage
+            </CardTitle>
+            <CardDescription>Track your daily AI credit consumption</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium" data-testid="text-credits-remaining">
+                {creditsRemaining} of {creditsTotal} remaining
+              </span>
+              <Badge variant="secondary" data-testid="text-credits-tier">
+                {credits?.tier || currentTier} tier
+              </Badge>
+            </div>
+            <Progress value={100 - creditsUsedPercent} className="h-2" data-testid="progress-credits" />
+            <p className="text-sm text-muted-foreground">
+              Credits reset daily at midnight UTC
+            </p>
+            <div className="pt-2 border-t">
+              <p className="text-sm font-medium mb-2">What uses credits:</p>
+              <ul className="space-y-1">
+                <li className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Check className="h-3 w-3 shrink-0" /> Ticket generation
+                </li>
+                <li className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Check className="h-3 w-3 shrink-0" /> AI analysis
+                </li>
+                <li className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Check className="h-3 w-3 shrink-0" /> Prop projections
+                </li>
+              </ul>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="bg-card rounded-xl p-8 border">
           <h2 className="text-2xl font-bold mb-6 text-center">Why Bettors Choose Sors Maxima</h2>

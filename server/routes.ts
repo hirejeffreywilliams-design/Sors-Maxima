@@ -2065,6 +2065,414 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  // === Notifications ===
+  const notificationTypes = [
+    { type: "line_movement", titles: ["Line Movement Alert", "Odds Shift Detected", "Spread Change"], descriptions: [
+      "Lakers vs Celtics spread moved from -3.5 to -5.0",
+      "Chiefs ML shifted from -150 to -170 after injury report",
+      "Over/Under adjusted from 224.5 to 221.0 for Bucks vs Heat",
+      "49ers spread moved from -7 to -6.5, reverse line movement detected",
+    ]},
+    { type: "injury_report", titles: ["Injury Update", "Player Status Change", "Roster Alert"], descriptions: [
+      "LeBron James (Lakers) - Questionable with ankle soreness",
+      "Patrick Mahomes (Chiefs) - Cleared to play, was listed as probable",
+      "Jayson Tatum (Celtics) - Out tonight with knee injury",
+      "Tyreek Hill (Dolphins) - Limited practice, game-time decision",
+    ]},
+    { type: "sharp_money", titles: ["Sharp Money Alert", "Professional Action Detected", "Smart Money Flow"], descriptions: [
+      "Sharp bettors loading up on Celtics +5.5 at -110",
+      "Reverse line movement on Warriors ML despite 72% public on Lakers",
+      "Large syndicate action detected on Under 221.5 in Bucks vs Heat",
+      "Steam move on Bills -3 across multiple offshore books",
+    ]},
+    { type: "game_start", titles: ["Game Starting Soon", "Tipoff Reminder", "Kickoff Alert"], descriptions: [
+      "Lakers vs Celtics tips off in 15 minutes",
+      "Chiefs vs Bills kicks off in 30 minutes - last chance to bet",
+      "Bucks vs Heat starting in 10 minutes",
+      "NFL Sunday Night Football begins in 1 hour",
+    ]},
+  ];
+
+  let serverNotifications: any[] = [];
+  let notificationIdCounter = 1;
+
+  function generateNotification() {
+    const typeGroup = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
+    const title = typeGroup.titles[Math.floor(Math.random() * typeGroup.titles.length)];
+    const description = typeGroup.descriptions[Math.floor(Math.random() * typeGroup.descriptions.length)];
+    const minutesAgo = Math.floor(Math.random() * 120);
+    const timestamp = new Date(Date.now() - minutesAgo * 60000).toISOString();
+
+    return {
+      id: notificationIdCounter++,
+      type: typeGroup.type,
+      title,
+      description,
+      timestamp,
+      read: false,
+    };
+  }
+
+  for (let i = 0; i < 12; i++) {
+    serverNotifications.push(generateNotification());
+  }
+  serverNotifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  setInterval(() => {
+    if (serverNotifications.length > 50) {
+      serverNotifications = serverNotifications.slice(0, 40);
+    }
+    const newNotif = generateNotification();
+    newNotif.read = false;
+    serverNotifications.unshift(newNotif);
+  }, 45000);
+
+  app.get("/api/notifications", (_req, res) => {
+    res.json(serverNotifications);
+  });
+
+  app.put("/api/notifications/read", (req, res) => {
+    const { ids } = req.body;
+    if (ids && Array.isArray(ids)) {
+      for (const notif of serverNotifications) {
+        if (ids.includes(notif.id)) {
+          notif.read = true;
+        }
+      }
+    } else {
+      for (const notif of serverNotifications) {
+        notif.read = true;
+      }
+    }
+    res.json({ success: true });
+  });
+
+  // === Cash-Out Advisor ===
+  app.get("/api/cashout-advisor/:betId", (req, res) => {
+    const { betId } = req.params;
+
+    const activeBets: Record<string, any> = {
+      "bet-1": {
+        id: "bet-1",
+        description: "Lakers ML + Celtics/Bulls Over 218.5",
+        type: "Parlay (2-leg)",
+        stake: 50,
+        potentialPayout: 245,
+        currentCashout: 142,
+        legsCompleted: 1,
+        legsTotal: 2,
+        timeRemaining: "4:32 3rd Q",
+        momentum: 68,
+        injuryRisk: 15,
+        weatherImpact: 0,
+        recommendation: "hold",
+        confidence: 72,
+        factors: {
+          momentum: { label: "Team Momentum", value: 68, impact: "positive" },
+          timeRemaining: { label: "Time Remaining", value: 55, impact: "neutral" },
+          injuryRisk: { label: "Injury Risk", value: 15, impact: "positive" },
+          weatherChanges: { label: "Weather Impact", value: 0, impact: "neutral" },
+        },
+      },
+      "bet-2": {
+        id: "bet-2",
+        description: "Chiefs -3.5 vs Bills",
+        type: "Straight Bet",
+        stake: 100,
+        potentialPayout: 191,
+        currentCashout: 85,
+        legsCompleted: 0,
+        legsTotal: 1,
+        timeRemaining: "8:15 2nd Q",
+        momentum: 35,
+        injuryRisk: 42,
+        weatherImpact: 28,
+        recommendation: "cash_out",
+        confidence: 81,
+        factors: {
+          momentum: { label: "Team Momentum", value: 35, impact: "negative" },
+          timeRemaining: { label: "Time Remaining", value: 65, impact: "neutral" },
+          injuryRisk: { label: "Injury Risk", value: 42, impact: "negative" },
+          weatherChanges: { label: "Weather Impact", value: 28, impact: "negative" },
+        },
+      },
+      "bet-3": {
+        id: "bet-3",
+        description: "Bucks ML + Under 224.5",
+        type: "Parlay (2-leg)",
+        stake: 75,
+        potentialPayout: 320,
+        currentCashout: 195,
+        legsCompleted: 1,
+        legsTotal: 2,
+        timeRemaining: "2:05 4th Q",
+        momentum: 82,
+        injuryRisk: 5,
+        weatherImpact: 0,
+        recommendation: "partial",
+        confidence: 65,
+        factors: {
+          momentum: { label: "Team Momentum", value: 82, impact: "positive" },
+          timeRemaining: { label: "Time Remaining", value: 25, impact: "negative" },
+          injuryRisk: { label: "Injury Risk", value: 5, impact: "positive" },
+          weatherChanges: { label: "Weather Impact", value: 0, impact: "neutral" },
+        },
+      },
+    };
+
+    if (betId === "all") {
+      return res.json(Object.values(activeBets));
+    }
+
+    const bet = activeBets[betId];
+    if (!bet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+    return res.json(bet);
+  });
+
+  // === Live Chat ===
+  const chatMessages: Record<string, Array<{ id: string; username: string; content: string; timestamp: string }>> = {};
+
+  function generateSampleChat(gameId: string) {
+    const sampleMessages = [
+      { username: "SharpShooter99", content: "This line is moving fast, get in now" },
+      { username: "ParlayKing", content: "Defense looking solid in the first quarter" },
+      { username: "EdgeMaster", content: "Over is looking good with this pace" },
+      { username: "BetWizard", content: "Anyone else on the spread here?" },
+      { username: "MoneyMoves", content: "Live odds just shifted, interesting" },
+      { username: "PropHunter", content: "Player props are where the value is tonight" },
+      { username: "ValueSeeker", content: "Great hedge opportunity right now" },
+      { username: "QuantumBetter", content: "The momentum has completely shifted" },
+    ];
+    const msgs = sampleMessages.map((m, i) => ({
+      id: `msg-${gameId}-${i}`,
+      username: m.username,
+      content: m.content,
+      timestamp: new Date(Date.now() - (sampleMessages.length - i) * 60000).toISOString(),
+    }));
+    chatMessages[gameId] = msgs;
+    return msgs;
+  }
+
+  app.get("/api/live-chat/:gameId", (req, res) => {
+    const { gameId } = req.params;
+    const msgs = chatMessages[gameId] || generateSampleChat(gameId);
+    res.json(msgs);
+  });
+
+  app.post("/api/live-chat/:gameId", (req, res) => {
+    const { gameId } = req.params;
+    const { content } = req.body;
+    const username = req.session?.username || "Anonymous";
+    if (!content || typeof content !== "string") {
+      return res.status(400).json({ error: "Content is required" });
+    }
+    if (!chatMessages[gameId]) {
+      generateSampleChat(gameId);
+    }
+    const newMsg = {
+      id: `msg-${gameId}-${Date.now()}`,
+      username,
+      content,
+      timestamp: new Date().toISOString(),
+    };
+    chatMessages[gameId].push(newMsg);
+    res.json(newMsg);
+  });
+
+  // === Social Feed ===
+  const feedPosts: Array<{
+    id: string; username: string; content: string; timestamp: string;
+    likes: number; comments: number; likedBy: Set<string>;
+  }> = [
+    { id: "post-1", username: "SharpShooter99", content: "Just hit a 5-leg parlay! Chiefs, Lakers, and three overs all cashed. Trust the process.", timestamp: new Date(Date.now() - 3600000).toISOString(), likes: 24, comments: 8, likedBy: new Set() },
+    { id: "post-2", username: "ParlayKing", content: "NFL Week 14 breakdown: Sharp money is heavy on the unders this week. Weather plays are underrated.", timestamp: new Date(Date.now() - 7200000).toISOString(), likes: 18, comments: 12, likedBy: new Set() },
+    { id: "post-3", username: "EdgeMaster", content: "Hot take: Player props are the most +EV market in sports betting right now. Books are slow to adjust.", timestamp: new Date(Date.now() - 14400000).toISOString(), likes: 31, comments: 15, likedBy: new Set() },
+    { id: "post-4", username: "MoneyMoves", content: "Bankroll management tip: Never risk more than 3% of your bankroll on a single bet. Consistency wins.", timestamp: new Date(Date.now() - 28800000).toISOString(), likes: 42, comments: 6, likedBy: new Set() },
+    { id: "post-5", username: "ValueSeeker", content: "Found a great line discrepancy between books on tonight's game. DM for details.", timestamp: new Date(Date.now() - 43200000).toISOString(), likes: 15, comments: 22, likedBy: new Set() },
+  ];
+
+  app.get("/api/social-feed", (_req, res) => {
+    const posts = feedPosts.map(p => ({
+      id: p.id, username: p.username, content: p.content,
+      timestamp: p.timestamp, likes: p.likes, comments: p.comments,
+      liked: false,
+    }));
+    res.json(posts);
+  });
+
+  app.post("/api/social-feed", (req, res) => {
+    const { content } = req.body;
+    const username = req.session?.username || "Anonymous";
+    if (!content || typeof content !== "string") {
+      return res.status(400).json({ error: "Content is required" });
+    }
+    const post = {
+      id: `post-${Date.now()}`,
+      username,
+      content,
+      timestamp: new Date().toISOString(),
+      likes: 0,
+      comments: 0,
+      likedBy: new Set<string>(),
+    };
+    feedPosts.unshift(post);
+    res.json({
+      id: post.id, username: post.username, content: post.content,
+      timestamp: post.timestamp, likes: 0, comments: 0, liked: false,
+    });
+  });
+
+  app.post("/api/social-feed/:postId/like", (req, res) => {
+    const { postId } = req.params;
+    const username = req.session?.username || "Anonymous";
+    const post = feedPosts.find(p => p.id === postId);
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
+    }
+    if (post.likedBy.has(username)) {
+      post.likedBy.delete(username);
+      post.likes = Math.max(0, post.likes - 1);
+      res.json({ liked: false, likes: post.likes });
+    } else {
+      post.likedBy.add(username);
+      post.likes += 1;
+      res.json({ liked: true, likes: post.likes });
+    }
+  });
+
+  // === Copy Betting ===
+  const tipsters = [
+    { id: "tip-1", username: "SharpShooter99", winRate: 62, roi: 34.5, streak: 8, totalPicks: 245, sport: "NFL", recentPicks: [{ pick: "Chiefs -3.5", odds: "-110", result: "win" }, { pick: "Bills ML", odds: "-130", result: "win" }, { pick: "Over 48.5 Cowboys/Eagles", odds: "-105", result: "loss" }] },
+    { id: "tip-2", username: "ParlayKing", winRate: 58, roi: 28.2, streak: 5, totalPicks: 312, sport: "NBA", recentPicks: [{ pick: "Lakers -4.5", odds: "-110", result: "win" }, { pick: "Celtics ML", odds: "-150", result: "win" }, { pick: "Under 220.5 Suns/Mavs", odds: "-110", result: "win" }] },
+    { id: "tip-3", username: "EdgeMaster", winRate: 56, roi: 25.8, streak: 3, totalPicks: 189, sport: "MLB", recentPicks: [{ pick: "Yankees ML", odds: "+120", result: "win" }, { pick: "Dodgers -1.5", odds: "+130", result: "loss" }, { pick: "Over 8.5 Mets/Braves", odds: "-115", result: "win" }] },
+    { id: "tip-4", username: "PropHunter", winRate: 53, roi: 17.8, streak: 2, totalPicks: 287, sport: "NFL", recentPicks: [{ pick: "Mahomes Over 285.5 yds", odds: "-115", result: "win" }, { pick: "Henry Over 89.5 rush", odds: "-110", result: "loss" }] },
+    { id: "tip-5", username: "ValueSeeker", winRate: 52, roi: 15.2, streak: 1, totalPicks: 198, sport: "NBA", recentPicks: [{ pick: "Warriors +5.5", odds: "-110", result: "win" }, { pick: "Nuggets ML", odds: "-140", result: "win" }] },
+  ];
+  const followedTipsters = new Set<string>();
+
+  app.get("/api/copy-betting/tipsters", (_req, res) => {
+    res.json(tipsters.map(t => ({
+      ...t,
+      following: followedTipsters.has(t.id),
+    })));
+  });
+
+  app.post("/api/copy-betting/follow/:tipsterId", (req, res) => {
+    const { tipsterId } = req.params;
+    const tipster = tipsters.find(t => t.id === tipsterId);
+    if (!tipster) {
+      return res.status(404).json({ error: "Tipster not found" });
+    }
+    if (followedTipsters.has(tipsterId)) {
+      followedTipsters.delete(tipsterId);
+      res.json({ following: false });
+    } else {
+      followedTipsters.add(tipsterId);
+      res.json({ following: true });
+    }
+  });
+
+  // === Pick Competitions ===
+  const competitions = [
+    {
+      id: "comp-1", name: "Weekly NFL Challenge", sport: "NFL", type: "weekly",
+      entries: 1247, maxEntries: 5000, prize: "$500 Free Bets",
+      startDate: new Date(Date.now() - 3 * 86400000).toISOString(),
+      endDate: new Date(Date.now() + 4 * 86400000).toISOString(),
+      leaderboard: [
+        { rank: 1, username: "SharpShooter99", points: 285, record: "12-3" },
+        { rank: 2, username: "ParlayKing", points: 270, record: "11-4" },
+        { rank: 3, username: "EdgeMaster", points: 255, record: "10-5" },
+        { rank: 4, username: "BetWizard", points: 240, record: "9-6" },
+        { rank: 5, username: "MoneyMoves", points: 225, record: "9-6" },
+      ],
+    },
+    {
+      id: "comp-2", name: "Monthly NBA Picks", sport: "NBA", type: "monthly",
+      entries: 3421, maxEntries: 10000, prize: "$2,000 Free Bets",
+      startDate: new Date(Date.now() - 15 * 86400000).toISOString(),
+      endDate: new Date(Date.now() + 15 * 86400000).toISOString(),
+      leaderboard: [
+        { rank: 1, username: "ValueSeeker", points: 890, record: "34-16" },
+        { rank: 2, username: "PropHunter", points: 855, record: "32-18" },
+        { rank: 3, username: "QuantumBetter", points: 820, record: "31-19" },
+        { rank: 4, username: "MoneyMoves", points: 800, record: "30-20" },
+        { rank: 5, username: "SharpShooter99", points: 785, record: "29-21" },
+      ],
+    },
+    {
+      id: "comp-3", name: "Weekend Parlay Showdown", sport: "Multi-Sport", type: "weekly",
+      entries: 856, maxEntries: 2000, prize: "$250 Free Bets",
+      startDate: new Date(Date.now() - 1 * 86400000).toISOString(),
+      endDate: new Date(Date.now() + 2 * 86400000).toISOString(),
+      leaderboard: [
+        { rank: 1, username: "ParlayKing", points: 150, record: "6-1" },
+        { rank: 2, username: "EdgeMaster", points: 135, record: "5-2" },
+        { rank: 3, username: "BetWizard", points: 120, record: "5-2" },
+      ],
+    },
+  ];
+  const enteredCompetitions = new Set<string>();
+
+  app.get("/api/competitions", (_req, res) => {
+    res.json(competitions.map(c => ({
+      ...c,
+      entered: enteredCompetitions.has(c.id),
+    })));
+  });
+
+  app.post("/api/competitions/:id/enter", (req, res) => {
+    const { id } = req.params;
+    const comp = competitions.find(c => c.id === id);
+    if (!comp) {
+      return res.status(404).json({ error: "Competition not found" });
+    }
+    if (enteredCompetitions.has(id)) {
+      return res.json({ entered: true, message: "Already entered" });
+    }
+    enteredCompetitions.add(id);
+    comp.entries += 1;
+    res.json({ entered: true, message: "Successfully entered competition" });
+  });
+
+  // === AI Credits ===
+  app.get("/api/credits", (_req, res) => {
+    const tier = _req.session?.isAuthenticated ? "free" : "free";
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
+    tomorrow.setUTCHours(0, 0, 0, 0);
+
+    res.json({
+      used: 2,
+      total: 5,
+      tier,
+      resetsAt: tomorrow.toISOString(),
+    });
+  });
+
+  // === Referral Program ===
+  app.get("/api/referral", (_req, res) => {
+    res.json({
+      code: "SORS-7X92KM",
+      totalReferrals: 8,
+      conversions: 5,
+      earned: 50,
+      referrals: [
+        { name: "Alex M.", date: "2026-02-04", status: "completed", reward: 10 },
+        { name: "Jordan K.", date: "2026-02-03", status: "completed", reward: 10 },
+        { name: "Sam R.", date: "2026-02-02", status: "pending", reward: 0 },
+        { name: "Taylor W.", date: "2026-01-30", status: "completed", reward: 10 },
+        { name: "Casey B.", date: "2026-01-28", status: "completed", reward: 10 },
+        { name: "Morgan L.", date: "2026-01-25", status: "completed", reward: 10 },
+        { name: "Riley P.", date: "2026-01-22", status: "pending", reward: 0 },
+        { name: "Jamie D.", date: "2026-01-20", status: "pending", reward: 0 },
+      ],
+    });
+  });
+
   // === Cost Monitoring (Admin) ===
   app.get("/api/admin/cost-monitor", requireAdmin, (_req, res) => {
     try {

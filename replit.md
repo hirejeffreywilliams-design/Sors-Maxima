@@ -39,7 +39,22 @@ Key features include:
 - **Gamification**: Includes daily challenges, achievements, streaks, and paper trading.
 - **Financial Tools**: Multi-book tracker, ROI dashboard, and tax export.
 - **Scheme Recognition Engine**: AI-powered analysis of team offensive/defensive schemes and coaching patterns from historical data. Identifies scheme mismatches, coaching tendencies (risk tolerance, tempo, aggression), and situational patterns (home/away, primetime, underdog/favorite) that affect betting outcomes. Available in both pre-game and live modes.
-- **Live Center**: Features a momentum tracker, scheme recognition (live mode), hedge calculator, AI assistant, CLV tracker, and public vs. sharp money insights.
+- **Push Notifications**: Real-time alerts for line movement, injury reports, sharp money flow, and game starts with notification preferences and unread count badge in header.
+- **Cash-Out Advisor**: AI-powered recommendations on when to hold, partial cash out, or full cash out based on momentum, time remaining, injury risk, and weather factors. Located in Live Center.
+- **Live Chat**: Real-time game discussion chat within the Live Center with auto-scroll and simulated incoming messages.
+- **Social Feed**: Timeline for sharing wins, analysis, and hot takes with likes and comments. Located in Community page.
+- **Copy Betting**: Follow and mirror top tipsters' picks with stats tracking (win rate, ROI, streak). Located in Community page.
+- **Pick Competitions**: Weekly/monthly accuracy contests with leaderboards, entry tracking, and prize pools. Located in Rewards page.
+- **Player Prop Lab**: Deep-dive player performance analysis with stat tabs, prop lines, trend indicators, and matchup data. Located in Pro Tools.
+- **Arbitrage Finder**: Cross-sportsbook scanner for guaranteed profit opportunities with stake calculator and status indicators. Located in Pro Tools.
+- **Bet Grading Post-Game**: Detailed post-game analysis of completed bets with factor breakdowns, accuracy percentages, and grade history. Located in Pro Tools.
+- **Custom Model Builder**: User-adjustable weights for all 46 analysis factors across 7 categories with save/load and model testing. Located in Pro Tools.
+- **AI Credits System**: Tiered daily AI credit allocation (Free: 5, Pro: 50, Elite: 200, Whale: Unlimited) with usage tracking on pricing page.
+- **Daily Free Pick**: One high-confidence pick per day available to all users with confidence score and EV indicator.
+- **Referral Program**: Referral code/link sharing with $10 credit per successful referral, stats tracking, and conversion history. Located in Settings.
+- **Multi-Language Support**: Language selector supporting 8 languages (EN, ES, FR, DE, PT, JA, ZH, KO) with localStorage persistence. Located in Settings.
+- **Export to Sportsbook**: Generate formatted bet slips for 6 major sportsbooks (DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers) with copy-to-clipboard and deep linking. Located in Pro Tools.
+- **Live Center**: Features a momentum tracker, scheme recognition (live mode), hedge calculator, AI assistant, CLV tracker, public vs. sharp money insights, cash-out advisor, and live chat.
 - **Admin Dashboards**: For user management, fraud detection, subscription stats, AI-powered quantum diagnostics, and AI marketing tools.
 
 ## External Dependencies
@@ -55,19 +70,19 @@ Key features include:
 ## Navigation Structure (Consolidated - 8 main items + admin)
 Main navigation items:
 1. **Generate** (/) - Smart Ticket Generator (default home page)
-2. **Live** (/live) - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant
-3. **Tools** (/tools) - Pro Tools with Quantum Analysis, Odds, ML, Correlation
+2. **Live** (/live) - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant, Cash-Out Advisor, Live Chat
+3. **Tools** (/tools) - Pro Tools with Quantum Analysis, Odds, ML, Correlation, Player Props, Arbitrage, Bet Grading, Custom Model, Export
 4. **Community** (/community) - Unified community page with 2 main tabs:
-   - Social: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts
+   - Social: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts, Social Feed, Copy Betting
    - Tipsters: Discover communities, create your own, earn from tips/subscriptions (15% platform fee)
-5. **Rewards** (/rewards) - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading
+5. **Rewards** (/rewards) - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading, Pick Competitions
 6. **Finance** (/bankroll) - All financial tools in 5 tabs:
    - Bets: Bet history and tracking
    - Books: Multi-sportsbook balance tracker
    - Stats: Performance analytics
    - ROI: Return on investment dashboard
    - Tax: Tax export and reports
-7. **Settings** (/settings) - User Settings (3 tabs): Notifications, Responsible Gaming, Backup
+7. **Settings** (/settings) - User Settings (3 tabs): Notifications, Responsible Gaming, Backup, Referral Program, Multi-Language Support
 8. **Upgrade** (/pricing) - Subscription pricing page
 
 Admin-only pages:

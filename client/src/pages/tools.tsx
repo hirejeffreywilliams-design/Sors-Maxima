@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Brain, Zap, Sparkles, Users, BarChart3, DollarSign, MapPin, Scale, Link2 } from "lucide-react";
+import { Eye, Brain, Zap, Sparkles, Users, BarChart3, DollarSign, MapPin, Scale, Link2, UserCheck, Percent, SlidersHorizontal, ClipboardCheck, FileOutput } from "lucide-react";
 
 import { SharpMoneyTracker } from "@/components/sharp-money-tracker";
 import { SteamMoveDetector } from "@/components/steam-move-detector";
@@ -40,6 +40,11 @@ import { CashoutMaximizer } from "@/components/cashout-maximizer";
 import { QuantumCoachingAnalysis } from "@/components/quantum-coaching-analysis";
 import { QuantumPlayerPrediction } from "@/components/quantum-player-prediction";
 import { QuantumTeamDynamics } from "@/components/quantum-team-dynamics";
+import { PlayerPropLab } from "@/components/player-prop-lab";
+import { ArbitrageFinder } from "@/components/arbitrage-finder";
+import { BetGradingPostgame } from "@/components/bet-grading-postgame";
+import { CustomModelBuilder } from "@/components/custom-model-builder";
+import { ExportBetSlip } from "@/components/export-bet-slip";
 import { Atom } from "lucide-react";
 
 const TOOL_CATEGORIES = [
@@ -54,6 +59,11 @@ const TOOL_CATEGORIES = [
   { id: "venue", name: "Venue & Officials", icon: Scale },
   { id: "strategies", name: "Strategies", icon: Sparkles },
   { id: "pro", name: "Pro Tools", icon: Zap },
+  { id: "player-props", name: "Player Props", icon: UserCheck },
+  { id: "arb", name: "Arbitrage", icon: Percent },
+  { id: "model", name: "Custom Model", icon: SlidersHorizontal },
+  { id: "grading", name: "Bet Grading", icon: ClipboardCheck },
+  { id: "export", name: "Export Slips", icon: FileOutput },
 ];
 
 export default function Tools() {
@@ -190,6 +200,26 @@ export default function Tools() {
                 <BookLimitPlanner desiredStake={100} />
               </div>
             </div>
+          )}
+
+          {activeCategory === "player-props" && (
+            <PlayerPropLab />
+          )}
+
+          {activeCategory === "arb" && (
+            <ArbitrageFinder />
+          )}
+
+          {activeCategory === "model" && (
+            <CustomModelBuilder />
+          )}
+
+          {activeCategory === "grading" && (
+            <BetGradingPostgame />
+          )}
+
+          {activeCategory === "export" && (
+            <ExportBetSlip />
           )}
         </div>
       </div>

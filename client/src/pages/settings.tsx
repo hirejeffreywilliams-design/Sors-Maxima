@@ -22,8 +22,12 @@ import {
   Plus,
   Trash2,
   Save,
-  FileText
+  FileText,
+  Gift,
+  Globe
 } from "lucide-react";
+import { ReferralProgram } from "@/components/referral-program";
+import { LanguageSelector } from "@/components/language-selector";
 import {
   Dialog,
   DialogContent,
@@ -123,7 +127,7 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="notifications">
-          <TabsList className="w-full grid grid-cols-3 h-auto">
+          <TabsList className="w-full grid grid-cols-4 h-auto">
             <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-notifications">
               <Bell className="h-4 w-4" />
               <span className="hidden sm:inline">Alerts</span>
@@ -135,6 +139,10 @@ export default function Settings() {
             <TabsTrigger value="backup" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-backup">
               <Download className="h-4 w-4" />
               <span className="hidden sm:inline">Backup</span>
+            </TabsTrigger>
+            <TabsTrigger value="referral" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-referral">
+              <Gift className="h-4 w-4" />
+              <span className="hidden sm:inline">Referral</span>
             </TabsTrigger>
           </TabsList>
 
@@ -225,6 +233,19 @@ export default function Settings() {
                     data-testid="switch-recap"
                   />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Language
+                </CardTitle>
+                <CardDescription>Select your preferred display language</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <LanguageSelector />
               </CardContent>
             </Card>
 
@@ -463,6 +484,10 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="referral" className="space-y-4 mt-4">
+            <ReferralProgram />
           </TabsContent>
         </Tabs>
       </div>

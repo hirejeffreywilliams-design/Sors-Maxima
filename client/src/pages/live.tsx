@@ -1,11 +1,13 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Shield, Bot, LineChart, Users, Brain } from "lucide-react";
+import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
 import { CLVTracker } from "@/components/analytics/clv-tracker";
 import { PublicVsSharp } from "@/components/analytics/public-vs-sharp";
 import { SchemeRecognition } from "@/components/scheme-recognition";
+import { CashoutAdvisor } from "@/components/live/cashout-advisor";
+import { LiveChat } from "@/components/live/live-chat";
 import { Badge } from "@/components/ui/badge";
 
 export default function Live() {
@@ -26,10 +28,14 @@ export default function Live() {
         </header>
 
         <Tabs defaultValue="momentum" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+          <TabsList className="grid w-full grid-cols-8 max-w-3xl">
             <TabsTrigger value="momentum" className="gap-1" data-testid="tab-momentum">
               <Activity className="w-4 h-4" />
               <span className="hidden sm:inline">Momentum</span>
+            </TabsTrigger>
+            <TabsTrigger value="cashout" className="gap-1" data-testid="tab-cashout">
+              <DollarSign className="w-4 h-4" />
+              <span className="hidden sm:inline">Cashout</span>
             </TabsTrigger>
             <TabsTrigger value="schemes" className="gap-1" data-testid="tab-schemes">
               <Brain className="w-4 h-4" />
@@ -51,10 +57,18 @@ export default function Live() {
               <Users className="w-4 h-4" />
               <span className="hidden sm:inline">Sharp</span>
             </TabsTrigger>
+            <TabsTrigger value="chat" className="gap-1" data-testid="tab-chat">
+              <MessageSquare className="w-4 h-4" />
+              <span className="hidden sm:inline">Chat</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="momentum" className="space-y-6">
             <MomentumTracker />
+          </TabsContent>
+
+          <TabsContent value="cashout" className="space-y-6">
+            <CashoutAdvisor />
           </TabsContent>
 
           <TabsContent value="schemes" className="space-y-6">
@@ -75,6 +89,10 @@ export default function Live() {
 
           <TabsContent value="sharp" className="space-y-6">
             <PublicVsSharp />
+          </TabsContent>
+
+          <TabsContent value="chat" className="space-y-6">
+            <LiveChat />
           </TabsContent>
         </Tabs>
       </div>

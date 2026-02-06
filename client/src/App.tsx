@@ -32,6 +32,7 @@ import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shiel
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
+import { NotificationsPanel } from "@/components/notifications-panel";
 
 function Router() {
   return (
@@ -251,6 +252,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
                 )}
               </span>
             )}
+            <NotificationsPanel />
             <ThemeToggle />
             <Button 
               variant="ghost" 
