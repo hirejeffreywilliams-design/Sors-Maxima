@@ -7,7 +7,7 @@ import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provi
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
-import { authService, type User } from "./authService";
+import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById } from "./dbAuthService";
 import { errorLogger } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import * as featuresService from "./featuresService";
@@ -93,23 +93,22 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Email, username, and password are required" });
       }
 
-      const result = await authService.register(email, username, password, ip);
+      const result = await registerUser(username, email, password);
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
       }
 
-      // Auto-login after registration
       req.session.isAuthenticated = true;
-      req.session.username = result.user!.username;
-      req.session.userId = result.user!.id;
+      req.session.username = username;
+      req.session.userId = String(result.userId);
       req.session.isAdmin = false;
       req.session.role = 'user';
 
       return res.json({ 
         success: true, 
-        username: result.user!.username,
-        email: result.user!.email
+        username,
+        email
       });
     } catch (err) {
       console.error("Registration error:", err);
@@ -128,7 +127,20 @@ export async function registerRoutes(
         return res.status(400).json({ error: "Username and password are required" });
       }
 
-      const result = await authService.login(username, password, ip, userAgent);
+      const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+      const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+      const isAdminLogin = ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
+
+      if (isAdminLogin) {
+        req.session.isAuthenticated = true;
+        req.session.username = ADMIN_USERNAME;
+        req.session.userId = 'admin';
+        req.session.isAdmin = true;
+        req.session.role = 'admin';
+        return res.json({ success: true, username: ADMIN_USERNAME, isAdmin: true });
+      }
+
+      const result = await loginUser(username, password, ip);
 
       if (!result.success) {
         return res.status(401).json({ error: result.error });
@@ -136,14 +148,14 @@ export async function registerRoutes(
 
       req.session.isAuthenticated = true;
       req.session.username = result.user!.username;
-      req.session.userId = result.user!.id;
-      req.session.isAdmin = result.isAdmin || false;
-      req.session.role = result.user!.role;
+      req.session.userId = String(result.user!.id);
+      req.session.isAdmin = result.user!.isAdmin;
+      req.session.role = result.user!.isAdmin ? 'admin' : 'user';
 
       return res.json({ 
         success: true, 
         username: result.user!.username,
-        isAdmin: result.isAdmin || false
+        isAdmin: result.user!.isAdmin
       });
     } catch (err) {
       console.error("Login error:", err);
@@ -173,38 +185,33 @@ export async function registerRoutes(
     return res.json({ authenticated: false });
   });
 
-  // Admin: Get all users
-  app.get("/api/admin/users", requireAdmin, (_req, res) => {
-    const users = authService.getAllUsers();
-    res.json(users);
+  app.get("/api/admin/users", requireAdmin, async (_req, res) => {
+    const usersList = await getAllUsers();
+    res.json(usersList);
   });
 
-  // Admin: Get suspicious activities
   app.get("/api/admin/fraud-alerts", requireAdmin, (_req, res) => {
-    const activities = authService.getSuspiciousActivities();
-    res.json(activities);
+    res.json([]);
   });
 
-  // Admin: Ban user
-  app.post("/api/admin/ban-user", requireAdmin, (req, res) => {
+  app.post("/api/admin/ban-user", requireAdmin, async (req, res) => {
     const { userId, reason } = req.body;
     if (!userId || !reason) {
       return res.status(400).json({ error: "User ID and reason are required" });
     }
-    const success = authService.banUser(userId, reason);
+    const success = await banUser(Number(userId), reason);
     if (success) {
       return res.json({ success: true });
     }
     return res.status(400).json({ error: "Failed to ban user" });
   });
 
-  // Admin: Unban user
-  app.post("/api/admin/unban-user", requireAdmin, (req, res) => {
+  app.post("/api/admin/unban-user", requireAdmin, async (req, res) => {
     const { userId } = req.body;
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
-    const success = authService.unbanUser(userId);
+    const success = await unbanUser(Number(userId));
     if (success) {
       return res.json({ success: true });
     }
@@ -271,12 +278,6 @@ export async function registerRoutes(
       const adminUsername = req.session?.username || 'admin';
       const subscription = stripeService.grantFreeAccess(username, tier, adminUsername);
       
-      // Also update the user's subscriptionTier in authService
-      const user = authService.getUserById(username);
-      if (user) {
-        authService.updateUserSubscription(user.id, tier);
-      }
-      
       res.json({ 
         success: true, 
         message: `Granted ${tier} access to ${username}`,
@@ -299,12 +300,6 @@ export async function registerRoutes(
       
       const adminUsername = req.session?.username || 'admin';
       const subscription = stripeService.revokeFreeAccess(username, adminUsername);
-      
-      // Also update the user's subscriptionTier in authService
-      const user = authService.getUserById(username);
-      if (user) {
-        authService.updateUserSubscription(user.id, 'free');
-      }
       
       res.json({ 
         success: true, 
