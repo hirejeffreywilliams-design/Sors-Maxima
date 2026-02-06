@@ -7,7 +7,7 @@ import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provi
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
-import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById } from "./dbAuthService";
+import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, updateSubscription } from "./dbAuthService";
 import { errorLogger } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import * as featuresService from "./featuresService";
