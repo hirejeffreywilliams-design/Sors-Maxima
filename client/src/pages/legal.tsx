@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Shield, FileText, AlertTriangle } from "lucide-react";
+import { Shield, FileText, AlertTriangle, ExternalLink } from "lucide-react";
 
 export default function LegalPage() {
   const [activeTab, setActiveTab] = useState("terms");
@@ -17,7 +17,7 @@ export default function LegalPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 mb-6">
+        <TabsList className="grid w-full grid-cols-4 mb-6">
           <TabsTrigger value="terms" className="gap-2" data-testid="tab-terms">
             <FileText className="w-4 h-4" />
             Terms
@@ -29,6 +29,10 @@ export default function LegalPage() {
           <TabsTrigger value="disclaimer" className="gap-2" data-testid="tab-disclaimer">
             <AlertTriangle className="w-4 h-4" />
             Disclaimer
+          </TabsTrigger>
+          <TabsTrigger value="affiliate" className="gap-2" data-testid="tab-affiliate">
+            <ExternalLink className="w-4 h-4" />
+            Affiliates
           </TabsTrigger>
         </TabsList>
 
@@ -295,6 +299,73 @@ export default function LegalPage() {
                   <section>
                     <h3 className="font-semibold mb-2">Self-Exclusion</h3>
                     <p>If you need to take a break from our Service, contact support@sorsmaxima.com to request account suspension or deletion.</p>
+                  </section>
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="affiliate">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ExternalLink className="w-5 h-5" />
+                Affiliate & Partner Disclosure
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[500px] pr-4">
+                <div className="space-y-4 text-sm" data-testid="affiliate-legal-content">
+                  <p className="text-muted-foreground">Last Updated: February 2026</p>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">1. Affiliate Relationships</h3>
+                    <p>Sors Maxima maintains affiliate partnerships with licensed, regulated sportsbook operators. When you click on links to sportsbooks on our platform and subsequently register or make a deposit, we may receive a commission at no additional cost to you.</p>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">2. Partner Sportsbooks</h3>
+                    <p>Our current affiliate partnerships include, but are not limited to:</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>DraftKings</li>
+                      <li>FanDuel</li>
+                      <li>BetMGM</li>
+                      <li>Caesars Sportsbook</li>
+                      <li>PointsBet</li>
+                      <li>BetRivers</li>
+                    </ul>
+                    <p className="mt-2">All partner sportsbooks are licensed and regulated in their respective operating jurisdictions.</p>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">3. Independence of Analysis</h3>
+                    <p>Our affiliate relationships do not influence our analysis algorithms, predictions, or recommendations. Our AI-powered analysis engine operates independently of any commercial partnerships. Odds are compared across multiple sportsbooks to ensure users receive the best available information.</p>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">4. Tipster Community Revenue</h3>
+                    <p>The Sors Maxima Tipster Community feature allows users to share betting tips and analysis. The platform retains 15% of tipster earnings as a service fee. This fee structure is:</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>Clearly disclosed before any subscription is created</li>
+                      <li>Applied uniformly to all tipster communities</li>
+                      <li>Used to maintain platform infrastructure and moderation</li>
+                    </ul>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">5. Advertising Standards</h3>
+                    <p>Sors Maxima adheres to responsible advertising practices:</p>
+                    <ul className="list-disc pl-6 mt-2 space-y-1">
+                      <li>We do not target vulnerable users or minors</li>
+                      <li>We do not promise or guarantee profitability</li>
+                      <li>We include responsible gambling messaging in all promotional materials</li>
+                      <li>We comply with advertising regulations in all operating jurisdictions</li>
+                    </ul>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">6. Contact</h3>
+                    <p>For questions about our affiliate relationships, contact partnerships@sorsmaxima.com.</p>
                   </section>
                 </div>
               </ScrollArea>

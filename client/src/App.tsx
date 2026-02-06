@@ -30,6 +30,8 @@ import TipsterCommunities from "@/pages/tipster-communities";
 import TrainingCenter from "@/pages/training-center";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
+import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
+import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 
 function Router() {
   return (
@@ -285,6 +287,10 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </header>
       
+      <div className="max-w-screen-2xl mx-auto px-4 lg:px-6 pt-2">
+        <GeoComplianceBanner />
+      </div>
+      
       <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
         <Router />
       </main>
@@ -297,6 +303,9 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
               <Link href="/legal" className="hover:text-primary">Terms</Link>
               <Link href="/legal" className="hover:text-primary">Privacy</Link>
               <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
+            </div>
+            <div className="flex items-center gap-4">
+              <AffiliateDisclosure compact />
             </div>
             <div className="text-center md:text-right max-w-xl">
               <p className="text-yellow-600 dark:text-yellow-500">

@@ -40,6 +40,9 @@ import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tuto
 import { BettingInsights } from "@/components/betting-insights";
 import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recognition";
 import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/quantum-fusion-display";
+import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
+import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
+import { eventTracker } from "@/lib/event-tracker";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -50,7 +53,7 @@ const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = 
   { id: "NCAAF", name: "College Football", color: "bg-amber-600", icon: "" },
 ];
 
-function TicketCard({ ticket, index }: { ticket: GeneratedTicket; index: number }) {
+function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
   
@@ -97,6 +100,10 @@ function TicketCard({ ticket, index }: { ticket: GeneratedTicket; index: number 
             </Badge>
             <Button size="icon" variant="ghost" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
               {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+            <Button size="sm" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
+              <DollarSign className="w-4 h-4" />
+              Place Bet
             </Button>
           </div>
         </div>
@@ -251,6 +258,8 @@ export default function AutoGenerator() {
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
+  const [confirmTicket, setConfirmTicket] = useState<GeneratedTicket | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
   
@@ -264,6 +273,15 @@ export default function AutoGenerator() {
   const handleTutorialComplete = () => {
     setShowTutorial(false);
     localStorage.setItem("sors_tutorial_complete", "true");
+  };
+
+  const handlePlaceBet = (ticket: GeneratedTicket) => {
+    setConfirmTicket(ticket);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmBet = (ticket: GeneratedTicket) => {
+    eventTracker.trackTicketAccept(ticket.id, ticket.recommendedStake, ticket.americanOdds);
   };
   
   const toggleSport = (sport: Sport) => {
@@ -292,6 +310,7 @@ export default function AutoGenerator() {
     
     const generatedTickets = generateTickets(request);
     setTickets(generatedTickets);
+    eventTracker.trackTicketGenerate(quickSports, "moderate", 500);
     
     const fusions = generatedTickets.map(ticket => 
       analyzeTicket(
@@ -347,6 +366,7 @@ export default function AutoGenerator() {
     
     const generatedTickets = generateTickets(request);
     setTickets(generatedTickets);
+    eventTracker.trackTicketGenerate(selectedSports, riskLevel, bankroll);
     
     const fusions = generatedTickets.map(ticket => 
       analyzeTicket(
@@ -377,6 +397,12 @@ export default function AutoGenerator() {
   return (
     <div className="min-h-full">
       <OnboardingTutorial isOpen={showTutorial} onComplete={handleTutorialComplete} />
+      <StakeConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        ticket={confirmTicket}
+        onConfirm={handleConfirmBet}
+      />
       
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
@@ -642,9 +668,11 @@ export default function AutoGenerator() {
               </Badge>
             </div>
             
+            <AffiliateDisclosure compact />
+            
             <div className="grid gap-4 lg:grid-cols-2">
               {tickets.map((ticket, idx) => (
-                <TicketCard key={ticket.id} ticket={ticket} index={idx} />
+                <TicketCard key={ticket.id} ticket={ticket} index={idx} onPlaceBet={handlePlaceBet} />
               ))}
             </div>
             

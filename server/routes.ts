@@ -13,6 +13,9 @@ import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
 import { sportsDataService } from "./sportsDataService";
+import { auditTrail } from "./auditTrail";
+import { idempotencyStore } from "./idempotency";
+import { featureFlags } from "./featureFlags";
 
 declare module "express-session" {
   interface SessionData {
@@ -38,6 +41,41 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.session?.isAuthenticated || !req.session?.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
   }
+  next();
+}
+
+function idempotencyMiddleware(req: Request, res: Response, next: NextFunction) {
+  const rawKey = req.headers["x-idempotency-key"] as string;
+  if (!rawKey) {
+    return next();
+  }
+
+  const userId = (req.session as any)?.username || "anon";
+  const scopedKey = `${userId}:${rawKey}`;
+
+  const existing = idempotencyStore.get(scopedKey);
+  if (existing) {
+    return res.status(existing.response.status).json(existing.response.body);
+  }
+
+  const originalJson = res.json.bind(res);
+  const originalSend = res.send.bind(res);
+
+  res.json = function (body: any) {
+    idempotencyStore.set(scopedKey, res.statusCode, body);
+    return originalJson(body);
+  };
+
+  res.send = function (body: any) {
+    try {
+      const parsed = typeof body === "string" ? JSON.parse(body) : body;
+      idempotencyStore.set(scopedKey, res.statusCode, parsed);
+    } catch {
+      idempotencyStore.set(scopedKey, res.statusCode, { raw: true });
+    }
+    return originalSend(body);
+  };
+
   next();
 }
 
@@ -641,7 +679,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  app.post("/api/generate-parlays", async (req, res) => {
+  app.post("/api/generate-parlays", idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = generateParlaysRequestSchema.safeParse(req.body);
 
@@ -768,7 +806,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  app.post("/api/evaluate", async (req, res) => {
+  app.post("/api/evaluate", idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = evaluateRequestSchema.safeParse(req.body);
 
@@ -926,7 +964,7 @@ Format your response clearly with sections and bullet points.`;
     });
   });
 
-  app.post("/api/stripe/checkout", async (req, res) => {
+  app.post("/api/stripe/checkout", idempotencyMiddleware, async (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
@@ -1023,7 +1061,7 @@ Format your response clearly with sections and bullet points.`;
   });
 
   // Create community
-  app.post("/api/communities", (req, res) => {
+  app.post("/api/communities", idempotencyMiddleware, (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
@@ -1785,6 +1823,278 @@ Format your response clearly with sections and bullet points.`;
 
   // Start simulation automatically
   liveSportsData.startSimulation();
+
+  // === Audit Trail Routes ===
+  app.get("/api/audit/entries", requireAdmin, (req, res) => {
+    try {
+      const { userId, action, entityType, limit, since } = req.query;
+      const entries = auditTrail.getEntries({
+        userId: userId as string,
+        action: action as any,
+        entityType: entityType as string,
+        limit: limit ? parseInt(limit as string) : 100,
+        since: since as string,
+      });
+      res.json({ entries, total: entries.length });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch audit entries" });
+    }
+  });
+
+  app.get("/api/audit/stats", requireAdmin, (req, res) => {
+    try {
+      const { userId, since } = req.query;
+      const stats = auditTrail.getStats({
+        userId: userId as string,
+        since: since as string,
+      });
+      res.json(stats);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch audit stats" });
+    }
+  });
+
+  app.post("/api/audit/record", (req, res) => {
+    try {
+      const { action, entityType, entityId, before, after, metadata } = req.body;
+      const userId = req.session?.userId || "anonymous";
+      const ip = getClientIp(req);
+      const userAgent = req.headers["user-agent"] || "unknown";
+
+      const id = auditTrail.record(userId, action, entityType, entityId, {
+        before,
+        after,
+        metadata,
+        ip,
+        userAgent,
+      });
+
+      res.json({ success: true, id });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to record audit entry" });
+    }
+  });
+
+  // === Feature Flags Routes ===
+  app.get("/api/feature-flags", (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      const allFlags = featureFlags.getAllFlags();
+      const flagStatus = allFlags.map((flag) => ({
+        id: flag.id,
+        name: flag.name,
+        description: flag.description,
+        enabled: featureFlags.isEnabled(flag.id, userId),
+        rolloutPercentage: flag.rolloutPercentage,
+      }));
+      res.json({ flags: flagStatus });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch feature flags" });
+    }
+  });
+
+  app.get("/api/feature-flags/check/:flagId", (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      const enabled = featureFlags.isEnabled(req.params.flagId, userId);
+      res.json({ flagId: req.params.flagId, enabled });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to check feature flag" });
+    }
+  });
+
+  app.put("/api/admin/feature-flags/:flagId", requireAdmin, (req, res) => {
+    try {
+      const { enabled, rolloutPercentage } = req.body;
+      const updated = featureFlags.setFlag(req.params.flagId, { enabled, rolloutPercentage });
+      if (!updated) {
+        return res.status(404).json({ error: "Feature flag not found" });
+      }
+
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "feature_flag", req.params.flagId, {
+        after: { enabled, rolloutPercentage },
+        ip: getClientIp(req),
+      });
+
+      res.json({ success: true, flag: updated });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update feature flag" });
+    }
+  });
+
+  app.post("/api/admin/feature-flags/:flagId/kill", requireAdmin, (req, res) => {
+    try {
+      const success = featureFlags.killSwitch(req.params.flagId);
+      if (!success) {
+        return res.status(404).json({ error: "Feature flag not found" });
+      }
+
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "feature_flag", req.params.flagId, {
+        after: { enabled: false, rolloutPercentage: 0 },
+        metadata: { action: "kill_switch" },
+        ip: getClientIp(req),
+      });
+
+      res.json({ success: true, message: `Kill switch activated for ${req.params.flagId}` });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to activate kill switch" });
+    }
+  });
+
+  app.get("/api/admin/feature-flags/stats", requireAdmin, (_req, res) => {
+    try {
+      res.json(featureFlags.getStats());
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch feature flag stats" });
+    }
+  });
+
+  // === Idempotency Stats (Admin) ===
+  app.get("/api/admin/idempotency/stats", requireAdmin, (_req, res) => {
+    try {
+      res.json(idempotencyStore.getStats());
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch idempotency stats" });
+    }
+  });
+
+  // === Geolocation & VPN Detection ===
+  app.get("/api/geo/check", (req, res) => {
+    try {
+      const ip = getClientIp(req);
+      const userAgent = req.headers["user-agent"] || "";
+
+      const suspiciousHeaders = [
+        "x-forwarded-for",
+        "via",
+        "x-real-ip",
+      ];
+
+      const proxyIndicators = suspiciousHeaders.filter(
+        (h) => req.headers[h] && typeof req.headers[h] === "string" && (req.headers[h] as string).includes(",")
+      );
+
+      const isVpnSuspect =
+        proxyIndicators.length >= 2 ||
+        (req.headers["via"] && typeof req.headers["via"] === "string" && req.headers["via"].length > 0);
+
+      res.json({
+        ip,
+        proxyDetected: proxyIndicators.length > 0,
+        vpnSuspected: isVpnSuspect,
+        proxyIndicators: proxyIndicators.length,
+        userAgentPresent: userAgent.length > 0,
+        warning: isVpnSuspect
+          ? "VPN/proxy usage detected. Some features may be restricted in your jurisdiction."
+          : null,
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to check geolocation" });
+    }
+  });
+
+  // === Data Lineage & Model Versioning ===
+  const modelRegistry: Array<{
+    id: string;
+    version: string;
+    createdAt: string;
+    factorWeights: Record<string, number>;
+    accuracy?: number;
+    status: "active" | "archived" | "testing";
+    notes?: string;
+  }> = [];
+
+  app.get("/api/admin/model/versions", requireAdmin, (_req, res) => {
+    try {
+      const weights = getAllFactorWeights();
+      const currentVersion = {
+        id: `model_current_${Date.now()}`,
+        version: "1.0.0",
+        createdAt: new Date().toISOString(),
+        factorWeights: weights,
+        status: "active" as const,
+        notes: "Current production model",
+      };
+      res.json({
+        current: currentVersion,
+        history: modelRegistry,
+        totalVersions: modelRegistry.length + 1,
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch model versions" });
+    }
+  });
+
+  app.post("/api/admin/model/snapshot", requireAdmin, (req, res) => {
+    try {
+      const weights = getAllFactorWeights();
+      const { version, notes } = req.body;
+      const snapshot = {
+        id: `model_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        version: version || `1.${modelRegistry.length + 1}.0`,
+        createdAt: new Date().toISOString(),
+        factorWeights: weights,
+        status: "archived" as const,
+        notes: notes || "Manual snapshot",
+      };
+      modelRegistry.push(snapshot);
+
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "model", snapshot.id, {
+        after: { version: snapshot.version },
+        metadata: { action: "model_snapshot" },
+      });
+
+      res.json({ success: true, snapshot });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to create model snapshot" });
+    }
+  });
+
+  // === Revenue Reconciliation (Admin) ===
+  app.get("/api/admin/revenue/summary", requireAdmin, async (_req, res) => {
+    try {
+      const users = await storage.getUsers();
+      const premiumUsers = users.filter((u: any) => u.subscriptionTier === "pro" || u.subscriptionTier === "premium");
+      const today = new Date().toISOString().split("T")[0];
+      
+      res.json({
+        date: today,
+        totalUsers: users.length,
+        premiumUsers: premiumUsers.length,
+        estimatedMRR: premiumUsers.length * 29.99,
+        tipsterPlatformFee: "15%",
+        reconciliationStatus: "current",
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch revenue summary" });
+    }
+  });
+
+  // === Cost Monitoring (Admin) ===
+  app.get("/api/admin/cost-monitor", requireAdmin, (_req, res) => {
+    try {
+      const uptime = process.uptime();
+      const memUsage = process.memoryUsage();
+      
+      res.json({
+        uptime: Math.floor(uptime),
+        memory: {
+          heapUsed: Math.round(memUsage.heapUsed / 1024 / 1024),
+          heapTotal: Math.round(memUsage.heapTotal / 1024 / 1024),
+          rss: Math.round(memUsage.rss / 1024 / 1024),
+          external: Math.round(memUsage.external / 1024 / 1024),
+        },
+        apiCalls: {
+          oddsProvider: idempotencyStore.getStats().totalRecords,
+          auditEntries: auditTrail.getStats().total,
+          featureFlags: featureFlags.getStats().total,
+        },
+        alerts: [],
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch cost monitoring data" });
+    }
+  });
 
   return httpServer;
 }

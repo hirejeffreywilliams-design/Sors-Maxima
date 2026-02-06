@@ -29,6 +29,7 @@ import {
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -365,7 +366,7 @@ export default function AdminDashboard() {
       </div>
 
       <Tabs defaultValue="users">
-        <TabsList className="w-full grid grid-cols-4 h-auto">
+        <TabsList className="w-full grid grid-cols-6 h-auto">
           <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
             <Users className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden xs:inline">Users</span>
@@ -381,6 +382,14 @@ export default function AdminDashboard() {
           <TabsTrigger value="errors" data-testid="tab-errors" className="text-xs sm:text-sm py-2">
             <Bug className="h-4 w-4 mr-1 sm:mr-2" />
             <span className="hidden xs:inline">Errors</span>
+          </TabsTrigger>
+          <TabsTrigger value="flags" data-testid="tab-flags" className="text-xs sm:text-sm py-2">
+            <Activity className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Flags</span>
+          </TabsTrigger>
+          <TabsTrigger value="audit" data-testid="tab-audit" className="text-xs sm:text-sm py-2">
+            <Shield className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden xs:inline">Audit</span>
           </TabsTrigger>
         </TabsList>
 
@@ -740,6 +749,14 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="flags" className="space-y-4 mt-4">
+          <FeatureFlagsPanel />
+        </TabsContent>
+
+        <TabsContent value="audit" className="space-y-4 mt-4">
+          <AuditTrailPanel />
+        </TabsContent>
       </Tabs>
 
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
@@ -936,6 +953,210 @@ export default function AdminDashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function FeatureFlagsPanel() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: flagsData, isLoading } = useQuery<{ flags: Array<{
+    id: string;
+    name: string;
+    description: string;
+    enabled: boolean;
+    rolloutPercentage: number;
+  }> }>({
+    queryKey: ['/api/feature-flags'],
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: async ({ flagId, enabled }: { flagId: string; enabled: boolean }) => {
+      await apiRequest("PUT", `/api/admin/feature-flags/${flagId}`, { enabled });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feature-flags'] });
+      toast({ title: "Feature flag updated" });
+    },
+    onError: () => {
+      toast({ title: "Failed to update flag", variant: "destructive" });
+    },
+  });
+
+  const killMutation = useMutation({
+    mutationFn: async (flagId: string) => {
+      await apiRequest("POST", `/api/admin/feature-flags/${flagId}/kill`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feature-flags'] });
+      toast({ title: "Kill switch activated", variant: "destructive" });
+    },
+  });
+
+  const flags = flagsData?.flags || [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          Feature Flags
+        </CardTitle>
+        <CardDescription>Control feature rollouts and emergency kill switches</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Loading flags...</p>
+        ) : (
+          <div className="space-y-3">
+            {flags.map((flag) => (
+              <div
+                key={flag.id}
+                className="flex items-center justify-between gap-4 p-3 rounded-lg border flex-wrap"
+                data-testid={`flag-${flag.id}`}
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">{flag.name}</p>
+                  <p className="text-xs text-muted-foreground">{flag.description}</p>
+                  <Badge variant="outline" className="text-xs mt-1">
+                    {flag.rolloutPercentage}% rollout
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={flag.enabled}
+                    onCheckedChange={(checked) =>
+                      toggleMutation.mutate({ flagId: flag.id, enabled: checked })
+                    }
+                    data-testid={`switch-flag-${flag.id}`}
+                  />
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => killMutation.mutate(flag.id)}
+                    disabled={!flag.enabled}
+                    data-testid={`button-kill-${flag.id}`}
+                  >
+                    <XCircle className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function AuditTrailPanel() {
+  const { data: auditData, isLoading } = useQuery<{
+    entries: Array<{
+      id: string;
+      timestamp: string;
+      userId: string;
+      action: string;
+      entityType: string;
+      entityId: string;
+      metadata?: Record<string, unknown>;
+    }>;
+    total: number;
+  }>({
+    queryKey: ['/api/audit/entries'],
+  });
+
+  const { data: auditStats } = useQuery<{
+    total: number;
+    actionCounts: Record<string, number>;
+    uniqueUsers: number;
+  }>({
+    queryKey: ['/api/audit/stats'],
+  });
+
+  const entries = auditData?.entries || [];
+
+  const getActionBadge = (action: string) => {
+    const colors: Record<string, string> = {
+      ticket_generated: "bg-blue-500/20 text-blue-500",
+      ticket_accepted: "bg-green-500/20 text-green-500",
+      ticket_rejected: "bg-red-500/20 text-red-500",
+      settings_changed: "bg-yellow-500/20 text-yellow-500",
+      login: "bg-purple-500/20 text-purple-500",
+    };
+    return colors[action] || "bg-muted text-muted-foreground";
+  };
+
+  return (
+    <div className="space-y-4">
+      {auditStats && (
+        <div className="grid grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="py-4 text-center">
+              <p className="text-2xl font-bold">{auditStats.total}</p>
+              <p className="text-xs text-muted-foreground">Total Events</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="py-4 text-center">
+              <p className="text-2xl font-bold">{auditStats.uniqueUsers}</p>
+              <p className="text-xs text-muted-foreground">Unique Users</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="py-4 text-center">
+              <p className="text-2xl font-bold">{Object.keys(auditStats.actionCounts).length}</p>
+              <p className="text-xs text-muted-foreground">Action Types</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Audit Trail
+          </CardTitle>
+          <CardDescription>Complete log of user decisions and system actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading audit trail...</p>
+          ) : entries.length === 0 ? (
+            <div className="text-center py-8">
+              <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground">No audit entries yet</p>
+              <p className="text-xs text-muted-foreground mt-1">Actions will be logged as users interact with the platform</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {entries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-start justify-between gap-3 p-3 rounded-lg border text-sm flex-wrap"
+                  data-testid={`audit-entry-${entry.id}`}
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Badge className={getActionBadge(entry.action)}>
+                        {entry.action.replace(/_/g, " ")}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{entry.entityType}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      User: {entry.userId} | Entity: {entry.entityId}
+                    </p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(entry.timestamp).toLocaleString()}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
