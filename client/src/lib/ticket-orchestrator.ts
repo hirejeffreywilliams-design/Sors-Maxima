@@ -1,4 +1,5 @@
 import type { Sport, ParlayLeg, GeneratedParlay } from "@shared/schema";
+import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantum-fusion-engine";
 
 export interface TicketRequest {
   sports: Sport[];
@@ -38,6 +39,7 @@ export interface GeneratedTicket {
   rationale: string[];
   cashoutProbability: number;
   grade: string;
+  fusionData?: TicketFusion;
 }
 
 export interface TicketLeg {
@@ -59,6 +61,7 @@ export interface TicketLeg {
     publicPercent: number;
     confidenceLevel: "high" | "medium" | "low";
   };
+  legFusion?: FusionAnalysis;
 }
 
 const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
@@ -232,36 +235,27 @@ function decimalToAmerican(decimal: number): number {
   }
 }
 
-function formatAmerican(american: number): string {
-  return american > 0 ? `+${american}` : `${american}`;
-}
-
 function calculateCombinedOdds(legs: TicketLeg[]): number {
   return legs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
 }
 
-function simulateQuantumCoachingScore(): number {
-  return 0.6 + Math.random() * 0.35;
+function extractSignalScore(signals: FusionSignal[], factorName: string): number {
+  const signal = signals.find(s => s.source === factorName);
+  if (!signal) return 0.5;
+  const base = signal.direction === "bullish" ? signal.strength : 
+               signal.direction === "bearish" ? (100 - signal.strength) : 50;
+  return (base * signal.confidence / 100) / 100;
 }
 
-function simulateQuantumPlayerScore(): number {
-  return 0.55 + Math.random() * 0.4;
-}
-
-function simulateQuantumTeamScore(): number {
-  return 0.5 + Math.random() * 0.45;
-}
-
-function simulateMLProjectionScore(): number {
-  return 0.65 + Math.random() * 0.3;
-}
-
-function simulateCorrelationScore(): number {
-  return 0.4 + Math.random() * 0.5;
-}
-
-function simulateSharpMoneyScore(): number {
-  return 0.5 + Math.random() * 0.45;
+function extractCategoryScore(signals: FusionSignal[], factorNames: string[]): number {
+  let total = 0;
+  let count = 0;
+  for (const name of factorNames) {
+    const score = extractSignalScore(signals, name);
+    total += score;
+    count++;
+  }
+  return count > 0 ? total / count : 0.5;
 }
 
 function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
@@ -357,8 +351,31 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
   }
   
   const americanOdds = decimalToAmerican(decimalOdds);
-  const winProbability = 0.4 + Math.random() * 0.25;
-  const edgePercent = (Math.random() * 12 - 2);
+  const description = `${selectedTeam.city} ${selectedTeam.name} ${market} ${outcome}`;
+  
+  const legFusion = analyzeLeg(sport, description, americanOdds);
+  
+  const winProbability = legFusion.winProbability / 100;
+  const edgePercent = legFusion.edgePercentage;
+  
+  const sharpSignal = legFusion.signals.find(s => s.source === "sharp_money_flow");
+  const lineSignal = legFusion.signals.find(s => s.source === "line_movement");
+  const publicSignal = legFusion.signals.find(s => s.source === "public_fade");
+  
+  const sharpAction = sharpSignal ? sharpSignal.direction === "bullish" && sharpSignal.strength > 65 : false;
+  
+  let lineMovement: "steam" | "reverse" | "stable" = "stable";
+  if (lineSignal) {
+    if (lineSignal.direction === "bullish" && lineSignal.strength > 70) lineMovement = "steam";
+    else if (lineSignal.direction === "bearish" && lineSignal.strength > 60) lineMovement = "reverse";
+  }
+  
+  const publicPercent = publicSignal ? 
+    (publicSignal.direction === "bullish" ? 30 + Math.round(publicSignal.strength * 0.2) : 50 + Math.round(publicSignal.strength * 0.3)) : 50;
+  
+  const confidenceLevel: "high" | "medium" | "low" = 
+    legFusion.confidence >= 75 ? "high" :
+    legFusion.confidence >= 55 ? "medium" : "low";
   
   return {
     id: crypto.randomUUID(),
@@ -374,11 +391,12 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
     playerName,
     propCategory,
     analysis: {
-      sharpAction: Math.random() > 0.6,
-      lineMovement: ["steam", "reverse", "stable"][Math.floor(Math.random() * 3)] as "steam" | "reverse" | "stable",
-      publicPercent: Math.round(Math.random() * 40 + 30),
-      confidenceLevel: ["high", "medium", "low"][Math.floor(Math.random() * 3)] as "high" | "medium" | "low",
+      sharpAction,
+      lineMovement,
+      publicPercent,
+      confidenceLevel,
     },
+    legFusion,
   };
 }
 
@@ -389,74 +407,71 @@ function generateTicketName(sport: Sport, index: number, riskLevel: string): str
     aggressive: ["Power", "High-Value", "Bold", "Premium", "Elite"],
   };
   
-  const sportEmoji: Record<Sport, string> = {
-    NBA: "",
-    NFL: "",
-    MLB: "",
-    NHL: "",
-    NCAAB: "",
-    NCAAF: "",
-  };
-  
   const prefix = prefixes[riskLevel as keyof typeof prefixes][Math.floor(Math.random() * 5)];
   return `${prefix} ${sport} Ticket #${index + 1}`;
 }
 
-function calculateGrade(confidenceScore: number, ev: number): string {
-  const score = confidenceScore * 50 + Math.max(0, ev) * 50;
-  if (score >= 85) return "A+";
-  if (score >= 80) return "A";
-  if (score >= 75) return "A-";
-  if (score >= 70) return "B+";
-  if (score >= 65) return "B";
-  if (score >= 60) return "B-";
-  if (score >= 55) return "C+";
-  if (score >= 50) return "C";
-  return "C-";
-}
-
-function generateRationale(ticket: Omit<GeneratedTicket, "rationale">): string[] {
+function buildRationale(fusionData: TicketFusion, legs: TicketLeg[]): string[] {
   const rationale: string[] = [];
+  const cf = fusionData.combinedFusion;
   
-  if (ticket.analysisFactors.sharpMoneyScore > 0.75) {
-    rationale.push("Sharp money detected on multiple legs");
+  if (cf.synergies.length > 0) {
+    const topSynergy = cf.synergies.sort((a, b) => b.effect - a.effect)[0];
+    if (topSynergy.synergyType === "amplifying" && topSynergy.effect > 1.15) {
+      rationale.push(`Synergy detected: ${topSynergy.description}`);
+    }
   }
-  if (ticket.analysisFactors.quantumCoachingScore > 0.8) {
-    rationale.push("Coaching patterns favor this outcome");
+  
+  const bullishHighSignals = cf.signals.filter(s => s.direction === "bullish" && s.strength >= 70);
+  if (bullishHighSignals.length >= 3) {
+    rationale.push(`${bullishHighSignals.length} strong bullish signals across factors (${bullishHighSignals.slice(0, 3).map(s => s.source.replace(/_/g, ' ')).join(', ')})`);
   }
-  if (ticket.analysisFactors.quantumPlayerScore > 0.8) {
-    rationale.push("Player performance metrics highly favorable");
+  
+  if (cf.quantumState.coherence >= 70) {
+    rationale.push(`High quantum coherence (${cf.quantumState.coherence}%) - factors strongly aligned`);
   }
-  if (ticket.analysisFactors.mlProjectionScore > 0.8) {
-    rationale.push("ML models project strong edge");
+  
+  if (cf.expectedValue > 3) {
+    rationale.push(`Positive expected value: +${cf.expectedValue.toFixed(1)}% edge detected`);
   }
-  if (ticket.analysisFactors.correlationScore > 0.7) {
-    rationale.push("Positive correlations between legs boost probability");
+  
+  const sharpLegs = legs.filter(l => l.analysis.sharpAction);
+  if (sharpLegs.length > 0) {
+    rationale.push(`Sharp money backing ${sharpLegs.length} of ${legs.length} selections`);
   }
-  if (ticket.expectedValue > 0.1) {
-    rationale.push(`+EV opportunity: ${(ticket.expectedValue * 100).toFixed(1)}% edge`);
+  
+  const steamLegs = legs.filter(l => l.analysis.lineMovement === "steam");
+  if (steamLegs.length > 0) {
+    rationale.push(`Steam move detected on ${steamLegs.length} leg${steamLegs.length > 1 ? 's' : ''} - line moving favorably`);
   }
-  if (ticket.cashoutProbability > 0.85) {
-    rationale.push("High cashout eligibility across platforms");
+  
+  if (fusionData.correlationBonus > 5) {
+    rationale.push(`Correlation bonus: +${fusionData.correlationBonus.toFixed(1)}% from signal diversification across legs`);
   }
-  if (ticket.legs.some(l => l.analysis.sharpAction)) {
-    rationale.push("Professional bettors backing key selections");
+  
+  if (cf.recommendation === "strong_bet") {
+    rationale.push("All-systems-go: Quantum Fusion Engine rates this a STRONG BET");
+  } else if (cf.recommendation === "moderate_bet") {
+    rationale.push("Solid opportunity: Multiple analysis categories confirm value");
   }
-  if (ticket.legs.some(l => l.analysis.lineMovement === "steam")) {
-    rationale.push("Steam move detected - line moving favorably");
+  
+  for (const insight of cf.insights.slice(0, 2)) {
+    if (!rationale.some(r => r.includes(insight.substring(0, 20)))) {
+      rationale.push(insight);
+    }
   }
   
   if (rationale.length === 0) {
-    rationale.push("Balanced risk/reward profile");
-    rationale.push("Diversified market selection");
+    rationale.push("Balanced risk/reward profile across 46 analysis factors");
+    rationale.push("Diversified market selection for portfolio approach");
   }
   
-  return rationale;
+  return rationale.slice(0, 6);
 }
 
 export function generateTickets(request: TicketRequest): GeneratedTicket[] {
-  const tickets: GeneratedTicket[] = [];
-  const ticketsPerSport = Math.ceil(6 / request.sports.length);
+  const candidateTickets: GeneratedTicket[] = [];
+  const ticketsToGenerate = Math.ceil(10 / request.sports.length);
   
   const legCountsByRisk = {
     conservative: [2, 3],
@@ -467,7 +482,7 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
   const legCounts = legCountsByRisk[request.riskLevel];
   
   for (const sport of request.sports) {
-    for (let i = 0; i < ticketsPerSport; i++) {
+    for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
         legCounts[Math.floor(Math.random() * legCounts.length)],
         request.maxLegs
@@ -487,27 +502,37 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
       const totalOdds = calculateCombinedOdds(legs);
       const americanOdds = decimalToAmerican(totalOdds);
       
+      const fusionData = analyzeTicket(
+        legs.map((leg, idx) => ({
+          id: leg.id,
+          sport,
+          description: `${leg.team} ${leg.market} ${leg.outcome}`,
+          odds: leg.americanOdds,
+        })),
+        request.riskLevel
+      );
+      
+      const cf = fusionData.combinedFusion;
+      const allSignals = cf.signals;
+      
       const analysisFactors: AnalysisFactors = {
-        quantumCoachingScore: simulateQuantumCoachingScore(),
-        quantumPlayerScore: simulateQuantumPlayerScore(),
-        quantumTeamScore: simulateQuantumTeamScore(),
-        mlProjectionScore: simulateMLProjectionScore(),
-        correlationScore: simulateCorrelationScore(),
-        sharpMoneyScore: simulateSharpMoneyScore(),
-        lineValueScore: 0.5 + Math.random() * 0.4,
-        momentumScore: 0.4 + Math.random() * 0.5,
-        situationalScore: 0.5 + Math.random() * 0.4,
-        cashoutEligibility: 0.7 + Math.random() * 0.25,
+        quantumCoachingScore: extractCategoryScore(allSignals, ["coaching_tendency", "scheme_mismatch"]),
+        quantumPlayerScore: extractCategoryScore(allSignals, ["player_efficiency", "injury_adjustment", "biomech_fatigue", "load_management"]),
+        quantumTeamScore: extractCategoryScore(allSignals, ["team_chemistry", "mental_state", "roster_stability"]),
+        mlProjectionScore: extractCategoryScore(allSignals, ["predictive_model", "win_probability", "monte_carlo"]),
+        correlationScore: Math.min(0.95, (fusionData.correlationBonus / 15 + fusionData.diversificationScore / 100) / 2),
+        sharpMoneyScore: extractCategoryScore(allSignals, ["sharp_money_flow", "public_fade", "line_movement"]),
+        lineValueScore: extractSignalScore(allSignals, "line_movement"),
+        momentumScore: extractCategoryScore(allSignals, ["momentum_score", "confidence_index"]),
+        situationalScore: extractCategoryScore(allSignals, ["situational_spot", "rest_advantage", "home_field"]),
+        cashoutEligibility: 0.7 + (cf.confidence / 100) * 0.25,
       };
       
-      const avgFactorScore = Object.values(analysisFactors).reduce((a, b) => a + b, 0) / Object.values(analysisFactors).length;
-      const confidenceScore = Math.min(0.95, avgFactorScore * (0.9 + Math.random() * 0.2));
+      const confidenceScore = cf.confidence / 100;
+      const winProbability = cf.winProbability / 100;
+      const expectedValue = cf.expectedValue / 100;
       
-      const impliedProb = 1 / totalOdds;
-      const winProbability = Math.min(0.85, impliedProb * (1 + (avgFactorScore - 0.5) * 0.4));
-      const expectedValue = (winProbability * totalOdds) - 1;
-      
-      const kellyFraction = Math.max(0, (winProbability * (totalOdds - 1) - (1 - winProbability)) / (totalOdds - 1));
+      const kellyFraction = Math.max(0, cf.kellyCriterion / 100);
       const adjustedKelly = kellyFraction * 0.25;
       const recommendedStake = Math.round(request.bankroll * Math.min(adjustedKelly, 0.05) * 100) / 100;
       const potentialPayout = Math.round(recommendedStake * totalOdds * 100) / 100;
@@ -516,7 +541,7 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
         numLegs <= 2 ? "low" : 
         numLegs <= 4 ? "medium" : "high";
       
-      const baseTicket = {
+      const ticket: GeneratedTicket = {
         id: crypto.randomUUID(),
         name: generateTicketName(sport, i, request.riskLevel),
         sport,
@@ -527,25 +552,51 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
         expectedValue,
         confidenceScore,
         recommendedStake: Math.max(recommendedStake, 5),
-        potentialPayout,
+        potentialPayout: Math.max(potentialPayout, 5 * totalOdds),
         riskRating,
         analysisFactors,
+        rationale: [],
         cashoutProbability: analysisFactors.cashoutEligibility,
-        grade: calculateGrade(confidenceScore, expectedValue),
+        grade: cf.grade,
+        fusionData,
       };
       
-      const ticket: GeneratedTicket = {
-        ...baseTicket,
-        rationale: generateRationale(baseTicket as Omit<GeneratedTicket, "rationale">),
-      };
+      ticket.rationale = buildRationale(fusionData, legs);
       
-      tickets.push(ticket);
+      candidateTickets.push(ticket);
     }
   }
   
-  return tickets.sort((a, b) => {
-    const scoreA = a.confidenceScore * 0.4 + Math.max(0, a.expectedValue) * 0.3 + a.winProbability * 0.3;
-    const scoreB = b.confidenceScore * 0.4 + Math.max(0, b.expectedValue) * 0.3 + b.winProbability * 0.3;
+  const filteredTickets = candidateTickets.filter(t => {
+    if (!t.fusionData) return true;
+    const rec = t.fusionData.combinedFusion.recommendation;
+    return rec !== "fade";
+  });
+  
+  const sortedTickets = filteredTickets.sort((a, b) => {
+    const scoreA = getFusionSortScore(a);
+    const scoreB = getFusionSortScore(b);
     return scoreB - scoreA;
   });
+  
+  return sortedTickets.slice(0, 6);
+}
+
+function getFusionSortScore(ticket: GeneratedTicket): number {
+  if (!ticket.fusionData) {
+    return ticket.confidenceScore * 0.4 + Math.max(0, ticket.expectedValue) * 0.3 + ticket.winProbability * 0.3;
+  }
+  
+  const cf = ticket.fusionData.combinedFusion;
+  const recBonus = cf.recommendation === "strong_bet" ? 20 :
+                   cf.recommendation === "moderate_bet" ? 10 :
+                   cf.recommendation === "lean_bet" ? 5 :
+                   cf.recommendation === "avoid" ? -10 : -20;
+  
+  return (cf.overallScore * 0.35) + 
+         (cf.confidence * 0.2) + 
+         (Math.max(0, cf.expectedValue) * 2) + 
+         (cf.winProbability * 0.15) +
+         (ticket.fusionData.correlationBonus * 0.5) +
+         recBonus;
 }

@@ -33,7 +33,7 @@ import {
   Bell
 } from "lucide-react";
 import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
-import { analyzeTicket, type TicketFusion } from "@/lib/quantum-fusion-engine";
+import type { TicketFusion } from "@/lib/quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
@@ -312,17 +312,9 @@ export default function AutoGenerator() {
     setTickets(generatedTickets);
     eventTracker.trackTicketGenerate(quickSports, "moderate", 500);
     
-    const fusions = generatedTickets.map(ticket => 
-      analyzeTicket(
-        ticket.legs.map((leg, i) => ({
-          id: `leg-${i}`,
-          sport: ticket.sport,
-          description: `${leg.team} ${leg.market} ${leg.outcome}`,
-          odds: leg.americanOdds
-        })),
-        "moderate"
-      )
-    );
+    const fusions = generatedTickets
+      .map(ticket => ticket.fusionData)
+      .filter((f): f is TicketFusion => !!f);
     setTicketFusions(fusions);
     
     setHasGenerated(true);
@@ -368,17 +360,9 @@ export default function AutoGenerator() {
     setTickets(generatedTickets);
     eventTracker.trackTicketGenerate(selectedSports, riskLevel, bankroll);
     
-    const fusions = generatedTickets.map(ticket => 
-      analyzeTicket(
-        ticket.legs.map((leg, i) => ({
-          id: `leg-${i}`,
-          sport: ticket.sport,
-          description: `${leg.team} ${leg.market} ${leg.outcome}`,
-          odds: leg.americanOdds
-        })),
-        riskLevel as "conservative" | "moderate" | "aggressive"
-      )
-    );
+    const fusions = generatedTickets
+      .map(ticket => ticket.fusionData)
+      .filter((f): f is TicketFusion => !!f);
     setTicketFusions(fusions);
     
     setHasGenerated(true);
