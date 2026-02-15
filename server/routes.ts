@@ -8,8 +8,10 @@ import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
 import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, updateSubscription } from "./dbAuthService";
-import { errorLogger } from "./errorLogger";
+import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
+import { generateTickets as generateSmartTickets, type TicketRequest } from "./ticketOrchestrator";
+import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
 import { sportsDataService } from "./sportsDataService";
@@ -671,6 +673,56 @@ Format your response clearly with sections and bullet points.`;
         error: "Failed to refresh odds",
         message: err instanceof Error ? err.message : "Unknown error",
       });
+    }
+  });
+
+  app.post("/api/generate-tickets", async (req, res) => {
+    try {
+      const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
+
+      if (!sports || !Array.isArray(sports) || sports.length === 0) {
+        return res.status(400).json({ error: "At least one sport must be selected" });
+      }
+
+      const validRiskLevels = ["conservative", "moderate", "aggressive"];
+      if (riskLevel && !validRiskLevels.includes(riskLevel)) {
+        return res.status(400).json({ error: "Invalid risk level" });
+      }
+
+      const request: TicketRequest = {
+        sports,
+        bankroll: bankroll || 1000,
+        riskLevel: riskLevel || "moderate",
+        maxLegs: maxLegs || 4,
+        includeProps: includeProps !== false,
+      };
+
+      const tickets = generateSmartTickets(request);
+
+      return res.json({
+        tickets,
+        engineStats: getQuantumEngineStats(),
+        factorCategories: getQuantumFactorCategories(),
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      logError(err instanceof Error ? err : new Error(String(err)), {
+        context: "generate-tickets",
+      });
+      return res.status(500).json({
+        error: "Failed to generate tickets",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
+  app.get("/api/quantum-engine/stats", async (_req, res) => {
+    try {
+      const stats = getQuantumEngineStats();
+      const categories = getQuantumFactorCategories();
+      return res.json({ stats, categories });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get engine stats" });
     }
   });
 
