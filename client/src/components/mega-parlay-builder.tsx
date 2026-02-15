@@ -183,28 +183,30 @@ export function MegaParlayBuilder({ legs, stake, result, availableLegs = [], onA
       
       <CardContent className="pt-0">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 h-auto">
-            <TabsTrigger value="jackpot" className="text-xs py-2 gap-1">
-              <DollarSign className="w-3 h-3" />
-              Jackpot
-            </TabsTrigger>
-            <TabsTrigger value="synergy" className="text-xs py-2 gap-1">
-              <Zap className="w-3 h-3" />
-              Synergy
-            </TabsTrigger>
-            <TabsTrigger value="roundrobin" className="text-xs py-2 gap-1">
-              <Layers className="w-3 h-3" />
-              Round Robin
-            </TabsTrigger>
-            <TabsTrigger value="progressive" className="text-xs py-2 gap-1">
-              <TrendingUp className="w-3 h-3" />
-              Progressive
-            </TabsTrigger>
-            <TabsTrigger value="smart" className="text-xs py-2 gap-1">
-              <Sparkles className="w-3 h-3" />
-              Smart Add
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 h-auto">
+              <TabsTrigger value="jackpot" className="text-xs py-2 gap-1 px-2 sm:px-3">
+                <DollarSign className="w-3 h-3 shrink-0" />
+                Jackpot
+              </TabsTrigger>
+              <TabsTrigger value="synergy" className="text-xs py-2 gap-1 px-2 sm:px-3">
+                <Zap className="w-3 h-3 shrink-0" />
+                Synergy
+              </TabsTrigger>
+              <TabsTrigger value="roundrobin" className="text-xs py-2 gap-1 px-2 sm:px-3">
+                <Layers className="w-3 h-3 shrink-0" />
+                Round Robin
+              </TabsTrigger>
+              <TabsTrigger value="progressive" className="text-xs py-2 gap-1 px-2 sm:px-3">
+                <TrendingUp className="w-3 h-3 shrink-0" />
+                Progressive
+              </TabsTrigger>
+              <TabsTrigger value="smart" className="text-xs py-2 gap-1 px-2 sm:px-3">
+                <Sparkles className="w-3 h-3 shrink-0" />
+                Smart Add
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="jackpot" className="mt-4">
             <div className="space-y-3">

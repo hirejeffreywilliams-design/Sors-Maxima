@@ -15,6 +15,17 @@
   }
 }
 
+/* Hide scrollbar for horizontal tab scrolling on mobile */
+@media (max-width: 640px) {
+  .overflow-x-auto {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* LIGHT MODE */
 :root {
   --button-outline: rgba(0,0,0, .10);

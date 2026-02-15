@@ -418,7 +418,7 @@ export function TicketFusionDisplay({ ticketFusion }: TicketFusionDisplayProps) 
                     {leg.fusion.grade}
                   </Badge>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-xs">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   <div>
                     <span className="text-muted-foreground">Score: </span>
                     <span className="font-medium">{leg.fusion.overallScore}</span>

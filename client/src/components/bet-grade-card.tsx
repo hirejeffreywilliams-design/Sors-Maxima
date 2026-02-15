@@ -259,7 +259,7 @@ export function GradingLegend() {
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-2">
-        <div className="grid grid-cols-4 gap-1 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-xs">
           {grades.map((g) => (
             <div 
               key={g.grade}

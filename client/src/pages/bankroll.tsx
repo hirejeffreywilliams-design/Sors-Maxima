@@ -23,28 +23,30 @@ export default function Bankroll() {
         </header>
 
         <Tabs defaultValue="history" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-xl">
-            <TabsTrigger value="history" className="gap-1 text-xs sm:text-sm" data-testid="tab-history">
-              <History className="w-4 h-4" />
-              <span className="hidden sm:inline">Bets</span>
-            </TabsTrigger>
-            <TabsTrigger value="books" className="gap-1 text-xs sm:text-sm" data-testid="tab-books">
-              <Wallet className="w-4 h-4" />
-              <span className="hidden sm:inline">Books</span>
-            </TabsTrigger>
-            <TabsTrigger value="stats" className="gap-1 text-xs sm:text-sm" data-testid="tab-stats">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Stats</span>
-            </TabsTrigger>
-            <TabsTrigger value="roi" className="gap-1 text-xs sm:text-sm" data-testid="tab-roi">
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">ROI</span>
-            </TabsTrigger>
-            <TabsTrigger value="tax" className="gap-1 text-xs sm:text-sm" data-testid="tab-tax">
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">Tax</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 sm:max-w-xl">
+              <TabsTrigger value="history" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-history">
+                <History className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Bets</span>
+              </TabsTrigger>
+              <TabsTrigger value="books" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-books">
+                <Wallet className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Books</span>
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-stats">
+                <TrendingUp className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Stats</span>
+              </TabsTrigger>
+              <TabsTrigger value="roi" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-roi">
+                <BarChart3 className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">ROI</span>
+              </TabsTrigger>
+              <TabsTrigger value="tax" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-tax">
+                <FileText className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Tax</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="history" className="space-y-6">
             <BetTracker />

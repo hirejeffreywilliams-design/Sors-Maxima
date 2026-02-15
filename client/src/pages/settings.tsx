@@ -127,24 +127,26 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="notifications">
-          <TabsList className="w-full grid grid-cols-4 h-auto">
-            <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-notifications">
-              <Bell className="h-4 w-4" />
-              <span className="hidden sm:inline">Alerts</span>
-            </TabsTrigger>
-            <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-responsible">
-              <Shield className="h-4 w-4" />
-              <span className="hidden sm:inline">Limits</span>
-            </TabsTrigger>
-            <TabsTrigger value="backup" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-backup">
-              <Download className="h-4 w-4" />
-              <span className="hidden sm:inline">Backup</span>
-            </TabsTrigger>
-            <TabsTrigger value="referral" className="text-xs sm:text-sm py-2 gap-1" data-testid="tab-referral">
-              <Gift className="h-4 w-4" />
-              <span className="hidden sm:inline">Referral</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 h-auto">
+              <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-notifications">
+                <Bell className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Alerts</span>
+              </TabsTrigger>
+              <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-responsible">
+                <Shield className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Limits</span>
+              </TabsTrigger>
+              <TabsTrigger value="backup" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-backup">
+                <Download className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Backup</span>
+              </TabsTrigger>
+              <TabsTrigger value="referral" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-referral">
+                <Gift className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Referral</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="notifications" className="space-y-4 mt-4">
             <Card>

@@ -437,29 +437,31 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="alerts" className="w-full">
-          <TabsList className="w-full grid grid-cols-4 mb-4">
-            <TabsTrigger value="alerts" data-testid="tab-scheme-alerts">
-              <AlertTriangle className="w-4 h-4 mr-1 hidden sm:inline" />
-              Alerts
-              {highImpactAlerts.length > 0 && (
-                <span className="ml-1 bg-primary text-primary-foreground rounded-full px-1.5 text-xs">
-                  {highImpactAlerts.length}
-                </span>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="teams" data-testid="tab-team-schemes">
-              <Shield className="w-4 h-4 mr-1 hidden sm:inline" />
-              Teams
-            </TabsTrigger>
-            <TabsTrigger value="coaches" data-testid="tab-coach-profiles">
-              <Users className="w-4 h-4 mr-1 hidden sm:inline" />
-              Coaches
-            </TabsTrigger>
-            <TabsTrigger value="matchups" data-testid="tab-matchup-analysis">
-              <Target className="w-4 h-4 mr-1 hidden sm:inline" />
-              Matchups
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 mb-4">
+              <TabsTrigger value="alerts" className="px-2 sm:px-3" data-testid="tab-scheme-alerts">
+                <AlertTriangle className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
+                Alerts
+                {highImpactAlerts.length > 0 && (
+                  <span className="ml-1 bg-primary text-primary-foreground rounded-full px-1.5 text-xs">
+                    {highImpactAlerts.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="teams" className="px-2 sm:px-3" data-testid="tab-team-schemes">
+                <Shield className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
+                Teams
+              </TabsTrigger>
+              <TabsTrigger value="coaches" className="px-2 sm:px-3" data-testid="tab-coach-profiles">
+                <Users className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
+                Coaches
+              </TabsTrigger>
+              <TabsTrigger value="matchups" className="px-2 sm:px-3" data-testid="tab-matchup-analysis">
+                <Target className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
+                Matchups
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="alerts" className="space-y-3">
             {schemeAlerts.map(alert => (

@@ -38,32 +38,34 @@ export default function Community() {
 
           <TabsContent value="social" className="space-y-6">
             <Tabs defaultValue="leaderboard" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-6 max-w-2xl">
-                <TabsTrigger value="leaderboard" className="gap-1 text-xs sm:text-sm" data-testid="tab-leaderboard">
-                  <Trophy className="w-4 h-4" />
-                  <span className="hidden sm:inline">Leaders</span>
-                </TabsTrigger>
-                <TabsTrigger value="follow" className="gap-1 text-xs sm:text-sm" data-testid="tab-follow">
-                  <Users className="w-4 h-4" />
-                  <span className="hidden sm:inline">Follow</span>
-                </TabsTrigger>
-                <TabsTrigger value="share" className="gap-1 text-xs sm:text-sm" data-testid="tab-share">
-                  <Share2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Share</span>
-                </TabsTrigger>
-                <TabsTrigger value="alerts" className="gap-1 text-xs sm:text-sm" data-testid="tab-alerts">
-                  <Bell className="w-4 h-4" />
-                  <span className="hidden sm:inline">Alerts</span>
-                </TabsTrigger>
-                <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm" data-testid="tab-feed">
-                  <Rss className="w-4 h-4" />
-                  <span className="hidden sm:inline">Feed</span>
-                </TabsTrigger>
-                <TabsTrigger value="copy" className="gap-1 text-xs sm:text-sm" data-testid="tab-copy">
-                  <Copy className="w-4 h-4" />
-                  <span className="hidden sm:inline">Copy</span>
-                </TabsTrigger>
-              </TabsList>
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 sm:max-w-2xl">
+                  <TabsTrigger value="leaderboard" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-leaderboard">
+                    <Trophy className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Leaders</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="follow" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-follow">
+                    <Users className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Follow</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="share" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-share">
+                    <Share2 className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Share</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="alerts" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-alerts">
+                    <Bell className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Alerts</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-feed">
+                    <Rss className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Feed</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="copy" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-copy">
+                    <Copy className="w-4 h-4 shrink-0" />
+                    <span className="hidden sm:inline">Copy</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="leaderboard">
                 <Leaderboard />

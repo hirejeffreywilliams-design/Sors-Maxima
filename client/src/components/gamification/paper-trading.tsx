@@ -102,7 +102,7 @@ export function PaperTrading() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="text-center">
               <p className={`text-lg font-bold ${account.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}>
                 {account.profitLoss >= 0 ? "+" : ""}${account.profitLoss}

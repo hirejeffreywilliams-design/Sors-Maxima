@@ -281,21 +281,23 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
       )}
 
       <Tabs value={selectedSport} onValueChange={(v) => setSelectedSport(v as Sport)}>
-        <TabsList className="grid w-full grid-cols-6">
-          {sports.map(sport => {
-            const data = sportParlays.get(sport);
-            return (
-              <TabsTrigger key={sport} value={sport} className="gap-1">
-                {sport}
-                {data?.bestParlay && (
-                  <Badge variant="secondary" className="ml-1 text-xs">
-                    {data.parlays.length}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6">
+            {sports.map(sport => {
+              const data = sportParlays.get(sport);
+              return (
+                <TabsTrigger key={sport} value={sport} className="gap-1 px-2 sm:px-3">
+                  {sport}
+                  {data?.bestParlay && (
+                    <Badge variant="secondary" className="ml-1 text-xs">
+                      {data.parlays.length}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </div>
 
         {sports.map(sport => {
           const data = sportParlays.get(sport);
@@ -377,7 +379,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                           ))}
                         </div>
 
-                        <div className="mt-4 grid gap-4 grid-cols-4 pt-4 border-t">
+                        <div className="mt-4 grid gap-4 grid-cols-2 sm:grid-cols-4 pt-4 border-t">
                           <div className="text-center">
                             <p className="text-lg font-bold text-green-500">
                               {(parlay.winProbability * 100).toFixed(2)}%

@@ -25,28 +25,30 @@ export default function Rewards() {
         </header>
 
         <Tabs defaultValue="challenges" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
-            <TabsTrigger value="challenges" className="gap-1" data-testid="tab-challenges">
-              <Target className="w-4 h-4" />
-              <span className="hidden sm:inline">Challenges</span>
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="gap-1" data-testid="tab-achievements">
-              <Trophy className="w-4 h-4" />
-              <span className="hidden sm:inline">Achievements</span>
-            </TabsTrigger>
-            <TabsTrigger value="streaks" className="gap-1" data-testid="tab-streaks">
-              <Flame className="w-4 h-4" />
-              <span className="hidden sm:inline">Streaks</span>
-            </TabsTrigger>
-            <TabsTrigger value="practice" className="gap-1" data-testid="tab-practice">
-              <Gamepad2 className="w-4 h-4" />
-              <span className="hidden sm:inline">Practice</span>
-            </TabsTrigger>
-            <TabsTrigger value="compete" className="gap-1" data-testid="tab-compete">
-              <Swords className="w-4 h-4" />
-              <span className="hidden sm:inline">Compete</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 sm:max-w-2xl">
+              <TabsTrigger value="challenges" className="gap-1 px-2 sm:px-3" data-testid="tab-challenges">
+                <Target className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Challenges</span>
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="gap-1 px-2 sm:px-3" data-testid="tab-achievements">
+                <Trophy className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Achievements</span>
+              </TabsTrigger>
+              <TabsTrigger value="streaks" className="gap-1 px-2 sm:px-3" data-testid="tab-streaks">
+                <Flame className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Streaks</span>
+              </TabsTrigger>
+              <TabsTrigger value="practice" className="gap-1 px-2 sm:px-3" data-testid="tab-practice">
+                <Gamepad2 className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Practice</span>
+              </TabsTrigger>
+              <TabsTrigger value="compete" className="gap-1 px-2 sm:px-3" data-testid="tab-compete">
+                <Swords className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Compete</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="challenges" className="space-y-6">
             <DailyChallenges />

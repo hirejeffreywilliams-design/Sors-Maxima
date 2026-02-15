@@ -395,7 +395,7 @@ export function BetTracker() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-4 gap-2 text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                         <div>
                           <span className="text-muted-foreground">Stake:</span>
                           <span className="font-mono ml-1">${bet.stake.toFixed(2)}</span>

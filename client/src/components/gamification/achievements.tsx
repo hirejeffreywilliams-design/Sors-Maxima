@@ -105,13 +105,15 @@ export function Achievements() {
       </CardHeader>
       <CardContent className="space-y-4">
         <Tabs value={category} onValueChange={setCategory}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="wins">Wins</TabsTrigger>
-            <TabsTrigger value="streaks">Streaks</TabsTrigger>
-            <TabsTrigger value="special">Special</TabsTrigger>
-            <TabsTrigger value="milestones">Milestones</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5">
+              <TabsTrigger value="all" className="px-2 sm:px-3">All</TabsTrigger>
+              <TabsTrigger value="wins" className="px-2 sm:px-3">Wins</TabsTrigger>
+              <TabsTrigger value="streaks" className="px-2 sm:px-3">Streaks</TabsTrigger>
+              <TabsTrigger value="special" className="px-2 sm:px-3">Special</TabsTrigger>
+              <TabsTrigger value="milestones" className="px-2 sm:px-3">Milestones</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value={category} className="mt-4">
             <div className="grid gap-3 sm:grid-cols-2">

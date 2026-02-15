@@ -28,40 +28,42 @@ export default function Live() {
         </header>
 
         <Tabs defaultValue="momentum" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 max-w-3xl">
-            <TabsTrigger value="momentum" className="gap-1" data-testid="tab-momentum">
-              <Activity className="w-4 h-4" />
-              <span className="hidden sm:inline">Momentum</span>
-            </TabsTrigger>
-            <TabsTrigger value="cashout" className="gap-1" data-testid="tab-cashout">
-              <DollarSign className="w-4 h-4" />
-              <span className="hidden sm:inline">Cashout</span>
-            </TabsTrigger>
-            <TabsTrigger value="schemes" className="gap-1" data-testid="tab-schemes">
-              <Brain className="w-4 h-4" />
-              <span className="hidden sm:inline">Schemes</span>
-            </TabsTrigger>
-            <TabsTrigger value="hedge" className="gap-1" data-testid="tab-hedge">
-              <Shield className="w-4 h-4" />
-              <span className="hidden sm:inline">Hedge</span>
-            </TabsTrigger>
-            <TabsTrigger value="assistant" className="gap-1" data-testid="tab-assistant">
-              <Bot className="w-4 h-4" />
-              <span className="hidden sm:inline">AI</span>
-            </TabsTrigger>
-            <TabsTrigger value="clv" className="gap-1" data-testid="tab-clv">
-              <LineChart className="w-4 h-4" />
-              <span className="hidden sm:inline">CLV</span>
-            </TabsTrigger>
-            <TabsTrigger value="sharp" className="gap-1" data-testid="tab-sharp">
-              <Users className="w-4 h-4" />
-              <span className="hidden sm:inline">Sharp</span>
-            </TabsTrigger>
-            <TabsTrigger value="chat" className="gap-1" data-testid="tab-chat">
-              <MessageSquare className="w-4 h-4" />
-              <span className="hidden sm:inline">Chat</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-8 sm:max-w-3xl">
+              <TabsTrigger value="momentum" className="gap-1 px-2 sm:px-3" data-testid="tab-momentum">
+                <Activity className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Momentum</span>
+              </TabsTrigger>
+              <TabsTrigger value="cashout" className="gap-1 px-2 sm:px-3" data-testid="tab-cashout">
+                <DollarSign className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Cashout</span>
+              </TabsTrigger>
+              <TabsTrigger value="schemes" className="gap-1 px-2 sm:px-3" data-testid="tab-schemes">
+                <Brain className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Schemes</span>
+              </TabsTrigger>
+              <TabsTrigger value="hedge" className="gap-1 px-2 sm:px-3" data-testid="tab-hedge">
+                <Shield className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Hedge</span>
+              </TabsTrigger>
+              <TabsTrigger value="assistant" className="gap-1 px-2 sm:px-3" data-testid="tab-assistant">
+                <Bot className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">AI</span>
+              </TabsTrigger>
+              <TabsTrigger value="clv" className="gap-1 px-2 sm:px-3" data-testid="tab-clv">
+                <LineChart className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">CLV</span>
+              </TabsTrigger>
+              <TabsTrigger value="sharp" className="gap-1 px-2 sm:px-3" data-testid="tab-sharp">
+                <Users className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Sharp</span>
+              </TabsTrigger>
+              <TabsTrigger value="chat" className="gap-1 px-2 sm:px-3" data-testid="tab-chat">
+                <MessageSquare className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Chat</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="momentum" className="space-y-6">
             <MomentumTracker />

@@ -84,20 +84,18 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
   return (
     <Card className="overflow-hidden" data-testid={`ticket-card-${ticket.id}`}>
       <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">{ticket.sport}</Badge>
-              <span className={`text-2xl font-bold ${getGradeColor(ticket.grade)}`} data-testid={`text-grade-${ticket.id}`}>
-                {ticket.grade}
-              </span>
-            </div>
-            <CardTitle className="text-lg" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</CardTitle>
-          </div>
+        <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="secondary">{ticket.sport}</Badge>
+            <span className={`text-2xl font-bold ${getGradeColor(ticket.grade)}`} data-testid={`text-grade-${ticket.id}`}>
+              {ticket.grade}
+            </span>
             <Badge className={getRiskColor(ticket.riskRating)}>
               {ticket.riskRating.charAt(0).toUpperCase() + ticket.riskRating.slice(1)} Risk
             </Badge>
+          </div>
+          <CardTitle className="text-base sm:text-lg" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</CardTitle>
+          <div className="flex items-center gap-2">
             <Button size="icon" variant="ghost" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
               {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
             </Button>
@@ -110,44 +108,44 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Win Probability</p>
-            <p className="text-xl font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>
+            <p className="text-xs text-muted-foreground mb-1">Win Prob</p>
+            <p className="text-lg sm:text-xl font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>
               {(ticket.winProbability * 100).toFixed(1)}%
             </p>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground mb-1">Expected Value</p>
-            <p className={`text-xl font-bold ${ticket.expectedValue >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
+            <p className={`text-lg sm:text-xl font-bold ${ticket.expectedValue >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
               {ticket.expectedValue >= 0 ? "+" : ""}{(ticket.expectedValue * 100).toFixed(1)}%
             </p>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground mb-1">Total Odds</p>
-            <p className="text-xl font-bold" data-testid={`text-odds-${ticket.id}`}>
+            <p className="text-lg sm:text-xl font-bold" data-testid={`text-odds-${ticket.id}`}>
               {formatOdds(ticket.americanOdds)}
             </p>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
             <p className="text-xs text-muted-foreground mb-1">Confidence</p>
             <div className="flex items-center justify-center gap-2">
-              <Progress value={ticket.confidenceScore * 100} className="h-2 w-16" />
+              <Progress value={ticket.confidenceScore * 100} className="h-2 w-12 sm:w-16" />
               <span className="text-sm font-semibold">{(ticket.confidenceScore * 100).toFixed(0)}%</span>
             </div>
           </div>
         </div>
         
-        <div className="flex items-center justify-between gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20 flex-wrap">
+        <div className="grid grid-cols-2 gap-3 p-3 sm:p-4 bg-primary/5 rounded-lg border border-primary/20">
           <div>
-            <p className="text-sm text-muted-foreground">Recommended Stake</p>
-            <p className="text-2xl font-bold text-primary" data-testid={`text-stake-${ticket.id}`}>
+            <p className="text-xs sm:text-sm text-muted-foreground">Recommended Stake</p>
+            <p className="text-lg sm:text-2xl font-bold text-primary" data-testid={`text-stake-${ticket.id}`}>
               ${ticket.recommendedStake.toFixed(2)}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Potential Payout</p>
-            <p className="text-2xl font-bold text-green-500" data-testid={`text-payout-${ticket.id}`}>
+            <p className="text-xs sm:text-sm text-muted-foreground">Potential Payout</p>
+            <p className="text-lg sm:text-2xl font-bold text-green-500" data-testid={`text-payout-${ticket.id}`}>
               ${ticket.potentialPayout.toFixed(2)}
             </p>
           </div>
@@ -211,30 +209,30 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
                 <BarChart3 className="w-4 h-4 text-blue-500" />
                 AI Analysis Scores
               </p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">Quantum Coaching</span>
-                  <span className="font-medium">{(ticket.analysisFactors.quantumCoachingScore * 100).toFixed(0)}%</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">Quantum Coaching</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumCoachingScore * 100).toFixed(0)}%</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">Player Analysis</span>
-                  <span className="font-medium">{(ticket.analysisFactors.quantumPlayerScore * 100).toFixed(0)}%</span>
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">Player Analysis</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumPlayerScore * 100).toFixed(0)}%</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">Team Dynamics</span>
-                  <span className="font-medium">{(ticket.analysisFactors.quantumTeamScore * 100).toFixed(0)}%</span>
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">Team Dynamics</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumTeamScore * 100).toFixed(0)}%</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">ML Projections</span>
-                  <span className="font-medium">{(ticket.analysisFactors.mlProjectionScore * 100).toFixed(0)}%</span>
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">ML Projections</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.mlProjectionScore * 100).toFixed(0)}%</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">Sharp Money</span>
-                  <span className="font-medium">{(ticket.analysisFactors.sharpMoneyScore * 100).toFixed(0)}%</span>
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">Sharp Money</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.sharpMoneyScore * 100).toFixed(0)}%</span>
                 </div>
-                <div className="flex items-center justify-between p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground">Cashout Eligibility</span>
-                  <span className="font-medium">{(ticket.analysisFactors.cashoutEligibility * 100).toFixed(0)}%</span>
+                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
+                  <span className="text-muted-foreground truncate">Cashout</span>
+                  <span className="font-medium shrink-0">{(ticket.analysisFactors.cashoutEligibility * 100).toFixed(0)}%</span>
                 </div>
               </div>
             </div>
@@ -415,47 +413,47 @@ export default function AutoGenerator() {
         
         <header className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
-            <Sparkles className="w-8 h-8 text-primary" />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary shrink-0" />
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
               Smart Ticket Generator
             </h1>
           </div>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Select your sports, and our AI-powered engine will analyze 40+ factors to generate 
-            optimal betting tickets with the highest probability of winning.
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">
+            Select your sports, and our AI engine will analyze 40+ factors to generate 
+            optimal betting tickets.
           </p>
           
-          <div className="flex items-center justify-center gap-4 pt-2 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Radio className={`w-4 h-4 ${liveStatus?.available ? 'text-green-500 animate-pulse' : 'text-yellow-500'}`} />
-              <span className="text-sm">
+          <div className="flex items-center justify-center gap-2 sm:gap-4 pt-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Radio className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${liveStatus?.available ? 'text-green-500 animate-pulse' : 'text-yellow-500'}`} />
+              <span className="text-xs sm:text-sm">
                 {liveStatus?.available ? (
-                  <span className="text-green-600 dark:text-green-400">Live Odds Connected</span>
+                  <span className="text-green-600 dark:text-green-400">Live Odds</span>
                 ) : (
                   <span className="text-yellow-600 dark:text-yellow-400">Demo Mode</span>
                 )}
               </span>
             </div>
             {liveStatus?.requestsRemaining !== null && liveStatus?.requestsRemaining !== undefined && (
-              <Badge variant="outline" className="text-xs">
-                {liveStatus.requestsRemaining} API calls remaining
+              <Badge variant="outline" className="text-xs hidden sm:inline-flex">
+                {liveStatus.requestsRemaining} API calls
               </Badge>
             )}
             <Button 
-              size="sm" 
+              size="icon" 
               variant="ghost" 
               onClick={() => refetchStatus()}
-              className="h-7"
               data-testid="button-refresh-status"
             >
               <RefreshCw className="w-3 h-3" />
             </Button>
           </div>
           
-          <div className="flex items-center justify-center gap-3 pt-2 flex-wrap">
+          <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-2 sm:gap-3 pt-2">
             <Button
               onClick={handleQuickPick}
               disabled={isGenerating}
+              className="w-full sm:w-auto"
               data-testid="button-quick-pick"
             >
               <Zap className="w-4 h-4" />
@@ -465,13 +463,15 @@ export default function AutoGenerator() {
               variant="outline"
               onClick={handleSetReminder}
               disabled={reminderSet}
-              className="gap-2"
+              className="w-full sm:w-auto gap-2"
               data-testid="button-set-reminder"
             >
               <Bell className="w-4 h-4" />
-              {reminderSet ? "Reminder Set" : "Remind Me Later"}
+              {reminderSet ? "Set" : "Remind Me"}
             </Button>
-            <TutorialButton onClick={() => setShowTutorial(true)} />
+            <div className="col-span-2 flex justify-center sm:col-span-1">
+              <TutorialButton onClick={() => setShowTutorial(true)} />
+            </div>
           </div>
         </header>
         
@@ -483,19 +483,19 @@ export default function AutoGenerator() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
               {sportConfig.map(sport => (
                 <Button
                   key={sport.id}
                   variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                  className={`h-auto py-4 flex-col gap-2 ${
+                  className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
                     selectedSports.includes(sport.id) ? sport.color : ""
                   }`}
                   onClick={() => toggleSport(sport.id)}
                   data-testid={`button-sport-${sport.id}`}
                 >
-                  <span className="text-xl font-bold">{sport.id}</span>
-                  <span className="text-xs opacity-80">{sport.name}</span>
+                  <span className="text-base sm:text-xl font-bold">{sport.id}</span>
+                  <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
                 </Button>
               ))}
             </div>
