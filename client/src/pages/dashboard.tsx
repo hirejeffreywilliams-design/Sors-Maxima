@@ -1,11 +1,12 @@
 import { useState, useCallback } from "react";
-import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ParlayBuilder } from "@/components/parlay-builder";
 import { ParlayGenerator } from "@/components/parlay-generator";
+import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
 import { InsightsPanel } from "@/components/insights-panel";
 import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { TodaysBestBets } from "@/components/todays-best-bets";
@@ -71,20 +72,34 @@ export default function Dashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <div className="flex justify-center">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
               <TabsTrigger value="generator" className="gap-2" data-testid="tab-generator">
                 <Sparkles className="w-4 h-4" />
                 <span className="hidden sm:inline">Quick</span> Picks
               </TabsTrigger>
+              <TabsTrigger value="visual" className="gap-2" data-testid="tab-visual">
+                <GripVertical className="w-4 h-4" />
+                <span className="hidden sm:inline">Visual</span> Builder
+              </TabsTrigger>
               <TabsTrigger value="builder" className="gap-2" data-testid="tab-builder">
                 <Wrench className="w-4 h-4" />
-                <span className="hidden sm:inline">Build</span> Custom
+                <span className="hidden sm:inline">Manual</span> Entry
               </TabsTrigger>
             </TabsList>
           </div>
 
           <TabsContent value="generator" className="space-y-4">
             <ParlayGenerator onLoadParlay={handleLoadParlay} onLegsChange={handleLegsChange} />
+          </TabsContent>
+
+          <TabsContent value="visual" className="space-y-4">
+            <VisualParlayBuilder
+              onLegsChange={handleLegsChange}
+              onStakeChange={handleStakeChange}
+              onResultChange={handleResultChange}
+              bankroll={bankrollSettings.totalBankroll}
+              bettingEnv={bettingEnv}
+            />
           </TabsContent>
 
           <TabsContent value="builder" className="space-y-4">
