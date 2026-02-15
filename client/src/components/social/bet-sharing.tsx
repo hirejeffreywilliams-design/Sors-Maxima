@@ -99,17 +99,17 @@ export function BetSharing() {
 
               <div className="space-y-1">
                 {ticket.legs.map((leg, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-sm">
-                    <span className="flex items-center gap-2">
-                      {leg.result === "win" && <Check className="w-3 h-3 text-green-500" />}
-                      {leg.pick}
+                  <div key={idx} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="flex items-center gap-1.5 min-w-0 truncate">
+                      {leg.result === "win" && <Check className="w-3 h-3 text-green-500 shrink-0" />}
+                      <span className="truncate">{leg.pick}</span>
                     </span>
-                    <Badge variant="outline" className="text-xs">{leg.odds}</Badge>
+                    <Badge variant="outline" className="text-xs shrink-0">{leg.odds}</Badge>
                   </div>
                 ))}
               </div>
 
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50 flex-wrap">
                 <div>
                   <p className="text-xs text-muted-foreground">Stake: ${ticket.stake}</p>
                   <p className="text-sm font-bold flex items-center gap-1">
@@ -120,14 +120,14 @@ export function BetSharing() {
                     )}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="outline" onClick={() => handleCopy(ticket.id)} data-testid={`button-copy-${ticket.id}`}>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Button size="icon" variant="outline" onClick={() => handleCopy(ticket.id)} data-testid={`button-copy-${ticket.id}`}>
                     {copiedId === ticket.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                   </Button>
-                  <Button size="sm" variant="outline" data-testid={`button-share-twitter-${ticket.id}`}>
+                  <Button size="icon" variant="outline" data-testid={`button-share-twitter-${ticket.id}`}>
                     <Twitter className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="outline" data-testid={`button-download-${ticket.id}`}>
+                  <Button size="icon" variant="outline" data-testid={`button-download-${ticket.id}`}>
                     <Download className="w-4 h-4" />
                   </Button>
                 </div>

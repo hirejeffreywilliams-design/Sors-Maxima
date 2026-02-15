@@ -138,18 +138,18 @@ export function CopyBetting() {
       <CardContent className="space-y-4">
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-sm text-muted-foreground">Tipsters Copied</p>
-                <p className="text-2xl font-bold" data-testid="text-tipsters-copied">{copiedTipsters.length}</p>
+                <p className="text-xs text-muted-foreground">Copied</p>
+                <p className="text-xl sm:text-2xl font-bold" data-testid="text-tipsters-copied">{copiedTipsters.length}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Copied Bets</p>
-                <p className="text-2xl font-bold" data-testid="text-total-copied-bets">{totalCopiedBets}</p>
+                <p className="text-xs text-muted-foreground">Bets</p>
+                <p className="text-xl sm:text-2xl font-bold" data-testid="text-total-copied-bets">{totalCopiedBets}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Combined Win Rate</p>
-                <p className="text-2xl font-bold text-green-500" data-testid="text-combined-win-rate">{combinedWinRate}%</p>
+                <p className="text-xs text-muted-foreground">Win Rate</p>
+                <p className="text-xl sm:text-2xl font-bold text-green-500" data-testid="text-combined-win-rate">{combinedWinRate}%</p>
               </div>
             </div>
           </CardContent>
@@ -157,19 +157,19 @@ export function CopyBetting() {
 
         {recentCopiedPicks.length > 0 && (
           <Card>
-            <CardContent className="p-4 space-y-2">
+            <CardContent className="p-3 sm:p-4 space-y-2">
               <p className="text-sm font-medium">Recent Copied Picks</p>
               {recentCopiedPicks.map((pick, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between text-sm"
+                  className="flex items-center justify-between gap-2 text-sm"
                   data-testid={`recent-copied-pick-${idx}`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-xs">{pick.tipster}</span>
-                    <span>{pick.pick}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-muted-foreground text-xs shrink-0">{pick.tipster}</span>
+                    <span className="truncate">{pick.pick}</span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <Badge variant="outline" className="text-xs">{pick.odds}</Badge>
                     <Badge variant="outline" className={`text-xs ${getResultColor(pick.result)}`}>
                       {pick.result}
@@ -184,36 +184,36 @@ export function CopyBetting() {
         <div className="space-y-3">
           {tipsters.map((tipster) => (
             <Card key={tipster.id} data-testid={`tipster-card-${tipster.id}`}>
-              <CardContent className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 flex-shrink-0">
+              <CardContent className="p-3 sm:p-4 space-y-3">
+                <div className="flex items-center gap-2.5">
+                  <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
                     <AvatarFallback className="bg-muted text-sm">
                       {tipster.username.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium text-sm" data-testid={`tipster-username-${tipster.id}`}>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-medium text-sm truncate" data-testid={`tipster-username-${tipster.id}`}>
                         {tipster.username}
                       </span>
                       <Badge variant="outline" className="text-xs" data-testid={`badge-sport-${tipster.id}`}>
                         {tipster.sport}
                       </Badge>
                       {tipster.streak >= 3 && (
-                        <Badge variant="outline" className="gap-1 bg-orange-500/10 text-orange-500 border-orange-500/30 text-xs" data-testid={`badge-streak-${tipster.id}`}>
+                        <Badge variant="outline" className="gap-0.5 bg-orange-500/10 text-orange-500 border-orange-500/30 text-xs" data-testid={`badge-streak-${tipster.id}`}>
                           <Flame className="w-3 h-3" />
                           {tipster.streak}
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
                       <span className="flex items-center gap-1" data-testid={`text-winrate-${tipster.id}`}>
-                        <Target className="w-3 h-3" />
-                        {tipster.winRate}% win rate
+                        <Target className="w-3 h-3 shrink-0" />
+                        {tipster.winRate}%
                       </span>
                       <span className="flex items-center gap-1" data-testid={`text-roi-${tipster.id}`}>
-                        <TrendingUp className="w-3 h-3" />
-                        +{tipster.roi}% ROI
+                        <TrendingUp className="w-3 h-3 shrink-0" />
+                        +{tipster.roi}%
                       </span>
                       <span data-testid={`text-total-picks-${tipster.id}`}>{tipster.totalPicks} picks</span>
                     </div>
@@ -222,17 +222,18 @@ export function CopyBetting() {
                     variant={tipster.copying ? "default" : "outline"}
                     size="sm"
                     onClick={() => toggleCopy(tipster.id)}
-                    className={`toggle-elevate ${tipster.copying ? "toggle-elevated" : ""}`}
+                    className={`shrink-0 toggle-elevate ${tipster.copying ? "toggle-elevated" : ""}`}
                     data-testid={`button-copy-tipster-${tipster.id}`}
                   >
                     {tipster.copying ? (
                       <>
-                        <Check className="w-4 h-4 mr-1" />
-                        Copying
+                        <Check className="w-3.5 h-3.5 mr-1" />
+                        <span className="hidden sm:inline">Copying</span>
+                        <span className="sm:hidden">On</span>
                       </>
                     ) : (
                       <>
-                        <Copy className="w-4 h-4 mr-1" />
+                        <Copy className="w-3.5 h-3.5 mr-1" />
                         Copy
                       </>
                     )}
@@ -245,11 +246,11 @@ export function CopyBetting() {
                     {tipster.recentPicks.map((pick, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between text-sm"
+                        className="flex items-center justify-between gap-2 text-sm"
                         data-testid={`copied-pick-${tipster.id}-${idx}`}
                       >
-                        <span>{pick.pick}</span>
-                        <div className="flex items-center gap-2">
+                        <span className="truncate">{pick.pick}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
                           <Badge variant="outline" className="text-xs">{pick.odds}</Badge>
                           <Badge variant="outline" className={`text-xs ${getResultColor(pick.result)}`}>
                             {pick.result}
