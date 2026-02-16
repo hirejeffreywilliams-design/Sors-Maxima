@@ -240,10 +240,10 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
           {currentStep < tutorialSteps.length - 1 && (
             <div className="text-center pt-1">
               <Button
-                variant="link"
+                variant="ghost"
                 size="sm"
                 onClick={handleSkip}
-                className="text-muted-foreground text-[10px] sm:text-xs h-auto p-0"
+                className="text-muted-foreground text-[10px] sm:text-xs h-auto p-0 underline decoration-muted-foreground/30 underline-offset-2"
                 data-testid="button-skip-tutorial"
               >
                 Skip tutorial
