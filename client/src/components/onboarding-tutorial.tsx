@@ -30,7 +30,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Sors Maxima",
     description: "Your AI-powered sports betting intelligence platform. Let's walk through how to get the most out of your experience.",
-    icon: <Sparkles className="w-12 h-12 text-primary" />,
+    icon: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
     tips: [
       "Our quantum algorithms analyze 40+ factors for each bet",
       "We use real-time odds from major sportsbooks",
@@ -40,7 +40,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Generate Smart Tickets",
     description: "The home page is your ticket generator. Select sports, set your risk level, and let our AI create optimized parlays.",
-    icon: <Target className="w-12 h-12 text-green-500" />,
+    icon: <Target className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
     tips: [
       "Choose multiple sports for diversified tickets",
       "Conservative = higher win chance, lower payouts",
@@ -51,7 +51,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Quick Pick Feature",
     description: "Short on time? Hit the Quick Pick button for instant AI-generated tickets based on today's best opportunities.",
-    icon: <Zap className="w-12 h-12 text-yellow-500" />,
+    icon: <Zap className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-500" />,
     tips: [
       "One click generates 3 optimized tickets",
       "Automatically selects today's active sports",
@@ -62,7 +62,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Live Center",
     description: "Track your active bets in real-time. Use the hedge calculator to lock in profits or minimize losses.",
-    icon: <TrendingUp className="w-12 h-12 text-blue-500" />,
+    icon: <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />,
     tips: [
       "See live momentum for in-progress games",
       "Calculate optimal hedge bets",
@@ -73,7 +73,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Pro Tools",
     description: "Access advanced features like correlation analysis, odds comparison, and ML projections.",
-    icon: <Rocket className="w-12 h-12 text-purple-500" />,
+    icon: <Rocket className="w-8 h-8 sm:w-12 sm:h-12 text-purple-500" />,
     tips: [
       "Compare odds across 6 major sportsbooks",
       "Find arbitrage opportunities",
@@ -84,7 +84,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Community & Tipsters",
     description: "Follow successful bettors, share your picks, and join tipster communities.",
-    icon: <Users className="w-12 h-12 text-orange-500" />,
+    icon: <Users className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />,
     tips: [
       "Follow top performers on the leaderboard",
       "Share your winning tickets",
@@ -95,7 +95,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "Track Your Performance",
     description: "Use the Finance section to track all your bets, monitor ROI, and manage your bankroll.",
-    icon: <DollarSign className="w-12 h-12 text-emerald-500" />,
+    icon: <DollarSign className="w-8 h-8 sm:w-12 sm:h-12 text-emerald-500" />,
     tips: [
       "Log bets across multiple sportsbooks",
       "See detailed performance analytics",
@@ -106,7 +106,7 @@ const tutorialSteps: TutorialStep[] = [
   {
     title: "You're Ready!",
     description: "That's everything you need to start making smarter bets. Remember: always gamble responsibly.",
-    icon: <Trophy className="w-12 h-12 text-amber-500" />,
+    icon: <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-amber-500" />,
     tips: [
       "Set betting limits in Settings > Responsible Gaming",
       "Enable Smart Alerts for opportunities",
@@ -148,56 +148,58 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
   };
   
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" data-testid="tutorial-overlay">
-      <Card className="w-full max-w-lg relative overflow-hidden" data-testid="tutorial-card">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4" data-testid="tutorial-overlay">
+      <Card className="w-full max-w-lg relative overflow-hidden max-h-[90vh] overflow-y-auto" data-testid="tutorial-card">
         <Button
           size="icon"
           variant="ghost"
-          className="absolute top-2 right-2 z-10"
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 z-10 h-8 w-8 sm:h-9 sm:w-9"
           onClick={handleSkip}
           data-testid="button-close-tutorial"
         >
           <X className="w-4 h-4" />
         </Button>
         
-        <CardContent className="pt-6 pb-4 space-y-6">
+        <CardContent className="pt-8 pb-4 sm:pt-6 px-4 sm:px-6 space-y-4 sm:space-y-6">
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground">
               <span>Step {currentStep + 1} of {tutorialSteps.length}</span>
               <span>{Math.round(progress)}% Complete</span>
             </div>
             <Progress value={progress} className="h-1" />
           </div>
           
-          <div className="text-center space-y-4 py-4">
+          <div className="text-center space-y-2 sm:space-y-4 py-2 sm:py-4">
             <div className="flex justify-center">
               {step.icon}
             </div>
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold" data-testid="text-tutorial-title">{step.title}</h2>
-              <p className="text-muted-foreground text-sm" data-testid="text-tutorial-description">
+            <div className="space-y-1 sm:space-y-2">
+              <h2 className="text-lg sm:text-xl font-bold leading-tight" data-testid="text-tutorial-title">{step.title}</h2>
+              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed" data-testid="text-tutorial-description">
                 {step.description}
               </p>
             </div>
           </div>
           
-          <div className="space-y-2 bg-muted/50 rounded-lg p-4">
+          <div className="space-y-1.5 sm:space-y-2 bg-muted/50 rounded-lg p-3 sm:p-4">
             {step.tips.map((tip, i) => (
-              <div key={i} className="flex items-start gap-2 text-sm">
-                <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                <span>{tip}</span>
+              <div key={i} className="flex items-start gap-2 text-[11px] sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="leading-tight">{tip}</span>
               </div>
             ))}
           </div>
           
-          <div className="flex items-center justify-between gap-3 pt-2">
+          <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2">
             <Button
               variant="ghost"
+              size="sm"
               onClick={handlePrev}
               disabled={currentStep === 0}
+              className="h-8 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm"
               data-testid="button-tutorial-prev"
             >
-              <ChevronLeft className="w-4 h-4 mr-1" />
+              <ChevronLeft className="w-4 h-4 mr-0.5 sm:mr-1" />
               Back
             </Button>
             
@@ -206,7 +208,7 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
                 <button
                   key={i}
                   onClick={() => setCurrentStep(i)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
+                  className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${
                     i === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
                   }`}
                   data-testid={`button-tutorial-dot-${i}`}
@@ -214,28 +216,34 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
               ))}
             </div>
             
-            <Button onClick={handleNext} data-testid="button-tutorial-next">
+            <Button 
+              size="sm"
+              onClick={handleNext} 
+              className="h-8 sm:h-9 px-2 sm:px-4 text-xs sm:text-sm"
+              data-testid="button-tutorial-next"
+            >
               {currentStep === tutorialSteps.length - 1 ? (
                 <>
-                  Get Started
-                  <Sparkles className="w-4 h-4 ml-1" />
+                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="sm:hidden">Start</span>
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                 </>
               ) : (
                 <>
                   Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
+                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                 </>
               )}
             </Button>
           </div>
           
           {currentStep < tutorialSteps.length - 1 && (
-            <div className="text-center">
+            <div className="text-center pt-1">
               <Button
-                variant="ghost"
+                variant="link"
                 size="sm"
                 onClick={handleSkip}
-                className="text-muted-foreground underline"
+                className="text-muted-foreground text-[10px] sm:text-xs h-auto p-0"
                 data-testid="button-skip-tutorial"
               >
                 Skip tutorial
