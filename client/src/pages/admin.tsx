@@ -300,6 +300,13 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/security">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-security">
+              <Shield className="w-4 h-4" />
+              Error & Security
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 

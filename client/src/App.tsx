@@ -23,6 +23,7 @@ import Pricing from "@/pages/pricing";
 import AdminDashboard from "@/pages/admin";
 import AdminDiagnostics from "@/pages/admin-diagnostics";
 import AdminMarketing from "@/pages/admin-marketing";
+import AdminSecurity from "@/pages/admin-security";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
@@ -52,6 +53,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/diagnostics" component={AdminDiagnostics} />
       <Route path="/admin/marketing" component={AdminMarketing} />
+      <Route path="/admin/security" component={AdminSecurity} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />

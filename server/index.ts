@@ -5,6 +5,15 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
+import {
+  securityHeadersMiddleware,
+  ipBlockMiddleware,
+  inputSanitizationMiddleware,
+  apiRateLimitMiddleware,
+  sessionFingerprintMiddleware,
+  csrfTokenMiddleware,
+  csrfValidationMiddleware,
+} from "./securityMiddleware";
 
 const app = express();
 const httpServer = createServer(app);
@@ -25,6 +34,9 @@ declare module "express-session" {
   }
 }
 
+app.use(securityHeadersMiddleware);
+app.use(ipBlockMiddleware);
+
 app.use(
   express.json({
     verify: (req, _res, buf) => {
@@ -43,8 +55,15 @@ app.use(session({
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
+    sameSite: "lax",
   },
 }));
+
+app.use("/api", csrfTokenMiddleware);
+app.use("/api", csrfValidationMiddleware);
+app.use("/api", apiRateLimitMiddleware);
+app.use("/api", inputSanitizationMiddleware);
+app.use("/api", sessionFingerprintMiddleware);
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {

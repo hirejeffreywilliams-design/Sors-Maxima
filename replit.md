@@ -92,7 +92,24 @@ Admin-only pages:
 - /admin - Admin Dashboard for user management, fraud detection, subscription stats
 - /admin/diagnostics - AI-Powered Quantum Diagnostics
 - /admin/marketing - AI Marketing Tools for content generation and growth analytics
+- /admin/security - Error & Security Center: system health, error tracking with codes/categories/fixes, security event monitoring, IP blocking, debug tools
 - /training - Algorithm Training Center for backtesting and evaluation before launch
+
+## Security Architecture
+The application implements multi-layered security for handling user financial data:
+- **Security Headers**: CSP, HSTS, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- **IP Blocking**: Automatic + manual IP blocking with admin controls
+- **Input Sanitization**: XSS and SQL injection detection on all API requests
+- **Rate Limiting**: 100 req/min general API, 10 req/min on sensitive routes (auth, payments)
+- **Session Fingerprinting**: Browser fingerprint validation to detect session hijacking
+- **Password Security**: scrypt hashing with random salt, timing-safe comparison
+- **Account Lockout**: 5 failed attempts triggers 30-minute lockout
+- **Fraud Detection**: Multi-account detection, IP hopping tracking, risk scoring
+- **PII Minimization**: Data masking for emails, IPs, usernames in logs
+- **Idempotency**: Duplicate request prevention for payment operations
+- **Audit Trail**: All sensitive actions logged with user, IP, timestamp
+- **Error Code System**: 25+ categorized error codes with admin troubleshooting guides
+- **Health Monitoring**: Automated checks for database, memory, error rate, feature flags
 
 Other routes (accessible but not in main nav):
 - /builder - Manual Parlay Builder
