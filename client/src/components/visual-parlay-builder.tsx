@@ -39,6 +39,11 @@ import {
   BarChart3,
   Percent,
   Eye,
+  HelpCircle,
+  BookOpen,
+  CheckCircle2,
+  Info,
+  MousePointerClick,
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import type { ParlayLeg, SportEvent, EvaluationResult, Sport, BettingEnvironment } from "@shared/schema";
@@ -195,6 +200,9 @@ function DraggableOutcome({ data, isAdded, onAdd, showIndicators }: { data: Drag
 }
 
 function GameCard({ event, addedLegKeys, onAdd, showIndicators }: { event: SportEvent; addedLegKeys: Set<string>; onAdd: (data: DragData) => void; showIndicators: boolean }) {
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(["moneyline", "spread", "total"]));
+  const [showAllProps, setShowAllProps] = useState(false);
+
   const startTime = new Date(event.startTime);
   const timeStr = startTime.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const isToday = new Date().toDateString() === startTime.toDateString();
@@ -202,6 +210,18 @@ function GameCard({ event, addedLegKeys, onAdd, showIndicators }: { event: Sport
   const dayLabel = isToday ? "Today" : isTomorrow ? "Tomorrow" : startTime.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
 
   const injuryCount = (event.injuries || []).filter(i => i.status !== "healthy").length;
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(section)) next.delete(section);
+      else next.add(section);
+      return next;
+    });
+  };
+
+  const propCount = event.playerProps?.length || 0;
+  const visibleProps = showAllProps ? event.playerProps || [] : (event.playerProps || []).slice(0, 4);
 
   return (
     <Card className="overflow-visible" data-testid={`game-card-${event.id}`}>
@@ -227,105 +247,159 @@ function GameCard({ event, addedLegKeys, onAdd, showIndicators }: { event: Sport
 
         {event.markets.map((market) => {
           const MarketIcon = marketIcons[market.type] || TrendingUp;
+          const isExpanded = expandedSections.has(market.type);
           return (
             <div key={market.type} className="space-y-1">
-              <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleSection(market.type)}
+                className="flex items-center gap-1 w-full justify-start px-1"
+                data-testid={`toggle-market-${event.id}-${market.type}`}
+              >
                 <MarketIcon className="w-3 h-3 text-muted-foreground" />
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex-1 text-left">
                   {marketLabels[market.type] || market.type}
                 </span>
-              </div>
-              <div className="grid grid-cols-2 gap-1">
-                {market.outcomes.map((outcome, idx) => {
-                  const key = `${event.id}-${market.type}-${outcome.name}`;
-                  const dragData: DragData = {
-                    eventId: event.id,
-                    team: outcome.team || (idx === 0 ? event.awayTeam : event.homeTeam),
-                    opponent: outcome.team === event.homeTeam ? event.awayTeam : event.homeTeam,
-                    market: market.type,
-                    outcome: outcome.name,
-                    decimalOdds: outcome.decimalOdds,
-                    americanOdds: outcome.americanOdds,
-                    evRating: outcome.evAnalysis?.evRating,
-                    edge: outcome.evAnalysis?.edge,
-                    lineDirection: outcome.lineMovement?.direction,
-                    lineMovement: outcome.lineMovement?.movement,
-                    sharpAction: outcome.lineMovement?.sharpAction || outcome.bettingPercentages?.sharpSide,
-                  };
-                  return (
-                    <DraggableOutcome
-                      key={key}
-                      data={dragData}
-                      isAdded={addedLegKeys.has(key)}
-                      onAdd={onAdd}
-                      showIndicators={showIndicators}
-                    />
-                  );
-                })}
-              </div>
+                <Badge variant="outline" className="text-[10px] px-1 py-0">
+                  {market.outcomes.length}
+                </Badge>
+                {isExpanded ? (
+                  <ChevronUp className="w-3 h-3 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                )}
+              </Button>
+              {isExpanded && (
+                <div className="grid grid-cols-2 gap-1">
+                  {market.outcomes.map((outcome, idx) => {
+                    const key = `${event.id}-${market.type}-${outcome.name}`;
+                    const dragData: DragData = {
+                      eventId: event.id,
+                      team: outcome.team || (idx === 0 ? event.awayTeam : event.homeTeam),
+                      opponent: outcome.team === event.homeTeam ? event.awayTeam : event.homeTeam,
+                      market: market.type,
+                      outcome: outcome.name,
+                      decimalOdds: outcome.decimalOdds,
+                      americanOdds: outcome.americanOdds,
+                      evRating: outcome.evAnalysis?.evRating,
+                      edge: outcome.evAnalysis?.edge,
+                      lineDirection: outcome.lineMovement?.direction,
+                      lineMovement: outcome.lineMovement?.movement,
+                      sharpAction: outcome.lineMovement?.sharpAction || outcome.bettingPercentages?.sharpSide,
+                    };
+                    return (
+                      <DraggableOutcome
+                        key={key}
+                        data={dragData}
+                        isAdded={addedLegKeys.has(key)}
+                        onAdd={onAdd}
+                        showIndicators={showIndicators}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           );
         })}
 
-        {event.playerProps && event.playerProps.length > 0 && (
+        {propCount > 0 && (
           <div className="space-y-1">
-            <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => toggleSection("player_props")}
+              className="flex items-center gap-1 w-full justify-start px-1"
+              data-testid={`toggle-props-${event.id}`}
+            >
               <User className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex-1 text-left">
                 Player Props
               </span>
-            </div>
-            <div className="space-y-1">
-              {event.playerProps.slice(0, 4).map((prop, idx) => {
-                const overKey = `${event.id}-prop-${prop.playerId}-over`;
-                const underKey = `${event.id}-prop-${prop.playerId}-under`;
-                return (
-                  <div key={idx} className="space-y-1">
-                    <span className="text-xs text-muted-foreground">
-                      {prop.playerName} - {prop.category} ({prop.line})
-                    </span>
-                    <div className="grid grid-cols-2 gap-1">
-                      <DraggableOutcome
-                        data={{
-                          eventId: event.id,
-                          team: prop.playerName,
-                          opponent: "",
-                          market: "player_prop",
-                          outcome: `${prop.playerName} Over ${prop.line} ${prop.category}`,
-                          decimalOdds: prop.overOdds.decimalOdds,
-                          americanOdds: prop.overOdds.americanOdds,
-                          playerName: prop.playerName,
-                          playerId: prop.playerId,
-                          propCategory: prop.category,
-                          propLine: prop.line,
-                        }}
-                        isAdded={addedLegKeys.has(overKey)}
-                        onAdd={onAdd}
-                        showIndicators={showIndicators}
-                      />
-                      <DraggableOutcome
-                        data={{
-                          eventId: event.id,
-                          team: prop.playerName,
-                          opponent: "",
-                          market: "player_prop",
-                          outcome: `${prop.playerName} Under ${prop.line} ${prop.category}`,
-                          decimalOdds: prop.underOdds.decimalOdds,
-                          americanOdds: prop.underOdds.americanOdds,
-                          playerName: prop.playerName,
-                          playerId: prop.playerId,
-                          propCategory: prop.category,
-                          propLine: prop.line,
-                        }}
-                        isAdded={addedLegKeys.has(underKey)}
-                        onAdd={onAdd}
-                        showIndicators={showIndicators}
-                      />
+              <Badge variant="outline" className="text-[10px] px-1 py-0">
+                {propCount}
+              </Badge>
+              {expandedSections.has("player_props") ? (
+                <ChevronUp className="w-3 h-3 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="w-3 h-3 text-muted-foreground" />
+              )}
+            </Button>
+            {expandedSections.has("player_props") && (
+              <div className="space-y-1">
+                {visibleProps.map((prop, idx) => {
+                  const overKey = `${event.id}-prop-${prop.playerId}-over`;
+                  const underKey = `${event.id}-prop-${prop.playerId}-under`;
+                  return (
+                    <div key={idx} className="space-y-1">
+                      <span className="text-xs text-muted-foreground">
+                        {prop.playerName} - {prop.category} ({prop.line})
+                      </span>
+                      <div className="grid grid-cols-2 gap-1">
+                        <DraggableOutcome
+                          data={{
+                            eventId: event.id,
+                            team: prop.playerName,
+                            opponent: "",
+                            market: "player_prop",
+                            outcome: `${prop.playerName} Over ${prop.line} ${prop.category}`,
+                            decimalOdds: prop.overOdds.decimalOdds,
+                            americanOdds: prop.overOdds.americanOdds,
+                            playerName: prop.playerName,
+                            playerId: prop.playerId,
+                            propCategory: prop.category,
+                            propLine: prop.line,
+                          }}
+                          isAdded={addedLegKeys.has(overKey)}
+                          onAdd={onAdd}
+                          showIndicators={showIndicators}
+                        />
+                        <DraggableOutcome
+                          data={{
+                            eventId: event.id,
+                            team: prop.playerName,
+                            opponent: "",
+                            market: "player_prop",
+                            outcome: `${prop.playerName} Under ${prop.line} ${prop.category}`,
+                            decimalOdds: prop.underOdds.decimalOdds,
+                            americanOdds: prop.underOdds.americanOdds,
+                            playerName: prop.playerName,
+                            playerId: prop.playerId,
+                            propCategory: prop.category,
+                            propLine: prop.line,
+                          }}
+                          isAdded={addedLegKeys.has(underKey)}
+                          onAdd={onAdd}
+                          showIndicators={showIndicators}
+                        />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+                {propCount > 4 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAllProps(!showAllProps)}
+                    className="w-full text-xs"
+                    data-testid={`toggle-all-props-${event.id}`}
+                  >
+                    {showAllProps ? (
+                      <>
+                        <ChevronUp className="w-3 h-3 mr-1" />
+                        Show Less
+                      </>
+                    ) : (
+                      <>
+                        <ChevronDown className="w-3 h-3 mr-1" />
+                        Show All {propCount} Props
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
         )}
       </CardContent>
@@ -690,6 +764,200 @@ function GameFilters({ timeFilter, setTimeFilter, edgeFilter, setEdgeFilter, mar
   );
 }
 
+const TUTORIAL_STORAGE_KEY = "sors_visual_builder_tutorial_seen";
+
+interface TutorialStep {
+  title: string;
+  description: string;
+  icon: typeof TrendingUp;
+  iconColor: string;
+}
+
+const tutorialSteps: TutorialStep[] = [
+  {
+    title: "Browse Available Games",
+    description: "Games are loaded live from ESPN with real odds. Use sport tabs at the top to switch leagues. Each game card shows matchup, time, and betting markets.",
+    icon: LayoutGrid,
+    iconColor: "text-blue-500",
+  },
+  {
+    title: "Add Bets to Your Ticket",
+    description: "Click the + button on any outcome to add it to your ticket on the right. You can also drag and drop outcomes directly onto the ticket panel.",
+    icon: MousePointerClick,
+    iconColor: "text-green-500",
+  },
+  {
+    title: "Understand Edge Badges",
+    description: "+EV (green) means a positive expected value bet — the odds are in your favor. ~EV (blue) is roughly fair. -EV (red) means the house has a larger edge. Focus on +EV selections for long-term profitability.",
+    icon: TrendingUp,
+    iconColor: "text-green-500",
+  },
+  {
+    title: "Watch Line Movement",
+    description: "Green up arrows indicate \"steam moves\" — sudden sharp line movement suggesting professional action. Red down arrows show lines moving against you. These signals help you time your bets.",
+    icon: ArrowUp,
+    iconColor: "text-green-500",
+  },
+  {
+    title: "Sharp Money Signals",
+    description: "The eye icon marks outcomes backed by professional/sharp bettors. Sharp money often moves opposite to public betting and can indicate higher-quality selections.",
+    icon: Eye,
+    iconColor: "text-amber-500",
+  },
+  {
+    title: "Same-Game Parlay Warnings",
+    description: "When you add multiple legs from the same game, a yellow warning appears. These legs are correlated — if one loses, others in that game are more likely to lose too. Be aware of the increased risk.",
+    icon: AlertTriangle,
+    iconColor: "text-amber-500",
+  },
+  {
+    title: "Smart Suggestions & What-If",
+    description: "After adding legs, Smart Suggestions recommends complementary picks with positive edge. The What-If calculator shows how much payout you'd lose if each individual leg fails, identifying the weakest link.",
+    icon: Lightbulb,
+    iconColor: "text-amber-500",
+  },
+  {
+    title: "Filter & Analyze",
+    description: "Use filters to narrow by time window, edge quality, or market type. Toggle signal indicators on/off. When you have 2+ legs, hit Analyze to run a full Monte Carlo simulation of your parlay.",
+    icon: Filter,
+    iconColor: "text-blue-500",
+  },
+];
+
+function OnboardingTutorial({ onClose }: { onClose: () => void }) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const step = tutorialSteps[currentStep];
+  const StepIcon = step.icon;
+  const isLast = currentStep === tutorialSteps.length - 1;
+
+  const handleComplete = () => {
+    try { localStorage.setItem(TUTORIAL_STORAGE_KEY, "true"); } catch {}
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" data-testid="onboarding-overlay">
+      <Card className="w-full max-w-lg mx-4">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BookOpen className="w-4 h-4" />
+              Visual Parlay Builder Guide
+            </CardTitle>
+            <Button variant="ghost" size="icon" onClick={handleComplete} data-testid="button-close-tutorial">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+          <div className="flex gap-1 mt-2" data-testid="tutorial-progress">
+            {tutorialSteps.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  i <= currentStep ? "bg-primary" : "bg-muted"
+                }`}
+                data-testid={`tutorial-step-indicator-${i}`}
+              />
+            ))}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+              <StepIcon className={`w-5 h-5 ${step.iconColor}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold mb-1">{step.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-2">
+            <span className="text-xs text-muted-foreground">
+              Step {currentStep + 1} of {tutorialSteps.length}
+            </span>
+            <div className="flex items-center gap-2">
+              {currentStep > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  data-testid="button-tutorial-back"
+                >
+                  Back
+                </Button>
+              )}
+              {isLast ? (
+                <Button size="sm" onClick={handleComplete} data-testid="button-tutorial-done">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Got It
+                </Button>
+              ) : (
+                <Button size="sm" onClick={() => setCurrentStep(currentStep + 1)} data-testid="button-tutorial-next">
+                  Next
+                  <ArrowRight className="w-3 h-3 ml-1" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function LegendPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  if (!isOpen) return null;
+
+  const legendItems = [
+    { icon: <span className="px-1 py-0 rounded bg-green-500/15 text-green-600 dark:text-green-400 text-[10px] font-medium">+EV</span>, label: "Positive expected value — bet has edge over the house" },
+    { icon: <span className="px-1 py-0 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 text-[10px] font-medium">~EV</span>, label: "Approximately fair value — close to break-even" },
+    { icon: <span className="px-1 py-0 rounded bg-red-500/15 text-red-600 dark:text-red-400 text-[10px] font-medium">-EV</span>, label: "Negative expected value — house has the edge" },
+    { icon: <ArrowUp className="w-3 h-3 text-green-500" />, label: "Steam move — line moving sharply in this direction" },
+    { icon: <ArrowDown className="w-3 h-3 text-red-500" />, label: "Reverse line move — line moving against this pick" },
+    { icon: <Eye className="w-3 h-3 text-amber-500" />, label: "Sharp money — backed by professional bettors" },
+    { icon: <AlertTriangle className="w-3 h-3 text-amber-500" />, label: "Same-game parlay warning — correlated legs increase risk" },
+    { icon: <Lightbulb className="w-3 h-3 text-amber-500" />, label: "Smart suggestion — AI-recommended complementary pick" },
+    { icon: <Shield className="w-3 h-3 text-blue-500" />, label: "What-If analysis — shows payout impact if a leg loses" },
+    { icon: <GripVertical className="w-3 h-3 text-muted-foreground" />, label: "Draggable — grab and drag to add to your ticket" },
+    { icon: <Plus className="w-3 h-3 text-muted-foreground" />, label: "Click to add this selection to your ticket" },
+  ];
+
+  return (
+    <Card data-testid="legend-panel">
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <Info className="w-4 h-4 text-blue-500" />
+            Symbol Key
+          </CardTitle>
+          <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-legend">
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="space-y-2">
+          {legendItems.map((item, i) => (
+            <div key={i} className="flex items-center gap-3" data-testid={`legend-item-${i}`}>
+              <div className="w-6 flex items-center justify-center flex-shrink-0">
+                {item.icon}
+              </div>
+              <span className="text-xs text-muted-foreground">{item.label}</span>
+            </div>
+          ))}
+        </div>
+        <Separator className="my-3" />
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium">Quick Tips</p>
+          <p className="text-xs text-muted-foreground">Collapse market sections by clicking their headers to reduce clutter.</p>
+          <p className="text-xs text-muted-foreground">Use filters at the top to find +EV opportunities quickly.</p>
+          <p className="text-xs text-muted-foreground">Click "Show All Props" on a game card to see every player prop available.</p>
+          <p className="text-xs text-muted-foreground">Add 2+ legs then hit Analyze for a full Monte Carlo simulation.</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChange, bankroll = 1000, bettingEnv = defaultBettingEnv }: VisualParlayBuilderProps) {
   const [selectedSport, setSelectedSport] = useState<Sport>("NBA");
   const [legs, setLegs] = useState<ParlayLeg[]>([]);
@@ -697,6 +965,8 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
   const [result, setResult] = useState<EvaluationResult | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const [showIndicators, setShowIndicators] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("all");
@@ -712,6 +982,14 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
     },
     refetchInterval: 60000,
   });
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(TUTORIAL_STORAGE_KEY)) {
+        setShowTutorial(true);
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => { onLegsChange?.(legs); }, [legs, onLegsChange]);
   useEffect(() => { onStakeChange?.(stake); }, [stake, onStakeChange]);
@@ -866,8 +1144,8 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
   }, [events]);
 
   return (
-    <div className="grid gap-4 lg:grid-cols-5">
-      <div className="lg:col-span-3 space-y-3">
+    <div className="grid gap-4 lg:grid-cols-12">
+      <div className="lg:col-span-7 space-y-3">
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -903,16 +1181,38 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
                 marketFilter={marketFilter}
                 setMarketFilter={setMarketFilter}
               />
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowIndicators(!showIndicators)}
-                className="gap-1 text-xs"
-                data-testid="toggle-indicators"
-              >
-                <BarChart3 className="w-3 h-3" />
-                {showIndicators ? "Hide" : "Show"} Signals
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowIndicators(!showIndicators)}
+                  className="gap-1 text-xs"
+                  data-testid="toggle-indicators"
+                >
+                  <BarChart3 className="w-3 h-3" />
+                  {showIndicators ? "Hide" : "Show"} Signals
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowLegend(!showLegend)}
+                  className="gap-1 text-xs"
+                  data-testid="toggle-legend"
+                >
+                  <Info className="w-3 h-3" />
+                  Key
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTutorial(true)}
+                  className="gap-1 text-xs"
+                  data-testid="button-open-tutorial"
+                >
+                  <HelpCircle className="w-3 h-3" />
+                  Guide
+                </Button>
+              </div>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Drag outcomes to the ticket panel or click + to add
@@ -941,8 +1241,8 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
                 {events.length > 0 ? "No games match your filters" : `No games available for ${selectedSport}`}
               </div>
             ) : (
-              <ScrollArea className="max-h-[600px] pr-2">
-                <div className="grid gap-3 sm:grid-cols-2">
+              <ScrollArea className="h-[calc(100vh-340px)] min-h-[400px] max-h-[900px] pr-2">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {filteredEvents.map((event) => (
                     <GameCard
                       key={event.id}
@@ -957,9 +1257,11 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
             )}
           </CardContent>
         </Card>
+
+        <LegendPanel isOpen={showLegend} onClose={() => setShowLegend(false)} />
       </div>
 
-      <div className="lg:col-span-2 space-y-3">
+      <div className="lg:col-span-5 space-y-3">
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-4">
@@ -1108,6 +1410,10 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
           />
         )}
       </div>
+
+      {showTutorial && (
+        <OnboardingTutorial onClose={() => setShowTutorial(false)} />
+      )}
     </div>
   );
 }

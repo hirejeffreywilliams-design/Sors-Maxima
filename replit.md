@@ -26,6 +26,10 @@ Key features include:
   - Smart Suggestions panel recommending complementary high-value legs based on current selections
   - Quick filters (time window, edge threshold, market type) for efficient game browsing
   - What-If/Parlay Insurance calculator showing payout impact if each leg loses, identifying the weakest link
+  - Collapsible market sections per game card to reduce clutter while showing all available options
+  - Full player props access with "Show All" expansion (no longer limited to 4)
+  - 8-step interactive onboarding tutorial for first-time users (localStorage persisted)
+  - Persistent symbol key/legend panel explaining all icons and badges
 - **Manual Parlay Builder**: A flexible interface for users to manually add and manage betting legs.
 - **Live Team Rosters**: Real-time roster data from ESPN's free API covering NBA (30), NFL (32), MLB (30), NHL (32) teams with player details, coaching staff, injury status, and background cache preloading. Located at /rosters.
 - **Correlation Modeling**: Employs Gaussian copula-based methods to model dependencies between betting leg outcomes.
