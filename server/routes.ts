@@ -18,6 +18,7 @@ import { sportsDataService } from "./sportsDataService";
 import { auditTrail } from "./auditTrail";
 import { idempotencyStore } from "./idempotency";
 import { featureFlags } from "./featureFlags";
+import { getTeams, getTeamRoster } from "./espn-roster-provider";
 
 declare module "express-session" {
   interface SessionData {
@@ -2548,6 +2549,37 @@ Format your response clearly with sections and bullet points.`;
       });
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch cost monitoring data" });
+    }
+  });
+
+  app.get("/api/teams/:sport", async (req: Request, res: Response) => {
+    try {
+      const sport = req.params.sport as any;
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport. Use: " + validSports.join(", ") });
+      }
+      const teams = await getTeams(sport);
+      res.json(teams);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch teams" });
+    }
+  });
+
+  app.get("/api/teams/:sport/:teamId/roster", async (req: Request, res: Response) => {
+    try {
+      const { sport, teamId } = req.params;
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport" });
+      }
+      const roster = await getTeamRoster(sport as any, teamId);
+      if (!roster) {
+        return res.status(404).json({ error: "Roster not found" });
+      }
+      res.json(roster);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch roster" });
     }
   });
 

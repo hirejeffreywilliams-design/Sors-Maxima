@@ -19,7 +19,9 @@ The core features include a Monte Carlo simulation engine for probability analys
 Key features include:
 - **Smart Ticket Generator**: Automated ticket generation based on user-selected sports and risk levels, providing optimal betting tickets with confidence scores, EV, and win probability. Includes AI analysis scores (Quantum Coaching, Player Analysis, Team Dynamics, ML Projections, Sharp Money, Cashout Eligibility). This is the default home page.
 - **Advanced Parlay Generator**: Utilizes Monte Carlo optimization to suggest optimal parlays across various sports and player props.
+- **Visual Parlay Builder**: Drag-and-drop interface for building betting tickets visually from available games.
 - **Manual Parlay Builder**: A flexible interface for users to manually add and manage betting legs.
+- **Live Team Rosters**: Real-time roster data from ESPN's free API covering NBA (30), NFL (32), MLB (30), NHL (32) teams with player details, coaching staff, injury status, and background cache preloading. Located at /rosters.
 - **Correlation Modeling**: Employs Gaussian copula-based methods to model dependencies between betting leg outcomes.
 - **UI/UX**: Features a toggleable dark/light theme, intuitive navigation, and data visualization.
 - **Comprehensive Betting Insights**: Integrates advanced analytics such as +EV finding, confidence scoring, historical trend analysis, injury alerts, weather impact, line movement tracking, public vs. sharp money indicators, and situational factor analysis. Includes bankroll management, hedge calculations, and what-if scenarios.
@@ -72,7 +74,8 @@ Main navigation items:
 1. **Generate** (/) - Smart Ticket Generator (default home page)
 2. **Live** (/live) - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant, Cash-Out Advisor, Live Chat
 3. **Tools** (/tools) - Pro Tools with Quantum Analysis, Odds, ML, Correlation, Player Props, Arbitrage, Bet Grading, Custom Model, Export
-4. **Community** (/community) - Unified community page with 2 main tabs:
+4. **Rosters** (/rosters) - Live team rosters from ESPN API (NBA, NFL, MLB, NHL) with players, coaches, injury status
+5. **Community** (/community) - Unified community page with 2 main tabs:
    - Social: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts, Social Feed, Copy Betting
    - Tipsters: Discover communities, create your own, earn from tips/subscriptions (15% platform fee)
 5. **Rewards** (/rewards) - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading, Pick Competitions

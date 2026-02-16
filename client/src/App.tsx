@@ -28,7 +28,8 @@ import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
 import TipsterCommunities from "@/pages/tipster-communities";
 import TrainingCenter from "@/pages/training-center";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap } from "lucide-react";
+import RostersPage from "@/pages/rosters";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
       <Route path="/training" component={TrainingCenter} />
+      <Route path="/rosters" component={RostersPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -78,6 +80,7 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "AI-powered Smart Ticket Generator - Create optimized parlays" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, ML projections" },
+  { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },
   { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance", tooltip: "Track bets, ROI, multi-book balances, and taxes" },

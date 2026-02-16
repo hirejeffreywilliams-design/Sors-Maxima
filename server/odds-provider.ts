@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import type { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
 import { americanToDecimal, propCategories } from "@shared/schema";
+import { getPlayersFromCache, getTeamRoster, getTeams, type ESPNPlayer } from "./espn-roster-provider";
 
 function generateEVAnalysis(decimalOdds: number, outcomeId: string): EVAnalysis {
   const impliedProbability = 1 / decimalOdds;
@@ -271,6 +272,16 @@ const nhlPlayers: Record<string, MockPlayer[]> = {
 };
 
 function getPlayersForTeam(team: string, sport: Sport): MockPlayer[] {
+  const espnPlayers = getPlayersFromCache(sport, team);
+  if (espnPlayers.length > 0) {
+    return espnPlayers.slice(0, 6).map((p: ESPNPlayer) => ({
+      id: p.id,
+      name: p.fullName,
+      position: p.position.abbreviation,
+      team,
+    }));
+  }
+
   let roster: Record<string, MockPlayer[]>;
   switch (sport) {
     case "NFL":
@@ -700,7 +711,27 @@ export function eventsToLegs(events: SportEvent[]): ParlayLeg[] {
 const oddsCache: Map<Sport, { events: SportEvent[]; timestamp: number }> = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
 
+const rosterPreloadStarted = new Set<string>();
+
+function preloadRostersInBackground(sport: Sport) {
+  if (rosterPreloadStarted.has(sport)) return;
+  rosterPreloadStarted.add(sport);
+  
+  getTeams(sport).then(async (teams) => {
+    const batchSize = 5;
+    for (let i = 0; i < teams.length; i += batchSize) {
+      const batch = teams.slice(i, i + batchSize);
+      await Promise.all(
+        batch.map(t => getTeamRoster(sport, t.id).catch(() => null))
+      );
+    }
+    console.log(`[Rosters] Preloaded all ${teams.length} ${sport} rosters in background`);
+  }).catch(() => {});
+}
+
 export function getOddsForSport(sport: Sport): SportEvent[] {
+  preloadRostersInBackground(sport);
+
   const cached = oddsCache.get(sport);
   const now = Date.now();
 
