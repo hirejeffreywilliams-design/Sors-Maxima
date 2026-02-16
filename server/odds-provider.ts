@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 import type { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
 import { americanToDecimal, propCategories } from "@shared/schema";
 import { getPlayersFromCache, getTeamRoster, getTeams, type ESPNPlayer } from "./espn-roster-provider";
+import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 
 function generateEVAnalysis(decimalOdds: number, outcomeId: string): EVAnalysis {
   const impliedProbability = 1 / decimalOdds;
@@ -540,7 +541,189 @@ function generateGameStartTime(gameIndex: number, totalGames: number): Date {
   }
 }
 
-export function generateMockEvents(sport: Sport): SportEvent[] {
+function espnGameToEvent(game: ESPNScoreboardGame, sport: Sport): SportEvent {
+  const homeTeam = game.homeTeam.displayName;
+  const awayTeam = game.awayTeam.displayName;
+  const gameId = game.id;
+
+  const spreadVal = estimateSpreadFromRecords(game.homeTeam.record, game.awayTeam.record, sport);
+  const homeIsFavorite = spreadVal < 0;
+
+  const moneylineHome = generateRandomOdds(homeIsFavorite);
+  const moneylineAway = generateRandomOdds(!homeIsFavorite);
+
+  if (game.odds?.spread) {
+    const parsed = parseFloat(game.odds.spread.replace(/[^0-9.\-+]/g, '') || '0');
+    if (!isNaN(parsed) && parsed !== 0) {
+      const adjustedSpread = parsed;
+      moneylineHome.americanOdds = estimateMoneylineFromSpread(adjustedSpread, true);
+      moneylineHome.decimalOdds = americanToDecimal(moneylineHome.americanOdds);
+      moneylineAway.americanOdds = estimateMoneylineFromSpread(adjustedSpread, false);
+      moneylineAway.decimalOdds = americanToDecimal(moneylineAway.americanOdds);
+    }
+  }
+
+  const spread = generateSpreadFromValue(spreadVal);
+  const total = game.odds?.overUnder
+    ? generateTotalFromValue(game.odds.overUnder)
+    : generateTotal(sport);
+
+  const homeProps = generatePlayerProps(homeTeam, sport);
+  const awayProps = generatePlayerProps(awayTeam, sport);
+  const injuries = generateInjuries(homeTeam, awayTeam, sport);
+  const weather = generateWeather(gameId, sport);
+  const situationalFactors = generateSituationalFactors(gameId, homeTeam, awayTeam);
+
+  const historicalTrends: HistoricalTrend[] = [...homeProps, ...awayProps].slice(0, 6).map(prop =>
+    generateHistoricalTrends(prop.playerId, prop.playerName, prop.category, prop.line)
+  );
+
+  return {
+    id: gameId,
+    sport,
+    homeTeam,
+    awayTeam,
+    startTime: game.date,
+    markets: [
+      {
+        type: "moneyline",
+        outcomes: [
+          {
+            name: `${homeTeam} ML`,
+            team: homeTeam,
+            ...moneylineHome,
+            evAnalysis: generateEVAnalysis(moneylineHome.decimalOdds, `${gameId}-ml-home`),
+            lineMovement: generateLineMovement(gameId, "moneyline", `${homeTeam} ML`, moneylineHome.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${homeTeam} ML`),
+          },
+          {
+            name: `${awayTeam} ML`,
+            team: awayTeam,
+            ...moneylineAway,
+            evAnalysis: generateEVAnalysis(moneylineAway.decimalOdds, `${gameId}-ml-away`),
+            lineMovement: generateLineMovement(gameId, "moneyline", `${awayTeam} ML`, moneylineAway.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${awayTeam} ML`),
+          },
+        ],
+      },
+      {
+        type: "spread",
+        outcomes: [
+          {
+            name: `${homeTeam} ${spread.line > 0 ? "+" : ""}${spread.line}`,
+            team: homeTeam,
+            line: spread.line,
+            ...spread.homeOdds,
+            evAnalysis: generateEVAnalysis(spread.homeOdds.decimalOdds, `${gameId}-spread-home`),
+            lineMovement: generateLineMovement(gameId, "spread", `${homeTeam} spread`, spread.homeOdds.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "spread", `${homeTeam} spread`),
+          },
+          {
+            name: `${awayTeam} ${-spread.line > 0 ? "+" : ""}${-spread.line}`,
+            team: awayTeam,
+            line: -spread.line,
+            ...spread.awayOdds,
+            evAnalysis: generateEVAnalysis(spread.awayOdds.decimalOdds, `${gameId}-spread-away`),
+            lineMovement: generateLineMovement(gameId, "spread", `${awayTeam} spread`, spread.awayOdds.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "spread", `${awayTeam} spread`),
+          },
+        ],
+      },
+      {
+        type: "total",
+        outcomes: [
+          {
+            name: `Over ${total.line}`,
+            line: total.line,
+            ...total.overOdds,
+            evAnalysis: generateEVAnalysis(total.overOdds.decimalOdds, `${gameId}-total-over`),
+            lineMovement: generateLineMovement(gameId, "total", `Over ${total.line}`, total.overOdds.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "total", `Over ${total.line}`),
+          },
+          {
+            name: `Under ${total.line}`,
+            line: total.line,
+            ...total.underOdds,
+            evAnalysis: generateEVAnalysis(total.underOdds.decimalOdds, `${gameId}-total-under`),
+            lineMovement: generateLineMovement(gameId, "total", `Under ${total.line}`, total.underOdds.americanOdds),
+            bettingPercentages: generateBettingPercentages(gameId, "total", `Under ${total.line}`),
+          },
+        ],
+      },
+    ],
+    playerProps: [...homeProps, ...awayProps],
+    injuries,
+    weather,
+    situationalFactors,
+    historicalTrends,
+  };
+}
+
+function estimateSpreadFromRecords(homeRecord?: string, awayRecord?: string, sport?: Sport): number {
+  const parseWinPct = (record?: string): number => {
+    if (!record) return 0.5;
+    const parts = record.split("-");
+    const wins = parseInt(parts[0]) || 0;
+    const losses = parseInt(parts[1]) || 0;
+    const total = wins + losses;
+    return total > 0 ? wins / total : 0.5;
+  };
+  const homePct = parseWinPct(homeRecord);
+  const awayPct = parseWinPct(awayRecord);
+  const diff = homePct - awayPct;
+  const multiplier = sport === "NFL" ? 14 : sport === "NBA" ? 12 : sport === "MLB" ? 3 : sport === "NHL" ? 3 : 10;
+  const homeAdv = sport === "NFL" ? 3 : sport === "NBA" ? 3.5 : sport === "MLB" ? 0.5 : 0.5;
+  return Math.round((diff * multiplier + homeAdv) * 2) / 2;
+}
+
+function estimateMoneylineFromSpread(spread: number, isHome: boolean): number {
+  const s = isHome ? -spread : spread;
+  if (Math.abs(s) < 1) return -110;
+  if (s < -10) return -(Math.floor(Math.abs(s) * 20) + 100);
+  if (s < 0) return -(Math.floor(Math.abs(s) * 15) + 100);
+  if (s > 10) return Math.floor(s * 18) + 100;
+  return Math.floor(s * 12) + 100;
+}
+
+function generateSpreadFromValue(value: number): { line: number; homeOdds: { americanOdds: number; decimalOdds: number }; awayOdds: { americanOdds: number; decimalOdds: number } } {
+  const line = Math.round(value * 2) / 2 || 0.5;
+  const variation = Math.floor(Math.random() * 10) - 5;
+  const homeAmerican = -110 + variation;
+  const awayAmerican = -110 - variation;
+  return {
+    line,
+    homeOdds: { americanOdds: homeAmerican, decimalOdds: americanToDecimal(homeAmerican) },
+    awayOdds: { americanOdds: awayAmerican, decimalOdds: americanToDecimal(awayAmerican) },
+  };
+}
+
+function generateTotalFromValue(value: number): { line: number; overOdds: { americanOdds: number; decimalOdds: number }; underOdds: { americanOdds: number; decimalOdds: number } } {
+  return {
+    line: value,
+    overOdds: { americanOdds: -110, decimalOdds: americanToDecimal(-110) },
+    underOdds: { americanOdds: -110, decimalOdds: americanToDecimal(-110) },
+  };
+}
+
+export async function generateEventsFromESPN(sport: Sport): Promise<SportEvent[]> {
+  try {
+    const espnGames = await getMultiDayScoreboard(sport, 3);
+    const upcomingGames = espnGames.filter(g => g.status.state === "pre" || g.status.state === "in");
+
+    if (upcomingGames.length === 0) {
+      console.log(`[Odds] No upcoming ${sport} games from ESPN, using fallback`);
+      return generateFallbackEvents(sport);
+    }
+
+    console.log(`[Odds] Building events from ${upcomingGames.length} real ${sport} games`);
+    return upcomingGames.map(game => espnGameToEvent(game, sport));
+  } catch (error) {
+    console.error(`[Odds] ESPN fetch failed for ${sport}, using fallback:`, error);
+    return generateFallbackEvents(sport);
+  }
+}
+
+function generateFallbackEvents(sport: Sport): SportEvent[] {
   const teams = shuffleArray(getTeamsForSport(sport));
   const events: SportEvent[] = [];
   const numGames = Math.min(8, Math.floor(teams.length / 2));
@@ -555,102 +738,41 @@ export function generateMockEvents(sport: Sport): SportEvent[] {
     const moneylineAway = generateRandomOdds(!homeIsFavorite);
     const spread = generateSpread();
     const total = generateTotal(sport);
-
     const startTime = generateGameStartTime(i, numGames);
 
     const homeProps = generatePlayerProps(homeTeam, sport);
     const awayProps = generatePlayerProps(awayTeam, sport);
-    
     const injuries = generateInjuries(homeTeam, awayTeam, sport);
     const weather = generateWeather(gameId, sport);
     const situationalFactors = generateSituationalFactors(gameId, homeTeam, awayTeam);
-    
-    const historicalTrends: HistoricalTrend[] = [...homeProps, ...awayProps].slice(0, 6).map(prop => 
+    const historicalTrends: HistoricalTrend[] = [...homeProps, ...awayProps].slice(0, 6).map(prop =>
       generateHistoricalTrends(prop.playerId, prop.playerName, prop.category, prop.line)
     );
 
     events.push({
-      id: gameId,
-      sport,
-      homeTeam,
-      awayTeam,
-      startTime: startTime.toISOString(),
+      id: gameId, sport, homeTeam, awayTeam, startTime: startTime.toISOString(),
       markets: [
-        {
-          type: "moneyline",
-          outcomes: [
-            { 
-              name: `${homeTeam} ML`, 
-              team: homeTeam, 
-              ...moneylineHome,
-              evAnalysis: generateEVAnalysis(moneylineHome.decimalOdds, `${gameId}-ml-home`),
-              lineMovement: generateLineMovement(gameId, "moneyline", `${homeTeam} ML`, moneylineHome.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${homeTeam} ML`),
-            },
-            { 
-              name: `${awayTeam} ML`, 
-              team: awayTeam, 
-              ...moneylineAway,
-              evAnalysis: generateEVAnalysis(moneylineAway.decimalOdds, `${gameId}-ml-away`),
-              lineMovement: generateLineMovement(gameId, "moneyline", `${awayTeam} ML`, moneylineAway.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${awayTeam} ML`),
-            },
-          ],
-        },
-        {
-          type: "spread",
-          outcomes: [
-            { 
-              name: `${homeTeam} ${spread.line > 0 ? "+" : ""}${spread.line}`, 
-              team: homeTeam, 
-              line: spread.line, 
-              ...spread.homeOdds,
-              evAnalysis: generateEVAnalysis(spread.homeOdds.decimalOdds, `${gameId}-spread-home`),
-              lineMovement: generateLineMovement(gameId, "spread", `${homeTeam} spread`, spread.homeOdds.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "spread", `${homeTeam} spread`),
-            },
-            { 
-              name: `${awayTeam} ${-spread.line > 0 ? "+" : ""}${-spread.line}`, 
-              team: awayTeam, 
-              line: -spread.line, 
-              ...spread.awayOdds,
-              evAnalysis: generateEVAnalysis(spread.awayOdds.decimalOdds, `${gameId}-spread-away`),
-              lineMovement: generateLineMovement(gameId, "spread", `${awayTeam} spread`, spread.awayOdds.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "spread", `${awayTeam} spread`),
-            },
-          ],
-        },
-        {
-          type: "total",
-          outcomes: [
-            { 
-              name: `Over ${total.line}`, 
-              line: total.line, 
-              ...total.overOdds,
-              evAnalysis: generateEVAnalysis(total.overOdds.decimalOdds, `${gameId}-total-over`),
-              lineMovement: generateLineMovement(gameId, "total", `Over ${total.line}`, total.overOdds.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "total", `Over ${total.line}`),
-            },
-            { 
-              name: `Under ${total.line}`, 
-              line: total.line, 
-              ...total.underOdds,
-              evAnalysis: generateEVAnalysis(total.underOdds.decimalOdds, `${gameId}-total-under`),
-              lineMovement: generateLineMovement(gameId, "total", `Under ${total.line}`, total.underOdds.americanOdds),
-              bettingPercentages: generateBettingPercentages(gameId, "total", `Under ${total.line}`),
-            },
-          ],
-        },
+        { type: "moneyline", outcomes: [
+          { name: `${homeTeam} ML`, team: homeTeam, ...moneylineHome, evAnalysis: generateEVAnalysis(moneylineHome.decimalOdds, `${gameId}-ml-home`), lineMovement: generateLineMovement(gameId, "moneyline", `${homeTeam} ML`, moneylineHome.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${homeTeam} ML`) },
+          { name: `${awayTeam} ML`, team: awayTeam, ...moneylineAway, evAnalysis: generateEVAnalysis(moneylineAway.decimalOdds, `${gameId}-ml-away`), lineMovement: generateLineMovement(gameId, "moneyline", `${awayTeam} ML`, moneylineAway.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "moneyline", `${awayTeam} ML`) },
+        ]},
+        { type: "spread", outcomes: [
+          { name: `${homeTeam} ${spread.line > 0 ? "+" : ""}${spread.line}`, team: homeTeam, line: spread.line, ...spread.homeOdds, evAnalysis: generateEVAnalysis(spread.homeOdds.decimalOdds, `${gameId}-spread-home`), lineMovement: generateLineMovement(gameId, "spread", `${homeTeam} spread`, spread.homeOdds.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "spread", `${homeTeam} spread`) },
+          { name: `${awayTeam} ${-spread.line > 0 ? "+" : ""}${-spread.line}`, team: awayTeam, line: -spread.line, ...spread.awayOdds, evAnalysis: generateEVAnalysis(spread.awayOdds.decimalOdds, `${gameId}-spread-away`), lineMovement: generateLineMovement(gameId, "spread", `${awayTeam} spread`, spread.awayOdds.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "spread", `${awayTeam} spread`) },
+        ]},
+        { type: "total", outcomes: [
+          { name: `Over ${total.line}`, line: total.line, ...total.overOdds, evAnalysis: generateEVAnalysis(total.overOdds.decimalOdds, `${gameId}-total-over`), lineMovement: generateLineMovement(gameId, "total", `Over ${total.line}`, total.overOdds.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "total", `Over ${total.line}`) },
+          { name: `Under ${total.line}`, line: total.line, ...total.underOdds, evAnalysis: generateEVAnalysis(total.underOdds.decimalOdds, `${gameId}-total-under`), lineMovement: generateLineMovement(gameId, "total", `Under ${total.line}`, total.underOdds.americanOdds), bettingPercentages: generateBettingPercentages(gameId, "total", `Under ${total.line}`) },
+        ]},
       ],
-      playerProps: [...homeProps, ...awayProps],
-      injuries,
-      weather,
-      situationalFactors,
-      historicalTrends,
+      playerProps: [...homeProps, ...awayProps], injuries, weather, situationalFactors, historicalTrends,
     });
   }
-
   return events;
+}
+
+export function generateMockEvents(sport: Sport): SportEvent[] {
+  return generateFallbackEvents(sport);
 }
 
 export function eventsToLegs(events: SportEvent[]): ParlayLeg[] {
@@ -729,6 +851,24 @@ function preloadRostersInBackground(sport: Sport) {
   }).catch(() => {});
 }
 
+export async function getOddsForSportAsync(sport: Sport): Promise<SportEvent[]> {
+  preloadRostersInBackground(sport);
+
+  const cached = oddsCache.get(sport);
+  const now = Date.now();
+
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.events.sort((a, b) =>
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+  }
+
+  const events = await generateEventsFromESPN(sport);
+  events.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  oddsCache.set(sport, { events, timestamp: now });
+  return events;
+}
+
 export function getOddsForSport(sport: Sport): SportEvent[] {
   preloadRostersInBackground(sport);
 
@@ -736,19 +876,26 @@ export function getOddsForSport(sport: Sport): SportEvent[] {
   const now = Date.now();
 
   if (cached && now - cached.timestamp < CACHE_TTL) {
-    return cached.events.sort((a, b) => 
+    return cached.events.sort((a, b) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
   }
 
-  const events = generateMockEvents(sport);
-  events.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
-  oddsCache.set(sport, { events, timestamp: now });
-  return events;
+  generateEventsFromESPN(sport).then(events => {
+    events.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+    oddsCache.set(sport, { events, timestamp: Date.now() });
+  }).catch(() => {});
+
+  if (cached) return cached.events;
+
+  const fallback = generateFallbackEvents(sport);
+  oddsCache.set(sport, { events: fallback, timestamp: now - CACHE_TTL + 30000 });
+  return fallback;
 }
 
-export function refreshOddsForSport(sport: Sport): SportEvent[] {
-  const events = generateMockEvents(sport);
+export async function refreshOddsForSport(sport: Sport): Promise<SportEvent[]> {
+  const events = await generateEventsFromESPN(sport);
+  events.sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   oddsCache.set(sport, { events, timestamp: Date.now() });
   return events;
 }

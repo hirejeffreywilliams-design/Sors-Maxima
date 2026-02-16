@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
-import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
+import { getOddsForSport, getOddsForSportAsync, refreshOddsForSport, eventsToLegs } from "./odds-provider";
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
@@ -800,7 +800,7 @@ Format your response clearly with sections and bullet points.`;
     res.json(sportsList);
   });
 
-  app.get("/api/odds", (req, res) => {
+  app.get("/api/odds", async (req, res) => {
     try {
       const sport = req.query.sport as string;
       
@@ -811,7 +811,7 @@ Format your response clearly with sections and bullet points.`;
         });
       }
 
-      const events = getOddsForSport(sport as any);
+      const events = await getOddsForSportAsync(sport as any);
       return res.json(events);
     } catch (err) {
       console.error("Odds fetch error:", err);
@@ -865,7 +865,7 @@ Format your response clearly with sections and bullet points.`;
         includeProps: includeProps !== false,
       };
 
-      const tickets = generateSmartTickets(request);
+      const tickets = await generateSmartTickets(request);
 
       return res.json({
         tickets,
@@ -909,7 +909,7 @@ Format your response clearly with sections and bullet points.`;
       const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN, selectedEventIds, selectedTotals, selectedProps } =
         parseResult.data;
 
-      let events = getOddsForSport(sport);
+      let events = await getOddsForSportAsync(sport);
       
       if (selectedEventIds && selectedEventIds.length > 0) {
         events = events.filter(e => selectedEventIds.includes(e.id));
@@ -1062,13 +1062,13 @@ Format your response clearly with sections and bullet points.`;
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  app.get("/api/vegas/predictions", (req, res) => {
+  app.get("/api/vegas/predictions", async (req, res) => {
     try {
       const sport = req.query.sport as string | undefined;
       const validSport = sport && sports.includes(sport as any) ? sport as any : undefined;
       
-      const predictions = generateVegasPredictions(validSport);
-      const insights = getVegasInsights();
+      const predictions = await generateVegasPredictions(validSport);
+      const insights = await getVegasInsights();
       
       return res.json({
         predictions,

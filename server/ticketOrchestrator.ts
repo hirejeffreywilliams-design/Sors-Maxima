@@ -1,5 +1,6 @@
 import type { Sport, ParlayLeg, GeneratedParlay } from "../shared/schema";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantumFusionEngine";
+import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 
 function generateUniqueId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -262,6 +263,32 @@ function extractCategoryScore(signals: FusionSignal[], factorNames: string[]): n
   return count > 0 ? total / count : 0.5;
 }
 
+let espnGamesCache: { games: ESPNScoreboardGame[]; timestamp: number; sport: Sport } | null = null;
+
+async function getESPNGamesForSport(sport: Sport): Promise<ESPNScoreboardGame[]> {
+  if (espnGamesCache && espnGamesCache.sport === sport && Date.now() - espnGamesCache.timestamp < 5 * 60 * 1000) {
+    return espnGamesCache.games;
+  }
+  try {
+    const games = await getMultiDayScoreboard(sport, 3);
+    const upcoming = games.filter(g => g.status.state === "pre" || g.status.state === "in");
+    espnGamesCache = { games: upcoming, timestamp: Date.now(), sport };
+    return upcoming;
+  } catch {
+    return [];
+  }
+}
+
+function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
+  const homeTeam = { name: game.homeTeam.shortDisplayName, city: game.homeTeam.displayName.replace(` ${game.homeTeam.shortDisplayName}`, '') };
+  const awayTeam = { name: game.awayTeam.shortDisplayName, city: game.awayTeam.displayName.replace(` ${game.awayTeam.shortDisplayName}`, '') };
+  const isHomeTeam = Math.random() > 0.5;
+  const selectedTeam = isHomeTeam ? homeTeam : awayTeam;
+  const opponent = isHomeTeam ? awayTeam : homeTeam;
+
+  return buildLegFromTeams(sport, selectedTeam, opponent, marketType, includeProps);
+}
+
 function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
   const teams = teamsByLeague[sport];
   const homeTeamIdx = Math.floor(Math.random() * teams.length);
@@ -275,6 +302,11 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
   const isHomeTeam = Math.random() > 0.5;
   const selectedTeam = isHomeTeam ? homeTeam : awayTeam;
   const opponent = isHomeTeam ? awayTeam : homeTeam;
+
+  return buildLegFromTeams(sport, selectedTeam, opponent, marketType, includeProps);
+}
+
+function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: string }, opponent: { name: string; city: string }, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
   
   let market = "";
   let outcome = "";
@@ -473,7 +505,7 @@ function buildRationale(fusionData: TicketFusion, legs: TicketLeg[]): string[] {
   return rationale.slice(0, 6);
 }
 
-export function generateTickets(request: TicketRequest): GeneratedTicket[] {
+export async function generateTickets(request: TicketRequest): Promise<GeneratedTicket[]> {
   const candidateTickets: GeneratedTicket[] = [];
   const ticketsToGenerate = Math.ceil(10 / request.sports.length);
   
@@ -486,6 +518,8 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
   const legCounts = legCountsByRisk[request.riskLevel];
   
   for (const sport of request.sports) {
+    const espnGames = await getESPNGamesForSport(sport);
+
     for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
         legCounts[Math.floor(Math.random() * legCounts.length)],
@@ -500,7 +534,12 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
       const legs: TicketLeg[] = [];
       for (let j = 0; j < numLegs; j++) {
         const marketType = marketTypes[Math.floor(Math.random() * marketTypes.length)];
-        legs.push(generateLeg(sport, marketType, request.includeProps));
+        if (espnGames.length > 0) {
+          const game = espnGames[Math.floor(Math.random() * espnGames.length)];
+          legs.push(generateLegFromESPNGame(game, sport, marketType, request.includeProps));
+        } else {
+          legs.push(generateLeg(sport, marketType, request.includeProps));
+        }
       }
       
       const totalOdds = calculateCombinedOdds(legs);
