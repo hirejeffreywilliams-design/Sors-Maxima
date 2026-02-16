@@ -19,7 +19,13 @@ The core features include a Monte Carlo simulation engine for probability analys
 Key features include:
 - **Smart Ticket Generator**: Automated ticket generation based on user-selected sports and risk levels, providing optimal betting tickets with confidence scores, EV, and win probability. Includes AI analysis scores (Quantum Coaching, Player Analysis, Team Dynamics, ML Projections, Sharp Money, Cashout Eligibility). This is the default home page.
 - **Advanced Parlay Generator**: Utilizes Monte Carlo optimization to suggest optimal parlays across various sports and player props.
-- **Visual Parlay Builder**: Drag-and-drop interface for building betting tickets visually from available games.
+- **Visual Parlay Builder**: Advanced drag-and-drop interface for building betting tickets visually from real ESPN games. Features include:
+  - Leg-level edge/confidence badges (+EV, ~EV, -EV) with color coding
+  - Real-time line movement indicators (steam/reverse arrows) and sharp action signals
+  - Same-Game Parlay (SGP) detection with correlation warnings when multiple legs share the same game
+  - Smart Suggestions panel recommending complementary high-value legs based on current selections
+  - Quick filters (time window, edge threshold, market type) for efficient game browsing
+  - What-If/Parlay Insurance calculator showing payout impact if each leg loses, identifying the weakest link
 - **Manual Parlay Builder**: A flexible interface for users to manually add and manage betting legs.
 - **Live Team Rosters**: Real-time roster data from ESPN's free API covering NBA (30), NFL (32), MLB (30), NHL (32) teams with player details, coaching staff, injury status, and background cache preloading. Located at /rosters.
 - **Correlation Modeling**: Employs Gaussian copula-based methods to model dependencies between betting leg outcomes.
