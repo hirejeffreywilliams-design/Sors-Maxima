@@ -18,7 +18,7 @@ import { sportsDataService } from "./sportsDataService";
 import { auditTrail } from "./auditTrail";
 import { idempotencyStore } from "./idempotency";
 import { featureFlags } from "./featureFlags";
-import { getTeams, getTeamRoster } from "./espn-roster-provider";
+import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats } from "./espn-roster-provider";
 import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMiddleware";
 import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErrorCodesByCategory, healthMonitor } from "./errorCodeSystem";
 
@@ -101,6 +101,10 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+  preloadAllRosters().catch((err) => {
+    console.error("[Startup] Roster preload failed:", err);
+  });
+
   // User Registration (rate limited)
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
@@ -2748,6 +2752,11 @@ Format your response clearly with sections and bullet points.`;
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch roster" });
     }
+  });
+
+  app.get("/api/roster-cache-stats", (_req: Request, res: Response) => {
+    const stats = getRosterCacheStats();
+    res.json({ stats, totalTeams: stats.reduce((sum, s) => sum + s.teams, 0), totalPlayers: stats.reduce((sum, s) => sum + s.players, 0) });
   });
 
   return httpServer;

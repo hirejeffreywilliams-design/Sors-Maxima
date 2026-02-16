@@ -255,7 +255,80 @@ export function getPlayersFromCache(sport: Sport, teamName: string): ESPNPlayer[
   return [];
 }
 
+export function getPlayersFromCacheById(sport: Sport, teamId: string): ESPNPlayer[] {
+  const cacheKey = `${sport}-${teamId}`;
+  const cached = rosterCache.get(cacheKey);
+  if (cached) {
+    return cached.data.players.filter((p: ESPNPlayer) =>
+      !p.status || p.status.type === "active"
+    );
+  }
+  return [];
+}
+
+export function getRosterFromCacheById(sport: Sport, teamId: string): TeamRoster | null {
+  const cacheKey = `${sport}-${teamId}`;
+  const cached = rosterCache.get(cacheKey);
+  return cached?.data || null;
+}
+
+export function getInjuredPlayersFromCache(sport: Sport, teamId: string): ESPNPlayer[] {
+  const cacheKey = `${sport}-${teamId}`;
+  const cached = rosterCache.get(cacheKey);
+  if (!cached) return [];
+  return cached.data.players.filter((p: ESPNPlayer) =>
+    p.status && p.status.type !== "active" && p.status.name !== "Active"
+  );
+}
+
+export function getRosterCacheStats(): { sport: string; teams: number; players: number }[] {
+  const stats = new Map<string, { teams: number; players: number }>();
+  for (const [key, entry] of rosterCache.entries()) {
+    const sport = key.split("-")[0];
+    const existing = stats.get(sport) || { teams: 0, players: 0 };
+    existing.teams++;
+    existing.players += entry.data.players.length;
+    stats.set(sport, existing);
+  }
+  return Array.from(stats.entries()).map(([sport, data]) => ({ sport, ...data }));
+}
+
+const preloadedSports = new Set<string>();
+
+export async function preloadAllRosters(): Promise<void> {
+  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
+  const startTime = Date.now();
+  console.log("[Rosters] Starting background preload for all sports...");
+
+  for (const sport of sports) {
+    if (preloadedSports.has(sport)) continue;
+    try {
+      const teams = await getTeams(sport);
+      const batchSize = 5;
+      for (let i = 0; i < teams.length; i += batchSize) {
+        const batch = teams.slice(i, i + batchSize);
+        await Promise.all(
+          batch.map(t => getTeamRoster(sport, t.id).catch(() => null))
+        );
+      }
+      preloadedSports.add(sport);
+      const cached = rosterCache.size;
+      console.log(`[Rosters] Preloaded ${teams.length} ${sport} team rosters (${cached} total cached)`);
+    } catch (err) {
+      console.error(`[Rosters] Failed to preload ${sport}:`, err);
+    }
+  }
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`[Rosters] Preload complete in ${elapsed}s — ${rosterCache.size} rosters cached`);
+}
+
+export function isRosterPreloaded(sport: Sport): boolean {
+  return preloadedSports.has(sport);
+}
+
 export function clearCache(): void {
   teamsCache.clear();
   rosterCache.clear();
+  preloadedSports.clear();
 }

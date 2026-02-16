@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import type { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
 import { americanToDecimal, propCategories } from "@shared/schema";
-import { getPlayersFromCache, getTeamRoster, getTeams, type ESPNPlayer } from "./espn-roster-provider";
+import { getPlayersFromCache, getPlayersFromCacheById, getInjuredPlayersFromCache, getTeamRoster, getTeams, preloadAllRosters, isRosterPreloaded, type ESPNPlayer } from "./espn-roster-provider";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 
 function generateEVAnalysis(decimalOdds: number, outcomeId: string): EVAnalysis {
@@ -86,6 +86,62 @@ function generateInjuries(homeTeam: string, awayTeam: string, sport: Sport): Inj
     }
   });
   
+  return injuries;
+}
+
+function generateInjuriesFromRosters(homeTeam: string, awayTeam: string, sport: Sport, homeTeamId?: string, awayTeamId?: string): InjuryStatus[] {
+  const injuries: InjuryStatus[] = [];
+
+  const statusMap: Record<string, "out" | "doubtful" | "questionable" | "probable"> = {
+    "day-to-day": "questionable",
+    "out": "out",
+    "injured reserve": "out",
+    "suspended": "out",
+    "injured": "out",
+    "questionable": "questionable",
+    "doubtful": "doubtful",
+    "probable": "probable",
+    "10-day injured list": "out",
+    "15-day injured list": "out",
+    "60-day injured list": "out",
+    "injured list": "out",
+    "paternity list": "out",
+    "bereavement list": "out",
+    "reserve/injured": "out",
+    "reserve/suspended": "out",
+    "practice squad": "out",
+  };
+
+  const teams = [
+    { name: homeTeam, id: homeTeamId },
+    { name: awayTeam, id: awayTeamId },
+  ];
+
+  for (const team of teams) {
+    if (!team.id) continue;
+    const injuredPlayers = getInjuredPlayersFromCache(sport, team.id);
+
+    for (const player of injuredPlayers) {
+      const statusType = player.status?.type?.toLowerCase() || "";
+      const statusName = player.status?.name?.toLowerCase() || "";
+      const mappedStatus = statusMap[statusType] || statusMap[statusName] || "questionable";
+      const impactRating = mappedStatus === "out" ? -0.8 : mappedStatus === "doubtful" ? -0.5 : mappedStatus === "questionable" ? -0.3 : -0.1;
+
+      injuries.push({
+        playerId: player.id,
+        playerName: player.fullName,
+        team: team.name,
+        status: mappedStatus,
+        injury: player.status?.name || "Unknown",
+        impactRating,
+      });
+    }
+  }
+
+  if (injuries.length === 0) {
+    return generateInjuries(homeTeam, awayTeam, sport);
+  }
+
   return injuries;
 }
 
@@ -272,10 +328,18 @@ const nhlPlayers: Record<string, MockPlayer[]> = {
   ],
 };
 
-function getPlayersForTeam(team: string, sport: Sport): MockPlayer[] {
-  const espnPlayers = getPlayersFromCache(sport, team);
+function getPlayersForTeam(team: string, sport: Sport, teamId?: string): MockPlayer[] {
+  let espnPlayers: ESPNPlayer[] = [];
+
+  if (teamId) {
+    espnPlayers = getPlayersFromCacheById(sport, teamId);
+  }
+  if (espnPlayers.length === 0) {
+    espnPlayers = getPlayersFromCache(sport, team);
+  }
+
   if (espnPlayers.length > 0) {
-    return espnPlayers.slice(0, 6).map((p: ESPNPlayer) => ({
+    return espnPlayers.slice(0, 8).map((p: ESPNPlayer) => ({
       id: p.id,
       name: p.fullName,
       position: p.position.abbreviation,
@@ -410,8 +474,8 @@ function getPropCategoriesForPosition(sport: Sport, position: string): readonly 
   }
 }
 
-function generatePlayerProps(team: string, sport: Sport): PlayerProp[] {
-  const players = getPlayersForTeam(team, sport);
+function generatePlayerProps(team: string, sport: Sport, teamId?: string): PlayerProp[] {
+  const players = getPlayersForTeam(team, sport, teamId);
   const props: PlayerProp[] = [];
   
   for (const player of players) {
@@ -544,6 +608,8 @@ function generateGameStartTime(gameIndex: number, totalGames: number): Date {
 function espnGameToEvent(game: ESPNScoreboardGame, sport: Sport): SportEvent {
   const homeTeam = game.homeTeam.displayName;
   const awayTeam = game.awayTeam.displayName;
+  const homeTeamId = game.homeTeam.id;
+  const awayTeamId = game.awayTeam.id;
   const gameId = game.id;
 
   const spreadVal = estimateSpreadFromRecords(game.homeTeam.record, game.awayTeam.record, sport);
@@ -568,9 +634,9 @@ function espnGameToEvent(game: ESPNScoreboardGame, sport: Sport): SportEvent {
     ? generateTotalFromValue(game.odds.overUnder)
     : generateTotal(sport);
 
-  const homeProps = generatePlayerProps(homeTeam, sport);
-  const awayProps = generatePlayerProps(awayTeam, sport);
-  const injuries = generateInjuries(homeTeam, awayTeam, sport);
+  const homeProps = generatePlayerProps(homeTeam, sport, homeTeamId);
+  const awayProps = generatePlayerProps(awayTeam, sport, awayTeamId);
+  const injuries = generateInjuriesFromRosters(homeTeam, awayTeam, sport, homeTeamId, awayTeamId);
   const weather = generateWeather(gameId, sport);
   const situationalFactors = generateSituationalFactors(gameId, homeTeam, awayTeam);
 
@@ -833,26 +899,14 @@ export function eventsToLegs(events: SportEvent[]): ParlayLeg[] {
 const oddsCache: Map<Sport, { events: SportEvent[]; timestamp: number }> = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
 
-const rosterPreloadStarted = new Set<string>();
-
-function preloadRostersInBackground(sport: Sport) {
-  if (rosterPreloadStarted.has(sport)) return;
-  rosterPreloadStarted.add(sport);
-  
-  getTeams(sport).then(async (teams) => {
-    const batchSize = 5;
-    for (let i = 0; i < teams.length; i += batchSize) {
-      const batch = teams.slice(i, i + batchSize);
-      await Promise.all(
-        batch.map(t => getTeamRoster(sport, t.id).catch(() => null))
-      );
-    }
-    console.log(`[Rosters] Preloaded all ${teams.length} ${sport} rosters in background`);
-  }).catch(() => {});
+function ensureRostersLoaded(sport: Sport) {
+  if (!isRosterPreloaded(sport)) {
+    preloadAllRosters().catch(() => {});
+  }
 }
 
 export async function getOddsForSportAsync(sport: Sport): Promise<SportEvent[]> {
-  preloadRostersInBackground(sport);
+  ensureRostersLoaded(sport);
 
   const cached = oddsCache.get(sport);
   const now = Date.now();
@@ -870,7 +924,7 @@ export async function getOddsForSportAsync(sport: Sport): Promise<SportEvent[]> 
 }
 
 export function getOddsForSport(sport: Sport): SportEvent[] {
-  preloadRostersInBackground(sport);
+  ensureRostersLoaded(sport);
 
   const cached = oddsCache.get(sport);
   const now = Date.now();
