@@ -2499,5 +2499,63 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  // Daily Parlay Strategy Generator
+  app.post("/api/daily-strategy", async (req, res) => {
+    try {
+      const { sport, date, games, bankroll, riskLevel, maxLegs, preferredBetTypes, maxTickets, diversify } = req.body;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
+
+      const prompt = `Create a daily parlay strategy for the user’s incoming games today. 
+Inputs: 
+- sport: ${sport}
+- date: ${date}
+- games: ${JSON.stringify(games)}
+- bankroll: ${bankroll}
+- risk_level: ${riskLevel}
+- max_parlay_legs: ${maxLegs}
+- preferred_bet_types: ${preferredBetTypes?.join(", ") || "moneyline, spread, total"}
+- max_tickets: ${maxTickets}
+- diversify: ${diversify ? "yes" : "no"}
+
+Output must include:
+1. A one-paragraph overall strategy summary (budget, risk approach).
+2. A prioritized list of recommended parlays (each parlay: legs, reason per leg, combined odds, suggested stake, expected payout, confidence score 1–5).
+3. Suggested single bets to hedge or build bankroll (if any).
+4. Bankroll allocation plan across proposed tickets (dollar amounts and % of bankroll).
+5. Timing notes (when to place, key news to watch).
+6. Quick risk reminder and recommended max loss for the day.
+
+Follow these rules:
+- Keep parlays within max_parlay_legs.
+- For conservative favor favorites and 2–3 leg parlays; for aggressive include underdogs and up to max_parlay_legs.
+- Include rationale for each leg (stats, matchup, injuries, odds value).
+- Do not encourage reckless gambling; include responsible-gambling reminder.
+- Output in clean JSON format.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a professional sports betting strategist. Provide data-driven, responsible parlay strategies."
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      const strategy = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      res.json(strategy);
+    } catch (err) {
+      console.error("Daily strategy error:", err);
+      res.status(500).json({ error: "Failed to generate strategy" });
+    }
+  });
+
   return httpServer;
 }

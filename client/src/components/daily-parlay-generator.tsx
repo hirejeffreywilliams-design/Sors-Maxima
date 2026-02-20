@@ -149,6 +149,32 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
   const totalGamesAnalyzed = Array.from(sportParlays.values()).reduce((sum, s) => sum + s.gamesCount, 0);
   const totalParlaysGenerated = Array.from(sportParlays.values()).reduce((sum, s) => sum + s.parlays.length, 0);
 
+  const [strategy, setStrategy] = useState<any>(null);
+  const [isGeneratingStrategy, setIsGeneratingStrategy] = useState(false);
+
+  const handleGenerateStrategy = async () => {
+    setIsGeneratingStrategy(true);
+    try {
+      const response = await apiRequest("POST", "/api/daily-strategy", {
+        sport: selectedSport,
+        date: new Date().toISOString().split('T')[0],
+        games: Array.from(sportParlays.get(selectedSport)?.parlays || []).flatMap(p => p.legs),
+        bankroll,
+        riskLevel: "moderate",
+        maxLegs: 4,
+        preferredBetTypes: ["moneyline", "spread", "total"],
+        maxTickets: 3,
+        diversify: true
+      });
+      const data = await response.json();
+      setStrategy(data);
+    } catch (error) {
+      console.error("Strategy generation failed", error);
+    } finally {
+      setIsGeneratingStrategy(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card className="border-2 border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-orange-500/5">
@@ -167,32 +193,77 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Quantum-optimized 12-leg parlays for maximum winning potential
+                  Quantum-optimized strategies for maximum winning potential
                 </CardDescription>
               </div>
             </div>
-            <Button 
-              size="lg"
-              onClick={handleGenerateAll}
-              disabled={generatingAll}
-              className="gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
-              data-testid="button-generate-all-parlays"
-            >
-              {generatingAll ? (
-                <>
-                  <RefreshCw className="h-5 w-5 animate-spin" />
-                  Analyzing All Sports...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-5 w-5" />
-                  Generate Today's Best Parlays
-                </>
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={handleGenerateStrategy}
+                disabled={isGeneratingStrategy || !sportParlays.get(selectedSport)?.parlays.length}
+                className="gap-2"
+              >
+                <Brain className="h-4 w-4" />
+                AI Strategy
+              </Button>
+              <Button 
+                size="lg"
+                onClick={handleGenerateAll}
+                disabled={generatingAll}
+                className="gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600"
+                data-testid="button-generate-all-parlays"
+              >
+                {generatingAll ? (
+                  <>
+                    <RefreshCw className="h-5 w-5 animate-spin" />
+                    Analyzing All Sports...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-5 w-5" />
+                    Generate Today's Best Parlays
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
+          {strategy && (
+            <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-4 animate-in fade-in slide-in-from-top-4">
+              <div className="flex items-center gap-2 text-primary font-bold">
+                <Brain className="w-5 h-5" />
+                AI Daily Game Plan
+              </div>
+              <p className="text-sm leading-relaxed">{strategy.summary || strategy.overall_strategy_summary}</p>
+              
+              {strategy.recommended_parlays && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {strategy.recommended_parlays.map((p: any, i: number) => (
+                    <div key={i} className="p-3 rounded-lg bg-background border border-border space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-sm">Parlay {String.fromCharCode(65 + i)}</span>
+                        <Badge variant="secondary">{p.combined_odds}</Badge>
+                      </div>
+                      <div className="text-xs space-y-1">
+                        {p.legs?.map((leg: any, j: number) => (
+                          <div key={j} className="flex items-start gap-1">
+                            <Check className="w-3 h-3 text-green-500 mt-0.5 shrink-0" />
+                            <span>{leg.description || leg}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="pt-2 flex justify-between items-center border-t">
+                        <span className="text-[10px] text-muted-foreground">Confidence: {p.confidence_score}/5</span>
+                        <span className="text-xs font-bold text-primary">Stake: {p.suggested_stake}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <QuantumAnalysisIndicator />
           
           <div className="grid gap-4 md:grid-cols-3 mt-4">

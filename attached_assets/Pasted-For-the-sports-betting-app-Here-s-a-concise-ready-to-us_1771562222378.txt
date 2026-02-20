@@ -1,0 +1,409 @@
+For the sports betting app Here’s a concise, ready-to-use in-app prompt (plus expected input fields and output format) you can drop into your sports betting app to generate a daily parlay game plan for users.
+
+
+
+Prompt to show/generate (use as system/user prompt to your model):
+
+"Create a daily parlay strategy for the user’s incoming games today. Inputs: `sport`, `date`, `games` (list with teams, start time, odds, injuries/notes), `bankroll`, `risk_level` (conservative/moderate/aggressive), `max_parlay_legs` (2–6), `preferred_bet_types` (moneyline/spread/total/team props/teaser), `max_tickets` (number of parlays to propose), `diversify` (yes/no). Output must include:
+
+1. A one-paragraph overall strategy summary (budget, risk approach).
+
+2. A prioritized list of recommended parlays (each parlay: legs, reason per leg, combined odds, suggested stake, expected payout, confidence score 1–5).
+
+3. Suggested single bets to hedge or build bankroll (if any).
+
+4. Bankroll allocation plan across proposed tickets (dollar amounts and % of bankroll).
+
+5. Timing notes (when to place, key news to watch).
+
+6. Quick risk reminder and recommended max loss for the day.
+
+
+
+Follow these rules:
+
+- Keep parlays within `max_parlay_legs`.
+
+- For `conservative` favor favorites and 2–3 leg parlays; for `aggressive` include underdogs and up to `max_parlay_legs`.
+
+- Include rationale for each leg (stats, matchup, injuries, odds value).
+
+- Do not encourage reckless gambling; include responsible-gambling reminder."
+
+
+
+Example expected output format (short):
+
+- Summary: …
+
+- Parlay A (2 legs): [Team X - spread], [Team Y - moneyline]; Combined odds: +250; Stake: $30 (5% bankroll); Est. payout: $105; Confidence: 4/5; Rationale: …
+
+- Parlay B (3 legs): …
+
+- Singles/Hedges: …
+
+- Bankroll allocation: …
+
+- Timing & watchlist: …
+
+- Responsible gambling: …
+
+
+
+Got it — you mean “crack the code” as in discover a repeatable, scalable playbook to drive distribution. Here’s a concise, practical process to do exactly that.
+
+
+
+1) Clarify the north star
+
+- Pick one leading metric (e.g., weekly active users, paid conversions, MRR). This is the signal you’ll optimize.
+
+
+
+2) Diagnose current funnel
+
+- Map funnel: awareness → acquisition → activation → retention → monetization.
+
+- Instrument events and cohorts for each step (track conversion rates, CAC, LTV, churn).
+
+
+
+3) Form hypotheses (repeatable format)
+
+- Use a simple hypothesis template: “If we [change X], then [metric Y] will improve by Z% in N days because [reason].”
+
+- Generate 10–20 hypotheses across acquisition, activation, retention, referral, and pricing.
+
+
+
+4) Prioritize experiments
+
+- Score by impact × confidence ÷ effort (ICE). Run highest-score experiments first.
+
+- Limit to 1–3 parallel experiments per team to preserve learning clarity.
+
+
+
+5) Run rapid, measurable experiments
+
+- Define success criteria and sample size before starting.
+
+- Use A/B tests or time-boxed pilots. Run long enough for statistical reliability or qualitative signal.
+
+- Track leading and lagging indicators.
+
+
+
+6) Capture learnings into a playbook
+
+- For every experiment record: hypothesis, implementation, results (metrics + qualitative), why it worked/didn’t, next steps.
+
+- Convert winners into standardized, repeatable workflows (creative templates, targeting recipes, onboarding copy, integration steps).
+
+
+
+7) Build scalable channels & levers
+
+- Focus on 2–3 highest ROI channels revealed by experiments. Treat others as test beds.
+
+- For each channel document: audience, creatives, funnel flow, targeting, bid strategy, CAC, expected LTV.
+
+- Automate repeatable tasks: onboarding sequences, email cadences, creative templates, integration scripts.
+
+
+
+8) Create compounding mechanics
+
+- Embed viral/referral loops, integrations, or content engines that scale without linear spend.
+
+- Bake retention into product so acquisition investments compound (e.g., collaboration features that invite others).
+
+
+
+9) Optimize unit economics
+
+- Ensure CAC < allowed payback period (e.g., < 6–12 months) and LTV/CAC target (e.g., > 3 for SaaS).
+
+- If not, optimize onboarding, pricing, monetization tiers, and highest-value cohorts.
+
+
+
+10) Scale with guardrails
+
+- As you scale spending, keep experiments running to avoid saturation.
+
+- Monitor cohort retention changes and channel decay; cap spend where ROI declines.
+
+- Institutionalize weekly growth reviews and a prioritized experiment backlog.
+
+
+
+11) Institutionalize learning & hiring
+
+- Create a central growth playbook and dashboard.
+
+- Hire or train for roles: growth PM, data analyst, creative lead, partnerships/BD.
+
+- Regular retrospectives to evolve playbook.
+
+
+
+Quick 90-day execution template
+
+- Weeks 1–2: Instrument funnel, define north star, generate/prioritize hypotheses.
+
+- Weeks 3–6: Run top 4 experiments (across acquisition + activation). Measure & document.
+
+- Weeks 7–10: Scale 1–2 winners, start building automation & compounding mechanics.
+
+- Weeks 11–12: Reassess unit economics, expand channel budget, hire/assign roles as needed.
+
+
+
+Below is the combined ready-to-paste prompt (web-focused Playwright automation + Scalability & Load Testing). Replace bracketed placeholders with your app-specific details.
+
+
+
+```
+
+Task: Perform a comprehensive pre-launch web application review and provide Playwright-based automated test artifacts plus scalability/load testing. Identify functional bugs, UX issues, user errors, performance problems, compatibility gaps, accessibility shortcomings, security vulnerabilities, and any launch/publishing risks. Provide reproducible test cases, severity classifications, recommended fixes, suggested acceptance criteria, Playwright automated test suites covering core web flows, and load-testing artifacts validating behavior under expected and peak user loads.
+
+
+
+App Overview:
+
+- Name: [APP_NAME]
+
+- Platform(s): Web
+
+- Version/Build: [VERSION / BUILD]
+
+- Short description: [ONE-SENTENCE DESCRIPTION]
+
+- Key features/modules: [FEATURE_1, FEATURE_2, ...]
+
+- Target audience: [WHO WILL USE IT]
+
+- Third-party integrations: [e.g., OAuth, Stripe, Firebase, analytics]
+
+- Privacy constraints / data sensitivity: [e.g., PHI, PII, children]
+
+
+
+Review Scope & Objectives:
+
+- Functional correctness, UX, performance, cross-browser compatibility, accessibility (WCAG 2.1 AA), security & privacy, error handling & observability, release/publishing readiness, and scalability under load.
+
+
+
+Testing Instructions:
+
+1. Create 6+ user personas and 20+ prioritized user journeys (happy + error paths) covering onboarding, main tasks, account mgmt, payments (if any), data entry, sync, and sign-out.
+
+2. Edge cases: invalid inputs, network loss/flakiness, concurrent edits, large uploads, rate-limiting, session expiry, permission-denied flows.
+
+3. Cross-browser/device matrix:
+
+   - Desktop: Chrome, Firefox, Safari, Edge (latest stable)
+
+   - Mobile Web (emulation): iPhone 12/SE, Pixel 4 (Playwright emulation)
+
+   - Responsive widths for common breakpoints
+
+4. Performance checks: cold start/load, screen transition latency, API response behavior, throttled network (3G).
+
+5. Accessibility: keyboard-only flows, screen reader emulation, color contrast, alt text, form labels, dynamic content announcements.
+
+6. Security/privacy: auth flows (login, password reset, MFA), token expiry/revocation, insecure storage, HTTPS, data export/delete, COPPA/GDPR/CCPA risks if applicable.
+
+7. Observability: logging, crash reporting, telemetry adequacy, simulated crash reporting verification.
+
+
+
+Playwright Automation Requirements:
+
+- Use Playwright (Node.js or Python) to implement automated suites for core web flows (onboarding, login, profile, primary feature, checkout if present, logout).
+
+- Tests must include:
+
+  - Happy path + 1–2 negative/error paths per core flow
+
+  - Form validation and input error handling
+
+  - Network emulation for offline/flaky behavior
+
+  - Cross-browser runs (Chromium, Firefox, WebKit)
+
+  - Mobile web emulation for at least two device profiles
+
+  - Accessibility checks using axe-core integration (report violations)
+
+  - Basic API checks via Playwright request API where applicable
+
+- Deliver:
+
+  - Runnable test repo with `package.json` (or Python equivalent), Playwright config, and README
+
+  - Example test files (≥8 scenarios) covering core flows
+
+  - Sample fixtures and secrets guidance (use env vars)
+
+  - CI config example (GitHub Actions/GitLab) with parallelization and trace collection
+
+  - Commands:
+
+    - Install: `npm ci`
+
+    - Install browsers: `npx playwright install`
+
+    - Run tests: `npx playwright test --project=chromium --reporter=list,html`
+
+    - Full matrix: `npx playwright test --project=all --repeat-each=1 --workers=4`
+
+  - Artifacts: HTML report, Playwright trace files for failures, screenshots, network logs
+
+
+
+Scalability & Load Testing (performance at scale):
+
+- Objective: Validate stability and performance under expected and peak loads; identify bottlenecks and breaking points; verify autoscaling and graceful degradation.
+
+- Environment: Run load tests against a staging environment identical to prod (no destructive tests in production). Provide test data and test accounts.
+
+- Tools: Use k6 (recommended) or Gatling/JMeter for HTTP/API load; use Artillery or k6-browser for browser-level load where needed. Do NOT rely on Playwright for heavy load testing.
+
+- Scenarios: Implement realistic user journeys from the prioritized test matrix (login, search, create/update, checkout, file upload, long-poll/WS, background sync). Include read-heavy and write-heavy mixes.
+
+- Load profiles:
+
+  - Baseline: steady-state at expected concurrent users [X].
+
+  - Ramp: 0 → peak [Y] concurrent users over [T] minutes.
+
+  - Peak/Spike: sudden jump to [Z] users for [S] minutes.
+
+  - Soak: sustained peak load for 1–8 hours to detect leaks/degradation.
+
+  - Stress: increase until failure to determine max sustainable throughput and recovery.
+
+- Key metrics & SLAs:
+
+  - p95/p99 response times for critical endpoints (target: ≤ [ms])
+
+  - Error rate: < [x]% under expected load
+
+  - Throughput (req/sec), CPU, memory, GC pauses, DB connections, I/O, network saturation
+
+  - Availability and time-to-recovery post-overload
+
+  - Autoscaling events and latencies
+
+- Observability & correlation: capture application logs, APM traces (Datadog/NewRelic/Zipkin), DB metrics, load generator metrics, network metrics, and cloud autoscaler events. Correlate timeline with resource metrics.
+
+- Data & side effects: ensure idempotent or synthetic endpoints; reset test data between runs.
+
+- Failure mode checks: graceful degradation, rate-limit responses, circuit breaker behavior, queuing/backpressure handling, retry/backoff logic, monitoring/alerting firing.
+
+- Deliverables:
+
+  - Load test scripts (k6/Gatling/JMeter) and run instructions
+
+  - CSV/HTML reports with p50/p95/p99, error rates, throughput
+
+  - Resource utilization graphs correlated to test timeline
+
+  - Identified bottlenecks with reproduction steps, root-cause hypothesis, and suggested mitigations (caching, DB indexing, pooling, query optimization, horizontal scaling, rate limiting, CDN, batching)
+
+  - Capacity recommendations: estimated instances, DB/cache sizing, autoscaling rules, max concurrent users supported
+
+  - Acceptance criteria: targets for response times, error rates, and infrastructure scaling behavior under expected peak
+
+- Constraints: avoid testing against shared production services (payment gateways) unless authorized; use sandbox/test modes for external integrations.
+
+
+
+Deliverables & Format:
+
+- Executive summary (1 paragraph): overall readiness and top 5 risks.
+
+- Findings list with for each item:
+
+  - ID, Title, Severity (Critical/High/Medium/Low), Affected components, Repro steps, Expected vs actual, Evidence (screenshots/logs/traces), Suggested fix, Acceptance criteria & verification test.
+
+- Playwright test repo (ZIP or Git link) with tests, config, fixtures, README, CI example.
+
+- Load test scripts (k6/Gatling/JMeter) and reports.
+
+- Test results (HTML), traces/screenshots/logs, and resource utilization graphs.
+
+- CSV of issues, test coverage matrix, cross-browser/device matrix.
+
+- Performance benchmarks and thresholds.
+
+- Accessibility checklist with WCAG references and remediation steps.
+
+- Security summary and remediation plan.
+
+- Release checklist (store/web deploy items, metadata, legal docs, feature flags, rollback plan, monitoring/alerting).
+
+- Prioritized remediation roadmap (must-fix before launch, post-launch, informational).
+
+- 1-page prioritized remediation plan and 5-minute stakeholder briefing script.
+
+
+
+Severity guidance:
+
+- Critical: crashes/data loss, major security/privacy risk, core flow broken.
+
+- High: major UX blocker/frequent user error causing task failure.
+
+- Medium: important but not release-blocking.
+
+- Low: minor UI/copy nits.
+
+
+
+Execution constraints & assumptions:
+
+- Use synthetic data if real data unavailable.
+
+- Respect rate limits and do non-destructive testing in production; obtain authorization for active security scans/pen-testing.
+
+- Run existing automated tests (unit/UI/API) if available and include results.
+
+- For load tests, do not target production services without explicit authorization and use sandbox credentials for external integrators.
+
+
+
+Acceptance criteria:
+
+- All core flows covered with reproducible steps.
+
+- Playwright test suite with ≥8 automated scenarios executed across Chromium/Firefox/WebKit and ≥2 mobile web emulations.
+
+- Load tests executed per profiles with reports and resource graphs; capacity recommendations provided.
+
+- At least one critical and five high/medium tests executed (or explicit none found).
+
+- Deliverables packaged as ZIP containing report, Playwright repo, load test scripts/reports, CSV issues, and raw evidence.
+
+
+
+Special notes:
+
+- Flag external dependencies blocking launch (payment onboarding, review approvals).
+
+- For ambiguous behavior propose default behavior and rationale.
+
+- Provide access requirements and a preferred delivery deadline.
+
+
+
+If understood, reply "ACK" and request missing environment access (test accounts, build artifacts, API keys, CI details, staging environment for load tests) and preferred delivery deadline.
+
+```
+
+
+
+Please create a fork for the users of the app so they have and make adjustments of tickets before submitting 
