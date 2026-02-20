@@ -1033,6 +1033,7 @@ Format your response clearly with sections and bullet points.`;
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),
         generatedAt: new Date().toISOString(),
+        disclaimer: "No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
     } catch (err) {
       logError(err instanceof Error ? err : new Error(String(err)), {
@@ -1777,6 +1778,59 @@ Format your response clearly with sections and bullet points.`;
     } catch (err) {
       res.status(500).json({ error: "Failed to settle bet" });
     }
+  });
+
+  const ticketOutcomes: Map<string, { ticketId: string; predictedProb: number; consensusProb: number; evPercent: number; actualOutcome: "win" | "loss" | "push" | "pending"; profitLoss: number; isFollowedByUser: boolean; settledAt?: string }> = new Map();
+
+  app.post("/api/tickets/:id/outcome", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    try {
+      const { actualOutcome, profitLoss, predictedProb, consensusProb, evPercent } = req.body;
+      if (!["win", "loss", "push"].includes(actualOutcome)) {
+        return res.status(400).json({ error: "Invalid outcome. Must be win, loss, or push" });
+      }
+      const record = {
+        ticketId: req.params.id,
+        predictedProb: predictedProb || 0,
+        consensusProb: consensusProb || 0,
+        evPercent: evPercent || 0,
+        actualOutcome,
+        profitLoss: profitLoss || 0,
+        isFollowedByUser: true,
+        settledAt: new Date().toISOString(),
+      };
+      ticketOutcomes.set(req.params.id, record);
+      res.json({ success: true, record });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to record outcome" });
+    }
+  });
+
+  app.get("/api/tickets/outcomes", async (req, res) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    const outcomes = Array.from(ticketOutcomes.values());
+    const totalBets = outcomes.length;
+    const wins = outcomes.filter(o => o.actualOutcome === "win").length;
+    const totalPL = outcomes.reduce((sum, o) => sum + o.profitLoss, 0);
+    const avgPredicted = outcomes.length > 0 ? outcomes.reduce((sum, o) => sum + o.predictedProb, 0) / outcomes.length : 0;
+    const actualHitRate = totalBets > 0 ? wins / totalBets : 0;
+    res.json({
+      outcomes,
+      summary: {
+        totalBets,
+        wins,
+        losses: outcomes.filter(o => o.actualOutcome === "loss").length,
+        pushes: outcomes.filter(o => o.actualOutcome === "push").length,
+        totalProfitLoss: Math.round(totalPL * 100) / 100,
+        hitRate: Math.round(actualHitRate * 1000) / 1000,
+        avgPredictedProb: Math.round(avgPredicted * 1000) / 1000,
+        calibrationGap: Math.round(Math.abs(actualHitRate - avgPredicted) * 1000) / 1000,
+      },
+    });
   });
 
   app.get("/api/bets/grading-stats", async (req, res) => {

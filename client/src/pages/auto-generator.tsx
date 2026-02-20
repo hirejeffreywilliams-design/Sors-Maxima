@@ -123,9 +123,9 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
             </p>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Expected Value</p>
-            <p className={`text-lg sm:text-xl font-bold ${ticket.expectedValue >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
-              {ticket.expectedValue >= 0 ? "+" : ""}{(ticket.expectedValue * 100).toFixed(1)}%
+            <p className="text-xs text-muted-foreground mb-1">EV%</p>
+            <p className={`text-lg sm:text-xl font-bold ${(ticket.evPercent ?? ticket.expectedValue * 100) >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
+              {(ticket.evPercent ?? ticket.expectedValue * 100) >= 0 ? "+" : ""}{(ticket.evPercent ?? (ticket.expectedValue * 100)).toFixed(1)}%
             </p>
           </div>
           <div className="text-center p-3 bg-muted/50 rounded-lg">
@@ -140,8 +140,37 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
               <Progress value={ticket.confidenceScore * 100} className="h-2 w-12 sm:w-16" />
               <span className="text-sm font-semibold">{(ticket.confidenceScore * 100).toFixed(0)}%</span>
             </div>
+            {ticket.confidenceTag && (
+              <Badge variant="outline" className="text-xs mt-1">{ticket.confidenceTag}</Badge>
+            )}
           </div>
         </div>
+
+        {(ticket.consensusProbability || ticket.modelDisagreement !== undefined) && (
+          <div className="grid grid-cols-3 gap-3">
+            <div className="text-center p-2 bg-muted/30 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Consensus Prob</p>
+              <p className="text-sm font-semibold" data-testid={`text-consensus-${ticket.id}`}>
+                {((ticket.consensusProbability ?? 0) * 100).toFixed(1)}%
+              </p>
+            </div>
+            <div className="text-center p-2 bg-muted/30 rounded-lg">
+              <p className="text-xs text-muted-foreground mb-1">Model Agreement</p>
+              <p className="text-sm font-semibold" data-testid={`text-disagreement-${ticket.id}`}>
+                {(100 - (ticket.modelDisagreement ?? 0) * 100).toFixed(0)}%
+              </p>
+            </div>
+            {ticket.marketMovement && (
+              <div className="text-center p-2 bg-muted/30 rounded-lg">
+                <p className="text-xs text-muted-foreground mb-1">Line Movement</p>
+                <p className={`text-sm font-semibold ${ticket.marketMovement.possibleInefficiency ? "text-yellow-500" : ""}`}>
+                  {ticket.marketMovement.direction === "up" ? "+" : ticket.marketMovement.direction === "down" ? "-" : ""}{ticket.marketMovement.percentChange}%
+                  {ticket.marketMovement.possibleInefficiency && " *"}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="grid grid-cols-2 gap-3 p-3 sm:p-4 bg-primary/5 rounded-lg border border-primary/20">
           <div>
@@ -211,6 +240,80 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
               </div>
             </div>
             
+            {ticket.sourceSignals && ticket.sourceSignals.length > 0 && (
+              <div className="pt-3 border-t space-y-2">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-yellow-500" />
+                  Source Signals
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {ticket.sourceSignals.map((signal, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs capitalize">{signal}</Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ticket.riskFactors && ticket.riskFactors.length > 0 && (
+              <div className="pt-3 border-t space-y-2">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  Risk Factors
+                </p>
+                <div className="space-y-1">
+                  {ticket.riskFactors.map((risk, idx) => (
+                    <p key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
+                      <Shield className="w-3 h-3 mt-0.5 text-red-400 shrink-0" />
+                      {risk}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ticket.calibrationInfo && (
+              <div className="pt-3 border-t space-y-2">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-cyan-500" />
+                  Calibration
+                </p>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 bg-muted/30 rounded">
+                    <span className="text-muted-foreground">Historical Hit Rate: </span>
+                    <span className="font-medium">{(ticket.calibrationInfo.historicalHitRate * 100).toFixed(1)}%</span>
+                  </div>
+                  <div className="p-2 bg-muted/30 rounded">
+                    <span className="text-muted-foreground">Sample Size: </span>
+                    <span className="font-medium">{ticket.calibrationInfo.sampleSize.toLocaleString()}</span>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">Market slice: {ticket.calibrationInfo.marketSlice}</p>
+              </div>
+            )}
+
+            {ticket.recommendedAlternatives && ticket.recommendedAlternatives.length > 0 && (
+              <div className="pt-3 border-t space-y-2">
+                <p className="text-sm font-medium flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-purple-500" />
+                  Alternative Plays
+                </p>
+                {ticket.recommendedAlternatives.map((alt, idx) => (
+                  <div key={idx} className="p-2 bg-muted/20 rounded-lg text-xs space-y-1">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="font-medium">{alt.selection}</span>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs">{alt.market}</Badge>
+                        <span className={alt.evPercent >= 0 ? "text-green-500" : "text-red-500"}>
+                          {alt.evPercent >= 0 ? "+" : ""}{alt.evPercent}% EV
+                        </span>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground">{alt.rationale}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="pt-3 border-t">
               <p className="text-sm font-medium mb-2 flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-blue-500" />
