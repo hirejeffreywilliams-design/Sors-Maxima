@@ -33,7 +33,13 @@ type AuditAction =
   | "session_revoked"
   | "consent_updated"
   | "intervention_created"
-  | "intervention_resolved";
+  | "intervention_resolved"
+  | "support_chat"
+  | "support_escalate"
+  | "support_close"
+  | "support_feedback"
+  | "support_admin_respond"
+  | "support_admin_resolve";
 
 class AuditTrail {
   private entries: AuditEntry[] = [];

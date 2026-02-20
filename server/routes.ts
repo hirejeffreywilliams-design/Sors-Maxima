@@ -29,6 +29,24 @@ import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCam
 import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
 import { getAcquisitionDashboard } from "./acquisitionAnalyticsEngine";
+import {
+  getDashboardOverview,
+  getFunnelAnalysis,
+  getRetentionAnalysis,
+  getRevenueAnalysis,
+  getErrorsAndPerformance,
+  getPaymentAnalysis,
+  getRealTimeHealth,
+  getSLOs,
+  getAlertRules as getAnalyticsAlertRules,
+  getAlertRule as getAnalyticsAlertRule,
+  updateAlertRule as updateAnalyticsAlertRule,
+  createAlertRule as createAnalyticsAlertRule,
+  getDataQualityChecks,
+  getIncidentPlaybooks,
+  getIncidentPlaybook,
+  getAnalyticsDashboardStats,
+} from "./analyticsDashboardEngine";
 import { z } from "zod";
 
 const abTestCreateSchema = z.object({
@@ -4664,10 +4682,12 @@ Follow these rules:
 
     try {
       auditTrail.record(userId, "support_chat", "support_ticket", ticket.id, {
-        intent: aiResult.intent,
-        confidence: aiResult.confidence,
-        autoResolved: ticket.autoResolved,
-        status: ticket.status
+        metadata: {
+          intent: aiResult.intent,
+          confidence: aiResult.confidence,
+          autoResolved: ticket.autoResolved,
+          status: ticket.status
+        }
       });
     } catch (_e) {}
 
@@ -4718,7 +4738,7 @@ Follow these rules:
     ticket.updatedAt = new Date().toISOString();
     try {
       auditTrail.record(req.session.userId!, "support_escalate", "support_ticket", ticket.id, {
-        reason: ticket.escalationReason
+        metadata: { reason: ticket.escalationReason }
       });
     } catch (_e) {}
     res.json({ success: true, ticket });
@@ -4735,7 +4755,7 @@ Follow these rules:
     ticket.status = "closed";
     ticket.updatedAt = new Date().toISOString();
     try {
-      auditTrail.record(req.session.userId!, "support_close", "support_ticket", ticket.id, {});
+      auditTrail.record(req.session.userId!, "support_close", "support_ticket", ticket.id);
     } catch (_e) {}
     res.json({ success: true });
   });
@@ -4751,8 +4771,7 @@ Follow these rules:
     const { helpful, comment } = req.body;
     try {
       auditTrail.record(req.session.userId!, "support_feedback", "support_ticket", ticket.id, {
-        helpful: !!helpful,
-        comment: comment || ""
+        metadata: { helpful: !!helpful, comment: comment || "" }
       });
     } catch (_e) {}
     res.json({ success: true });
@@ -4813,7 +4832,7 @@ Follow these rules:
     ticket.updatedAt = new Date().toISOString();
     try {
       auditTrail.record(req.session?.userId || "admin", "support_admin_respond", "support_ticket", ticket.id, {
-        admin: req.session?.username || "admin"
+        metadata: { admin: req.session?.username || "admin" }
       });
     } catch (_e) {}
     res.json(ticket);
@@ -4834,7 +4853,7 @@ Follow these rules:
     ticket.updatedAt = new Date().toISOString();
     try {
       auditTrail.record(req.session?.userId || "admin", "support_admin_resolve", "support_ticket", ticket.id, {
-        resolution: ticket.resolution
+        metadata: { resolution: ticket.resolution }
       });
     } catch (_e) {}
     res.json(ticket);
@@ -4880,6 +4899,90 @@ Follow these rules:
   });
 
   // ==================== END AI-POWERED SUPPORT TICKET & CHAT SYSTEM ====================
+
+  // ==================== ANALYTICS DASHBOARD ENGINE ====================
+
+  app.get("/api/admin/analytics/stats", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAnalyticsDashboardStats());
+  });
+
+  app.get("/api/admin/analytics/overview", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getDashboardOverview());
+  });
+
+  app.get("/api/admin/analytics/funnel", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getFunnelAnalysis());
+  });
+
+  app.get("/api/admin/analytics/retention", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getRetentionAnalysis());
+  });
+
+  app.get("/api/admin/analytics/revenue", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getRevenueAnalysis());
+  });
+
+  app.get("/api/admin/analytics/errors", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getErrorsAndPerformance());
+  });
+
+  app.get("/api/admin/analytics/payments", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getPaymentAnalysis());
+  });
+
+  app.get("/api/admin/analytics/health", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getRealTimeHealth());
+  });
+
+  app.get("/api/admin/analytics/slos", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getSLOs());
+  });
+
+  app.get("/api/admin/analytics/alerts", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAnalyticsAlertRules());
+  });
+
+  const alertRuleCreateSchema = z.object({
+    name: z.string().min(1).max(200),
+    metric: z.string().min(1),
+    condition: z.enum(["above", "below", "equals", "change_percent"]),
+    threshold: z.number(),
+    severity: z.enum(["critical", "high", "medium", "low"]),
+    timeWindow: z.string().min(1),
+    enabled: z.boolean().default(true),
+    escalation: z.string().default(""),
+  });
+
+  app.post("/api/admin/analytics/alerts", requireAdmin, (req: Request, res: Response) => {
+    const parsed = alertRuleCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const rule = createAnalyticsAlertRule(parsed.data);
+    res.status(201).json(rule);
+  });
+
+  app.patch("/api/admin/analytics/alerts/:id", requireAdmin, (req: Request, res: Response) => {
+    const parsed = alertRuleCreateSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const rule = updateAnalyticsAlertRule(req.params.id, parsed.data);
+    if (!rule) return res.status(404).json({ error: "Alert rule not found" });
+    res.json(rule);
+  });
+
+  app.get("/api/admin/analytics/data-quality", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getDataQualityChecks());
+  });
+
+  app.get("/api/admin/analytics/playbooks", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getIncidentPlaybooks());
+  });
+
+  app.get("/api/admin/analytics/playbooks/:id", requireAdmin, (req: Request, res: Response) => {
+    const playbook = getIncidentPlaybook(req.params.id);
+    if (!playbook) return res.status(404).json({ error: "Playbook not found" });
+    res.json(playbook);
+  });
+
+  // ==================== END ANALYTICS DASHBOARD ENGINE ====================
 
   return httpServer;
 }

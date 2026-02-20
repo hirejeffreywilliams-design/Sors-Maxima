@@ -416,6 +416,13 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/analytics-dashboard">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-analytics-dashboard">
+              <Activity className="w-4 h-4" />
+              Analytics Dashboard
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 
