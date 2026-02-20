@@ -307,6 +307,20 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/growth">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-growth">
+              <Activity className="w-4 h-4" />
+              Growth Analytics
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/feature-flags">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-feature-flags">
+              <CheckCircle className="w-4 h-4" />
+              Feature Flags
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 

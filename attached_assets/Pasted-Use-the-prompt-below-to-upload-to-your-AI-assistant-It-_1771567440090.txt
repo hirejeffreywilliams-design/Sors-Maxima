@@ -1,0 +1,79 @@
+Use the prompt below to upload to your AI assistant. It describes the feature, security rules, and expected outputs (code + tests + docs). Edit platform names, language, or storage choices as needed.
+
+
+
+Prompt to upload
+
+"Build a secure 'remember this device' authentication feature for my app (like Instagram). Requirements:
+
+- Goal: When a user logs in and verifies a device the first time, that device becomes trusted so the user stays logged in on that device without entering credentials again. If the user uses a different/untrusted device, require full login.
+
+- Platforms: web (browser) and mobile (iOS/Android). Backend: REST/JSON API. Tech stack: [replace with your stack, e.g., Node.js/Express + PostgreSQL + Redis]. Language: [replace with preferred language].
+
+- UX flow:
+
+  1. User logs in with credentials + optional 2FA.
+
+  2. After successful auth, prompt: 'Trust this device?' (opt-in checkbox). If user opts in, mark device as trusted.
+
+  3. On subsequent visits from that trusted device, bypass credential entry and issue a valid session.
+
+  4. On untrusted/new device require full login + 2FA.
+
+  5. Provide user controls: view list of trusted devices, revoke any device, global 'Log out of all devices'.
+
+- Security rules:
+
+  - Use secure, long-lived device tokens bound to device identifier (not just cookie). Store only hashed token server-side.
+
+  - Device token has expiration (e.g., 30–90 days) and is refreshable after successful session re-validation.
+
+  - Pair token with device fingerprint data (user agent, platform, optional secure enclave ID on mobile) and IP heuristics for anomaly detection but avoid over-reliance.
+
+  - Require re-auth (password + 2FA) for sensitive actions and when device fingerprint/IP changes significantly.
+
+  - Allow user to opt-out and revoke tokens; revoke should blacklist tokens until expiry.
+
+  - Store tokens in secure storage: mobile = Keychain/Keystore; web = HttpOnly, Secure SameSite cookies or IndexedDB with strong protection and CSRF defenses.
+
+  - Rate limit trust-device creation to prevent abuse.
+
+- Backend specs to deliver:
+
+  - Database schema for users, sessions, trusted_devices (store hashed_token, device_id, device_meta, user_id, created_at, last_seen_at, expires_at).
+
+  - API endpoints (examples): POST /auth/login, POST /auth/verify-2fa, POST /auth/remember-device, GET /user/devices, POST /user/devices/:id/revoke, POST /auth/logout-all.
+
+  - Token lifecycle logic: issuance, rotation, renewal, revocation, blacklist checking.
+
+  - Server-side verification algorithm that validates device token + fingerprint + IP risk score and falls back to full login when mismatched.
+
+  - Example client code snippets for web and mobile showing token storage and automatic sign-in flow.
+
+  - Unit/integration tests for common flows and attack scenarios (replay, stolen token, token reuse after revocation).
+
+  - Short README explaining assumptions, configuration (token TTLs), and security trade-offs.
+
+- Deliverables:
+
+  - Complete backend implementation (controllers, models, middleware).
+
+  - Minimal frontend/mobile examples demonstrating the opt-in flow and auto-login.
+
+  - Tests and README.
+
+- Constraints & priorities:
+
+  - Prioritize security over convenience; default to not trusting device unless user opts in.
+
+  - Make tokens revocable and server-authoritative (no purely client-only trust).
+
+  - Keep user privacy: store minimal fingerprint metadata and explain what is stored.
+
+
+
+If you need specifics about my stack or preferences, ask these questions: backend language/framework, database choice, desired token TTL, whether to require 2FA on first trust, and whether to support biometric/device-bound secure keys."
+
+
+
+End of prompt.

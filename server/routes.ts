@@ -2094,6 +2094,33 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  // === Admin Feature Flags Routes ===
+  app.get("/api/admin/feature-flags", requireAdmin, (_req, res) => {
+    try {
+      res.json(featureFlags.getAllFlags());
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch feature flags" });
+    }
+  });
+
+  app.post("/api/admin/feature-flags", requireAdmin, (req, res) => {
+    try {
+      const { id, name, description, enabled, rolloutPercentage } = req.body;
+      if (!id || !name) {
+        return res.status(400).json({ error: "ID and name are required" });
+      }
+      const flag = featureFlags.createFlag({ id, name, description: description || "", enabled, rolloutPercentage });
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "feature_flag", id, {
+        after: { enabled: flag.enabled, rolloutPercentage: flag.rolloutPercentage },
+        metadata: { action: "create" },
+        ip: getClientIp(req),
+      });
+      res.json({ success: true, flag });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to create feature flag" });
+    }
+  });
+
   // === Feature Flags Routes ===
   app.get("/api/feature-flags", (req, res) => {
     try {

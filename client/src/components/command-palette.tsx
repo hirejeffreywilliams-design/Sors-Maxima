@@ -71,6 +71,8 @@ const commandItems: CommandItem[] = [
   { label: "Marketing Tools", href: "/admin/marketing", icon: Megaphone, group: "Admin", keywords: ["marketing", "content", "growth"] },
   { label: "Security Center", href: "/admin/security", icon: Shield, group: "Admin", keywords: ["security", "errors", "ip", "blocking"] },
   { label: "Training Center", href: "/training", icon: GraduationCap, group: "Admin", keywords: ["training", "backtest", "algorithm"] },
+  { label: "Growth Analytics", href: "/admin/growth", icon: TrendingUp, group: "Admin", keywords: ["growth", "funnel", "cohort", "retention", "cac", "mrr"] },
+  { label: "Feature Flags", href: "/admin/feature-flags", icon: Settings, group: "Admin", keywords: ["flags", "ab test", "experiment", "rollout", "toggle"] },
 ];
 
 export function CommandPalette() {

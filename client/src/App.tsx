@@ -24,6 +24,9 @@ import AdminDashboard from "@/pages/admin";
 import AdminDiagnostics from "@/pages/admin-diagnostics";
 import AdminMarketing from "@/pages/admin-marketing";
 import AdminSecurity from "@/pages/admin-security";
+import AdminGrowth from "@/pages/admin-growth";
+import AdminFeatureFlags from "@/pages/admin-feature-flags";
+import LandingPage from "@/pages/landing";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
 import Analytics from "@/pages/analytics";
@@ -41,6 +44,7 @@ import { NotificationsPanel } from "@/components/notifications-panel";
 import { CookieConsentBanner } from "@/components/cookie-consent";
 import { CommandPalette, SearchButton } from "@/components/command-palette";
 import { FeedbackWidget } from "@/components/feedback-widget";
+import { useUTMCapture } from "@/lib/utm-tracker";
 
 function Router() {
   return (
@@ -60,6 +64,8 @@ function Router() {
       <Route path="/admin/diagnostics" component={AdminDiagnostics} />
       <Route path="/admin/marketing" component={AdminMarketing} />
       <Route path="/admin/security" component={AdminSecurity} />
+      <Route path="/admin/growth" component={AdminGrowth} />
+      <Route path="/admin/feature-flags" component={AdminFeatureFlags} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
@@ -393,8 +399,10 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login',
   });
+
+  useUTMCapture();
 
   useEffect(() => {
     if (!isLoading && authData !== undefined) {
@@ -441,7 +449,10 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
-    return <LoginPage onLogin={handleLogin} />;
+    if (location === '/login') {
+      return <LoginPage onLogin={handleLogin} />;
+    }
+    return <LandingPage />;
   }
 
   return <AuthenticatedApp onLogout={() => setIsAuthenticated(false)} authState={authState} />;
