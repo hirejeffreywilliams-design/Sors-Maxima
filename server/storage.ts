@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import type { ParlayLeg, EvaluationResult, Sport, GeneratedParlay } from "@shared/schema";
+import type { ParlayLeg, EvaluationResult, Sport, GeneratedParlay, User } from "@shared/schema";
 
 export interface IStorage {
   evaluateParlay(
@@ -19,6 +19,7 @@ export interface IStorage {
       sport: Sport;
     }
   ): Promise<GeneratedParlay[]>;
+  getUsers(): Promise<User[]>;
 }
 
 const DEFAULT_SIMULATIONS = 100000;
@@ -914,6 +915,10 @@ export class MemStorage implements IStorage {
     results.sort((a, b) => b.score - a.score);
 
     return results;
+  }
+
+  async getUsers(): Promise<User[]> {
+    return [];
   }
 }
 

@@ -2028,9 +2028,9 @@ Format your response clearly with sections and bullet points.`;
         id: `model_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
         version: version || `1.${modelRegistry.length + 1}.0`,
         createdAt: new Date().toISOString(),
-        factorWeights: weights,
+        factorWeights: weights as Record<string, number>,
         status: "archived" as const,
-        notes: notes || "Manual snapshot",
+        notes: (notes || "Manual snapshot") as string,
       };
       modelRegistry.push(snapshot);
 

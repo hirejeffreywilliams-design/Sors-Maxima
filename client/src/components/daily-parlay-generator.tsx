@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { 
   Trophy, Zap, TrendingUp, Clock, Star, Flame, Target, 
   DollarSign, BarChart3, Shield, RefreshCw, ChevronRight,
-  Sparkles, Crown, Timer, Atom
+  Sparkles, Crown, Timer, Atom, Brain, Check
 } from "lucide-react";
 import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 import { apiRequest } from "@/lib/queryClient";
