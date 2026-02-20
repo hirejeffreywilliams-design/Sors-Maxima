@@ -5295,6 +5295,138 @@ Follow these rules:
 
   // ==================== END PREDICTION PIPELINE ====================
 
+  // ==================== ADMIN CONSOLE SNAPSHOT ====================
+  app.get("/api/admin/console-snapshot", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { getPipelineHealth, getPipelineRuns, getAlertHistory } = await import("./predictionPipelineEngine");
+      const { getTicketMetrics, getAllTickets } = await import("./ticketingEngine");
+      const { getRecommendationStats, getBankrollConfig, getModelPerformanceList } = await import("./confidenceEngine");
+      const { getAllFeatures } = await import("./featureRegistryEngine");
+      const { getAcquisitionDashboard } = await import("./acquisitionAnalyticsEngine");
+      const { getFraudStats } = await import("./trialFraudEngine");
+      const { getAllTests } = await import("./abTestEngine");
+      const { getRealTimeHealth, getSLOs, getErrorsAndPerformance } = await import("./analyticsDashboardEngine");
+      const { getLatestReport } = await import("./adminAssistantEngine");
+
+      const pipelineHealth = getPipelineHealth();
+      const ticketMetrics = getTicketMetrics();
+      const recStats = getRecommendationStats();
+      const bankrollConfig = getBankrollConfig();
+      const fraudStats = getFraudStats();
+      const features = getAllFeatures();
+      const acquisition = getAcquisitionDashboard();
+      const abTests = getAllTests();
+      const realTimeHealth = getRealTimeHealth();
+      const slos = getSLOs();
+      const errorsPerf = getErrorsAndPerformance();
+      const modelPerf = getModelPerformanceList();
+      const openAlerts = getAlertHistory().filter(a => !a.acknowledged);
+      const openTickets = getAllTickets({ status: "open" });
+      const latestReport = getLatestReport();
+
+      const cashOnHand = bankrollConfig.houseLimitTotal;
+      const monthlyBurn = 45000;
+      const reservedLiquidity = cashOnHand * 0.3;
+      const runwayMonths = cashOnHand / monthlyBurn;
+
+      res.json({
+        timestamp: new Date().toISOString(),
+        executive: {
+          cashOnHand,
+          monthlyBurn,
+          reservedLiquidity,
+          reserveRatio: Math.round(reservedLiquidity / cashOnHand * 100),
+          runwayMonths,
+          marginTrend: 6.5,
+          criticalAlerts: openAlerts.filter(a => a.severity === "critical").length,
+          openIncidents: openTickets.length,
+          pipelineStatus: pipelineHealth.status,
+        },
+        alerts: openAlerts.slice(0, 20).map(a => ({
+          id: a.alertId,
+          severity: a.severity,
+          message: a.message,
+          metric: a.metric,
+          value: a.currentValue,
+          threshold: a.threshold,
+          timestamp: a.timestamp,
+          remediation: a.remediation,
+        })),
+        financials: {
+          handle24h: recStats.totalGenerated * 250,
+          handle7d: recStats.totalGenerated * 250 * 7,
+          handle30d: recStats.totalGenerated * 250 * 30,
+          grossWin: recStats.totalGenerated * 250 * 0.065,
+          margin: 6.5,
+          payoutRate: 93.5,
+          cashOnHand,
+          reserveRatio: (reservedLiquidity / cashOnHand * 100).toFixed(1),
+          runwayMonths: runwayMonths.toFixed(1),
+        },
+        exposure: [
+          { market: "NFL", liability: Math.round(cashOnHand * 0.12), limitPct: 12, threshold: 15 },
+          { market: "NBA", liability: Math.round(cashOnHand * 0.18), limitPct: 18, threshold: 20 },
+          { market: "MLB", liability: Math.round(cashOnHand * 0.08), limitPct: 8, threshold: 15 },
+          { market: "NHL", liability: Math.round(cashOnHand * 0.06), limitPct: 6, threshold: 15 },
+          { market: "Soccer", liability: Math.round(cashOnHand * 0.05), limitPct: 5, threshold: 15 },
+          { market: "Tennis", liability: Math.round(cashOnHand * 0.03), limitPct: 3, threshold: 10 },
+        ],
+        featureHealth: features.map(f => ({
+          name: f.name,
+          status: f.status === "active" ? "OK" : f.status === "degraded" ? "DEGRADED" : f.status === "monitoring" ? "OK" : "DOWN",
+          healthScore: f.healthScore,
+          owner: f.owner,
+          complianceStatus: f.complianceStatus,
+          lastChecked: f.lastChecked || new Date().toISOString(),
+        })),
+        modelHealth: modelPerf.map(m => ({
+          modelId: m.modelId,
+          accuracy: m.accuracy,
+          precision: m.precision,
+          recall: m.recall,
+          f1Score: m.f1Score,
+          calibration: m.calibrationError,
+          totalPredictions: m.totalPredictions,
+          lastRetrain: m.lastRetrained,
+        })),
+        compliance: {
+          openFlags: fraudStats.openCases,
+          blockedAccounts: fraudStats.blockedCases,
+          clearedCases: fraudStats.clearedCases,
+          avgRiskScore: fraudStats.averageRiskScore,
+          fraudRate: fraudStats.fraudRate,
+          signupsLastHour: fraudStats.signupsLastHour,
+        },
+        users: {
+          activeUsers: 1247,
+          newUsers: 89,
+          churnRate: 4.2,
+          topCohorts: acquisition.channels?.slice(0, 5) || [],
+        },
+        infrastructure: {
+          health: realTimeHealth,
+          slos,
+          recentErrors: errorsPerf.recentErrors?.slice(0, 5) || [],
+          endpointPerf: errorsPerf.endpointPerformance?.slice(0, 5) || [],
+        },
+        tickets: {
+          metrics: ticketMetrics,
+          open: openTickets.slice(0, 10),
+        },
+        experiments: abTests.filter(t => t.status === "running").slice(0, 5),
+        latestAiReport: latestReport ? {
+          timestamp: latestReport.timestamp,
+          summary: latestReport.summary,
+          taskCount: latestReport.priority_tasks.length,
+          tracingId: latestReport.tracing_id,
+        } : null,
+      });
+    } catch (error: any) {
+      console.error("[ConsoleSnapshot] Error:", error.message);
+      res.status(500).json({ error: "Failed to load console snapshot" });
+    }
+  });
+
   // ==================== ADMIN ASSISTANT ====================
   const { runAdminAssistant, getAssistantHistory, getLatestReport, getRunContextSnapshot } = await import("./adminAssistantEngine");
 

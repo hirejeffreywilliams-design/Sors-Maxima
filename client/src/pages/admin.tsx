@@ -4,6 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   AlertTriangle, 
   Shield, 
@@ -24,6 +35,7 @@ import {
   Brain,
   Megaphone,
   ChevronRight,
+  ChevronDown,
   Target,
   Database,
   ShieldAlert,
@@ -38,11 +50,16 @@ import {
   LayoutDashboard,
   Settings,
   TrendingUp,
+  TrendingDown,
   Zap,
   Eye,
   PanelLeftClose,
   PanelLeft,
   Bot,
+  Server,
+  Cpu,
+  Play,
+  X,
   type LucideIcon
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -187,7 +204,6 @@ const navCategories: NavCategory[] = [
 ];
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("users");
   const [searchTerm, setSearchTerm] = useState("");
   const [navSearch, setNavSearch] = useState("");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -199,9 +215,16 @@ export default function AdminDashboard() {
   const [selectedTier, setSelectedTier] = useState<'pro' | 'elite' | 'whale'>('pro');
   const [selectedError, setSelectedError] = useState<ErrorLog | null>(null);
   const [errorLevelFilter, setErrorLevelFilter] = useState<string>("all");
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [alertsExpanded, setAlertsExpanded] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [location] = useLocation();
+
+  const { data: snapshot, isLoading: snapshotLoading } = useQuery<any>({
+    queryKey: ["/api/admin/console-snapshot"],
+    refetchInterval: 30000,
+  });
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
@@ -242,6 +265,14 @@ export default function AdminDashboard() {
       ),
     })).filter(cat => cat.items.length > 0);
   }, [navSearch]);
+
+  const visibleAlerts = useMemo(() => {
+    if (!snapshot?.alerts) return [];
+    const severityOrder: Record<string, number> = { critical: 0, high: 0, warning: 1, medium: 1, info: 2, low: 3 };
+    return snapshot.alerts
+      .filter((a: any) => !dismissedAlerts.has(a.id))
+      .sort((a: any, b: any) => (severityOrder[a.severity] ?? 3) - (severityOrder[b.severity] ?? 3));
+  }, [snapshot?.alerts, dismissedAlerts]);
 
   const grantAccessMutation = useMutation({
     mutationFn: async ({ username, tier }: { username: string; tier: 'pro' | 'elite' | 'whale' }) => {
@@ -382,6 +413,24 @@ export default function AdminDashboard() {
 
   const toggleCategory = (id: string) => {
     setExpandedCategory(prev => prev === id ? null : id);
+  };
+
+  const getAlertBorderColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': case 'high': return 'border-l-red-500';
+      case 'warning': case 'medium': return 'border-l-orange-500';
+      case 'info': case 'low': return 'border-l-blue-500';
+      default: return 'border-l-muted-foreground';
+    }
+  };
+
+  const getFeatureStatusBadge = (status: string) => {
+    switch (status) {
+      case 'OK': return <Badge variant="default" className="bg-green-600 text-white no-default-hover-elevate no-default-active-elevate">OK</Badge>;
+      case 'DEGRADED': return <Badge variant="default" className="bg-yellow-500 text-black no-default-hover-elevate no-default-active-elevate">DEGRADED</Badge>;
+      case 'DOWN': return <Badge variant="destructive">DOWN</Badge>;
+      default: return <Badge variant="outline">{status}</Badge>;
+    }
   };
 
   return (
@@ -540,14 +589,14 @@ export default function AdminDashboard() {
                 <span className="text-sm font-semibold">Admin</span>
               </div>
               <h1 className="text-sm font-semibold hidden sm:block" data-testid="heading-admin">
-                Platform Management
+                Operations Command Center
               </h1>
             </div>
             <div className="flex items-center gap-2">
-              {highRiskCount > 0 && (
-                <Badge variant="destructive" className="text-xs" data-testid="badge-risk-alert">
+              {snapshot?.executive?.criticalAlerts > 0 && (
+                <Badge variant="destructive" className="text-xs" data-testid="badge-critical-alerts">
                   <AlertTriangle className="h-3 w-3 mr-1" />
-                  {highRiskCount} High Risk
+                  {snapshot.executive.criticalAlerts} Critical
                 </Badge>
               )}
               {(errorStats?.last24Hours || 0) > 0 && (
@@ -571,131 +620,776 @@ export default function AdminDashboard() {
               ))}
             </div>
           </div>
-
-          <div className="flex items-center h-auto gap-0 -mb-px">
-            {[
-              { value: "users", label: "Users", icon: Users },
-              { value: "subscriptions", label: "Subs", icon: Crown },
-              { value: "fraud", label: "Fraud", icon: AlertTriangle },
-              { value: "errors", label: "Errors", icon: Bug },
-              { value: "flags", label: "Flags", icon: Eye },
-              { value: "audit", label: "Audit", icon: Shield },
-            ].map((tab) => {
-              const isActive = activeTab === tab.value;
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
-                    isActive 
-                      ? 'border-primary text-primary' 
-                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                  }`}
-                  data-testid={`tab-${tab.value}`}
-                >
-                  <tab.icon className="h-3.5 w-3.5" />
-                  <span className="hidden xs:inline">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        <div className="p-4 sm:p-6">
-          {activeTab === "users" && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="px-4 sm:px-6 pb-3">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
-                      <CardDescription className="text-sm">{users.length} registered users</CardDescription>
-                    </div>
-                    <Badge variant="outline" className="text-xs" data-testid="stat-total-users">
-                      {users.length} total
+        <div className="p-4 sm:p-6 space-y-6">
+          {snapshotLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i}>
+                  <CardContent className="p-4">
+                    <Skeleton className="h-3 w-16 mb-2" />
+                    <Skeleton className="h-7 w-12" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : snapshot?.executive && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" data-testid="executive-snapshot-row">
+              <Card data-testid="card-runway">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Runway</p>
+                  <p className="text-2xl font-bold mt-1" data-testid="stat-runway">
+                    {snapshot.executive.runwayMonths?.toFixed(1)}<span className="text-sm font-normal text-muted-foreground ml-1">mo</span>
+                  </p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-margin">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Margin</p>
+                  <p className="text-2xl font-bold mt-1" data-testid="stat-margin">
+                    {snapshot.executive.marginTrend?.toFixed(1)}<span className="text-sm font-normal text-muted-foreground ml-1">%</span>
+                  </p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-reserve">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Reserve Ratio</p>
+                  <p className="text-2xl font-bold mt-1" data-testid="stat-reserve">
+                    {snapshot.executive.reserveRatio?.toFixed(1)}<span className="text-sm font-normal text-muted-foreground ml-1">%</span>
+                  </p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-critical-alerts">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Critical Alerts</p>
+                  <p className={`text-2xl font-bold mt-1 ${snapshot.executive.criticalAlerts > 0 ? 'text-red-500' : ''}`} data-testid="stat-critical-alerts">
+                    {snapshot.executive.criticalAlerts}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-incidents">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Open Incidents</p>
+                  <p className={`text-2xl font-bold mt-1 ${snapshot.executive.openIncidents > 0 ? 'text-orange-500' : ''}`} data-testid="stat-incidents">
+                    {snapshot.executive.openIncidents}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card data-testid="card-pipeline">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Pipeline</p>
+                  <div className="mt-2">
+                    <Badge
+                      variant={
+                        snapshot.executive.pipelineStatus === 'healthy' ? 'default' :
+                        snapshot.executive.pipelineStatus === 'degraded' ? 'secondary' : 'destructive'
+                      }
+                      data-testid="stat-pipeline"
+                    >
+                      {snapshot.executive.pipelineStatus || 'unknown'}
                     </Badge>
                   </div>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6">
-                  <div className="mb-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search users by name or email..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                        data-testid="input-search-users"
-                      />
-                    </div>
-                  </div>
-
-                  {usersLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Loading users...</div>
-                  ) : filteredUsers.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">No users found</div>
-                  ) : (
-                    <div className="space-y-2">
-                      {filteredUsers.map((user) => (
-                        <div 
-                          key={user.id} 
-                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-md"
-                          data-testid={`row-user-${user.id}`}
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-medium truncate">{user.username}</span>
-                              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                                {user.role}
-                              </Badge>
-                              {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
-                            </div>
-                            <div className="text-sm text-muted-foreground truncate">{user.email}</div>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              {getRiskBadge(user.riskScore)}
-                              <Badge variant="outline" className="text-xs">{user.subscriptionTier}</Badge>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 self-end sm:self-center">
-                            {user.role !== 'admin' && (
-                              user.isBanned ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => unbanMutation.mutate(user.id)}
-                                  disabled={unbanMutation.isPending}
-                                  data-testid={`button-unban-${user.id}`}
-                                >
-                                  <CheckCircle className="h-4 w-4 mr-1" />
-                                  Unban
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => {
-                                    setSelectedUser(user);
-                                    setBanDialogOpen(true);
-                                  }}
-                                  data-testid={`button-ban-${user.id}`}
-                                >
-                                  <Ban className="h-4 w-4 mr-1" />
-                                  Ban
-                                </Button>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </div>
           )}
 
-          {activeTab === "subscriptions" && (
-            <div className="space-y-4">
+          {visibleAlerts.length > 0 && (
+            <div data-testid="alerts-section">
+              <button
+                onClick={() => setAlertsExpanded(!alertsExpanded)}
+                className="flex items-center gap-2 text-sm font-semibold mb-3"
+                data-testid="button-toggle-alerts"
+              >
+                {alertsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                Active Alerts ({visibleAlerts.length})
+              </button>
+              {alertsExpanded && (
+                <div className="space-y-2">
+                  {visibleAlerts.map((alert: any) => (
+                    <div
+                      key={alert.id}
+                      className={`border-l-4 ${getAlertBorderColor(alert.severity)} pl-3 py-3 flex items-start justify-between gap-3`}
+                      data-testid={`alert-${alert.id}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <Badge variant={['critical','high'].includes(alert.severity) ? 'destructive' : 'secondary'}>
+                            {alert.severity}
+                          </Badge>
+                          <span className="text-sm font-medium">{alert.message}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {alert.metric}: {alert.value} (threshold: {alert.threshold})
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Remediation: {alert.remediation}
+                        </p>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setDismissedAlerts(prev => { const next = new Set(Array.from(prev)); next.add(alert.id); return next; })}
+                        data-testid={`button-dismiss-alert-${alert.id}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {!snapshotLoading && snapshot && (
+            snapshot.latestAiReport ? (
+              <Card data-testid="card-ai-report">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      <Bot className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold">AI Operations Report</p>
+                        <ul className="mt-1 space-y-1">
+                          {snapshot.latestAiReport.summary.slice(0, 3).map((s: string, i: number) => (
+                            <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
+                              <CheckCircle className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                              <span>{s}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {snapshot.latestAiReport.taskCount} tasks &middot; {new Date(snapshot.latestAiReport.timestamp).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Link href="/admin/assistant">
+                      <Button size="sm" variant="outline" data-testid="button-view-report">
+                        View Full Report
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-dashed" data-testid="card-ai-no-report">
+                <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-3">
+                    <Bot className="h-5 w-5 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">No AI analysis available. Run the assistant for operational insights.</p>
+                  </div>
+                  <Link href="/admin/assistant">
+                    <Button size="sm" data-testid="button-run-ai">
+                      <Play className="h-4 w-4 mr-1" />Run AI Analysis
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            )
+          )}
+
+          <Tabs defaultValue="financials" data-testid="ops-tabs">
+            <ScrollArea className="w-full">
+              <TabsList className="flex-wrap" data-testid="tabs-list">
+                <TabsTrigger value="financials" data-testid="tab-financials">
+                  <DollarSign className="h-3.5 w-3.5 mr-1" />Financials
+                </TabsTrigger>
+                <TabsTrigger value="risk" data-testid="tab-risk">
+                  <AlertTriangle className="h-3.5 w-3.5 mr-1" />Risk
+                </TabsTrigger>
+                <TabsTrigger value="features" data-testid="tab-features">
+                  <Activity className="h-3.5 w-3.5 mr-1" />Features
+                </TabsTrigger>
+                <TabsTrigger value="models" data-testid="tab-models">
+                  <Brain className="h-3.5 w-3.5 mr-1" />Models
+                </TabsTrigger>
+                <TabsTrigger value="compliance" data-testid="tab-compliance">
+                  <ShieldAlert className="h-3.5 w-3.5 mr-1" />Compliance
+                </TabsTrigger>
+                <TabsTrigger value="ops" data-testid="tab-ops">
+                  <Server className="h-3.5 w-3.5 mr-1" />Ops
+                </TabsTrigger>
+                <TabsTrigger value="users" data-testid="tab-users">
+                  <Users className="h-3.5 w-3.5 mr-1" />Users
+                </TabsTrigger>
+                <TabsTrigger value="manage" data-testid="tab-manage">
+                  <Settings className="h-3.5 w-3.5 mr-1" />Manage
+                </TabsTrigger>
+              </TabsList>
+            </ScrollArea>
+
+            <TabsContent value="financials" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </div>
+              ) : snapshot?.financials ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <Card data-testid="card-handle-24h">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Handle (24h)</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-24h">
+                          ${snapshot.financials.handle24h?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-handle-7d">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Handle (7d)</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-7d">
+                          ${snapshot.financials.handle7d?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-handle-30d">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Handle (30d)</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-30d">
+                          ${snapshot.financials.handle30d?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-gross-win">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Gross Win</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-gross-win">
+                          ${snapshot.financials.grossWin?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-margin">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Margin</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-fin-margin">
+                          {snapshot.financials.margin?.toFixed(1)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-payout-rate">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Payout Rate</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-payout-rate">
+                          {snapshot.financials.payoutRate?.toFixed(1)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-cash">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Cash on Hand</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-cash">
+                          ${snapshot.financials.cashOnHand?.toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-fin-reserve">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Reserve Ratio</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-fin-reserve">
+                          {snapshot.financials.reserveRatio}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <Card data-testid="card-runway-detail">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div>
+                          <p className="text-sm font-medium">Runway</p>
+                          <p className="text-xs text-muted-foreground">Current cash position vs monthly burn</p>
+                        </div>
+                        <p className="text-2xl font-bold" data-testid="stat-fin-runway">
+                          {snapshot.financials.runwayMonths}<span className="text-sm font-normal text-muted-foreground ml-1">months</span>
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No financial data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="risk" className="space-y-4">
+              {snapshotLoading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : snapshot?.exposure?.length > 0 ? (
+                <Card data-testid="card-exposure-table">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Market Exposure</CardTitle>
+                    <CardDescription>Current liability across markets</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Market</TableHead>
+                            <TableHead className="text-right">Liability</TableHead>
+                            <TableHead className="text-right">Limit %</TableHead>
+                            <TableHead className="text-right">Threshold %</TableHead>
+                            <TableHead>Proximity</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {snapshot.exposure.map((row: any, i: number) => {
+                            const proximity = row.threshold > 0 ? (row.limitPct / row.threshold) * 100 : 0;
+                            const isNearThreshold = proximity >= 80;
+                            return (
+                              <TableRow
+                                key={i}
+                                className={isNearThreshold ? 'bg-red-500/5' : ''}
+                                data-testid={`row-exposure-${i}`}
+                              >
+                                <TableCell className="font-medium">{row.market}</TableCell>
+                                <TableCell className="text-right font-mono">${row.liability?.toLocaleString()}</TableCell>
+                                <TableCell className="text-right font-mono">{row.limitPct?.toFixed(1)}%</TableCell>
+                                <TableCell className="text-right font-mono">{row.threshold?.toFixed(1)}%</TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Progress
+                                      value={Math.min(proximity, 100)}
+                                      className={`h-2 w-24 ${isNearThreshold ? '[&>div]:bg-red-500' : ''}`}
+                                      data-testid={`progress-exposure-${i}`}
+                                    />
+                                    <span className={`text-xs font-mono ${isNearThreshold ? 'text-red-500' : 'text-muted-foreground'}`}>
+                                      {proximity.toFixed(0)}%
+                                    </span>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No exposure data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="features" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-32 w-full" />
+                  ))}
+                </div>
+              ) : snapshot?.featureHealth?.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {snapshot.featureHealth.map((feature: any, i: number) => (
+                    <Card key={i} data-testid={`card-feature-${i}`}>
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <p className="text-sm font-medium truncate">{feature.name}</p>
+                          {getFeatureStatusBadge(feature.status)}
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">Health</span>
+                            <span className="font-mono">{feature.healthScore}%</span>
+                          </div>
+                          <Progress value={feature.healthScore} className="h-1.5" data-testid={`progress-health-${i}`} />
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground gap-2 flex-wrap">
+                          <span>Owner: {feature.owner}</span>
+                          <Badge variant="outline" className="text-[10px]">{feature.complianceStatus}</Badge>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          Checked: {new Date(feature.lastChecked).toLocaleString()}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No feature health data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="models" className="space-y-4">
+              {snapshotLoading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : snapshot?.modelHealth?.length > 0 ? (
+                <Card data-testid="card-models-table">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">Model Performance</CardTitle>
+                    <CardDescription>Accuracy, calibration, and retrain status</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Model ID</TableHead>
+                            <TableHead className="text-right">Accuracy</TableHead>
+                            <TableHead className="text-right">Precision</TableHead>
+                            <TableHead className="text-right">Recall</TableHead>
+                            <TableHead className="text-right">F1</TableHead>
+                            <TableHead className="text-right">Calibration</TableHead>
+                            <TableHead className="text-right">Predictions</TableHead>
+                            <TableHead>Last Retrain</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {snapshot.modelHealth.map((model: any, i: number) => (
+                            <TableRow key={i} data-testid={`row-model-${i}`}>
+                              <TableCell className="font-medium font-mono text-xs">{model.modelId}</TableCell>
+                              <TableCell className="text-right font-mono">{(model.accuracy * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="text-right font-mono">{(model.precision * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="text-right font-mono">{(model.recall * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="text-right font-mono">{(model.f1Score * 100).toFixed(1)}%</TableCell>
+                              <TableCell className="text-right font-mono">{model.calibration?.toFixed(3)}</TableCell>
+                              <TableCell className="text-right font-mono">{model.totalPredictions?.toLocaleString()}</TableCell>
+                              <TableCell className="text-xs text-muted-foreground">
+                                {new Date(model.lastRetrain).toLocaleDateString()}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No model health data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="compliance" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </div>
+              ) : snapshot?.compliance ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <Card data-testid="card-open-flags">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Open Flags</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-open-flags">
+                          {snapshot.compliance.openFlags}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-blocked">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Blocked Accounts</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-blocked">
+                          {snapshot.compliance.blockedAccounts}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-cleared">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Cleared Cases</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-cleared">
+                          {snapshot.compliance.clearedCases}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-avg-risk">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Avg Risk Score</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-avg-risk">
+                          {snapshot.compliance.avgRiskScore?.toFixed(1)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-fraud-rate">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Fraud Rate</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-fraud-rate">
+                          {snapshot.compliance.fraudRate?.toFixed(2)}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-signups">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Signups/Hour</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-signups">
+                          {snapshot.compliance.signupsLastHour}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  <Link href="/admin/fraud">
+                    <Button variant="outline" size="sm" data-testid="button-full-fraud">
+                      <ShieldAlert className="h-4 w-4 mr-1" />View Full Fraud Dashboard
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No compliance data available</div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="ops" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-24 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {snapshot?.infrastructure?.health && (
+                    <Card data-testid="card-infra-health">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Cpu className="h-4 w-4" />Infrastructure Health
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {Object.entries(snapshot.infrastructure.health).map(([key, val]: [string, any]) => (
+                            <div key={key} data-testid={`stat-infra-${key}`}>
+                              <p className="text-xs text-muted-foreground capitalize">{key.replace(/_/g, ' ')}</p>
+                              <p className="text-lg font-bold mt-1">
+                                {typeof val === 'number' ? (val > 1 ? val.toFixed(0) : `${(val * 100).toFixed(1)}%`) : String(val)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {snapshot?.infrastructure?.slos?.length > 0 && (
+                    <Card data-testid="card-slos">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Target className="h-4 w-4" />SLO Status
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                          {snapshot.infrastructure.slos.map((slo: any, i: number) => (
+                            <div key={i} className="p-3 border rounded-md" data-testid={`slo-${i}`}>
+                              <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                                <p className="text-sm font-medium truncate">{slo.name || slo.metric || `SLO ${i + 1}`}</p>
+                                <Badge variant={slo.status === 'met' || slo.status === 'pass' ? 'default' : 'destructive'}>
+                                  {slo.status}
+                                </Badge>
+                              </div>
+                              {slo.current !== undefined && (
+                                <div className="space-y-1">
+                                  <Progress value={Math.min(slo.current, 100)} className="h-1.5" />
+                                  <p className="text-xs text-muted-foreground">
+                                    Current: {slo.current}% / Target: {slo.target}%
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {snapshot?.infrastructure?.recentErrors?.length > 0 && (
+                    <Card data-testid="card-recent-errors">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Bug className="h-4 w-4" />Recent Errors
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          {snapshot.infrastructure.recentErrors.slice(0, 10).map((err: any, i: number) => (
+                            <div key={i} className="flex items-start gap-3 p-2 border rounded-md" data-testid={`error-item-${i}`}>
+                              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm truncate">{err.message || err.error || String(err)}</p>
+                                {err.timestamp && (
+                                  <p className="text-xs text-muted-foreground">{new Date(err.timestamp).toLocaleString()}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {snapshot?.infrastructure?.endpointPerf?.length > 0 && (
+                    <Card data-testid="card-endpoint-perf">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Endpoint Performance</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Endpoint</TableHead>
+                                <TableHead className="text-right">Avg Latency</TableHead>
+                                <TableHead className="text-right">P95</TableHead>
+                                <TableHead className="text-right">Requests</TableHead>
+                                <TableHead className="text-right">Error Rate</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {snapshot.infrastructure.endpointPerf.map((ep: any, i: number) => (
+                                <TableRow key={i} data-testid={`row-endpoint-${i}`}>
+                                  <TableCell className="font-mono text-xs">{ep.endpoint || ep.path}</TableCell>
+                                  <TableCell className="text-right font-mono">{ep.avgLatency || ep.avg}ms</TableCell>
+                                  <TableCell className="text-right font-mono">{ep.p95 || ep.p95Latency}ms</TableCell>
+                                  <TableCell className="text-right font-mono">{ep.requests?.toLocaleString() || ep.count}</TableCell>
+                                  <TableCell className="text-right font-mono">{ep.errorRate?.toFixed(2) || 0}%</TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {!snapshot?.infrastructure && (
+                    <div className="text-center py-12 text-muted-foreground">No infrastructure data available</div>
+                  )}
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="users" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="grid grid-cols-3 gap-3">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {snapshot?.users && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <Card data-testid="card-active-users">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground">Active Users</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-active-users">
+                            {snapshot.users.activeUsers?.toLocaleString()}
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card data-testid="card-new-users">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground">New Users</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-new-users">
+                            {snapshot.users.newUsers?.toLocaleString()}
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card data-testid="card-churn">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground">Churn Rate</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-churn">
+                            {snapshot.users.churnRate?.toFixed(1)}%
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  <Card data-testid="card-user-mgmt">
+                    <CardHeader className="px-4 sm:px-6 pb-3">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div>
+                          <CardTitle className="text-base">User Management</CardTitle>
+                          <CardDescription className="text-sm">{users.length} registered users</CardDescription>
+                        </div>
+                        <Badge variant="outline" className="text-xs" data-testid="stat-total-users">
+                          {users.length} total
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="px-4 sm:px-6">
+                      <div className="mb-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search users by name or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                            data-testid="input-search-users"
+                          />
+                        </div>
+                      </div>
+
+                      {usersLoading ? (
+                        <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+                      ) : filteredUsers.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">No users found</div>
+                      ) : (
+                        <div className="space-y-2">
+                          {filteredUsers.map((user) => (
+                            <div 
+                              key={user.id} 
+                              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-md"
+                              data-testid={`row-user-${user.id}`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="font-medium truncate">{user.username}</span>
+                                  <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                                    {user.role}
+                                  </Badge>
+                                  {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
+                                </div>
+                                <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                  {getRiskBadge(user.riskScore)}
+                                  <Badge variant="outline" className="text-xs">{user.subscriptionTier}</Badge>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 self-end sm:self-center">
+                                {user.role !== 'admin' && (
+                                  user.isBanned ? (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => unbanMutation.mutate(user.id)}
+                                      disabled={unbanMutation.isPending}
+                                      data-testid={`button-unban-${user.id}`}
+                                    >
+                                      <CheckCircle className="h-4 w-4 mr-1" />
+                                      Unban
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        setSelectedUser(user);
+                                        setBanDialogOpen(true);
+                                      }}
+                                      data-testid={`button-ban-${user.id}`}
+                                    >
+                                      <Ban className="h-4 w-4 mr-1" />
+                                      Ban
+                                    </Button>
+                                  )
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </>
+              )}
+            </TabsContent>
+
+            <TabsContent value="manage" className="space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Card>
                   <CardContent className="p-3 sm:p-4">
@@ -722,7 +1416,7 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
-              
+
               <Card>
                 <CardHeader className="px-4 sm:px-6">
                   <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -800,177 +1494,11 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
-            </div>
-          )}
 
-          {activeTab === "fraud" && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="text-base sm:text-lg">Fraud Alerts</CardTitle>
-                  <CardDescription className="text-sm">Suspicious activity detected by the system</CardDescription>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6">
-                  {alertsLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Loading alerts...</div>
-                  ) : fraudAlerts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p>No fraud alerts detected</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {fraudAlerts.map((alert, index) => (
-                        <div 
-                          key={index} 
-                          className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 sm:p-4 border rounded-md"
-                          data-testid={`row-fraud-alert-${index}`}
-                        >
-                          <div className={`p-2 rounded-md ${getSeverityColor(alert.severity)} shrink-0 self-start`}>
-                            <AlertTriangle className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <Badge className={getSeverityColor(alert.severity)}>
-                                {alert.severity?.toUpperCase() || 'UNKNOWN'}
-                              </Badge>
-                              <span className="font-medium text-sm">{alert.type.replace(/_/g, ' ')}</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground break-words">{alert.details}</p>
-                            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              {new Date(alert.timestamp).toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "errors" && (
-            <div className="space-y-4">
-              <Card>
-                <CardHeader className="px-4 sm:px-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div>
-                      <CardTitle className="text-base sm:text-lg">Error Logs</CardTitle>
-                      <CardDescription className="text-sm">
-                        {errorStats?.total || 0} total entries
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => refetchErrors()}
-                        data-testid="button-refresh-errors"
-                      >
-                        <RefreshCw className="h-4 w-4 mr-1" />
-                        Refresh
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => testErrorMutation.mutate()}
-                        disabled={testErrorMutation.isPending}
-                        data-testid="button-test-error"
-                      >
-                        <Bug className="h-4 w-4 mr-1" />
-                        Test
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => clearErrorsMutation.mutate()}
-                        disabled={clearErrorsMutation.isPending || errorLogs.length === 0}
-                        data-testid="button-clear-errors"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Clear
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="px-4 sm:px-6">
-                  <div className="flex items-center gap-2 mb-4 flex-wrap">
-                    <span className="text-sm text-muted-foreground">Filter:</span>
-                    {[
-                      { value: 'all', label: 'All', count: errorStats?.total },
-                      { value: 'error', label: 'Errors', count: errorStats?.errors },
-                      { value: 'warn', label: 'Warnings', count: errorStats?.warnings },
-                      { value: 'info', label: 'Info', count: errorStats?.info }
-                    ].map(filter => (
-                      <Button
-                        key={filter.value}
-                        size="sm"
-                        variant={errorLevelFilter === filter.value ? "default" : "outline"}
-                        onClick={() => setErrorLevelFilter(filter.value)}
-                        data-testid={`button-filter-${filter.value}`}
-                      >
-                        {filter.label} ({filter.count || 0})
-                      </Button>
-                    ))}
-                  </div>
-                  
-                  {errorsLoading ? (
-                    <div className="text-center py-8 text-muted-foreground">Loading error logs...</div>
-                  ) : errorLogs.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                      <p>No errors logged{errorLevelFilter !== 'all' ? ` for level: ${errorLevelFilter}` : ''}</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {errorLogs.map((log) => (
-                        <div 
-                          key={log.id} 
-                          className="flex flex-col gap-2 p-3 sm:p-4 border rounded-md cursor-pointer transition-colors hover-elevate"
-                          onClick={() => setSelectedError(log)}
-                          data-testid={`error-log-${log.id}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            {getLogLevelIcon(log.level)}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 flex-wrap mb-1">
-                                {getLogLevelBadge(log.level)}
-                                <code className="text-xs text-muted-foreground">{log.id}</code>
-                              </div>
-                              <p className="text-sm font-medium break-words">{log.message}</p>
-                              {log.path && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {log.method} {log.path}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground pl-7">
-                            <Clock className="h-3 w-3" />
-                            {new Date(log.timestamp).toLocaleString()}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === "flags" && (
-            <div className="space-y-4">
               <FeatureFlagsPanel />
-            </div>
-          )}
-
-          {activeTab === "audit" && (
-            <div className="space-y-4">
               <AuditTrailPanel />
-            </div>
-          )}
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
