@@ -10,17 +10,17 @@ import { Badge } from "@/components/ui/badge";
 export default function Rewards() {
   return (
     <div className="min-h-full">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 px-2 sm:px-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
               Rewards & Practice
-              <Badge variant="outline" className="gap-1 bg-yellow-500/10 border-yellow-500/30 text-yellow-500">
-                <Trophy className="w-3 h-3" />
+              <Badge variant="outline" className="gap-1 bg-yellow-500/10 border-yellow-500/30 text-yellow-500 h-5 text-[10px]">
+                <Trophy className="w-2.5 h-2.5" />
                 Gamification
               </Badge>
             </h1>
-            <p className="text-sm text-muted-foreground">Earn achievements, complete challenges, and practice risk-free</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Earn achievements and practice risk-free</p>
           </div>
         </header>
 

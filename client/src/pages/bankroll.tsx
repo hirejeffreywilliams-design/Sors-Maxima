@@ -10,16 +10,16 @@ import { BetTracker } from "@/components/bet-tracker";
 export default function Bankroll() {
   return (
     <div className="min-h-full">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
+      <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <header className="px-2 sm:px-0">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
             Finance
-            <Badge variant="outline" className="gap-1 bg-green-500/10 border-green-500/30 text-green-500">
-              <Wallet className="w-3 h-3" />
+            <Badge variant="outline" className="gap-1 bg-green-500/10 border-green-500/30 text-green-500 h-5 text-[10px]">
+              <Wallet className="w-2.5 h-2.5" />
               Tracking
             </Badge>
           </h1>
-          <p className="text-sm text-muted-foreground">Track bets, balances, performance, and tax reports</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">Track bets, balances, and performance</p>
         </header>
 
         <Tabs defaultValue="history" className="space-y-6">

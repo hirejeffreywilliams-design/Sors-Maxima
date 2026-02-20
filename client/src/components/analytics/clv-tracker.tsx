@@ -79,39 +79,37 @@ export function CLVTracker() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
-          <div className="p-4 rounded-lg bg-muted/50 text-center">
-            <p className={`text-2xl font-bold ${avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          <div className="p-2 sm:p-4 rounded-lg bg-muted/50 text-center">
+            <p className={`text-lg sm:text-2xl font-bold ${avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
               {avgCLV >= 0 ? "+" : ""}{avgCLV.toFixed(1)}%
             </p>
-            <p className="text-xs text-muted-foreground">Average CLV</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Avg CLV</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/50 text-center">
-            <p className="text-2xl font-bold text-blue-500">{beatingClosing.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">Beat Closing</p>
+          <div className="p-2 sm:p-4 rounded-lg bg-muted/50 text-center">
+            <p className="text-lg sm:text-2xl font-bold text-blue-500">{beatingClosing.toFixed(0)}%</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Beat Close</p>
           </div>
-          <div className="p-4 rounded-lg bg-muted/50 text-center">
-            <p className="text-2xl font-bold">{data.length}</p>
-            <p className="text-xs text-muted-foreground">Bets Tracked</p>
+          <div className="p-2 sm:p-4 rounded-lg bg-muted/50 text-center">
+            <p className="text-lg sm:text-2xl font-bold">{data.length}</p>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Tracked</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-            <div className="flex items-center gap-2 mb-1">
-              <Trophy className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-medium">CLV on Wins</span>
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
+          <div className="p-2 sm:p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
+              <span className="text-xs sm:text-sm font-medium">Wins</span>
             </div>
-            <p className="text-xl font-bold text-green-500">+{avgCLVWins.toFixed(1)}%</p>
-            <p className="text-xs text-muted-foreground">{clvByResult.wins.length} winning bets</p>
+            <p className="text-base sm:text-xl font-bold text-green-500">+{avgCLVWins.toFixed(1)}%</p>
           </div>
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingDown className="w-4 h-4 text-red-500" />
-              <span className="text-sm font-medium">CLV on Losses</span>
+          <div className="p-2 sm:p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
+              <span className="text-xs sm:text-sm font-medium">Losses</span>
             </div>
-            <p className="text-xl font-bold text-red-500">{avgCLVLosses.toFixed(1)}%</p>
-            <p className="text-xs text-muted-foreground">{clvByResult.losses.length} losing bets</p>
+            <p className="text-base sm:text-xl font-bold text-red-500">{avgCLVLosses.toFixed(1)}%</p>
           </div>
         </div>
 

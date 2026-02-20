@@ -72,16 +72,16 @@ export default function Tools() {
 
   return (
     <div className="min-h-full">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pro Tools</h1>
-            <p className="text-sm text-muted-foreground">Advanced betting analytics</p>
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Pro Tools</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">Advanced betting analytics</p>
           </div>
           <Select value={activeCategory} onValueChange={setActiveCategory}>
-            <SelectTrigger className="w-full sm:w-56" data-testid="select-category">
+            <SelectTrigger className="w-full sm:w-56 h-9 sm:h-10" data-testid="select-category">
               <div className="flex items-center gap-2">
-                <ActiveIcon className="w-4 h-4" />
+                <ActiveIcon className="w-4 h-4 shrink-0" />
                 <SelectValue />
               </div>
             </SelectTrigger>
