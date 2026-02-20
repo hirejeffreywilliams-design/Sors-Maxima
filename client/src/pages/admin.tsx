@@ -24,7 +24,11 @@ import {
   XCircle,
   Brain,
   Megaphone,
-  ChevronRight
+  ChevronRight,
+  Target,
+  Database,
+  ShieldAlert,
+  DollarSign
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -318,6 +322,34 @@ export default function AdminDashboard() {
             <Button variant="outline" className="gap-2" data-testid="link-admin-feature-flags">
               <CheckCircle className="w-4 h-4" />
               Feature Flags
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/model-performance">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-model-performance">
+              <Target className="w-4 h-4" />
+              Model Performance
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/data-provenance">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-data-provenance">
+              <Database className="w-4 h-4" />
+              Data Lineage
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/risk-register">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-risk-register">
+              <ShieldAlert className="w-4 h-4" />
+              Risk & SOPs
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/financial-projections">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-financial-projections">
+              <DollarSign className="w-4 h-4" />
+              Financial Projections
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

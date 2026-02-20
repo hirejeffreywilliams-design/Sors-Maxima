@@ -36,7 +36,12 @@ import RostersPage from "@/pages/rosters";
 import HelpCenter from "@/pages/help";
 import ProfilePage from "@/pages/profile";
 import ChangelogPage from "@/pages/changelog";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid } from "lucide-react";
+import AdminModelPerformance from "@/pages/admin-model-performance";
+import AdminDataProvenance from "@/pages/admin-data-provenance";
+import AdminRiskRegister from "@/pages/admin-risk-register";
+import AdminFinancialProjections from "@/pages/admin-financial-projections";
+import Roadmap from "@/pages/roadmap";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -45,6 +50,7 @@ import { CookieConsentBanner } from "@/components/cookie-consent";
 import { CommandPalette, SearchButton } from "@/components/command-palette";
 import { FeedbackWidget } from "@/components/feedback-widget";
 import { useUTMCapture } from "@/lib/utm-tracker";
+import { AgeVerificationGate } from "@/components/age-verification-gate";
 
 function Router() {
   return (
@@ -66,6 +72,11 @@ function Router() {
       <Route path="/admin/security" component={AdminSecurity} />
       <Route path="/admin/growth" component={AdminGrowth} />
       <Route path="/admin/feature-flags" component={AdminFeatureFlags} />
+      <Route path="/admin/model-performance" component={AdminModelPerformance} />
+      <Route path="/admin/data-provenance" component={AdminDataProvenance} />
+      <Route path="/admin/risk-register" component={AdminRiskRegister} />
+      <Route path="/admin/financial-projections" component={AdminFinancialProjections} />
+      <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
@@ -104,6 +115,7 @@ const navItems: NavItem[] = [
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },
   { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance", tooltip: "Track bets, ROI, multi-book balances, and taxes" },
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings", tooltip: "Notifications, responsible gaming, and backup" },
+  { href: "/roadmap", icon: Map, label: "Roadmap", testId: "nav-roadmap", tooltip: "Product roadmap - See what's coming next" },
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing", tooltip: "Upgrade to Pro for unlimited features" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin dashboard - User management and stats", adminOnly: true },
   { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", tooltip: "AI-powered system diagnostics", adminOnly: true },
@@ -342,7 +354,9 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       </div>
       
       <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
-        <Router />
+        <AgeVerificationGate>
+          <Router />
+        </AgeVerificationGate>
       </main>
       
       <footer className="hidden lg:block border-t bg-muted/30 py-4 px-6">

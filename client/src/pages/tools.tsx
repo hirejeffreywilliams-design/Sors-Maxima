@@ -45,7 +45,8 @@ import { ArbitrageFinder } from "@/components/arbitrage-finder";
 import { BetGradingPostgame } from "@/components/bet-grading-postgame";
 import { CustomModelBuilder } from "@/components/custom-model-builder";
 import { ExportBetSlip } from "@/components/export-bet-slip";
-import { Atom } from "lucide-react";
+import { ROIUpliftCalculator } from "@/components/roi-uplift-calculator";
+import { Atom, Calculator } from "lucide-react";
 
 const TOOL_CATEGORIES = [
   { id: "quantum", name: "Quantum Analysis", icon: Atom },
@@ -64,6 +65,7 @@ const TOOL_CATEGORIES = [
   { id: "model", name: "Custom Model", icon: SlidersHorizontal },
   { id: "grading", name: "Bet Grading", icon: ClipboardCheck },
   { id: "export", name: "Export Slips", icon: FileOutput },
+  { id: "roi", name: "ROI Calculator", icon: Calculator },
 ];
 
 export default function Tools() {
@@ -220,6 +222,10 @@ export default function Tools() {
 
           {activeCategory === "export" && (
             <ExportBetSlip />
+          )}
+
+          {activeCategory === "roi" && (
+            <ROIUpliftCalculator />
           )}
         </div>
       </div>

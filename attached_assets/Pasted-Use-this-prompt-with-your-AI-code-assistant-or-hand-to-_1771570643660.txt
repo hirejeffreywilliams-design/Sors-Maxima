@@ -1,0 +1,180 @@
+Use this prompt with your AI/code assistant (or hand to your product/engineering team). It requests a full design + starter code for an AI‑driven early-warning & recovery system that detects unhappy users before they post negative reviews and attempts automated + human recovery.
+
+
+
+Prompt
+
+"Design and implement an AI‑driven 'bad-experience interception' system for a consumer app that detects users likely to leave negative reviews and intervenes with contextual remediation flows to prevent churn and bad public reviews. Deliver a complete specification, detection models, interception UX, automated remediation actions, escalation/playbooks, analytics, and starter code (backend + minimal front-end). Prioritize privacy, low friction, and measurable business impact.
+
+
+
+Requirements & goals
+
+- Primary objective: detect users with high likelihood of posting negative app-store reviews or churn due to bad experience, and intervene to resolve issues before a public review.
+
+- Minimize false positives and user friction; preserve user trust and privacy.
+
+- Support automated remediation (in-app prompts, targeted surveys, instant support chat, credits/refunds) and human escalation (CS agent workflows).
+
+- Capture signals for training, auditing, and continuous improvement.
+
+
+
+Deliverables (detailed)
+
+1) Signal inventory & labeling
+
+   - Passive signals: recent session drop-offs, crash events, feature error rates, high latency/API errors, repeated failed payments, sudden usage decline, repeated help-center page views, NPS/surveys, uninstall intent, app-store review page open (if detectable), rating prompts dismissed, negative in-app feedback.
+
+   - Active signals: negative sentiment in in-app chat/messages, complaint emails, returned help tickets, low survey/NPS scores.
+
+   - Contextual signals: user segment (trial vs paid), LTV, recency/frequency, device/OS, geographic patterns.
+
+   - Labeling guidance: map historical reviews→user events to create labeled dataset (review_score negative/neutral/positive).
+
+
+
+2) Detection approaches
+
+   - Rules-based: high-severity triggers (crash during checkout, failed payment ×3, refund request) -> immediate interception.
+
+   - Probabilistic ML: train lightweight model (logistic regression/GBM) using signal vector to predict probability of negative review within T days. Output risk score and top contributing features (explainability).
+
+   - Real-time scoring: score on session end, on critical events, and periodically for at-risk cohorts.
+
+   - Privacy: store minimal PII; use hashed ids for modeling and auditing; respect user opt-outs.
+
+
+
+3) Interception UX & flows
+
+   - Passive recovery: subtle in-app banner/modal after error: "Sorry — looks like something went wrong. Want help now?" with choices: Try fix, Contact support, Give feedback.
+
+   - Guided micro-survey: 1–3 quick questions (pre-filled context) to capture issue type and sentiment.
+
+   - Instant remediation options: retry operation, clear cache, auto-collect logs (with consent), restart flow, temporary credit/bonus, expedited refund, or scheduled CS callback.
+
+   - Review deflection flow: before showing app-store review prompt, check risk; if high-risk, replace with feedback dialog and recovery options.
+
+   - Escalation: if user signals unresolved after X attempts or score remains high, route to human CS with full context and priority tag.
+
+
+
+4) Automated remediation & bot assistance
+
+   - AI assistant: contextual troubleshooting steps (guided by error code + device data); suggested responses for CS agents; auto-generated apology + resolution offers.
+
+   - Offer templates: one-click compensation (credit/refund), discount codes, expedited support appointment booking.
+
+   - Rate-limit incentives to prevent abuse; require verification for high-cost offers.
+
+
+
+5) Human-in-the-loop workflows
+
+   - CS dashboard showing user risk score, event timeline, suggested remediation actions, and one-click send templates.
+
+   - SLA rules: response windows based on risk & LTV.
+
+   - Feedback loop: CS actions and outcomes feed model labels.
+
+
+
+6) Measurement & KPIs
+
+   - Leading: % detected at-risk users, intervention acceptance rate, time-to-resolution.
+
+   - Outcome: reduction in negative app-store reviews, change in average rating, churn reduction, retention uplift, CS cost per averted review.
+
+   - Model metrics: precision@k, recall, AUC, calibration, false positive rate (impact on UX).
+
+
+
+7) Experimentation & tuning
+
+   - A/B test interception thresholds, messaging variants (apology vs solution-first), incentive forms (credit vs free days), and placement timing.
+
+   - Monitor long-term effects (do incentives reduce lifetime value?).
+
+
+
+8) Anti-abuse & fraud controls
+
+   - Prevent incentive gaming: limit offers per user, per payment instrument, per account cluster.
+
+   - Use heuristics to detect fake complaints (contradictory signals) and escalate for manual review.
+
+
+
+9) Privacy, legal & UX considerations
+
+   - Consent for collecting logs and contacting users; clear disclosures for any compensation.
+
+   - Comply with data retention laws; ability for users to see/opt-out of feedback collection.
+
+   - Ensure recovery messages don’t mislead (no fake promises); maintain honest, empathetic copy.
+
+
+
+10) Operational playbooks & runbook
+
+   - Incident response: spikes in crash-related alerts trigger throttled review prompts and a targeted apology campaign.
+
+   - Escalation ladder for unresolved high-risk users: automated retries → CS outreach → manager-level offer.
+
+   - Training docs for CS on empathy scripts and escalation criteria.
+
+
+
+11) Implementation artifacts to produce
+
+   - Real-time scoring pseudocode & sample model training pipeline (feature schema, training labels).
+
+   - API endpoints: score_user_risk(user_id, context), log_intervention_event, get_suggested_actions(user_id), record_outcome.
+
+   - Sample front-end code snippets to show intercept modal and micro-survey (React).
+
+   - Sample backend code (Node.js/Express or Python/Flask) to compute scores, call AI assistant for suggested remediation copy, and log outcomes.
+
+   - CS dashboard mockups (data elements listed) and sample email/SMS templates.
+
+   - DB schema for storing signals, risk scores, interventions, and outcomes.
+
+   - Monitoring dashboards (metrics above) and alerting rules.
+
+
+
+12) Starter code request (example)
+
+   - "Generate a Node.js/Express microservice with endpoints: POST /events (ingest signal), POST /score (return risk score + reasons), POST /intervene (trigger suggested remediation), and GET /user/:id/interventions. Include a simple logistic regression training pipeline in Python (scikit-learn) with example feature CSV, and a React component for an interception modal that calls /score and /intervene. Provide unit tests and example data."
+
+
+
+Questions you must ask me before producing runnable code
+
+- Preferred tech stack (backend language, DB, front-end framework).
+
+- Where to integrate (mobile SDK, web app, or both) and any platform constraints (iOS/Android review flow limitations).
+
+- Current logging/events available and volume (approx. daily users/events).
+
+- Existing CS tooling (Zendesk/Freshdesk/Intercom) to integrate.
+
+- Tolerance for in‑app friction vs false positives and incentive budget rules.
+
+- Desired KPIs to prioritize (reduce negative reviews vs reduce churn).
+
+
+
+Constraints for the AI/system
+
+- Avoid recommending deceptive UX that prevents legitimate reviews; focus on remediation and honest feedback collection.
+
+- Respect privacy laws and user consent; do not collect unnecessary PII.
+
+
+
+Deliver final output as:
+
+- Detection spec, model feature spec, API contract, sample backend + frontend starter code, CS dashboard data spec, UX copy variants, measurement dashboard templates, and 6–8 week implementation roadmap (sprints & owners)."
+
