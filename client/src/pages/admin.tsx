@@ -35,7 +35,13 @@ import {
   Mail,
   UsersRound,
   Percent,
-  BarChart3
+  BarChart3,
+  LayoutDashboard,
+  Settings,
+  TrendingUp,
+  Zap,
+  Eye,
+  type LucideIcon
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -111,7 +117,73 @@ interface ErrorStats {
   last24Hours: number;
 }
 
+interface NavItem {
+  href: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  testId: string;
+}
+
+interface NavCategory {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  items: NavItem[];
+}
+
+const navCategories: NavCategory[] = [
+  {
+    title: "Operations",
+    description: "System health, monitoring & orchestration",
+    icon: Settings,
+    items: [
+      { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & feature governance", icon: Zap, testId: "link-admin-orchestration" },
+      { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs, health & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
+      { href: "/admin/diagnostics", label: "Diagnostics", description: "AI-powered quantum system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
+      { href: "/admin/security", label: "Error & Security", description: "Error codes, security headers & IP blocking", icon: Shield, testId: "link-admin-security" },
+      { href: "/admin/feature-flags", label: "Feature Flags", description: "Control feature rollouts & kill switches", icon: CheckCircle, testId: "link-admin-feature-flags" },
+    ],
+  },
+  {
+    title: "Intelligence",
+    description: "Models, data & risk management",
+    icon: Target,
+    items: [
+      { href: "/admin/model-performance", label: "Model Performance", description: "Prediction accuracy & calibration curves", icon: Target, testId: "link-admin-model-performance" },
+      { href: "/admin/data-provenance", label: "Data Lineage", description: "Data sources, pipeline health & contracts", icon: Database, testId: "link-admin-data-provenance" },
+      { href: "/admin/risk-register", label: "Risk & SOPs", description: "Operational risks & standard procedures", icon: ShieldAlert, testId: "link-admin-risk-register" },
+      { href: "/admin/financial-projections", label: "Financial Projections", description: "Revenue forecasts & unit economics", icon: DollarSign, testId: "link-admin-financial-projections" },
+    ],
+  },
+  {
+    title: "Growth & Marketing",
+    description: "Campaigns, segments & acquisition",
+    icon: TrendingUp,
+    items: [
+      { href: "/admin/acquisition", label: "Acquisition", description: "Channel performance, CAC & LTV tracking", icon: BarChart3, testId: "link-admin-acquisition" },
+      { href: "/admin/marketing", label: "Marketing Tools", description: "AI-powered marketing campaigns", icon: Megaphone, testId: "link-admin-marketing" },
+      { href: "/admin/ab-tests", label: "A/B Tests", description: "Growth experiments & variant analysis", icon: FlaskConical, testId: "link-admin-ab-tests" },
+      { href: "/admin/lifecycle-campaigns", label: "Lifecycle Campaigns", description: "Automated user journey campaigns", icon: Mail, testId: "link-admin-lifecycle-campaigns" },
+      { href: "/admin/segmentation", label: "Segmentation", description: "User segments & personalization rules", icon: UsersRound, testId: "link-admin-segmentation" },
+      { href: "/admin/promos", label: "Promotions", description: "Offers, bonuses & rewards management", icon: Percent, testId: "link-admin-promos" },
+    ],
+  },
+  {
+    title: "User Safety",
+    description: "Health monitoring, support & fraud prevention",
+    icon: HeartPulse,
+    items: [
+      { href: "/admin/user-health", label: "User Health", description: "At-risk users, scores & interventions", icon: HeartPulse, testId: "link-admin-user-health" },
+      { href: "/admin/support", label: "Support Center", description: "Ticket queue, AI chat & escalations", icon: MessageCircle, testId: "link-admin-support" },
+      { href: "/admin/fraud", label: "Fraud Detection", description: "Trial abuse, device fingerprinting & risk", icon: ShieldAlert, testId: "link-admin-fraud" },
+      { href: "/admin/growth", label: "Growth Analytics", description: "User growth trends & engagement", icon: Activity, testId: "link-admin-growth" },
+    ],
+  },
+];
+
 export default function AdminDashboard() {
+  const [activeView, setActiveView] = useState<"command" | "manage">("command");
   const [searchTerm, setSearchTerm] = useState("");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);
@@ -253,19 +325,19 @@ export default function AdminDashboard() {
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-500 text-white';
-      case 'high': return 'bg-orange-500 text-white';
-      case 'medium': return 'bg-yellow-500 text-black';
-      case 'low': return 'bg-blue-500 text-white';
-      default: return 'bg-gray-500 text-white';
+      case 'critical': return 'bg-red-500 dark:bg-red-600 text-white';
+      case 'high': return 'bg-orange-500 dark:bg-orange-600 text-white';
+      case 'medium': return 'bg-yellow-500 dark:bg-yellow-600 text-black dark:text-white';
+      case 'low': return 'bg-blue-500 dark:bg-blue-600 text-white';
+      default: return 'bg-muted text-muted-foreground';
     }
   };
 
   const getLogLevelIcon = (level: string) => {
     switch (level) {
-      case 'error': return <AlertCircle className="h-4 w-4 text-red-500" />;
-      case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'info': return <Info className="h-4 w-4 text-blue-500" />;
+      case 'error': return <AlertCircle className="h-4 w-4 text-red-500 dark:text-red-400" />;
+      case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-500 dark:text-yellow-400" />;
+      case 'info': return <Info className="h-4 w-4 text-blue-500 dark:text-blue-400" />;
       default: return <Bug className="h-4 w-4" />;
     }
   };
@@ -273,7 +345,7 @@ export default function AdminDashboard() {
   const getLogLevelBadge = (level: string) => {
     switch (level) {
       case 'error': return <Badge variant="destructive">ERROR</Badge>;
-      case 'warn': return <Badge className="bg-yellow-500 text-black">WARN</Badge>;
+      case 'warn': return <Badge variant="secondary">WARN</Badge>;
       case 'info': return <Badge variant="secondary">INFO</Badge>;
       default: return <Badge variant="outline">{level}</Badge>;
     }
@@ -281,613 +353,511 @@ export default function AdminDashboard() {
 
   const getRiskBadge = (score: number) => {
     if (score >= 75) return <Badge variant="destructive">High Risk</Badge>;
-    if (score >= 50) return <Badge className="bg-orange-500">Medium Risk</Badge>;
-    if (score >= 25) return <Badge className="bg-yellow-500 text-black">Low Risk</Badge>;
-    return <Badge variant="secondary">Safe</Badge>;
+    if (score >= 50) return <Badge variant="secondary">Medium Risk</Badge>;
+    if (score >= 25) return <Badge variant="outline">Low Risk</Badge>;
+    return <Badge variant="outline">Safe</Badge>;
   };
 
+  const bannedCount = users.filter(u => u.isBanned).length;
+  const highRiskCount = users.filter(u => u.riskScore >= 50).length;
+
   return (
-    <div className="min-h-full p-4 sm:p-6 space-y-4 sm:space-y-6">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-500" />
-            Admin Dashboard
-          </h1>
-          <p className="text-sm text-muted-foreground">User management, fraud prevention, and error logs</p>
+    <div className="min-h-full p-4 sm:p-6 space-y-6">
+      <header className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2" data-testid="heading-admin">
+              <LayoutDashboard className="h-5 w-5 sm:h-6 sm:w-6" />
+              Admin Command Center
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">Platform management, analytics & governance</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={activeView === "command" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveView("command")}
+              data-testid="button-view-command"
+            >
+              <LayoutDashboard className="h-4 w-4 mr-1" />
+              Overview
+            </Button>
+            <Button
+              variant={activeView === "manage" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveView("manage")}
+              data-testid="button-view-manage"
+            >
+              <Users className="h-4 w-4 mr-1" />
+              Manage
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Link href="/admin/diagnostics">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-diagnostics">
-              <Brain className="w-4 h-4" />
-              Diagnostics
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/marketing">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-marketing">
-              <Megaphone className="w-4 h-4" />
-              Marketing Tools
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/security">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-security">
-              <Shield className="w-4 h-4" />
-              Error & Security
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/growth">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-growth">
-              <Activity className="w-4 h-4" />
-              Growth Analytics
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/feature-flags">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-feature-flags">
-              <CheckCircle className="w-4 h-4" />
-              Feature Flags
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/model-performance">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-model-performance">
-              <Target className="w-4 h-4" />
-              Model Performance
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/data-provenance">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-data-provenance">
-              <Database className="w-4 h-4" />
-              Data Lineage
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/risk-register">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-risk-register">
-              <ShieldAlert className="w-4 h-4" />
-              Risk & SOPs
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/financial-projections">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-financial-projections">
-              <DollarSign className="w-4 h-4" />
-              Financial Projections
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/user-health">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-user-health">
-              <HeartPulse className="w-4 h-4" />
-              User Health
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/support">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-support">
-              <MessageCircle className="w-4 h-4" />
-              Support Center
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/fraud">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-fraud">
-              <Shield className="w-4 h-4" />
-              Trial Fraud Detection
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/ab-tests">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-ab-tests">
-              <FlaskConical className="w-4 h-4" />
-              A/B Test Manager
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/lifecycle-campaigns">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-lifecycle-campaigns">
-              <Mail className="w-4 h-4" />
-              Lifecycle Campaigns
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/segmentation">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-segmentation">
-              <UsersRound className="w-4 h-4" />
-              Segmentation
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/promos">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-promos">
-              <Percent className="w-4 h-4" />
-              Promotional Offers
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/acquisition">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-acquisition">
-              <BarChart3 className="w-4 h-4" />
-              Acquisition Analytics
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/analytics-dashboard">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-analytics-dashboard">
-              <Activity className="w-4 h-4" />
-              Analytics Dashboard
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-          <Link href="/admin/orchestration">
-            <Button variant="outline" className="gap-2" data-testid="link-admin-orchestration">
-              <Shield className="w-4 h-4" />
-              Orchestration System
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">Users</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-total-users">{users.length}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <Ban className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">Banned</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-banned">{bannedCount}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">High Risk</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-high-risk">{highRiskCount}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">Fraud Alerts</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-fraud-alerts">{fraudAlerts.length}</p>
+            </CardContent>
+          </Card>
+          <Card className="col-span-2 sm:col-span-1">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2">
+                <Bug className="h-4 w-4 text-muted-foreground shrink-0" />
+                <span className="text-xs text-muted-foreground">Errors (24h)</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-errors-24h">{errorStats?.last24Hours || 0}</p>
+            </CardContent>
+          </Card>
         </div>
       </header>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-        <Card>
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Total Users</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-              {users.length}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Banned</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <Ban className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-              {users.filter(u => u.isBanned).length}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">High Risk</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-orange-500" />
-              {users.filter(u => u.riskScore >= 50).length}
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Fraud Alerts</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
-              {fraudAlerts.length}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="col-span-2 sm:col-span-1">
-          <CardHeader className="pb-2 px-3 sm:px-6">
-            <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Errors (24h)</CardTitle>
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6">
-            <div className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-              <Bug className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
-              {errorStats?.last24Hours || 0}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="users">
-        <TabsList className="w-full grid grid-cols-6 h-auto">
-          <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
-            <Users className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Users</span>
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm py-2">
-            <Crown className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Subs</span>
-          </TabsTrigger>
-          <TabsTrigger value="fraud" data-testid="tab-fraud" className="text-xs sm:text-sm py-2">
-            <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Fraud</span>
-          </TabsTrigger>
-          <TabsTrigger value="errors" data-testid="tab-errors" className="text-xs sm:text-sm py-2">
-            <Bug className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Errors</span>
-          </TabsTrigger>
-          <TabsTrigger value="flags" data-testid="tab-flags" className="text-xs sm:text-sm py-2">
-            <Activity className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Flags</span>
-          </TabsTrigger>
-          <TabsTrigger value="audit" data-testid="tab-audit" className="text-xs sm:text-sm py-2">
-            <Shield className="h-4 w-4 mr-1 sm:mr-2" />
-            <span className="hidden xs:inline">Audit</span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
-              <CardDescription className="text-sm">View and manage all registered users</CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                    data-testid="input-search-users"
-                  />
-                </div>
+      {activeView === "command" ? (
+        <div className="space-y-6">
+          {navCategories.map((category) => (
+            <section key={category.title} data-testid={`section-${category.title.toLowerCase().replace(/\s+/g, "-")}`}>
+              <div className="flex items-center gap-2 mb-3">
+                <category.icon className="h-4 w-4 text-muted-foreground" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{category.title}</h2>
+                <span className="text-xs text-muted-foreground">- {category.description}</span>
               </div>
-
-              {usersLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading users...</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No users found</div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredUsers.map((user) => (
-                    <div 
-                      key={user.id} 
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium truncate">{user.username}</span>
-                          <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                            {user.role}
-                          </Badge>
-                          {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {category.items.map((item) => (
+                  <Link key={item.href} href={item.href}>
+                    <Card className="cursor-pointer transition-colors border-border/60 hover-elevate h-full" data-testid={item.testId}>
+                      <CardContent className="p-4 flex items-start gap-3">
+                        <div className="p-2 rounded-md bg-muted shrink-0">
+                          <item.icon className="h-4 w-4" />
                         </div>
-                        <div className="text-sm text-muted-foreground truncate">{user.email}</div>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          {getRiskBadge(user.riskScore)}
-                          <Badge variant="outline" className="text-xs">{user.subscriptionTier}</Badge>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-sm">{item.label}</p>
+                            <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0 ml-auto" />
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        {user.role !== 'admin' && (
-                          user.isBanned ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => unbanMutation.mutate(user.id)}
-                              disabled={unbanMutation.isPending}
-                              data-testid={`button-unban-${user.id}`}
-                            >
-                              <CheckCircle className="h-4 w-4 mr-1" />
-                              Unban
-                            </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setBanDialogOpen(true);
-                              }}
-                              data-testid={`button-ban-${user.id}`}
-                            >
-                              <Ban className="h-4 w-4 mr-1" />
-                              Ban
-                            </Button>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="subscriptions" className="space-y-4 mt-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Card>
-              <CardHeader className="pb-2 px-3 sm:px-6">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Free</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="text-xl sm:text-2xl font-bold">{subscriptionStats?.free || 0}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 px-3 sm:px-6">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Pro</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="text-xl sm:text-2xl font-bold text-blue-500">{subscriptionStats?.pro || 0}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 px-3 sm:px-6">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Elite</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="text-xl sm:text-2xl font-bold text-purple-500">{subscriptionStats?.elite || 0}</div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2 px-3 sm:px-6">
-                <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Whale</CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="text-xl sm:text-2xl font-bold text-amber-500">{subscriptionStats?.whale || 0}</div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="text-base sm:text-lg flex items-center gap-2">
-                <Gift className="h-5 w-5 text-green-500" />
-                Grant Free Access
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Give users free premium access without payment ({subscriptionStats?.grantedFree || 0} currently granted)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              <div className="mb-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users to grant access..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                    data-testid="input-search-grant-access"
-                  />
-                </div>
-              </div>
-
-              {usersLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading users...</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">No users found</div>
-              ) : (
-                <div className="space-y-3">
-                  {filteredUsers.filter(u => u.role !== 'admin').map((user) => (
-                    <div 
-                      key={user.id} 
-                      className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-lg"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-medium truncate">{user.username}</span>
-                          <Badge 
-                            variant={user.subscriptionTier === 'free' ? 'secondary' : 'default'}
-                            className={
-                              user.subscriptionTier === 'whale' ? 'bg-amber-500' :
-                              user.subscriptionTier === 'elite' ? 'bg-purple-500' :
-                              user.subscriptionTier === 'pro' ? 'bg-blue-500' : ''
-                            }
-                          >
-                            {user.subscriptionTier?.toUpperCase() || 'FREE'}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-muted-foreground truncate">{user.email}</div>
-                      </div>
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        {user.subscriptionTier === 'free' ? (
-                          <Button
-                            size="sm"
-                            variant="default"
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => {
-                              setSelectedUser(user);
-                              setGrantAccessDialogOpen(true);
-                            }}
-                            data-testid={`button-grant-${user.id}`}
-                          >
-                            <Gift className="h-4 w-4 mr-1" />
-                            Grant Access
-                          </Button>
-                        ) : (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => revokeAccessMutation.mutate(user.username)}
-                            disabled={revokeAccessMutation.isPending}
-                            data-testid={`button-revoke-${user.id}`}
-                          >
-                            <XCircle className="h-4 w-4 mr-1" />
-                            Revoke
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="fraud" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader className="px-4 sm:px-6">
-              <CardTitle className="text-base sm:text-lg">Fraud Alerts</CardTitle>
-              <CardDescription className="text-sm">Suspicious activity detected by the system</CardDescription>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              {alertsLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading alerts...</div>
-              ) : fraudAlerts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <p>No fraud alerts detected</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {fraudAlerts.map((alert, index) => (
-                    <div 
-                      key={index} 
-                      className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 sm:p-4 border rounded-lg"
-                    >
-                      <div className={`p-2 rounded-full ${getSeverityColor(alert.severity)} shrink-0 self-start`}>
-                        <AlertTriangle className="h-4 w-4" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1 flex-wrap">
-                          <Badge className={getSeverityColor(alert.severity)}>
-                            {alert.severity?.toUpperCase() || 'UNKNOWN'}
-                          </Badge>
-                          <span className="font-medium text-sm">{alert.type.replace(/_/g, ' ')}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground break-words">{alert.details}</p>
-                        <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          {new Date(alert.timestamp).toLocaleString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="errors" className="space-y-4 mt-4">
-          <Card>
-            <CardHeader className="px-4 sm:px-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <CardTitle className="text-base sm:text-lg">Error Logs</CardTitle>
-                  <CardDescription className="text-sm">
-                    Backend errors and warnings ({errorStats?.total || 0} total)
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    size="sm" 
-                    variant="outline" 
-                    onClick={() => refetchErrors()}
-                    data-testid="button-refresh-errors"
-                  >
-                    <RefreshCw className="h-4 w-4 mr-1" />
-                    Refresh
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => testErrorMutation.mutate()}
-                    disabled={testErrorMutation.isPending}
-                    data-testid="button-test-error"
-                  >
-                    <Bug className="h-4 w-4 mr-1" />
-                    Test
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="destructive"
-                    onClick={() => clearErrorsMutation.mutate()}
-                    disabled={clearErrorsMutation.isPending || errorLogs.length === 0}
-                    data-testid="button-clear-errors"
-                  >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Clear
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="px-4 sm:px-6">
-              <div className="flex items-center gap-2 mb-4 flex-wrap">
-                <span className="text-sm text-muted-foreground">Filter:</span>
-                {[
-                  { value: 'all', label: 'All', count: errorStats?.total },
-                  { value: 'error', label: 'Errors', count: errorStats?.errors },
-                  { value: 'warn', label: 'Warnings', count: errorStats?.warnings },
-                  { value: 'info', label: 'Info', count: errorStats?.info }
-                ].map(filter => (
-                  <Button
-                    key={filter.value}
-                    size="sm"
-                    variant={errorLevelFilter === filter.value ? "default" : "outline"}
-                    onClick={() => setErrorLevelFilter(filter.value)}
-                    data-testid={`button-filter-${filter.value}`}
-                  >
-                    {filter.label} ({filter.count || 0})
-                  </Button>
+                      </CardContent>
+                    </Card>
+                  </Link>
                 ))}
               </div>
-              
-              {errorsLoading ? (
-                <div className="text-center py-8 text-muted-foreground">Loading error logs...</div>
-              ) : errorLogs.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <p>No errors logged{errorLevelFilter !== 'all' ? ` for level: ${errorLevelFilter}` : ''}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {errorLogs.map((log) => (
-                    <div 
-                      key={log.id} 
-                      className="flex flex-col gap-2 p-3 sm:p-4 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => setSelectedError(log)}
-                      data-testid={`error-log-${log.id}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        {getLogLevelIcon(log.level)}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            {getLogLevelBadge(log.level)}
-                            <code className="text-xs text-muted-foreground">{log.id}</code>
-                          </div>
-                          <p className="text-sm font-medium break-words">{log.message}</p>
-                          {log.path && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {log.method} {log.path}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground pl-7">
-                        <Clock className="h-3 w-3" />
-                        {new Date(log.timestamp).toLocaleString()}
-                      </div>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <Tabs defaultValue="users">
+            <TabsList className="w-full grid grid-cols-6 h-auto">
+              <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
+                <Users className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Users</span>
+              </TabsTrigger>
+              <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm py-2">
+                <Crown className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Subs</span>
+              </TabsTrigger>
+              <TabsTrigger value="fraud" data-testid="tab-fraud" className="text-xs sm:text-sm py-2">
+                <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Fraud</span>
+              </TabsTrigger>
+              <TabsTrigger value="errors" data-testid="tab-errors" className="text-xs sm:text-sm py-2">
+                <Bug className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Errors</span>
+              </TabsTrigger>
+              <TabsTrigger value="flags" data-testid="tab-flags" className="text-xs sm:text-sm py-2">
+                <Eye className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Flags</span>
+              </TabsTrigger>
+              <TabsTrigger value="audit" data-testid="tab-audit" className="text-xs sm:text-sm py-2">
+                <Shield className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden xs:inline">Audit</span>
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="users" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
+                  <CardDescription className="text-sm">View and manage all registered users</CardDescription>
+                </CardHeader>
+                <CardContent className="px-4 sm:px-6">
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                        data-testid="input-search-users"
+                      />
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+                  </div>
 
-        <TabsContent value="flags" className="space-y-4 mt-4">
-          <FeatureFlagsPanel />
-        </TabsContent>
+                  {usersLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">No users found</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredUsers.map((user) => (
+                        <div 
+                          key={user.id} 
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-md"
+                          data-testid={`row-user-${user.id}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium truncate">{user.username}</span>
+                              <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+                                {user.role}
+                              </Badge>
+                              {user.isBanned && <Badge variant="destructive" className="text-xs">Banned</Badge>}
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                            <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              {getRiskBadge(user.riskScore)}
+                              <Badge variant="outline" className="text-xs">{user.subscriptionTier}</Badge>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 self-end sm:self-center">
+                            {user.role !== 'admin' && (
+                              user.isBanned ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => unbanMutation.mutate(user.id)}
+                                  disabled={unbanMutation.isPending}
+                                  data-testid={`button-unban-${user.id}`}
+                                >
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Unban
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setBanDialogOpen(true);
+                                  }}
+                                  data-testid={`button-ban-${user.id}`}
+                                >
+                                  <Ban className="h-4 w-4 mr-1" />
+                                  Ban
+                                </Button>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        <TabsContent value="audit" className="space-y-4 mt-4">
-          <AuditTrailPanel />
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="subscriptions" className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <Card>
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-xs text-muted-foreground">Free</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-free-users">{subscriptionStats?.free || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-xs text-muted-foreground">Pro</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-pro-users">{subscriptionStats?.pro || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-xs text-muted-foreground">Elite</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-elite-users">{subscriptionStats?.elite || 0}</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 sm:p-4">
+                    <p className="text-xs text-muted-foreground">Whale</p>
+                    <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-whale-users">{subscriptionStats?.whale || 0}</p>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <Card>
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+                    <Gift className="h-5 w-5" />
+                    Grant Free Access
+                  </CardTitle>
+                  <CardDescription className="text-sm">
+                    Give users free premium access without payment ({subscriptionStats?.grantedFree || 0} currently granted)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="px-4 sm:px-6">
+                  <div className="mb-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users to grant access..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10"
+                        data-testid="input-search-grant-access"
+                      />
+                    </div>
+                  </div>
+
+                  {usersLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading users...</div>
+                  ) : filteredUsers.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">No users found</div>
+                  ) : (
+                    <div className="space-y-3">
+                      {filteredUsers.filter(u => u.role !== 'admin').map((user) => (
+                        <div 
+                          key={user.id} 
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 sm:p-4 border rounded-md"
+                          data-testid={`row-grant-${user.id}`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-medium truncate">{user.username}</span>
+                              <Badge variant={user.subscriptionTier === 'free' ? 'secondary' : 'default'}>
+                                {user.subscriptionTier?.toUpperCase() || 'FREE'}
+                              </Badge>
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                          </div>
+                          <div className="flex items-center gap-2 self-end sm:self-center">
+                            {user.subscriptionTier === 'free' ? (
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setGrantAccessDialogOpen(true);
+                                }}
+                                data-testid={`button-grant-${user.id}`}
+                              >
+                                <Gift className="h-4 w-4 mr-1" />
+                                Grant Access
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => revokeAccessMutation.mutate(user.username)}
+                                disabled={revokeAccessMutation.isPending}
+                                data-testid={`button-revoke-${user.id}`}
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Revoke
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="fraud" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader className="px-4 sm:px-6">
+                  <CardTitle className="text-base sm:text-lg">Fraud Alerts</CardTitle>
+                  <CardDescription className="text-sm">Suspicious activity detected by the system</CardDescription>
+                </CardHeader>
+                <CardContent className="px-4 sm:px-6">
+                  {alertsLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading alerts...</div>
+                  ) : fraudAlerts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p>No fraud alerts detected</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {fraudAlerts.map((alert, index) => (
+                        <div 
+                          key={index} 
+                          className="flex flex-col sm:flex-row sm:items-start gap-3 p-3 sm:p-4 border rounded-md"
+                          data-testid={`row-fraud-alert-${index}`}
+                        >
+                          <div className={`p-2 rounded-md ${getSeverityColor(alert.severity)} shrink-0 self-start`}>
+                            <AlertTriangle className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <Badge className={getSeverityColor(alert.severity)}>
+                                {alert.severity?.toUpperCase() || 'UNKNOWN'}
+                              </Badge>
+                              <span className="font-medium text-sm">{alert.type.replace(/_/g, ' ')}</span>
+                            </div>
+                            <p className="text-sm text-muted-foreground break-words">{alert.details}</p>
+                            <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {new Date(alert.timestamp).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="errors" className="space-y-4 mt-4">
+              <Card>
+                <CardHeader className="px-4 sm:px-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-base sm:text-lg">Error Logs</CardTitle>
+                      <CardDescription className="text-sm">
+                        Backend errors and warnings ({errorStats?.total || 0} total)
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => refetchErrors()}
+                        data-testid="button-refresh-errors"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        Refresh
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => testErrorMutation.mutate()}
+                        disabled={testErrorMutation.isPending}
+                        data-testid="button-test-error"
+                      >
+                        <Bug className="h-4 w-4 mr-1" />
+                        Test
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={() => clearErrorsMutation.mutate()}
+                        disabled={clearErrorsMutation.isPending || errorLogs.length === 0}
+                        data-testid="button-clear-errors"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Clear
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="px-4 sm:px-6">
+                  <div className="flex items-center gap-2 mb-4 flex-wrap">
+                    <span className="text-sm text-muted-foreground">Filter:</span>
+                    {[
+                      { value: 'all', label: 'All', count: errorStats?.total },
+                      { value: 'error', label: 'Errors', count: errorStats?.errors },
+                      { value: 'warn', label: 'Warnings', count: errorStats?.warnings },
+                      { value: 'info', label: 'Info', count: errorStats?.info }
+                    ].map(filter => (
+                      <Button
+                        key={filter.value}
+                        size="sm"
+                        variant={errorLevelFilter === filter.value ? "default" : "outline"}
+                        onClick={() => setErrorLevelFilter(filter.value)}
+                        data-testid={`button-filter-${filter.value}`}
+                      >
+                        {filter.label} ({filter.count || 0})
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  {errorsLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading error logs...</div>
+                  ) : errorLogs.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CheckCircle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p>No errors logged{errorLevelFilter !== 'all' ? ` for level: ${errorLevelFilter}` : ''}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {errorLogs.map((log) => (
+                        <div 
+                          key={log.id} 
+                          className="flex flex-col gap-2 p-3 sm:p-4 border rounded-md cursor-pointer transition-colors hover-elevate"
+                          onClick={() => setSelectedError(log)}
+                          data-testid={`error-log-${log.id}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            {getLogLevelIcon(log.level)}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                {getLogLevelBadge(log.level)}
+                                <code className="text-xs text-muted-foreground">{log.id}</code>
+                              </div>
+                              <p className="text-sm font-medium break-words">{log.message}</p>
+                              {log.path && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {log.method} {log.path}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground pl-7">
+                            <Clock className="h-3 w-3" />
+                            {new Date(log.timestamp).toLocaleString()}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="flags" className="space-y-4 mt-4">
+              <FeatureFlagsPanel />
+            </TabsContent>
+
+            <TabsContent value="audit" className="space-y-4 mt-4">
+              <AuditTrailPanel />
+            </TabsContent>
+          </Tabs>
+        </div>
+      )}
 
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-md">
@@ -934,7 +904,7 @@ export default function AdminDashboard() {
         <DialogContent className="max-w-[90vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Gift className="h-5 w-5 text-green-500" />
+              <Gift className="h-5 w-5" />
               Grant Free Access
             </DialogTitle>
             <DialogDescription>
@@ -958,7 +928,7 @@ export default function AdminDashboard() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="p-3 rounded-lg bg-muted text-sm">
+            <div className="p-3 rounded-md bg-muted text-sm">
               <p className="font-medium mb-1">Tier Benefits:</p>
               {selectedTier === 'pro' && (
                 <ul className="text-muted-foreground space-y-1">
@@ -992,7 +962,6 @@ export default function AdminDashboard() {
               Cancel
             </Button>
             <Button 
-              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
               onClick={() => {
                 if (selectedUser) {
                   grantAccessMutation.mutate({ username: selectedUser.username, tier: selectedTier });
@@ -1000,6 +969,7 @@ export default function AdminDashboard() {
               }}
               disabled={grantAccessMutation.isPending}
               data-testid="button-confirm-grant"
+              className="w-full sm:w-auto"
             >
               {grantAccessMutation.isPending ? "Granting..." : `Grant ${selectedTier?.toUpperCase() || 'ACCESS'} Access`}
             </Button>
@@ -1068,7 +1038,7 @@ export default function AdminDashboard() {
                 {selectedError.stack && (
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Stack Trace</label>
-                    <pre className="mt-1 p-3 bg-muted rounded-lg text-xs overflow-x-auto whitespace-pre-wrap break-words">
+                    <pre className="mt-1 p-3 bg-muted rounded-md text-xs overflow-x-auto whitespace-pre-wrap break-words">
                       {selectedError.stack}
                     </pre>
                   </div>
@@ -1130,7 +1100,7 @@ function FeatureFlagsPanel() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
+          <Eye className="h-5 w-5" />
           Feature Flags
         </CardTitle>
         <CardDescription>Control feature rollouts and emergency kill switches</CardDescription>
@@ -1143,7 +1113,7 @@ function FeatureFlagsPanel() {
             {flags.map((flag) => (
               <div
                 key={flag.id}
-                className="flex items-center justify-between gap-4 p-3 rounded-lg border flex-wrap"
+                className="flex items-center justify-between gap-4 p-3 rounded-md border flex-wrap"
                 data-testid={`flag-${flag.id}`}
               >
                 <div className="flex-1 min-w-0">
@@ -1207,35 +1177,32 @@ function AuditTrailPanel() {
   const entries = auditData?.entries || [];
 
   const getActionBadge = (action: string) => {
-    const colors: Record<string, string> = {
-      ticket_generated: "bg-blue-500/20 text-blue-500",
-      ticket_accepted: "bg-green-500/20 text-green-500",
-      ticket_rejected: "bg-red-500/20 text-red-500",
-      settings_changed: "bg-yellow-500/20 text-yellow-500",
-      login: "bg-purple-500/20 text-purple-500",
-    };
-    return colors[action] || "bg-muted text-muted-foreground";
+    const safetyActions = ["ticket_rejected", "bet_cancelled", "account_deletion", "session_revoked"];
+    const successActions = ["ticket_accepted", "ticket_generated", "bet_placed", "login"];
+    if (safetyActions.includes(action)) return "destructive" as const;
+    if (successActions.includes(action)) return "default" as const;
+    return "secondary" as const;
   };
 
   return (
     <div className="space-y-4">
       {auditStats && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <Card>
-            <CardContent className="py-4 text-center">
-              <p className="text-2xl font-bold">{auditStats.total}</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-2xl font-bold" data-testid="stat-audit-total">{auditStats.total}</p>
               <p className="text-xs text-muted-foreground">Total Events</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="py-4 text-center">
-              <p className="text-2xl font-bold">{auditStats.uniqueUsers}</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-2xl font-bold" data-testid="stat-audit-users">{auditStats.uniqueUsers}</p>
               <p className="text-xs text-muted-foreground">Unique Users</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="py-4 text-center">
-              <p className="text-2xl font-bold">{Object.keys(auditStats.actionCounts).length}</p>
+            <CardContent className="p-3 sm:p-4 text-center">
+              <p className="text-2xl font-bold" data-testid="stat-audit-types">{Object.keys(auditStats.actionCounts).length}</p>
               <p className="text-xs text-muted-foreground">Action Types</p>
             </CardContent>
           </Card>
@@ -1257,28 +1224,21 @@ function AuditTrailPanel() {
             <div className="text-center py-8">
               <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-sm text-muted-foreground">No audit entries yet</p>
-              <p className="text-xs text-muted-foreground mt-1">Actions will be logged as users interact with the platform</p>
             </div>
           ) : (
             <div className="space-y-2">
-              {entries.map((entry) => (
+              {entries.slice(0, 50).map((entry) => (
                 <div
                   key={entry.id}
-                  className="flex items-start justify-between gap-3 p-3 rounded-lg border text-sm flex-wrap"
+                  className="flex items-center gap-3 p-3 border rounded-md text-sm"
                   data-testid={`audit-entry-${entry.id}`}
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge className={getActionBadge(entry.action)}>
-                        {entry.action.replace(/_/g, " ")}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{entry.entityType}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      User: {entry.userId} | Entity: {entry.entityId}
-                    </p>
-                  </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <Badge variant={getActionBadge(entry.action)} className="text-xs shrink-0">
+                    {entry.action.replace(/_/g, ' ')}
+                  </Badge>
+                  <span className="text-muted-foreground shrink-0">{entry.entityType}</span>
+                  <span className="text-xs text-muted-foreground truncate flex-1">{entry.entityId}</span>
+                  <span className="text-xs text-muted-foreground shrink-0">
                     {new Date(entry.timestamp).toLocaleString()}
                   </span>
                 </div>
