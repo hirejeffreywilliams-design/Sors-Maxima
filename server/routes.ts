@@ -5295,5 +5295,41 @@ Follow these rules:
 
   // ==================== END PREDICTION PIPELINE ====================
 
+  // ==================== ADMIN ASSISTANT ====================
+  const { runAdminAssistant, getAssistantHistory, getLatestReport, getRunContextSnapshot } = await import("./adminAssistantEngine");
+
+  app.post("/api/admin/assistant/run", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { period = "daily" } = req.body;
+      if (!["daily", "weekly", "monthly"].includes(period)) {
+        return res.status(400).json({ error: "period must be daily, weekly, or monthly" });
+      }
+      const result = await runAdminAssistant(period, "admin");
+      res.json(result);
+    } catch (error: any) {
+      console.error("[AdminAssistant] Error:", error.message);
+      res.status(500).json({ error: "Failed to generate admin report", details: error.message });
+    }
+  });
+
+  app.get("/api/admin/assistant/history", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAssistantHistory());
+  });
+
+  app.get("/api/admin/assistant/latest", requireAdmin, (_req: Request, res: Response) => {
+    const latest = getLatestReport();
+    res.json(latest || { empty: true, message: "No reports generated yet. Run the assistant to generate your first report." });
+  });
+
+  app.get("/api/admin/assistant/context", requireAdmin, (req: Request, res: Response) => {
+    const period = (req.query.period as string) || "daily";
+    if (!["daily", "weekly", "monthly"].includes(period)) {
+      return res.status(400).json({ error: "period must be daily, weekly, or monthly" });
+    }
+    res.json(getRunContextSnapshot(period as "daily" | "weekly" | "monthly"));
+  });
+
+  // ==================== END ADMIN ASSISTANT ====================
+
   return httpServer;
 }

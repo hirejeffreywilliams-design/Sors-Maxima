@@ -25,6 +25,7 @@ Key features include:
 - **Admin Dashboards**: Comprehensive dashboards for user management, fraud detection, subscription statistics, model performance monitoring, data provenance, risk management, and financial projections.
 - **Prediction Pipeline Engine**: A 12-module production-grade pipeline covering data ingestion, feature engineering, prediction, diversity, optimization, risk/compliance, verification, feedback, evaluation, monitoring, explainability, and data privacy.
 - **Security Architecture**: Multi-layered security including security headers, IP blocking, input sanitization, rate limiting, session fingerprinting, password security, account lockout, and fraud detection.
+- **AI Admin Assistant**: AI-powered operational intelligence dashboard (server/adminAssistantEngine.ts, /admin/assistant) that generates structured admin reports with prioritized tasks, financial/risk/compliance actions, budget plans, experiment suggestions, and operational checklists using OpenAI analysis of live platform data.
 - **Growth & Operations Management**: Includes features like Trial Fraud Detection, A/B Test Manager, Lifecycle Campaign Manager, User Segmentation & Personalization, Promotional Offers Manager, Acquisition & CAC Analytics, and an advanced Orchestration System for platform governance and ticketing.
 
 ## External Dependencies

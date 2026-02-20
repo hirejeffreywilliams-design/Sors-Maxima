@@ -42,6 +42,7 @@ import {
   Eye,
   PanelLeftClose,
   PanelLeft,
+  Bot,
   type LucideIcon
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -140,6 +141,7 @@ const navCategories: NavCategory[] = [
     title: "Operations",
     icon: Settings,
     items: [
+      { href: "/admin/assistant", label: "AI Assistant", description: "AI-powered ops briefings & tasks", icon: Bot, testId: "link-admin-assistant" },
       { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & governance", icon: Zap, testId: "link-admin-orchestration" },
       { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
       { href: "/admin/diagnostics", label: "Diagnostics", description: "AI quantum system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
