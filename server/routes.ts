@@ -11,7 +11,7 @@ import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, 
 import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import { generateTickets as generateSmartTickets, type TicketRequest } from "./ticketOrchestrator";
-import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories } from "./quantumFusionEngine";
+import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
 import { sportsDataService } from "./sportsDataService";
@@ -1053,6 +1053,89 @@ Format your response clearly with sections and bullet points.`;
       return res.json({ stats, categories });
     } catch (err) {
       return res.status(500).json({ error: "Failed to get engine stats" });
+    }
+  });
+
+  app.get("/api/sport-factors/sports", async (_req, res) => {
+    try {
+      const sports = getAllSupportedSports();
+      const sportProfiles = sports.map(sport => ({
+        id: sport,
+        factorCount: getSportFactorCount(sport),
+        categories: getSportFactorCategories(sport).length,
+      }));
+      return res.json({ sports: sportProfiles, totalSports: sports.length });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get supported sports" });
+    }
+  });
+
+  app.get("/api/sport-factors/:sport", async (req, res) => {
+    try {
+      const { sport } = req.params;
+      const profile = getSportFactors(sport);
+      if (!profile) {
+        return res.status(404).json({ error: `Sport '${sport}' not found` });
+      }
+      return res.json(profile);
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get sport factors" });
+    }
+  });
+
+  app.get("/api/sport-factors/:sport/categories", async (req, res) => {
+    try {
+      const { sport } = req.params;
+      const categories = getSportFactorCategories(sport);
+      return res.json({ sport, categories, totalCategories: categories.length });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get sport factor categories" });
+    }
+  });
+
+  app.post("/api/sport-factors/:sport/analyze", async (req, res) => {
+    try {
+      const { sport } = req.params;
+      const allSupported = getAllSupportedSports();
+      if (!allSupported.includes(sport)) {
+        return res.status(400).json({ error: `Sport '${sport}' is not supported. Supported: ${allSupported.join(", ")}` });
+      }
+      const context = req.body.context || {};
+      const analysis = analyzeSportSpecificFactors(sport, context);
+      return res.json(analysis);
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to analyze sport factors" });
+    }
+  });
+
+  app.post("/api/sport-factors/:sport/fusion-analysis", async (req, res) => {
+    try {
+      const { sport } = req.params;
+      const { description, odds } = req.body;
+      if (!description || odds === undefined) {
+        return res.status(400).json({ error: "description and odds are required" });
+      }
+      const allSupported = getAllSupportedSports();
+      if (!allSupported.includes(sport)) {
+        return res.status(400).json({ error: `Sport '${sport}' is not supported. Supported: ${allSupported.join(", ")}` });
+      }
+      const coreSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+      const sportKey = coreSports.includes(sport) ? sport as any : "NFL";
+      const fusionResult = analyzeLeg(sportKey, description, odds, req.body.context || {});
+      const sportAnalysis = analyzeSportSpecificFactors(sport, req.body.context || {});
+      const isCoreEngine = coreSports.includes(sport);
+      return res.json({
+        fusion: fusionResult,
+        sportSpecific: sportAnalysis,
+        combinedScore: isCoreEngine
+          ? Math.round((fusionResult.overallScore * 0.7 + sportAnalysis.overallSportScore * 0.3))
+          : Math.round((fusionResult.overallScore * 0.4 + sportAnalysis.overallSportScore * 0.6)),
+        sport,
+        coreEngineSupport: isCoreEngine,
+        analyzedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to perform fusion analysis" });
     }
   });
 

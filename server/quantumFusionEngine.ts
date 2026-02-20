@@ -69,6 +69,7 @@
  */
 
 import type { Sport } from "../shared/schema";
+import { getSportSignalModifiers, generateSportSpecificInsights, analyzeSportSpecificFactors } from "./sportFactorsEngine";
 
 // === Core Types ===
 
@@ -508,27 +509,86 @@ const SIGNAL_CONFIGS: SignalConfig[] = [
 function generateSignals(sport: Sport, odds: number, _context: Record<string, unknown>): FusionSignal[] {
   const signals: FusionSignal[] = [];
   
-  const sportMultiplier = sport === "NFL" || sport === "NCAAF" ? 1.1 : 
-                          sport === "NBA" || sport === "NCAAB" ? 1.05 : 1.0;
+  const sportModifiers = getSportSignalModifiers(sport);
   
   const oddsAdjustment = odds < -150 ? 0.95 : odds > 150 ? 1.05 : 1.0;
   
   for (const config of SIGNAL_CONFIGS) {
+    const sportMod = sportModifiers[config.source] || 1.0;
+    
     const direction = getDirection(config.bullishProb * oddsAdjustment);
-    const strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMultiplier));
-    const confidence = Math.round(config.baseConfidence[0] + Math.random() * config.baseConfidence[1]);
+    const strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMod));
+    const confidence = Math.round(Math.min(100, (config.baseConfidence[0] + Math.random() * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0)));
+    
+    const sportReasoningSuffix = getSportSpecificReasoning(sport, config.source);
     
     signals.push({
       source: config.source,
       direction,
       strength,
       confidence,
-      reasoning: config.reasoning,
-      impact: config.impact
+      reasoning: sportReasoningSuffix ? `${config.reasoning}. ${sportReasoningSuffix}` : config.reasoning,
+      impact: config.impact * (sportMod > 1.15 ? 1.05 : 1.0)
     });
   }
   
   return signals;
+}
+
+function getSportSpecificReasoning(sport: Sport, factor: string): string {
+  const reasonings: Record<string, Record<string, string>> = {
+    NFL: {
+      scheme_mismatch: "Offensive/defensive formation matchup critical in NFL tactical chess",
+      coaching_tendency: "Play-calling balance, 4th-down aggression, and 2-minute drill execution analyzed",
+      weather_impact: "Wind/rain/snow directly affects passing accuracy and special teams",
+      field_conditions: "Turf vs. grass surface affects injury risk and running game effectiveness",
+      injury_adjustment: "QB health, OL/DL matchups, and concussion protocol impacts evaluated",
+      home_field: "NFL home-field advantage includes crowd noise affecting snap counts and audibles",
+      rest_advantage: "Short-week Thursday games and bye-week advantages factored in",
+    },
+    NBA: {
+      pace_tempo: "Pace-of-play matchup drives scoring variance and total projections",
+      player_efficiency: "PER, true shooting %, and net rating differentials analyzed",
+      load_management: "Back-to-back games and minutes load significantly impact NBA performance",
+      rest_advantage: "B2B fatigue is one of the strongest NBA predictive factors",
+      clutch_index: "Late-game execution and free-throw reliability in pressure moments",
+      biomech_fatigue: "Cumulative minutes and heavy schedule stretch fatigue impact",
+      momentum_score: "Hot hand effect and winning streak psychology matter in NBA",
+    },
+    MLB: {
+      weather_impact: "Wind direction at Wrigley/ballpark dimensions affect HR probability",
+      altitude_adjustment: "Coors Field effect: 5,280ft altitude increases offensive production ~15%",
+      scouting_data: "Pitcher-batter matchup splits and platoon advantages analyzed",
+      coaching_tendency: "Bullpen management timing and defensive shift strategies evaluated",
+      equipment_advantage: "Ball composition and bat technology affecting launch angle/exit velo",
+      injury_adjustment: "Starting pitcher arm fatigue, blister issues, and innings pitch count",
+      historical_h2h: "Pitcher vs. lineup historical performance splits",
+    },
+    NHL: {
+      momentum_score: "Hockey momentum swings are pronounced with power plays and fights",
+      biomech_fatigue: "Heavy minutes for top-line players and back-to-back schedule impact",
+      equipment_advantage: "Ice quality, skate sharpening, stick flex, and puck behavior",
+      field_conditions: "Ice surface quality degrades through periods affecting puck movement",
+      travel_fatigue: "Grueling road trips with back-to-back games across time zones",
+      mental_state: "Goalie confidence and retaliation dynamics after physical play",
+      team_chemistry: "Line chemistry and penalty-kill/power-play unit cohesion",
+    },
+    NCAAF: {
+      home_field: "College atmosphere with 100k+ crowds creates massive home advantage",
+      scheme_mismatch: "Spread vs. pro-style offensive schemes create matchup challenges",
+      motivation_level: "Rivalry week, bowl eligibility, and playoff implications drive intensity",
+      coaching_tendency: "Coordinator adjustments and recruiting class talent depth",
+      weather_impact: "Late-season cold weather games favor run-heavy northern teams",
+    },
+    NCAAB: {
+      home_field: "Cameron Crazies, Phog Allen effect - college home court is dominant",
+      pace_tempo: "Tempo-free statistics reveal true team efficiency beyond raw scoring",
+      pressure_response: "March Madness single-elimination pressure separates contenders",
+      team_chemistry: "Transfer portal disruption vs. returning core lineup continuity",
+      strength_schedule: "NET rankings and quadrant records for tournament seeding",
+    },
+  };
+  return reasonings[sport]?.[factor] || "";
 }
 
 export function getSignalsByCategory(signals: FusionSignal[]): Record<string, FusionSignal[]> {
@@ -662,6 +722,9 @@ export function analyzeLeg(
   
   const insights = generateInsights(signals, synergies, quantumState);
   
+  const sportInsights = generateSportSpecificInsights(sport, signals);
+  const allInsights = [...insights, ...sportInsights.slice(0, 3)];
+  
   return {
     overallScore: Math.round(fusedScore),
     confidence,
@@ -676,7 +739,7 @@ export function analyzeLeg(
     edgePercentage: Math.round(ev * 10) / 10,
     winProbability: Math.round(estimatedProb * 100),
     recommendation,
-    insights,
+    insights: allInsights,
     synergies,
     learningContribution: Math.round(signals.length * avgConfidence / 100 * 10) / 10
   };
@@ -807,6 +870,8 @@ export function recordOutcome(
 }
 
 // === Engine Statistics ===
+
+export { getSportSignalModifiers, analyzeSportSpecificFactors, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount } from "./sportFactorsEngine";
 
 export function getEngineStats() {
   return {
