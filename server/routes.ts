@@ -3,19 +3,24 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
-import { getOddsForSport, refreshOddsForSport, eventsToLegs } from "./odds-provider";
+import { getOddsForSport, getOddsForSportAsync, refreshOddsForSport, eventsToLegs } from "./odds-provider";
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
 import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, updateSubscription } from "./dbAuthService";
-import { errorLogger } from "./errorLogger";
+import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
+import { generateTickets as generateSmartTickets, type TicketRequest } from "./ticketOrchestrator";
+import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
 import { sportsDataService } from "./sportsDataService";
 import { auditTrail } from "./auditTrail";
 import { idempotencyStore } from "./idempotency";
 import { featureFlags } from "./featureFlags";
+import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats } from "./espn-roster-provider";
+import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMiddleware";
+import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErrorCodesByCategory, healthMonitor } from "./errorCodeSystem";
 
 declare module "express-session" {
   interface SessionData {
@@ -25,6 +30,19 @@ declare module "express-session" {
     isAdmin?: boolean;
     role?: 'user' | 'admin';
   }
+}
+
+function formatUptime(seconds: number): string {
+  const days = Math.floor(seconds / 86400);
+  const hours = Math.floor((seconds % 86400) / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  const parts: string[] = [];
+  if (days > 0) parts.push(`${days}d`);
+  if (hours > 0) parts.push(`${hours}h`);
+  if (mins > 0) parts.push(`${mins}m`);
+  parts.push(`${secs}s`);
+  return parts.join(" ");
 }
 
 // Helper to get client IP
@@ -83,8 +101,12 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  // User Registration
-  app.post("/api/auth/register", async (req, res) => {
+  preloadAllRosters().catch((err) => {
+    console.error("[Startup] Roster preload failed:", err);
+  });
+
+  // User Registration (rate limited)
+  app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
       const { email, username, password } = req.body;
       const ip = getClientIp(req);
@@ -117,7 +139,7 @@ export async function registerRoutes(
   });
 
   // Login
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
       const { username, password } = req.body;
       const ip = getClientIp(req);
@@ -261,6 +283,158 @@ export async function registerRoutes(
     });
     res.json({ success: true, errorId: id });
   });
+
+  // ==================== SECURITY & DEBUG CENTER ====================
+
+  // Admin: Security events
+  app.get("/api/admin/security/events", requireAdmin, (req, res) => {
+    const { type, severity, limit, since, resolved } = req.query;
+    const events = securityService.getEvents({
+      type: type as any,
+      severity: severity as any,
+      limit: limit ? parseInt(limit as string) : 100,
+      since: since as string | undefined,
+      resolved: resolved === "true" ? true : resolved === "false" ? false : undefined,
+    });
+    res.json(events);
+  });
+
+  // Admin: Security stats
+  app.get("/api/admin/security/stats", requireAdmin, (_req, res) => {
+    res.json(securityService.getStats());
+  });
+
+  // Admin: Resolve security event
+  app.post("/api/admin/security/events/:id/resolve", requireAdmin, (req, res) => {
+    const success = securityService.resolveEvent(req.params.id);
+    if (success) {
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "security_event", req.params.id, {
+        after: { resolved: true },
+        ip: getClientIp(req),
+      });
+      return res.json({ success: true });
+    }
+    return res.status(404).json({ error: "Security event not found" });
+  });
+
+  // Admin: Block IP
+  app.post("/api/admin/security/block-ip", requireAdmin, (req, res) => {
+    const { ip, durationMinutes, reason } = req.body;
+    if (!ip || !reason) return res.status(400).json({ error: "IP and reason required" });
+    const duration = (durationMinutes || 60) * 60 * 1000;
+    securityService.blockIP(ip, duration, reason);
+    auditTrail.record(req.session?.userId || "admin", "settings_changed", "security", ip, {
+      after: { blocked: true, duration: durationMinutes || 60, reason },
+      ip: getClientIp(req),
+    });
+    res.json({ success: true });
+  });
+
+  // Admin: Unblock IP
+  app.post("/api/admin/security/unblock-ip", requireAdmin, (req, res) => {
+    const { ip } = req.body;
+    if (!ip) return res.status(400).json({ error: "IP required" });
+    const success = securityService.unblockIP(ip);
+    if (success) {
+      auditTrail.record(req.session?.userId || "admin", "settings_changed", "security", ip, {
+        after: { blocked: false },
+        ip: getClientIp(req),
+      });
+    }
+    res.json({ success });
+  });
+
+  // Admin: Get blocked IPs
+  app.get("/api/admin/security/blocked-ips", requireAdmin, (_req, res) => {
+    res.json(securityService.getBlockedIPs());
+  });
+
+  // Admin: Error codes reference
+  app.get("/api/admin/error-codes", requireAdmin, (req, res) => {
+    const { search, category } = req.query;
+    if (search) return res.json(searchErrorCodes(search as string));
+    if (category) return res.json(getErrorCodesByCategory(category as any));
+    res.json(getAllErrorCodes());
+  });
+
+  // Admin: Single error code lookup
+  app.get("/api/admin/error-codes/:code", requireAdmin, (req, res) => {
+    const code = getErrorCode(req.params.code);
+    if (code) return res.json(code);
+    return res.status(404).json({ error: "Error code not found" });
+  });
+
+  // Admin: Error code categories
+  app.get("/api/admin/error-categories", requireAdmin, (_req, res) => {
+    res.json(getCategories());
+  });
+
+  // Admin: System health checks
+  app.get("/api/admin/health", requireAdmin, async (_req, res) => {
+    try {
+      const checks = await healthMonitor.runAllChecks();
+      const overall = healthMonitor.getOverallStatus();
+      res.json({ overall, checks, timestamp: new Date().toISOString() });
+    } catch (err) {
+      res.status(500).json({ error: "Health check failed" });
+    }
+  });
+
+  // Admin: System info
+  app.get("/api/admin/system-info", requireAdmin, (_req, res) => {
+    const mem = process.memoryUsage();
+    res.json({
+      uptime: process.uptime(),
+      uptimeFormatted: formatUptime(process.uptime()),
+      memory: {
+        heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+        heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+        rss: Math.round(mem.rss / 1024 / 1024),
+        external: Math.round(mem.external / 1024 / 1024),
+      },
+      nodeVersion: process.version,
+      platform: process.platform,
+      pid: process.pid,
+      env: process.env.NODE_ENV || "development",
+    });
+  });
+
+  // Admin: Debug overview (combined data for dashboard)
+  app.get("/api/admin/debug-overview", requireAdmin, async (_req, res) => {
+    try {
+      const [healthChecks, errorStats, securityStats] = await Promise.all([
+        healthMonitor.runAllChecks(),
+        Promise.resolve(errorLogger.getStats()),
+        Promise.resolve(securityService.getStats()),
+      ]);
+
+      const recentErrors = errorLogger.getLogs({ limit: 10, level: "error" });
+      const recentSecurityEvents = securityService.getEvents({ limit: 10 });
+      const auditStats = auditTrail.getStats();
+
+      res.json({
+        health: {
+          overall: healthMonitor.getOverallStatus(),
+          checks: healthChecks,
+        },
+        errors: {
+          stats: errorStats,
+          recent: recentErrors,
+        },
+        security: {
+          stats: securityStats,
+          recent: recentSecurityEvents,
+        },
+        audit: auditStats,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      logError(err);
+      res.status(500).json({ error: "Failed to gather debug overview" });
+    }
+  });
+
+  // ==================== END SECURITY & DEBUG CENTER ====================
 
   // Grant free premium access to a user
   app.post("/api/admin/grant-access", requireAdmin, (req, res) => {
@@ -630,7 +804,7 @@ Format your response clearly with sections and bullet points.`;
     res.json(sportsList);
   });
 
-  app.get("/api/odds", (req, res) => {
+  app.get("/api/odds", async (req, res) => {
     try {
       const sport = req.query.sport as string;
       
@@ -641,7 +815,7 @@ Format your response clearly with sections and bullet points.`;
         });
       }
 
-      const events = getOddsForSport(sport as any);
+      const events = await getOddsForSportAsync(sport as any);
       return res.json(events);
     } catch (err) {
       console.error("Odds fetch error:", err);
@@ -674,6 +848,56 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  app.post("/api/generate-tickets", async (req, res) => {
+    try {
+      const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
+
+      if (!sports || !Array.isArray(sports) || sports.length === 0) {
+        return res.status(400).json({ error: "At least one sport must be selected" });
+      }
+
+      const validRiskLevels = ["conservative", "moderate", "aggressive"];
+      if (riskLevel && !validRiskLevels.includes(riskLevel)) {
+        return res.status(400).json({ error: "Invalid risk level" });
+      }
+
+      const request: TicketRequest = {
+        sports,
+        bankroll: bankroll || 1000,
+        riskLevel: riskLevel || "moderate",
+        maxLegs: maxLegs || 4,
+        includeProps: includeProps !== false,
+      };
+
+      const tickets = await generateSmartTickets(request);
+
+      return res.json({
+        tickets,
+        engineStats: getQuantumEngineStats(),
+        factorCategories: getQuantumFactorCategories(),
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      logError(err instanceof Error ? err : new Error(String(err)), {
+        context: "generate-tickets",
+      });
+      return res.status(500).json({
+        error: "Failed to generate tickets",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
+  app.get("/api/quantum-engine/stats", async (_req, res) => {
+    try {
+      const stats = getQuantumEngineStats();
+      const categories = getQuantumFactorCategories();
+      return res.json({ stats, categories });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get engine stats" });
+    }
+  });
+
   app.post("/api/generate-parlays", idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = generateParlaysRequestSchema.safeParse(req.body);
@@ -689,7 +913,7 @@ Format your response clearly with sections and bullet points.`;
       const { sport, stake, minLegs, maxLegs, bankroll, riskLevel, topN, selectedEventIds, selectedTotals, selectedProps } =
         parseResult.data;
 
-      let events = getOddsForSport(sport);
+      let events = await getOddsForSportAsync(sport);
       
       if (selectedEventIds && selectedEventIds.length > 0) {
         events = events.filter(e => selectedEventIds.includes(e.id));
@@ -842,13 +1066,13 @@ Format your response clearly with sections and bullet points.`;
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });
 
-  app.get("/api/vegas/predictions", (req, res) => {
+  app.get("/api/vegas/predictions", async (req, res) => {
     try {
       const sport = req.query.sport as string | undefined;
       const validSport = sport && sports.includes(sport as any) ? sport as any : undefined;
       
-      const predictions = generateVegasPredictions(validSport);
-      const insights = getVegasInsights();
+      const predictions = await generateVegasPredictions(validSport);
+      const insights = await getVegasInsights();
       
       return res.json({
         predictions,
@@ -1999,9 +2223,9 @@ Format your response clearly with sections and bullet points.`;
     notes?: string;
   }> = [];
 
-  app.get("/api/admin/model/versions", requireAdmin, (_req, res) => {
+  app.get("/api/admin/model/versions", requireAdmin, async (_req, res) => {
     try {
-      const weights = getAllFactorWeights();
+      const weights = await getAllFactorWeights();
       const currentVersion = {
         id: `model_current_${Date.now()}`,
         version: "1.0.0",
@@ -2020,17 +2244,17 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  app.post("/api/admin/model/snapshot", requireAdmin, (req, res) => {
+  app.post("/api/admin/model/snapshot", requireAdmin, async (req, res) => {
     try {
-      const weights = getAllFactorWeights();
+      const weights = await getAllFactorWeights();
       const { version, notes } = req.body;
       const snapshot = {
         id: `model_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
         version: version || `1.${modelRegistry.length + 1}.0`,
         createdAt: new Date().toISOString(),
-        factorWeights: weights as Record<string, number>,
+        factorWeights: weights,
         status: "archived" as const,
-        notes: (notes || "Manual snapshot") as string,
+        notes: notes || "Manual snapshot",
       };
       modelRegistry.push(snapshot);
 
@@ -2555,6 +2779,42 @@ Follow these rules:
       console.error("Daily strategy error:", err);
       res.status(500).json({ error: "Failed to generate strategy" });
     }
+  });
+
+  app.get("/api/teams/:sport", async (req: any, res: any) => {
+    try {
+      const sport = req.params.sport as any;
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport. Use: " + validSports.join(", ") });
+      }
+      const teams = await getTeams(sport);
+      res.json(teams);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch teams" });
+    }
+  });
+
+  app.get("/api/teams/:sport/:teamId/roster", async (req: any, res: any) => {
+    try {
+      const { sport, teamId } = req.params;
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport" });
+      }
+      const roster = await getTeamRoster(sport as any, teamId);
+      if (!roster) {
+        return res.status(404).json({ error: "Roster not found" });
+      }
+      res.json(roster);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch roster" });
+    }
+  });
+
+  app.get("/api/roster-cache-stats", (_req: any, res: any) => {
+    const stats = getRosterCacheStats();
+    res.json({ stats, totalTeams: stats.reduce((sum: any, s: any) => sum + s.teams, 0), totalPlayers: stats.reduce((sum: any, s: any) => sum + s.players, 0) });
   });
 
   return httpServer;

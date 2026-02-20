@@ -300,6 +300,13 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/security">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-security">
+              <Shield className="w-4 h-4" />
+              Error & Security
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -557,7 +564,7 @@ export default function AdminDashboard() {
                               user.subscriptionTier === 'pro' ? 'bg-blue-500' : ''
                             }
                           >
-                            {user.subscriptionTier.toUpperCase()}
+                            {user.subscriptionTier?.toUpperCase() || 'FREE'}
                           </Badge>
                         </div>
                         <div className="text-sm text-muted-foreground truncate">{user.email}</div>
@@ -625,7 +632,7 @@ export default function AdminDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
                           <Badge className={getSeverityColor(alert.severity)}>
-                            {alert.severity.toUpperCase()}
+                            {alert.severity?.toUpperCase() || 'UNKNOWN'}
                           </Badge>
                           <span className="font-medium text-sm">{alert.type.replace(/_/g, ' ')}</span>
                         </div>
@@ -871,7 +878,7 @@ export default function AdminDashboard() {
               disabled={grantAccessMutation.isPending}
               data-testid="button-confirm-grant"
             >
-              {grantAccessMutation.isPending ? "Granting..." : `Grant ${selectedTier.toUpperCase()} Access`}
+              {grantAccessMutation.isPending ? "Granting..." : `Grant ${selectedTier?.toUpperCase() || 'ACCESS'} Access`}
             </Button>
           </DialogFooter>
         </DialogContent>

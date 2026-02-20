@@ -27,66 +27,69 @@ interface PricingTier {
 const tiers: PricingTier[] = [
   {
     id: 'free',
-    name: 'Free',
-    description: 'Get started with basic quantum analysis',
+    name: 'Starter',
+    description: 'Explore the engine and see what you\'ve been missing',
     monthlyPrice: 0,
     yearlyPrice: 0,
     monthlyPriceId: '',
     yearlyPriceId: '',
     features: [
-      '5 AI credits/day',
-      '3 ticket generations per day',
-      'Basic quantum coherence scores',
-      '2 sports coverage (NBA, NFL)',
-      'Standard bet grading (A to C)',
-      'Community leaderboard view',
+      '3 AI-powered ticket generations per day',
+      '5 AI analysis credits daily',
+      'Quantum Fusion scoring on every bet',
+      '2 sports (NBA & NFL)',
+      'Bet grading with confidence scores',
+      'Daily free high-confidence pick',
+      'Community leaderboard access',
     ],
     icon: <Zap className="w-6 h-6" />,
     color: 'from-gray-500 to-gray-600',
   },
   {
     id: 'pro',
-    name: 'Pro',
-    description: 'Full quantum analysis for serious bettors',
-    monthlyPrice: 29,
-    yearlyPrice: 290,
+    name: 'Sharp',
+    description: 'The tools serious bettors actually need to win',
+    monthlyPrice: 19,
+    yearlyPrice: 190,
     monthlyPriceId: 'price_1SskcQIp7f8yVoSO8uj04w8T',
     yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
     features: [
-      '50 AI credits/day',
       'Unlimited ticket generations',
-      'All 45 quantum analysis factors',
+      '50 AI credits per day',
+      'Full 46-factor Quantum Fusion Engine',
       'All 6 sports coverage',
-      'Advanced bet grading (A+ to F)',
-      'Kelly Criterion stake sizing',
-      'Correlation engine access',
-      'Basic smart alerts (5/day)',
-      'Paper trading mode',
-      'ROI dashboard & analytics',
+      'Visual drag-and-drop ticket builder',
+      'Kelly Criterion optimal stake sizing',
+      'Correlation engine for smarter parlays',
+      'Monte Carlo simulation analysis',
+      '+EV finder across all markets',
+      'ROI dashboard & performance tracking',
+      'Paper trading to test strategies risk-free',
     ],
     icon: <Star className="w-6 h-6" />,
     color: 'from-blue-500 to-cyan-500',
   },
   {
     id: 'elite',
-    name: 'Elite',
-    description: 'Premium tools for professional edge',
-    monthlyPrice: 99,
-    yearlyPrice: 990,
+    name: 'Edge',
+    description: 'Every tool, every alert, zero limits on analysis',
+    monthlyPrice: 49,
+    yearlyPrice: 490,
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOEKOx5hde',
     yearlyPriceId: 'price_1SskcRIp7f8yVoSOOBNZTk3V',
     features: [
-      '200 AI credits/day',
-      'Everything in Pro',
-      'Real-time steam move alerts',
-      'AI Betting Assistant (unlimited)',
-      'ML prop projections',
-      'CLV tracking & analysis',
-      'Public vs Sharp money data',
-      'Live momentum tracker',
-      'Unlimited smart alerts',
-      'Advanced tax export by year',
-      'Multi-sportsbook bankroll sync',
+      'Everything in Sharp, plus:',
+      '200 AI credits per day',
+      'AI Betting Assistant (unlimited chats)',
+      'ML-powered player prop projections',
+      'Real-time line movement alerts',
+      'Live momentum tracker & CLV tracking',
+      'Arbitrage opportunity scanner',
+      'Same-game parlay optimizer',
+      'Custom model builder (adjust all 46 weights)',
+      'Multi-book bankroll tracker',
+      'Automated tax export reports',
+      'Unlimited smart alerts & notifications',
     ],
     icon: <Crown className="w-6 h-6" />,
     popular: true,
@@ -94,24 +97,24 @@ const tiers: PricingTier[] = [
   },
   {
     id: 'whale',
-    name: 'Whale',
-    description: 'Maximum power for high-volume bettors',
-    monthlyPrice: 499,
-    yearlyPrice: 4990,
+    name: 'Quantum',
+    description: 'Unlimited everything for bettors who don\'t settle',
+    monthlyPrice: 99,
+    yearlyPrice: 990,
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOWQe60fFw',
     yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
     features: [
-      'Unlimited AI credits',
-      'Everything in Elite',
-      'VIP quantum algorithm (deeper analysis)',
-      'Extended historical data (5+ years)',
-      'Advanced arbitrage detection',
-      'Custom alert configurations',
-      'Exclusive whale leaderboard',
-      'Early access to beta features',
-      'Priority API response times',
-      'Unlimited bet backup storage',
-      'Advanced hedge optimization',
+      'Everything in Edge, plus:',
+      'Unlimited AI credits (no daily cap)',
+      'Deep-scan analysis (2x simulation depth)',
+      'Advanced hedge calculator & optimizer',
+      'Bankroll simulator with projections',
+      'Export bet slips to 6 major sportsbooks',
+      'Algorithm training & backtesting center',
+      'Full bet grading post-game breakdowns',
+      'Scheme recognition engine (pre-game & live)',
+      'Priority processing on all analyses',
+      'Early access to new features & models',
     ],
     icon: <Gem className="w-6 h-6" />,
     color: 'from-yellow-500 to-orange-500',
@@ -193,13 +196,13 @@ export default function Pricing() {
         <header className="text-center space-y-4">
           <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
             <Atom className="w-3 h-3" />
-            Quantum-Powered Intelligence
+            Powered by 46 Analysis Factors
           </Badge>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">
-            Choose Your Edge
+            Stop Guessing. Start Winning.
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Unlock the full power of quantum analysis with our premium tiers. Join thousands of winning bettors.
+            Every plan gives you AI-driven analysis, optimized parlays, and tools that work around the clock so you never miss an edge.
           </p>
           
           <div className="flex items-center justify-center gap-3 pt-4">
@@ -276,8 +279,8 @@ export default function Pricing() {
                   data-testid={`button-subscribe-${tier.id}`}
                 >
                   {currentTier === tier.id ? 'Current Plan' : 
-                   tier.id === 'free' ? 'Get Started Free' : 
-                   `Subscribe to ${tier.name}`}
+                   tier.id === 'free' ? 'Start Free' : 
+                   `Upgrade to ${tier.name}`}
                 </Button>
               </CardFooter>
             </Card>
@@ -323,33 +326,33 @@ export default function Pricing() {
         </Card>
 
         <div className="bg-card rounded-xl p-8 border">
-          <h2 className="text-2xl font-bold mb-6 text-center">Why Bettors Choose Sors Maxima</h2>
+          <h2 className="text-2xl font-bold mb-6 text-center">Built to Give You an Unfair Advantage</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center space-y-3">
               <div className="w-14 h-14 mx-auto rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Atom className="w-7 h-7 text-blue-500" />
+                <Bot className="w-7 h-7 text-blue-500" />
               </div>
-              <h3 className="font-semibold">Quantum Analysis</h3>
+              <h3 className="font-semibold">Fully Automated Analysis</h3>
               <p className="text-sm text-muted-foreground">
-                40+ factors analyzed using quantum-inspired algorithms for superior pattern recognition
+                46 factors crunched instantly by AI. No waiting, no middleman. You get results in seconds, not hours.
               </p>
             </div>
             <div className="text-center space-y-3">
               <div className="w-14 h-14 mx-auto rounded-full bg-green-500/10 flex items-center justify-center">
-                <LineChart className="w-7 h-7 text-green-500" />
+                <Target className="w-7 h-7 text-green-500" />
               </div>
-              <h3 className="font-semibold">Proven Results</h3>
+              <h3 className="font-semibold">Find +EV Bets Instantly</h3>
               <p className="text-sm text-muted-foreground">
-                Our users average 12% higher CLV and 23% better ROI vs market benchmarks
+                The engine scans every market for positive expected value so you only bet when the math is in your favor.
               </p>
             </div>
             <div className="text-center space-y-3">
               <div className="w-14 h-14 mx-auto rounded-full bg-purple-500/10 flex items-center justify-center">
-                <Shield className="w-7 h-7 text-purple-500" />
+                <Wallet className="w-7 h-7 text-purple-500" />
               </div>
-              <h3 className="font-semibold">Smart Bankroll</h3>
+              <h3 className="font-semibold">Protect Your Bankroll</h3>
               <p className="text-sm text-muted-foreground">
-                Kelly Criterion sizing and risk management to protect and grow your bankroll
+                Kelly Criterion sizing, risk warnings, and correlation checks keep your bets smart and your money safe.
               </p>
             </div>
           </div>

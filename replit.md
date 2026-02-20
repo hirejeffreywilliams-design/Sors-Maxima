@@ -19,7 +19,19 @@ The core features include a Monte Carlo simulation engine for probability analys
 Key features include:
 - **Smart Ticket Generator**: Automated ticket generation based on user-selected sports and risk levels, providing optimal betting tickets with confidence scores, EV, and win probability. Includes AI analysis scores (Quantum Coaching, Player Analysis, Team Dynamics, ML Projections, Sharp Money, Cashout Eligibility). This is the default home page.
 - **Advanced Parlay Generator**: Utilizes Monte Carlo optimization to suggest optimal parlays across various sports and player props.
+- **Visual Parlay Builder**: Advanced drag-and-drop interface for building betting tickets visually from real ESPN games. Features include:
+  - Leg-level edge/confidence badges (+EV, ~EV, -EV) with color coding
+  - Real-time line movement indicators (steam/reverse arrows) and sharp action signals
+  - Same-Game Parlay (SGP) detection with correlation warnings when multiple legs share the same game
+  - Smart Suggestions panel recommending complementary high-value legs based on current selections
+  - Quick filters (time window, edge threshold, market type) for efficient game browsing
+  - What-If/Parlay Insurance calculator showing payout impact if each leg loses, identifying the weakest link
+  - Collapsible market sections per game card to reduce clutter while showing all available options
+  - Full player props access with "Show All" expansion (no longer limited to 4)
+  - 8-step interactive onboarding tutorial for first-time users (localStorage persisted)
+  - Persistent symbol key/legend panel explaining all icons and badges
 - **Manual Parlay Builder**: A flexible interface for users to manually add and manage betting legs.
+- **Live Team Rosters**: Real-time roster data from ESPN's free API covering NBA (30), NFL (32), MLB (30), NHL (32) teams with player details, coaching staff, injury status, and background cache preloading. Located at /rosters.
 - **Correlation Modeling**: Employs Gaussian copula-based methods to model dependencies between betting leg outcomes.
 - **UI/UX**: Features a toggleable dark/light theme, intuitive navigation, and data visualization.
 - **Comprehensive Betting Insights**: Integrates advanced analytics such as +EV finding, confidence scoring, historical trend analysis, injury alerts, weather impact, line movement tracking, public vs. sharp money indicators, and situational factor analysis. Includes bankroll management, hedge calculations, and what-if scenarios.
@@ -72,7 +84,8 @@ Main navigation items:
 1. **Generate** (/) - Smart Ticket Generator (default home page)
 2. **Live** (/live) - Live Center with Momentum Tracker, Hedge Calculator, AI Assistant, Cash-Out Advisor, Live Chat
 3. **Tools** (/tools) - Pro Tools with Quantum Analysis, Odds, ML, Correlation, Player Props, Arbitrage, Bet Grading, Custom Model, Export
-4. **Community** (/community) - Unified community page with 2 main tabs:
+4. **Rosters** (/rosters) - Live team rosters from ESPN API (NBA, NFL, MLB, NHL) with players, coaches, injury status
+5. **Community** (/community) - Unified community page with 2 main tabs:
    - Social: Leaderboard, Follow Bettors, Bet Sharing, Smart Alerts, Social Feed, Copy Betting
    - Tipsters: Discover communities, create your own, earn from tips/subscriptions (15% platform fee)
 5. **Rewards** (/rewards) - Gamification: Daily Challenges, Achievements, Streaks, Paper Trading, Pick Competitions
@@ -89,7 +102,24 @@ Admin-only pages:
 - /admin - Admin Dashboard for user management, fraud detection, subscription stats
 - /admin/diagnostics - AI-Powered Quantum Diagnostics
 - /admin/marketing - AI Marketing Tools for content generation and growth analytics
+- /admin/security - Error & Security Center: system health, error tracking with codes/categories/fixes, security event monitoring, IP blocking, debug tools
 - /training - Algorithm Training Center for backtesting and evaluation before launch
+
+## Security Architecture
+The application implements multi-layered security for handling user financial data:
+- **Security Headers**: CSP, HSTS, X-Frame-Options, X-XSS-Protection, Referrer-Policy
+- **IP Blocking**: Automatic + manual IP blocking with admin controls
+- **Input Sanitization**: XSS and SQL injection detection on all API requests
+- **Rate Limiting**: 100 req/min general API, 10 req/min on sensitive routes (auth, payments)
+- **Session Fingerprinting**: Browser fingerprint validation to detect session hijacking
+- **Password Security**: scrypt hashing with random salt, timing-safe comparison
+- **Account Lockout**: 5 failed attempts triggers 30-minute lockout
+- **Fraud Detection**: Multi-account detection, IP hopping tracking, risk scoring
+- **PII Minimization**: Data masking for emails, IPs, usernames in logs
+- **Idempotency**: Duplicate request prevention for payment operations
+- **Audit Trail**: All sensitive actions logged with user, IP, timestamp
+- **Error Code System**: 25+ categorized error codes with admin troubleshooting guides
+- **Health Monitoring**: Automated checks for database, memory, error rate, feature flags
 
 Other routes (accessible but not in main nav):
 - /builder - Manual Parlay Builder

@@ -1,4 +1,5 @@
 import type { Sport } from "@shared/schema";
+import { getScoreboard, getAllSportsScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 
 export interface LiveGame {
   id: string;
@@ -17,6 +18,12 @@ export interface LiveGame {
     spread: number;
     total: number;
   };
+  venue?: string;
+  broadcast?: string;
+  homeRecord?: string;
+  awayRecord?: string;
+  homeLogo?: string;
+  awayLogo?: string;
 }
 
 export interface GameResult {
@@ -30,274 +37,180 @@ export interface GameResult {
   completedAt: Date;
 }
 
-const NBA_TEAMS = [
-  "Lakers", "Celtics", "Warriors", "Nuggets", "Bucks", "Heat", "76ers", "Knicks",
-  "Suns", "Mavericks", "Cavaliers", "Kings", "Pelicans", "Clippers", "Nets", "Hawks"
-];
-
-const NFL_TEAMS = [
-  "Chiefs", "49ers", "Eagles", "Cowboys", "Bills", "Dolphins", "Ravens", "Bengals",
-  "Lions", "Packers", "Jets", "Patriots", "Steelers", "Browns", "Raiders", "Chargers"
-];
-
-const MLB_TEAMS = [
-  "Yankees", "Red Sox", "Dodgers", "Giants", "Astros", "Rangers", "Braves", "Phillies",
-  "Cubs", "Cardinals", "Mets", "Padres", "Mariners", "Orioles", "Twins", "Guardians"
-];
-
-const NHL_TEAMS = [
-  "Bruins", "Maple Leafs", "Rangers", "Devils", "Avalanche", "Stars", "Panthers", "Lightning",
-  "Oilers", "Flames", "Hurricanes", "Capitals", "Penguins", "Red Wings", "Kraken", "Golden Knights"
-];
-
-const NCAAB_TEAMS = [
-  "Duke", "North Carolina", "Kentucky", "Kansas", "UCLA", "Gonzaga", "Villanova", "UConn",
-  "Michigan State", "Michigan", "Arizona", "Purdue", "Houston", "Alabama", "Tennessee", "Baylor"
-];
-
-const NCAAF_TEAMS = [
-  "Alabama", "Georgia", "Ohio State", "Michigan", "Clemson", "Florida State", "Texas", "Oklahoma",
-  "USC", "Notre Dame", "Oregon", "Penn State", "LSU", "Florida", "Auburn", "Tennessee"
-];
-
-const TEAMS_BY_SPORT: Record<Sport, string[]> = {
-  NBA: NBA_TEAMS,
-  NFL: NFL_TEAMS,
-  MLB: MLB_TEAMS,
-  NHL: NHL_TEAMS,
-  NCAAB: NCAAB_TEAMS,
-  NCAAF: NCAAF_TEAMS,
-};
-
-function getRandomTeams(sport: Sport): { home: string; away: string } {
-  const teams = TEAMS_BY_SPORT[sport];
-  const homeIdx = Math.floor(Math.random() * teams.length);
-  let awayIdx = Math.floor(Math.random() * teams.length);
-  while (awayIdx === homeIdx) {
-    awayIdx = Math.floor(Math.random() * teams.length);
-  }
-  return { home: teams[homeIdx], away: teams[awayIdx] };
+function mapESPNStatus(state: string, completed: boolean): LiveGame["status"] {
+  if (completed) return "final";
+  if (state === "in") return "in_progress";
+  if (state === "post") return "final";
+  return "scheduled";
 }
 
-function generateRealisticScore(sport: Sport, status: "in_progress" | "final"): { home: number; away: number } {
-  const multiplier = status === "final" ? 1 : Math.random() * 0.8 + 0.2;
-  
-  switch (sport) {
-    case "NBA":
-      return {
-        home: Math.floor((85 + Math.random() * 40) * multiplier),
-        away: Math.floor((85 + Math.random() * 40) * multiplier),
-      };
-    case "NFL":
-      return {
-        home: Math.floor((14 + Math.random() * 24) * multiplier),
-        away: Math.floor((14 + Math.random() * 24) * multiplier),
-      };
-    case "MLB":
-      return {
-        home: Math.floor((2 + Math.random() * 8) * multiplier),
-        away: Math.floor((2 + Math.random() * 8) * multiplier),
-      };
-    case "NHL":
-      return {
-        home: Math.floor((1 + Math.random() * 5) * multiplier),
-        away: Math.floor((1 + Math.random() * 5) * multiplier),
-      };
-    case "NCAAB":
-      return {
-        home: Math.floor((55 + Math.random() * 35) * multiplier),
-        away: Math.floor((55 + Math.random() * 35) * multiplier),
-      };
-    case "NCAAF":
-      return {
-        home: Math.floor((14 + Math.random() * 28) * multiplier),
-        away: Math.floor((14 + Math.random() * 28) * multiplier),
-      };
-    default:
-      return { home: 0, away: 0 };
+function espnGameToLiveGame(game: ESPNScoreboardGame): LiveGame {
+  const status = mapESPNStatus(game.status.state, game.status.completed);
+
+  let odds: LiveGame["odds"] | undefined;
+  if (game.odds) {
+    const spreadNum = parseSpread(game.odds.spread);
+    odds = {
+      homeMoneyline: game.odds.homeMoneyline || estimateMoneyline(spreadNum, true),
+      awayMoneyline: game.odds.awayMoneyline || estimateMoneyline(spreadNum, false),
+      spread: spreadNum,
+      total: game.odds.overUnder || estimateTotal(game.sport),
+    };
+  } else {
+    const spread = estimateSpreadFromRecords(game.homeTeam.record, game.awayTeam.record, game.sport);
+    odds = {
+      homeMoneyline: estimateMoneyline(spread, true),
+      awayMoneyline: estimateMoneyline(spread, false),
+      spread,
+      total: estimateTotal(game.sport),
+    };
   }
+
+  return {
+    id: game.id,
+    sport: game.sport,
+    homeTeam: game.homeTeam.displayName,
+    awayTeam: game.awayTeam.displayName,
+    homeScore: game.homeTeam.score,
+    awayScore: game.awayTeam.score,
+    status,
+    startTime: new Date(game.date),
+    period: status === "in_progress" ? game.status.shortDetail : undefined,
+    timeRemaining: status === "in_progress" ? game.status.clock : undefined,
+    odds,
+    venue: game.venue?.name,
+    broadcast: game.broadcast,
+    homeRecord: game.homeTeam.record,
+    awayRecord: game.awayTeam.record,
+    homeLogo: game.homeTeam.logo,
+    awayLogo: game.awayTeam.logo,
+  };
 }
 
-function generateMoneyline(): number {
-  const isFavorite = Math.random() > 0.5;
-  if (isFavorite) {
-    return -(100 + Math.floor(Math.random() * 200));
-  }
-  return 100 + Math.floor(Math.random() * 200);
+function parseSpread(spreadStr?: string): number {
+  if (!spreadStr) return 0;
+  const match = spreadStr.match(/([-+]?\d+\.?\d*)/);
+  return match ? parseFloat(match[1]) : 0;
+}
+
+function estimateSpreadFromRecords(homeRecord?: string, awayRecord?: string, sport?: Sport): number {
+  const parseWinPct = (record?: string): number => {
+    if (!record) return 0.5;
+    const parts = record.split("-");
+    const wins = parseInt(parts[0]) || 0;
+    const losses = parseInt(parts[1]) || 0;
+    const total = wins + losses;
+    return total > 0 ? wins / total : 0.5;
+  };
+
+  const homePct = parseWinPct(homeRecord);
+  const awayPct = parseWinPct(awayRecord);
+  const diff = homePct - awayPct;
+
+  const multiplier = sport === "NFL" ? 14 : sport === "NBA" ? 12 : sport === "MLB" ? 3 : sport === "NHL" ? 3 : 10;
+  const homeAdv = sport === "NFL" ? 3 : sport === "NBA" ? 3.5 : sport === "MLB" ? 0.5 : 0.5;
+
+  return Math.round((diff * multiplier + homeAdv) * 2) / 2;
+}
+
+function estimateMoneyline(spread: number, isHome: boolean): number {
+  const adjustedSpread = isHome ? -spread : spread;
+  if (Math.abs(adjustedSpread) < 1) return -110;
+  if (adjustedSpread < -10) return -(Math.floor(Math.abs(adjustedSpread) * 20) + 100);
+  if (adjustedSpread < 0) return -(Math.floor(Math.abs(adjustedSpread) * 15) + 100);
+  if (adjustedSpread > 10) return Math.floor(adjustedSpread * 18) + 100;
+  return Math.floor(adjustedSpread * 12) + 100;
+}
+
+function estimateTotal(sport: Sport): number {
+  const totals: Record<string, number> = {
+    NBA: 224, NFL: 44, MLB: 8.5, NHL: 6, NCAAB: 142, NCAAF: 48,
+  };
+  return totals[sport] || 200;
 }
 
 class LiveSportsDataService {
-  private games: Map<string, LiveGame> = new Map();
-  private completedGames: GameResult[] = [];
-  private simulationInterval: NodeJS.Timeout | null = null;
   private listeners: Set<(games: LiveGame[]) => void> = new Set();
+  private refreshInterval: NodeJS.Timeout | null = null;
+  private cachedGames: LiveGame[] = [];
+  private completedGames: GameResult[] = [];
+  private lastFetch = 0;
 
   constructor() {
-    this.initializeGames();
+    this.loadInitialData();
   }
 
-  private initializeGames() {
-    const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
-    
-    for (const sport of sports) {
-      const gamesCount = 2 + Math.floor(Math.random() * 3);
-      
-      for (let i = 0; i < gamesCount; i++) {
-        const teams = getRandomTeams(sport);
-        const status = Math.random() > 0.3 ? "in_progress" : "scheduled";
-        const scores = status === "in_progress" ? generateRealisticScore(sport, "in_progress") : { home: 0, away: 0 };
-        
-        const game: LiveGame = {
-          id: `${sport}-${Date.now()}-${i}`,
-          sport,
-          homeTeam: teams.home,
-          awayTeam: teams.away,
-          homeScore: scores.home,
-          awayScore: scores.away,
-          status,
-          startTime: new Date(Date.now() - Math.random() * 2 * 60 * 60 * 1000),
-          period: status === "in_progress" ? this.getRandomPeriod(sport) : undefined,
-          timeRemaining: status === "in_progress" ? `${Math.floor(Math.random() * 12)}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}` : undefined,
-          odds: {
-            homeMoneyline: generateMoneyline(),
-            awayMoneyline: generateMoneyline(),
-            spread: (Math.random() > 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * 10) + 0.5),
-            total: this.getTotalLine(sport),
-          },
-        };
-        
-        this.games.set(game.id, game);
-      }
-    }
-  }
+  private async loadInitialData() {
+    try {
+      const espnGames = await getAllSportsScoreboard();
+      this.cachedGames = espnGames.map(espnGameToLiveGame);
 
-  private getRandomPeriod(sport: Sport): string {
-    switch (sport) {
-      case "NBA":
-      case "NCAAB":
-        return `Q${1 + Math.floor(Math.random() * 4)}`;
-      case "NFL":
-      case "NCAAF":
-        return `Q${1 + Math.floor(Math.random() * 4)}`;
-      case "MLB":
-        return `${1 + Math.floor(Math.random() * 9)} Inn`;
-      case "NHL":
-        return `P${1 + Math.floor(Math.random() * 3)}`;
-      default:
-        return "Live";
-    }
-  }
+      this.completedGames = this.cachedGames
+        .filter(g => g.status === "final")
+        .map(g => ({
+          gameId: g.id,
+          sport: g.sport,
+          homeTeam: g.homeTeam,
+          awayTeam: g.awayTeam,
+          homeScore: g.homeScore,
+          awayScore: g.awayScore,
+          winner: g.homeScore > g.awayScore ? "home" as const : g.homeScore < g.awayScore ? "away" as const : "tie" as const,
+          completedAt: g.startTime,
+        }));
 
-  private getTotalLine(sport: Sport): number {
-    switch (sport) {
-      case "NBA": return 210 + Math.floor(Math.random() * 30);
-      case "NFL": return 40 + Math.floor(Math.random() * 15);
-      case "MLB": return 7 + Math.floor(Math.random() * 4);
-      case "NHL": return 5 + Math.floor(Math.random() * 2);
-      case "NCAAB": return 130 + Math.floor(Math.random() * 20);
-      case "NCAAF": return 45 + Math.floor(Math.random() * 20);
-      default: return 0;
+      this.lastFetch = Date.now();
+      console.log(`[LiveSports] Loaded ${this.cachedGames.length} real games from ESPN`);
+    } catch (error) {
+      console.error("[LiveSports] Error loading initial data:", error);
     }
   }
 
   startSimulation() {
-    if (this.simulationInterval) return;
+    if (this.refreshInterval) return;
 
-    this.simulationInterval = setInterval(() => {
-      this.updateGames();
-    }, 30000);
+    this.refreshInterval = setInterval(async () => {
+      await this.refreshFromESPN();
+    }, 60000);
 
-    console.log("[LiveSports] Real-time game simulation started");
+    console.log("[LiveSports] Real-time ESPN data refresh started (60s interval)");
   }
 
   stopSimulation() {
-    if (this.simulationInterval) {
-      clearInterval(this.simulationInterval);
-      this.simulationInterval = null;
-      console.log("[LiveSports] Game simulation stopped");
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+      this.refreshInterval = null;
+      console.log("[LiveSports] ESPN data refresh stopped");
     }
   }
 
-  private updateGames() {
-    const updatedGames: LiveGame[] = [];
-    const gameEntries = Array.from(this.games.entries());
+  private async refreshFromESPN() {
+    try {
+      const espnGames = await getAllSportsScoreboard();
+      const previousIds = new Set(this.cachedGames.filter(g => g.status === "final").map(g => g.id));
 
-    for (const [id, game] of gameEntries) {
-      if (game.status === "scheduled") {
-        if (Math.random() > 0.7) {
-          game.status = "in_progress";
-          game.period = this.getRandomPeriod(game.sport);
-          game.timeRemaining = "12:00";
-        }
-      } else if (game.status === "in_progress") {
-        const scoreIncrease = Math.random();
-        if (scoreIncrease > 0.6) {
-          game.homeScore += this.getScoreIncrement(game.sport);
-        }
-        if (scoreIncrease > 0.5) {
-          game.awayScore += this.getScoreIncrement(game.sport);
-        }
+      this.cachedGames = espnGames.map(espnGameToLiveGame);
 
-        if (Math.random() > 0.85) {
-          game.status = "final";
-          const finalScores = generateRealisticScore(game.sport, "final");
-          game.homeScore = Math.max(game.homeScore, finalScores.home);
-          game.awayScore = Math.max(game.awayScore, finalScores.away);
+      const newlyCompleted = this.cachedGames.filter(
+        g => g.status === "final" && !previousIds.has(g.id)
+      );
 
-          const result: GameResult = {
-            gameId: game.id,
-            sport: game.sport,
-            homeTeam: game.homeTeam,
-            awayTeam: game.awayTeam,
-            homeScore: game.homeScore,
-            awayScore: game.awayScore,
-            winner: game.homeScore > game.awayScore ? "home" : game.homeScore < game.awayScore ? "away" : "tie",
-            completedAt: new Date(),
-          };
-          this.completedGames.push(result);
-
-          const teams = getRandomTeams(game.sport);
-          const newGame: LiveGame = {
-            id: `${game.sport}-${Date.now()}-new`,
-            sport: game.sport,
-            homeTeam: teams.home,
-            awayTeam: teams.away,
-            homeScore: 0,
-            awayScore: 0,
-            status: "scheduled",
-            startTime: new Date(Date.now() + Math.random() * 2 * 60 * 60 * 1000),
-            odds: {
-              homeMoneyline: generateMoneyline(),
-              awayMoneyline: generateMoneyline(),
-              spread: (Math.random() > 0.5 ? -1 : 1) * (1 + Math.floor(Math.random() * 10) + 0.5),
-              total: this.getTotalLine(game.sport),
-            },
-          };
-          this.games.delete(id);
-          this.games.set(newGame.id, newGame);
-        }
+      for (const game of newlyCompleted) {
+        this.completedGames.push({
+          gameId: game.id,
+          sport: game.sport,
+          homeTeam: game.homeTeam,
+          awayTeam: game.awayTeam,
+          homeScore: game.homeScore,
+          awayScore: game.awayScore,
+          winner: game.homeScore > game.awayScore ? "home" : game.homeScore < game.awayScore ? "away" : "tie",
+          completedAt: new Date(),
+        });
       }
 
-      updatedGames.push(game);
-    }
-
-    this.notifyListeners();
-  }
-
-  private getScoreIncrement(sport: Sport): number {
-    switch (sport) {
-      case "NBA":
-      case "NCAAB":
-        return Math.floor(Math.random() * 3) + 1;
-      case "NFL":
-      case "NCAAF":
-        return [3, 6, 7][Math.floor(Math.random() * 3)];
-      case "MLB":
-        return 1;
-      case "NHL":
-        return 1;
-      default:
-        return 1;
+      this.lastFetch = Date.now();
+      this.notifyListeners();
+    } catch (error) {
+      console.error("[LiveSports] Error refreshing from ESPN:", error);
     }
   }
 
@@ -312,11 +225,11 @@ class LiveSportsDataService {
   }
 
   getLiveGames(): LiveGame[] {
-    return Array.from(this.games.values());
+    return [...this.cachedGames];
   }
 
   getGamesBySport(sport: Sport): LiveGame[] {
-    return this.getLiveGames().filter(g => g.sport === sport);
+    return this.cachedGames.filter(g => g.sport === sport);
   }
 
   getCompletedGames(): GameResult[] {
@@ -331,10 +244,8 @@ class LiveSportsDataService {
     this.completedGames = [];
   }
 
-  refreshGames() {
-    this.games.clear();
-    this.initializeGames();
-    this.notifyListeners();
+  async refreshGames() {
+    await this.refreshFromESPN();
   }
 }
 

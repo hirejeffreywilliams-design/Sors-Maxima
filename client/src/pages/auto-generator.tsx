@@ -32,9 +32,10 @@ import {
   HelpCircle,
   Bell
 } from "lucide-react";
-import { generateTickets, type GeneratedTicket, type TicketRequest } from "@/lib/ticket-orchestrator";
-import { analyzeTicket, type TicketFusion } from "@/lib/quantum-fusion-engine";
+import type { GeneratedTicket } from "@/lib/ticket-orchestrator";
+import type { TicketFusion } from "@/lib/quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { BettingInsights } from "@/components/betting-insights";
@@ -43,6 +44,7 @@ import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/qua
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { eventTracker } from "@/lib/event-tracker";
+import { useToast } from "@/hooks/use-toast";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -260,6 +262,7 @@ export default function AutoGenerator() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
+  const { toast } = useToast();
   
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem("sors_tutorial_complete");
@@ -290,41 +293,52 @@ export default function AutoGenerator() {
     );
   };
   
+  const fetchTicketsFromBackend = async (
+    sports: Sport[],
+    reqBankroll: number,
+    reqRiskLevel: string,
+    reqMaxLegs: number,
+    reqIncludeProps: boolean,
+  ) => {
+    try {
+      const response = await apiRequest("POST", "/api/generate-tickets", {
+        sports,
+        bankroll: reqBankroll,
+        riskLevel: reqRiskLevel,
+        maxLegs: reqMaxLegs,
+        includeProps: reqIncludeProps,
+      });
+      
+      const data = await response.json();
+      const generatedTickets: GeneratedTicket[] = data.tickets || [];
+      
+      setTickets(generatedTickets);
+      eventTracker.trackTicketGenerate(sports, reqRiskLevel, reqBankroll);
+      
+      const fusions = generatedTickets
+        .map(ticket => ticket.fusionData)
+        .filter((f): f is TicketFusion => !!f);
+      setTicketFusions(fusions);
+      
+      setHasGenerated(true);
+    } catch (err) {
+      toast({
+        title: "Generation Error",
+        description: err instanceof Error ? err.message : "Failed to generate tickets. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+  
   const handleQuickPick = async () => {
     setIsGenerating(true);
     
     const quickSports: Sport[] = ["NBA", "NFL", "MLB"];
     setSelectedSports(quickSports);
     
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    const request: TicketRequest = {
-      sports: quickSports,
-      bankroll: 500,
-      riskLevel: "moderate",
-      maxLegs: 3,
-      includeProps: true,
-    };
-    
-    const generatedTickets = generateTickets(request);
-    setTickets(generatedTickets);
-    eventTracker.trackTicketGenerate(quickSports, "moderate", 500);
-    
-    const fusions = generatedTickets.map(ticket => 
-      analyzeTicket(
-        ticket.legs.map((leg, i) => ({
-          id: `leg-${i}`,
-          sport: ticket.sport,
-          description: `${leg.team} ${leg.market} ${leg.outcome}`,
-          odds: leg.americanOdds
-        })),
-        "moderate"
-      )
-    );
-    setTicketFusions(fusions);
-    
-    setHasGenerated(true);
-    setIsGenerating(false);
+    await fetchTicketsFromBackend(quickSports, 500, "moderate", 3, true);
   };
   
   const handleSetReminder = () => {
@@ -352,35 +366,7 @@ export default function AutoGenerator() {
     
     setIsGenerating(true);
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const request: TicketRequest = {
-      sports: selectedSports,
-      bankroll,
-      riskLevel,
-      maxLegs,
-      includeProps,
-    };
-    
-    const generatedTickets = generateTickets(request);
-    setTickets(generatedTickets);
-    eventTracker.trackTicketGenerate(selectedSports, riskLevel, bankroll);
-    
-    const fusions = generatedTickets.map(ticket => 
-      analyzeTicket(
-        ticket.legs.map((leg, i) => ({
-          id: `leg-${i}`,
-          sport: ticket.sport,
-          description: `${leg.team} ${leg.market} ${leg.outcome}`,
-          odds: leg.americanOdds
-        })),
-        riskLevel as "conservative" | "moderate" | "aggressive"
-      )
-    );
-    setTicketFusions(fusions);
-    
-    setHasGenerated(true);
-    setIsGenerating(false);
+    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps);
   };
   
   const getRiskDescription = (level: string) => {

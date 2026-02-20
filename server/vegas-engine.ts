@@ -1,4 +1,5 @@
 import type { Sport } from "@shared/schema";
+import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 
 export interface VegasFactor {
   name: string;
@@ -271,8 +272,36 @@ function generateSharpMoneyData(): { sharpMoney: number; publicMoney: number; li
   };
 }
 
-export function generateVegasPredictions(sport?: Sport): VegasPrediction[] {
-  const games: Array<{ home: string; away: string; sport: Sport }> = [
+let vegasGamesCache: { games: Array<{ home: string; away: string; sport: Sport }>; timestamp: number } | null = null;
+
+async function loadRealGames(): Promise<Array<{ home: string; away: string; sport: Sport }>> {
+  if (vegasGamesCache && Date.now() - vegasGamesCache.timestamp < 5 * 60 * 1000) {
+    return vegasGamesCache.games;
+  }
+  try {
+    const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
+    const allGames: Array<{ home: string; away: string; sport: Sport }> = [];
+
+    for (const s of sports) {
+      const espnGames = await getMultiDayScoreboard(s, 3);
+      const upcoming = espnGames.filter(g => g.status.state === "pre" || g.status.state === "in");
+      for (const g of upcoming) {
+        allGames.push({
+          home: g.homeTeam.shortDisplayName || g.homeTeam.displayName,
+          away: g.awayTeam.shortDisplayName || g.awayTeam.displayName,
+          sport: s,
+        });
+      }
+    }
+    vegasGamesCache = { games: allGames, timestamp: Date.now() };
+    return allGames;
+  } catch {
+    return getStaticFallbackGames();
+  }
+}
+
+function getStaticFallbackGames(): Array<{ home: string; away: string; sport: Sport }> {
+  return [
     { home: "Celtics", away: "Lakers", sport: "NBA" },
     { home: "Bucks", away: "Warriors", sport: "NBA" },
     { home: "Nuggets", away: "Suns", sport: "NBA" },
@@ -290,6 +319,10 @@ export function generateVegasPredictions(sport?: Sport): VegasPrediction[] {
     { home: "Golden Knights", away: "Stars", sport: "NHL" },
     { home: "Lightning", away: "Maple Leafs", sport: "NHL" },
   ];
+}
+
+export async function generateVegasPredictions(sport?: Sport): Promise<VegasPrediction[]> {
+  const games = await loadRealGames();
   
   const filteredGames = sport ? games.filter(g => g.sport === sport) : games;
   const config = DEFAULT_CONFIG;
@@ -422,15 +455,15 @@ export function generateVegasPredictions(sport?: Sport): VegasPrediction[] {
   }).filter(p => p.edge > 1).sort((a, b) => b.edge - a.edge);
 }
 
-export function getVegasInsights(): {
+export async function getVegasInsights(): Promise<{
   marketEfficiency: number;
   sharpSidePercentage: number;
   topEdgePlays: number;
   steamMoveCount: number;
   reverseLineMoveCount: number;
   averageHold: number;
-} {
-  const predictions = generateVegasPredictions();
+}> {
+  const predictions = await generateVegasPredictions();
   
   return {
     marketEfficiency: Math.round(85 + Math.random() * 10),
