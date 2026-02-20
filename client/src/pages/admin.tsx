@@ -53,8 +53,6 @@ import {
   TrendingDown,
   Zap,
   Eye,
-  PanelLeftClose,
-  PanelLeft,
   Bot,
   Server,
   Cpu,
@@ -62,7 +60,7 @@ import {
   X,
   type LucideIcon
 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -83,7 +81,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface SubscriptionStats {
   total: number;
@@ -205,9 +210,6 @@ const navCategories: NavCategory[] = [
 
 export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [navSearch, setNavSearch] = useState("");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>("ops");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -219,8 +221,6 @@ export default function AdminDashboard() {
   const [alertsExpanded, setAlertsExpanded] = useState(true);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [location] = useLocation();
-
   const { data: snapshot, isLoading: snapshotLoading } = useQuery<any>({
     queryKey: ["/api/admin/console-snapshot"],
     refetchInterval: 30000,
@@ -255,16 +255,6 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/subscription-stats'],
   });
 
-  const filteredNavCategories = useMemo(() => {
-    if (!navSearch.trim()) return navCategories;
-    const q = navSearch.toLowerCase();
-    return navCategories.map(cat => ({
-      ...cat,
-      items: cat.items.filter(item => 
-        item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)
-      ),
-    })).filter(cat => cat.items.length > 0);
-  }, [navSearch]);
 
   const visibleAlerts = useMemo(() => {
     if (!snapshot?.alerts) return [];
@@ -411,9 +401,6 @@ export default function AdminDashboard() {
   const bannedCount = users.filter(u => u.isBanned).length;
   const highRiskCount = users.filter(u => u.riskScore >= 50).length;
 
-  const toggleCategory = (id: string) => {
-    setExpandedCategory(prev => prev === id ? null : id);
-  };
 
   const getAlertBorderColor = (severity: string) => {
     switch (severity) {
@@ -434,165 +421,44 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-full flex" data-testid="admin-command-center" data-view="command">
-      <aside
-        className={`hidden md:flex flex-col border-r bg-muted/30 transition-all duration-200 shrink-0 ${
-          sidebarCollapsed ? 'w-16' : 'w-64'
-        }`}
-        data-testid="admin-sidebar"
-      >
-        <div className="p-3 border-b flex items-center gap-2">
-          {!sidebarCollapsed && (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-7 h-7 rounded-md shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">Command Center</p>
-                <p className="text-[10px] text-muted-foreground">Admin Panel</p>
-              </div>
-            </div>
-          )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-7 w-7 shrink-0"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            data-testid="button-toggle-sidebar"
-          >
-            {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
-          </Button>
-        </div>
-
-        {!sidebarCollapsed && (
-          <div className="p-2">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Find a page..."
-                value={navSearch}
-                onChange={(e) => setNavSearch(e.target.value)}
-                className="h-8 pl-8 text-xs bg-background"
-                data-testid="input-admin-nav-search"
-              />
-            </div>
-          </div>
-        )}
-
-        <ScrollArea className="flex-1">
-          <nav className="p-2 space-y-1">
-            {!sidebarCollapsed && (
-              <div className="mb-2">
-                <div
-                  className={`flex items-center gap-2 px-2.5 py-2 rounded-md text-sm font-medium cursor-default ${
-                    location === '/admin' ? 'bg-primary/10 text-primary' : ''
-                  }`}
-                  data-testid="nav-admin-home"
-                >
-                  <LayoutDashboard className="h-4 w-4 shrink-0" />
-                  <span>Dashboard</span>
-                </div>
-              </div>
-            )}
-
-            {sidebarCollapsed ? (
-              <div className="space-y-1 flex flex-col items-center">
-                <div className="p-2 rounded-md bg-primary/10 mb-1" data-testid="nav-admin-home-collapsed">
-                  <LayoutDashboard className="h-4 w-4 text-primary" />
-                </div>
-                {navCategories.map((cat) => (
-                  <div key={cat.id} className="space-y-1 flex flex-col items-center w-full">
-                    <div className="w-8 h-px bg-border my-1" />
-                    {cat.items.map((item) => (
-                      <Link key={item.href} href={item.href}>
-                        <div
-                          className="p-2 rounded-md transition-colors hover:bg-muted cursor-pointer"
-                          title={item.label}
-                          data-testid={item.testId}
-                        >
-                          <item.icon className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              filteredNavCategories.map((category) => {
-                const isExpanded = expandedCategory === category.id;
-                return (
-                  <div key={category.id} data-testid={`section-${category.id}`}>
-                    <button
-                      onClick={() => toggleCategory(category.id)}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
-                      data-testid={`toggle-${category.id}`}
-                    >
-                      <category.icon className="h-3.5 w-3.5 shrink-0" />
-                      <span className="flex-1 text-left">{category.title}</span>
-                      <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
-                    </button>
-                    {isExpanded && (
-                      <div className="ml-2 mt-0.5 space-y-0.5 border-l border-border/50 pl-2">
-                        {category.items.map((item) => (
-                          <Link key={item.href} href={item.href}>
-                            <div
-                              className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors hover:bg-muted cursor-pointer group"
-                              data-testid={item.testId}
-                            >
-                              <item.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
-                              <div className="min-w-0 flex-1">
-                                <p className="text-sm truncate">{item.label}</p>
-                              </div>
-                              <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+    <div className="min-h-full" data-testid="admin-command-center" data-view="command">
+      <div className="sticky top-14 z-30 bg-background border-b">
+        <div className="px-4 sm:px-6">
+          <div className="flex items-center justify-between h-12 gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-sm font-semibold whitespace-nowrap" data-testid="heading-admin">
+                Command Center
+              </h1>
+              <div className="hidden sm:flex items-center gap-1 overflow-x-auto">
+                {navCategories.map((category) => (
+                  <DropdownMenu key={category.id}>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="text-xs h-8 gap-1.5 shrink-0" data-testid={`dropdown-${category.id}`}>
+                        <category.icon className="h-3.5 w-3.5" />
+                        {category.title}
+                        <ChevronDown className="h-3 w-3 opacity-60" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wider">{category.title}</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {category.items.map((item) => (
+                        <DropdownMenuItem key={item.href} asChild className="gap-2 cursor-pointer" data-testid={item.testId}>
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4 text-muted-foreground" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm">{item.label}</p>
+                              <p className="text-xs text-muted-foreground truncate">{item.description}</p>
                             </div>
                           </Link>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </nav>
-        </ScrollArea>
-
-        {!sidebarCollapsed && (
-          <div className="p-3 border-t space-y-2">
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-center p-2 rounded-md bg-background border border-border/50">
-                <p className="text-lg font-bold" data-testid="sidebar-stat-users">{users.length}</p>
-                <p className="text-[10px] text-muted-foreground">Users</p>
-              </div>
-              <div className="text-center p-2 rounded-md bg-background border border-border/50">
-                <p className="text-lg font-bold" data-testid="sidebar-stat-alerts">{fraudAlerts.length}</p>
-                <p className="text-[10px] text-muted-foreground">Alerts</p>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ))}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="text-center p-2 rounded-md bg-background border border-border/50">
-                <p className="text-lg font-bold" data-testid="sidebar-stat-banned">{bannedCount}</p>
-                <p className="text-[10px] text-muted-foreground">Banned</p>
-              </div>
-              <div className="text-center p-2 rounded-md bg-background border border-border/50">
-                <p className="text-lg font-bold" data-testid="sidebar-stat-errors">{errorStats?.last24Hours || 0}</p>
-                <p className="text-[10px] text-muted-foreground">Errors 24h</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </aside>
-
-      <div className="flex-1 min-w-0">
-        <div className="sticky top-14 z-30 bg-background border-b px-4 sm:px-6">
-          <div className="flex items-center justify-between h-12">
-            <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-2">
-                <img src={sorsMaximaLogo} alt="" className="w-6 h-6 rounded" />
-                <span className="text-sm font-semibold">Admin</span>
-              </div>
-              <h1 className="text-sm font-semibold hidden sm:block" data-testid="heading-admin">
-                Operations Command Center
-              </h1>
-            </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               {snapshot?.executive?.criticalAlerts > 0 && (
                 <Badge variant="destructive" className="text-xs" data-testid="badge-critical-alerts">
                   <AlertTriangle className="h-3 w-3 mr-1" />
@@ -605,24 +471,41 @@ export default function AdminDashboard() {
                   {errorStats?.last24Hours} Errors
                 </Badge>
               )}
-            </div>
-          </div>
-
-          <div className="md:hidden pb-2 overflow-x-auto">
-            <div className="flex gap-1 min-w-max">
-              {navCategories.flatMap(cat => cat.items.slice(0, 2)).map((item) => (
-                <Link key={item.href} href={item.href}>
-                  <Button variant="ghost" size="sm" className="text-xs h-7 gap-1 shrink-0" data-testid={`mobile-${item.testId}`}>
-                    <item.icon className="h-3 w-3" />
-                    {item.label}
-                  </Button>
-                </Link>
-              ))}
+              <Badge variant="outline" className="text-xs hidden md:flex" data-testid="stat-users-count">
+                <Users className="h-3 w-3 mr-1" />
+                {users.length} Users
+              </Badge>
             </div>
           </div>
         </div>
+        <div className="sm:hidden px-4 pb-2 overflow-x-auto">
+          <div className="flex gap-1 min-w-max">
+            {navCategories.map((category) => (
+              <DropdownMenu key={category.id}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="text-xs h-7 gap-1 shrink-0" data-testid={`mobile-dropdown-${category.id}`}>
+                    <category.icon className="h-3 w-3" />
+                    {category.title}
+                    <ChevronDown className="h-3 w-3 opacity-60" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {category.items.map((item) => (
+                    <DropdownMenuItem key={item.href} asChild className="gap-2 cursor-pointer" data-testid={`mobile-${item.testId}`}>
+                      <Link href={item.href}>
+                        <item.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                        <span className="text-sm">{item.label}</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ))}
+          </div>
+        </div>
+      </div>
 
-        <div className="p-4 sm:p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-6">
           {snapshotLoading ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -1500,7 +1383,6 @@ export default function AdminDashboard() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
 
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-md">

@@ -74,6 +74,83 @@ function AdminGuard({ component: Component, authState }: { component: React.Comp
   return <Component />;
 }
 
+function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+      onLogout();
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex h-14 items-center justify-between px-4 lg:px-6">
+          <div className="flex items-center gap-3">
+            <Link href="/admin">
+              <div className="flex items-center gap-2 cursor-pointer">
+                <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
+                <div className="hidden sm:block">
+                  <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
+                    Sors Maxima
+                  </span>
+                  <span className="text-xs text-muted-foreground ml-2">Admin</span>
+                </div>
+              </div>
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            {authState.username && (
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {authState.username}
+              </span>
+            )}
+            <ThemeToggle />
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="gap-2 text-xs" data-testid="button-exit-admin">
+                <Zap className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">User App</span>
+              </Button>
+            </Link>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2" data-testid="button-admin-logout">
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </Button>
+          </div>
+        </div>
+      </header>
+      <main className="min-h-[calc(100vh-3.5rem)]">
+        <Switch>
+          <Route path="/admin">{() => <AdminGuard component={AdminDashboard} authState={authState} />}</Route>
+          <Route path="/admin/diagnostics">{() => <AdminGuard component={AdminDiagnostics} authState={authState} />}</Route>
+          <Route path="/admin/marketing">{() => <AdminGuard component={AdminMarketing} authState={authState} />}</Route>
+          <Route path="/admin/security">{() => <AdminGuard component={AdminSecurity} authState={authState} />}</Route>
+          <Route path="/admin/growth">{() => <AdminGuard component={AdminGrowth} authState={authState} />}</Route>
+          <Route path="/admin/feature-flags">{() => <AdminGuard component={AdminFeatureFlags} authState={authState} />}</Route>
+          <Route path="/admin/model-performance">{() => <AdminGuard component={AdminModelPerformance} authState={authState} />}</Route>
+          <Route path="/admin/data-provenance">{() => <AdminGuard component={AdminDataProvenance} authState={authState} />}</Route>
+          <Route path="/admin/risk-register">{() => <AdminGuard component={AdminRiskRegister} authState={authState} />}</Route>
+          <Route path="/admin/financial-projections">{() => <AdminGuard component={AdminFinancialProjections} authState={authState} />}</Route>
+          <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
+          <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
+          <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
+          <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
+          <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
+          <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
+          <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
+          <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
+          <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
+          <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
+          <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
+          <Route component={NotFound} />
+        </Switch>
+      </main>
+    </div>
+  );
+}
+
 function Router({ authState }: { authState: AuthState }) {
   return (
     <Switch>
@@ -88,27 +165,6 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/live" component={Live} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/legal" component={LegalPage} />
-      <Route path="/admin">{() => <AdminGuard component={AdminDashboard} authState={authState} />}</Route>
-      <Route path="/admin/diagnostics">{() => <AdminGuard component={AdminDiagnostics} authState={authState} />}</Route>
-      <Route path="/admin/marketing">{() => <AdminGuard component={AdminMarketing} authState={authState} />}</Route>
-      <Route path="/admin/security">{() => <AdminGuard component={AdminSecurity} authState={authState} />}</Route>
-      <Route path="/admin/growth">{() => <AdminGuard component={AdminGrowth} authState={authState} />}</Route>
-      <Route path="/admin/feature-flags">{() => <AdminGuard component={AdminFeatureFlags} authState={authState} />}</Route>
-      <Route path="/admin/model-performance">{() => <AdminGuard component={AdminModelPerformance} authState={authState} />}</Route>
-      <Route path="/admin/data-provenance">{() => <AdminGuard component={AdminDataProvenance} authState={authState} />}</Route>
-      <Route path="/admin/risk-register">{() => <AdminGuard component={AdminRiskRegister} authState={authState} />}</Route>
-      <Route path="/admin/financial-projections">{() => <AdminGuard component={AdminFinancialProjections} authState={authState} />}</Route>
-      <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
-      <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
-      <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
-      <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
-      <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
-      <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
-      <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
-      <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
-      <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
-      <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
-      <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
@@ -154,9 +210,7 @@ const navItems: NavItem[] = [
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings", tooltip: "Notifications, responsible gaming, and backup" },
   { href: "/roadmap", icon: Map, label: "Roadmap", testId: "nav-roadmap", tooltip: "Product roadmap - See what's coming next" },
   { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing", tooltip: "Upgrade to Pro for unlimited features" },
-  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin dashboard - User management and stats", adminOnly: true },
-  { href: "/admin/diagnostics", icon: Brain, label: "Diagnostics", testId: "nav-diagnostics", tooltip: "AI-powered system diagnostics", adminOnly: true },
-  { href: "/training", icon: GraduationCap, label: "Training", testId: "nav-training", tooltip: "Algorithm Training Center - Test predictions before launch", adminOnly: true },
+  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
 
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
@@ -508,6 +562,10 @@ function AppContent() {
       return <LoginPage onLogin={handleLogin} />;
     }
     return <LandingPage />;
+  }
+
+  if (authState.isAdmin && location.startsWith('/admin')) {
+    return <AdminApp onLogout={() => setIsAuthenticated(false)} authState={authState} />;
   }
 
   return <AuthenticatedApp onLogout={() => setIsAuthenticated(false)} authState={authState} />;
