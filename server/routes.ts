@@ -1028,7 +1028,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  // ========== Community / Tipster Routes ==========
+  // === Community / Tipster Routes ===
   
   // Get all communities
   app.get("/api/communities", (_req, res) => {
@@ -1676,7 +1676,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  // ========== LIVE SPORTS DATA API ==========
+  // === LIVE SPORTS DATA API ===
   
   // Get live odds for a specific sport
   app.get("/api/live/odds/:sport", async (req, res) => {
