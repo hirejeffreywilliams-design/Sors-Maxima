@@ -68,6 +68,13 @@ Key features include:
 - **Export to Sportsbook**: Generate formatted bet slips for 6 major sportsbooks (DraftKings, FanDuel, BetMGM, Caesars, PointsBet, BetRivers) with copy-to-clipboard and deep linking. Located in Pro Tools.
 - **Live Center**: Features a momentum tracker, scheme recognition (live mode), hedge calculator, AI assistant, CLV tracker, public vs. sharp money insights, cash-out advisor, and live chat.
 - **Admin Dashboards**: For user management, fraud detection, subscription stats, AI-powered quantum diagnostics, and AI marketing tools.
+- **Cookie Consent Banner**: GDPR/CCPA compliant cookie consent with localStorage persistence and privacy policy link.
+- **Command Palette**: Global search (Ctrl/Cmd+K) indexing all pages, tools, and features with keyboard shortcut access.
+- **Help Center**: Searchable FAQ page with 20+ categorized questions covering all platform features. Publicly accessible.
+- **User Profile Page**: Account management with data export (GDPR), account deletion, password change, and active session management.
+- **What's New / Changelog**: Version history page showing all platform updates. Publicly accessible.
+- **Feedback Widget**: In-app floating feedback button for submitting feature requests, bug reports, and general feedback.
+- **Session Management**: View and revoke active login sessions from the Profile page.
 
 ## External Dependencies
 - **Frontend Framework**: React
@@ -124,6 +131,9 @@ The application implements multi-layered security for handling user financial da
 Other routes (accessible but not in main nav):
 - /builder - Manual Parlay Builder
 - /legal - Legal compliance (Terms, Privacy, Gambling Disclaimer) - PUBLIC
+- /help - Help Center with searchable FAQ - PUBLIC
+- /profile - User Profile with account management, data export, session control
+- /changelog - What's New / version history - PUBLIC
 
 ## Running the App
 The app runs on port 5000 with `npm run dev`. The frontend and backend are served from the same Express server via Vite middleware.

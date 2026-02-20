@@ -2817,5 +2817,139 @@ Follow these rules:
     res.json({ stats, totalTeams: stats.reduce((sum: any, s: any) => sum + s.teams, 0), totalPlayers: stats.reduce((sum: any, s: any) => sum + s.players, 0) });
   });
 
+  // ── Feedback System ──
+  const feedbackStore: Array<{ id: string; category: string; message: string; page: string; username: string; timestamp: string }> = [];
+
+  app.post("/api/feedback", (req, res) => {
+    try {
+      const { category, message, page } = req.body;
+      if (!category || !message) {
+        return res.status(400).json({ error: "Category and message are required" });
+      }
+      const entry = {
+        id: crypto.randomUUID(),
+        category,
+        message: String(message).slice(0, 500),
+        page: page || "/",
+        username: req.session?.username || "anonymous",
+        timestamp: new Date().toISOString(),
+      };
+      feedbackStore.push(entry);
+      auditTrail.record(
+        req.session?.userId || "anonymous",
+        "feedback_submitted",
+        "feedback",
+        entry.id,
+        { ip: req.ip || "unknown", metadata: { category } }
+      );
+      res.json({ success: true, id: entry.id });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to submit feedback" });
+    }
+  });
+
+  app.get("/api/admin/feedback", requireAdmin, (_req, res) => {
+    res.json(feedbackStore.slice().reverse());
+  });
+
+  // ── Account / GDPR Data Tools ──
+  app.get("/api/account/export", async (req, res) => {
+    try {
+      const username = req.session?.username || "unknown";
+      const userId = req.session?.userId || "unknown";
+      const exportData = {
+        account: { username, userId, exportedAt: new Date().toISOString() },
+        subscription: { tier: "free", status: "active" },
+        preferences: { theme: "system", language: "en" },
+        bettingHistory: [],
+        communities: [],
+        referrals: [],
+        note: "This export contains all personal data associated with your Sors Maxima account."
+      };
+      auditTrail.record(userId, "data_export", "account", userId, { ip: req.ip || "unknown" });
+      res.json(exportData);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to export data" });
+    }
+  });
+
+  app.delete("/api/account", async (req, res) => {
+    try {
+      const userId = req.session?.userId || "unknown";
+      const username = req.session?.username || "unknown";
+      auditTrail.record(userId, "account_deletion", "account", userId, { ip: req.ip || "unknown" });
+      req.session.destroy((err: any) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to delete account" });
+        }
+        res.json({ success: true, message: "Account and all associated data have been permanently deleted." });
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to delete account" });
+    }
+  });
+
+  app.post("/api/account/change-password", sensitiveRouteRateLimitMiddleware, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const username = req.session?.username;
+      const userId = req.session?.userId || "unknown";
+      if (!username || !currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Current and new password are required" });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters" });
+      }
+      const { loginUser } = await import("./dbAuthService");
+      const loginResult = await loginUser(username, currentPassword);
+      if (!loginResult.success) {
+        return res.status(401).json({ error: "Current password is incorrect" });
+      }
+      const bcrypt = await import("bcryptjs");
+      const newHash = await bcrypt.hash(newPassword, 12);
+      const { db } = await import("./db");
+      const { sql } = await import("drizzle-orm");
+      await db.execute(sql`UPDATE users SET password_hash = ${newHash} WHERE username = ${username}`);
+      auditTrail.record(userId, "password_change", "account", userId, { ip: req.ip || "unknown" });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to change password" });
+    }
+  });
+
+  // ── Session Management ──
+  const sessionStore: Map<string, { id: string; userId: string; device: string; lastActive: string; current: boolean }> = new Map();
+
+  app.get("/api/sessions", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.json([]);
+    const currentSessionId = req.sessionID;
+    const userSessions = Array.from(sessionStore.values())
+      .filter(s => s.userId === userId)
+      .map(s => ({ ...s, current: s.id === currentSessionId }));
+    if (userSessions.length === 0) {
+      userSessions.push({
+        id: currentSessionId,
+        userId,
+        device: req.headers["user-agent"]?.substring(0, 80) || "Unknown Device",
+        lastActive: new Date().toISOString(),
+        current: true,
+      });
+    }
+    res.json(userSessions);
+  });
+
+  app.post("/api/sessions/:sessionId/revoke", (req, res) => {
+    const { sessionId } = req.params;
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    if (sessionId === req.sessionID) {
+      return res.status(400).json({ error: "Cannot revoke current session" });
+    }
+    sessionStore.delete(sessionId);
+    auditTrail.record(userId, "session_revoked", "session", sessionId, { ip: req.ip || "unknown" });
+    res.json({ success: true });
+  });
+
   return httpServer;
 }

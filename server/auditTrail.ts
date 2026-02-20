@@ -25,7 +25,12 @@ type AuditAction =
   | "login"
   | "logout"
   | "profile_update"
-  | "subscription_change";
+  | "subscription_change"
+  | "feedback_submitted"
+  | "data_export"
+  | "account_deletion"
+  | "password_change"
+  | "session_revoked";
 
 class AuditTrail {
   private entries: AuditEntry[] = [];

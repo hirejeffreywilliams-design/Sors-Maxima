@@ -30,11 +30,17 @@ import Analytics from "@/pages/analytics";
 import TipsterCommunities from "@/pages/tipster-communities";
 import TrainingCenter from "@/pages/training-center";
 import RostersPage from "@/pages/rosters";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound } from "lucide-react";
+import HelpCenter from "@/pages/help";
+import ProfilePage from "@/pages/profile";
+import ChangelogPage from "@/pages/changelog";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { NotificationsPanel } from "@/components/notifications-panel";
+import { CookieConsentBanner } from "@/components/cookie-consent";
+import { CommandPalette, SearchButton } from "@/components/command-palette";
+import { FeedbackWidget } from "@/components/feedback-widget";
 
 function Router() {
   return (
@@ -59,6 +65,9 @@ function Router() {
       <Route path="/tipster-communities" component={TipsterCommunities} />
       <Route path="/training" component={TrainingCenter} />
       <Route path="/rosters" component={RostersPage} />
+      <Route path="/help" component={HelpCenter} />
+      <Route path="/profile" component={ProfilePage} />
+      <Route path="/changelog" component={ChangelogPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -122,7 +131,30 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         </nav>
       </div>
       
-      <div className="border-t pt-4 pb-6 px-4 space-y-4">
+      <div className="border-t pt-4 pb-6 px-4 space-y-3">
+        <nav className="space-y-1 pb-2">
+          {[
+            { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
+            { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
+            { href: "/changelog", icon: Megaphone, label: "What's New", testId: "mobile-nav-changelog" },
+          ].map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href} onClick={onClose}>
+                <div 
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  data-testid={item.testId}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
         {authState.username && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{authState.username}</span>
@@ -249,6 +281,9 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           </div>
           
           <div className="flex items-center gap-2">
+            <div className="hidden sm:block">
+              <SearchButton />
+            </div>
             {authState.username && (
               <span className="text-sm text-muted-foreground hidden lg:inline">
                 {authState.username}
@@ -305,11 +340,13 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <footer className="hidden lg:block border-t bg-muted/30 py-4 px-6">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <span>© 2026 Sors Maxima</span>
               <Link href="/legal" className="hover:text-primary">Terms</Link>
               <Link href="/legal" className="hover:text-primary">Privacy</Link>
               <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
+              <Link href="/help" className="hover:text-primary">Help</Link>
+              <Link href="/changelog" className="hover:text-primary">What's New</Link>
             </div>
             <div className="flex items-center gap-4">
               <AffiliateDisclosure compact />
@@ -326,6 +363,9 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       </footer>
       
       <BottomNav authState={authState} />
+      <CommandPalette />
+      <CookieConsentBanner />
+      <FeedbackWidget />
     </div>
   );
 }
@@ -353,7 +393,7 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog',
   });
 
   useEffect(() => {
@@ -379,6 +419,14 @@ function AppContent() {
 
   if (location === '/pricing') {
     return <Pricing />;
+  }
+
+  if (location === '/help') {
+    return <HelpCenter />;
+  }
+
+  if (location === '/changelog') {
+    return <ChangelogPage />;
   }
 
   if (isLoading || isAuthenticated === null) {
