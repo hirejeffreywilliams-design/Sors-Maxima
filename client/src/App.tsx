@@ -52,7 +52,8 @@ import AdminAcquisition from "@/pages/admin-acquisition";
 import AdminAnalyticsDashboard from "@/pages/admin-analytics";
 import AdminOrchestration from "@/pages/admin-orchestration";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical } from "lucide-react";
+import PipelineIntelligence from "@/pages/pipeline";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -116,6 +117,7 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/profile" component={ProfilePage} />
       <Route path="/changelog" component={ChangelogPage} />
       <Route path="/sport-analysis" component={SportFactorAnalysis} />
+      <Route path="/pipeline" component={PipelineIntelligence} />
       <Route path="/landing" component={LandingPage} />
       <Route component={NotFound} />
     </Switch>
@@ -142,6 +144,7 @@ const navItems: NavItem[] = [
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, ML projections" },
   { href: "/sport-analysis", icon: FlaskConical, label: "Factors", testId: "nav-sport-analysis", tooltip: "Sport Factor Analysis - Deep dive into 100+ factors across 14 sports" },
+  { href: "/pipeline", icon: GitBranch, label: "Pipeline", testId: "nav-pipeline", tooltip: "Advanced Prediction Pipeline - 12-module intelligence engine" },
   { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },

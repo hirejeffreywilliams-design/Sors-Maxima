@@ -62,6 +62,20 @@ import {
   getSLAMap as getTicketSLAMap,
 } from "./ticketingEngine";
 import {
+  runPipeline,
+  getPipelineRuns,
+  getPipelineRun,
+  getPipelineConfig,
+  updatePipelineConfig,
+  getPipelineHealth,
+  getAlertHistory,
+  getAlertRules as getPipelineAlertRules,
+  acknowledgeAlert,
+  submitFeedback,
+  getExplanation,
+  getCanonicalStoreStats,
+} from "./predictionPipelineEngine";
+import {
   getAllRecommendations,
   getRecommendation,
   getRecommendationStats,
@@ -5211,6 +5225,75 @@ Follow these rules:
   });
 
   // ==================== END ORCHESTRATION SYSTEM ====================
+
+  // ==================== PREDICTION PIPELINE ENGINE ====================
+
+  app.post("/api/pipeline/run", async (req: Request, res: Response) => {
+    try {
+      const { sport, riskLevel, bankroll, maxCandidates, userId, eventData } = req.body;
+      if (!sport || !riskLevel || !bankroll) {
+        return res.status(400).json({ error: "sport, riskLevel, and bankroll are required" });
+      }
+      const result = await runPipeline({ sport, riskLevel, bankroll, maxCandidates, userId, eventData });
+      res.json(result);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Pipeline execution failed" });
+    }
+  });
+
+  app.get("/api/pipeline/health", (_req: Request, res: Response) => {
+    res.json(getPipelineHealth());
+  });
+
+  app.get("/api/pipeline/runs", (_req: Request, res: Response) => {
+    res.json(getPipelineRuns());
+  });
+
+  app.get("/api/pipeline/runs/:runId", (req: Request, res: Response) => {
+    const run = getPipelineRun(req.params.runId);
+    if (!run) return res.status(404).json({ error: "Run not found" });
+    res.json(run);
+  });
+
+  app.get("/api/pipeline/config", (_req: Request, res: Response) => {
+    res.json(getPipelineConfig());
+  });
+
+  app.patch("/api/pipeline/config", requireAdmin, (req: Request, res: Response) => {
+    res.json(updatePipelineConfig(req.body));
+  });
+
+  app.get("/api/pipeline/alerts", (_req: Request, res: Response) => {
+    res.json(getAlertHistory());
+  });
+
+  app.get("/api/pipeline/alert-rules", (_req: Request, res: Response) => {
+    res.json(getPipelineAlertRules());
+  });
+
+  app.post("/api/pipeline/alerts/:alertId/acknowledge", (req: Request, res: Response) => {
+    const success = acknowledgeAlert(req.params.alertId);
+    if (!success) return res.status(404).json({ error: "Alert not found" });
+    res.json({ success: true });
+  });
+
+  app.post("/api/pipeline/feedback", (req: Request, res: Response) => {
+    const { ticketId, outcome, userSatisfaction, resolutionTimestamp } = req.body;
+    if (!ticketId || !outcome) return res.status(400).json({ error: "ticketId and outcome required" });
+    res.json(submitFeedback({ ticketId, outcome, userSatisfaction, resolutionTimestamp: resolutionTimestamp || new Date().toISOString() }));
+  });
+
+  app.get("/api/pipeline/explain/:ticketId", (req: Request, res: Response) => {
+    const explanation = getExplanation(req.params.ticketId);
+    if (!explanation) return res.status(404).json({ error: "Ticket not found or not delivered" });
+    res.json(explanation);
+  });
+
+  app.get("/api/pipeline/data-store/stats", (_req: Request, res: Response) => {
+    res.json(getCanonicalStoreStats());
+  });
+
+  // ==================== END PREDICTION PIPELINE ====================
 
   return httpServer;
 }
