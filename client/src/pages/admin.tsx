@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   AlertTriangle, 
   Shield, 
@@ -41,9 +40,11 @@ import {
   TrendingUp,
   Zap,
   Eye,
+  PanelLeftClose,
+  PanelLeft,
   type LucideIcon
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
@@ -64,6 +65,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 interface SubscriptionStats {
   total: number;
@@ -126,65 +128,68 @@ interface NavItem {
 }
 
 interface NavCategory {
+  id: string;
   title: string;
-  description: string;
   icon: LucideIcon;
   items: NavItem[];
 }
 
 const navCategories: NavCategory[] = [
   {
+    id: "ops",
     title: "Operations",
-    description: "System health, monitoring & orchestration",
     icon: Settings,
     items: [
-      { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & feature governance", icon: Zap, testId: "link-admin-orchestration" },
-      { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs, health & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
-      { href: "/admin/diagnostics", label: "Diagnostics", description: "AI-powered quantum system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
-      { href: "/admin/security", label: "Error & Security", description: "Error codes, security headers & IP blocking", icon: Shield, testId: "link-admin-security" },
-      { href: "/admin/feature-flags", label: "Feature Flags", description: "Control feature rollouts & kill switches", icon: CheckCircle, testId: "link-admin-feature-flags" },
+      { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & governance", icon: Zap, testId: "link-admin-orchestration" },
+      { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
+      { href: "/admin/diagnostics", label: "Diagnostics", description: "AI quantum system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
+      { href: "/admin/security", label: "Error & Security", description: "Security headers & IP blocking", icon: Shield, testId: "link-admin-security" },
+      { href: "/admin/feature-flags", label: "Feature Flags", description: "Rollouts & kill switches", icon: CheckCircle, testId: "link-admin-feature-flags" },
     ],
   },
   {
+    id: "intel",
     title: "Intelligence",
-    description: "Models, data & risk management",
     icon: Target,
     items: [
-      { href: "/admin/model-performance", label: "Model Performance", description: "Prediction accuracy & calibration curves", icon: Target, testId: "link-admin-model-performance" },
-      { href: "/admin/data-provenance", label: "Data Lineage", description: "Data sources, pipeline health & contracts", icon: Database, testId: "link-admin-data-provenance" },
-      { href: "/admin/risk-register", label: "Risk & SOPs", description: "Operational risks & standard procedures", icon: ShieldAlert, testId: "link-admin-risk-register" },
-      { href: "/admin/financial-projections", label: "Financial Projections", description: "Revenue forecasts & unit economics", icon: DollarSign, testId: "link-admin-financial-projections" },
+      { href: "/admin/model-performance", label: "Model Performance", description: "Accuracy & calibration curves", icon: Target, testId: "link-admin-model-performance" },
+      { href: "/admin/data-provenance", label: "Data Lineage", description: "Sources, pipelines & contracts", icon: Database, testId: "link-admin-data-provenance" },
+      { href: "/admin/risk-register", label: "Risk & SOPs", description: "Risks & standard procedures", icon: ShieldAlert, testId: "link-admin-risk-register" },
+      { href: "/admin/financial-projections", label: "Financials", description: "Revenue forecasts & economics", icon: DollarSign, testId: "link-admin-financial-projections" },
     ],
   },
   {
-    title: "Growth & Marketing",
-    description: "Campaigns, segments & acquisition",
+    id: "growth",
+    title: "Growth",
     icon: TrendingUp,
     items: [
-      { href: "/admin/acquisition", label: "Acquisition", description: "Channel performance, CAC & LTV tracking", icon: BarChart3, testId: "link-admin-acquisition" },
-      { href: "/admin/marketing", label: "Marketing Tools", description: "AI-powered marketing campaigns", icon: Megaphone, testId: "link-admin-marketing" },
-      { href: "/admin/ab-tests", label: "A/B Tests", description: "Growth experiments & variant analysis", icon: FlaskConical, testId: "link-admin-ab-tests" },
-      { href: "/admin/lifecycle-campaigns", label: "Lifecycle Campaigns", description: "Automated user journey campaigns", icon: Mail, testId: "link-admin-lifecycle-campaigns" },
-      { href: "/admin/segmentation", label: "Segmentation", description: "User segments & personalization rules", icon: UsersRound, testId: "link-admin-segmentation" },
-      { href: "/admin/promos", label: "Promotions", description: "Offers, bonuses & rewards management", icon: Percent, testId: "link-admin-promos" },
+      { href: "/admin/acquisition", label: "Acquisition", description: "Channel performance & CAC", icon: BarChart3, testId: "link-admin-acquisition" },
+      { href: "/admin/marketing", label: "Marketing", description: "AI marketing campaigns", icon: Megaphone, testId: "link-admin-marketing" },
+      { href: "/admin/ab-tests", label: "A/B Tests", description: "Experiments & variants", icon: FlaskConical, testId: "link-admin-ab-tests" },
+      { href: "/admin/lifecycle-campaigns", label: "Lifecycle", description: "Journey campaigns", icon: Mail, testId: "link-admin-lifecycle-campaigns" },
+      { href: "/admin/segmentation", label: "Segments", description: "Users & personalization", icon: UsersRound, testId: "link-admin-segmentation" },
+      { href: "/admin/promos", label: "Promotions", description: "Offers & rewards", icon: Percent, testId: "link-admin-promos" },
     ],
   },
   {
+    id: "safety",
     title: "User Safety",
-    description: "Health monitoring, support & fraud prevention",
     icon: HeartPulse,
     items: [
-      { href: "/admin/user-health", label: "User Health", description: "At-risk users, scores & interventions", icon: HeartPulse, testId: "link-admin-user-health" },
-      { href: "/admin/support", label: "Support Center", description: "Ticket queue, AI chat & escalations", icon: MessageCircle, testId: "link-admin-support" },
-      { href: "/admin/fraud", label: "Fraud Detection", description: "Trial abuse, device fingerprinting & risk", icon: ShieldAlert, testId: "link-admin-fraud" },
-      { href: "/admin/growth", label: "Growth Analytics", description: "User growth trends & engagement", icon: Activity, testId: "link-admin-growth" },
+      { href: "/admin/user-health", label: "User Health", description: "At-risk users & interventions", icon: HeartPulse, testId: "link-admin-user-health" },
+      { href: "/admin/support", label: "Support", description: "Tickets, AI chat & escalations", icon: MessageCircle, testId: "link-admin-support" },
+      { href: "/admin/fraud", label: "Fraud Detection", description: "Trial abuse & fingerprinting", icon: ShieldAlert, testId: "link-admin-fraud" },
+      { href: "/admin/growth", label: "Growth Trends", description: "User growth & engagement", icon: Activity, testId: "link-admin-growth" },
     ],
   },
 ];
 
 export default function AdminDashboard() {
-  const [activeView, setActiveView] = useState<"command" | "manage">("command");
+  const [activeTab, setActiveTab] = useState("users");
   const [searchTerm, setSearchTerm] = useState("");
+  const [navSearch, setNavSearch] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>("ops");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -194,6 +199,7 @@ export default function AdminDashboard() {
   const [errorLevelFilter, setErrorLevelFilter] = useState<string>("all");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
@@ -223,6 +229,17 @@ export default function AdminDashboard() {
   const { data: subscriptionStats } = useQuery<SubscriptionStats>({
     queryKey: ['/api/admin/subscription-stats'],
   });
+
+  const filteredNavCategories = useMemo(() => {
+    if (!navSearch.trim()) return navCategories;
+    const q = navSearch.toLowerCase();
+    return navCategories.map(cat => ({
+      ...cat,
+      items: cat.items.filter(item => 
+        item.label.toLowerCase().includes(q) || item.description.toLowerCase().includes(q)
+      ),
+    })).filter(cat => cat.items.length > 0);
+  }, [navSearch]);
 
   const grantAccessMutation = useMutation({
     mutationFn: async ({ username, tier }: { username: string; tier: 'pro' | 'elite' | 'whale' }) => {
@@ -361,162 +378,248 @@ export default function AdminDashboard() {
   const bannedCount = users.filter(u => u.isBanned).length;
   const highRiskCount = users.filter(u => u.riskScore >= 50).length;
 
+  const toggleCategory = (id: string) => {
+    setExpandedCategory(prev => prev === id ? null : id);
+  };
+
   return (
-    <div className="min-h-full p-4 sm:p-6 space-y-6">
-      <header className="space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2" data-testid="heading-admin">
-              <LayoutDashboard className="h-5 w-5 sm:h-6 sm:w-6" />
-              Admin Command Center
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">Platform management, analytics & governance</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant={activeView === "command" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveView("command")}
-              data-testid="button-view-command"
-            >
-              <LayoutDashboard className="h-4 w-4 mr-1" />
-              Overview
-            </Button>
-            <Button
-              variant={activeView === "manage" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveView("manage")}
-              data-testid="button-view-manage"
-            >
-              <Users className="h-4 w-4 mr-1" />
-              Manage
-            </Button>
-          </div>
+    <div className="min-h-full flex" data-testid="admin-command-center" data-view="command">
+      <aside
+        className={`hidden md:flex flex-col border-r bg-muted/30 transition-all duration-200 shrink-0 ${
+          sidebarCollapsed ? 'w-16' : 'w-64'
+        }`}
+        data-testid="admin-sidebar"
+      >
+        <div className="p-3 border-b flex items-center gap-2">
+          {!sidebarCollapsed && (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-7 h-7 rounded-md shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">Command Center</p>
+                <p className="text-[10px] text-muted-foreground">Admin Panel</p>
+              </div>
+            </div>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 shrink-0"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            data-testid="button-toggle-sidebar"
+          >
+            {sidebarCollapsed ? <PanelLeft className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+          </Button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-xs text-muted-foreground">Users</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-total-users">{users.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <Ban className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-xs text-muted-foreground">Banned</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-banned">{bannedCount}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-xs text-muted-foreground">High Risk</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-high-risk">{highRiskCount}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-xs text-muted-foreground">Fraud Alerts</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-fraud-alerts">{fraudAlerts.length}</p>
-            </CardContent>
-          </Card>
-          <Card className="col-span-2 sm:col-span-1">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center gap-2">
-                <Bug className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span className="text-xs text-muted-foreground">Errors (24h)</span>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold mt-1" data-testid="stat-errors-24h">{errorStats?.last24Hours || 0}</p>
-            </CardContent>
-          </Card>
-        </div>
-      </header>
+        {!sidebarCollapsed && (
+          <div className="p-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Find a page..."
+                value={navSearch}
+                onChange={(e) => setNavSearch(e.target.value)}
+                className="h-8 pl-8 text-xs bg-background"
+                data-testid="input-admin-nav-search"
+              />
+            </div>
+          </div>
+        )}
 
-      {activeView === "command" ? (
-        <div className="space-y-6">
-          {navCategories.map((category) => (
-            <section key={category.title} data-testid={`section-${category.title.toLowerCase().replace(/\s+/g, "-")}`}>
-              <div className="flex items-center gap-2 mb-3">
-                <category.icon className="h-4 w-4 text-muted-foreground" />
-                <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">{category.title}</h2>
-                <span className="text-xs text-muted-foreground">- {category.description}</span>
+        <ScrollArea className="flex-1">
+          <nav className="p-2 space-y-1">
+            {!sidebarCollapsed && (
+              <div className="mb-2">
+                <div
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-md text-sm font-medium cursor-default ${
+                    location === '/admin' ? 'bg-primary/10 text-primary' : ''
+                  }`}
+                  data-testid="nav-admin-home"
+                >
+                  <LayoutDashboard className="h-4 w-4 shrink-0" />
+                  <span>Dashboard</span>
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                {category.items.map((item) => (
-                  <Link key={item.href} href={item.href}>
-                    <Card className="cursor-pointer transition-colors border-border/60 hover-elevate h-full" data-testid={item.testId}>
-                      <CardContent className="p-4 flex items-start gap-3">
-                        <div className="p-2 rounded-md bg-muted shrink-0">
-                          <item.icon className="h-4 w-4" />
+            )}
+
+            {sidebarCollapsed ? (
+              <div className="space-y-1 flex flex-col items-center">
+                <div className="p-2 rounded-md bg-primary/10 mb-1" data-testid="nav-admin-home-collapsed">
+                  <LayoutDashboard className="h-4 w-4 text-primary" />
+                </div>
+                {navCategories.map((cat) => (
+                  <div key={cat.id} className="space-y-1 flex flex-col items-center w-full">
+                    <div className="w-8 h-px bg-border my-1" />
+                    {cat.items.map((item) => (
+                      <Link key={item.href} href={item.href}>
+                        <div
+                          className="p-2 rounded-md transition-colors hover:bg-muted cursor-pointer"
+                          title={item.label}
+                          data-testid={item.testId}
+                        >
+                          <item.icon className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-sm">{item.label}</p>
-                            <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0 ml-auto" />
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.description}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                      </Link>
+                    ))}
+                  </div>
                 ))}
               </div>
-            </section>
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <Tabs defaultValue="users">
-            <TabsList className="w-full grid grid-cols-6 h-auto">
-              <TabsTrigger value="users" data-testid="tab-users" className="text-xs sm:text-sm py-2">
-                <Users className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Users</span>
-              </TabsTrigger>
-              <TabsTrigger value="subscriptions" data-testid="tab-subscriptions" className="text-xs sm:text-sm py-2">
-                <Crown className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Subs</span>
-              </TabsTrigger>
-              <TabsTrigger value="fraud" data-testid="tab-fraud" className="text-xs sm:text-sm py-2">
-                <AlertTriangle className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Fraud</span>
-              </TabsTrigger>
-              <TabsTrigger value="errors" data-testid="tab-errors" className="text-xs sm:text-sm py-2">
-                <Bug className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Errors</span>
-              </TabsTrigger>
-              <TabsTrigger value="flags" data-testid="tab-flags" className="text-xs sm:text-sm py-2">
-                <Eye className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Flags</span>
-              </TabsTrigger>
-              <TabsTrigger value="audit" data-testid="tab-audit" className="text-xs sm:text-sm py-2">
-                <Shield className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden xs:inline">Audit</span>
-              </TabsTrigger>
-            </TabsList>
+            ) : (
+              filteredNavCategories.map((category) => {
+                const isExpanded = expandedCategory === category.id;
+                return (
+                  <div key={category.id} data-testid={`section-${category.id}`}>
+                    <button
+                      onClick={() => toggleCategory(category.id)}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                      data-testid={`toggle-${category.id}`}
+                    >
+                      <category.icon className="h-3.5 w-3.5 shrink-0" />
+                      <span className="flex-1 text-left">{category.title}</span>
+                      <ChevronRight className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                    </button>
+                    {isExpanded && (
+                      <div className="ml-2 mt-0.5 space-y-0.5 border-l border-border/50 pl-2">
+                        {category.items.map((item) => (
+                          <Link key={item.href} href={item.href}>
+                            <div
+                              className="flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors hover:bg-muted cursor-pointer group"
+                              data-testid={item.testId}
+                            >
+                              <item.icon className="h-3.5 w-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm truncate">{item.label}</p>
+                              </div>
+                              <ChevronRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </nav>
+        </ScrollArea>
 
-            <TabsContent value="users" className="space-y-4 mt-4">
+        {!sidebarCollapsed && (
+          <div className="p-3 border-t space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-center p-2 rounded-md bg-background border border-border/50">
+                <p className="text-lg font-bold" data-testid="sidebar-stat-users">{users.length}</p>
+                <p className="text-[10px] text-muted-foreground">Users</p>
+              </div>
+              <div className="text-center p-2 rounded-md bg-background border border-border/50">
+                <p className="text-lg font-bold" data-testid="sidebar-stat-alerts">{fraudAlerts.length}</p>
+                <p className="text-[10px] text-muted-foreground">Alerts</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="text-center p-2 rounded-md bg-background border border-border/50">
+                <p className="text-lg font-bold" data-testid="sidebar-stat-banned">{bannedCount}</p>
+                <p className="text-[10px] text-muted-foreground">Banned</p>
+              </div>
+              <div className="text-center p-2 rounded-md bg-background border border-border/50">
+                <p className="text-lg font-bold" data-testid="sidebar-stat-errors">{errorStats?.last24Hours || 0}</p>
+                <p className="text-[10px] text-muted-foreground">Errors 24h</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
+
+      <div className="flex-1 min-w-0">
+        <div className="sticky top-14 z-30 bg-background border-b px-4 sm:px-6">
+          <div className="flex items-center justify-between h-12">
+            <div className="flex items-center gap-3">
+              <div className="md:hidden flex items-center gap-2">
+                <img src={sorsMaximaLogo} alt="" className="w-6 h-6 rounded" />
+                <span className="text-sm font-semibold">Admin</span>
+              </div>
+              <h1 className="text-sm font-semibold hidden sm:block" data-testid="heading-admin">
+                Platform Management
+              </h1>
+            </div>
+            <div className="flex items-center gap-2">
+              {highRiskCount > 0 && (
+                <Badge variant="destructive" className="text-xs" data-testid="badge-risk-alert">
+                  <AlertTriangle className="h-3 w-3 mr-1" />
+                  {highRiskCount} High Risk
+                </Badge>
+              )}
+              {(errorStats?.last24Hours || 0) > 0 && (
+                <Badge variant="secondary" className="text-xs" data-testid="badge-error-count">
+                  <Bug className="h-3 w-3 mr-1" />
+                  {errorStats?.last24Hours} Errors
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="md:hidden pb-2 overflow-x-auto">
+            <div className="flex gap-1 min-w-max">
+              {navCategories.flatMap(cat => cat.items.slice(0, 2)).map((item) => (
+                <Link key={item.href} href={item.href}>
+                  <Button variant="ghost" size="sm" className="text-xs h-7 gap-1 shrink-0" data-testid={`mobile-${item.testId}`}>
+                    <item.icon className="h-3 w-3" />
+                    {item.label}
+                  </Button>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center h-auto gap-0 -mb-px">
+            {[
+              { value: "users", label: "Users", icon: Users },
+              { value: "subscriptions", label: "Subs", icon: Crown },
+              { value: "fraud", label: "Fraud", icon: AlertTriangle },
+              { value: "errors", label: "Errors", icon: Bug },
+              { value: "flags", label: "Flags", icon: Eye },
+              { value: "audit", label: "Audit", icon: Shield },
+            ].map((tab) => {
+              const isActive = activeTab === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+                    isActive 
+                      ? 'border-primary text-primary' 
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+                  }`}
+                  data-testid={`tab-${tab.value}`}
+                >
+                  <tab.icon className="h-3.5 w-3.5" />
+                  <span className="hidden xs:inline">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          {activeTab === "users" && (
+            <div className="space-y-4">
               <Card>
-                <CardHeader className="px-4 sm:px-6">
-                  <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
-                  <CardDescription className="text-sm">View and manage all registered users</CardDescription>
+                <CardHeader className="px-4 sm:px-6 pb-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <CardTitle className="text-base sm:text-lg">User Management</CardTitle>
+                      <CardDescription className="text-sm">{users.length} registered users</CardDescription>
+                    </div>
+                    <Badge variant="outline" className="text-xs" data-testid="stat-total-users">
+                      {users.length} total
+                    </Badge>
+                  </div>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
                   <div className="mb-4">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Search users..."
+                        placeholder="Search users by name or email..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pl-10"
@@ -530,7 +633,7 @@ export default function AdminDashboard() {
                   ) : filteredUsers.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">No users found</div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {filteredUsers.map((user) => (
                         <div 
                           key={user.id} 
@@ -586,9 +689,11 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="subscriptions" className="space-y-4 mt-4">
+          {activeTab === "subscriptions" && (
+            <div className="space-y-4">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <Card>
                   <CardContent className="p-3 sm:p-4">
@@ -623,7 +728,7 @@ export default function AdminDashboard() {
                     Grant Free Access
                   </CardTitle>
                   <CardDescription className="text-sm">
-                    Give users free premium access without payment ({subscriptionStats?.grantedFree || 0} currently granted)
+                    Give users free premium access ({subscriptionStats?.grantedFree || 0} currently granted)
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-6">
@@ -645,7 +750,7 @@ export default function AdminDashboard() {
                   ) : filteredUsers.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">No users found</div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {filteredUsers.filter(u => u.role !== 'admin').map((user) => (
                         <div 
                           key={user.id} 
@@ -693,9 +798,11 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="fraud" className="space-y-4 mt-4">
+          {activeTab === "fraud" && (
+            <div className="space-y-4">
               <Card>
                 <CardHeader className="px-4 sm:px-6">
                   <CardTitle className="text-base sm:text-lg">Fraud Alerts</CardTitle>
@@ -710,7 +817,7 @@ export default function AdminDashboard() {
                       <p>No fraud alerts detected</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {fraudAlerts.map((alert, index) => (
                         <div 
                           key={index} 
@@ -739,16 +846,18 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="errors" className="space-y-4 mt-4">
+          {activeTab === "errors" && (
+            <div className="space-y-4">
               <Card>
                 <CardHeader className="px-4 sm:px-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div>
                       <CardTitle className="text-base sm:text-lg">Error Logs</CardTitle>
                       <CardDescription className="text-sm">
-                        Backend errors and warnings ({errorStats?.total || 0} total)
+                        {errorStats?.total || 0} total entries
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -813,7 +922,7 @@ export default function AdminDashboard() {
                       <p>No errors logged{errorLevelFilter !== 'all' ? ` for level: ${errorLevelFilter}` : ''}</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {errorLogs.map((log) => (
                         <div 
                           key={log.id} 
@@ -846,18 +955,22 @@ export default function AdminDashboard() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="flags" className="space-y-4 mt-4">
+          {activeTab === "flags" && (
+            <div className="space-y-4">
               <FeatureFlagsPanel />
-            </TabsContent>
+            </div>
+          )}
 
-            <TabsContent value="audit" className="space-y-4 mt-4">
+          {activeTab === "audit" && (
+            <div className="space-y-4">
               <AuditTrailPanel />
-            </TabsContent>
-          </Tabs>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       <Dialog open={banDialogOpen} onOpenChange={setBanDialogOpen}>
         <DialogContent className="max-w-[90vw] sm:max-w-md">
@@ -1109,7 +1222,7 @@ function FeatureFlagsPanel() {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Loading flags...</p>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {flags.map((flag) => (
               <div
                 key={flag.id}
