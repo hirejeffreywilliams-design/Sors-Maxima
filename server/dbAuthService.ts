@@ -3,6 +3,7 @@ import { users, subscriptions } from "./dbSchema";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { logError, logWarn, logInfo } from "./errorLogger";
+import { evaluateRegistrationRisk, onTrialGranted, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
 
 const SALT_ROUNDS = 12;
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -25,8 +26,11 @@ export interface DbUser {
 export async function registerUser(
   username: string, 
   email: string, 
-  password: string
-): Promise<{ success: boolean; error?: string; userId?: number }> {
+  password: string,
+  ip?: string,
+  userAgent?: string,
+  deviceFingerprint?: Partial<DeviceFingerprintData>
+): Promise<{ success: boolean; error?: string; userId?: number; fraudRisk?: RegistrationRisk }> {
   try {
     const existingUsername = await db.select().from(users).where(eq(users.username, username)).limit(1);
     if (existingUsername.length > 0) {
@@ -36,6 +40,21 @@ export async function registerUser(
     const existingEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existingEmail.length > 0) {
       return { success: false, error: "Email already registered" };
+    }
+
+    const tempUserId = `pending-${Date.now()}`;
+    const fraudRisk = evaluateRegistrationRisk({
+      email,
+      username,
+      ip: ip || '0.0.0.0',
+      userAgent: userAgent || 'unknown',
+      userId: tempUserId,
+      deviceFingerprint,
+    });
+
+    if (fraudRisk.action === 'block') {
+      logWarn(`Registration blocked by fraud engine for ${username}: ${fraudRisk.reason} (score: ${fraudRisk.riskScore})`);
+      return { success: false, error: "Unable to create account at this time. Please contact support if you believe this is an error.", fraudRisk };
     }
 
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
@@ -55,8 +74,15 @@ export async function registerUser(
       status: "active",
     });
 
-    logInfo(`New user registered: ${username}`);
-    return { success: true, userId: newUser.id };
+    remapUserId(tempUserId, String(newUser.id));
+    onTrialGranted(String(newUser.id));
+
+    if (fraudRisk.action === 'verify') {
+      logWarn(`Registration flagged for verification: ${username} (score: ${fraudRisk.riskScore})`);
+    }
+
+    logInfo(`New user registered: ${username} (fraud score: ${fraudRisk.riskScore}, action: ${fraudRisk.action})`);
+    return { success: true, userId: newUser.id, fraudRisk };
   } catch (error: any) {
     logError(error, { context: "registerUser", username });
     return { success: false, error: "Registration failed" };

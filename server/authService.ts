@@ -1,6 +1,7 @@
 // Authentication & Fraud Prevention Service
 import { randomBytes, scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import { evaluateRegistrationRisk, onTrialGranted, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
 
 const scryptAsync = promisify(scrypt);
 
@@ -117,8 +118,10 @@ class AuthService {
     email: string, 
     username: string, 
     password: string, 
-    ip: string
-  ): Promise<{ success: boolean; user?: User; error?: string }> {
+    ip: string,
+    userAgent?: string,
+    deviceFingerprint?: Partial<DeviceFingerprintData>
+  ): Promise<{ success: boolean; user?: User; error?: string; fraudRisk?: RegistrationRisk }> {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -171,6 +174,27 @@ class AuthService {
     // Create user
     const userId = randomBytes(16).toString('hex');
     const passwordHash = await this.hashPassword(password);
+
+    // Run fraud detection engine
+    const fraudRisk = evaluateRegistrationRisk({
+      email,
+      username,
+      ip,
+      userAgent: userAgent || 'unknown',
+      userId,
+      deviceFingerprint,
+    });
+
+    if (fraudRisk.action === 'block') {
+      this.logSuspiciousActivity({
+        userId: 'pending',
+        type: 'suspicious_pattern',
+        details: `Registration blocked by fraud engine: ${fraudRisk.reason} (score: ${fraudRisk.riskScore})`,
+        timestamp: new Date().toISOString(),
+        severity: 'critical',
+      });
+      return { success: false, error: "Unable to create account at this time. Please contact support if you believe this is an error.", fraudRisk };
+    }
     
     const user: User = {
       id: userId,
@@ -185,7 +209,7 @@ class AuthService {
       emailVerified: false,
       isBanned: false,
       banReason: null,
-      riskScore: 0,
+      riskScore: fraudRisk.riskScore,
       ipAddresses: [ip],
       subscriptionTier: 'free'
     };
@@ -199,7 +223,21 @@ class AuthService {
     }
     ipToUsers.get(ip)!.add(userId);
 
-    return { success: true, user };
+    // Map temp fraud engine userId to actual user ID and track trial signals
+    remapUserId(userId, userId); // userId is already the real ID in authService
+    onTrialGranted(userId);
+
+    if (fraudRisk.action === 'verify') {
+      this.logSuspiciousActivity({
+        userId,
+        type: 'suspicious_pattern',
+        details: `Registration flagged for verification: ${fraudRisk.reason} (score: ${fraudRisk.riskScore})`,
+        timestamp: new Date().toISOString(),
+        severity: 'medium',
+      });
+    }
+
+    return { success: true, user, fraudRisk };
   }
 
   // Login

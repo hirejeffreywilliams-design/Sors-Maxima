@@ -1,0 +1,203 @@
+Use this prompt with your AI assistant or hand to your security/product team. It requests a complete fraud-detection and prevention system to stop users from abusing a 7‑day free trial (multiple free trials via different emails) while remaining privacy‑compliant and minimizing false positives. And also create a code that wants the seven day free trial is up. It automatically switches them to the highest plan on the application besides the enterprise one unless it’s a business that’s doing a free trial and then it’ll automatically after the seven day trial Schwarze them over to the enterprise one
+
+
+
+Prompt
+
+"Design a privacy‑aware, scalable fraud-detection & prevention system to stop abuse of a 7‑day free trial for a sports-betting analysis app. The system must detect and block users who attempt to create multiple free trials for the same real person using different emails, while minimizing friction for legitimate users. Deliver an end-to-end design: data signals, detection models, deterministic & probabilistic matching, risk scoring, enforcement flows, verification/secondary-auth, analytics & feedback loops, operational playbooks, and compliance/privacy controls.
+
+
+
+Goals & constraints
+
+- Primary goal: prevent one person from repeatedly claiming free trials.
+
+- Avoid excessive friction for legitimate users; minimize false positives and business impact.
+
+- Respect privacy/regulatory requirements (GDPR, CCPA); avoid persistent storage of unnecessary PII; use hashing, tokenization, and ephemeral device signals where possible.
+
+- Do not recommend illegal or invasive techniques (no hidden surveillance or buying illicit PII).
+
+
+
+Required outputs
+
+1) Signal inventory (deterministic & probabilistic)
+
+   - Deterministic: email normalized + domain checks, phone number (OTP-verified), payment instrument identifiers (tokenized card fingerprint, first 6/last 4 with token), device identifiers (device fingerprint, advertising ID where permitted), IP address & geo, billing address, government ID ONLY if explicit verification flow exists.
+
+   - Probabilistic / behavioral: name similarity (normalized), address similarity, shipping vs billing mismatch, payment velocity, signup velocity from same IP/subnet, cookie/device graph overlaps, browser fingerprint similarity, typing/interaction patterns, email name mismatch heuristics, VPN/proxy indicators, emulator/automation detection, referral/source patterns, reuse of promo codes.
+
+   - External signals: shared account / family account flags, known disposable email domain lists, fraud blacklists, credit-card BIN risk, phone carrier lookups, public data (if lawful and consented).
+
+
+
+2) Deterministic matching rules
+
+   - Exact-match blocks: identical payment token, identical phone number, identical government ID (if collected), identical billing address normalized to a canonical form.
+
+   - Soft blocks with review: exact device fingerprint match + new email; same IP within short timeframe + different emails; exact name + address match with different phone.
+
+   - Normalization rules: canonicalize names (case, punctuation), use libpostal for addresses, normalize Unicode, strip diacritics.
+
+
+
+3) Probabilistic matching & risk scoring
+
+   - Build a composite risk score combining weighted signals. Example signals with suggested weights: payment_token (40), phone_verified (25), device_fp (20), IP_risk (10), name_address_similarity (15), behavior_heuristics (10), disposable_email (−30 for high risk).
+
+   - Calibrate thresholds: score < X = allow; X–Y = require lightweight verification (SMS OTP, 2FA); >Y = block or require manual review.
+
+   - Use ML models (logistic regression / gradient-boosted trees) trained on labeled abuse data to detect non-obvious collusions; include explainability features (SHAP) to avoid opaque decisions.
+
+
+
+4) Verification & enforcement flows
+
+   - Lightweight flow (low risk): allow signup; track signals.
+
+   - Secondary verification (medium risk): require phone OTP, 3D Secure card check, or KBA-lite; rate-limit trial issuance.
+
+   - High-risk enforcement: block trial; show clear appeal/verify path (upload ID + live selfie) only if business is comfortable.
+
+   - One-trial-per-person enforcement: mark account with trial_granted flag tied to hashed identity keys (see privacy).
+
+   - Throttle & cooldown rules: limit trials per payment instrument, per normalized address, per device fingerprint, per IP subnet per time window.
+
+
+
+5) Identity graph & hashed linkage
+
+   - Build an identity graph that links hashed signals (hashed phone, hashed payment token, hashed normalized name+address, device cluster IDs) using privacy-preserving hashes (salted per-environment).
+
+   - Use probabilistic graph matching to detect clusters that likely represent one person. Store only hashed or tokenized keys and cluster ids; avoid storing raw PII where unnecessary.
+
+   - Provide TTLs for linkage data and purge policies aligned with privacy laws.
+
+
+
+6) Device & anti-automation controls
+
+   - Implement device fingerprinting (canvas/font metrics, user-agent features) with fallback for privacy modes.
+
+   - Detect headless browsers, emulators, automation tools, and unusual user-agent patterns.
+
+   - Use behavioral bot detection (mouse/scroll timing, input cadence) and CAPTCHAs as a last resort.
+
+
+
+7) Payment & velocity controls
+
+   - Require a valid payment method for trial with a $0 or $1 authorization via PCI‑compliant tokenization to bind trial to instrument.
+
+   - Rate-limit trials per payment token and per BIN/country risk tier.
+
+   - Monitor high velocity of card additions, attempts to add many low-value cards, and repeated chargeback patterns.
+
+
+
+8) Analytics, feedback loop & ML lifecycle
+
+   - Logging: store signal vectors, risk score, outcome label (fraud/legit), and remediation action for supervised learning and auditing.
+
+   - Retraining cadence: retrain models weekly/monthly depending on volume; use incremental learning and validation sets.
+
+   - A/B test detection thresholds to balance false positives/negatives and measure business impact (trial-to-paid, retention loss).
+
+   - Provide dashboards: fraud rate, false positive rate, manual review queue metrics, conversion impact, cluster size distribution.
+
+
+
+9) Manual review & appeal process
+
+   - Build a human-in-the-loop review UI with signal context and recommended actions.
+
+   - Implement an appeal path: users blocked from trials can verify identity (document + liveness) to receive trial after successful verification.
+
+   - Triage rules: automated allow/deny for high-confidence cases, human review for ambiguous clusters.
+
+
+
+10) Operational playbooks & SLA
+
+   - Incident response for suspected mass abuse events (sudden spike in trial signups): auto-throttle new trials, raise alert, increase verification friction.
+
+   - Escalation ladder: fraud ops → product → legal/compliance.
+
+   - Manual review SLAs and backlog targets.
+
+
+
+11) Privacy, legal & compliance
+
+   - Use data minimization: only collect PII needed for detection; hash/tokenize PII at ingest; keep raw PII only for brief verification windows.
+
+   - Consent: disclose trial verification & fraud checks in TOS/privacy; obtain consent for SMS/phone checks.
+
+   - Data retention & deletion: retention windows, purge policies, and mechanisms to remove linkage data on request (subject to fraud-fighting retention exceptions where lawful).
+
+   - Record auditing for any manual account reinstatements.
+
+
+
+12) Required deliverables & artifacts
+
+   - Signal catalog & normalization spec (email, phone, payment token, device schema).
+
+   - Scoring model spec, feature definitions, example scoring thresholds.
+
+   - Identity-graph design & hashing/tokenization plan.
+
+   - Verification UX flows & copy for blocked/verify pages.
+
+   - Manual review UI mockups & SOPs.
+
+   - Dashboards & KPIs (fraud rate, FPR, precision/recall, conversion impact).
+
+   - Privacy & legal checklist for data collection and storage.
+
+   - Implementation roadmap & estimated engineering effort (sprints).
+
+
+
+13) Metrics & KPIs to monitor
+
+   - Fraud attempts per 1k signups, trial abuse rate, false positive rate, manual review throughput/time, conversion impact (trials→paid) from verification friction, chargeback rate, downstream customer lifetime value of verified vs unverified users.
+
+
+
+Questions you must ask me before producing configs/code
+
+- Do you require payment-method binding for trial (recommended)? Which payment provider(s) are you using?
+
+- Which PII are you legally allowed to collect/retain in your target jurisdictions (phone, address, ID)?
+
+- Do you want to require phone verification for all trials or only on risk signals?
+
+- What privacy constraints should we enforce (strict GDPR, US only, etc.)?
+
+- Current tech stack (backend, DB, analytics, identity providers) and preferred fraud tooling (own models vs 3rd-party).
+
+- Volume expectations (avg daily signups) to size models and review ops.
+
+- Tolerance for false positives and preferred enforcement policy (soft verification vs hard block).
+
+
+
+Constraints for the AI/system
+
+- Recommend privacy-preserving defaults; avoid storing raw PII long-term.
+
+- Prefer explainable models for reviewability.
+
+- Do NOT suggest any illegal data collection or deanonymization techniques.
+
+
+
+Deliver the final output as:
+
+- A security spec document (1–2 pages summary + detailed sections), runnable detection rules (pseudocode or JSON rules), sample ML feature set & model template, verification UX copy & flow diagrams, identity-graph schema & hashing policy, and a 6–12 week engineering roadmap with estimated effort."
+
+
+
+If you want, I can now generate:

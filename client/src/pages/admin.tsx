@@ -369,6 +369,13 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/fraud">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-fraud">
+              <Shield className="w-4 h-4" />
+              Trial Fraud Detection
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 

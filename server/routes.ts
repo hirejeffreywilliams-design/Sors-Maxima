@@ -17,6 +17,7 @@ import { communityService } from "./communityService";
 import { sportsDataService } from "./sportsDataService";
 import { auditTrail } from "./auditTrail";
 import { idempotencyStore } from "./idempotency";
+import { getAllFraudCases, getFraudCase, updateFraudCase, getFraudStats, getIdentityGraph, getThrottleStatus } from "./trialFraudEngine";
 import { featureFlags } from "./featureFlags";
 import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats } from "./espn-roster-provider";
 import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMiddleware";
@@ -110,17 +111,22 @@ export async function registerRoutes(
   // User Registration (rate limited)
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
-      const { email, username, password } = req.body;
+      const { email, username, password, deviceFingerprint } = req.body;
       const ip = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || 'unknown';
 
       if (!email || !username || !password) {
         return res.status(400).json({ error: "Email, username, and password are required" });
       }
 
-      const result = await registerUser(username, email, password);
+      const result = await registerUser(username, email, password, ip, userAgent, deviceFingerprint);
 
       if (!result.success) {
-        return res.status(400).json({ error: result.error });
+        const statusCode = result.fraudRisk?.action === 'block' ? 403 : 400;
+        return res.status(statusCode).json({ 
+          error: result.error,
+          requiresVerification: result.fraudRisk?.action === 'verify',
+        });
       }
 
       req.session.isAuthenticated = true;
@@ -132,7 +138,13 @@ export async function registerRoutes(
       return res.json({ 
         success: true, 
         username,
-        email
+        email,
+        requiresVerification: result.fraudRisk?.action === 'verify',
+        trialInfo: {
+          autoUpgradeEnabled: true,
+          postTrialTier: 'whale',
+          trialDays: 7,
+        },
       });
     } catch (err) {
       console.error("Registration error:", err);
@@ -370,7 +382,46 @@ export async function registerRoutes(
   });
 
   app.get("/api/admin/fraud-alerts", requireAdmin, (_req, res) => {
-    res.json([]);
+    const cases = getAllFraudCases({ limit: 100 });
+    res.json(cases);
+  });
+
+  app.get("/api/admin/fraud/cases", requireAdmin, (req, res) => {
+    const { status, riskLevel, limit } = req.query;
+    const cases = getAllFraudCases({
+      status: status as string | undefined,
+      riskLevel: riskLevel as string | undefined,
+      limit: limit ? parseInt(limit as string) : undefined,
+    });
+    res.json({ cases, total: cases.length });
+  });
+
+  app.get("/api/admin/fraud/cases/:caseId", requireAdmin, (req, res) => {
+    const fc = getFraudCase(req.params.caseId);
+    if (!fc) return res.status(404).json({ error: "Case not found" });
+    const graph = getIdentityGraph(fc.userId);
+    res.json({ ...fc, identityGraph: graph });
+  });
+
+  app.post("/api/admin/fraud/cases/:caseId/action", requireAdmin, (req, res) => {
+    const { status, reviewNotes } = req.body;
+    const reviewedBy = req.session?.username || 'admin';
+    const updated = updateFraudCase(req.params.caseId, { status, reviewedBy, reviewNotes });
+    if (!updated) return res.status(404).json({ error: "Case not found" });
+    res.json(updated);
+  });
+
+  app.get("/api/admin/fraud/stats", requireAdmin, (_req, res) => {
+    res.json(getFraudStats());
+  });
+
+  app.get("/api/admin/fraud/identity-graph/:userId", requireAdmin, (req, res) => {
+    res.json(getIdentityGraph(req.params.userId));
+  });
+
+  app.get("/api/admin/fraud/throttle-status", requireAdmin, (req, res) => {
+    const ip = req.query.ip as string || '0.0.0.0';
+    res.json(getThrottleStatus(ip));
   });
 
   app.post("/api/admin/ban-user", requireAdmin, async (req, res) => {

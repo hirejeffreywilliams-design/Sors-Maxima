@@ -1,0 +1,75 @@
+Here is a ready-to-use, detailed prompt you can paste into an AI, a marketing consultant brief, or a copywriter to get concrete growth and conversion strategies for your betting app.
+
+
+
+Main prompt (use as-is)
+
+```
+
+You are a senior growth marketer and product manager with extensive experience scaling mobile betting and iGaming apps. My app is [brief description: name, target market/countries, key product features, platform(s) iOS/Android/web], and my goal is to rapidly increase new paying users and maximize conversion rate (sign-up → deposit → first wager → repeat wager) while staying compliant with region-specific gambling laws and maintaining high user LTV.
+
+
+
+Deliver a prioritized 90-day growth plan with specific, actionable tactics across acquisition, onboarding, activation, monetization, retention, and referral. For each tactic include: objective, target audience segment, exact creative/messaging ideas (examples of ad copy, push/email subject lines, landing page headline and CTA), required product changes or experiments, A/B test setup (hypothesis, experiment design, success metrics), estimated impact (uplift % or KPI change), required budget or engineering effort, timeline, and any legal/compliance considerations.
+
+
+
+Focus areas to cover:
+
+- High-ROI paid acquisition channels (meta, programmatic sports audiences, TikTok, YouTube, display/native, affiliates/influencers) with audience targets, bid/creative recommendations, conversion funnel tracking, and expected CAC.
+
+- Organic & content strategies (SEO, editorial betting tips, match previews, newsletters) to drive long-term acquisition and reduce CAC.
+
+- Onboarding & first-deposit optimization (signup flow, friction removal, incentive structure, social proof, verification UX).
+
+- Personalization and segmentation (preference capture, dynamic offers, behavioral triggers).
+
+- Retention & reactivation (push/pull notification calendars, lifecycle email flows with templates, win-loss based re-engagement, in-play bet nudges).
+
+- Product features to increase frequency and AOV (cash-out, boosted odds, micro-betting, combos, subscriptions/season passes, in-app gamification/leaderboards).
+
+- Pricing and promotion strategies (welcome bonus structure, wagering requirements, loyalty tiers, time-limited boosts, referral program with viral mechanics).
+
+- Payments & trust (preferred local payment methods, frictionless KYC, transparent withdrawal processes).
+
+- Measurement & analytics (events to instrument, essential dashboards, cohort LTV models, attribution setup, incrementality testing).
+
+- Fraud, responsible gambling, and compliance guardrails.
+
+
+
+End deliverable: a prioritized roadmap (with weekly milestones), 6 concrete A/B test plans ready to run, 6 copy/ad creative examples, and a 30/60/90-day KPI forecast (installs, signups, deposit rate, first-week retention, predicted CAC and LTV). If you need more app specifics (existing metrics, budget, markets), request them and adapt the plan.
+
+```
+
+
+
+Three shorter focused variants
+
+- Acquisition-focused:
+
+```
+
+Act as a UA specialist for betting apps. Provide a 60-day paid media plan to scale new depositing users in [country], including channel mix, audience segments, creatives (3 ad examples), landing page copy, expected CAC by channel, tracking setup, and 4 prioritized A/B tests to improve ad→deposit conversion.
+
+```
+
+- Onboarding & conversion-focused:
+
+```
+
+Act as a CRO expert. Audit onboarding funnel (assume 5-step: install → signup → verification → deposit → first bet). Propose 8 experiments to raise deposit conversion by ≥30% with wireframe copy, incentive mechanics, analytics events, and success criteria.
+
+```
+
+- Retention & monetization-focused:
+
+```
+
+Act as a retention/product growth lead. Create a 90-day plan to lift 7-day retention and weekly wagering frequency using lifecycle campaigns, personalization rules, gamification features, and loyalty mechanics. Include example push/email copy and 5 testable hypotheses.
+
+```
+
+
+
+Use whichever fits your need; tell me your app name, core metrics (current installs, deposit rate, CAC, markets, budget) and I’ll generate the tailored 90-day plan and creatives

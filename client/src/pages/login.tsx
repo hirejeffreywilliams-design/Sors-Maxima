@@ -7,6 +7,7 @@ import { Lock, User, AlertCircle, Mail, Eye, EyeOff, Shield, CheckCircle2 } from
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { getCachedFingerprint } from "@/lib/device-fingerprint";
 
 interface LoginPageProps {
   onLogin: () => void;
@@ -84,13 +85,15 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setLoading(true);
 
     try {
+      const deviceFingerprint = getCachedFingerprint();
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email: regEmail, 
           username: regUsername, 
-          password: regPassword 
+          password: regPassword,
+          deviceFingerprint,
         }),
         credentials: "include",
       });
