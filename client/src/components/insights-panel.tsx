@@ -536,29 +536,35 @@ export function InsightsPanel({
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 p-1">
-              <TabsTrigger value="ev" className="text-xs px-2 sm:px-3" data-testid="tab-ev">
-                <TrendingUp className="w-3 h-3 mr-1 shrink-0" />
-                +EV
+              <TabsTrigger value="ev" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-ev">
+                <TrendingUp className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">+EV</span>
+                <span className="sm:hidden">EV</span>
               </TabsTrigger>
-              <TabsTrigger value="lines" className="text-xs px-2 sm:px-3" data-testid="tab-lines">
-                <Activity className="w-3 h-3 mr-1 shrink-0" />
-                Lines
+              <TabsTrigger value="lines" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-lines">
+                <Activity className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Lines</span>
+                <span className="sm:hidden">Line</span>
               </TabsTrigger>
-              <TabsTrigger value="context" className="text-xs px-2 sm:px-3" data-testid="tab-context">
-                <AlertTriangle className="w-3 h-3 mr-1 shrink-0" />
-                Context
+              <TabsTrigger value="context" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-context">
+                <AlertTriangle className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Context</span>
+                <span className="sm:hidden">Ctx</span>
               </TabsTrigger>
-              <TabsTrigger value="trends" className="text-xs px-2 sm:px-3" data-testid="tab-trends">
-                <Flame className="w-3 h-3 mr-1 shrink-0" />
-                Trends
+              <TabsTrigger value="trends" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-trends">
+                <Flame className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Trends</span>
+                <span className="sm:hidden">Trnd</span>
               </TabsTrigger>
-              <TabsTrigger value="risk" className="text-xs px-2 sm:px-3" data-testid="tab-risk">
-                <Shield className="w-3 h-3 mr-1 shrink-0" />
-                Risk
+              <TabsTrigger value="risk" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-risk">
+                <Shield className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Risk</span>
+                <span className="sm:hidden">Risk</span>
               </TabsTrigger>
-              <TabsTrigger value="hedge" className="text-xs px-2 sm:px-3" data-testid="tab-hedge">
-                <Calculator className="w-3 h-3 mr-1 shrink-0" />
-                Hedge
+              <TabsTrigger value="hedge" className="text-[10px] sm:text-xs px-1 sm:px-3" data-testid="tab-hedge">
+                <Calculator className="w-3 h-3 sm:mr-1 shrink-0" />
+                <span className="hidden sm:inline">Hedge</span>
+                <span className="sm:hidden">Hdg</span>
               </TabsTrigger>
             </TabsList>
           </div>

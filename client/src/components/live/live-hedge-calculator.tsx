@@ -106,16 +106,16 @@ export function LiveHedgeCalculator() {
 
         {selectedBet && (
           <div className="p-4 rounded-lg bg-muted/50 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="font-medium">Hedge Amount</span>
-              <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-medium text-sm">Hedge Amount</span>
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
                 <Input
                   type="number"
-                  placeholder="Enter amount"
+                  placeholder="Amount"
                   value={hedgeAmount}
                   onChange={(e) => setHedgeAmount(e.target.value)}
-                  className="w-32"
+                  className="w-24 sm:w-32 h-8 sm:h-9 text-sm"
                   data-testid="input-hedge-amount"
                 />
               </div>
@@ -134,32 +134,32 @@ export function LiveHedgeCalculator() {
                 </Button>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
-                    <p className="text-xs text-muted-foreground">If Original Wins</p>
-                    <p className="text-lg font-bold text-green-500">
+                  <div className="p-2 sm:p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight">If Original Wins</p>
+                    <p className="text-base sm:text-lg font-bold text-green-500">
                       +${hedgeCalc.originalWinScenario.toFixed(2)}
                     </p>
                   </div>
-                  <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                    <p className="text-xs text-muted-foreground">If Hedge Wins</p>
-                    <p className="text-lg font-bold text-blue-500">
+                  <div className="p-2 sm:p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground leading-tight">If Hedge Wins</p>
+                    <p className="text-base sm:text-lg font-bold text-blue-500">
                       +${hedgeCalc.hedgeWinScenario.toFixed(2)}
                     </p>
                   </div>
                 </div>
 
-                <div className={`p-3 rounded-lg ${hedgeCalc.guaranteedProfit >= 0 ? "bg-green-500/10 border border-green-500/30" : "bg-red-500/10 border border-red-500/30"}`}>
+                <div className={`p-2 sm:p-3 rounded-lg ${hedgeCalc.guaranteedProfit >= 0 ? "bg-green-500/10 border border-green-500/30" : "bg-red-500/10 border border-red-500/30"}`}>
                   <div className="flex items-center gap-2">
                     {hedgeCalc.guaranteedProfit >= 0 ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                     ) : (
-                      <AlertTriangle className="w-5 h-5 text-red-500" />
+                      <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
                     )}
                     <div>
-                      <p className="font-medium">
+                      <p className="font-medium text-xs sm:text-base">
                         {hedgeCalc.guaranteedProfit >= 0 ? "Guaranteed Profit" : "Potential Loss"}
                       </p>
-                      <p className={`text-2xl font-bold ${hedgeCalc.guaranteedProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      <p className={`text-xl sm:text-2xl font-bold ${hedgeCalc.guaranteedProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
                         {hedgeCalc.guaranteedProfit >= 0 ? "+" : ""}${hedgeCalc.guaranteedProfit.toFixed(2)}
                       </p>
                     </div>
