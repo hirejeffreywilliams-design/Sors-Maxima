@@ -28,7 +28,8 @@ import {
   Target,
   Database,
   ShieldAlert,
-  DollarSign
+  DollarSign,
+  HeartPulse
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -350,6 +351,13 @@ export default function AdminDashboard() {
             <Button variant="outline" className="gap-2" data-testid="link-admin-financial-projections">
               <DollarSign className="w-4 h-4" />
               Financial Projections
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/user-health">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-user-health">
+              <HeartPulse className="w-4 h-4" />
+              User Health
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

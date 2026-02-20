@@ -41,6 +41,7 @@ import AdminDataProvenance from "@/pages/admin-data-provenance";
 import AdminRiskRegister from "@/pages/admin-risk-register";
 import AdminFinancialProjections from "@/pages/admin-financial-projections";
 import Roadmap from "@/pages/roadmap";
+import AdminUserHealth from "@/pages/admin-user-health";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -51,6 +52,7 @@ import { CommandPalette, SearchButton } from "@/components/command-palette";
 import { FeedbackWidget } from "@/components/feedback-widget";
 import { useUTMCapture } from "@/lib/utm-tracker";
 import { AgeVerificationGate } from "@/components/age-verification-gate";
+import { ErrorRecoveryInterceptor } from "@/components/error-recovery-interceptor";
 
 function Router() {
   return (
@@ -76,6 +78,7 @@ function Router() {
       <Route path="/admin/data-provenance" component={AdminDataProvenance} />
       <Route path="/admin/risk-register" component={AdminRiskRegister} />
       <Route path="/admin/financial-projections" component={AdminFinancialProjections} />
+      <Route path="/admin/user-health" component={AdminUserHealth} />
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
@@ -388,6 +391,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <CommandPalette />
       <CookieConsentBanner />
       <FeedbackWidget />
+      <ErrorRecoveryInterceptor />
     </div>
   );
 }

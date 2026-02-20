@@ -1,0 +1,282 @@
+Use this single, comprehensive prompt to instruct your in‑app AI system to fully automate customer support for both the Bet App and the Social App. It asks the AI to design, generate, and operate an end‑to‑end, low‑touch customer support stack that requires minimal human intervention while remaining safe, auditable, privacy‑compliant, and able to escalate when needed.
+
+
+
+Prompt
+
+"Build and operate a fully automated, AI‑driven customer support system for two products: (A) Bet App (sports‑betting analysis / parlay-ticket generator) and (B) Social App (social digital‑universe). The system must handle 80–95% of routine support interactions end‑to‑end, handle escalations reliably, and comply with legal, regulatory and safety constraints for each product. Deliver design, runnable code/config, conversation templates, error-handling policies, integrations, monitoring, and an operations playbook so no manual work is required for day‑to‑day support except for high‑risk escalations and periodic audits.
+
+
+
+Scope & high-level goals
+
+- Fully automated omni‑channel support: in-app chat, web chat widget, email, SMS, and webhook-driven ticketing integration with existing CS systems (Zendesk/Intercom/Freshdesk) for escalation.
+
+- Self-service first: intelligent help center search, contextual troubleshooting, step-by-step remediation, and automated refunds/credits where policy allows.
+
+- Compliance & safety: geo/age awareness, refuse to facilitate illegal betting activity, ensure legal/regulatory disclaimers, and escalate all sensitive/legal requests (e.g., subpoenas, gambling complaints) to humans.
+
+- Low false positives on escalations: AI must favor conservative escalation when uncertainty or legal risk exists.
+
+- Auditable decisions: every automated action must log reasoning, evidence, and confidence score.
+
+
+
+Deliverables (automate‑ready)
+
+1) Conversation design & intent taxonomy
+
+   - Comprehensive intent list for each app, with canonical utterances and required context slots.
+
+     - Bet App examples: account signup/login, identity verification, trial handling, payment/charge/refund, free‑trial abuse dispute, odds discrepancy, parlay generation help, ticket export issues, prohibited-request detection (how to place illegal bets), responsible-gambling help, blocked account appeals, fraud/dispute.
+
+     - Social App examples: account/profile issues, content posting & visibility, avatar/asset purchase/refunds, moderation appeals, cross‑account linking, time‑capsule flows (create/update/release/verification), legacy contact flows, privacy/export requests, safety/reporting (harassment), billing/subscription enterprise queries.
+
+   - Intent metadata: required entities, urgency label, legal risk flag, confidence threshold for auto‑resolve vs escalate.
+
+
+
+2) Dialogue policies & behavior
+
+   - Default tone: empathetic, concise, professional. Vary tone per persona (trial user vs high‑value enterprise customer).
+
+   - Multi‑turn dialog management: slot filling, context carryover, clarification prompts, and recovery from user corrections.
+
+   - Confidence thresholds:
+
+     - >0.85: auto‑resolve and take permitted action (send instructions, perform allowed API call).
+
+     - 0.6–0.85: suggest actions and request explicit user confirmation before performing side‑effects.
+
+     - <0.6 or legal risk flag: escalate to human queue with full context.
+
+   - Explainability: whenever an automated decision affects user funds, data, or access, present a clear, concise explanation of the reason and the source data/signals used.
+
+
+
+3) Automated actions & policy engine
+
+   - Action types: read-only guidance, remediation scripts (client-side fixes), API calls (password reset, resend verification, regenerate ticket), billing ops (issue credit/refund up to policy limits), subscription changes, revoke trial, mark account for review, release time‑capsule per policy, and block abusive accounts.
+
+   - Approval policy rules:
+
+     - Low-risk auto-actions (e.g., resend verification email, small credit under $X, retry failed export) allowed automatically.
+
+     - Medium-risk actions (refunds above $X, lifting blocks, trial reissue) require 2‑step confirm or automated rules + time delay.
+
+     - High/Legal-risk (account reinstatement after fraud, KYC changes, death verification releases, subpoena responses) -> human review mandatory.
+
+   - Rate limits & anti‑abuse: per-user and per-entity limits; fraud detection hooks (reuse of payment tokens, device fingerprint clusters) to block automated credits.
+
+
+
+4) Integrations & automation stack
+
+   - Connectors to: auth system (SSO), user DB, payments (Stripe/Adyen), KMS/Encryption, object storage (S3), logging/audit (immutable append), ticketing (Zendesk/Intercom), monitoring (Datadog), analytics (Mixpanel/Amplitude), identity verification (IDV), fraud engine, legal/DMCA workflow.
+
+   - Webhook handlers for external events (payment webhooks, app-store reviews, delivery statuses) to trigger proactive outreach.
+
+   - Admin endpoints for humans to query automated decision logs, replay conversation, override decisions, and release audit exports.
+
+
+
+5) Knowledge base & retrieval
+
+   - Auto‑generate and maintain a canonical KB from product docs, policies, and incident postmortems. Implement retrieval‑augmented generation (RAG) with source attribution and versioning.
+
+   - KB must include legal/regulatory snippets for Bet App and safety/moderation guidance for Social App.
+
+   - Auto‑suggest KB updates when new unresolved intents appear (provide suggested article drafts for human review).
+
+
+
+6) Escalation & human‑in‑the‑loop
+
+   - Triage logic: prioritize escalations by risk (legal/compliance), user value (enterprise/high LTV), and severity (funds locked, account suspended).
+
+   - Human queue UI: full context, timeline of automated reasoning, attached evidence, suggested next actions, and one-click execute/undo buttons.
+
+   - SLA rules: human response times by priority; auto‑escalate beyond SLA.
+
+   - Post‑escalation learning: when humans resolve, log final label and corrective actions to retrain models.
+
+
+
+7) Compliance, privacy & safety
+
+   - Data minimization: redact PII in logs where not needed; use hashed identifiers for modeling. Explicitly log any raw PII access with auditor tag.
+
+   - Consent & disclosures: notify users when automated decisions occur and provide opt‑out for AI interactions if required by law.
+
+   - Geo & age gating: enforce region-specific legal flows; block or route gambling-related requests per jurisdiction.
+
+   - Moderation rules: for Social App, auto-block hate/illegal content but require human review for borderline cases; provide appeal flow.
+
+   - Retention & deletion: retention TTLs for chat transcripts, verification docs, and audit logs; support legal hold processes.
+
+
+
+8) AI model & training plan
+
+   - Models: intent classification, NER/entity extraction, sentiment/risk scoring, reranking for KB retrieval, policy‑decision classifier for auto‑action eligibility, and summarization for human queue.
+
+   - Training data: historical tickets, labeled intents, resolved outcomes, KB articles, and legal/operations rules. Synthetic augmentation for rare/edge cases (fraud, deceased recipient).
+
+   - Retraining cadence: weekly for intent models, monthly for policy classifiers; continuous learning pipeline with human‑labeled corrections.
+
+   - Explainability: store feature attributions and top KB sources for each automated decision.
+
+
+
+9) Monitoring, metrics & SLAs
+
+   - Operational metrics: automation rate (% resolved without human), escalation rate, time‑to-resolution, CSAT/NPS, appeals rate, incorrect‑auto actions, refunds issued by AI, fraud false‑positives from AI.
+
+   - Safety metrics: legal escalations, moderation errors, wrongful releases, and privacy accesses.
+
+   - Alerting: anomalies in automation rate, sudden spike in escalations, or abusive request patterns.
+
+   - Periodic audits: weekly automated audit reports and monthly human review samples (random + high‑risk cases).
+
+
+
+10) UX copy, templates & flows
+
+    - Provide library of empathetic templates for common scenarios, consent notices, error explanations, and appeal/verification emails/SMS.
+
+    - Prebuilt modal flows: pre‑escalation micro‑survey, verification request flows, and refund/compensation offer flows.
+
+    - In-app review deflection (Bet App): detect negative sentiment and invoke recovery flow before external review prompt.
+
+
+
+11) Security & access controls
+
+    - RBAC for admin overrides, audit logging for each use of override, and separation of duties for financial approvals above thresholds.
+
+    - Keys & secrets via KMS; encrypted transit/storage for attachments (verification docs).
+
+    - Penetration testing schedule for support endpoints.
+
+
+
+12) Operational playbooks
+
+    - Incident handling (mass outage, payment provider outage, fraud wave).
+
+    - Appeals & dispute resolution (escalation checklist, required evidence).
+
+    - Model degradation playbook: rollback to rules or increased escalation if model performance drops.
+
+    - Onboarding for enterprise accounts: dedicated scripted flows, SLA commitments, and CSM handoff.
+
+
+
+13) Auto‑reporting & governance
+
+    - Weekly executive summary: automation KPIs, top unresolved intents, incidents, and pending legal escalations.
+
+    - Monthly compliance package: sample logs, audit trails, data access records for legal review.
+
+    - Governance process for KB/article changes and policy updates with versioning and approval workflow.
+
+
+
+14) Safety guardrails & prohibited behaviors
+
+    - Do not provide instructions that enable illegal betting or circumvention of geo/age checks.
+
+    - No permanent automated release of time‑capsules when death verification is ambiguous—require human review.
+
+    - Limit financial reimbursements to policy limits and require human approval for exceptions.
+
+    - Preserve user privacy; do not surface sensitive PII in chat without consent.
+
+
+
+15) Starter code & deployment
+
+    - Provide runnable microservices: intent classifier, policy engine, action executor, KB RAG service, webhook adapters, and human queue UI (React).
+
+    - Provide Dockerfiles, Kubernetes manifests, CI pipelines, and sample infra IaC (Terraform) for integrations (DB, KMS, S3, Redis, queue).
+
+    - Provide unit & integration tests and simulated dataset for end‑to‑end testing (including fraud and legal scenarios).
+
+    - Provide Ansible/helm templates for on‑prem or private VPC deployment for enterprise customers.
+
+
+
+16) Acceptance criteria & testing
+
+    - Automation target: configurable per environment (default 85% automation with <2% incorrect auto‑actions).
+
+    - Safety: 100% of high‑legal‑risk intents escalate; <0.5% refunds incorrectly issued by AI.
+
+    - Performance: API latency <200ms for scoring; KB retrieval latency <300ms.
+
+    - CSAT: baseline target >4.2/5 post‑intervention.
+
+
+
+17) Rollout & iteration plan
+
+    - Phased rollout: start with low‑risk intents, expand to medium, then high‑risk with stricter thresholds and human‑reviewed bootstrapping.
+
+    - Shadow mode: run full automation in shadow for 2–4 weeks to collect labels before enabling auto‑actions.
+
+    - A/B experiments for messaging, compensation offers, and thresholds.
+
+
+
+18) Documentation & runbook
+
+    - Full operator manual, developer integration guide, policy decision matrix, and escalation contact list.
+
+    - Onboarding checklist for new CS personnel and enterprise CSMs.
+
+
+
+19) Questions you must ask me before production
+
+    - Which ticketing/CS system(s) must we integrate with? (Zendesk/Intercom/Freshdesk/Custom)
+
+    - What are the dollar thresholds for automated refunds/credits per app and per user-tier?
+
+    - Which jurisdictions/markets are supported for Bet App (geo constraints, age verification)?
+
+    - Do you require human consent logs for AI automated decisions (opt‑in/opt‑out)?
+
+    - Which identity verification/IDV vendors are acceptable?
+
+    - Where will media/verification docs be stored and for how long?
+
+    - Enterprise customers: require private deployments or is SaaS acceptable?
+
+    - Which languages do we need to support and what tone/voice per locale?
+
+    - Which user segments should be prioritized for human escalation (enterprise/high LTV)?
+
+    - What are acceptable KPIs for automation rate and false‑positive tolerance?
+
+
+
+Operational constraints & guardrails for the AI
+
+- Favor safety & legal compliance over automation when uncertain.
+
+- Log reasoning, data sources, and confidence for every automated action.
+
+- Allow easy human override and undo for all side‑effects.
+
+- Never suggest or implement actions that would enable illegal gambling or privacy violations.
+
+
+
+Output format required from the AI system
+
+- Runnable code repo (microservices + UI), configuration templates, policy/rules JSON, KB content and RAG pipeline config, monitoring dashboards (Grafana/Datadog), alerting rules, human queue UI mockups, training data samples & model artifacts, integration docs, and an ops runbook.
+
+
+
+End of prompt."
+

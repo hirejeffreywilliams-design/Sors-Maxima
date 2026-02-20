@@ -39,6 +39,9 @@ Key features include:
 - **Age Verification Gate**: Legal compliance age verification (21+) with DOB capture, session-based verification state, and access denial for underage users.
 - **ROI Uplift Calculator**: User-facing tool showing expected value improvement from subscription tiers, including hit rate boost, monthly/annual uplift, and ROI multiple.
 - **Public Roadmap**: Multi-horizon product roadmap (near-term, mid-term, long-term, ultra-long-term) for community transparency.
+- **User Experience Health Monitor**: AI-driven system that tracks user signals (errors, payment failures, session drops, negative feedback), computes risk scores per user, and enables proactive intervention to prevent churn.
+- **Error Recovery Interceptor**: Frontend component that detects repeated server errors and network failures, showing contextual recovery modal with retry, help center, and feedback options.
+- **Admin User Health Dashboard**: Admin page showing at-risk users with risk scores, event timelines, intervention history, suggested actions, and one-click intervention tools.
 - **Security Architecture**: Multi-layered security including security headers, IP blocking, input sanitization, rate limiting, session fingerprinting, password security (scrypt), account lockout, and fraud detection.
 
 ## External Dependencies

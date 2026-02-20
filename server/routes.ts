@@ -3270,7 +3270,7 @@ Follow these rules:
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const { analytics, marketing, dataSharing } = req.body;
     analyticsEventService.setUserConsent(userId, { analytics, marketing, dataSharing });
-    auditTrail.record(userId, "consent_updated", "user", userId, { analytics, marketing, dataSharing });
+    auditTrail.record(userId, "consent_updated", "user", userId, { metadata: { analytics, marketing, dataSharing } });
     res.json({ success: true, consent: analyticsEventService.getUserConsent(userId) });
   });
 
@@ -3585,6 +3585,220 @@ Follow these rules:
       },
     };
     res.json(roadmap);
+  });
+
+  // ── User Experience Health Monitor ──
+  interface HealthEvent {
+    id: string;
+    userId: string;
+    username: string;
+    type: "error" | "payment_failure" | "session_drop" | "feature_error" | "api_error" | "crash" | "help_view" | "negative_feedback" | "usage_decline";
+    severity: "low" | "medium" | "high" | "critical";
+    metadata: Record<string, unknown>;
+    timestamp: string;
+  }
+
+  interface Intervention {
+    id: string;
+    userId: string;
+    username: string;
+    type: "recovery_modal" | "support_prompt" | "credit_offer" | "callback_scheduled" | "follow_up" | "trial_extension" | "onboarding_reset";
+    description: string;
+    outcome?: "resolved" | "no_response" | "escalated" | "pending";
+    outcomeNote?: string;
+    createdAt: string;
+    resolvedAt?: string;
+  }
+
+  const healthEvents: HealthEvent[] = [];
+  const interventions: Intervention[] = [];
+
+  function computeRiskScore(userId: string): { score: number; level: "healthy" | "at_risk" | "critical"; factors: string[] } {
+    const now = Date.now();
+    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+    const userEvents = healthEvents.filter(e => e.userId === userId && new Date(e.timestamp).getTime() > thirtyDaysAgo);
+    if (userEvents.length === 0) return { score: 0, level: "healthy", factors: [] };
+
+    const factors: string[] = [];
+    let score = 0;
+
+    const sevWeights = { low: 2, medium: 5, high: 12, critical: 25 };
+    const typeWeights: Record<string, number> = { error: 1, payment_failure: 3, session_drop: 1.5, feature_error: 1.2, api_error: 0.8, crash: 2, help_view: 0.5, negative_feedback: 2.5, usage_decline: 1.8 };
+
+    for (const ev of userEvents) {
+      score += sevWeights[ev.severity] * (typeWeights[ev.type] || 1);
+    }
+
+    const errorCount = userEvents.filter(e => ["error", "crash", "api_error", "feature_error"].includes(e.type)).length;
+    if (errorCount >= 5) { factors.push(`${errorCount} errors in 30 days`); score += errorCount * 2; }
+    const paymentFails = userEvents.filter(e => e.type === "payment_failure").length;
+    if (paymentFails >= 2) { factors.push(`${paymentFails} payment failures`); score += paymentFails * 8; }
+    const negFeedback = userEvents.filter(e => e.type === "negative_feedback").length;
+    if (negFeedback >= 1) { factors.push(`${negFeedback} negative feedback submissions`); score += negFeedback * 10; }
+    const recentCrashes = userEvents.filter(e => e.type === "crash" && (now - new Date(e.timestamp).getTime()) < 7 * 24 * 60 * 60 * 1000).length;
+    if (recentCrashes >= 2) { factors.push(`${recentCrashes} crashes this week`); }
+    const helpViews = userEvents.filter(e => e.type === "help_view").length;
+    if (helpViews >= 3) { factors.push(`${helpViews} help center visits`); }
+
+    score = Math.min(100, Math.round(score));
+    const level = score >= 60 ? "critical" : score >= 30 ? "at_risk" : "healthy";
+    if (factors.length === 0 && score > 0) factors.push(`${userEvents.length} events tracked`);
+
+    return { score, level, factors };
+  }
+
+  const validEventTypes = ["error", "payment_failure", "session_drop", "feature_error", "api_error", "crash", "help_view", "negative_feedback", "usage_decline"];
+  const validSeverities = ["low", "medium", "high", "critical"];
+
+  app.post("/api/health/event", (req, res) => {
+    const userId = req.session?.userId;
+    const username = req.session?.username || "anonymous";
+    const { type, severity, metadata } = req.body;
+    if (!type || !severity) return res.status(400).json({ error: "type and severity required" });
+    if (!validEventTypes.includes(type)) return res.status(400).json({ error: `Invalid event type. Must be one of: ${validEventTypes.join(", ")}` });
+    if (!validSeverities.includes(severity)) return res.status(400).json({ error: `Invalid severity. Must be one of: ${validSeverities.join(", ")}` });
+
+    const event: HealthEvent = {
+      id: `he_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      userId: userId || "anonymous",
+      username,
+      type,
+      severity,
+      metadata: metadata || {},
+      timestamp: new Date().toISOString(),
+    };
+    healthEvents.push(event);
+    if (healthEvents.length > 10000) healthEvents.splice(0, healthEvents.length - 10000);
+
+    res.json({ success: true, eventId: event.id });
+  });
+
+  app.get("/api/health/status", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const riskInfo = computeRiskScore(userId);
+    const recentEvents = healthEvents
+      .filter(e => e.userId === userId)
+      .slice(-10)
+      .reverse();
+    res.json({ ...riskInfo, recentEvents });
+  });
+
+  app.get("/api/admin/user-health", requireAdmin, (_req, res) => {
+    const userMap = new Map<string, { userId: string; username: string; events: HealthEvent[] }>();
+    for (const ev of healthEvents) {
+      if (!userMap.has(ev.userId)) userMap.set(ev.userId, { userId: ev.userId, username: ev.username, events: [] });
+      userMap.get(ev.userId)!.events.push(ev);
+    }
+
+    const users = Array.from(userMap.values()).map(u => {
+      const risk = computeRiskScore(u.userId);
+      const userInterventions = interventions.filter(i => i.userId === u.userId);
+      return {
+        userId: u.userId,
+        username: u.username,
+        riskScore: risk.score,
+        riskLevel: risk.level,
+        factors: risk.factors,
+        eventCount: u.events.length,
+        lastEvent: u.events[u.events.length - 1]?.timestamp,
+        interventionCount: userInterventions.length,
+        pendingInterventions: userInterventions.filter(i => i.outcome === "pending" || !i.outcome).length,
+      };
+    });
+
+    users.sort((a, b) => b.riskScore - a.riskScore);
+    const summary = {
+      totalTracked: users.length,
+      critical: users.filter(u => u.riskLevel === "critical").length,
+      atRisk: users.filter(u => u.riskLevel === "at_risk").length,
+      healthy: users.filter(u => u.riskLevel === "healthy").length,
+      totalEvents: healthEvents.length,
+      totalInterventions: interventions.length,
+    };
+
+    res.json({ users, summary });
+  });
+
+  app.get("/api/admin/user-health/:userId", requireAdmin, (req, res) => {
+    const { userId } = req.params;
+    const events = healthEvents.filter(e => e.userId === userId).reverse();
+    const userInterventions = interventions.filter(i => i.userId === userId).reverse();
+    const risk = computeRiskScore(userId);
+    const username = events[0]?.username || userInterventions[0]?.username || userId;
+
+    const suggestedActions: string[] = [];
+    if (risk.score >= 60) {
+      suggestedActions.push("Offer expedited support or callback");
+      suggestedActions.push("Consider trial extension or credit");
+    }
+    if (risk.factors.some(f => f.includes("payment"))) suggestedActions.push("Review payment method issues");
+    if (risk.factors.some(f => f.includes("error"))) suggestedActions.push("Check for recurring technical issues");
+    if (risk.factors.some(f => f.includes("feedback"))) suggestedActions.push("Review and respond to feedback");
+    if (risk.factors.some(f => f.includes("help"))) suggestedActions.push("Proactive outreach with solution");
+    if (suggestedActions.length === 0) suggestedActions.push("No action needed - user appears healthy");
+
+    res.json({ userId, username, risk, events, interventions: userInterventions, suggestedActions });
+  });
+
+  app.post("/api/admin/interventions", requireAdmin, (req, res) => {
+    const { userId, username, type, description } = req.body;
+    if (!userId || !type) return res.status(400).json({ error: "userId and type required" });
+
+    const intervention: Intervention = {
+      id: `int_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      userId,
+      username: username || userId,
+      type,
+      description: description || "",
+      outcome: "pending",
+      createdAt: new Date().toISOString(),
+    };
+    interventions.push(intervention);
+
+    auditTrail.record(req.session?.userId || "admin", "intervention_created", "user", userId, { metadata: { interventionId: intervention.id, type } });
+
+    res.json({ success: true, intervention });
+  });
+
+  app.post("/api/admin/interventions/:id/outcome", requireAdmin, (req, res) => {
+    const { id } = req.params;
+    const { outcome, note } = req.body;
+    const intervention = interventions.find(i => i.id === id);
+    if (!intervention) return res.status(404).json({ error: "Intervention not found" });
+    if (!["resolved", "no_response", "escalated"].includes(outcome)) return res.status(400).json({ error: "Invalid outcome" });
+
+    intervention.outcome = outcome;
+    intervention.outcomeNote = note || "";
+    intervention.resolvedAt = new Date().toISOString();
+
+    auditTrail.record(req.session?.userId || "admin", "intervention_resolved", "user", intervention.userId, { metadata: { interventionId: id, outcome } });
+
+    res.json({ success: true, intervention });
+  });
+
+  app.get("/api/health/suggestions", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const risk = computeRiskScore(userId);
+    const suggestions: Array<{ action: string; label: string; priority: "low" | "medium" | "high" }> = [];
+
+    if (risk.score >= 30) {
+      suggestions.push({ action: "contact_support", label: "Chat with our support team", priority: "high" });
+      suggestions.push({ action: "visit_help", label: "Browse help articles", priority: "medium" });
+    }
+    if (risk.factors.some(f => f.includes("error"))) {
+      suggestions.push({ action: "retry_operation", label: "Retry your last action", priority: "high" });
+      suggestions.push({ action: "clear_cache", label: "Clear app cache and refresh", priority: "medium" });
+    }
+    if (risk.factors.some(f => f.includes("payment"))) {
+      suggestions.push({ action: "update_payment", label: "Update payment method", priority: "high" });
+    }
+    if (suggestions.length === 0) {
+      suggestions.push({ action: "send_feedback", label: "Share your experience with us", priority: "low" });
+    }
+
+    res.json({ riskLevel: risk.level, suggestions });
   });
 
   return httpServer;
