@@ -28,7 +28,8 @@ import {
   Smartphone,
   Monitor,
   XCircle,
-  Loader2
+  Loader2,
+  Eye
 } from "lucide-react";
 import { ReferralProgram } from "@/components/referral-program";
 import { LanguageSelector } from "@/components/language-selector";
@@ -56,6 +57,134 @@ interface TrustedDeviceInfo {
   lastUsedAt: string;
   expiresAt: string;
   current: boolean;
+}
+
+function PrivacyConsent() {
+  const { toast } = useToast();
+
+  const { data: consent, isLoading } = useQuery<{ analytics: boolean; marketing: boolean; dataSharing: boolean }>({
+    queryKey: ["/api/user/consent"],
+  });
+
+  const updateConsentMutation = useMutation({
+    mutationFn: async (updates: { analytics?: boolean; marketing?: boolean; dataSharing?: boolean }) => {
+      const res = await apiRequest("POST", "/api/user/consent", updates);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/consent"] });
+      toast({ title: "Privacy settings updated", description: "Your consent preferences have been saved" });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to update privacy settings", variant: "destructive" });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            Privacy & Consent
+          </CardTitle>
+          <CardDescription>Control how your data is collected and used. We respect your choices and comply with privacy regulations.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium" data-testid="label-analytics-consent">Analytics Tracking</Label>
+              <p className="text-xs text-muted-foreground">Allow us to collect usage data to improve the app experience. No personal information is shared with third parties.</p>
+            </div>
+            <Switch
+              checked={consent?.analytics ?? true}
+              onCheckedChange={(checked) => updateConsentMutation.mutate({ analytics: checked })}
+              data-testid="switch-analytics-consent"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium" data-testid="label-marketing-consent">Marketing Communications</Label>
+              <p className="text-xs text-muted-foreground">Receive personalized tips, promotions, and educational content about betting strategies via email and push notifications.</p>
+            </div>
+            <Switch
+              checked={consent?.marketing ?? false}
+              onCheckedChange={(checked) => updateConsentMutation.mutate({ marketing: checked })}
+              data-testid="switch-marketing-consent"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium" data-testid="label-data-sharing-consent">Data Sharing</Label>
+              <p className="text-xs text-muted-foreground">Allow anonymized usage patterns to be shared with partner sportsbooks for odds improvement. No personal data is ever shared.</p>
+            </div>
+            <Switch
+              checked={consent?.dataSharing ?? false}
+              onCheckedChange={(checked) => updateConsentMutation.mutate({ dataSharing: checked })}
+              data-testid="switch-data-sharing-consent"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Your Rights
+          </CardTitle>
+          <CardDescription>Under GDPR, CCPA, and other privacy regulations, you have the following rights:</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm font-medium" data-testid="text-right-access">Right to Access</p>
+              <p className="text-xs text-muted-foreground">Request a copy of all data we hold about you</p>
+            </div>
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm font-medium" data-testid="text-right-erasure">Right to Erasure</p>
+              <p className="text-xs text-muted-foreground">Request deletion of your personal data</p>
+            </div>
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm font-medium" data-testid="text-right-portability">Data Portability</p>
+              <p className="text-xs text-muted-foreground">Export your data in a machine-readable format</p>
+            </div>
+            <div className="rounded-md border p-3 space-y-1">
+              <p className="text-sm font-medium" data-testid="text-right-objection">Right to Object</p>
+              <p className="text-xs text-muted-foreground">Object to processing of your data for certain purposes</p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground pt-2">
+            To exercise any of these rights, please use the Backup tab to export your data, or contact our support team. We will respond within 30 days as required by law.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Affiliate Disclosure
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground" data-testid="text-affiliate-disclosure">
+            Sors Maxima is an analysis and educational tool only -- we are not a sportsbook. We may earn referral fees if you sign up with partner sportsbooks through links in our app. This does not affect our analysis or recommendations. All odds and probabilities are estimates and should not be treated as guarantees.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 function DeviceManagement() {
@@ -303,7 +432,7 @@ export default function Settings() {
 
         <Tabs defaultValue="notifications">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 h-auto">
               <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-notifications">
                 <Bell className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Alerts</span>
@@ -311,6 +440,10 @@ export default function Settings() {
               <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-responsible">
                 <Shield className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Limits</span>
+              </TabsTrigger>
+              <TabsTrigger value="privacy" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-privacy">
+                <Eye className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Privacy</span>
               </TabsTrigger>
               <TabsTrigger value="devices" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-devices">
                 <Smartphone className="h-4 w-4 shrink-0" />
@@ -577,6 +710,10 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="privacy" className="space-y-4 mt-4">
+            <PrivacyConsent />
           </TabsContent>
 
           <TabsContent value="devices" className="space-y-4 mt-4">

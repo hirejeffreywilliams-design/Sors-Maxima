@@ -466,9 +466,10 @@ export default function LandingPage() {
               </Button>
             </Link>
           </div>
-          <p className="text-xs text-gray-400 max-w-md mx-auto pt-4">
-            For entertainment and educational purposes only. Not gambling advice.
-            No guarantees of accuracy or profitability. Must be 21+.
+          <p className="text-xs text-gray-400 max-w-md mx-auto pt-4" data-testid="text-landing-disclaimer">
+            For entertainment and educational purposes only. This is an analysis tool, not a sportsbook. Not gambling advice.
+            No guarantees of accuracy or profitability. Must be 21+. We may earn referral fees from partner sportsbooks.
+            {" "}<a href="https://www.ncpgambling.org" target="_blank" rel="noopener noreferrer" className="underline">Problem Gambling Help: 1-800-522-4700</a>
           </p>
         </div>
       </section>

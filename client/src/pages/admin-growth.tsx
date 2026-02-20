@@ -30,6 +30,8 @@ import {
   FileEdit,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2, Activity } from "lucide-react";
 
 const funnelStages = [
   { label: "Visitors", value: 15420, color: "bg-blue-500" },
@@ -165,9 +167,49 @@ function getExperimentStatusVariant(status: string): "default" | "secondary" | "
   }
 }
 
+interface LiveKPIs {
+  totalEvents: number;
+  uniqueUsers: number;
+  ticketsGenerated: number;
+  parlaysSimulated: number;
+  ticketsSaved: number;
+  ticketsShared: number;
+  trialStarts: number;
+  subscriptionStarts: number;
+  affiliateClicks: number;
+  trialToPayConversion: number;
+  avgEventsPerUser: number;
+}
+
+interface LiveFunnelStep {
+  step: string;
+  count: number;
+  conversionRate: number;
+}
+
+interface LiveExperiment {
+  experimentId: string;
+  variants: Array<{ variant: string; impressions: number; conversions: number; conversionRate: number }>;
+}
+
 export default function AdminGrowth() {
   const [activeTab, setActiveTab] = useState("funnel");
   const maxMrr = Math.max(...mrrHistory.map((m) => m.value));
+
+  const { data: liveKPIs, isLoading: kpisLoading } = useQuery<LiveKPIs>({
+    queryKey: ["/api/admin/analytics/kpis"],
+    refetchInterval: 30000,
+  });
+
+  const { data: liveFunnel } = useQuery<LiveFunnelStep[]>({
+    queryKey: ["/api/admin/analytics/funnel"],
+    refetchInterval: 30000,
+  });
+
+  const { data: liveExperiments } = useQuery<LiveExperiment[]>({
+    queryKey: ["/api/admin/analytics/experiments"],
+    refetchInterval: 30000,
+  });
 
   return (
     <div className="min-h-full p-4 sm:p-6 space-y-4 sm:space-y-6 max-w-[1400px] mx-auto">
@@ -187,6 +229,89 @@ export default function AdminGrowth() {
           </p>
         </div>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Activity className="h-4 w-4 text-green-500" />
+            Live Analytics KPIs
+          </CardTitle>
+          <CardDescription>Real-time event tracking and conversion metrics</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {kpisLoading ? (
+            <div className="flex items-center justify-center py-4">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : liveKPIs ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Tickets Generated</p>
+                <p className="text-lg font-bold" data-testid="kpi-tickets-generated">{liveKPIs.ticketsGenerated}</p>
+              </div>
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Parlays Simulated</p>
+                <p className="text-lg font-bold" data-testid="kpi-parlays-simulated">{liveKPIs.parlaysSimulated}</p>
+              </div>
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Tickets Saved</p>
+                <p className="text-lg font-bold" data-testid="kpi-tickets-saved">{liveKPIs.ticketsSaved}</p>
+              </div>
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Trial-to-Paid</p>
+                <p className="text-lg font-bold" data-testid="kpi-trial-conversion">{liveKPIs.trialToPayConversion}%</p>
+              </div>
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Affiliate Clicks</p>
+                <p className="text-lg font-bold" data-testid="kpi-affiliate-clicks">{liveKPIs.affiliateClicks}</p>
+              </div>
+              <div className="rounded-md border p-3 space-y-1">
+                <p className="text-xs text-muted-foreground">Avg Events/User</p>
+                <p className="text-lg font-bold" data-testid="kpi-avg-events">{liveKPIs.avgEventsPerUser}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">No analytics data available yet. Events will appear as users interact with the app.</p>
+          )}
+          {liveFunnel && liveFunnel.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">Live Event Funnel</p>
+              <div className="space-y-1">
+                {liveFunnel.filter(s => s.count > 0).map((step) => (
+                  <div key={step.step} className="flex items-center gap-2">
+                    <span className="text-xs w-32 truncate">{step.step}</span>
+                    <div className="flex-1 h-4 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded-full transition-all"
+                        style={{ width: `${Math.min(step.conversionRate, 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-xs font-medium w-16 text-right">{step.count} ({step.conversionRate}%)</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {liveExperiments && liveExperiments.length > 0 && (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground">Active A/B Experiments</p>
+              {liveExperiments.map((exp) => (
+                <div key={exp.experimentId} className="rounded-md border p-3 space-y-2">
+                  <p className="text-sm font-medium">{exp.experimentId}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {exp.variants.map((v) => (
+                      <div key={v.variant} className="text-xs space-y-0.5">
+                        <span className="font-medium">{v.variant}</span>
+                        <span className="text-muted-foreground"> - {v.impressions} imp, {v.conversions} conv ({v.conversionRate}%)</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="flex-wrap">

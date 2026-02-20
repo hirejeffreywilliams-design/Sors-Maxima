@@ -1,0 +1,191 @@
+Use this prompt to upload to your AI assistant. It designs a compliant, privacy-safe, and conversion-focused marketing & targeting plan for a sports-betting analysis and ticket-generation tool whose purpose is to help users win money (it is NOT a sportsbook). Edit regions, channels, and business specifics as needed.
+
+
+
+Prompt
+
+"Build a compliant, privacy-first, and performance-driven customer-targeting & marketing plan for an app that provides data-driven sports-betting analysis, parlay suggestions, and ticket-generation tools intended to help users win money. The product is an analysis/education tool only — users place wagers with licensed sportsbooks. Deliverables: audience strategy, data sources, channel plans, creatives/copy, measurement & KPIs, compliance checklist, sample ad JSON, analytics events, experiments, and operational runbook.
+
+
+
+Context & positioning
+
+- Product: analytics + probability estimates + parlay/ticket generator that helps users identify value bets and optimize ticket construction. Emphasize education, transparency (odds, edge, variance), and risk disclosure.
+
+- Business model: freemium/subscriptions, pay-per-ticket, premium analytics, optional affiliate/referral links to sportsbooks (if legal and disclosed).
+
+- Primary objective: acquire and monetize users who want to win money by making smarter betting decisions while protecting vulnerable users and staying within legal/platform rules.
+
+
+
+Hard constraints (must follow)
+
+- Target only legal-age users per region; implement explicit age-gating and geo-block where required.
+
+- Comply with platform ad policies and local gambling-related rules; block regions where gambling services or gambling-related marketing is illegal.
+
+- Exclude self-excluded/problem-gambling cohorts and users who opt out of gambling marketing.
+
+- Use only consented first‑party data, hashed identifiers, clean-room matches, or platform-provided audiences; do NOT use illicit data brokers or sensitive health/financial indicators.
+
+- Avoid exploitative language: do not promise guaranteed wins, misrepresent probability, or apply pressure tactics. Always include responsible-gambling messaging and disclaimers, and prominent affiliate disclosures where applicable.
+
+
+
+Required outputs (detailed)
+
+1) Audience segments (optimized for winning-focused users)
+
+   - Candidate segments: value-seekers (look for odds/value content), parlay enthusiasts (high ticket-generation rate), data-driven bettors (consume analytics), fantasy/betting hybrid users, high-frequency bettors (with consented behavior signals), casual bettors likely to convert to paid analytics.
+
+   - Signals and rules: in-app events (ticket_generate, simulate_parlay, save_ticket), search queries (odds, parlay, tipster), content consumption (team previews, betting guides), newsletter engagement, explicit interest tags.
+
+   - Prioritization: rank segments by predicted LTV, propensity-to-pay, and regulatory risk.
+
+
+
+2) Privacy-safe data sources & methods
+
+   - First-party: app events, email lists, consented deposit/partner data, anonymized engagement cohorts.
+
+   - Platform tools: lookalike/cohort audiences on Meta, Google, TikTok; contextual targeting on sports content.
+
+   - Clean-room / hashed-ID techniques for partner joins; server-side matching for conversions with consent.
+
+   - Prohibitions: no use of unconsented PII brokers or vulnerable-person signals.
+
+
+
+3) Channel & campaign strategy
+
+   - Channels: paid social (education-first creatives), search (informational keywords, “how to build parlays”), programmatic contextual on sports sites, podcasts/influencers (tutorials/demos), email, push (consent), and SEO (long-form analytics content).
+
+   - Campaigns: Acquisition (trial/lead gen with demo), Engagement (save/generate tickets), Monetization (trial → subscription), Reactivation (saved-ticket nudges).
+
+   - Creative guidance: emphasize education, sample wins explained with variance, show methodology (simulations, edge), include age/legal disclaimers and responsible-gambling links.
+
+
+
+4) Creative & messaging (compliant examples)
+
+   - Headline templates: “Make smarter parlays with data-backed analysis — educational tool for informed bettors (18+).”
+
+   - CTA variants: “Try free simulations”, “Generate a sample parlay”, “See your ticket’s win probability”.
+
+   - Mandatory content: age requirement, responsible-gambling link, affiliate disclosure: “We may earn referral fees if you sign up with partners.”
+
+   - A/B test ideas: method-focused vs outcome-focused vs tutorial/demo.
+
+
+
+5) Measurement & KPIs (tailored)
+
+   - Acquisition: CAC, conversion-to-trial, cost per engaged user.
+
+   - Engagement: ticket_generate per user, simulate_runs, session length, feature adoption (probability view, variance simulation).
+
+   - Monetization: trial-to-paid conversion, ARPU, LTV, revenue per ticket, cost per paying user.
+
+   - Risk & compliance: % ad disapprovals, geo-block failures, number of self-excluded users targeted (should be zero).
+
+   - Attribution: privacy-safe attribution (aggregated reports, clean-room joins, SKAdNetwork where relevant).
+
+
+
+6) Cost & ROI controls
+
+   - Target cohorts with favorable predicted LTV; cap bids for high-risk regions.
+
+   - Track cost-per-deposit or downstream sportsbook conversions only with explicit consent and partner integrations.
+
+   - Use cohort LTV models to decide CAC bids; implement automated rules to pause spend on cohorts with negative unit economics.
+
+
+
+7) Risk controls & safeguards
+
+   - Mandatory age verification before showing gambling-related features.
+
+   - Exclusion lists and opt-outs enforced server-side.
+
+   - Responsible-gambling modules: deposit/time limits shown in-app, links to help resources, clear loss-projection examples.
+
+   - Creative review workflow and legal sign-off per campaign/region.
+
+
+
+8) Operational & implementation artifacts
+
+   - Analytics events (JSON schema) for: ticket_generate, parlay_simulate, ticket_save, share_ticket, subscription_start, affiliate_click (with consent).
+
+   - Sample DB schema for user_consent, exclusion_flags, segments, and event_aggregation.
+
+   - Ad platform audience JSON snippets for common segments (template-ready).
+
+   - Dashboard templates (top charts: CAC vs LTV by segment, ticket-generation funnel, cohort retention).
+
+
+
+9) Monetization & partnership guidance
+
+   - Pricing experiments: freemium limits (simulations per month), pay-per-ticket, subscription tiers with advanced analytics, enterprise/tipster offerings.
+
+   - Affiliate/referral: require disclosure, legal review, and opt-in tracking; avoid being a sportsbook substitute.
+
+
+
+10) Experiments & optimization roadmap
+
+   - Tests: onboarding messaging (money-winning vs methodology), free-simulations limit, pricing tiers, influencer-driven demo funnels.
+
+   - Metrics to evaluate: uplift in trial-to-paid, retention, ticket-generation frequency, net revenue per cohort.
+
+
+
+11) Compliance checklist (per region & channel)
+
+   - Legal review, age/geo gating implemented, ad-copy compliance, mandatory disclaimers, affiliate disclosures, data-processing agreements, opt-outs & exclusion enforcement, record of sign-offs.
+
+
+
+12) Deliverables
+
+   - Prioritized audience plan, channel playbook, compliant ad-copy variants, JSON audience templates for ad platforms, analytics-event specs, DB schema snippets, dashboard definitions, experiment plan, and campaign launch checklist.
+
+
+
+Questions you must ask me before producing the final configs/campaigns
+
+- Countries/regions to target and regions to block.
+
+- Minimum legal age per region.
+
+- Channels to use (Meta, Google, TikTok, programmatic, podcasts).
+
+- Available first‑party signals (event logs, opt-in partner data, email lists).
+
+- Affiliate/referral intent and legal counsel availability.
+
+- Budget, CAC/LTV targets, and expected user behavior (avg tickets/user, simulation runs).
+
+- Any existing compliance resources or self-exclusion lists to integrate.
+
+
+
+Priority notes for the AI output
+
+- Explicitly label all copy and landing pages as analysis/education tools, not a sportsbook.
+
+- Emphasize transparency about probabilities, variance, and realistic expectations (no guaranteed wins).
+
+- Include responsible-gambling links and affiliate disclosures prominently.
+
+- Default to conservative targeting and require legal sign-off for any high-risk region or messaging.
+
+
+
+Produce final artifacts as editable files/snippets: ad copy variants, JSON audiences, analytics-event schemas, sample SQL for funnel reports, dashboard definitions, and a step-by-step launch checklist."
+
+
+
+End of prompt.

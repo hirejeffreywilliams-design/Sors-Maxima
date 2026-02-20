@@ -48,6 +48,7 @@ import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
 import { getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { eventTracker } from "@/lib/event-tracker";
+import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
@@ -318,6 +319,7 @@ export default function AutoGenerator() {
       
       setTickets(generatedTickets);
       eventTracker.trackTicketGenerate(sports, reqRiskLevel, reqBankroll);
+      trackTicketGenerate(sports.join(","), generatedTickets.length);
       
       const fusions = generatedTickets
         .map(ticket => ticket.fusionData)

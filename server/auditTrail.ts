@@ -30,7 +30,8 @@ type AuditAction =
   | "data_export"
   | "account_deletion"
   | "password_change"
-  | "session_revoked";
+  | "session_revoked"
+  | "consent_updated";
 
 class AuditTrail {
   private entries: AuditEntry[] = [];

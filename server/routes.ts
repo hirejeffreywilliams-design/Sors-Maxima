@@ -22,6 +22,7 @@ import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats } from 
 import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMiddleware";
 import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErrorCodesByCategory, healthMonitor } from "./errorCodeSystem";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "./trustedDeviceService";
+import { analyticsEventService } from "./analyticsEventService";
 
 declare module "express-session" {
   interface SessionData {
@@ -3178,6 +3179,75 @@ Follow these rules:
     sessionStore.delete(sessionId);
     auditTrail.record(userId, "session_revoked", "session", sessionId, { ip: req.ip || "unknown" });
     res.json({ success: true });
+  });
+
+  app.post("/api/events", (req, res) => {
+    const { eventType, properties = {}, sessionId, experimentId, experimentVariant } = req.body;
+    if (!eventType || !sessionId) {
+      return res.status(400).json({ error: "eventType and sessionId are required" });
+    }
+    const userId = req.session?.userId;
+    const event = analyticsEventService.trackEvent({
+      eventType,
+      userId,
+      sessionId,
+      timestamp: new Date().toISOString(),
+      properties,
+      experimentId,
+      experimentVariant,
+      consentGiven: true,
+      ipSubnet: (req.ip || "").split(".").slice(0, 3).join(".") + ".*",
+      userAgent: req.headers["user-agent"],
+    });
+    if (!event) {
+      return res.status(429).json({ error: "Event rejected (rate limit or invalid type)" });
+    }
+    res.json({ success: true, eventId: event.id });
+  });
+
+  app.get("/api/user/consent", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    res.json(analyticsEventService.getUserConsent(userId));
+  });
+
+  app.post("/api/user/consent", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const { analytics, marketing, dataSharing } = req.body;
+    analyticsEventService.setUserConsent(userId, { analytics, marketing, dataSharing });
+    auditTrail.record(userId, "consent_updated", "user", userId, { analytics, marketing, dataSharing });
+    res.json({ success: true, consent: analyticsEventService.getUserConsent(userId) });
+  });
+
+  app.get("/api/admin/analytics/events", requireAdmin, (req, res) => {
+    const since = req.query.since as string | undefined;
+    res.json(analyticsEventService.getEventCounts(since));
+  });
+
+  app.get("/api/admin/analytics/kpis", requireAdmin, (_req, res) => {
+    res.json(analyticsEventService.getKPIs());
+  });
+
+  app.get("/api/admin/analytics/funnel", requireAdmin, (_req, res) => {
+    res.json(analyticsEventService.getFunnelData());
+  });
+
+  app.get("/api/admin/analytics/cohorts", requireAdmin, (_req, res) => {
+    res.json(analyticsEventService.getCohortRetention());
+  });
+
+  app.get("/api/admin/analytics/experiments", requireAdmin, (_req, res) => {
+    res.json(analyticsEventService.getExperimentResults());
+  });
+
+  app.get("/api/admin/analytics/recent", requireAdmin, (req, res) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    res.json(analyticsEventService.getRecentEvents(limit));
+  });
+
+  app.get("/api/admin/analytics/stats", requireAdmin, (_req, res) => {
+    res.json(analyticsEventService.getStats());
   });
 
   return httpServer;

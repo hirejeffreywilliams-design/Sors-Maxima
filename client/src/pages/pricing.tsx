@@ -358,6 +358,18 @@ export default function Pricing() {
           </div>
         </div>
 
+        <div className="pt-6 border-t text-center space-y-2">
+          <p className="text-xs text-muted-foreground" data-testid="text-pricing-disclaimer">
+            Sors Maxima is an analysis and educational tool only -- we are not a sportsbook. All probabilities and predictions are estimates based on statistical models.
+            No guaranteed wins. Please gamble responsibly. Must be 21+ in most jurisdictions.
+          </p>
+          <p className="text-xs text-muted-foreground" data-testid="text-pricing-affiliate">
+            We may earn referral fees if you sign up with partner sportsbooks through our links. This does not affect pricing or analysis quality.
+            {" "}<a href="/legal" className="underline">Full disclosure</a>
+            {" | "}<a href="https://www.ncpgambling.org" target="_blank" rel="noopener noreferrer" className="underline">Problem Gambling Help: 1-800-522-4700</a>
+          </p>
+        </div>
+
       </div>
     </div>
   );

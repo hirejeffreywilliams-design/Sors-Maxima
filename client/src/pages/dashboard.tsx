@@ -161,9 +161,14 @@ export default function Dashboard() {
           </CollapsibleContent>
         </Collapsible>
 
-        <footer className="pt-4 border-t text-center">
-          <p className="text-xs text-muted-foreground">
-            For educational purposes only. Please gamble responsibly.
+        <footer className="pt-4 border-t text-center space-y-2">
+          <p className="text-xs text-muted-foreground" data-testid="text-disclaimer">
+            For educational and analysis purposes only. This is not a sportsbook. Please gamble responsibly. Must be 21+ in most jurisdictions.
+          </p>
+          <p className="text-xs text-muted-foreground" data-testid="text-affiliate-disclosure">
+            We may earn referral fees from partner sportsbooks. This does not affect our analysis.
+            {" "}<a href="/legal" className="underline">Full disclosure</a>
+            {" | "}<a href="https://www.ncpgambling.org" target="_blank" rel="noopener noreferrer" className="underline">Problem Gambling Help: 1-800-522-4700</a>
           </p>
         </footer>
       </div>

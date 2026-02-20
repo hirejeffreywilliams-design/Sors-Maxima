@@ -36,7 +36,7 @@ import RostersPage from "@/pages/rosters";
 import HelpCenter from "@/pages/help";
 import ProfilePage from "@/pages/profile";
 import ChangelogPage from "@/pages/changelog";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -96,6 +96,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "AI-powered Smart Ticket Generator - Create optimized parlays" },
+  { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Visual Parlay Builder - Drag-and-drop interface for building tickets" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, ML projections" },
   { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
