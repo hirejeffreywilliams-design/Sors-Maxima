@@ -24,7 +24,11 @@ import {
   Save,
   FileText,
   Gift,
-  Globe
+  Globe,
+  Smartphone,
+  Monitor,
+  XCircle,
+  Loader2
 } from "lucide-react";
 import { ReferralProgram } from "@/components/referral-program";
 import { LanguageSelector } from "@/components/language-selector";
@@ -43,6 +47,177 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+interface TrustedDeviceInfo {
+  id: string;
+  deviceName: string;
+  ipAddress: string;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+  current: boolean;
+}
+
+function DeviceManagement() {
+  const { toast } = useToast();
+
+  const { data: devices, isLoading } = useQuery<TrustedDeviceInfo[]>({
+    queryKey: ["/api/devices"],
+  });
+
+  const revokeMutation = useMutation({
+    mutationFn: (deviceId: string) => apiRequest("POST", `/api/devices/${deviceId}/revoke`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/devices"] });
+      toast({ title: "Device removed from trusted list" });
+    },
+    onError: () => {
+      toast({ title: "Failed to revoke device", variant: "destructive" });
+    },
+  });
+
+  const revokeAllMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/devices/revoke-all"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/devices"] });
+      toast({ title: "All trusted devices revoked" });
+    },
+    onError: () => {
+      toast({ title: "Failed to revoke devices", variant: "destructive" });
+    },
+  });
+
+  const logoutAllMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/auth/logout-all"),
+    onSuccess: () => {
+      window.location.reload();
+    },
+    onError: () => {
+      toast({ title: "Failed to log out of all devices", variant: "destructive" });
+    },
+  });
+
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  };
+
+  const daysUntilExpiry = (expiresAt: string) => {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Smartphone className="h-5 w-5 text-blue-500" />
+            Trusted Devices
+          </CardTitle>
+          <CardDescription>
+            Devices you have chosen to remember. Trusted devices can sign in automatically without entering your password.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : !devices || devices.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground" data-testid="text-no-devices">
+              <Monitor className="h-10 w-10 mx-auto mb-3 opacity-40" />
+              <p className="font-medium">No trusted devices</p>
+              <p className="text-sm mt-1">When you log in and check "Remember this device", it will appear here.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {devices.map((device) => (
+                <div
+                  key={device.id}
+                  className={`flex items-center justify-between gap-4 p-3 rounded-md border ${
+                    device.current ? "border-primary/30 bg-primary/5" : ""
+                  }`}
+                  data-testid={`device-${device.id}`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Monitor className="h-5 w-5 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm" data-testid={`text-device-name-${device.id}`}>
+                          {device.deviceName}
+                        </span>
+                        {device.current && (
+                          <Badge variant="secondary" className="text-xs">This device</Badge>
+                        )}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        IP: {device.ipAddress} &middot; Last used {formatDate(device.lastUsedAt)} &middot; Expires in {daysUntilExpiry(device.expiresAt)} days
+                      </div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => revokeMutation.mutate(device.id)}
+                    disabled={revokeMutation.isPending}
+                    data-testid={`button-revoke-device-${device.id}`}
+                  >
+                    <XCircle className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5 text-orange-500" />
+            Security Actions
+          </CardTitle>
+          <CardDescription>
+            Manage device trust and active sessions across all your devices
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-medium text-sm">Revoke all trusted devices</p>
+              <p className="text-xs text-muted-foreground">Remove trust from all devices. You will need to log in again on each device.</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => revokeAllMutation.mutate()}
+              disabled={revokeAllMutation.isPending || !devices || devices.length === 0}
+              data-testid="button-revoke-all-devices"
+            >
+              {revokeAllMutation.isPending ? "Revoking..." : "Revoke All"}
+            </Button>
+          </div>
+          <div className="border-t pt-3 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="font-medium text-sm">Log out of all devices</p>
+              <p className="text-xs text-muted-foreground">End all sessions and revoke all trusted devices. You will be signed out everywhere.</p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => logoutAllMutation.mutate()}
+              disabled={logoutAllMutation.isPending}
+              data-testid="button-logout-all-devices"
+            >
+              {logoutAllMutation.isPending ? "Logging out..." : "Log Out Everywhere"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function Settings() {
   const { toast } = useToast();
@@ -128,7 +303,7 @@ export default function Settings() {
 
         <Tabs defaultValue="notifications">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-5 h-auto">
               <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-notifications">
                 <Bell className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Alerts</span>
@@ -136,6 +311,10 @@ export default function Settings() {
               <TabsTrigger value="responsible" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-responsible">
                 <Shield className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Limits</span>
+              </TabsTrigger>
+              <TabsTrigger value="devices" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-devices">
+                <Smartphone className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Devices</span>
               </TabsTrigger>
               <TabsTrigger value="backup" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-backup">
                 <Download className="h-4 w-4 shrink-0" />
@@ -398,6 +577,10 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="devices" className="space-y-4 mt-4">
+            <DeviceManagement />
           </TabsContent>
 
           <TabsContent value="backup" className="space-y-4 mt-4">

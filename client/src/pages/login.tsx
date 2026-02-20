@@ -28,6 +28,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [trustDevice, setTrustDevice] = useState(false);
 
   // Password strength indicators
   const passwordChecks = {
@@ -47,7 +48,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: loginUsername, password: loginPassword }),
+        body: JSON.stringify({ username: loginUsername, password: loginPassword, trustDevice }),
         credentials: "include",
       });
 
@@ -175,6 +176,20 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="trust-device"
+                    checked={trustDevice}
+                    onChange={(e) => setTrustDevice(e.target.checked)}
+                    className="h-4 w-4 rounded border-border accent-primary"
+                    data-testid="checkbox-trust-device"
+                  />
+                  <Label htmlFor="trust-device" className="text-sm text-muted-foreground cursor-pointer">
+                    Remember this device for 60 days
+                  </Label>
                 </div>
 
                 <Button 
