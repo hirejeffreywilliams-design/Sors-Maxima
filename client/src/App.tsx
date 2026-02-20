@@ -74,6 +74,7 @@ function Router() {
       <Route path="/help" component={HelpCenter} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/changelog" component={ChangelogPage} />
+      <Route path="/landing" component={LandingPage} />
       <Route component={NotFound} />
     </Switch>
   );

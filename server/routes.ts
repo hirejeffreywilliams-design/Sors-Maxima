@@ -2195,6 +2195,52 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  // === UTM Attribution Tracking ===
+  const utmEvents: Array<{ source: string; medium: string; campaign: string; content?: string; term?: string; timestamp: string; ip: string }> = [];
+
+  app.post("/api/utm/track", (req, res) => {
+    try {
+      const { source, medium, campaign, content, term } = req.body;
+      if (!source && !medium && !campaign) {
+        return res.status(400).json({ error: "At least one UTM parameter required" });
+      }
+      utmEvents.push({
+        source: source || "(direct)",
+        medium: medium || "(none)",
+        campaign: campaign || "(none)",
+        content: content || undefined,
+        term: term || undefined,
+        timestamp: new Date().toISOString(),
+        ip: getClientIp(req),
+      });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to track UTM data" });
+    }
+  });
+
+  app.get("/api/admin/utm/stats", requireAdmin, (_req, res) => {
+    try {
+      const bySource: Record<string, number> = {};
+      const byMedium: Record<string, number> = {};
+      const byCampaign: Record<string, number> = {};
+      utmEvents.forEach((e) => {
+        bySource[e.source] = (bySource[e.source] || 0) + 1;
+        byMedium[e.medium] = (byMedium[e.medium] || 0) + 1;
+        byCampaign[e.campaign] = (byCampaign[e.campaign] || 0) + 1;
+      });
+      res.json({
+        total: utmEvents.length,
+        bySource,
+        byMedium,
+        byCampaign,
+        recent: utmEvents.slice(-20).reverse(),
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch UTM stats" });
+    }
+  });
+
   // === Idempotency Stats (Admin) ===
   app.get("/api/admin/idempotency/stats", requireAdmin, (_req, res) => {
     try {

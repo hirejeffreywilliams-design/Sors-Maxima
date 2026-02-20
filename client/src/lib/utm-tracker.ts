@@ -101,6 +101,19 @@ export function appendUTMToRequest(
 
 export function useUTMCapture(): void {
   useEffect(() => {
-    captureUTMParams();
+    const data = captureUTMParams();
+    if (data && (data.utm_source || data.utm_medium || data.utm_campaign)) {
+      fetch("/api/utm/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source: data.utm_source,
+          medium: data.utm_medium,
+          campaign: data.utm_campaign,
+          content: data.utm_content,
+          term: data.utm_term,
+        }),
+      }).catch(() => {});
+    }
   }, []);
 }

@@ -15,7 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Flag, Settings, ToggleLeft, Plus, ArrowLeft, Percent, Loader2 } from "lucide-react";
+import { Flag, Settings, ToggleLeft, Plus, ArrowLeft, Percent, Loader2, XCircle } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -66,6 +66,20 @@ export default function AdminFeatureFlags() {
     },
     onError: () => {
       toast({ title: "Failed to update rollout", variant: "destructive" });
+    },
+  });
+
+  const killMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("POST", `/api/admin/feature-flags/${id}/kill`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/feature-flags"] });
+      toast({ title: "Kill switch activated - flag disabled and rollout set to 0%" });
+    },
+    onError: () => {
+      toast({ title: "Failed to activate kill switch", variant: "destructive" });
     },
   });
 
@@ -200,6 +214,7 @@ export default function AdminFeatureFlags() {
                     <TableHead>Status</TableHead>
                     <TableHead>Enabled</TableHead>
                     <TableHead>Rollout %</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -239,6 +254,18 @@ export default function AdminFeatureFlags() {
                             {flag.rolloutPercentage}%
                           </span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => killMutation.mutate(flag.id)}
+                          disabled={!flag.enabled || killMutation.isPending}
+                          data-testid={`button-kill-${flag.id}`}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Kill
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
