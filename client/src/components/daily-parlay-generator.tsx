@@ -158,7 +158,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
       const response = await apiRequest("POST", "/api/daily-strategy", {
         sport: selectedSport,
         date: new Date().toISOString().split('T')[0],
-        games: Array.from(sportParlays.get(selectedSport)?.parlays || []).flatMap(p => p.legs),
+        games: getLegsForStrategy(),
         bankroll,
         riskLevel: "moderate",
         maxLegs: 4,
@@ -173,6 +173,11 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
     } finally {
       setIsGeneratingStrategy(false);
     }
+  };
+
+  const getLegsForStrategy = () => {
+    const parlays = sportParlays.get(selectedSport)?.parlays || [];
+    return parlays.flatMap(p => p.legs);
   };
 
   return (
