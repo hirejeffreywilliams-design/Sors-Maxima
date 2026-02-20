@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   Sparkles, 
@@ -30,7 +31,8 @@ import {
   Radio,
   RefreshCw,
   HelpCircle,
-  Bell
+  Bell,
+  GripVertical
 } from "lucide-react";
 import type { GeneratedTicket } from "@/lib/ticket-orchestrator";
 import type { TicketFusion } from "@/lib/quantum-fusion-engine";
@@ -43,6 +45,8 @@ import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recogn
 import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/quantum-fusion-display";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
+import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
+import { getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { eventTracker } from "@/lib/event-tracker";
 import { useToast } from "@/hooks/use-toast";
 
@@ -396,6 +400,32 @@ export default function AutoGenerator() {
             Past performance does not guarantee future results. Please gamble responsibly.
           </p>
         </div>
+
+        <Tabs defaultValue="generator" className="space-y-6">
+          <div className="flex justify-center">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+              <TabsTrigger value="generator" className="gap-2" data-testid="tab-smart-generator">
+                <Sparkles className="w-4 h-4" />
+                Smart Generator
+              </TabsTrigger>
+              <TabsTrigger value="visual" className="gap-2" data-testid="tab-visual-builder">
+                <GripVertical className="w-4 h-4" />
+                Visual Builder
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="visual" className="space-y-4">
+            <VisualParlayBuilder
+              onLegsChange={() => {}}
+              onStakeChange={() => {}}
+              onResultChange={() => {}}
+              bankroll={bankroll}
+              bettingEnv={getDefaultBettingEnvironment()}
+            />
+          </TabsContent>
+
+          <TabsContent value="generator" className="space-y-6">
         
         <header className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
@@ -692,6 +722,9 @@ export default function AutoGenerator() {
         />
         
         <BettingInsights />
+
+          </TabsContent>
+        </Tabs>
         
         <footer className="pt-4 border-t text-center">
           <p className="text-xs text-muted-foreground">
