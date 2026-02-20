@@ -283,7 +283,7 @@ export function getInjuredPlayersFromCache(sport: Sport, teamId: string): ESPNPl
 
 export function getRosterCacheStats(): { sport: string; teams: number; players: number }[] {
   const stats = new Map<string, { teams: number; players: number }>();
-  for (const [key, entry] of rosterCache.entries()) {
+  for (const [key, entry] of Array.from(rosterCache.entries())) {
     const sport = key.split("-")[0];
     const existing = stats.get(sport) || { teams: 0, players: 0 };
     existing.teams++;

@@ -14,8 +14,10 @@ export class WebhookHandlers {
     }
 
     const stripe = await getUncachableStripeClient();
+    if (!stripe) {
+      throw new Error('Stripe client not available. Set STRIPE_SECRET_KEY.');
+    }
     
-    // Get webhook secret from environment or Replit connectors
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
     let event;

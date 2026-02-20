@@ -201,7 +201,8 @@ export async function getScoreboard(sport: Sport): Promise<ESPNScoreboardGame[]>
     return games;
   } catch (error) {
     console.error(`[ESPN-Scoreboard] Error fetching ${sport}:`, error);
-    return cached?.data || [];
+    const fallback = scoreboardCache.get(cacheKey);
+    return fallback?.data || [];
   }
 }
 

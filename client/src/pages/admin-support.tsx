@@ -104,7 +104,8 @@ export default function AdminSupportDashboard() {
     queryFn: async () => {
       const res = await fetch(ticketsQueryUrl, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch tickets");
-      return res.json();
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.tickets || []);
     },
   });
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -241,8 +241,8 @@ function TicketsTab() {
             </TableHeader>
             <TableBody>
               {tickets.map((t: any) => (
-                <>
-                  <TableRow key={t.ticketId} className="cursor-pointer" onClick={() => setExpandedId(expandedId === t.ticketId ? null : t.ticketId)} data-testid={`row-ticket-${t.ticketId}`}>
+                <Fragment key={t.ticketId}>
+                  <TableRow className="cursor-pointer" onClick={() => setExpandedId(expandedId === t.ticketId ? null : t.ticketId)} data-testid={`row-ticket-${t.ticketId}`}>
                     <TableCell className="font-mono text-xs">{t.ticketId.slice(0, 12)}...</TableCell>
                     <TableCell><Badge variant="outline" className="text-xs">{t.type.replace(/_/g, " ")}</Badge></TableCell>
                     <TableCell className="max-w-64 truncate">{t.title}</TableCell>
@@ -290,7 +290,7 @@ function TicketsTab() {
                       </TableCell>
                     </TableRow>
                   )}
-                </>
+                </Fragment>
               ))}
             </TableBody>
           </Table>

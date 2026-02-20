@@ -53,7 +53,7 @@ class IdempotencyStore {
 
   private cleanup(): void {
     const now = Date.now();
-    for (const [key, record] of this.records) {
+    for (const [key, record] of Array.from(this.records)) {
       if (now > record.expiresAt) {
         this.records.delete(key);
       }

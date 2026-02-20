@@ -5,6 +5,10 @@ import { getUncachableStripeClient } from './stripeClient';
 
 async function createProducts() {
   const stripe = await getUncachableStripeClient();
+  if (!stripe) {
+    console.error('Stripe client not available. Set STRIPE_SECRET_KEY to continue.');
+    return;
+  }
   
   console.log('Creating Sors Maxima subscription products...\n');
 
