@@ -30,7 +30,12 @@ import {
   ShieldAlert,
   DollarSign,
   HeartPulse,
-  MessageCircle
+  MessageCircle,
+  FlaskConical,
+  Mail,
+  UsersRound,
+  Percent,
+  BarChart3
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -373,6 +378,41 @@ export default function AdminDashboard() {
             <Button variant="outline" className="gap-2" data-testid="link-admin-fraud">
               <Shield className="w-4 h-4" />
               Trial Fraud Detection
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/ab-tests">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-ab-tests">
+              <FlaskConical className="w-4 h-4" />
+              A/B Test Manager
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/lifecycle-campaigns">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-lifecycle-campaigns">
+              <Mail className="w-4 h-4" />
+              Lifecycle Campaigns
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/segmentation">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-segmentation">
+              <UsersRound className="w-4 h-4" />
+              Segmentation
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/promos">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-promos">
+              <Percent className="w-4 h-4" />
+              Promotional Offers
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/acquisition">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-acquisition">
+              <BarChart3 className="w-4 h-4" />
+              Acquisition Analytics
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

@@ -1,0 +1,224 @@
+Use this ready-to-paste advanced prompt to brief an analytics engineering team, data product manager, or AI assistant to design and deliver a complete analytics solution and admin analytics surface for your apps.
+
+
+
+Main prompt (use-as-is)
+
+```
+
+You are a senior analytics engineer, data product manager, and observability/analytics architect with extensive experience building product analytics, admin dashboards, and data platforms for mobile and web applications. My product is [APP NAME], serving [markets / user types], built on [tech stack: e.g., React Native + Node + Postgres]. The analytics goal is to give product and ops admins full, reliable, real-time insight into app behavior, surface problems quickly, enable root-cause analysis, and measure business KPIs while ensuring privacy, low cost, and operational reliability.
+
+
+
+Deliver a comprehensive analytics specification, implementation plan, and admin analytics product covering instrumentation, data pipeline, schema, dashboards, alerts, troubleshooting playbooks, access controls, and governance. For each deliverable include concrete examples, exact event schemas, SQL queries or analytics-kit snippets, alert thresholds, and rollout steps.
+
+
+
+Required deliverables and details
+
+
+
+1) Analytics objectives & KPIs
+
+   - Define 10–15 primary business and product KPIs (install, DAU/MAU, retention cohorts, conversion funnel: install→signup→deposit/transaction→repeat, revenue/ARPU, churn-risk, error-rate, latency impact on conversion).
+
+   - For each KPI provide: definition, event list required, calculation SQL/pseudocode, and owners.
+
+
+
+2) Event taxonomy & instrumentation spec
+
+   - Provide an event naming convention and naming examples (namespace, event, properties).
+
+   - Provide exact JSON schema for 25 recommended events (install, app_open, session_start, session_end, screen_view, button_click, signup_start, signup_complete, identity_verification, deposit_initiated, deposit_success, bet_placed/transaction, purchase_refund, feature_X_used, error/exception, network_failure, push_received, push_open, consent_update, logout, upgrade_tier, referral_invite, referral_redeem, subscription_renew).
+
+   - For each event include required properties, optional properties, user identifiers (anonymous_id, user_id), device, platform, timestamp format (ISO8601), and sampling guidance.
+
+
+
+3) Data pipeline & architecture
+
+   - Propose end-to-end architecture (SDKs -> event collector -> streaming layer -> raw event lake -> transformation/warehouse -> feature store / analytics DB -> BI/dashboard layer + alerting).
+
+   - Recommend tools (open-source and commercial options) for each layer (e.g., Segment/ Rudderstack / Snowplow, Kafka or Kinesis, S3/BigQuery/Redshift/Snowflake, dbt, Feature Store, Amplitude/Mixpanel/GA4 for product analytics, Grafana/Looker/Metabase for admin dashboards, Honeycomb / Datadog for observability).
+
+   - Include data retention, partitioning, and cost-control strategies (ingest sampling, event TTLs, hot/cold storage).
+
+
+
+4) Measurement & data model (event → derived tables)
+
+   - Provide a canonical events table schema and 6 derived table specs with sample SQL:
+
+     - users (user profile, lifetime metrics)
+
+     - sessions (session start/end, duration)
+
+     - funnel_events (install→signup→deposit)
+
+     - cohort_retention (day 1/7/30 retention)
+
+     - revenue_by_user/day
+
+     - errors_and_perf
+
+   - Include example SQL queries to compute DAU/MAU, 7-day retention, conversion rate, ARPU, LTV cohort.
+
+
+
+5) Admin dashboards & views
+
+   - Define and mock a prioritized set of dashboard pages (Overview / Executive, Acquisition Funnel, Activation & Onboarding, Monetization, Retention & Cohorts, Real-time Health, Errors & Crashes, Payments & Fraud, Experimentation/A-B results).
+
+   - For each dashboard include: KPIs displayed, visualizations (time series, funnels, cohort heatmap), data refresh cadence (near real-time, 5m, hourly), and sample filters (country, OS version, app version, traffic source, segment).
+
+   - Provide 6 example dashboard widgets with exact query definitions.
+
+
+
+6) Alerts, SLOs & incident playbooks
+
+   - Define SLOs and SLAs for key system metrics (API latency, deposit success rate, onboarding conversion rate, crash-free users).
+
+   - Provide alert rules (metric, threshold, severity, time window, on-call escalation playbook).
+
+   - Provide runbooks for top 8 incidents (e.g., payment gateway failures, signup verification outage, spike in errors after release, sudden DAU drop, major payment chargeback spike, data pipeline lag, analytics event schema break).
+
+
+
+7) Data quality, validation & monitoring
+
+   - Provide data quality checks (schema validation, null rates, daily completeness, sentinel event counts) and example dbt/tests or Great Expectations specs.
+
+   - Describe anomaly detection setup for metrics (baseline windows, z-score or seasonal decomposition approach, alerting on anomalies).
+
+   - Include automated alerting for schema changes and missing events.
+
+
+
+8) A/B testing & experimentation integration
+
+   - Define how to capture experiment assignment events, exposure, and outcome metrics.
+
+   - Provide event schema for experiments and post-experiment analysis SQL templates (intention-to-treat, per-protocol, uplift, confidence intervals).
+
+   - Recommend guardrails for experiment safety and minimum detectable effect/sample size guidance.
+
+
+
+9) Security, privacy & compliance
+
+   - Data minimization rules and PII handling (hashing, encryption at rest/in transit).
+
+   - Consent capture and propagation to analytics (consent_update event), opt-out handling, region-specific rules (GDPR, CCPA, age gating).
+
+   - Retention policies and data deletion process (right to be forgotten).
+
+   - RBAC and audit logging for admin analytics access.
+
+
+
+10) Access control, roles & workflows
+
+   - Define roles and permissions for analytics dashboards (admin, product manager, analyst, support, fraud ops).
+
+   - Example queries or views for support staff to troubleshoot single-user issues without exposing PII.
+
+   - Audit logging spec for queries and dashboard access.
+
+
+
+11) Cost, sizing & roadmap
+
+   - Provide estimated monthly ingest volumes for given input scenarios (low/medium/high active users) and cost implications per component.
+
+   - Prioritized 90-day rollout plan (MVP analytics in 0–4 weeks: core events, critical dashboards, alerts; 4–12 weeks: data models, cohort analysis, A/B integration; 12–24 weeks: feature store, online inference, advanced anomaly detection).
+
+   - Suggested sprint tasks and owners.
+
+
+
+12) Operational excellence & handover
+
+   - Provide onboarding docs/checklist for new analysts and on-call engineers.
+
+   - Create an analytics SLA, data steward roles, and a change-control process for event schema updates (including versioning).
+
+   - Provide sample onboarding notebook queries (SQL) and a pre-built analytics workbook for new hires.
+
+
+
+13) Troubleshooting and common pitfalls
+
+   - List top 12 common analytics issues with step-by-step investigation flow (missing events, duplicated events, timezone issues, sampling bias, stale dashboards, attribution mismatch).
+
+   - Provide precise debug queries and checks for each issue.
+
+
+
+14) Example snippets & templates (must include)
+
+   - 25 event JSON schema examples
+
+   - 10 SQL query templates (DAU/MAU, retention cohorts, funnel conversion, ARPU, LTV, revenue attribution)
+
+   - 6 alert rule YAML/JSON examples for common monitoring tools
+
+   - 1 example dbt test and 1 Great Expectations check
+
+
+
+Tone & constraints
+
+- Deliver technical detail sufficient for engineers to implement with minimal follow-up.
+
+- Prioritize reliability, observability, privacy, and low operational cost.
+
+- Use explicit naming and examples; avoid vague descriptions.
+
+
+
+If you accept, please:
+
+1) Generate the full implementation spec tailored to my app. My app details: [APP NAME], tech stack: [details], first-party analytics vendor preference: [e.g., Rudderstack/Snowplow/Segment/Amplitude], expected MAU: [number], retention baseline: [numbers], budget for analytics infra: [range].
+
+2) Then produce: (a) event schema file (JSON), (b) initial set of dashboard SQLs, (c) alert rules, and (d) 90-day rollout plan with sprint tasks.
+
+
+
+```
+
+
+
+Focused shorter variants (pick one to paste instead if you want a narrower brief)
+
+
+
+- MVP analytics & admin dashboard (fast)
+
+```
+
+Act as an analytics engineer. Deliver an MVP analytics plan for [APP NAME] to be built in 4 weeks: 12 core instrumented events (JSON), 5 critical dashboards (overview, funnel, retention, real-time health, payments), 8 alert rules, and a rollout checklist. Include SQL templates for DAU, 7-day retention, and conversion rate.
+
+```
+
+
+
+- A/B experimentation & attribution
+
+```
+
+Act as an experimentation lead. Provide event schema, instrumentation plan, statistical analysis templates, and experiment guardrails to run safe A/B tests and attribute impact on retention and revenue. Include sample SQL for ITT analysis and MDE/sample size calc.
+
+```
+
+
+
+- Data quality & monitoring playbook
+
+```
+
+Act as a data quality lead. Provide a monitoring playbook: schema validations, daily completeness checks, anomaly detection rules, and 10 runbooks for common data failures. Include dbt test examples and alert templates.
+
+```
+

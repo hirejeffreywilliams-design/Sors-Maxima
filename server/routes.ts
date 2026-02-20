@@ -24,6 +24,68 @@ import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMi
 import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErrorCodesByCategory, healthMonitor } from "./errorCodeSystem";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "./trustedDeviceService";
 import { analyticsEventService } from "./analyticsEventService";
+import { getAllTests, getTest, createTest, updateTest, deleteTest, getTestStats } from "./abTestEngine";
+import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCampaign, getCampaignStats } from "./lifecycleCampaignEngine";
+import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
+import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
+import { getAcquisitionDashboard } from "./acquisitionAnalyticsEngine";
+import { z } from "zod";
+
+const abTestCreateSchema = z.object({
+  name: z.string().min(1).max(200),
+  hypothesis: z.string().min(1),
+  status: z.enum(["draft", "running", "paused", "completed"]),
+  category: z.enum(["acquisition", "onboarding", "activation", "retention", "monetization", "referral"]),
+  variants: z.array(z.object({ id: z.string(), name: z.string(), description: z.string(), isControl: z.boolean(), trafficPercent: z.number(), impressions: z.number().default(0), conversions: z.number().default(0), revenue: z.number().default(0) })).min(2),
+  targetAudience: z.string().min(1),
+  successMetric: z.string().min(1),
+  secondaryMetrics: z.array(z.string()).default([]),
+  trafficSplit: z.number().min(1).max(100),
+  startDate: z.string().nullable().default(null),
+  endDate: z.string().nullable().default(null),
+  notes: z.string().default(""),
+});
+
+const campaignCreateSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1),
+  status: z.enum(["active", "paused", "draft", "archived"]),
+  category: z.enum(["onboarding", "activation", "retention", "reactivation", "monetization", "win_loss"]),
+  trigger: z.object({ type: z.enum(["event", "time", "segment", "behavioral"]), condition: z.string(), delay: z.string().optional() }),
+  steps: z.array(z.object({ id: z.string(), channel: z.enum(["email", "push", "in_app", "sms"]), subject: z.string(), body: z.string(), delay: z.string(), sent: z.number().default(0), opened: z.number().default(0), clicked: z.number().default(0), converted: z.number().default(0) })).min(1),
+  targetSegment: z.string().min(1),
+  enrolledUsers: z.number().default(0),
+  completedUsers: z.number().default(0),
+  conversionRate: z.number().default(0),
+  revenue: z.number().default(0),
+});
+
+const segmentCreateSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1),
+  type: z.enum(["behavioral", "demographic", "value", "lifecycle", "custom"]),
+  rules: z.array(z.object({ field: z.string(), operator: z.enum(["equals", "not_equals", "greater_than", "less_than", "contains", "in", "between"]), value: z.union([z.string(), z.number(), z.array(z.string())]) })).min(1),
+  estimatedSize: z.number().default(0),
+  actualSize: z.number().default(0),
+  isActive: z.boolean().default(true),
+  dynamicOffer: z.any().nullable().default(null),
+});
+
+const promoCreateSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().min(1),
+  type: z.enum(["welcome_bonus", "deposit_match", "free_bet", "odds_boost", "cashback", "loyalty_reward", "time_limited", "referral_bonus"]),
+  status: z.enum(["active", "scheduled", "expired", "paused", "draft"]),
+  value: z.number().min(0),
+  valueType: z.enum(["percentage", "fixed", "multiplier"]),
+  maxPayout: z.number().min(0),
+  wageringRequirement: z.number().min(0),
+  minDeposit: z.number().min(0),
+  targetSegment: z.string().min(1),
+  startDate: z.string(),
+  endDate: z.string(),
+  terms: z.string().min(1),
+});
 
 declare module "express-session" {
   interface SessionData {
@@ -422,6 +484,159 @@ export async function registerRoutes(
   app.get("/api/admin/fraud/throttle-status", requireAdmin, (req, res) => {
     const ip = req.query.ip as string || '0.0.0.0';
     res.json(getThrottleStatus(ip));
+  });
+
+  // === A/B Test Manager ===
+  app.get("/api/admin/ab-tests", requireAdmin, (req, res) => {
+    const { status, category } = req.query;
+    res.json(getAllTests({ status: status as string, category: category as string }));
+  });
+
+  app.get("/api/admin/ab-tests/stats", requireAdmin, (_req, res) => {
+    res.json(getTestStats());
+  });
+
+  app.get("/api/admin/ab-tests/:id", requireAdmin, (req, res) => {
+    const test = getTest(req.params.id);
+    if (!test) return res.status(404).json({ error: "Test not found" });
+    res.json(test);
+  });
+
+  app.post("/api/admin/ab-tests", requireAdmin, (req, res) => {
+    const parsed = abTestCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const test = createTest(parsed.data);
+    res.status(201).json(test);
+  });
+
+  app.patch("/api/admin/ab-tests/:id", requireAdmin, (req, res) => {
+    const parsed = abTestCreateSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const test = updateTest(req.params.id, parsed.data);
+    if (!test) return res.status(404).json({ error: "Test not found" });
+    res.json(test);
+  });
+
+  app.delete("/api/admin/ab-tests/:id", requireAdmin, (req, res) => {
+    const success = deleteTest(req.params.id);
+    if (!success) return res.status(404).json({ error: "Test not found" });
+    res.json({ success: true });
+  });
+
+  // === Lifecycle Campaign Manager ===
+  app.get("/api/admin/campaigns", requireAdmin, (req, res) => {
+    const { status, category } = req.query;
+    res.json(getAllCampaigns({ status: status as string, category: category as string }));
+  });
+
+  app.get("/api/admin/campaigns/stats", requireAdmin, (_req, res) => {
+    res.json(getCampaignStats());
+  });
+
+  app.get("/api/admin/campaigns/:id", requireAdmin, (req, res) => {
+    const campaign = getCampaign(req.params.id);
+    if (!campaign) return res.status(404).json({ error: "Campaign not found" });
+    res.json(campaign);
+  });
+
+  app.post("/api/admin/campaigns", requireAdmin, (req, res) => {
+    const parsed = campaignCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const campaign = createCampaign(parsed.data);
+    res.status(201).json(campaign);
+  });
+
+  app.patch("/api/admin/campaigns/:id", requireAdmin, (req, res) => {
+    const parsed = campaignCreateSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const campaign = updateCampaign(req.params.id, parsed.data);
+    if (!campaign) return res.status(404).json({ error: "Campaign not found" });
+    res.json(campaign);
+  });
+
+  app.delete("/api/admin/campaigns/:id", requireAdmin, (req, res) => {
+    const success = deleteCampaign(req.params.id);
+    if (!success) return res.status(404).json({ error: "Campaign not found" });
+    res.json({ success: true });
+  });
+
+  // === User Segmentation & Personalization ===
+  app.get("/api/admin/segments", requireAdmin, (req, res) => {
+    const { type } = req.query;
+    const active = req.query.active === "true" ? true : req.query.active === "false" ? false : undefined;
+    res.json(getAllSegments({ type: type as string, active }));
+  });
+
+  app.get("/api/admin/segments/stats", requireAdmin, (_req, res) => {
+    res.json(getSegmentationStats());
+  });
+
+  app.get("/api/admin/segments/:id", requireAdmin, (req, res) => {
+    const segment = getSegment(req.params.id);
+    if (!segment) return res.status(404).json({ error: "Segment not found" });
+    res.json(segment);
+  });
+
+  app.post("/api/admin/segments", requireAdmin, (req, res) => {
+    const parsed = segmentCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const data = parsed.data;
+    const segment = createSegment({ ...data, dynamicOffer: data.dynamicOffer ?? null } as any);
+    res.status(201).json(segment);
+  });
+
+  app.patch("/api/admin/segments/:id", requireAdmin, (req, res) => {
+    const parsed = segmentCreateSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const segment = updateSegment(req.params.id, parsed.data as any);
+    if (!segment) return res.status(404).json({ error: "Segment not found" });
+    res.json(segment);
+  });
+
+  app.get("/api/admin/personalization-rules", requireAdmin, (_req, res) => {
+    res.json(getAllPersonalizationRules());
+  });
+
+  // === Promotional Offers ===
+  app.get("/api/admin/promos", requireAdmin, (req, res) => {
+    const { type, status } = req.query;
+    res.json(getAllOffers({ type: type as string, status: status as string }));
+  });
+
+  app.get("/api/admin/promos/stats", requireAdmin, (_req, res) => {
+    res.json(getPromoStats());
+  });
+
+  app.get("/api/admin/promos/:id", requireAdmin, (req, res) => {
+    const offer = getOffer(req.params.id);
+    if (!offer) return res.status(404).json({ error: "Offer not found" });
+    res.json(offer);
+  });
+
+  app.post("/api/admin/promos", requireAdmin, (req, res) => {
+    const parsed = promoCreateSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const offer = createOffer(parsed.data);
+    res.status(201).json(offer);
+  });
+
+  app.patch("/api/admin/promos/:id", requireAdmin, (req, res) => {
+    const parsed = promoCreateSchema.partial().safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const offer = updateOffer(req.params.id, parsed.data);
+    if (!offer) return res.status(404).json({ error: "Offer not found" });
+    res.json(offer);
+  });
+
+  app.delete("/api/admin/promos/:id", requireAdmin, (req, res) => {
+    const success = deleteOffer(req.params.id);
+    if (!success) return res.status(404).json({ error: "Offer not found" });
+    res.json({ success: true });
+  });
+
+  // === Acquisition & CAC Analytics ===
+  app.get("/api/admin/acquisition", requireAdmin, (_req, res) => {
+    res.json(getAcquisitionDashboard());
   });
 
   app.post("/api/admin/ban-user", requireAdmin, async (req, res) => {

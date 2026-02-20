@@ -44,6 +44,11 @@ import Roadmap from "@/pages/roadmap";
 import AdminUserHealth from "@/pages/admin-user-health";
 import AdminSupportDashboard from "@/pages/admin-support";
 import AdminFraudDashboard from "@/pages/admin-fraud";
+import AdminABTests from "@/pages/admin-ab-tests";
+import AdminLifecycleCampaigns from "@/pages/admin-lifecycle-campaigns";
+import AdminSegmentation from "@/pages/admin-segmentation";
+import AdminPromos from "@/pages/admin-promos";
+import AdminAcquisition from "@/pages/admin-acquisition";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
@@ -92,6 +97,11 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
       <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
       <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
+      <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
+      <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
+      <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
+      <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
+      <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
