@@ -42,6 +42,7 @@ import AdminRiskRegister from "@/pages/admin-risk-register";
 import AdminFinancialProjections from "@/pages/admin-financial-projections";
 import Roadmap from "@/pages/roadmap";
 import AdminUserHealth from "@/pages/admin-user-health";
+import AdminSupportDashboard from "@/pages/admin-support";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -53,8 +54,16 @@ import { FeedbackWidget } from "@/components/feedback-widget";
 import { useUTMCapture } from "@/lib/utm-tracker";
 import { AgeVerificationGate } from "@/components/age-verification-gate";
 import { ErrorRecoveryInterceptor } from "@/components/error-recovery-interceptor";
+import { SupportChat } from "@/components/support-chat";
 
-function Router() {
+function AdminGuard({ component: Component, authState }: { component: React.ComponentType; authState: AuthState }) {
+  if (!authState.isAdmin) {
+    return <NotFound />;
+  }
+  return <Component />;
+}
+
+function Router({ authState }: { authState: AuthState }) {
   return (
     <Switch>
       <Route path="/" component={AutoGenerator} />
@@ -68,22 +77,23 @@ function Router() {
       <Route path="/live" component={Live} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/legal" component={LegalPage} />
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/diagnostics" component={AdminDiagnostics} />
-      <Route path="/admin/marketing" component={AdminMarketing} />
-      <Route path="/admin/security" component={AdminSecurity} />
-      <Route path="/admin/growth" component={AdminGrowth} />
-      <Route path="/admin/feature-flags" component={AdminFeatureFlags} />
-      <Route path="/admin/model-performance" component={AdminModelPerformance} />
-      <Route path="/admin/data-provenance" component={AdminDataProvenance} />
-      <Route path="/admin/risk-register" component={AdminRiskRegister} />
-      <Route path="/admin/financial-projections" component={AdminFinancialProjections} />
-      <Route path="/admin/user-health" component={AdminUserHealth} />
+      <Route path="/admin">{() => <AdminGuard component={AdminDashboard} authState={authState} />}</Route>
+      <Route path="/admin/diagnostics">{() => <AdminGuard component={AdminDiagnostics} authState={authState} />}</Route>
+      <Route path="/admin/marketing">{() => <AdminGuard component={AdminMarketing} authState={authState} />}</Route>
+      <Route path="/admin/security">{() => <AdminGuard component={AdminSecurity} authState={authState} />}</Route>
+      <Route path="/admin/growth">{() => <AdminGuard component={AdminGrowth} authState={authState} />}</Route>
+      <Route path="/admin/feature-flags">{() => <AdminGuard component={AdminFeatureFlags} authState={authState} />}</Route>
+      <Route path="/admin/model-performance">{() => <AdminGuard component={AdminModelPerformance} authState={authState} />}</Route>
+      <Route path="/admin/data-provenance">{() => <AdminGuard component={AdminDataProvenance} authState={authState} />}</Route>
+      <Route path="/admin/risk-register">{() => <AdminGuard component={AdminRiskRegister} authState={authState} />}</Route>
+      <Route path="/admin/financial-projections">{() => <AdminGuard component={AdminFinancialProjections} authState={authState} />}</Route>
+      <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
+      <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
-      <Route path="/training" component={TrainingCenter} />
+      <Route path="/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
       <Route path="/rosters" component={RostersPage} />
       <Route path="/help" component={HelpCenter} />
       <Route path="/profile" component={ProfilePage} />
@@ -358,7 +368,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       
       <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
         <AgeVerificationGate>
-          <Router />
+          <Router authState={authState} />
         </AgeVerificationGate>
       </main>
       
@@ -392,6 +402,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <CookieConsentBanner />
       <FeedbackWidget />
       <ErrorRecoveryInterceptor />
+      <SupportChat />
     </div>
   );
 }

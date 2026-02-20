@@ -29,7 +29,8 @@ import {
   Database,
   ShieldAlert,
   DollarSign,
-  HeartPulse
+  HeartPulse,
+  MessageCircle
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -358,6 +359,13 @@ export default function AdminDashboard() {
             <Button variant="outline" className="gap-2" data-testid="link-admin-user-health">
               <HeartPulse className="w-4 h-4" />
               User Health
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
+          <Link href="/admin/support">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-support">
+              <MessageCircle className="w-4 h-4" />
+              Support Center
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>

@@ -42,7 +42,10 @@ Key features include:
 - **User Experience Health Monitor**: AI-driven system that tracks user signals (errors, payment failures, session drops, negative feedback), computes risk scores per user, and enables proactive intervention to prevent churn.
 - **Error Recovery Interceptor**: Frontend component that detects repeated server errors and network failures, showing contextual recovery modal with retry, help center, and feedback options.
 - **Admin User Health Dashboard**: Admin page showing at-risk users with risk scores, event timelines, intervention history, suggested actions, and one-click intervention tools.
-- **Security Architecture**: Multi-layered security including security headers, IP blocking, input sanitization, rate limiting, session fingerprinting, password security (scrypt), account lockout, and fraud detection.
+- **AI Support Chat System**: In-app AI-powered support chatbot with 30-entry knowledge base, intent classification, confidence scoring (>0.85 auto-resolve, 0.6-0.85 confirm, <0.6 escalate), ticket creation/tracking, and feedback collection. Covers account, billing, features, responsible gaming, security, and community topics. Refund/fraud requests always escalate to humans.
+- **Admin Support Dashboard**: Ticket queue management with status/priority filtering, escalation view, admin reply system, resolution workflow, and AI automation analytics (automation rate, confidence scores, category/status/priority breakdowns).
+- **Frontend Admin Route Guards**: All admin routes (/admin/*) protected with AdminGuard component that shows 404 to non-admin users, preventing unauthorized URL navigation.
+- **Security Architecture**: Multi-layered security including security headers, IP blocking, input sanitization, rate limiting, session fingerprinting, password security (scrypt), account lockout, fraud detection, admin route guards (frontend + backend), and requireAdmin middleware on all sensitive endpoints.
 
 ## External Dependencies
 - **Frontend Framework**: React

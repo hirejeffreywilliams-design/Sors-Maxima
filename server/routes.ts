@@ -1675,7 +1675,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  app.get("/api/learning/weights", async (req, res) => {
+  app.get("/api/learning/weights", requireAdmin, async (req, res) => {
     try {
       const weights = await getAllFactorWeights();
       res.json(weights);
@@ -2174,7 +2174,7 @@ Format your response clearly with sections and bullet points.`;
   const { liveSportsData } = await import("./live-sports-data");
 
   // Get all live games
-  app.get("/api/training/live-games", (_req, res) => {
+  app.get("/api/training/live-games", requireAdmin, (_req, res) => {
     try {
       const games = liveSportsData.getLiveGames();
       res.json({ 
@@ -2190,7 +2190,7 @@ Format your response clearly with sections and bullet points.`;
   });
 
   // Get completed game results
-  app.get("/api/training/results", (_req, res) => {
+  app.get("/api/training/results", requireAdmin, (_req, res) => {
     try {
       const results = liveSportsData.getRecentResults(50);
       res.json({ 
@@ -3800,6 +3800,737 @@ Follow these rules:
 
     res.json({ riskLevel: risk.level, suggestions });
   });
+
+  // ==================== AI-POWERED SUPPORT TICKET & CHAT SYSTEM ====================
+
+  interface SupportTicket {
+    id: string;
+    userId: string;
+    username: string;
+    subject: string;
+    category: 'account' | 'billing' | 'technical' | 'betting' | 'responsible_gaming' | 'feature_request' | 'other';
+    priority: 'low' | 'medium' | 'high' | 'critical';
+    status: 'open' | 'auto_resolved' | 'escalated' | 'in_progress' | 'resolved' | 'closed';
+    messages: TicketMessage[];
+    aiConfidence: number;
+    autoResolved: boolean;
+    escalationReason?: string;
+    assignedTo?: string;
+    resolution?: string;
+    createdAt: string;
+    updatedAt: string;
+    resolvedAt?: string;
+  }
+
+  interface TicketMessage {
+    id: string;
+    role: 'user' | 'ai' | 'admin';
+    content: string;
+    timestamp: string;
+    confidence?: number;
+    sources?: string[];
+  }
+
+  const supportTickets: SupportTicket[] = [];
+
+  interface KBEntry {
+    id: string;
+    category: string;
+    keywords: string[];
+    question: string;
+    answer: string;
+    actionable: boolean;
+    autoResolveEligible: boolean;
+  }
+
+  const knowledgeBase: KBEntry[] = [
+    {
+      id: "kb_account_login",
+      category: "account",
+      keywords: ["login", "sign in", "can't login", "cant login", "password", "forgot password", "reset password", "locked out", "access", "authentication"],
+      question: "I can't log in to my account",
+      answer: "If you're having trouble logging in, try these steps: 1) Make sure you're using the correct username and password. 2) Clear your browser cache and cookies. 3) Try using a different browser or incognito mode. 4) If you forgot your password, use the password reset option on the login page. If you're still locked out, our team can help verify your identity and restore access.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_account_register",
+      category: "account",
+      keywords: ["register", "sign up", "create account", "new account", "registration", "join"],
+      question: "How do I create a new account?",
+      answer: "To create a new account, click the 'Sign Up' button on the landing page. You'll need to provide a username, email address, and password. After registration, you'll have access to the free tier features. You can upgrade to Pro, Elite, or Whale tier at any time from the Pricing page.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_subscription_tiers",
+      category: "billing",
+      keywords: ["subscription", "tiers", "plans", "pricing", "pro", "elite", "whale", "free", "upgrade", "downgrade", "plan"],
+      question: "What subscription tiers are available?",
+      answer: "Sors Maxima offers four subscription tiers: Free (basic access with limited features), Pro ($29/month - includes Pro Tools, advanced analytics, and priority support), Elite ($79/month - includes everything in Pro plus Quantum Fusion Engine, AI credits, and exclusive strategies), and Whale ($199/month - includes everything in Elite plus unlimited AI credits, personal advisor, and white-glove support). Visit the Pricing page for full details.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_subscription_cancel",
+      category: "billing",
+      keywords: ["cancel", "cancellation", "cancel subscription", "stop subscription", "unsubscribe", "end subscription"],
+      question: "How do I cancel my subscription?",
+      answer: "To cancel your subscription, go to Settings > Subscription and click 'Cancel Subscription'. Your access will continue until the end of your current billing period. You won't be charged again after cancellation. If you change your mind, you can resubscribe at any time.",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_billing_refund",
+      category: "billing",
+      keywords: ["refund", "money back", "charge", "charged", "overcharged", "billing error", "wrong charge", "dispute"],
+      question: "I want a refund or have a billing issue",
+      answer: "I understand you have a billing concern. Refund requests and billing disputes require manual review by our billing team. I'm escalating this to a human agent who can review your account and process any necessary adjustments. Please provide your transaction details if possible.",
+      actionable: false,
+      autoResolveEligible: false
+    },
+    {
+      id: "kb_smart_ticket_generator",
+      category: "betting",
+      keywords: ["smart ticket", "ticket generator", "generate ticket", "smart tickets", "auto generate", "ticket builder", "generate parlay"],
+      question: "How does the Smart Ticket Generator work?",
+      answer: "The Smart Ticket Generator uses AI-powered analysis to build optimized betting tickets. It considers factors like team performance, player stats, historical trends, weather, and market movements. Select your preferred sport, risk level, and ticket size, then the generator creates parlays with the highest expected value. You can customize legs, adjust stakes, and export tickets to your preferred sportsbook.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_visual_parlay_builder",
+      category: "betting",
+      keywords: ["visual parlay", "parlay builder", "visual builder", "drag drop", "build parlay", "parlay"],
+      question: "How do I use the Visual Parlay Builder?",
+      answer: "The Visual Parlay Builder provides an intuitive drag-and-drop interface for creating custom parlays. Browse available games and props, drag legs into your ticket, and see real-time probability calculations. The builder shows correlation warnings between legs and provides EV estimates. You can save, share, and export your parlays directly from the builder.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_pro_tools",
+      category: "technical",
+      keywords: ["pro tools", "advanced tools", "premium tools", "pro features", "edge finder", "arbitrage", "sharp money"],
+      question: "What are the Pro Tools?",
+      answer: "Pro Tools is a suite of advanced analytical features available to Pro tier and above subscribers. It includes: Edge Finder (identifies value bets), Arbitrage Scanner (finds risk-free opportunities), Sharp Money Tracker (follows professional bettor movements), CLV Predictor (closing line value analysis), Correlation Engine (models leg dependencies), and Key Number Analyzer (identifies important scoring thresholds). Access Pro Tools from the Tools page.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_data_export",
+      category: "account",
+      keywords: ["export data", "download data", "my data", "data export", "gdpr", "data request", "personal data"],
+      question: "How do I export my data?",
+      answer: "You can export your personal data from Settings > Privacy > Export My Data. This generates a downloadable file containing your betting history, saved parlays, preferences, and account information. The export is available in JSON and CSV formats. Under GDPR regulations, you have the right to receive a copy of all personal data we hold about you. Exports are typically ready within a few minutes.",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_data_deletion",
+      category: "account",
+      keywords: ["delete account", "remove account", "delete data", "erase data", "right to erasure", "forget me", "data deletion"],
+      question: "How do I delete my account and data?",
+      answer: "To request account deletion, go to Settings > Privacy > Delete Account. This will permanently remove all your personal data, betting history, and account information. Account deletion is irreversible. Per GDPR/CCPA requirements, we will process your deletion request within 30 days. You'll receive a confirmation email once the process is complete.",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_responsible_gaming_tools",
+      category: "responsible_gaming",
+      keywords: ["responsible gaming", "gambling problem", "addiction", "self-exclude", "self exclusion", "deposit limit", "loss limit", "cool off", "take a break", "spending limit"],
+      question: "What responsible gaming tools are available?",
+      answer: "Sors Maxima provides several responsible gaming tools: deposit limits, loss limits, session time reminders, cool-off periods (24 hours to 30 days), self-exclusion options, and reality checks showing time and activity summaries. Access these from Settings > Responsible Gaming. Remember, this platform is for entertainment and analytical purposes only. If you or someone you know has a gambling problem, please call 1-800-522-4700 (National Council on Problem Gambling, available 24/7).",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_gambling_help",
+      category: "responsible_gaming",
+      keywords: ["help gambling", "gambling addiction", "problem gambling", "need help", "helpline", "crisis", "can't stop gambling", "gambling too much"],
+      question: "I need help with a gambling problem",
+      answer: "We take responsible gaming very seriously. If you or someone you know has a gambling problem, please reach out for help immediately: National Council on Problem Gambling Helpline: 1-800-522-4700 (available 24/7, call or text). You can also visit ncpgambling.org for additional resources. Within the app, you can activate self-exclusion from Settings > Responsible Gaming to temporarily or permanently restrict your access. Our support team is also available to help you set up any responsible gaming features.",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_session_security",
+      category: "account",
+      keywords: ["session", "security", "fingerprint", "device", "trusted device", "suspicious", "unauthorized", "hacked", "compromised", "two factor", "2fa"],
+      question: "How is my account secured?",
+      answer: "Your account is protected by multiple security layers: session fingerprinting detects unusual access patterns, trusted device management lets you control which devices can access your account, and automatic session expiry protects against unauthorized access. You can view and manage your active sessions from Settings > Security. If you suspect unauthorized access, use 'Logout All Devices' immediately and change your password.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_odds_discrepancy",
+      category: "betting",
+      keywords: ["odds wrong", "odds different", "odds discrepancy", "stale odds", "odds not matching", "wrong odds", "odds outdated", "odds accuracy"],
+      question: "The odds shown don't match my sportsbook",
+      answer: "Odds on Sors Maxima are sourced from The Odds API and updated regularly, but slight differences with your sportsbook are normal due to: 1) Timing differences - odds change rapidly. 2) Different sportsbook markets may have different lines. 3) Regional variations in odds offerings. Our platform shows consensus odds from multiple books. For the most current odds, always verify with your specific sportsbook before placing any wagers. You can refresh odds manually from the odds display.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_ticket_export",
+      category: "betting",
+      keywords: ["export ticket", "share ticket", "save ticket", "download ticket", "ticket image", "screenshot ticket", "export parlay", "share parlay"],
+      question: "How do I export or share my tickets?",
+      answer: "You can export your betting tickets in multiple formats: 1) Image (PNG) - generates a shareable card image of your ticket. 2) CSV - exports ticket data for spreadsheet analysis. 3) Share Link - creates a unique link others can view. From any ticket view, click the export/share button and select your preferred format. Pro and Elite users can also batch export their ticket history.",
+      actionable: true,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_feature_request",
+      category: "feature_request",
+      keywords: ["feature request", "suggest feature", "new feature", "suggestion", "idea", "improvement", "wish list", "roadmap", "request feature"],
+      question: "I have a feature request or suggestion",
+      answer: "We love hearing from our users! Your feature request has been noted. You can also view our public roadmap on the Roadmap page to see what we're working on. Popular community suggestions are prioritized in our development cycle. You can upvote existing feature requests or submit detailed suggestions through the feedback form on the Help page.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_app_error",
+      category: "technical",
+      keywords: ["error", "crash", "bug", "broken", "not working", "glitch", "freeze", "blank page", "white screen", "loading forever", "stuck"],
+      question: "The app is showing an error or not working properly",
+      answer: "I'm sorry you're experiencing issues. Try these troubleshooting steps: 1) Refresh the page (Ctrl+F5 for a hard refresh). 2) Clear your browser cache and cookies. 3) Try a different browser or device. 4) Disable browser extensions that might interfere. 5) Check your internet connection. If the issue persists, please describe the error you're seeing and what you were doing when it occurred, so we can investigate further.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_ai_credits",
+      category: "billing",
+      keywords: ["ai credits", "credits", "credit limit", "out of credits", "buy credits", "credit balance", "ai usage", "credit system"],
+      question: "How does the AI credits system work?",
+      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Quantum Fusion Engine analysis, and AI betting assistant chat. Free tier users receive a limited number of credits per month. Pro users get 500 credits/month, Elite users get 2000 credits/month, and Whale users get unlimited credits. Credits reset at the beginning of each billing cycle. You can track your credit usage in Settings > Subscription.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_live_center",
+      category: "betting",
+      keywords: ["live center", "live betting", "live games", "in-play", "live scores", "live odds", "live tracker", "momentum", "live momentum"],
+      question: "How does the Live Center work?",
+      answer: "The Live Center provides real-time updates for in-progress games including live scores, odds movements, momentum tracking, and situational analysis. Features include: Live Momentum Tracker (shows which team has momentum), Live Hedge Calculator (adjusts hedging recommendations in real-time), and in-play betting suggestions. Access the Live Center from the Live tab in the main navigation. Data refreshes every few seconds during live events.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_cashout_advisor",
+      category: "betting",
+      keywords: ["cash out", "cashout", "cash-out", "cashout advisor", "when to cash out", "early cashout", "take profit", "sell bet"],
+      question: "How does the Cash-Out Advisor work?",
+      answer: "The Cash-Out Advisor analyzes your active bets in real-time and recommends optimal cash-out timing. It considers current odds, game momentum, remaining legs, and expected value to suggest whether to hold, partially cash out, or fully cash out. The advisor uses a traffic-light system: green (hold - high EV), yellow (consider partial cash-out), red (recommended to cash out). Access it from the Live Center when you have active bets.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_community_tipsters",
+      category: "other",
+      keywords: ["community", "tipster", "tipsters", "follow", "social", "leaderboard", "picks", "shared picks", "copy bets", "follow bettors"],
+      question: "How do the community and tipster features work?",
+      answer: "The Community section lets you connect with other bettors: follow top tipsters, view the leaderboard rankings, share and copy betting tickets, and participate in pick competitions. Tipster profiles show verified track records, ROI stats, and win rates. You can filter tipsters by sport, bet type, and performance metrics. The social feed shows activity from bettors you follow. Access Community from the main navigation.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_quantum_engine",
+      category: "technical",
+      keywords: ["quantum", "quantum fusion", "quantum engine", "fusion engine", "quantum analysis", "advanced analysis"],
+      question: "How does the Quantum Fusion Engine work?",
+      answer: "The Quantum Fusion Engine is our most advanced analytical tool (Elite tier+). It combines multiple data sources using multi-dimensional factor analysis: team dynamics, player performance trends, situational factors, weather, referee tendencies, travel fatigue, and market signals. The engine produces confidence scores and factor breakdowns for each prediction. Results are presented with detailed factor contributions so you can understand the reasoning behind each recommendation.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_correlation_engine",
+      category: "technical",
+      keywords: ["correlation", "correlated", "correlation engine", "leg correlation", "dependent legs", "copula", "correlation matrix"],
+      question: "What is the Correlation Engine?",
+      answer: "The Correlation Engine uses Gaussian copula-based methods to model dependencies between betting leg outcomes. It helps identify when legs in your parlay are correlated (positively or negatively), which affects your actual win probability and expected value. Positive correlation between legs means your parlay is riskier than individual probabilities suggest. The engine provides visual correlation matrices and adjusts EV calculations accordingly.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_sports_coverage",
+      category: "betting",
+      keywords: ["sports", "which sports", "supported sports", "nfl", "nba", "mlb", "nhl", "soccer", "mma", "ufc", "tennis"],
+      question: "What sports does Sors Maxima cover?",
+      answer: "Sors Maxima covers major North American and international sports including: NFL, NBA, MLB, NHL, NCAAF, NCAAB, MMA/UFC, Soccer (EPL, La Liga, Serie A, Bundesliga, MLS), Tennis, and more. Coverage includes pre-game analysis, live odds, player props, and team totals. Sport availability may vary by season. Check the dashboard for currently available sports and events.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_not_gambling",
+      category: "other",
+      keywords: ["gambling advice", "legal", "is this legal", "real money", "real gambling", "betting advice", "financial advice"],
+      question: "Is this real gambling advice?",
+      answer: "Sors Maxima is an analytical and entertainment platform. We provide statistical analysis, data-driven insights, and probability calculations to help inform your decisions. We do not facilitate actual wagers, handle money, or guarantee outcomes. All predictions are based on statistical models and should be used for informational purposes only. Always gamble responsibly and never bet more than you can afford to lose. Please comply with your local gambling laws and regulations.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_roster_data",
+      category: "technical",
+      keywords: ["roster", "rosters", "lineup", "lineups", "player data", "team roster", "injured", "injury", "inactive"],
+      question: "How do Live Rosters work?",
+      answer: "Live Rosters are sourced from ESPN and updated regularly to reflect the latest team compositions, injuries, and lineup changes. The system preloads roster data at startup and refreshes periodically. Roster information is used across features including the Smart Ticket Generator, player prop analysis, and situational analysis. If you notice outdated roster info, try refreshing the page as data updates may take a few minutes to propagate.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_fraud_concern",
+      category: "account",
+      keywords: ["fraud", "scam", "stolen", "unauthorized charge", "identity theft", "phishing", "suspicious activity"],
+      question: "I suspect fraud or unauthorized activity on my account",
+      answer: "I'm taking your concern seriously. For your security, I'm immediately escalating this to our security team for investigation. In the meantime, please: 1) Change your password immediately. 2) Use 'Logout All Devices' from Settings > Security. 3) Review your recent account activity. 4) Enable any available additional security features. A member of our security team will review your case as a priority.",
+      actionable: false,
+      autoResolveEligible: false
+    },
+    {
+      id: "kb_bankroll_management",
+      category: "betting",
+      keywords: ["bankroll", "bankroll management", "stake size", "kelly criterion", "bet sizing", "money management", "unit size"],
+      question: "How does bankroll management work?",
+      answer: "The Bankroll Management tools help you optimize your bet sizing and protect your capital. Features include: Kelly Criterion calculator (suggests optimal stake based on edge), Bankroll Simulator (models potential outcomes over time), Variance Calculator (shows expected swings), and customizable unit-size recommendations. Set your bankroll in Settings and the tools will adjust recommendations accordingly. Proper bankroll management is essential for long-term success.",
+      actionable: false,
+      autoResolveEligible: true
+    },
+    {
+      id: "kb_contact_human",
+      category: "other",
+      keywords: ["speak to human", "talk to person", "real person", "human agent", "live agent", "customer service", "support agent", "representative"],
+      question: "I want to speak to a human agent",
+      answer: "I understand you'd like to speak with a human agent. I'm escalating your ticket now so a member of our support team can assist you directly. Our team typically responds within a few hours during business hours. In the meantime, feel free to provide any additional details about your issue so the agent has full context when they review your case.",
+      actionable: false,
+      autoResolveEligible: false
+    }
+  ];
+
+  function classifyIntent(message: string): { intent: string; confidence: number; kbMatch: KBEntry | null; category: string } {
+    const normalized = message.toLowerCase().trim();
+    const words = normalized.split(/\s+/);
+    let bestMatch: KBEntry | null = null;
+    let bestScore = 0;
+
+    for (const entry of knowledgeBase) {
+      let score = 0;
+      let matchedKeywords = 0;
+
+      for (const keyword of entry.keywords) {
+        const kwLower = keyword.toLowerCase();
+        if (kwLower.includes(" ")) {
+          if (normalized.includes(kwLower)) {
+            score += 0.35;
+            matchedKeywords++;
+          } else {
+            const kwParts = kwLower.split(/\s+/);
+            const allPartsPresent = kwParts.every(part => words.some(w => w.includes(part)));
+            if (allPartsPresent) {
+              score += 0.3;
+              matchedKeywords++;
+            }
+          }
+        } else {
+          if (words.some(w => w === kwLower || w.replace(/[?!.,]/g, '') === kwLower)) {
+            score += 0.3;
+            matchedKeywords++;
+          } else if (normalized.includes(kwLower)) {
+            score += 0.15;
+            matchedKeywords++;
+          }
+        }
+      }
+
+      if (matchedKeywords > 0) {
+        const coverage = matchedKeywords / Math.min(entry.keywords.length, 5);
+        score += coverage * 0.4;
+        if (matchedKeywords >= 2) score += 0.15;
+        if (matchedKeywords >= 3) score += 0.1;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMatch = entry;
+      }
+    }
+
+    const confidence = Math.min(bestScore, 1.0);
+
+    return {
+      intent: bestMatch?.id || "unknown",
+      confidence: parseFloat(confidence.toFixed(3)),
+      kbMatch: bestMatch,
+      category: bestMatch?.category || "other"
+    };
+  }
+
+  function generateAIResponse(message: string, ticketHistory: TicketMessage[]): { response: string; confidence: number; autoResolvable: boolean; intent: string; sources: string[] } {
+    const classification = classifyIntent(message);
+    const { confidence, kbMatch, intent, category } = classification;
+
+    const alwaysEscalateIntents = ["kb_billing_refund", "kb_fraud_concern", "kb_contact_human"];
+    const forceEscalate = alwaysEscalateIntents.includes(intent);
+
+    const responsibleGamingIntents = ["kb_responsible_gaming_tools", "kb_gambling_help"];
+    const isResponsibleGaming = responsibleGamingIntents.includes(intent);
+
+    if (forceEscalate && kbMatch) {
+      return {
+        response: kbMatch.answer,
+        confidence,
+        autoResolvable: false,
+        intent,
+        sources: [kbMatch.id]
+      };
+    }
+
+    if (confidence > 0.85 && kbMatch) {
+      let answer = kbMatch.answer;
+      if (isResponsibleGaming && !answer.includes("1-800-522-4700")) {
+        answer += "\n\nIf you need immediate help, please call 1-800-522-4700 (National Council on Problem Gambling, available 24/7).";
+      }
+      return {
+        response: answer,
+        confidence,
+        autoResolvable: kbMatch.autoResolveEligible,
+        intent,
+        sources: [kbMatch.id]
+      };
+    }
+
+    if (confidence >= 0.6 && kbMatch) {
+      let answer = kbMatch.answer;
+      if (isResponsibleGaming && !answer.includes("1-800-522-4700")) {
+        answer += "\n\nIf you need immediate help, please call 1-800-522-4700 (National Council on Problem Gambling, available 24/7).";
+      }
+      answer += "\n\nDoes this answer your question? If not, I can connect you with a human agent for more help.";
+      return {
+        response: answer,
+        confidence,
+        autoResolvable: false,
+        intent,
+        sources: [kbMatch.id]
+      };
+    }
+
+    return {
+      response: "Thank you for reaching out. I wasn't able to find an exact answer to your question in our knowledge base. I'm escalating your ticket to a human support agent who can assist you further. They typically respond within a few hours during business hours. Please feel free to add any additional details to help them understand your issue.",
+      confidence,
+      autoResolvable: false,
+      intent: "unknown",
+      sources: []
+    };
+  }
+
+  // === User-facing Support Endpoints ===
+
+  app.post("/api/support/chat", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+
+    const { message, ticketId } = req.body;
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
+      return res.status(400).json({ error: "Message is required" });
+    }
+
+    const userId = req.session.userId!;
+    const username = req.session.username!;
+    const now = new Date().toISOString();
+    const rand = () => Math.random().toString(36).substring(2, 8);
+
+    let ticket: SupportTicket;
+
+    if (ticketId) {
+      const existing = supportTickets.find(t => t.id === ticketId && t.userId === userId);
+      if (!existing) {
+        return res.status(404).json({ error: "Ticket not found" });
+      }
+      if (existing.status === "closed" || existing.status === "resolved") {
+        return res.status(400).json({ error: "Ticket is already closed" });
+      }
+      ticket = existing;
+    } else {
+      const classification = classifyIntent(message);
+      const categoryMap: Record<string, SupportTicket["category"]> = {
+        account: "account",
+        billing: "billing",
+        technical: "technical",
+        betting: "betting",
+        responsible_gaming: "responsible_gaming",
+        feature_request: "feature_request",
+        other: "other"
+      };
+      ticket = {
+        id: `st_${Date.now()}_${rand()}`,
+        userId,
+        username,
+        subject: message.substring(0, 100),
+        category: categoryMap[classification.category] || "other",
+        priority: classification.category === "responsible_gaming" ? "high" : "medium",
+        status: "open",
+        messages: [],
+        aiConfidence: 0,
+        autoResolved: false,
+        createdAt: now,
+        updatedAt: now
+      };
+      supportTickets.push(ticket);
+    }
+
+    const userMsg: TicketMessage = {
+      id: `msg_${Date.now()}_${rand()}`,
+      role: "user",
+      content: message.trim(),
+      timestamp: now
+    };
+    ticket.messages.push(userMsg);
+
+    const aiResult = generateAIResponse(message, ticket.messages);
+
+    const aiMsg: TicketMessage = {
+      id: `msg_${Date.now()}_${rand()}`,
+      role: "ai",
+      content: aiResult.response,
+      timestamp: new Date().toISOString(),
+      confidence: aiResult.confidence,
+      sources: aiResult.sources
+    };
+    ticket.messages.push(aiMsg);
+
+    ticket.aiConfidence = aiResult.confidence;
+    ticket.updatedAt = new Date().toISOString();
+
+    if (aiResult.autoResolvable && aiResult.confidence > 0.85) {
+      ticket.status = "auto_resolved";
+      ticket.autoResolved = true;
+      ticket.resolvedAt = new Date().toISOString();
+    } else if (aiResult.confidence < 0.6 || !aiResult.autoResolvable) {
+      if (ticket.status === "open") {
+        ticket.status = "escalated";
+        ticket.escalationReason = aiResult.confidence < 0.6 ? "Low AI confidence" : "Requires human review";
+      }
+    }
+
+    try {
+      auditTrail.record(userId, "support_chat", "support_ticket", ticket.id, {
+        intent: aiResult.intent,
+        confidence: aiResult.confidence,
+        autoResolved: ticket.autoResolved,
+        status: ticket.status
+      });
+    } catch (_e) {}
+
+    res.json({
+      ticketId: ticket.id,
+      response: aiResult.response,
+      confidence: aiResult.confidence,
+      autoResolved: ticket.autoResolved,
+      sources: aiResult.sources
+    });
+  });
+
+  app.get("/api/support/tickets", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const userId = req.session.userId!;
+    const userTickets = supportTickets
+      .filter(t => t.userId === userId)
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    res.json(userTickets);
+  });
+
+  app.get("/api/support/tickets/:id", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const ticket = supportTickets.find(t => t.id === req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    if (ticket.userId !== req.session.userId) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    res.json(ticket);
+  });
+
+  app.post("/api/support/tickets/:id/escalate", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const ticket = supportTickets.find(t => t.id === req.params.id && t.userId === req.session!.userId);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    ticket.status = "escalated";
+    ticket.escalationReason = req.body.reason || "User requested escalation";
+    ticket.updatedAt = new Date().toISOString();
+    try {
+      auditTrail.record(req.session.userId!, "support_escalate", "support_ticket", ticket.id, {
+        reason: ticket.escalationReason
+      });
+    } catch (_e) {}
+    res.json({ success: true, ticket });
+  });
+
+  app.post("/api/support/tickets/:id/close", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const ticket = supportTickets.find(t => t.id === req.params.id && t.userId === req.session!.userId);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    ticket.status = "closed";
+    ticket.updatedAt = new Date().toISOString();
+    try {
+      auditTrail.record(req.session.userId!, "support_close", "support_ticket", ticket.id, {});
+    } catch (_e) {}
+    res.json({ success: true });
+  });
+
+  app.post("/api/support/tickets/:id/feedback", (req: Request, res: Response) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const ticket = supportTickets.find(t => t.id === req.params.id && t.userId === req.session!.userId);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    const { helpful, comment } = req.body;
+    try {
+      auditTrail.record(req.session.userId!, "support_feedback", "support_ticket", ticket.id, {
+        helpful: !!helpful,
+        comment: comment || ""
+      });
+    } catch (_e) {}
+    res.json({ success: true });
+  });
+
+  // === Admin Support Endpoints ===
+
+  app.get("/api/admin/support/tickets", requireAdmin, (req: Request, res: Response) => {
+    let filtered = [...supportTickets];
+    const { status, priority, category } = req.query;
+    if (status) filtered = filtered.filter(t => t.status === status);
+    if (priority) filtered = filtered.filter(t => t.priority === priority);
+    if (category) filtered = filtered.filter(t => t.category === category);
+    filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+    const autoResolvedCount = supportTickets.filter(t => t.autoResolved).length;
+    const automationRate = supportTickets.length > 0 ? ((autoResolvedCount / supportTickets.length) * 100).toFixed(1) : "0";
+
+    res.json({
+      tickets: filtered,
+      stats: {
+        total: supportTickets.length,
+        autoResolved: autoResolvedCount,
+        automationRate: `${automationRate}%`
+      }
+    });
+  });
+
+  app.get("/api/admin/support/tickets/:id", requireAdmin, (req: Request, res: Response) => {
+    const ticket = supportTickets.find(t => t.id === req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    res.json(ticket);
+  });
+
+  app.post("/api/admin/support/tickets/:id/respond", requireAdmin, (req: Request, res: Response) => {
+    const ticket = supportTickets.find(t => t.id === req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    const { message } = req.body;
+    if (!message || typeof message !== "string") {
+      return res.status(400).json({ error: "Message is required" });
+    }
+    const rand = () => Math.random().toString(36).substring(2, 8);
+    const adminMsg: TicketMessage = {
+      id: `msg_${Date.now()}_${rand()}`,
+      role: "admin",
+      content: message.trim(),
+      timestamp: new Date().toISOString()
+    };
+    ticket.messages.push(adminMsg);
+    if (ticket.status === "escalated") {
+      ticket.status = "in_progress";
+    }
+    ticket.assignedTo = req.session?.username || "admin";
+    ticket.updatedAt = new Date().toISOString();
+    try {
+      auditTrail.record(req.session?.userId || "admin", "support_admin_respond", "support_ticket", ticket.id, {
+        admin: req.session?.username || "admin"
+      });
+    } catch (_e) {}
+    res.json(ticket);
+  });
+
+  app.post("/api/admin/support/tickets/:id/resolve", requireAdmin, (req: Request, res: Response) => {
+    const ticket = supportTickets.find(t => t.id === req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket not found" });
+    }
+    const { resolution } = req.body;
+    if (!resolution || typeof resolution !== "string") {
+      return res.status(400).json({ error: "Resolution is required" });
+    }
+    ticket.status = "resolved";
+    ticket.resolution = resolution.trim();
+    ticket.resolvedAt = new Date().toISOString();
+    ticket.updatedAt = new Date().toISOString();
+    try {
+      auditTrail.record(req.session?.userId || "admin", "support_admin_resolve", "support_ticket", ticket.id, {
+        resolution: ticket.resolution
+      });
+    } catch (_e) {}
+    res.json(ticket);
+  });
+
+  app.get("/api/admin/support/stats", requireAdmin, (_req: Request, res: Response) => {
+    const totalTickets = supportTickets.length;
+    const autoResolved = supportTickets.filter(t => t.autoResolved).length;
+    const escalated = supportTickets.filter(t => t.status === "escalated").length;
+    const confidences = supportTickets.map(t => t.aiConfidence);
+    const avgConfidence = confidences.length > 0 ? parseFloat((confidences.reduce((a, b) => a + b, 0) / confidences.length).toFixed(3)) : 0;
+
+    const byCategory: Record<string, number> = {};
+    const byPriority: Record<string, number> = {};
+    const byStatus: Record<string, number> = {};
+
+    for (const t of supportTickets) {
+      byCategory[t.category] = (byCategory[t.category] || 0) + 1;
+      byPriority[t.priority] = (byPriority[t.priority] || 0) + 1;
+      byStatus[t.status] = (byStatus[t.status] || 0) + 1;
+    }
+
+    const automationRate = totalTickets > 0 ? parseFloat(((autoResolved / totalTickets) * 100).toFixed(1)) : 0;
+
+    res.json({
+      totalTickets,
+      autoResolved,
+      escalated,
+      avgConfidence,
+      byCategory,
+      byPriority,
+      byStatus,
+      automationRate
+    });
+  });
+
+  app.get("/api/admin/support/escalations", requireAdmin, (_req: Request, res: Response) => {
+    const priorityOrder: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+    const escalated = supportTickets
+      .filter(t => t.status === "escalated")
+      .sort((a, b) => (priorityOrder[a.priority] ?? 4) - (priorityOrder[b.priority] ?? 4));
+    res.json(escalated);
+  });
+
+  // ==================== END AI-POWERED SUPPORT TICKET & CHAT SYSTEM ====================
 
   return httpServer;
 }
