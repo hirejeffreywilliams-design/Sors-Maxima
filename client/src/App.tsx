@@ -50,6 +50,7 @@ import AdminSegmentation from "@/pages/admin-segmentation";
 import AdminPromos from "@/pages/admin-promos";
 import AdminAcquisition from "@/pages/admin-acquisition";
 import AdminAnalyticsDashboard from "@/pages/admin-analytics";
+import AdminOrchestration from "@/pages/admin-orchestration";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
@@ -104,6 +105,7 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
       <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
       <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
+      <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
       <Route path="/analytics" component={Analytics} />

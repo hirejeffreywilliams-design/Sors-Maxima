@@ -423,6 +423,13 @@ export default function AdminDashboard() {
               <ChevronRight className="w-4 h-4" />
             </Button>
           </Link>
+          <Link href="/admin/orchestration">
+            <Button variant="outline" className="gap-2" data-testid="link-admin-orchestration">
+              <Shield className="w-4 h-4" />
+              Orchestration System
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </header>
 

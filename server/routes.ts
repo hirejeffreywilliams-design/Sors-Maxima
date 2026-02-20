@@ -47,6 +47,44 @@ import {
   getIncidentPlaybook,
   getAnalyticsDashboardStats,
 } from "./analyticsDashboardEngine";
+import {
+  getAllTickets as getOrchTickets,
+  getTicket as getOrchTicket,
+  getConfidenceTickets,
+  createTicket as createOrchTicket,
+  createConfidenceTicket,
+  updateTicketStatus as updateOrchTicketStatus,
+  assignTicket as assignOrchTicket,
+  addTicketComment as addOrchTicketComment,
+  getTicketMetrics,
+  getAutoSendPolicy,
+  updateAutoSendPolicy,
+  getSLAMap as getTicketSLAMap,
+} from "./ticketingEngine";
+import {
+  getAllRecommendations,
+  getRecommendation,
+  getRecommendationStats,
+  getModelPerformanceList,
+  getBankrollConfig,
+  updateBankrollConfig,
+  getUserControls,
+  updateUserControls,
+  updateRecommendationStatus,
+  recordOutcome,
+} from "./confidenceEngine";
+import {
+  getAllFeatures,
+  getFeature,
+  updateFeatureStatus as updateFeatStatus,
+  updateComplianceStatus as updateFeatCompliance,
+  getRecentEvents,
+  getAllCoordinationRules,
+  toggleCoordinationRule,
+  getAllBusinessConstraints,
+  toggleBusinessConstraint,
+  getRegistryMetrics,
+} from "./featureRegistryEngine";
 import { z } from "zod";
 
 const abTestCreateSchema = z.object({
@@ -4983,6 +5021,196 @@ Follow these rules:
   });
 
   // ==================== END ANALYTICS DASHBOARD ENGINE ====================
+
+  // ==================== ORCHESTRATION SYSTEM (Ticketing, Confidence, Feature Registry) ====================
+
+  app.get("/api/admin/orchestration/tickets", requireAdmin, (req: Request, res: Response) => {
+    const filters: any = {};
+    if (req.query.type) filters.type = req.query.type as string;
+    if (req.query.status) filters.status = req.query.status as string;
+    if (req.query.priority) filters.priority = req.query.priority as string;
+    if (req.query.featureName) filters.featureName = req.query.featureName as string;
+    if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+    res.json(getOrchTickets(filters));
+  });
+
+  app.get("/api/admin/orchestration/tickets/confidence", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getConfidenceTickets());
+  });
+
+  app.get("/api/admin/orchestration/tickets/metrics", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getTicketMetrics());
+  });
+
+  app.get("/api/admin/orchestration/tickets/sla-map", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getTicketSLAMap());
+  });
+
+  app.get("/api/admin/orchestration/tickets/:id", requireAdmin, (req: Request, res: Response) => {
+    const ticket = getOrchTicket(req.params.id);
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    res.json(ticket);
+  });
+
+  const ticketStatusSchema = z.object({
+    status: z.enum(["open", "in_progress", "pending_review", "resolved", "closed", "escalated"]),
+    comment: z.string().optional(),
+  });
+
+  app.patch("/api/admin/orchestration/tickets/:id/status", requireAdmin, (req: Request, res: Response) => {
+    const parsed = ticketStatusSchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    const ticket = updateOrchTicketStatus(req.params.id, parsed.data.status, parsed.data.comment);
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    res.json(ticket);
+  });
+
+  app.patch("/api/admin/orchestration/tickets/:id/assign", requireAdmin, (req: Request, res: Response) => {
+    const { assigneeId } = req.body;
+    if (!assigneeId) return res.status(400).json({ error: "assigneeId required" });
+    const ticket = assignOrchTicket(req.params.id, assigneeId);
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    res.json(ticket);
+  });
+
+  app.post("/api/admin/orchestration/tickets/:id/comments", requireAdmin, (req: Request, res: Response) => {
+    const { content } = req.body;
+    if (!content) return res.status(400).json({ error: "content required" });
+    const ticket = addOrchTicketComment(req.params.id, "admin", "admin", content);
+    if (!ticket) return res.status(404).json({ error: "Ticket not found" });
+    res.json(ticket);
+  });
+
+  app.get("/api/admin/orchestration/auto-send-policy", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAutoSendPolicy());
+  });
+
+  const autoSendPolicySchema = z.object({
+    enabled: z.boolean().optional(),
+    minConfidenceScore: z.number().min(0).max(1).optional(),
+    minPredictedWinProb: z.number().min(0).max(1).optional(),
+    minExpectedValue: z.number().optional(),
+    maxStakePercent: z.number().min(0).max(100).optional(),
+    maxExposurePerMarket: z.number().min(0).optional(),
+    maxDailyAutoSends: z.number().min(0).optional(),
+    requireHumanReviewAboveStake: z.number().min(0).optional(),
+    cooldownMinutes: z.number().min(0).optional(),
+  });
+
+  app.patch("/api/admin/orchestration/auto-send-policy", requireAdmin, (req: Request, res: Response) => {
+    const parsed = autoSendPolicySchema.safeParse(req.body);
+    if (!parsed.success) return res.status(400).json({ error: fromError(parsed.error).message });
+    res.json(updateAutoSendPolicy(parsed.data));
+  });
+
+  app.get("/api/admin/orchestration/recommendations", requireAdmin, (req: Request, res: Response) => {
+    const filters: any = {};
+    if (req.query.userId) filters.userId = req.query.userId as string;
+    if (req.query.sport) filters.sport = req.query.sport as string;
+    if (req.query.status) filters.status = req.query.status as string;
+    if (req.query.minConfidence) filters.minConfidence = parseFloat(req.query.minConfidence as string);
+    if (req.query.limit) filters.limit = parseInt(req.query.limit as string);
+    res.json(getAllRecommendations(filters));
+  });
+
+  app.get("/api/admin/orchestration/recommendations/stats", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getRecommendationStats());
+  });
+
+  app.get("/api/admin/orchestration/recommendations/models", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getModelPerformanceList());
+  });
+
+  app.get("/api/admin/orchestration/recommendations/:id", requireAdmin, (req: Request, res: Response) => {
+    const rec = getRecommendation(req.params.id);
+    if (!rec) return res.status(404).json({ error: "Recommendation not found" });
+    res.json(rec);
+  });
+
+  app.patch("/api/admin/orchestration/recommendations/:id/status", requireAdmin, (req: Request, res: Response) => {
+    const { status } = req.body;
+    if (!status) return res.status(400).json({ error: "status required" });
+    const rec = updateRecommendationStatus(req.params.id, status);
+    if (!rec) return res.status(404).json({ error: "Recommendation not found" });
+    res.json(rec);
+  });
+
+  app.post("/api/admin/orchestration/recommendations/:id/outcome", requireAdmin, (req: Request, res: Response) => {
+    const { outcome, actualReturn } = req.body;
+    if (!outcome) return res.status(400).json({ error: "outcome required" });
+    const rec = recordOutcome(req.params.id, outcome, actualReturn);
+    if (!rec) return res.status(404).json({ error: "Recommendation not found" });
+    res.json(rec);
+  });
+
+  app.get("/api/admin/orchestration/bankroll-config", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getBankrollConfig());
+  });
+
+  app.patch("/api/admin/orchestration/bankroll-config", requireAdmin, (req: Request, res: Response) => {
+    res.json(updateBankrollConfig(req.body));
+  });
+
+  app.get("/api/admin/orchestration/features", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAllFeatures());
+  });
+
+  app.get("/api/admin/orchestration/features/metrics", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getRegistryMetrics());
+  });
+
+  app.get("/api/admin/orchestration/features/:id", requireAdmin, (req: Request, res: Response) => {
+    const feature = getFeature(req.params.id);
+    if (!feature) return res.status(404).json({ error: "Feature not found" });
+    res.json(feature);
+  });
+
+  app.patch("/api/admin/orchestration/features/:id/status", requireAdmin, (req: Request, res: Response) => {
+    const { status, healthScore } = req.body;
+    if (!status) return res.status(400).json({ error: "status required" });
+    const feature = updateFeatStatus(req.params.id, status, healthScore);
+    if (!feature) return res.status(404).json({ error: "Feature not found" });
+    res.json(feature);
+  });
+
+  app.patch("/api/admin/orchestration/features/:id/compliance", requireAdmin, (req: Request, res: Response) => {
+    const { complianceStatus } = req.body;
+    if (!complianceStatus) return res.status(400).json({ error: "complianceStatus required" });
+    const feature = updateFeatCompliance(req.params.id, complianceStatus);
+    if (!feature) return res.status(404).json({ error: "Feature not found" });
+    res.json(feature);
+  });
+
+  app.get("/api/admin/orchestration/events", requireAdmin, (req: Request, res: Response) => {
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+    res.json(getRecentEvents(limit));
+  });
+
+  app.get("/api/admin/orchestration/coordination-rules", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAllCoordinationRules());
+  });
+
+  app.patch("/api/admin/orchestration/coordination-rules/:id/toggle", requireAdmin, (req: Request, res: Response) => {
+    const { enabled } = req.body;
+    if (enabled === undefined) return res.status(400).json({ error: "enabled required" });
+    const rule = toggleCoordinationRule(req.params.id, enabled);
+    if (!rule) return res.status(404).json({ error: "Rule not found" });
+    res.json(rule);
+  });
+
+  app.get("/api/admin/orchestration/business-constraints", requireAdmin, (_req: Request, res: Response) => {
+    res.json(getAllBusinessConstraints());
+  });
+
+  app.patch("/api/admin/orchestration/business-constraints/:id/toggle", requireAdmin, (req: Request, res: Response) => {
+    const { active } = req.body;
+    if (active === undefined) return res.status(400).json({ error: "active required" });
+    const constraint = toggleBusinessConstraint(req.params.id, active);
+    if (!constraint) return res.status(404).json({ error: "Constraint not found" });
+    res.json(constraint);
+  });
+
+  // ==================== END ORCHESTRATION SYSTEM ====================
 
   return httpServer;
 }
