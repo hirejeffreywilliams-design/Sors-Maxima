@@ -67,7 +67,7 @@ const commandItems: CommandItem[] = [
   { label: "Export Bet Slip", href: "/tools", icon: FileText, group: "Tools", keywords: ["export", "draftkings", "fanduel", "betmgm"] },
 
   { label: "Admin Dashboard", href: "/admin", icon: Shield, group: "Admin", keywords: ["admin", "users", "fraud"] },
-  { label: "AI Diagnostics", href: "/admin/diagnostics", icon: Brain, group: "Admin", keywords: ["diagnostics", "quantum", "ai"] },
+  { label: "AI Diagnostics", href: "/admin/diagnostics", icon: Brain, group: "Admin", keywords: ["diagnostics", "system", "ai"] },
   { label: "Marketing Tools", href: "/admin/marketing", icon: Megaphone, group: "Admin", keywords: ["marketing", "content", "growth"] },
   { label: "Security Center", href: "/admin/security", icon: Shield, group: "Admin", keywords: ["security", "errors", "ip", "blocking"] },
   { label: "Training Center", href: "/training", icon: GraduationCap, group: "Admin", keywords: ["training", "backtest", "algorithm"] },

@@ -176,7 +176,7 @@ export function StakeConfirmationDialog({
           <div className="space-y-4">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>You are about to place a bet</AlertTitle>
+              <AlertTitle>You are about to track a bet</AlertTitle>
               <AlertDescription>
                 <p className="mt-1">
                   Stake: <strong>${ticket.recommendedStake.toFixed(2)}</strong>
