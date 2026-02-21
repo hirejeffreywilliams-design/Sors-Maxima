@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
   Activity, Zap, TrendingUp, TrendingDown, Clock,
-  Flame, Snowflake, Timer, Atom
+  Flame, Snowflake, Timer, Atom, Star, Check
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
+import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
+import { useToast } from "@/hooks/use-toast";
 
 interface LiveGame {
   id: string;
@@ -95,6 +98,33 @@ function getTrendIcon(trend: string, team: string) {
 export function MomentumTracker() {
   const [games, setGames] = useState<LiveGame[]>(mockLiveGames);
   const [lastUpdate, setLastUpdate] = useState(new Date());
+  const { addLeg, isInSlip } = useParlaySlip();
+  const { toast } = useToast();
+
+  const handleAddTeamToSlip = (game: LiveGame, side: "home" | "away") => {
+    const team = side === "home" ? game.homeTeam : game.awayTeam;
+    const opponent = side === "home" ? game.awayTeam : game.homeTeam;
+    const ml = side === "home" ? game.homeML : game.awayML;
+    const decimalOdds = ml > 0 ? 1 + (ml / 100) : 1 + (100 / Math.abs(ml));
+    const legId = `live_${game.id}_${side}`;
+
+    const slipLeg: ParlaySlipLeg = {
+      id: legId,
+      team,
+      opponent,
+      market: "moneyline",
+      outcome: `${team} ML`,
+      decimalOdds,
+      americanOdds: ml,
+      addedFrom: "Live Center",
+      addedAt: new Date().toISOString(),
+      sport: game.sport,
+    };
+    const added = addLeg(slipLeg);
+    if (added) {
+      toast({ title: "Added to Slip", description: `${team} moneyline added from live game` });
+    }
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -139,13 +169,26 @@ export function MomentumTracker() {
             </div>
 
             <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center">
+              <div className="text-center space-y-1">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-lg font-bold">{game.awayTeam}</span>
                   {getTrendIcon(game.trend, "away")}
                 </div>
                 <p className="text-3xl font-bold">{game.awayScore}</p>
                 <Badge variant="outline">{game.awayML > 0 ? "+" : ""}{game.awayML}</Badge>
+                <div>
+                  <Button
+                    size="sm"
+                    variant={isInSlip(`live_${game.id}_away`) ? "secondary" : "outline"}
+                    className="text-xs h-7 px-2 mt-1"
+                    onClick={() => handleAddTeamToSlip(game, "away")}
+                    disabled={isInSlip(`live_${game.id}_away`)}
+                    data-testid={`button-add-live-away-${game.id}`}
+                  >
+                    {isInSlip(`live_${game.id}_away`) ? <Check className="w-3 h-3 mr-1" /> : <Star className="w-3 h-3 mr-1" />}
+                    {isInSlip(`live_${game.id}_away`) ? "In Slip" : "Add to Slip"}
+                  </Button>
+                </div>
               </div>
               
               <div className="flex flex-col items-center justify-center">
@@ -158,13 +201,26 @@ export function MomentumTracker() {
                 </span>
               </div>
 
-              <div className="text-center">
+              <div className="text-center space-y-1">
                 <div className="flex items-center justify-center gap-1">
                   <span className="text-lg font-bold">{game.homeTeam}</span>
                   {getTrendIcon(game.trend, "home")}
                 </div>
                 <p className="text-3xl font-bold">{game.homeScore}</p>
                 <Badge variant="outline">{game.homeML > 0 ? "+" : ""}{game.homeML}</Badge>
+                <div>
+                  <Button
+                    size="sm"
+                    variant={isInSlip(`live_${game.id}_home`) ? "secondary" : "outline"}
+                    className="text-xs h-7 px-2 mt-1"
+                    onClick={() => handleAddTeamToSlip(game, "home")}
+                    disabled={isInSlip(`live_${game.id}_home`)}
+                    data-testid={`button-add-live-home-${game.id}`}
+                  >
+                    {isInSlip(`live_${game.id}_home`) ? <Check className="w-3 h-3 mr-1" /> : <Star className="w-3 h-3 mr-1" />}
+                    {isInSlip(`live_${game.id}_home`) ? "In Slip" : "Add to Slip"}
+                  </Button>
+                </div>
               </div>
             </div>
 

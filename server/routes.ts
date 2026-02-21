@@ -1382,6 +1382,79 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  app.get("/api/data-sources/status", async (_req, res) => {
+    try {
+      const oddsApiStatus = sportsDataService.getApiStatus();
+      const hasOpenAI = !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY);
+      const hasStripe = !!(process.env.STRIPE_SECRET_KEY);
+
+      return res.json({
+        sources: [
+          {
+            id: "espn",
+            name: "ESPN Live Data",
+            description: "Real-time scoreboards, rosters, injuries",
+            status: "active",
+            type: "free",
+          },
+          {
+            id: "odds_api",
+            name: "The Odds API",
+            description: "Multi-book odds comparison (DraftKings, FanDuel, BetMGM, etc.)",
+            status: oddsApiStatus.available ? "active" : "fallback",
+            type: "api_key",
+            requestsRemaining: oddsApiStatus.requestsRemaining,
+            fallbackNote: oddsApiStatus.available ? undefined : "Using ESPN-derived odds. Add THE_ODDS_API_KEY for multi-book comparison.",
+          },
+          {
+            id: "quantum_fusion",
+            name: "Quantum Fusion Engine",
+            description: "46-factor prediction analysis across 7 categories",
+            status: "active",
+            type: "built_in",
+          },
+          {
+            id: "learning_engine",
+            name: "Continuous Learning Engine",
+            description: "Self-improving model weights from prediction outcomes",
+            status: "active",
+            type: "built_in",
+          },
+          {
+            id: "openai",
+            name: "AI Intelligence",
+            description: "AI-powered diagnostics, assistant, and betting insights",
+            status: hasOpenAI ? "active" : "inactive",
+            type: "api_key",
+          },
+          {
+            id: "stripe",
+            name: "Payment Processing",
+            description: "Stripe subscription and payment handling",
+            status: hasStripe ? "active" : "inactive",
+            type: "api_key",
+          },
+          {
+            id: "prediction_pipeline",
+            name: "12-Module Prediction Pipeline",
+            description: "Data ingestion through explainability",
+            status: "active",
+            type: "built_in",
+          },
+          {
+            id: "sport_factors",
+            name: "Sport-Specific Factor Analysis",
+            description: "14 sports with 300+ weighted factors",
+            status: "active",
+            type: "built_in",
+          },
+        ],
+      });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to get data source status" });
+    }
+  });
+
   app.get("/api/quantum-engine/stats", async (_req, res) => {
     try {
       const stats = getQuantumEngineStats();

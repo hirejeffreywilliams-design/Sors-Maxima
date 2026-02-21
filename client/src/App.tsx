@@ -5,6 +5,8 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ParlaySlipProvider } from "@/hooks/use-parlay-slip";
+import { ParlaySlipDrawer } from "@/components/parlay-slip-drawer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -445,9 +447,12 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       </div>
       
       <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
-        <AgeVerificationGate>
-          <Router authState={authState} />
-        </AgeVerificationGate>
+        <ParlaySlipProvider>
+          <AgeVerificationGate>
+            <Router authState={authState} />
+          </AgeVerificationGate>
+          <ParlaySlipDrawer />
+        </ParlaySlipProvider>
       </main>
       
       <footer className="hidden lg:block border-t bg-muted/30 py-4 px-6">

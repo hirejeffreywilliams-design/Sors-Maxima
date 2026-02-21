@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import type { Sport, GeneratedParlay, SportEvent } from "@shared/schema";
 import { sports, getGameTimeBucket, formatGameTime, getTimeUrgencyScore } from "@shared/schema";
 
@@ -53,6 +55,53 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
   const [generatingAll, setGeneratingAll] = useState(false);
   const [sportParlays, setSportParlays] = useState<Map<Sport, SportParlays>>(new Map());
   const [selectedSport, setSelectedSport] = useState<Sport>("NBA");
+  const { addLeg, isInSlip } = useParlaySlip();
+  const { toast } = useToast();
+
+  const handleAddLegToSlip = (leg: any, sport: Sport) => {
+    const slipLeg: ParlaySlipLeg = {
+      id: leg.id,
+      team: leg.team || "",
+      opponent: leg.opponent || "",
+      market: leg.market || "moneyline",
+      outcome: leg.outcome || leg.description || "",
+      decimalOdds: leg.decimalOdds || 1.5,
+      americanOdds: leg.americanOdds,
+      playerName: leg.playerName,
+      propCategory: leg.propCategory,
+      addedFrom: "Daily Parlays",
+      addedAt: new Date().toISOString(),
+      sport,
+    };
+    const added = addLeg(slipLeg);
+    if (added) {
+      toast({ title: "Added to Slip", description: `${slipLeg.outcome} added to your parlay slip` });
+    }
+  };
+
+  const handleAddParlayToSlip = (parlay: GeneratedParlay, sport: Sport) => {
+    let addedCount = 0;
+    parlay.legs.forEach(leg => {
+      if (!isInSlip(leg.id)) {
+        const slipLeg: ParlaySlipLeg = {
+          id: leg.id,
+          team: leg.team || "",
+          opponent: leg.opponent || "",
+          market: leg.market || "moneyline",
+          outcome: leg.outcome || "",
+          decimalOdds: leg.decimalOdds || 1.5,
+          americanOdds: leg.americanOdds,
+          addedFrom: "Daily Parlays",
+          addedAt: new Date().toISOString(),
+          sport,
+        };
+        if (addLeg(slipLeg)) addedCount++;
+      }
+    });
+    if (addedCount > 0) {
+      toast({ title: "Added to Slip", description: `${addedCount} leg${addedCount > 1 ? "s" : ""} added to your parlay slip` });
+    }
+  };
 
   const generateMutation = useMutation({
     mutationFn: async (sport: Sport) => {
@@ -429,11 +478,23 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                               {parlay.riskRating}
                             </Badge>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold font-mono">
-                              {formatOdds(parlay.combinedOdds)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">combined odds</p>
+                          <div className="flex items-center gap-3">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-xs shrink-0"
+                              onClick={() => handleAddParlayToSlip(parlay, sport)}
+                              data-testid={`button-add-parlay-slip-${index}`}
+                            >
+                              <Star className="w-3 h-3 mr-1" />
+                              Add to Slip
+                            </Button>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold font-mono">
+                                {formatOdds(parlay.combinedOdds)}
+                              </p>
+                              <p className="text-xs text-muted-foreground">combined odds</p>
+                            </div>
                           </div>
                         </div>
                       </CardHeader>
@@ -442,15 +503,27 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                           {parlay.legs.map((leg, legIndex) => (
                             <div 
                               key={leg.id} 
-                              className="p-2 rounded-md bg-muted/50 text-sm flex items-center justify-between"
+                              className="p-2 rounded-md bg-muted/50 text-sm flex items-center justify-between gap-2"
                             >
                               <div className="min-w-0 flex-1">
                                 <p className="font-medium truncate">{leg.outcome}</p>
                                 <p className="text-xs text-muted-foreground truncate">{leg.team}</p>
                               </div>
-                              <Badge variant="outline" className="ml-2 shrink-0">
-                                {formatOdds(leg.decimalOdds)}
-                              </Badge>
+                              <div className="flex items-center gap-1 shrink-0">
+                                <Badge variant="outline">
+                                  {formatOdds(leg.decimalOdds)}
+                                </Badge>
+                                <Button
+                                  size="icon"
+                                  variant={isInSlip(leg.id) ? "secondary" : "ghost"}
+                                  className="h-6 w-6"
+                                  onClick={() => handleAddLegToSlip(leg, sport)}
+                                  disabled={isInSlip(leg.id)}
+                                  data-testid={`button-add-daily-leg-${leg.id}`}
+                                >
+                                  {isInSlip(leg.id) ? <Check className="w-3 h-3" /> : <Star className="w-3 h-3" />}
+                                </Button>
+                              </div>
                             </div>
                           ))}
                         </div>

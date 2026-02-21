@@ -43,6 +43,7 @@ import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tuto
 import { BettingInsights } from "@/components/betting-insights";
 import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recognition";
 import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/quantum-fusion-display";
+import { DataSourceStatus } from "@/components/data-source-status";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
@@ -50,6 +51,7 @@ import { getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { eventTracker } from "@/lib/event-tracker";
 import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
+import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 
 const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
@@ -63,6 +65,61 @@ const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = 
 function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const { addLeg, isInSlip } = useParlaySlip();
+  const { toast } = useToast();
+
+  const handleAddLegToSlip = (leg: any) => {
+    const slipLeg: ParlaySlipLeg = {
+      id: leg.id,
+      team: leg.team,
+      opponent: leg.opponent,
+      market: leg.market as any,
+      outcome: leg.outcome,
+      decimalOdds: leg.decimalOdds,
+      americanOdds: leg.americanOdds,
+      playerName: leg.playerName,
+      propCategory: leg.propCategory,
+      propLine: leg.line,
+      addedFrom: "Smart Generator",
+      addedAt: new Date().toISOString(),
+      sport: ticket.sport,
+      confidence: leg.winProbability ? Math.round(leg.winProbability * 100) : undefined,
+      evPercent: leg.edgePercent,
+    };
+    const added = addLeg(slipLeg);
+    if (added) {
+      toast({ title: "Added to Slip", description: `${leg.outcome} added to your parlay slip` });
+    }
+  };
+
+  const handleAddAllLegs = () => {
+    let addedCount = 0;
+    ticket.legs.forEach(leg => {
+      if (!isInSlip(leg.id)) {
+        const slipLeg: ParlaySlipLeg = {
+          id: leg.id,
+          team: leg.team,
+          opponent: leg.opponent,
+          market: leg.market as any,
+          outcome: leg.outcome,
+          decimalOdds: leg.decimalOdds,
+          americanOdds: leg.americanOdds,
+          playerName: leg.playerName,
+          propCategory: leg.propCategory,
+          propLine: leg.line,
+          addedFrom: "Smart Generator",
+          addedAt: new Date().toISOString(),
+          sport: ticket.sport,
+          confidence: leg.winProbability ? Math.round(leg.winProbability * 100) : undefined,
+          evPercent: leg.edgePercent,
+        };
+        if (addLeg(slipLeg)) addedCount++;
+      }
+    });
+    if (addedCount > 0) {
+      toast({ title: "Added to Slip", description: `${addedCount} leg${addedCount > 1 ? "s" : ""} added to your parlay slip` });
+    }
+  };
   
   const formatOdds = (american: number) => {
     return american > 0 ? `+${american}` : `${american}`;
@@ -102,9 +159,13 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
             </Badge>
           </div>
           <CardTitle className="text-base sm:text-lg" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button size="icon" variant="ghost" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
               {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            </Button>
+            <Button size="sm" variant="outline" onClick={handleAddAllLegs} data-testid={`button-add-all-slip-${ticket.id}`}>
+              <Star className="w-4 h-4 mr-1" />
+              Add to Slip
             </Button>
             <Button size="sm" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
               <DollarSign className="w-4 h-4" />
@@ -205,22 +266,38 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
                     <p className="font-medium" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
                     <p className="text-sm text-muted-foreground">{leg.team} vs {leg.opponent}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex flex-col items-end gap-1">
                     <p className="font-bold" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</p>
                     <Badge variant="outline" className="text-xs">{leg.market}</Badge>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs flex-wrap">
-                  <Badge variant={leg.analysis.sharpAction ? "default" : "secondary"} className="text-xs">
-                    {leg.analysis.sharpAction ? "Sharp Action" : "Public Bet"}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {leg.analysis.lineMovement === "steam" ? "Steam Move" : 
-                     leg.analysis.lineMovement === "reverse" ? "Reverse Line" : "Stable Line"}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {leg.edgePercent >= 0 ? "+" : ""}{leg.edgePercent.toFixed(1)}% Edge
-                  </Badge>
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 text-xs flex-wrap">
+                    <Badge variant={leg.analysis.sharpAction ? "default" : "secondary"} className="text-xs">
+                      {leg.analysis.sharpAction ? "Sharp Action" : "Public Bet"}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {leg.analysis.lineMovement === "steam" ? "Steam Move" : 
+                       leg.analysis.lineMovement === "reverse" ? "Reverse Line" : "Stable Line"}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">
+                      {leg.edgePercent >= 0 ? "+" : ""}{leg.edgePercent.toFixed(1)}% Edge
+                    </Badge>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant={isInSlip(leg.id) ? "secondary" : "outline"}
+                    className="text-xs h-7 px-2 shrink-0"
+                    onClick={() => handleAddLegToSlip(leg)}
+                    disabled={isInSlip(leg.id)}
+                    data-testid={`button-add-leg-slip-${leg.id}`}
+                  >
+                    {isInSlip(leg.id) ? (
+                      <><CheckCircle2 className="w-3 h-3 mr-1" /> In Slip</>
+                    ) : (
+                      <><Star className="w-3 h-3 mr-1" /> Add to Slip</>
+                    )}
+                  </Button>
                 </div>
               </div>
             ))}
@@ -505,6 +582,8 @@ export default function AutoGenerator() {
             Past performance does not guarantee future results. Please gamble responsibly.
           </p>
         </div>
+
+        <DataSourceStatus />
 
         <Tabs defaultValue="generator" className="space-y-6">
           <div className="flex justify-center">
