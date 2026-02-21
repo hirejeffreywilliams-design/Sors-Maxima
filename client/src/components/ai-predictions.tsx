@@ -262,7 +262,7 @@ export function AIPredictions() {
                   <span className="font-medium">{pred.impliedProbability}%</span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-background/30 rounded">
-                  <span className="text-muted-foreground">Vig Removed</span>
+                  <span className="text-muted-foreground">Odds Margin Removed</span>
                   <span className="font-medium text-yellow-400">{pred.vigRemoved}%</span>
                 </div>
               </div>
@@ -319,7 +319,7 @@ export function AIPredictions() {
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-3 h-3 text-green-500" />
-              <span>Vegas-calibrated probabilities with vig removed</span>
+              <span>Vegas-calibrated probabilities with odds margin removed</span>
             </div>
             <span>{data?.timestamp ? new Date(data.timestamp).toLocaleTimeString() : ""}</span>
           </div>

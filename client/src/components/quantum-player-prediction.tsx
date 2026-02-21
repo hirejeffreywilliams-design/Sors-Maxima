@@ -39,15 +39,15 @@ interface PlayerPrediction {
 }
 
 export function QuantumPlayerPrediction() {
-  const [selectedPlayer, setSelectedPlayer] = useState("lebron-james");
+  const [selectedPlayer, setSelectedPlayer] = useState("jalen-brunson");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [prediction, setPrediction] = useState<PlayerPrediction | null>(null);
 
   const players = [
-    { id: "lebron-james", name: "LeBron James", team: "Lakers", position: "SF" },
-    { id: "stephen-curry", name: "Stephen Curry", team: "Warriors", position: "PG" },
-    { id: "giannis-antetokounmpo", name: "Giannis Antetokounmpo", team: "Bucks", position: "PF" },
+    { id: "jalen-brunson", name: "Jalen Brunson", team: "Knicks", position: "PG" },
     { id: "luka-doncic", name: "Luka Doncic", team: "Mavericks", position: "PG" },
+    { id: "giannis-antetokounmpo", name: "Giannis Antetokounmpo", team: "Bucks", position: "PF" },
+    { id: "anthony-edwards", name: "Anthony Edwards", team: "Timberwolves", position: "SG" },
     { id: "nikola-jokic", name: "Nikola Jokic", team: "Nuggets", position: "C" },
   ];
 

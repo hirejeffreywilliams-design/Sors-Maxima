@@ -691,7 +691,7 @@ export default function AdminAssistant() {
                           <TableHead>Financial</TableHead>
                           <TableHead>Risk</TableHead>
                           <TableHead>Compliance</TableHead>
-                          <TableHead>Trace ID</TableHead>
+                          <TableHead>Run ID</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

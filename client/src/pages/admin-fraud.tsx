@@ -475,7 +475,7 @@ export default function AdminFraudDashboard() {
                   { signal: "Suspicious Pattern", weight: 15 },
                   { signal: "IP Subnet Match", weight: 10 },
                   { signal: "VPN/Proxy", weight: 10 },
-                  { signal: "Behavior Heuristics", weight: 10 },
+                  { signal: "Behavior Signals", weight: 10 },
                   { signal: "User Agent Match", weight: 5 },
                 ].map((item) => (
                   <div key={item.signal} className="p-2 rounded bg-muted/50 text-sm">

@@ -155,7 +155,7 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
       
       startContinuousLearning();
-      log("Quantum learning engine activated - improving predictions every second");
+      log("AI learning engine activated - improving predictions every second");
     },
   );
 })();

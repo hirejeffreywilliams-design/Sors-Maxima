@@ -74,10 +74,10 @@ const DEFAULT_CONFIG: VegasModelConfig = {
 };
 
 const TEAM_POWER_RATINGS: Record<string, number> = {
-  "Lakers": 108.5, "Celtics": 112.3, "Warriors": 110.1, "Bucks": 111.8,
-  "Nuggets": 113.2, "Suns": 109.4, "Heat": 107.8, "76ers": 108.9,
-  "Nets": 105.6, "Clippers": 107.2, "Mavericks": 109.8, "Grizzlies": 106.4,
-  "Cavaliers": 110.5, "Sacramento Kings": 107.1, "Pelicans": 106.8, "Knicks": 108.2,
+  "Knicks": 108.5, "Mavericks": 112.3, "Nuggets": 110.1, "Bucks": 111.8,
+  "Suns": 109.4, "Heat": 107.8, "76ers": 108.9,
+  "Nets": 105.6, "Clippers": 107.2, "Grizzlies": 106.4,
+  "Cavaliers": 110.5, "Sacramento Kings": 107.1, "Pelicans": 106.8,
   "Chiefs": 28.5, "Bills": 27.8, "Eagles": 27.2, "49ers": 26.9,
   "Cowboys": 25.8, "Lions": 26.4, "Ravens": 27.1, "Dolphins": 25.6,
   "Bengals": 26.2, "Jaguars": 24.8, "Chargers": 25.4, "Vikings": 25.1,
@@ -302,8 +302,8 @@ async function loadRealGames(): Promise<Array<{ home: string; away: string; spor
 
 function getStaticFallbackGames(): Array<{ home: string; away: string; sport: Sport }> {
   return [
-    { home: "Celtics", away: "Lakers", sport: "NBA" },
-    { home: "Bucks", away: "Warriors", sport: "NBA" },
+    { home: "Knicks", away: "Heat", sport: "NBA" },
+    { home: "Bucks", away: "Mavericks", sport: "NBA" },
     { home: "Nuggets", away: "Suns", sport: "NBA" },
     { home: "Heat", away: "76ers", sport: "NBA" },
     { home: "Bills", away: "Chiefs", sport: "NFL" },

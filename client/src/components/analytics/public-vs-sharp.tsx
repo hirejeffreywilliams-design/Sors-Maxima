@@ -24,7 +24,7 @@ interface GameSplit {
 
 const mockSplits: GameSplit[] = [
   { id: "1", game: "Chiefs @ Bills", sport: "NFL", pick: "Bills +3.5", publicTicketPct: 35, publicMoneyPct: 28, sharpMoneyPct: 72, lineMovement: "Bills +3 → +3.5", signal: "follow_sharp", gameTime: "4:25 PM" },
-  { id: "2", game: "Lakers @ Celtics", sport: "NBA", pick: "Lakers +6.5", publicTicketPct: 25, publicMoneyPct: 22, sharpMoneyPct: 65, lineMovement: "Lakers +5.5 → +6.5", signal: "follow_sharp", gameTime: "7:30 PM" },
+  { id: "2", game: "Bucks @ Heat", sport: "NBA", pick: "Bucks +6.5", publicTicketPct: 25, publicMoneyPct: 22, sharpMoneyPct: 65, lineMovement: "Bucks +5.5 → +6.5", signal: "follow_sharp", gameTime: "7:30 PM" },
   { id: "3", game: "Cowboys @ Eagles", sport: "NFL", pick: "Cowboys ML", publicTicketPct: 68, publicMoneyPct: 72, sharpMoneyPct: 35, lineMovement: "Cowboys +2 → +3", signal: "fade_public", gameTime: "8:20 PM" },
   { id: "4", game: "Suns @ Nuggets", sport: "NBA", pick: "Over 228.5", publicTicketPct: 65, publicMoneyPct: 58, sharpMoneyPct: 48, lineMovement: "228 → 228.5", signal: "neutral", gameTime: "9:00 PM" },
   { id: "5", game: "Rangers @ Bruins", sport: "NHL", pick: "Bruins ML", publicTicketPct: 55, publicMoneyPct: 48, sharpMoneyPct: 62, lineMovement: "-135 → -145", signal: "follow_sharp", gameTime: "7:00 PM" },

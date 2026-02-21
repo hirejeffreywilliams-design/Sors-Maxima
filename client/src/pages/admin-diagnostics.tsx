@@ -441,7 +441,7 @@ export default function AdminDiagnostics() {
                     <div className="text-3xl font-bold text-purple-500">
                       {diagnosticResult.quantumMetrics.coherenceScore}%
                     </div>
-                    <div className="text-sm text-muted-foreground">Coherence Score</div>
+                    <div className="text-sm text-muted-foreground">Consistency Score</div>
                   </div>
                   <div className="text-center p-4 rounded-lg bg-muted/50">
                     <div className="text-3xl font-bold text-blue-500">

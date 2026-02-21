@@ -15,7 +15,7 @@ async function createProducts() {
   // Pro Plan - $29/month
   const proProduct = await stripe.products.create({
     name: 'Sors Maxima Pro',
-    description: 'Full quantum analysis, unlimited picks, all 40+ analysis factors',
+    description: 'Full AI analysis, unlimited picks, all 46 analysis factors',
     metadata: {
       tier: 'pro',
       features: 'quantum_analysis,unlimited_picks,all_sports,basic_alerts',

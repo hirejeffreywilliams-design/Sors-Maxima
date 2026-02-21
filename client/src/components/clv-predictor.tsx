@@ -59,7 +59,7 @@ function getMockPredictions(): LinePrediction[] {
     },
     {
       id: "3",
-      game: "Lakers vs Nuggets",
+      game: "Heat vs Timberwolves",
       sport: "NBA",
       market: "Spread",
       currentLine: 5.5,

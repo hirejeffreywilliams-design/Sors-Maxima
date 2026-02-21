@@ -203,7 +203,7 @@ function generateStreakBreakerAlerts(events: SportEvent[]): StreakBreakerAlert[]
           streakType: trend.streakType as "over" | "under",
           historicalAvgStreak: 3.2,
           regressionProbability: Math.min(0.85, 0.5 + trend.streak * 0.08),
-          recommendation: `${trend.streak} game streak on ${trend.streakType}. Regression likely soon.`,
+          recommendation: `${trend.streak} game streak on ${trend.streakType}. Correction likely soon.`,
         });
       }
     });
@@ -491,7 +491,7 @@ export function EdgeFinder({ events, sport }: EdgeFinderProps) {
                       </div>
                       <div className="text-xs">
                         <div className="flex justify-between mb-1">
-                          <span className="text-muted-foreground">Regression probability:</span>
+                          <span className="text-muted-foreground">Correction probability:</span>
                           <span className="text-orange-400">{(alert.regressionProbability * 100).toFixed(0)}%</span>
                         </div>
                         <Progress value={alert.regressionProbability * 100} className="h-1 [&>div]:bg-orange-500" />

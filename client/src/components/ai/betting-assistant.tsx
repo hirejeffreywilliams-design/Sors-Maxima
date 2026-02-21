@@ -38,8 +38,8 @@ const mockResponses: Record<string, string> = {
   "build me a 3-leg nba parlay": `Great choice! Based on my advanced analysis, here's a sharp 3-leg NBA parlay for tonight:
 
 **Recommended Parlay (+412)**
-1. **Celtics -4.5** (-110) - Strong home court advantage, 72% ATS at home
-2. **Lakers/Nuggets Over 228.5** (-105) - Both teams averaging 118+ PPG last 5
+1. **Bucks -4.5** (-110) - Strong home court advantage, 72% ATS at home
+2. **Knicks/Heat Over 228.5** (-105) - Both teams averaging 118+ PPG last 5
 3. **Suns ML** (-135) - Durant averaging 31 PPG vs this opponent
 
 **Parlay Stats:**
@@ -58,7 +58,7 @@ Want me to add this to your builder?`,
    - Line opened at +1.5, now +3.5
    - Edge Score: 84
 
-2. **Celtics/Heat Under 215.5** (+EV 4.1%)
+2. **Timberwolves/Mavericks Under 215.5** (+EV 4.1%)
    - Both teams rank top-5 in defensive efficiency
    - Weather affecting visiting team
    - Edge Score: 78

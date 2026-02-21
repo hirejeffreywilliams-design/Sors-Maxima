@@ -56,8 +56,8 @@ function generateMockOdds(): GameOdds[] {
     {
       id: "nba-1",
       sport: "NBA",
-      homeTeam: "Lakers",
-      awayTeam: "Celtics",
+      homeTeam: "Knicks",
+      awayTeam: "Bucks",
       gameTime: "Tonight 10:00 PM",
       books: books.map((book, i) => ({
         book,

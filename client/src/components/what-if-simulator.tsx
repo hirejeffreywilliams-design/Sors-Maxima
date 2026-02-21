@@ -27,10 +27,10 @@ interface SimulationResult {
 
 export function WhatIfSimulator() {
   const [legs, setLegs] = useState<SimulationLeg[]>([
-    { id: "1", name: "Lakers ML", odds: 1.85, probability: 54, enabled: true },
+    { id: "1", name: "Knicks ML", odds: 1.85, probability: 54, enabled: true },
     { id: "2", name: "Chiefs -3.5", odds: 1.91, probability: 52, enabled: true },
     { id: "3", name: "Over 228.5", odds: 1.87, probability: 53, enabled: true },
-    { id: "4", name: "Celtics -4", odds: 1.95, probability: 51, enabled: true },
+    { id: "4", name: "Eagles -4", odds: 1.95, probability: 51, enabled: true },
   ]);
   const [stake, setStake] = useState(25);
   const [result, setResult] = useState<SimulationResult | null>(null);

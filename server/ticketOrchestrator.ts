@@ -529,7 +529,7 @@ function buildRationale(fusionData: TicketFusion, legs: TicketLeg[]): string[] {
   }
   
   if (cf.recommendation === "strong_bet") {
-    rationale.push("All-systems-go: Quantum Fusion Engine rates this a STRONG BET");
+    rationale.push("All-systems-go: Sors Prediction Engine rates this a STRONG BET");
   } else if (cf.recommendation === "moderate_bet") {
     rationale.push("Solid opportunity: Multiple analysis categories confirm value");
   }

@@ -31,7 +31,7 @@ interface PlayerData {
 const SAMPLE_PLAYERS: PlayerData[] = [
   {
     id: "p1",
-    name: "LeBron James",
+    name: "Anthony Edwards",
     team: "LAL",
     position: "SF",
     sport: "NBA",

@@ -165,7 +165,7 @@ export function collectRunContext(period: "daily" | "weekly" | "monthly" = "dail
   return {
     time: new Date().toISOString(),
     admin_id: adminId,
-    model_version: "quantum-fusion-v2.1",
+    model_version: "sors-prediction-v2.1",
     period,
     budget_snapshot: {
       cash_on_hand: cashOnHand,

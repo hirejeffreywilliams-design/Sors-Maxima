@@ -184,7 +184,7 @@ export default function AdminAnalytics() {
                           {kpi.unit === "$" ? `$${kpi.value.toLocaleString()}` : `${kpi.value.toLocaleString()}${kpi.unit === "%" ? "%" : kpi.unit === "ms" ? "ms" : ""}`}
                           {kpi.unit === "users" && <span className="text-sm font-normal text-muted-foreground ml-1">users</span>}
                         </div>
-                        <div className="text-sm text-muted-foreground">{kpi.name}</div>
+                        <div className="text-sm text-muted-foreground">{kpi.name === "Latency" ? "Response Time" : kpi.name}</div>
                         <div className={`text-xs mt-1 ${kpi.changePercent > 0 ? (kpi.name.includes("Error") || kpi.name.includes("Churn") || kpi.name.includes("Latency") ? "text-red-500" : "text-green-500") : kpi.changePercent < 0 ? (kpi.name.includes("Error") || kpi.name.includes("Churn") || kpi.name.includes("Latency") ? "text-green-500" : "text-red-500") : "text-muted-foreground"}`}>
                           {kpi.changePercent > 0 ? "+" : ""}{kpi.changePercent}% vs prior period
                         </div>

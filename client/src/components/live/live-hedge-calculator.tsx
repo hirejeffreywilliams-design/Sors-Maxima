@@ -21,7 +21,7 @@ interface ActiveBet {
 
 const mockActiveBets: ActiveBet[] = [
   { id: "1", description: "Chiefs ML (Original: -150)", originalStake: 150, potentialPayout: 250, currentLiveOdds: -280, hedgeOdds: +240, status: "winning" },
-  { id: "2", description: "Lakers -5.5 (Original: -110)", originalStake: 110, potentialPayout: 210, currentLiveOdds: +120, hedgeOdds: -130, status: "losing" },
+  { id: "2", description: "Mavericks -5.5 (Original: -110)", originalStake: 110, potentialPayout: 210, currentLiveOdds: +120, hedgeOdds: -130, status: "losing" },
 ];
 
 export function LiveHedgeCalculator() {

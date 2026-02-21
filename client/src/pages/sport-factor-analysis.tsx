@@ -288,7 +288,7 @@ function RealTimeAnalysisTab() {
             <div>
               <label className="text-sm font-medium mb-1 block">Home Team</label>
               <Input
-                placeholder="e.g. Lakers"
+                placeholder="e.g. Knicks"
                 value={homeTeam}
                 onChange={(e) => setHomeTeam(e.target.value)}
                 data-testid="input-home-team"
@@ -297,7 +297,7 @@ function RealTimeAnalysisTab() {
             <div>
               <label className="text-sm font-medium mb-1 block">Away Team</label>
               <Input
-                placeholder="e.g. Celtics"
+                placeholder="e.g. Nuggets"
                 value={awayTeam}
                 onChange={(e) => setAwayTeam(e.target.value)}
                 data-testid="input-away-team"
@@ -497,7 +497,7 @@ function FusionDeepDiveTab() {
             <div>
               <label className="text-sm font-medium mb-1 block">Bet Description</label>
               <Input
-                placeholder="e.g. Lakers -3.5 vs Celtics"
+                placeholder="e.g. Knicks -3.5 vs Nuggets"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 data-testid="input-bet-description"

@@ -32,7 +32,7 @@ function generateMockBetHistory(): BetRecord[] {
       legs: [
         {
           id: `leg-${i}-1`,
-          team: ["Lakers", "Celtics", "Warriors", "Heat", "Bucks"][Math.floor(Math.random() * 5)],
+          team: ["Knicks", "Nuggets", "Mavericks", "Heat", "Bucks"][Math.floor(Math.random() * 5)],
           market: ["moneyline", "spread", "total"][Math.floor(Math.random() * 3)] as any,
           outcome: "Win",
           decimalOdds: 1.5 + Math.random(),

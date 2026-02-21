@@ -38,18 +38,18 @@ function getMockStacks(): CorrelatedStack[] {
     },
     {
       id: "2",
-      name: "Lakers High-Scoring Game",
+      name: "Knicks High-Scoring Game",
       sport: "NBA",
-      game: "LAL vs DEN",
+      game: "NYK vs MIL",
       legs: [
-        { player: "LeBron James", prop: "Points O26.5", line: 26.5, recommendation: "lean_over" },
-        { player: "Anthony Davis", prop: "Rebounds O11.5", line: 11.5, recommendation: "lean_over" },
+        { player: "Jalen Brunson", prop: "Points O26.5", line: 26.5, recommendation: "lean_over" },
+        { player: "Karl-Anthony Towns", prop: "Rebounds O11.5", line: 11.5, recommendation: "lean_over" },
         { player: "Game Total", prop: "Over 228.5", line: 228.5, recommendation: "lean_over" },
       ],
       correlationScore: 0.71,
       combinedEV: 8.8,
       synergy: "strong",
-      reason: "LeBron + AD scoring correlates with game pace. High totals benefit both players.",
+      reason: "Brunson + KAT scoring correlates with game pace. High totals benefit both players.",
       warnings: [],
     },
     {

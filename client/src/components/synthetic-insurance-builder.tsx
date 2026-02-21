@@ -273,7 +273,7 @@ export function SyntheticInsuranceBuilder({
             <p className="text-lg font-bold text-green-500">
               -{(insurancePackage.varianceReduction * 100).toFixed(0)}%
             </p>
-            <p className="text-xs text-muted-foreground">Variance Reduction</p>
+            <p className="text-xs text-muted-foreground">Risk Reduction</p>
           </div>
           <div className="p-3 rounded-lg border bg-card text-center">
             <TrendingUp className="h-4 w-4 mx-auto mb-1 text-amber-500" />

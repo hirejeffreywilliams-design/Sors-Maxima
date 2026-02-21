@@ -479,7 +479,7 @@ function ModelPerformanceTab() {
               <div className="flex items-center gap-4 text-sm">
                 <span>Hit Rate: <strong>{m.hitRate}%</strong></span>
                 <span>ROI: <strong className={m.realizedROI >= 0 ? "text-green-500" : "text-red-500"}>{m.realizedROI}%</strong></span>
-                <span>Brier: <strong>{m.brierScore}</strong></span>
+                <span>Accuracy: <strong>{m.brierScore}</strong></span>
                 <span>Drift: <strong>{m.calibrationDrift}</strong></span>
                 <span className="text-muted-foreground">{m.totalPredictions.toLocaleString()} predictions</span>
                 <Button size="icon" variant="ghost" data-testid={`button-expand-model-${m.modelVersion}`}>
@@ -569,7 +569,7 @@ function FeatureRegistryTab() {
                 </div>
                 <div>
                   <div className="text-lg font-bold" data-testid={`value-latency-${f.id}`}>{f.avgLatencyMs}ms</div>
-                  <div className="text-xs text-muted-foreground">Avg Latency</div>
+                  <div className="text-xs text-muted-foreground">Avg Speed</div>
                 </div>
               </div>
 

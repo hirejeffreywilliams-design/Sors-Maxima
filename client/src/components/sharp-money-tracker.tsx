@@ -21,10 +21,10 @@ interface SharpAction {
 
 function generateMockSharpActions(): SharpAction[] {
   const games = [
-    { home: "Lakers", away: "Celtics" },
+    { home: "Knicks", away: "Heat" },
     { home: "Chiefs", away: "Bills" },
     { home: "Yankees", away: "Dodgers" },
-    { home: "Warriors", away: "Bucks" },
+    { home: "Nuggets", away: "Suns" },
     { home: "Cowboys", away: "Eagles" },
   ];
   

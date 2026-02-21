@@ -36,13 +36,13 @@ function getMockConditionals(): ConditionalLeg[] {
       gameScript: "High-scoring first halves correlate with 82% over rate on game totals in divisional games.",
     },
     {
-      condition: "LeBron scores 10+ in Q1",
+      condition: "Giannis scores 10+ in Q1",
       conditionOdds: -120,
-      consequence: "LeBron O26.5 Points",
+      consequence: "Giannis O26.5 Points",
       consequenceOdds: -110,
       probability: 84,
       combinedEV: 6.8,
-      gameScript: "When LeBron is aggressive early (10+ Q1), he averages 31.2 PPG vs 24.8 otherwise.",
+      gameScript: "When Giannis is aggressive early (10+ Q1), he averages 31.2 PPG vs 24.8 otherwise.",
     },
     {
       condition: "Ohtani gets a hit in 1st AB",

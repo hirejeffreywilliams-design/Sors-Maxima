@@ -306,8 +306,8 @@ class SportsDataService {
   private getTeamsForSport(sport: string): { home: string; away: string }[] {
     const teams: Record<string, { home: string; away: string }[]> = {
       NBA: [
-        { home: 'Los Angeles Lakers', away: 'Boston Celtics' },
-        { home: 'Golden State Warriors', away: 'Phoenix Suns' },
+        { home: 'New York Knicks', away: 'Milwaukee Bucks' },
+        { home: 'Dallas Mavericks', away: 'Phoenix Suns' },
         { home: 'Miami Heat', away: 'Milwaukee Bucks' },
         { home: 'Denver Nuggets', away: 'Dallas Mavericks' },
       ],

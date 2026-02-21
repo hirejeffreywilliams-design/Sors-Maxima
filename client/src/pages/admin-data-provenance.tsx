@@ -115,7 +115,7 @@ export default function AdminDataProvenance() {
                       <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {timeSince(src.lastRefresh)}</span>
                         <span>Interval: {src.refreshInterval}</span>
-                        <span>Latency: {src.latency}ms</span>
+                        <span>Speed: {src.latency}ms</span>
                         <span>{src.dataPoints.toLocaleString()} records</span>
                       </div>
                     </div>

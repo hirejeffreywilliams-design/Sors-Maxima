@@ -45,10 +45,10 @@ const mockAccount: PaperAccount = {
 
 const mockBets: PaperBet[] = [
   { id: "1", pick: "Chiefs -3.5", odds: -110, stake: 50, potentialPayout: 95.45, status: "pending", placedAt: new Date() },
-  { id: "2", pick: "Lakers ML", odds: -150, stake: 75, potentialPayout: 125, status: "pending", placedAt: new Date(Date.now() - 3600000) },
+  { id: "2", pick: "Heat ML", odds: -150, stake: 75, potentialPayout: 125, status: "pending", placedAt: new Date(Date.now() - 3600000) },
   { id: "3", pick: "Over 48.5 (Bills/Dolphins)", odds: -105, stake: 50, potentialPayout: 97.62, status: "won", placedAt: new Date(Date.now() - 86400000), settledAt: new Date(Date.now() - 43200000) },
-  { id: "4", pick: "Celtics -5.5", odds: -110, stake: 100, potentialPayout: 190.91, status: "won", placedAt: new Date(Date.now() - 172800000), settledAt: new Date(Date.now() - 129600000) },
-  { id: "5", pick: "Warriors +3", odds: +110, stake: 50, potentialPayout: 105, status: "lost", placedAt: new Date(Date.now() - 259200000), settledAt: new Date(Date.now() - 216000000) },
+  { id: "4", pick: "Suns -5.5", odds: -110, stake: 100, potentialPayout: 190.91, status: "won", placedAt: new Date(Date.now() - 172800000), settledAt: new Date(Date.now() - 129600000) },
+  { id: "5", pick: "Timberwolves +3", odds: +110, stake: 50, potentialPayout: 105, status: "lost", placedAt: new Date(Date.now() - 259200000), settledAt: new Date(Date.now() - 216000000) },
 ];
 
 export function PaperTrading() {

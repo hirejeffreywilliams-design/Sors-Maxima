@@ -16,9 +16,9 @@ const SPORTSBOOKS = [
 ];
 
 const SAMPLE_LEGS = [
-  { sport: "NBA", event: "Lakers vs Celtics", pick: "Over 218.5", odds: "-110", type: "Total" },
+  { sport: "NBA", event: "Nuggets vs Suns", pick: "Over 218.5", odds: "-110", type: "Total" },
   { sport: "NFL", event: "Chiefs vs Bills", pick: "Chiefs -3.5", odds: "-105", type: "Spread" },
-  { sport: "NBA", event: "Warriors vs Suns", pick: "Stephen Curry O28.5 Pts", odds: "+115", type: "Player Prop" },
+  { sport: "NBA", event: "Knicks vs Heat", pick: "Jalen Brunson O28.5 Pts", odds: "+115", type: "Player Prop" },
 ];
 
 function formatForSportsbook(bookId: string, legs: typeof SAMPLE_LEGS): string {

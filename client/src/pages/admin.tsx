@@ -1113,7 +1113,7 @@ export default function AdminDashboard() {
                             <TableHeader>
                               <TableRow>
                                 <TableHead>Endpoint</TableHead>
-                                <TableHead className="text-right">Avg Latency</TableHead>
+                                <TableHead className="text-right">Avg Speed</TableHead>
                                 <TableHead className="text-right">P95</TableHead>
                                 <TableHead className="text-right">Requests</TableHead>
                                 <TableHead className="text-right">Error Rate</TableHead>

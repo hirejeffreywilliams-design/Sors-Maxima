@@ -56,10 +56,10 @@ export function CashoutMaximizer() {
   });
 
   const mockLegs = [
-    { id: 1, team: "Lakers", market: "Moneyline", odds: -150 },
+    { id: 1, team: "Dolphins", market: "Moneyline", odds: -150 },
     { id: 2, team: "Chiefs", market: "Spread -3.5", odds: -110 },
-    { id: 3, team: "Celtics", market: "Total O 220.5", odds: -110 },
-    { id: 4, team: "Warriors", market: "Moneyline", odds: +140 },
+    { id: 3, team: "Ravens", market: "Total O 220.5", odds: -110 },
+    { id: 4, team: "Bengals", market: "Moneyline", odds: +140 },
     { id: 5, team: "Eagles", market: "1H Spread", odds: -115 }
   ];
 

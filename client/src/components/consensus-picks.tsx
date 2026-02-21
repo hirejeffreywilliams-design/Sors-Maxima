@@ -42,7 +42,7 @@ function generateMockConsensus(): ConsensusPick[] {
     },
     {
       id: "cons-3",
-      game: "Warriors @ Bucks",
+      game: "Kings @ Bucks",
       pick: "Under 228.5",
       expertsFor: 12,
       expertsAgainst: 6,

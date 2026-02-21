@@ -120,14 +120,14 @@ const generateHighGradedBets = (): HighGradedBet[] => {
     },
     {
       id: "hg4",
-      matchup: "Warriors vs Suns",
-      pick: "Warriors -2.5",
+      matchup: "Pacers vs Suns",
+      pick: "Pacers -2.5",
       odds: -108,
       grade: "B+",
       confidence: 76,
       sport: "NBA",
       gameTime: "Tomorrow 9:00 PM",
-      reasoning: "Curry averaging 35+ at home, Suns missing key rotation player"
+      reasoning: "Haliburton averaging 25+ at home, Suns missing key rotation player"
     },
     {
       id: "hg5",

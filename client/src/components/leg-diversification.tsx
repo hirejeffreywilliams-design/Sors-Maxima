@@ -82,7 +82,7 @@ export function LegDiversification() {
     { id: "2", description: "Bills ML", sport: "NFL", team: "BUF", betType: "moneyline", direction: "favorite" },
     { id: "3", description: "Cowboys/Eagles O48.5", sport: "NFL", team: "DAL", betType: "total", direction: "over" },
     { id: "4", description: "Mahomes O285.5 Pass", sport: "NFL", team: "KC", betType: "prop", direction: "over" },
-    { id: "5", description: "Lakers +3.5", sport: "NBA", team: "LAL", betType: "spread", direction: "underdog" },
+    { id: "5", description: "Suns +3.5", sport: "NBA", team: "PHX", betType: "spread", direction: "underdog" },
   ]);
 
   const analysis = analyzeDiversification(legs);

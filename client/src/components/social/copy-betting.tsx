@@ -48,8 +48,8 @@ const initialTipsters: Tipster[] = [
     totalPicks: 312,
     sport: "NBA",
     recentPicks: [
-      { pick: "Celtics -5.5", odds: "-110", result: "win" },
-      { pick: "Warriors ML", odds: "+120", result: "pending" },
+      { pick: "Knicks -5.5", odds: "-110", result: "win" },
+      { pick: "Heat ML", odds: "+120", result: "pending" },
       { pick: "Under 220.5 PHX/DAL", odds: "-110", result: "win" },
     ],
     copying: true,

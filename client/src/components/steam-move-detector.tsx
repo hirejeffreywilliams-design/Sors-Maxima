@@ -48,9 +48,9 @@ function generateMockSteamMoves(): SteamMove[] {
     },
     {
       id: "steam-3",
-      game: "Warriors @ Bucks",
+      game: "Timberwolves @ Bucks",
       market: "moneyline",
-      side: "Warriors",
+      side: "Timberwolves",
       originalLine: 145,
       newLine: 130,
       booksAffected: 4,

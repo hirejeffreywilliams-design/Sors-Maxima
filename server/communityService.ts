@@ -93,9 +93,9 @@ class CommunityService {
       {
         id: 'comm_1',
         name: 'Sharp NBA Plays',
-        description: 'Professional NBA analysis with 65%+ win rate. Daily picks backed by quantum analysis.',
+        description: 'Professional NBA analysis with 65%+ win rate. Daily picks backed by AI analysis.',
         creatorId: 'user_1',
-        creatorUsername: 'QuantumKing',
+        creatorUsername: 'SharpKing',
         bannerColor: 'from-blue-500 to-purple-600',
         isPublic: true,
         isPremium: true,

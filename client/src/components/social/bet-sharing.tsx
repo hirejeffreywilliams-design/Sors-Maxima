@@ -23,7 +23,7 @@ const mockTickets: BetTicket[] = [
     id: "ticket-1",
     legs: [
       { pick: "Chiefs -3.5", odds: "-110", result: "win" },
-      { pick: "Lakers ML", odds: "-150", result: "win" },
+      { pick: "Bucks ML", odds: "-150", result: "win" },
       { pick: "Over 48.5 (Bills/Dolphins)", odds: "-105", result: "win" },
     ],
     stake: 50,
@@ -35,8 +35,8 @@ const mockTickets: BetTicket[] = [
   {
     id: "ticket-2",
     legs: [
-      { pick: "Celtics -5.5", odds: "-110", result: "pending" },
-      { pick: "Warriors ML", odds: "+120", result: "pending" },
+      { pick: "Mavericks -5.5", odds: "-110", result: "pending" },
+      { pick: "Suns ML", odds: "+120", result: "pending" },
       { pick: "Under 220.5 (Suns/Mavs)", odds: "-110", result: "pending" },
       { pick: "Nuggets -2.5", odds: "-105", result: "pending" },
     ],

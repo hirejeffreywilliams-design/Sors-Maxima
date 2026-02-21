@@ -31,14 +31,14 @@ interface GradedBet {
 const SAMPLE_BETS: GradedBet[] = [
   {
     id: "g1",
-    event: "Lakers vs Celtics",
-    pick: "Lakers -3.5",
+    event: "Eagles vs Cowboys",
+    pick: "Eagles -3.5",
     result: "W",
     grade: "A+",
-    sport: "NBA",
+    sport: "NFL",
     date: "2026-02-05",
-    modelPredicted: "Lakers -5.2",
-    actualOutcome: "Lakers win by 8",
+    modelPredicted: "Eagles -5.2",
+    actualOutcome: "Eagles win by 8",
     factorAccuracy: 92,
     factors: [
       { name: "Home Court Advantage", correct: true, predicted: "+3.5 pts", actual: "+4.1 pts" },

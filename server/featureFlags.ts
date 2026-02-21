@@ -27,7 +27,7 @@ class FeatureFlagService {
       },
       {
         id: "quantum_fusion",
-        name: "Quantum Fusion Engine",
+        name: "Sors Prediction Engine",
         description: "Advanced 46-factor analysis engine",
         enabled: true,
         rolloutPercentage: 100,

@@ -22,15 +22,15 @@ function generateMockTravelData(): TravelRestData[] {
   return [
     {
       id: "tr-1",
-      team: "Lakers",
-      opponent: "Celtics",
+      team: "Heat",
+      opponent: "76ers",
       restDays: 1,
       opponentRestDays: 3,
       travelMiles: 2500,
       timeZoneChange: 3,
       backToBack: true,
       advantageScore: -12,
-      recommendation: "Fade Lakers - significant rest and travel disadvantage",
+      recommendation: "Fade Heat - significant rest and travel disadvantage",
       sport: "NBA",
     },
     {
@@ -48,7 +48,7 @@ function generateMockTravelData(): TravelRestData[] {
     },
     {
       id: "tr-3",
-      team: "Warriors",
+      team: "Pacers",
       opponent: "Nuggets",
       restDays: 2,
       opponentRestDays: 1,
@@ -56,7 +56,7 @@ function generateMockTravelData(): TravelRestData[] {
       timeZoneChange: 1,
       backToBack: false,
       advantageScore: 5,
-      recommendation: "Warriors have rest edge - lean their way",
+      recommendation: "Pacers have rest edge - lean their way",
       sport: "NBA",
     },
     {

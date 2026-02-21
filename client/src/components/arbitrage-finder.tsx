@@ -26,15 +26,15 @@ interface ArbOpportunity {
 const SAMPLE_ARBS: ArbOpportunity[] = [
   {
     id: "arb1",
-    event: "Lakers vs Celtics",
+    event: "Knicks vs Mavericks",
     sport: "NBA",
     market: "Moneyline",
     bookA: "DraftKings",
     bookAOdds: 2.45,
-    bookASide: "Lakers ML",
+    bookASide: "Knicks ML",
     bookB: "FanDuel",
     bookBOdds: 1.72,
-    bookBSide: "Celtics ML",
+    bookBSide: "Mavericks ML",
     arbPct: 2.3,
     status: "active",
   },

@@ -63,7 +63,7 @@ function getMockSharpPicks(): SharpPick[] {
     },
     {
       id: "3",
-      game: "Lakers vs Nuggets",
+      game: "Suns vs Nuggets",
       sport: "NBA",
       pick: "Nuggets -5",
       odds: -105,

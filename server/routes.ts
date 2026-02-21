@@ -1020,7 +1020,7 @@ export async function registerRoutes(
         email_welcome: "Write a welcome email for new Sors Maxima users. Thank them for joining, explain their 7-day Pro trial benefits, and guide them to create their first smart ticket.",
         email_trial_ending: "Write an email for users whose 7-day trial ends in 2 days. Create urgency, highlight what they'll lose, and offer special upgrade pricing. Be persuasive but not pushy.",
         email_conversion: "Write a conversion email for users whose trial just expired. Offer 20% off first month, show success stories, and make upgrading easy.",
-        ad_google: "Write Google Ads copy (headline max 30 chars, description max 90 chars) for Sors Maxima. Focus on free trial and quantum AI technology.",
+        ad_google: "Write Google Ads copy (headline max 30 chars, description max 90 chars) for Sors Maxima. Focus on free trial and AI-powered analysis.",
         ad_facebook: "Create Facebook ad copy with headline, primary text, and description. Target sports bettors aged 25-45. Emphasize the free 7-day Pro trial.",
         push_notification: "Write a push notification (max 100 chars) encouraging users to check their daily smart ticket picks. Make it urgent and valuable.",
       };
@@ -1158,9 +1158,9 @@ SYSTEM CONTEXT:
 - Total Subscriptions: ${systemContext.subscriptionStats.total}
 
 When analyzing issues, provide:
-1. QUANTUM COHERENCE SCORE (0-100): How well the issue aligns with known patterns
-2. ROOT CAUSE ANALYSIS: Identify potential causes using quantum probability modeling
-3. RECOMMENDED ACTIONS: Step-by-step solutions ranked by quantum confidence
+1. CONSISTENCY SCORE (0-100): How well the issue aligns with known patterns
+2. ROOT CAUSE ANALYSIS: Identify potential causes using AI probability modeling
+3. RECOMMENDED ACTIONS: Step-by-step solutions ranked by AI confidence
 4. PREDICTION IMPACT: How this issue affects the 45 prediction factors
 5. PREVENTION STRATEGIES: Long-term fixes to prevent recurrence
 
@@ -1253,7 +1253,7 @@ Analyze and provide:
 1. SYSTEM HEALTH ASSESSMENT: Overall platform health score (0-100)
 2. DETECTED ISSUES: List any problems found with severity (low/medium/high/critical)
 3. OPTIMIZATION OPPORTUNITIES: Areas that could be improved
-4. QUANTUM PATTERN ANALYSIS: Unusual patterns in the data
+4. AI PATTERN ANALYSIS: Unusual patterns in the data
 5. RECOMMENDED IMMEDIATE ACTIONS: What should be done now
 
 Format your response clearly with sections and bullet points.`;
@@ -1408,7 +1408,7 @@ Format your response clearly with sections and bullet points.`;
           },
           {
             id: "quantum_fusion",
-            name: "Quantum Fusion Engine",
+            name: "Sors Prediction Engine",
             description: "46-factor prediction analysis across 7 categories",
             status: "active",
             type: "built_in",
@@ -3243,7 +3243,7 @@ Format your response clearly with sections and bullet points.`;
       { username: "MoneyMoves", content: "Live odds just shifted, interesting" },
       { username: "PropHunter", content: "Player props are where the value is tonight" },
       { username: "ValueSeeker", content: "Great hedge opportunity right now" },
-      { username: "QuantumBetter", content: "The momentum has completely shifted" },
+      { username: "SharpBetter", content: "The momentum has completely shifted" },
     ];
     const msgs = sampleMessages.map((m, i) => ({
       id: `msg-${gameId}-${i}`,
@@ -3397,7 +3397,7 @@ Format your response clearly with sections and bullet points.`;
       leaderboard: [
         { rank: 1, username: "ValueSeeker", points: 890, record: "34-16" },
         { rank: 2, username: "PropHunter", points: 855, record: "32-18" },
-        { rank: 3, username: "QuantumBetter", points: 820, record: "31-19" },
+        { rank: 3, username: "SharpBetter", points: 820, record: "31-19" },
         { rank: 4, username: "MoneyMoves", points: 800, record: "30-20" },
         { rank: 5, username: "SharpShooter99", points: 785, record: "29-21" },
       ],
@@ -4069,7 +4069,7 @@ Follow these rules:
         horizon: "10-100 years",
         title: "Institutional Vision",
         items: [
-          { id: "ULT1", title: "Quantum Computing Integration", status: "research", description: "Quantum optimization for portfolio-level bet construction" },
+          { id: "ULT1", title: "Advanced AI Integration", status: "research", description: "AI optimization for portfolio-level bet construction" },
           { id: "ULT2", title: "AGI-Powered Analysis", status: "vision", description: "Adapt to paradigm shifts in AI for deep strategic analysis" },
           { id: "ULT3", title: "Sports Analytics Foundation", status: "vision", description: "Endowment-funded research institution for sports prediction science" },
           { id: "ULT4", title: "Privacy-First Compute", status: "vision", description: "Fully encrypted, user-sovereign prediction infrastructure" },
@@ -4359,7 +4359,7 @@ Follow these rules:
       category: "billing",
       keywords: ["subscription", "tiers", "plans", "pricing", "pro", "elite", "whale", "free", "upgrade", "downgrade", "plan"],
       question: "What subscription tiers are available?",
-      answer: "Sors Maxima offers four subscription tiers: Free (basic access with limited features), Pro ($29/month - includes Pro Tools, advanced analytics, and priority support), Elite ($79/month - includes everything in Pro plus Quantum Fusion Engine, AI credits, and exclusive strategies), and Whale ($199/month - includes everything in Elite plus unlimited AI credits, personal advisor, and white-glove support). Visit the Pricing page for full details.",
+      answer: "Sors Maxima offers four subscription tiers: Free (basic access with limited features), Pro ($29/month - includes Pro Tools, advanced analytics, and priority support), Elite ($79/month - includes everything in Pro plus Sors Prediction Engine, AI credits, and exclusive strategies), and Whale ($199/month - includes everything in Elite plus unlimited AI credits, personal advisor, and white-glove support). Visit the Pricing page for full details.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -4494,7 +4494,7 @@ Follow these rules:
       category: "billing",
       keywords: ["ai credits", "credits", "credit limit", "out of credits", "buy credits", "credit balance", "ai usage", "credit system"],
       question: "How does the AI credits system work?",
-      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Quantum Fusion Engine analysis, and AI betting assistant chat. Free tier users receive a limited number of credits per month. Pro users get 500 credits/month, Elite users get 2000 credits/month, and Whale users get unlimited credits. Credits reset at the beginning of each billing cycle. You can track your credit usage in Settings > Subscription.",
+      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Sors Prediction Engine analysis, and AI betting assistant chat. Free tier users receive a limited number of credits per month. Pro users get 500 credits/month, Elite users get 2000 credits/month, and Whale users get unlimited credits. Credits reset at the beginning of each billing cycle. You can track your credit usage in Settings > Subscription.",
       actionable: false,
       autoResolveEligible: true
     },

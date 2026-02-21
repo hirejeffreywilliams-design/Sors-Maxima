@@ -52,7 +52,7 @@ function seed() {
         { id: "s2", channel: "push", subject: "Your free analysis is ready!", body: "We've analyzed today's top games. Tap to see your personalized picks.", delay: "24h", sent: 7200, opened: 4320, clicked: 2592, converted: 1555 },
         { id: "s3", channel: "email", subject: "Pro tip: How top bettors use Sors Maxima", body: "Discover the 3 features that power users swear by...", delay: "3d", sent: 6800, opened: 3400, clicked: 1700, converted: 850 },
         { id: "s4", channel: "in_app", subject: "Unlock Premium Features", body: "You've been using Sors Maxima for 5 days. Ready to go pro?", delay: "5d", sent: 5500, opened: 5500, clicked: 2200, converted: 660 },
-        { id: "s5", channel: "email", subject: "Last chance: Your trial ends in 2 days", body: "Don't lose access to quantum predictions. Upgrade now and save 20%.", delay: "5d", sent: 4800, opened: 2880, clicked: 1728, converted: 518 },
+        { id: "s5", channel: "email", subject: "Last chance: Your trial ends in 2 days", body: "Don't lose access to AI predictions. Upgrade now and save 20%.", delay: "5d", sent: 4800, opened: 2880, clicked: 1728, converted: 518 },
       ],
       targetSegment: "All new registrations", enrolledUsers: 8420, completedUsers: 4800, conversionRate: 25.2, revenue: 143200, createdAt: "2026-01-01", updatedAt: "2026-02-20",
     },
@@ -61,7 +61,7 @@ function seed() {
       status: "active", category: "win_loss",
       trigger: { type: "behavioral", condition: "parlay.won", delay: "1h" },
       steps: [
-        { id: "s1", channel: "push", subject: "Congrats! You hit your parlay! 🎉", body: "You won ${{amount}}! Your quantum score was {{score}}. See what's hot next.", delay: "1h", sent: 3200, opened: 2560, clicked: 1792, converted: 1075 },
+        { id: "s1", channel: "push", subject: "Congrats! You hit your parlay! 🎉", body: "You won ${{amount}}! Your Power Score was {{score}}. See what's hot next.", delay: "1h", sent: 3200, opened: 2560, clicked: 1792, converted: 1075 },
         { id: "s2", channel: "email", subject: "Your winning streak analysis", body: "You're on a {{streak}}-win streak. Here's what our AI predicts next...", delay: "4h", sent: 2800, opened: 1680, clicked: 840, converted: 420 },
       ],
       targetSegment: "Users with recent parlay wins", enrolledUsers: 3200, completedUsers: 2800, conversionRate: 33.6, revenue: 89400, createdAt: "2026-01-15", updatedAt: "2026-02-18",
@@ -94,7 +94,7 @@ function seed() {
       status: "active", category: "monetization",
       trigger: { type: "event", condition: "trial.started" },
       steps: [
-        { id: "s1", channel: "email", subject: "Day 3: You've unlocked {{count}} winning picks", body: "In just 3 days, our quantum engine found {{count}} high-value opportunities for you. Imagine a full month...", delay: "3d", sent: 5600, opened: 3360, clicked: 1680, converted: 672 },
+        { id: "s1", channel: "email", subject: "Day 3: You've unlocked {{count}} winning picks", body: "In just 3 days, our AI engine found {{count}} high-value opportunities for you. Imagine a full month...", delay: "3d", sent: 5600, opened: 3360, clicked: 1680, converted: 672 },
         { id: "s2", channel: "in_app", subject: "Trial milestone: Your accuracy report", body: "Your trial picks so far: {{wins}}/{{total}} won ({{rate}}%). Upgrade to keep this edge.", delay: "5d", sent: 4800, opened: 4800, clicked: 1920, converted: 576 },
         { id: "s3", channel: "push", subject: "⚡ Trial ending in 48 hours", body: "Your quantum-powered trial ends soon. Lock in your rate now.", delay: "5d", sent: 4200, opened: 2940, clicked: 1470, converted: 441 },
         { id: "s4", channel: "email", subject: "Your trial ends tomorrow - exclusive offer inside", body: "Last chance to upgrade at launch pricing. Save 30% with annual plan.", delay: "6d", sent: 3800, opened: 2280, clicked: 1368, converted: 547 },

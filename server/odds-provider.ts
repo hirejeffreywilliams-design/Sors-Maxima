@@ -208,10 +208,10 @@ function generateHistoricalTrends(playerId: string, playerName: string, category
 }
 
 const nbaTeams = [
-  "Los Angeles Lakers", "Boston Celtics", "Golden State Warriors", "Miami Heat",
-  "Milwaukee Bucks", "Phoenix Suns", "Denver Nuggets", "Philadelphia 76ers",
-  "Brooklyn Nets", "Dallas Mavericks", "Cleveland Cavaliers", "Memphis Grizzlies",
-  "Sacramento Kings", "New York Knicks", "Atlanta Hawks", "Minnesota Timberwolves"
+  "New York Knicks", "Dallas Mavericks", "Denver Nuggets", "Miami Heat",
+  "Milwaukee Bucks", "Phoenix Suns", "Philadelphia 76ers", "Brooklyn Nets",
+  "Cleveland Cavaliers", "Memphis Grizzlies", "Sacramento Kings", "Atlanta Hawks",
+  "Minnesota Timberwolves", "Indiana Pacers", "Orlando Magic", "Chicago Bulls"
 ];
 
 const nflTeams = [
@@ -270,20 +270,20 @@ const nflPlayers: Record<string, MockPlayer[]> = {
 };
 
 const nbaPlayers: Record<string, MockPlayer[]> = {
-  "Los Angeles Lakers": [
-    { id: "lal1", name: "LeBron James", position: "SF", team: "Los Angeles Lakers" },
-    { id: "lal2", name: "Anthony Davis", position: "PF", team: "Los Angeles Lakers" },
-    { id: "lal3", name: "D'Angelo Russell", position: "PG", team: "Los Angeles Lakers" },
+  "New York Knicks": [
+    { id: "nyk1", name: "Jalen Brunson", position: "PG", team: "New York Knicks" },
+    { id: "nyk2", name: "Julius Randle", position: "PF", team: "New York Knicks" },
+    { id: "nyk3", name: "OG Anunoby", position: "SF", team: "New York Knicks" },
   ],
-  "Boston Celtics": [
-    { id: "bos1", name: "Jayson Tatum", position: "SF", team: "Boston Celtics" },
-    { id: "bos2", name: "Jaylen Brown", position: "SG", team: "Boston Celtics" },
-    { id: "bos3", name: "Derrick White", position: "PG", team: "Boston Celtics" },
+  "Dallas Mavericks": [
+    { id: "dal1", name: "Luka Doncic", position: "PG", team: "Dallas Mavericks" },
+    { id: "dal2", name: "Kyrie Irving", position: "SG", team: "Dallas Mavericks" },
+    { id: "dal3", name: "Dereck Lively", position: "C", team: "Dallas Mavericks" },
   ],
-  "Golden State Warriors": [
-    { id: "gsw1", name: "Stephen Curry", position: "PG", team: "Golden State Warriors" },
-    { id: "gsw2", name: "Klay Thompson", position: "SG", team: "Golden State Warriors" },
-    { id: "gsw3", name: "Draymond Green", position: "PF", team: "Golden State Warriors" },
+  "Denver Nuggets": [
+    { id: "den1", name: "Nikola Jokic", position: "C", team: "Denver Nuggets" },
+    { id: "den2", name: "Jamal Murray", position: "PG", team: "Denver Nuggets" },
+    { id: "den3", name: "Michael Porter Jr", position: "SF", team: "Denver Nuggets" },
   ],
   "Milwaukee Bucks": [
     { id: "mil1", name: "Giannis Antetokounmpo", position: "PF", team: "Milwaukee Bucks" },

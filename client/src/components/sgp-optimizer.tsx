@@ -51,12 +51,12 @@ function getMockSGPs(): OptimizedSGP[] {
     },
     {
       id: "2",
-      game: "Lakers vs Nuggets",
+      game: "Mavericks vs Bucks",
       sport: "NBA",
       legs: [
-        { player: "LeBron James", prop: "Points", line: 25.5, odds: -110, hitRate: 72, correlationImpact: 0 },
-        { player: "LeBron James", prop: "Assists", line: 7.5, odds: +100, hitRate: 55, correlationImpact: 8 },
-        { player: "Anthony Davis", prop: "Rebounds", line: 11.5, odds: -115, hitRate: 64, correlationImpact: 5 },
+        { player: "Luka Doncic", prop: "Points", line: 25.5, odds: -110, hitRate: 72, correlationImpact: 0 },
+        { player: "Luka Doncic", prop: "Assists", line: 7.5, odds: +100, hitRate: 55, correlationImpact: 8 },
+        { player: "Giannis Antetokounmpo", prop: "Rebounds", line: 11.5, odds: -115, hitRate: 64, correlationImpact: 5 },
       ],
       combinedOdds: 420,
       trueOdds: 380,

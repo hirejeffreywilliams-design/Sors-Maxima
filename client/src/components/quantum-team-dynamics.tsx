@@ -37,15 +37,15 @@ interface TeamAnalysis {
 }
 
 export function QuantumTeamDynamics() {
-  const [selectedTeam, setSelectedTeam] = useState("lakers");
-  const [selectedOpponent, setSelectedOpponent] = useState("celtics");
+  const [selectedTeam, setSelectedTeam] = useState("knicks");
+  const [selectedOpponent, setSelectedOpponent] = useState("76ers");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<TeamAnalysis | null>(null);
 
   const teams = [
-    { id: "lakers", name: "Los Angeles Lakers" },
-    { id: "celtics", name: "Boston Celtics" },
-    { id: "warriors", name: "Golden State Warriors" },
+    { id: "knicks", name: "New York Knicks" },
+    { id: "76ers", name: "Philadelphia 76ers" },
+    { id: "mavericks", name: "Dallas Mavericks" },
     { id: "bucks", name: "Milwaukee Bucks" },
     { id: "nuggets", name: "Denver Nuggets" },
     { id: "heat", name: "Miami Heat" },

@@ -297,7 +297,7 @@ export function ProgressiveHedgePlanner({ legs, stake, potentialPayout }: Progre
                   <div className="text-right">
                     <p className="font-medium">${scenario.estimatedCashout.toFixed(0)}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(scenario.vig * 100).toFixed(1)}% vig
+                      {(scenario.vig * 100).toFixed(1)}% margin
                     </p>
                   </div>
                   <span className={`text-xs font-medium ${getCashoutColor(scenario.recommendation)}`}>

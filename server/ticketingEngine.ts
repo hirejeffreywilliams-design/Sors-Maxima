@@ -484,7 +484,7 @@ export function processFailoverQueue(): number {
 function seedTickets() {
   const sports = ["NBA", "NFL", "MLB", "NHL", "Soccer", "Tennis"];
   const teams = [
-    ["Lakers vs Celtics", "Heat vs Bucks", "Warriors vs Nuggets"],
+    ["Knicks vs Bucks", "Heat vs Bucks", "Mavericks vs Suns"],
     ["Chiefs vs Eagles", "49ers vs Cowboys", "Bills vs Ravens"],
     ["Yankees vs Dodgers", "Astros vs Braves"],
     ["Bruins vs Rangers", "Oilers vs Avalanche"],

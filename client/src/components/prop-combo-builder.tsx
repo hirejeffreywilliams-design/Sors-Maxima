@@ -32,7 +32,7 @@ function generateMockCombos(): PropCombo[] {
     },
     {
       id: "combo-2",
-      player1: "LeBron James",
+      player1: "Jayson Tatum",
       prop1: "Over 27.5 Points",
       player2: "Anthony Davis",
       prop2: "Over 11.5 Rebounds",

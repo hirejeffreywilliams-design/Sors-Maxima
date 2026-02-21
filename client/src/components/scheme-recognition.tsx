@@ -144,7 +144,7 @@ const generateTeamSchemes = (): TeamScheme[] => [
     }
   },
   {
-    teamName: "Boston Celtics",
+    teamName: "Milwaukee Bucks",
     sport: "NBA",
     offensiveScheme: {
       name: "Motion Offense",
@@ -244,7 +244,7 @@ const generateCoachProfiles = (): CoachProfile[] => [
   },
   {
     name: "Joe Mazzulla",
-    team: "Boston Celtics",
+    team: "Milwaukee Bucks",
     sport: "NBA",
     tendencies: {
       riskTolerance: "medium",
@@ -311,9 +311,9 @@ const generateSchemeAlerts = (): SchemeAlert[] => [
     id: "3",
     type: "advantage",
     title: "Pace Advantage Identified",
-    description: "Celtics' fast tempo (102.3 possessions/game) creates +4.2 point differential vs slow-paced opponents like tonight's matchup.",
+    description: "Bucks' fast tempo (102.3 possessions/game) creates +4.2 point differential vs slow-paced opponents like tonight's matchup.",
     impact: "high",
-    affectedLegs: ["Celtics -6", "Game Total O228.5"],
+    affectedLegs: ["Bucks -6", "Game Total O228.5"],
     confidence: 81
   },
   {
@@ -351,14 +351,14 @@ const generateMatchupAnalysis = (): MatchupSchemeAnalysis[] => [
     alerts: []
   },
   {
-    matchup: "Celtics vs Pistons",
-    homeTeam: "Boston Celtics",
-    awayTeam: "Detroit Pistons",
+    matchup: "Bucks vs Pacers",
+    homeTeam: "Milwaukee Bucks",
+    awayTeam: "Indiana Pacers",
     schemeAdvantage: "home",
     keyFactors: [
-      "Celtics switch-everything defense limits Pistons' action",
-      "Pace differential of +8.7 possessions favors Celtics",
-      "Pistons 2-8 ATS vs top-5 defenses"
+      "Bucks switch-everything defense limits Pacers' action",
+      "Pace differential of +8.7 possessions favors Bucks",
+      "Pacers 2-8 ATS vs top-5 defenses"
     ],
     predictionImpact: 8,
     alerts: []
