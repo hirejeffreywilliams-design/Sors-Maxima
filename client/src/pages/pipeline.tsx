@@ -64,7 +64,7 @@ const STAGE_ICONS: Record<string, any> = {
   "Feedback Collector": BarChart3,
   "Evaluator": LineChart,
   "Monitor": Gauge,
-  "Explainability": Eye,
+  "Why This Pick": Eye,
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -302,7 +302,7 @@ export default function PipelineIntelligence() {
             </Card>
             <Card className="border bg-card">
               <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground">Avg Latency</p>
+                <p className="text-xs text-muted-foreground">Avg Speed</p>
                 <p className="text-2xl font-bold mt-1" data-testid="stat-avg-latency">
                   {health ? `${health.avgLatencyMs}ms` : "—"}
                 </p>
@@ -336,7 +336,7 @@ export default function PipelineIntelligence() {
                   </Badge>
                 </div>
                 <CardDescription className="text-xs">
-                  {latestRun.inputSummary.sport} &middot; {latestRun.inputSummary.riskLevel} &middot; Trace: {latestRun.traceId.slice(0, 12)}...
+                  {latestRun.inputSummary.sport} &middot; {latestRun.inputSummary.riskLevel} &middot; Run ID: {latestRun.traceId.slice(0, 12)}...
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -480,7 +480,7 @@ export default function PipelineIntelligence() {
                         )}
                         {Object.keys(stage.metadata).length > 0 && (
                           <div className="bg-muted/50 rounded-lg p-3">
-                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Metadata</p>
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mb-2">Details</p>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                               {Object.entries(stage.metadata).map(([key, value]) => (
                                 <div key={key} className="text-xs">
@@ -527,10 +527,10 @@ export default function PipelineIntelligence() {
                   { label: "ROI", value: health.metrics.roi, format: "pct", good: (v: number) => v > 0 },
                   { label: "Calibration", value: health.metrics.calibration, format: "pct", good: (v: number) => v > 0.9 },
                   { label: "Precision", value: health.metrics.precision, format: "pct", good: (v: number) => v > 0.5 },
-                  { label: "Brier Score", value: health.metrics.brierScore, format: "dec", good: (v: number) => v < 0.25 },
-                  { label: "Log Loss", value: health.metrics.logLoss, format: "dec", good: (v: number) => v < 0.69 },
-                  { label: "Concept Drift", value: health.metrics.conceptDrift, format: "pct", good: (v: number) => v < 0.15 },
-                  { label: "Model Latency", value: health.metrics.modelLatency, format: "ms", good: (v: number) => v < 500 },
+                  { label: "Prediction Accuracy", value: health.metrics.brierScore, format: "dec", good: (v: number) => v < 0.25 },
+                  { label: "Error Rate", value: health.metrics.logLoss, format: "dec", good: (v: number) => v < 0.69 },
+                  { label: "Market Shift", value: health.metrics.conceptDrift, format: "pct", good: (v: number) => v < 0.15 },
+                  { label: "Model Speed", value: health.metrics.modelLatency, format: "ms", good: (v: number) => v < 500 },
                 ].map((metric) => (
                   <Card key={metric.label} className="border bg-card">
                     <CardContent className="p-4">
@@ -759,7 +759,7 @@ export default function PipelineIntelligence() {
                         })}
                       </div>
                       <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
-                        <span>Trace: <code className="bg-muted px-1 rounded">{run.traceId.slice(0, 16)}</code></span>
+                        <span>Run ID: <code className="bg-muted px-1 rounded">{run.traceId.slice(0, 16)}</code></span>
                         {run.alerts.length > 0 && (
                           <span className="text-yellow-500">{run.alerts.length} alert(s)</span>
                         )}

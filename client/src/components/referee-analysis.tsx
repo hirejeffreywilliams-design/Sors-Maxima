@@ -116,6 +116,10 @@ export function RefereeAnalysis() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+        <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
+      </div>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Scale className="w-5 h-5 text-primary" />

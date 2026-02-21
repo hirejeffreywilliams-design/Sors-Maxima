@@ -105,10 +105,10 @@ export function AgeVerificationGate({ children }: { children: React.ReactNode })
         <Alert>
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-xs text-left">
-            By continuing, you confirm that you are at least 18 years old (or the legal 
+            By continuing, you confirm that you are at least 21 years old (or the legal 
             gambling age in your jurisdiction) and that online sports betting analysis is 
             legal in your location. This platform is for educational and informational 
-            purposes only.
+            purposes only. Sors Maxima does not facilitate, process, or place any real bets.
           </AlertDescription>
         </Alert>
 

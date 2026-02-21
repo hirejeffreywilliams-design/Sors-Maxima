@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Gift, Percent, DollarSign, Star, Clock, CheckCircle, TrendingUp, Sparkles, Plus } from "lucide-react";
+import { Gift, Percent, DollarSign, Star, Clock, CheckCircle, TrendingUp, Sparkles, Plus, AlertTriangle } from "lucide-react";
 import type { ParlayLeg } from "@shared/schema";
 
 interface PromoBoost {
@@ -191,6 +191,10 @@ export function PromoBoostStacker({ legs, currentOdds }: PromoBoostStackerProps)
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-promo">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         {optimalStack.promos.length > 0 && (
           <div className="p-4 rounded-lg border bg-gradient-to-r from-green-500/10 to-purple-500/10">
             <div className="flex items-start gap-2 mb-3">

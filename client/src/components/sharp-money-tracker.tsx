@@ -87,6 +87,10 @@ export function SharpMoneyTracker() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+          <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
+        </div>
         {sharpActions.map((action) => (
           <div
             key={action.id}

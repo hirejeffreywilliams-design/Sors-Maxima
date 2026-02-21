@@ -1,42 +1,48 @@
 import { useState } from "react";
+import {
+  DollarSign, Brain, Link2, Users, Eye,
+  MapPin, BarChart3, Sparkles, Zap, Scale,
+  Percent, SlidersHorizontal, ClipboardCheck,
+  FileOutput, UserCheck
+} from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Eye, Brain, Zap, Sparkles, Users, BarChart3, DollarSign, MapPin, Scale, Link2, UserCheck, Percent, SlidersHorizontal, ClipboardCheck, FileOutput } from "lucide-react";
-
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { CorrelationEngine } from "@/components/correlation-engine";
+import { SGPOptimizer } from "@/components/sgp-optimizer";
+import { MLPropProjections } from "@/components/ml-prop-projections";
+import { ConditionalEngine } from "@/components/conditional-engine";
+import { LegDiversification } from "@/components/leg-diversification";
+import { MatchupAnalyzer } from "@/components/matchup-analyzer";
+import { PropComboBuilder } from "@/components/prop-combo-builder";
+import { PlayerMatchupCenter } from "@/components/player-matchup-center";
+import { VenuePerformance } from "@/components/venue-performance";
+import { RefereeAnalysis } from "@/components/referee-analysis";
+import { TravelRestAnalyzer } from "@/components/travel-rest-analyzer";
+import { RealTimeOdds } from "@/components/real-time-odds";
+import { SharpConsensus } from "@/components/sharp-consensus";
 import { SharpMoneyTracker } from "@/components/sharp-money-tracker";
 import { SteamMoveDetector } from "@/components/steam-move-detector";
-import { KeyNumberAnalyzer } from "@/components/key-number-analyzer";
-import { PropComboBuilder } from "@/components/prop-combo-builder";
-import { MatchupAnalyzer } from "@/components/matchup-analyzer";
-import { PlayerMatchupCenter } from "@/components/player-matchup-center";
+import { SituationalSpots } from "@/components/situational-spots";
+import { BankrollSimulator } from "@/components/bankroll-simulator";
+import { CashoutMaximizer } from "@/components/cashout-maximizer";
+import { CorrelationHedgeCalculator } from "@/components/correlation-hedge-calculator";
+import { BookLimitOptimizer } from "@/components/book-limit-optimizer";
 import { VarianceCalculator } from "@/components/variance-calculator";
+import { WhatIfSimulator } from "@/components/what-if-simulator";
+import { CLVPredictor } from "@/components/clv-predictor";
+import { MarketTimingAlerts } from "@/components/market-timing-alerts";
 import { AIPredictions } from "@/components/ai-predictions";
 import { ConsensusPicks } from "@/components/consensus-picks";
-import { WhatIfSimulator } from "@/components/what-if-simulator";
-import { TravelRestAnalyzer } from "@/components/travel-rest-analyzer";
-import { MarketTimingAlerts } from "@/components/market-timing-alerts";
-import { PortfolioParlayOptimizer } from "@/components/portfolio-parlay-optimizer";
+import { KeyNumberAnalyzer } from "@/components/key-number-analyzer";
+import { ParlayStrategyBuilder } from "@/components/parlay-strategy-builder";
 import { CorrelationGraph } from "@/components/correlation-graph";
 import { ScenarioStressLab } from "@/components/scenario-stress-lab";
 import { ProgressiveHedgePlanner } from "@/components/progressive-hedge-planner";
 import { PromoBoostStacker } from "@/components/promo-boost-stacker";
 import { SyntheticInsuranceBuilder } from "@/components/synthetic-insurance-builder";
 import { BookLimitPlanner } from "@/components/book-limit-planner";
-import { ParlayStrategyBuilder } from "@/components/parlay-strategy-builder";
-import { RealTimeOdds } from "@/components/real-time-odds";
-import { MLPropProjections } from "@/components/ml-prop-projections";
-import { CorrelationEngine } from "@/components/correlation-engine";
-import { SGPOptimizer } from "@/components/sgp-optimizer";
-import { BankrollSimulator } from "@/components/bankroll-simulator";
-import { CorrelationHedgeCalculator } from "@/components/correlation-hedge-calculator";
-import { BookLimitOptimizer } from "@/components/book-limit-optimizer";
-import { LegDiversification } from "@/components/leg-diversification";
-import { ConditionalEngine } from "@/components/conditional-engine";
-import { CLVPredictor } from "@/components/clv-predictor";
-import { SharpConsensus } from "@/components/sharp-consensus";
-import { SituationalSpots } from "@/components/situational-spots";
-import { RefereeAnalysis } from "@/components/referee-analysis";
-import { VenuePerformance } from "@/components/venue-performance";
-import { CashoutMaximizer } from "@/components/cashout-maximizer";
+import { PortfolioParlayOptimizer } from "@/components/portfolio-parlay-optimizer";
 import { QuantumCoachingAnalysis } from "@/components/quantum-coaching-analysis";
 import { QuantumPlayerPrediction } from "@/components/quantum-player-prediction";
 import { QuantumTeamDynamics } from "@/components/quantum-team-dynamics";
@@ -46,31 +52,75 @@ import { BetGradingPostgame } from "@/components/bet-grading-postgame";
 import { CustomModelBuilder } from "@/components/custom-model-builder";
 import { ExportBetSlip } from "@/components/export-bet-slip";
 import { ROIUpliftCalculator } from "@/components/roi-uplift-calculator";
-import { Atom, Calculator } from "lucide-react";
+import { Calculator } from "lucide-react";
 
-const TOOL_CATEGORIES = [
-  { id: "quantum", name: "Quantum Analysis", icon: Atom },
-  { id: "odds", name: "Live Odds", icon: DollarSign },
-  { id: "ml", name: "ML Projections", icon: Brain },
-  { id: "correlation", name: "Correlation Tools", icon: Link2 },
-  { id: "matchups", name: "Player Matchups", icon: Users },
-  { id: "sharp", name: "Sharp Intel", icon: Eye },
-  { id: "situational", name: "Situational Spots", icon: MapPin },
-  { id: "bankroll", name: "Bankroll & Risk", icon: BarChart3 },
-  { id: "venue", name: "Venue & Officials", icon: Scale },
-  { id: "strategies", name: "Strategies", icon: Sparkles },
-  { id: "pro", name: "Pro Tools", icon: Zap },
-  { id: "player-props", name: "Player Props", icon: UserCheck },
-  { id: "arb", name: "Arbitrage", icon: Percent },
-  { id: "model", name: "Custom Model", icon: SlidersHorizontal },
-  { id: "grading", name: "Bet Grading", icon: ClipboardCheck },
-  { id: "export", name: "Export Slips", icon: FileOutput },
-  { id: "roi", name: "ROI Calculator", icon: Calculator },
+const TOOL_GROUPS = [
+  {
+    id: "analysis",
+    name: "Analysis & Predictions",
+    icon: Brain,
+    subcategories: [
+      { id: "predictions", name: "AI Predictions" },
+      { id: "player-props", name: "Player Props" },
+      { id: "matchups", name: "Matchups" },
+      { id: "projections", name: "Projections" },
+    ],
+  },
+  {
+    id: "market",
+    name: "Market & Odds",
+    icon: DollarSign,
+    subcategories: [
+      { id: "odds", name: "Live Odds" },
+      { id: "sharp", name: "Sharp Action" },
+      { id: "arb", name: "Line Shopping" },
+    ],
+  },
+  {
+    id: "correlations",
+    name: "Correlations & Strategy",
+    icon: Link2,
+    subcategories: [
+      { id: "correlation", name: "Correlations" },
+      { id: "strategies", name: "Strategies" },
+      { id: "situational", name: "Situational" },
+    ],
+  },
+  {
+    id: "risk",
+    name: "Bankroll & Risk",
+    icon: BarChart3,
+    subcategories: [
+      { id: "bankroll", name: "Bankroll" },
+      { id: "simulators", name: "Simulators" },
+    ],
+  },
+  {
+    id: "extras",
+    name: "More Tools",
+    icon: Zap,
+    subcategories: [
+      { id: "venue", name: "Game Context" },
+      { id: "grading", name: "Grading & Export" },
+      { id: "model", name: "Custom Model" },
+    ],
+  },
 ];
 
 export default function Tools() {
-  const [activeCategory, setActiveCategory] = useState("quantum");
-  const ActiveIcon = TOOL_CATEGORIES.find(c => c.id === activeCategory)?.icon || Users;
+  const [activeGroup, setActiveGroup] = useState("analysis");
+  const [activeSub, setActiveSub] = useState("predictions");
+
+  const currentGroup = TOOL_GROUPS.find(g => g.id === activeGroup) || TOOL_GROUPS[0];
+  const ActiveIcon = currentGroup.icon;
+
+  const handleGroupChange = (groupId: string) => {
+    setActiveGroup(groupId);
+    const group = TOOL_GROUPS.find(g => g.id === groupId);
+    if (group && group.subcategories.length > 0) {
+      setActiveSub(group.subcategories[0].id);
+    }
+  };
 
   return (
     <div className="min-h-full">
@@ -78,9 +128,9 @@ export default function Tools() {
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
             <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Pro Tools</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">Advanced betting analytics</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">Advanced betting analytics and research</p>
           </div>
-          <Select value={activeCategory} onValueChange={setActiveCategory}>
+          <Select value={activeGroup} onValueChange={handleGroupChange}>
             <SelectTrigger className="w-full sm:w-56 h-9 sm:h-10" data-testid="select-category">
               <div className="flex items-center gap-2">
                 <ActiveIcon className="w-4 h-4 shrink-0" />
@@ -88,11 +138,11 @@ export default function Tools() {
               </div>
             </SelectTrigger>
             <SelectContent>
-              {TOOL_CATEGORIES.map((cat) => (
-                <SelectItem key={cat.id} value={cat.id}>
+              {TOOL_GROUPS.map((group) => (
+                <SelectItem key={group.id} value={group.id}>
                   <div className="flex items-center gap-2">
-                    <cat.icon className="w-4 h-4" />
-                    {cat.name}
+                    <group.icon className="w-4 h-4" />
+                    {group.name}
                   </div>
                 </SelectItem>
               ))}
@@ -100,33 +150,33 @@ export default function Tools() {
           </Select>
         </header>
 
+        {currentGroup.subcategories.length > 1 && (
+          <Tabs value={activeSub} onValueChange={setActiveSub}>
+            <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
+              {currentGroup.subcategories.map((sub) => (
+                <TabsTrigger key={sub.id} value={sub.id} className="text-xs sm:text-sm" data-testid={`tab-${sub.id}`}>
+                  {sub.name}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        )}
+
         <div className="space-y-6">
-          {activeCategory === "quantum" && (
+          {activeGroup === "analysis" && activeSub === "predictions" && (
             <div className="space-y-6">
               <QuantumCoachingAnalysis />
               <QuantumPlayerPrediction />
               <QuantumTeamDynamics />
             </div>
           )}
-
-          {activeCategory === "odds" && (
-            <RealTimeOdds />
-          )}
-
-          {activeCategory === "ml" && (
-            <MLPropProjections />
-          )}
-
-          {activeCategory === "correlation" && (
+          {activeGroup === "analysis" && activeSub === "player-props" && (
             <div className="space-y-6">
-              <CorrelationEngine />
-              <SGPOptimizer />
-              <ConditionalEngine />
-              <LegDiversification />
+              <PlayerPropLab />
+              <MLPropProjections />
             </div>
           )}
-
-          {activeCategory === "matchups" && (
+          {activeGroup === "analysis" && activeSub === "matchups" && (
             <div className="space-y-6">
               <PlayerMatchupCenter />
               <div className="grid gap-6 lg:grid-cols-2">
@@ -135,8 +185,17 @@ export default function Tools() {
               </div>
             </div>
           )}
+          {activeGroup === "analysis" && activeSub === "projections" && (
+            <div className="space-y-6">
+              <AIPredictions />
+              <ConsensusPicks />
+            </div>
+          )}
 
-          {activeCategory === "sharp" && (
+          {activeGroup === "market" && activeSub === "odds" && (
+            <RealTimeOdds />
+          )}
+          {activeGroup === "market" && activeSub === "sharp" && (
             <div className="space-y-6">
               <SharpConsensus />
               <CLVPredictor />
@@ -146,12 +205,29 @@ export default function Tools() {
               </div>
             </div>
           )}
+          {activeGroup === "market" && activeSub === "arb" && (
+            <ArbitrageFinder />
+          )}
 
-          {activeCategory === "situational" && (
+          {activeGroup === "correlations" && activeSub === "correlation" && (
+            <div className="space-y-6">
+              <CorrelationEngine />
+              <SGPOptimizer />
+              <ConditionalEngine />
+              <LegDiversification />
+            </div>
+          )}
+          {activeGroup === "correlations" && activeSub === "strategies" && (
+            <div className="space-y-6">
+              <ParlayStrategyBuilder />
+              <KeyNumberAnalyzer />
+            </div>
+          )}
+          {activeGroup === "correlations" && activeSub === "situational" && (
             <SituationalSpots />
           )}
 
-          {activeCategory === "bankroll" && (
+          {activeGroup === "risk" && activeSub === "bankroll" && (
             <div className="space-y-6">
               <CashoutMaximizer />
               <BankrollSimulator />
@@ -159,39 +235,21 @@ export default function Tools() {
                 <CorrelationHedgeCalculator />
                 <BookLimitOptimizer />
               </div>
+            </div>
+          )}
+          {activeGroup === "risk" && activeSub === "simulators" && (
+            <div className="space-y-6">
               <div className="grid gap-6 lg:grid-cols-2">
                 <VarianceCalculator />
                 <WhatIfSimulator />
               </div>
-            </div>
-          )}
-
-          {activeCategory === "venue" && (
-            <div className="space-y-6">
-              <VenuePerformance />
-              <RefereeAnalysis />
-              <TravelRestAnalyzer />
-            </div>
-          )}
-
-          {activeCategory === "strategies" && (
-            <div className="space-y-6">
-              <ParlayStrategyBuilder />
-              <AIPredictions />
-              <ConsensusPicks />
-              <KeyNumberAnalyzer />
-            </div>
-          )}
-
-          {activeCategory === "pro" && (
-            <div className="space-y-6">
+              <div className="grid gap-6 lg:grid-cols-2">
+                <ScenarioStressLab legs={[]} stake={25} winProbability={0.5} />
+                <ROIUpliftCalculator />
+              </div>
               <div className="grid gap-6 lg:grid-cols-2">
                 <MarketTimingAlerts events={[]} />
                 <PortfolioParlayOptimizer legs={[]} bankroll={1000} />
-              </div>
-              <div className="grid gap-6 lg:grid-cols-2">
-                <CorrelationGraph legs={[]} />
-                <ScenarioStressLab legs={[]} stake={25} winProbability={0.5} />
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
                 <ProgressiveHedgePlanner legs={[]} stake={25} potentialPayout={250} />
@@ -201,31 +259,25 @@ export default function Tools() {
                 <SyntheticInsuranceBuilder legs={[]} stake={25} potentialPayout={250} expectedValue={5} />
                 <BookLimitPlanner desiredStake={100} />
               </div>
+              <CorrelationGraph legs={[]} />
             </div>
           )}
 
-          {activeCategory === "player-props" && (
-            <PlayerPropLab />
+          {activeGroup === "extras" && activeSub === "venue" && (
+            <div className="space-y-6">
+              <VenuePerformance />
+              <RefereeAnalysis />
+              <TravelRestAnalyzer />
+            </div>
           )}
-
-          {activeCategory === "arb" && (
-            <ArbitrageFinder />
+          {activeGroup === "extras" && activeSub === "grading" && (
+            <div className="space-y-6">
+              <BetGradingPostgame />
+              <ExportBetSlip />
+            </div>
           )}
-
-          {activeCategory === "model" && (
+          {activeGroup === "extras" && activeSub === "model" && (
             <CustomModelBuilder />
-          )}
-
-          {activeCategory === "grading" && (
-            <BetGradingPostgame />
-          )}
-
-          {activeCategory === "export" && (
-            <ExportBetSlip />
-          )}
-
-          {activeCategory === "roi" && (
-            <ROIUpliftCalculator />
           )}
         </div>
       </div>

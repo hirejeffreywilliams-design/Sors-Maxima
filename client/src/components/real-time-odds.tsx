@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { RefreshCw, TrendingUp, TrendingDown, Zap, Clock, DollarSign, ArrowRight, Atom } from "lucide-react";
+import { RefreshCw, TrendingUp, TrendingDown, Zap, Clock, DollarSign, ArrowRight, Atom, AlertTriangle } from "lucide-react";
 import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 
 interface BookOdds {
@@ -118,6 +118,10 @@ export function RealTimeOdds() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
+        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+        <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
+      </div>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2">
           <Select value={sport} onValueChange={setSport}>

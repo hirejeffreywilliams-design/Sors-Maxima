@@ -39,7 +39,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Atom className="w-3 h-3" />
-          <span>Coherence</span>
+          <span>Model Alignment</span>
         </div>
         <Progress value={quantumState.coherence} className="h-2" />
         <span className="text-xs font-medium">{quantumState.coherence}%</span>
@@ -47,7 +47,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Link2 className="w-3 h-3" />
-          <span>Entanglement</span>
+          <span>Leg Correlation</span>
         </div>
         <Progress value={quantumState.entanglement} className="h-2" />
         <span className="text-xs font-medium">{quantumState.entanglement}%</span>
@@ -55,7 +55,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Activity className="w-3 h-3" />
-          <span>Superposition</span>
+          <span>Outcome Range</span>
         </div>
         <Progress value={quantumState.superposition} className="h-2" />
         <span className="text-xs font-medium">{quantumState.superposition}%</span>
@@ -63,7 +63,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <TrendingDown className="w-3 h-3" />
-          <span>Decoherence</span>
+          <span>Uncertainty</span>
         </div>
         <Progress value={quantumState.decoherenceRate} className="h-2" />
         <span className="text-xs font-medium">{quantumState.decoherenceRate}%</span>
@@ -71,7 +71,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Target className="w-3 h-3" />
-          <span>Collapse</span>
+          <span>Final Prediction</span>
         </div>
         <Progress value={quantumState.observedCollapse} className="h-2" />
         <span className="text-xs font-medium">{quantumState.observedCollapse}%</span>
@@ -267,7 +267,7 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
           <div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold">{fusion.overallScore}</span>
-              <span className="text-sm text-muted-foreground">Fusion Score</span>
+              <span className="text-sm text-muted-foreground">Power Score</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{fusion.confidence}% confidence</span>
@@ -289,7 +289,7 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
           </div>
         </div>
         <div className="p-2 rounded bg-card border">
-          <div className="text-muted-foreground text-xs">Kelly Criterion</div>
+          <div className="text-muted-foreground text-xs">Suggested Stake %</div>
           <div className="font-semibold">{fusion.kellyCriterion}%</div>
         </div>
         <div className="p-2 rounded bg-card border">
@@ -309,14 +309,14 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="w-full gap-2" data-testid="button-expand-fusion">
               {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              {expanded ? "Hide" : "Show"} Quantum Analysis
+              {expanded ? "Hide" : "Show"} Deep Analysis
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-4 pt-3">
             <div>
               <div className="flex items-center gap-1 text-sm font-medium mb-2">
                 <Atom className="w-4 h-4" />
-                <span>Quantum State</span>
+                <span>Prediction Metrics</span>
               </div>
               <QuantumStateDisplay quantumState={fusion.quantumState} />
             </div>
@@ -365,7 +365,7 @@ export function TicketFusionDisplay({ ticketFusion }: TicketFusionDisplayProps) 
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2 text-lg" data-testid="ticket-fusion-title">
             <Brain className="w-5 h-5" />
-            Quantum Fusion Analysis
+            Deep Prediction Analysis
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="capitalize">
@@ -461,7 +461,7 @@ export function QuantumFusionEngineBanner() {
             </div>
             <div>
               <h3 className="font-semibold flex items-center gap-2">
-                Quantum Fusion Engine™
+                Sors Prediction Engine
                 <Badge className="bg-violet-500/10 text-violet-500 text-xs">Active</Badge>
               </h3>
               <p className="text-sm text-muted-foreground">

@@ -145,7 +145,7 @@ export function SituationalSpots() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <MapPin className="w-5 h-5 text-primary" />
-          <span className="font-medium">Quantum Situational Analysis</span>
+          <span className="font-medium">Situational Analysis</span>
           <Badge variant="outline" className="gap-1">
             <Atom className="w-3 h-3" />
             Pattern Detection

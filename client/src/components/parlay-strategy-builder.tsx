@@ -273,12 +273,12 @@ export function ParlayStrategyBuilder() {
           </div>
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              Quantum Strategy Builder
+              Strategy Builder
               <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
                 <Atom className="w-3 h-3" />
               </Badge>
             </CardTitle>
-            <p className="text-xs text-muted-foreground">Build quantum-optimized parlays with proven strategies</p>
+            <p className="text-xs text-muted-foreground">Build data-driven parlays with proven strategies</p>
           </div>
         </div>
       </CardHeader>

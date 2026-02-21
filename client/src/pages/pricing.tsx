@@ -36,7 +36,7 @@ const tiers: PricingTier[] = [
     features: [
       '3 AI-powered ticket generations per day',
       '5 AI analysis credits daily',
-      'Quantum Fusion scoring on every bet',
+      'Power Score analysis on every bet',
       '2 sports (NBA & NFL)',
       'Bet grading with confidence scores',
       'Daily free high-confidence pick',
@@ -56,12 +56,12 @@ const tiers: PricingTier[] = [
     features: [
       'Unlimited ticket generations',
       '50 AI credits per day',
-      'Full 46-factor Quantum Fusion Engine',
+      'Full 46-factor Sors Prediction Engine',
       'All 6 sports coverage',
       'Visual drag-and-drop ticket builder',
-      'Kelly Criterion optimal stake sizing',
+      'Optimal stake sizing suggestions',
       'Correlation engine for smarter parlays',
-      'Monte Carlo simulation analysis',
+      'Advanced simulation analysis',
       '+EV finder across all markets',
       'ROI dashboard & performance tracking',
       'Paper trading to test strategies risk-free',
@@ -81,7 +81,7 @@ const tiers: PricingTier[] = [
       'Everything in Sharp, plus:',
       '200 AI credits per day',
       'AI Betting Assistant (unlimited chats)',
-      'ML-powered player prop projections',
+      'AI-powered player prop projections',
       'Real-time line movement alerts',
       'Live momentum tracker & CLV tracking',
       'Arbitrage opportunity scanner',
@@ -97,7 +97,7 @@ const tiers: PricingTier[] = [
   },
   {
     id: 'whale',
-    name: 'Quantum',
+    name: 'Max',
     description: 'Unlimited everything for bettors who don\'t settle',
     monthlyPrice: 99,
     yearlyPrice: 990,
@@ -280,7 +280,7 @@ export default function Pricing() {
                 >
                   {currentTier === tier.id ? 'Current Plan' : 
                    tier.id === 'free' ? 'Start Free' : 
-                   `Upgrade to ${tier.name}`}
+                   `Upgrade to ${tier.name} — 7-Day Free Trial`}
                 </Button>
               </CardFooter>
             </Card>

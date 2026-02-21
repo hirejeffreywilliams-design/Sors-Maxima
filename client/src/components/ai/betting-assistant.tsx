@@ -23,7 +23,7 @@ const initialMessages: Message[] = [
   {
     id: "1",
     role: "assistant",
-    content: "Hey! I'm your Quantum Betting Assistant. I can help you build parlays, analyze matchups, find +EV opportunities, and answer any betting questions. What would you like to explore today?",
+    content: "Hey! I'm your Sors Betting Assistant. I can help you build parlays, analyze matchups, find +EV opportunities, and answer any betting questions. What would you like to explore today?",
     timestamp: new Date(),
     suggestions: [
       "Build me a 3-leg NBA parlay",
@@ -35,7 +35,7 @@ const initialMessages: Message[] = [
 ];
 
 const mockResponses: Record<string, string> = {
-  "build me a 3-leg nba parlay": `Great choice! Based on my quantum analysis, here's a sharp 3-leg NBA parlay for tonight:
+  "build me a 3-leg nba parlay": `Great choice! Based on my advanced analysis, here's a sharp 3-leg NBA parlay for tonight:
 
 **Recommended Parlay (+412)**
 1. **Celtics -4.5** (-110) - Strong home court advantage, 72% ATS at home
@@ -45,7 +45,7 @@ const mockResponses: Record<string, string> = {
 **Parlay Stats:**
 - Combined Win Probability: 18.2%
 - Expected Value: +4.8%
-- Quantum Confidence: 76%
+- Power Score: 76%
 
 Want me to add this to your builder?`,
 
@@ -56,21 +56,21 @@ Want me to add this to your builder?`,
 1. **Bills +3.5** (+EV 6.2%)
    - Sharp money heavily on Bills
    - Line opened at +1.5, now +3.5
-   - Quantum Edge Score: 84
+   - Edge Score: 84
 
 2. **Celtics/Heat Under 215.5** (+EV 4.1%)
    - Both teams rank top-5 in defensive efficiency
    - Weather affecting visiting team
-   - Quantum Edge Score: 78
+   - Edge Score: 78
 
 3. **Nuggets ML** (+EV 3.8%)
    - Jokic triple-double trend
    - Rest advantage: 3 days vs 1 day
-   - Quantum Edge Score: 75
+   - Edge Score: 75
 
 Would you like detailed analysis on any of these?`,
 
-  "default": `I understand you're interested in that! Based on my quantum analysis of current market conditions and historical data, I can help you make more informed decisions.
+  "default": `I understand you're interested in that! Based on my advanced analysis of current market conditions and historical data, I can help you make more informed decisions.
 
 Here are some key insights:
 - Current market sentiment is slightly bullish on favorites
@@ -144,7 +144,7 @@ export function BettingAssistant() {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
             <Bot className="w-5 h-5 text-purple-500" />
-            Quantum Betting Assistant
+            Sors Betting Assistant
             <QuantumBadge />
           </CardTitle>
           <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-500 border-green-500/30">

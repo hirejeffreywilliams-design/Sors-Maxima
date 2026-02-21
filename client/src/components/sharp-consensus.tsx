@@ -120,10 +120,10 @@ export function SharpConsensus() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <Users className="w-5 h-5 text-primary" />
-          <span className="font-medium">Quantum Sharp Analysis</span>
+          <span className="font-medium">Sharp Analysis</span>
           <Badge variant="outline" className="gap-1">
             <Atom className="w-3 h-3" />
-            Quantum Intel
+            Pro Intel
           </Badge>
         </div>
         <Select value={sport} onValueChange={setSport}>

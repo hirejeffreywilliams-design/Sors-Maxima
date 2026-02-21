@@ -115,8 +115,8 @@ export function AIPredictions() {
               <Brain className="w-5 h-5 text-purple-500" />
             </div>
             <div>
-              <CardTitle className="text-lg">Quantum AI Predictions</CardTitle>
-              <p className="text-xs text-muted-foreground">Powered by Sors Maxima Quantum Engine</p>
+              <CardTitle className="text-lg">AI Predictions</CardTitle>
+              <p className="text-xs text-muted-foreground">Powered by Sors Prediction Engine</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -181,6 +181,10 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-limits">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="p-3 rounded-lg border bg-muted/50">
           <Label htmlFor="desired-stake" className="text-sm font-medium">
             Desired Total Stake

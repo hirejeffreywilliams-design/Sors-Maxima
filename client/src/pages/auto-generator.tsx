@@ -169,7 +169,7 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
             </Button>
             <Button size="sm" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
               <DollarSign className="w-4 h-4" />
-              Place Bet
+              Track This Bet
             </Button>
           </div>
         </div>
@@ -356,7 +356,7 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
                 </p>
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div className="p-2 bg-muted/30 rounded">
-                    <span className="text-muted-foreground">Historical Hit Rate: </span>
+                    <span className="text-muted-foreground">Model Hit Rate (simulated): </span>
                     <span className="font-medium">{(ticket.calibrationInfo.historicalHitRate * 100).toFixed(1)}%</span>
                   </div>
                   <div className="p-2 bg-muted/30 rounded">

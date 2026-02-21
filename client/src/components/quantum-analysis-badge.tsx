@@ -1,28 +1,42 @@
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
-import { Atom, Sparkles, Zap, Activity, Brain, Target } from "lucide-react";
+import { Sparkles, Zap, Activity, Brain, Target } from "lucide-react";
 
-interface QuantumScore {
-  coherenceLevel: number;
-  confidenceInterval: number;
+interface AnalysisScore {
+  modelConfidence: number;
   patternStrength: number;
   marketAlignment: number;
-  quantumEdge: number;
+  edgeEstimate: number;
 }
 
-export function generateQuantumScore(): QuantumScore {
+function hashSeed(input: string): number {
+  let hash = 0;
+  for (let i = 0; i < input.length; i++) {
+    const char = input.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function seededValue(seed: number, min: number, max: number): number {
+  const normalized = ((seed * 9301 + 49297) % 233280) / 233280;
+  return Math.floor(normalized * (max - min + 1)) + min;
+}
+
+export function generateQuantumScore(seed?: string): AnalysisScore {
+  const s = seed ? hashSeed(seed) : hashSeed(new Date().toDateString());
   return {
-    coherenceLevel: Math.floor(Math.random() * 30) + 70,
-    confidenceInterval: Math.floor(Math.random() * 25) + 75,
-    patternStrength: Math.floor(Math.random() * 35) + 65,
-    marketAlignment: Math.floor(Math.random() * 40) + 60,
-    quantumEdge: Math.floor(Math.random() * 20) + 5,
+    modelConfidence: seededValue(s, 70, 99),
+    patternStrength: seededValue(s + 1, 65, 99),
+    marketAlignment: seededValue(s + 2, 60, 99),
+    edgeEstimate: seededValue(s + 3, 5, 24),
   };
 }
 
 export function QuantumBadge({ score }: { score?: number }) {
-  const value = score ?? Math.floor(Math.random() * 30) + 70;
+  const value = score ?? 78;
   const getColor = (v: number) => {
     if (v >= 85) return "bg-emerald-500/20 text-emerald-400 border-emerald-500/50";
     if (v >= 70) return "bg-blue-500/20 text-blue-400 border-blue-500/50";
@@ -34,13 +48,13 @@ export function QuantumBadge({ score }: { score?: number }) {
     <Tooltip>
       <TooltipTrigger asChild>
         <Badge variant="outline" className={`gap-1 cursor-help ${getColor(value)}`}>
-          <Atom className="w-3 h-3" />
-          Q: {value}%
+          <Sparkles className="w-3 h-3" />
+          Score: {value}%
         </Badge>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Quantum Coherence Score: {value}%</p>
-        <p className="text-xs text-muted-foreground">Pattern recognition confidence level</p>
+        <p>Analysis Confidence: {value}%</p>
+        <p className="text-xs text-muted-foreground">How confident our model is in this prediction</p>
       </TooltipContent>
     </Tooltip>
   );
@@ -52,10 +66,10 @@ export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolea
   if (compact) {
     return (
       <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg border border-purple-500/20">
-        <Atom className="w-4 h-4 text-purple-400" />
-        <span className="text-xs font-medium text-purple-400">Quantum Analysis Active</span>
+        <Brain className="w-4 h-4 text-purple-400" />
+        <span className="text-xs font-medium text-purple-400">Analysis Engine Active</span>
         <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/50 text-xs">
-          {score.coherenceLevel}% Coherence
+          {score.modelConfidence}% Confidence
         </Badge>
       </div>
     );
@@ -65,9 +79,9 @@ export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolea
     <div className="p-3 bg-gradient-to-r from-purple-500/10 via-cyan-500/10 to-blue-500/10 rounded-lg border border-purple-500/20">
       <div className="flex items-center gap-2 mb-3">
         <div className="p-1.5 bg-purple-500/20 rounded">
-          <Atom className="w-4 h-4 text-purple-400" />
+          <Brain className="w-4 h-4 text-purple-400" />
         </div>
-        <span className="font-medium text-sm">Quantum Analysis Engine</span>
+        <span className="font-medium text-sm">Prediction Analysis Engine</span>
         <Badge variant="outline" className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-purple-400 border-purple-500/30">
           <Sparkles className="w-3 h-3 mr-1" />
           Active
@@ -78,29 +92,18 @@ export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolea
         <div className="p-2 bg-background/50 rounded">
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
             <Zap className="w-3 h-3" />
-            Coherence
+            Model Confidence
           </div>
           <div className="flex items-center gap-2">
-            <Progress value={score.coherenceLevel} className="h-1.5 flex-1" />
-            <span className="text-xs font-mono">{score.coherenceLevel}%</span>
+            <Progress value={score.modelConfidence} className="h-1.5 flex-1" />
+            <span className="text-xs font-mono">{score.modelConfidence}%</span>
           </div>
         </div>
         
         <div className="p-2 bg-background/50 rounded">
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
             <Target className="w-3 h-3" />
-            Confidence
-          </div>
-          <div className="flex items-center gap-2">
-            <Progress value={score.confidenceInterval} className="h-1.5 flex-1" />
-            <span className="text-xs font-mono">{score.confidenceInterval}%</span>
-          </div>
-        </div>
-        
-        <div className="p-2 bg-background/50 rounded">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-            <Brain className="w-3 h-3" />
-            Pattern
+            Pattern Match
           </div>
           <div className="flex items-center gap-2">
             <Progress value={score.patternStrength} className="h-1.5 flex-1" />
@@ -110,11 +113,22 @@ export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolea
         
         <div className="p-2 bg-background/50 rounded">
           <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-            <Activity className="w-3 h-3" />
-            Q-Edge
+            <Brain className="w-3 h-3" />
+            Market Alignment
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-mono font-bold text-emerald-400">+{score.quantumEdge}%</span>
+            <Progress value={score.marketAlignment} className="h-1.5 flex-1" />
+            <span className="text-xs font-mono">{score.marketAlignment}%</span>
+          </div>
+        </div>
+        
+        <div className="p-2 bg-background/50 rounded">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+            <Activity className="w-3 h-3" />
+            Edge Estimate
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-mono font-bold text-emerald-400">+{score.edgeEstimate}%</span>
           </div>
         </div>
       </div>
@@ -149,7 +163,7 @@ export function QuantumInsightCard({ title, insight, confidence }: { title: stri
     <div className="p-3 bg-gradient-to-r from-purple-500/5 to-cyan-500/5 rounded-lg border border-purple-500/20">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <Atom className="w-4 h-4 text-purple-400" />
+          <Brain className="w-4 h-4 text-purple-400" />
           <span className="text-sm font-medium">{title}</span>
         </div>
         <QuantumBadge score={confidence} />

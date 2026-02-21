@@ -153,10 +153,10 @@ export function MLPropProjections() {
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <Brain className="w-5 h-5 text-primary" />
-          <span className="font-medium">Quantum ML Projections</span>
+          <span className="font-medium">Player Projections</span>
           <Badge variant="outline" className="gap-1">
             <Atom className="w-3 h-3" />
-            Quantum Enhanced
+            AI Enhanced
           </Badge>
         </div>
         <Select value={sport} onValueChange={setSport}>

@@ -21,7 +21,7 @@ const serviceConfig = {
     icon: ServerCrash,
     title: "Analysis Engine Offline",
     description: "The prediction model service is temporarily unavailable.",
-    fallbackMessage: "Basic analysis is still available. Advanced quantum features will return shortly.",
+    fallbackMessage: "Basic analysis is still available. Advanced analysis features will return shortly.",
   },
   api: {
     icon: WifiOff,

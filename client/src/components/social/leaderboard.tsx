@@ -31,7 +31,7 @@ const mockLeaderboard: LeaderboardUser[] = [
   { id: "5", username: "MoneyMoves", rank: 5, roi: 19.4, winRate: 54, totalBets: 423, streak: 4, tier: "gold", change: -1 },
   { id: "6", username: "PropHunter", rank: 6, roi: 17.8, winRate: 53, totalBets: 287, streak: 0, tier: "gold", change: 3 },
   { id: "7", username: "ValueSeeker", rank: 7, roi: 15.2, winRate: 52, totalBets: 198, streak: 1, tier: "gold", change: -2 },
-  { id: "8", username: "QuantumBetter", rank: 8, roi: 13.6, winRate: 51, totalBets: 167, streak: 2, tier: "silver", change: 0 },
+  { id: "8", username: "SharpBetter", rank: 8, roi: 13.6, winRate: 51, totalBets: 167, streak: 2, tier: "silver", change: 0 },
 ];
 
 function getTierColor(tier: string) {

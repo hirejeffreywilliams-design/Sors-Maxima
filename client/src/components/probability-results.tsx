@@ -209,14 +209,14 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000, 
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mb-2 cursor-help">
                   <Target className="w-3 h-3" />
                   <span className="font-mono">
-                    95% CI: [{(result.confidenceInterval[0] * 100).toFixed(2)}% - {(result.confidenceInterval[1] * 100).toFixed(2)}%]
+                    Range: {(result.confidenceInterval[0] * 100).toFixed(2)}% - {(result.confidenceInterval[1] * 100).toFixed(2)}%
                   </span>
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                <p>95% confidence interval from {(result.simulations || 0).toLocaleString()} simulations</p>
+                <p>Predicted range based on {(result.simulations || 0).toLocaleString()} simulations</p>
                 {result.standardError && (
-                  <p className="text-xs">Standard error: ±{(result.standardError * 100).toFixed(3)}%</p>
+                  <p className="text-xs">Margin of error: ±{(result.standardError * 100).toFixed(3)}%</p>
                 )}
               </TooltipContent>
             </Tooltip>
@@ -311,7 +311,7 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000, 
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <Award className="w-4 h-4" />
-                <span className="font-medium">Bet Grade</span>
+                <span className="font-medium">Power Score</span>
                 <span className="text-lg font-mono font-bold">{betGrade.numericScore.toFixed(0)}</span>
                 <span className="text-sm text-muted-foreground">/ 100</span>
               </div>
