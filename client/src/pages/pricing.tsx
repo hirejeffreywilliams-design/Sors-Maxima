@@ -38,7 +38,7 @@ const tiers: PricingTier[] = [
       '5 AI analysis credits daily',
       'Power Score analysis on every bet',
       '2 sports (NBA & NFL)',
-      'Bet grading with confidence scores',
+      'Bet grading with Power Scores',
       'Daily free high-confidence pick',
       'Community leaderboard access',
     ],
@@ -57,7 +57,7 @@ const tiers: PricingTier[] = [
       'Unlimited ticket generations',
       '50 AI credits per day',
       'Full 46-factor Sors Prediction Engine',
-      'All 6 sports coverage',
+      'All 14 sports coverage',
       'Visual drag-and-drop ticket builder',
       'Optimal stake sizing suggestions',
       'Correlation engine for smarter parlays',
@@ -352,7 +352,7 @@ export default function Pricing() {
               </div>
               <h3 className="font-semibold">Protect Your Bankroll</h3>
               <p className="text-sm text-muted-foreground">
-                Kelly Criterion sizing, risk warnings, and correlation checks keep your bets smart and your money safe.
+                Smart stake sizing, risk warnings, and correlation checks keep your bets smart and your money safe.
               </p>
             </div>
           </div>

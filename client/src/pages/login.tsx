@@ -120,7 +120,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           <div>
             <CardTitle className="text-2xl">Sors Maxima</CardTitle>
             <CardDescription>
-              Quantum-powered sports betting intelligence
+              AI-powered sports betting intelligence
             </CardDescription>
           </div>
         </CardHeader>

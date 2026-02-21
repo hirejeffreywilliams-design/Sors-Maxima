@@ -54,7 +54,7 @@ const dailyTips: Tip[] = [
   {
     id: "2",
     title: "Best Betting Windows",
-    content: "Place bets early in the week for NFL games to get the best lines. Wait until closer to game time for injury news on NBA games.",
+    content: "Look for value early in the week for NFL games to get the best lines. Wait until closer to game time for injury news on NBA games.",
     category: "timing"
   },
   {
@@ -87,18 +87,18 @@ const generateHighGradedBets = (): HighGradedBet[] => {
   const bets: HighGradedBet[] = [
     {
       id: "hg1",
-      matchup: "Lakers vs Celtics",
-      pick: "Lakers +4.5",
+      matchup: "Chiefs vs Bills",
+      pick: "Chiefs +3.5",
       odds: -110,
       grade: "A",
       confidence: 87,
-      sport: "NBA",
-      gameTime: "Tonight 7:30 PM",
-      reasoning: "Lakers 8-2 ATS last 10 games, Celtics on 3rd game in 4 nights"
+      sport: "NFL",
+      gameTime: "Sunday 1:00 PM",
+      reasoning: "Chiefs 8-2 ATS last 10 games, Bills on short week after Monday night"
     },
     {
       id: "hg2",
-      matchup: "Chiefs vs Bills",
+      matchup: "Eagles vs Cowboys",
       pick: "Over 47.5",
       odds: -105,
       grade: "A-",

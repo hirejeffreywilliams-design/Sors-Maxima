@@ -203,7 +203,7 @@ const navItems: NavItem[] = [
   { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "nav-builder", tooltip: "Visual Parlay Builder - Drag-and-drop interface for building tickets" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, player projections" },
-  { href: "/sport-analysis", icon: FlaskConical, label: "Factors", testId: "nav-sport-analysis", tooltip: "Sport Factor Analysis - Deep dive into 100+ factors across 14 sports" },
+  { href: "/sport-analysis", icon: FlaskConical, label: "Factors", testId: "nav-sport-analysis", tooltip: "Sport Factor Analysis - Deep dive into 46 factors across 14 sports" },
   { href: "/pipeline", icon: GitBranch, label: "Predictions", testId: "nav-pipeline", tooltip: "Prediction Engine - See how picks are analyzed and generated" },
   { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },

@@ -143,7 +143,7 @@ export function QuantumTeamDynamics() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Users className="w-5 h-5 text-orange-500" />
-              <CardTitle className="text-lg">Quantum Team Dynamics</CardTitle>
+              <CardTitle className="text-lg">Team Dynamics</CardTitle>
               <Badge variant="secondary">
                 Multi-Factor
               </Badge>
@@ -307,7 +307,7 @@ export function QuantumTeamDynamics() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Zap className="w-4 h-4 text-yellow-500" />
-                Quantum Factor Breakdown
+                Factor Breakdown
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">

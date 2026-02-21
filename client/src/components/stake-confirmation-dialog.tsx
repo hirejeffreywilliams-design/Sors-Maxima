@@ -208,7 +208,7 @@ export function StakeConfirmationDialog({
             ) : (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                I Understand, Place Bet
+                I Understand, Track This Bet
               </>
             )}
           </Button>

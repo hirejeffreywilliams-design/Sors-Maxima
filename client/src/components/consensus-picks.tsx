@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, ThumbsUp, ThumbsDown, TrendingUp, Star } from "lucide-react";
+import { Users, ThumbsUp, ThumbsDown, TrendingUp, Star, AlertTriangle } from "lucide-react";
 
 interface ConsensusPick {
   id: string;
@@ -20,14 +20,14 @@ function generateMockConsensus(): ConsensusPick[] {
   return [
     {
       id: "cons-1",
-      game: "Lakers @ Celtics",
-      pick: "Celtics -4.5",
+      game: "Packers @ Bears",
+      pick: "Packers -4.5",
       expertsFor: 14,
       expertsAgainst: 4,
       consensusPercent: 78,
       historicalAccuracy: 62,
       grade: "A",
-      sport: "NBA",
+      sport: "NFL",
     },
     {
       id: "cons-2",
@@ -116,6 +116,10 @@ export function ConsensusPicks() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-consensus">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         {filteredPicks.map((pick) => (
           <div
             key={pick.id}

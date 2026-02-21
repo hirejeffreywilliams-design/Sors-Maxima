@@ -32,7 +32,7 @@ const tutorialSteps: TutorialStep[] = [
     description: "Your AI-powered sports betting intelligence platform. Let's walk through how to get the most out of your experience.",
     icon: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
     tips: [
-      "Our quantum algorithms analyze 40+ factors for each bet",
+      "Our AI analyzes 46 factors for each bet",
       "We use real-time odds from major sportsbooks",
       "All recommendations are graded A-F for easy decision making"
     ]
@@ -105,7 +105,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: "You're Ready!",
-    description: "That's everything you need to start making smarter bets. Remember: always gamble responsibly.",
+    description: "That's everything you need to start making smarter picks. Remember: always bet responsibly and only risk what you can afford.",
     icon: <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-amber-500" />,
     tips: [
       "Set betting limits in Settings > Responsible Gaming",

@@ -198,6 +198,10 @@ export function CorrelationGraph({ legs }: CorrelationGraphProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-correlation">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div className="p-3 rounded-lg border bg-card text-center">
             <p className="text-2xl font-bold">{diversificationScore}%</p>

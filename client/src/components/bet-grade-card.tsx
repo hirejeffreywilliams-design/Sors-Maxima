@@ -65,7 +65,7 @@ export function BetGradeCard({ grade, evIndicator, riskAdvisory }: BetGradeCardP
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
             <Award className="w-5 h-5" />
-            Quantum Bet Grade
+            Power Score
             <QuantumBadge />
           </CardTitle>
           {evIndicator && (

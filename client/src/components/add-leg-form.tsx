@@ -95,7 +95,7 @@ export function AddLegForm({ onAdd }: AddLegFormProps) {
               <Label htmlFor="team">Team / Player</Label>
               <Input
                 id="team"
-                placeholder="e.g., Lakers"
+                placeholder="e.g., Chiefs"
                 value={team}
                 onChange={(e) => setTeam(e.target.value)}
                 data-testid="input-team"
@@ -105,7 +105,7 @@ export function AddLegForm({ onAdd }: AddLegFormProps) {
               <Label htmlFor="opponent">Opponent (optional)</Label>
               <Input
                 id="opponent"
-                placeholder="e.g., Celtics"
+                placeholder="e.g., Bills"
                 value={opponent}
                 onChange={(e) => setOpponent(e.target.value)}
                 data-testid="input-opponent"

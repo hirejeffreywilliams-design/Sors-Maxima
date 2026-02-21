@@ -818,7 +818,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: "Filter & Analyze",
-    description: "Use filters to narrow by time window, edge quality, or market type. Toggle signal indicators on/off. When you have 2+ legs, hit Analyze to run a full Monte Carlo simulation of your parlay.",
+    description: "Use filters to narrow by time window, edge quality, or market type. Toggle signal indicators on/off. When you have 2+ legs, hit Analyze to run a full simulation of your parlay.",
     icon: Filter,
     iconColor: "text-blue-500",
   },
@@ -951,7 +951,7 @@ function LegendPanel({ isOpen, onClose }: { isOpen: boolean; onClose: () => void
           <p className="text-xs text-muted-foreground">Collapse market sections by clicking their headers to reduce clutter.</p>
           <p className="text-xs text-muted-foreground">Use filters at the top to find +EV opportunities quickly.</p>
           <p className="text-xs text-muted-foreground">Click "Show All Props" on a game card to see every player prop available.</p>
-          <p className="text-xs text-muted-foreground">Add 2+ legs then hit Analyze for a full Monte Carlo simulation.</p>
+          <p className="text-xs text-muted-foreground">Add 2+ legs then hit Analyze for a full simulation.</p>
         </div>
       </CardContent>
     </Card>

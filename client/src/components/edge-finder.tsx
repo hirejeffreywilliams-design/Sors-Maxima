@@ -304,7 +304,7 @@ export function EdgeFinder({ events, sport }: EdgeFinderProps) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
           <Zap className="w-5 h-5 text-yellow-500" />
-          Quantum Edge Finder
+          Edge Finder
           <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
             <Atom className="w-3 h-3" />
             Q-Analysis

@@ -206,7 +206,7 @@ function SportExplorerTab() {
             <div className="space-y-2">
               <h3 className="text-sm font-medium flex items-center gap-2">
                 <Zap className="w-4 h-4 text-yellow-500" />
-                Signal Modifiers ({Object.keys(sportProfile.signalModifiers).length} factors)
+                Factor Adjustments ({Object.keys(sportProfile.signalModifiers).length} factors)
               </h3>
               <Card>
                 <CardContent className="p-0">
@@ -463,7 +463,7 @@ function FusionDeepDiveTab() {
     },
     onSuccess: (data) => {
       setResults(data);
-      toast({ title: "Fusion Analysis Complete", description: "Combined quantum + sport analysis generated." });
+      toast({ title: "Fusion Analysis Complete", description: "Combined factor + sport analysis generated." });
     },
     onError: () => {
       toast({ title: "Analysis Failed", description: "Could not complete fusion analysis.", variant: "destructive" });
@@ -544,7 +544,7 @@ function FusionDeepDiveTab() {
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <Brain className="w-4 h-4 text-purple-500" />
-                  Quantum Fusion
+                  Prediction Engine
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -816,7 +816,7 @@ export default function SportFactorAnalysis() {
               Sport Factor Analysis
             </h1>
             <p className="text-muted-foreground mt-1">
-              Deep-dive into sport-specific factors, real-time analysis, and quantum fusion insights
+              Deep-dive into sport-specific factors, real-time analysis, and prediction insights
             </p>
           </div>
           <Badge variant="outline" className="gap-1">

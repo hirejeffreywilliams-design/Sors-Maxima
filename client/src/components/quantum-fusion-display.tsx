@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Atom,
+  Sparkles,
   Brain,
   TrendingUp,
   TrendingDown,
@@ -15,7 +15,6 @@ import {
   Shield,
   ChevronDown,
   ChevronUp,
-  Sparkles,
   Activity,
   BarChart3,
   Lightbulb,
@@ -38,7 +37,7 @@ function QuantumStateDisplay({ quantumState }: QuantumStateDisplayProps) {
     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3" data-testid="quantum-state-display">
       <div className="space-y-1">
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Atom className="w-3 h-3" />
+          <Sparkles className="w-3 h-3" />
           <span>Model Alignment</span>
         </div>
         <Progress value={quantumState.coherence} className="h-2" />
@@ -315,7 +314,7 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
           <CollapsibleContent className="space-y-4 pt-3">
             <div>
               <div className="flex items-center gap-1 text-sm font-medium mb-2">
-                <Atom className="w-4 h-4" />
+                <Sparkles className="w-4 h-4" />
                 <span>Prediction Metrics</span>
               </div>
               <QuantumStateDisplay quantumState={fusion.quantumState} />

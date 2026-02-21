@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { 
   TrendingUp, TrendingDown, DollarSign, Target, 
   Calendar, PieChart, BarChart3, Clock, CheckCircle2, 
-  XCircle, Loader2, Plus, Trash2, Filter
+  XCircle, Loader2, Plus, Trash2, Filter, AlertTriangle
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -145,6 +145,10 @@ export function BetTracker() {
   
   return (
     <div className="space-y-6">
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-tracker">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+      </div>
       <div className="grid gap-4 md:grid-cols-4">
         <Card className={stats.profitLoss >= 0 ? "border-green-500/30" : "border-red-500/30"}>
           <CardContent className="pt-6">

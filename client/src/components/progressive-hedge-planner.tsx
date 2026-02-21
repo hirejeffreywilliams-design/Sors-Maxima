@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
-import { LineChart, Shield, DollarSign, TrendingUp, Lock, Target, ChevronRight, Calculator } from "lucide-react";
+import { LineChart, Shield, DollarSign, TrendingUp, Lock, Target, ChevronRight, Calculator, AlertTriangle } from "lucide-react";
 import type { ParlayLeg } from "@shared/schema";
 
 interface HedgeStep {
@@ -178,6 +178,10 @@ export function ProgressiveHedgePlanner({ legs, stake, potentialPayout }: Progre
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-hedge">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="p-3 rounded-lg border bg-muted/50">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Simulate Progress</span>

@@ -153,7 +153,7 @@ export function BettingSettings({ settings, onSettingsChange }: BettingSettingsP
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm">Kelly Multiplier</Label>
+                  <Label className="text-sm">Stake Sizing</Label>
                   <span className="text-sm font-mono">{(localSettings.kellyMultiplier * 100).toFixed(0)}%</span>
                 </div>
                 <Slider
@@ -164,7 +164,7 @@ export function BettingSettings({ settings, onSettingsChange }: BettingSettingsP
                   step={5}
                   data-testid="slider-kelly"
                 />
-                <p className="text-xs text-muted-foreground">Fraction of full Kelly (25% = Quarter Kelly)</p>
+                <p className="text-xs text-muted-foreground">How aggressively to size your stakes (lower = more conservative)</p>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -215,14 +215,14 @@ export function BettingSettings({ settings, onSettingsChange }: BettingSettingsP
             <AccordionTrigger className="text-sm">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4" />
-                Juice & Adjustments
+                Odds Margin & Adjustments
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm">Include Juice Adjustment</Label>
-                  <p className="text-xs text-muted-foreground">Adjust probabilities for sportsbook vig</p>
+                  <Label className="text-sm">Include Odds Margin Adjustment</Label>
+                  <p className="text-xs text-muted-foreground">Adjust probabilities for sportsbook odds margin</p>
                 </div>
                 <Switch
                   checked={localSettings.includeJuiceAdjustment}
@@ -234,7 +234,7 @@ export function BettingSettings({ settings, onSettingsChange }: BettingSettingsP
               {localSettings.includeJuiceAdjustment && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm">Juice %</Label>
+                    <Label className="text-sm">Margin %</Label>
                     <span className="text-sm font-mono">{(localSettings.juicePercent * 100).toFixed(1)}%</span>
                   </div>
                   <Slider
@@ -292,7 +292,7 @@ export function BettingSettings({ settings, onSettingsChange }: BettingSettingsP
               <div className="font-mono font-medium">{(localSettings.maxStakePercent * 100).toFixed(1)}%</div>
             </div>
             <div className="p-2 rounded bg-muted/50">
-              <div className="text-muted-foreground">Kelly</div>
+              <div className="text-muted-foreground">Sizing</div>
               <div className="font-mono font-medium">{(localSettings.kellyMultiplier * 100).toFixed(0)}%</div>
             </div>
             <div className="p-2 rounded bg-muted/50">

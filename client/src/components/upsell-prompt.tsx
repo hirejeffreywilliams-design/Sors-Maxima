@@ -119,7 +119,7 @@ export function UpsellModal({
 }: UpsellModalProps) {
   const upgradeFeatures = [
     "Unlock this premium feature",
-    "Access all tools in the Quantum tier",
+    "Access all tools in the Max tier",
     "Remove usage limits",
     "Get priority processing",
     "Early access to new features",

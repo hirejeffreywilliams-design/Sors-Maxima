@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
-import { SlidersHorizontal, RotateCcw, Save, FlaskConical } from "lucide-react";
+import { SlidersHorizontal, RotateCcw, Save, FlaskConical, AlertTriangle } from "lucide-react";
 
 interface Factor {
   id: string;
@@ -47,8 +47,8 @@ const MODEL_CATEGORIES: FactorCategory[] = [
       { id: "a4", name: "Pace Adjusted Stats", defaultWeight: 65 },
       { id: "a5", name: "Opponent Adjusted Metrics", defaultWeight: 70 },
       { id: "a6", name: "Regression Models", defaultWeight: 60 },
-      { id: "a7", name: "Bayesian Projections", defaultWeight: 55 },
-      { id: "a8", name: "Monte Carlo Simulation", defaultWeight: 58 },
+      { id: "a7", name: "Historical Projections", defaultWeight: 55 },
+      { id: "a8", name: "Simulation Engine", defaultWeight: 58 },
     ],
   },
   {
@@ -170,6 +170,10 @@ export function CustomModelBuilder() {
 
   return (
     <div className="space-y-4">
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-model">
+        <AlertTriangle className="w-4 h-4 shrink-0" />
+        <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+      </div>
       <div className="flex items-center gap-2">
         <SlidersHorizontal className="w-5 h-5 text-chart-1" />
         <span className="font-medium">Custom Model Builder</span>

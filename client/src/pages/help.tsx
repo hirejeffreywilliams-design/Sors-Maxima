@@ -36,7 +36,7 @@ const faqItems: FAQItem[] = [
   {
     category: "Getting Started",
     question: "How does the Smart Ticket Generator work?",
-    answer: "The Smart Ticket Generator uses our AI engine to analyze 40+ factors including team performance, player stats, historical trends, weather conditions, and sharp money movement. Simply select your sports, adjust your settings, and click Generate to receive optimized betting tickets with confidence scores, expected value (EV), and win probability."
+    answer: "The Smart Ticket Generator uses our AI engine to analyze 46 factors including team performance, player stats, historical trends, weather conditions, and sharp money movement. Simply select your sports, adjust your settings, and click Generate to receive optimized betting tickets with Power Scores and win probability."
   },
   {
     category: "Getting Started",
@@ -46,7 +46,7 @@ const faqItems: FAQItem[] = [
   {
     category: "Getting Started",
     question: "What sports does Sors Maxima cover?",
-    answer: "We currently cover NBA, NFL, MLB, NHL, College Basketball (NCAAB), and College Football (NCAAF). All game data is sourced from ESPN's live API for maximum accuracy."
+    answer: "We cover 14 sports including NBA, NFL, MLB, NHL, College Basketball (NCAAB), College Football (NCAAF), Soccer, Tennis, Golf, MMA, Boxing, NASCAR, WNBA, and more. All game data is sourced from ESPN's live API for maximum accuracy."
   },
   {
     category: "Getting Started",
@@ -60,13 +60,13 @@ const faqItems: FAQItem[] = [
   },
   {
     category: "Features",
-    question: "How does the Quantum Fusion Engine work?",
-    answer: "The Quantum Fusion Engine integrates 46 contributing factors across 7 categories (core betting, advanced analytics, psychological, physical health, technology, environmental, and financial) with synergy detection. It continuously learns from prediction outcomes and adapts factor weights to improve accuracy over time."
+    question: "How does the Sors Prediction Engine work?",
+    answer: "The Sors Prediction Engine integrates 46 contributing factors across 7 categories (core betting, advanced analytics, psychological, physical health, technology, environmental, and financial) with synergy detection. It continuously learns from prediction outcomes and adapts factor weights to improve accuracy over time."
   },
   {
     category: "Features",
     question: "What is the Correlation Engine?",
-    answer: "The Correlation Engine uses Gaussian copula-based methods to model dependencies between betting leg outcomes. It helps identify when legs in your parlay are correlated (positively or negatively), which affects your actual win probability and expected value."
+    answer: "The Correlation Engine uses advanced statistical methods to model dependencies between betting leg outcomes. It helps identify when legs in your parlay are correlated (positively or negatively), which affects your actual win probability and expected value."
   },
   {
     category: "Features",

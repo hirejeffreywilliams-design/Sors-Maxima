@@ -169,7 +169,7 @@ export default function AdminDiagnostics() {
       setDiagnosticResult(data);
       toast({
         title: "Analysis Complete",
-        description: "Quantum diagnostic analysis has been generated",
+        description: "Diagnostic analysis has been generated",
       });
     },
     onError: (error: any) => {
@@ -216,10 +216,10 @@ export default function AdminDiagnostics() {
             <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-blue-600">
               <Brain className="w-6 h-6 text-white" />
             </div>
-            Quantum Diagnostics
+            System Diagnostics
           </h1>
           <p className="text-muted-foreground mt-1">
-            AI-powered system analysis with quantum pattern recognition
+            AI-powered system analysis with pattern recognition
           </p>
         </div>
         <Badge variant="outline" className="gap-1">
@@ -375,7 +375,7 @@ export default function AdminDiagnostics() {
                 AI Issue Analysis
               </CardTitle>
               <CardDescription>
-                Describe an issue and let our Quantum AI analyze it with pattern recognition
+                Describe an issue and let our Sors AI analyze it with pattern recognition
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -418,7 +418,7 @@ export default function AdminDiagnostics() {
                   ) : (
                     <Send className="w-4 h-4" />
                   )}
-                  Analyze with Quantum AI
+                  Analyze with Sors AI
                 </Button>
               </div>
             </CardContent>
@@ -488,7 +488,7 @@ export default function AdminDiagnostics() {
                 Automated System Scan
               </CardTitle>
               <CardDescription>
-                Run a comprehensive scan of all system components using quantum pattern analysis
+                Run a comprehensive scan of all system components using AI pattern analysis
               </CardDescription>
             </CardHeader>
             <CardContent>

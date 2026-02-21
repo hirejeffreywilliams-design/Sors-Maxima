@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Hash, AlertCircle, TrendingUp, Info } from "lucide-react";
+import { Hash, AlertCircle, TrendingUp, Info, AlertTriangle } from "lucide-react";
 
 interface KeyNumberGame {
   id: string;
@@ -65,12 +65,12 @@ function generateMockKeyNumberGames(): KeyNumberGame[] {
     },
     {
       id: "key-5",
-      game: "Lakers @ Celtics",
+      game: "Eagles @ Cowboys",
       spread: -4.5,
       distanceFromKey: 0.5,
       keyNumber: 5,
-      recommendation: "Near NBA key number of 5",
-      sport: "NBA",
+      recommendation: "Near NFL key number of 5",
+      sport: "NFL",
       value: "medium",
     },
   ];
@@ -98,6 +98,10 @@ export function KeyNumberAnalyzer() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-keynumbers">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="grid grid-cols-2 gap-2 p-3 bg-muted/50 rounded-lg text-xs">
           <div>
             <p className="font-medium mb-1">NFL Key Numbers</p>

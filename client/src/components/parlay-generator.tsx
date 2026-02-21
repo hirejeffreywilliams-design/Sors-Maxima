@@ -684,7 +684,7 @@ export function ParlayGenerator({ onLoadParlay, onLegsChange }: ParlayGeneratorP
                 </div>
               </div>
               <div className="text-center">
-                <p className="font-semibold">Running Monte Carlo Simulations</p>
+                <p className="font-semibold">Running Simulations</p>
                 <p className="text-sm text-muted-foreground">
                   Analyzing correlations and finding optimal combinations...
                 </p>

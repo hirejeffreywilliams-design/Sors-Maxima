@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Swords, TrendingUp, TrendingDown, Shield, Target } from "lucide-react";
+import { Swords, TrendingUp, TrendingDown, Shield, Target, AlertTriangle } from "lucide-react";
 
 interface MatchupData {
   id: string;
@@ -110,6 +110,10 @@ export function MatchupAnalyzer() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-matchup">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         {matchups.map((matchup) => (
           <div
             key={matchup.id}

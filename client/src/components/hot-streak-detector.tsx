@@ -1,4 +1,4 @@
-import { Flame, TrendingUp, Star, Users, User } from "lucide-react";
+import { Flame, TrendingUp, Star, Users, User, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,7 +13,7 @@ function generateMockHotStreaks(sport: string): HotStreak[] {
     {
       type: "player",
       name: "Star Player A",
-      team: "Lakers",
+      team: "Knicks",
       sport: "NBA",
       streakLength: 8,
       streakType: "Over on Points (25.5)",
@@ -45,7 +45,7 @@ function generateMockHotStreaks(sport: string): HotStreak[] {
     },
     {
       type: "team",
-      name: "Celtics",
+      name: "Mavericks",
       sport: "NBA",
       streakLength: 7,
       streakType: "ATS Cover Streak",
@@ -97,6 +97,10 @@ export function HotStreakDetector({ sport = "all" }: HotStreakDetectorProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm mb-3" data-testid="banner-demo-streaks">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         {hotStreaks.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <Flame className="w-8 h-8 mx-auto mb-2 opacity-50" />

@@ -25,10 +25,10 @@ interface Challenge {
 
 const mockChallenges: Challenge[] = [
   { id: "1", title: "Parlay Perfect", description: "Win a 3-leg parlay", type: "daily", reward: 100, progress: 0, maxProgress: 1, completed: false, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "medium" },
-  { id: "2", title: "Sharp Eyes", description: "Place 3 bets on sharp consensus picks", type: "daily", reward: 75, progress: 2, maxProgress: 3, completed: false, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "easy" },
-  { id: "3", title: "Risk Taker", description: "Win an underdog bet (+150 or better)", type: "daily", reward: 150, progress: 1, maxProgress: 1, completed: true, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "hard" },
-  { id: "4", title: "Diversify", description: "Place bets on 4 different sports", type: "daily", reward: 50, progress: 2, maxProgress: 4, completed: false, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "easy" },
-  { id: "5", title: "Week Warrior", description: "Win 10 bets this week", type: "weekly", reward: 500, progress: 6, maxProgress: 10, completed: false, claimed: false, expiresAt: new Date(Date.now() + 432000000), difficulty: "medium" },
+  { id: "2", title: "Sharp Eyes", description: "Track 3 sharp consensus picks", type: "daily", reward: 75, progress: 2, maxProgress: 3, completed: false, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "easy" },
+  { id: "3", title: "Risk Taker", description: "Track an underdog pick (+150 or better)", type: "daily", reward: 150, progress: 1, maxProgress: 1, completed: true, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "hard" },
+  { id: "4", title: "Diversify", description: "Track picks across 4 different sports", type: "daily", reward: 50, progress: 2, maxProgress: 4, completed: false, claimed: false, expiresAt: new Date(Date.now() + 43200000), difficulty: "easy" },
+  { id: "5", title: "Week Warrior", description: "Track 10 picks this week", type: "weekly", reward: 500, progress: 6, maxProgress: 10, completed: false, claimed: false, expiresAt: new Date(Date.now() + 432000000), difficulty: "medium" },
   { id: "6", title: "Profit Month", description: "End the week with positive ROI", type: "weekly", reward: 750, progress: 1, maxProgress: 1, completed: true, claimed: true, expiresAt: new Date(Date.now() + 432000000), difficulty: "hard" },
 ];
 

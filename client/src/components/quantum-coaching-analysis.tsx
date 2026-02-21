@@ -144,7 +144,7 @@ export function QuantumCoachingAnalysis() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Brain className="w-5 h-5 text-purple-500" />
-              <CardTitle className="text-lg">Quantum Coaching Analysis</CardTitle>
+              <CardTitle className="text-lg">Coaching Analysis</CardTitle>
               <Badge variant="secondary">
                 10,000+ Patterns
               </Badge>
@@ -174,7 +174,7 @@ export function QuantumCoachingAnalysis() {
               ) : (
                 <>
                   <Brain className="w-4 h-4 mr-2" />
-                  Run Quantum Analysis
+                  Run Analysis
                 </>
               )}
             </Button>
@@ -244,7 +244,7 @@ export function QuantumCoachingAnalysis() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                Quantum Decision Predictions
+                Decision Predictions
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -291,7 +291,7 @@ export function QuantumCoachingAnalysis() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Interference</p>
+                      <p className="text-xs text-muted-foreground">Uncertainty</p>
                       <div className="flex items-center gap-2">
                         <Progress value={decision.quantumInterference * 100} className="h-2 flex-1" />
                         <span className="font-mono">{(decision.quantumInterference * 100).toFixed(0)}%</span>
@@ -317,7 +317,7 @@ export function QuantumCoachingAnalysis() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Zap className="w-4 h-4 text-yellow-500" />
-                Quantum Analysis Layers
+                Analysis Layers
               </CardTitle>
             </CardHeader>
             <CardContent>

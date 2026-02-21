@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { 
   LineChart, TrendingUp, TrendingDown, Target, Trophy,
-  Clock, Zap, Atom
+  Clock, Zap, Atom, AlertTriangle
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
 
@@ -22,11 +22,11 @@ interface CLVData {
 
 const mockCLVData: CLVData[] = [
   { id: "1", bet: "Chiefs -3.5", placedOdds: -105, closingOdds: -120, clv: 2.8, result: "win", sport: "NFL", date: new Date() },
-  { id: "2", bet: "Lakers ML", placedOdds: -140, closingOdds: -160, clv: 3.2, result: "win", sport: "NBA", date: new Date(Date.now() - 86400000) },
+  { id: "2", bet: "Bills ML", placedOdds: -140, closingOdds: -160, clv: 3.2, result: "win", sport: "NFL", date: new Date(Date.now() - 86400000) },
   { id: "3", bet: "Over 48.5 (Bills)", placedOdds: -110, closingOdds: -105, clv: -0.8, result: "loss", sport: "NFL", date: new Date(Date.now() - 172800000) },
-  { id: "4", bet: "Celtics -5.5", placedOdds: -108, closingOdds: -125, clv: 3.5, result: "win", sport: "NBA", date: new Date(Date.now() - 259200000) },
+  { id: "4", bet: "Cowboys -5.5", placedOdds: -108, closingOdds: -125, clv: 3.5, result: "win", sport: "NFL", date: new Date(Date.now() - 259200000) },
   { id: "5", bet: "Rangers ML", placedOdds: +120, closingOdds: +105, clv: 2.4, result: "pending", sport: "NHL", date: new Date() },
-  { id: "6", bet: "Warriors +3", placedOdds: -110, closingOdds: -115, clv: 0.9, result: "loss", sport: "NBA", date: new Date(Date.now() - 345600000) },
+  { id: "6", bet: "Packers +3", placedOdds: -110, closingOdds: -115, clv: 0.9, result: "loss", sport: "NFL", date: new Date(Date.now() - 345600000) },
 ];
 
 export function CLVTracker() {
@@ -71,6 +71,10 @@ export function CLVTracker() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-clv">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
           <p className="text-sm text-muted-foreground mb-2">What is CLV?</p>
           <p className="text-xs text-muted-foreground">

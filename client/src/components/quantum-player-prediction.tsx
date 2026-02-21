@@ -220,7 +220,7 @@ export function QuantumPlayerPrediction() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <User className="w-5 h-5 text-blue-500" />
-              <CardTitle className="text-lg">Quantum Player Prediction</CardTitle>
+              <CardTitle className="text-lg">Player Prediction</CardTitle>
               <Badge variant="secondary">
                 10 Factors
               </Badge>
@@ -245,7 +245,7 @@ export function QuantumPlayerPrediction() {
               {isAnalyzing ? (
                 <>
                   <Zap className="w-4 h-4 mr-2 animate-pulse" />
-                  Computing Quantum States...
+                  Computing Predictions...
                 </>
               ) : (
                 <>
@@ -270,7 +270,7 @@ export function QuantumPlayerPrediction() {
             </Card>
             <Card className="col-span-1">
               <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Quantum Adj.</p>
+                <p className="text-sm text-muted-foreground mb-1">AI Adj.</p>
                 <p className={`text-3xl font-bold ${prediction.quantumAdjustment >= 0 ? "text-green-500" : "text-red-500"}`}>
                   {prediction.quantumAdjustment >= 0 ? "+" : ""}{(prediction.quantumAdjustment * 100).toFixed(1)}%
                 </p>
@@ -320,7 +320,7 @@ export function QuantumPlayerPrediction() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                Quantum Factor Analysis (10 Dimensions)
+                Factor Analysis (10 Dimensions)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">

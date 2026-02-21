@@ -86,7 +86,7 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000, 
           <div className="flex flex-col items-center justify-center py-12 gap-4">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <div className="text-center">
-              <p className="font-medium">Running Monte Carlo Simulation</p>
+              <p className="font-medium">Running Simulation</p>
               <p className="text-sm text-muted-foreground">Calculating win probability...</p>
             </div>
           </div>

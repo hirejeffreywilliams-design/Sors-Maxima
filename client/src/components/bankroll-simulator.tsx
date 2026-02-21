@@ -100,7 +100,7 @@ export function BankrollSimulator() {
     <div className="space-y-4">
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="w-5 h-5 text-primary" />
-        <span className="font-medium">Bankroll Monte Carlo Simulator</span>
+        <span className="font-medium">Bankroll Simulator</span>
         <Badge variant="outline">10,000 Simulations</Badge>
       </div>
 
@@ -143,7 +143,7 @@ export function BankrollSimulator() {
                 step={5}
                 data-testid="slider-kelly"
               />
-              <p className="text-xs text-muted-foreground">% of Kelly criterion to use (25% = quarter Kelly)</p>
+              <p className="text-xs text-muted-foreground">% of suggested stake size (25% = conservative)</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

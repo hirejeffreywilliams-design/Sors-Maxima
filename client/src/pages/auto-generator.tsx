@@ -398,7 +398,7 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                 <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Quantum Coaching</span>
+                  <span className="text-muted-foreground truncate">Coaching Analysis</span>
                   <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumCoachingScore * 100).toFixed(0)}%</span>
                 </div>
                 <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
@@ -619,7 +619,7 @@ export default function AutoGenerator() {
             </h1>
           </div>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">
-            Select your sports, and our AI engine will analyze 40+ factors to generate 
+            Select your sports, and our AI engine will analyze 46 factors to generate 
             optimal betting tickets.
           </p>
           
@@ -728,7 +728,7 @@ export default function AutoGenerator() {
                       step={100}
                       data-testid="slider-bankroll"
                     />
-                    <p className="text-xs text-muted-foreground">Stakes calculated based on Kelly Criterion</p>
+                    <p className="text-xs text-muted-foreground">Stakes calculated using optimal sizing</p>
                   </div>
                   
                   <div className="space-y-3">
@@ -802,7 +802,7 @@ export default function AutoGenerator() {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing 40+ Factors...
+                  Analyzing 46 Factors...
                 </>
               ) : (
                 <>
@@ -827,12 +827,12 @@ export default function AutoGenerator() {
                 <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
                 <div className="space-y-2">
                   <p className="text-lg font-medium">Generating Optimal Tickets</p>
-                  <p className="text-sm text-muted-foreground">Running quantum analysis across 40+ factors...</p>
+                  <p className="text-sm text-muted-foreground">Running analysis across 46 factors...</p>
                 </div>
                 <div className="max-w-md mx-auto space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
-                    <span>Quantum Coaching Analysis</span>
+                    <span>Coaching Analysis</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500" />
@@ -880,7 +880,7 @@ export default function AutoGenerator() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                   <Brain className="w-5 h-5" />
-                  Quantum Fusion Analysis
+                  Full Factor Analysis
                 </h3>
                 {ticketFusions.map((fusion, idx) => (
                   <TicketFusionDisplay key={fusion.ticketId} ticketFusion={fusion} />

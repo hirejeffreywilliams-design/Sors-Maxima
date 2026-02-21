@@ -240,14 +240,14 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
               </div>
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  Quantum Daily Parlays
+                  AI Daily Parlays
                   <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
                     <Atom className="w-3 h-3" />
                     Q-Engine
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Quantum-optimized strategies for maximum winning potential
+                  AI-optimized strategies for maximum winning potential
                 </CardDescription>
               </div>
             </div>

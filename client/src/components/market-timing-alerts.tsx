@@ -201,6 +201,10 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps) {
         </div>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm mb-4" data-testid="banner-demo-timing">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <Tabs defaultValue="movements">
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="movements" className="flex items-center gap-1">

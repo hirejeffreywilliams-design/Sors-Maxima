@@ -27,14 +27,14 @@ import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 const features = [
   {
     icon: Atom,
-    title: "Quantum Fusion Engine",
+    title: "Sors Prediction Engine",
     description: "46 contributing factors across 7 categories with synergy detection and adaptive learning for every prediction.",
     color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   {
     icon: Brain,
-    title: "Monte Carlo Simulations",
+    title: "Advanced Simulations",
     description: "Run millions of simulations per analysis to calculate true win probabilities and expected value on every bet.",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
@@ -42,7 +42,7 @@ const features = [
   {
     icon: Activity,
     title: "Live ESPN Data",
-    description: "Real-time scores, rosters, injuries, and line movement from ESPN across 6 major sports leagues.",
+    description: "Real-time scores, rosters, injuries, and line movement from ESPN across 14 sports.",
     color: "text-green-500",
     bg: "bg-green-500/10",
   },
@@ -71,7 +71,7 @@ const features = [
 
 const stats = [
   { value: "46", label: "Analysis Factors", icon: Target },
-  { value: "6", label: "Sports Covered", icon: Activity },
+  { value: "14", label: "Sports Covered", icon: Activity },
   { value: "1M+", label: "Simulations Daily", icon: Brain },
   { value: "99.9%", label: "Uptime", icon: Zap },
 ];
@@ -81,7 +81,7 @@ const pricingTiers = [
     name: "Starter",
     price: 0,
     description: "Explore the engine for free",
-    features: ["3 AI ticket generations/day", "2 sports (NBA & NFL)", "Quantum Fusion scoring", "Community access"],
+    features: ["3 AI ticket generations/day", "2 sports (NBA & NFL)", "Power Score analysis", "Community access"],
     cta: "Start Free",
     variant: "outline" as const,
   },
@@ -89,7 +89,7 @@ const pricingTiers = [
     name: "Sharp",
     price: 19,
     description: "Tools serious bettors need",
-    features: ["Unlimited ticket generations", "All 6 sports", "Kelly Criterion sizing", "Monte Carlo analysis"],
+    features: ["Unlimited ticket generations", "All 14 sports", "Smart stake sizing", "Simulation analysis"],
     cta: "Go Sharp",
     variant: "secondary" as const,
   },
@@ -140,13 +140,13 @@ export default function LandingPage() {
             />
             <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-300 backdrop-blur-sm">
               <Atom className="w-3 h-3" />
-              Quantum-Powered Betting Intelligence
+              AI-Powered Betting Intelligence
             </Badge>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white max-w-4xl leading-tight">
               Stop Guessing. Start Winning with Data.
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">
-              Harness 46 analysis factors, Monte Carlo simulations, and live ESPN data
+              Harness 46 analysis factors, advanced simulations, and live ESPN data
               to gain a competitive edge the sportsbooks fear.
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-center">

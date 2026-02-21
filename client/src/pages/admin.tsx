@@ -166,7 +166,7 @@ const navCategories: NavCategory[] = [
       { href: "/admin/assistant", label: "AI Assistant", description: "AI-powered ops briefings & tasks", icon: Bot, testId: "link-admin-assistant" },
       { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & governance", icon: Zap, testId: "link-admin-orchestration" },
       { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
-      { href: "/admin/diagnostics", label: "Diagnostics", description: "AI quantum system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
+      { href: "/admin/diagnostics", label: "Diagnostics", description: "AI system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },
       { href: "/admin/security", label: "Error & Security", description: "Security headers & IP blocking", icon: Shield, testId: "link-admin-security" },
       { href: "/admin/feature-flags", label: "Feature Flags", description: "Rollouts & kill switches", icon: CheckCircle, testId: "link-admin-feature-flags" },
     ],
@@ -1458,8 +1458,8 @@ export default function AdminDashboard() {
               {selectedTier === 'pro' && (
                 <ul className="text-muted-foreground space-y-1">
                   <li>Unlimited tickets</li>
-                  <li>All 40+ analysis factors</li>
-                  <li>6 sports coverage</li>
+                  <li>All 46 analysis factors</li>
+                  <li>14 sports coverage</li>
                   <li>Basic alerts</li>
                 </ul>
               )}

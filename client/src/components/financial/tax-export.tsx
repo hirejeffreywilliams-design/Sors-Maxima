@@ -65,6 +65,10 @@ export function TaxExport() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-tax">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500 mt-0.5" />

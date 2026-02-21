@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
   Wallet, Plus, TrendingUp, TrendingDown, DollarSign,
-  Building2, ChevronRight, Atom, PieChart
+  Building2, ChevronRight, Atom, PieChart, AlertTriangle
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
 
@@ -54,6 +54,10 @@ export function MultiBookTracker() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-multibook">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-blue-500/10 border border-green-500/20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>

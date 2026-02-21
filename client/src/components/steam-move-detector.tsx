@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Flame, Clock, TrendingUp, TrendingDown, Bell, Zap } from "lucide-react";
+import { Flame, Clock, TrendingUp, TrendingDown, Bell, Zap, AlertTriangle } from "lucide-react";
 
 interface SteamMove {
   id: string;
@@ -22,16 +22,16 @@ function generateMockSteamMoves(): SteamMove[] {
   const moves: SteamMove[] = [
     {
       id: "steam-1",
-      game: "Celtics @ Lakers",
+      game: "Chiefs @ Bills",
       market: "spread",
-      side: "Lakers",
+      side: "Chiefs",
       originalLine: -3.5,
       newLine: -5,
       booksAffected: 6,
       severity: "high",
       direction: "down",
       timeAgo: "2 min ago",
-      sport: "NBA",
+      sport: "NFL",
     },
     {
       id: "steam-2",
@@ -114,6 +114,10 @@ export function SteamMoveDetector() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-steam">
+          <AlertTriangle className="w-4 h-4 shrink-0" />
+          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        </div>
         {steamMoves.length === 0 ? (
           <p className="text-center text-muted-foreground py-4">
             No steam moves detected in the last hour
