@@ -165,7 +165,7 @@ async function analyzeAndAdjustWeights(): Promise<{
     else if (pred.actualResult === "lost") totalLosses++;
 
     for (const factor of LEARNING_FACTORS) {
-      const factorContribution = confidence * (Math.random() * 0.3 + 0.7);
+      const factorContribution = confidence;
       if (isWin) {
         factorPerformance[factor].wins += factorContribution;
       } else if (pred.actualResult === "lost") {

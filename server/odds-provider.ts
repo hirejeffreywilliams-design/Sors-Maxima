@@ -133,29 +133,7 @@ function generateBettingPercentages(gameId: string, market: string, outcome: str
 }
 
 function generateInjuries(homeTeam: string, awayTeam: string, sport: Sport): InjuryStatus[] {
-  const injuries: InjuryStatus[] = [];
-  const statuses: Array<"out" | "doubtful" | "questionable" | "probable" | "healthy"> = ["out", "doubtful", "questionable", "probable", "healthy"];
-  const injuryTypes = sport === "NFL" ? ["knee", "ankle", "hamstring", "concussion", "shoulder"] :
-                      sport === "NBA" ? ["ankle", "knee", "back", "hamstring", "illness"] :
-                      sport === "MLB" ? ["elbow", "shoulder", "oblique", "back", "wrist"] :
-                      ["lower body", "upper body", "illness", "undisclosed"];
-  
-  [homeTeam, awayTeam].forEach(team => {
-    if (Math.random() > 0.6) {
-      const status = statuses[Math.floor(Math.random() * 4)];
-      const impactRating = status === "out" ? -0.8 : status === "doubtful" ? -0.5 : status === "questionable" ? -0.3 : -0.1;
-      injuries.push({
-        playerId: randomUUID(),
-        playerName: `${team.split(" ").pop()} Key Player`,
-        team,
-        status,
-        injury: injuryTypes[Math.floor(Math.random() * injuryTypes.length)],
-        impactRating,
-      });
-    }
-  });
-  
-  return injuries;
+  return [];
 }
 
 function generateInjuriesFromRosters(homeTeam: string, awayTeam: string, sport: Sport, homeTeamId?: string, awayTeamId?: string): InjuryStatus[] {
