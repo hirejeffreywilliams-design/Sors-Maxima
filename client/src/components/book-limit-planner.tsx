@@ -5,20 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Building2, DollarSign, AlertTriangle, CheckCircle, Split, Target, TrendingUp, Clock } from "lucide-react";
+import { Building2, DollarSign, AlertTriangle, CheckCircle, Split, Target, TrendingUp, Plus, Trash2 } from "lucide-react";
 
 interface BookLimit {
   id: string;
   name: string;
-  logo?: string;
   maxBetLimit: number;
-  parlayLimit: number;
   currentUsage: number;
-  available: number;
-  status: "full" | "limited" | "available";
-  fillProbability: number;
-  avgDelay: number;
-  notes: string;
 }
 
 interface StakePlan {
@@ -26,8 +19,8 @@ interface StakePlan {
   bookName: string;
   amount: number;
   percentage: number;
-  fillProbability: number;
-  status: "confirmed" | "likely" | "risky";
+  available: number;
+  status: "confirmed" | "likely" | "tight";
 }
 
 interface BookLimitPlannerProps {
@@ -35,141 +28,79 @@ interface BookLimitPlannerProps {
   onStakeChange?: (stake: number) => void;
 }
 
-function getBookLimits(): BookLimit[] {
-  return [
-    {
-      id: "fanduel",
-      name: "FanDuel",
-      maxBetLimit: 5000,
-      parlayLimit: 2500,
-      currentUsage: Math.floor(Math.random() * 1000),
-      available: 2500 - Math.floor(Math.random() * 1000),
-      status: "available",
-      fillProbability: 0.98,
-      avgDelay: 0,
-      notes: "High limits, instant acceptance",
-    },
-    {
-      id: "draftkings",
-      name: "DraftKings",
-      maxBetLimit: 5000,
-      parlayLimit: 2000,
-      currentUsage: Math.floor(Math.random() * 800),
-      available: 2000 - Math.floor(Math.random() * 800),
-      status: "available",
-      fillProbability: 0.95,
-      avgDelay: 2,
-      notes: "May review large parlays",
-    },
-    {
-      id: "betmgm",
-      name: "BetMGM",
-      maxBetLimit: 3000,
-      parlayLimit: 1500,
-      currentUsage: Math.floor(Math.random() * 600),
-      available: 1500 - Math.floor(Math.random() * 600),
-      status: Math.random() > 0.7 ? "limited" : "available",
-      fillProbability: 0.90,
-      avgDelay: 5,
-      notes: "Occasional limits on props",
-    },
-    {
-      id: "caesars",
-      name: "Caesars",
-      maxBetLimit: 3500,
-      parlayLimit: 1800,
-      currentUsage: Math.floor(Math.random() * 700),
-      available: 1800 - Math.floor(Math.random() * 700),
-      status: "available",
-      fillProbability: 0.92,
-      avgDelay: 3,
-      notes: "Good for player props",
-    },
-    {
-      id: "pointsbet",
-      name: "PointsBet",
-      maxBetLimit: 2000,
-      parlayLimit: 1000,
-      currentUsage: Math.floor(Math.random() * 400),
-      available: 1000 - Math.floor(Math.random() * 400),
-      status: Math.random() > 0.5 ? "limited" : "available",
-      fillProbability: 0.85,
-      avgDelay: 8,
-      notes: "Lower limits but good promos",
-    },
-    {
-      id: "fanatics",
-      name: "Fanatics",
-      maxBetLimit: 2500,
-      parlayLimit: 1200,
-      currentUsage: Math.floor(Math.random() * 500),
-      available: 1200 - Math.floor(Math.random() * 500),
-      status: "available",
-      fillProbability: 0.93,
-      avgDelay: 2,
-      notes: "Newer book, good acceptance",
-    },
-  ];
-}
-
 function createStakePlan(books: BookLimit[], desiredStake: number): StakePlan[] {
   const plan: StakePlan[] = [];
   let remainingStake = desiredStake;
-  
+
   const sortedBooks = [...books]
-    .filter(b => b.status !== "full" && b.available > 0)
-    .sort((a, b) => b.fillProbability - a.fillProbability);
-  
+    .map(b => ({ ...b, available: Math.max(0, b.maxBetLimit - b.currentUsage) }))
+    .filter(b => b.available > 0)
+    .sort((a, b) => b.available - a.available);
+
   for (const book of sortedBooks) {
     if (remainingStake <= 0) break;
-    
-    const allocation = Math.min(remainingStake, book.available * 0.9);
-    if (allocation > 10) {
+
+    const allocation = Math.min(remainingStake, book.available);
+    if (allocation > 0) {
+      const usageRatio = allocation / book.available;
       plan.push({
         bookId: book.id,
         bookName: book.name,
         amount: allocation,
-        percentage: (allocation / desiredStake) * 100,
-        fillProbability: book.fillProbability,
-        status: book.fillProbability > 0.95 ? "confirmed" : 
-                book.fillProbability > 0.85 ? "likely" : "risky",
+        percentage: desiredStake > 0 ? (allocation / desiredStake) * 100 : 0,
+        available: book.available,
+        status: usageRatio < 0.7 ? "confirmed" : usageRatio < 0.95 ? "likely" : "tight",
       });
       remainingStake -= allocation;
     }
   }
-  
+
   return plan;
 }
 
 export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlannerProps) {
   const [stake, setStake] = useState(desiredStake);
-  const [showAllBooks, setShowAllBooks] = useState(false);
+  const [books, setBooks] = useState<BookLimit[]>([]);
+  const [newBookName, setNewBookName] = useState("");
+  const [newBookLimit, setNewBookLimit] = useState("");
+  const [newBookUsage, setNewBookUsage] = useState("");
 
-  const books = useMemo(() => getBookLimits(), []);
   const stakePlan = useMemo(() => createStakePlan(books, stake), [books, stake]);
 
   const totalAllocated = stakePlan.reduce((sum, p) => sum + p.amount, 0);
   const fillRate = stake > 0 ? (totalAllocated / stake) * 100 : 0;
-  const avgFillProb = stakePlan.length > 0 && totalAllocated > 0
-    ? stakePlan.reduce((sum, p) => sum + p.fillProbability * p.amount, 0) / totalAllocated
-    : 0;
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "available": return "text-green-500";
-      case "limited": return "text-yellow-500";
-      case "full": return "text-red-500";
-      default: return "text-muted-foreground";
-    }
-  };
+  const totalAvailable = books.reduce((sum, b) => sum + Math.max(0, b.maxBetLimit - b.currentUsage), 0);
 
   const getPlanStatusColor = (status: string) => {
     switch (status) {
       case "confirmed": return "bg-green-500 text-white";
       case "likely": return "bg-yellow-500 text-black";
-      case "risky": return "bg-red-500 text-white";
+      case "tight": return "bg-red-500 text-white";
       default: return "bg-muted";
     }
+  };
+
+  const addBook = () => {
+    const limit = parseFloat(newBookLimit);
+    const usage = parseFloat(newBookUsage) || 0;
+    if (!newBookName.trim() || isNaN(limit) || limit <= 0) return;
+
+    setBooks(prev => [
+      ...prev,
+      {
+        id: `book-${Date.now()}`,
+        name: newBookName.trim(),
+        maxBetLimit: limit,
+        currentUsage: Math.min(usage, limit),
+      },
+    ]);
+    setNewBookName("");
+    setNewBookLimit("");
+    setNewBookUsage("");
+  };
+
+  const removeBook = (id: string) => {
+    setBooks(prev => prev.filter(b => b.id !== id));
   };
 
   return (
@@ -181,10 +112,6 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-limits">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
-        </div>
         <div className="p-3 rounded-lg border bg-muted/50">
           <Label htmlFor="desired-stake" className="text-sm font-medium">
             Desired Total Stake
@@ -193,6 +120,7 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
             <DollarSign className="h-4 w-4 text-muted-foreground" />
             <Input
               id="desired-stake"
+              data-testid="input-desired-stake"
               type="number"
               value={stake}
               onChange={(e) => {
@@ -206,33 +134,118 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
           </div>
         </div>
 
+        <div className="p-3 rounded-lg border bg-muted/50 space-y-3">
+          <h4 className="font-medium text-sm">Add Your Sportsbook Limits</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div>
+              <Label htmlFor="book-name" className="text-xs text-muted-foreground">Book Name</Label>
+              <Input
+                id="book-name"
+                data-testid="input-book-name"
+                value={newBookName}
+                onChange={(e) => setNewBookName(e.target.value)}
+                placeholder="e.g. FanDuel"
+              />
+            </div>
+            <div>
+              <Label htmlFor="book-limit" className="text-xs text-muted-foreground">Max Bet Limit ($)</Label>
+              <Input
+                id="book-limit"
+                data-testid="input-book-limit"
+                type="number"
+                value={newBookLimit}
+                onChange={(e) => setNewBookLimit(e.target.value)}
+                placeholder="e.g. 2500"
+              />
+            </div>
+            <div>
+              <Label htmlFor="book-usage" className="text-xs text-muted-foreground">Current Usage ($)</Label>
+              <Input
+                id="book-usage"
+                data-testid="input-book-usage"
+                type="number"
+                value={newBookUsage}
+                onChange={(e) => setNewBookUsage(e.target.value)}
+                placeholder="e.g. 500"
+              />
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={addBook}
+            disabled={!newBookName.trim() || !newBookLimit || parseFloat(newBookLimit) <= 0}
+            data-testid="button-add-book"
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Book
+          </Button>
+        </div>
+
+        {books.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Your Books ({books.length})
+            </h4>
+            {books.map((book) => {
+              const available = Math.max(0, book.maxBetLimit - book.currentUsage);
+              const usagePct = book.maxBetLimit > 0 ? (book.currentUsage / book.maxBetLimit) * 100 : 0;
+              return (
+                <div key={book.id} className="p-2 rounded-lg border bg-card" data-testid={`card-book-${book.id}`}>
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                    <span className="font-medium text-sm">{book.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-green-500">
+                        ${available.toFixed(0)} available
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => removeBook(book.id)}
+                        data-testid={`button-remove-book-${book.id}`}
+                      >
+                        <Trash2 className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                    <span>Limit: ${book.maxBetLimit}</span>
+                    <span>Used: ${book.currentUsage}</span>
+                  </div>
+                  <Progress value={usagePct} className="h-1" />
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-desired">
             <Target className="h-4 w-4 mx-auto mb-1 text-primary" />
             <p className="text-lg font-bold">${stake.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Desired</p>
           </div>
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-allocated">
             <Split className="h-4 w-4 mx-auto mb-1 text-green-500" />
             <p className="text-lg font-bold text-green-500">${totalAllocated.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Allocated</p>
           </div>
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-available">
             <TrendingUp className="h-4 w-4 mx-auto mb-1 text-blue-500" />
-            <p className="text-lg font-bold">{(avgFillProb * 100).toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground">Fill Rate</p>
+            <p className="text-lg font-bold">${totalAvailable.toFixed(0)}</p>
+            <p className="text-xs text-muted-foreground">Total Available</p>
           </div>
         </div>
 
-        {fillRate < 100 && (
+        {stake > 0 && fillRate < 100 && books.length > 0 && (
           <div className="p-3 rounded-lg border border-yellow-500/50 bg-yellow-500/10">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5" />
               <div>
                 <p className="font-medium text-yellow-500">Partial Fill Warning</p>
                 <p className="text-sm text-muted-foreground">
-                  Only ${totalAllocated.toFixed(0)} of ${stake.toFixed(0)} ({fillRate.toFixed(0)}%) can be 
-                  allocated across available books. Consider reducing stake or waiting for limit resets.
+                  Only ${totalAllocated.toFixed(0)} of ${stake.toFixed(0)} ({fillRate.toFixed(0)}%) can be
+                  allocated across your books. Consider reducing stake or adding more books.
                 </p>
               </div>
             </div>
@@ -244,16 +257,20 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
             <Split className="h-4 w-4" />
             Execution Plan
           </h4>
-          
+
           {stakePlan.length === 0 ? (
-            <div className="text-center py-4 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground" data-testid="empty-plan">
               <Building2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Enter a stake amount to generate plan</p>
+              <p className="text-sm">
+                {books.length === 0
+                  ? "Add your sportsbook limits above to generate a plan"
+                  : "Enter a stake amount to generate a plan"}
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
               {stakePlan.map((plan, idx) => (
-                <div key={plan.bookId} className="p-3 rounded-lg border bg-card">
+                <div key={plan.bookId} className="p-3 rounded-lg border bg-card" data-testid={`plan-item-${idx}`}>
                   <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="text-xs">
@@ -261,14 +278,12 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
                       </Badge>
                       <span className="font-medium">{plan.bookName}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getPlanStatusColor(plan.status)}>
-                        {plan.status === "confirmed" && <CheckCircle className="h-3 w-3 mr-1" />}
-                        {plan.status}
-                      </Badge>
-                    </div>
+                    <Badge className={getPlanStatusColor(plan.status)}>
+                      {plan.status === "confirmed" && <CheckCircle className="h-3 w-3 mr-1" />}
+                      {plan.status}
+                    </Badge>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-2 text-xs mb-2">
                     <div>
                       <span className="text-muted-foreground">Amount:</span>{" "}
@@ -279,13 +294,11 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
                       <span className="font-medium">{plan.percentage.toFixed(0)}%</span>
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Fill:</span>{" "}
-                      <span className="font-medium text-green-500">
-                        {(plan.fillProbability * 100).toFixed(0)}%
-                      </span>
+                      <span className="text-muted-foreground">Available:</span>{" "}
+                      <span className="font-medium text-green-500">${plan.available.toFixed(0)}</span>
                     </div>
                   </div>
-                  
+
                   <Progress value={plan.percentage} className="h-1.5" />
                 </div>
               ))}
@@ -293,55 +306,7 @@ export function BookLimitPlanner({ desiredStake, onStakeChange }: BookLimitPlann
           )}
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h4 className="font-medium flex items-center gap-2">
-              <Building2 className="h-4 w-4" />
-              Book Status
-            </h4>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={() => setShowAllBooks(!showAllBooks)}
-            >
-              {showAllBooks ? "Show Less" : "Show All"}
-            </Button>
-          </div>
-          
-          <div className="space-y-2">
-            {(showAllBooks ? books : books.slice(0, 3)).map((book) => (
-              <div key={book.id} className="p-2 rounded-lg border bg-card">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">{book.name}</span>
-                    <span className={`text-xs ${getStatusColor(book.status)}`}>
-                      {book.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <span className="text-sm font-medium">
-                    ${book.available.toFixed(0)} available
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Limit: ${book.parlayLimit}</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {book.avgDelay}s avg delay
-                  </span>
-                  <span>{(book.fillProbability * 100).toFixed(0)}% fill</span>
-                </div>
-                
-                <Progress 
-                  value={(book.available / book.parlayLimit) * 100} 
-                  className="h-1 mt-1" 
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <Button className="w-full" data-testid="button-execute-split-plan">
+        <Button className="w-full" data-testid="button-execute-split-plan" disabled={stakePlan.length === 0}>
           <Split className="h-4 w-4 mr-2" />
           Execute Split Stake Plan
         </Button>

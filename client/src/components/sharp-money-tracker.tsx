@@ -1,154 +1,203 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TrendingUp, TrendingDown, Users, DollarSign, AlertTriangle, Eye, Zap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TrendingUp, TrendingDown, Eye, Zap, AlertTriangle, ArrowRightLeft } from "lucide-react";
 
-interface SharpAction {
-  id: string;
-  game: string;
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+
+interface LineMovement {
   market: string;
-  side: string;
-  publicPercent: number;
-  moneyPercent: number;
-  lineOpen: number;
-  lineCurrent: number;
-  sharpIndicator: "strong" | "moderate" | "weak";
-  reverseMove: boolean;
-  timestamp: string;
+  opening: number;
+  current: number;
+  movement: number;
+  direction: "up" | "down" | "stable";
+  velocity: "slow" | "moderate" | "fast" | "steam";
+  sharpAction: boolean;
 }
 
-function generateMockSharpActions(): SharpAction[] {
-  const games = [
-    { home: "Knicks", away: "Heat" },
-    { home: "Chiefs", away: "Bills" },
-    { home: "Yankees", away: "Dodgers" },
-    { home: "Nuggets", away: "Suns" },
-    { home: "Cowboys", away: "Eagles" },
-  ];
-  
-  return games.map((game, i) => {
-    const publicPercent = Math.floor(Math.random() * 40) + 50;
-    const moneyPercent = Math.floor(Math.random() * 30) + 20;
-    const reverseMove = publicPercent > 60 && moneyPercent < 40;
-    
-    return {
-      id: `sharp-${i}`,
-      game: `${game.away} @ ${game.home}`,
-      market: ["spread", "moneyline", "total"][Math.floor(Math.random() * 3)],
-      side: Math.random() > 0.5 ? game.home : game.away,
-      publicPercent,
-      moneyPercent,
-      lineOpen: -110 + Math.floor(Math.random() * 20) - 10,
-      lineCurrent: -110 + Math.floor(Math.random() * 30) - 15,
-      sharpIndicator: reverseMove ? "strong" : moneyPercent < 35 ? "moderate" : "weak",
-      reverseMove,
-      timestamp: new Date(Date.now() - Math.random() * 3600000).toLocaleTimeString(),
-    };
-  });
+interface GameData {
+  id: string;
+  shortName: string;
+  homeTeam: { name: string; abbreviation: string; record: string };
+  awayTeam: { name: string; abbreviation: string; record: string };
+  consensus: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number };
+  bookmakers: { book: string; homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number }[];
+  lineMovement: LineMovement[];
+  edgeAnalysis: { homeEV: number; awayEV: number; valueSide?: string };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: GameData[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+function deriveSharpIndicator(lm: LineMovement, bookmakerCount: number): "strong" | "moderate" | "weak" {
+  const absMov = Math.abs(lm.movement);
+  if (lm.sharpAction && (lm.velocity === "steam" || lm.velocity === "fast") && bookmakerCount >= 3) return "strong";
+  if (lm.sharpAction || lm.velocity === "fast") return "moderate";
+  if (absMov > 0.5) return "weak";
+  return "weak";
+}
+
+function isReverseLineMove(lm: LineMovement): boolean {
+  return lm.sharpAction && lm.velocity !== "slow";
 }
 
 export function SharpMoneyTracker() {
-  const [sport, setSport] = useState("all");
-  const [actions] = useState<SharpAction[]>(generateMockSharpActions());
+  const [sport, setSport] = useState("NBA");
 
-  const sharpActions = actions.filter(a => 
-    sport === "all" || a.game.toLowerCase().includes(sport.toLowerCase())
+  const { data, isLoading, isError } = useQuery<MarketSnapshot>({
+    queryKey: ["/api/market-snapshot", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/market-snapshot?sport=${sport}`);
+      if (!res.ok) throw new Error("Failed to fetch market data");
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
+  const sharpSignals = (data?.games ?? []).flatMap((game) =>
+    game.lineMovement
+      .filter((lm) => lm.sharpAction || lm.velocity === "fast" || lm.velocity === "steam" || Math.abs(lm.movement) > 0.5)
+      .map((lm) => ({
+        gameId: game.id,
+        gameName: game.shortName,
+        market: lm.market,
+        opening: lm.opening,
+        current: lm.current,
+        movement: lm.movement,
+        direction: lm.direction,
+        velocity: lm.velocity,
+        sharpAction: lm.sharpAction,
+        indicator: deriveSharpIndicator(lm, game.bookmakers.length),
+        reverseMove: isReverseLineMove(lm),
+        bookmakerCount: game.bookmakers.length,
+        dataSource: game.dataSource,
+      }))
   );
 
-  const strongSignals = sharpActions.filter(a => a.sharpIndicator === "strong").length;
+  const strongSignals = sharpSignals.filter((s) => s.indicator === "strong").length;
 
   return (
-    <Card>
+    <Card data-testid="card-sharp-money-tracker">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <Eye className="w-5 h-5 text-chart-1" />
             Sharp Money Tracker
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="gap-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className="gap-1" data-testid="badge-strong-signals">
               <Zap className="w-3 h-3" />
-              {strongSignals} Strong Signals
+              {strongSignals} Strong
             </Badge>
             <Select value={sport} onValueChange={setSport}>
               <SelectTrigger className="w-28" data-testid="select-sharp-sport">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Sports</SelectItem>
-                <SelectItem value="nba">NBA</SelectItem>
-                <SelectItem value="nfl">NFL</SelectItem>
-                <SelectItem value="mlb">MLB</SelectItem>
+                {SPORTS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-          <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
-        </div>
-        {sharpActions.map((action) => (
+        {isLoading && (
+          <div className="space-y-3" data-testid="loading-sharp">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-20 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {isError && (
+          <div className="flex items-center gap-2 p-3 rounded-md bg-destructive/10 border border-destructive/20" data-testid="error-sharp">
+            <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
+            <p className="text-sm text-destructive">Failed to load market data. Please try again.</p>
+          </div>
+        )}
+
+        {!isLoading && !isError && sharpSignals.length === 0 && (
+          <div className="text-center py-6" data-testid="empty-sharp">
+            <Eye className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No sharp money signals detected for {sport}</p>
+          </div>
+        )}
+
+        {!isLoading && !isError && sharpSignals.map((signal, idx) => (
           <div
-            key={action.id}
+            key={`${signal.gameId}-${signal.market}-${idx}`}
+            data-testid={`card-sharp-signal-${signal.gameId}-${signal.market}`}
             className={`p-3 rounded-lg border ${
-              action.sharpIndicator === "strong" 
-                ? "bg-chart-1/10 border-chart-1/30" 
-                : action.sharpIndicator === "moderate"
+              signal.indicator === "strong"
+                ? "bg-chart-1/10 border-chart-1/30"
+                : signal.indicator === "moderate"
                 ? "bg-chart-3/10 border-chart-3/30"
                 : "bg-muted/50 border-border"
             }`}
           >
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
-                <p className="font-medium text-sm">{action.game}</p>
+                <p className="font-medium text-sm" data-testid={`text-game-name-${signal.gameId}`}>{signal.gameName}</p>
                 <p className="text-xs text-muted-foreground capitalize">
-                  {action.market} • {action.side}
+                  {signal.market} | {signal.velocity} velocity | {signal.bookmakerCount} books
                 </p>
               </div>
-              <div className="flex items-center gap-1">
-                {action.reverseMove && (
+              <div className="flex items-center gap-1 flex-wrap">
+                {signal.reverseMove && (
                   <Badge variant="destructive" className="text-xs">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    <ArrowRightLeft className="w-3 h-3 mr-1" />
                     Reverse
                   </Badge>
                 )}
-                <Badge 
-                  variant={action.sharpIndicator === "strong" ? "default" : "secondary"}
+                <Badge
+                  variant={signal.indicator === "strong" ? "default" : "secondary"}
                   className="text-xs capitalize"
+                  data-testid={`badge-indicator-${signal.gameId}-${signal.market}`}
                 >
-                  {action.sharpIndicator}
+                  {signal.indicator}
                 </Badge>
               </div>
             </div>
-            
-            <div className="grid grid-cols-3 gap-2 text-xs">
+
+            <div className="flex items-center gap-3 text-xs">
               <div className="flex items-center gap-1">
-                <Users className="w-3 h-3 text-muted-foreground" />
-                <span>Public: {action.publicPercent}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <DollarSign className="w-3 h-3 text-muted-foreground" />
-                <span>Money: {action.moneyPercent}%</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {action.lineCurrent < action.lineOpen ? (
+                {signal.direction === "down" ? (
                   <TrendingDown className="w-3 h-3 text-red-500" />
-                ) : (
+                ) : signal.direction === "up" ? (
                   <TrendingUp className="w-3 h-3 text-green-500" />
+                ) : (
+                  <ArrowRightLeft className="w-3 h-3 text-muted-foreground" />
                 )}
-                <span>{action.lineOpen} → {action.lineCurrent}</span>
+                <span className="font-mono" data-testid={`text-line-movement-${signal.gameId}-${signal.market}`}>
+                  {signal.opening} {"\u2192"} {signal.current}
+                </span>
               </div>
+              <span className="text-muted-foreground">
+                ({signal.movement > 0 ? "+" : ""}{signal.movement})
+              </span>
+              {signal.sharpAction && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <Zap className="w-2.5 h-2.5" />
+                  Sharp
+                </Badge>
+              )}
             </div>
           </div>
         ))}
-        
-        <p className="text-xs text-muted-foreground text-center pt-2">
-          Sharp action detected when money% diverges from public%
-        </p>
+
+        {data?.meta && (
+          <p className="text-xs text-muted-foreground text-center pt-2" data-testid="text-data-source-sharp">
+            Sources: {data.meta.dataSources.join(", ")} | {data.meta.gamesWithOdds}/{data.meta.totalGames} games with odds
+          </p>
+        )}
       </CardContent>
     </Card>
   );

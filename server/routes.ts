@@ -1345,6 +1345,25 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  app.get("/api/market-snapshot", async (req, res) => {
+    try {
+      const sport = (req.query.sport as string) || "NBA";
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: `Invalid sport. Must be one of: ${validSports.join(", ")}` });
+      }
+      const { generateMarketSnapshot } = await import("./marketSnapshotEngine");
+      const snapshot = await generateMarketSnapshot(sport as any);
+      return res.json(snapshot);
+    } catch (err) {
+      console.error("[Market Snapshot] Error:", err);
+      return res.status(500).json({
+        error: "Failed to generate market snapshot",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
   app.get("/api/scheme-analysis", async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";

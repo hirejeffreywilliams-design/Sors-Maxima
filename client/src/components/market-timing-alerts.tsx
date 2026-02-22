@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
-import { Clock, TrendingUp, TrendingDown, AlertTriangle, Zap, Target, DollarSign, Activity } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Clock, TrendingUp, TrendingDown, AlertTriangle, Zap, Target, Activity } from "lucide-react";
 
 interface OddsEvent {
   id: string;
@@ -13,355 +14,364 @@ interface OddsEvent {
   markets: any[];
 }
 
-interface LineMovement {
-  id: string;
-  game: string;
+interface MarketTimingAlertsProps {
+  events?: OddsEvent[];
+}
+
+interface LineMovementData {
   market: string;
-  outcome: string;
-  openingLine: number;
-  currentLine: number;
+  opening: number;
+  current: number;
   movement: number;
-  direction: "up" | "down";
+  direction: "up" | "down" | "stable";
   velocity: "slow" | "moderate" | "fast" | "steam";
   sharpAction: boolean;
-  publicPercent: number;
-  sharpPercent: number;
-  valueWindow: number;
-  confidence: number;
-  timestamp: string;
 }
 
-interface ValueWindow {
+interface MarketGame {
   id: string;
-  game: string;
-  market: string;
-  outcome: string;
-  currentOdds: number;
-  expectedClose: number;
-  edge: number;
-  windowMinutes: number;
-  urgency: "low" | "medium" | "high" | "critical";
-  reason: string;
-}
-
-interface SharpAlert {
-  id: string;
-  game: string;
-  market: string;
-  side: string;
-  sharpBooks: string[];
-  moveSize: number;
-  timing: string;
-  confidence: number;
-  recommendation: string;
-}
-
-interface MarketTimingAlertsProps {
-  events: OddsEvent[];
-}
-
-function generateLineMovements(events: OddsEvent[]): LineMovement[] {
-  const movements: LineMovement[] = [];
-  const markets = ["Spread", "Moneyline", "Total"];
-  
-  events.slice(0, 8).forEach((event, idx) => {
-    const movement = (Math.random() - 0.3) * 5;
-    const velocity = Math.abs(movement) > 3 ? "steam" : Math.abs(movement) > 2 ? "fast" : Math.abs(movement) > 1 ? "moderate" : "slow";
-    const sharpAction = velocity === "steam" || velocity === "fast";
-    
-    movements.push({
-      id: `lm-${idx}`,
-      game: `${event.awayTeam} @ ${event.homeTeam}`,
-      market: markets[idx % 3],
-      outcome: idx % 2 === 0 ? event.homeTeam : event.awayTeam,
-      openingLine: -110 + Math.floor(Math.random() * 20),
-      currentLine: -110 + Math.floor(Math.random() * 30) - 10,
-      movement,
-      direction: movement > 0 ? "up" : "down",
-      velocity,
-      sharpAction,
-      publicPercent: 45 + Math.floor(Math.random() * 30),
-      sharpPercent: 35 + Math.floor(Math.random() * 40),
-      valueWindow: Math.floor(Math.random() * 20) + 5,
-      confidence: 0.6 + Math.random() * 0.35,
-      timestamp: new Date(Date.now() - Math.random() * 3600000).toISOString(),
-    });
-  });
-  
-  return movements.sort((a, b) => Math.abs(b.movement) - Math.abs(a.movement));
-}
-
-function generateValueWindows(events: OddsEvent[]): ValueWindow[] {
-  const windows: ValueWindow[] = [];
-  
-  events.slice(0, 6).forEach((event, idx) => {
-    const edge = 0.02 + Math.random() * 0.08;
-    const windowMinutes = Math.floor(Math.random() * 25) + 5;
-    
-    windows.push({
-      id: `vw-${idx}`,
-      game: `${event.awayTeam} @ ${event.homeTeam}`,
-      market: ["Spread", "Total", "Moneyline"][idx % 3],
-      outcome: idx % 2 === 0 ? `${event.homeTeam} -${3 + idx}` : `Over ${210 + idx * 2}`,
-      currentOdds: -110 + Math.floor(Math.random() * 20),
-      expectedClose: -115 + Math.floor(Math.random() * 10),
-      edge,
-      windowMinutes,
-      urgency: windowMinutes < 10 ? "critical" : windowMinutes < 15 ? "high" : windowMinutes < 20 ? "medium" : "low",
-      reason: edge > 0.05 ? "Sharp money incoming" : edge > 0.03 ? "Line about to adjust" : "Early market inefficiency",
-    });
-  });
-  
-  return windows.sort((a, b) => a.windowMinutes - b.windowMinutes);
-}
-
-function generateSharpAlerts(events: OddsEvent[]): SharpAlert[] {
-  const alerts: SharpAlert[] = [];
-  const sharpBooks = ["Pinnacle", "Circa", "Bookmaker", "BetCRIS", "Heritage"];
-  
-  events.slice(0, 5).forEach((event, idx) => {
-    if (Math.random() > 0.4) {
-      const numBooks = 2 + Math.floor(Math.random() * 3);
-      alerts.push({
-        id: `sa-${idx}`,
-        game: `${event.awayTeam} @ ${event.homeTeam}`,
-        market: ["Spread", "Total", "1H Spread"][idx % 3],
-        side: idx % 2 === 0 ? event.homeTeam : `Under ${215 + idx * 2}`,
-        sharpBooks: sharpBooks.slice(0, numBooks),
-        moveSize: 0.5 + Math.random() * 2,
-        timing: `${Math.floor(Math.random() * 30) + 5} min ago`,
-        confidence: 0.7 + Math.random() * 0.25,
-        recommendation: "Fade public, follow sharp money",
-      });
-    }
-  });
-  
-  return alerts;
-}
-
-export function MarketTimingAlerts({ events }: MarketTimingAlertsProps) {
-  const [lineMovements, setLineMovements] = useState<LineMovement[]>([]);
-  const [valueWindows, setValueWindows] = useState<ValueWindow[]>([]);
-  const [sharpAlerts, setSharpAlerts] = useState<SharpAlert[]>([]);
-  const [autoRefresh, setAutoRefresh] = useState(true);
-
-  useEffect(() => {
-    const refresh = () => {
-      setLineMovements(generateLineMovements(events));
-      setValueWindows(generateValueWindows(events));
-      setSharpAlerts(generateSharpAlerts(events));
-    };
-    
-    refresh();
-    
-    if (autoRefresh) {
-      const interval = setInterval(refresh, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [events, autoRefresh]);
-
-  const getVelocityColor = (velocity: string) => {
-    switch (velocity) {
-      case "steam": return "bg-red-500 text-white";
-      case "fast": return "bg-orange-500 text-white";
-      case "moderate": return "bg-yellow-500 text-black";
-      default: return "bg-muted";
-    }
+  shortName: string;
+  date: string;
+  homeTeam: { name: string; abbreviation: string; record: string };
+  awayTeam: { name: string; abbreviation: string; record: string };
+  consensus: {
+    homeMoneyline?: number;
+    awayMoneyline?: number;
+    spread?: number;
+    total?: number;
   };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case "critical": return "bg-red-500 text-white animate-pulse";
-      case "high": return "bg-orange-500 text-white";
-      case "medium": return "bg-yellow-500 text-black";
-      default: return "bg-muted";
-    }
+  lineMovement: LineMovementData[];
+  edgeAnalysis: {
+    homeEV: number;
+    awayEV: number;
+    valueSide?: "home" | "away" | "none";
   };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: {
+    sport: string;
+    totalGames: number;
+    gamesWithOdds: number;
+    dataSources: string[];
+    generatedAt: string;
+  };
+}
+
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+
+function getVelocityColor(velocity: string) {
+  switch (velocity) {
+    case "steam": return "bg-red-500 text-white";
+    case "fast": return "bg-orange-500 text-white";
+    case "moderate": return "bg-yellow-500 text-black";
+    default: return "bg-muted";
+  }
+}
+
+function getWindowUrgency(gameDate: string): { minutes: number; urgency: "low" | "medium" | "high" | "critical" } {
+  const diff = Math.max(0, Math.round((new Date(gameDate).getTime() - Date.now()) / 60000));
+  const urgency = diff < 30 ? "critical" : diff < 60 ? "high" : diff < 120 ? "medium" : "low" as const;
+  return { minutes: diff, urgency };
+}
+
+function getUrgencyColor(urgency: string) {
+  switch (urgency) {
+    case "critical": return "bg-red-500 text-white animate-pulse";
+    case "high": return "bg-orange-500 text-white";
+    case "medium": return "bg-yellow-500 text-black";
+    default: return "bg-muted";
+  }
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-3" data-testid="skeleton-loading">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="p-3 rounded-lg border">
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="space-y-1.5 flex-1">
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
+            <Skeleton className="h-5 w-16" />
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-full" />
+            <Skeleton className="h-3 w-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
+  const [selectedSport, setSelectedSport] = useState<string>("NBA");
+
+  const { data, isLoading, isError, error } = useQuery<MarketSnapshot>({
+    queryKey: ["/api/market-snapshot", `?sport=${selectedSport}`],
+    refetchInterval: 60000,
+    staleTime: 30000,
+  });
+
+  const games = data?.games ?? [];
+
+  const lineMovements = games.flatMap((game) =>
+    game.lineMovement.map((lm, idx) => ({
+      ...lm,
+      gameId: game.id,
+      gameName: game.shortName,
+      gameIdx: idx,
+    }))
+  );
+
+  const valueWindows = games
+    .filter(
+      (game) =>
+        game.edgeAnalysis.valueSide !== "none" &&
+        (game.edgeAnalysis.homeEV > 0 || game.edgeAnalysis.awayEV > 0)
+    )
+    .map((game) => {
+      const { minutes, urgency } = getWindowUrgency(game.date);
+      const side = game.edgeAnalysis.valueSide === "home" ? game.homeTeam : game.awayTeam;
+      const ev = game.edgeAnalysis.valueSide === "home" ? game.edgeAnalysis.homeEV : game.edgeAnalysis.awayEV;
+      const odds = game.edgeAnalysis.valueSide === "home" ? game.consensus.homeMoneyline : game.consensus.awayMoneyline;
+      return {
+        gameId: game.id,
+        gameName: game.shortName,
+        side: side.abbreviation,
+        sideName: side.name,
+        ev,
+        odds,
+        spread: game.consensus.spread,
+        minutes,
+        urgency,
+      };
+    })
+    .sort((a, b) => a.minutes - b.minutes);
+
+  const sharpAlerts = games.flatMap((game) =>
+    game.lineMovement
+      .filter((lm) => lm.sharpAction)
+      .map((lm, idx) => ({
+        ...lm,
+        gameId: game.id,
+        gameName: game.shortName,
+        gameIdx: idx,
+      }))
+  );
 
   return (
-    <Card>
+    <Card data-testid="card-market-timing-alerts">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
             Market Timing Alerts
           </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge variant={autoRefresh ? "default" : "outline"}>
-              {autoRefresh ? "Live" : "Paused"}
-            </Badge>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setAutoRefresh(!autoRefresh)}
-            >
-              {autoRefresh ? "Pause" : "Resume"}
-            </Button>
-          </div>
+          <Select value={selectedSport} onValueChange={setSelectedSport}>
+            <SelectTrigger className="w-[120px]" data-testid="select-sport">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {SPORTS.map((sport) => (
+                <SelectItem key={sport} value={sport} data-testid={`select-sport-${sport}`}>
+                  {sport}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm mb-4" data-testid="banner-demo-timing">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
-        </div>
+        {data?.meta?.dataSources && data.meta.dataSources.length > 0 && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3" data-testid="text-data-sources">
+            <span>Sources:</span>
+            {data.meta.dataSources.map((src) => (
+              <Badge key={src} variant="outline" className="text-xs">
+                {src}
+              </Badge>
+            ))}
+            {data.meta.generatedAt && (
+              <span className="ml-auto">
+                Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+        )}
+
+        {isError && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm mb-4" data-testid="banner-error">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>Failed to load market data: {(error as Error)?.message ?? "Unknown error"}</span>
+          </div>
+        )}
+
         <Tabs defaultValue="movements">
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="movements" className="flex items-center gap-1">
+            <TabsTrigger value="movements" className="flex items-center gap-1" data-testid="tab-movements">
               <Activity className="h-3 w-3" />
               Line Movement
             </TabsTrigger>
-            <TabsTrigger value="windows" className="flex items-center gap-1">
+            <TabsTrigger value="windows" className="flex items-center gap-1" data-testid="tab-windows">
               <Target className="h-3 w-3" />
               Value Windows
             </TabsTrigger>
-            <TabsTrigger value="sharp" className="flex items-center gap-1">
+            <TabsTrigger value="sharp" className="flex items-center gap-1" data-testid="tab-sharp">
               <Zap className="h-3 w-3" />
               Sharp Action
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="movements" className="space-y-3">
-            {lineMovements.map((lm) => (
-              <div key={lm.id} className="p-3 rounded-lg border bg-card">
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                  <div>
-                    <p className="font-medium text-sm">{lm.game}</p>
-                    <p className="text-xs text-muted-foreground">{lm.market}: {lm.outcome}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getVelocityColor(lm.velocity)}>
-                      {lm.velocity === "steam" && <Zap className="h-3 w-3 mr-1" />}
-                      {lm.velocity.toUpperCase()}
-                    </Badge>
-                    {lm.sharpAction && (
-                      <Badge variant="destructive">
-                        <AlertTriangle className="h-3 w-3 mr-1" />
-                        Sharp
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div>
-                    <span className="text-muted-foreground">Open:</span>{" "}
-                    <span className="font-medium">{lm.openingLine > 0 ? "+" : ""}{lm.openingLine}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Current:</span>{" "}
-                    <span className="font-medium">{lm.currentLine > 0 ? "+" : ""}{lm.currentLine}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {lm.direction === "up" ? (
-                      <TrendingUp className="h-3 w-3 text-green-500" />
-                    ) : (
-                      <TrendingDown className="h-3 w-3 text-red-500" />
-                    )}
-                    <span className={lm.direction === "up" ? "text-green-500" : "text-red-500"}>
-                      {lm.movement > 0 ? "+" : ""}{lm.movement.toFixed(1)} pts
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Window:</span>{" "}
-                    <span className="font-medium">{lm.valueWindow}m</span>
-                  </div>
-                </div>
-
-                <div className="mt-2 flex items-center gap-4 text-xs">
-                  <div className="flex-1">
-                    <div className="flex justify-between mb-1">
-                      <span className="text-muted-foreground">Public: {lm.publicPercent}%</span>
-                      <span className="text-muted-foreground">Sharp: {lm.sharpPercent}%</span>
-                    </div>
-                    <Progress value={lm.sharpPercent} className="h-1.5" />
-                  </div>
-                  <Badge variant="outline" className="text-xs">
-                    {(lm.confidence * 100).toFixed(0)}% conf
-                  </Badge>
-                </div>
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : lineMovements.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground" data-testid="empty-movements">
+                <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No line movements detected</p>
+                <p className="text-xs">Check back closer to game time</p>
               </div>
-            ))}
+            ) : (
+              lineMovements.map((lm) => (
+                <div key={`${lm.gameId}-${lm.market}-${lm.gameIdx}`} className="p-3 rounded-lg border bg-card" data-testid={`card-movement-${lm.gameId}-${lm.market}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                    <div>
+                      <p className="font-medium text-sm" data-testid={`text-game-${lm.gameId}`}>{lm.gameName}</p>
+                      <p className="text-xs text-muted-foreground">{lm.market}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getVelocityColor(lm.velocity)} data-testid={`badge-velocity-${lm.velocity}`}>
+                        {lm.velocity === "steam" && <Zap className="h-3 w-3 mr-1" />}
+                        {lm.velocity.toUpperCase()}
+                      </Badge>
+                      {lm.sharpAction && (
+                        <Badge variant="destructive" data-testid="badge-sharp">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Sharp
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Open:</span>{" "}
+                      <span className="font-medium" data-testid="text-opening">{lm.opening > 0 ? "+" : ""}{lm.opening}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Current:</span>{" "}
+                      <span className="font-medium" data-testid="text-current">{lm.current > 0 ? "+" : ""}{lm.current}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {lm.direction === "up" ? (
+                        <TrendingUp className="h-3 w-3 text-green-500" />
+                      ) : lm.direction === "down" ? (
+                        <TrendingDown className="h-3 w-3 text-red-500" />
+                      ) : null}
+                      <span className={lm.direction === "up" ? "text-green-500" : lm.direction === "down" ? "text-red-500" : "text-muted-foreground"} data-testid="text-movement">
+                        {lm.movement > 0 ? "+" : ""}{lm.movement} pts
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="windows" className="space-y-3">
-            {valueWindows.map((vw) => (
-              <div key={vw.id} className="p-3 rounded-lg border bg-card">
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                  <div>
-                    <p className="font-medium text-sm">{vw.game}</p>
-                    <p className="text-xs text-muted-foreground">{vw.market}: {vw.outcome}</p>
-                  </div>
-                  <Badge className={getUrgencyColor(vw.urgency)}>
-                    {vw.windowMinutes}m left
-                  </Badge>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-2 text-xs mb-2">
-                  <div>
-                    <span className="text-muted-foreground">Current:</span>{" "}
-                    <span className="font-medium">{vw.currentOdds > 0 ? "+" : ""}{vw.currentOdds}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Expected Close:</span>{" "}
-                    <span className="font-medium">{vw.expectedClose > 0 ? "+" : ""}{vw.expectedClose}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Edge:</span>{" "}
-                    <span className="font-medium text-green-500">+{(vw.edge * 100).toFixed(1)}%</span>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground">{vw.reason}</p>
-                  <Button size="sm" variant="default" data-testid="button-add-to-parlay">
-                    <DollarSign className="h-3 w-3 mr-1" />
-                    Add to Parlay
-                  </Button>
-                </div>
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : valueWindows.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground" data-testid="empty-windows">
+                <Target className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>No value windows detected</p>
+                <p className="text-xs">Markets are efficiently priced right now</p>
               </div>
-            ))}
+            ) : (
+              valueWindows.map((vw) => (
+                <div key={vw.gameId} className="p-3 rounded-lg border bg-card" data-testid={`card-value-${vw.gameId}`}>
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                    <div>
+                      <p className="font-medium text-sm" data-testid={`text-value-game-${vw.gameId}`}>{vw.gameName}</p>
+                      <p className="text-xs text-muted-foreground">Value on: {vw.sideName} ({vw.side})</p>
+                    </div>
+                    <Badge className={getUrgencyColor(vw.urgency)} data-testid={`badge-urgency-${vw.urgency}`}>
+                      {vw.minutes < 1440 ? `${vw.minutes}m to tip` : `${Math.round(vw.minutes / 60)}h to tip`}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Odds:</span>{" "}
+                      <span className="font-medium" data-testid="text-odds">
+                        {vw.odds !== undefined ? (vw.odds > 0 ? `+${vw.odds}` : vw.odds) : "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Spread:</span>{" "}
+                      <span className="font-medium" data-testid="text-spread">
+                        {vw.spread !== undefined ? (vw.spread > 0 ? `+${vw.spread}` : vw.spread) : "N/A"}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">EV:</span>{" "}
+                      <span className={`font-medium ${vw.ev > 0 ? "text-green-500" : "text-red-500"}`} data-testid="text-ev">
+                        {vw.ev > 0 ? "+" : ""}{(vw.ev * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="sharp" className="space-y-3">
-            {sharpAlerts.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+            {isLoading ? (
+              <LoadingSkeleton />
+            ) : sharpAlerts.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground" data-testid="empty-sharp">
                 <Zap className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No sharp action detected currently</p>
                 <p className="text-xs">Monitoring for coordinated sharp moves...</p>
               </div>
             ) : (
               sharpAlerts.map((sa) => (
-                <div key={sa.id} className="p-3 rounded-lg border bg-card">
+                <div key={`${sa.gameId}-${sa.market}-${sa.gameIdx}`} className="p-3 rounded-lg border bg-card" data-testid={`card-sharp-${sa.gameId}-${sa.market}`}>
                   <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
                     <div>
-                      <p className="font-medium text-sm">{sa.game}</p>
-                      <p className="text-xs text-muted-foreground">{sa.market}: {sa.side}</p>
+                      <p className="font-medium text-sm" data-testid={`text-sharp-game-${sa.gameId}`}>{sa.gameName}</p>
+                      <p className="text-xs text-muted-foreground">{sa.market}</p>
                     </div>
-                    <Badge variant="destructive">
+                    <Badge variant="destructive" data-testid="badge-sharp-alert">
                       <Zap className="h-3 w-3 mr-1" />
-                      {sa.moveSize.toFixed(1)} pt move
+                      {Math.abs(sa.movement)} pt move
                     </Badge>
                   </div>
-                  
-                  <div className="flex flex-wrap gap-1 mb-2">
-                    {sa.sharpBooks.map((book) => (
-                      <Badge key={book} variant="outline" className="text-xs">
-                        {book}
-                      </Badge>
-                    ))}
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{sa.timing}</span>
-                    <span className="text-green-500 font-medium">{sa.recommendation}</span>
-                  </div>
-                  
-                  <div className="mt-2">
-                    <Progress value={sa.confidence * 100} className="h-1.5" />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(sa.confidence * 100).toFixed(0)}% confidence in sharp side
-                    </p>
+
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div>
+                      <span className="text-muted-foreground">Open:</span>{" "}
+                      <span className="font-medium">{sa.opening > 0 ? "+" : ""}{sa.opening}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Current:</span>{" "}
+                      <span className="font-medium">{sa.current > 0 ? "+" : ""}{sa.current}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {sa.direction === "up" ? (
+                        <TrendingUp className="h-3 w-3 text-green-500" />
+                      ) : sa.direction === "down" ? (
+                        <TrendingDown className="h-3 w-3 text-red-500" />
+                      ) : null}
+                      <span className={sa.direction === "up" ? "text-green-500" : sa.direction === "down" ? "text-red-500" : "text-muted-foreground"}>
+                        {sa.velocity.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))

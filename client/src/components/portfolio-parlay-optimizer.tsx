@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
-import { Briefcase, TrendingUp, Shield, Target, DollarSign, Shuffle, ChevronRight, AlertTriangle } from "lucide-react";
+import { Briefcase, TrendingUp, Shield, Target, DollarSign, Shuffle, ChevronRight, AlertTriangle, Info } from "lucide-react";
 import type { ParlayLeg } from "@shared/schema";
 
 interface PortfolioTicket {
@@ -35,94 +35,142 @@ interface PortfolioParlayOptimizerProps {
   bankroll: number;
 }
 
+function impliedProbability(decimalOdds: number): number {
+  return 1 / decimalOdds;
+}
+
+function combinedProbability(legs: ParlayLeg[]): number {
+  return legs.reduce((acc, leg) => acc * impliedProbability(leg.decimalOdds || 1.8), 1);
+}
+
+function combinedOdds(legs: ParlayLeg[]): number {
+  return legs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.8), 1);
+}
+
+function calculateEV(winProb: number, stake: number, payout: number): number {
+  return (winProb * payout) - ((1 - winProb) * stake);
+}
+
+function estimateCorrelation(legs: ParlayLeg[]): number {
+  const teams = legs.map(l => l.team);
+  const uniqueTeams = new Set(teams);
+  const teamOverlap = 1 - (uniqueTeams.size / teams.length);
+
+  const markets = legs.map(l => l.market);
+  const uniqueMarkets = new Set(markets);
+  const marketOverlap = 1 - (uniqueMarkets.size / markets.length);
+
+  return Math.min(0.95, teamOverlap * 0.5 + marketOverlap * 0.3 + 0.05);
+}
+
 function generatePortfolio(legs: ParlayLeg[], bankroll: number, riskTolerance: number): PortfolioTicket[] {
   if (legs.length < 3) return [];
-  
+
   const tickets: PortfolioTicket[] = [];
-  
+
   const anchorLegs = legs.slice(0, 3);
-  const anchorOdds = anchorLegs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.8), 1);
+  const anchorOdds = combinedOdds(anchorLegs);
+  const anchorWinProb = combinedProbability(anchorLegs);
+  const anchorStake = bankroll * 0.15 * (1 + riskTolerance * 0.1);
+  const anchorPayout = anchorStake * anchorOdds;
+  const anchorEV = calculateEV(anchorWinProb, anchorStake, anchorPayout);
   tickets.push({
     id: "anchor-1",
     name: "Anchor Parlay",
     legs: anchorLegs,
-    stake: bankroll * 0.15 * (1 + riskTolerance * 0.1),
-    winProbability: 0.25 + Math.random() * 0.15,
-    expectedValue: 0.04 + Math.random() * 0.06,
-    potentialPayout: bankroll * 0.15 * anchorOdds,
+    stake: anchorStake,
+    winProbability: anchorWinProb,
+    expectedValue: anchorStake > 0 ? anchorEV / anchorStake : 0,
+    potentialPayout: anchorPayout,
     riskLevel: "low",
-    correlation: 0.15,
+    correlation: estimateCorrelation(anchorLegs),
     role: "anchor",
   });
-  
+
   if (legs.length >= 5) {
     const satelliteLegs = legs.slice(2, 6);
-    const satelliteOdds = satelliteLegs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.9), 1);
+    const satOdds = combinedOdds(satelliteLegs);
+    const satWinProb = combinedProbability(satelliteLegs);
+    const satStake = bankroll * 0.08 * (1 + riskTolerance * 0.15);
+    const satPayout = satStake * satOdds;
+    const satEV = calculateEV(satWinProb, satStake, satPayout);
     tickets.push({
       id: "satellite-1",
       name: "Satellite Parlay A",
       legs: satelliteLegs,
-      stake: bankroll * 0.08 * (1 + riskTolerance * 0.15),
-      winProbability: 0.12 + Math.random() * 0.08,
-      expectedValue: 0.06 + Math.random() * 0.08,
-      potentialPayout: bankroll * 0.08 * satelliteOdds,
+      stake: satStake,
+      winProbability: satWinProb,
+      expectedValue: satStake > 0 ? satEV / satStake : 0,
+      potentialPayout: satPayout,
       riskLevel: "medium",
-      correlation: 0.25,
+      correlation: estimateCorrelation(satelliteLegs),
       role: "satellite",
     });
   }
-  
+
   if (legs.length >= 6) {
-    const satellite2Legs = [legs[0], legs[3], legs[5], ...(legs.length > 6 ? [legs[6]] : [])];
-    const satellite2Odds = satellite2Legs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.85), 1);
+    const sat2Legs = [legs[0], legs[3], legs[5], ...(legs.length > 6 ? [legs[6]] : [])];
+    const sat2Odds = combinedOdds(sat2Legs);
+    const sat2WinProb = combinedProbability(sat2Legs);
+    const sat2Stake = bankroll * 0.06 * (1 + riskTolerance * 0.15);
+    const sat2Payout = sat2Stake * sat2Odds;
+    const sat2EV = calculateEV(sat2WinProb, sat2Stake, sat2Payout);
     tickets.push({
       id: "satellite-2",
       name: "Satellite Parlay B",
-      legs: satellite2Legs,
-      stake: bankroll * 0.06 * (1 + riskTolerance * 0.15),
-      winProbability: 0.10 + Math.random() * 0.08,
-      expectedValue: 0.05 + Math.random() * 0.07,
-      potentialPayout: bankroll * 0.06 * satellite2Odds,
+      legs: sat2Legs,
+      stake: sat2Stake,
+      winProbability: sat2WinProb,
+      expectedValue: sat2Stake > 0 ? sat2EV / sat2Stake : 0,
+      potentialPayout: sat2Payout,
       riskLevel: "medium",
-      correlation: 0.18,
+      correlation: estimateCorrelation(sat2Legs),
       role: "satellite",
     });
   }
-  
+
   if (legs.length >= 8 && riskTolerance > 0.4) {
     const moonshotLegs = legs.slice(0, 8);
-    const moonshotOdds = moonshotLegs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.9), 1);
+    const moonOdds = combinedOdds(moonshotLegs);
+    const moonWinProb = combinedProbability(moonshotLegs);
+    const moonStake = bankroll * 0.02 * (1 + riskTolerance * 0.3);
+    const moonPayout = moonStake * moonOdds;
+    const moonEV = calculateEV(moonWinProb, moonStake, moonPayout);
     tickets.push({
       id: "moonshot-1",
       name: "Moonshot Parlay",
       legs: moonshotLegs,
-      stake: bankroll * 0.02 * (1 + riskTolerance * 0.3),
-      winProbability: 0.02 + Math.random() * 0.03,
-      expectedValue: 0.08 + Math.random() * 0.12,
-      potentialPayout: bankroll * 0.02 * moonshotOdds,
+      stake: moonStake,
+      winProbability: moonWinProb,
+      expectedValue: moonStake > 0 ? moonEV / moonStake : 0,
+      potentialPayout: moonPayout,
       riskLevel: "high",
-      correlation: 0.35,
+      correlation: estimateCorrelation(moonshotLegs),
       role: "moonshot",
     });
   }
-  
+
   if (legs.length >= 12 && riskTolerance > 0.6) {
-    const megaMoonshotLegs = legs.slice(0, 12);
-    const megaOdds = megaMoonshotLegs.reduce((acc, leg) => acc * (leg.decimalOdds || 1.85), 1);
+    const megaLegs = legs.slice(0, 12);
+    const megaOdds = combinedOdds(megaLegs);
+    const megaWinProb = combinedProbability(megaLegs);
+    const megaStake = bankroll * 0.01 * (1 + riskTolerance * 0.4);
+    const megaPayout = Math.min(megaStake * megaOdds, 1000000);
+    const megaEV = calculateEV(megaWinProb, megaStake, megaPayout);
     tickets.push({
       id: "moonshot-2",
       name: "Mega Moonshot",
-      legs: megaMoonshotLegs,
-      stake: bankroll * 0.01 * (1 + riskTolerance * 0.4),
-      winProbability: 0.005 + Math.random() * 0.01,
-      expectedValue: 0.10 + Math.random() * 0.15,
-      potentialPayout: Math.min(bankroll * 0.01 * megaOdds, 1000000),
+      legs: megaLegs,
+      stake: megaStake,
+      winProbability: megaWinProb,
+      expectedValue: megaStake > 0 ? megaEV / megaStake : 0,
+      potentialPayout: megaPayout,
       riskLevel: "high",
-      correlation: 0.45,
+      correlation: estimateCorrelation(megaLegs),
       role: "moonshot",
     });
   }
-  
+
   return tickets;
 }
 
@@ -130,17 +178,18 @@ function calculatePortfolioMetrics(tickets: PortfolioTicket[]): PortfolioMetrics
   const totalStake = tickets.reduce((sum, t) => sum + t.stake, 0);
   const weightedEV = totalStake > 0 ? tickets.reduce((sum, t) => sum + t.expectedValue * t.stake, 0) / totalStake : 0;
   const avgWinProb = totalStake > 0 ? tickets.reduce((sum, t) => sum + t.winProbability * t.stake, 0) / totalStake : 0;
-  
+
   const avgCorrelation = tickets.length > 0 ? tickets.reduce((sum, t) => sum + t.correlation, 0) / tickets.length : 0;
   const diversificationScore = 1 - avgCorrelation;
-  
-  const maxDrawdown = totalStake * 0.85;
-  const sharpeRatio = weightedEV / (avgCorrelation + 0.1);
-  
+
+  const maxDrawdown = totalStake;
+  const volatility = avgCorrelation + 0.1;
+  const sharpeRatio = volatility > 0 ? weightedEV / volatility : 0;
+
   const jackpotProb = tickets
     .filter(t => t.role === "moonshot")
     .reduce((prob, t) => 1 - (1 - prob) * (1 - t.winProbability), 0);
-  
+
   return {
     totalStake,
     portfolioEV: weightedEV,
@@ -156,12 +205,12 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
   const [riskTolerance, setRiskTolerance] = useState(0.5);
   const [selectedTicket, setSelectedTicket] = useState<string | null>(null);
 
-  const portfolio = useMemo(() => 
+  const portfolio = useMemo(() =>
     generatePortfolio(legs, bankroll, riskTolerance),
     [legs, bankroll, riskTolerance]
   );
 
-  const metrics = useMemo(() => 
+  const metrics = useMemo(() =>
     calculatePortfolioMetrics(portfolio),
     [portfolio]
   );
@@ -194,7 +243,7 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="text-center py-8 text-muted-foreground" data-testid="empty-portfolio">
             <Briefcase className="h-12 w-12 mx-auto mb-3 opacity-50" />
             <p className="font-medium">Add at least 3 legs to build a portfolio</p>
             <p className="text-sm">Portfolio optimization works best with 6+ legs</p>
@@ -213,14 +262,15 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-portfolio">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm" data-testid="banner-correlation-note">
+          <Info className="w-4 h-4 shrink-0" />
+          <span>Win probabilities derived from leg odds. Correlation is estimated from team/market overlap.</span>
         </div>
+
         <div className="p-3 rounded-lg border bg-muted/50">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
             <span className="text-sm font-medium">Risk Tolerance</span>
-            <Badge variant="outline">
+            <Badge variant="outline" data-testid="badge-risk-label">
               {riskTolerance < 0.3 ? "Conservative" : riskTolerance < 0.6 ? "Balanced" : "Aggressive"}
             </Badge>
           </div>
@@ -231,6 +281,7 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
             max={1}
             step={0.1}
             className="mb-2"
+            data-testid="slider-risk-tolerance"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>Safe</span>
@@ -239,22 +290,24 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-total-stake">
             <DollarSign className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
             <p className="text-lg font-bold">${metrics.totalStake.toFixed(0)}</p>
             <p className="text-xs text-muted-foreground">Total Stake</p>
           </div>
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-portfolio-ev">
             <TrendingUp className="h-4 w-4 mx-auto mb-1 text-green-500" />
-            <p className="text-lg font-bold text-green-500">+{(metrics.portfolioEV * 100).toFixed(1)}%</p>
+            <p className={`text-lg font-bold ${metrics.portfolioEV >= 0 ? "text-green-500" : "text-red-500"}`}>
+              {metrics.portfolioEV >= 0 ? "+" : ""}{(metrics.portfolioEV * 100).toFixed(1)}%
+            </p>
             <p className="text-xs text-muted-foreground">Portfolio EV</p>
           </div>
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-diversification">
             <Shield className="h-4 w-4 mx-auto mb-1 text-blue-500" />
             <p className="text-lg font-bold">{(metrics.diversificationScore * 100).toFixed(0)}%</p>
             <p className="text-xs text-muted-foreground">Diversification</p>
           </div>
-          <div className="p-3 rounded-lg border bg-card text-center">
+          <div className="p-3 rounded-lg border bg-card text-center" data-testid="stat-jackpot-chance">
             <Target className="h-4 w-4 mx-auto mb-1 text-amber-500" />
             <p className="text-lg font-bold">{(metrics.jackpotProbability * 100).toFixed(2)}%</p>
             <p className="text-xs text-muted-foreground">Jackpot Chance</p>
@@ -262,17 +315,18 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
         </div>
 
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
             <h4 className="font-medium">Optimized Tickets ({portfolio.length})</h4>
-            <Button size="sm" variant="outline">
+            <Button size="sm" variant="outline" data-testid="button-regenerate">
               <Shuffle className="h-3 w-3 mr-1" />
               Regenerate
             </Button>
           </div>
 
           {portfolio.map((ticket) => (
-            <div 
+            <div
               key={ticket.id}
+              data-testid={`ticket-${ticket.id}`}
               className={`p-3 rounded-lg border bg-card cursor-pointer transition-all ${
                 selectedTicket === ticket.id ? "ring-2 ring-primary" : "hover-elevate"
               }`}
@@ -311,9 +365,9 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
                 <div>
                   <span className="text-muted-foreground">Payout:</span>{" "}
                   <span className="font-medium text-green-500">
-                    ${ticket.potentialPayout >= 1000000 
-                      ? `${(ticket.potentialPayout / 1000000).toFixed(1)}M` 
-                      : ticket.potentialPayout >= 1000 
+                    ${ticket.potentialPayout >= 1000000
+                      ? `${(ticket.potentialPayout / 1000000).toFixed(1)}M`
+                      : ticket.potentialPayout >= 1000
                         ? `${(ticket.potentialPayout / 1000).toFixed(1)}K`
                         : ticket.potentialPayout.toFixed(0)}
                   </span>
@@ -324,17 +378,19 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
                 <div className="mt-3 pt-3 border-t space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Expected Value:</span>
-                    <span className="text-green-500 font-medium">+{(ticket.expectedValue * 100).toFixed(1)}%</span>
+                    <span className={`font-medium ${ticket.expectedValue >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {ticket.expectedValue >= 0 ? "+" : ""}{(ticket.expectedValue * 100).toFixed(1)}%
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">Correlation Factor:</span>
+                    <span className="text-muted-foreground">Correlation (estimated):</span>
                     <span className="font-medium">{(ticket.correlation * 100).toFixed(0)}%</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
                     <span className="font-medium">Legs: </span>
                     {ticket.legs.map(l => l.team).join(", ")}
                   </div>
-                  <Button size="sm" className="w-full mt-2">
+                  <Button size="sm" className="w-full mt-2" data-testid={`button-place-ticket-${ticket.id}`}>
                     <DollarSign className="h-3 w-3 mr-1" />
                     Place This Ticket
                   </Button>
@@ -345,7 +401,7 @@ export function PortfolioParlayOptimizer({ legs, bankroll }: PortfolioParlayOpti
         </div>
 
         {riskTolerance > 0.7 && (
-          <div className="p-3 rounded-lg border border-amber-500/50 bg-amber-500/10">
+          <div className="p-3 rounded-lg border border-amber-500/50 bg-amber-500/10" data-testid="banner-high-risk">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5" />
               <div className="text-sm">

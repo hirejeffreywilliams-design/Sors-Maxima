@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Lightbulb,
   History,
@@ -11,7 +14,8 @@ import {
   ChevronRight,
   Target,
   Flame,
-  Trophy
+  AlertCircle,
+  Info
 } from "lucide-react";
 
 interface Tip {
@@ -21,27 +25,43 @@ interface Tip {
   category: "strategy" | "timing" | "bankroll" | "analysis";
 }
 
-interface HighGradedBet {
+interface MarketGame {
+  id: string;
+  shortName: string;
+  name: string;
+  date: string;
+  homeTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  awayTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  consensus: {
+    homeMoneyline?: number;
+    awayMoneyline?: number;
+    spread?: number;
+    total?: number;
+    homeImpliedProb?: number;
+    awayImpliedProb?: number;
+  };
+  bookmakers: { book: string; homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number }[];
+  edgeAnalysis: { homeEV: number; awayEV: number; valueSide?: "home" | "away" | "none"; hasArbitrage: boolean };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+interface DerivedHighGradedBet {
   id: string;
   matchup: string;
   pick: string;
   odds: number;
   grade: string;
-  confidence: number;
+  ev: number;
   sport: string;
   gameTime: string;
-  reasoning: string;
-}
-
-interface BetHistoryItem {
-  id: string;
-  matchup: string;
-  pick: string;
-  odds: number;
-  result: "won" | "lost" | "pending";
-  stake: number;
-  payout: number;
-  date: string;
+  homeRecord: string;
+  awayRecord: string;
+  dataSource: string;
 }
 
 const dailyTips: Tip[] = [
@@ -83,121 +103,54 @@ const dailyTips: Tip[] = [
   }
 ];
 
-const generateHighGradedBets = (): HighGradedBet[] => {
-  const bets: HighGradedBet[] = [
-    {
-      id: "hg1",
-      matchup: "Chiefs vs Bills",
-      pick: "Chiefs +3.5",
-      odds: -110,
-      grade: "A",
-      confidence: 87,
-      sport: "NFL",
-      gameTime: "Sunday 1:00 PM",
-      reasoning: "Chiefs 8-2 ATS last 10 games, Bills on short week after Monday night"
-    },
-    {
-      id: "hg2",
-      matchup: "Eagles vs Cowboys",
-      pick: "Over 47.5",
-      odds: -105,
-      grade: "A-",
-      confidence: 82,
-      sport: "NFL",
-      gameTime: "Sunday 4:25 PM",
-      reasoning: "Both teams averaging 28+ PPG, favorable weather conditions"
-    },
-    {
-      id: "hg3",
-      matchup: "Yankees vs Red Sox",
-      pick: "Yankees ML",
-      odds: -145,
-      grade: "A",
-      confidence: 85,
-      sport: "MLB",
-      gameTime: "Tomorrow 7:05 PM",
-      reasoning: "Ace pitcher starting, 12-3 record vs division this season"
-    },
-    {
-      id: "hg4",
-      matchup: "Pacers vs Suns",
-      pick: "Pacers -2.5",
-      odds: -108,
-      grade: "B+",
-      confidence: 76,
-      sport: "NBA",
-      gameTime: "Tomorrow 9:00 PM",
-      reasoning: "Haliburton averaging 25+ at home, Suns missing key rotation player"
-    },
-    {
-      id: "hg5",
-      matchup: "Ravens vs Bengals",
-      pick: "Ravens -3",
-      odds: -115,
-      grade: "A-",
-      confidence: 81,
-      sport: "NFL",
-      gameTime: "Next Monday 8:15 PM",
-      reasoning: "Ravens dominant at home, Lamar Jackson 6-1 vs Bengals career"
-    }
-  ];
-  return bets;
-};
+function deriveHighGradedBets(games: MarketGame[], sport: string): DerivedHighGradedBet[] {
+  return games
+    .filter(g => g.bookmakers.length > 0 && (g.edgeAnalysis.homeEV > 0 || g.edgeAnalysis.awayEV > 0))
+    .map(game => {
+      const bestEV = Math.max(game.edgeAnalysis.homeEV, game.edgeAnalysis.awayEV);
+      const isHome = game.edgeAnalysis.homeEV >= game.edgeAnalysis.awayEV;
+      const team = isHome ? game.homeTeam : game.awayTeam;
+      const ml = isHome ? game.consensus.homeMoneyline : game.consensus.awayMoneyline;
 
-const generateBetHistory = (): BetHistoryItem[] => {
-  return [
-    {
-      id: "bh1",
-      matchup: "Bucks vs Heat",
-      pick: "Bucks -5.5",
-      odds: -110,
-      result: "won",
-      stake: 50,
-      payout: 95.45,
-      date: "Yesterday"
-    },
-    {
-      id: "bh2",
-      matchup: "49ers vs Seahawks",
-      pick: "49ers ML",
-      odds: -165,
-      result: "won",
-      stake: 75,
-      payout: 120.45,
-      date: "2 days ago"
-    },
-    {
-      id: "bh3",
-      matchup: "Dodgers vs Padres",
-      pick: "Over 8.5",
-      odds: -105,
-      result: "lost",
-      stake: 40,
-      payout: 0,
-      date: "3 days ago"
-    },
-    {
-      id: "bh4",
-      matchup: "Nuggets vs Clippers",
-      pick: "Jokic O25.5 pts",
-      odds: -120,
-      result: "won",
-      stake: 60,
-      payout: 110,
-      date: "4 days ago"
-    },
-    {
-      id: "bh5",
-      matchup: "Cowboys vs Eagles",
-      pick: "Eagles -3.5",
-      odds: -110,
-      result: "pending",
-      stake: 55,
-      payout: 0,
-      date: "Today"
-    }
-  ];
-};
+      let pickLabel = `${team.abbreviation} ML`;
+      if (game.consensus.spread !== undefined) {
+        const spreadVal = isHome ? game.consensus.spread : -(game.consensus.spread);
+        pickLabel = `${team.abbreviation} ${spreadVal > 0 ? "+" : ""}${spreadVal}`;
+      }
+
+      let grade = "D";
+      if (bestEV > 0.2) grade = "A";
+      else if (bestEV > 0.12) grade = "A-";
+      else if (bestEV > 0.08) grade = "B+";
+      else if (bestEV > 0.04) grade = "B";
+      else if (bestEV > 0) grade = "C";
+
+      const gameDate = new Date(game.date);
+      const now = new Date();
+      const diffMs = gameDate.getTime() - now.getTime();
+      const diffHours = diffMs / (1000 * 60 * 60);
+      let gameTime = gameDate.toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" });
+      if (diffHours < 24 && diffHours > 0) gameTime = `Today ${gameDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+      else if (diffHours < 48 && diffHours >= 24) gameTime = `Tomorrow ${gameDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`;
+
+      return {
+        id: game.id,
+        matchup: game.shortName,
+        pick: pickLabel,
+        odds: ml || 0,
+        grade,
+        ev: bestEV,
+        sport,
+        gameTime,
+        homeRecord: game.homeTeam.record,
+        awayRecord: game.awayTeam.record,
+        dataSource: game.dataSource,
+      };
+    })
+    .sort((a, b) => b.ev - a.ev);
+}
+
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
 
 const getCategoryColor = (category: string) => {
   switch (category) {
@@ -216,33 +169,38 @@ const getGradeColor = (grade: string) => {
   return "text-red-500";
 };
 
-const getResultColor = (result: string) => {
-  switch (result) {
-    case "won": return "bg-green-500/10 text-green-500";
-    case "lost": return "bg-red-500/10 text-red-500";
-    default: return "bg-yellow-500/10 text-yellow-500";
-  }
+const formatOdds = (odds: number) => {
+  if (odds === 0) return "N/A";
+  return odds > 0 ? `+${odds}` : `${odds}`;
 };
 
 export function BettingInsights() {
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
-  const [highGradedBets] = useState<HighGradedBet[]>(generateHighGradedBets);
-  const [betHistory] = useState<BetHistoryItem[]>(generateBetHistory);
-  
+  const [sport, setSport] = useState("NBA");
+
+  const { data, isLoading, isError, error } = useQuery<MarketSnapshot>({
+    queryKey: ["/api/market-snapshot", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/market-snapshot?sport=${sport}`);
+      if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
+      return res.json();
+    },
+  });
+
+  const highGradedBets = data ? deriveHighGradedBets(data.games, sport) : [];
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTipIndex(prev => (prev + 1) % dailyTips.length);
     }, 10000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const currentTip = dailyTips[currentTipIndex];
-  
-  const formatOdds = (odds: number) => odds > 0 ? `+${odds}` : `${odds}`;
-  
+
   return (
-    <div className="space-y-4">
-      <Card className="overflow-hidden" data-testid="card-daily-tip">
+    <div className="space-y-4" data-testid="section-betting-insights">
+      <Card className="overflow-visible" data-testid="card-daily-tip">
         <CardHeader className="pb-2 bg-gradient-to-r from-amber-500/10 to-orange-500/10">
           <CardTitle className="flex items-center gap-2 text-base">
             <Lightbulb className="w-5 h-5 text-amber-500" />
@@ -288,7 +246,7 @@ export function BettingInsights() {
           </div>
         </CardContent>
       </Card>
-      
+
       <Tabs defaultValue="upcoming" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="upcoming" className="gap-2" data-testid="tab-upcoming-bets">
@@ -300,39 +258,80 @@ export function BettingInsights() {
             Recent History
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="upcoming" className="mt-4 space-y-3">
-          {highGradedBets.slice(0, 4).map((bet) => (
-            <Card key={bet.id} className="overflow-hidden hover-elevate" data-testid={`card-high-graded-${bet.id}`}>
+          <div className="flex items-center justify-end">
+            <Select value={sport} onValueChange={setSport}>
+              <SelectTrigger className="w-28" data-testid="select-insights-sport">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {SPORTS.map(s => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {isLoading && (
+            <div className="space-y-3" data-testid="loading-insights">
+              {[1, 2, 3].map(i => (
+                <Card key={i} className="overflow-visible">
+                  <CardContent className="p-4 space-y-2">
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-5 w-2/3" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {isError && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm" data-testid="error-insights">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              <span>Failed to load picks: {(error as Error)?.message || "Unknown error"}</span>
+            </div>
+          )}
+
+          {!isLoading && !isError && highGradedBets.length === 0 && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border text-muted-foreground text-sm" data-testid="empty-insights">
+              <Info className="w-4 h-4 shrink-0" />
+              <span>No positive EV picks found for {sport} right now. Check back when more odds data is available.</span>
+            </div>
+          )}
+
+          {highGradedBets.slice(0, 6).map((bet) => (
+            <Card key={bet.id} className="overflow-visible hover-elevate" data-testid={`card-high-graded-${bet.id}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="secondary">{bet.sport}</Badge>
-                      <span className={`text-xl font-bold ${getGradeColor(bet.grade)}`}>
+                      <span className={`text-xl font-bold ${getGradeColor(bet.grade)}`} data-testid={`text-grade-${bet.id}`}>
                         {bet.grade}
                       </span>
-                      <span className="text-sm text-muted-foreground">{bet.confidence}% confidence</span>
+                      <span className="text-sm text-muted-foreground" data-testid={`text-ev-${bet.id}`}>EV: {bet.ev > 0 ? "+" : ""}{(bet.ev * 100).toFixed(1)}%</span>
                     </div>
-                    <h4 className="font-medium">{bet.matchup}</h4>
+                    <h4 className="font-medium" data-testid={`text-matchup-${bet.id}`}>{bet.matchup}</h4>
                     <div className="flex items-center gap-2 text-sm">
                       <Target className="w-3 h-3 text-primary" />
-                      <span className="font-semibold">{bet.pick}</span>
+                      <span className="font-semibold" data-testid={`text-pick-${bet.id}`}>{bet.pick}</span>
                       <span className="text-muted-foreground">({formatOdds(bet.odds)})</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Clock className="w-3 h-3" />
-                      {bet.gameTime}
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{bet.gameTime}</span>
+                      </div>
+                      <span>{bet.homeRecord} vs {bet.awayRecord}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-2 italic">
-                      {bet.reasoning}
-                    </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     {bet.grade === "A" && (
                       <div className="flex items-center gap-1 text-amber-500">
                         <Flame className="w-4 h-4" />
-                        <span className="text-xs font-medium">Hot Pick</span>
+                        <span className="text-xs font-medium">Top Pick</span>
                       </div>
                     )}
                   </div>
@@ -340,54 +339,21 @@ export function BettingInsights() {
               </CardContent>
             </Card>
           ))}
-          <div className="text-center pt-2">
-            <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-all-picks">
-              View All Picks
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
+
+          {data && (
+            <div className="text-center pt-2 text-xs text-muted-foreground" data-testid="text-insights-source">
+              {data.meta.dataSources.join(" + ")} | Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}
+            </div>
+          )}
         </TabsContent>
-        
+
         <TabsContent value="history" className="mt-4 space-y-3">
-          {betHistory.map((bet) => (
-            <Card key={bet.id} className="overflow-hidden" data-testid={`card-history-${bet.id}`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="space-y-1 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="secondary" className={getResultColor(bet.result)}>
-                        {bet.result === "won" && <Trophy className="w-3 h-3 mr-1" />}
-                        {bet.result.toUpperCase()}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{bet.date}</span>
-                    </div>
-                    <h4 className="font-medium text-sm">{bet.matchup}</h4>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span>{bet.pick}</span>
-                      <span className="text-muted-foreground">({formatOdds(bet.odds)})</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground">Stake: ${bet.stake}</p>
-                    {bet.result === "won" && (
-                      <p className="text-sm font-semibold text-green-500">+${(bet.payout - bet.stake).toFixed(2)}</p>
-                    )}
-                    {bet.result === "lost" && (
-                      <p className="text-sm font-semibold text-red-500">-${bet.stake}</p>
-                    )}
-                    {bet.result === "pending" && (
-                      <p className="text-sm font-semibold text-yellow-500">Pending</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-          <div className="text-center pt-2">
-            <Button variant="outline" size="sm" className="gap-2" data-testid="button-view-all-history">
-              View Full History
-              <ChevronRight className="w-4 h-4" />
-            </Button>
+          <div className="flex flex-col items-center justify-center py-8 text-center" data-testid="empty-bet-history">
+            <History className="w-10 h-10 text-muted-foreground/50 mb-3" />
+            <p className="text-sm font-medium text-muted-foreground">No bet history yet</p>
+            <p className="text-xs text-muted-foreground/70 mt-1 max-w-xs">
+              Your tracked bets will appear here once you start placing and recording wagers.
+            </p>
           </div>
         </TabsContent>
       </Tabs>
