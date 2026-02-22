@@ -731,7 +731,7 @@ export default function AdminMarketing() {
             AI Marketing Tools
           </h1>
           <p className="text-muted-foreground mt-1">
-            AI-powered marketing automation to drive growth to $1 billion
+            Marketing automation to drive growth
           </p>
         </div>
         <Badge className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">

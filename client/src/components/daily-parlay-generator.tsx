@@ -10,7 +10,6 @@ import {
   DollarSign, BarChart3, Shield, RefreshCw, ChevronRight,
   Sparkles, Crown, Timer, Atom, Brain, Check
 } from "lucide-react";
-import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
@@ -240,14 +239,13 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
               </div>
               <div>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  AI Daily Parlays
-                  <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
-                    <Atom className="w-3 h-3" />
-                    Q-Engine
+                  Daily Parlays
+                  <Badge variant="outline" className="gap-1 bg-blue-500/10 border-blue-500/30 text-blue-400">
+                    ESPN Data
                   </Badge>
                 </CardTitle>
                 <CardDescription>
-                  AI-optimized strategies for maximum winning potential
+                  Built from today's real games and odds data
                 </CardDescription>
               </div>
             </div>
@@ -259,7 +257,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                 className="gap-2"
               >
                 <Brain className="h-4 w-4" />
-                AI Strategy
+                Game Plan
               </Button>
               <Button 
                 size="lg"
@@ -288,7 +286,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
             <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-4 animate-in fade-in slide-in-from-top-4">
               <div className="flex items-center gap-2 text-primary font-bold">
                 <Brain className="w-5 h-5" />
-                AI Daily Game Plan
+                Daily Game Plan
               </div>
               <p className="text-sm leading-relaxed">{strategy.summary || strategy.overall_strategy_summary}</p>
               
@@ -318,7 +316,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
               )}
             </div>
           )}
-          <QuantumAnalysisIndicator />
+          
           
           <div className="grid gap-4 md:grid-cols-3 mt-4">
             <div className="p-4 rounded-lg bg-muted/50 text-center">

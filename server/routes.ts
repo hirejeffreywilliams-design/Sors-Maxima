@@ -1371,10 +1371,10 @@ Format your response clearly with sections and bullet points.`;
         generatedAt: new Date().toISOString(),
         dataSources: {
           primary: "ESPN Live Data",
-          analysis: "46-Factor Prediction Engine",
-          agent: "Real-Time Analytics Agent",
+          analysis: "Statistical Model",
+          note: "Odds and game data sourced from ESPN. Analysis is model-estimated, not guaranteed.",
         },
-        disclaimer: "No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
+        disclaimer: "For entertainment purposes only. No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
     } catch (err) {
       logError(err instanceof Error ? err : new Error(String(err)), {
@@ -1419,10 +1419,10 @@ Format your response clearly with sections and bullet points.`;
         dataRefreshedAt: new Date().toISOString(),
         dataSources: {
           primary: "ESPN Live Data",
-          analysis: "46-Factor Prediction Engine",
-          agent: "Real-Time Analytics Agent",
+          analysis: "Statistical Model",
+          note: "Odds and game data sourced from ESPN. Analysis is model-estimated, not guaranteed.",
         },
-        disclaimer: "No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
+        disclaimer: "For entertainment purposes only. No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
     } catch (err) {
       logError(err instanceof Error ? err : new Error(String(err)), {

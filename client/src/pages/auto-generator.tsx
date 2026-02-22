@@ -413,7 +413,7 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
             <div className="pt-3 border-t">
               <p className="text-sm font-medium mb-2 flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-blue-500" />
-                AI Analysis Scores
+                Analysis Scores (Model Estimated)
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                 <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
@@ -874,7 +874,7 @@ export default function AutoGenerator() {
               {isGenerating ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing 46 Factors...
+                  Analyzing Games...
                 </>
               ) : (
                 <>

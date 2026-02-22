@@ -432,7 +432,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          AI-powered analysis of team schemes and coaching patterns affecting ticket outcomes
+          Analysis of team schemes and coaching patterns affecting ticket outcomes
         </p>
       </CardHeader>
       <CardContent>

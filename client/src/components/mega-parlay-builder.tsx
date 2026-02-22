@@ -420,7 +420,7 @@ export function MegaParlayBuilder({ legs, stake, result, availableLegs = [], onA
               <div className="flex items-center gap-2 mb-3">
                 <Sparkles className="w-4 h-4" />
                 <span className="font-medium">Smart Recommendations</span>
-                <span className="text-xs text-muted-foreground">AI-powered leg suggestions</span>
+                <span className="text-xs text-muted-foreground">Data-driven leg suggestions</span>
               </div>
               
               {smartRecommendations.length === 0 ? (

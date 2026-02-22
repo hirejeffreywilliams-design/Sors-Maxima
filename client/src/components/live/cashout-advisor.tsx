@@ -232,7 +232,7 @@ export function CashoutAdvisor() {
           <DollarSign className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
           <h3 className="font-semibold mb-1">No Active Bets</h3>
           <p className="text-sm text-muted-foreground">
-            Place some bets to see AI-powered cash-out recommendations here.
+            Place some bets to see cash-out recommendations here.
           </p>
         </CardContent>
       </Card>

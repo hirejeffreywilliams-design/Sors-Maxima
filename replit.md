@@ -1,26 +1,15 @@
 # Sors Maxima - Sports Betting Intelligence
 
 ## Overview
-Sors Maxima is an AI-powered sports betting intelligence platform designed to help users construct more intelligent parlays. It provides coherence scores, pattern recognition, and optimized predictions using advanced probability analysis, correlation modeling, and optimal stake sizing. The project aims to provide a competitive edge in the sports betting market through data-driven decision-making.
+Sors Maxima is a sports betting intelligence platform designed to help users construct more intelligent parlays using real ESPN game data. It provides statistical analysis, odds comparison, and parlay building tools. The project aims to provide a competitive edge through data-driven decision-making with honest, transparent data sourcing.
 
 ## Recent Changes (Feb 2026)
-- Added 8 international soccer leagues: EPL, La Liga, Bundesliga, Serie A, Ligue 1, MLS, Champions League, International
-- Soccer-specific ticket generation with xG analysis, possession stats, formation matchups, and unique market types (1X2, BTTS, Over/Under Goals, Asian Handicap)
-- Revamped pricing tiers: Starter (Free), Sharp ($29/mo), Edge ($59/mo), Max ($119/mo) with logical progressive benefits
-- Added 12 reserved/disabled feature flags for future admin activation (live cashout, auto bet placement, copy betting, streaming odds, AI autopilot, backtesting, cross-sport correlation, referee analysis, weather model, sharp money tracker, webhooks, multi-currency)
-- Updated landing page to reflect "14+ Sports & Leagues" coverage
-- Added soccer leagues to parlay strategy builder sport filters
-- Completed 29-item UX/clarity audit across all user and admin interfaces
-- Renamed misleading "Quantum" branding to "Advanced" in user-facing labels
-- Simplified betting jargon: Kelly→"Optimal Stake", CLV→"Line Value", Schemes→"Patterns", SGP expanded
-- Renamed nav items: Upgrade→Plans, Factors→Analysis, Predictions→Engine
-- Removed orphaned routes (/tracker, /analytics, /landing for authenticated users)
-- Added Daily Parlays to main navigation
-- Made responsible gaming footer visible on mobile
-- Added breadcrumbs to all admin sub-pages via AdminGuard wrapper
-- Added confidence score context labels (High/Medium/Low)
-- Added AI Credits explanation on pricing page
-- Moved Training Center to admin-only access
+- **Major Honesty Transformation**: Removed all fake/random analysis layers (EV, line movements, betting percentages, weather, situational factors, historical trends)
+- **Navigation Simplified**: Reduced from 15 to 7 core items (Generate, Daily Picks, Live, Tools, Rosters, Plans, Admin). Secondary features accessible via hamburger menu.
+- **Honest Labeling**: Replaced "46-Factor Prediction Engine" with "Statistical Model", removed misleading "AI-powered" and "AI-generated" claims throughout
+- **Daily Parlays Fixed**: Replaced hardcoded demo data with real ESPN game data fetch, removed fake confidence/EV scores
+- **Data Source Transparency**: All ticket data clearly attributed as "ESPN", "ESPN-derived", or "model-estimated"
+- **Previous changes**: Added 8 international soccer leagues, revamped pricing tiers, 29-item UX/clarity audit, simplified betting jargon, responsible gaming improvements
 
 ## User Preferences
 I want iterative development.

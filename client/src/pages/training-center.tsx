@@ -749,7 +749,7 @@ export default function TrainingCenter() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Layers className="w-5 h-5" />
-                46 Factor Performance Analysis
+                Statistical Performance Analysis
               </CardTitle>
               <CardDescription>
                 Detailed breakdown of all contributing factors by category

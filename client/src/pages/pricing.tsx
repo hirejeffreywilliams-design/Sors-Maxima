@@ -306,7 +306,7 @@ export default function Pricing() {
             </div>
             <Progress value={100 - creditsUsedPercent} className="h-2" data-testid="progress-credits" />
             <p className="text-sm text-muted-foreground">
-              Credits reset daily at midnight UTC. Each credit = one AI-powered action (like generating a ticket or running an analysis).
+              Credits reset daily at midnight UTC. Each credit = one action (like generating a ticket or running an analysis).
             </p>
             <div className="pt-2 border-t">
               <p className="text-sm font-medium mb-2">What uses 1 credit:</p>

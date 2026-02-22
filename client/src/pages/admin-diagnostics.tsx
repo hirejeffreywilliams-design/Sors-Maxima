@@ -219,7 +219,7 @@ export default function AdminDiagnostics() {
             System Diagnostics
           </h1>
           <p className="text-muted-foreground mt-1">
-            AI-powered system analysis with pattern recognition
+            System analysis with pattern recognition
           </p>
         </div>
         <Badge variant="outline" className="gap-1">

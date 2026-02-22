@@ -339,7 +339,7 @@ export default function LegalPage() {
 
                   <section>
                     <h3 className="font-semibold mb-2">3. Independence of Analysis</h3>
-                    <p>Our affiliate relationships do not influence our analysis algorithms, predictions, or recommendations. Our AI-powered analysis engine operates independently of any commercial partnerships. Odds are compared across multiple sportsbooks to ensure users receive the best available information.</p>
+                    <p>Our affiliate relationships do not influence our analysis algorithms, predictions, or recommendations. Our statistical analysis engine operates independently of any commercial partnerships. Odds are compared across multiple sportsbooks to ensure users receive the best available information.</p>
                   </section>
 
                   <section>

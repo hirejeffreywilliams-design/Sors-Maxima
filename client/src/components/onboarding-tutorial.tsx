@@ -29,17 +29,17 @@ interface TutorialStep {
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Sors Maxima",
-    description: "Your AI-powered sports betting intelligence platform. Let's walk through how to get the most out of your experience.",
+    description: "Your sports betting intelligence platform. Let's walk through how to get the most out of your experience.",
     icon: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
     tips: [
-      "Our AI analyzes 46 factors for each bet",
-      "We use real-time odds from major sportsbooks",
+      "We use real ESPN game data for all picks",
+      "Odds from ESPN are compared and analyzed",
       "All recommendations are graded A-F for easy decision making"
     ]
   },
   {
     title: "Generate Smart Tickets",
-    description: "The home page is your ticket generator. Select sports, set your risk level, and let our AI create optimized parlays.",
+    description: "The home page is your ticket generator. Select sports, set your risk level, and generate optimized parlays from real data.",
     icon: <Target className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
     tips: [
       "Choose multiple sports for diversified tickets",
@@ -50,7 +50,7 @@ const tutorialSteps: TutorialStep[] = [
   },
   {
     title: "Quick Pick Feature",
-    description: "Short on time? Hit the Quick Pick button for instant AI-generated tickets based on today's best opportunities.",
+    description: "Short on time? Hit the Quick Pick button for instant tickets based on today's best opportunities.",
     icon: <Zap className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-500" />,
     tips: [
       "One click generates 3 optimized tickets",

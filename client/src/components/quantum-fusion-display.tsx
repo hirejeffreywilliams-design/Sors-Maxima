@@ -464,7 +464,7 @@ export function QuantumFusionEngineBanner() {
                 <Badge className="bg-violet-500/10 text-violet-500 text-xs">Active</Badge>
               </h3>
               <p className="text-sm text-muted-foreground">
-                {stats.totalFactors} factors • {stats.synergyRules} synergy rules • {Math.round(stats.avgHistoricalAccuracy * 100)}% accuracy
+                Statistical model using ESPN game data, team records, and odds analysis
               </p>
             </div>
           </div>

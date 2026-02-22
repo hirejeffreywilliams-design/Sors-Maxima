@@ -78,7 +78,7 @@ const changelog: ChangelogEntry[] = [
       { text: "Error & Security Center with system health monitoring", icon: Shield, tag: "new" },
       { text: "25+ categorized error codes with admin troubleshooting guides", icon: Bug, tag: "new" },
       { text: "IP blocking system - automatic and manual with admin controls", icon: Shield, tag: "new" },
-      { text: "AI-powered diagnostics for admin", icon: Brain, tag: "new" },
+      { text: "System diagnostics for admin", icon: Brain, tag: "new" },
       { text: "AI Marketing Tools for content generation and growth analytics", icon: CreditCard, tag: "new" },
     ],
   },
@@ -115,7 +115,7 @@ const changelog: ChangelogEntry[] = [
     type: "major",
     title: "Initial Launch",
     highlights: [
-      { text: "Smart Ticket Generator with AI-powered optimization", icon: Zap, tag: "new" },
+      { text: "Smart Ticket Generator with data-driven optimization", icon: Zap, tag: "new" },
       { text: "Simulation engine for probability analysis", icon: Brain, tag: "new" },
       { text: "Multi-sport coverage: NBA, NFL, MLB, NHL, NCAAB, NCAAF", icon: Activity, tag: "new" },
       { text: "Stripe-powered subscription billing with 4 tiers", icon: CreditCard, tag: "new" },

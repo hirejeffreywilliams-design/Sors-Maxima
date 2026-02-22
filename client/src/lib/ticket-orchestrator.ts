@@ -92,7 +92,7 @@ export interface TicketLeg {
     odds: "ESPN" | "ESPN-derived" | "model-estimated";
     game: "ESPN Live" | "scheduled";
     injury: "ESPN Rosters" | "estimated";
-    analysis: "46-Factor Prediction Engine";
+    analysis: "Statistical Model";
   };
 }
 

@@ -98,7 +98,7 @@ export interface TicketLeg {
     odds: "ESPN" | "ESPN-derived" | "model-estimated";
     game: "ESPN Live" | "scheduled";
     injury: "ESPN Rosters" | "estimated";
-    analysis: "46-Factor Prediction Engine";
+    analysis: "Statistical Model";
   };
 }
 
@@ -454,7 +454,7 @@ function generateSoccerLeg(league: string, marketType: string): TicketLeg {
       odds: "model-estimated",
       game: "scheduled",
       injury: "estimated",
-      analysis: "46-Factor Prediction Engine",
+      analysis: "Statistical Model",
     },
   };
 }
@@ -899,7 +899,7 @@ function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketT
       odds: oddsSource,
       game: gameSource,
       injury: "estimated",
-      analysis: "46-Factor Prediction Engine",
+      analysis: "Statistical Model",
     },
   };
 }
@@ -1103,7 +1103,7 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
       odds: "model-estimated",
       game: "scheduled",
       injury: "estimated",
-      analysis: "46-Factor Prediction Engine",
+      analysis: "Statistical Model",
     },
   };
 }

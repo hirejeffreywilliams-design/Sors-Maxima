@@ -156,10 +156,10 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
       
       startContinuousLearning();
-      log("AI learning engine activated - improving predictions every second");
+      log("Statistical model engine started");
       
       startAnalyticsAgent();
-      log("Analytics agent engine started — monitoring all systems behind the scenes");
+      log("ESPN data agent started — live game monitoring active");
     },
   );
 })();

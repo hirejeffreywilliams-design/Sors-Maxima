@@ -6,60 +6,40 @@ import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboar
 
 function generateEVAnalysis(decimalOdds: number, outcomeId: string): EVAnalysis {
   const impliedProbability = 1 / decimalOdds;
-  const variance = (Math.random() - 0.5) * 0.15;
-  const modelProbability = Math.min(0.95, Math.max(0.05, impliedProbability + variance));
-  const edge = (modelProbability - impliedProbability) / impliedProbability;
-  
-  let evRating: "strong" | "moderate" | "weak" | "negative";
-  if (edge > 0.08) evRating = "strong";
-  else if (edge > 0.03) evRating = "moderate";
-  else if (edge > 0) evRating = "weak";
-  else evRating = "negative";
+  const modelProbability = impliedProbability;
+  const edge = 0;
   
   return {
     legId: outcomeId,
     impliedProbability,
     modelProbability,
     edge,
-    isPositiveEV: edge > 0,
-    evRating,
+    isPositiveEV: false,
+    evRating: "weak" as "strong" | "moderate" | "weak" | "negative",
   };
 }
 
 function generateLineMovement(gameId: string, market: string, outcome: string, currentOdds: number): LineMovement {
-  const movementAmount = (Math.random() - 0.5) * 30;
-  const openingOdds = currentOdds - movementAmount;
-  const sharpAction = Math.abs(movementAmount) > 10 && Math.random() > 0.6;
-  
-  let direction: "steam" | "reverse" | "stable";
-  if (Math.abs(movementAmount) < 5) direction = "stable";
-  else if (movementAmount > 0) direction = "steam";
-  else direction = "reverse";
-  
   return {
     gameId,
     market,
     outcome,
-    openingOdds,
+    openingOdds: currentOdds,
     currentOdds,
-    movement: movementAmount,
-    direction,
-    sharpAction,
+    movement: 0,
+    direction: "stable" as "steam" | "reverse" | "stable",
+    sharpAction: false,
   };
 }
 
 function generateBettingPercentages(gameId: string, market: string, outcome: string): BettingPercentages {
-  const publicPercentage = Math.floor(Math.random() * 40) + 30;
-  const moneyPercentage = Math.floor(Math.random() * 60) + 20;
-  const sharpSide = moneyPercentage > 60 && publicPercentage < 45;
-  
   return {
     gameId,
     market,
     outcome,
-    publicPercentage,
-    moneyPercentage,
-    sharpSide,
+    publicPercentage: 50,
+    moneyPercentage: 50,
+    sharpSide: false,
   };
 }
 
@@ -149,61 +129,23 @@ function generateWeather(gameId: string, sport: Sport): WeatherData | undefined 
   if (sport === "NBA" || sport === "NCAAB" || sport === "NHL") {
     return { gameId, temperature: 70, windSpeed: 0, precipitation: 0, conditions: "dome", impactOnTotal: 0 };
   }
-  
-  const conditions: Array<"clear" | "cloudy" | "rain" | "snow"> = ["clear", "cloudy", "rain", "snow"];
-  const condition = conditions[Math.floor(Math.random() * 4)];
-  const temperature = Math.floor(Math.random() * 50) + 30;
-  const windSpeed = Math.floor(Math.random() * 25);
-  const precipitation = condition === "rain" ? Math.random() * 0.5 : condition === "snow" ? Math.random() * 0.3 : 0;
-  
-  let impactOnTotal = 0;
-  if (windSpeed > 15) impactOnTotal -= 3;
-  if (temperature < 40) impactOnTotal -= 2;
-  if (precipitation > 0.2) impactOnTotal -= 4;
-  
-  return { gameId, temperature, windSpeed, precipitation, conditions: condition, impactOnTotal };
+  return undefined;
 }
 
-function generateSituationalFactors(gameId: string, homeTeam: string, awayTeam: string): SituationalFactor[] {
-  const factors: SituationalFactor[] = [];
-  const possibleFactors: Array<{ type: "back_to_back" | "rest_advantage" | "revenge_game" | "divisional" | "primetime" | "travel"; description: string; impactRating: number }> = [
-    { type: "back_to_back", description: "Playing second of back-to-back games", impactRating: -0.15 },
-    { type: "rest_advantage", description: "3+ days rest advantage", impactRating: 0.1 },
-    { type: "revenge_game", description: "Lost to opponent by 20+ last meeting", impactRating: 0.08 },
-    { type: "divisional", description: "Divisional rivalry matchup", impactRating: 0.05 },
-    { type: "primetime", description: "National TV primetime game", impactRating: 0.03 },
-    { type: "travel", description: "Cross-country travel (3+ time zones)", impactRating: -0.08 },
-  ];
-  
-  [homeTeam, awayTeam].forEach(team => {
-    const teamFactors = possibleFactors.filter(() => Math.random() > 0.7);
-    if (teamFactors.length > 0) {
-      factors.push({
-        gameId,
-        team,
-        factors: teamFactors,
-      });
-    }
-  });
-  
-  return factors;
+function generateSituationalFactors(_gameId: string, _homeTeam: string, _awayTeam: string): SituationalFactor[] {
+  return [];
 }
 
-function generateHistoricalTrends(playerId: string, playerName: string, category: string, line: number): HistoricalTrend {
-  const hitRate = Math.random() * 0.4 + 0.4;
-  const last10 = Math.floor(Math.random() * 6) + 4;
-  const streak = Math.floor(Math.random() * 8);
-  const streakType: "over" | "under" | "none" = streak > 2 ? (Math.random() > 0.5 ? "over" : "under") : "none";
-  
+function generateHistoricalTrends(playerId: string, _playerName: string, category: string, line: number): HistoricalTrend {
   return {
     playerId,
     category,
     line,
-    hitRate,
-    last10,
-    streak,
-    streakType,
-    homeAwayFactor: Math.random() * 0.2 - 0.1,
+    hitRate: 0.5,
+    last10: 5,
+    streak: 0,
+    streakType: "none" as "over" | "under" | "none",
+    homeAwayFactor: 0,
   };
 }
 

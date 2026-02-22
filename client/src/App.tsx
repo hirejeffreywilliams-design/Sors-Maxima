@@ -210,19 +210,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "AI-powered Smart Ticket Generator - Create optimized parlays" },
-  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Power Parlays - AI-generated top picks refreshed every day" },
-  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "nav-builder", tooltip: "Visual Parlay Builder - Drag-and-drop interface for building tickets" },
-  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
-  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, player projections" },
-  { href: "/sport-analysis", icon: FlaskConical, label: "Analysis", testId: "nav-sport-analysis", tooltip: "Sport Analysis - Deep dive into 46 factors across 14 sports" },
-  { href: "/pipeline", icon: GitBranch, label: "Engine", testId: "nav-pipeline", tooltip: "Prediction Engine - See how your picks are built step by step" },
-  { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
-  { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },
-  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },
-  { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance", tooltip: "Track bets, ROI, multi-book balances, and taxes" },
-  { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings", tooltip: "Notifications, responsible gaming, and backup" },
-  { href: "/roadmap", icon: Map, label: "Roadmap", testId: "nav-roadmap", tooltip: "Product roadmap - See what's coming next" },
+  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real ESPN game data" },
+  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Parlays - Top picks from today's real games" },
+  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
+  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Betting tools - Odds calculators, correlations, comparisons" },
+  { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports from ESPN" },
   { href: "/pricing", icon: CreditCard, label: "Plans", testId: "nav-pricing", tooltip: "View plans & pricing" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
@@ -285,8 +277,17 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
       </div>
       
       <div className="border-t pt-4 pb-6 px-4 space-y-3">
+        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">More</div>
         <nav className="space-y-1 pb-2">
           {[
+            { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
+            { href: "/sport-analysis", icon: FlaskConical, label: "Analysis", testId: "mobile-nav-analysis" },
+            { href: "/pipeline", icon: GitBranch, label: "Engine", testId: "mobile-nav-pipeline" },
+            { href: "/bankroll", icon: Wallet, label: "Finance", testId: "mobile-nav-finance" },
+            { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
+            { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
+            { href: "/rewards", icon: Trophy, label: "Rewards", testId: "mobile-nav-rewards" },
+            { href: "/roadmap", icon: Map, label: "Roadmap", testId: "mobile-nav-roadmap" },
             { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
             { href: "/changelog", icon: Megaphone, label: "What's New", testId: "mobile-nav-changelog" },

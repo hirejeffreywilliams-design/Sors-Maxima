@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 
 const quickLinks = [
-  { href: "/", label: "Smart Ticket Generator", description: "AI-powered parlay optimization", icon: Sparkles },
+  { href: "/", label: "Smart Ticket Generator", description: "Build parlays from real ESPN data", icon: Sparkles },
   { href: "/builder", label: "Visual Parlay Builder", description: "Drag-and-drop ticket builder", icon: Zap },
   { href: "/tools", label: "Pro Tools", description: "Odds comparison & analytics", icon: BarChart3 },
 ];
