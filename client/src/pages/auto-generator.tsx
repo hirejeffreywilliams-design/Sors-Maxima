@@ -738,25 +738,38 @@ export default function AutoGenerator() {
                   onClick={() => toggleSport(sport.id)}
                   data-testid={`button-sport-${sport.id}`}
                 >
-                  <span className="text-base sm:text-xl font-bold">{sport.id}</span>
+                  <span className="text-sm sm:text-xl font-bold">{sport.id}</span>
                   <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
                 </Button>
               ))}
               <div className="col-span-3 sm:col-span-3 lg:col-span-6 text-xs text-muted-foreground font-medium pt-2 border-t mt-1">International Soccer</div>
-              {sportConfig.slice(6).map(sport => (
-                <Button
-                  key={sport.id}
-                  variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                  className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
-                    selectedSports.includes(sport.id) ? sport.color : ""
-                  }`}
-                  onClick={() => toggleSport(sport.id)}
-                  data-testid={`button-sport-${sport.id}`}
-                >
-                  <span className="text-base sm:text-xl font-bold">{sport.id.replace("Soccer_", "")}</span>
-                  <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
-                </Button>
-              ))}
+              {sportConfig.slice(6).map(sport => {
+                const shortId = sport.id.replace("Soccer_", "");
+                const mobileAbbrevs: Record<string, string> = {
+                  "LALIGA": "LIGA",
+                  "BUNDESLIGA": "BUN",
+                  "SERIEA": "SER",
+                  "LIGUE1": "LG1",
+                };
+                const mobileLabel = mobileAbbrevs[shortId] || shortId;
+                return (
+                  <Button
+                    key={sport.id}
+                    variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                    className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
+                      selectedSports.includes(sport.id) ? sport.color : ""
+                    }`}
+                    onClick={() => toggleSport(sport.id)}
+                    data-testid={`button-sport-${sport.id}`}
+                  >
+                    <span className="text-sm sm:text-xl font-bold">
+                      <span className="sm:hidden">{mobileLabel}</span>
+                      <span className="hidden sm:inline">{shortId}</span>
+                    </span>
+                    <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
+                  </Button>
+                );
+              })}
             </div>
             
             <Collapsible open={showSettings} onOpenChange={setShowSettings}>

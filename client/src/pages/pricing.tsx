@@ -277,7 +277,10 @@ export default function Pricing() {
                 >
                   {currentTier === tier.id ? 'Current Plan' : 
                    tier.id === 'free' ? 'Start Free' : 
-                   `Upgrade to ${tier.name} — 7-Day Free Trial`}
+                   <>
+                     <span className="sm:hidden">Try {tier.name} Free</span>
+                     <span className="hidden sm:inline">Upgrade to {tier.name} — 7-Day Free Trial</span>
+                   </>}
                 </Button>
               </CardFooter>
             </Card>

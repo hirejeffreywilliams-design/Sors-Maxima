@@ -280,8 +280,9 @@ function DeviceManagement() {
                           <Badge variant="secondary" className="text-xs">This device</Badge>
                         )}
                       </div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        IP: {device.ipAddress} &middot; Last used {formatDate(device.lastUsedAt)} &middot; Expires in {daysUntilExpiry(device.expiresAt)} days
+                      <div className="text-xs text-muted-foreground mt-0.5 break-words">
+                        <span className="hidden sm:inline">IP: {device.ipAddress} · </span>
+                        Last used {formatDate(device.lastUsedAt)} · Expires in {daysUntilExpiry(device.expiresAt)} days
                       </div>
                     </div>
                   </div>

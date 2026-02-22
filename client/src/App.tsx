@@ -477,7 +477,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
                 If you have a gambling problem, call 1-800-522-4700.
               </p>
             </div>
-            <div className="hidden lg:flex items-center gap-4 flex-wrap justify-center">
+            <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
               <span>© 2026 Sors Maxima</span>
               <Link href="/legal" className="hover:text-primary">Terms</Link>
               <Link href="/legal" className="hover:text-primary">Privacy</Link>
