@@ -2,6 +2,9 @@ import type { Sport, ParlayLeg, GeneratedParlay } from "../shared/schema";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantumFusionEngine";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { analyticsAgent } from "./analyticsAgentEngine";
+import { getPlayersFromCacheById, getTeamsFromCache, type ESPNPlayer } from "./espn-roster-provider";
+import { getModelWeights, applyModelWeights } from "./historicalLearningEngine";
+import { fetchRealOddsForGame } from "./odds-provider";
 
 function generateUniqueId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -176,6 +179,34 @@ const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
     { name: "Seminoles", city: "Florida State" },
   ],
 };
+
+function getDefaultPropLine(prop: string): number {
+  const propLineRanges: Record<string, { min: number; max: number }> = {
+    "Points": { min: 15, max: 35 },
+    "Rebounds": { min: 4, max: 14 },
+    "Assists": { min: 3, max: 12 },
+    "3-Pointers": { min: 1.5, max: 5.5 },
+    "Pts+Rebs+Asts": { min: 25, max: 55 },
+    "Steals+Blocks": { min: 1.5, max: 4.5 },
+    "Passing Yards": { min: 200, max: 320 },
+    "Rushing Yards": { min: 40, max: 100 },
+    "Receiving Yards": { min: 40, max: 90 },
+    "Receptions": { min: 3.5, max: 8.5 },
+    "TDs": { min: 0.5, max: 1.5 },
+    "Passing TDs": { min: 1.5, max: 2.5 },
+    "Hits": { min: 0.5, max: 2.5 },
+    "RBIs": { min: 0.5, max: 1.5 },
+    "Runs": { min: 0.5, max: 1.5 },
+    "Total Bases": { min: 1.5, max: 3.5 },
+    "Strikeouts (P)": { min: 4.5, max: 8.5 },
+    "Hits Allowed": { min: 4.5, max: 7.5 },
+    "Goals": { min: 0.5, max: 1.5 },
+    "Shots on Goal": { min: 2.5, max: 5.5 },
+    "Saves": { min: 24.5, max: 32.5 },
+  };
+  const range = propLineRanges[prop] || { min: 5, max: 25 };
+  return Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
+}
 
 const playersBySport: Record<Sport, { name: string; team: string; position: string }[]> = {
   NBA: [
@@ -710,11 +741,25 @@ function mapLeaderCategoryToProp(category: string, sport: Sport): string | null 
   return null;
 }
 
-function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
+function generateLegFromESPNGame(
+  game: ESPNScoreboardGame,
+  sport: Sport,
+  marketType: "moneyline" | "spread" | "total" | "prop",
+  includeProps: boolean,
+  realOdds?: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number; bookmakerCount: number; source: string }
+): TicketLeg {
   const homeTeam = { name: game.homeTeam.shortDisplayName, city: game.homeTeam.displayName.replace(` ${game.homeTeam.shortDisplayName}`, '') };
   const awayTeam = { name: game.awayTeam.shortDisplayName, city: game.awayTeam.displayName.replace(` ${game.awayTeam.shortDisplayName}`, '') };
 
   const resolved = resolveGameOdds(game, sport);
+  
+  if (realOdds) {
+    if (realOdds.homeMoneyline !== undefined) resolved.homeMoneyline = realOdds.homeMoneyline;
+    if (realOdds.awayMoneyline !== undefined) resolved.awayMoneyline = realOdds.awayMoneyline;
+    if (realOdds.spread !== undefined) resolved.spread = realOdds.spread;
+    if (realOdds.total !== undefined) resolved.total = realOdds.total;
+    resolved.oddsSource = "ESPN-derived";
+  }
   const confidenceBias = computeRecordConfidenceBias(game);
   const homePct = parseWinPct(game.homeTeam.record);
   const awayPct = parseWinPct(game.awayTeam.record);
@@ -775,44 +820,54 @@ function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketT
     }
 
     if (!usedLeader) {
-      const players = playersBySport[sport];
-      const player = players[Math.floor(Math.random() * players.length)];
+      const homeTeamId = game.homeTeam.id;
+      const awayTeamId = game.awayTeam.id;
+      const teamIdForProps = isHomeTeam ? homeTeamId : awayTeamId;
+      let rosterPlayers: ESPNPlayer[] = [];
+      if (teamIdForProps) {
+        rosterPlayers = getPlayersFromCacheById(sport, teamIdForProps);
+      }
+
       const props = propsBySport[sport];
       const prop = props[Math.floor(Math.random() * props.length)];
-      playerName = player.name;
-      propCategory = prop;
 
-      const propLineRanges: Record<string, { min: number; max: number }> = {
-        "Points": { min: 15, max: 35 },
-        "Rebounds": { min: 4, max: 14 },
-        "Assists": { min: 3, max: 12 },
-        "3-Pointers": { min: 1.5, max: 5.5 },
-        "Pts+Rebs+Asts": { min: 25, max: 55 },
-        "Steals+Blocks": { min: 1.5, max: 4.5 },
-        "Passing Yards": { min: 200, max: 320 },
-        "Rushing Yards": { min: 40, max: 100 },
-        "Receiving Yards": { min: 40, max: 90 },
-        "Receptions": { min: 3.5, max: 8.5 },
-        "TDs": { min: 0.5, max: 1.5 },
-        "Passing TDs": { min: 1.5, max: 2.5 },
-        "Hits": { min: 0.5, max: 2.5 },
-        "RBIs": { min: 0.5, max: 1.5 },
-        "Runs": { min: 0.5, max: 1.5 },
-        "Total Bases": { min: 1.5, max: 3.5 },
-        "Strikeouts (P)": { min: 4.5, max: 8.5 },
-        "Hits Allowed": { min: 4.5, max: 7.5 },
-        "Goals": { min: 0.5, max: 1.5 },
-        "Shots on Goal": { min: 2.5, max: 5.5 },
-        "Saves": { min: 24.5, max: 32.5 },
-      };
+      if (rosterPlayers.length > 0) {
+        const keyPositions: Record<string, string[]> = {
+          NBA: ["PG", "SG", "SF", "PF", "C", "G", "F"],
+          NFL: ["QB", "RB", "WR", "TE"],
+          MLB: ["SP", "1B", "2B", "3B", "SS", "OF", "CF", "LF", "RF", "DH"],
+          NHL: ["C", "LW", "RW", "D", "G"],
+          NCAAB: ["PG", "SG", "SF", "PF", "C", "G", "F"],
+          NCAAF: ["QB", "RB", "WR", "TE"],
+        };
+        const positions = keyPositions[sport] || keyPositions.NBA;
+        const eligiblePlayers = rosterPlayers.filter(p => positions.includes(p.position.abbreviation));
+        const chosenPlayer = eligiblePlayers.length > 0
+          ? eligiblePlayers[Math.floor(Math.random() * eligiblePlayers.length)]
+          : rosterPlayers[Math.floor(Math.random() * rosterPlayers.length)];
 
-      const range = propLineRanges[prop] || { min: 5, max: 25 };
-      const propLine = Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
-      line = propLine;
-      const isOver = Math.random() > 0.5;
-      decimalOdds = americanToDecimal(-115);
-      outcome = `${player.name} ${isOver ? "Over" : "Under"} ${propLine} ${prop}`;
-      oddsSource = "model-estimated";
+        playerName = chosenPlayer.fullName;
+        propCategory = prop;
+
+        const propLine = getDefaultPropLine(prop);
+        line = Math.max(0.5, propLine + Math.round((Math.random() * 4 - 2) * 2) / 2);
+        const isOver = Math.random() > 0.5;
+        decimalOdds = americanToDecimal(-110);
+        outcome = `${chosenPlayer.fullName} ${isOver ? "Over" : "Under"} ${line} ${prop}`;
+        oddsSource = "ESPN-derived";
+      } else {
+        const players = playersBySport[sport];
+        const player = players[Math.floor(Math.random() * players.length)];
+        playerName = player.name;
+        propCategory = prop;
+
+        const propLine = getDefaultPropLine(prop);
+        line = Math.max(0.5, propLine + Math.round((Math.random() * 4 - 2) * 2) / 2);
+        const isOver = Math.random() > 0.5;
+        decimalOdds = americanToDecimal(-110);
+        outcome = `${player.name} ${isOver ? "Over" : "Under"} ${line} ${prop}`;
+        oddsSource = "model-estimated";
+      }
     }
   } else {
     market = "Moneyline";
@@ -904,33 +959,6 @@ function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketT
   };
 }
 
-function getDefaultPropLine(prop: string): number {
-  const defaults: Record<string, number> = {
-    "Points": 22.5,
-    "Rebounds": 8.5,
-    "Assists": 6.5,
-    "3-Pointers": 2.5,
-    "Pts+Rebs+Asts": 35.5,
-    "Steals+Blocks": 2.5,
-    "Passing Yards": 250.5,
-    "Rushing Yards": 65.5,
-    "Receiving Yards": 55.5,
-    "Receptions": 5.5,
-    "TDs": 0.5,
-    "Passing TDs": 1.5,
-    "Hits": 1.5,
-    "RBIs": 0.5,
-    "Runs": 0.5,
-    "Total Bases": 1.5,
-    "Strikeouts (P)": 5.5,
-    "Hits Allowed": 5.5,
-    "Goals": 0.5,
-    "Shots on Goal": 3.5,
-    "Saves": 28.5,
-  };
-  return defaults[prop] || 10.5;
-}
-
 function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
   const teams = teamsByLeague[sport];
   const homeTeamIdx = Math.floor(Math.random() * teams.length);
@@ -985,43 +1013,50 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
     outcome = `${isOver ? "Over" : "Under"} ${totalValue}`;
   } else if (marketType === "prop" && includeProps) {
     market = "Player Prop";
-    const players = playersBySport[sport];
-    const player = players[Math.floor(Math.random() * players.length)];
+    const allTeams = getTeamsFromCache(sport);
+    const matchingTeam = allTeams.find(t => 
+      (t.displayName || "").toLowerCase().includes(selectedTeam.name.toLowerCase()) || 
+      selectedTeam.name.toLowerCase().includes((t.displayName || "").toLowerCase()) ||
+      (t.shortDisplayName || "").toLowerCase() === selectedTeam.name.toLowerCase()
+    );
+    
+    let chosenPlayerName = "";
     const props = propsBySport[sport];
     const prop = props[Math.floor(Math.random() * props.length)];
-    playerName = player.name;
     propCategory = prop;
-    
-    const propLineRanges: Record<string, { min: number; max: number }> = {
-      "Points": { min: 15, max: 35 },
-      "Rebounds": { min: 4, max: 14 },
-      "Assists": { min: 3, max: 12 },
-      "3-Pointers": { min: 1.5, max: 5.5 },
-      "Pts+Rebs+Asts": { min: 25, max: 55 },
-      "Steals+Blocks": { min: 1.5, max: 4.5 },
-      "Passing Yards": { min: 200, max: 320 },
-      "Rushing Yards": { min: 40, max: 100 },
-      "Receiving Yards": { min: 40, max: 90 },
-      "Receptions": { min: 3.5, max: 8.5 },
-      "TDs": { min: 0.5, max: 1.5 },
-      "Passing TDs": { min: 1.5, max: 2.5 },
-      "Hits": { min: 0.5, max: 2.5 },
-      "RBIs": { min: 0.5, max: 1.5 },
-      "Runs": { min: 0.5, max: 1.5 },
-      "Total Bases": { min: 1.5, max: 3.5 },
-      "Strikeouts (P)": { min: 4.5, max: 8.5 },
-      "Hits Allowed": { min: 4.5, max: 7.5 },
-      "Goals": { min: 0.5, max: 1.5 },
-      "Shots on Goal": { min: 2.5, max: 5.5 },
-      "Saves": { min: 24.5, max: 32.5 },
-    };
-    
-    const range = propLineRanges[prop] || { min: 5, max: 25 };
-    const propLine = Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
-    line = propLine;
+
+    if (matchingTeam) {
+      const rosterPlayers = getPlayersFromCacheById(sport, matchingTeam.id);
+      if (rosterPlayers.length > 0) {
+        const keyPositions: Record<string, string[]> = {
+          NBA: ["PG", "SG", "SF", "PF", "C", "G", "F"],
+          NFL: ["QB", "RB", "WR", "TE"],
+          MLB: ["SP", "1B", "2B", "3B", "SS", "OF"],
+          NHL: ["C", "LW", "RW", "D", "G"],
+          NCAAB: ["PG", "SG", "SF", "PF", "C", "G", "F"],
+          NCAAF: ["QB", "RB", "WR", "TE"],
+        };
+        const positions = keyPositions[sport] || keyPositions.NBA;
+        const eligible = rosterPlayers.filter(p => positions.includes(p.position.abbreviation));
+        const chosen = eligible.length > 0
+          ? eligible[Math.floor(Math.random() * eligible.length)]
+          : rosterPlayers[Math.floor(Math.random() * rosterPlayers.length)];
+        chosenPlayerName = chosen.fullName;
+      }
+    }
+
+    if (!chosenPlayerName) {
+      const players = playersBySport[sport];
+      const player = players[Math.floor(Math.random() * players.length)];
+      chosenPlayerName = player.name;
+    }
+
+    playerName = chosenPlayerName;
+    const propLine = getDefaultPropLine(prop);
+    line = Math.max(0.5, propLine + Math.round((Math.random() * 4 - 2) * 2) / 2);
     const isOver = Math.random() > 0.5;
     decimalOdds = generateRandomOdds(1.7, 2.2);
-    outcome = `${player.name} ${isOver ? "Over" : "Under"} ${propLine} ${prop}`;
+    outcome = `${chosenPlayerName} ${isOver ? "Over" : "Under"} ${line} ${prop}`;
   } else {
     market = "Moneyline";
     decimalOdds = generateRandomOdds(1.4, 2.8);
@@ -1330,6 +1365,9 @@ function getAnalyticsAgentData(sport: Sport): GeneratedTicket["analyticsAgentDat
 export async function generateTickets(request: TicketRequest): Promise<GeneratedTicket[]> {
   const candidateTickets: GeneratedTicket[] = [];
   const ticketsToGenerate = Math.ceil(10 / request.sports.length);
+
+  const modelWeightsData = await getModelWeights();
+  const hasModelWeights = Object.keys(modelWeightsData).length > 0;
   
   const legCountsByRisk = {
     conservative: [2, 3],
@@ -1345,6 +1383,22 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
     const soccerInfo = isSoccer ? mapSoccerLeague(sport) : null;
 
     const espnGames = sportForESPN ? await getESPNGamesForSport(sportForESPN) : [];
+    
+    const realOddsMap = new Map<string, Awaited<ReturnType<typeof fetchRealOddsForGame>>>();
+    if (sportForESPN && espnGames.length > 0) {
+      const oddsPromises = espnGames.map(async (game) => {
+        const homeTeamName = game.homeTeam.name || game.homeTeam.displayName || "";
+        const awayTeamName = game.awayTeam.name || game.awayTeam.displayName || "";
+        if (homeTeamName && awayTeamName) {
+          const realOdds = await fetchRealOddsForGame(sportForESPN, homeTeamName, awayTeamName);
+          if (realOdds) {
+            realOddsMap.set(game.id, realOdds);
+          }
+        }
+      });
+      await Promise.all(oddsPromises);
+    }
+
     const agentData = sportForESPN ? getAnalyticsAgentData(sportForESPN) : {
       evFromAgent: null,
       kellyFromAgent: null,
@@ -1375,7 +1429,8 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
           const marketType = marketTypes[Math.floor(Math.random() * marketTypes.length)];
           if (espnGames.length > 0 && sportForESPN) {
             const game = espnGames[Math.floor(Math.random() * espnGames.length)];
-            legs.push(generateLegFromESPNGame(game, sportForESPN, marketType, request.includeProps));
+            const gameRealOdds = realOddsMap.get(game.id);
+            legs.push(generateLegFromESPNGame(game, sportForESPN, marketType, request.includeProps, gameRealOdds || undefined));
           } else if (sportForESPN) {
             legs.push(generateLeg(sportForESPN, marketType, request.includeProps));
           }
@@ -1395,6 +1450,12 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
           sport: fusionSport,
           description: `${leg.team} ${leg.market} ${leg.outcome}`,
           odds: leg.americanOdds,
+          context: {
+            hasRealOdds: leg.dataSources?.odds !== "model-estimated",
+            bookmakerCount: 0,
+            oddsSource: leg.dataSources?.odds || "model-estimated",
+            lineMovement: 0,
+          },
         })),
         request.riskLevel
       );
@@ -1415,10 +1476,30 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
         cashoutEligibility: 0.7 + (cf.confidence / 100) * 0.25,
       };
       
-      const confidenceScore = cf.confidence / 100;
-      const winProbability = cf.winProbability / 100;
+      let confidenceScore = cf.confidence / 100;
+      let winProbability = cf.winProbability / 100;
       const expectedValue = cf.expectedValue / 100;
-      
+
+      if (hasModelWeights) {
+        const avgRecordStrength = legs.reduce((sum, leg) => {
+          return sum + 0.5;
+        }, 0) / legs.length;
+
+        confidenceScore = applyModelWeights(confidenceScore, {
+          isHome: legs.some(l => l.outcome?.includes("ML") && !l.outcome?.includes("@")),
+          recordStrength: avgRecordStrength,
+          spreadAvailable: legs.some(l => l.market === "Spread"),
+          marketType: legs[0]?.market || "Moneyline",
+        }, modelWeightsData);
+
+        winProbability = applyModelWeights(winProbability, {
+          isHome: false,
+          recordStrength: avgRecordStrength,
+          spreadAvailable: legs.some(l => l.market === "Spread"),
+          marketType: legs.length > 1 ? "Mixed" : (legs[0]?.market || "Moneyline"),
+        }, modelWeightsData);
+      }
+
       const kellyFraction = Math.max(0, cf.kellyCriterion / 100);
       const adjustedKelly = kellyFraction * 0.25;
       const recommendedStake = Math.round(request.bankroll * Math.min(adjustedKelly, 0.05) * 100) / 100;

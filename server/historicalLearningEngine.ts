@@ -507,3 +507,71 @@ export function getHistoricalLearningStatus(): {
 } {
   return { isRunning, gamesProcessed: totalGamesProcessed, trainingRecords: totalTrainingRecords };
 }
+
+let cachedWeights: Record<string, { weight: number; accuracy: number }> | null = null;
+let weightsCacheTime = 0;
+const WEIGHTS_CACHE_TTL = 10 * 60 * 1000;
+
+export async function getModelWeights(): Promise<Record<string, { weight: number; accuracy: number }>> {
+  if (cachedWeights && (Date.now() - weightsCacheTime) < WEIGHTS_CACHE_TTL) {
+    return cachedWeights;
+  }
+  try {
+    const rows = await db.select().from(modelWeights);
+    const weights: Record<string, { weight: number; accuracy: number }> = {};
+    for (const row of rows) {
+      weights[row.factorName] = { weight: row.weight, accuracy: row.accuracy };
+    }
+    cachedWeights = weights;
+    weightsCacheTime = Date.now();
+    return weights;
+  } catch (error) {
+    logError(error as Error, { context: "getModelWeights" });
+    return {};
+  }
+}
+
+export function applyModelWeights(
+  baseConfidence: number,
+  factors: {
+    isHome: boolean;
+    recordStrength: number;
+    spreadAvailable: boolean;
+    marketType: string;
+  },
+  weights: Record<string, { weight: number; accuracy: number }>
+): number {
+  let adjusted = baseConfidence;
+
+  const homeAdv = weights["home_advantage"];
+  if (homeAdv && factors.isHome) {
+    adjusted += (homeAdv.weight - 1.0) * 0.05 * homeAdv.accuracy;
+  }
+
+  const recordW = weights["record_strength"];
+  if (recordW) {
+    adjusted += (factors.recordStrength - 0.5) * recordW.weight * 0.1 * recordW.accuracy;
+  }
+
+  const spreadW = weights["spread_accuracy"];
+  if (spreadW && factors.spreadAvailable && factors.marketType === "Spread") {
+    adjusted *= (0.9 + spreadW.accuracy * 0.2);
+  }
+
+  const totalW = weights["total_accuracy"];
+  if (totalW && factors.marketType === "Total") {
+    adjusted *= (0.9 + totalW.accuracy * 0.2);
+  }
+
+  const mlW = weights["moneyline_value"];
+  if (mlW && factors.marketType === "Moneyline") {
+    adjusted *= (0.9 + mlW.accuracy * 0.2);
+  }
+
+  const marketEff = weights["market_efficiency"];
+  if (marketEff) {
+    adjusted *= (0.85 + marketEff.accuracy * 0.3);
+  }
+
+  return Math.max(0.1, Math.min(0.95, adjusted));
+}

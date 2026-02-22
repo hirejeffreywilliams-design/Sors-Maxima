@@ -4,14 +4,13 @@
 Sors Maxima is a sports betting intelligence platform designed to help users construct more intelligent parlays using real ESPN game data. It provides statistical analysis, odds comparison, and parlay building tools. The project aims to provide a competitive edge through data-driven decision-making with honest, transparent data sourcing.
 
 ## Recent Changes (Feb 2026)
-- **Complete Real-Time Data Coverage**: All player, coach, and team data now sourced dynamically from ESPN API across 6 sports (NBA, NFL, MLB, NHL, NCAAF, NCAAB). 224+ teams and 7,400+ players loaded at startup.
-- **Automated Data Refresh**: Background refresh every 6 hours clears and reloads all roster/team/scoreboard data automatically. Admin endpoint `POST /api/admin/refresh-data` for manual refresh.
-- **Dynamic Team Selectors**: Player Prediction, Coaching Analysis, Player Props, and Matchup components now load ALL teams from ESPN instead of hardcoded lists. Users can analyze any team in any sport.
-- **All-Player Predictions**: Player Prediction page now shows stat projections for every player on a team's roster (not just the first player). Sorted by key positions per sport.
-- **Real Coach Data**: Coaching Analysis displays actual ESPN coach names and experience (e.g., "Andy Reid, 26 yrs experience" for Chiefs).
-- **Player Props + Matchups from ESPN**: Removed hardcoded sample players. Both components now generate data from live ESPN roster and scoreboard data.
-- **NCAAF + NCAAB Added**: College football and basketball added to all sport selectors across Player Prediction, Coaching, Team Dynamics, Rosters, Player Props, and Matchups.
-- **Previous changes**: Major Honesty Transformation, navigation simplified, honest labeling, daily parlays fixed, data source transparency, historical learning engine
+- **Ticket Generation Pipeline Overhaul**: Fixed The Odds API sport key mapping (was broken, using "nba" instead of "basketball_nba"), enabling real market odds to flow into EV analysis and ticket scoring across all 6 sports.
+- **Real Odds Integration**: Both `/api/generate-tickets` and `/api/generate-parlays` now overlay real The Odds API market data (moneylines, spreads, totals) on ESPN game data. Multi-bookmaker consensus pricing with sharp-book weighting for EV calculations.
+- **ESPN Roster-Based Props**: Ticket generation now pulls player props from real ESPN rosters (via `getPlayersFromCacheById`) instead of hardcoded player lists. Position-filtered by sport for realistic prop selections.
+- **Historical Learning Weights**: Model weights trained from 1,066+ ESPN games are now integrated into ticket confidence scoring via `applyModelWeights()`. Weights cached with 10-min TTL from database.
+- **Quantum Fusion Real Market Context**: Fusion engine signals (sharp_money_flow, line_movement, public_fade, monte_carlo, predictive_model) now receive real market context when available, boosting confidence based on actual bookmaker count and line movement data.
+- **Unified Pipeline**: Added `fetchRealOddsForGame()` to bridge The Odds API data into the ticket orchestrator, with improved team name matching (exact → contains → token fallback).
+- **Previous changes**: Complete real-time data coverage (224+ teams, 7,400+ players), automated 6-hour refresh, dynamic team selectors, NCAAF/NCAAB support, honest labeling, data source transparency
 
 ## User Preferences
 I want iterative development.

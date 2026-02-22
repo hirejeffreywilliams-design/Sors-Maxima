@@ -34,8 +34,23 @@ interface OddsApiGame {
 const oddsApiCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
 const ODDS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
+function mapSportToOddsApiKey(sport: string): string | null {
+  const mapping: Record<string, string> = {
+    NBA: "basketball_nba",
+    NFL: "americanfootball_nfl",
+    MLB: "baseball_mlb",
+    NHL: "icehockey_nhl",
+    NCAAB: "basketball_ncaab",
+    NCAAF: "americanfootball_ncaaf",
+  };
+  return mapping[sport.toUpperCase()] || null;
+}
+
 async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
   if (!THE_ODDS_API_KEY) return [];
+
+  const sportKey = mapSportToOddsApiKey(sport);
+  if (!sportKey) return [];
 
   const cacheKey = `odds-${sport}`;
   const cached = oddsApiCache.get(cacheKey);
@@ -43,7 +58,6 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
     return cached.data;
   }
 
-  const sportKey = sport.toLowerCase();
   const regions = "us";
   const markets = "h2h,spreads,totals";
   const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${THE_ODDS_API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=american`;
@@ -67,34 +81,62 @@ function generateEVAnalysis(decimalOdds: number, outcomeId: string, marketOdds?:
   let evRating: "strong" | "moderate" | "weak" | "negative" = "weak";
 
   if (marketOdds && marketOdds.bookmakers && marketOdds.bookmakers.length > 0) {
-    // Advanced Market Aggregation: Calculate a 'Consensus Price' across all available books
-    let totalPrice = 0;
-    let count = 0;
-    
+    const allPrices: number[] = [];
+    const marketTypes = ["h2h", "spreads", "totals"];
+
     for (const book of marketOdds.bookmakers) {
-      const h2hMarket = book.markets.find(m => m.key === "h2h");
-      if (h2hMarket) {
-        const outcome = h2hMarket.outcomes.find(o => outcomeId.includes(o.name.toLowerCase()) || o.name.toLowerCase().includes(outcomeId.toLowerCase()));
-        if (outcome) {
-          totalPrice += outcome.price;
-          count++;
+      for (const mType of marketTypes) {
+        const market = book.markets.find(m => m.key === mType);
+        if (market) {
+          for (const outcome of market.outcomes) {
+            const outcomeName = outcome.name.toLowerCase();
+            const searchId = outcomeId.toLowerCase();
+            if (searchId.includes(outcomeName) || outcomeName.includes(searchId.split("-").pop() || "")) {
+              allPrices.push(outcome.price);
+            }
+          }
         }
       }
     }
 
-    if (count > 0) {
-      const avgAmerican = totalPrice / count;
+    if (allPrices.length > 0) {
+      const avgAmerican = allPrices.reduce((a, b) => a + b, 0) / allPrices.length;
       const avgDecimal = americanToDecimal(avgAmerican);
-      const marketProb = 1 / avgDecimal;
-      
-      // We weight the model slightly towards the market average to avoid extreme outliers
-      // while still looking for discrepancies (the edge)
-      modelProbability = (impliedProbability * 0.4) + (marketProb * 0.6);
+      const consensusProb = 1 / avgDecimal;
+
+      const sharpBooks = marketOdds.bookmakers.filter(b => 
+        ["pinnacle", "betfair", "betcris", "bookmaker"].includes(b.key.toLowerCase())
+      );
+      let sharpProb = consensusProb;
+      if (sharpBooks.length > 0) {
+        const sharpPrices: number[] = [];
+        for (const book of sharpBooks) {
+          for (const mType of marketTypes) {
+            const market = book.markets.find(m => m.key === mType);
+            if (market) {
+              for (const outcome of market.outcomes) {
+                const outcomeName = outcome.name.toLowerCase();
+                const searchId = outcomeId.toLowerCase();
+                if (searchId.includes(outcomeName) || outcomeName.includes(searchId.split("-").pop() || "")) {
+                  sharpPrices.push(outcome.price);
+                }
+              }
+            }
+          }
+        }
+        if (sharpPrices.length > 0) {
+          const sharpAvg = sharpPrices.reduce((a, b) => a + b, 0) / sharpPrices.length;
+          sharpProb = 1 / americanToDecimal(sharpAvg);
+        }
+      }
+
+      modelProbability = (sharpProb * 0.5) + (consensusProb * 0.3) + (impliedProbability * 0.2);
       edge = (modelProbability / impliedProbability) - 1;
-      
+
       if (edge > 0.08) evRating = "strong";
       else if (edge > 0.04) evRating = "moderate";
-      else if (edge < 0) evRating = "negative";
+      else if (edge > 0.01) evRating = "weak";
+      else evRating = "negative";
     }
   }
 
@@ -647,13 +689,58 @@ async function espnGameToEvent(game: ESPNScoreboardGame, sport: Sport): Promise<
   const weather = generateWeather(gameId, sport);
   const situationalFactors = generateSituationalFactors(gameId, homeTeam, awayTeam);
 
-  // Fetch real-time odds from The Odds API if available
-  const marketOdds = await fetchOddsApi(sport).then(games =>
-    games.find(g =>
-      (g.home_team.toLowerCase().includes(homeTeam.toLowerCase()) || homeTeam.toLowerCase().includes(g.home_team.toLowerCase())) &&
-      (g.away_team.toLowerCase().includes(awayTeam.toLowerCase()) || awayTeam.toLowerCase().includes(g.away_team.toLowerCase()))
-    )
+  const oddsApiGames = await fetchOddsApi(sport);
+  const marketOdds = oddsApiGames.find(g =>
+    (g.home_team.toLowerCase().includes(homeTeam.toLowerCase()) || homeTeam.toLowerCase().includes(g.home_team.toLowerCase())) &&
+    (g.away_team.toLowerCase().includes(awayTeam.toLowerCase()) || awayTeam.toLowerCase().includes(g.away_team.toLowerCase()))
   );
+
+  if (marketOdds && marketOdds.bookmakers.length > 0) {
+    const h2hMarket = marketOdds.bookmakers[0]?.markets?.find(m => m.key === "h2h");
+    if (h2hMarket) {
+      const homeOutcome = h2hMarket.outcomes.find(o => o.name.toLowerCase().includes(homeTeam.split(" ").pop()!.toLowerCase()));
+      const awayOutcome = h2hMarket.outcomes.find(o => o.name.toLowerCase().includes(awayTeam.split(" ").pop()!.toLowerCase()));
+      if (homeOutcome) {
+        moneylineHome.americanOdds = homeOutcome.price;
+        moneylineHome.decimalOdds = americanToDecimal(homeOutcome.price);
+      }
+      if (awayOutcome) {
+        moneylineAway.americanOdds = awayOutcome.price;
+        moneylineAway.decimalOdds = americanToDecimal(awayOutcome.price);
+      }
+    }
+
+    const spreadsMarket = marketOdds.bookmakers[0]?.markets?.find(m => m.key === "spreads");
+    if (spreadsMarket) {
+      const homeSpread = spreadsMarket.outcomes.find(o => o.name.toLowerCase().includes(homeTeam.split(" ").pop()!.toLowerCase()));
+      if (homeSpread?.point !== undefined) {
+        spread.line = homeSpread.point;
+        spread.homeOdds.americanOdds = homeSpread.price;
+        spread.homeOdds.decimalOdds = americanToDecimal(homeSpread.price);
+        const awaySpread = spreadsMarket.outcomes.find(o => o.name !== homeSpread.name);
+        if (awaySpread) {
+          spread.awayOdds.americanOdds = awaySpread.price;
+          spread.awayOdds.decimalOdds = americanToDecimal(awaySpread.price);
+        }
+      }
+    }
+
+    const totalsMarket = marketOdds.bookmakers[0]?.markets?.find(m => m.key === "totals");
+    if (totalsMarket) {
+      const overOutcome = totalsMarket.outcomes.find(o => o.name === "Over");
+      const underOutcome = totalsMarket.outcomes.find(o => o.name === "Under");
+      if (overOutcome?.point !== undefined) {
+        total.line = overOutcome.point;
+        total.overOdds.americanOdds = overOutcome.price;
+        total.overOdds.decimalOdds = americanToDecimal(overOutcome.price);
+      }
+      if (underOutcome) {
+        total.underOdds.americanOdds = underOutcome.price;
+        total.underOdds.decimalOdds = americanToDecimal(underOutcome.price);
+      }
+    }
+    logInfo(`[Odds] Real market odds loaded for ${homeTeam} vs ${awayTeam} from The Odds API`);
+  }
 
   const historicalTrends: HistoricalTrend[] = [...homeProps, ...awayProps].slice(0, 6).map(prop =>
     generateHistoricalTrends(prop.playerId, prop.playerName, prop.category, prop.line)
@@ -960,6 +1047,75 @@ export function getOddsForSport(sport: Sport): SportEvent[] {
   const fallback = generateFallbackEvents(sport);
   oddsCache.set(sport, { events: fallback, timestamp: now - CACHE_TTL + 30000 });
   return fallback;
+}
+
+export async function fetchRealOddsForGame(
+  sport: Sport,
+  homeTeam: string,
+  awayTeam: string
+): Promise<{
+  homeMoneyline?: number;
+  awayMoneyline?: number;
+  spread?: number;
+  total?: number;
+  bookmakerCount: number;
+  source: "The Odds API" | "none";
+} | null> {
+  const oddsGames = await fetchOddsApi(sport as string);
+  if (oddsGames.length === 0) return null;
+
+  const homeLower = homeTeam.toLowerCase();
+  const awayLower = awayTeam.toLowerCase();
+  const homeNorm = homeLower.split(" ").pop() || "";
+  const awayNorm = awayLower.split(" ").pop() || "";
+
+  const match = oddsGames.find(g => {
+    const gHome = g.home_team.toLowerCase();
+    const gAway = g.away_team.toLowerCase();
+    if (gHome === homeLower && gAway === awayLower) return true;
+    if (gHome.includes(homeLower) && gAway.includes(awayLower)) return true;
+    if (homeLower.includes(gHome) && awayLower.includes(gAway)) return true;
+    const gHomeToken = gHome.split(" ").pop() || "";
+    const gAwayToken = gAway.split(" ").pop() || "";
+    return (gHomeToken === homeNorm || gHome.includes(homeNorm) || homeNorm.includes(gHomeToken)) &&
+           (gAwayToken === awayNorm || gAway.includes(awayNorm) || awayNorm.includes(gAwayToken));
+  });
+
+  if (!match || match.bookmakers.length === 0) return null;
+
+  const result: {
+    homeMoneyline?: number;
+    awayMoneyline?: number;
+    spread?: number;
+    total?: number;
+    bookmakerCount: number;
+    source: "The Odds API" | "none";
+  } = {
+    bookmakerCount: match.bookmakers.length,
+    source: "The Odds API",
+  };
+
+  const h2h = match.bookmakers[0]?.markets?.find(m => m.key === "h2h");
+  if (h2h) {
+    const homeO = h2h.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
+    const awayO = h2h.outcomes.find(o => o.name.toLowerCase().includes(awayNorm));
+    if (homeO) result.homeMoneyline = homeO.price;
+    if (awayO) result.awayMoneyline = awayO.price;
+  }
+
+  const spreads = match.bookmakers[0]?.markets?.find(m => m.key === "spreads");
+  if (spreads) {
+    const homeSpread = spreads.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
+    if (homeSpread?.point !== undefined) result.spread = homeSpread.point;
+  }
+
+  const totals = match.bookmakers[0]?.markets?.find(m => m.key === "totals");
+  if (totals) {
+    const over = totals.outcomes.find(o => o.name === "Over");
+    if (over?.point !== undefined) result.total = over.point;
+  }
+
+  return result;
 }
 
 export async function refreshOddsForSport(sport: Sport): Promise<SportEvent[]> {

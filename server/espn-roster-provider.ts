@@ -266,6 +266,11 @@ export function getPlayersFromCacheById(sport: Sport, teamId: string): ESPNPlaye
   return [];
 }
 
+export function getTeamsFromCache(sport: Sport): ESPNTeam[] {
+  const cached = teamsCache.get(sport);
+  return cached?.data || [];
+}
+
 export function getRosterFromCacheById(sport: Sport, teamId: string): TeamRoster | null {
   const cacheKey = `${sport}-${teamId}`;
   const cached = rosterCache.get(cacheKey);
