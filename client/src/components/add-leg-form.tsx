@@ -13,6 +13,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -87,6 +88,7 @@ export function AddLegForm({ onAdd }: AddLegFormProps) {
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Add New Leg</DialogTitle>
+          <DialogDescription>Add a new selection to your parlay ticket.</DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6 pt-4">
