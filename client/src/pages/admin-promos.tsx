@@ -351,6 +351,9 @@ export default function AdminPromos() {
                   <Gift className="h-5 w-5" />
                   {selectedOffer.name}
                 </DialogTitle>
+                <DialogDescription>
+                  View performance metrics and manage the lifecycle of this promotional offer.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-5">

@@ -288,6 +288,9 @@ export default function AdminLifecycleCampaigns() {
                   <Target className="h-5 w-5" />
                   {selectedCampaign.name}
                 </DialogTitle>
+                <DialogDescription>
+                  Manage and monitor the performance of your automated lifecycle campaign.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">

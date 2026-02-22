@@ -319,6 +319,9 @@ export default function AdminABTests() {
                     {selectedTest.status}
                   </Badge>
                 </DialogTitle>
+                <DialogDescription>
+                  Analyze test results and variant performance to determine statistical significance.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">

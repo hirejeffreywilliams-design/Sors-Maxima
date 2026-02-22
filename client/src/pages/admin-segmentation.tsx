@@ -242,6 +242,9 @@ function SegmentsTab() {
                   <Target className="h-5 w-5" />
                   {segmentDetail.name}
                 </DialogTitle>
+                <DialogDescription>
+                  Detailed configuration and performance metrics for the {segmentDetail.name} segment.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">

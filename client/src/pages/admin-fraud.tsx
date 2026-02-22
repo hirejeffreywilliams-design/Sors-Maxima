@@ -330,6 +330,9 @@ function CaseList() {
                   <Shield className="h-5 w-5" />
                   Case {caseDetail.caseId}
                 </DialogTitle>
+                <DialogDescription>
+                  Review fraud signals and take action on the suspicious activity detected for {caseDetail.username}.
+                </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">
