@@ -1,7 +1,20 @@
-# Sors Maxima - Quantum Sports Betting Intelligence
+# Sors Maxima - Sports Betting Intelligence
 
 ## Overview
-Sors Maxima is a quantum-powered sports betting intelligence platform designed to help users construct more intelligent parlays. It provides coherence scores, pattern recognition, and quantum-optimized predictions using advanced probability analysis, correlation modeling, and optimal stake sizing. The project aims to provide a competitive edge in the sports betting market through data-driven decision-making.
+Sors Maxima is an AI-powered sports betting intelligence platform designed to help users construct more intelligent parlays. It provides coherence scores, pattern recognition, and optimized predictions using advanced probability analysis, correlation modeling, and optimal stake sizing. The project aims to provide a competitive edge in the sports betting market through data-driven decision-making.
+
+## Recent Changes (Feb 2026)
+- Completed 29-item UX/clarity audit across all user and admin interfaces
+- Renamed misleading "Quantum" branding to "Advanced" in user-facing labels
+- Simplified betting jargon: Kelly→"Optimal Stake", CLV→"Line Value", Schemes→"Patterns", SGP expanded
+- Renamed nav items: Upgrade→Plans, Factors→Analysis, Predictions→Engine
+- Removed orphaned routes (/tracker, /analytics, /landing for authenticated users)
+- Added Daily Parlays to main navigation
+- Made responsible gaming footer visible on mobile
+- Added breadcrumbs to all admin sub-pages via AdminGuard wrapper
+- Added confidence score context labels (High/Medium/Low)
+- Added AI Credits explanation on pricing page
+- Moved Training Center to admin-only access
 
 ## User Preferences
 I want iterative development.
