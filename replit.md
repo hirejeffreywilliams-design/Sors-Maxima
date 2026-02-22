@@ -10,6 +10,7 @@ Sors Maxima is a sports betting intelligence platform designed to help users con
 - **Historical Learning Weights**: Model weights trained from 1,066+ ESPN games are now integrated into ticket confidence scoring via `applyModelWeights()`. Weights cached with 10-min TTL from database.
 - **Quantum Fusion Real Market Context**: Fusion engine signals (sharp_money_flow, line_movement, public_fade, monte_carlo, predictive_model) now receive real market context when available, boosting confidence based on actual bookmaker count and line movement data.
 - **Unified Pipeline**: Added `fetchRealOddsForGame()` to bridge The Odds API data into the ticket orchestrator, with improved team name matching (exact → contains → token fallback).
+- **Scheme Recognition Engine Live**: Replaced entirely hardcoded mock data (4 static teams/coaches) with live server-side engine (`server/schemeRecognitionEngine.ts`) that analyzes real ESPN scoreboard games, team records, coaches, and The Odds API market data. New `GET /api/scheme-analysis?sport=` endpoint. Frontend fetches via TanStack Query with sport selector, loading states, data source attribution, and live auto-refresh.
 - **Previous changes**: Complete real-time data coverage (224+ teams, 7,400+ players), automated 6-hour refresh, dynamic team selectors, NCAAF/NCAAB support, honest labeling, data source transparency
 
 ## User Preferences
