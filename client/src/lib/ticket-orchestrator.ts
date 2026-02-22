@@ -2,7 +2,7 @@ import type { Sport, ParlayLeg, GeneratedParlay } from "@shared/schema";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantum-fusion-engine";
 
 export interface TicketRequest {
-  sports: Sport[];
+  sports: string[];
   bankroll: number;
   riskLevel: "conservative" | "moderate" | "aggressive";
   maxLegs: number;
@@ -33,7 +33,7 @@ export interface AlternativeTicket {
 export interface GeneratedTicket {
   id: string;
   name: string;
-  sport: Sport;
+  sport: string;
   legs: TicketLeg[];
   totalOdds: number;
   americanOdds: number;

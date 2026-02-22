@@ -53,13 +53,21 @@ import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 
-const sportConfig: { id: Sport; name: string; color: string; icon: string }[] = [
+const sportConfig: { id: string; name: string; color: string; icon: string; league?: string }[] = [
   { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
   { id: "NFL", name: "NFL", color: "bg-green-600", icon: "" },
   { id: "MLB", name: "MLB", color: "bg-red-500", icon: "" },
   { id: "NHL", name: "NHL", color: "bg-blue-500", icon: "" },
   { id: "NCAAB", name: "College Basketball", color: "bg-purple-500", icon: "" },
   { id: "NCAAF", name: "College Football", color: "bg-amber-600", icon: "" },
+  { id: "Soccer_EPL", name: "Premier League", color: "bg-indigo-500", icon: "" },
+  { id: "Soccer_LALIGA", name: "La Liga", color: "bg-rose-500", icon: "" },
+  { id: "Soccer_BUNDESLIGA", name: "Bundesliga", color: "bg-red-600", icon: "" },
+  { id: "Soccer_SERIEA", name: "Serie A", color: "bg-sky-600", icon: "" },
+  { id: "Soccer_LIGUE1", name: "Ligue 1", color: "bg-cyan-600", icon: "" },
+  { id: "Soccer_MLS", name: "MLS", color: "bg-emerald-600", icon: "" },
+  { id: "Soccer_UCL", name: "Champions League", color: "bg-violet-600", icon: "" },
+  { id: "Soccer_INTL", name: "International", color: "bg-teal-600", icon: "" },
 ];
 
 function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
@@ -442,7 +450,7 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
 }
 
 export default function AutoGenerator() {
-  const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
+  const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [bankroll, setBankroll] = useState(1000);
   const [riskLevel, setRiskLevel] = useState<"conservative" | "moderate" | "aggressive">("moderate");
   const [maxLegs, setMaxLegs] = useState(4);
@@ -484,7 +492,7 @@ export default function AutoGenerator() {
     eventTracker.trackTicketAccept(ticket.id, ticket.recommendedStake, ticket.americanOdds);
   };
   
-  const toggleSport = (sport: Sport) => {
+  const toggleSport = (sport: string) => {
     setSelectedSports(prev => 
       prev.includes(sport) 
         ? prev.filter(s => s !== sport)
@@ -493,7 +501,7 @@ export default function AutoGenerator() {
   };
   
   const fetchTicketsFromBackend = async (
-    sports: Sport[],
+    sports: string[],
     reqBankroll: number,
     reqRiskLevel: string,
     reqMaxLegs: number,
@@ -544,7 +552,7 @@ export default function AutoGenerator() {
   const handleQuickPick = async () => {
     setIsGenerating(true);
     
-    const quickSports: Sport[] = ["NBA", "NFL", "MLB"];
+    const quickSports: string[] = ["NBA", "NFL", "MLB"];
     setSelectedSports(quickSports);
     
     await fetchTicketsFromBackend(quickSports, 500, "moderate", 3, true);
@@ -720,7 +728,7 @@ export default function AutoGenerator() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-              {sportConfig.map(sport => (
+              {sportConfig.slice(0, 6).map(sport => (
                 <Button
                   key={sport.id}
                   variant={selectedSports.includes(sport.id) ? "default" : "outline"}
@@ -731,6 +739,21 @@ export default function AutoGenerator() {
                   data-testid={`button-sport-${sport.id}`}
                 >
                   <span className="text-base sm:text-xl font-bold">{sport.id}</span>
+                  <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
+                </Button>
+              ))}
+              <div className="col-span-3 sm:col-span-3 lg:col-span-6 text-xs text-muted-foreground font-medium pt-2 border-t mt-1">International Soccer</div>
+              {sportConfig.slice(6).map(sport => (
+                <Button
+                  key={sport.id}
+                  variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                  className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
+                    selectedSports.includes(sport.id) ? sport.color : ""
+                  }`}
+                  onClick={() => toggleSport(sport.id)}
+                  data-testid={`button-sport-${sport.id}`}
+                >
+                  <span className="text-base sm:text-xl font-bold">{sport.id.replace("Soccer_", "")}</span>
                   <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
                 </Button>
               ))}
@@ -987,7 +1010,7 @@ export default function AutoGenerator() {
         
         <SchemeRecognition 
           mode="pre-game" 
-          selectedSports={selectedSports.length > 0 ? selectedSports : ["NBA", "NFL", "MLB"]} 
+          selectedSports={selectedSports.length > 0 ? selectedSports : (["NBA", "NFL", "MLB"] as string[])} 
         />
         
         <BettingInsights />

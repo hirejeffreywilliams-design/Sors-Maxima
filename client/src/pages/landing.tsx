@@ -42,7 +42,7 @@ const features = [
   {
     icon: Activity,
     title: "Live ESPN Data",
-    description: "Real-time scores, rosters, injuries, and line movement from ESPN across 14 sports.",
+    description: "Real-time scores, rosters, injuries, and line movement from ESPN across 14+ sports and leagues.",
     color: "text-green-500",
     bg: "bg-green-500/10",
   },
@@ -71,7 +71,7 @@ const features = [
 
 const stats = [
   { value: "46", label: "Analysis Factors", icon: Target },
-  { value: "14", label: "Sports Covered", icon: Activity },
+  { value: "14+", label: "Sports & Leagues", icon: Activity },
   { value: "1M+", label: "Simulations Daily", icon: Brain },
   { value: "99.9%", label: "Uptime", icon: Zap },
 ];
@@ -80,23 +80,23 @@ const pricingTiers = [
   {
     name: "Starter",
     price: 0,
-    description: "Explore the engine for free",
-    features: ["3 AI ticket generations/day", "2 sports (NBA & NFL)", "Power Score analysis", "Community access"],
+    description: "Try the engine free",
+    features: ["3 ticket generations/day", "4 US sports", "Power Score grading", "Community access"],
     cta: "Start Free",
     variant: "outline" as const,
   },
   {
     name: "Sharp",
-    price: 19,
-    description: "Tools serious bettors need",
-    features: ["Unlimited ticket generations", "All 14 sports", "Smart stake sizing", "Simulation analysis"],
+    price: 29,
+    description: "All sports, smarter parlays",
+    features: ["Unlimited generations", "14+ sports & leagues", "46-factor engine", "+EV finder"],
     cta: "Go Sharp",
     variant: "secondary" as const,
   },
   {
     name: "Edge",
-    price: 49,
-    description: "Every tool, zero limits",
+    price: 59,
+    description: "Pro tools & AI assistant",
     features: ["200 AI credits/day", "AI Betting Assistant", "ML prop projections", "Arbitrage scanner"],
     cta: "Go Edge",
     variant: "default" as const,
@@ -104,9 +104,9 @@ const pricingTiers = [
   },
   {
     name: "Max",
-    price: 99,
+    price: 119,
     description: "Unlimited everything",
-    features: ["Unlimited AI credits", "Deep-scan analysis", "Backtesting center", "Priority processing"],
+    features: ["Unlimited AI credits", "Custom model builder", "Priority processing", "Early access"],
     cta: "Go Max",
     variant: "secondary" as const,
   },
@@ -146,7 +146,7 @@ export default function LandingPage() {
               Stop Guessing. Start Winning with Data.
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">
-              Harness 46 analysis factors, advanced simulations, and live ESPN data
+              Harness 46 analysis factors, advanced simulations, and live ESPN data across 14+ sports and leagues
               to gain a competitive edge the sportsbooks fear.
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-center">

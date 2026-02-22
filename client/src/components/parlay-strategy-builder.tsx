@@ -43,6 +43,14 @@ const SPORTS_OPTIONS = [
   { value: "nhl", label: "NHL" },
   { value: "ncaab", label: "NCAAB" },
   { value: "ncaaf", label: "NCAAF" },
+  { value: "soccer_epl", label: "Premier League" },
+  { value: "soccer_laliga", label: "La Liga" },
+  { value: "soccer_bundesliga", label: "Bundesliga" },
+  { value: "soccer_seriea", label: "Serie A" },
+  { value: "soccer_ligue1", label: "Ligue 1" },
+  { value: "soccer_mls", label: "MLS" },
+  { value: "soccer_ucl", label: "Champions League" },
+  { value: "soccer_intl", label: "International" },
 ];
 
 const STRATEGY_TYPES = [

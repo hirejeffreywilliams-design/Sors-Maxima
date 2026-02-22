@@ -1,0 +1,203 @@
+Use this advanced system prompt to instruct your AI module to add international soccer to your sports-betting analysis app, match the same level of analytics/data as other sports, and enable ticket generation. Replace placeholders (e.g., API keys, data endpoints, model names) with your actual values.
+
+
+
+System prompt (for the AI component responsible for soccer integration):
+
+
+
+"Goal: Integrate international soccer into the sports-betting analysis application so soccer receives the same comprehensive data collection, analytics, UI features, real-time updates, and betting-ticket generation as existing sports.
+
+
+
+Scope and priorities:
+
+- Cover all major international competitions (FIFA World Cup, continental tournaments, national team friendlies) and major domestic leagues worldwide. Support custom league selections by users.
+
+- Match data depth and analytical features currently implemented for other sports (historical, live, player/team advanced metrics, odds analysis, ticket generation).
+
+- Maintain performance, scalability, and compliance with legal and responsible-gambling policies.
+
+
+
+Data requirements (ingest and normalize):
+
+- Match-level: match_id, competition, season, stage, date_time (UTC), venue, attendance, weather, referee.
+
+- Team-level: team_id, name, country, formation, ranking (FIFA/ELO where available), recent form (last N matches), home/away splits.
+
+- Player-level: player_id, name, position, age, minutes_played, goals, assists, shots, xG, key_passes, tackles, interceptions, yellow/red cards, injuries, suspension status, transfer status.
+
+- Event-level (live and historical): event_time, event_type (goal, assist, shot, xG, substitution, card, injury), player_id, team_id, coordinates (if available).
+
+- Advanced metrics: expected goals (xG), expected assists (xA), possession-adjusted metrics, pressing intensity, chance quality, expected goals prevented (xGP), team attack/defense profile vectors.
+
+- Odds & market data: pre-match odds (moneyline/1X2, spread, totals), live odds, market liquidity, implied probabilities, bookmaker source, timestamp.
+
+- Head-to-head and situational stats: home/away head-to-head, travel distance, rest days, fixture congestion, referee influence.
+
+- Metadata: data source ID, ingestion timestamp, versioning, confidence/quality score.
+
+
+
+Data sources & freshness:
+
+- Primary feeds: authorized sports-data APIs (specify providers), official league/tournament APIs, licensed odds providers.
+
+- Secondary: reputable open sources for supplemental stats, event feeds, and advanced metrics.
+
+- Update cadence: pre-match refresh (daily/hourly depending on competition), live updates <5s latency for critical event streaming (goal, red card, odds change), post-match reconciliation and recalculation within N minutes.
+
+- Data normalization: map IDs across sources, canonicalize team/player names, de-duplicate events, propagate corrections.
+
+
+
+Analytics & modeling:
+
+- Predictive models:
+
+  - Match outcome classifier (probabilities for home/draw/away) with calibration against market-implied probabilities.
+
+  - Goals/total goals model (Poisson/negative binomial or ML with features including xG).
+
+  - Player impact models (expected contribution, replacement-level impact).
+
+  - Live-update models that re-score probabilities after each event and update suggested bets.
+
+- Feature engineering:
+
+  - Rolling-window form features, opponent-adjusted performance, travel/fatigue, rest days, lineup strength (XI estimated from recent matches), set-piece threat, penalty/PK history.
+
+- Model requirements:
+
+  - Track training data windows, feature drift detection, backtest logs, model versioning, and out-of-sample performance metrics (AUC, Brier, log loss, calibration).
+
+  - Enforce explainability: per-prediction feature contributions (SHAP or similar) for user transparency.
+
+- Odds integration:
+
+  - Compare model probabilities to market implied probabilities, compute edge, recommend stake sizing via Kelly or user-configured risk models, and output expected value (EV).
+
+- Alerting & signals:
+
+  - Auto-generate signals for high EV opportunities, market inefficiencies, late-line changes, or correlated markets.
+
+
+
+UI / UX and ticket generation:
+
+- Seamless placement: add soccer into the same navigation and workflows as other sports.
+
+- Match preview page: concise summary, model probability table, key factors, lineup and injury summary, market odds, recommended bets with rationale and confidence score.
+
+- Ticket builder:
+
+  - Allow single and multi-leg (parlay) tickets including correlated-leg checks.
+
+  - Auto-suggest tickets based on model recommendations and user risk profile.
+
+  - Include stake recommendation, projected ROI, probability of hit, max liability, and a short human-readable rationale for each leg.
+
+- Export/notifications:
+
+  - Provide JSON response for tickets with standardized schema and a human-friendly summary for UI cards.
+
+  - Support push/alert for live events or model-triggered signals.
+
+
+
+APIs / response schema (examples):
+
+- Endpoint: POST /api/v1/soccer/predict
+
+  - Input: {competition, season, match_id, team_home_id, team_away_id, timestamp}
+
+  - Output: {
+
+      match_id,
+
+      model_version,
+
+      probabilities: {home:0.xx, draw:0.xx, away:0.xx},
+
+      odds: [{bookmaker, market, price}],
+
+      edge: {market_implied, edge_value},
+
+      recommended_bets: [{bet_id, market, selection, stake_usd, confidence_score, rationale}],
+
+      explainability: [{feature, contribution}]
+
+    }
+
+- Endpoint: POST /api/v1/soccer/ticket/generate
+
+  - Input: {user_id, ticket_type, selections:[{match_id,market,selection,odds}], risk_profile}
+
+  - Output: {ticket_id, total_stake, projected_return, probability_of_win, breakdown_per_leg, rationale_per_leg}
+
+
+
+Testing, evaluation, and rollout:
+
+- Backtest: run historical backtests per competition, show performance metrics vs. benchmarks (bookmaker closing prices).
+
+- Paper-trading: initial release in paper mode for N weeks with side-by-side comparison to real-money results.
+
+- Gradual rollout: enable country/league toggles; monitor model performance and user feedback before broad release.
+
+
+
+Security, compliance, privacy:
+
+- Enforce rate limiting, API keys, logging, and access controls.
+
+- Implement geofencing and legal checks to disable betting features where prohibited.
+
+- Include responsible-gambling features (limits, cooling-off, self-exclusion), and display disclaimers.
+
+
+
+Operational needs & deliverables:
+
+- Deliver data mapping documents, ETL specs, example data files, model training notebooks, API docs, and integration tests.
+
+- Provide monitoring dashboards for data health, model drift, latency, and signal quality.
+
+
+
+Constraints and assumptions:
+
+- Assume access to licensed data feeds for odds and event data; if not available, fall back to pre-approved open sources and flag reduced confidence.
+
+- Maintain parity with analytics depth for other sports; any reduction in scope must be approved.
+
+
+
+Acceptance criteria:
+
+- Soccer data appears in the app UI identical in format and depth to other sports.
+
+- Predictive outputs and ticket generation use the same schema and risk logic as other sports.
+
+- Live updates and ticket generation for soccer function within the same SLAs as existing sports.
+
+
+
+Tone for generated user-facing text:
+
+- Concise, transparent, confidence-scored, and non-technical for end users; include optional expandable technical notes for power users."
+
+
+
+Example short prompts for subcomponents (use as quick task prompts):
+
+- "Build ETL job to ingest match events from <DATA_FEED_URL>, normalize to canonical schema, store in events table, emit data-quality metrics."
+
+- "Train and validate a match-outcome model for the English Premier League using features X, Y, Z; produce SHAP explanations and evaluate calibration."
+
+- "Implement ticket generation API that accepts model recommendations and returns a JSON ticket aligned with existing ticket schema."
+
+
+
+End of system prompt."
