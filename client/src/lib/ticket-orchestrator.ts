@@ -509,7 +509,8 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
   
   const legCounts = legCountsByRisk[request.riskLevel];
   
-  for (const sport of request.sports) {
+  for (const sportId of request.sports) {
+    const sport = sportId as Sport;
     for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
         legCounts[Math.floor(Math.random() * legCounts.length)],
