@@ -1,14 +1,17 @@
 import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Gamepad2, DollarSign, TrendingUp, TrendingDown, RefreshCw,
-  Trophy, Target, History, Zap, Atom, Play
+  Trophy, Target, History, Zap, Atom, Play, Info
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface PaperBet {
   id: string;
@@ -17,8 +20,8 @@ interface PaperBet {
   stake: number;
   potentialPayout: number;
   status: "pending" | "won" | "lost";
-  placedAt: Date;
-  settledAt?: Date;
+  placedAt: string;
+  settledAt?: string;
 }
 
 interface PaperAccount {
@@ -32,47 +35,65 @@ interface PaperAccount {
   roi: number;
 }
 
-const mockAccount: PaperAccount = {
-  balance: 1250,
-  initialBalance: 1000,
-  totalBets: 45,
-  wins: 26,
-  losses: 17,
-  pending: 2,
-  profitLoss: 250,
-  roi: 25,
-};
-
-const mockBets: PaperBet[] = [
-  { id: "1", pick: "Chiefs -3.5", odds: -110, stake: 50, potentialPayout: 95.45, status: "pending", placedAt: new Date() },
-  { id: "2", pick: "Heat ML", odds: -150, stake: 75, potentialPayout: 125, status: "pending", placedAt: new Date(Date.now() - 3600000) },
-  { id: "3", pick: "Over 48.5 (Bills/Dolphins)", odds: -105, stake: 50, potentialPayout: 97.62, status: "won", placedAt: new Date(Date.now() - 86400000), settledAt: new Date(Date.now() - 43200000) },
-  { id: "4", pick: "Suns -5.5", odds: -110, stake: 100, potentialPayout: 190.91, status: "won", placedAt: new Date(Date.now() - 172800000), settledAt: new Date(Date.now() - 129600000) },
-  { id: "5", pick: "Timberwolves +3", odds: +110, stake: 50, potentialPayout: 105, status: "lost", placedAt: new Date(Date.now() - 259200000), settledAt: new Date(Date.now() - 216000000) },
-];
-
 export function PaperTrading() {
-  const [account, setAccount] = useState<PaperAccount>(mockAccount);
-  const [bets, setBets] = useState<PaperBet[]>(mockBets);
+  const { data: account, isLoading: accountLoading } = useQuery<PaperAccount>({ queryKey: ["/api/user/paper-account"] });
+  const { data: bets = [], isLoading: betsLoading } = useQuery<PaperBet[]>({ queryKey: ["/api/user/paper-bets"] });
   const [newStake, setNewStake] = useState("25");
   const [view, setView] = useState("dashboard");
 
-  const resetAccount = () => {
-    setAccount({
-      ...account,
-      balance: 1000,
-      totalBets: 0,
-      wins: 0,
-      losses: 0,
-      pending: 0,
-      profitLoss: 0,
-      roi: 0,
-    });
-    setBets([]);
-  };
+  const placeBetMutation = useMutation({
+    mutationFn: async (betData: { pick: string; odds: number; stake: number }) => {
+      await apiRequest("POST", "/api/user/paper-bets", betData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/paper-bets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/paper-account"] });
+    },
+  });
+
+  const resolveBetMutation = useMutation({
+    mutationFn: async ({ id, result }: { id: string; result: string }) => {
+      await apiRequest("PATCH", `/api/user/paper-bets/${id}/resolve`, { result });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/paper-bets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/paper-account"] });
+    },
+  });
+
+  const isLoading = accountLoading || betsLoading;
 
   const pendingBets = bets.filter(b => b.status === "pending");
   const settledBets = bets.filter(b => b.status !== "pending");
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+            <Gamepad2 className="w-5 h-5 text-purple-500" />
+            Paper Trading
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const safeAccount: PaperAccount = account || {
+    balance: 0,
+    initialBalance: 1000,
+    totalBets: 0,
+    wins: 0,
+    losses: 0,
+    pending: 0,
+    profitLoss: 0,
+    roi: 0,
+  };
 
   return (
     <Card>
@@ -90,13 +111,18 @@ export function PaperTrading() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 px-3 py-2 text-sm text-blue-500">
+          <Info className="w-4 h-4 shrink-0" />
+          <span>Data source: Live API</span>
+        </div>
+
         <div className="p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-blue-500/10 border border-purple-500/20">
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-sm text-muted-foreground">Virtual Balance</p>
-              <p className="text-3xl font-bold">${account.balance.toLocaleString()}</p>
+              <p className="text-3xl font-bold">${safeAccount.balance.toLocaleString()}</p>
             </div>
-            <Button variant="outline" size="sm" onClick={resetAccount} data-testid="button-reset-account">
+            <Button variant="outline" size="sm" onClick={() => {}} data-testid="button-reset-account">
               <RefreshCw className="w-4 h-4 mr-1" />
               Reset
             </Button>
@@ -104,23 +130,23 @@ export function PaperTrading() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="text-center">
-              <p className={`text-lg font-bold ${account.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {account.profitLoss >= 0 ? "+" : ""}${account.profitLoss}
+              <p className={`text-lg font-bold ${safeAccount.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}>
+                {safeAccount.profitLoss >= 0 ? "+" : ""}${safeAccount.profitLoss}
               </p>
               <p className="text-xs text-muted-foreground">P/L</p>
             </div>
             <div className="text-center">
-              <p className={`text-lg font-bold ${account.roi >= 0 ? "text-green-500" : "text-red-500"}`}>
-                {account.roi >= 0 ? "+" : ""}{account.roi}%
+              <p className={`text-lg font-bold ${safeAccount.roi >= 0 ? "text-green-500" : "text-red-500"}`}>
+                {safeAccount.roi >= 0 ? "+" : ""}{safeAccount.roi}%
               </p>
               <p className="text-xs text-muted-foreground">ROI</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold">{account.wins}-{account.losses}</p>
+              <p className="text-lg font-bold">{safeAccount.wins}-{safeAccount.losses}</p>
               <p className="text-xs text-muted-foreground">Record</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-yellow-500">{account.pending}</p>
+              <p className="text-lg font-bold text-yellow-500">{safeAccount.pending}</p>
               <p className="text-xs text-muted-foreground">Pending</p>
             </div>
           </div>
@@ -171,8 +197,8 @@ export function PaperTrading() {
                   <span className="text-sm font-medium">Win Rate</span>
                 </div>
                 <p className="text-2xl font-bold text-green-500">
-                  {account.totalBets > 0 
-                    ? Math.round((account.wins / (account.wins + account.losses)) * 100) 
+                  {safeAccount.totalBets > 0 
+                    ? Math.round((safeAccount.wins / (safeAccount.wins + safeAccount.losses)) * 100) 
                     : 0}%
                 </p>
               </div>
@@ -181,7 +207,7 @@ export function PaperTrading() {
                   <Target className="w-4 h-4 text-blue-500" />
                   <span className="text-sm font-medium">Total Bets</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-500">{account.totalBets}</p>
+                <p className="text-2xl font-bold text-blue-500">{safeAccount.totalBets}</p>
               </div>
             </div>
           </TabsContent>

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Flame, Snowflake, TrendingUp, TrendingDown, Calendar,
-  Trophy, Target, Zap, Atom
+  Trophy, Target, Zap, Atom, Info
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
 
@@ -17,26 +18,18 @@ interface StreakData {
   weeklyStreak: number;
 }
 
-const mockStreakData: StreakData = {
-  currentStreak: 5,
-  streakType: "hot",
-  longestStreak: 12,
-  lastTenResults: ["W", "W", "W", "W", "W", "L", "W", "W", "L", "W"],
-  momentum: 78,
-  dailyStreak: 8,
-  weeklyStreak: 3,
-};
-
 export function StreakTracker() {
-  const [data] = useState<StreakData>(mockStreakData);
+  const { data, isLoading } = useQuery<StreakData>({ queryKey: ["/api/user/streak"] });
 
   const getStreakIcon = () => {
+    if (!data) return null;
     if (data.streakType === "hot") return <Flame className="w-8 h-8 text-orange-500" />;
     if (data.streakType === "cold") return <Snowflake className="w-8 h-8 text-blue-500" />;
     return <TrendingUp className="w-8 h-8 text-muted-foreground" />;
   };
 
   const getStreakColor = () => {
+    if (!data) return "from-gray-500 to-gray-600";
     if (data.streakType === "hot") return "from-orange-500 to-red-500";
     if (data.streakType === "cold") return "from-blue-500 to-cyan-500";
     return "from-gray-500 to-gray-600";
@@ -48,6 +41,49 @@ export function StreakTracker() {
     return "text-red-500";
   };
 
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+            <Flame className="w-5 h-5 text-orange-500" />
+            Streak Tracker
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-center">
+            <Skeleton className="w-32 h-32 rounded-full" />
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
+          <Skeleton className="h-12 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+            <Flame className="w-5 h-5 text-orange-500" />
+            Streak Tracker
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-muted-foreground">
+            <Flame className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>No streak data available</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -58,6 +94,11 @@ export function StreakTracker() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="flex items-center gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 px-3 py-2 text-sm text-blue-500">
+          <Info className="w-4 h-4 shrink-0" />
+          <span>Data source: Live API</span>
+        </div>
+
         <div className="flex items-center justify-center">
           <div className={`relative w-32 h-32 rounded-full bg-gradient-to-br ${getStreakColor()} p-1`}>
             <div className="w-full h-full rounded-full bg-background flex flex-col items-center justify-center">

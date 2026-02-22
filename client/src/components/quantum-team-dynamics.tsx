@@ -3,8 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, TrendingUp, Zap, Shield, Target, MessageSquare, Activity, Heart, Award, AlertTriangle, Home } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Users, TrendingUp, Zap, Shield, Target, MessageSquare, Activity, Heart, Award, AlertTriangle, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface TeamFactor {
   id: string;
@@ -36,104 +39,28 @@ interface TeamAnalysis {
   plusMinusProjection: number;
 }
 
-export function QuantumTeamDynamics() {
-  const [selectedTeam, setSelectedTeam] = useState("knicks");
-  const [selectedOpponent, setSelectedOpponent] = useState("76ers");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<TeamAnalysis | null>(null);
+const sports = [
+  { id: "nba", name: "NBA" },
+  { id: "nfl", name: "NFL" },
+  { id: "mlb", name: "MLB" },
+  { id: "nhl", name: "NHL" },
+];
 
-  const teams = [
-    { id: "knicks", name: "New York Knicks" },
-    { id: "76ers", name: "Philadelphia 76ers" },
-    { id: "mavericks", name: "Dallas Mavericks" },
-    { id: "bucks", name: "Milwaukee Bucks" },
-    { id: "nuggets", name: "Denver Nuggets" },
-    { id: "heat", name: "Miami Heat" },
-  ];
+export function QuantumTeamDynamics() {
+  const [selectedSport, setSelectedSport] = useState("nba");
+  const [teamName, setTeamName] = useState("");
+  const [submittedTeam, setSubmittedTeam] = useState("");
+  const [submittedSport, setSubmittedSport] = useState("");
+
+  const { data: analysis, isLoading, isError, error } = useQuery<TeamAnalysis>({
+    queryKey: ["/api/tools/team-analysis", submittedSport, encodeURIComponent(submittedTeam)],
+    enabled: !!submittedTeam && !!submittedSport,
+  });
 
   const runTeamAnalysis = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const mockAnalysis: TeamAnalysis = {
-        teamName: teams.find(t => t.id === selectedTeam)?.name || "",
-        opponent: teams.find(t => t.id === selectedOpponent)?.name || "",
-        isHome: true,
-        winProbability: 0.58,
-        spreadPrediction: -4.5,
-        totalPrediction: 224.5,
-        overallConfidence: 0.79,
-        teamDynamics: {
-          communication: 85,
-          morale: 78,
-          chemistry: 82,
-          focus: 75
-        },
-        fanEngagement: 88,
-        distractionLevel: 15,
-        efficiencyRating: 112.4,
-        plusMinusProjection: 4.2,
-        factors: [
-          {
-            id: "1",
-            name: "Coaching Matchup Advantage",
-            value: 0.08,
-            impact: "positive",
-            confidence: 0.82,
-            bettingImplication: "Coach has 65% win rate vs opponent's coach"
-          },
-          {
-            id: "2",
-            name: "Recent Performance Momentum",
-            value: 0.12,
-            impact: "positive",
-            confidence: 0.88,
-            bettingImplication: "5-game winning streak, momentum building"
-          },
-          {
-            id: "3",
-            name: "Rest Advantage",
-            value: 0.05,
-            impact: "positive",
-            confidence: 0.90,
-            bettingImplication: "3 days rest vs opponent's back-to-back"
-          },
-          {
-            id: "4",
-            name: "Home Court Boost",
-            value: 0.06,
-            impact: "positive",
-            confidence: 0.85,
-            bettingImplication: "Strong home record (18-4)"
-          },
-          {
-            id: "5",
-            name: "Injury Report Impact",
-            value: -0.04,
-            impact: "negative",
-            confidence: 0.92,
-            bettingImplication: "Key rotation player questionable"
-          },
-          {
-            id: "6",
-            name: "Schedule Spot",
-            value: -0.02,
-            impact: "negative",
-            confidence: 0.78,
-            bettingImplication: "Potential lookahead to rivalry game"
-          },
-          {
-            id: "7",
-            name: "Public Perception Gap",
-            value: 0.04,
-            impact: "positive",
-            confidence: 0.72,
-            bettingImplication: "Sharps vs public money disagree - value exists"
-          }
-        ]
-      };
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
-    }, 2000);
+    if (!teamName.trim()) return;
+    setSubmittedSport(selectedSport);
+    setSubmittedTeam(teamName.trim());
   };
 
   return (
@@ -149,32 +76,33 @@ export function QuantumTeamDynamics() {
               </Badge>
             </div>
           </div>
+          <div className="flex items-center gap-2 mt-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-500/10 p-2 rounded-md">
+            <Info className="w-4 h-4 flex-shrink-0" />
+            <span>Live analysis from real-time data</span>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-              <SelectTrigger className="w-full sm:w-48" data-testid="select-team">
-                <SelectValue placeholder="Select Team" />
+            <Select value={selectedSport} onValueChange={setSelectedSport}>
+              <SelectTrigger className="w-full sm:w-36" data-testid="select-sport">
+                <SelectValue placeholder="Select Sport" />
               </SelectTrigger>
               <SelectContent>
-                {teams.map(team => (
-                  <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
+                {sports.map(sport => (
+                  <SelectItem key={sport.id} value={sport.id}>{sport.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <span className="self-center text-muted-foreground">vs</span>
-            <Select value={selectedOpponent} onValueChange={setSelectedOpponent}>
-              <SelectTrigger className="w-full sm:w-48" data-testid="select-opponent">
-                <SelectValue placeholder="Select Opponent" />
-              </SelectTrigger>
-              <SelectContent>
-                {teams.filter(t => t.id !== selectedTeam).map(team => (
-                  <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={runTeamAnalysis} disabled={isAnalyzing} data-testid="button-run-team-analysis">
-              {isAnalyzing ? (
+            <Input
+              placeholder="Enter team name (e.g. Knicks)"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && runTeamAnalysis()}
+              className="w-full sm:w-64"
+              data-testid="input-team-name"
+            />
+            <Button onClick={runTeamAnalysis} disabled={isLoading || !teamName.trim()} data-testid="button-run-team-analysis">
+              {isLoading ? (
                 <>
                   <Zap className="w-4 h-4 mr-2 animate-pulse" />
                   Analyzing...
@@ -182,7 +110,7 @@ export function QuantumTeamDynamics() {
               ) : (
                 <>
                   <Users className="w-4 h-4 mr-2" />
-                  Analyze Matchup
+                  Analyze Team
                 </>
               )}
             </Button>
@@ -190,7 +118,58 @@ export function QuantumTeamDynamics() {
         </CardContent>
       </Card>
 
-      {analysis && (
+      {isLoading && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="pt-6 text-center space-y-2">
+                  <Skeleton className="h-4 w-24 mx-auto" />
+                  <Skeleton className="h-8 w-16 mx-auto" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-6 w-full" />
+                ))}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+
+      {isError && (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            <p>Failed to load team analysis: {(error as Error)?.message}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {!analysis && !isLoading && !isError && (
+        <Card>
+          <CardContent className="pt-6 text-center text-muted-foreground">
+            <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+            <p className="text-lg font-medium">Select a sport and enter a team name</p>
+            <p className="text-sm mt-1">Click "Analyze Team" to view detailed team dynamics and betting insights</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {analysis && !isLoading && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
@@ -351,12 +330,12 @@ export function QuantumTeamDynamics() {
                 <div className="p-4 bg-green-500/10 rounded-lg text-center">
                   <Badge className="bg-green-500 mb-2">SPREAD</Badge>
                   <p className="font-bold text-lg">{analysis.teamName.split(" ").pop()} {analysis.spreadPrediction}</p>
-                  <p className="text-xs text-muted-foreground mt-1">58% confidence</p>
+                  <p className="text-xs text-muted-foreground mt-1">{(analysis.overallConfidence * 100).toFixed(0)}% confidence</p>
                 </div>
                 <div className="p-4 bg-blue-500/10 rounded-lg text-center">
                   <Badge className="bg-blue-500 mb-2">TOTAL</Badge>
                   <p className="font-bold text-lg">OVER {analysis.totalPrediction}</p>
-                  <p className="text-xs text-muted-foreground mt-1">62% confidence</p>
+                  <p className="text-xs text-muted-foreground mt-1">{(analysis.overallConfidence * 100).toFixed(0)}% confidence</p>
                 </div>
                 <div className="p-4 bg-purple-500/10 rounded-lg text-center">
                   <Badge className="bg-purple-500 mb-2">MONEYLINE</Badge>

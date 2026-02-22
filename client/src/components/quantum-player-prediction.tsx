@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { User, TrendingUp, TrendingDown, MapPin, Heart, Zap, Calendar, Home, AlertTriangle, Star, Target, Activity } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { User, TrendingUp, TrendingDown, MapPin, Heart, Zap, Calendar, Home, AlertTriangle, Star, Target, Activity, Info } from "lucide-react";
 
 interface QuantumFactor {
   id: string;
@@ -39,154 +42,51 @@ interface PlayerPrediction {
 }
 
 export function QuantumPlayerPrediction() {
-  const [selectedPlayer, setSelectedPlayer] = useState("jalen-brunson");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [prediction, setPrediction] = useState<PlayerPrediction | null>(null);
+  const [selectedSport, setSelectedSport] = useState("nba");
+  const [selectedTeam, setSelectedTeam] = useState("knicks");
 
-  const players = [
-    { id: "jalen-brunson", name: "Jalen Brunson", team: "Knicks", position: "PG" },
-    { id: "luka-doncic", name: "Luka Doncic", team: "Mavericks", position: "PG" },
-    { id: "giannis-antetokounmpo", name: "Giannis Antetokounmpo", team: "Bucks", position: "PF" },
-    { id: "anthony-edwards", name: "Anthony Edwards", team: "Timberwolves", position: "SG" },
-    { id: "nikola-jokic", name: "Nikola Jokic", team: "Nuggets", position: "C" },
+  const sports = [
+    { id: "nba", name: "NBA" },
+    { id: "nfl", name: "NFL" },
+    { id: "mlb", name: "MLB" },
+    { id: "nhl", name: "NHL" },
   ];
 
+  const teams: Record<string, { id: string; name: string }[]> = {
+    nba: [
+      { id: "knicks", name: "Knicks" },
+      { id: "mavericks", name: "Mavericks" },
+      { id: "bucks", name: "Bucks" },
+      { id: "timberwolves", name: "Timberwolves" },
+      { id: "nuggets", name: "Nuggets" },
+    ],
+    nfl: [
+      { id: "chiefs", name: "Chiefs" },
+      { id: "49ers", name: "49ers" },
+      { id: "eagles", name: "Eagles" },
+      { id: "ravens", name: "Ravens" },
+    ],
+    mlb: [
+      { id: "yankees", name: "Yankees" },
+      { id: "dodgers", name: "Dodgers" },
+    ],
+    nhl: [
+      { id: "bruins", name: "Bruins" },
+      { id: "avalanche", name: "Avalanche" },
+    ],
+  };
+
+  const predictionMutation = useMutation<PlayerPrediction, Error, { sport: string; teamId: string }>({
+    mutationFn: async ({ sport, teamId }) => {
+      const res = await apiRequest("GET", `/api/tools/player-prediction/${sport}/${teamId}`);
+      return res.json();
+    },
+  });
+
+  const prediction = predictionMutation.data ?? null;
+
   const runQuantumPrediction = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const mockPrediction: PlayerPrediction = {
-        playerId: selectedPlayer,
-        playerName: players.find(p => p.id === selectedPlayer)?.name || "",
-        team: players.find(p => p.id === selectedPlayer)?.team || "",
-        position: players.find(p => p.id === selectedPlayer)?.position || "",
-        baselinePerformance: 27.4,
-        quantumAdjustment: 0.087,
-        predictedPerformance: 29.8,
-        confidenceLevel: 0.82,
-        confidenceRating: "HIGH",
-        bettingRecommendation: "MODERATE_BET_OVER - Favorable conditions detected",
-        riskAssessment: "LOW_RISK - Stable prediction",
-        predictedStats: {
-          points: 29.8,
-          rebounds: 7.5,
-          assists: 8.9
-        },
-        factors: [
-          {
-            id: "1",
-            factorName: "Hometown Boost",
-            factorValue: 0.12,
-            weight: 0.12,
-            confidence: 0.88,
-            dataPoints: 45,
-            impactClassification: "STRONG_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Playing within 100 miles of hometown"
-          },
-          {
-            id: "2",
-            factorName: "Incentive Motivation",
-            factorValue: 0.08,
-            weight: 0.10,
-            confidence: 0.90,
-            dataPoints: 3,
-            impactClassification: "MODERATE_POSITIVE",
-            reliabilityRating: "VERY_RELIABLE",
-            description: "85% progress toward contract bonus"
-          },
-          {
-            id: "3",
-            factorName: "Injury Impact",
-            factorValue: -0.03,
-            weight: 0.18,
-            confidence: 0.85,
-            dataPoints: 1,
-            impactClassification: "SLIGHT_NEGATIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Minor ankle tweak 10 days ago"
-          },
-          {
-            id: "4",
-            factorName: "Player Mood",
-            factorValue: 0.05,
-            weight: 0.15,
-            confidence: 0.72,
-            dataPoints: 8,
-            impactClassification: "MODERATE_POSITIVE",
-            reliabilityRating: "MODERATELY_RELIABLE",
-            description: "Positive mood indicators last 2 weeks"
-          },
-          {
-            id: "5",
-            factorName: "Team Streak Impact",
-            factorValue: 0.04,
-            weight: 0.11,
-            confidence: 0.75,
-            dataPoints: 4,
-            impactClassification: "SLIGHT_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Team on 4-game winning streak"
-          },
-          {
-            id: "6",
-            factorName: "Opponent Matchup",
-            factorValue: 0.09,
-            weight: 0.09,
-            confidence: 0.80,
-            dataPoints: 12,
-            impactClassification: "MODERATE_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Historically strong vs opponent"
-          },
-          {
-            id: "7",
-            factorName: "Rest Days",
-            factorValue: 0.05,
-            weight: 0.07,
-            confidence: 0.85,
-            dataPoints: 1,
-            impactClassification: "MODERATE_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Optimal 3 days rest"
-          },
-          {
-            id: "8",
-            factorName: "Seasonal Fatigue",
-            factorValue: -0.02,
-            weight: 0.06,
-            confidence: 0.80,
-            dataPoints: 52,
-            impactClassification: "SLIGHT_NEGATIVE",
-            reliabilityRating: "RELIABLE",
-            description: "52 games played this season"
-          },
-          {
-            id: "9",
-            factorName: "Coaching Stability",
-            factorValue: 0.02,
-            weight: 0.05,
-            confidence: 0.75,
-            dataPoints: 1,
-            impactClassification: "SLIGHT_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Stable coaching environment"
-          },
-          {
-            id: "10",
-            factorName: "Home/Away Differential",
-            factorValue: 0.06,
-            weight: 0.07,
-            confidence: 0.82,
-            dataPoints: 38,
-            impactClassification: "MODERATE_POSITIVE",
-            reliabilityRating: "RELIABLE",
-            description: "Strong home court advantage"
-          }
-        ]
-      };
-      setPrediction(mockPrediction);
-      setIsAnalyzing(false);
-    }, 2500);
+    predictionMutation.mutate({ sport: selectedSport, teamId: selectedTeam });
   };
 
   const getImpactColor = (impact: string) => {
@@ -228,21 +128,38 @@ export function QuantumPlayerPrediction() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
+            <Info className="w-4 h-4 shrink-0" />
+            <span>Select a sport and team, then run the prediction for AI-powered player analysis.</span>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={selectedPlayer} onValueChange={setSelectedPlayer}>
-              <SelectTrigger className="w-full sm:w-64" data-testid="select-player">
-                <SelectValue placeholder="Select Player" />
+            <Select value={selectedSport} onValueChange={(v) => { setSelectedSport(v); setSelectedTeam(teams[v]?.[0]?.id || ""); }}>
+              <SelectTrigger className="w-full sm:w-40" data-testid="select-sport">
+                <SelectValue placeholder="Select Sport" />
               </SelectTrigger>
               <SelectContent>
-                {players.map(player => (
-                  <SelectItem key={player.id} value={player.id}>
-                    {player.name} ({player.team})
+                {sports.map(sport => (
+                  <SelectItem key={sport.id} value={sport.id}>
+                    {sport.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={runQuantumPrediction} disabled={isAnalyzing} data-testid="button-run-player-prediction">
-              {isAnalyzing ? (
+            <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+              <SelectTrigger className="w-full sm:w-64" data-testid="select-player">
+                <SelectValue placeholder="Select Team" />
+              </SelectTrigger>
+              <SelectContent>
+                {(teams[selectedSport] || []).map(team => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={runQuantumPrediction} disabled={predictionMutation.isPending} data-testid="button-run-player-prediction">
+              {predictionMutation.isPending ? (
                 <>
                   <Zap className="w-4 h-4 mr-2 animate-pulse" />
                   Computing Predictions...
@@ -257,6 +174,20 @@ export function QuantumPlayerPrediction() {
           </div>
         </CardContent>
       </Card>
+
+      {predictionMutation.isPending && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6 text-center space-y-2">
+                <Skeleton className="h-4 w-20 mx-auto" />
+                <Skeleton className="h-8 w-16 mx-auto" />
+                <Skeleton className="h-3 w-24 mx-auto" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {prediction && (
         <>
@@ -320,7 +251,7 @@ export function QuantumPlayerPrediction() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Zap className="w-4 h-4" />
-                Factor Analysis (10 Dimensions)
+                Factor Analysis ({prediction.factors.length} Dimensions)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">

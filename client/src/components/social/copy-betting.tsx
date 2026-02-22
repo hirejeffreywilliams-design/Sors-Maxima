@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, TrendingUp, Flame, Target, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Copy, Check, TrendingUp, Flame, Target, Users, Info } from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 interface RecentPick {
   pick: string;
@@ -23,92 +25,17 @@ interface Tipster {
   copying: boolean;
 }
 
-const initialTipsters: Tipster[] = [
-  {
-    id: "t1",
-    username: "SharpShooter99",
-    winRate: 62,
-    roi: 34.5,
-    streak: 8,
-    totalPicks: 245,
-    sport: "NFL",
-    recentPicks: [
-      { pick: "Chiefs -3.5", odds: "-110", result: "win" },
-      { pick: "Over 48.5 BUF/MIA", odds: "-105", result: "win" },
-      { pick: "Ravens ML", odds: "-150", result: "loss" },
-    ],
-    copying: false,
-  },
-  {
-    id: "t2",
-    username: "ParlayKing",
-    winRate: 58,
-    roi: 28.2,
-    streak: 5,
-    totalPicks: 312,
-    sport: "NBA",
-    recentPicks: [
-      { pick: "Knicks -5.5", odds: "-110", result: "win" },
-      { pick: "Heat ML", odds: "+120", result: "pending" },
-      { pick: "Under 220.5 PHX/DAL", odds: "-110", result: "win" },
-    ],
-    copying: true,
-  },
-  {
-    id: "t3",
-    username: "EdgeMaster",
-    winRate: 56,
-    roi: 25.8,
-    streak: 3,
-    totalPicks: 189,
-    sport: "MLB",
-    recentPicks: [
-      { pick: "Yankees -1.5", odds: "+130", result: "win" },
-      { pick: "Over 8.5 LAD/SF", odds: "-115", result: "loss" },
-      { pick: "Astros ML", odds: "-140", result: "win" },
-    ],
-    copying: false,
-  },
-  {
-    id: "t4",
-    username: "BetWizard",
-    winRate: 55,
-    roi: 22.1,
-    streak: 2,
-    totalPicks: 156,
-    sport: "NHL",
-    recentPicks: [
-      { pick: "Bruins ML", odds: "-130", result: "pending" },
-      { pick: "Over 5.5 TOR/MTL", odds: "+100", result: "win" },
-      { pick: "Rangers -1.5", odds: "+155", result: "loss" },
-    ],
-    copying: false,
-  },
-  {
-    id: "t5",
-    username: "MoneyMoves",
-    winRate: 54,
-    roi: 19.4,
-    streak: 4,
-    totalPicks: 423,
-    sport: "NFL",
-    recentPicks: [
-      { pick: "Eagles +3", odds: "-110", result: "win" },
-      { pick: "Under 44.5 SF/SEA", odds: "-105", result: "win" },
-      { pick: "Dolphins ML", odds: "+140", result: "pending" },
-    ],
-    copying: true,
-  },
-];
-
 export function CopyBetting() {
-  const [tipsters, setTipsters] = useState<Tipster[]>(initialTipsters);
+  const { data: tipsters = [], isLoading } = useQuery<Tipster[]>({
+    queryKey: ["/api/social/copy-bettors"],
+  });
 
-  const toggleCopy = (tipsterId: string) => {
-    setTipsters((prev) =>
-      prev.map((t) => (t.id === tipsterId ? { ...t, copying: !t.copying } : t))
-    );
-  };
+  const copyMutation = useMutation({
+    mutationFn: (tipsterId: string) => apiRequest("POST", `/api/social/copy-bettors/${tipsterId}/toggle`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/social/copy-bettors"] });
+    },
+  });
 
   const copiedTipsters = tipsters.filter((t) => t.copying);
   const totalCopiedBets = copiedTipsters.reduce((sum, t) => sum + t.totalPicks, 0);
@@ -181,88 +108,118 @@ export function CopyBetting() {
           </Card>
         )}
 
-        <div className="space-y-3">
-          {tipsters.map((tipster) => (
-            <Card key={tipster.id} data-testid={`tipster-card-${tipster.id}`}>
-              <CardContent className="p-3 sm:p-4 space-y-3">
-                <div className="flex items-center gap-2.5">
-                  <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
-                    <AvatarFallback className="bg-muted text-sm">
-                      {tipster.username.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-medium text-sm truncate" data-testid={`tipster-username-${tipster.id}`}>
-                        {tipster.username}
-                      </span>
-                      <Badge variant="outline" className="text-xs" data-testid={`badge-sport-${tipster.id}`}>
-                        {tipster.sport}
-                      </Badge>
-                      {tipster.streak >= 3 && (
-                        <Badge variant="outline" className="gap-0.5 bg-orange-500/10 text-orange-500 border-orange-500/30 text-xs" data-testid={`badge-streak-${tipster.id}`}>
-                          <Flame className="w-3 h-3" />
-                          {tipster.streak}
+        {isLoading ? (
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-3 sm:p-4 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-48" />
+                    </div>
+                    <Skeleton className="h-8 w-20" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : tipsters.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Copy className="w-10 h-10 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No tipsters available to copy yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {tipsters.map((tipster) => (
+              <Card key={tipster.id} data-testid={`tipster-card-${tipster.id}`}>
+                <CardContent className="p-3 sm:p-4 space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
+                      <AvatarFallback className="bg-muted text-sm">
+                        {tipster.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-medium text-sm truncate" data-testid={`tipster-username-${tipster.id}`}>
+                          {tipster.username}
+                        </span>
+                        <Badge variant="outline" className="text-xs" data-testid={`badge-sport-${tipster.id}`}>
+                          {tipster.sport}
                         </Badge>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
-                      <span className="flex items-center gap-1" data-testid={`text-winrate-${tipster.id}`}>
-                        <Target className="w-3 h-3 shrink-0" />
-                        {tipster.winRate}%
-                      </span>
-                      <span className="flex items-center gap-1" data-testid={`text-roi-${tipster.id}`}>
-                        <TrendingUp className="w-3 h-3 shrink-0" />
-                        +{tipster.roi}%
-                      </span>
-                      <span data-testid={`text-total-picks-${tipster.id}`}>{tipster.totalPicks} picks</span>
-                    </div>
-                  </div>
-                  <Button
-                    variant={tipster.copying ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => toggleCopy(tipster.id)}
-                    className={`shrink-0 toggle-elevate ${tipster.copying ? "toggle-elevated" : ""}`}
-                    data-testid={`button-copy-tipster-${tipster.id}`}
-                  >
-                    {tipster.copying ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 mr-1" />
-                        <span className="hidden sm:inline">Copying</span>
-                        <span className="sm:hidden">On</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5 mr-1" />
-                        Copy
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {tipster.copying && tipster.recentPicks.length > 0 && (
-                  <div className="space-y-1.5 pt-2 border-t border-border/50">
-                    <p className="text-xs text-muted-foreground font-medium">Recent Picks</p>
-                    {tipster.recentPicks.map((pick, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-2 text-sm"
-                        data-testid={`copied-pick-${tipster.id}-${idx}`}
-                      >
-                        <span className="truncate">{pick.pick}</span>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Badge variant="outline" className="text-xs">{pick.odds}</Badge>
-                          <Badge variant="outline" className={`text-xs ${getResultColor(pick.result)}`}>
-                            {pick.result}
+                        {tipster.streak >= 3 && (
+                          <Badge variant="outline" className="gap-0.5 bg-orange-500/10 text-orange-500 border-orange-500/30 text-xs" data-testid={`badge-streak-${tipster.id}`}>
+                            <Flame className="w-3 h-3" />
+                            {tipster.streak}
                           </Badge>
-                        </div>
+                        )}
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground mt-0.5 flex-wrap">
+                        <span className="flex items-center gap-1" data-testid={`text-winrate-${tipster.id}`}>
+                          <Target className="w-3 h-3 shrink-0" />
+                          {tipster.winRate}%
+                        </span>
+                        <span className="flex items-center gap-1" data-testid={`text-roi-${tipster.id}`}>
+                          <TrendingUp className="w-3 h-3 shrink-0" />
+                          +{tipster.roi}%
+                        </span>
+                        <span data-testid={`text-total-picks-${tipster.id}`}>{tipster.totalPicks} picks</span>
+                      </div>
+                    </div>
+                    <Button
+                      variant={tipster.copying ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => copyMutation.mutate(tipster.id)}
+                      disabled={copyMutation.isPending}
+                      className={`shrink-0 toggle-elevate ${tipster.copying ? "toggle-elevated" : ""}`}
+                      data-testid={`button-copy-tipster-${tipster.id}`}
+                    >
+                      {tipster.copying ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 mr-1" />
+                          <span className="hidden sm:inline">Copying</span>
+                          <span className="sm:hidden">On</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 mr-1" />
+                          Copy
+                        </>
+                      )}
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+
+                  {tipster.copying && tipster.recentPicks.length > 0 && (
+                    <div className="space-y-1.5 pt-2 border-t border-border/50">
+                      <p className="text-xs text-muted-foreground font-medium">Recent Picks</p>
+                      {tipster.recentPicks.map((pick, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between gap-2 text-sm"
+                          data-testid={`copied-pick-${tipster.id}-${idx}`}
+                        >
+                          <span className="truncate">{pick.pick}</span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <Badge variant="outline" className="text-xs">{pick.odds}</Badge>
+                            <Badge variant="outline" className={`text-xs ${getResultColor(pick.result)}`}>
+                              {pick.result}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+          <Info className="w-4 h-4 text-blue-500 shrink-0" />
+          <p className="text-xs text-blue-600 dark:text-blue-400">Data source: Live copy betting data</p>
         </div>
       </CardContent>
     </Card>

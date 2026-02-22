@@ -1,58 +1,78 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Shield, Calculator, DollarSign, TrendingUp, Zap,
-  AlertTriangle, CheckCircle, Atom
+  AlertTriangle, CheckCircle, Info
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
 
-interface ActiveBet {
+interface PendingBet {
   id: string;
-  description: string;
-  originalStake: number;
-  potentialPayout: number;
-  currentLiveOdds: number;
-  hedgeOdds: number;
-  status: "winning" | "losing" | "push";
+  sport: string;
+  sportsbook: string;
+  stake: number;
+  payout: number;
+  legs: { team: string; opponent: string; market: string; selection: string; odds: number; result: string }[];
+  result: string;
 }
 
-const mockActiveBets: ActiveBet[] = [
-  { id: "1", description: "Chiefs ML (Original: -150)", originalStake: 150, potentialPayout: 250, currentLiveOdds: -280, hedgeOdds: +240, status: "winning" },
-  { id: "2", description: "Mavericks -5.5 (Original: -110)", originalStake: 110, potentialPayout: 210, currentLiveOdds: +120, hedgeOdds: -130, status: "losing" },
-];
-
 export function LiveHedgeCalculator() {
-  const [activeBets] = useState<ActiveBet[]>(mockActiveBets);
-  const [selectedBet, setSelectedBet] = useState<ActiveBet | null>(null);
-  const [hedgeAmount, setHedgeAmount] = useState("");
+  const { data: pendingBets, isLoading } = useQuery<PendingBet[]>({
+    queryKey: ["/api/live/hedge-bets"],
+    refetchInterval: 30000,
+  });
 
-  const calculateHedge = (bet: ActiveBet, amount: number) => {
+  const [selectedBet, setSelectedBet] = useState<PendingBet | null>(null);
+  const [hedgeAmount, setHedgeAmount] = useState("");
+  const [hedgeOdds, setHedgeOdds] = useState("-110");
+
+  const calculateHedge = (bet: PendingBet, amount: number, odds: number) => {
     if (!amount || amount <= 0) return null;
     
-    const hedgeDecimalOdds = bet.hedgeOdds > 0 
-      ? (bet.hedgeOdds / 100) + 1 
-      : (100 / Math.abs(bet.hedgeOdds)) + 1;
+    const hedgeDecimalOdds = odds > 0 
+      ? (odds / 100) + 1 
+      : (100 / Math.abs(odds)) + 1;
     
     const hedgePayout = amount * hedgeDecimalOdds;
-    const originalWinScenario = bet.potentialPayout - amount;
-    const hedgeWinScenario = hedgePayout - bet.originalStake;
+    const originalWinScenario = bet.payout - amount;
+    const hedgeWinScenario = hedgePayout - bet.stake;
     const guaranteedProfit = Math.min(originalWinScenario, hedgeWinScenario);
+    const optimalHedge = Math.round(bet.payout / hedgeDecimalOdds);
     
     return {
       hedgePayout,
       originalWinScenario,
       hedgeWinScenario,
       guaranteedProfit,
-      optimalHedge: Math.round(bet.potentialPayout / hedgeDecimalOdds),
+      optimalHedge,
     };
   };
 
+  const parsedOdds = parseInt(hedgeOdds) || -110;
   const hedgeCalc = selectedBet && hedgeAmount 
-    ? calculateHedge(selectedBet, parseFloat(hedgeAmount))
+    ? calculateHedge(selectedBet, parseFloat(hedgeAmount), parsedOdds)
     : null;
+
+  const activeBets = (pendingBets || []).filter(b => b.result === "pending");
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Shield className="w-5 h-5 text-blue-500" />
+            Live Hedge Calculator
+          </CardTitle>
+        </CardHeader>
+        <CardContent><Skeleton className="h-40 w-full" /></CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -68,47 +88,53 @@ export function LiveHedgeCalculator() {
           Calculate optimal hedge bets for your active wagers in real-time
         </p>
 
-        <div className="space-y-3">
-          <p className="font-medium text-sm">Active Bets</p>
-          {activeBets.map((bet) => (
-            <div
-              key={bet.id}
-              onClick={() => setSelectedBet(bet)}
-              className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                selectedBet?.id === bet.id 
-                  ? "border-primary bg-primary/5" 
-                  : "border-border hover-elevate"
-              } ${
-                bet.status === "winning" ? "bg-green-500/5" : bet.status === "losing" ? "bg-red-500/5" : ""
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">{bet.description}</p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>Stake: ${bet.originalStake}</span>
-                    <span>•</span>
-                    <span>To Win: ${bet.potentialPayout}</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
+          <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+          <p className="text-xs text-blue-600 dark:text-blue-400">
+            Uses your tracked pending bets. Add bets via the Bet Tracker to see them here.
+          </p>
+        </div>
+
+        {activeBets.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Shield className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p>No pending bets to hedge</p>
+            <p className="text-sm mt-1">Track active bets in the Bet Tracker to use the hedge calculator</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <p className="font-medium text-sm">Pending Bets ({activeBets.length})</p>
+            {activeBets.map((bet) => (
+              <div
+                key={bet.id}
+                onClick={() => setSelectedBet(bet)}
+                className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                  selectedBet?.id === bet.id 
+                    ? "border-primary bg-primary/5" 
+                    : "border-border hover:bg-muted/50"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium text-sm">{bet.legs.map(l => l.selection).join(" / ")}</p>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <span>Stake: ${bet.stake}</span>
+                      <span>•</span>
+                      <span>To Win: ${bet.payout}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <Badge className={bet.status === "winning" ? "bg-green-500" : bet.status === "losing" ? "bg-red-500" : "bg-yellow-500"}>
-                    {bet.status.toUpperCase()}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Hedge: {bet.hedgeOdds > 0 ? "+" : ""}{bet.hedgeOdds}
-                  </p>
+                  <Badge variant="outline">{bet.sport}</Badge>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {selectedBet && (
           <div className="p-4 rounded-lg bg-muted/50 space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-sm">Hedge Amount</span>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">Hedge Amount</span>
                 <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
                 <Input
                   type="number"
@@ -117,6 +143,16 @@ export function LiveHedgeCalculator() {
                   onChange={(e) => setHedgeAmount(e.target.value)}
                   className="w-24 sm:w-32 h-8 sm:h-9 text-sm"
                   data-testid="input-hedge-amount"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Odds</span>
+                <Input
+                  type="number"
+                  value={hedgeOdds}
+                  onChange={(e) => setHedgeOdds(e.target.value)}
+                  className="w-20 h-8 sm:h-9 text-sm"
+                  data-testid="input-hedge-odds"
                 />
               </div>
             </div>

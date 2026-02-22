@@ -5713,5 +5713,275 @@ Follow these rules:
 
   // ==================== END ANALYTICS AGENT ENGINE ====================
 
+  // ==================== USER DATA ENGINE (Bet Tracking, Finance, Gamification) ====================
+  const userDataEngine = await import("./userDataEngine");
+
+  app.get("/api/user/bets", (_req, res) => {
+    res.json(userDataEngine.getBets());
+  });
+
+  app.post("/api/user/bets", (req, res) => {
+    try {
+      const bet = userDataEngine.addBet(req.body);
+      res.json(bet);
+    } catch (e: any) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  app.patch("/api/user/bets/:id", (req, res) => {
+    const bet = userDataEngine.updateBet(req.params.id, req.body);
+    if (!bet) return res.status(404).json({ error: "Bet not found" });
+    res.json(bet);
+  });
+
+  app.delete("/api/user/bets/:id", (req, res) => {
+    const deleted = userDataEngine.deleteBet(req.params.id);
+    if (!deleted) return res.status(404).json({ error: "Bet not found" });
+    res.json({ success: true });
+  });
+
+  app.get("/api/user/bet-stats", (_req, res) => {
+    res.json(userDataEngine.getBetStats());
+  });
+
+  app.get("/api/user/tax-summary", (_req, res) => {
+    res.json(userDataEngine.getTaxSummary());
+  });
+
+  app.get("/api/user/sportsbooks", (_req, res) => {
+    res.json(userDataEngine.getSportsbooks());
+  });
+
+  app.patch("/api/user/sportsbooks/:id", (req, res) => {
+    const book = userDataEngine.updateSportsbook(req.params.id, req.body);
+    if (!book) return res.status(404).json({ error: "Sportsbook not found" });
+    res.json(book);
+  });
+
+  app.post("/api/user/sportsbooks", (req, res) => {
+    const book = userDataEngine.addSportsbook(req.body.name || "New Book");
+    res.json(book);
+  });
+
+  app.get("/api/user/achievements", (_req, res) => {
+    res.json(userDataEngine.getAchievements());
+  });
+
+  app.get("/api/user/challenges", (_req, res) => {
+    res.json(userDataEngine.getChallenges());
+  });
+
+  app.post("/api/user/challenges/action", (req, res) => {
+    userDataEngine.triggerChallengeAction(req.body.action, req.body.sport);
+    res.json({ success: true });
+  });
+
+  app.get("/api/user/streak", (_req, res) => {
+    res.json(userDataEngine.getStreakData());
+  });
+
+  app.get("/api/user/paper-account", (_req, res) => {
+    res.json(userDataEngine.getPaperAccount());
+  });
+
+  app.get("/api/user/paper-bets", (_req, res) => {
+    res.json(userDataEngine.getPaperBets());
+  });
+
+  app.post("/api/user/paper-bets", (req, res) => {
+    const bet = userDataEngine.placePaperBet(req.body);
+    if (!bet) return res.status(400).json({ error: "Insufficient paper balance" });
+    res.json(bet);
+  });
+
+  app.patch("/api/user/paper-bets/:id/resolve", (req, res) => {
+    const bet = userDataEngine.resolvePaperBet(req.params.id, req.body.result);
+    if (!bet) return res.status(404).json({ error: "Bet not found or already resolved" });
+    res.json(bet);
+  });
+
+  app.get("/api/user/alerts", (_req, res) => {
+    res.json(userDataEngine.getAlerts());
+  });
+
+  app.post("/api/user/alerts", (req, res) => {
+    const alert = userDataEngine.addAlert(req.body);
+    res.json(alert);
+  });
+
+  app.delete("/api/user/alerts/:id", (req, res) => {
+    const deleted = userDataEngine.deleteAlert(req.params.id);
+    if (!deleted) return res.status(404).json({ error: "Alert not found" });
+    res.json({ success: true });
+  });
+
+  app.patch("/api/user/alerts/:id/toggle", (req, res) => {
+    const alert = userDataEngine.toggleAlert(req.params.id);
+    if (!alert) return res.status(404).json({ error: "Alert not found" });
+    res.json(alert);
+  });
+
+  // ==================== SOCIAL DATA ENGINE ====================
+  const socialDataEngine = await import("./socialDataEngine");
+
+  app.get("/api/social/leaderboard", (req, res) => {
+    const timeframe = (req.query.timeframe as string) || "weekly";
+    res.json(socialDataEngine.getLeaderboard(timeframe));
+  });
+
+  app.get("/api/social/bettors", (_req, res) => {
+    res.json(socialDataEngine.getSocialBettors());
+  });
+
+  app.post("/api/social/follow/:bettorId", (req, res) => {
+    const isFollowing = socialDataEngine.followBettor(req.params.bettorId);
+    res.json({ isFollowing });
+  });
+
+  app.get("/api/social/shared-tickets", (_req, res) => {
+    res.json(socialDataEngine.getSharedTickets());
+  });
+
+  app.post("/api/social/share-ticket", (req, res) => {
+    const ticket = socialDataEngine.shareTicket(req.body);
+    res.json(ticket);
+  });
+
+  app.post("/api/social/like-ticket/:id", (req, res) => {
+    socialDataEngine.likeTicket(req.params.id);
+    res.json({ success: true });
+  });
+
+  app.get("/api/social/feed", (_req, res) => {
+    res.json(socialDataEngine.getFeed());
+  });
+
+  app.get("/api/social/competitions", (_req, res) => {
+    res.json(socialDataEngine.getCompetitions());
+  });
+
+  app.post("/api/social/competitions/:id/join", (req, res) => {
+    const joined = socialDataEngine.joinCompetition(req.params.id, req.body.username || "You");
+    if (!joined) return res.status(400).json({ error: "Cannot join competition" });
+    res.json({ success: true });
+  });
+
+  app.get("/api/social/copy-bettors", (_req, res) => {
+    res.json(socialDataEngine.getCopyBettors());
+  });
+
+  // ==================== LIVE ANALYTICS ENGINE ====================
+  const liveAnalyticsEngine = await import("./liveAnalyticsEngine");
+
+  app.get("/api/live/momentum", async (_req, res) => {
+    try {
+      const games = await liveAnalyticsEngine.getMomentumGames();
+      res.json(games);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/live/clv", (_req, res) => {
+    res.json(liveAnalyticsEngine.getCLVData());
+  });
+
+  app.get("/api/live/public-sharp", async (_req, res) => {
+    try {
+      const splits = await liveAnalyticsEngine.getPublicSharpSplits();
+      res.json(splits);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/live/hedge-bets", (_req, res) => {
+    const bets = userDataEngine.getBets().filter((b: any) => b.result === "pending");
+    res.json(bets);
+  });
+
+  // ==================== PRO TOOLS ENGINE ====================
+  const proToolsEngine = await import("./proToolsEngine");
+
+  app.get("/api/tools/player-prediction/:sport/:teamId", (req, res) => {
+    const { sport, teamId } = req.params;
+    const playerId = req.query.playerId as string | undefined;
+    const prediction = proToolsEngine.getPlayerPrediction(sport as any, teamId, playerId);
+    if (!prediction) return res.status(404).json({ error: "No player data available", dataSource: "ESPN roster cache" });
+    res.json(prediction);
+  });
+
+  app.get("/api/tools/team-analysis/:sport/:teamName", async (req, res) => {
+    try {
+      const { sport, teamName } = req.params;
+      const analysis = await proToolsEngine.getTeamAnalysis(sport as any, decodeURIComponent(teamName));
+      if (!analysis) return res.status(404).json({ error: "No team data available" });
+      res.json(analysis);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/tools/coaching-analysis/:sport/:teamName", async (req, res) => {
+    try {
+      const { sport, teamName } = req.params;
+      const analysis = await proToolsEngine.getCoachingAnalysis(sport as any, decodeURIComponent(teamName));
+      res.json(analysis);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/tools/cashout-analysis", (req, res) => {
+    const { betOdds, currentOdds, stake, legsRemaining } = req.body;
+    if (!betOdds || !stake) return res.status(400).json({ error: "Missing required fields" });
+    const analysis = proToolsEngine.analyzeCashout(
+      Number(betOdds), Number(currentOdds || betOdds), Number(stake), Number(legsRemaining || 1)
+    );
+    res.json(analysis);
+  });
+
+  // ==================== AI BETTING ASSISTANT (OpenAI) ====================
+  app.post("/api/ai/chat", async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message) return res.status(400).json({ error: "Message required" });
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const bets = userDataEngine.getBets();
+      const stats = userDataEngine.getBetStats();
+
+      const systemPrompt = `You are Sors Maxima's betting intelligence assistant. You help users with sports betting analysis, strategy, and bankroll management.
+
+User's betting stats:
+- Total bets tracked: ${stats.totalBets}
+- Win rate: ${stats.winRate.toFixed(1)}%
+- ROI: ${stats.roi.toFixed(1)}%
+- Total profit: $${stats.totalProfit.toFixed(2)}
+- Recent bets: ${bets.slice(-5).map(b => `${b.sport} ${b.result}`).join(', ')}
+
+Be concise, data-driven, and honest. If you don't have enough data to make a recommendation, say so. Never guarantee outcomes. Always emphasize responsible gambling.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message },
+        ],
+        max_tokens: 500,
+      });
+
+      res.json({ response: completion.choices[0]?.message?.content || "I couldn't generate a response." });
+    } catch (e: any) {
+      console.error("AI chat error:", e.message);
+      res.json({ response: "AI assistant is currently unavailable. Please check your API configuration.", error: true });
+    }
+  });
+
+  // ==================== END ALL FEATURE ROUTES ====================
+
   return httpServer;
 }

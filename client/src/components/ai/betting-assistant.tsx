@@ -7,9 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Bot, Send, User, Sparkles, TrendingUp, Target,
-  Lightbulb, Zap, Atom
+  Lightbulb, Zap, Atom, Info
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
   id: string;
@@ -34,56 +36,9 @@ const initialMessages: Message[] = [
   },
 ];
 
-const mockResponses: Record<string, string> = {
-  "build me a 3-leg nba parlay": `Great choice! Based on my advanced analysis, here's a sharp 3-leg NBA parlay for tonight:
-
-**Recommended Parlay (+412)**
-1. **Bucks -4.5** (-110) - Strong home court advantage, 72% ATS at home
-2. **Knicks/Heat Over 228.5** (-105) - Both teams averaging 118+ PPG last 5
-3. **Suns ML** (-135) - Durant averaging 31 PPG vs this opponent
-
-**Parlay Stats:**
-- Combined Win Probability: 18.2%
-- Expected Value: +4.8%
-- Power Score: 76%
-
-Want me to add this to your builder?`,
-
-  "what are today's best +ev plays?": `I've scanned all markets for positive expected value. Here are today's top +EV opportunities:
-
-**Top 3 +EV Plays:**
-
-1. **Bills +3.5** (+EV 6.2%)
-   - Sharp money heavily on Bills
-   - Line opened at +1.5, now +3.5
-   - Edge Score: 84
-
-2. **Timberwolves/Mavericks Under 215.5** (+EV 4.1%)
-   - Both teams rank top-5 in defensive efficiency
-   - Weather affecting visiting team
-   - Edge Score: 78
-
-3. **Nuggets ML** (+EV 3.8%)
-   - Jokic triple-double trend
-   - Rest advantage: 3 days vs 1 day
-   - Edge Score: 75
-
-Would you like detailed analysis on any of these?`,
-
-  "default": `I understand you're interested in that! Based on my advanced analysis of current market conditions and historical data, I can help you make more informed decisions.
-
-Here are some key insights:
-- Current market sentiment is slightly bullish on favorites
-- Sharp money has been moving toward unders today
-- Several injury reports may affect lines later
-
-What specific aspect would you like me to dive deeper into?`,
-};
-
 export function BettingAssistant() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -91,6 +46,36 @@ export function BettingAssistant() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const chatMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const res = await apiRequest("POST", "/api/ai/chat", { message });
+      return res.json() as Promise<{ response: string }>;
+    },
+    onSuccess: (data) => {
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data.response,
+        timestamp: new Date(),
+        suggestions: [
+          "Tell me more",
+          "Add to my parlay",
+          "Show alternatives",
+        ],
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+    },
+    onError: (error: Error) => {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    },
+  });
 
   const sendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -104,34 +89,7 @@ export function BettingAssistant() {
 
     setMessages(prev => [...prev, userMessage]);
     setInput("");
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const lowerContent = content.toLowerCase();
-      let response = mockResponses.default;
-      
-      for (const [key, value] of Object.entries(mockResponses)) {
-        if (lowerContent.includes(key)) {
-          response = value;
-          break;
-        }
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: response,
-        timestamp: new Date(),
-        suggestions: [
-          "Tell me more",
-          "Add to my parlay",
-          "Show alternatives",
-        ],
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      setIsTyping(false);
-    }, 1500);
+    chatMutation.mutate(content);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -151,6 +109,10 @@ export function BettingAssistant() {
             <div className="w-2 h-2 rounded-full bg-green-500" />
             Online
           </Badge>
+        </div>
+        <div className="flex items-center gap-2 mt-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-500/10 p-2 rounded-md">
+          <Info className="w-4 h-4 flex-shrink-0" />
+          <span>AI-powered responses from live model</span>
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
@@ -204,7 +166,7 @@ export function BettingAssistant() {
                 )}
               </div>
             ))}
-            {isTyping && (
+            {chatMutation.isPending && (
               <div className="flex gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="bg-gradient-to-br from-purple-500 to-blue-500 text-white">
@@ -230,9 +192,10 @@ export function BettingAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && sendMessage(input)}
+              disabled={chatMutation.isPending}
               data-testid="input-chat-message"
             />
-            <Button onClick={() => sendMessage(input)} disabled={!input.trim()} data-testid="button-send-message">
+            <Button onClick={() => sendMessage(input)} disabled={!input.trim() || chatMutation.isPending} data-testid="button-send-message">
               <Send className="w-4 h-4" />
             </Button>
           </div>

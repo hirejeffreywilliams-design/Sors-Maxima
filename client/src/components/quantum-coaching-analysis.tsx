@@ -1,10 +1,13 @@
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Brain, Target, TrendingUp, Clock, Users, Zap, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Brain, Target, TrendingUp, Clock, Users, Zap, AlertTriangle, CheckCircle2, Info } from "lucide-react";
 
 interface CoachingDecision {
   id: string;
@@ -35,90 +38,50 @@ interface QuantumAnalysisResult {
 }
 
 export function QuantumCoachingAnalysis() {
-  const [selectedCoach, setSelectedCoach] = useState("andy-reid");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysis, setAnalysis] = useState<QuantumAnalysisResult | null>(null);
+  const [selectedSport, setSelectedSport] = useState("nfl");
+  const [selectedTeam, setSelectedTeam] = useState("chiefs");
 
-  const coaches = [
-    { id: "andy-reid", name: "Andy Reid", team: "Chiefs" },
-    { id: "kyle-shanahan", name: "Kyle Shanahan", team: "49ers" },
-    { id: "sean-mcvay", name: "Sean McVay", team: "Rams" },
-    { id: "bill-belichick", name: "Bill Belichick", team: "Patriots" },
-    { id: "mike-tomlin", name: "Mike Tomlin", team: "Steelers" },
+  const sports = [
+    { id: "nfl", name: "NFL" },
+    { id: "nba", name: "NBA" },
+    { id: "mlb", name: "MLB" },
+    { id: "nhl", name: "NHL" },
   ];
 
+  const teamsBySport: Record<string, { id: string; name: string }[]> = {
+    nfl: [
+      { id: "chiefs", name: "Chiefs" },
+      { id: "49ers", name: "49ers" },
+      { id: "rams", name: "Rams" },
+      { id: "patriots", name: "Patriots" },
+      { id: "steelers", name: "Steelers" },
+    ],
+    nba: [
+      { id: "celtics", name: "Celtics" },
+      { id: "lakers", name: "Lakers" },
+      { id: "nuggets", name: "Nuggets" },
+    ],
+    mlb: [
+      { id: "yankees", name: "Yankees" },
+      { id: "dodgers", name: "Dodgers" },
+    ],
+    nhl: [
+      { id: "bruins", name: "Bruins" },
+      { id: "avalanche", name: "Avalanche" },
+    ],
+  };
+
+  const analysisMutation = useMutation<QuantumAnalysisResult, Error, { sport: string; teamName: string }>({
+    mutationFn: async ({ sport, teamName }) => {
+      const res = await apiRequest("GET", `/api/tools/coaching-analysis/${sport}/${teamName}`);
+      return res.json();
+    },
+  });
+
+  const analysis = analysisMutation.data ?? null;
+
   const runQuantumAnalysis = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      const mockAnalysis: QuantumAnalysisResult = {
-        coachName: coaches.find(c => c.id === selectedCoach)?.name || "",
-        team: coaches.find(c => c.id === selectedCoach)?.team || "",
-        overallConfidence: 0.847,
-        totalPatterns: 2847,
-        situationalContext: {
-          scoreDifferential: -3,
-          timeRemaining: "4:32",
-          quarter: "4th",
-          pressureLevel: "HIGH"
-        },
-        decisions: [
-          {
-            id: "1",
-            decisionType: "Fourth Down Aggressive",
-            finalProbability: 0.42,
-            historicalFrequency: 187,
-            successRate: 0.73,
-            pressureFactor: 0.81,
-            momentumCorrelation: 0.68,
-            quantumInterference: 0.12,
-            predictionLevel: "HIGHLY_LIKELY",
-            bettingRecommendation: "LIVE_BET_OVER_TOTAL",
-            expectedValue: 30.66
-          },
-          {
-            id: "2",
-            decisionType: "Strategic Timeout",
-            finalProbability: 0.28,
-            historicalFrequency: 234,
-            successRate: 0.78,
-            pressureFactor: 0.85,
-            momentumCorrelation: 0.72,
-            quantumInterference: 0.08,
-            predictionLevel: "LIKELY",
-            bettingRecommendation: "BET_TEAM_AFTER_TIMEOUT",
-            expectedValue: 21.84
-          },
-          {
-            id: "3",
-            decisionType: "Two-Minute Drill",
-            finalProbability: 0.18,
-            historicalFrequency: 156,
-            successRate: 0.69,
-            pressureFactor: 0.77,
-            momentumCorrelation: 0.65,
-            quantumInterference: 0.15,
-            predictionLevel: "POSSIBLE",
-            bettingRecommendation: "EXPECT_HIGH_SCORING",
-            expectedValue: 12.42
-          },
-          {
-            id: "4",
-            decisionType: "Challenge Play",
-            finalProbability: 0.08,
-            historicalFrequency: 89,
-            successRate: 0.67,
-            pressureFactor: 0.62,
-            momentumCorrelation: 0.54,
-            quantumInterference: 0.22,
-            predictionLevel: "UNLIKELY",
-            bettingRecommendation: "MOMENTUM_SHIFT_OPPORTUNITY",
-            expectedValue: 5.36
-          }
-        ]
-      };
-      setAnalysis(mockAnalysis);
-      setIsAnalyzing(false);
-    }, 2000);
+    analysisMutation.mutate({ sport: selectedSport, teamName: selectedTeam });
   };
 
   const getPredictionColor = (level: string) => {
@@ -152,21 +115,38 @@ export function QuantumCoachingAnalysis() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
+            <Info className="w-4 h-4 shrink-0" />
+            <span>Select a sport and team, then run the analysis for AI-powered coaching pattern predictions.</span>
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={selectedCoach} onValueChange={setSelectedCoach}>
-              <SelectTrigger className="w-full sm:w-64" data-testid="select-coach">
-                <SelectValue placeholder="Select Coach" />
+            <Select value={selectedSport} onValueChange={(v) => { setSelectedSport(v); setSelectedTeam(teamsBySport[v]?.[0]?.id || ""); }}>
+              <SelectTrigger className="w-full sm:w-40" data-testid="select-sport">
+                <SelectValue placeholder="Select Sport" />
               </SelectTrigger>
               <SelectContent>
-                {coaches.map(coach => (
-                  <SelectItem key={coach.id} value={coach.id}>
-                    {coach.name} ({coach.team})
+                {sports.map(sport => (
+                  <SelectItem key={sport.id} value={sport.id}>
+                    {sport.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={runQuantumAnalysis} disabled={isAnalyzing} data-testid="button-run-quantum-analysis">
-              {isAnalyzing ? (
+            <Select value={selectedTeam} onValueChange={setSelectedTeam}>
+              <SelectTrigger className="w-full sm:w-64" data-testid="select-coach">
+                <SelectValue placeholder="Select Team" />
+              </SelectTrigger>
+              <SelectContent>
+                {(teamsBySport[selectedSport] || []).map(team => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={runQuantumAnalysis} disabled={analysisMutation.isPending} data-testid="button-run-quantum-analysis">
+              {analysisMutation.isPending ? (
                 <>
                   <Zap className="w-4 h-4 mr-2 animate-pulse" />
                   Analyzing Patterns...
@@ -204,6 +184,20 @@ export function QuantumCoachingAnalysis() {
         </CardContent>
       </Card>
 
+      {analysisMutation.isPending && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6 text-center space-y-2">
+                <Skeleton className="h-4 w-24 mx-auto" />
+                <Skeleton className="h-10 w-20 mx-auto" />
+                <Skeleton className="h-3 w-32 mx-auto" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
       {analysis && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -231,10 +225,10 @@ export function QuantumCoachingAnalysis() {
               <CardContent className="pt-6 text-center">
                 <p className="text-sm text-muted-foreground mb-1">Top Prediction</p>
                 <p className="text-lg font-bold text-blue-500">
-                  {analysis.decisions[0].decisionType}
+                  {analysis.decisions[0]?.decisionType}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {(analysis.decisions[0].finalProbability * 100).toFixed(0)}% probability
+                  {analysis.decisions[0] ? `${(analysis.decisions[0].finalProbability * 100).toFixed(0)}% probability` : "N/A"}
                 </p>
               </CardContent>
             </Card>
@@ -248,6 +242,12 @@ export function QuantumCoachingAnalysis() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {analysis.decisions.length === 0 && (
+                <div className="text-center py-8">
+                  <Brain className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+                  <p className="text-sm text-muted-foreground">No decision predictions available.</p>
+                </div>
+              )}
               {analysis.decisions.map((decision) => (
                 <div key={decision.id} className="p-4 bg-muted/50 rounded-lg space-y-3" data-testid={`decision-${decision.id}`}>
                   <div className="flex items-start justify-between gap-3">

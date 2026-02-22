@@ -1,129 +1,82 @@
 import { useState, useMemo } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   TrendingUp, TrendingDown, DollarSign, Target, 
   Calendar, PieChart, BarChart3, Clock, CheckCircle2, 
-  XCircle, Loader2, Plus, Trash2, Filter, AlertTriangle
+  XCircle, Loader2, Plus, Trash2, Filter, Info
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { BetRecord, BetTrackingStats, Sport, ParlayLeg } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
-function generateMockBetHistory(): BetRecord[] {
-  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
-  const results: ("won" | "lost" | "pending" | "push")[] = ["won", "lost", "pending", "push"];
-  const bets: BetRecord[] = [];
-  
-  for (let i = 0; i < 25; i++) {
-    const result = results[Math.floor(Math.random() * results.length)];
-    const odds = 1.5 + Math.random() * 3;
-    const stake = Math.floor(Math.random() * 50 + 10);
-    const closingOdds = odds * (0.95 + Math.random() * 0.1);
-    const clv = ((odds - closingOdds) / closingOdds) * 100;
-    
-    bets.push({
-      id: `bet-${i}`,
-      legs: [
-        {
-          id: `leg-${i}-1`,
-          team: ["Knicks", "Nuggets", "Mavericks", "Heat", "Bucks"][Math.floor(Math.random() * 5)],
-          market: ["moneyline", "spread", "total"][Math.floor(Math.random() * 3)] as any,
-          outcome: "Win",
-          decimalOdds: 1.5 + Math.random(),
-        },
-      ],
-      stake,
-      odds,
-      potentialWin: stake * odds,
-      result,
-      actualReturn: result === "won" ? stake * odds : result === "push" ? stake : 0,
-      placedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      settledAt: result !== "pending" ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : undefined,
-      closingOdds,
-      clvPercent: clv,
-      sport: sports[Math.floor(Math.random() * sports.length)],
-    });
-  }
-  
-  return bets.sort((a, b) => new Date(b.placedAt).getTime() - new Date(a.placedAt).getTime());
+interface BetRecord {
+  id: string;
+  sport: string;
+  date: string;
+  sportsbook: string;
+  stake: number;
+  result: "won" | "lost" | "pending" | "push";
+  payout: number;
+  profit: number;
+  legs: { team: string; opponent: string; market: string; selection: string; odds: number; result: string }[];
+  tags?: string[];
+  notes?: string;
 }
 
-function calculateStats(bets: BetRecord[]): BetTrackingStats {
-  const settledBets = bets.filter(b => b.result !== "pending");
-  const wonBets = bets.filter(b => b.result === "won");
-  const lostBets = bets.filter(b => b.result === "lost");
-  const pendingBets = bets.filter(b => b.result === "pending");
-  
-  const totalStaked = settledBets.reduce((sum, b) => sum + b.stake, 0);
-  const totalReturns = settledBets.reduce((sum, b) => sum + (b.actualReturn || 0), 0);
-  const profitLoss = totalReturns - totalStaked;
-  const roi = totalStaked > 0 ? (profitLoss / totalStaked) * 100 : 0;
-  const avgOdds = settledBets.length > 0 ? settledBets.reduce((sum, b) => sum + b.odds, 0) / settledBets.length : 0;
-  const winRate = settledBets.length > 0 ? (wonBets.length / settledBets.length) * 100 : 0;
-  
-  const clvPositive = settledBets.filter(b => b.clvPercent && b.clvPercent > 0).length;
-  const avgCLV = settledBets.length > 0 ? settledBets.reduce((sum, b) => sum + (b.clvPercent || 0), 0) / settledBets.length : 0;
-  
-  const statsBySport: Record<string, { bets: number; won: number; lost: number; roi: number }> = {};
-  const statsByMarket: Record<string, { bets: number; won: number; lost: number; roi: number }> = {};
-  
-  bets.forEach(bet => {
-    if (!statsBySport[bet.sport]) {
-      statsBySport[bet.sport] = { bets: 0, won: 0, lost: 0, roi: 0 };
-    }
-    statsBySport[bet.sport].bets++;
-    if (bet.result === "won") statsBySport[bet.sport].won++;
-    if (bet.result === "lost") statsBySport[bet.sport].lost++;
-    
-    const market = bet.legs[0]?.market || "other";
-    if (!statsByMarket[market]) {
-      statsByMarket[market] = { bets: 0, won: 0, lost: 0, roi: 0 };
-    }
-    statsByMarket[market].bets++;
-    if (bet.result === "won") statsByMarket[market].won++;
-    if (bet.result === "lost") statsByMarket[market].lost++;
-  });
-  
-  Object.keys(statsBySport).forEach(sport => {
-    const s = statsBySport[sport];
-    s.roi = s.bets > 0 ? ((s.won - s.lost) / s.bets) * 100 : 0;
-  });
-  
-  Object.keys(statsByMarket).forEach(market => {
-    const m = statsByMarket[market];
-    m.roi = m.bets > 0 ? ((m.won - m.lost) / m.bets) * 100 : 0;
-  });
-  
-  return {
-    totalBets: bets.length,
-    wonBets: wonBets.length,
-    lostBets: lostBets.length,
-    pendingBets: pendingBets.length,
-    totalStaked,
-    totalReturns,
-    profitLoss,
-    roi,
-    avgOdds,
-    winRate,
-    clvPositive,
-    avgCLV,
-    statsBySport,
-    statsByMarket,
-  };
+interface BetStats {
+  totalBets: number;
+  resolvedBets: number;
+  pendingBets: number;
+  wins: number;
+  losses: number;
+  pushes: number;
+  winRate: number;
+  totalStaked: number;
+  totalProfit: number;
+  roi: number;
+  avgOdds: number;
+  bySport: { sport: string; bets: number; wins: number; profit: number; staked: number; roi: number; winRate: number }[];
+  byMarket: { market: string; bets: number; wins: number; profit: number; staked: number; roi: number; winRate: number }[];
+  byMonth: { period: string; roi: number; profit: number; bets: number }[];
 }
 
 export function BetTracker() {
-  const [bets, setBets] = useState<BetRecord[]>(generateMockBetHistory);
+  const { data: bets = [], isLoading: betsLoading } = useQuery<BetRecord[]>({
+    queryKey: ["/api/user/bets"],
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery<BetStats>({
+    queryKey: ["/api/user/bet-stats"],
+  });
+
+  const { toast } = useToast();
+
+  const addBetMutation = useMutation({
+    mutationFn: async (bet: Partial<BetRecord>) => {
+      const res = await apiRequest("POST", "/api/user/bets", bet);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/bets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/bet-stats"] });
+      toast({ title: "Bet tracked", description: "Your bet has been recorded" });
+    },
+  });
+
   const [activeTab, setActiveTab] = useState("overview");
   const [filterSport, setFilterSport] = useState<string>("all");
   const [filterResult, setFilterResult] = useState<string>("all");
-  
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newBet, setNewBet] = useState({ sport: "NBA", team: "", opponent: "", market: "moneyline", stake: "", odds: "", sportsbook: "DraftKings" });
+
   const filteredBets = useMemo(() => {
     return bets.filter(bet => {
       if (filterSport !== "all" && bet.sport !== filterSport) return false;
@@ -131,46 +84,106 @@ export function BetTracker() {
       return true;
     });
   }, [bets, filterSport, filterResult]);
-  
-  const stats = useMemo(() => calculateStats(filteredBets), [filteredBets]);
-  
+
+  const handleAddBet = () => {
+    const stake = parseFloat(newBet.stake);
+    const decimalOdds = parseFloat(newBet.odds);
+    if (!stake || !decimalOdds || !newBet.team) return;
+
+    addBetMutation.mutate({
+      sport: newBet.sport,
+      date: new Date().toISOString(),
+      sportsbook: newBet.sportsbook,
+      stake,
+      result: "pending",
+      payout: 0,
+      profit: 0,
+      legs: [{
+        team: newBet.team,
+        opponent: newBet.opponent || "TBD",
+        market: newBet.market,
+        selection: `${newBet.team} ${newBet.market}`,
+        odds: decimalOdds,
+        result: "pending",
+      }],
+    });
+    setShowAddForm(false);
+    setNewBet({ sport: "NBA", team: "", opponent: "", market: "moneyline", stake: "", odds: "", sportsbook: "DraftKings" });
+  };
+
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", { 
-      month: "short", 
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit"
+      month: "short", day: "numeric", hour: "2-digit", minute: "2-digit"
     });
   };
-  
+
+  const isLoading = betsLoading || statsLoading;
+  const s = stats || { totalBets: 0, wins: 0, losses: 0, pushes: 0, pendingBets: 0, totalStaked: 0, totalProfit: 0, roi: 0, winRate: 0, avgOdds: 0, bySport: [], byMarket: [], byMonth: [], resolvedBets: 0 };
+
+  if (isLoading) {
+    return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>;
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-tracker">
-        <AlertTriangle className="w-4 h-4 shrink-0" />
-        <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
+      <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm" data-testid="banner-tracker-info">
+        <Info className="w-4 h-4 shrink-0" />
+        <span>Track your real bets here. Add bets manually to build your performance history.</span>
       </div>
+
+      <div className="flex justify-end">
+        <Button onClick={() => setShowAddForm(!showAddForm)} data-testid="button-add-bet">
+          <Plus className="w-4 h-4 mr-1" />
+          Track a Bet
+        </Button>
+      </div>
+
+      {showAddForm && (
+        <Card>
+          <CardContent className="pt-6 space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <Select value={newBet.sport} onValueChange={(v) => setNewBet({...newBet, sport: v})}>
+                <SelectTrigger data-testid="select-new-sport"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NBA">NBA</SelectItem>
+                  <SelectItem value="NFL">NFL</SelectItem>
+                  <SelectItem value="MLB">MLB</SelectItem>
+                  <SelectItem value="NHL">NHL</SelectItem>
+                </SelectContent>
+              </Select>
+              <Input placeholder="Team" value={newBet.team} onChange={e => setNewBet({...newBet, team: e.target.value})} data-testid="input-new-team" />
+              <Input placeholder="Stake ($)" type="number" value={newBet.stake} onChange={e => setNewBet({...newBet, stake: e.target.value})} data-testid="input-new-stake" />
+              <Input placeholder="Decimal Odds" type="number" step="0.01" value={newBet.odds} onChange={e => setNewBet({...newBet, odds: e.target.value})} data-testid="input-new-odds" />
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={handleAddBet} disabled={addBetMutation.isPending} data-testid="button-submit-bet">
+                {addBetMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : null}
+                Save Bet
+              </Button>
+              <Button variant="outline" onClick={() => setShowAddForm(false)}>Cancel</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className={stats.profitLoss >= 0 ? "border-green-500/30" : "border-red-500/30"}>
+        <Card className={s.totalProfit >= 0 ? "border-green-500/30" : "border-red-500/30"}>
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                stats.profitLoss >= 0 ? "bg-green-500/20" : "bg-red-500/20"
-              }`}>
-                <DollarSign className={`w-5 h-5 ${stats.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`} />
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${s.totalProfit >= 0 ? "bg-green-500/20" : "bg-red-500/20"}`}>
+                <DollarSign className={`w-5 h-5 ${s.totalProfit >= 0 ? "text-green-500" : "text-red-500"}`} />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Profit/Loss</p>
-                <p className={`text-2xl font-bold font-mono ${stats.profitLoss >= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {stats.profitLoss >= 0 ? "+" : ""}{stats.profitLoss.toFixed(2)}
+                <p className={`text-2xl font-bold font-mono ${s.totalProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {s.totalProfit >= 0 ? "+" : ""}${s.totalProfit.toFixed(2)}
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  ROI: {stats.roi >= 0 ? "+" : ""}{stats.roi.toFixed(1)}%
-                </p>
+                <p className="text-xs text-muted-foreground">ROI: {s.roi >= 0 ? "+" : ""}{s.roi.toFixed(1)}%</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
@@ -179,15 +192,13 @@ export function BetTracker() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Win Rate</p>
-                <p className="text-2xl font-bold font-mono">{stats.winRate.toFixed(1)}%</p>
-                <p className="text-xs text-muted-foreground">
-                  {stats.wonBets}W - {stats.lostBets}L
-                </p>
+                <p className="text-2xl font-bold font-mono">{s.winRate.toFixed(1)}%</p>
+                <p className="text-xs text-muted-foreground">{s.wins}W - {s.losses}L</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
@@ -195,18 +206,14 @@ export function BetTracker() {
                 <TrendingUp className="w-5 h-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Line Value</p>
-                <p className={`text-2xl font-bold font-mono ${stats.avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {stats.avgCLV >= 0 ? "+" : ""}{stats.avgCLV.toFixed(2)}%
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {stats.clvPositive} positive CLV bets
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Total Staked</p>
+                <p className="text-2xl font-bold font-mono">${s.totalStaked.toFixed(0)}</p>
+                <p className="text-xs text-muted-foreground">Avg odds: {s.avgOdds}</p>
               </div>
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-start gap-4">
@@ -215,38 +222,23 @@ export function BetTracker() {
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold font-mono">{stats.pendingBets}</p>
-                <p className="text-xs text-muted-foreground">
-                  {stats.totalBets} total bets
-                </p>
+                <p className="text-2xl font-bold font-mono">{s.pendingBets}</p>
+                <p className="text-xs text-muted-foreground">{s.totalBets} total bets</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex items-center justify-between gap-4 flex-wrap">
           <TabsList>
-            <TabsTrigger value="overview" className="gap-2">
-              <PieChart className="w-4 h-4" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <Calendar className="w-4 h-4" />
-              History
-            </TabsTrigger>
-            <TabsTrigger value="clv" className="gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Line Value
-            </TabsTrigger>
+            <TabsTrigger value="overview" className="gap-2"><PieChart className="w-4 h-4" />Overview</TabsTrigger>
+            <TabsTrigger value="history" className="gap-2"><Calendar className="w-4 h-4" />History</TabsTrigger>
           </TabsList>
-          
           <div className="flex gap-2">
             <Select value={filterSport} onValueChange={setFilterSport}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Sport" />
-              </SelectTrigger>
+              <SelectTrigger className="w-32"><SelectValue placeholder="Sport" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Sports</SelectItem>
                 <SelectItem value="NBA">NBA</SelectItem>
@@ -255,11 +247,8 @@ export function BetTracker() {
                 <SelectItem value="NHL">NHL</SelectItem>
               </SelectContent>
             </Select>
-            
             <Select value={filterResult} onValueChange={setFilterResult}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="Result" />
-              </SelectTrigger>
+              <SelectTrigger className="w-32"><SelectValue placeholder="Result" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Results</SelectItem>
                 <SelectItem value="won">Won</SelectItem>
@@ -269,240 +258,134 @@ export function BetTracker() {
             </Select>
           </div>
         </div>
-        
+
         <TabsContent value="overview" className="mt-4 space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
+          {s.totalBets === 0 ? (
             <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Performance by Sport</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(stats.statsBySport).map(([sport, data]) => (
-                    <div key={sport} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium">{sport}</span>
-                        <span className={data.roi >= 0 ? "text-green-500" : "text-red-500"}>
-                          {data.roi >= 0 ? "+" : ""}{data.roi.toFixed(1)}% ROI
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{data.bets} bets</span>
-                        <span>{data.won}W - {data.lost}L</span>
-                      </div>
-                      <Progress 
-                        value={data.bets > 0 ? (data.won / data.bets) * 100 : 0} 
-                        className="h-2"
-                      />
-                    </div>
-                  ))}
-                </div>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <Target className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                <p className="text-lg font-medium">No bets tracked yet</p>
+                <p className="text-sm mt-1">Click "Track a Bet" to start building your performance history</p>
               </CardContent>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Performance by Market</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(stats.statsByMarket).map(([market, data]) => (
-                    <div key={market} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium capitalize">{market}</span>
-                        <span className={data.roi >= 0 ? "text-green-500" : "text-red-500"}>
-                          {data.roi >= 0 ? "+" : ""}{data.roi.toFixed(1)}% ROI
-                        </span>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader><CardTitle className="text-sm">Performance by Sport</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {s.bySport.map((data) => (
+                      <div key={data.sport} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium">{data.sport}</span>
+                          <span className={data.roi >= 0 ? "text-green-500" : "text-red-500"}>
+                            {data.roi >= 0 ? "+" : ""}{data.roi.toFixed(1)}% ROI
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{data.bets} bets</span>
+                          <span>{data.wins}W</span>
+                        </div>
+                        <Progress value={data.winRate} className="h-2" />
                       </div>
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{data.bets} bets</span>
-                        <span>{data.won}W - {data.lost}L</span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-sm">Performance by Market</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {s.byMarket.map((data) => (
+                      <div key={data.market} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium capitalize">{data.market}</span>
+                          <span className={data.roi >= 0 ? "text-green-500" : "text-red-500"}>
+                            {data.roi >= 0 ? "+" : ""}{data.roi.toFixed(1)}% ROI
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{data.bets} bets</span>
+                          <span>{data.wins}W</span>
+                        </div>
+                        <Progress value={data.winRate} className="h-2" />
                       </div>
-                      <Progress 
-                        value={data.bets > 0 ? (data.won / data.bets) * 100 : 0} 
-                        className="h-2"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Quick Stats</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-4 text-center">
-                <div>
-                  <div className="text-2xl font-bold font-mono">${stats.totalStaked.toFixed(0)}</div>
-                  <div className="text-xs text-muted-foreground">Total Staked</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold font-mono">${stats.totalReturns.toFixed(0)}</div>
-                  <div className="text-xs text-muted-foreground">Total Returns</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold font-mono">{stats.avgOdds.toFixed(2)}x</div>
-                  <div className="text-xs text-muted-foreground">Avg Odds</div>
-                </div>
-                <div>
-                  <div className="text-2xl font-bold font-mono">{stats.totalBets}</div>
-                  <div className="text-xs text-muted-foreground">Total Bets</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
-        
+
         <TabsContent value="history" className="mt-4">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Bet History</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle className="text-sm">Bet History</CardTitle></CardHeader>
             <CardContent>
-              <ScrollArea className="h-[500px]">
-                <div className="space-y-2">
-                  {filteredBets.map((bet) => (
-                    <div 
-                      key={bet.id} 
-                      className={`p-3 rounded-lg border ${
+              {filteredBets.length === 0 ? (
+                <div className="py-8 text-center text-muted-foreground">
+                  <Calendar className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p>No bets to display</p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[500px]">
+                  <div className="space-y-2">
+                    {filteredBets.map((bet) => (
+                      <div key={bet.id} className={`p-3 rounded-lg border ${
                         bet.result === "won" ? "bg-green-500/10 border-green-500/30" :
                         bet.result === "lost" ? "bg-red-500/10 border-red-500/30" :
                         bet.result === "push" ? "bg-amber-500/10 border-amber-500/30" :
                         "bg-muted/30 border-muted"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-2">
-                          {bet.result === "won" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-                          {bet.result === "lost" && <XCircle className="w-4 h-4 text-red-500" />}
-                          {bet.result === "pending" && <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />}
-                          {bet.result === "push" && <Clock className="w-4 h-4 text-amber-500" />}
-                          <span className="font-medium text-sm">
-                            {bet.legs.map(l => l.team).join(", ")}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">{bet.sport}</Badge>
-                          <Badge 
-                            className={
+                      }`}>
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex items-center gap-2">
+                            {bet.result === "won" && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                            {bet.result === "lost" && <XCircle className="w-4 h-4 text-red-500" />}
+                            {bet.result === "pending" && <Loader2 className="w-4 h-4 text-amber-500 animate-spin" />}
+                            {bet.result === "push" && <Clock className="w-4 h-4 text-amber-500" />}
+                            <span className="font-medium text-sm">
+                              {bet.legs.map(l => l.selection || l.team).join(", ")}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">{bet.sport}</Badge>
+                            <Badge className={
                               bet.result === "won" ? "bg-green-500" :
                               bet.result === "lost" ? "bg-red-500" :
-                              bet.result === "push" ? "bg-amber-500" :
-                              "bg-muted"
-                            }
-                          >
-                            {bet.result.toUpperCase()}
-                          </Badge>
+                              bet.result === "push" ? "bg-amber-500" : "bg-muted"
+                            }>
+                              {bet.result.toUpperCase()}
+                            </Badge>
+                          </div>
                         </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          <div>
+                            <span className="text-muted-foreground">Stake:</span>
+                            <span className="font-mono ml-1">${bet.stake.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Odds:</span>
+                            <span className="font-mono ml-1">{bet.legs[0]?.odds?.toFixed(2) || "—"}x</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Profit:</span>
+                            <span className={`font-mono ml-1 ${bet.profit >= 0 ? "text-green-500" : "text-red-500"}`}>
+                              {bet.profit >= 0 ? "+" : ""}${bet.profit.toFixed(2)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Book:</span>
+                            <span className="ml-1">{bet.sportsbook}</span>
+                          </div>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-2">{formatDate(bet.date)}</div>
                       </div>
-                      
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">Stake:</span>
-                          <span className="font-mono ml-1">${bet.stake.toFixed(2)}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Odds:</span>
-                          <span className="font-mono ml-1">{bet.odds.toFixed(2)}x</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Return:</span>
-                          <span className={`font-mono ml-1 ${
-                            (bet.actualReturn || 0) > bet.stake ? "text-green-500" : 
-                            (bet.actualReturn || 0) < bet.stake ? "text-red-500" : ""
-                          }`}>
-                            ${(bet.actualReturn || 0).toFixed(2)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">CLV:</span>
-                          <span className={`font-mono ml-1 ${
-                            (bet.clvPercent || 0) > 0 ? "text-green-500" : "text-red-500"
-                          }`}>
-                            {(bet.clvPercent || 0) > 0 ? "+" : ""}{(bet.clvPercent || 0).toFixed(2)}%
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs text-muted-foreground mt-2">
-                        {formatDate(bet.placedAt)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-        
-        <TabsContent value="clv" className="mt-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">CLV Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <div className={`text-3xl font-bold font-mono ${stats.avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {stats.avgCLV >= 0 ? "+" : ""}{stats.avgCLV.toFixed(2)}%
-                    </div>
-                    <div className="text-sm text-muted-foreground">Average CLV</div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Positive CLV Bets</span>
-                      <span className="text-green-500">{stats.clvPositive}</span>
-                    </div>
-                    <Progress 
-                      value={(stats.clvPositive / Math.max(stats.totalBets - stats.pendingBets, 1)) * 100} 
-                      className="h-3 [&>div]:bg-green-500"
-                    />
-                    <div className="text-xs text-muted-foreground text-center">
-                      {((stats.clvPositive / Math.max(stats.totalBets - stats.pendingBets, 1)) * 100).toFixed(1)}% of settled bets
-                    </div>
-                  </div>
-                  
-                  <div className="text-xs text-muted-foreground space-y-1">
-                    <p>Closing Line Value (CLV) measures if you beat the closing line.</p>
-                    <p>Consistently positive CLV indicates sharp betting.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">CLV by Sport</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {Object.entries(stats.statsBySport).map(([sport, data]) => {
-                    const sportBets = filteredBets.filter(b => b.sport === sport && b.result !== "pending");
-                    const avgCLV = sportBets.length > 0 
-                      ? sportBets.reduce((sum, b) => sum + (b.clvPercent || 0), 0) / sportBets.length 
-                      : 0;
-                    
-                    return (
-                      <div key={sport} className="flex items-center justify-between p-2 rounded bg-muted/30">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">{sport}</Badge>
-                          <span className="text-sm">{data.bets} bets</span>
-                        </div>
-                        <span className={`font-mono ${avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
-                          {avgCLV >= 0 ? "+" : ""}{avgCLV.toFixed(2)}% CLV
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </div>

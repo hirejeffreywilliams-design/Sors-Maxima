@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { DollarSign, CheckCircle2, XCircle, AlertTriangle, Zap, Target, Shield, TrendingUp, Clock, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { DollarSign, CheckCircle2, XCircle, AlertTriangle, Zap, Target, Shield, TrendingUp, Clock, RefreshCw, Info } from "lucide-react";
 
 interface CashoutFactor {
   id: string;
@@ -45,8 +49,6 @@ interface CashoutAnalysis {
 }
 
 export function CashoutMaximizer() {
-  const [analysis, setAnalysis] = useState<CashoutAnalysis | null>(null);
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [preferences, setPreferences] = useState({
     prioritizeLiquidity: true,
     focusMajorLeagues: true,
@@ -55,160 +57,30 @@ export function CashoutMaximizer() {
     maxLegs: 6
   });
 
-  const mockLegs = [
-    { id: 1, team: "Dolphins", market: "Moneyline", odds: -150 },
-    { id: 2, team: "Chiefs", market: "Spread -3.5", odds: -110 },
-    { id: 3, team: "Ravens", market: "Total O 220.5", odds: -110 },
-    { id: 4, team: "Bengals", market: "Moneyline", odds: +140 },
-    { id: 5, team: "Eagles", market: "1H Spread", odds: -115 }
-  ];
+  const [inputs, setInputs] = useState({
+    betOdds: "",
+    currentOdds: "",
+    stake: "",
+    legsRemaining: ""
+  });
+
+  const analysisMutation = useMutation<CashoutAnalysis, Error, typeof inputs>({
+    mutationFn: async (data) => {
+      const res = await apiRequest("POST", "/api/tools/cashout-analysis", {
+        betOdds: parseFloat(data.betOdds) || 0,
+        currentOdds: parseFloat(data.currentOdds) || 0,
+        stake: parseFloat(data.stake) || 0,
+        legsRemaining: parseInt(data.legsRemaining) || 0,
+      });
+      return res.json();
+    },
+  });
+
+  const analysis = analysisMutation.data ?? null;
 
   const runAnalysis = () => {
-    setIsOptimizing(true);
-    
-    setTimeout(() => {
-      const mockAnalysis: CashoutAnalysis = {
-        overallScore: 82,
-        grade: "A-",
-        factors: [
-          {
-            id: "1",
-            name: "Market Liquidity",
-            description: "Using high-volume markets that books actively manage",
-            weight: 25,
-            score: 92,
-            status: "good",
-            recommendation: "All legs use liquid markets"
-          },
-          {
-            id: "2",
-            name: "League Popularity",
-            description: "Major leagues have better cashout availability",
-            weight: 20,
-            score: 88,
-            status: "good",
-            recommendation: "NBA and NFL are tier-1 leagues"
-          },
-          {
-            id: "3",
-            name: "Leg Count",
-            description: "Optimal leg count for cashout eligibility",
-            weight: 20,
-            score: 78,
-            status: "warning",
-            recommendation: "Consider reducing to 4-5 legs for better cashout rates"
-          },
-          {
-            id: "4",
-            name: "Market Diversity",
-            description: "Mix of market types improves cashout odds",
-            weight: 15,
-            score: 85,
-            status: "good",
-            recommendation: "Good mix of ML, spreads, and totals"
-          },
-          {
-            id: "5",
-            name: "Timing Alignment",
-            description: "Games starting at similar times",
-            weight: 10,
-            score: 65,
-            status: "warning",
-            recommendation: "Stagger game times for extended cashout windows"
-          },
-          {
-            id: "6",
-            name: "Prop Exposure",
-            description: "Player props can limit cashout availability",
-            weight: 10,
-            score: 95,
-            status: "good",
-            recommendation: "No player props - maximizes cashout eligibility"
-          }
-        ],
-        platformScores: [
-          {
-            platform: "DraftKings",
-            probability: 94,
-            features: ["Live cashout", "Partial cashout", "Auto-cashout"],
-            limitations: ["Some SGPs excluded"],
-            tips: ["Enable auto-cashout alerts", "Cash out early for best value"]
-          },
-          {
-            platform: "FanDuel",
-            probability: 91,
-            features: ["Cash out anytime", "Same game parlays eligible"],
-            limitations: ["Max cashout limits apply"],
-            tips: ["Check cashout value frequently during live games"]
-          },
-          {
-            platform: "BetMGM",
-            probability: 87,
-            features: ["Edit my bet", "Partial cashout"],
-            limitations: ["Some futures excluded", "Min cashout $1"],
-            tips: ["Use Edit Bet to add legs without losing cashout"]
-          },
-          {
-            platform: "Caesars",
-            probability: 82,
-            features: ["Full cashout", "Live betting compatible"],
-            limitations: ["Limited on boosted odds"],
-            tips: ["Avoid using promos if cashout is priority"]
-          },
-          {
-            platform: "PointsBet",
-            probability: 76,
-            features: ["Standard cashout"],
-            limitations: ["No partial cashout", "Some markets excluded"],
-            tips: ["Stick to main markets for best cashout rates"]
-          },
-          {
-            platform: "BetRivers",
-            probability: 73,
-            features: ["Cash out available"],
-            limitations: ["Limited market coverage"],
-            tips: ["Focus on spreads and moneylines"]
-          }
-        ],
-        suggestions: [
-          {
-            current: "Eagles 1H Spread -3.5",
-            suggested: "Eagles Full Game Spread -3.5",
-            reason: "Full game lines have higher cashout availability",
-            cashoutImpact: +12
-          },
-          {
-            current: "5-leg parlay",
-            suggested: "4-leg parlay",
-            reason: "Removing weakest correlation leg improves cashout probability",
-            cashoutImpact: +8
-          }
-        ],
-        optimalLegCount: { min: 3, max: 5 },
-        bestMarkets: [
-          "Moneylines (NFL/NBA)",
-          "Point Spreads",
-          "Game Totals (O/U)",
-          "1st Half Spreads",
-          "Alt Spreads (within 3 pts)"
-        ],
-        avoidMarkets: [
-          "Obscure player props",
-          "Exotic parlays (round robins)",
-          "College non-major sports",
-          "Live betting alternates",
-          "Boosted/promoted bets"
-        ]
-      };
-
-      setAnalysis(mockAnalysis);
-      setIsOptimizing(false);
-    }, 1500);
+    analysisMutation.mutate(inputs);
   };
-
-  useEffect(() => {
-    runAnalysis();
-  }, [preferences]);
 
   const getGradeColor = (grade: string) => {
     if (grade.startsWith("A")) return "text-green-500";
@@ -245,10 +117,10 @@ export function CashoutMaximizer() {
             <Button
               size="sm"
               onClick={runAnalysis}
-              disabled={isOptimizing}
+              disabled={analysisMutation.isPending}
               data-testid="button-run-cashout-analysis"
             >
-              {isOptimizing ? (
+              {analysisMutation.isPending ? (
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                   Analyzing...
@@ -263,6 +135,54 @@ export function CashoutMaximizer() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
+            <Info className="w-4 h-4 shrink-0" />
+            <span>Enter your bet details below and run the analysis for AI-powered cashout recommendations.</span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="space-y-1">
+              <Label className="text-sm">Bet Odds</Label>
+              <Input
+                type="number"
+                placeholder="e.g. -150"
+                value={inputs.betOdds}
+                onChange={(e) => setInputs(p => ({ ...p, betOdds: e.target.value }))}
+                data-testid="input-bet-odds"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Current Odds</Label>
+              <Input
+                type="number"
+                placeholder="e.g. -110"
+                value={inputs.currentOdds}
+                onChange={(e) => setInputs(p => ({ ...p, currentOdds: e.target.value }))}
+                data-testid="input-current-odds"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Stake ($)</Label>
+              <Input
+                type="number"
+                placeholder="e.g. 100"
+                value={inputs.stake}
+                onChange={(e) => setInputs(p => ({ ...p, stake: e.target.value }))}
+                data-testid="input-stake"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-sm">Legs Remaining</Label>
+              <Input
+                type="number"
+                placeholder="e.g. 3"
+                value={inputs.legsRemaining}
+                onChange={(e) => setInputs(p => ({ ...p, legsRemaining: e.target.value }))}
+                data-testid="input-legs-remaining"
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="flex items-center gap-2">
               <Switch
@@ -315,6 +235,29 @@ export function CashoutMaximizer() {
           )}
         </CardContent>
       </Card>
+
+      {analysisMutation.isPending && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center space-y-3">
+                <Skeleton className="w-32 h-32 rounded-full mx-auto" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="col-span-1 md:col-span-2">
+            <CardContent className="pt-6 space-y-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {analysis && (
         <>
@@ -455,6 +398,10 @@ export function CashoutMaximizer() {
                     </Button>
                   </div>
                 ))}
+
+                {analysis.suggestions.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">No suggestions available.</p>
+                )}
 
                 <div className="p-3 bg-green-500/10 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
