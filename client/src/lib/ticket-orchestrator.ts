@@ -85,11 +85,9 @@ export interface TicketLeg {
 
 const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
   NBA: [
-    { name: "Lakers", city: "Los Angeles" },
-    { name: "Celtics", city: "Boston" },
-    { name: "Warriors", city: "Golden State" },
-    { name: "Nuggets", city: "Denver" },
+    { name: "Knicks", city: "New York" },
     { name: "Bucks", city: "Milwaukee" },
+    { name: "Nuggets", city: "Denver" },
     { name: "76ers", city: "Philadelphia" },
     { name: "Heat", city: "Miami" },
     { name: "Suns", city: "Phoenix" },
@@ -160,9 +158,7 @@ const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
 
 const playersBySport: Record<Sport, { name: string; team: string; position: string }[]> = {
   NBA: [
-    { name: "LeBron James", team: "Lakers", position: "SF" },
-    { name: "Stephen Curry", team: "Warriors", position: "PG" },
-    { name: "Jayson Tatum", team: "Celtics", position: "SF" },
+    { name: "Jalen Brunson", team: "Knicks", position: "PG" },
     { name: "Nikola Jokic", team: "Nuggets", position: "C" },
     { name: "Giannis Antetokounmpo", team: "Bucks", position: "PF" },
     { name: "Luka Doncic", team: "Mavericks", position: "PG" },
@@ -469,7 +465,7 @@ function buildRationale(fusionData: TicketFusion, legs: TicketLeg[]): string[] {
   }
   
   if (cf.recommendation === "strong_bet") {
-    rationale.push("All-systems-go: Quantum Fusion Engine rates this a STRONG BET");
+    rationale.push("All-systems-go: Sors Prediction Engine rates this a STRONG BET");
   } else if (cf.recommendation === "moderate_bet") {
     rationale.push("Solid opportunity: Multiple analysis categories confirm value");
   }

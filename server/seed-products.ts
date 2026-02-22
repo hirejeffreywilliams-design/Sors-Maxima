@@ -18,7 +18,7 @@ async function createProducts() {
     description: 'Full AI analysis, unlimited picks, all 46 analysis factors',
     metadata: {
       tier: 'pro',
-      features: 'quantum_analysis,unlimited_picks,all_sports,basic_alerts',
+      features: 'ai_analysis,unlimited_picks,all_sports,basic_alerts',
     },
   });
   

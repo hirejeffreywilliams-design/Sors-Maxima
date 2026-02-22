@@ -268,7 +268,7 @@ const performanceMetrics: PerformanceMetric[] = [
   { endpoint: "/api/rosters/:sport", p50: 65, p95: 180, p99: 350, requestCount: 12400, errorRate: 1.2, avgResponseTime: 85 },
   { endpoint: "/api/auth/login", p50: 120, p95: 250, p99: 500, requestCount: 3200, errorRate: 0.1, avgResponseTime: 145 },
   { endpoint: "/api/live/scoreboard", p50: 35, p95: 90, p99: 200, requestCount: 28500, errorRate: 0.5, avgResponseTime: 48 },
-  { endpoint: "/api/quantum/analyze", p50: 250, p95: 580, p99: 1200, requestCount: 6800, errorRate: 0.4, avgResponseTime: 310 },
+  { endpoint: "/api/prediction/analyze", p50: 250, p95: 580, p99: 1200, requestCount: 6800, errorRate: 0.4, avgResponseTime: 310 },
   { endpoint: "/api/stripe/webhook", p50: 80, p95: 150, p99: 300, requestCount: 1200, errorRate: 0.0, avgResponseTime: 95 },
 ];
 

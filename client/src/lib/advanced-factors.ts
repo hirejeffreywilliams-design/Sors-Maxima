@@ -124,7 +124,7 @@ export function analyzeSituationalFactors(
   
   // Rivalry detection (mock - would use real rivalry data)
   const rivalries = [
-    ['Lakers', 'Celtics'], ['Yankees', 'Red Sox'], ['Cowboys', 'Eagles'],
+    ['Chiefs', 'Bills'], ['Yankees', 'Red Sox'], ['Cowboys', 'Eagles'],
     ['Duke', 'UNC'], ['Michigan', 'Ohio State'], ['Chiefs', 'Raiders']
   ];
   

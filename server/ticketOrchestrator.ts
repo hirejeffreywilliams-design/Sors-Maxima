@@ -90,9 +90,9 @@ export interface TicketLeg {
 
 const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
   NBA: [
-    { name: "Lakers", city: "Los Angeles" },
-    { name: "Celtics", city: "Boston" },
-    { name: "Warriors", city: "Golden State" },
+    { name: "Knicks", city: "New York" },
+    { name: "Timberwolves", city: "Minnesota" },
+    { name: "Kings", city: "Sacramento" },
     { name: "Nuggets", city: "Denver" },
     { name: "Bucks", city: "Milwaukee" },
     { name: "76ers", city: "Philadelphia" },
@@ -165,9 +165,9 @@ const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
 
 const playersBySport: Record<Sport, { name: string; team: string; position: string }[]> = {
   NBA: [
-    { name: "LeBron James", team: "Lakers", position: "SF" },
-    { name: "Stephen Curry", team: "Warriors", position: "PG" },
-    { name: "Jayson Tatum", team: "Celtics", position: "SF" },
+    { name: "Jalen Brunson", team: "Knicks", position: "PG" },
+    { name: "Anthony Edwards", team: "Timberwolves", position: "SG" },
+    { name: "De'Aaron Fox", team: "Kings", position: "PG" },
     { name: "Nikola Jokic", team: "Nuggets", position: "C" },
     { name: "Giannis Antetokounmpo", team: "Bucks", position: "PF" },
     { name: "Luka Doncic", team: "Mavericks", position: "PG" },

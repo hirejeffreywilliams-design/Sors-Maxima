@@ -49,7 +49,7 @@ class FeatureFlagService {
       {
         id: "advanced_correlations",
         name: "Advanced Correlation Engine",
-        description: "Gaussian copula correlation modeling",
+        description: "Advanced correlation modeling",
         enabled: true,
         rolloutPercentage: 100,
       },
@@ -77,7 +77,7 @@ class FeatureFlagService {
       {
         id: "bankroll_simulator",
         name: "Bankroll Simulator",
-        description: "Monte Carlo bankroll simulation",
+        description: "AI-powered bankroll simulation",
         enabled: true,
         rolloutPercentage: 100,
       },

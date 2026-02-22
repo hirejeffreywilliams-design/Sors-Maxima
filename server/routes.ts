@@ -1012,7 +1012,7 @@ export async function registerRoutes(
       const { contentType, customPrompt } = req.body;
       
       const contentPrompts: Record<string, string> = {
-        social_twitter: "Create a compelling Twitter/X post (max 280 chars) promoting Sors Maxima's quantum-powered sports betting intelligence. Highlight the 7-day free Pro trial. Make it engaging and include relevant hashtags.",
+        social_twitter: "Create a compelling Twitter/X post (max 280 chars) promoting Sors Maxima's AI-powered sports betting intelligence. Highlight the 7-day free Pro trial. Make it engaging and include relevant hashtags.",
         social_facebook: "Write an engaging Facebook post promoting Sors Maxima. Focus on how our AI helps users make smarter bets. Mention the 7-day free trial and include a call to action.",
         social_instagram: "Create an Instagram caption for Sors Maxima. Focus on lifestyle and winning potential. Include relevant hashtags. Mention the free 7-day Pro trial.",
         social_linkedin: "Write a professional LinkedIn post about Sors Maxima's advanced betting intelligence platform. Focus on the technology and data-driven approach. Target professional sports enthusiasts.",
@@ -1039,7 +1039,7 @@ export async function registerRoutes(
         messages: [
           {
             role: "system",
-            content: "You are a marketing expert for Sors Maxima, a quantum-powered sports betting intelligence platform. Create compelling, conversion-focused content. The platform offers a 7-day free Pro trial, subscription tiers (Free, Pro $29, Elite $99, Whale $499), and AI-powered betting analysis."
+            content: "You are a marketing expert for Sors Maxima, an AI-powered sports betting intelligence platform. Create compelling, conversion-focused content. The platform offers a 7-day free Pro trial, subscription tiers (Free, Pro $29, Elite $99, Whale $499), and AI-powered betting analysis."
           },
           { role: "user", content: fullPrompt }
         ],
@@ -1147,8 +1147,8 @@ export async function registerRoutes(
         category: category || 'general'
       };
 
-      const systemPrompt = `You are the Quantum Diagnostic AI for Sors Maxima, a sports betting intelligence platform. 
-You analyze issues using quantum-inspired pattern recognition and provide actionable solutions.
+      const systemPrompt = `You are the Diagnostic AI for Sors Maxima, a sports betting intelligence platform. 
+You analyze issues using advanced pattern recognition and provide actionable solutions.
 
 SYSTEM CONTEXT:
 - Total Error Logs: ${systemContext.errorCount}
@@ -1261,7 +1261,7 @@ Format your response clearly with sections and bullet points.`;
       const response = await openai.chat.completions.create({
         model: "gpt-4.1",
         messages: [
-          { role: "system", content: "You are a system diagnostic AI specializing in quantum-enhanced pattern recognition and sports betting platform optimization." },
+          { role: "system", content: "You are a system diagnostic AI specializing in advanced pattern recognition and sports betting platform optimization." },
           { role: "user", content: scanPrompt }
         ],
         max_tokens: 2500,
@@ -3068,25 +3068,25 @@ Format your response clearly with sections and bullet points.`;
   // === Notifications ===
   const notificationTypes = [
     { type: "line_movement", titles: ["Line Movement Alert", "Odds Shift Detected", "Spread Change"], descriptions: [
-      "Lakers vs Celtics spread moved from -3.5 to -5.0",
+      "Knicks vs Bucks spread moved from -3.5 to -5.0",
       "Chiefs ML shifted from -150 to -170 after injury report",
       "Over/Under adjusted from 224.5 to 221.0 for Bucks vs Heat",
       "49ers spread moved from -7 to -6.5, reverse line movement detected",
     ]},
     { type: "injury_report", titles: ["Injury Update", "Player Status Change", "Roster Alert"], descriptions: [
-      "LeBron James (Lakers) - Questionable with ankle soreness",
+      "Jalen Brunson (Knicks) - Questionable with ankle soreness",
       "Patrick Mahomes (Chiefs) - Cleared to play, was listed as probable",
-      "Jayson Tatum (Celtics) - Out tonight with knee injury",
+      "Giannis Antetokounmpo (Bucks) - Out tonight with knee injury",
       "Tyreek Hill (Dolphins) - Limited practice, game-time decision",
     ]},
     { type: "sharp_money", titles: ["Sharp Money Alert", "Professional Action Detected", "Smart Money Flow"], descriptions: [
-      "Sharp bettors loading up on Celtics +5.5 at -110",
-      "Reverse line movement on Warriors ML despite 72% public on Lakers",
+      "Sharp bettors loading up on Bucks +5.5 at -110",
+      "Reverse line movement on Mavericks ML despite 72% public on Knicks",
       "Large syndicate action detected on Under 221.5 in Bucks vs Heat",
       "Steam move on Bills -3 across multiple offshore books",
     ]},
     { type: "game_start", titles: ["Game Starting Soon", "Tipoff Reminder", "Kickoff Alert"], descriptions: [
-      "Lakers vs Celtics tips off in 15 minutes",
+      "Knicks vs Bucks tips off in 15 minutes",
       "Chiefs vs Bills kicks off in 30 minutes - last chance to bet",
       "Bucks vs Heat starting in 10 minutes",
       "NFL Sunday Night Football begins in 1 hour",
@@ -3154,7 +3154,7 @@ Format your response clearly with sections and bullet points.`;
     const activeBets: Record<string, any> = {
       "bet-1": {
         id: "bet-1",
-        description: "Lakers ML + Celtics/Bulls Over 218.5",
+        description: "Knicks ML + Bucks/Bulls Over 218.5",
         type: "Parlay (2-leg)",
         stake: 50,
         potentialPayout: 245,
@@ -3286,7 +3286,7 @@ Format your response clearly with sections and bullet points.`;
     id: string; username: string; content: string; timestamp: string;
     likes: number; comments: number; likedBy: Set<string>;
   }> = [
-    { id: "post-1", username: "SharpShooter99", content: "Just hit a 5-leg parlay! Chiefs, Lakers, and three overs all cashed. Trust the process.", timestamp: new Date(Date.now() - 3600000).toISOString(), likes: 24, comments: 8, likedBy: new Set() },
+    { id: "post-1", username: "SharpShooter99", content: "Just hit a 5-leg parlay! Chiefs, Knicks, and three overs all cashed. Trust the process.", timestamp: new Date(Date.now() - 3600000).toISOString(), likes: 24, comments: 8, likedBy: new Set() },
     { id: "post-2", username: "ParlayKing", content: "NFL Week 14 breakdown: Sharp money is heavy on the unders this week. Weather plays are underrated.", timestamp: new Date(Date.now() - 7200000).toISOString(), likes: 18, comments: 12, likedBy: new Set() },
     { id: "post-3", username: "EdgeMaster", content: "Hot take: Player props are the most +EV market in sports betting right now. Books are slow to adjust.", timestamp: new Date(Date.now() - 14400000).toISOString(), likes: 31, comments: 15, likedBy: new Set() },
     { id: "post-4", username: "MoneyMoves", content: "Bankroll management tip: Never risk more than 3% of your bankroll on a single bet. Consistency wins.", timestamp: new Date(Date.now() - 28800000).toISOString(), likes: 42, comments: 6, likedBy: new Set() },
@@ -3345,10 +3345,10 @@ Format your response clearly with sections and bullet points.`;
   // === Copy Betting ===
   const tipsters = [
     { id: "tip-1", username: "SharpShooter99", winRate: 62, roi: 34.5, streak: 8, totalPicks: 245, sport: "NFL", recentPicks: [{ pick: "Chiefs -3.5", odds: "-110", result: "win" }, { pick: "Bills ML", odds: "-130", result: "win" }, { pick: "Over 48.5 Cowboys/Eagles", odds: "-105", result: "loss" }] },
-    { id: "tip-2", username: "ParlayKing", winRate: 58, roi: 28.2, streak: 5, totalPicks: 312, sport: "NBA", recentPicks: [{ pick: "Lakers -4.5", odds: "-110", result: "win" }, { pick: "Celtics ML", odds: "-150", result: "win" }, { pick: "Under 220.5 Suns/Mavs", odds: "-110", result: "win" }] },
+    { id: "tip-2", username: "ParlayKing", winRate: 58, roi: 28.2, streak: 5, totalPicks: 312, sport: "NBA", recentPicks: [{ pick: "Knicks -4.5", odds: "-110", result: "win" }, { pick: "Bucks ML", odds: "-150", result: "win" }, { pick: "Under 220.5 Suns/Mavs", odds: "-110", result: "win" }] },
     { id: "tip-3", username: "EdgeMaster", winRate: 56, roi: 25.8, streak: 3, totalPicks: 189, sport: "MLB", recentPicks: [{ pick: "Yankees ML", odds: "+120", result: "win" }, { pick: "Dodgers -1.5", odds: "+130", result: "loss" }, { pick: "Over 8.5 Mets/Braves", odds: "-115", result: "win" }] },
     { id: "tip-4", username: "PropHunter", winRate: 53, roi: 17.8, streak: 2, totalPicks: 287, sport: "NFL", recentPicks: [{ pick: "Mahomes Over 285.5 yds", odds: "-115", result: "win" }, { pick: "Henry Over 89.5 rush", odds: "-110", result: "loss" }] },
-    { id: "tip-5", username: "ValueSeeker", winRate: 52, roi: 15.2, streak: 1, totalPicks: 198, sport: "NBA", recentPicks: [{ pick: "Warriors +5.5", odds: "-110", result: "win" }, { pick: "Nuggets ML", odds: "-140", result: "win" }] },
+    { id: "tip-5", username: "ValueSeeker", winRate: 52, roi: 15.2, streak: 1, totalPicks: 198, sport: "NBA", recentPicks: [{ pick: "Mavericks +5.5", odds: "-110", result: "win" }, { pick: "Nuggets ML", odds: "-140", result: "win" }] },
   ];
   const followedTipsters = new Set<string>();
 
@@ -4528,9 +4528,9 @@ Follow these rules:
     {
       id: "kb_quantum_engine",
       category: "technical",
-      keywords: ["quantum", "quantum fusion", "quantum engine", "fusion engine", "quantum analysis", "advanced analysis"],
-      question: "How does the Quantum Fusion Engine work?",
-      answer: "The Quantum Fusion Engine is our most advanced analytical tool (Elite tier+). It combines multiple data sources using multi-dimensional factor analysis: team dynamics, player performance trends, situational factors, weather, referee tendencies, travel fatigue, and market signals. The engine produces confidence scores and factor breakdowns for each prediction. Results are presented with detailed factor contributions so you can understand the reasoning behind each recommendation.",
+      keywords: ["sors", "prediction engine", "sors engine", "ai analysis", "advanced analysis"],
+      question: "How does the Sors Prediction Engine work?",
+      answer: "The Sors Prediction Engine is our most advanced analytical tool (Elite tier+). It combines multiple data sources using multi-dimensional factor analysis: team dynamics, player performance trends, situational factors, weather, referee tendencies, travel fatigue, and market signals. The engine produces confidence scores and factor breakdowns for each prediction. Results are presented with detailed factor contributions so you can understand the reasoning behind each recommendation.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -4539,7 +4539,7 @@ Follow these rules:
       category: "technical",
       keywords: ["correlation", "correlated", "correlation engine", "leg correlation", "dependent legs", "copula", "correlation matrix"],
       question: "What is the Correlation Engine?",
-      answer: "The Correlation Engine uses Gaussian copula-based methods to model dependencies between betting leg outcomes. It helps identify when legs in your parlay are correlated (positively or negatively), which affects your actual win probability and expected value. Positive correlation between legs means your parlay is riskier than individual probabilities suggest. The engine provides visual correlation matrices and adjusts EV calculations accordingly.",
+      answer: "The Correlation Engine uses advanced statistical methods to model dependencies between betting leg outcomes. It helps identify when legs in your parlay are correlated (positively or negatively), which affects your actual win probability and expected value. Positive correlation between legs means your parlay is riskier than individual probabilities suggest. The engine provides visual correlation charts and adjusts EV calculations accordingly.",
       actionable: false,
       autoResolveEligible: true
     },

@@ -48,7 +48,7 @@ function seed() {
       status: "active", category: "onboarding",
       trigger: { type: "event", condition: "user.registered" },
       steps: [
-        { id: "s1", channel: "email", subject: "Welcome to Sors Maxima - Your Edge Starts Now", body: "Hi {{name}}, welcome! Here's how to get started with quantum-powered predictions...", delay: "immediate", sent: 8420, opened: 5894, clicked: 3536, converted: 2122 },
+        { id: "s1", channel: "email", subject: "Welcome to Sors Maxima - Your Edge Starts Now", body: "Hi {{name}}, welcome! Here's how to get started with AI-powered predictions...", delay: "immediate", sent: 8420, opened: 5894, clicked: 3536, converted: 2122 },
         { id: "s2", channel: "push", subject: "Your free analysis is ready!", body: "We've analyzed today's top games. Tap to see your personalized picks.", delay: "24h", sent: 7200, opened: 4320, clicked: 2592, converted: 1555 },
         { id: "s3", channel: "email", subject: "Pro tip: How top bettors use Sors Maxima", body: "Discover the 3 features that power users swear by...", delay: "3d", sent: 6800, opened: 3400, clicked: 1700, converted: 850 },
         { id: "s4", channel: "in_app", subject: "Unlock Premium Features", body: "You've been using Sors Maxima for 5 days. Ready to go pro?", delay: "5d", sent: 5500, opened: 5500, clicked: 2200, converted: 660 },
@@ -96,7 +96,7 @@ function seed() {
       steps: [
         { id: "s1", channel: "email", subject: "Day 3: You've unlocked {{count}} winning picks", body: "In just 3 days, our AI engine found {{count}} high-value opportunities for you. Imagine a full month...", delay: "3d", sent: 5600, opened: 3360, clicked: 1680, converted: 672 },
         { id: "s2", channel: "in_app", subject: "Trial milestone: Your accuracy report", body: "Your trial picks so far: {{wins}}/{{total}} won ({{rate}}%). Upgrade to keep this edge.", delay: "5d", sent: 4800, opened: 4800, clicked: 1920, converted: 576 },
-        { id: "s3", channel: "push", subject: "⚡ Trial ending in 48 hours", body: "Your quantum-powered trial ends soon. Lock in your rate now.", delay: "5d", sent: 4200, opened: 2940, clicked: 1470, converted: 441 },
+        { id: "s3", channel: "push", subject: "⚡ Trial ending in 48 hours", body: "Your AI-powered trial ends soon. Lock in your rate now.", delay: "5d", sent: 4200, opened: 2940, clicked: 1470, converted: 441 },
         { id: "s4", channel: "email", subject: "Your trial ends tomorrow - exclusive offer inside", body: "Last chance to upgrade at launch pricing. Save 30% with annual plan.", delay: "6d", sent: 3800, opened: 2280, clicked: 1368, converted: 547 },
       ],
       targetSegment: "Active trial users", enrolledUsers: 5600, completedUsers: 3800, conversionRate: 12.0, revenue: 186400, createdAt: "2026-01-05", updatedAt: "2026-02-20",

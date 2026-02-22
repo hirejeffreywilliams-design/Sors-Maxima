@@ -126,8 +126,8 @@ const generateHistoricalEvents = (count: number): HistoricalEvent[] => {
   const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
   const teams: Record<Sport, { home: string; away: string }[]> = {
     NBA: [
-      { home: "Lakers", away: "Celtics" },
-      { home: "Warriors", away: "Nuggets" },
+      { home: "Knicks", away: "Bucks" },
+      { home: "Mavericks", away: "Suns" },
       { home: "Bucks", away: "Heat" },
       { home: "76ers", away: "Knicks" },
       { home: "Suns", away: "Mavericks" },

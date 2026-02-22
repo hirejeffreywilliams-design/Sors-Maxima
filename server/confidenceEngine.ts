@@ -451,10 +451,10 @@ function generateCalibrationBins(noise: number): CalibrationBin[] {
 function seedRecommendations() {
   const sports = ["NBA", "NFL", "MLB", "NHL", "Soccer", "Tennis"];
   const matches = [
-    "Lakers vs Celtics", "Heat vs Bucks", "Chiefs vs Eagles",
+    "Knicks vs Bucks", "Heat vs Mavericks", "Chiefs vs Eagles",
     "49ers vs Cowboys", "Yankees vs Dodgers", "Man City vs Liverpool",
     "Real Madrid vs Barcelona", "Djokovic vs Alcaraz", "Bruins vs Rangers",
-    "Astros vs Braves", "Warriors vs Nuggets", "Bills vs Ravens",
+    "Astros vs Braves", "Nuggets vs Suns", "Bills vs Ravens",
   ];
   const marketTypes = ["match_winner", "spread", "total_over_under", "player_props"];
   const models = ["ensemble-v4.2", "gradient-boost-v3.1", "neural-v5.0", "hybrid-v2.8"];
