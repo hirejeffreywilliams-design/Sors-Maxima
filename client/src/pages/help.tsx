@@ -56,7 +56,7 @@ const faqItems: FAQItem[] = [
   {
     category: "Features",
     question: "What are the Pro Tools?",
-    answer: "Pro Tools include: Real-time Odds Comparison across sportsbooks, ML Prop Projections, Correlation Engine for SGP optimization, Player Prop Lab for deep stat analysis, Arbitrage Finder for guaranteed profit opportunities, Custom Model Builder to adjust our 46 analysis factors, and Export Bet Slip to generate formatted slips for major sportsbooks."
+    answer: "Pro Tools include: Real-time Odds Comparison across sportsbooks, AI Prop Projections, Correlation Engine for same-game parlay optimization, Player Prop Lab for deep stat analysis, Arbitrage Finder for guaranteed profit opportunities, Custom Model Builder to adjust our 46 analysis factors, and Export Bet Slip to generate formatted slips for major sportsbooks."
   },
   {
     category: "Features",

@@ -156,7 +156,7 @@ export function BetGradeCard({ grade, evIndicator, riskAdvisory }: BetGradeCardP
               </div>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Kelly value component (25% weight)</p>
+              <p>Optimal value component (25% weight)</p>
             </TooltipContent>
           </Tooltip>
 
@@ -281,7 +281,7 @@ export function GradingLegend() {
           </div>
           <div className="flex items-center gap-2">
             <TrendingUp className="w-3 h-3" />
-            <span>Value (Kelly): 25% weight</span>
+            <span>Value (Optimal Sizing): 25% weight</span>
           </div>
           <div className="flex items-center gap-2">
             <Shield className="w-3 h-3" />
@@ -324,8 +324,26 @@ export function EVIndicatorBadge({ indicator }: { indicator: EVIndicator }) {
           <div className="text-xs">
             True Prob: {(indicator.trueProbability * 100).toFixed(1)}%
           </div>
-          <div className="text-xs capitalize">
-            Confidence: {indicator.confidence}
+          <div className="text-xs capitalize flex items-center gap-1">
+            <span>Confidence:</span>
+            {typeof indicator.confidence === "number" ? (
+              <span className={indicator.confidence > 0.7 ? "text-emerald-500 font-medium" : indicator.confidence > 0.4 ? "text-amber-500 font-medium" : "text-red-500 font-medium"}>
+                {indicator.confidence > 0.7 ? "High" : indicator.confidence > 0.4 ? "Medium" : "Low"}
+              </span>
+            ) : (
+              <span className={
+                String(indicator.confidence).toLowerCase().includes("high") ? "text-emerald-500 font-medium" :
+                String(indicator.confidence).toLowerCase().includes("low") ? "text-red-500 font-medium" :
+                "text-amber-500 font-medium"
+              }>
+                <span className={`inline-block w-2 h-2 rounded-full mr-1 ${
+                  String(indicator.confidence).toLowerCase().includes("high") ? "bg-emerald-500" :
+                  String(indicator.confidence).toLowerCase().includes("low") ? "bg-red-500" :
+                  "bg-amber-500"
+                }`} />
+                {indicator.confidence}
+              </span>
+            )}
           </div>
         </div>
       </TooltipContent>

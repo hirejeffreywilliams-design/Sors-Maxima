@@ -485,7 +485,7 @@ function BankrollManagement({ settings, onChange, totalSpent }: {
       </div>
       
       <div>
-        <Label className="text-xs">Kelly Multiplier: {settings.kellyMultiplier}x</Label>
+        <Label className="text-xs">Bet Size Factor: {settings.kellyMultiplier}x</Label>
         <Slider
           value={[settings.kellyMultiplier]}
           min={0.1}
@@ -495,7 +495,7 @@ function BankrollManagement({ settings, onChange, totalSpent }: {
         />
         <div className="flex justify-between text-xs text-muted-foreground mt-1">
           <span>Conservative</span>
-          <span>Full Kelly</span>
+          <span>Full Size</span>
         </div>
       </div>
     </div>

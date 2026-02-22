@@ -195,7 +195,7 @@ export function BetTracker() {
                 <TrendingUp className="w-5 h-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg CLV</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Line Value</p>
                 <p className={`text-2xl font-bold font-mono ${stats.avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
                   {stats.avgCLV >= 0 ? "+" : ""}{stats.avgCLV.toFixed(2)}%
                 </p>
@@ -238,7 +238,7 @@ export function BetTracker() {
             </TabsTrigger>
             <TabsTrigger value="clv" className="gap-2">
               <BarChart3 className="w-4 h-4" />
-              CLV Analysis
+              Line Value
             </TabsTrigger>
           </TabsList>
           

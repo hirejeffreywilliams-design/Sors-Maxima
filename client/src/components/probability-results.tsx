@@ -253,15 +253,15 @@ export function ProbabilityResults({ result, stake, isLoading, bankroll = 1000, 
           <div className="p-4 rounded-lg bg-muted/50">
             <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
               <DollarSign className="w-4 h-4" />
-              Kelly Stake
+              Optimal Stake
             </div>
             <div className="text-2xl font-mono font-bold" data-testid="text-kelly-stake">
               ${(result.kellyStake * bettingEnv.kellyMultiplier).toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               {bettingEnv.kellyMultiplier < 1 
-                ? `${(bettingEnv.kellyMultiplier * 100).toFixed(0)}% Kelly (${bettingEnv.profileType})`
-                : "Full Kelly"}
+                ? `${(bettingEnv.kellyMultiplier * 100).toFixed(0)}% optimal sizing (${bettingEnv.profileType})`
+                : "Full sizing"}
             </p>
           </div>
           

@@ -543,7 +543,7 @@ export function DailyParlayGenerator({ bankroll }: DailyParlayGeneratorProps) {
                           </div>
                           <div className="text-center">
                             <p className="text-lg font-bold">${parlay.kellyStake.toFixed(0)}</p>
-                            <p className="text-xs text-muted-foreground">Kelly Stake</p>
+                            <p className="text-xs text-muted-foreground">Optimal Stake</p>
                           </div>
                           <div className="text-center">
                             <p className="text-lg font-bold text-green-500">

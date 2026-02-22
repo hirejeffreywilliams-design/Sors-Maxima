@@ -65,7 +65,7 @@ const changelog: ChangelogEntry[] = [
       { text: "Persistent symbol key/legend panel explaining all icons and badges", icon: Wrench, tag: "new" },
       { text: "Collapsible market sections per game card reducing clutter", icon: GripVertical, tag: "improved" },
       { text: "Full player props access with 'Show All' expansion", icon: TrendingUp, tag: "improved" },
-      { text: "SGP detection with correlation warnings for same-game legs", icon: Brain, tag: "new" },
+      { text: "Same-game parlay detection with correlation warnings for same-game legs", icon: Brain, tag: "new" },
       { text: "What-If/Parlay Insurance calculator showing payout impact per leg", icon: Shield, tag: "new" },
     ],
   },

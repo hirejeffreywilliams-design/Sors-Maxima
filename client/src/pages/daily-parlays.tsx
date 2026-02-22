@@ -8,7 +8,7 @@ import { DollarSign, TrendingUp, Clock, Target, Users } from "lucide-react";
 
 const FREE_PICK = {
   sport: "NBA",
-  event: "Sample Pick",
+  event: "Example Pick (Demo Data)",
   pickType: "Total",
   pickValue: "Over 218.5",
   odds: "-110",
@@ -76,7 +76,7 @@ export default function DailyParlays() {
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5" />
               Today's Free Pick
-              <Badge variant="secondary" className="text-xs font-normal">Sample</Badge>
+              <Badge variant="secondary" className="text-xs font-normal">Demo</Badge>
             </CardTitle>
             <Badge variant="outline" className="gap-1">
               <Users className="h-3 w-3" />

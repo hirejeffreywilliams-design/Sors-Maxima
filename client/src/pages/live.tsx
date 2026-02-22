@@ -23,7 +23,7 @@ export default function Live() {
                 LIVE
               </Badge>
             </h1>
-            <p className="text-sm text-muted-foreground">Real-time momentum tracking, hedging, and AI assistance</p>
+            <p className="text-sm text-muted-foreground">Real-time game tracking, hedging tools, and AI assistance</p>
           </div>
         </header>
 
@@ -40,7 +40,7 @@ export default function Live() {
               </TabsTrigger>
               <TabsTrigger value="schemes" className="gap-1 px-2 sm:px-3" data-testid="tab-schemes">
                 <Brain className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline">Schemes</span>
+                <span className="hidden sm:inline">Patterns</span>
               </TabsTrigger>
               <TabsTrigger value="hedge" className="gap-1 px-2 sm:px-3" data-testid="tab-hedge">
                 <Shield className="w-4 h-4 shrink-0" />
@@ -52,7 +52,7 @@ export default function Live() {
               </TabsTrigger>
               <TabsTrigger value="clv" className="gap-1 px-2 sm:px-3" data-testid="tab-clv">
                 <LineChart className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline">CLV</span>
+                <span className="hidden sm:inline">Line Value</span>
               </TabsTrigger>
               <TabsTrigger value="sharp" className="gap-1 px-2 sm:px-3" data-testid="tab-sharp">
                 <Users className="w-4 h-4 shrink-0" />

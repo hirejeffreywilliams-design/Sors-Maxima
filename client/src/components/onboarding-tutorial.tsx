@@ -67,7 +67,7 @@ const tutorialSteps: TutorialStep[] = [
       "See live momentum for in-progress games",
       "Calculate optimal hedge bets",
       "Get AI assistant advice on your active bets",
-      "Track closing line value (CLV)"
+      "Track closing line value to see if you're beating the market"
     ]
   },
   {

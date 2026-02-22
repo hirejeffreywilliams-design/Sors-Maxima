@@ -13,7 +13,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import NotFound from "@/pages/not-found";
 import AutoGenerator from "@/pages/auto-generator";
 import Dashboard from "@/pages/dashboard";
-import BetHistory from "@/pages/bet-history";
 import LoginPage from "@/pages/login";
 import DailyParlays from "@/pages/daily-parlays";
 import Tools from "@/pages/tools";
@@ -31,7 +30,6 @@ import AdminFeatureFlags from "@/pages/admin-feature-flags";
 import LandingPage from "@/pages/landing";
 import LegalPage from "@/pages/legal";
 import Settings from "@/pages/settings";
-import Analytics from "@/pages/analytics";
 import TipsterCommunities from "@/pages/tipster-communities";
 import TrainingCenter from "@/pages/training-center";
 import RostersPage from "@/pages/rosters";
@@ -56,7 +54,7 @@ import AdminOrchestration from "@/pages/admin-orchestration";
 import AdminAssistant from "@/pages/admin-assistant";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
 import PipelineIntelligence from "@/pages/pipeline";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -70,10 +68,26 @@ import { ErrorRecoveryInterceptor } from "@/components/error-recovery-intercepto
 import { SupportChat } from "@/components/support-chat";
 
 function AdminGuard({ component: Component, authState }: { component: React.ComponentType; authState: AuthState }) {
+  const [location] = useLocation();
   if (!authState.isAdmin) {
     return <NotFound />;
   }
-  return <Component />;
+  const isSubPage = location !== "/admin" && location.startsWith("/admin/");
+  const pageName = isSubPage ? location.replace("/admin/", "").split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ") : "";
+  return (
+    <>
+      {isSubPage && (
+        <div className="bg-muted/30 border-b px-4 sm:px-6 py-2">
+          <div className="max-w-screen-2xl mx-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Link href="/admin" className="hover:text-primary transition-colors" data-testid="breadcrumb-admin">Command Center</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium" data-testid="breadcrumb-current">{pageName}</span>
+          </div>
+        </div>
+      )}
+      <Component />
+    </>
+  );
 }
 
 function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
@@ -146,6 +160,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
           <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
           <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
           <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
+          <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -158,7 +173,6 @@ function Router({ authState }: { authState: AuthState }) {
     <Switch>
       <Route path="/" component={AutoGenerator} />
       <Route path="/builder" component={Dashboard} />
-      <Route path="/tracker" component={BetHistory} />
       <Route path="/daily" component={DailyParlays} />
       <Route path="/tools" component={Tools} />
       <Route path="/community" component={Community} />
@@ -169,16 +183,13 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/legal" component={LegalPage} />
       <Route path="/roadmap" component={Roadmap} />
       <Route path="/settings" component={Settings} />
-      <Route path="/analytics" component={Analytics} />
       <Route path="/tipster-communities" component={TipsterCommunities} />
-      <Route path="/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
       <Route path="/rosters" component={RostersPage} />
       <Route path="/help" component={HelpCenter} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/changelog" component={ChangelogPage} />
       <Route path="/sport-analysis" component={SportFactorAnalysis} />
       <Route path="/pipeline" component={PipelineIntelligence} />
-      <Route path="/landing" component={LandingPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -200,18 +211,19 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "AI-powered Smart Ticket Generator - Create optimized parlays" },
+  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Power Parlays - AI-generated top picks refreshed every day" },
   { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "nav-builder", tooltip: "Visual Parlay Builder - Drag-and-drop interface for building tickets" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live betting center - Track games and hedge in real-time" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Pro tools - Odds comparison, correlations, player projections" },
-  { href: "/sport-analysis", icon: FlaskConical, label: "Factors", testId: "nav-sport-analysis", tooltip: "Sport Factor Analysis - Deep dive into 46 factors across 14 sports" },
-  { href: "/pipeline", icon: GitBranch, label: "Predictions", testId: "nav-pipeline", tooltip: "Prediction Engine - See how picks are analyzed and generated" },
+  { href: "/sport-analysis", icon: FlaskConical, label: "Analysis", testId: "nav-sport-analysis", tooltip: "Sport Analysis - Deep dive into 46 factors across 14 sports" },
+  { href: "/pipeline", icon: GitBranch, label: "Engine", testId: "nav-pipeline", tooltip: "Prediction Engine - See how your picks are built step by step" },
   { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Social features - Leaderboards, tipsters, share picks" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Daily challenges, achievements, and paper trading" },
   { href: "/bankroll", icon: Wallet, label: "Finance", testId: "nav-finance", tooltip: "Track bets, ROI, multi-book balances, and taxes" },
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "nav-settings", tooltip: "Notifications, responsible gaming, and backup" },
   { href: "/roadmap", icon: Map, label: "Roadmap", testId: "nav-roadmap", tooltip: "Product roadmap - See what's coming next" },
-  { href: "/pricing", icon: CreditCard, label: "Upgrade", testId: "nav-pricing", tooltip: "Upgrade to Pro for unlimited features" },
+  { href: "/pricing", icon: CreditCard, label: "Plans", testId: "nav-pricing", tooltip: "View plans & pricing" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
 
@@ -455,26 +467,24 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </ParlaySlipProvider>
       </main>
       
-      <footer className="hidden lg:block border-t bg-muted/30 py-4 px-6">
+      <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
         <div className="max-w-screen-2xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
+            <div className="text-center max-w-xl">
+              <p className="text-yellow-600 dark:text-yellow-500">
+                For entertainment & educational purposes only. Not gambling advice. 
+                No guarantees of profitability. Must be 21+. 
+                If you have a gambling problem, call 1-800-522-4700.
+              </p>
+            </div>
+            <div className="hidden lg:flex items-center gap-4 flex-wrap justify-center">
               <span>© 2026 Sors Maxima</span>
               <Link href="/legal" className="hover:text-primary">Terms</Link>
               <Link href="/legal" className="hover:text-primary">Privacy</Link>
               <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
               <Link href="/help" className="hover:text-primary">Help</Link>
               <Link href="/changelog" className="hover:text-primary">What's New</Link>
-            </div>
-            <div className="flex items-center gap-4">
               <AffiliateDisclosure compact />
-            </div>
-            <div className="text-center md:text-right max-w-xl">
-              <p className="text-yellow-600 dark:text-yellow-500">
-                For entertainment & educational purposes only. Not gambling advice. 
-                No guarantees of profitability. Must be 21+. 
-                If you have a gambling problem, call 1-800-522-4700.
-              </p>
             </div>
           </div>
         </div>

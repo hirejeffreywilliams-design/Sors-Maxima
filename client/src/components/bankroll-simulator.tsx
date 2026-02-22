@@ -134,7 +134,7 @@ export function BankrollSimulator() {
             </div>
 
             <div className="space-y-2">
-              <Label>Kelly Fraction: {kellyFraction}%</Label>
+              <Label>Bet Size Fraction: {kellyFraction}%</Label>
               <Slider
                 value={[kellyFraction]}
                 onValueChange={([v]) => setKellyFraction(v)}
@@ -245,7 +245,7 @@ export function BankrollSimulator() {
               {result.ruinProbability > 10 && (
                 <div className="flex items-center gap-2 p-2 bg-red-500/10 rounded-lg text-sm text-red-500">
                   <AlertTriangle className="w-4 h-4" />
-                  High ruin risk - consider reducing Kelly fraction
+                  High ruin risk - consider reducing bet size fraction
                 </div>
               )}
             </CardContent>

@@ -17,7 +17,7 @@ export default function Rewards() {
               Rewards & Practice
               <Badge variant="outline" className="gap-1 bg-yellow-500/10 border-yellow-500/30 text-yellow-500 h-5 text-[10px]">
                 <Trophy className="w-2.5 h-2.5" />
-                Gamification
+                Rewards & Challenges
               </Badge>
             </h1>
             <p className="text-xs sm:text-sm text-muted-foreground">Earn achievements and practice risk-free</p>

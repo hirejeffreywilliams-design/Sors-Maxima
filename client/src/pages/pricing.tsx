@@ -83,9 +83,9 @@ const tiers: PricingTier[] = [
       'AI Betting Assistant (unlimited chats)',
       'AI-powered player prop projections',
       'Real-time line movement alerts',
-      'Live momentum tracker & CLV tracking',
+      'Live momentum tracker & closing line value tracking',
       'Arbitrage opportunity scanner',
-      'Same-game parlay optimizer',
+      'Same-game parlay (SGP) optimizer',
       'Custom model builder (adjust all 46 weights)',
       'Multi-book bankroll tracker',
       'Automated tax export reports',
@@ -306,10 +306,10 @@ export default function Pricing() {
             </div>
             <Progress value={100 - creditsUsedPercent} className="h-2" data-testid="progress-credits" />
             <p className="text-sm text-muted-foreground">
-              Credits reset daily at midnight UTC
+              Credits reset daily at midnight UTC. Each credit = one AI-powered action (like generating a ticket or running an analysis).
             </p>
             <div className="pt-2 border-t">
-              <p className="text-sm font-medium mb-2">What uses credits:</p>
+              <p className="text-sm font-medium mb-2">What uses 1 credit:</p>
               <ul className="space-y-1">
                 <li className="text-sm text-muted-foreground flex items-center gap-2">
                   <Check className="h-3 w-3 shrink-0" /> Ticket generation
