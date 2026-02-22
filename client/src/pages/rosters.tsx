@@ -73,6 +73,8 @@ const sportOptions: { id: Sport; name: string }[] = [
   { id: "NFL", name: "NFL" },
   { id: "MLB", name: "MLB" },
   { id: "NHL", name: "NHL" },
+  { id: "NCAAF", name: "NCAAF" },
+  { id: "NCAAB", name: "NCAAB" },
 ];
 
 const statusConfig: Record<string, { color: string; icon: typeof Activity }> = {

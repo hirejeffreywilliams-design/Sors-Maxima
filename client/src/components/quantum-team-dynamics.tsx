@@ -44,6 +44,8 @@ const sports = [
   { id: "nfl", name: "NFL" },
   { id: "mlb", name: "MLB" },
   { id: "nhl", name: "NHL" },
+  { id: "ncaaf", name: "NCAAF" },
+  { id: "ncaab", name: "NCAAB" },
 ];
 
 export function QuantumTeamDynamics() {

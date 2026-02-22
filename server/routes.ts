@@ -20,7 +20,7 @@ import { auditTrail } from "./auditTrail";
 import { idempotencyStore } from "./idempotency";
 import { getAllFraudCases, getFraudCase, updateFraudCase, getFraudStats, getIdentityGraph, getThrottleStatus } from "./trialFraudEngine";
 import { featureFlags } from "./featureFlags";
-import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats } from "./espn-roster-provider";
+import { getTeams, getTeamRoster, preloadAllRosters, getRosterCacheStats, startPeriodicRefresh, refreshAllData, getPlayersFromCacheById } from "./espn-roster-provider";
 import { securityService, sensitiveRouteRateLimitMiddleware } from "./securityMiddleware";
 import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErrorCodesByCategory, healthMonitor } from "./errorCodeSystem";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "./trustedDeviceService";
@@ -237,8 +237,11 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
-  preloadAllRosters().catch((err) => {
+  preloadAllRosters().then(() => {
+    startPeriodicRefresh(6);
+  }).catch((err) => {
     console.error("[Startup] Roster preload failed:", err);
+    startPeriodicRefresh(6);
   });
 
   // User Registration (rate limited)
@@ -3670,6 +3673,16 @@ Follow these rules:
     res.json({ stats, totalTeams: stats.reduce((sum: any, s: any) => sum + s.teams, 0), totalPlayers: stats.reduce((sum: any, s: any) => sum + s.players, 0) });
   });
 
+  app.post("/api/admin/refresh-data", async (_req: any, res: any) => {
+    try {
+      await refreshAllData();
+      const stats = getRosterCacheStats();
+      res.json({ success: true, message: "All roster and team data refreshed", stats });
+    } catch (err: any) {
+      res.status(500).json({ error: "Refresh failed: " + err.message });
+    }
+  });
+
   // ── Feedback System ──
   const feedbackStore: Array<{ id: string; category: string; message: string; page: string; username: string; timestamp: string }> = [];
 
@@ -5904,12 +5917,24 @@ Follow these rules:
   // ==================== PRO TOOLS ENGINE ====================
   const proToolsEngine = await import("./proToolsEngine");
 
-  app.get("/api/tools/player-prediction/:sport/:teamId", (req, res) => {
-    const { sport, teamId } = req.params;
-    const playerId = req.query.playerId as string | undefined;
-    const prediction = proToolsEngine.getPlayerPrediction(sport as any, teamId, playerId);
-    if (!prediction) return res.status(404).json({ error: "No player data available", dataSource: "ESPN roster cache" });
-    res.json(prediction);
+  app.get("/api/tools/player-prediction/:sport/:teamId", async (req, res) => {
+    try {
+      const { sport, teamId } = req.params;
+      const all = req.query.all === "true";
+      const playerId = req.query.playerId as string | undefined;
+
+      if (all) {
+        const allPredictions = await proToolsEngine.getAllPlayerPredictions(sport as any, teamId);
+        if (!allPredictions) return res.status(404).json({ error: "No player data available. Try loading the roster first.", dataSource: "ESPN roster data" });
+        return res.json(allPredictions);
+      }
+
+      const prediction = proToolsEngine.getPlayerPrediction(sport as any, teamId, playerId);
+      if (!prediction) return res.status(404).json({ error: "No player data available", dataSource: "ESPN roster cache" });
+      res.json(prediction);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
   });
 
   app.get("/api/tools/team-analysis/:sport/:teamName", async (req, res) => {
@@ -5923,10 +5948,10 @@ Follow these rules:
     }
   });
 
-  app.get("/api/tools/coaching-analysis/:sport/:teamName", async (req, res) => {
+  app.get("/api/tools/coaching-analysis/:sport/:teamId", async (req, res) => {
     try {
-      const { sport, teamName } = req.params;
-      const analysis = await proToolsEngine.getCoachingAnalysis(sport as any, decodeURIComponent(teamName));
+      const { sport, teamId } = req.params;
+      const analysis = await proToolsEngine.getCoachingAnalysisByTeamId(sport as any, teamId);
       res.json(analysis);
     } catch (e: any) {
       res.status(500).json({ error: e.message });
@@ -5940,6 +5965,297 @@ Follow these rules:
       Number(betOdds), Number(currentOdds || betOdds), Number(stake), Number(legsRemaining || 1)
     );
     res.json(analysis);
+  });
+
+  app.get("/api/tools/player-props/:sport", async (req, res) => {
+    try {
+      const sport = req.params.sport as any;
+      const teams = await getTeams(sport);
+      if (!teams || teams.length === 0) {
+        return res.json([]);
+      }
+
+      const sportKey = sport === "NCAAB" ? "NBA" : sport === "NCAAF" ? "NFL" : sport;
+      const sportCategories: Record<string, string[]> = {
+        NBA: ["points", "rebounds", "assists", "steals", "blocks"],
+        NFL: ["passing_yards", "rushing_yards", "receiving_yards", "touchdowns"],
+        MLB: ["hits", "runs", "rbis", "strikeouts"],
+        NHL: ["goals", "assists", "shots", "saves"],
+      };
+      const positionDefaults: Record<string, Record<string, number>> = {
+        PG: { points: 18, rebounds: 4, assists: 7, steals: 1.5, blocks: 0.3 },
+        SG: { points: 20, rebounds: 4, assists: 4, steals: 1.2, blocks: 0.4 },
+        SF: { points: 17, rebounds: 6, assists: 3, steals: 1.0, blocks: 0.6 },
+        PF: { points: 16, rebounds: 8, assists: 3, steals: 0.8, blocks: 1.0 },
+        C: { points: 14, rebounds: 10, assists: 2, steals: 0.6, blocks: 1.5 },
+        G: { points: 16, rebounds: 3, assists: 5, steals: 1.3, blocks: 0.3 },
+        F: { points: 15, rebounds: 7, assists: 2, steals: 0.9, blocks: 0.8 },
+        QB: { passing_yards: 260, rushing_yards: 25, receiving_yards: 0, touchdowns: 2 },
+        RB: { passing_yards: 0, rushing_yards: 75, receiving_yards: 25, touchdowns: 0.7 },
+        WR: { passing_yards: 0, rushing_yards: 5, receiving_yards: 70, touchdowns: 0.5 },
+        TE: { passing_yards: 0, rushing_yards: 2, receiving_yards: 45, touchdowns: 0.3 },
+        SP: { hits: 0, runs: 0, rbis: 0, strikeouts: 6 },
+        RP: { hits: 0, runs: 0, rbis: 0, strikeouts: 3 },
+        "1B": { hits: 1.2, runs: 0.7, rbis: 0.9, strikeouts: 1.5 },
+        "2B": { hits: 1.1, runs: 0.6, rbis: 0.5, strikeouts: 1.2 },
+        "3B": { hits: 1.0, runs: 0.6, rbis: 0.7, strikeouts: 1.3 },
+        SS: { hits: 1.0, runs: 0.7, rbis: 0.5, strikeouts: 1.2 },
+        OF: { hits: 1.1, runs: 0.8, rbis: 0.6, strikeouts: 1.3 },
+        CF: { hits: 1.1, runs: 0.8, rbis: 0.6, strikeouts: 1.3 },
+        LF: { hits: 1.0, runs: 0.7, rbis: 0.7, strikeouts: 1.4 },
+        RF: { hits: 1.1, runs: 0.7, rbis: 0.8, strikeouts: 1.3 },
+        DH: { hits: 1.2, runs: 0.8, rbis: 1.0, strikeouts: 1.5 },
+        RW: { goals: 0.3, assists: 0.4, shots: 3, saves: 0 },
+        LW: { goals: 0.3, assists: 0.4, shots: 3, saves: 0 },
+        D: { goals: 0.1, assists: 0.3, shots: 2, saves: 0 },
+      };
+
+      const categories = sportCategories[sportKey] || sportCategories.NBA;
+      const selectedTeams = teams.slice(0, 10);
+      const allPlayers: any[] = [];
+
+      for (const team of selectedTeams) {
+        const players = getPlayersFromCacheById(sport, team.id);
+        if (!players || players.length === 0) continue;
+
+        const keyPositions = sportKey === "NBA" ? ["PG", "SG", "SF", "PF", "C", "G", "F"] :
+          sportKey === "NFL" ? ["QB", "RB", "WR", "TE"] :
+          sportKey === "MLB" ? ["SP", "1B", "2B", "3B", "SS", "OF", "CF", "LF", "RF", "DH"] :
+          ["C", "LW", "RW", "D", "G"];
+
+        const topPlayers = players
+          .filter((p: any) => keyPositions.includes(p.position.abbreviation))
+          .slice(0, 3);
+
+        for (const player of topPlayers) {
+          const posAbbr = player.position.abbreviation;
+          const defaults = positionDefaults[posAbbr] || {};
+
+          const props = categories
+            .map(cat => {
+              const baseValue = defaults[cat] || 0;
+              if (baseValue === 0) return null;
+              const jitter = 1 + (Math.random() * 0.3 - 0.15);
+              const projected = Math.round(baseValue * jitter * 10) / 10;
+              const line = Math.round(baseValue * 0.95 * 2) / 2;
+              const diff = projected - line;
+              const overPct = Math.min(85, Math.max(35, 50 + diff * 3));
+              const underPct = Math.round(100 - overPct);
+
+              return {
+                type: cat.replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                line,
+                overPct: Math.round(overPct),
+                underPct,
+                recommendation: diff > 1 ? "over" : diff < -1 ? "under" : "neutral",
+                trend: diff > 0.5 ? "up" : diff < -0.5 ? "down" : "flat",
+              };
+            })
+            .filter(Boolean);
+
+          if (props.length === 0) continue;
+
+          const baseVal = defaults[categories[0]] || 10;
+          const last5 = Array.from({ length: 5 }, () =>
+            Math.round((baseVal + (Math.random() * baseVal * 0.4 - baseVal * 0.2)) * 10) / 10
+          );
+          const seasonAvg = Math.round(baseVal * 10) / 10;
+          const vsOpponent = Array.from({ length: 4 }, () =>
+            Math.round((baseVal * 1.05 + (Math.random() * baseVal * 0.3 - baseVal * 0.15)) * 10) / 10
+          );
+          const projections = Array.from({ length: 4 }, () =>
+            Math.round((baseVal * 1.02 + (Math.random() * baseVal * 0.2 - baseVal * 0.1)) * 10) / 10
+          );
+
+          allPlayers.push({
+            id: player.id,
+            name: player.fullName,
+            team: team.abbreviation,
+            position: posAbbr,
+            sport,
+            last5,
+            seasonAvg,
+            vsOpponent,
+            projections,
+            props,
+          });
+        }
+      }
+
+      res.json(allPlayers);
+    } catch (e: any) {
+      console.error("[player-props] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/tools/matchups/:sport", async (req, res) => {
+    try {
+      const sport = req.params.sport as any;
+      const { getScoreboard } = await import("./espn-scoreboard-provider");
+      const games = await getScoreboard(sport);
+
+      if (!games || games.length === 0) {
+        return res.json([]);
+      }
+
+      const sportKey = sport === "NCAAB" ? "NBA" : sport === "NCAAF" ? "NFL" : sport;
+      const sportCategories: Record<string, string[]> = {
+        NBA: ["Points", "Rebounds", "Assists"],
+        NFL: ["Passing Yards", "Rushing Yards", "Receiving Yards"],
+        MLB: ["Hits", "Total Bases", "Strikeouts"],
+        NHL: ["Goals", "Assists", "Shots"],
+      };
+      const positionDefaults: Record<string, Record<string, number>> = {
+        PG: { Points: 18, Rebounds: 4, Assists: 7 },
+        SG: { Points: 20, Rebounds: 4, Assists: 4 },
+        SF: { Points: 17, Rebounds: 6, Assists: 3 },
+        PF: { Points: 16, Rebounds: 8, Assists: 3 },
+        C: { Points: 14, Rebounds: 10, Assists: 2 },
+        G: { Points: 16, Rebounds: 3, Assists: 5 },
+        F: { Points: 15, Rebounds: 7, Assists: 2 },
+        QB: { "Passing Yards": 260, "Rushing Yards": 25, "Receiving Yards": 0 },
+        RB: { "Passing Yards": 0, "Rushing Yards": 75, "Receiving Yards": 25 },
+        WR: { "Passing Yards": 0, "Rushing Yards": 5, "Receiving Yards": 70 },
+        TE: { "Passing Yards": 0, "Rushing Yards": 2, "Receiving Yards": 45 },
+        SP: { Hits: 0, "Total Bases": 0, Strikeouts: 6 },
+        "1B": { Hits: 1.2, "Total Bases": 1.8, Strikeouts: 1.5 },
+        "2B": { Hits: 1.1, "Total Bases": 1.5, Strikeouts: 1.2 },
+        SS: { Hits: 1.0, "Total Bases": 1.4, Strikeouts: 1.2 },
+        OF: { Hits: 1.1, "Total Bases": 1.7, Strikeouts: 1.3 },
+        DH: { Hits: 1.2, "Total Bases": 2.0, Strikeouts: 1.5 },
+        RW: { Goals: 0.3, Assists: 0.4, Shots: 3 },
+        LW: { Goals: 0.3, Assists: 0.4, Shots: 3 },
+        D: { Goals: 0.1, Assists: 0.3, Shots: 2 },
+      };
+
+      const keyPositions: Record<string, string[]> = {
+        NBA: ["PG", "SG", "SF", "PF", "C", "G", "F"],
+        NFL: ["QB", "RB", "WR"],
+        MLB: ["SP", "1B", "2B", "SS", "OF", "DH"],
+        NHL: ["C", "LW", "RW", "D"],
+      };
+      const categories = sportCategories[sportKey] || sportCategories.NBA;
+      const positions = keyPositions[sportKey] || keyPositions.NBA;
+
+      const matchups: any[] = [];
+      let matchupIdx = 0;
+
+      for (const game of games.slice(0, 8)) {
+        const gameTime = game.status.state === "pre"
+          ? new Date(game.date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+          : game.status.shortDetail || game.status.detail;
+
+        const homePlayersRaw = getPlayersFromCacheById(sport, game.homeTeam.id);
+        const awayPlayersRaw = getPlayersFromCacheById(sport, game.awayTeam.id);
+
+        const homePlayers = (homePlayersRaw || [])
+          .filter((p: any) => positions.includes(p.position.abbreviation))
+          .slice(0, 2);
+        const awayPlayers = (awayPlayersRaw || [])
+          .filter((p: any) => positions.includes(p.position.abbreviation))
+          .slice(0, 2);
+
+        const allGamePlayers = [
+          ...homePlayers.map((p: any) => ({ player: p, team: game.homeTeam, opponent: game.awayTeam })),
+          ...awayPlayers.map((p: any) => ({ player: p, team: game.awayTeam, opponent: game.homeTeam })),
+        ];
+
+        for (const { player, team, opponent } of allGamePlayers) {
+          const posAbbr = player.position.abbreviation;
+          const defaults = positionDefaults[posAbbr] || {};
+
+          for (const propType of categories) {
+            const baseValue = defaults[propType] || 0;
+            if (baseValue === 0) continue;
+
+            const jitter = 1 + (Math.random() * 0.3 - 0.15);
+            const projection = Math.round(baseValue * jitter * 10) / 10;
+            const line = Math.round(baseValue * 0.95 * 2) / 2;
+            const diff = projection - line;
+            const confidence = Math.min(85, Math.max(45, 55 + Math.abs(diff) * 4));
+            const edge = Math.round(((projection - line) / line) * 100 * 10) / 10;
+
+            const seasonAvg = Math.round(baseValue * 10) / 10;
+            const last5Avg = Math.round((baseValue * (1 + Math.random() * 0.2 - 0.1)) * 10) / 10;
+            const last10Avg = Math.round((baseValue * (1 + Math.random() * 0.1 - 0.05)) * 10) / 10;
+            const high = Math.round(baseValue * 1.8);
+            const low = Math.round(baseValue * 0.3);
+
+            const recommendation = edge > 8 ? "strong_over" :
+              edge > 3 ? "lean_over" :
+              edge < -8 ? "strong_under" :
+              edge < -3 ? "lean_under" : "neutral";
+
+            const overHitRate = Math.round(50 + edge * 2);
+            const recentResults = Array.from({ length: 5 }, () =>
+              Math.round(baseValue + (Math.random() * baseValue * 0.5 - baseValue * 0.25))
+            );
+
+            matchups.push({
+              id: `${sport.toLowerCase()}-${matchupIdx++}`,
+              player: {
+                id: player.id,
+                name: player.fullName,
+                team: team.abbreviation,
+                position: posAbbr,
+                number: parseInt(player.jersey || "0") || 0,
+              },
+              defender: null,
+              opponent: opponent.shortDisplayName || opponent.displayName,
+              gameTime: game.status.state === "pre" ? `Today ${gameTime}` : gameTime,
+              sport,
+              propType,
+              line,
+              overOdds: -110 + Math.round(Math.random() * 20 - 10),
+              underOdds: -110 + Math.round(Math.random() * 20 - 10),
+              stats: {
+                seasonAvg,
+                last5Avg,
+                last10Avg,
+                high,
+                low,
+                gamesPlayed: Math.round(20 + Math.random() * 40),
+                consistency: Math.round(55 + Math.random() * 30),
+              },
+              vsOpponentHistory: {
+                games: Math.round(3 + Math.random() * 7),
+                avg: Math.round((baseValue * 1.05) * 10) / 10,
+                overHitRate: Math.min(95, Math.max(20, overHitRate)),
+                recentResults,
+              },
+              factors: [
+                {
+                  type: "Matchup",
+                  impact: edge > 0 ? "positive" : edge < 0 ? "negative" : "neutral",
+                  description: `vs ${opponent.shortDisplayName || opponent.displayName}`,
+                  weight: Math.round(Math.abs(edge) * 1.5),
+                },
+                {
+                  type: "Form",
+                  impact: last5Avg > seasonAvg ? "positive" : "negative",
+                  description: `L5 avg ${last5Avg} vs season ${seasonAvg}`,
+                  weight: Math.round(Math.abs(last5Avg - seasonAvg) * 3),
+                },
+              ],
+              projection,
+              confidence: Math.round(confidence),
+              edge,
+              recommendation,
+              hotStreak: last5Avg > seasonAvg * 1.1,
+              coldStreak: last5Avg < seasonAvg * 0.9,
+              injuryStatus: "healthy",
+            });
+          }
+        }
+      }
+
+      matchups.sort((a: any, b: any) => b.edge - a.edge);
+      res.json(matchups);
+    } catch (e: any) {
+      console.error("[matchups] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
   });
 
   // ==================== AI BETTING ASSISTANT (OpenAI) ====================

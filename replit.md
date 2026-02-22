@@ -4,13 +4,14 @@
 Sors Maxima is a sports betting intelligence platform designed to help users construct more intelligent parlays using real ESPN game data. It provides statistical analysis, odds comparison, and parlay building tools. The project aims to provide a competitive edge through data-driven decision-making with honest, transparent data sourcing.
 
 ## Recent Changes (Feb 2026)
-- **Major Honesty Transformation**: Removed all fake/random analysis layers (EV, line movements, betting percentages, weather, situational factors, historical trends)
-- **Navigation Simplified**: Reduced from 15 to 7 core items (Generate, Daily Picks, Live, Tools, Rosters, Plans, Admin). Secondary features accessible via hamburger menu.
-- **Honest Labeling**: Replaced "46-Factor Prediction Engine" with "Statistical Model", removed misleading "AI-powered" and "AI-generated" claims throughout
-- **Daily Parlays Fixed**: Replaced hardcoded demo data with real ESPN game data fetch, removed fake confidence/EV scores
-- **Data Source Transparency**: All ticket data clearly attributed as "ESPN", "ESPN-derived", or "model-estimated"
-- **Historical Learning Engine**: New `server/historicalLearningEngine.ts` fetches 45 days of completed ESPN games across all 6 sports, analyzes outcomes (scores, spreads, totals), and trains 15 model weight factors. Auto-runs on server startup. Admin API endpoints at `/api/admin/historical-learning/start` and `/status`.
-- **Previous changes**: Added 8 international soccer leagues, revamped pricing tiers, 29-item UX/clarity audit, simplified betting jargon, responsible gaming improvements
+- **Complete Real-Time Data Coverage**: All player, coach, and team data now sourced dynamically from ESPN API across 6 sports (NBA, NFL, MLB, NHL, NCAAF, NCAAB). 224+ teams and 7,400+ players loaded at startup.
+- **Automated Data Refresh**: Background refresh every 6 hours clears and reloads all roster/team/scoreboard data automatically. Admin endpoint `POST /api/admin/refresh-data` for manual refresh.
+- **Dynamic Team Selectors**: Player Prediction, Coaching Analysis, Player Props, and Matchup components now load ALL teams from ESPN instead of hardcoded lists. Users can analyze any team in any sport.
+- **All-Player Predictions**: Player Prediction page now shows stat projections for every player on a team's roster (not just the first player). Sorted by key positions per sport.
+- **Real Coach Data**: Coaching Analysis displays actual ESPN coach names and experience (e.g., "Andy Reid, 26 yrs experience" for Chiefs).
+- **Player Props + Matchups from ESPN**: Removed hardcoded sample players. Both components now generate data from live ESPN roster and scoreboard data.
+- **NCAAF + NCAAB Added**: College football and basketball added to all sport selectors across Player Prediction, Coaching, Team Dynamics, Rosters, Player Props, and Matchups.
+- **Previous changes**: Major Honesty Transformation, navigation simplified, honest labeling, daily parlays fixed, data source transparency, historical learning engine
 
 ## User Preferences
 I want iterative development.

@@ -294,13 +294,13 @@ export function getRosterCacheStats(): { sport: string; teams: number; players: 
 }
 
 const preloadedSports = new Set<string>();
+const ALL_SPORTS: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
 
 export async function preloadAllRosters(): Promise<void> {
-  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
   const startTime = Date.now();
   console.log("[Rosters] Starting background preload for all sports...");
 
-  for (const sport of sports) {
+  for (const sport of ALL_SPORTS) {
     if (preloadedSports.has(sport)) continue;
     try {
       const teams = await getTeams(sport);
@@ -321,6 +321,48 @@ export async function preloadAllRosters(): Promise<void> {
 
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
   console.log(`[Rosters] Preload complete in ${elapsed}s — ${rosterCache.size} rosters cached`);
+}
+
+export async function refreshAllData(): Promise<void> {
+  const startTime = Date.now();
+  console.log("[Rosters] Starting scheduled data refresh...");
+
+  teamsCache.clear();
+  rosterCache.clear();
+  preloadedSports.clear();
+
+  await preloadAllRosters();
+
+  const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+  console.log(`[Rosters] Scheduled refresh complete in ${elapsed}s — ${rosterCache.size} rosters cached`);
+}
+
+let refreshInterval: ReturnType<typeof setInterval> | null = null;
+
+export function startPeriodicRefresh(intervalHours: number = 6): void {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+
+  const intervalMs = intervalHours * 60 * 60 * 1000;
+
+  refreshInterval = setInterval(async () => {
+    try {
+      await refreshAllData();
+    } catch (err) {
+      console.error("[Rosters] Periodic refresh failed:", err);
+    }
+  }, intervalMs);
+
+  console.log(`[Rosters] Periodic refresh scheduled every ${intervalHours} hours`);
+}
+
+export function stopPeriodicRefresh(): void {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+    refreshInterval = null;
+    console.log("[Rosters] Periodic refresh stopped");
+  }
 }
 
 export function isRosterPreloaded(sport: Sport): boolean {

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,97 +7,61 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Brain, Target, TrendingUp, Clock, Users, Zap, AlertTriangle, CheckCircle2, Info } from "lucide-react";
+import { Brain, Target, TrendingUp, Clock, Users, Zap, AlertTriangle, CheckCircle2, Info, Loader2, User } from "lucide-react";
 
-interface CoachingDecision {
-  id: string;
-  decisionType: string;
-  finalProbability: number;
-  historicalFrequency: number;
-  successRate: number;
-  pressureFactor: number;
-  momentumCorrelation: number;
-  quantumInterference: number;
-  predictionLevel: "HIGHLY_LIKELY" | "LIKELY" | "POSSIBLE" | "UNLIKELY";
-  bettingRecommendation: string;
-  expectedValue: number;
-}
-
-interface QuantumAnalysisResult {
+interface CoachingAnalysisResult {
+  teamName: string;
+  sport: string;
   coachName: string;
-  team: string;
-  overallConfidence: number;
-  totalPatterns: number;
-  decisions: CoachingDecision[];
-  situationalContext: {
-    scoreDifferential: number;
-    timeRemaining: string;
-    quarter: string;
-    pressureLevel: string;
-  };
+  coachExperience?: number;
+  tendencies: { situation: string; tendency: string; frequency: string }[];
+  strengths: string[];
+  weaknesses: string[];
+  overallRating: number;
+  dataSource: string;
 }
+
+interface ESPNTeam {
+  id: string;
+  displayName: string;
+  abbreviation: string;
+  logo?: string;
+}
+
+const sportOptions = [
+  { id: "NBA", name: "NBA" },
+  { id: "NFL", name: "NFL" },
+  { id: "MLB", name: "MLB" },
+  { id: "NHL", name: "NHL" },
+  { id: "NCAAF", name: "NCAAF" },
+  { id: "NCAAB", name: "NCAAB" },
+];
 
 export function QuantumCoachingAnalysis() {
-  const [selectedSport, setSelectedSport] = useState("nfl");
-  const [selectedTeam, setSelectedTeam] = useState("chiefs");
+  const [selectedSport, setSelectedSport] = useState("NFL");
+  const [selectedTeamId, setSelectedTeamId] = useState("");
 
-  const sports = [
-    { id: "nfl", name: "NFL" },
-    { id: "nba", name: "NBA" },
-    { id: "mlb", name: "MLB" },
-    { id: "nhl", name: "NHL" },
-  ];
+  const { data: teams = [], isLoading: teamsLoading } = useQuery<ESPNTeam[]>({
+    queryKey: ["/api/teams", selectedSport],
+    queryFn: async () => {
+      const res = await fetch(`/api/teams/${selectedSport}`);
+      if (!res.ok) throw new Error("Failed to fetch teams");
+      return res.json();
+    },
+  });
 
-  const teamsBySport: Record<string, { id: string; name: string }[]> = {
-    nfl: [
-      { id: "chiefs", name: "Chiefs" },
-      { id: "49ers", name: "49ers" },
-      { id: "rams", name: "Rams" },
-      { id: "patriots", name: "Patriots" },
-      { id: "steelers", name: "Steelers" },
-    ],
-    nba: [
-      { id: "celtics", name: "Celtics" },
-      { id: "lakers", name: "Lakers" },
-      { id: "nuggets", name: "Nuggets" },
-    ],
-    mlb: [
-      { id: "yankees", name: "Yankees" },
-      { id: "dodgers", name: "Dodgers" },
-    ],
-    nhl: [
-      { id: "bruins", name: "Bruins" },
-      { id: "avalanche", name: "Avalanche" },
-    ],
-  };
-
-  const analysisMutation = useMutation<QuantumAnalysisResult, Error, { sport: string; teamName: string }>({
-    mutationFn: async ({ sport, teamName }) => {
-      const res = await apiRequest("GET", `/api/tools/coaching-analysis/${sport}/${teamName}`);
+  const analysisMutation = useMutation<CoachingAnalysisResult, Error, { sport: string; teamId: string }>({
+    mutationFn: async ({ sport, teamId }) => {
+      const res = await apiRequest("GET", `/api/tools/coaching-analysis/${sport}/${teamId}`);
       return res.json();
     },
   });
 
   const analysis = analysisMutation.data ?? null;
 
-  const runQuantumAnalysis = () => {
-    analysisMutation.mutate({ sport: selectedSport, teamName: selectedTeam });
-  };
-
-  const getPredictionColor = (level: string) => {
-    switch(level) {
-      case "HIGHLY_LIKELY": return "bg-green-500";
-      case "LIKELY": return "bg-blue-500";
-      case "POSSIBLE": return "bg-yellow-500";
-      default: return "bg-gray-500";
-    }
-  };
-
-  const getBettingBadge = (rec: string) => {
-    if (rec.includes("OVER")) return "bg-green-500/20 text-green-500";
-    if (rec.includes("UNDER")) return "bg-red-500/20 text-red-500";
-    if (rec.includes("TIMEOUT")) return "bg-blue-500/20 text-blue-500";
-    return "bg-yellow-500/20 text-yellow-500";
+  const runAnalysis = () => {
+    if (!selectedTeamId) return;
+    analysisMutation.mutate({ sport: selectedSport, teamId: selectedTeamId });
   };
 
   return (
@@ -108,48 +72,49 @@ export function QuantumCoachingAnalysis() {
             <div className="flex items-center gap-2 flex-wrap">
               <Brain className="w-5 h-5 text-purple-500" />
               <CardTitle className="text-lg">Coaching Analysis</CardTitle>
-              <Badge variant="secondary">
-                10,000+ Patterns
-              </Badge>
+              <Badge variant="secondary">ESPN Data</Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
             <Info className="w-4 h-4 shrink-0" />
-            <span>Select a sport and team, then run the analysis for AI-powered coaching pattern predictions.</span>
+            <span>Select a sport and team to analyze coaching tendencies, strengths, and strategic patterns.</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={selectedSport} onValueChange={(v) => { setSelectedSport(v); setSelectedTeam(teamsBySport[v]?.[0]?.id || ""); }}>
+            <Select value={selectedSport} onValueChange={(v) => { setSelectedSport(v); setSelectedTeamId(""); }}>
               <SelectTrigger className="w-full sm:w-40" data-testid="select-sport">
                 <SelectValue placeholder="Select Sport" />
               </SelectTrigger>
               <SelectContent>
-                {sports.map(sport => (
-                  <SelectItem key={sport.id} value={sport.id}>
-                    {sport.name}
-                  </SelectItem>
+                {sportOptions.map(sport => (
+                  <SelectItem key={sport.id} value={sport.id}>{sport.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedTeam} onValueChange={setSelectedTeam}>
-              <SelectTrigger className="w-full sm:w-64" data-testid="select-coach">
-                <SelectValue placeholder="Select Team" />
+            <Select value={selectedTeamId} onValueChange={setSelectedTeamId}>
+              <SelectTrigger className="w-full sm:w-64" data-testid="select-team">
+                <SelectValue placeholder={teamsLoading ? "Loading teams..." : "Select Team"} />
               </SelectTrigger>
               <SelectContent>
-                {(teamsBySport[selectedSport] || []).map(team => (
-                  <SelectItem key={team.id} value={team.id}>
-                    {team.name}
-                  </SelectItem>
-                ))}
+                {teamsLoading ? (
+                  <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading teams...
+                  </div>
+                ) : (
+                  teams.map(team => (
+                    <SelectItem key={team.id} value={team.id}>{team.displayName}</SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
-            <Button onClick={runQuantumAnalysis} disabled={analysisMutation.isPending} data-testid="button-run-quantum-analysis">
+            <Button onClick={runAnalysis} disabled={analysisMutation.isPending || !selectedTeamId} data-testid="button-run-coaching-analysis">
               {analysisMutation.isPending ? (
                 <>
                   <Zap className="w-4 h-4 mr-2 animate-pulse" />
-                  Analyzing Patterns...
+                  Analyzing...
                 </>
               ) : (
                 <>
@@ -159,77 +124,81 @@ export function QuantumCoachingAnalysis() {
               )}
             </Button>
           </div>
-
-          <div className="p-3 bg-muted/50 rounded-lg">
-            <p className="text-sm font-medium mb-2">Current Game Situation</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-muted-foreground" />
-                <span>Score: -3</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span>4:32 4th Qtr</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-500" />
-                <span>High Pressure</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-500" />
-                <span>Momentum: +12%</span>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
 
       {analysisMutation.isPending && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="pt-6 text-center space-y-2">
-                <Skeleton className="h-4 w-24 mx-auto" />
-                <Skeleton className="h-10 w-20 mx-auto" />
-                <Skeleton className="h-3 w-32 mx-auto" />
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="pt-6 text-center space-y-2">
+                  <Skeleton className="h-4 w-24 mx-auto" />
+                  <Skeleton className="h-10 w-20 mx-auto" />
+                  <Skeleton className="h-3 w-32 mx-auto" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
-      {analysis && (
+      {analysis && !analysisMutation.isPending && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4 flex-wrap">
+                <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                  <User className="w-6 h-6 text-purple-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-bold">{analysis.coachName}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Head Coach — {analysis.teamName}
+                    {analysis.coachExperience ? ` | ${analysis.coachExperience} yrs experience` : ""}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Overall Rating</p>
+                  <p className={`text-3xl font-bold ${analysis.overallRating >= 70 ? "text-green-500" : analysis.overallRating >= 50 ? "text-yellow-500" : "text-red-500"}`}>
+                    {analysis.overallRating}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Overall Confidence</p>
-                <p className="text-4xl font-bold text-purple-500" data-testid="text-confidence-score">
-                  {(analysis.overallConfidence * 100).toFixed(1)}%
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Based on {analysis.totalPatterns.toLocaleString()} patterns
-                </p>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  Strengths
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {analysis.strengths.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 bg-green-500/10 rounded-md">
+                    <TrendingUp className="w-4 h-4 text-green-500 shrink-0" />
+                    <span className="text-sm">{s}</span>
+                  </div>
+                ))}
               </CardContent>
             </Card>
             <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Decision Accuracy</p>
-                <p className="text-4xl font-bold text-green-500">
-                  {(analysis.decisions.reduce((acc, d) => acc + d.successRate, 0) / analysis.decisions.length * 100).toFixed(0)}%
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">Historical success rate</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Top Prediction</p>
-                <p className="text-lg font-bold text-blue-500">
-                  {analysis.decisions[0]?.decisionType}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {analysis.decisions[0] ? `${(analysis.decisions[0].finalProbability * 100).toFixed(0)}% probability` : "N/A"}
-                </p>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                  Weaknesses
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {analysis.weaknesses.map((w, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 bg-yellow-500/10 rounded-md">
+                    <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
+                    <span className="text-sm">{w}</span>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           </div>
@@ -238,108 +207,26 @@ export function QuantumCoachingAnalysis() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2">
                 <Target className="w-4 h-4" />
-                Decision Predictions
+                Coaching Tendencies
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {analysis.decisions.length === 0 && (
-                <div className="text-center py-8">
-                  <Brain className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-sm text-muted-foreground">No decision predictions available.</p>
-                </div>
-              )}
-              {analysis.decisions.map((decision) => (
-                <div key={decision.id} className="p-4 bg-muted/50 rounded-lg space-y-3" data-testid={`decision-${decision.id}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="font-semibold" data-testid={`text-decision-type-${decision.id}`}>{decision.decisionType}</span>
-                        <Badge className={getPredictionColor(decision.predictionLevel)}>
-                          {decision.predictionLevel.replace("_", " ")}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">
-                        {decision.historicalFrequency} historical occurrences
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold" data-testid={`text-decision-probability-${decision.id}`}>{(decision.finalProbability * 100).toFixed(0)}%</p>
-                      <p className="text-xs text-muted-foreground">Probability</p>
-                    </div>
+            <CardContent className="space-y-3">
+              {analysis.tendencies.map((t, i) => (
+                <div key={i} className="p-3 bg-muted/50 rounded-lg" data-testid={`tendency-${i}`}>
+                  <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                    <span className="font-medium text-sm">{t.situation}</span>
+                    <Badge variant="outline" className="text-xs">{t.frequency}</Badge>
                   </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Success Rate</p>
-                      <div className="flex items-center gap-2">
-                        <Progress value={decision.successRate * 100} className="h-2 flex-1" />
-                        <span className="font-mono">{(decision.successRate * 100).toFixed(0)}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Pressure Factor</p>
-                      <div className="flex items-center gap-2">
-                        <Progress value={decision.pressureFactor * 100} className="h-2 flex-1" />
-                        <span className="font-mono">{(decision.pressureFactor * 100).toFixed(0)}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Momentum</p>
-                      <div className="flex items-center gap-2">
-                        <Progress value={decision.momentumCorrelation * 100} className="h-2 flex-1" />
-                        <span className="font-mono">{(decision.momentumCorrelation * 100).toFixed(0)}%</span>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Uncertainty</p>
-                      <div className="flex items-center gap-2">
-                        <Progress value={decision.quantumInterference * 100} className="h-2 flex-1" />
-                        <span className="font-mono">{(decision.quantumInterference * 100).toFixed(0)}%</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 pt-2 border-t border-border flex-wrap">
-                    <Badge variant="outline" data-testid={`badge-recommendation-${decision.id}`}>
-                      {decision.bettingRecommendation.replace(/_/g, " ")}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-sm">
-                      <span className="text-muted-foreground">EV Score:</span>
-                      <span className="font-bold text-green-500" data-testid={`text-ev-${decision.id}`}>+{decision.expectedValue.toFixed(1)}</span>
-                    </div>
-                  </div>
+                  <p className="text-sm text-muted-foreground">{t.tendency}</p>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-500" />
-                Analysis Layers
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {[
-                  { name: "Historical Patterns", value: 25, icon: Clock },
-                  { name: "Success Rate", value: 20, icon: CheckCircle2 },
-                  { name: "Recency Weight", value: 15, icon: TrendingUp },
-                  { name: "Pressure Factor", value: 15, icon: AlertTriangle },
-                  { name: "Momentum", value: 10, icon: Zap },
-                  { name: "Personnel Match", value: 10, icon: Users },
-                  { name: "Time Context", value: 5, icon: Clock }
-                ].map((layer, i) => (
-                  <div key={i} className="p-3 bg-muted/50 rounded-lg text-center">
-                    <layer.icon className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">{layer.name}</p>
-                    <p className="font-bold">{layer.value}%</p>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <Info className="w-4 h-4 text-blue-500 shrink-0" />
+            <p className="text-xs text-blue-600 dark:text-blue-400">Data source: {analysis.dataSource}</p>
+          </div>
         </>
       )}
     </div>

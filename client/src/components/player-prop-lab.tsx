@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, TrendingUp, TrendingDown, User, ArrowUp, ArrowDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search, TrendingUp, TrendingDown, User, ArrowUp, ArrowDown, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PlayerProp {
   type: string;
@@ -28,88 +32,7 @@ interface PlayerData {
   props: PlayerProp[];
 }
 
-const SAMPLE_PLAYERS: PlayerData[] = [
-  {
-    id: "p1",
-    name: "Anthony Edwards",
-    team: "LAL",
-    position: "SF",
-    sport: "NBA",
-    last5: [28, 32, 24, 30, 27],
-    seasonAvg: 27.4,
-    vsOpponent: [31, 29, 34, 26],
-    projections: [28.5, 29.0, 27.8, 30.2],
-    props: [
-      { type: "Points", line: 26.5, overPct: 68, underPct: 32, recommendation: "over", trend: "up" },
-      { type: "Rebounds", line: 7.5, overPct: 55, underPct: 45, recommendation: "over", trend: "flat" },
-      { type: "Assists", line: 7.5, overPct: 52, underPct: 48, recommendation: "neutral", trend: "down" },
-    ],
-  },
-  {
-    id: "p2",
-    name: "Jayson Tatum",
-    team: "BOS",
-    position: "SF",
-    sport: "NBA",
-    last5: [30, 26, 33, 28, 31],
-    seasonAvg: 28.9,
-    vsOpponent: [35, 27, 30, 32],
-    projections: [29.5, 30.1, 28.8, 31.0],
-    props: [
-      { type: "Points", line: 28.5, overPct: 62, underPct: 38, recommendation: "over", trend: "up" },
-      { type: "Rebounds", line: 8.5, overPct: 48, underPct: 52, recommendation: "under", trend: "down" },
-      { type: "Assists", line: 4.5, overPct: 58, underPct: 42, recommendation: "over", trend: "up" },
-    ],
-  },
-  {
-    id: "p3",
-    name: "Josh Allen",
-    team: "BUF",
-    position: "QB",
-    sport: "NFL",
-    last5: [285, 312, 268, 340, 295],
-    seasonAvg: 298.2,
-    vsOpponent: [310, 278, 325],
-    projections: [295.0, 305.5, 290.0, 310.0],
-    props: [
-      { type: "Pass Yards", line: 275.5, overPct: 72, underPct: 28, recommendation: "over", trend: "up" },
-      { type: "Pass TDs", line: 2.5, overPct: 55, underPct: 45, recommendation: "over", trend: "flat" },
-      { type: "Rush Yards", line: 35.5, overPct: 60, underPct: 40, recommendation: "over", trend: "up" },
-    ],
-  },
-  {
-    id: "p4",
-    name: "Tyreek Hill",
-    team: "MIA",
-    position: "WR",
-    sport: "NFL",
-    last5: [95, 142, 78, 110, 88],
-    seasonAvg: 98.5,
-    vsOpponent: [156, 134, 137],
-    projections: [100.0, 105.5, 95.0, 112.0],
-    props: [
-      { type: "Rec Yards", line: 82.5, overPct: 65, underPct: 35, recommendation: "over", trend: "up" },
-      { type: "Receptions", line: 5.5, overPct: 58, underPct: 42, recommendation: "over", trend: "flat" },
-      { type: "Anytime TD", line: 0.5, overPct: 45, underPct: 55, recommendation: "under", trend: "down" },
-    ],
-  },
-  {
-    id: "p5",
-    name: "Nikola Jokic",
-    team: "DEN",
-    position: "C",
-    sport: "NBA",
-    last5: [25, 31, 22, 28, 35],
-    seasonAvg: 26.8,
-    vsOpponent: [30, 28, 33],
-    projections: [27.5, 28.0, 26.5, 29.0],
-    props: [
-      { type: "Points", line: 25.5, overPct: 64, underPct: 36, recommendation: "over", trend: "up" },
-      { type: "Rebounds", line: 12.5, overPct: 58, underPct: 42, recommendation: "over", trend: "up" },
-      { type: "Assists", line: 9.5, overPct: 55, underPct: 45, recommendation: "over", trend: "flat" },
-    ],
-  },
-];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
 
 function StatBars({ values, label }: { values: number[]; label: string }) {
   const max = Math.max(...values);
@@ -135,22 +58,68 @@ function StatBars({ values, label }: { values: number[]; label: string }) {
   );
 }
 
+function PlayerCardSkeleton() {
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between gap-2">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+          <Skeleton className="h-5 w-12 rounded-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function PlayerPropLab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlayer, setSelectedPlayer] = useState<PlayerData | null>(null);
+  const [selectedSport, setSelectedSport] = useState("NBA");
+
+  const { data: players = [], isLoading } = useQuery<PlayerData[]>({
+    queryKey: ["/api/tools/player-props", selectedSport],
+    queryFn: async () => {
+      const res = await fetch(`/api/tools/player-props/${selectedSport}`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch player props");
+      return res.json();
+    },
+  });
 
   const filteredPlayers = useMemo(() => {
-    if (!searchQuery.trim()) return SAMPLE_PLAYERS;
-    return SAMPLE_PLAYERS.filter((p) =>
+    if (!searchQuery.trim()) return players;
+    return players.filter((p) =>
       p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [searchQuery]);
+  }, [searchQuery, players]);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <User className="w-5 h-5 text-chart-1" />
-        <span className="font-medium">Player Prop Lab</span>
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <User className="w-5 h-5 text-chart-1" />
+          <span className="font-medium">Player Prop Lab</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs max-w-xs">Data source: ESPN roster data, model-estimated projections</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <Select value={selectedSport} onValueChange={(v) => { setSelectedSport(v); setSelectedPlayer(null); }}>
+          <SelectTrigger className="w-28" data-testid="select-prop-sport">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SPORTS.map((s) => (
+              <SelectItem key={s} value={s}>{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="relative">
@@ -164,34 +133,46 @@ export function PlayerPropLab() {
         />
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredPlayers.map((player) => (
-          <Card
-            key={player.id}
-            className={`cursor-pointer transition-colors ${
-              selectedPlayer?.id === player.id ? "border-chart-1" : ""
-            }`}
-          >
-            <CardContent className="p-4">
-              <button
-                className="w-full text-left"
-                onClick={() => setSelectedPlayer(player)}
-                data-testid={`button-select-player-${player.id}`}
-              >
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div>
-                    <p className="font-semibold">{player.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {player.team} - {player.position}
-                    </p>
+      {isLoading ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <PlayerCardSkeleton key={i} />
+          ))}
+        </div>
+      ) : filteredPlayers.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground" data-testid="text-empty-state">
+          {searchQuery ? "No players match your search" : "No player data available for this sport. Data may still be loading."}
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {filteredPlayers.map((player) => (
+            <Card
+              key={player.id}
+              className={`cursor-pointer transition-colors ${
+                selectedPlayer?.id === player.id ? "border-chart-1" : ""
+              }`}
+            >
+              <CardContent className="p-4">
+                <button
+                  className="w-full text-left"
+                  onClick={() => setSelectedPlayer(player)}
+                  data-testid={`button-select-player-${player.id}`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div>
+                      <p className="font-semibold">{player.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {player.team} - {player.position}
+                      </p>
+                    </div>
+                    <Badge variant="outline" data-testid={`badge-sport-${player.id}`}>{player.sport}</Badge>
                   </div>
-                  <Badge variant="outline" data-testid={`badge-sport-${player.id}`}>{player.sport}</Badge>
-                </div>
-              </button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {selectedPlayer && (
         <Card>
