@@ -230,12 +230,40 @@ const navItems: NavItem[] = [
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
   const [location] = useLocation();
   
+  const adminItems = navItems.filter(item => item.adminOnly);
+  const userItems = navItems.filter(item => !item.adminOnly);
+  
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 py-4">
+      <div className="flex-1 py-4 overflow-y-auto">
+        {authState.isAdmin && adminItems.length > 0 && (
+          <div className="mb-2">
+            <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-purple-500">Admin</div>
+            <nav className="space-y-1">
+              {adminItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location === item.href;
+                return (
+                  <Link key={item.href} href={item.href} onClick={onClose}>
+                    <div 
+                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                        isActive ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'hover:bg-purple-500/5 text-purple-600 dark:text-purple-400'
+                      }`}
+                      data-testid={`mobile-${item.testId}`}
+                      title={item.tooltip}
+                    >
+                      <Icon className="w-5 h-5" />
+                      <span className="font-medium">{item.label}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="mx-4 my-2 border-b" />
+          </div>
+        )}
         <nav className="space-y-1">
-          {navItems.map((item) => {
-            if (item.adminOnly && !authState.isAdmin) return null;
+          {userItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
@@ -346,11 +374,17 @@ function DesktopNav({ authState }: { authState: AuthState }) {
 function BottomNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
   
-  const mobileNavItems = navItems.slice(0, 5).filter(item => !item.adminOnly || authState.isAdmin);
+  const adminItem = navItems.find(item => item.adminOnly);
+  let mobileNavItems: NavItem[];
+  if (authState.isAdmin && adminItem) {
+    mobileNavItems = [...navItems.slice(0, 4), adminItem];
+  } else {
+    mobileNavItems = navItems.slice(0, 5);
+  }
   
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
-      <div className="flex items-center justify-around h-16">
+      <div className="flex items-center justify-around gap-1 h-16">
         {mobileNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.href;
@@ -358,7 +392,7 @@ function BottomNav({ authState }: { authState: AuthState }) {
             <Link key={item.href} href={item.href}>
               <div 
                 className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
+                  isActive ? 'text-primary' : item.adminOnly ? 'text-purple-500 dark:text-purple-400' : 'text-muted-foreground'
                 }`}
                 data-testid={`bottom-${item.testId}`}
               >
