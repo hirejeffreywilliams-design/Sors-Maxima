@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
+import { runHistoricalLearning } from "./historicalLearningEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -160,6 +161,20 @@ app.use((req, res, next) => {
       
       startAnalyticsAgent();
       log("ESPN data agent started — live game monitoring active");
+
+      setTimeout(() => {
+        log("Starting historical game learning from ESPN...");
+        runHistoricalLearning({ daysBack: 45 }).then((result) => {
+          if (result.success) {
+            log(`Historical learning complete: ${result.gamesProcessed} ESPN games processed, ${result.weightsUpdated} model weights trained. Home win rate: ${(result.homeWinRate * 100).toFixed(1)}%, Spread cover rate: ${(result.spreadCoverRate * 100).toFixed(1)}%`);
+          } else {
+            log("Historical learning: already running or failed to start");
+          }
+        }).catch((err) => {
+          console.error("Historical learning error:", err);
+        });
+      }, 10000);
+    
     },
   );
 })();

@@ -10,6 +10,7 @@ import { WebhookHandlers } from "./webhookHandlers";
 import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, updateSubscription } from "./dbAuthService";
 import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
+import { runHistoricalLearning, getHistoricalLearningStatus } from "./historicalLearningEngine";
 import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, type TicketRequest } from "./ticketOrchestrator";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
@@ -2227,6 +2228,29 @@ Format your response clearly with sections and bullet points.`;
     } catch (err) {
       console.error("Factor weights error:", err);
       res.status(500).json({ error: "Failed to get factor weights" });
+    }
+  });
+
+  app.post("/api/admin/historical-learning/start", requireAdmin, async (req, res) => {
+    try {
+      const { daysBack, sports } = req.body || {};
+      const result = await runHistoricalLearning({
+        daysBack: daysBack || 45,
+        sports: sports || undefined,
+      });
+      res.json(result);
+    } catch (err) {
+      console.error("Historical learning error:", err);
+      res.status(500).json({ error: "Failed to run historical learning" });
+    }
+  });
+
+  app.get("/api/admin/historical-learning/status", requireAdmin, async (req, res) => {
+    try {
+      const status = getHistoricalLearningStatus();
+      res.json(status);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get historical learning status" });
     }
   });
 

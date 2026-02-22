@@ -9,6 +9,7 @@ Sors Maxima is a sports betting intelligence platform designed to help users con
 - **Honest Labeling**: Replaced "46-Factor Prediction Engine" with "Statistical Model", removed misleading "AI-powered" and "AI-generated" claims throughout
 - **Daily Parlays Fixed**: Replaced hardcoded demo data with real ESPN game data fetch, removed fake confidence/EV scores
 - **Data Source Transparency**: All ticket data clearly attributed as "ESPN", "ESPN-derived", or "model-estimated"
+- **Historical Learning Engine**: New `server/historicalLearningEngine.ts` fetches 45 days of completed ESPN games across all 6 sports, analyzes outcomes (scores, spreads, totals), and trains 15 model weight factors. Auto-runs on server startup. Admin API endpoints at `/api/admin/historical-learning/start` and `/status`.
 - **Previous changes**: Added 8 international soccer leagues, revamped pricing tiers, 29-item UX/clarity audit, simplified betting jargon, responsible gaming improvements
 
 ## User Preferences
