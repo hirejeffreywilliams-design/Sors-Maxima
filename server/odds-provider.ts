@@ -66,10 +66,36 @@ function generateEVAnalysis(decimalOdds: number, outcomeId: string, marketOdds?:
   let edge = 0;
   let evRating: "strong" | "moderate" | "weak" | "negative" = "weak";
 
-  if (marketOdds) {
-    // If we have market odds, we can estimate a more "true" probability by averaging sharp books
-    // For now, we'll just use the provided market data if available
-    const averageMarketPrice = 0; // Simplified
+  if (marketOdds && marketOdds.bookmakers && marketOdds.bookmakers.length > 0) {
+    // Advanced Market Aggregation: Calculate a 'Consensus Price' across all available books
+    let totalPrice = 0;
+    let count = 0;
+    
+    for (const book of marketOdds.bookmakers) {
+      const h2hMarket = book.markets.find(m => m.key === "h2h");
+      if (h2hMarket) {
+        const outcome = h2hMarket.outcomes.find(o => outcomeId.includes(o.name.toLowerCase()) || o.name.toLowerCase().includes(outcomeId.toLowerCase()));
+        if (outcome) {
+          totalPrice += outcome.price;
+          count++;
+        }
+      }
+    }
+
+    if (count > 0) {
+      const avgAmerican = totalPrice / count;
+      const avgDecimal = americanToDecimal(avgAmerican);
+      const marketProb = 1 / avgDecimal;
+      
+      // We weight the model slightly towards the market average to avoid extreme outliers
+      // while still looking for discrepancies (the edge)
+      modelProbability = (impliedProbability * 0.4) + (marketProb * 0.6);
+      edge = (modelProbability / impliedProbability) - 1;
+      
+      if (edge > 0.08) evRating = "strong";
+      else if (edge > 0.04) evRating = "moderate";
+      else if (edge < 0) evRating = "negative";
+    }
   }
 
   return {
