@@ -61,6 +61,8 @@ const LEARNING_FACTORS = [
   "offensive_efficiency",
   "pace_factor",
   "clutch_performance",
+  "market_efficiency",
+  "sharp_money_alignment",
 ];
 
 let isRunning = false;
