@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Brain,
   TrendingUp,
@@ -15,16 +17,20 @@ import {
   Users,
   Clock,
   MapPin,
-  CloudRain,
   Flame,
   ChevronRight,
   Eye,
-  BarChart3
+  BarChart3,
+  CloudRain,
+  Loader2,
+  RefreshCw
 } from "lucide-react";
 
 interface TeamScheme {
   teamName: string;
+  teamId: string;
   sport: string;
+  record: string;
   offensiveScheme: {
     name: string;
     style: "aggressive" | "balanced" | "conservative";
@@ -46,12 +52,15 @@ interface TeamScheme {
     underdog: number;
     favorite: number;
   };
+  dataSource: string;
 }
 
 interface CoachProfile {
   name: string;
   team: string;
+  teamId: string;
   sport: string;
+  experience: number;
   tendencies: {
     riskTolerance: "high" | "medium" | "low";
     fourthDownAggression?: number;
@@ -70,6 +79,7 @@ interface CoachProfile {
     coverRate: number;
     trend: "hot" | "cold" | "neutral";
   };
+  dataSource: string;
 }
 
 interface SchemeAlert {
@@ -80,290 +90,45 @@ interface SchemeAlert {
   impact: "high" | "medium" | "low";
   affectedLegs: string[];
   confidence: number;
+  dataSource: string;
 }
 
 interface MatchupSchemeAnalysis {
   matchup: string;
+  gameId: string;
   homeTeam: string;
   awayTeam: string;
+  homeRecord: string;
+  awayRecord: string;
+  gameTime: string;
+  venue?: string;
+  broadcast?: string;
   schemeAdvantage: "home" | "away" | "even";
   keyFactors: string[];
   predictionImpact: number;
   alerts: SchemeAlert[];
+  odds?: {
+    spread?: string;
+    overUnder?: number;
+    homeMoneyline?: number;
+    awayMoneyline?: number;
+  };
+  dataSource: string;
 }
 
-const generateTeamSchemes = (): TeamScheme[] => [
-  {
-    teamName: "Kansas City Chiefs",
-    sport: "NFL",
-    offensiveScheme: {
-      name: "West Coast Spread",
-      style: "aggressive",
-      keyPlays: ["RPO", "Deep Crossing Routes", "Screen Games"],
-      successRate: 78,
-      trendDirection: "up"
-    },
-    defensiveScheme: {
-      name: "4-3 Under",
-      style: "balanced",
-      formation: "Multiple Fronts",
-      successRate: 72,
-      trendDirection: "stable"
-    },
-    situationalPatterns: {
-      homeAdvantage: 85,
-      awayPerformance: 71,
-      primetime: 82,
-      underdog: 68,
-      favorite: 79
-    }
-  },
-  {
-    teamName: "Philadelphia Eagles",
-    sport: "NFL",
-    offensiveScheme: {
-      name: "Power Run RPO",
-      style: "aggressive",
-      keyPlays: ["Tush Push", "Hurts Scrambles", "RPO Pass"],
-      successRate: 81,
-      trendDirection: "up"
-    },
-    defensiveScheme: {
-      name: "4-3 Wide",
-      style: "aggressive",
-      formation: "Pressure Heavy",
-      successRate: 76,
-      trendDirection: "up"
-    },
-    situationalPatterns: {
-      homeAdvantage: 88,
-      awayPerformance: 74,
-      primetime: 79,
-      underdog: 75,
-      favorite: 82
-    }
-  },
-  {
-    teamName: "Milwaukee Bucks",
-    sport: "NBA",
-    offensiveScheme: {
-      name: "Motion Offense",
-      style: "balanced",
-      keyPlays: ["Ball Movement", "3PT Shooting", "Pick and Pop"],
-      successRate: 84,
-      trendDirection: "up"
-    },
-    defensiveScheme: {
-      name: "Switch Everything",
-      style: "aggressive",
-      formation: "Man-to-Man",
-      successRate: 79,
-      trendDirection: "stable"
-    },
-    situationalPatterns: {
-      homeAdvantage: 82,
-      awayPerformance: 76,
-      primetime: 80,
-      underdog: 71,
-      favorite: 85
-    }
-  },
-  {
-    teamName: "LA Dodgers",
-    sport: "MLB",
-    offensiveScheme: {
-      name: "Analytics-Driven",
-      style: "aggressive",
-      keyPlays: ["Launch Angle Hitting", "Patient At-Bats", "Power Focus"],
-      successRate: 77,
-      trendDirection: "stable"
-    },
-    defensiveScheme: {
-      name: "Shift Heavy",
-      style: "balanced",
-      formation: "Infield Positioning",
-      successRate: 74,
-      trendDirection: "down"
-    },
-    situationalPatterns: {
-      homeAdvantage: 79,
-      awayPerformance: 72,
-      primetime: 81,
-      underdog: 69,
-      favorite: 76
-    }
-  }
-];
-
-const generateCoachProfiles = (): CoachProfile[] => [
-  {
-    name: "Andy Reid",
-    team: "Kansas City Chiefs",
-    sport: "NFL",
-    tendencies: {
-      riskTolerance: "high",
-      fourthDownAggression: 72,
-      tempoPreference: "moderate",
-      adjustmentRating: 89,
-      clutchDecisions: 85
-    },
-    historicalPatterns: {
-      vsSpread: 54.2,
-      overUnderTrend: "over",
-      rivalryBoost: 12,
-      restAdvantage: 8
-    },
-    recentForm: {
-      lastFive: "4-1",
-      coverRate: 60,
-      trend: "hot"
-    }
-  },
-  {
-    name: "Nick Sirianni",
-    team: "Philadelphia Eagles",
-    sport: "NFL",
-    tendencies: {
-      riskTolerance: "high",
-      fourthDownAggression: 78,
-      tempoPreference: "fast",
-      adjustmentRating: 76,
-      clutchDecisions: 72
-    },
-    historicalPatterns: {
-      vsSpread: 51.8,
-      overUnderTrend: "under",
-      rivalryBoost: 15,
-      restAdvantage: 6
-    },
-    recentForm: {
-      lastFive: "3-2",
-      coverRate: 55,
-      trend: "neutral"
-    }
-  },
-  {
-    name: "Joe Mazzulla",
-    team: "Milwaukee Bucks",
-    sport: "NBA",
-    tendencies: {
-      riskTolerance: "medium",
-      tempoPreference: "fast",
-      adjustmentRating: 82,
-      clutchDecisions: 78
-    },
-    historicalPatterns: {
-      vsSpread: 56.1,
-      overUnderTrend: "over",
-      rivalryBoost: 10,
-      restAdvantage: 7
-    },
-    recentForm: {
-      lastFive: "4-1",
-      coverRate: 65,
-      trend: "hot"
-    }
-  },
-  {
-    name: "Dave Roberts",
-    team: "LA Dodgers",
-    sport: "MLB",
-    tendencies: {
-      riskTolerance: "medium",
-      tempoPreference: "moderate",
-      adjustmentRating: 75,
-      clutchDecisions: 68
-    },
-    historicalPatterns: {
-      vsSpread: 52.4,
-      overUnderTrend: "over",
-      rivalryBoost: 8,
-      restAdvantage: 5
-    },
-    recentForm: {
-      lastFive: "3-2",
-      coverRate: 52,
-      trend: "neutral"
-    }
-  }
-];
-
-const generateSchemeAlerts = (): SchemeAlert[] => [
-  {
-    id: "1",
-    type: "advantage",
-    title: "RPO Scheme Mismatch Detected",
-    description: "Chiefs' West Coast Spread has 23% higher success rate against zone coverage teams. Today's opponent runs predominantly zone.",
-    impact: "high",
-    affectedLegs: ["Chiefs -3.5", "Chiefs Team Total O24.5"],
-    confidence: 87
-  },
-  {
-    id: "2",
-    type: "warning",
-    title: "Coaching Tendency Alert",
-    description: "Eagles historically underperform ATS in afternoon road games when favored by 7+. Current line is -7.5.",
-    impact: "medium",
-    affectedLegs: ["Eagles -7.5"],
-    confidence: 73
-  },
-  {
-    id: "3",
-    type: "advantage",
-    title: "Pace Advantage Identified",
-    description: "Bucks' fast tempo (102.3 possessions/game) creates +4.2 point differential vs slow-paced opponents like tonight's matchup.",
-    impact: "high",
-    affectedLegs: ["Bucks -6", "Game Total O228.5"],
-    confidence: 81
-  },
-  {
-    id: "4",
-    type: "neutral",
-    title: "Historical Pattern Match",
-    description: "Dodgers are 8-3 in home day games after a loss. Pattern suggests bounce-back potential.",
-    impact: "low",
-    affectedLegs: ["Dodgers ML"],
-    confidence: 65
-  },
-  {
-    id: "5",
-    type: "warning",
-    title: "Defensive Scheme Vulnerability",
-    description: "Chiefs' 4-3 Under struggles against power run teams. Opponent averages 5.2 YPC against this formation.",
-    impact: "medium",
-    affectedLegs: ["Chiefs -3.5", "Under 48.5"],
-    confidence: 71
-  }
-];
-
-const generateMatchupAnalysis = (): MatchupSchemeAnalysis[] => [
-  {
-    matchup: "Chiefs vs Raiders",
-    homeTeam: "Kansas City Chiefs",
-    awayTeam: "Las Vegas Raiders",
-    schemeAdvantage: "home",
-    keyFactors: [
-      "Chiefs RPO success rate 23% higher vs zone",
-      "Andy Reid 8-2 ATS in division games",
-      "Raiders struggle vs mobile QBs (32nd in league)"
-    ],
-    predictionImpact: 12,
-    alerts: []
-  },
-  {
-    matchup: "Bucks vs Pacers",
-    homeTeam: "Milwaukee Bucks",
-    awayTeam: "Indiana Pacers",
-    schemeAdvantage: "home",
-    keyFactors: [
-      "Bucks switch-everything defense limits Pacers' action",
-      "Pace differential of +8.7 possessions favors Bucks",
-      "Pacers 2-8 ATS vs top-5 defenses"
-    ],
-    predictionImpact: 8,
-    alerts: []
-  }
-];
+interface SchemeAnalysisResponse {
+  teamSchemes: TeamScheme[];
+  coachProfiles: CoachProfile[];
+  alerts: SchemeAlert[];
+  matchupAnalysis: MatchupSchemeAnalysis[];
+  meta: {
+    sport: string;
+    gamesAnalyzed: number;
+    teamsAnalyzed: number;
+    generatedAt: string;
+    dataSources: string[];
+  };
+}
 
 const getTrendIcon = (trend: "up" | "down" | "stable") => {
   switch (trend) {
@@ -397,28 +162,48 @@ const getImpactColor = (impact: "high" | "medium" | "low") => {
   }
 };
 
+function formatGameTime(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  } catch {
+    return dateStr;
+  }
+}
+
 interface SchemeRecognitionProps {
   mode?: "live" | "pre-game";
   selectedSports?: string[];
 }
 
 export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: SchemeRecognitionProps) {
-  const [teamSchemes] = useState<TeamScheme[]>(generateTeamSchemes);
-  const [coachProfiles] = useState<CoachProfile[]>(generateCoachProfiles);
-  const [schemeAlerts] = useState<SchemeAlert[]>(generateSchemeAlerts);
-  const [matchupAnalysis] = useState<MatchupSchemeAnalysis[]>(generateMatchupAnalysis);
+  const defaultSport = selectedSports.length > 0 ? selectedSports[0] : "NBA";
+  const [activeSport, setActiveSport] = useState(defaultSport);
   const [selectedTeam, setSelectedTeam] = useState<TeamScheme | null>(null);
-  
-  const filteredSchemes = selectedSports.length > 0 
-    ? teamSchemes.filter(t => selectedSports.includes(t.sport))
-    : teamSchemes;
-  
-  const filteredCoaches = selectedSports.length > 0
-    ? coachProfiles.filter(c => selectedSports.includes(c.sport))
-    : coachProfiles;
-  
+
+  const { data, isLoading, error, isFetching } = useQuery<SchemeAnalysisResponse>({
+    queryKey: ["/api/scheme-analysis", activeSport],
+    queryFn: async () => {
+      const res = await fetch(`/api/scheme-analysis?sport=${activeSport}`);
+      if (!res.ok) throw new Error("Failed to fetch scheme analysis");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: mode === "live" ? 60 * 1000 : undefined,
+  });
+
+  const teamSchemes = data?.teamSchemes || [];
+  const coachProfiles = data?.coachProfiles || [];
+  const schemeAlerts = data?.alerts || [];
+  const matchupAnalysis = data?.matchupAnalysis || [];
+  const meta = data?.meta;
+
   const highImpactAlerts = schemeAlerts.filter(a => a.impact === "high");
-  
+
+  const availableSports = selectedSports.length > 0
+    ? selectedSports
+    : ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+
   return (
     <Card className="w-full" data-testid="scheme-recognition-card">
       <CardHeader className="pb-3">
@@ -426,16 +211,51 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
           <CardTitle className="flex items-center gap-2 text-lg" data-testid="scheme-recognition-title">
             <Brain className="w-5 h-5" />
             Scheme Recognition Engine
+            {isFetching && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
           </CardTitle>
-          <Badge variant={mode === "live" ? "default" : "secondary"}>
-            {mode === "live" ? "Live Analysis" : "Pre-Game Analysis"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Select value={activeSport} onValueChange={setActiveSport}>
+              <SelectTrigger className="w-[120px] h-8" data-testid="scheme-sport-selector">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {availableSports.map(s => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Badge variant={mode === "live" ? "default" : "secondary"}>
+              {mode === "live" ? "Live Analysis" : "Pre-Game"}
+            </Badge>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground">
-          Analysis of team schemes and coaching patterns affecting ticket outcomes
-        </p>
+        {meta && (
+          <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap mt-1">
+            <span>{meta.gamesAnalyzed} games analyzed</span>
+            <span>{meta.teamsAnalyzed} teams</span>
+            <span>Sources: {meta.dataSources.join(", ")}</span>
+          </div>
+        )}
       </CardHeader>
       <CardContent>
+        {isLoading ? (
+          <div className="space-y-3">
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-20 w-full" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-yellow-500" />
+            <p className="text-sm">Failed to load scheme analysis. Try again later.</p>
+          </div>
+        ) : teamSchemes.length === 0 && matchupAnalysis.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <Brain className="w-8 h-8 mx-auto mb-2" />
+            <p className="text-sm">No upcoming {activeSport} games found for scheme analysis.</p>
+            <p className="text-xs mt-1">Try a different sport or check back closer to game time.</p>
+          </div>
+        ) : (
         <Tabs defaultValue="alerts" className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-4 mb-4">
@@ -448,6 +268,11 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="matchups" className="px-2 sm:px-3" data-testid="tab-matchup-analysis">
+                <Target className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
+                Matchups
+                <span className="ml-1 text-xs text-muted-foreground">({matchupAnalysis.length})</span>
+              </TabsTrigger>
               <TabsTrigger value="teams" className="px-2 sm:px-3" data-testid="tab-team-schemes">
                 <Shield className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
                 Teams
@@ -456,59 +281,127 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                 <Users className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
                 Coaches
               </TabsTrigger>
-              <TabsTrigger value="matchups" className="px-2 sm:px-3" data-testid="tab-matchup-analysis">
-                <Target className="w-4 h-4 mr-1 shrink-0 hidden sm:inline" />
-                Matchups
-              </TabsTrigger>
             </TabsList>
           </div>
           
           <TabsContent value="alerts" className="space-y-3">
-            {schemeAlerts.map(alert => (
-              <div 
-                key={alert.id} 
-                className="p-3 rounded-lg border bg-card hover-elevate"
-                data-testid={`alert-${alert.id}`}
-              >
-                <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
-                  <div className="flex items-center gap-2">
-                    {getAlertBadge(alert.type)}
-                    <span className="font-medium text-sm">{alert.title}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-medium ${getImpactColor(alert.impact)}`}>
-                      {alert.impact.toUpperCase()} IMPACT
-                    </span>
-                    <Badge variant="outline" className="text-xs">
-                      {alert.confidence}% conf
-                    </Badge>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">{alert.description}</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-muted-foreground">Affects:</span>
-                  {alert.affectedLegs.map((leg, i) => (
-                    <Badge key={i} variant="secondary" className="text-xs">{leg}</Badge>
-                  ))}
-                </div>
+            {schemeAlerts.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                No scheme alerts for current {activeSport} games.
               </div>
-            ))}
+            ) : (
+              schemeAlerts.map(alert => (
+                <div 
+                  key={alert.id} 
+                  className="p-3 rounded-lg border bg-card hover-elevate"
+                  data-testid={`alert-${alert.id}`}
+                >
+                  <div className="flex items-start justify-between gap-2 flex-wrap mb-2">
+                    <div className="flex items-center gap-2">
+                      {getAlertBadge(alert.type)}
+                      <span className="font-medium text-sm">{alert.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-xs font-medium ${getImpactColor(alert.impact)}`}>
+                        {alert.impact.toUpperCase()} IMPACT
+                      </span>
+                      <Badge variant="outline" className="text-xs">
+                        {alert.confidence}% conf
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">{alert.description}</p>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-muted-foreground">Affects:</span>
+                      {alert.affectedLegs.map((leg, i) => (
+                        <Badge key={i} variant="secondary" className="text-xs">{leg}</Badge>
+                      ))}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{alert.dataSource}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </TabsContent>
+
+          <TabsContent value="matchups" className="space-y-3">
+            {matchupAnalysis.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                No upcoming {activeSport} matchups found.
+              </div>
+            ) : (
+              matchupAnalysis.map((analysis, i) => (
+                <div 
+                  key={analysis.gameId || i}
+                  className="p-3 rounded-lg border bg-card"
+                  data-testid={`matchup-analysis-${i}`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4" />
+                      <span className="font-medium">{analysis.matchup}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={analysis.schemeAdvantage === "home" ? "bg-green-500/10 text-green-500" : analysis.schemeAdvantage === "away" ? "bg-blue-500/10 text-blue-500" : ""}>
+                        {analysis.schemeAdvantage === "home" ? analysis.homeTeam.split(" ").pop() : analysis.schemeAdvantage === "away" ? analysis.awayTeam.split(" ").pop() : "Even"} Advantage
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        +{analysis.predictionImpact}% impact
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2 flex-wrap">
+                    <span>{analysis.homeTeam} ({analysis.homeRecord}) vs {analysis.awayTeam} ({analysis.awayRecord})</span>
+                    <span>{formatGameTime(analysis.gameTime)}</span>
+                    {analysis.venue && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{analysis.venue}</span>}
+                  </div>
+
+                  {analysis.odds && (
+                    <div className="flex items-center gap-3 text-xs mb-2 flex-wrap">
+                      {analysis.odds.spread && <Badge variant="outline">Spread: {analysis.odds.spread}</Badge>}
+                      {analysis.odds.overUnder && <Badge variant="outline">O/U: {analysis.odds.overUnder}</Badge>}
+                      {analysis.odds.homeMoneyline && <Badge variant="outline">{analysis.homeTeam.split(" ").pop()} ML: {analysis.odds.homeMoneyline > 0 ? "+" : ""}{analysis.odds.homeMoneyline}</Badge>}
+                      {analysis.odds.awayMoneyline && <Badge variant="outline">{analysis.awayTeam.split(" ").pop()} ML: {analysis.odds.awayMoneyline > 0 ? "+" : ""}{analysis.odds.awayMoneyline}</Badge>}
+                    </div>
+                  )}
+                  
+                  <div>
+                    <h4 className="text-xs text-muted-foreground mb-2">Key Scheme Factors</h4>
+                    <ul className="space-y-1">
+                      {analysis.keyFactors.map((factor, j) => (
+                        <li key={j} className="flex items-start gap-2 text-sm">
+                          <Target className="w-3 h-3 mt-0.5 text-green-500 shrink-0" />
+                          <span>{factor}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-2 pt-2 border-t">
+                    {analysis.broadcast && <span className="text-[10px] text-muted-foreground">{analysis.broadcast}</span>}
+                    <span className="text-[10px] text-muted-foreground ml-auto">{analysis.dataSource}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </TabsContent>
           
           <TabsContent value="teams" className="space-y-3">
-            {filteredSchemes.map(team => (
+            {teamSchemes.map(team => (
               <div 
-                key={team.teamName}
+                key={team.teamId}
                 className="p-3 rounded-lg border bg-card hover-elevate cursor-pointer"
-                onClick={() => setSelectedTeam(selectedTeam?.teamName === team.teamName ? null : team)}
+                onClick={() => setSelectedTeam(selectedTeam?.teamId === team.teamId ? null : team)}
                 data-testid={`team-scheme-${team.teamName.replace(/\s+/g, '-').toLowerCase()}`}
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{team.teamName}</span>
-                    <Badge variant="outline" className="text-xs">{team.sport}</Badge>
+                    <Badge variant="outline" className="text-xs">{team.record}</Badge>
                   </div>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${selectedTeam?.teamName === team.teamName ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`w-4 h-4 transition-transform ${selectedTeam?.teamId === team.teamId ? 'rotate-90' : ''}`} />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3 text-sm">
@@ -542,7 +435,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                   </div>
                 </div>
                 
-                {selectedTeam?.teamName === team.teamName && (
+                {selectedTeam?.teamId === team.teamId && (
                   <div className="mt-3 pt-3 border-t space-y-3">
                     <div>
                       <h4 className="text-xs text-muted-foreground mb-2">Key Offensive Plays</h4>
@@ -569,6 +462,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                         </div>
                       </div>
                     </div>
+                    <div className="text-[10px] text-muted-foreground">Source: {team.dataSource}</div>
                   </div>
                 )}
               </div>
@@ -576,118 +470,101 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
           </TabsContent>
           
           <TabsContent value="coaches" className="space-y-3">
-            {filteredCoaches.map(coach => (
-              <div 
-                key={coach.name}
-                className="p-3 rounded-lg border bg-card"
-                data-testid={`coach-profile-${coach.name.replace(/\s+/g, '-').toLowerCase()}`}
-              >
-                <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-                  <div>
-                    <span className="font-medium">{coach.name}</span>
-                    <span className="text-sm text-muted-foreground ml-2">({coach.team})</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {getFormBadge(coach.recentForm.trend)}
-                    <Badge variant="outline" className="text-xs">{coach.recentForm.lastFive}</Badge>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <h4 className="text-xs text-muted-foreground mb-2">Coaching Tendencies</h4>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between">
-                        <span className="text-xs">Risk Tolerance</span>
-                        <Badge variant="secondary" className="text-xs capitalize">{coach.tendencies.riskTolerance}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-xs">Tempo</span>
-                        <Badge variant="secondary" className="text-xs capitalize">{coach.tendencies.tempoPreference}</Badge>
-                      </div>
-                      {coach.tendencies.fourthDownAggression !== undefined && (
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs">4th Down Aggression</span>
-                          <div className="flex items-center gap-1">
-                            <Progress value={coach.tendencies.fourthDownAggression} className="w-16 h-1.5" />
-                            <span className="text-xs">{coach.tendencies.fourthDownAggression}%</span>
-                          </div>
-                        </div>
+            {coachProfiles.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground text-sm">
+                No coach data available for current {activeSport} games.
+              </div>
+            ) : (
+              coachProfiles.map(coach => (
+                <div 
+                  key={`${coach.teamId}-${coach.name}`}
+                  className="p-3 rounded-lg border bg-card"
+                  data-testid={`coach-profile-${coach.name.replace(/\s+/g, '-').toLowerCase()}`}
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+                    <div>
+                      <span className="font-medium">{coach.name}</span>
+                      <span className="text-sm text-muted-foreground ml-2">({coach.team})</span>
+                      {coach.experience > 0 && (
+                        <span className="text-xs text-muted-foreground ml-1">- {coach.experience} yrs exp</span>
                       )}
                     </div>
+                    <div className="flex items-center gap-2">
+                      {getFormBadge(coach.recentForm.trend)}
+                      <Badge variant="outline" className="text-xs">{coach.recentForm.lastFive}</Badge>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="text-xs text-muted-foreground mb-2">Betting Patterns</h4>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between">
-                        <span className="text-xs">ATS Record</span>
-                        <span className={`text-xs font-medium ${coach.historicalPatterns.vsSpread > 52 ? 'text-green-500' : coach.historicalPatterns.vsSpread < 48 ? 'text-red-500' : ''}`}>
-                          {coach.historicalPatterns.vsSpread}%
-                        </span>
+                  
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <h4 className="text-xs text-muted-foreground mb-2">Coaching Tendencies</h4>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between">
+                          <span className="text-xs">Risk Tolerance</span>
+                          <Badge variant="secondary" className="text-xs capitalize">{coach.tendencies.riskTolerance}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs">Tempo</span>
+                          <Badge variant="secondary" className="text-xs capitalize">{coach.tendencies.tempoPreference}</Badge>
+                        </div>
+                        {coach.tendencies.fourthDownAggression !== undefined && (
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs">4th Down Aggression</span>
+                            <div className="flex items-center gap-1">
+                              <Progress value={coach.tendencies.fourthDownAggression} className="w-16 h-1.5" />
+                              <span className="text-xs">{coach.tendencies.fourthDownAggression}%</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-xs">O/U Trend</span>
-                        <Badge variant="secondary" className="text-xs capitalize">{coach.historicalPatterns.overUnderTrend}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-xs">Cover Rate (L5)</span>
-                        <span className={`text-xs font-medium ${coach.recentForm.coverRate > 55 ? 'text-green-500' : coach.recentForm.coverRate < 45 ? 'text-red-500' : ''}`}>
-                          {coach.recentForm.coverRate}%
-                        </span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs text-muted-foreground mb-2">Betting Patterns</h4>
+                      <div className="space-y-1.5">
+                        <div className="flex justify-between">
+                          <span className="text-xs">ATS Record</span>
+                          <span className={`text-xs font-medium ${coach.historicalPatterns.vsSpread > 52 ? 'text-green-500' : coach.historicalPatterns.vsSpread < 48 ? 'text-red-500' : ''}`}>
+                            {coach.historicalPatterns.vsSpread}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs">O/U Trend</span>
+                          <Badge variant="secondary" className="text-xs capitalize">{coach.historicalPatterns.overUnderTrend}</Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-xs">Cover Rate (L5)</span>
+                          <span className={`text-xs font-medium ${coach.recentForm.coverRate > 55 ? 'text-green-500' : coach.recentForm.coverRate < 45 ? 'text-red-500' : ''}`}>
+                            {coach.recentForm.coverRate}%
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
+                  <div className="text-[10px] text-muted-foreground mt-2">{coach.dataSource}</div>
                 </div>
-              </div>
-            ))}
-          </TabsContent>
-          
-          <TabsContent value="matchups" className="space-y-3">
-            {matchupAnalysis.map((analysis, i) => (
-              <div 
-                key={i}
-                className="p-3 rounded-lg border bg-card"
-                data-testid={`matchup-analysis-${i}`}
-              >
-                <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    <span className="font-medium">{analysis.matchup}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={analysis.schemeAdvantage === "home" ? "bg-green-500/10 text-green-500" : analysis.schemeAdvantage === "away" ? "bg-blue-500/10 text-blue-500" : ""}>
-                      {analysis.schemeAdvantage === "home" ? analysis.homeTeam : analysis.schemeAdvantage === "away" ? analysis.awayTeam : "Even"} Advantage
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      +{analysis.predictionImpact}% impact
-                    </Badge>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs text-muted-foreground mb-2">Key Scheme Factors</h4>
-                  <ul className="space-y-1">
-                    {analysis.keyFactors.map((factor, j) => (
-                      <li key={j} className="flex items-start gap-2 text-sm">
-                        <Target className="w-3 h-3 mt-0.5 text-green-500 shrink-0" />
-                        <span>{factor}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            ))}
+              ))
+            )}
           </TabsContent>
         </Tabs>
+        )}
       </CardContent>
     </Card>
   );
 }
 
-export function SchemeAlertBanner() {
-  const [alerts] = useState<SchemeAlert[]>(generateSchemeAlerts);
-  const highImpactAlerts = alerts.filter(a => a.impact === "high");
-  
+export function SchemeAlertBanner({ sport = "NBA" }: { sport?: string }) {
+  const { data } = useQuery<SchemeAnalysisResponse>({
+    queryKey: ["/api/scheme-analysis", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/scheme-analysis?sport=${sport}`);
+      if (!res.ok) throw new Error("Failed to fetch scheme analysis");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const highImpactAlerts = (data?.alerts || []).filter(a => a.impact === "high");
+
   if (highImpactAlerts.length === 0) return null;
   
   return (
@@ -696,6 +573,7 @@ export function SchemeAlertBanner() {
         <Brain className="w-4 h-4 text-green-500" />
         <span className="font-medium text-sm">Scheme Intelligence Detected</span>
         <Badge className="text-xs">{highImpactAlerts.length} high-impact</Badge>
+        {data?.meta && <span className="text-[10px] text-muted-foreground ml-auto">Live from {data.meta.dataSources.join(", ")}</span>}
       </div>
       <div className="space-y-1">
         {highImpactAlerts.slice(0, 2).map(alert => (

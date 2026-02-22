@@ -1345,6 +1345,25 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  app.get("/api/scheme-analysis", async (req, res) => {
+    try {
+      const sport = (req.query.sport as string) || "NBA";
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: `Invalid sport. Must be one of: ${validSports.join(", ")}` });
+      }
+      const { analyzeSchemes } = await import("./schemeRecognitionEngine");
+      const analysis = await analyzeSchemes(sport as any);
+      return res.json(analysis);
+    } catch (err) {
+      console.error("[Scheme Analysis] Error:", err);
+      return res.status(500).json({
+        error: "Failed to generate scheme analysis",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
   app.post("/api/generate-tickets", async (req, res) => {
     try {
       const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
