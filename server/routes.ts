@@ -5536,5 +5536,105 @@ Follow these rules:
 
   // ==================== END ADMIN ASSISTANT ====================
 
+  // ==================== ANALYTICS AGENT ENGINE (Admin Only) ====================
+  const { analyticsAgent } = await import("./analyticsAgentEngine");
+
+  app.get("/api/admin/analytics-agent/status", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getStatus());
+  });
+
+  app.get("/api/admin/analytics-agent/dashboard", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getDashboardSummary());
+  });
+
+  app.post("/api/admin/analytics-agent/start", requireAdmin, (_req, res) => {
+    analyticsAgent.start();
+    res.json({ success: true, message: "Analytics agent started", status: analyticsAgent.getStatus() });
+  });
+
+  app.post("/api/admin/analytics-agent/stop", requireAdmin, (_req, res) => {
+    analyticsAgent.stop();
+    res.json({ success: true, message: "Analytics agent stopped", status: analyticsAgent.getStatus() });
+  });
+
+  app.post("/api/admin/analytics-agent/restart", requireAdmin, (_req, res) => {
+    analyticsAgent.restart();
+    res.json({ success: true, message: "Analytics agent restarted", status: analyticsAgent.getStatus() });
+  });
+
+  app.get("/api/admin/analytics-agent/config", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getConfig());
+  });
+
+  app.patch("/api/admin/analytics-agent/config", requireAdmin, (req, res) => {
+    const updates = req.body;
+    const config = analyticsAgent.updateConfig(updates);
+    res.json({ success: true, config });
+  });
+
+  app.get("/api/admin/analytics-agent/metrics", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getMetrics());
+  });
+
+  app.post("/api/admin/analytics-agent/metrics/reset", requireAdmin, (_req, res) => {
+    analyticsAgent.resetMetrics();
+    res.json({ success: true, message: "Metrics reset" });
+  });
+
+  app.get("/api/admin/analytics-agent/feeds", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getFeedHealth());
+  });
+
+  app.post("/api/admin/analytics-agent/feeds/reset", requireAdmin, (_req, res) => {
+    analyticsAgent.resetFeedHealth();
+    res.json({ success: true, message: "Feed health reset" });
+  });
+
+  app.get("/api/admin/analytics-agent/errors", requireAdmin, (req, res) => {
+    const { severity, category, resolved } = req.query;
+    res.json(analyticsAgent.getErrors({
+      severity: severity as string | undefined,
+      category: category as string | undefined,
+      resolved: resolved !== undefined ? resolved === "true" : undefined,
+    }));
+  });
+
+  app.post("/api/admin/analytics-agent/errors/:errorId/resolve", requireAdmin, (req, res) => {
+    const success = analyticsAgent.resolveError(req.params.errorId);
+    res.json({ success, message: success ? "Error resolved" : "Error not found" });
+  });
+
+  app.post("/api/admin/analytics-agent/errors/clear", requireAdmin, (_req, res) => {
+    analyticsAgent.clearErrors();
+    res.json({ success: true, message: "All errors cleared" });
+  });
+
+  app.get("/api/admin/analytics-agent/markets", requireAdmin, (req, res) => {
+    const { eventId } = req.query;
+    res.json(analyticsAgent.getMarketAnalysis(eventId as string | undefined));
+  });
+
+  app.get("/api/admin/analytics-agent/snapshot", requireAdmin, (_req, res) => {
+    const snapshot = analyticsAgent.generateSnapshot();
+    res.json(snapshot);
+  });
+
+  app.get("/api/admin/analytics-agent/snapshot/latest", requireAdmin, (_req, res) => {
+    const snapshot = analyticsAgent.getLatestSnapshot();
+    res.json(snapshot || { message: "No snapshots available" });
+  });
+
+  app.get("/api/admin/analytics-agent/snapshot/history", requireAdmin, (_req, res) => {
+    res.json(analyticsAgent.getSnapshotHistory());
+  });
+
+  app.get("/api/admin/analytics-agent/snapshot/:snapshotId", requireAdmin, (req, res) => {
+    const snapshot = analyticsAgent.getSnapshot(req.params.snapshotId);
+    if (!snapshot) return res.status(404).json({ error: "Snapshot not found" });
+    res.json(snapshot);
+  });
+
+  // ==================== END ANALYTICS AGENT ENGINE ====================
+
   return httpServer;
 }

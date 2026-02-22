@@ -6,6 +6,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
+import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -156,6 +157,9 @@ app.use((req, res, next) => {
       
       startContinuousLearning();
       log("AI learning engine activated - improving predictions every second");
+      
+      startAnalyticsAgent();
+      log("Analytics agent engine started — monitoring all systems behind the scenes");
     },
   );
 })();
