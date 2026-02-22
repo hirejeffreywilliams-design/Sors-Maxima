@@ -231,34 +231,34 @@ function getBlowoutThreshold(sport: string): number {
   }
 }
 
-async function fetchHistoricalGames(sport: string, daysBack: number): Promise<HistoricalGame[]> {
+async function fetchHistoricalGamesForDate(sport: string, daysAgo: number): Promise<HistoricalGame[]> {
   const path = SPORT_PATHS[sport];
   if (!path) return [];
 
-  const games: HistoricalGame[] = [];
   const today = new Date();
+  const date = new Date(today);
+  date.setDate(date.getDate() - daysAgo);
+  const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
 
-  for (let i = 1; i <= daysBack; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, "");
+  try {
+    const data = await fetchJSON(`${ESPN_BASE}/${path}/scoreboard?dates=${dateStr}`);
+    const events = data.events || [];
+    const games: HistoricalGame[] = [];
 
-    try {
-      const data = await fetchJSON(`${ESPN_BASE}/${path}/scoreboard?dates=${dateStr}`);
-      const events = data.events || [];
-
-      for (const event of events) {
-        const game = parseHistoricalGame(event, sport);
-        if (game) games.push(game);
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 200));
-    } catch (error) {
-      logWarn(`[Historical] Failed to fetch ${sport} for day -${i}: ${error}`);
+    for (const event of events) {
+      const game = parseHistoricalGame(event, sport);
+      if (game) games.push(game);
     }
+    return games;
+  } catch (error) {
+    logWarn(`[Historical] Failed to fetch ${sport} for day -${daysAgo}: ${error}`);
+    return [];
   }
+}
 
-  return games;
+async function fetchHistoricalGames(sport: string, daysBack: number): Promise<HistoricalGame[]> {
+  // This is now legacy, using fetchHistoricalGamesForDate in parallel in runHistoricalLearning
+  return [];
 }
 
 async function processTrainingBatch(results: TrainingResult[]): Promise<{ updated: number; homeWinRate: number; spreadCoverRate: number }> {
@@ -410,7 +410,11 @@ export async function runHistoricalLearning(options: {
   try {
     for (const sport of sports) {
       logInfo(`[Historical Learning] Fetching ${sport} games...`);
-      const games = await fetchHistoricalGames(sport, daysBack);
+      // Increased concurrency: Fetch multiple days in parallel
+      const daysToFetch = Array.from({ length: daysBack }, (_, i) => i + 1);
+      const gameBatches = await Promise.all(daysToFetch.map(day => fetchHistoricalGamesForDate(sport, day)));
+      const games = gameBatches.flat();
+      
       sportBreakdown[sport] = games.length;
 
       logInfo(`[Historical Learning] ${sport}: ${games.length} completed games found`);
