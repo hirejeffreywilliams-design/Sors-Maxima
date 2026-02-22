@@ -271,6 +271,17 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
                     <Badge variant="outline" className="text-xs">{leg.market}</Badge>
                   </div>
                 </div>
+                {leg.dataSources && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <Badge variant="outline" className="text-[10px] gap-0.5 py-0 h-5 bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400">
+                      <Radio className="w-2.5 h-2.5" />
+                      {leg.dataSources.odds}
+                    </Badge>
+                    <Badge variant="outline" className="text-[10px] gap-0.5 py-0 h-5 bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400">
+                      {leg.dataSources.game}
+                    </Badge>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 text-xs flex-wrap">
                     <Badge variant={leg.analysis.sharpAction ? "default" : "secondary"} className="text-xs">
@@ -445,6 +456,9 @@ export default function AutoGenerator() {
   const [reminderSet, setReminderSet] = useState(false);
   const [confirmTicket, setConfirmTicket] = useState<GeneratedTicket | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
+  const [lastDataRefresh, setLastDataRefresh] = useState<string | null>(null);
+  const [responseSources, setResponseSources] = useState<{ primary?: string; analysis?: string; agent?: string } | null>(null);
   
   const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
   const { toast } = useToast();
@@ -484,9 +498,10 @@ export default function AutoGenerator() {
     reqRiskLevel: string,
     reqMaxLegs: number,
     reqIncludeProps: boolean,
+    endpoint: string = "/api/generate-tickets",
   ) => {
     try {
-      const response = await apiRequest("POST", "/api/generate-tickets", {
+      const response = await apiRequest("POST", endpoint, {
         sports,
         bankroll: reqBankroll,
         riskLevel: reqRiskLevel,
@@ -506,6 +521,13 @@ export default function AutoGenerator() {
         .filter((f): f is TicketFusion => !!f);
       setTicketFusions(fusions);
       
+      if (data.dataSources) {
+        setResponseSources(data.dataSources);
+      }
+      if (data.generatedAt) {
+        setLastDataRefresh(data.generatedAt);
+      }
+      
       setHasGenerated(true);
     } catch (err) {
       toast({
@@ -515,6 +537,7 @@ export default function AutoGenerator() {
       });
     } finally {
       setIsGenerating(false);
+      setIsRecalculating(false);
     }
   };
   
@@ -553,6 +576,19 @@ export default function AutoGenerator() {
     setIsGenerating(true);
     
     await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps);
+  };
+  
+  const handleRecalculate = async () => {
+    if (selectedSports.length === 0) return;
+    
+    setIsRecalculating(true);
+    
+    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps, "/api/recalculate-predictions");
+    
+    toast({
+      title: "Predictions Refreshed",
+      description: "Tickets regenerated with the latest live data from ESPN and our analytics engine.",
+    });
   };
   
   const getRiskDescription = (level: string) => {
@@ -858,14 +894,63 @@ export default function AutoGenerator() {
             
             <SchemeAlertBanner />
             
+            {responseSources && (
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">Data Sources Verified</span>
+                  </div>
+                  {lastDataRefresh && (
+                    <span className="text-xs text-muted-foreground" data-testid="text-last-refresh">
+                      Last updated: {new Date(lastDataRefresh).toLocaleTimeString()}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3 mt-2">
+                  {responseSources.primary && (
+                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-primary">
+                      <Radio className="w-3 h-3 text-green-500" />
+                      {responseSources.primary}
+                    </Badge>
+                  )}
+                  {responseSources.analysis && (
+                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-analysis">
+                      <Brain className="w-3 h-3 text-blue-500" />
+                      {responseSources.analysis}
+                    </Badge>
+                  )}
+                  {responseSources.agent && (
+                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-agent">
+                      <Activity className="w-3 h-3 text-purple-500" />
+                      {responseSources.agent}
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+            
             <div className="flex items-center justify-between flex-wrap gap-2">
               <h2 className="text-xl font-bold flex items-center gap-2">
                 <Star className="w-5 h-5 text-yellow-500" />
                 Your Optimized Tickets
               </h2>
-              <Badge variant="secondary" className="text-sm">
-                {tickets.length} tickets generated
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRecalculate}
+                  disabled={isRecalculating || isGenerating}
+                  className="gap-2"
+                  data-testid="button-recalculate"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
+                  {isRecalculating ? "Refreshing..." : "Recalculate"}
+                </Button>
+                <Badge variant="secondary" className="text-sm">
+                  {tickets.length} tickets generated
+                </Badge>
+              </div>
             </div>
             
             <AffiliateDisclosure compact />

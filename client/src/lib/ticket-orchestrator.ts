@@ -57,6 +57,13 @@ export interface GeneratedTicket {
   calibrationInfo: { historicalHitRate: number; sampleSize: number; marketSlice: string };
   recommendedAlternatives: AlternativeTicket[];
   marketMovement?: { direction: "up" | "down" | "stable"; percentChange: number; possibleInefficiency: boolean };
+  analyticsAgentData?: {
+    evFromAgent: number | null;
+    kellyFromAgent: number | null;
+    arbitrageDetected: boolean;
+    trendDirection: "up" | "down" | "stable";
+    confidenceBoost: number;
+  };
 }
 
 export interface TicketLeg {
@@ -81,6 +88,12 @@ export interface TicketLeg {
     underSignalCount?: number;
   };
   legFusion?: FusionAnalysis;
+  dataSources?: {
+    odds: "ESPN" | "ESPN-derived" | "model-estimated";
+    game: "ESPN Live" | "scheduled";
+    injury: "ESPN Rosters" | "estimated";
+    analysis: "46-Factor Prediction Engine";
+  };
 }
 
 const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {

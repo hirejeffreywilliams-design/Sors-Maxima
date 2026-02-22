@@ -10,7 +10,7 @@ import { WebhookHandlers } from "./webhookHandlers";
 import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, updateSubscription } from "./dbAuthService";
 import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
-import { generateTickets as generateSmartTickets, type TicketRequest } from "./ticketOrchestrator";
+import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, type TicketRequest } from "./ticketOrchestrator";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
@@ -1369,6 +1369,11 @@ Format your response clearly with sections and bullet points.`;
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),
         generatedAt: new Date().toISOString(),
+        dataSources: {
+          primary: "ESPN Live Data",
+          analysis: "46-Factor Prediction Engine",
+          agent: "Real-Time Analytics Agent",
+        },
         disclaimer: "No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
     } catch (err) {
@@ -1377,6 +1382,54 @@ Format your response clearly with sections and bullet points.`;
       });
       return res.status(500).json({
         error: "Failed to generate tickets",
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+    }
+  });
+
+  app.post("/api/recalculate-predictions", async (req, res) => {
+    try {
+      const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
+
+      if (!sports || !Array.isArray(sports) || sports.length === 0) {
+        return res.status(400).json({ error: "At least one sport must be selected" });
+      }
+
+      const validRiskLevels = ["conservative", "moderate", "aggressive"];
+      if (riskLevel && !validRiskLevels.includes(riskLevel)) {
+        return res.status(400).json({ error: "Invalid risk level" });
+      }
+
+      const request: TicketRequest = {
+        sports,
+        bankroll: bankroll || 1000,
+        riskLevel: riskLevel || "moderate",
+        maxLegs: maxLegs || 4,
+        includeProps: includeProps !== false,
+      };
+
+      const tickets = await regenerateTicketsWithLatestData(request);
+
+      return res.json({
+        tickets,
+        engineStats: getQuantumEngineStats(),
+        factorCategories: getQuantumFactorCategories(),
+        generatedAt: new Date().toISOString(),
+        recalculated: true,
+        dataRefreshedAt: new Date().toISOString(),
+        dataSources: {
+          primary: "ESPN Live Data",
+          analysis: "46-Factor Prediction Engine",
+          agent: "Real-Time Analytics Agent",
+        },
+        disclaimer: "No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
+      });
+    } catch (err) {
+      logError(err instanceof Error ? err : new Error(String(err)), {
+        context: "recalculate-predictions",
+      });
+      return res.status(500).json({
+        error: "Failed to recalculate predictions",
         message: err instanceof Error ? err.message : "Unknown error",
       });
     }

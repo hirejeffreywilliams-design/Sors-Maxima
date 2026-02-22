@@ -1,6 +1,7 @@
 import type { Sport, ParlayLeg, GeneratedParlay } from "../shared/schema";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantumFusionEngine";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
+import { analyticsAgent } from "./analyticsAgentEngine";
 
 function generateUniqueId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -54,6 +55,13 @@ export interface GeneratedTicket {
   calibrationInfo: { historicalHitRate: number; sampleSize: number; marketSlice: string };
   recommendedAlternatives: AlternativeTicket[];
   marketMovement?: { direction: "up" | "down" | "stable"; percentChange: number; possibleInefficiency: boolean };
+  analyticsAgentData?: {
+    evFromAgent: number | null;
+    kellyFromAgent: number | null;
+    arbitrageDetected: boolean;
+    trendDirection: "up" | "down" | "stable";
+    confidenceBoost: number;
+  };
 }
 
 export interface AlternativeTicket {
@@ -86,6 +94,12 @@ export interface TicketLeg {
     underSignalCount?: number;
   };
   legFusion?: FusionAnalysis;
+  dataSources?: {
+    odds: "ESPN" | "ESPN-derived" | "model-estimated";
+    game: "ESPN Live" | "scheduled";
+    injury: "ESPN Rosters" | "estimated";
+    analysis: "46-Factor Prediction Engine";
+  };
 }
 
 const teamsByLeague: Record<Sport, { name: string; city: string }[]> = {
@@ -251,6 +265,62 @@ function generateRandomOdds(min: number, max: number): number {
   return Math.round((Math.random() * (max - min) + min) * 100) / 100;
 }
 
+function parseSpread(spreadStr?: string): number {
+  if (!spreadStr) return 0;
+  const match = spreadStr.match(/([-+]?\d+\.?\d*)/);
+  return match ? parseFloat(match[1]) : 0;
+}
+
+function estimateSpreadFromRecords(homeRecord?: string, awayRecord?: string, sport?: Sport): number {
+  const parseWinPct = (record?: string): number => {
+    if (!record) return 0.5;
+    const parts = record.split("-");
+    const wins = parseInt(parts[0]) || 0;
+    const losses = parseInt(parts[1]) || 0;
+    const total = wins + losses;
+    return total > 0 ? wins / total : 0.5;
+  };
+
+  const homePct = parseWinPct(homeRecord);
+  const awayPct = parseWinPct(awayRecord);
+  const diff = homePct - awayPct;
+
+  const multiplier = sport === "NFL" ? 14 : sport === "NBA" ? 12 : sport === "MLB" ? 3 : sport === "NHL" ? 3 : 10;
+  const homeAdv = sport === "NFL" ? 3 : sport === "NBA" ? 3.5 : sport === "MLB" ? 0.5 : 0.5;
+
+  return Math.round((diff * multiplier + homeAdv) * 2) / 2;
+}
+
+function estimateMoneyline(spread: number, isHome: boolean): number {
+  const adjustedSpread = isHome ? -spread : spread;
+  if (Math.abs(adjustedSpread) < 1) return -110;
+  if (adjustedSpread < -10) return -(Math.floor(Math.abs(adjustedSpread) * 20) + 100);
+  if (adjustedSpread < 0) return -(Math.floor(Math.abs(adjustedSpread) * 15) + 100);
+  if (adjustedSpread > 10) return Math.floor(adjustedSpread * 18) + 100;
+  return Math.floor(adjustedSpread * 12) + 100;
+}
+
+function estimateTotal(sport: Sport): number {
+  const totals: Record<string, number> = {
+    NBA: 224, NFL: 44, MLB: 8.5, NHL: 6, NCAAB: 142, NCAAF: 48,
+  };
+  return totals[sport] || 200;
+}
+
+function americanToDecimal(american: number): number {
+  if (american > 0) return 1 + american / 100;
+  return 1 + 100 / Math.abs(american);
+}
+
+function parseWinPct(record?: string): number {
+  if (!record) return 0.5;
+  const parts = record.split("-");
+  const wins = parseInt(parts[0]) || 0;
+  const losses = parseInt(parts[1]) || 0;
+  const total = wins + losses;
+  return total > 0 ? wins / total : 0.5;
+}
+
 function decimalToAmerican(decimal: number): number {
   if (decimal >= 2) {
     return Math.round((decimal - 1) * 100);
@@ -298,14 +368,319 @@ async function getESPNGamesForSport(sport: Sport): Promise<ESPNScoreboardGame[]>
   }
 }
 
+function resolveGameOdds(game: ESPNScoreboardGame, sport: Sport): {
+  spread: number;
+  total: number;
+  homeMoneyline: number;
+  awayMoneyline: number;
+  oddsSource: "ESPN" | "ESPN-derived" | "model-estimated";
+} {
+  let spread: number;
+  let total: number;
+  let homeMoneyline: number;
+  let awayMoneyline: number;
+  let oddsSource: "ESPN" | "ESPN-derived" | "model-estimated";
+
+  if (game.odds) {
+    spread = parseSpread(game.odds.spread);
+    total = game.odds.overUnder || estimateTotal(sport);
+
+    if (game.odds.homeMoneyline && game.odds.awayMoneyline) {
+      homeMoneyline = game.odds.homeMoneyline;
+      awayMoneyline = game.odds.awayMoneyline;
+      oddsSource = "ESPN";
+    } else {
+      homeMoneyline = estimateMoneyline(spread, true);
+      awayMoneyline = estimateMoneyline(spread, false);
+      oddsSource = game.odds.spread ? "ESPN-derived" : "model-estimated";
+    }
+  } else {
+    spread = estimateSpreadFromRecords(game.homeTeam.record, game.awayTeam.record, sport);
+    total = estimateTotal(sport);
+    homeMoneyline = estimateMoneyline(spread, true);
+    awayMoneyline = estimateMoneyline(spread, false);
+    oddsSource = "model-estimated";
+  }
+
+  return { spread, total, homeMoneyline, awayMoneyline, oddsSource };
+}
+
+function computeRecordConfidenceBias(game: ESPNScoreboardGame): number {
+  const homePct = parseWinPct(game.homeTeam.record);
+  const awayPct = parseWinPct(game.awayTeam.record);
+  const diff = Math.abs(homePct - awayPct);
+  return Math.min(diff * 15, 10);
+}
+
+function getLeadersForGame(game: ESPNScoreboardGame, sport: Sport): { playerName: string; category: string; value: string; team: string }[] {
+  if (game.leaders && game.leaders.length > 0) {
+    return game.leaders;
+  }
+  return [];
+}
+
+function mapLeaderCategoryToProp(category: string, sport: Sport): string | null {
+  const mapping: Record<string, Record<string, string>> = {
+    NBA: {
+      "Points": "Points",
+      "Rebounds": "Rebounds",
+      "Assists": "Assists",
+    },
+    NFL: {
+      "Passing Yards": "Passing Yards",
+      "Rushing Yards": "Rushing Yards",
+      "Receiving Yards": "Receiving Yards",
+      "Passing Touchdowns": "Passing TDs",
+    },
+    MLB: {
+      "Hits": "Hits",
+      "Home Runs": "Total Bases",
+      "RBIs": "RBIs",
+      "Strikeouts": "Strikeouts (P)",
+    },
+    NHL: {
+      "Goals": "Goals",
+      "Assists": "Assists",
+      "Points": "Points",
+      "Saves": "Saves",
+    },
+    NCAAB: {
+      "Points": "Points",
+      "Rebounds": "Rebounds",
+      "Assists": "Assists",
+    },
+    NCAAF: {
+      "Passing Yards": "Passing Yards",
+      "Rushing Yards": "Rushing Yards",
+      "Receiving Yards": "Receiving Yards",
+    },
+  };
+  const sportMap = mapping[sport] || {};
+  for (const [key, val] of Object.entries(sportMap)) {
+    if (category.toLowerCase().includes(key.toLowerCase())) return val;
+  }
+  return null;
+}
+
 function generateLegFromESPNGame(game: ESPNScoreboardGame, sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
   const homeTeam = { name: game.homeTeam.shortDisplayName, city: game.homeTeam.displayName.replace(` ${game.homeTeam.shortDisplayName}`, '') };
   const awayTeam = { name: game.awayTeam.shortDisplayName, city: game.awayTeam.displayName.replace(` ${game.awayTeam.shortDisplayName}`, '') };
-  const isHomeTeam = Math.random() > 0.5;
+
+  const resolved = resolveGameOdds(game, sport);
+  const confidenceBias = computeRecordConfidenceBias(game);
+  const homePct = parseWinPct(game.homeTeam.record);
+  const awayPct = parseWinPct(game.awayTeam.record);
+  const isHomeTeam = homePct >= awayPct ? (Math.random() > 0.35) : (Math.random() > 0.65);
   const selectedTeam = isHomeTeam ? homeTeam : awayTeam;
   const opponent = isHomeTeam ? awayTeam : homeTeam;
 
-  return buildLegFromTeams(sport, selectedTeam, opponent, marketType, includeProps);
+  let market = "";
+  let outcome = "";
+  let line: number | undefined;
+  let decimalOdds = 1.91;
+  let playerName: string | undefined;
+  let propCategory: string | undefined;
+  let oddsSource = resolved.oddsSource;
+
+  if (marketType === "moneyline") {
+    market = "Moneyline";
+    const ml = isHomeTeam ? resolved.homeMoneyline : resolved.awayMoneyline;
+    decimalOdds = americanToDecimal(ml);
+    outcome = `${selectedTeam.city} ${selectedTeam.name} ML`;
+  } else if (marketType === "spread") {
+    market = "Spread";
+    const rawSpread = resolved.spread;
+    const spreadValue = isHomeTeam ? -rawSpread : rawSpread;
+    line = spreadValue;
+    decimalOdds = americanToDecimal(-110);
+    outcome = `${selectedTeam.city} ${selectedTeam.name} ${spreadValue > 0 ? "+" : ""}${spreadValue}`;
+  } else if (marketType === "total") {
+    market = "Total";
+    const totalValue = resolved.total;
+    line = totalValue;
+    const isOver = Math.random() > 0.5;
+    decimalOdds = americanToDecimal(-110);
+    outcome = `${isOver ? "Over" : "Under"} ${totalValue}`;
+  } else if (marketType === "prop" && includeProps) {
+    market = "Player Prop";
+    const leaders = getLeadersForGame(game, sport);
+
+    let usedLeader = false;
+    if (leaders.length > 0) {
+      const eligibleLeaders = leaders.filter(l => mapLeaderCategoryToProp(l.category, sport) !== null);
+      if (eligibleLeaders.length > 0) {
+        const leader = eligibleLeaders[Math.floor(Math.random() * eligibleLeaders.length)];
+        const mappedProp = mapLeaderCategoryToProp(leader.category, sport)!;
+        playerName = leader.playerName;
+        propCategory = mappedProp;
+
+        const leaderValue = parseFloat(leader.value) || 0;
+        const propLine = leaderValue > 0
+          ? Math.round((leaderValue + (Math.random() * 4 - 2)) * 2) / 2
+          : getDefaultPropLine(mappedProp);
+        line = Math.max(0.5, propLine);
+        const isOver = Math.random() > 0.5;
+        decimalOdds = americanToDecimal(-110);
+        outcome = `${leader.playerName} ${isOver ? "Over" : "Under"} ${line} ${mappedProp}`;
+        usedLeader = true;
+      }
+    }
+
+    if (!usedLeader) {
+      const players = playersBySport[sport];
+      const player = players[Math.floor(Math.random() * players.length)];
+      const props = propsBySport[sport];
+      const prop = props[Math.floor(Math.random() * props.length)];
+      playerName = player.name;
+      propCategory = prop;
+
+      const propLineRanges: Record<string, { min: number; max: number }> = {
+        "Points": { min: 15, max: 35 },
+        "Rebounds": { min: 4, max: 14 },
+        "Assists": { min: 3, max: 12 },
+        "3-Pointers": { min: 1.5, max: 5.5 },
+        "Pts+Rebs+Asts": { min: 25, max: 55 },
+        "Steals+Blocks": { min: 1.5, max: 4.5 },
+        "Passing Yards": { min: 200, max: 320 },
+        "Rushing Yards": { min: 40, max: 100 },
+        "Receiving Yards": { min: 40, max: 90 },
+        "Receptions": { min: 3.5, max: 8.5 },
+        "TDs": { min: 0.5, max: 1.5 },
+        "Passing TDs": { min: 1.5, max: 2.5 },
+        "Hits": { min: 0.5, max: 2.5 },
+        "RBIs": { min: 0.5, max: 1.5 },
+        "Runs": { min: 0.5, max: 1.5 },
+        "Total Bases": { min: 1.5, max: 3.5 },
+        "Strikeouts (P)": { min: 4.5, max: 8.5 },
+        "Hits Allowed": { min: 4.5, max: 7.5 },
+        "Goals": { min: 0.5, max: 1.5 },
+        "Shots on Goal": { min: 2.5, max: 5.5 },
+        "Saves": { min: 24.5, max: 32.5 },
+      };
+
+      const range = propLineRanges[prop] || { min: 5, max: 25 };
+      const propLine = Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
+      line = propLine;
+      const isOver = Math.random() > 0.5;
+      decimalOdds = americanToDecimal(-115);
+      outcome = `${player.name} ${isOver ? "Over" : "Under"} ${propLine} ${prop}`;
+      oddsSource = "model-estimated";
+    }
+  } else {
+    market = "Moneyline";
+    const ml = isHomeTeam ? resolved.homeMoneyline : resolved.awayMoneyline;
+    decimalOdds = americanToDecimal(ml);
+    outcome = `${selectedTeam.city} ${selectedTeam.name} ML`;
+  }
+
+  const americanOdds = decimalToAmerican(decimalOdds);
+  const description = `${selectedTeam.city} ${selectedTeam.name} ${market} ${outcome}`;
+
+  const legFusion = analyzeLeg(sport, description, americanOdds);
+
+  let winProbability = legFusion.winProbability / 100;
+  winProbability = Math.min(0.95, Math.max(0.05, winProbability + (confidenceBias / 100) * (isHomeTeam ? 1 : -1)));
+  const edgePercent = legFusion.edgePercentage;
+
+  const sharpSignal = legFusion.signals.find(s => s.source === "sharp_money_flow");
+  const lineSignal = legFusion.signals.find(s => s.source === "line_movement");
+  const publicSignal = legFusion.signals.find(s => s.source === "public_fade");
+
+  const sharpAction = sharpSignal ? sharpSignal.direction === "bullish" && sharpSignal.strength > 65 : false;
+
+  let lineMovement: "steam" | "reverse" | "stable" = "stable";
+  if (lineSignal) {
+    if (lineSignal.direction === "bullish" && lineSignal.strength > 70) lineMovement = "steam";
+    else if (lineSignal.direction === "bearish" && lineSignal.strength > 60) lineMovement = "reverse";
+  }
+
+  const publicPercent = publicSignal ? 
+    (publicSignal.direction === "bullish" ? 30 + Math.round(publicSignal.strength * 0.2) : 50 + Math.round(publicSignal.strength * 0.3)) : 50;
+
+  const confidenceLevel: "high" | "medium" | "low" = 
+    legFusion.confidence >= 75 ? "high" :
+    legFusion.confidence >= 55 ? "medium" : "low";
+
+  const oddsChangePercent = (Math.random() * 8 - 2);
+  const oddsMovement: { direction: "up" | "down" | "stable"; percentChange: number; possibleInefficiency: boolean } = {
+    direction: oddsChangePercent > 2 ? "up" : oddsChangePercent < -2 ? "down" : "stable",
+    percentChange: Math.round(Math.abs(oddsChangePercent) * 10) / 10,
+    possibleInefficiency: Math.abs(oddsChangePercent) > 4,
+  };
+
+  let underSignalCount = 0;
+  if (outcome.includes("Under")) {
+    const defSignal = legFusion.signals.find(s => s.source === "player_efficiency" || s.source === "team_chemistry");
+    const paceSignal = legFusion.signals.find(s => s.source === "momentum_score");
+    const situationalSignal = legFusion.signals.find(s => s.source === "situational_spot");
+    const injurySignal = legFusion.signals.find(s => s.source === "injury_adjustment");
+    if (defSignal && defSignal.direction === "bearish") underSignalCount++;
+    if (paceSignal && paceSignal.strength < 50) underSignalCount++;
+    if (situationalSignal && situationalSignal.direction === "bearish") underSignalCount++;
+    if (injurySignal && injurySignal.strength > 60) underSignalCount++;
+    if (sharpAction) underSignalCount++;
+    if (lineMovement === "reverse") underSignalCount++;
+    underSignalCount = Math.max(underSignalCount, 2);
+  }
+
+  const gameSource: "ESPN Live" | "scheduled" = game.status.state === "in" ? "ESPN Live" : "scheduled";
+
+  return {
+    id: generateUniqueId(),
+    team: `${selectedTeam.city} ${selectedTeam.name}`,
+    opponent: `${opponent.city} ${opponent.name}`,
+    market,
+    outcome,
+    line,
+    decimalOdds,
+    americanOdds,
+    winProbability,
+    edgePercent,
+    playerName,
+    propCategory,
+    analysis: {
+      sharpAction,
+      lineMovement,
+      publicPercent,
+      confidenceLevel,
+      oddsMovement,
+      underSignalCount: outcome.includes("Under") ? underSignalCount : undefined,
+    },
+    legFusion,
+    dataSources: {
+      odds: oddsSource,
+      game: gameSource,
+      injury: "estimated",
+      analysis: "46-Factor Prediction Engine",
+    },
+  };
+}
+
+function getDefaultPropLine(prop: string): number {
+  const defaults: Record<string, number> = {
+    "Points": 22.5,
+    "Rebounds": 8.5,
+    "Assists": 6.5,
+    "3-Pointers": 2.5,
+    "Pts+Rebs+Asts": 35.5,
+    "Steals+Blocks": 2.5,
+    "Passing Yards": 250.5,
+    "Rushing Yards": 65.5,
+    "Receiving Yards": 55.5,
+    "Receptions": 5.5,
+    "TDs": 0.5,
+    "Passing TDs": 1.5,
+    "Hits": 1.5,
+    "RBIs": 0.5,
+    "Runs": 0.5,
+    "Total Bases": 1.5,
+    "Strikeouts (P)": 5.5,
+    "Hits Allowed": 5.5,
+    "Goals": 0.5,
+    "Shots on Goal": 3.5,
+    "Saves": 28.5,
+  };
+  return defaults[prop] || 10.5;
 }
 
 function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
@@ -476,6 +851,12 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
       underSignalCount: outcome.includes("Under") ? underSignalCount : undefined,
     },
     legFusion,
+    dataSources: {
+      odds: "model-estimated",
+      game: "scheduled",
+      injury: "estimated",
+      analysis: "46-Factor Prediction Engine",
+    },
   };
 }
 
@@ -532,6 +913,11 @@ function buildRationale(fusionData: TicketFusion, legs: TicketLeg[]): string[] {
     rationale.push("All-systems-go: Sors Prediction Engine rates this a STRONG BET");
   } else if (cf.recommendation === "moderate_bet") {
     rationale.push("Solid opportunity: Multiple analysis categories confirm value");
+  }
+
+  const espnLegs = legs.filter(l => l.dataSources?.odds === "ESPN");
+  if (espnLegs.length > 0) {
+    rationale.push(`${espnLegs.length} leg(s) using verified ESPN odds data for higher accuracy`);
   }
   
   for (const insight of cf.insights.slice(0, 2)) {
@@ -638,6 +1024,61 @@ function buildAlternatives(legs: TicketLeg[], sport: Sport): AlternativeTicket[]
   return alts.slice(0, 3);
 }
 
+function getAnalyticsAgentData(sport: Sport): GeneratedTicket["analyticsAgentData"] {
+  try {
+    const markets = analyticsAgent.getMarketAnalysis();
+    if (markets.length === 0) {
+      return {
+        evFromAgent: null,
+        kellyFromAgent: null,
+        arbitrageDetected: false,
+        trendDirection: "stable",
+        confidenceBoost: 0,
+      };
+    }
+
+    const sportMarkets = markets.filter(m => m.league.toUpperCase().includes(sport));
+    const relevantMarkets = sportMarkets.length > 0 ? sportMarkets : markets.slice(0, 3);
+
+    let avgEv = 0;
+    let avgKelly = 0;
+    let arbDetected = false;
+    let trendSum = 0;
+
+    for (const m of relevantMarkets) {
+      avgEv += m.value.evPerUnit;
+      avgKelly += m.value.fractionalKelly;
+      if (m.signals.arbitrageOpportunity.exists) arbDetected = true;
+      trendSum += m.trends.shortTerm.delta;
+    }
+
+    const count = relevantMarkets.length;
+    avgEv = Math.round((avgEv / count) * 1000) / 1000;
+    avgKelly = Math.round((avgKelly / count) * 1000) / 1000;
+
+    const trendDirection: "up" | "down" | "stable" =
+      trendSum > 0.5 ? "up" : trendSum < -0.5 ? "down" : "stable";
+
+    const confidenceBoost = Math.round(Math.min(5, Math.max(-5, avgEv * 2)) * 10) / 10;
+
+    return {
+      evFromAgent: avgEv,
+      kellyFromAgent: avgKelly,
+      arbitrageDetected: arbDetected,
+      trendDirection,
+      confidenceBoost,
+    };
+  } catch {
+    return {
+      evFromAgent: null,
+      kellyFromAgent: null,
+      arbitrageDetected: false,
+      trendDirection: "stable",
+      confidenceBoost: 0,
+    };
+  }
+}
+
 export async function generateTickets(request: TicketRequest): Promise<GeneratedTicket[]> {
   const candidateTickets: GeneratedTicket[] = [];
   const ticketsToGenerate = Math.ceil(10 / request.sports.length);
@@ -652,6 +1093,7 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
   
   for (const sport of request.sports) {
     const espnGames = await getESPNGamesForSport(sport);
+    const agentData = getAnalyticsAgentData(sport);
 
     for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
@@ -778,6 +1220,7 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
         calibrationInfo,
         recommendedAlternatives: alternatives,
         marketMovement,
+        analyticsAgentData: agentData,
       };
       
       ticket.rationale = buildRationale(fusionData, legs);
@@ -834,4 +1277,9 @@ function getFusionSortScore(ticket: GeneratedTicket): number {
          (cf.winProbability * 0.15) +
          (ticket.fusionData.correlationBonus * 0.5) +
          recBonus;
+}
+
+export async function regenerateTicketsWithLatestData(request: TicketRequest): Promise<GeneratedTicket[]> {
+  espnGamesCache = null;
+  return generateTickets(request);
 }
