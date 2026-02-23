@@ -28,6 +28,7 @@ import { getAllErrorCodes, getErrorCode, searchErrorCodes, getCategories, getErr
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "./trustedDeviceService";
 import { analyticsEventService } from "./analyticsEventService";
 import { getAllTests, getTest, createTest, updateTest, deleteTest, getTestStats } from "./abTestEngine";
+import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, stopPrecomputedEngine } from "./precomputedPredictionsEngine";
 import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCampaign, getCampaignStats } from "./lifecycleCampaignEngine";
 import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
@@ -7473,7 +7474,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
       const size = Math.min(Math.max(parlaySize || 2, 2), picks.length - 1);
       const betStake = stake || 10;
 
-      function getCombinations<T>(arr: T[], k: number): T[][] {
+      const getCombinations = <T,>(arr: T[], k: number): T[][] => {
         if (k === 1) return arr.map(item => [item]);
         if (k === arr.length) return [arr];
         const result: T[][] = [];
@@ -7554,6 +7555,40 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
       console.error("Round robin error:", err);
       return res.status(500).json({ error: "Failed to generate round robin" });
     }
+  });
+
+  // ==================== PRECOMPUTED PREDICTIONS ENGINE ====================
+
+  startPrecomputedEngine();
+
+  app.get("/api/precomputed-predictions/:sport", async (req: Request, res: Response) => {
+    try {
+      const sport = req.params.sport?.toUpperCase();
+      if (!["NBA", "NFL", "MLB", "NHL"].includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport. Use NBA, NFL, MLB, or NHL." });
+      }
+      const snapshot = await getPrecomputedPredictions(sport as any);
+      return res.json(snapshot);
+    } catch (err) {
+      console.error("Precomputed predictions error:", err);
+      return res.status(500).json({ error: "Failed to fetch precomputed predictions" });
+    }
+  });
+
+  app.get("/api/precomputed-predictions/:sport/cache", (req: Request, res: Response) => {
+    const sport = req.params.sport?.toUpperCase();
+    if (!["NBA", "NFL", "MLB", "NHL"].includes(sport)) {
+      return res.status(400).json({ error: "Invalid sport" });
+    }
+    const cached = getPrecomputedCache(sport as any);
+    if (!cached) {
+      return res.status(404).json({ error: "No cached predictions available" });
+    }
+    return res.json(cached);
+  });
+
+  app.get("/api/precomputed-engine/status", (_req: Request, res: Response) => {
+    return res.json(getPrecomputedEngineStatus());
   });
 
   // ==================== END ALL FEATURE ROUTES ====================
