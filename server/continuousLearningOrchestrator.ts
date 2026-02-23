@@ -129,12 +129,33 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             const homeAbbr = (home.team?.abbreviation || "").toLowerCase();
             const awayAbbr = (away.team?.abbreviation || "").toLowerCase();
 
+            let spread: number | undefined;
+            let overUnder: number | undefined;
+            let homeML: number | undefined;
+            let awayML: number | undefined;
+            const odds = comp.odds?.[0];
+            if (odds) {
+              if (odds.details) {
+                const spreadMatch = odds.details.match(/([+-]?\d+\.?\d*)/);
+                if (spreadMatch) spread = parseFloat(spreadMatch[1]);
+              }
+              if (odds.overUnder) overUnder = parseFloat(odds.overUnder);
+              if (odds.homeTeamOdds?.moneyLine) homeML = odds.homeTeamOdds.moneyLine;
+              if (odds.awayTeamOdds?.moneyLine) awayML = odds.awayTeamOdds.moneyLine;
+            }
+
+            const homeShort = (home.team?.shortDisplayName || "").toLowerCase();
+            const awayShort = (away.team?.shortDisplayName || "").toLowerCase();
+
             const gameData = {
               id: event.id,
-              homeTeam, awayTeam, homeAbbr, awayAbbr,
+              homeTeam, awayTeam, homeAbbr, awayAbbr, homeShort, awayShort,
               homeScore, awayScore,
               totalScore: homeScore + awayScore,
               scoreDiff: homeScore - awayScore,
+              spread, overUnder, homeML, awayML,
+              date: event.date || "",
+              venue: comp.venue?.fullName || "",
             };
 
             gameMap.set(event.id, gameData);
@@ -232,38 +253,59 @@ function settleLeg(leg: any, game: any): "won" | "lost" | "push" | "unknown" {
   const type = (leg.type || leg.market || "").toLowerCase();
   const selection = (leg.selection || leg.outcome || "").toLowerCase();
 
+  const matchesHome = selection.includes(game.homeTeam) ||
+    selection.includes(game.homeAbbr) ||
+    selection.includes(game.homeShort || "");
+  const matchesAway = selection.includes(game.awayTeam) ||
+    selection.includes(game.awayAbbr) ||
+    selection.includes(game.awayShort || "");
+
   if (type.includes("moneyline") || type === "h2h") {
-    const homeTeam = (game.homeTeam || "").toLowerCase();
-    const awayTeam = (game.awayTeam || "").toLowerCase();
-    if (selection.includes(homeTeam) || selection.includes(game.homeAbbr)) {
+    if (matchesHome) {
       return game.homeScore > game.awayScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
     }
-    if (selection.includes(awayTeam) || selection.includes(game.awayAbbr)) {
+    if (matchesAway) {
+      return game.awayScore > game.homeScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
+    }
+    if (selection.includes("home")) {
+      return game.homeScore > game.awayScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
+    }
+    if (selection.includes("away")) {
       return game.awayScore > game.homeScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
     }
   }
 
   if (type.includes("spread")) {
-    const line = leg.line ?? leg.point ?? leg.spread;
-    if (line === undefined || line === null) return "unknown";
-    const isHome = selection.includes((game.homeTeam || "").toLowerCase()) || selection.includes(game.homeAbbr);
-    const adjustedDiff = isHome ? game.scoreDiff + line : -game.scoreDiff + line;
-    if (Math.abs(adjustedDiff) < 0.5) return "push";
-    return adjustedDiff > 0 ? "won" : "lost";
+    const espnSpread = game.spread;
+    if (espnSpread === undefined || espnSpread === null) return "unknown";
+    const isHome = matchesHome || selection.includes("home");
+    const margin = isHome ? game.scoreDiff + espnSpread : -game.scoreDiff - espnSpread;
+    if (Math.abs(margin) < 0.5) return "push";
+    return margin > 0 ? "won" : "lost";
   }
 
   if (type.includes("total") || type.includes("over_under")) {
-    const line = leg.line ?? leg.point ?? leg.total;
-    if (line === undefined || line === null) return "unknown";
+    const espnTotal = game.overUnder;
+    if (espnTotal === undefined || espnTotal === null) return "unknown";
     const isOver = selection.includes("over");
     const isUnder = selection.includes("under");
-    if (game.totalScore === line) return "push";
-    if (isOver) return game.totalScore > line ? "won" : "lost";
-    if (isUnder) return game.totalScore < line ? "won" : "lost";
+    if (game.totalScore === espnTotal) return "push";
+    if (isOver) return game.totalScore > espnTotal ? "won" : "lost";
+    if (isUnder) return game.totalScore < espnTotal ? "won" : "lost";
   }
 
   if (type.includes("historical_training")) {
-    return leg.homeWin ? "won" : "lost";
+    const homeWon = game.homeScore > game.awayScore;
+    return homeWon ? "won" : "lost";
+  }
+
+  if (!type || type === "unknown") {
+    if (matchesHome) {
+      return game.homeScore > game.awayScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
+    }
+    if (matchesAway) {
+      return game.awayScore > game.homeScore ? "won" : game.homeScore === game.awayScore ? "push" : "lost";
+    }
   }
 
   return "unknown";
