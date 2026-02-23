@@ -52,7 +52,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || "sors-maxima-default-session-secret",
   resave: false,
   saveUninitialized: false,
   cookie: {

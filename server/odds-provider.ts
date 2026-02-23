@@ -1,5 +1,7 @@
 import { randomUUID } from "crypto";
-import { AmericanOdds, DecimalOdds, Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
+import { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
+type AmericanOdds = number;
+type DecimalOdds = number;
 import { americanToDecimal, propCategories } from "@shared/schema";
 import { getPlayersFromCache, getPlayersFromCacheById, getInjuredPlayersFromCache, getTeamRoster, getTeams, preloadAllRosters, isRosterPreloaded, type ESPNPlayer } from "./espn-roster-provider";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";

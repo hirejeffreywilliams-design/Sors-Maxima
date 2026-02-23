@@ -278,7 +278,7 @@ export function getBetStats(sessionId?: string) {
     entry.count++;
     monthMap.set(key, entry);
   }
-  for (const [period, data] of monthMap.entries()) {
+  for (const [period, data] of Array.from(monthMap.entries())) {
     byMonth.push({
       period,
       roi: data.staked > 0 ? (data.profit / data.staked) * 100 : 0,

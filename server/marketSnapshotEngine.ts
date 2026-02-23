@@ -145,6 +145,7 @@ interface OddsApiGame {
 }
 
 const oddsFullCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
+let oddsApiWarned = false;
 
 async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   if (!THE_ODDS_API_KEY) return [];
@@ -158,12 +159,22 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   try {
     const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${THE_ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
     const res = await fetch(url);
-    if (!res.ok) throw new Error(`Odds API ${res.status}`);
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 429) {
+        if (!oddsApiWarned) {
+          console.warn(`[MarketSnapshot] Odds API returned ${res.status} — odds data unavailable (key may be expired or rate-limited)`);
+          oddsApiWarned = true;
+        }
+        return oddsFullCache.get(cacheKey)?.data || [];
+      }
+      throw new Error(`Odds API ${res.status}`);
+    }
+    oddsApiWarned = false;
     const data: OddsApiGame[] = await res.json();
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (e) {
-    console.error(`[MarketSnapshot] Odds API error for ${sport}:`, e);
+    console.error(`[MarketSnapshot] Odds API error for ${sport}: ${(e as Error).message}`);
     return oddsFullCache.get(cacheKey)?.data || [];
   }
 }
