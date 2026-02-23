@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,12 +11,16 @@ import {
   Target,
   Zap,
   TrendingUp,
-  Users,
   Trophy,
   DollarSign,
-  Settings,
   CheckCircle2,
-  Rocket
+  Star,
+  Shield,
+  BarChart3,
+  Brain,
+  ArrowRight,
+  CircleDot,
+  Layers
 } from "lucide-react";
 
 interface TutorialStep {
@@ -24,94 +28,124 @@ interface TutorialStep {
   description: string;
   icon: React.ReactNode;
   tips: string[];
+  actionLabel?: string;
 }
 
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Sors Maxima",
-    description: "Your sports betting intelligence platform. Let's walk through how to get the most out of your experience.",
+    description: "This guide will show you exactly how to generate, read, and pick winning tickets step by step. Every pick is powered by real ESPN game data and live odds from major sportsbooks.",
     icon: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
     tips: [
-      "We use real ESPN game data for all picks",
-      "Odds from ESPN are compared and analyzed",
-      "All recommendations are graded A-F for easy decision making"
+      "All game data comes live from ESPN (scores, records, rosters)",
+      "Odds are pulled from DraftKings, FanDuel, BetMGM & more",
+      "Our engine analyzes 46 different factors before recommending a pick",
+      "Nothing is made up - every number is backed by real data"
     ]
   },
   {
-    title: "Generate Smart Tickets",
-    description: "The home page is your ticket generator. Select sports, set your risk level, and generate optimized parlays from real data.",
+    title: "Step 1: Pick Your Sports",
+    description: "Start by selecting the sports you want to bet on. You can pick one sport or mix several together. The more sports you select, the more matchups are available for the engine to find value.",
     icon: <Target className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
     tips: [
-      "Choose multiple sports for diversified tickets",
-      "Conservative = higher win chance, lower payouts",
-      "Aggressive = lower win chance, higher payouts",
-      "Use Quick Pick for instant recommendations"
+      "Tap the sport buttons (NBA, NFL, MLB, NHL, etc.) to select them",
+      "Selected sports turn colored - tap again to deselect",
+      "Mixing 2-3 sports gives you the most diverse picks",
+      "Or use 'Quick Pick' to auto-select today's active sports instantly"
+    ],
+    actionLabel: "Select sports on the main page"
+  },
+  {
+    title: "Step 2: Set Your Risk Level",
+    description: "Open 'Advanced Settings' to control how risky your tickets are. This directly affects how many legs per ticket and how big the potential payouts are.",
+    icon: <Shield className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-500" />,
+    tips: [
+      "Conservative = 2-3 legs, higher chance of winning, smaller payouts",
+      "Moderate = 3-4 legs, balanced risk and reward (recommended for beginners)",
+      "Aggressive = 4-6 legs, lower win chance but much bigger payouts",
+      "Set your bankroll (total $ you're working with) so stake sizes are calculated for you"
+    ],
+    actionLabel: "Tap 'Advanced Settings' to adjust"
+  },
+  {
+    title: "Step 3: Generate Tickets",
+    description: "Hit the big 'Generate Winning Tickets' button. The engine scans every live game, compares odds across sportsbooks, and builds the best possible parlay combinations for you.",
+    icon: <Zap className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
+    tips: [
+      "Generation takes a few seconds while it analyzes all live matchups",
+      "You'll get up to 6 optimized tickets ranked from best to worst",
+      "Each ticket is named after the actual games it covers (e.g., 'Celtics vs Lakers')",
+      "Hit 'Recalculate' anytime to refresh with the latest live data"
+    ],
+    actionLabel: "Tap 'Generate Winning Tickets'"
+  },
+  {
+    title: "Step 4: Read Your Tickets",
+    description: "Each ticket card shows you everything you need to decide if it's worth betting. Here's what the key numbers mean:",
+    icon: <BarChart3 className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />,
+    tips: [
+      "Grade (A+ to D) = overall quality rating. Aim for B or higher",
+      "Win Prob = estimated chance this ticket wins. Higher = safer",
+      "EV% = expected value. Positive means the odds are in your favor",
+      "Confidence = how strongly our 46-factor engine agrees on this pick"
     ]
   },
   {
-    title: "Quick Pick Feature",
-    description: "Short on time? Hit the Quick Pick button for instant tickets based on today's best opportunities.",
-    icon: <Zap className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-500" />,
+    title: "Step 5: Dig Into the Details",
+    description: "Tap a ticket's 'Legs' button to expand it. Each leg is one individual bet inside the parlay. Check the matchup details, odds, and analysis signals before deciding.",
+    icon: <Layers className="w-8 h-8 sm:w-12 sm:h-12 text-purple-500" />,
     tips: [
-      "One click generates 3 optimized tickets",
-      "Automatically selects today's active sports",
-      "Uses moderate risk level for balanced picks",
-      "Perfect for busy bettors"
+      "Each leg shows the teams, bet type (Spread, Moneyline, Total), and odds",
+      "'Sharp Action' badge = professional bettors are on this side (good sign)",
+      "'Steam Move' badge = line is moving fast, meaning the value is real",
+      "Green data source badges show where the odds data came from"
     ]
   },
   {
-    title: "Live Center",
-    description: "Track your active bets in real-time. Use the hedge calculator to lock in profits or minimize losses.",
-    icon: <TrendingUp className="w-8 h-8 sm:w-12 sm:h-12 text-blue-500" />,
+    title: "Step 6: Pick & Use Your Ticket",
+    description: "Found a ticket you like? Here's how to use it:",
+    icon: <Star className="w-8 h-8 sm:w-12 sm:h-12 text-amber-500" />,
     tips: [
-      "See live momentum for in-progress games",
-      "Calculate optimal hedge bets",
-      "Get AI assistant advice on your active bets",
-      "Track closing line value to see if you're beating the market"
+      "'Add to Slip' = saves individual legs to your custom parlay builder",
+      "'Track This Bet' = logs the bet so you can track your results over time",
+      "Copy button = copies the picks to share with friends or paste into your sportsbook",
+      "Look for tickets with Grade B+ or higher, positive EV%, and 'Sharp Action' legs"
+    ],
+    actionLabel: "Use the buttons on any ticket card"
+  },
+  {
+    title: "Pro Tip: What Makes a Good Ticket",
+    description: "Not all tickets are equal. Here's a quick checklist for picking winners:",
+    icon: <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-emerald-500" />,
+    tips: [
+      "Grade B or higher = the engine has strong confidence",
+      "Positive EV% = the math says these odds have value for you",
+      "Multiple 'Sharp Action' legs = pros agree with these picks",
+      "Low model disagreement = all 46 factors are pointing the same way",
+      "Check 'Risk Factors' in the details to know what could go wrong"
     ]
   },
   {
-    title: "Pro Tools",
-    description: "Access advanced features like correlation analysis, odds comparison, and ML projections.",
-    icon: <Rocket className="w-8 h-8 sm:w-12 sm:h-12 text-purple-500" />,
+    title: "Bonus: Other Powerful Tools",
+    description: "Beyond the ticket generator, explore these features to sharpen your edge even more:",
+    icon: <Brain className="w-8 h-8 sm:w-12 sm:h-12 text-indigo-500" />,
     tips: [
-      "Compare odds across 6 major sportsbooks",
-      "Find arbitrage opportunities",
-      "Use the correlation engine for SGPs",
-      "Run bankroll simulations"
+      "Visual Builder tab = manually build your own parlays with live odds",
+      "Pro Tools = odds comparison, arbitrage finder, correlation engine",
+      "Live Center = track games in real-time with momentum and cash-out advice",
+      "Finance = log all your bets, track ROI, and manage your bankroll over time"
     ]
   },
   {
-    title: "Community & Tipsters",
-    description: "Follow successful bettors, share your picks, and join tipster communities.",
-    icon: <Users className="w-8 h-8 sm:w-12 sm:h-12 text-orange-500" />,
+    title: "You're Ready to Win!",
+    description: "You now know how to generate, read, and select the best tickets. Remember: always bet what you can afford to lose, and use the data to make smarter decisions.",
+    icon: <DollarSign className="w-8 h-8 sm:w-12 sm:h-12 text-green-500" />,
     tips: [
-      "Follow top performers on the leaderboard",
-      "Share your winning tickets",
-      "Create your own tipster community",
-      "Earn from your picks (platform takes 15%)"
-    ]
-  },
-  {
-    title: "Track Your Performance",
-    description: "Use the Finance section to track all your bets, monitor ROI, and manage your bankroll.",
-    icon: <DollarSign className="w-8 h-8 sm:w-12 sm:h-12 text-emerald-500" />,
-    tips: [
-      "Log bets across multiple sportsbooks",
-      "See detailed performance analytics",
-      "Track ROI over time",
-      "Export tax reports at year end"
-    ]
-  },
-  {
-    title: "You're Ready!",
-    description: "That's everything you need to start making smarter picks. Remember: always bet responsibly and only risk what you can afford.",
-    icon: <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-amber-500" />,
-    tips: [
-      "Set betting limits in Settings > Responsible Gaming",
-      "Enable Smart Alerts for opportunities",
-      "Complete daily challenges for rewards",
-      "Good luck!"
+      "Start with Conservative or Moderate risk while you learn",
+      "Focus on tickets graded B or higher with positive EV%",
+      "Use 'Recalculate' before placing bets to get the freshest data",
+      "Set responsible gaming limits in Settings if needed",
+      "Good luck - let the data work for you!"
     ]
   }
 ];
@@ -160,16 +194,16 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
           <X className="w-4 h-4" />
         </Button>
         
-        <CardContent className="pt-8 pb-4 sm:pt-6 px-4 sm:px-6 space-y-4 sm:space-y-6">
+        <CardContent className="pt-8 pb-4 sm:pt-6 px-4 sm:px-6 space-y-4 sm:space-y-5">
           <div className="space-y-2">
             <div className="flex items-center justify-between text-[10px] sm:text-xs text-muted-foreground">
               <span>Step {currentStep + 1} of {tutorialSteps.length}</span>
               <span>{Math.round(progress)}% Complete</span>
             </div>
-            <Progress value={progress} className="h-1" />
+            <Progress value={progress} className="h-1.5" />
           </div>
           
-          <div className="text-center space-y-2 sm:space-y-4 py-2 sm:py-4">
+          <div className="text-center space-y-2 sm:space-y-3 py-2 sm:py-3">
             <div className="flex justify-center">
               {step.icon}
             </div>
@@ -189,6 +223,13 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
               </div>
             ))}
           </div>
+
+          {step.actionLabel && (
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg p-2.5 sm:p-3">
+              <ArrowRight className="w-4 h-4 text-primary flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-primary">{step.actionLabel}</span>
+            </div>
+          )}
           
           <div className="flex items-center justify-between gap-2 pt-1 sm:pt-2">
             <Button
@@ -209,7 +250,7 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
                   key={i}
                   onClick={() => setCurrentStep(i)}
                   className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full transition-colors ${
-                    i === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
+                    i === currentStep ? 'bg-primary' : i < currentStep ? 'bg-primary/40' : 'bg-muted-foreground/30'
                   }`}
                   data-testid={`button-tutorial-dot-${i}`}
                 />
@@ -224,7 +265,7 @@ export function OnboardingTutorial({ onComplete, isOpen }: OnboardingTutorialPro
             >
               {currentStep === tutorialSteps.length - 1 ? (
                 <>
-                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="hidden sm:inline">Start Winning</span>
                   <span className="sm:hidden">Start</span>
                   <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                 </>

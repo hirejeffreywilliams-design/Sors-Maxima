@@ -1146,7 +1146,28 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
   };
 }
 
-function generateTicketName(sport: Sport, index: number, riskLevel: string): string {
+function generateTicketName(sport: Sport, index: number, riskLevel: string, legs?: TicketLeg[]): string {
+  if (legs && legs.length > 0) {
+    const uniqueMatchups = new Map<string, string>();
+    for (const leg of legs) {
+      if (leg.team && leg.opponent) {
+        const key = [leg.team, leg.opponent].sort().join("|");
+        if (!uniqueMatchups.has(key)) {
+          const shortTeam = leg.team.split(" ").pop() || leg.team;
+          const shortOpp = leg.opponent.split(" ").pop() || leg.opponent;
+          uniqueMatchups.set(key, `${shortTeam} vs ${shortOpp}`);
+        }
+      }
+    }
+    if (uniqueMatchups.size > 0) {
+      const matchupNames = Array.from(uniqueMatchups.values());
+      if (matchupNames.length <= 2) {
+        return matchupNames.join(" + ");
+      }
+      return `${matchupNames[0]} + ${matchupNames.length - 1} more`;
+    }
+  }
+
   const prefixes = {
     conservative: ["Safe", "Steady", "Solid", "Reliable", "Stable"],
     moderate: ["Balanced", "Smart", "Sharp", "Strategic", "Calculated"],
@@ -1551,8 +1572,8 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
       };
 
       const ticketName = isSoccer && soccerInfo
-        ? `${["Sharp", "Smart", "Elite", "Premium", "Strategic"][Math.floor(Math.random() * 5)]} ${soccerInfo.displayName} Ticket #${i + 1}`
-        : generateTicketName(sport as Sport, i, request.riskLevel);
+        ? generateTicketName("NBA" as Sport, i, request.riskLevel, legs)
+        : generateTicketName(sport as Sport, i, request.riskLevel, legs);
 
       const ticket: GeneratedTicket = {
         id: generateUniqueId(),

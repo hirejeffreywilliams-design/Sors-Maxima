@@ -71,7 +71,7 @@ const sportConfig: { id: string; name: string; color: string; icon: string; leag
 ];
 
 function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(index < 2);
   const [copied, setCopied] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
@@ -966,27 +966,32 @@ export default function AutoGenerator() {
               </div>
             )}
             
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <Star className="w-5 h-5 text-yellow-500" />
-                Your Optimized Tickets
-              </h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRecalculate}
-                  disabled={isRecalculating || isGenerating}
-                  className="gap-2"
-                  data-testid="button-recalculate"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
-                  {isRecalculating ? "Refreshing..." : "Recalculate"}
-                </Button>
-                <Badge variant="secondary" className="text-sm">
-                  {tickets.length} tickets generated
-                </Badge>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  Your Optimized Tickets
+                </h2>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRecalculate}
+                    disabled={isRecalculating || isGenerating}
+                    className="gap-2"
+                    data-testid="button-recalculate"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
+                    {isRecalculating ? "Refreshing..." : "Recalculate"}
+                  </Button>
+                  <Badge variant="secondary" className="text-sm">
+                    {tickets.length} tickets generated
+                  </Badge>
+                </div>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Ranked best to worst. Look for Grade B+ or higher with positive EV%. Tap "Legs" to see each pick, then use "Add to Slip" or "Track This Bet" on the ones you like.
+              </p>
             </div>
             
             <AffiliateDisclosure compact />
