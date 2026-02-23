@@ -10,6 +10,7 @@ import { LegCard } from "./leg-card";
 import { AddLegForm } from "./add-leg-form";
 import { ProbabilityResults } from "./probability-results";
 import { CorrelationMatrix } from "./correlation-matrix";
+import { ParlayReportCard } from "./parlay-report-card";
 import { apiRequest } from "@/lib/queryClient";
 import type { ParlayLeg, EvaluationResult, InsertParlayLeg, BettingEnvironment } from "@shared/schema";
 
@@ -194,6 +195,8 @@ export function ParlayBuilder({ preloadedLegs, onLegsLoaded, onLegsChange, onSta
       </div>
 
       <div className="space-y-6">
+        <ParlayReportCard legs={legs} />
+
         <ProbabilityResults
           result={result}
           stake={stake}

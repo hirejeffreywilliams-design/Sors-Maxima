@@ -1849,6 +1849,91 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  app.post("/api/grade-parlay", async (req, res) => {
+    try {
+      const { legs } = req.body;
+      if (!legs || !Array.isArray(legs) || legs.length < 2) {
+        return res.status(400).json({ error: "At least 2 legs required for grading" });
+      }
+
+      const combinedOdds = legs.reduce((acc: number, l: any) => acc * (l.decimalOdds || 1), 1);
+      const impliedProb = 1 / combinedOdds;
+      const legProbabilities = legs.map((l: any) => {
+        const ip = 1 / (l.decimalOdds || 2);
+        return Math.min(0.95, Math.max(0.05, ip * 0.95));
+      });
+      const winProbability = legProbabilities.reduce((a: number, b: number) => a * b, 1);
+      const evPercent = ((winProbability / impliedProb) - 1) * 100;
+      const confidenceScore = Math.min(95, Math.max(20, 60 + (evPercent * 2) - (legs.length * 3)));
+
+      const ticketForGrading = {
+        legs,
+        totalOdds: combinedOdds,
+        winProbability,
+        expectedValue: evPercent / 100,
+        confidenceScore,
+        evPercent,
+        riskRating: legs.length <= 3 ? "low" : legs.length <= 5 ? "medium" : "high",
+      };
+
+      const grade = gradeTicket(ticketForGrading);
+
+      const legReports = legs.map((leg: any, i: number) => {
+        const legProb = legProbabilities[i];
+        const legImplied = 1 / (leg.decimalOdds || 2);
+        const legEV = ((legProb / legImplied) - 1) * 100;
+        const legPros: string[] = [];
+        const legCons: string[] = [];
+
+        if (legEV > 2) legPros.push(`Positive expected value (+${legEV.toFixed(1)}% edge)`);
+        else if (legEV < -3) legCons.push(`Negative expected value (${legEV.toFixed(1)}% edge)`);
+
+        if (leg.decimalOdds >= 1.5 && leg.decimalOdds <= 2.5) legPros.push("Moderate odds — balanced risk/reward");
+        else if (leg.decimalOdds > 3.0) legCons.push("Long odds — lower probability of hitting");
+        else if (leg.decimalOdds < 1.3) legCons.push("Very short odds — low payout for the risk");
+
+        if (leg.market === "moneyline") legPros.push("Moneyline bets have straightforward outcomes");
+        if (leg.market === "spread") legPros.push("Spread bets offer consistent value when teams cover");
+        if (leg.market === "total") legPros.push("Totals are less affected by which team wins");
+        if (leg.market?.startsWith("player_")) legCons.push("Player props carry individual variance risk");
+
+        const americanOdds = leg.americanOdds || (leg.decimalOdds >= 2 ? Math.round((leg.decimalOdds - 1) * 100) : Math.round(-100 / (leg.decimalOdds - 1)));
+        let legGrade: string;
+        if (legEV > 3) legGrade = "A";
+        else if (legEV > 1) legGrade = "B";
+        else if (legEV > -1) legGrade = "C";
+        else if (legEV > -3) legGrade = "D";
+        else legGrade = "F";
+
+        return {
+          team: leg.team || "Unknown",
+          market: leg.market || "unknown",
+          outcome: leg.outcome || "",
+          americanOdds,
+          decimalOdds: leg.decimalOdds,
+          impliedProbability: Math.round(legImplied * 1000) / 10,
+          modelProbability: Math.round(legProb * 1000) / 10,
+          evPercent: Math.round(legEV * 10) / 10,
+          grade: legGrade,
+          pros: legPros,
+          cons: legCons,
+        };
+      });
+
+      return res.json({
+        ...grade,
+        legReports,
+        combinedOdds: Math.round(combinedOdds * 100) / 100,
+        winProbability: Math.round(winProbability * 10000) / 100,
+        evPercent: Math.round(evPercent * 10) / 10,
+        riskLevel: legs.length <= 3 ? "Low" : legs.length <= 5 ? "Medium" : "High",
+      });
+    } catch (err) {
+      console.error("Grade parlay error:", err);
+      return res.status(500).json({ error: "Failed to grade parlay" });
+    }
+  });
+
   app.get("/api/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });

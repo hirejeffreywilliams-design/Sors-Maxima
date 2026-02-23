@@ -50,6 +50,7 @@ import type { ParlayLeg, SportEvent, EvaluationResult, Sport, BettingEnvironment
 import { decimalToAmerican, impliedProbability } from "@shared/schema";
 import { ProbabilityResults } from "./probability-results";
 import { CorrelationMatrix } from "./correlation-matrix";
+import { ParlayReportCard } from "./parlay-report-card";
 
 const sportOptions: { id: Sport; name: string }[] = [
   { id: "NBA", name: "NBA" },
@@ -1383,6 +1384,8 @@ export function VisualParlayBuilder({ onLegsChange, onStakeChange, onResultChang
             )}
           </CardContent>
         </Card>
+
+        <ParlayReportCard legs={legs} />
 
         <SmartSuggestions
           events={events}
