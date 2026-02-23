@@ -11,7 +11,7 @@ import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, 
 import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import { runHistoricalLearning, getHistoricalLearningStatus } from "./historicalLearningEngine";
-import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, type TicketRequest } from "./ticketOrchestrator";
+import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, getActiveSports, type TicketRequest } from "./ticketOrchestrator";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
@@ -1404,10 +1404,11 @@ Format your response clearly with sections and bullet points.`;
         includeProps: includeProps !== false,
       };
 
-      const tickets = await generateSmartTickets(request);
+      const result = await generateSmartTickets(request);
 
       return res.json({
-        tickets,
+        tickets: result.tickets,
+        skippedSports: result.skippedSports,
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),
         generatedAt: new Date().toISOString(),
@@ -1450,10 +1451,11 @@ Format your response clearly with sections and bullet points.`;
         includeProps: includeProps !== false,
       };
 
-      const tickets = await regenerateTicketsWithLatestData(request);
+      const result = await regenerateTicketsWithLatestData(request);
 
       return res.json({
-        tickets,
+        tickets: result.tickets,
+        skippedSports: result.skippedSports,
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),
         generatedAt: new Date().toISOString(),
@@ -1474,6 +1476,15 @@ Format your response clearly with sections and bullet points.`;
         error: "Failed to recalculate predictions",
         message: err instanceof Error ? err.message : "Unknown error",
       });
+    }
+  });
+
+  app.get("/api/active-sports", async (_req, res) => {
+    try {
+      const activeSports = await getActiveSports();
+      return res.json({ sports: activeSports });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to check active sports" });
     }
   });
 

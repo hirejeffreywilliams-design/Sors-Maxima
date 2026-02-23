@@ -27,6 +27,7 @@ import {
 import type { GeneratedTicket } from "@/lib/ticket-orchestrator";
 import type { TicketFusion } from "@/lib/quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
@@ -267,8 +268,17 @@ export default function AutoGenerator() {
   const [confirmTicket, setConfirmTicket] = useState<GeneratedTicket | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  const [skippedSports, setSkippedSports] = useState<string[]>([]);
   
   const { toast } = useToast();
+
+  const { data: activeSportsData } = useQuery<{ sports: { sport: string; active: boolean; gameCount: number }[] }>({
+    queryKey: ["/api/active-sports"],
+    refetchInterval: 5 * 60 * 1000,
+  });
+  const activeSportsMap = new Map(
+    (activeSportsData?.sports || []).map(s => [s.sport, s])
+  );
   
   useEffect(() => {
     const hasSeenTutorial = localStorage.getItem("sors_tutorial_complete");
@@ -318,8 +328,17 @@ export default function AutoGenerator() {
       
       const data = await response.json();
       const generatedTickets: GeneratedTicket[] = data.tickets || [];
+      const skipped: string[] = data.skippedSports || [];
       
       setTickets(generatedTickets);
+      setSkippedSports(skipped);
+      
+      if (skipped.length > 0) {
+        toast({
+          title: "Some sports skipped",
+          description: `No live games found for ${skipped.join(", ")}. Tickets generated from remaining sports.`,
+        });
+      }
       eventTracker.trackTicketGenerate(sports, reqRiskLevel, reqBankroll);
       trackTicketGenerate(sports.join(","), generatedTickets.length);
       
@@ -343,9 +362,14 @@ export default function AutoGenerator() {
   
   const handleQuickPick = async () => {
     setIsGenerating(true);
-    const quickSports: string[] = ["NBA", "NFL", "MLB"];
-    setSelectedSports(quickSports);
-    await fetchTicketsFromBackend(quickSports, 500, "moderate", 3, true);
+    const preferredSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB"];
+    const quickSports = preferredSports.filter(s => {
+      const info = activeSportsMap.get(s);
+      return !info || info.active;
+    });
+    const finalSports = quickSports.length > 0 ? quickSports : ["NBA", "MLB", "NHL"];
+    setSelectedSports(finalSports);
+    await fetchTicketsFromBackend(finalSports, 500, "moderate", 3, true);
   };
   
   const handleGenerate = async () => {
@@ -407,20 +431,31 @@ export default function AutoGenerator() {
                 Pick Your Sports
               </p>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {sportConfig.map(sport => (
-                  <Button
-                    key={sport.id}
-                    variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                    className={`h-auto py-2.5 flex-col gap-0.5 text-xs ${
-                      selectedSports.includes(sport.id) ? sport.color : ""
-                    }`}
-                    onClick={() => toggleSport(sport.id)}
-                    data-testid={`button-sport-${sport.id}`}
-                  >
-                    <span className="font-bold text-sm">{sport.id}</span>
-                    <span className="opacity-80 text-[10px]">{sport.name}</span>
-                  </Button>
-                ))}
+                {sportConfig.map(sport => {
+                  const sportInfo = activeSportsMap.get(sport.id);
+                  const isActive = !sportInfo || sportInfo.active;
+                  const gameCount = sportInfo?.gameCount || 0;
+                  return (
+                    <Button
+                      key={sport.id}
+                      variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                      className={`h-auto py-2.5 flex-col gap-0.5 text-xs relative ${
+                        selectedSports.includes(sport.id) ? sport.color : ""
+                      } ${!isActive ? "opacity-50" : ""}`}
+                      onClick={() => toggleSport(sport.id)}
+                      data-testid={`button-sport-${sport.id}`}
+                    >
+                      <span className="font-bold text-sm">{sport.id}</span>
+                      <span className="opacity-80 text-[10px]">{sport.name}</span>
+                      {sportInfo && !isActive && (
+                        <span className="text-[9px] opacity-90">Off-Season</span>
+                      )}
+                      {sportInfo && isActive && (
+                        <span className="text-[9px] opacity-70">{gameCount} games</span>
+                      )}
+                    </Button>
+                  );
+                })}
               </div>
               
               <Collapsible open={showSoccer} onOpenChange={setShowSoccer}>
@@ -430,19 +465,22 @@ export default function AutoGenerator() {
                     {showSoccer ? "Hide Soccer Leagues" : "Show Soccer Leagues"}
                   </button>
                 </CollapsibleTrigger>
-                <CollapsibleContent className="pt-2">
+                <CollapsibleContent className="pt-2 space-y-2">
+                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3" />
+                    Soccer data coming soon — not yet available for ticket generation
+                  </p>
                   <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
                     {soccerConfig.map(sport => (
                       <Button
                         key={sport.id}
-                        variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                        className={`h-auto py-2 flex-col gap-0 text-[10px] ${
-                          selectedSports.includes(sport.id) ? sport.color : ""
-                        }`}
-                        onClick={() => toggleSport(sport.id)}
+                        variant="outline"
+                        className="h-auto py-2 flex-col gap-0 text-[10px] opacity-40 cursor-not-allowed"
+                        disabled
                         data-testid={`button-sport-${sport.id}`}
                       >
                         <span className="font-bold text-xs">{sport.name}</span>
+                        <span className="text-[9px]">Coming Soon</span>
                       </Button>
                     ))}
                   </div>

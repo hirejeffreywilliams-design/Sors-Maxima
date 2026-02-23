@@ -634,20 +634,32 @@ function extractCategoryScore(signals: FusionSignal[], factorNames: string[]): n
   return count > 0 ? total / count : 0.5;
 }
 
-let espnGamesCache: { games: ESPNScoreboardGame[]; timestamp: number; sport: Sport } | null = null;
+const espnGamesCacheMap = new Map<string, { games: ESPNScoreboardGame[]; timestamp: number }>();
 
 async function getESPNGamesForSport(sport: Sport): Promise<ESPNScoreboardGame[]> {
-  if (espnGamesCache && espnGamesCache.sport === sport && Date.now() - espnGamesCache.timestamp < 5 * 60 * 1000) {
-    return espnGamesCache.games;
+  const cached = espnGamesCacheMap.get(sport);
+  if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+    return cached.games;
   }
   try {
     const games = await getMultiDayScoreboard(sport, 3);
     const upcoming = games.filter(g => g.status.state === "pre" || g.status.state === "in");
-    espnGamesCache = { games: upcoming, timestamp: Date.now(), sport };
+    espnGamesCacheMap.set(sport, { games: upcoming, timestamp: Date.now() });
     return upcoming;
   } catch {
     return [];
   }
+}
+
+export async function getActiveSports(): Promise<{ sport: string; gameCount: number; active: boolean }[]> {
+  const allSports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+  const results = await Promise.all(
+    allSports.map(async (sport) => {
+      const games = await getESPNGamesForSport(sport);
+      return { sport, gameCount: games.length, active: games.length > 0 };
+    })
+  );
+  return results;
 }
 
 function resolveGameOdds(game: ESPNScoreboardGame, sport: Sport): {
@@ -1386,7 +1398,7 @@ function getAnalyticsAgentData(sport: Sport): GeneratedTicket["analyticsAgentDat
   }
 }
 
-export async function generateTickets(request: TicketRequest): Promise<GeneratedTicket[]> {
+export async function generateTickets(request: TicketRequest): Promise<{ tickets: GeneratedTicket[]; skippedSports: string[] }> {
   const candidateTickets: GeneratedTicket[] = [];
   const ticketsToGenerate = Math.ceil(10 / request.sports.length);
 
@@ -1401,15 +1413,27 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
   
   const legCounts = legCountsByRisk[request.riskLevel];
   
+  const skippedSports: string[] = [];
+
   for (const sport of request.sports) {
     const isSoccer = sport.startsWith("Soccer_");
-    const sportForESPN = isSoccer ? null : (sport as Sport);
-    const soccerInfo = isSoccer ? mapSoccerLeague(sport) : null;
-
-    const espnGames = sportForESPN ? await getESPNGamesForSport(sportForESPN) : [];
     
+    if (isSoccer) {
+      skippedSports.push(sport);
+      continue;
+    }
+    
+    const sportForESPN = sport as Sport;
+
+    const espnGames = await getESPNGamesForSport(sportForESPN);
+    
+    if (espnGames.length === 0) {
+      skippedSports.push(sport);
+      continue;
+    }
+
     const realOddsMap = new Map<string, Awaited<ReturnType<typeof fetchRealOddsForGame>>>();
-    if (sportForESPN && espnGames.length > 0) {
+    if (espnGames.length > 0) {
       const oddsPromises = espnGames.map(async (game) => {
         const homeTeamName = game.homeTeam.displayName || game.homeTeam.shortDisplayName || "";
         const awayTeamName = game.awayTeam.displayName || game.awayTeam.shortDisplayName || "";
@@ -1423,13 +1447,7 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
       await Promise.all(oddsPromises);
     }
 
-    const agentData = sportForESPN ? getAnalyticsAgentData(sportForESPN) : {
-      evFromAgent: null,
-      kellyFromAgent: null,
-      arbitrageDetected: false,
-      trendDirection: "stable" as const,
-      confidenceBoost: 0,
-    };
+    const agentData = getAnalyticsAgentData(sportForESPN);
 
     for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
@@ -1438,27 +1456,15 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
       );
       
       const legs: TicketLeg[] = [];
-
-      if (isSoccer && soccerInfo) {
-        for (let j = 0; j < numLegs; j++) {
-          const marketType = soccerMarketTypes[Math.floor(Math.random() * soccerMarketTypes.length)];
-          legs.push(generateSoccerLeg(soccerInfo.league, marketType));
-        }
-      } else {
-        const marketTypes: ("moneyline" | "spread" | "total" | "prop")[] = ["moneyline", "spread", "total"];
-        if (request.includeProps) {
-          marketTypes.push("prop");
-        }
-        for (let j = 0; j < numLegs; j++) {
-          const marketType = marketTypes[Math.floor(Math.random() * marketTypes.length)];
-          if (espnGames.length > 0 && sportForESPN) {
-            const game = espnGames[Math.floor(Math.random() * espnGames.length)];
-            const gameRealOdds = realOddsMap.get(game.id);
-            legs.push(generateLegFromESPNGame(game, sportForESPN, marketType, request.includeProps, gameRealOdds || undefined));
-          } else if (sportForESPN) {
-            legs.push(generateLeg(sportForESPN, marketType, request.includeProps));
-          }
-        }
+      const marketTypes: ("moneyline" | "spread" | "total" | "prop")[] = ["moneyline", "spread", "total"];
+      if (request.includeProps) {
+        marketTypes.push("prop");
+      }
+      for (let j = 0; j < numLegs; j++) {
+        const marketType = marketTypes[Math.floor(Math.random() * marketTypes.length)];
+        const game = espnGames[Math.floor(Math.random() * espnGames.length)];
+        const gameRealOdds = realOddsMap.get(game.id);
+        legs.push(generateLegFromESPNGame(game, sportForESPN, marketType, request.includeProps, gameRealOdds || undefined));
       }
 
       if (legs.length === 0) continue;
@@ -1466,7 +1472,7 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
       const totalOdds = calculateCombinedOdds(legs);
       const americanOdds = decimalToAmerican(totalOdds);
 
-      const fusionSport = (isSoccer ? "NBA" : sport) as Sport;
+      const fusionSport = sport as Sport;
       
       const fusionData = analyzeTicket(
         legs.map((leg, idx) => ({
@@ -1667,7 +1673,7 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
     );
   }
 
-  return finalTickets;
+  return { tickets: finalTickets, skippedSports };
 }
 
 function getFusionSortScore(ticket: GeneratedTicket): number {
@@ -1689,7 +1695,7 @@ function getFusionSortScore(ticket: GeneratedTicket): number {
          recBonus;
 }
 
-export async function regenerateTicketsWithLatestData(request: TicketRequest): Promise<GeneratedTicket[]> {
-  espnGamesCache = null;
+export async function regenerateTicketsWithLatestData(request: TicketRequest): Promise<{ tickets: GeneratedTicket[]; skippedSports: string[] }> {
+  espnGamesCacheMap.clear();
   return generateTickets(request);
 }
