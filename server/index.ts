@@ -8,6 +8,7 @@ import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import { runHistoricalLearning } from "./historicalLearningEngine";
+import { startContinuousLearningOrchestrator } from "./continuousLearningOrchestrator";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -161,6 +162,9 @@ app.use((req, res, next) => {
       
       startAnalyticsAgent();
       log("ESPN data agent started — live game monitoring active");
+
+      startContinuousLearningOrchestrator();
+      log("Continuous Learning Orchestrator started — auto-settlement, retraining, weight sync, calibration");
 
       setTimeout(() => {
         log("Starting historical game learning from ESPN...");

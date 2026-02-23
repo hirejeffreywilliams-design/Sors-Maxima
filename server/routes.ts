@@ -6697,6 +6697,87 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     res.json({ venues: getKnownVenues(), count: getKnownVenues().length, dataSource: "Open-Meteo (free)" });
   });
 
+  // ==================== CONTINUOUS LEARNING ORCHESTRATOR ====================
+
+  app.get("/api/admin/orchestrator/status", async (_req, res) => {
+    try {
+      const { getOrchestratorStatus } = await import("./continuousLearningOrchestrator");
+      res.json(getOrchestratorStatus());
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/settle", async (_req, res) => {
+    try {
+      const { triggerManualSettlement } = await import("./continuousLearningOrchestrator");
+      const result = await triggerManualSettlement();
+      res.json({ success: true, ...result });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/retrain", async (_req, res) => {
+    try {
+      const { triggerManualRetraining } = await import("./continuousLearningOrchestrator");
+      await triggerManualRetraining();
+      res.json({ success: true, message: "Retraining triggered" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/sync-weights", async (_req, res) => {
+    try {
+      const { triggerManualWeightSync } = await import("./continuousLearningOrchestrator");
+      await triggerManualWeightSync();
+      res.json({ success: true, message: "Weight sync triggered" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/calibrate", async (_req, res) => {
+    try {
+      const { triggerManualCalibration } = await import("./continuousLearningOrchestrator");
+      await triggerManualCalibration();
+      res.json({ success: true, message: "Calibration check triggered" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/check-freshness", async (_req, res) => {
+    try {
+      const { triggerManualFreshnessCheck } = await import("./continuousLearningOrchestrator");
+      await triggerManualFreshnessCheck();
+      res.json({ success: true, message: "Freshness check triggered" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/start", async (_req, res) => {
+    try {
+      const { startContinuousLearningOrchestrator } = await import("./continuousLearningOrchestrator");
+      startContinuousLearningOrchestrator();
+      res.json({ success: true, message: "Orchestrator started" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/orchestrator/stop", async (_req, res) => {
+    try {
+      const { stopContinuousLearningOrchestrator } = await import("./continuousLearningOrchestrator");
+      stopContinuousLearningOrchestrator();
+      res.json({ success: true, message: "Orchestrator stopped" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==================== PROP PARLAY BUILDER ====================
 
   app.post("/api/prop-parlays", async (req, res) => {
