@@ -279,10 +279,22 @@ class HealthMonitor {
     const results: HealthCheck[] = [];
 
     results.push(this.checkMemory());
-    results.push(await this.checkDatabase());
-    results.push(this.checkErrorRate());
+    try {
+      results.push(await this.checkDatabase());
+    } catch {
+      results.push({ name: "Database", status: "down", lastChecked: new Date().toISOString(), details: "Check threw unexpected error" });
+    }
+    try {
+      results.push(this.checkErrorRate());
+    } catch {
+      results.push({ name: "Error Rate", status: "degraded", lastChecked: new Date().toISOString(), details: "Error rate check unavailable", errorCode: "SYSTEM-002" });
+    }
     results.push(this.checkSessionStore());
-    results.push(this.checkFeatureFlags());
+    try {
+      results.push(this.checkFeatureFlags());
+    } catch {
+      results.push({ name: "Feature Flags", status: "degraded", lastChecked: new Date().toISOString(), details: "Feature flag check unavailable", errorCode: "SYSTEM-003" });
+    }
 
     results.forEach((r) => this.checks.set(r.name, r));
     return results;
@@ -343,11 +355,17 @@ class HealthMonitor {
   }
 
   private checkErrorRate(): HealthCheck {
-    const { errorLogger } = require("./errorLogger");
-    const recentErrors = errorLogger.getLogs({
-      level: "error",
-      since: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
-    });
+    let recentErrors: any[] = [];
+    try {
+      const mod = require("./errorLogger");
+      const logger = mod.errorLogger || mod.default?.errorLogger;
+      if (logger?.getLogs) {
+        recentErrors = logger.getLogs({
+          level: "error",
+          since: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        });
+      }
+    } catch {}
 
     let status: HealthCheck["status"] = "healthy";
     let errorCode: string | undefined;
@@ -378,24 +396,36 @@ class HealthMonitor {
   }
 
   private checkFeatureFlags(): HealthCheck {
-    const { featureFlags } = require("./featureFlags");
-    const stats = featureFlags.getStats();
-    const criticalFlags = ["stripe_payments", "quantum_fusion"];
-    const disabledCritical = criticalFlags.filter((f) => !featureFlags.isEnabled(f));
+    try {
+      const mod = require("./featureFlags");
+      const flags = mod.featureFlags || mod.default?.featureFlags;
+      if (flags?.getStats && flags?.isEnabled) {
+        const stats = flags.getStats();
+        const criticalFlags = ["stripe_payments", "quantum_fusion"];
+        const disabledCritical = criticalFlags.filter((f: string) => !flags.isEnabled(f));
 
-    let status: HealthCheck["status"] = "healthy";
-    let errorCode: string | undefined;
-    if (disabledCritical.length > 0) {
-      status = "degraded";
-      errorCode = "SYSTEM-003";
-    }
+        let status: HealthCheck["status"] = "healthy";
+        let errorCode: string | undefined;
+        if (disabledCritical.length > 0) {
+          status = "degraded";
+          errorCode = "SYSTEM-003";
+        }
 
+        return {
+          name: "Feature Flags",
+          status,
+          lastChecked: new Date().toISOString(),
+          details: `${stats.enabled}/${stats.total} enabled${disabledCritical.length > 0 ? `, critical disabled: ${disabledCritical.join(", ")}` : ""}`,
+          errorCode,
+        };
+      }
+    } catch {}
     return {
       name: "Feature Flags",
-      status,
+      status: "degraded",
       lastChecked: new Date().toISOString(),
-      details: `${stats.enabled}/${stats.total} enabled${disabledCritical.length > 0 ? `, critical disabled: ${disabledCritical.join(", ")}` : ""}`,
-      errorCode,
+      details: "Feature flag check unavailable",
+      errorCode: "SYSTEM-003",
     };
   }
 
