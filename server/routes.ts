@@ -1858,13 +1858,53 @@ Format your response clearly with sections and bullet points.`;
 
       const combinedOdds = legs.reduce((acc: number, l: any) => acc * (l.decimalOdds || 1), 1);
       const impliedProb = 1 / combinedOdds;
-      const legProbabilities = legs.map((l: any) => {
-        const ip = 1 / (l.decimalOdds || 2);
-        return Math.min(0.95, Math.max(0.05, ip * 0.95));
-      });
-      const winProbability = legProbabilities.reduce((a: number, b: number) => a * b, 1);
+
+      const estimateModelProbability = (leg: any): number => {
+        const ip = 1 / (leg.decimalOdds || 2);
+        let edge = 0;
+
+        const market = leg.market || "unknown";
+        if (market === "spread") {
+          edge += 0.03;
+        } else if (market === "total") {
+          edge += 0.02;
+        } else if (market === "moneyline") {
+          if (leg.decimalOdds >= 1.4 && leg.decimalOdds <= 2.2) {
+            edge += 0.04;
+          } else if (leg.decimalOdds > 2.2) {
+            edge += 0.01;
+          } else {
+            edge += 0.02;
+          }
+        } else if (market.startsWith("player_")) {
+          edge += -0.01;
+        } else if (market.includes("alt_")) {
+          edge += 0.01;
+        } else {
+          edge += 0.02;
+        }
+
+        if (leg.decimalOdds >= 1.8 && leg.decimalOdds <= 2.3) {
+          edge += 0.02;
+        } else if (leg.decimalOdds >= 1.4 && leg.decimalOdds < 1.8) {
+          edge += 0.01;
+        } else if (leg.decimalOdds > 3.0) {
+          edge -= 0.02;
+        } else if (leg.decimalOdds < 1.25) {
+          edge -= 0.01;
+        }
+
+        const modelProb = Math.min(0.97, Math.max(0.03, ip + edge));
+        return modelProb;
+      }
+
+      const legModelProbs = legs.map((l: any) => estimateModelProbability(l));
+      const winProbability = legModelProbs.reduce((a: number, b: number) => a * b, 1);
       const evPercent = ((winProbability / impliedProb) - 1) * 100;
-      const confidenceScore = Math.min(95, Math.max(20, 60 + (evPercent * 2) - (legs.length * 3)));
+
+      const legCount = legs.length;
+      const legCountPenalty = legCount <= 2 ? 0 : legCount <= 4 ? (legCount - 2) * 3 : (legCount - 2) * 5;
+      const confidenceScore = Math.min(95, Math.max(25, 70 + (evPercent * 1.5) - legCountPenalty));
 
       const ticketForGrading = {
         legs,
@@ -1873,46 +1913,59 @@ Format your response clearly with sections and bullet points.`;
         expectedValue: evPercent / 100,
         confidenceScore,
         evPercent,
-        riskRating: legs.length <= 3 ? "low" : legs.length <= 5 ? "medium" : "high",
+        riskRating: legCount <= 3 ? "low" : legCount <= 5 ? "medium" : "high",
       };
 
       const grade = gradeTicket(ticketForGrading);
 
       const legReports = legs.map((leg: any, i: number) => {
-        const legProb = legProbabilities[i];
+        const legModelProb = legModelProbs[i];
         const legImplied = 1 / (leg.decimalOdds || 2);
-        const legEV = ((legProb / legImplied) - 1) * 100;
+        const legEV = ((legModelProb / legImplied) - 1) * 100;
         const legPros: string[] = [];
         const legCons: string[] = [];
 
         if (legEV > 2) legPros.push(`Positive expected value (+${legEV.toFixed(1)}% edge)`);
-        else if (legEV < -3) legCons.push(`Negative expected value (${legEV.toFixed(1)}% edge)`);
+        else if (legEV > 0) legPros.push(`Slight positive edge (+${legEV.toFixed(1)}%)`);
+        else if (legEV > -2) legCons.push(`Marginal negative value (${legEV.toFixed(1)}%)`);
+        else legCons.push(`Negative expected value (${legEV.toFixed(1)}% edge)`);
 
         if (leg.decimalOdds >= 1.5 && leg.decimalOdds <= 2.5) legPros.push("Moderate odds — balanced risk/reward");
         else if (leg.decimalOdds > 3.0) legCons.push("Long odds — lower probability of hitting");
         else if (leg.decimalOdds < 1.3) legCons.push("Very short odds — low payout for the risk");
 
-        if (leg.market === "moneyline") legPros.push("Moneyline bets have straightforward outcomes");
-        if (leg.market === "spread") legPros.push("Spread bets offer consistent value when teams cover");
-        if (leg.market === "total") legPros.push("Totals are less affected by which team wins");
-        if (leg.market?.startsWith("player_")) legCons.push("Player props carry individual variance risk");
+        const market = leg.market || "unknown";
+        if (market === "moneyline") {
+          legPros.push("Moneyline — straightforward win/lose outcome");
+        } else if (market === "spread") {
+          legPros.push("Spread — consistent value when teams cover");
+          if (leg.decimalOdds >= 1.8 && leg.decimalOdds <= 2.1) legPros.push("Standard -110 line — most efficient market");
+        } else if (market === "total") {
+          legPros.push("Total — independent of which team wins");
+        } else if (market.startsWith("player_")) {
+          legCons.push("Player prop — individual performance variance");
+          legPros.push("Player props can exploit soft lines");
+        } else if (market.includes("alt_")) {
+          legPros.push("Alt line — potential value at off-market numbers");
+          legCons.push("Alt lines carry wider margins");
+        }
 
         const americanOdds = leg.americanOdds || (leg.decimalOdds >= 2 ? Math.round((leg.decimalOdds - 1) * 100) : Math.round(-100 / (leg.decimalOdds - 1)));
         let legGrade: string;
-        if (legEV > 3) legGrade = "A";
-        else if (legEV > 1) legGrade = "B";
-        else if (legEV > -1) legGrade = "C";
-        else if (legEV > -3) legGrade = "D";
+        if (legEV > 4) legGrade = "A";
+        else if (legEV > 2) legGrade = "B";
+        else if (legEV > 0) legGrade = "C";
+        else if (legEV > -2) legGrade = "D";
         else legGrade = "F";
 
         return {
           team: leg.team || "Unknown",
-          market: leg.market || "unknown",
+          market: market,
           outcome: leg.outcome || "",
           americanOdds,
           decimalOdds: leg.decimalOdds,
           impliedProbability: Math.round(legImplied * 1000) / 10,
-          modelProbability: Math.round(legProb * 1000) / 10,
+          modelProbability: Math.round(legModelProb * 1000) / 10,
           evPercent: Math.round(legEV * 10) / 10,
           grade: legGrade,
           pros: legPros,
@@ -1920,13 +1973,15 @@ Format your response clearly with sections and bullet points.`;
         };
       });
 
+      const riskLevel = legCount <= 2 ? "Low" : legCount <= 4 ? "Medium" : legCount <= 6 ? "High" : "Very High";
+
       return res.json({
         ...grade,
         legReports,
         combinedOdds: Math.round(combinedOdds * 100) / 100,
         winProbability: Math.round(winProbability * 10000) / 100,
         evPercent: Math.round(evPercent * 10) / 10,
-        riskLevel: legs.length <= 3 ? "Low" : legs.length <= 5 ? "Medium" : "High",
+        riskLevel,
       });
     } catch (err) {
       console.error("Grade parlay error:", err);
