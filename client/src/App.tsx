@@ -62,7 +62,8 @@ import BettingProfile from "@/pages/betting-profile";
 import ProTools from "@/pages/pro-tools";
 import CorrelationMatrix from "@/pages/correlation-matrix";
 import SharedTickets from "@/pages/shared-tickets";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator } from "lucide-react";
+import OddsCenter from "@/pages/odds-center";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -169,6 +170,9 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
           <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
           <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
           <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
+          <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
+          <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
+          <Route path="/admin/correlation-matrix">{() => <AdminGuard component={CorrelationMatrix} authState={authState} />}</Route>
           <Route component={NotFound} />
         </Switch>
       </main>
@@ -196,15 +200,13 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/help" component={HelpCenter} />
       <Route path="/profile" component={ProfilePage} />
       <Route path="/changelog" component={ChangelogPage} />
-      <Route path="/sport-analysis" component={SportFactorAnalysis} />
-      <Route path="/pipeline" component={PipelineIntelligence} />
+      <Route path="/odds-center" component={OddsCenter} />
       <Route path="/ev-heatmap" component={EVHeatmap} />
       <Route path="/line-movement" component={LineMovement} />
       <Route path="/power-rankings" component={PowerRankings} />
       <Route path="/ticket-history" component={TicketHistory} />
       <Route path="/betting-profile" component={BettingProfile} />
       <Route path="/pro-tools" component={ProTools} />
-      <Route path="/correlation-matrix" component={CorrelationMatrix} />
       <Route path="/shared-tickets" component={SharedTickets} />
       <Route component={NotFound} />
     </Switch>
@@ -229,15 +231,9 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real ESPN game data" },
   { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Parlays - Top picks from today's real games" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
-  { href: "/ev-heatmap", icon: Flame, label: "EV Map", testId: "nav-ev-heatmap", tooltip: "Live EV Heatmap & Arbitrage Scanner" },
-  { href: "/line-movement", icon: TrendingUp, label: "Lines", testId: "nav-line-movement", tooltip: "Line Movement Timeline & CLV Tracker" },
-  { href: "/power-rankings", icon: BarChart3, label: "Rankings", testId: "nav-rankings", tooltip: "Power Rankings & Bankroll Simulator" },
-  { href: "/pro-tools", icon: Calculator, label: "Pro", testId: "nav-pro-tools", tooltip: "Pro Tools - What-If, Optimizer, Cash-Out Calculator" },
+  { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage scanner" },
   { href: "/ticket-history", icon: History, label: "History", testId: "nav-history", tooltip: "Track your ticket performance and ROI" },
-  { href: "/betting-profile", icon: UserCog, label: "Profile", testId: "nav-profile", tooltip: "Build your betting profile and set favorites" },
-  { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Betting tools - Odds calculators, correlations, comparisons" },
-  { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports from ESPN" },
-  { href: "/pricing", icon: CreditCard, label: "Plans", testId: "nav-pricing", tooltip: "View plans & pricing" },
+  { href: "/pro-tools", icon: Calculator, label: "Pro Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - What-If, Optimizer, Cash-Out Calculator" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
 
@@ -301,19 +297,21 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
       <div className="border-t pt-4 pb-6 px-4 space-y-3">
         <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">More</div>
         <nav className="space-y-1 pb-2">
-          {[
+          {([
             { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
-            { href: "/sport-analysis", icon: FlaskConical, label: "Analysis", testId: "mobile-nav-analysis" },
-            { href: "/pipeline", icon: GitBranch, label: "Engine", testId: "mobile-nav-pipeline" },
-            { href: "/bankroll", icon: Wallet, label: "Finance", testId: "mobile-nav-finance" },
+            { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },
+            { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
+            { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "mobile-nav-rosters" },
+            { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "mobile-nav-finance" },
+            { href: "/shared-tickets", icon: Users, label: "Shared Tickets", testId: "mobile-nav-shared" },
+            { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
             { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
             { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
             { href: "/rewards", icon: Trophy, label: "Rewards", testId: "mobile-nav-rewards" },
-            { href: "/roadmap", icon: Map, label: "Roadmap", testId: "mobile-nav-roadmap" },
             { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
             { href: "/changelog", icon: Megaphone, label: "What's New", testId: "mobile-nav-changelog" },
-          ].map((item) => {
+          ] as const).map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
