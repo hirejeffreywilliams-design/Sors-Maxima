@@ -29,6 +29,12 @@ Sors Maxima is a sports betting intelligence platform designed to help users con
 - **Navigation Simplification** (Feb 2026): Reduced main navigation from 12+ items to 6 core user-facing pages: Generate, Daily Picks, Live, Odds Center, History, Pro Tools. Technical/analytical pages (Pipeline Intelligence, Sport Factor Analysis, Correlation Matrix) moved to admin-only routes behind AdminGuard. New unified Odds Center (client/src/pages/odds-center.tsx) consolidates EV heatmap, line movement, bookmaker comparison, and arbitrage scanner into a single tabbed interface. Mobile "More" menu reorganized with secondary features (Betting Profile, Tools, Rosters, Bankroll, Shared Tickets, Pricing, etc.).
 - **Previous changes**: Complete real-time data coverage (224+ teams, 7,400+ players), automated 6-hour refresh, dynamic team selectors, NCAAF/NCAAB support, honest labeling, data source transparency
 
+## Pre-Publish Reminders
+- **ADD PAID API KEYS BEFORE PUBLISHING**: The app currently uses free-tier ESPN data as a fallback. Before going live, add paid API keys for better/richer data:
+  - **The Odds API** (`THE_ODDS_API_KEY`): Already configured but quota may be exhausted on free tier. Upgrade to a paid plan for live multi-bookmaker odds, real-time line movement, and full market coverage.
+  - **API-Football** (`API_FOOTBALL_KEY`): Already configured. Verify paid tier for full soccer/football coverage.
+  - Consider additional premium data providers for player props, injury data, or weather data if needed.
+
 ## User Preferences
 I want iterative development.
 I prefer detailed explanations.
