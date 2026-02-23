@@ -33,7 +33,11 @@ Sors Maxima is a sports betting intelligence platform designed to help users con
 - **ADD PAID API KEYS BEFORE PUBLISHING**: The app currently uses free-tier ESPN data as a fallback. Before going live, add paid API keys for better/richer data:
   - **The Odds API** (`THE_ODDS_API_KEY`): Already configured but quota may be exhausted on free tier. Upgrade to a paid plan for live multi-bookmaker odds, real-time line movement, and full market coverage.
   - **API-Football** (`API_FOOTBALL_KEY`): Already configured. Verify paid tier for full soccer/football coverage.
-  - Consider additional premium data providers for player props, injury data, or weather data if needed.
+- **Free Data Sources Already Integrated (No API Keys Needed)**:
+  - **Injury Data**: ESPN free injury API (server/espn-injury-provider.ts) — 1,200+ injuries tracked across NBA/NFL/MLB/NHL, 15-min cache, endpoints at `/api/injuries` and `/api/injuries/:sport`
+  - **Weather Data**: Open-Meteo free weather API (server/weather-provider.ts) — 69 venue locations with real-time weather, betting impact analysis, 30-min cache, endpoints at `/api/weather/venue/:name`, `/api/weather/games/:sport`, `/api/weather/venues`
+  - **Player Props**: Already integrated via The Odds API and ESPN-derived data, endpoint at `/api/tools/player-props/:sport`
+- **Pricing Tiers**: Sharp ($49/mo), Edge ($99/mo), Max ($249/mo) — no free tier
 
 ## User Preferences
 I want iterative development.

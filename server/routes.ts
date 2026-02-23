@@ -6613,6 +6613,90 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     }
   });
 
+  // ==================== INJURY DATA (ESPN — Free, No API Key) ====================
+  app.get("/api/injuries/:sport", async (req, res) => {
+    try {
+      const { getInjuries, getInjurySummary } = await import("./espn-injury-provider");
+      const sport = req.params.sport;
+      const reports = await getInjuries(sport);
+      const summary = getInjurySummary(reports);
+      res.json({ sport, teams: reports, summary, dataSource: "ESPN (free)" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/injuries", async (_req, res) => {
+    try {
+      const { getAllInjuries, getInjurySummary } = await import("./espn-injury-provider");
+      const all = await getAllInjuries();
+      const result: Record<string, any> = {};
+      let totalInjured = 0;
+      for (const [sport, reports] of Object.entries(all)) {
+        const summary = getInjurySummary(reports);
+        totalInjured += summary.totalInjured;
+        result[sport] = { teams: reports, summary };
+      }
+      res.json({ sports: result, totalInjured, dataSource: "ESPN (free)" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== WEATHER DATA (Open-Meteo — Free, No API Key) ====================
+  app.get("/api/weather/venue/:venueName", async (req, res) => {
+    try {
+      const { getVenueWeather } = await import("./weather-provider");
+      const venueName = decodeURIComponent(req.params.venueName);
+      const gameTime = req.query.gameTime as string | undefined;
+      const weather = await getVenueWeather(venueName, gameTime);
+      if (!weather) {
+        return res.status(404).json({ error: "Venue not found in database", venue: venueName, dataSource: "Open-Meteo (free)" });
+      }
+      res.json({ ...weather, dataSource: "Open-Meteo (free)" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/weather/games/:sport", async (req, res) => {
+    try {
+      const { getScoreboard } = await import("./espn-scoreboard-provider");
+      const { getVenueWeather, isOutdoorVenue } = await import("./weather-provider");
+      const sport = req.params.sport as any;
+      const games = await getScoreboard(sport);
+
+      const weatherData = await Promise.allSettled(
+        games.map(async (game: any) => {
+          const venueName = game.venue?.name;
+          if (!venueName) return null;
+          const weather = await getVenueWeather(venueName, game.date);
+          if (!weather) return null;
+          return {
+            gameId: game.id,
+            matchup: `${game.awayTeam?.displayName || "Away"} @ ${game.homeTeam?.displayName || "Home"}`,
+            venue: venueName,
+            outdoor: isOutdoorVenue(venueName),
+            weather,
+          };
+        })
+      );
+
+      const results = weatherData
+        .filter((r): r is PromiseFulfilledResult<any> => r.status === "fulfilled" && r.value !== null)
+        .map((r) => r.value);
+
+      res.json({ sport, games: results, dataSource: "Open-Meteo (free)" });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/weather/venues", async (_req, res) => {
+    const { getKnownVenues } = await import("./weather-provider");
+    res.json({ venues: getKnownVenues(), count: getKnownVenues().length, dataSource: "Open-Meteo (free)" });
+  });
+
   // ==================== END ALL FEATURE ROUTES ====================
 
   return httpServer;
