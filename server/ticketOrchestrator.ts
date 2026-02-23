@@ -273,8 +273,8 @@ function chooseOverUnderDirection(
   }
 
   overScore = Math.max(20, Math.min(80, overScore));
-  const isOver = Math.random() * 100 < overScore;
-  const confidence = Math.abs(overScore - 50) / 50;
+  const isOver = overScore >= 50;
+  const confidence = Math.min(1, Math.abs(overScore - 50) / 30);
   if (!reasoning) reasoning = isOver ? "Model leans over based on game factors" : "Model leans under based on game factors";
 
   return { isOver, confidence, reasoning };
