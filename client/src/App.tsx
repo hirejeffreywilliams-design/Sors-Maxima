@@ -52,6 +52,7 @@ import AdminAcquisition from "@/pages/admin-acquisition";
 import AdminAnalyticsDashboard from "@/pages/admin-analytics";
 import AdminOrchestration from "@/pages/admin-orchestration";
 import AdminAssistant from "@/pages/admin-assistant";
+import AdminGuardian from "@/pages/admin-guardian";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
 import PipelineIntelligence from "@/pages/pipeline";
 import EVHeatmap from "@/pages/ev-heatmap";
@@ -170,6 +171,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
           <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
           <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
           <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
+          <Route path="/admin/guardian">{() => <AdminGuard component={AdminGuardian} authState={authState} />}</Route>
           <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
           <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
           <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>

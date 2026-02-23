@@ -9,6 +9,7 @@ import { startContinuousLearning } from "./learningEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import { runHistoricalLearning } from "./historicalLearningEngine";
 import { startContinuousLearningOrchestrator } from "./continuousLearningOrchestrator";
+import { startGuardian } from "./appGuardianEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -165,6 +166,9 @@ app.use((req, res, next) => {
 
       startContinuousLearningOrchestrator();
       log("Continuous Learning Orchestrator started — auto-settlement, retraining, weight sync, calibration");
+
+      startGuardian();
+      log("App Guardian Engine started — continuous monitoring, auto-healing, AI diagnostics");
 
       setTimeout(() => {
         log("Starting historical game learning from ESPN...");

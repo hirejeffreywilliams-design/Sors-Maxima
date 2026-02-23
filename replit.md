@@ -24,6 +24,7 @@ Core architectural decisions and features include:
 - **Unified Market Data API**: A `GET /api/market-snapshot` endpoint merges live ESPN scoreboard data with multi-bookmaker Odds API pricing, providing consensus pricing, best lines, line movement with sharp action detection, and edge analysis.
 - **AI-Powered Admin Assistant**: An operational intelligence dashboard generating structured admin reports with prioritized tasks, financial/risk/compliance actions, and operational checklists via OpenAI analysis of live platform data.
 - **Hidden Analytics Agent**: A real-time, server-side analytics agent (`server/analyticsAgentEngine.ts`) continuously ingests ESPN live data, performs market analysis (implied probabilities, EV, Kelly, arbitrage, risk exposure, trends), monitors model drift, and produces canonical JSON snapshots, controllable via admin API endpoints.
+- **App Guardian Engine**: A continuous health monitoring system (`server/appGuardianEngine.ts`) that runs 6 scheduled tasks: health checks (30s), service monitoring (60s), error analysis (2m), auto-healing (60s), AI diagnostics (5m), and data pruning (1h). Monitors 7 services (ESPN, Weather, Odds API, App Server, Market Snapshot, Orchestrator, ESPN NBA), auto-heals downed services (orchestrator restart, GC), tracks alerts/incidents, and provides AI-powered diagnostics via OpenAI. Admin dashboard at `/admin/guardian`.
 
 ## External Dependencies
 - **Frontend Framework**: React

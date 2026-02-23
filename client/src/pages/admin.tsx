@@ -164,6 +164,7 @@ const navCategories: NavCategory[] = [
     icon: Settings,
     items: [
       { href: "/admin/assistant", label: "AI Assistant", description: "AI-powered ops briefings & tasks", icon: Bot, testId: "link-admin-assistant" },
+      { href: "/admin/guardian", label: "App Guardian", description: "Health monitoring, auto-heal & alerts", icon: Shield, testId: "link-admin-guardian" },
       { href: "/admin/orchestration", label: "Orchestration", description: "Ticketing, confidence & governance", icon: Zap, testId: "link-admin-orchestration" },
       { href: "/admin/analytics-dashboard", label: "Analytics", description: "KPIs, SLOs & incident playbooks", icon: Activity, testId: "link-admin-analytics-dashboard" },
       { href: "/admin/diagnostics", label: "Diagnostics", description: "AI system diagnostics", icon: Brain, testId: "link-admin-diagnostics" },

@@ -5906,6 +5906,66 @@ Follow these rules:
 
   // ==================== END ADMIN ASSISTANT ====================
 
+  // ==================== APP GUARDIAN ENGINE (Admin Only) ====================
+  const { appGuardian } = await import("./appGuardianEngine");
+
+  app.get("/api/admin/guardian/status", requireAdmin, async (_req, res) => {
+    res.json(appGuardian.getStatus());
+  });
+
+  app.get("/api/admin/guardian/alerts", requireAdmin, (req, res) => {
+    const includeResolved = req.query.includeResolved === "true";
+    res.json(appGuardian.getAlerts(includeResolved));
+  });
+
+  app.get("/api/admin/guardian/incidents", requireAdmin, (_req, res) => {
+    res.json(appGuardian.getIncidents());
+  });
+
+  app.get("/api/admin/guardian/diagnostics", requireAdmin, (_req, res) => {
+    res.json(appGuardian.getDiagnostics());
+  });
+
+  app.post("/api/admin/guardian/scan", requireAdmin, async (_req, res) => {
+    try {
+      const status = await appGuardian.forceFullScan();
+      res.json({ success: true, status });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/guardian/diagnose", requireAdmin, async (_req, res) => {
+    try {
+      const diagnostics = await appGuardian.runDiagnosticsNow();
+      res.json({ success: true, diagnostics });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/guardian/alerts/:id/acknowledge", requireAdmin, (req, res) => {
+    appGuardian.acknowledgeAlert(req.params.id);
+    res.json({ success: true });
+  });
+
+  app.post("/api/admin/guardian/start", requireAdmin, (_req, res) => {
+    appGuardian.start();
+    res.json({ success: true, message: "Guardian started" });
+  });
+
+  app.post("/api/admin/guardian/stop", requireAdmin, (_req, res) => {
+    appGuardian.stop();
+    res.json({ success: true, message: "Guardian stopped" });
+  });
+
+  app.post("/api/admin/guardian/restart", requireAdmin, (_req, res) => {
+    appGuardian.restart();
+    res.json({ success: true, message: "Guardian restarted" });
+  });
+
+  // ==================== END APP GUARDIAN ====================
+
   // ==================== ANALYTICS AGENT ENGINE (Admin Only) ====================
   const { analyticsAgent } = await import("./analyticsAgentEngine");
 
