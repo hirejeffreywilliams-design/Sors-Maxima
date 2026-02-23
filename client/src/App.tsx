@@ -54,7 +54,15 @@ import AdminOrchestration from "@/pages/admin-orchestration";
 import AdminAssistant from "@/pages/admin-assistant";
 import SportFactorAnalysis from "@/pages/sport-factor-analysis";
 import PipelineIntelligence from "@/pages/pipeline";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight } from "lucide-react";
+import EVHeatmap from "@/pages/ev-heatmap";
+import LineMovement from "@/pages/line-movement";
+import PowerRankings from "@/pages/power-rankings";
+import TicketHistory from "@/pages/ticket-history";
+import BettingProfile from "@/pages/betting-profile";
+import ProTools from "@/pages/pro-tools";
+import CorrelationMatrix from "@/pages/correlation-matrix";
+import SharedTickets from "@/pages/shared-tickets";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -190,6 +198,14 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/changelog" component={ChangelogPage} />
       <Route path="/sport-analysis" component={SportFactorAnalysis} />
       <Route path="/pipeline" component={PipelineIntelligence} />
+      <Route path="/ev-heatmap" component={EVHeatmap} />
+      <Route path="/line-movement" component={LineMovement} />
+      <Route path="/power-rankings" component={PowerRankings} />
+      <Route path="/ticket-history" component={TicketHistory} />
+      <Route path="/betting-profile" component={BettingProfile} />
+      <Route path="/pro-tools" component={ProTools} />
+      <Route path="/correlation-matrix" component={CorrelationMatrix} />
+      <Route path="/shared-tickets" component={SharedTickets} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -213,6 +229,12 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real ESPN game data" },
   { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Parlays - Top picks from today's real games" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
+  { href: "/ev-heatmap", icon: Flame, label: "EV Map", testId: "nav-ev-heatmap", tooltip: "Live EV Heatmap & Arbitrage Scanner" },
+  { href: "/line-movement", icon: TrendingUp, label: "Lines", testId: "nav-line-movement", tooltip: "Line Movement Timeline & CLV Tracker" },
+  { href: "/power-rankings", icon: BarChart3, label: "Rankings", testId: "nav-rankings", tooltip: "Power Rankings & Bankroll Simulator" },
+  { href: "/pro-tools", icon: Calculator, label: "Pro", testId: "nav-pro-tools", tooltip: "Pro Tools - What-If, Optimizer, Cash-Out Calculator" },
+  { href: "/ticket-history", icon: History, label: "History", testId: "nav-history", tooltip: "Track your ticket performance and ROI" },
+  { href: "/betting-profile", icon: UserCog, label: "Profile", testId: "nav-profile", tooltip: "Build your betting profile and set favorites" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "nav-tools", tooltip: "Betting tools - Odds calculators, correlations, comparisons" },
   { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "nav-rosters", tooltip: "Live team rosters, coaches, and injury reports from ESPN" },
   { href: "/pricing", icon: CreditCard, label: "Plans", testId: "nav-pricing", tooltip: "View plans & pricing" },

@@ -11,7 +11,8 @@ import { registerUser, loginUser, getAllUsers, banUser, unbanUser, getUserById, 
 import { errorLogger, logError } from "./errorLogger";
 import { getLearningStats, getAllFactorWeights } from "./learningEngine";
 import { runHistoricalLearning, getHistoricalLearningStatus } from "./historicalLearningEngine";
-import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, getActiveSports, type TicketRequest } from "./ticketOrchestrator";
+import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, getActiveSports, type TicketRequest, type GeneratedTicket } from "./ticketOrchestrator";
+import { analyzeCorrelations, gradeTicket, calculateSharpPublicSplit, generateHedgeAdvice, buildCorrelationMatrix } from "./ticketIntelligence";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "./quantumFusionEngine";
 import * as featuresService from "./featuresService";
 import { communityService } from "./communityService";
@@ -1407,8 +1408,27 @@ Format your response clearly with sections and bullet points.`;
 
       const result = await generateSmartTickets(request);
 
+      const enrichedTickets = result.tickets.map(ticket => {
+        const correlationAlerts = analyzeCorrelations(ticket.legs);
+        const ticketGrade = gradeTicket(ticket);
+        const hedgeAdvice = generateHedgeAdvice(ticket);
+        const correlationMatrix = buildCorrelationMatrix(ticket.legs);
+        const sharpPublicSplits = ticket.legs.map(leg => calculateSharpPublicSplit(leg));
+
+        return {
+          ...ticket,
+          intelligence: {
+            correlationAlerts,
+            ticketGrade,
+            hedgeAdvice,
+            correlationMatrix,
+            sharpPublicSplits,
+          },
+        };
+      });
+
       return res.json({
-        tickets: result.tickets,
+        tickets: enrichedTickets,
         skippedSports: result.skippedSports,
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),
@@ -1455,8 +1475,17 @@ Format your response clearly with sections and bullet points.`;
 
       const result = await regenerateTicketsWithLatestData(request);
 
+      const enrichedTickets = result.tickets.map(ticket => {
+        const correlationAlerts = analyzeCorrelations(ticket.legs);
+        const ticketGrade = gradeTicket(ticket);
+        const hedgeAdvice = generateHedgeAdvice(ticket);
+        const correlationMatrix = buildCorrelationMatrix(ticket.legs);
+        const sharpPublicSplits = ticket.legs.map(leg => calculateSharpPublicSplit(leg));
+        return { ...ticket, intelligence: { correlationAlerts, ticketGrade, hedgeAdvice, correlationMatrix, sharpPublicSplits } };
+      });
+
       return res.json({
-        tickets: result.tickets,
+        tickets: enrichedTickets,
         skippedSports: result.skippedSports,
         engineStats: getQuantumEngineStats(),
         factorCategories: getQuantumFactorCategories(),

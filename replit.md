@@ -4,6 +4,17 @@
 Sors Maxima is a sports betting intelligence platform designed to help users construct more intelligent parlays using **real-time** ESPN game data and multi-bookmaker market odds. It provides statistical analysis, odds comparison, and parlay building tools. The project aims to provide a competitive edge through data-driven decision-making with honest, transparent, and live data sourcing.
 
 ## Recent Changes (Feb 2026)
+- **Exclusive Feature Suite** (20+ new features):
+  - **Ticket Intelligence Engine** (server/ticketIntelligence.ts): Correlation guard (detects negatively correlated parlay legs), A-F ticket grading with factor breakdown, sharp vs public money split per leg, hedge advisor with optimal hedge calculations, SGP correlation matrix builder.
+  - **30+ Bet Types**: First-half/quarter spreads & totals, alternate lines, team totals, player prop variants (points/rebounds/assists/TDs/yards), soccer specials (BTTS, draw no bet, Asian handicap, correct score, match result+BTTS). Deterministic over/under direction selection using ESPN stats.
+  - **EV Heatmap & Arbitrage Scanner** (client/src/pages/ev-heatmap.tsx): Live color-coded EV grid sorted by value, pulsing cards for high-EV games, real-time arbitrage detection.
+  - **Line Movement Timeline & CLV Tracker** (client/src/pages/line-movement.tsx): Opening-to-current line visualization, sharp action badges, closing line value comparison with mock historical data.
+  - **Power Rankings & Bankroll Simulator** (client/src/pages/power-rankings.tsx): Sport-specific power ratings from market data, Monte Carlo bankroll projection with flat/percentage/Kelly strategies.
+  - **Ticket History & Performance** (client/src/pages/ticket-history.tsx): LocalStorage-backed ticket tracker with W/L/push status, ROI calculation, profit chart, sport-by-sport breakdown.
+  - **Betting Profile Builder** (client/src/pages/betting-profile.tsx): Risk tolerance quiz, betting style profiling (Sniper/Balanced/High Roller/Grinder), favorite teams & leagues selection.
+  - **Pro Tools** (client/src/pages/pro-tools.tsx): What-If Scenario Builder, Parlay Optimizer (target payout), Live Cash-Out Calculator.
+  - **SGP Correlation Matrix** (client/src/pages/correlation-matrix.tsx): Visual 9x9 correlation grid for same-game parlay analysis with known betting correlations and insights.
+  - **Shared Tickets & Leaderboard** (client/src/pages/shared-tickets.tsx): Shareable ticket links with watermarks, competitive leaderboard, 3-tier access display (Free/Pro/Elite).
 - **Algorithm Protection Suite** (server/algorithmProtection.ts): HMAC-SHA256 fingerprinting for ticket signing, XOR-cipher obfuscated mathematical constants, proprietary probability transforms (sigmoid warp, Bayesian update, Cholesky correlation, entropy weighting, wavelet denoising), temporal execution guard for anti-debugging, AES-256-GCM state encryption, and anti-replay nonce manager. Every generated ticket now includes a cryptographic signature and one-time nonce.
 - **Data-Driven Quantum Fusion Signals**: Replaced Math.random() signal direction with getDataDrivenDirection() that uses real market data (line movement, sharp money direction, win%, moneyline-implied probability) when MarketContext is provided. Falls back to random when no market data available. Integrated Bayesian probability updates and Shannon entropy-weighted signal fusion into the core probability estimation pipeline.
 - **LSP Error Fixes**: Fixed ESPN team name property references (.name → .displayName/.shortDisplayName) in ticketOrchestrator.ts.

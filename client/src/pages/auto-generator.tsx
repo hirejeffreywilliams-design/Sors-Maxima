@@ -19,10 +19,17 @@ import {
   Copy,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Star,
   RefreshCw,
   ThumbsUp,
-  Trophy
+  Trophy,
+  TrendingUp,
+  TrendingDown,
+  ArrowRightLeft,
+  Eye,
+  Link2,
+  History
 } from "lucide-react";
 import type { GeneratedTicket } from "@/lib/ticket-orchestrator";
 import type { TicketFusion } from "@/lib/quantum-fusion-engine";
@@ -32,6 +39,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
+import { saveTicketToHistory } from "@/pages/ticket-history";
 import { eventTracker } from "@/lib/event-tracker";
 import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
@@ -76,14 +84,16 @@ function getRecommendationLabel(grade: string, ev: number): { label: string; col
   return { label: "Risky Pick", color: "bg-red-400 text-white", icon: <AlertCircle className="w-4 h-4" /> };
 }
 
-function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
+function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket & { intelligence?: any }; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
   const [showLegs, setShowLegs] = useState(index === 0);
+  const [showIntel, setShowIntel] = useState(false);
   const [copied, setCopied] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
 
   const evPercent = ticket.evPercent ?? ticket.expectedValue * 100;
   const rec = getRecommendationLabel(ticket.grade, evPercent);
+  const intel = ticket.intelligence;
   
   const formatOdds = (american: number) => american > 0 ? `+${american}` : `${american}`;
 
@@ -146,6 +156,11 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  const handleSaveToHistory = () => {
+    saveTicketToHistory(ticket);
+    toast({ title: "Saved", description: "Ticket saved to your history" });
+  };
   
   return (
     <Card className={`overflow-hidden ${index === 0 ? "ring-2 ring-primary/50" : ""}`} data-testid={`ticket-card-${ticket.id}`}>
@@ -157,7 +172,23 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
                 {rec.icon}
                 {rec.label}
               </Badge>
+              {intel?.ticketGrade && (
+                <Badge variant="outline" className={`text-xs font-bold ${
+                  intel.ticketGrade.grade === "A" ? "border-green-500 text-green-500" :
+                  intel.ticketGrade.grade === "B" ? "border-blue-500 text-blue-500" :
+                  intel.ticketGrade.grade === "C" ? "border-yellow-500 text-yellow-500" :
+                  "border-red-400 text-red-400"
+                }`} data-testid={`badge-grade-${ticket.id}`}>
+                  Grade: {intel.ticketGrade.grade}
+                </Badge>
+              )}
               {index === 0 && <Badge variant="outline" className="text-xs border-primary/50 text-primary">Top Pick</Badge>}
+              {intel?.correlationAlerts?.some((a: any) => a.type === "negative") && (
+                <Badge variant="outline" className="text-xs border-orange-500 text-orange-500 gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Corr. Warning
+                </Badge>
+              )}
             </div>
             <h3 className="font-semibold text-base sm:text-lg leading-tight" data-testid={`text-ticket-name-${ticket.id}`}>
               {ticket.name}
@@ -214,44 +245,133 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="space-y-2 pt-2">
-            {ticket.legs.map((leg) => (
-              <div key={leg.id} className="p-2.5 bg-muted/30 rounded-lg flex items-center justify-between gap-2" data-testid={`leg-${leg.id}`}>
-                <div className="min-w-0">
-                  <p className="font-medium text-sm truncate" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-xs text-muted-foreground">{leg.team} vs {leg.opponent}</span>
+            {ticket.legs.map((leg, legIdx) => {
+              const split = intel?.sharpPublicSplits?.[legIdx];
+              return (
+                <div key={leg.id} className="p-2.5 bg-muted/30 rounded-lg space-y-1.5" data-testid={`leg-${leg.id}`}>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-xs text-muted-foreground">{leg.team} vs {leg.opponent}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Badge variant="outline" className="text-[10px] h-4 px-1.5">{leg.market}</Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-sm" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</span>
+                      <Button
+                        size="sm"
+                        variant={isInSlip(leg.id) ? "secondary" : "outline"}
+                        className="text-[10px] h-7 px-2"
+                        onClick={() => handleAddLeg(leg)}
+                        disabled={isInSlip(leg.id)}
+                        data-testid={`button-add-leg-slip-${leg.id}`}
+                      >
+                        {isInSlip(leg.id) ? <CheckCircle2 className="w-3 h-3" /> : <Star className="w-3 h-3" />}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 mt-1">
-                    <Badge variant="outline" className="text-[10px] h-4 px-1.5">{leg.market}</Badge>
-                  </div>
+                  {split && (
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500 rounded-full" style={{ width: `${split.sharpPercent}%` }} />
+                      </div>
+                      <span className={`text-[10px] font-medium ${
+                        split.verdict === "sharp_agree" ? "text-blue-500" : 
+                        split.verdict === "sharp_fade" ? "text-orange-500" : "text-muted-foreground"
+                      }`} data-testid={`text-sharp-split-${leg.id}`}>
+                        {split.verdict === "sharp_agree" ? "Sharp" : split.verdict === "sharp_fade" ? "Faded" : `${split.sharpPercent}% Sharp`}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className="font-bold text-sm" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</span>
-                  <Button
-                    size="sm"
-                    variant={isInSlip(leg.id) ? "secondary" : "outline"}
-                    className="text-[10px] h-7 px-2"
-                    onClick={() => handleAddLeg(leg)}
-                    disabled={isInSlip(leg.id)}
-                    data-testid={`button-add-leg-slip-${leg.id}`}
-                  >
-                    {isInSlip(leg.id) ? <CheckCircle2 className="w-3 h-3" /> : <Star className="w-3 h-3" />}
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
           </CollapsibleContent>
         </Collapsible>
 
+        {intel && (
+          <Collapsible open={showIntel} onOpenChange={setShowIntel}>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="w-full justify-between gap-2 h-8 text-muted-foreground" data-testid={`button-intel-${ticket.id}`}>
+                <span className="text-xs flex items-center gap-1.5">
+                  <Eye className="w-3 h-3" />
+                  {showIntel ? "Hide Analysis" : "Show Analysis"}
+                </span>
+                {showIntel ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="space-y-3 pt-1">
+              {intel.correlationAlerts?.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                    <Link2 className="w-3 h-3" /> Correlation Analysis
+                  </p>
+                  {intel.correlationAlerts.map((alert: any, i: number) => (
+                    <div key={i} className={`text-[11px] p-2 rounded-md flex items-start gap-1.5 ${
+                      alert.type === "negative" ? "bg-red-500/10 text-red-400" : "bg-green-500/10 text-green-400"
+                    }`} data-testid={`correlation-alert-${i}`}>
+                      {alert.type === "negative" ? <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> : <CheckCircle2 className="w-3 h-3 mt-0.5 shrink-0" />}
+                      <span>{alert.message}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {intel.ticketGrade && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                    <Trophy className="w-3 h-3" /> Grade Breakdown
+                  </p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {intel.ticketGrade.breakdown?.slice(0, 4).map((b: any, i: number) => (
+                      <div key={i} className="text-[10px] p-1.5 bg-muted/30 rounded">
+                        <span className="text-muted-foreground">{b.factor}:</span>{" "}
+                        <span className="font-medium">{b.score}/{Math.round(b.weight * 100)}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {intel.ticketGrade.strengths?.length > 0 && (
+                    <p className="text-[10px] text-green-500">+ {intel.ticketGrade.strengths[0]}</p>
+                  )}
+                  {intel.ticketGrade.weaknesses?.length > 0 && (
+                    <p className="text-[10px] text-red-400">- {intel.ticketGrade.weaknesses[0]}</p>
+                  )}
+                </div>
+              )}
+
+              {intel.hedgeAdvice?.shouldHedge && (
+                <div className="p-2.5 bg-blue-500/10 rounded-lg border border-blue-500/20 space-y-1">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-blue-400 flex items-center gap-1">
+                    <ArrowRightLeft className="w-3 h-3" /> Hedge Recommendation
+                  </p>
+                  <p className="text-xs font-medium">{intel.hedgeAdvice.hedgeBet?.description}</p>
+                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                    <span>Hedge: <span className="text-foreground font-medium">${intel.hedgeAdvice.hedgeBet?.stake?.toFixed(0) ?? "0"}</span></span>
+                    <span>Lock in: <span className="text-green-500 font-medium">${intel.hedgeAdvice.guaranteedProfit?.toFixed(0) ?? "0"}</span></span>
+                    <span>Risk: <span className="text-foreground font-medium">-{((intel.hedgeAdvice.riskReduction ?? 0) * 100).toFixed(0)}%</span></span>
+                  </div>
+                </div>
+              )}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
         <div className="flex items-center gap-2 pt-1">
           <Button size="sm" className="flex-1 gap-1.5" onClick={handleAddAllLegs} data-testid={`button-add-all-slip-${ticket.id}`}>
             <Star className="w-3.5 h-3.5" />
-            Add All to Slip
+            Add to Slip
           </Button>
-          <Button size="sm" variant="outline" className="flex-1 gap-1.5" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={handleSaveToHistory} data-testid={`button-save-history-${ticket.id}`}>
+            <History className="w-3.5 h-3.5" />
+            Save
+          </Button>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
             <DollarSign className="w-3.5 h-3.5" />
-            Track Bet
+            Track
           </Button>
           <Button size="icon" variant="ghost" className="shrink-0 h-8 w-8" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
             {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
