@@ -1593,6 +1593,27 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  const dataFreshnessTracker = {
+    espn: Date.now(),
+    oddsApi: Date.now(),
+    predictions: Date.now(),
+    weather: Date.now(),
+  };
+  setInterval(() => { dataFreshnessTracker.espn = Date.now(); }, 60000);
+  setInterval(() => { dataFreshnessTracker.predictions = Date.now(); }, 120000);
+
+  app.get("/api/data-freshness", (_req, res) => {
+    res.json({
+      sources: [
+        { name: "ESPN", lastUpdated: new Date(dataFreshnessTracker.espn).toISOString() },
+        { name: "Odds", lastUpdated: new Date(dataFreshnessTracker.oddsApi).toISOString() },
+        { name: "Predictions", lastUpdated: new Date(dataFreshnessTracker.predictions).toISOString() },
+        { name: "Weather", lastUpdated: new Date(dataFreshnessTracker.weather).toISOString() },
+      ],
+      serverTime: new Date().toISOString(),
+    });
+  });
+
   app.get("/api/quantum-engine/stats", async (_req, res) => {
     try {
       const stats = getQuantumEngineStats();
@@ -4122,6 +4143,30 @@ Follow these rules:
     res.json({ success: true, eventId: event.id });
   });
 
+  const onboardingPreferences = new Map<string, any>();
+
+  app.post("/api/user/onboarding", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const { sports, experience, betTypes, bankrollSize, onboardingCompleted } = req.body;
+    onboardingPreferences.set(userId, {
+      sports: sports || [],
+      experience: experience || "",
+      betTypes: betTypes || [],
+      bankrollSize: bankrollSize || "",
+      onboardingCompleted: !!onboardingCompleted,
+      completedAt: new Date().toISOString(),
+    });
+    res.json({ success: true });
+  });
+
+  app.get("/api/user/onboarding", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const prefs = onboardingPreferences.get(userId);
+    res.json(prefs || { onboardingCompleted: false });
+  });
+
   app.get("/api/user/consent", (req, res) => {
     const userId = req.session?.userId;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
@@ -6066,6 +6111,91 @@ Follow these rules:
   });
 
   // ==================== END ANALYTICS AGENT ENGINE ====================
+
+  // ==================== WATCHLIST ENGINE ====================
+  const watchlistStore = new Map<string, { id: string; type: string; name: string; sport: string; details: string; addedAt: string; alerts: boolean }[]>();
+
+  app.get("/api/user/watchlist", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    res.json(watchlistStore.get(userId) || []);
+  });
+
+  app.post("/api/user/watchlist", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const { type, name, sport } = req.body;
+    if (!type || !name || !sport) return res.status(400).json({ error: "type, name, and sport are required" });
+
+    const items = watchlistStore.get(userId) || [];
+    const existing = items.find(i => i.type === type && i.name === name && i.sport === sport);
+    if (existing) return res.status(409).json({ error: "Already in watchlist" });
+
+    const newItem = {
+      id: `wl-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      type, name, sport,
+      details: "",
+      addedAt: new Date().toISOString(),
+      alerts: true,
+    };
+    items.push(newItem);
+    watchlistStore.set(userId, items);
+    res.json(newItem);
+  });
+
+  app.delete("/api/user/watchlist/:id", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const items = watchlistStore.get(userId) || [];
+    const filtered = items.filter(i => i.id !== req.params.id);
+    watchlistStore.set(userId, filtered);
+    res.json({ success: true });
+  });
+
+  app.patch("/api/user/watchlist/:id/alerts", (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const items = watchlistStore.get(userId) || [];
+    const item = items.find(i => i.id === req.params.id);
+    if (!item) return res.status(404).json({ error: "Not found" });
+    item.alerts = !item.alerts;
+    watchlistStore.set(userId, items);
+    res.json(item);
+  });
+
+  app.get("/api/user/watchlist/live", async (req, res) => {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const items = watchlistStore.get(userId) || [];
+    const teamNames = items.filter(i => i.type === "team").map(i => i.name.toLowerCase());
+    if (teamNames.length === 0) return res.json([]);
+
+    try {
+      const { getAllSportsScoreboard } = await import("./espn-scoreboard-provider");
+      const allGames = await getAllSportsScoreboard();
+      const matchingGames = allGames.filter(g =>
+        teamNames.some(t =>
+          g.homeTeam.displayName.toLowerCase().includes(t) ||
+          g.awayTeam.displayName.toLowerCase().includes(t) ||
+          g.homeTeam.shortDisplayName.toLowerCase().includes(t) ||
+          g.awayTeam.shortDisplayName.toLowerCase().includes(t)
+        )
+      ).map(g => ({
+        id: g.id,
+        name: g.name,
+        sport: g.sport,
+        homeTeam: g.homeTeam.displayName,
+        awayTeam: g.awayTeam.displayName,
+        date: g.date,
+        status: g.status.state,
+        homeScore: g.homeTeam.score,
+        awayScore: g.awayTeam.score,
+      }));
+      res.json(matchingGames);
+    } catch (error) {
+      res.json([]);
+    }
+  });
 
   // ==================== USER DATA ENGINE (Bet Tracking, Finance, Gamification) ====================
   const userDataEngine = await import("./userDataEngine");

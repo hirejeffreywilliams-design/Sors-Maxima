@@ -10,6 +10,7 @@ import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
 import { InsightsPanel } from "@/components/insights-panel";
 import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { TodaysBestBets } from "@/components/todays-best-bets";
+import { DataFreshnessBar } from "@/components/data-freshness";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 
@@ -34,6 +35,11 @@ export default function Dashboard() {
 
   const { data: events = [] } = useQuery<SportEvent[]>({
     queryKey: ["/api/odds", "NBA"],
+  });
+
+  const { data: freshnessData } = useQuery<{ sources: { name: string; lastUpdated: string }[] }>({
+    queryKey: ["/api/data-freshness"],
+    refetchInterval: 30000,
   });
 
   const handleLoadParlay = useCallback((legs: ParlayLeg[]) => {
@@ -68,6 +74,11 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-sm sm:text-base">
             Choose games, analyze odds, and optimize your bets
           </p>
+          {freshnessData?.sources && (
+            <div className="flex justify-center pt-1">
+              <DataFreshnessBar sources={freshnessData.sources} />
+            </div>
+          )}
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

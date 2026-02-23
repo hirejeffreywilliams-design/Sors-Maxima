@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
@@ -11,65 +11,67 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import NotFound from "@/pages/not-found";
-import AutoGenerator from "@/pages/auto-generator";
-import Dashboard from "@/pages/dashboard";
 import LoginPage from "@/pages/login";
-import DailyParlays from "@/pages/daily-parlays";
-import Tools from "@/pages/tools";
-import Community from "@/pages/community";
-import Rewards from "@/pages/rewards";
-import Bankroll from "@/pages/bankroll";
-import Live from "@/pages/live";
-import Pricing from "@/pages/pricing";
-import AdminDashboard from "@/pages/admin";
-import AdminDiagnostics from "@/pages/admin-diagnostics";
-import AdminMarketing from "@/pages/admin-marketing";
-import AdminSecurity from "@/pages/admin-security";
-import AdminGrowth from "@/pages/admin-growth";
-import AdminFeatureFlags from "@/pages/admin-feature-flags";
 import LandingPage from "@/pages/landing";
-import LegalPage from "@/pages/legal";
-import Settings from "@/pages/settings";
-import TipsterCommunities from "@/pages/tipster-communities";
-import TrainingCenter from "@/pages/training-center";
-import RostersPage from "@/pages/rosters";
-import HelpCenter from "@/pages/help";
-import ProfilePage from "@/pages/profile";
-import ChangelogPage from "@/pages/changelog";
-import AdminModelPerformance from "@/pages/admin-model-performance";
-import AdminDataProvenance from "@/pages/admin-data-provenance";
-import AdminRiskRegister from "@/pages/admin-risk-register";
-import AdminFinancialProjections from "@/pages/admin-financial-projections";
-import Roadmap from "@/pages/roadmap";
-import AdminUserHealth from "@/pages/admin-user-health";
-import AdminSupportDashboard from "@/pages/admin-support";
-import AdminFraudDashboard from "@/pages/admin-fraud";
-import AdminABTests from "@/pages/admin-ab-tests";
-import AdminLifecycleCampaigns from "@/pages/admin-lifecycle-campaigns";
-import AdminSegmentation from "@/pages/admin-segmentation";
-import AdminPromos from "@/pages/admin-promos";
-import AdminAcquisition from "@/pages/admin-acquisition";
-import AdminAnalyticsDashboard from "@/pages/admin-analytics";
-import AdminOrchestration from "@/pages/admin-orchestration";
-import AdminAssistant from "@/pages/admin-assistant";
-import AdminGuardian from "@/pages/admin-guardian";
-import SportFactorAnalysis from "@/pages/sport-factor-analysis";
-import PipelineIntelligence from "@/pages/pipeline";
-import EVHeatmap from "@/pages/ev-heatmap";
-import LineMovement from "@/pages/line-movement";
-import PowerRankings from "@/pages/power-rankings";
-import TicketHistory from "@/pages/ticket-history";
-import BettingProfile from "@/pages/betting-profile";
-import ProTools from "@/pages/pro-tools";
-import CorrelationMatrix from "@/pages/correlation-matrix";
-import SharedTickets from "@/pages/shared-tickets";
-import OddsCenter from "@/pages/odds-center";
-import PropParlayBuilder from "@/pages/prop-parlay-builder";
-import StraightBets from "@/pages/straight-bets";
-import SGPGenerator from "@/pages/sgp-generator";
-import TeaserGenerator from "@/pages/teaser-generator";
-import RoundRobinGenerator from "@/pages/round-robin-generator";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal, Target, Layers, ArrowUpDown, Shuffle } from "lucide-react";
+const AutoGenerator = lazy(() => import("@/pages/auto-generator"));
+const Dashboard = lazy(() => import("@/pages/dashboard"));
+const DailyParlays = lazy(() => import("@/pages/daily-parlays"));
+const Tools = lazy(() => import("@/pages/tools"));
+const Community = lazy(() => import("@/pages/community"));
+const Rewards = lazy(() => import("@/pages/rewards"));
+const Bankroll = lazy(() => import("@/pages/bankroll"));
+const Live = lazy(() => import("@/pages/live"));
+const Pricing = lazy(() => import("@/pages/pricing"));
+const AdminDashboard = lazy(() => import("@/pages/admin"));
+const AdminDiagnostics = lazy(() => import("@/pages/admin-diagnostics"));
+const AdminMarketing = lazy(() => import("@/pages/admin-marketing"));
+const AdminSecurity = lazy(() => import("@/pages/admin-security"));
+const AdminGrowth = lazy(() => import("@/pages/admin-growth"));
+const AdminFeatureFlags = lazy(() => import("@/pages/admin-feature-flags"));
+const LegalPage = lazy(() => import("@/pages/legal"));
+const Settings = lazy(() => import("@/pages/settings"));
+const TipsterCommunities = lazy(() => import("@/pages/tipster-communities"));
+const TrainingCenter = lazy(() => import("@/pages/training-center"));
+const RostersPage = lazy(() => import("@/pages/rosters"));
+const HelpCenter = lazy(() => import("@/pages/help"));
+const ProfilePage = lazy(() => import("@/pages/profile"));
+const ChangelogPage = lazy(() => import("@/pages/changelog"));
+const AdminModelPerformance = lazy(() => import("@/pages/admin-model-performance"));
+const AdminDataProvenance = lazy(() => import("@/pages/admin-data-provenance"));
+const AdminRiskRegister = lazy(() => import("@/pages/admin-risk-register"));
+const AdminFinancialProjections = lazy(() => import("@/pages/admin-financial-projections"));
+const Roadmap = lazy(() => import("@/pages/roadmap"));
+const AdminUserHealth = lazy(() => import("@/pages/admin-user-health"));
+const AdminSupportDashboard = lazy(() => import("@/pages/admin-support"));
+const AdminFraudDashboard = lazy(() => import("@/pages/admin-fraud"));
+const AdminABTests = lazy(() => import("@/pages/admin-ab-tests"));
+const AdminLifecycleCampaigns = lazy(() => import("@/pages/admin-lifecycle-campaigns"));
+const AdminSegmentation = lazy(() => import("@/pages/admin-segmentation"));
+const AdminPromos = lazy(() => import("@/pages/admin-promos"));
+const AdminAcquisition = lazy(() => import("@/pages/admin-acquisition"));
+const AdminAnalyticsDashboard = lazy(() => import("@/pages/admin-analytics"));
+const AdminOrchestration = lazy(() => import("@/pages/admin-orchestration"));
+const AdminAssistant = lazy(() => import("@/pages/admin-assistant"));
+const AdminGuardian = lazy(() => import("@/pages/admin-guardian"));
+const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
+const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
+const EVHeatmap = lazy(() => import("@/pages/ev-heatmap"));
+const LineMovement = lazy(() => import("@/pages/line-movement"));
+const PowerRankings = lazy(() => import("@/pages/power-rankings"));
+const TicketHistory = lazy(() => import("@/pages/ticket-history"));
+const BettingProfile = lazy(() => import("@/pages/betting-profile"));
+const ProTools = lazy(() => import("@/pages/pro-tools"));
+const CorrelationMatrix = lazy(() => import("@/pages/correlation-matrix"));
+const SharedTickets = lazy(() => import("@/pages/shared-tickets"));
+const OddsCenter = lazy(() => import("@/pages/odds-center"));
+const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
+const StraightBets = lazy(() => import("@/pages/straight-bets"));
+const SGPGenerator = lazy(() => import("@/pages/sgp-generator"));
+const TeaserGenerator = lazy(() => import("@/pages/teaser-generator"));
+const RoundRobinGenerator = lazy(() => import("@/pages/round-robin-generator"));
+const OnboardingPage = lazy(() => import("@/pages/onboarding"));
+const WatchlistPage = lazy(() => import("@/pages/watchlist"));
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal, Target, Layers, ArrowUpDown, Shuffle, Star } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -81,6 +83,17 @@ import { useUTMCapture } from "@/lib/utm-tracker";
 import { AgeVerificationGate } from "@/components/age-verification-gate";
 import { ErrorRecoveryInterceptor } from "@/components/error-recovery-interceptor";
 import { SupportChat } from "@/components/support-chat";
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
+}
 
 function AdminGuard({ component: Component, authState }: { component: React.ComponentType; authState: AuthState }) {
   const [location] = useLocation();
@@ -153,35 +166,37 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
         </div>
       </header>
       <main className="min-h-[calc(100vh-3.5rem)]">
-        <Switch>
-          <Route path="/admin">{() => <AdminGuard component={AdminDashboard} authState={authState} />}</Route>
-          <Route path="/admin/diagnostics">{() => <AdminGuard component={AdminDiagnostics} authState={authState} />}</Route>
-          <Route path="/admin/marketing">{() => <AdminGuard component={AdminMarketing} authState={authState} />}</Route>
-          <Route path="/admin/security">{() => <AdminGuard component={AdminSecurity} authState={authState} />}</Route>
-          <Route path="/admin/growth">{() => <AdminGuard component={AdminGrowth} authState={authState} />}</Route>
-          <Route path="/admin/feature-flags">{() => <AdminGuard component={AdminFeatureFlags} authState={authState} />}</Route>
-          <Route path="/admin/model-performance">{() => <AdminGuard component={AdminModelPerformance} authState={authState} />}</Route>
-          <Route path="/admin/data-provenance">{() => <AdminGuard component={AdminDataProvenance} authState={authState} />}</Route>
-          <Route path="/admin/risk-register">{() => <AdminGuard component={AdminRiskRegister} authState={authState} />}</Route>
-          <Route path="/admin/financial-projections">{() => <AdminGuard component={AdminFinancialProjections} authState={authState} />}</Route>
-          <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
-          <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
-          <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
-          <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
-          <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
-          <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
-          <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
-          <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
-          <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
-          <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
-          <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
-          <Route path="/admin/guardian">{() => <AdminGuard component={AdminGuardian} authState={authState} />}</Route>
-          <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
-          <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
-          <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
-          <Route path="/admin/correlation-matrix">{() => <AdminGuard component={CorrelationMatrix} authState={authState} />}</Route>
-          <Route component={NotFound} />
-        </Switch>
+        <Suspense fallback={<PageLoader />}>
+          <Switch>
+            <Route path="/admin">{() => <AdminGuard component={AdminDashboard} authState={authState} />}</Route>
+            <Route path="/admin/diagnostics">{() => <AdminGuard component={AdminDiagnostics} authState={authState} />}</Route>
+            <Route path="/admin/marketing">{() => <AdminGuard component={AdminMarketing} authState={authState} />}</Route>
+            <Route path="/admin/security">{() => <AdminGuard component={AdminSecurity} authState={authState} />}</Route>
+            <Route path="/admin/growth">{() => <AdminGuard component={AdminGrowth} authState={authState} />}</Route>
+            <Route path="/admin/feature-flags">{() => <AdminGuard component={AdminFeatureFlags} authState={authState} />}</Route>
+            <Route path="/admin/model-performance">{() => <AdminGuard component={AdminModelPerformance} authState={authState} />}</Route>
+            <Route path="/admin/data-provenance">{() => <AdminGuard component={AdminDataProvenance} authState={authState} />}</Route>
+            <Route path="/admin/risk-register">{() => <AdminGuard component={AdminRiskRegister} authState={authState} />}</Route>
+            <Route path="/admin/financial-projections">{() => <AdminGuard component={AdminFinancialProjections} authState={authState} />}</Route>
+            <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
+            <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
+            <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
+            <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
+            <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
+            <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
+            <Route path="/admin/promos">{() => <AdminGuard component={AdminPromos} authState={authState} />}</Route>
+            <Route path="/admin/acquisition">{() => <AdminGuard component={AdminAcquisition} authState={authState} />}</Route>
+            <Route path="/admin/analytics-dashboard">{() => <AdminGuard component={AdminAnalyticsDashboard} authState={authState} />}</Route>
+            <Route path="/admin/orchestration">{() => <AdminGuard component={AdminOrchestration} authState={authState} />}</Route>
+            <Route path="/admin/assistant">{() => <AdminGuard component={AdminAssistant} authState={authState} />}</Route>
+            <Route path="/admin/guardian">{() => <AdminGuard component={AdminGuardian} authState={authState} />}</Route>
+            <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
+            <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
+            <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
+            <Route path="/admin/correlation-matrix">{() => <AdminGuard component={CorrelationMatrix} authState={authState} />}</Route>
+            <Route component={NotFound} />
+          </Switch>
+        </Suspense>
       </main>
     </div>
   );
@@ -189,39 +204,43 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
 
 function Router({ authState }: { authState: AuthState }) {
   return (
-    <Switch>
-      <Route path="/" component={AutoGenerator} />
-      <Route path="/builder" component={Dashboard} />
-      <Route path="/daily" component={DailyParlays} />
-      <Route path="/tools" component={Tools} />
-      <Route path="/community" component={Community} />
-      <Route path="/rewards" component={Rewards} />
-      <Route path="/bankroll" component={Bankroll} />
-      <Route path="/live" component={Live} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/legal" component={LegalPage} />
-      <Route path="/roadmap" component={Roadmap} />
-      <Route path="/settings" component={Settings} />
-      <Route path="/tipster-communities" component={TipsterCommunities} />
-      <Route path="/rosters" component={RostersPage} />
-      <Route path="/help" component={HelpCenter} />
-      <Route path="/profile" component={ProfilePage} />
-      <Route path="/changelog" component={ChangelogPage} />
-      <Route path="/odds-center" component={OddsCenter} />
-      <Route path="/ev-heatmap" component={EVHeatmap} />
-      <Route path="/line-movement" component={LineMovement} />
-      <Route path="/power-rankings" component={PowerRankings} />
-      <Route path="/ticket-history" component={TicketHistory} />
-      <Route path="/betting-profile" component={BettingProfile} />
-      <Route path="/pro-tools" component={ProTools} />
-      <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
-      <Route path="/straight-bets" component={StraightBets} />
-      <Route path="/sgp" component={SGPGenerator} />
-      <Route path="/teasers" component={TeaserGenerator} />
-      <Route path="/round-robin" component={RoundRobinGenerator} />
-      <Route path="/shared-tickets" component={SharedTickets} />
-      <Route component={NotFound} />
-    </Switch>
+    <Suspense fallback={<PageLoader />}>
+      <Switch>
+        <Route path="/" component={AutoGenerator} />
+        <Route path="/builder" component={Dashboard} />
+        <Route path="/daily" component={DailyParlays} />
+        <Route path="/tools" component={Tools} />
+        <Route path="/community" component={Community} />
+        <Route path="/rewards" component={Rewards} />
+        <Route path="/bankroll" component={Bankroll} />
+        <Route path="/live" component={Live} />
+        <Route path="/pricing" component={Pricing} />
+        <Route path="/legal" component={LegalPage} />
+        <Route path="/roadmap" component={Roadmap} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/tipster-communities" component={TipsterCommunities} />
+        <Route path="/rosters" component={RostersPage} />
+        <Route path="/help" component={HelpCenter} />
+        <Route path="/profile" component={ProfilePage} />
+        <Route path="/changelog" component={ChangelogPage} />
+        <Route path="/odds-center" component={OddsCenter} />
+        <Route path="/ev-heatmap" component={EVHeatmap} />
+        <Route path="/line-movement" component={LineMovement} />
+        <Route path="/power-rankings" component={PowerRankings} />
+        <Route path="/ticket-history" component={TicketHistory} />
+        <Route path="/betting-profile" component={BettingProfile} />
+        <Route path="/pro-tools" component={ProTools} />
+        <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
+        <Route path="/straight-bets" component={StraightBets} />
+        <Route path="/sgp" component={SGPGenerator} />
+        <Route path="/teasers" component={TeaserGenerator} />
+        <Route path="/round-robin" component={RoundRobinGenerator} />
+        <Route path="/onboarding" component={OnboardingPage} />
+        <Route path="/watchlist" component={WatchlistPage} />
+        <Route path="/shared-tickets" component={SharedTickets} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 
@@ -243,6 +262,7 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real ESPN game data" },
   { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Parlays - Top picks from today's real games" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
+  { href: "/watchlist", icon: Star, label: "Watchlist", testId: "nav-watchlist", tooltip: "Your Watchlist - Track favorite teams and games" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage scanner" },
   { href: "/ticket-history", icon: History, label: "History", testId: "nav-history", tooltip: "Track your ticket performance and ROI" },
   { href: "/pro-tools", icon: Calculator, label: "Pro Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - What-If, Optimizer, Cash-Out Calculator" },
