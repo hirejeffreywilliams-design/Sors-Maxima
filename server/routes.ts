@@ -6697,6 +6697,90 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     res.json({ venues: getKnownVenues(), count: getKnownVenues().length, dataSource: "Open-Meteo (free)" });
   });
 
+  // ==================== PROP PARLAY BUILDER ====================
+
+  app.post("/api/prop-parlays", async (req, res) => {
+    try {
+      const { generatePropParlays } = await import("./propParlayEngine");
+      const {
+        sports = ["NBA"],
+        legCount = 3,
+        riskLevel = "moderate",
+        targetPayout,
+        includeProps = true,
+        includeMoneylines = true,
+        includeSpreads = true,
+        includeTotals = true,
+        stake = 10,
+      } = req.body;
+
+      const parlays = await generatePropParlays({
+        sports: Array.isArray(sports) ? sports : [sports],
+        legCount: Math.min(10, Math.max(2, legCount)),
+        riskLevel,
+        targetPayout,
+        includeProps,
+        includeMoneylines,
+        includeSpreads,
+        includeTotals,
+        stake,
+      });
+
+      res.json({
+        parlays,
+        meta: {
+          requestedLegs: legCount,
+          riskLevel,
+          sportsQueried: sports,
+          generatedAt: new Date().toISOString(),
+        },
+      });
+    } catch (e: any) {
+      console.error("[prop-parlays] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/prop-parlays/legs/:sport", async (req, res) => {
+    try {
+      const { getAvailableLegs } = await import("./propParlayEngine");
+      const sport = req.params.sport;
+      const legs = await getAvailableLegs(sport);
+      res.json(legs);
+    } catch (e: any) {
+      console.error("[prop-legs] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/real-player-props/:sport", async (req, res) => {
+    try {
+      const { fetchRealPlayerProps, isOddsApiAvailable } = await import("./odds-provider");
+      const sport = req.params.sport;
+      const maxEvents = parseInt(req.query.maxEvents as string) || 5;
+
+      if (!isOddsApiAvailable()) {
+        return res.json({
+          props: [],
+          available: false,
+          message: "The Odds API key is not configured or expired. Using ESPN-derived data.",
+          dataSource: "none",
+        });
+      }
+
+      const props = await fetchRealPlayerProps(sport, maxEvents);
+      res.json({
+        props,
+        available: true,
+        count: props.length,
+        dataSource: "The Odds API (live)",
+      });
+    } catch (e: any) {
+      console.error("[real-props] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ==================== END ALL FEATURE ROUTES ====================
 
   return httpServer;

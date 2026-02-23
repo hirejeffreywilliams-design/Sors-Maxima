@@ -1134,3 +1134,225 @@ export async function refreshOddsForSport(sport: Sport): Promise<SportEvent[]> {
   oddsCache.set(sport, { events, timestamp: Date.now() });
   return events;
 }
+
+export interface RealPlayerProp {
+  eventId: string;
+  sportKey: string;
+  homeTeam: string;
+  awayTeam: string;
+  commenceTime: string;
+  playerName: string;
+  market: string;
+  marketLabel: string;
+  line: number;
+  overOdds: number;
+  underOdds: number;
+  overDecimal: number;
+  underDecimal: number;
+  bookmaker: string;
+  allBookmakers: {
+    bookmaker: string;
+    overOdds: number;
+    underOdds: number;
+    line: number;
+  }[];
+  bestOver: { bookmaker: string; odds: number };
+  bestUnder: { bookmaker: string; odds: number };
+  consensusLine: number;
+  overImpliedProb: number;
+  underImpliedProb: number;
+  dataSource: "The Odds API (live)";
+}
+
+const PLAYER_PROP_MARKETS: Record<string, string[]> = {
+  NBA: ["player_points", "player_rebounds", "player_assists", "player_threes", "player_points_rebounds_assists"],
+  NFL: ["player_pass_yds", "player_pass_tds", "player_rush_yds", "player_reception_yds", "player_receptions", "player_anytime_td"],
+  MLB: ["batter_hits", "batter_total_bases", "batter_rbis", "batter_home_runs", "pitcher_strikeouts"],
+  NHL: ["player_points", "player_shots_on_goal", "player_anytime_goalscorer"],
+  NCAAB: ["player_points", "player_rebounds", "player_assists"],
+  NCAAF: ["player_pass_yds", "player_rush_yds", "player_reception_yds", "player_anytime_td"],
+};
+
+const MARKET_LABELS: Record<string, string> = {
+  player_points: "Points", player_rebounds: "Rebounds", player_assists: "Assists",
+  player_threes: "3-Pointers", player_blocks: "Blocks", player_steals: "Steals",
+  player_points_rebounds_assists: "Pts+Reb+Ast", player_points_rebounds: "Pts+Reb",
+  player_points_assists: "Pts+Ast", player_rebounds_assists: "Reb+Ast",
+  player_pass_yds: "Pass Yards", player_pass_tds: "Pass TDs", player_pass_completions: "Completions",
+  player_rush_yds: "Rush Yards", player_rush_attempts: "Rush Attempts",
+  player_reception_yds: "Rec Yards", player_receptions: "Receptions",
+  player_anytime_td: "Anytime TD", player_1st_td: "First TD",
+  batter_hits: "Hits", batter_total_bases: "Total Bases", batter_rbis: "RBIs",
+  batter_home_runs: "Home Runs", batter_runs_scored: "Runs", batter_strikeouts: "Strikeouts",
+  pitcher_strikeouts: "Strikeouts (K)", pitcher_hits_allowed: "Hits Allowed",
+  player_shots_on_goal: "Shots on Goal", player_anytime_goalscorer: "Anytime Goal",
+};
+
+const playerPropsCache = new Map<string, { data: RealPlayerProp[]; timestamp: number }>();
+const PROPS_CACHE_TTL = 5 * 60 * 1000;
+
+async function fetchEventIds(sport: string): Promise<{ id: string; home_team: string; away_team: string; commence_time: string }[]> {
+  if (!THE_ODDS_API_KEY) return [];
+  const sportKey = mapSportToOddsApiKey(sport);
+  if (!sportKey) return [];
+
+  const cacheKey = `events-${sport}`;
+  const cached = oddsApiCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp) < ODDS_CACHE_TTL) {
+    return cached.data.map(g => ({ id: g.id, home_team: g.home_team, away_team: g.away_team, commence_time: g.commence_time }));
+  }
+
+  const url = `${THE_ODDS_API_BASE}/${sportKey}/events?apiKey=${THE_ODDS_API_KEY}`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Events API error: ${response.status}`);
+    const data = await response.json();
+    return data.map((e: any) => ({ id: e.id, home_team: e.home_team, away_team: e.away_team, commence_time: e.commence_time }));
+  } catch (error) {
+    logWarn(`Failed to fetch events for ${sport}: ${error}`);
+    return [];
+  }
+}
+
+async function fetchPlayerPropsForEvent(
+  sport: string,
+  eventId: string,
+  markets: string[]
+): Promise<any> {
+  if (!THE_ODDS_API_KEY) return null;
+  const sportKey = mapSportToOddsApiKey(sport);
+  if (!sportKey) return null;
+
+  const marketsStr = markets.join(",");
+  const url = `${THE_ODDS_API_BASE}/${sportKey}/events/${eventId}/odds?apiKey=${THE_ODDS_API_KEY}&regions=us&markets=${marketsStr}&oddsFormat=american`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      if (response.status === 422) return null;
+      throw new Error(`Props API error: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    logWarn(`Failed to fetch props for event ${eventId}: ${error}`);
+    return null;
+  }
+}
+
+export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5): Promise<RealPlayerProp[]> {
+  const cacheKey = `props-${sport}`;
+  const cached = playerPropsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp) < PROPS_CACHE_TTL) {
+    return cached.data;
+  }
+
+  const sportUpper = sport.toUpperCase();
+  const markets = PLAYER_PROP_MARKETS[sportUpper];
+  if (!markets || !THE_ODDS_API_KEY) return [];
+
+  const events = await fetchEventIds(sport);
+  const now = Date.now();
+  const upcomingEvents = events
+    .filter(e => new Date(e.commence_time).getTime() > now)
+    .slice(0, maxEvents);
+
+  if (upcomingEvents.length === 0) return [];
+
+  const allProps: RealPlayerProp[] = [];
+
+  const batchSize = 3;
+  for (let i = 0; i < upcomingEvents.length; i += batchSize) {
+    const batch = upcomingEvents.slice(i, i + batchSize);
+    const results = await Promise.all(
+      batch.map(event => fetchPlayerPropsForEvent(sport, event.id, markets))
+    );
+
+    for (let j = 0; j < results.length; j++) {
+      const data = results[j];
+      const event = batch[j];
+      if (!data || !data.bookmakers) continue;
+
+      for (const marketKey of markets) {
+        const playerMap = new Map<string, {
+          overPrices: { bookmaker: string; price: number; point: number }[];
+          underPrices: { bookmaker: string; price: number; point: number }[];
+        }>();
+
+        for (const bookmaker of data.bookmakers) {
+          const market = bookmaker.markets?.find((m: any) => m.key === marketKey);
+          if (!market) continue;
+
+          for (const outcome of market.outcomes) {
+            const playerName = outcome.description;
+            if (!playerName) continue;
+
+            if (!playerMap.has(playerName)) {
+              playerMap.set(playerName, { overPrices: [], underPrices: [] });
+            }
+            const entry = playerMap.get(playerName)!;
+
+            if (outcome.name === "Over") {
+              entry.overPrices.push({ bookmaker: bookmaker.title, price: outcome.price, point: outcome.point || 0 });
+            } else if (outcome.name === "Under") {
+              entry.underPrices.push({ bookmaker: bookmaker.title, price: outcome.price, point: outcome.point || 0 });
+            }
+          }
+        }
+
+        const playerEntries = Array.from(playerMap.entries());
+        for (const [playerName, prices] of playerEntries) {
+          if (prices.overPrices.length === 0 || prices.underPrices.length === 0) continue;
+
+          type PriceEntry = { bookmaker: string; price: number; point: number };
+          const consensusLine = prices.overPrices.reduce((s: number, p: PriceEntry) => s + p.point, 0) / prices.overPrices.length;
+          const bestOver = prices.overPrices.reduce((best: PriceEntry, p: PriceEntry) => p.price > best.price ? p : best, prices.overPrices[0]);
+          const bestUnder = prices.underPrices.reduce((best: PriceEntry, p: PriceEntry) => p.price > best.price ? p : best, prices.underPrices[0]);
+          const firstOver = prices.overPrices[0];
+          const firstUnder = prices.underPrices[0];
+
+          const overDecimal = americanToDecimal(firstOver.price);
+          const underDecimal = americanToDecimal(firstUnder.price);
+
+          allProps.push({
+            eventId: event.id,
+            sportKey: sport,
+            homeTeam: event.home_team,
+            awayTeam: event.away_team,
+            commenceTime: event.commence_time,
+            playerName,
+            market: marketKey,
+            marketLabel: MARKET_LABELS[marketKey] || marketKey,
+            line: firstOver.point,
+            overOdds: firstOver.price,
+            underOdds: firstUnder.price,
+            overDecimal,
+            underDecimal,
+            bookmaker: firstOver.bookmaker,
+            allBookmakers: prices.overPrices.map((op: PriceEntry, idx: number) => ({
+              bookmaker: op.bookmaker,
+              overOdds: op.price,
+              underOdds: prices.underPrices[idx]?.price || firstUnder.price,
+              line: op.point,
+            })),
+            bestOver: { bookmaker: bestOver.bookmaker, odds: bestOver.price },
+            bestUnder: { bookmaker: bestUnder.bookmaker, odds: bestUnder.price },
+            consensusLine,
+            overImpliedProb: 1 / overDecimal,
+            underImpliedProb: 1 / underDecimal,
+            dataSource: "The Odds API (live)",
+          });
+        }
+      }
+    }
+  }
+
+  playerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
+  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${upcomingEvents.length} events`);
+  return allProps;
+}
+
+export function isOddsApiAvailable(): boolean {
+  return !!THE_ODDS_API_KEY;
+}
+
+export { mapSportToOddsApiKey, fetchOddsApi, MARKET_LABELS, PLAYER_PROP_MARKETS };

@@ -63,6 +63,7 @@ import ProTools from "@/pages/pro-tools";
 import CorrelationMatrix from "@/pages/correlation-matrix";
 import SharedTickets from "@/pages/shared-tickets";
 import OddsCenter from "@/pages/odds-center";
+import PropParlayBuilder from "@/pages/prop-parlay-builder";
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -207,6 +208,7 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/ticket-history" component={TicketHistory} />
       <Route path="/betting-profile" component={BettingProfile} />
       <Route path="/pro-tools" component={ProTools} />
+      <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
       <Route path="/shared-tickets" component={SharedTickets} />
       <Route component={NotFound} />
     </Switch>
@@ -299,6 +301,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <nav className="space-y-1 pb-2">
           {([
             { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
+            { href: "/prop-parlay-builder", icon: Brain, label: "Prop Parlay Builder", testId: "mobile-nav-prop-parlay" },
             { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },
             { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
             { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "mobile-nav-rosters" },
