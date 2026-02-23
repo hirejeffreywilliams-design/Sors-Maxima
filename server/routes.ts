@@ -1044,7 +1044,7 @@ export async function registerRoutes(
         messages: [
           {
             role: "system",
-            content: "You are a marketing expert for Sors Maxima, an AI-powered sports betting intelligence platform. Create compelling, conversion-focused content. The platform offers a 7-day free Pro trial, subscription tiers (Free, Pro $29, Elite $99, Whale $499), and AI-powered betting analysis."
+            content: "You are a marketing expert for Sors Maxima, an exclusive AI-powered sports betting intelligence platform. Create compelling, conversion-focused content. The platform offers three members-only tiers: Sharp ($49/mo), Edge ($99/mo), and Max ($249/mo), each with AI-powered 46-factor betting analysis."
           },
           { role: "user", content: fullPrompt }
         ],
@@ -2063,7 +2063,7 @@ Format your response clearly with sections and bullet points.`;
 
   app.get("/api/subscription", (req, res) => {
     if (!req.session?.isAuthenticated || !req.session?.username) {
-      return res.json({ tier: 'free', status: 'none' });
+      return res.json({ tier: 'none', status: 'none' });
     }
     
     const subscription = stripeService.getUserSubscription(req.session.username);
@@ -3796,15 +3796,18 @@ Format your response clearly with sections and bullet points.`;
 
   // === AI Credits ===
   app.get("/api/credits", (_req, res) => {
-    const tier = _req.session?.isAuthenticated ? "free" : "free";
+    const tier = _req.session?.isAuthenticated ? "sharp" : "none";
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     tomorrow.setUTCHours(0, 0, 0, 0);
 
+    const creditLimits: Record<string, number> = { sharp: 50, edge: 300, max: 9999, none: 0 };
+    const total = creditLimits[tier] || 50;
+
     res.json({
       used: 2,
-      total: 5,
+      total,
       tier,
       resetsAt: tomorrow.toISOString(),
     });
@@ -4717,16 +4720,16 @@ Follow these rules:
       category: "account",
       keywords: ["register", "sign up", "create account", "new account", "registration", "join"],
       question: "How do I create a new account?",
-      answer: "To create a new account, click the 'Sign Up' button on the landing page. You'll need to provide a username, email address, and password. After registration, you'll have access to the free tier features. You can upgrade to Pro, Elite, or Whale tier at any time from the Pricing page.",
+      answer: "To create a new account, click the 'Sign Up' button on the landing page. You'll need to provide a username, email address, and password. After registration, choose a subscription tier (Sharp, Edge, or Max) from the Pricing page to start using the platform.",
       actionable: false,
       autoResolveEligible: true
     },
     {
       id: "kb_subscription_tiers",
       category: "billing",
-      keywords: ["subscription", "tiers", "plans", "pricing", "pro", "elite", "whale", "free", "upgrade", "downgrade", "plan"],
+      keywords: ["subscription", "tiers", "plans", "pricing", "sharp", "edge", "max", "upgrade", "downgrade", "plan"],
       question: "What subscription tiers are available?",
-      answer: "Sors Maxima offers four subscription tiers: Free (basic access with limited features), Pro ($29/month - includes Pro Tools, advanced analytics, and priority support), Elite ($79/month - includes everything in Pro plus Sors Prediction Engine, AI credits, and exclusive strategies), and Whale ($199/month - includes everything in Elite plus unlimited AI credits, personal advisor, and white-glove support). Visit the Pricing page for full details.",
+      answer: "Sors Maxima offers three exclusive subscription tiers: Sharp ($49/month - full 46-factor engine, 25 daily tickets, +EV finder, and bet grading), Edge ($99/month - everything in Sharp plus unlimited tickets, AI assistant, prop projections, line movement alerts, and SGP optimizer), and Max ($249/month - everything in Edge plus unlimited AI credits, custom model builder, hedge & arbitrage tools, priority processing, and direct support). Visit the Pricing page for full details.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -4771,7 +4774,7 @@ Follow these rules:
       category: "technical",
       keywords: ["pro tools", "advanced tools", "premium tools", "pro features", "edge finder", "arbitrage", "sharp money"],
       question: "What are the Pro Tools?",
-      answer: "Pro Tools is a suite of advanced analytical features available to Pro tier and above subscribers. It includes: Edge Finder (identifies value bets), Arbitrage Scanner (finds risk-free opportunities), Sharp Money Tracker (follows professional bettor movements), CLV Predictor (closing line value analysis), Correlation Engine (models leg dependencies), and Key Number Analyzer (identifies important scoring thresholds). Access Pro Tools from the Tools page.",
+      answer: "Pro Tools is a suite of advanced analytical features available to all Sors Maxima members. It includes: Edge Finder (identifies value bets), Arbitrage Scanner (finds risk-free opportunities), Sharp Money Tracker (follows professional bettor movements), CLV Predictor (closing line value analysis), Correlation Engine (models leg dependencies), and Key Number Analyzer (identifies important scoring thresholds). Access Pro Tools from the Tools page. Some advanced tools require Edge or Max tier.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -4861,7 +4864,7 @@ Follow these rules:
       category: "billing",
       keywords: ["ai credits", "credits", "credit limit", "out of credits", "buy credits", "credit balance", "ai usage", "credit system"],
       question: "How does the AI credits system work?",
-      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Sors Prediction Engine analysis, and AI betting assistant chat. Free tier users receive a limited number of credits per month. Pro users get 500 credits/month, Elite users get 2000 credits/month, and Whale users get unlimited credits. Credits reset at the beginning of each billing cycle. You can track your credit usage in Settings > Subscription.",
+      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Sors Prediction Engine analysis, and AI betting assistant chat. Sharp members get 50 credits/day, Edge members get 300 credits/day, and Max members get unlimited credits. Credits reset daily at midnight UTC. You can track your credit usage on the Pricing page or in Settings.",
       actionable: false,
       autoResolveEligible: true
     },

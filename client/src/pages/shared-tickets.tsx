@@ -10,7 +10,6 @@ import {
   Crown,
   Medal,
   Lock,
-  Unlock,
   Copy,
   CheckCircle2,
   Star,
@@ -381,50 +380,51 @@ function TierAccessTab() {
 
   const tiers = [
     {
-      name: "Free",
-      price: "$0",
-      period: "",
+      name: "Sharp",
+      price: "$49",
+      period: "/mo",
       current: true,
-      icon: <Unlock className="w-5 h-5" />,
+      icon: <Shield className="w-5 h-5 text-blue-500" />,
       features: [
-        "3 tickets per day",
-        "Basic grade analysis",
-        "Standard odds display",
+        "25 tickets per day",
+        "Full 46-factor engine",
+        "+EV finder & bet grading",
+        "ROI dashboard",
       ],
       limitations: [
-        "No EV heatmap",
-        "No line movement alerts",
-        "No pro tools",
+        "No AI assistant",
+        "No prop projections",
+        "No arbitrage scanner",
       ],
     },
     {
-      name: "Pro",
-      price: "$29",
+      name: "Edge",
+      price: "$99",
       period: "/mo",
       current: false,
-      icon: <Shield className="w-5 h-5 text-blue-500" />,
+      icon: <Zap className="w-5 h-5 text-purple-500" />,
       features: [
         "Unlimited tickets",
-        "Full intelligence reports",
-        "EV heatmap access",
+        "AI Betting Assistant",
+        "Prop projections",
         "Line movement alerts",
-        "Advanced grading",
+        "SGP optimizer",
       ],
       limitations: [],
     },
     {
-      name: "Elite",
-      price: "$99",
+      name: "Max",
+      price: "$249",
       period: "/mo",
       current: false,
-      icon: <Zap className="w-5 h-5 text-yellow-500" />,
+      icon: <Crown className="w-5 h-5 text-amber-500" />,
       features: [
-        "Everything in Pro",
-        "Hedge advisor",
-        "Arbitrage scanner",
-        "Priority alerts",
-        "API access",
-        "Dedicated support",
+        "Everything in Edge",
+        "Unlimited AI credits",
+        "Custom model builder",
+        "Hedge & arbitrage tools",
+        "Priority processing",
+        "Direct support",
       ],
       limitations: [],
     },
@@ -436,17 +436,17 @@ function TierAccessTab() {
         <CardContent className="p-4 flex items-center justify-between gap-3 flex-wrap">
           <div>
             <p className="text-sm font-medium">Daily Usage</p>
-            <p className="text-xs text-muted-foreground">Free tier: 3 tickets/day</p>
+            <p className="text-xs text-muted-foreground">Sharp tier: 25 tickets/day</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
               <div
                 className="h-full bg-primary rounded-full transition-all"
-                style={{ width: `${Math.min((dailyUsage / 3) * 100, 100)}%` }}
+                style={{ width: `${Math.min((dailyUsage / 25) * 100, 100)}%` }}
               />
             </div>
             <span className="text-sm font-bold" data-testid="text-daily-usage">
-              {dailyUsage}/3
+              {dailyUsage}/25
             </span>
           </div>
         </CardContent>
