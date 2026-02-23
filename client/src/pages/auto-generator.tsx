@@ -466,23 +466,31 @@ export default function AutoGenerator() {
                   </button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="pt-2 space-y-2">
-                  <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Soccer data coming soon — not yet available for ticket generation
-                  </p>
                   <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
-                    {soccerConfig.map(sport => (
-                      <Button
-                        key={sport.id}
-                        variant="outline"
-                        className="h-auto py-2 flex-col gap-0 text-[10px] opacity-40 cursor-not-allowed"
-                        disabled
-                        data-testid={`button-sport-${sport.id}`}
-                      >
-                        <span className="font-bold text-xs">{sport.name}</span>
-                        <span className="text-[9px]">Coming Soon</span>
-                      </Button>
-                    ))}
+                    {soccerConfig.map(sport => {
+                      const sportInfo = activeSportsMap.get(sport.id);
+                      const isActive = !sportInfo || sportInfo.active;
+                      const gameCount = sportInfo?.gameCount || 0;
+                      return (
+                        <Button
+                          key={sport.id}
+                          variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                          className={`h-auto py-2 flex-col gap-0 text-[10px] ${
+                            selectedSports.includes(sport.id) ? sport.color : ""
+                          } ${!isActive ? "opacity-50" : ""}`}
+                          onClick={() => toggleSport(sport.id)}
+                          data-testid={`button-sport-${sport.id}`}
+                        >
+                          <span className="font-bold text-xs">{sport.name}</span>
+                          {sportInfo && isActive && (
+                            <span className="text-[9px] opacity-70">{gameCount} games</span>
+                          )}
+                          {sportInfo && !isActive && (
+                            <span className="text-[9px] opacity-90">No Games</span>
+                          )}
+                        </Button>
+                      );
+                    })}
                   </div>
                 </CollapsibleContent>
               </Collapsible>

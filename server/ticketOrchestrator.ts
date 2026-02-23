@@ -5,6 +5,7 @@ import { analyticsAgent } from "./analyticsAgentEngine";
 import { getPlayersFromCacheById, getTeamsFromCache, type ESPNPlayer } from "./espn-roster-provider";
 import { getModelWeights, applyModelWeights } from "./historicalLearningEngine";
 import { fetchRealOddsForGame } from "./odds-provider";
+import { fetchSoccerFixtures, getActiveSoccerLeagues, isSoccerSport, type SoccerFixture } from "./api-football-provider";
 import { protectionSuite } from "./algorithmProtection";
 
 function generateUniqueId(): string {
@@ -653,13 +654,27 @@ async function getESPNGamesForSport(sport: Sport): Promise<ESPNScoreboardGame[]>
 
 export async function getActiveSports(): Promise<{ sport: string; gameCount: number; active: boolean }[]> {
   const allSports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
-  const results = await Promise.all(
+  const espnResults = await Promise.all(
     allSports.map(async (sport) => {
       const games = await getESPNGamesForSport(sport);
       return { sport, gameCount: games.length, active: games.length > 0 };
     })
   );
-  return results;
+
+  let soccerResults: { sport: string; gameCount: number; active: boolean }[] = [];
+  try {
+    const soccerLeagues = await getActiveSoccerLeagues();
+    soccerResults = soccerLeagues.map(s => ({
+      sport: s.sport,
+      gameCount: s.gameCount,
+      active: s.active,
+    }));
+  } catch {
+    const soccerIds = ["Soccer_EPL", "Soccer_LALIGA", "Soccer_BUNDESLIGA", "Soccer_SERIEA", "Soccer_LIGUE1", "Soccer_MLS", "Soccer_UCL", "Soccer_INTL"];
+    soccerResults = soccerIds.map(id => ({ sport: id, gameCount: 0, active: false }));
+  }
+
+  return [...espnResults, ...soccerResults];
 }
 
 function resolveGameOdds(game: ESPNScoreboardGame, sport: Sport): {
@@ -968,6 +983,93 @@ function generateLegFromESPNGame(
     dataSources: {
       odds: oddsSource,
       game: gameSource,
+      injury: "estimated",
+      analysis: "Statistical Model",
+    },
+  };
+}
+
+function generateLegFromSoccerFixture(
+  fixture: SoccerFixture,
+  sportId: string,
+  marketType: "moneyline" | "spread" | "total",
+  realOdds?: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number; bookmakerCount: number; source: string }
+): TicketLeg {
+  const homeTeam = fixture.homeTeam.name;
+  const awayTeam = fixture.awayTeam.name;
+  const isHomeTeam = Math.random() > 0.45;
+  const selectedTeam = isHomeTeam ? homeTeam : awayTeam;
+  const opponent = isHomeTeam ? awayTeam : homeTeam;
+
+  let market = "";
+  let outcome = "";
+  let line: number | undefined;
+  let decimalOdds = 1.91;
+  let oddsSource: "ESPN" | "ESPN-derived" | "model-estimated" = "model-estimated";
+
+  const homeML = realOdds?.homeMoneyline ?? (Math.random() > 0.5 ? -(100 + Math.floor(Math.random() * 150)) : (100 + Math.floor(Math.random() * 200)));
+  const awayML = realOdds?.awayMoneyline ?? (homeML < 0 ? (100 + Math.floor(Math.random() * 200)) : -(100 + Math.floor(Math.random() * 150)));
+  const spreadVal = realOdds?.spread ?? (Math.round((Math.random() * 3 - 1.5) * 2) / 2);
+  const totalVal = realOdds?.total ?? (2 + Math.round(Math.random() * 2 * 2) / 2);
+
+  if (realOdds) {
+    oddsSource = "ESPN-derived";
+  }
+
+  if (marketType === "moneyline") {
+    market = "Moneyline";
+    const ml = isHomeTeam ? homeML : awayML;
+    decimalOdds = americanToDecimal(ml);
+    outcome = `${selectedTeam} ML`;
+  } else if (marketType === "spread") {
+    market = "Spread";
+    const sv = isHomeTeam ? -spreadVal : spreadVal;
+    line = sv;
+    decimalOdds = americanToDecimal(-110);
+    outcome = `${selectedTeam} ${sv > 0 ? "+" : ""}${sv}`;
+  } else if (marketType === "total") {
+    market = "Total Goals";
+    line = totalVal;
+    const isOver = Math.random() > 0.5;
+    decimalOdds = americanToDecimal(-110);
+    outcome = `${isOver ? "Over" : "Under"} ${totalVal}`;
+  }
+
+  const americanOdds = decimalToAmerican(decimalOdds);
+  const description = `${selectedTeam} ${market} ${outcome}`;
+  const legFusion = analyzeLeg("NBA" as Sport, description, americanOdds);
+
+  let winProbability = legFusion.winProbability / 100;
+  winProbability = Math.min(0.95, Math.max(0.05, winProbability));
+  const edgePercent = legFusion.edgePercentage;
+
+  const sharpSignal = legFusion.signals.find(s => s.source === "sharp_money_flow");
+  const sharpAction = sharpSignal ? sharpSignal.direction === "bullish" : Math.random() > 0.7;
+  const lineMovement: "steam" | "reverse" | "stable" = Math.random() > 0.7 ? "steam" : Math.random() > 0.4 ? "stable" : "reverse";
+  const publicPercent = Math.floor(Math.random() * 40) + 30;
+  const confidenceLevel: "high" | "medium" | "low" = winProbability > 0.55 ? "high" : winProbability > 0.4 ? "medium" : "low";
+
+  return {
+    id: generateUniqueId(),
+    team: selectedTeam,
+    opponent,
+    market,
+    outcome,
+    line,
+    decimalOdds,
+    americanOdds,
+    winProbability,
+    edgePercent,
+    analysis: {
+      sharpAction,
+      lineMovement,
+      publicPercent,
+      confidenceLevel,
+    },
+    legFusion,
+    dataSources: {
+      odds: oddsSource,
+      game: fixture.status === "NS" ? "scheduled" : "ESPN Live",
       injury: "estimated",
       analysis: "Statistical Model",
     },
@@ -1416,10 +1518,118 @@ export async function generateTickets(request: TicketRequest): Promise<{ tickets
   const skippedSports: string[] = [];
 
   for (const sport of request.sports) {
-    const isSoccer = sport.startsWith("Soccer_");
+    const isSoccer = isSoccerSport(sport);
     
     if (isSoccer) {
-      skippedSports.push(sport);
+      const fixtures = await fetchSoccerFixtures(sport);
+      if (fixtures.length === 0) {
+        skippedSports.push(sport);
+        continue;
+      }
+
+      const soccerOddsMap = new Map<string, Awaited<ReturnType<typeof fetchRealOddsForGame>>>();
+      const oddsPromises = fixtures.map(async (fixture) => {
+        const odds = await fetchRealOddsForGame(sport, fixture.homeTeam.name, fixture.awayTeam.name);
+        if (odds) {
+          soccerOddsMap.set(fixture.id, odds);
+        }
+      });
+      await Promise.all(oddsPromises);
+
+      for (let i = 0; i < ticketsToGenerate; i++) {
+        const numLegs = Math.min(
+          legCounts[Math.floor(Math.random() * legCounts.length)],
+          request.maxLegs
+        );
+        const legs: TicketLeg[] = [];
+        const soccerMarkets: ("moneyline" | "spread" | "total")[] = ["moneyline", "spread", "total"];
+        for (let j = 0; j < numLegs; j++) {
+          const marketType = soccerMarkets[Math.floor(Math.random() * soccerMarkets.length)];
+          const fixture = fixtures[Math.floor(Math.random() * fixtures.length)];
+          const fixtureOdds = soccerOddsMap.get(fixture.id);
+          legs.push(generateLegFromSoccerFixture(fixture, sport, marketType, fixtureOdds || undefined));
+        }
+
+        if (legs.length === 0) continue;
+
+        const totalOdds = calculateCombinedOdds(legs);
+        const americanOdds = decimalToAmerican(totalOdds);
+        const fusionSport = "NBA" as Sport;
+        const fusionData = analyzeTicket(
+          legs.map((leg) => ({
+            id: leg.id,
+            sport: fusionSport,
+            description: `${leg.team} ${leg.market} ${leg.outcome}`,
+            odds: leg.americanOdds,
+            context: {
+              hasRealOdds: leg.dataSources?.odds !== "model-estimated",
+              bookmakerCount: 0,
+              oddsSource: leg.dataSources?.odds || "model-estimated",
+              lineMovement: 0,
+            },
+          })),
+          request.riskLevel
+        );
+
+        const cf = fusionData.combinedFusion;
+        const overallConfidence = cf.confidence;
+        const grade = cf.grade;
+        const evPercent = cf.edgePercentage;
+        const expectedValue = evPercent / 100;
+        const recommendedStake = Math.max(1, Math.round(request.bankroll * (overallConfidence / 100) * 0.02));
+
+        const gameNames = legs.map(l => `${l.team} vs ${l.opponent}`);
+        const uniqueGames = Array.from(new Set(gameNames));
+        const displayName = uniqueGames.length <= 2
+          ? uniqueGames.join(" + ")
+          : `${uniqueGames[0]} + ${uniqueGames.length - 1} more`;
+
+        const winProbability = legs.reduce((acc, l) => acc * l.winProbability, 1);
+        const confidenceScore = overallConfidence / 100;
+        const potentialPayout = recommendedStake * totalOdds;
+        const riskRating: "low" | "medium" | "high" = totalOdds > 8 ? "high" : totalOdds > 3 ? "medium" : "low";
+        const confidenceTag: "low" | "medium" | "high" = overallConfidence >= 71 ? "high" : overallConfidence >= 41 ? "medium" : "low";
+
+        candidateTickets.push({
+          id: generateUniqueId(),
+          name: displayName,
+          sport,
+          legs,
+          totalOdds,
+          americanOdds,
+          winProbability,
+          expectedValue,
+          confidenceScore,
+          evPercent,
+          grade,
+          recommendedStake,
+          potentialPayout,
+          riskRating,
+          analysisFactors: {
+            quantumCoachingScore: 0.5,
+            quantumPlayerScore: 0.5,
+            quantumTeamScore: 0.5,
+            mlProjectionScore: 0.5,
+            correlationScore: 0.5,
+            sharpMoneyScore: 0.5,
+            lineValueScore: 0.5,
+            momentumScore: 0.5,
+            situationalScore: 0.5,
+            cashoutEligibility: 0.5,
+          },
+          rationale: buildRationale(fusionData, legs),
+          cashoutProbability: 0.5,
+          fusionData,
+          consensusProbability: winProbability,
+          modelDisagreement: 0,
+          sourceSignals: ["API-Football", "The Odds API"],
+          riskFactors: [],
+          confidenceTag,
+          calibrationInfo: { historicalHitRate: 0.5, sampleSize: 0, marketSlice: sport },
+          recommendedAlternatives: [],
+        });
+      }
+
       continue;
     }
     
@@ -1577,9 +1787,7 @@ export async function generateTickets(request: TicketRequest): Promise<{ tickets
         possibleInefficiency: avgOddsMovement > 4,
       };
 
-      const ticketName = isSoccer && soccerInfo
-        ? generateTicketName("NBA" as Sport, i, request.riskLevel, legs)
-        : generateTicketName(sport as Sport, i, request.riskLevel, legs);
+      const ticketName = generateTicketName(sport as Sport, i, request.riskLevel, legs);
 
       const ticket: GeneratedTicket = {
         id: generateUniqueId(),
@@ -1611,9 +1819,7 @@ export async function generateTickets(request: TicketRequest): Promise<{ tickets
         analyticsAgentData: agentData,
       };
       
-      ticket.rationale = isSoccer && soccerInfo
-        ? buildSoccerRationale(legs, soccerInfo.league, soccerInfo.displayName)
-        : buildRationale(fusionData, legs);
+      ticket.rationale = buildRationale(fusionData, legs);
       
       candidateTickets.push(ticket);
     }

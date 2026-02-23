@@ -42,8 +42,16 @@ function mapSportToOddsApiKey(sport: string): string | null {
     NHL: "icehockey_nhl",
     NCAAB: "basketball_ncaab",
     NCAAF: "americanfootball_ncaaf",
+    Soccer_EPL: "soccer_epl",
+    Soccer_LALIGA: "soccer_spain_la_liga",
+    Soccer_BUNDESLIGA: "soccer_germany_bundesliga",
+    Soccer_SERIEA: "soccer_italy_serie_a",
+    Soccer_LIGUE1: "soccer_france_ligue_one",
+    Soccer_MLS: "soccer_usa_mls",
+    Soccer_UCL: "soccer_uefa_champs_league",
+    Soccer_INTL: "soccer_fifa_world_cup",
   };
-  return mapping[sport.toUpperCase()] || null;
+  return mapping[sport] || mapping[sport.toUpperCase()] || null;
 }
 
 async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
@@ -1050,7 +1058,7 @@ export function getOddsForSport(sport: Sport): SportEvent[] {
 }
 
 export async function fetchRealOddsForGame(
-  sport: Sport,
+  sport: Sport | string,
   homeTeam: string,
   awayTeam: string
 ): Promise<{
