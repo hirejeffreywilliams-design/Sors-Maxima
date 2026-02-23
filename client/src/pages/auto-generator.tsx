@@ -1,104 +1,80 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { 
   Sparkles, 
-  TrendingUp, 
   DollarSign, 
   Target, 
   Zap, 
   ChevronDown, 
   ChevronUp,
-  Check,
-  Brain,
-  BarChart3,
   Shield,
-  Clock,
   Users,
-  Activity,
   Loader2,
   Copy,
   CheckCircle2,
   AlertCircle,
   Star,
-  Radio,
   RefreshCw,
-  HelpCircle,
-  Bell,
-  GripVertical
+  ThumbsUp,
+  Trophy
 } from "lucide-react";
 import type { GeneratedTicket } from "@/lib/ticket-orchestrator";
 import type { TicketFusion } from "@/lib/quantum-fusion-engine";
 import type { Sport } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
-import { useLiveOddsStatus } from "@/hooks/use-live-odds";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
-import { BettingInsights } from "@/components/betting-insights";
-import { SchemeRecognition, SchemeAlertBanner } from "@/components/scheme-recognition";
-import { QuantumFusionEngineBanner, TicketFusionDisplay } from "@/components/quantum-fusion-display";
-import { DataSourceStatus } from "@/components/data-source-status";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
-import { VisualParlayBuilder } from "@/components/visual-parlay-builder";
-import { getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { eventTracker } from "@/lib/event-tracker";
 import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 
-const sportConfig: { id: string; name: string; color: string; icon: string; league?: string }[] = [
-  { id: "NBA", name: "NBA", color: "bg-orange-500", icon: "" },
-  { id: "NFL", name: "NFL", color: "bg-green-600", icon: "" },
-  { id: "MLB", name: "MLB", color: "bg-red-500", icon: "" },
-  { id: "NHL", name: "NHL", color: "bg-blue-500", icon: "" },
-  { id: "NCAAB", name: "College Basketball", color: "bg-purple-500", icon: "" },
-  { id: "NCAAF", name: "College Football", color: "bg-amber-600", icon: "" },
-  { id: "Soccer_EPL", name: "Premier League", color: "bg-indigo-500", icon: "" },
-  { id: "Soccer_LALIGA", name: "La Liga", color: "bg-rose-500", icon: "" },
-  { id: "Soccer_BUNDESLIGA", name: "Bundesliga", color: "bg-red-600", icon: "" },
-  { id: "Soccer_SERIEA", name: "Serie A", color: "bg-sky-600", icon: "" },
-  { id: "Soccer_LIGUE1", name: "Ligue 1", color: "bg-cyan-600", icon: "" },
-  { id: "Soccer_MLS", name: "MLS", color: "bg-emerald-600", icon: "" },
-  { id: "Soccer_UCL", name: "Champions League", color: "bg-violet-600", icon: "" },
-  { id: "Soccer_INTL", name: "International", color: "bg-teal-600", icon: "" },
+const sportConfig: { id: string; name: string; color: string }[] = [
+  { id: "NBA", name: "Basketball", color: "bg-orange-500" },
+  { id: "NFL", name: "Football", color: "bg-green-600" },
+  { id: "MLB", name: "Baseball", color: "bg-red-500" },
+  { id: "NHL", name: "Hockey", color: "bg-blue-500" },
+  { id: "NCAAB", name: "College Hoops", color: "bg-purple-500" },
+  { id: "NCAAF", name: "College Football", color: "bg-amber-600" },
 ];
 
-function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
-  const [expanded, setExpanded] = useState(index < 2);
+const soccerConfig: { id: string; name: string; color: string }[] = [
+  { id: "Soccer_EPL", name: "Premier League", color: "bg-indigo-500" },
+  { id: "Soccer_LALIGA", name: "La Liga", color: "bg-rose-500" },
+  { id: "Soccer_BUNDESLIGA", name: "Bundesliga", color: "bg-red-600" },
+  { id: "Soccer_SERIEA", name: "Serie A", color: "bg-sky-600" },
+  { id: "Soccer_LIGUE1", name: "Ligue 1", color: "bg-cyan-600" },
+  { id: "Soccer_MLS", name: "MLS", color: "bg-emerald-600" },
+  { id: "Soccer_UCL", name: "Champions League", color: "bg-violet-600" },
+  { id: "Soccer_INTL", name: "International", color: "bg-teal-600" },
+];
+
+function getRecommendationLabel(grade: string, ev: number): { label: string; color: string; icon: React.ReactNode } {
+  if (grade.startsWith("A")) return { label: "Best Pick", color: "bg-green-500 text-white", icon: <Trophy className="w-4 h-4" /> };
+  if (grade === "B+" || grade === "B") return { label: "Great Pick", color: "bg-blue-500 text-white", icon: <ThumbsUp className="w-4 h-4" /> };
+  if (grade.startsWith("B")) return { label: "Good Pick", color: "bg-blue-400 text-white", icon: <ThumbsUp className="w-4 h-4" /> };
+  if (grade.startsWith("C") && ev > 0) return { label: "Decent Pick", color: "bg-yellow-500 text-white", icon: <Star className="w-4 h-4" /> };
+  if (grade.startsWith("C")) return { label: "Fair Pick", color: "bg-yellow-500/80 text-white", icon: <Star className="w-4 h-4" /> };
+  return { label: "Risky Pick", color: "bg-red-400 text-white", icon: <AlertCircle className="w-4 h-4" /> };
+}
+
+function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; index: number; onPlaceBet: (ticket: GeneratedTicket) => void }) {
+  const [showLegs, setShowLegs] = useState(index === 0);
   const [copied, setCopied] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
 
-  const handleAddLegToSlip = (leg: any) => {
-    const slipLeg: ParlaySlipLeg = {
-      id: leg.id,
-      team: leg.team,
-      opponent: leg.opponent,
-      market: leg.market as any,
-      outcome: leg.outcome,
-      decimalOdds: leg.decimalOdds,
-      americanOdds: leg.americanOdds,
-      playerName: leg.playerName,
-      propCategory: leg.propCategory,
-      propLine: leg.line,
-      addedFrom: "Smart Generator",
-      addedAt: new Date().toISOString(),
-      sport: ticket.sport,
-      confidence: leg.winProbability ? Math.round(leg.winProbability * 100) : undefined,
-      evPercent: leg.edgePercent,
-    };
-    const added = addLeg(slipLeg);
-    if (added) {
-      toast({ title: "Added to Slip", description: `${leg.outcome} added to your parlay slip` });
-    }
-  };
+  const evPercent = ticket.evPercent ?? ticket.expectedValue * 100;
+  const rec = getRecommendationLabel(ticket.grade, evPercent);
+  
+  const formatOdds = (american: number) => american > 0 ? `+${american}` : `${american}`;
 
   const handleAddAllLegs = () => {
     let addedCount = 0;
@@ -125,25 +101,32 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
       }
     });
     if (addedCount > 0) {
-      toast({ title: "Added to Slip", description: `${addedCount} leg${addedCount > 1 ? "s" : ""} added to your parlay slip` });
+      toast({ title: "Added to Slip", description: `${addedCount} pick${addedCount > 1 ? "s" : ""} added to your parlay slip` });
     }
   };
-  
-  const formatOdds = (american: number) => {
-    return american > 0 ? `+${american}` : `${american}`;
-  };
-  
-  const getGradeColor = (grade: string) => {
-    if (grade.startsWith("A")) return "text-green-500";
-    if (grade.startsWith("B")) return "text-blue-500";
-    if (grade.startsWith("C")) return "text-yellow-500";
-    return "text-red-500";
-  };
-  
-  const getRiskColor = (risk: string) => {
-    if (risk === "low") return "bg-green-500/20 text-green-500";
-    if (risk === "medium") return "bg-yellow-500/20 text-yellow-500";
-    return "bg-red-500/20 text-red-500";
+
+  const handleAddLeg = (leg: any) => {
+    const slipLeg: ParlaySlipLeg = {
+      id: leg.id,
+      team: leg.team,
+      opponent: leg.opponent,
+      market: leg.market as any,
+      outcome: leg.outcome,
+      decimalOdds: leg.decimalOdds,
+      americanOdds: leg.americanOdds,
+      playerName: leg.playerName,
+      propCategory: leg.propCategory,
+      propLine: leg.line,
+      addedFrom: "Smart Generator",
+      addedAt: new Date().toISOString(),
+      sport: ticket.sport,
+      confidence: leg.winProbability ? Math.round(leg.winProbability * 100) : undefined,
+      evPercent: leg.edgePercent,
+    };
+    const added = addLeg(slipLeg);
+    if (added) {
+      toast({ title: "Added", description: `${leg.outcome} added to your parlay slip` });
+    }
   };
   
   const copyToClipboard = () => {
@@ -154,296 +137,115 @@ function TicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTicket; in
   };
   
   return (
-    <Card className="overflow-hidden" data-testid={`ticket-card-${ticket.id}`}>
-      <CardHeader className="pb-2">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="secondary">{ticket.sport}</Badge>
-            <span className={`text-2xl font-bold ${getGradeColor(ticket.grade)}`} data-testid={`text-grade-${ticket.id}`}>
-              {ticket.grade}
-            </span>
-            <Badge className={getRiskColor(ticket.riskRating)}>
-              {ticket.riskRating.charAt(0).toUpperCase() + ticket.riskRating.slice(1)} Risk
-            </Badge>
-          </div>
-          <CardTitle className="text-base sm:text-lg" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</CardTitle>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button size="icon" variant="ghost" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
-              {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleAddAllLegs} data-testid={`button-add-all-slip-${ticket.id}`}>
-              <Star className="w-4 h-4 mr-1" />
-              Add to Slip
-            </Button>
-            <Button size="sm" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
-              <DollarSign className="w-4 h-4" />
-              Track This Bet
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Win Prob</p>
-            <p className="text-lg sm:text-xl font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>
-              {(ticket.winProbability * 100).toFixed(1)}%
-            </p>
-          </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">EV%</p>
-            <p className={`text-lg sm:text-xl font-bold ${(ticket.evPercent ?? ticket.expectedValue * 100) >= 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-ev-${ticket.id}`}>
-              {(ticket.evPercent ?? ticket.expectedValue * 100) >= 0 ? "+" : ""}{(ticket.evPercent ?? (ticket.expectedValue * 100)).toFixed(1)}%
-            </p>
-          </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Total Odds</p>
-            <p className="text-lg sm:text-xl font-bold" data-testid={`text-odds-${ticket.id}`}>
-              {formatOdds(ticket.americanOdds)}
-            </p>
-          </div>
-          <div className="text-center p-3 bg-muted/50 rounded-lg">
-            <p className="text-xs text-muted-foreground mb-1">Confidence</p>
-            <div className="flex items-center justify-center gap-2">
-              <Progress value={ticket.confidenceScore * 100} className="h-2 w-12 sm:w-16" />
-              <span className="text-sm font-semibold">{(ticket.confidenceScore * 100).toFixed(0)}%</span>
+    <Card className={`overflow-hidden ${index === 0 ? "ring-2 ring-primary/50" : ""}`} data-testid={`ticket-card-${ticket.id}`}>
+      <CardContent className="p-4 sm:p-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1.5 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge className={`${rec.color} gap-1 text-xs font-semibold`} data-testid={`badge-rec-${ticket.id}`}>
+                {rec.icon}
+                {rec.label}
+              </Badge>
+              {index === 0 && <Badge variant="outline" className="text-xs border-primary/50 text-primary">Top Pick</Badge>}
             </div>
-            {ticket.confidenceTag && (
-              <Badge variant="outline" className="text-xs mt-1">{ticket.confidenceTag}</Badge>
-            )}
+            <h3 className="font-semibold text-base sm:text-lg leading-tight" data-testid={`text-ticket-name-${ticket.id}`}>
+              {ticket.name}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {ticket.legs.length} pick{ticket.legs.length > 1 ? "s" : ""} · {ticket.sport}
+            </p>
           </div>
         </div>
 
-        {(ticket.consensusProbability || ticket.modelDisagreement !== undefined) && (
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-2 bg-muted/30 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Consensus Prob</p>
-              <p className="text-sm font-semibold" data-testid={`text-consensus-${ticket.id}`}>
-                {((ticket.consensusProbability ?? 0) * 100).toFixed(1)}%
-              </p>
-            </div>
-            <div className="text-center p-2 bg-muted/30 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">Model Agreement</p>
-              <p className="text-sm font-semibold" data-testid={`text-disagreement-${ticket.id}`}>
-                {(100 - (ticket.modelDisagreement ?? 0) * 100).toFixed(0)}%
-              </p>
-            </div>
-            {ticket.marketMovement && (
-              <div className="text-center p-2 bg-muted/30 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">Line Movement</p>
-                <p className={`text-sm font-semibold ${ticket.marketMovement.possibleInefficiency ? "text-yellow-500" : ""}`}>
-                  {ticket.marketMovement.direction === "up" ? "+" : ticket.marketMovement.direction === "down" ? "-" : ""}{ticket.marketMovement.percentChange}%
-                  {ticket.marketMovement.possibleInefficiency && " *"}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-        
-        <div className="grid grid-cols-2 gap-3 p-3 sm:p-4 bg-primary/5 rounded-lg border border-primary/20">
-          <div>
-            <p className="text-xs sm:text-sm text-muted-foreground">Recommended Stake</p>
-            <p className="text-lg sm:text-2xl font-bold text-primary" data-testid={`text-stake-${ticket.id}`}>
-              ${ticket.recommendedStake.toFixed(2)}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="text-center p-2.5 bg-muted/50 rounded-lg">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Win Chance</p>
+            <p className="text-base sm:text-lg font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>
+              {(ticket.winProbability * 100).toFixed(0)}%
             </p>
           </div>
-          <div className="text-right">
-            <p className="text-xs sm:text-sm text-muted-foreground">Potential Payout</p>
-            <p className="text-lg sm:text-2xl font-bold text-green-500" data-testid={`text-payout-${ticket.id}`}>
-              ${ticket.potentialPayout.toFixed(2)}
+          <div className="text-center p-2.5 bg-muted/50 rounded-lg">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Odds</p>
+            <p className="text-base sm:text-lg font-bold" data-testid={`text-odds-${ticket.id}`}>
+              {formatOdds(ticket.americanOdds)}
+            </p>
+          </div>
+          <div className="text-center p-2.5 bg-muted/50 rounded-lg">
+            <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Value</p>
+            <p className={`text-base sm:text-lg font-bold ${evPercent >= 0 ? "text-green-500" : "text-red-400"}`} data-testid={`text-ev-${ticket.id}`}>
+              {evPercent >= 0 ? "+" : ""}{evPercent.toFixed(0)}%
             </p>
           </div>
         </div>
-        
-        <Collapsible open={expanded} onOpenChange={setExpanded}>
+
+        <div className="flex items-center justify-between gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
+          <div>
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Suggested Bet</p>
+            <p className="text-lg sm:text-xl font-bold text-primary" data-testid={`text-stake-${ticket.id}`}>
+              ${ticket.recommendedStake.toFixed(0)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] sm:text-xs text-muted-foreground">Could Win</p>
+            <p className="text-lg sm:text-xl font-bold text-green-500" data-testid={`text-payout-${ticket.id}`}>
+              ${ticket.potentialPayout.toFixed(0)}
+            </p>
+          </div>
+        </div>
+
+        <Collapsible open={showLegs} onOpenChange={setShowLegs}>
           <CollapsibleTrigger asChild>
-            <Button variant="ghost" className="w-full justify-between gap-2" data-testid={`button-expand-${ticket.id}`}>
-              <span className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                {ticket.legs.length} Legs
+            <Button variant="ghost" size="sm" className="w-full justify-between gap-2 h-9" data-testid={`button-expand-${ticket.id}`}>
+              <span className="text-sm">
+                {showLegs ? "Hide Picks" : `Show ${ticket.legs.length} Picks`}
               </span>
-              {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showLegs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
             </Button>
           </CollapsibleTrigger>
-          <CollapsibleContent className="space-y-3 pt-3">
-            {ticket.legs.map((leg, idx) => (
-              <div key={leg.id} className="p-3 bg-muted/30 rounded-lg space-y-2" data-testid={`leg-${leg.id}`}>
-                <div className="flex items-start justify-between gap-3 flex-wrap">
-                  <div>
-                    <p className="font-medium" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
-                    <p className="text-sm text-muted-foreground">{leg.team} vs {leg.opponent}</p>
+          <CollapsibleContent className="space-y-2 pt-2">
+            {ticket.legs.map((leg) => (
+              <div key={leg.id} className="p-2.5 bg-muted/30 rounded-lg flex items-center justify-between gap-2" data-testid={`leg-${leg.id}`}>
+                <div className="min-w-0">
+                  <p className="font-medium text-sm truncate" data-testid={`text-leg-outcome-${leg.id}`}>{leg.outcome}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-xs text-muted-foreground">{leg.team} vs {leg.opponent}</span>
                   </div>
-                  <div className="text-right flex flex-col items-end gap-1">
-                    <p className="font-bold" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</p>
-                    <Badge variant="outline" className="text-xs">{leg.market}</Badge>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Badge variant="outline" className="text-[10px] h-4 px-1.5">{leg.market}</Badge>
                   </div>
                 </div>
-                {leg.dataSources && (
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <Badge variant="outline" className="text-[10px] gap-0.5 py-0 h-5 bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-400">
-                      <Radio className="w-2.5 h-2.5" />
-                      {leg.dataSources.odds}
-                    </Badge>
-                    <Badge variant="outline" className="text-[10px] gap-0.5 py-0 h-5 bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-400">
-                      {leg.dataSources.game}
-                    </Badge>
-                  </div>
-                )}
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2 text-xs flex-wrap">
-                    <Badge variant={leg.analysis.sharpAction ? "default" : "secondary"} className="text-xs">
-                      {leg.analysis.sharpAction ? "Sharp Action" : "Public Bet"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {leg.analysis.lineMovement === "steam" ? "Steam Move" : 
-                       leg.analysis.lineMovement === "reverse" ? "Reverse Line" : "Stable Line"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {leg.edgePercent >= 0 ? "+" : ""}{leg.edgePercent.toFixed(1)}% Edge
-                    </Badge>
-                  </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="font-bold text-sm" data-testid={`text-leg-odds-${leg.id}`}>{formatOdds(leg.americanOdds)}</span>
                   <Button
                     size="sm"
                     variant={isInSlip(leg.id) ? "secondary" : "outline"}
-                    className="text-xs h-7 px-2 shrink-0"
-                    onClick={() => handleAddLegToSlip(leg)}
+                    className="text-[10px] h-7 px-2"
+                    onClick={() => handleAddLeg(leg)}
                     disabled={isInSlip(leg.id)}
                     data-testid={`button-add-leg-slip-${leg.id}`}
                   >
-                    {isInSlip(leg.id) ? (
-                      <><CheckCircle2 className="w-3 h-3 mr-1" /> In Slip</>
-                    ) : (
-                      <><Star className="w-3 h-3 mr-1" /> Add to Slip</>
-                    )}
+                    {isInSlip(leg.id) ? <CheckCircle2 className="w-3 h-3" /> : <Star className="w-3 h-3" />}
                   </Button>
                 </div>
               </div>
             ))}
-            
-            <div className="pt-3 border-t space-y-2">
-              <p className="text-sm font-medium flex items-center gap-2">
-                <Brain className="w-4 h-4 text-purple-500" />
-                Analysis Rationale
-              </p>
-              <div className="space-y-1">
-                {ticket.rationale.map((reason, idx) => (
-                  <p key={idx} className="text-sm text-muted-foreground flex items-start gap-2">
-                    <Check className="w-4 h-4 text-green-500 mt-0.5 shrink-0" />
-                    {reason}
-                  </p>
-                ))}
-              </div>
-            </div>
-            
-            {ticket.sourceSignals && ticket.sourceSignals.length > 0 && (
-              <div className="pt-3 border-t space-y-2">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-yellow-500" />
-                  Source Signals
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {ticket.sourceSignals.map((signal, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs capitalize">{signal}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {ticket.riskFactors && ticket.riskFactors.length > 0 && (
-              <div className="pt-3 border-t space-y-2">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-red-500" />
-                  Risk Factors
-                </p>
-                <div className="space-y-1">
-                  {ticket.riskFactors.map((risk, idx) => (
-                    <p key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                      <Shield className="w-3 h-3 mt-0.5 text-red-400 shrink-0" />
-                      {risk}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {ticket.calibrationInfo && (
-              <div className="pt-3 border-t space-y-2">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-cyan-500" />
-                  Calibration
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2 bg-muted/30 rounded">
-                    <span className="text-muted-foreground">Model Hit Rate (simulated): </span>
-                    <span className="font-medium">{(ticket.calibrationInfo.historicalHitRate * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="p-2 bg-muted/30 rounded">
-                    <span className="text-muted-foreground">Sample Size: </span>
-                    <span className="font-medium">{ticket.calibrationInfo.sampleSize.toLocaleString()}</span>
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground">Market slice: {ticket.calibrationInfo.marketSlice}</p>
-              </div>
-            )}
-
-            {ticket.recommendedAlternatives && ticket.recommendedAlternatives.length > 0 && (
-              <div className="pt-3 border-t space-y-2">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-purple-500" />
-                  Alternative Plays
-                </p>
-                {ticket.recommendedAlternatives.map((alt, idx) => (
-                  <div key={idx} className="p-2 bg-muted/20 rounded-lg text-xs space-y-1">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span className="font-medium">{alt.selection}</span>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="text-xs">{alt.market}</Badge>
-                        <span className={alt.evPercent >= 0 ? "text-green-500" : "text-red-500"}>
-                          {alt.evPercent >= 0 ? "+" : ""}{alt.evPercent}% EV
-                        </span>
-                      </div>
-                    </div>
-                    <p className="text-muted-foreground">{alt.rationale}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="pt-3 border-t">
-              <p className="text-sm font-medium mb-2 flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-blue-500" />
-                Analysis Scores (Model Estimated)
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Coaching Analysis</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumCoachingScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Player Analysis</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumPlayerScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Team Dynamics</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.quantumTeamScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">ML Projections</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.mlProjectionScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Sharp Money</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.sharpMoneyScore * 100).toFixed(0)}%</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 p-2 bg-muted/30 rounded">
-                  <span className="text-muted-foreground truncate">Cashout</span>
-                  <span className="font-medium shrink-0">{(ticket.analysisFactors.cashoutEligibility * 100).toFixed(0)}%</span>
-                </div>
-              </div>
-            </div>
           </CollapsibleContent>
         </Collapsible>
+
+        <div className="flex items-center gap-2 pt-1">
+          <Button size="sm" className="flex-1 gap-1.5" onClick={handleAddAllLegs} data-testid={`button-add-all-slip-${ticket.id}`}>
+            <Star className="w-3.5 h-3.5" />
+            Add All to Slip
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1 gap-1.5" onClick={() => onPlaceBet(ticket)} data-testid={`button-place-bet-${ticket.id}`}>
+            <DollarSign className="w-3.5 h-3.5" />
+            Track Bet
+          </Button>
+          <Button size="icon" variant="ghost" className="shrink-0 h-8 w-8" onClick={copyToClipboard} data-testid={`button-copy-${ticket.id}`}>
+            {copied ? <CheckCircle2 className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
@@ -456,19 +258,16 @@ export default function AutoGenerator() {
   const [maxLegs, setMaxLegs] = useState(4);
   const [includeProps, setIncludeProps] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [showSoccer, setShowSoccer] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [tickets, setTickets] = useState<GeneratedTicket[]>([]);
   const [ticketFusions, setTicketFusions] = useState<TicketFusion[]>([]);
   const [hasGenerated, setHasGenerated] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [reminderSet, setReminderSet] = useState(false);
   const [confirmTicket, setConfirmTicket] = useState<GeneratedTicket | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
-  const [lastDataRefresh, setLastDataRefresh] = useState<string | null>(null);
-  const [responseSources, setResponseSources] = useState<{ primary?: string; analysis?: string; agent?: string } | null>(null);
   
-  const { data: liveStatus, refetch: refetchStatus } = useLiveOddsStatus();
   const { toast } = useToast();
   
   useEffect(() => {
@@ -529,13 +328,6 @@ export default function AutoGenerator() {
         .filter((f): f is TicketFusion => !!f);
       setTicketFusions(fusions);
       
-      if (data.dataSources) {
-        setResponseSources(data.dataSources);
-      }
-      if (data.generatedAt) {
-        setLastDataRefresh(data.generatedAt);
-      }
-      
       setHasGenerated(true);
     } catch (err) {
       toast({
@@ -551,59 +343,32 @@ export default function AutoGenerator() {
   
   const handleQuickPick = async () => {
     setIsGenerating(true);
-    
     const quickSports: string[] = ["NBA", "NFL", "MLB"];
     setSelectedSports(quickSports);
-    
     await fetchTicketsFromBackend(quickSports, 500, "moderate", 3, true);
-  };
-  
-  const handleSetReminder = () => {
-    if ("Notification" in window) {
-      Notification.requestPermission().then(permission => {
-        if (permission === "granted") {
-          setReminderSet(true);
-          setTimeout(() => {
-            new Notification("Sors Maxima", {
-              body: "Time to check today's best betting opportunities!",
-              icon: "/favicon.ico"
-            });
-          }, 4 * 60 * 60 * 1000);
-        } else {
-          setReminderSet(true);
-        }
-      });
-    } else {
-      setReminderSet(true);
-    }
   };
   
   const handleGenerate = async () => {
     if (selectedSports.length === 0) return;
-    
     setIsGenerating(true);
-    
     await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps);
   };
   
   const handleRecalculate = async () => {
     if (selectedSports.length === 0) return;
-    
     setIsRecalculating(true);
-    
     await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps, "/api/recalculate-predictions");
-    
     toast({
-      title: "Predictions Refreshed",
-      description: "Tickets regenerated with the latest live data from ESPN and our analytics engine.",
+      title: "Refreshed",
+      description: "Tickets updated with the latest live data.",
     });
   };
   
-  const getRiskDescription = (level: string) => {
+  const getRiskLabel = (level: string) => {
     switch (level) {
-      case "conservative": return "Lower odds, higher win probability (2-3 legs)";
-      case "moderate": return "Balanced risk and reward (3-4 legs)";
-      case "aggressive": return "Higher odds, lower win probability (4-6 legs)";
+      case "conservative": return "Safer bets, smaller payouts";
+      case "moderate": return "Balanced risk & reward";
+      case "aggressive": return "Bigger payouts, lower win chance";
       default: return "";
     }
   };
@@ -618,307 +383,192 @@ export default function AutoGenerator() {
         onConfirm={handleConfirmBet}
       />
       
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
-          <p className="text-xs text-yellow-600 dark:text-yellow-400">
-            <AlertCircle className="w-3 h-3 inline mr-1" />
-            <strong>For entertainment & educational purposes only.</strong> Analysis is based on statistical models and is not guaranteed betting advice. 
-            Past performance does not guarantee future results. Please gamble responsibly.
-          </p>
-        </div>
-
-        <DataSourceStatus />
-
-        <Tabs defaultValue="generator" className="space-y-6">
-          <div className="flex justify-center">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="generator" className="gap-2" data-testid="tab-smart-generator">
-                <Sparkles className="w-4 h-4" />
-                Smart Generator
-              </TabsTrigger>
-              <TabsTrigger value="visual" className="gap-2" data-testid="tab-visual-builder">
-                <GripVertical className="w-4 h-4" />
-                Visual Builder
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="visual" className="space-y-4">
-            <VisualParlayBuilder
-              onLegsChange={() => {}}
-              onStakeChange={() => {}}
-              onResultChange={() => {}}
-              bankroll={bankroll}
-              bettingEnv={getDefaultBettingEnvironment()}
-            />
-          </TabsContent>
-
-          <TabsContent value="generator" className="space-y-6">
-        
-        <header className="text-center space-y-3">
+      <div className="max-w-screen-md mx-auto px-4 sm:px-6 py-6 space-y-5">
+        <header className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-primary shrink-0" />
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">
+            <Sparkles className="w-6 h-6 text-primary" />
+            <h1 className="text-xl sm:text-2xl font-bold">
               Smart Ticket Generator
             </h1>
           </div>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-2">
-            Select your sports, and our AI engine will analyze 46 factors to generate 
-            optimal betting tickets.
+          <p className="text-sm text-muted-foreground">
+            Pick your sports, tap Generate, and get optimized betting tickets backed by real data.
           </p>
-          
-          <div className="flex items-center justify-center gap-2 sm:gap-4 pt-2 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <Radio className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${liveStatus?.available ? 'text-green-500 animate-pulse' : 'text-yellow-500'}`} />
-              <span className="text-xs sm:text-sm">
-                {liveStatus?.available ? (
-                  <span className="text-green-600 dark:text-green-400">Live Odds</span>
-                ) : (
-                  <span className="text-yellow-600 dark:text-yellow-400">Demo Mode</span>
-                )}
-              </span>
-            </div>
-            {liveStatus?.requestsRemaining !== null && liveStatus?.requestsRemaining !== undefined && (
-              <Badge variant="outline" className="text-xs hidden sm:inline-flex">
-                {liveStatus.requestsRemaining} API calls
-              </Badge>
-            )}
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              onClick={() => refetchStatus()}
-              data-testid="button-refresh-status"
-            >
-              <RefreshCw className="w-3 h-3" />
-            </Button>
-          </div>
-          
-          <div className="grid grid-cols-2 sm:flex sm:items-center sm:justify-center gap-2 sm:gap-3 pt-2">
-            <Button
-              onClick={handleQuickPick}
-              disabled={isGenerating}
-              className="w-full sm:w-auto"
-              data-testid="button-quick-pick"
-            >
-              <Zap className="w-4 h-4" />
-              Quick Pick
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleSetReminder}
-              disabled={reminderSet}
-              className="w-full sm:w-auto gap-2"
-              data-testid="button-set-reminder"
-            >
-              <Bell className="w-4 h-4" />
-              {reminderSet ? "Set" : "Remind Me"}
-            </Button>
-            <div className="col-span-2 flex justify-center sm:col-span-1">
-              <TutorialButton onClick={() => setShowTutorial(true)} />
-            </div>
+          <div className="flex items-center justify-center gap-2 pt-1">
+            <TutorialButton onClick={() => setShowTutorial(true)} />
           </div>
         </header>
-        
+
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Target className="w-5 h-5 text-primary" />
-              Select Your Sports
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
-              {sportConfig.slice(0, 6).map(sport => (
-                <Button
-                  key={sport.id}
-                  variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                  className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
-                    selectedSports.includes(sport.id) ? sport.color : ""
-                  }`}
-                  onClick={() => toggleSport(sport.id)}
-                  data-testid={`button-sport-${sport.id}`}
-                >
-                  <span className="text-sm sm:text-xl font-bold">{sport.id}</span>
-                  <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
-                </Button>
-              ))}
-              <div className="col-span-3 sm:col-span-3 lg:col-span-6 text-xs text-muted-foreground font-medium pt-2 border-t mt-1">International Soccer</div>
-              {sportConfig.slice(6).map(sport => {
-                const shortId = sport.id.replace("Soccer_", "");
-                const mobileAbbrevs: Record<string, string> = {
-                  "LALIGA": "LIGA",
-                  "BUNDESLIGA": "BUN",
-                  "SERIEA": "SER",
-                  "LIGUE1": "LG1",
-                };
-                const mobileLabel = mobileAbbrevs[shortId] || shortId;
-                return (
+          <CardContent className="p-4 sm:p-5 space-y-5">
+            <div className="space-y-3">
+              <p className="text-sm font-medium flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                Pick Your Sports
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {sportConfig.map(sport => (
                   <Button
                     key={sport.id}
                     variant={selectedSports.includes(sport.id) ? "default" : "outline"}
-                    className={`h-auto py-3 sm:py-4 flex-col gap-1 sm:gap-2 ${
+                    className={`h-auto py-2.5 flex-col gap-0.5 text-xs ${
                       selectedSports.includes(sport.id) ? sport.color : ""
                     }`}
                     onClick={() => toggleSport(sport.id)}
                     data-testid={`button-sport-${sport.id}`}
                   >
-                    <span className="text-sm sm:text-xl font-bold">
-                      <span className="sm:hidden">{mobileLabel}</span>
-                      <span className="hidden sm:inline">{shortId}</span>
-                    </span>
-                    <span className="text-[10px] sm:text-xs opacity-80 truncate w-full text-center">{sport.name}</span>
+                    <span className="font-bold text-sm">{sport.id}</span>
+                    <span className="opacity-80 text-[10px]">{sport.name}</span>
                   </Button>
-                );
-              })}
+                ))}
+              </div>
+              
+              <Collapsible open={showSoccer} onOpenChange={setShowSoccer}>
+                <CollapsibleTrigger asChild>
+                  <button className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+                    {showSoccer ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                    {showSoccer ? "Hide Soccer Leagues" : "Show Soccer Leagues"}
+                  </button>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="pt-2">
+                  <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
+                    {soccerConfig.map(sport => (
+                      <Button
+                        key={sport.id}
+                        variant={selectedSports.includes(sport.id) ? "default" : "outline"}
+                        className={`h-auto py-2 flex-col gap-0 text-[10px] ${
+                          selectedSports.includes(sport.id) ? sport.color : ""
+                        }`}
+                        onClick={() => toggleSport(sport.id)}
+                        data-testid={`button-sport-${sport.id}`}
+                      >
+                        <span className="font-bold text-xs">{sport.name}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-            
+
             <Collapsible open={showSettings} onOpenChange={setShowSettings}>
               <CollapsibleTrigger asChild>
-                <Button variant="ghost" className="w-full justify-between gap-2" data-testid="button-toggle-settings">
-                  <span className="flex items-center gap-2">
-                    <Activity className="w-4 h-4" />
-                    Advanced Settings
-                  </span>
-                  {showSettings ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </Button>
+                <button className="text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1" data-testid="button-toggle-settings">
+                  {showSettings ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  {showSettings ? "Hide Settings" : "Adjust Settings"}
+                </button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-6 pt-4">
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
-                        <DollarSign className="w-4 h-4" />
-                        Bankroll
-                      </Label>
-                      <span className="font-bold" data-testid="text-bankroll">${bankroll}</span>
-                    </div>
-                    <Slider
-                      value={[bankroll]}
-                      onValueChange={([v]) => setBankroll(v)}
-                      min={100}
-                      max={10000}
-                      step={100}
-                      data-testid="slider-bankroll"
-                    />
-                    <p className="text-xs text-muted-foreground">Stakes calculated using optimal sizing</p>
+              <CollapsibleContent className="space-y-4 pt-3">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Bankroll</Label>
+                    <span className="text-sm font-bold" data-testid="text-bankroll">${bankroll}</span>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
-                        <Shield className="w-4 h-4" />
-                        Risk Level
-                      </Label>
-                      <Badge variant="outline">{riskLevel}</Badge>
-                    </div>
-                    <div className="flex gap-2">
-                      {(["conservative", "moderate", "aggressive"] as const).map(level => (
-                        <Button
-                          key={level}
-                          size="sm"
-                          variant={riskLevel === level ? "default" : "outline"}
-                          onClick={() => setRiskLevel(level)}
-                          className="flex-1 capitalize"
-                          data-testid={`button-risk-${level}`}
-                        >
-                          {level}
-                        </Button>
-                      ))}
-                    </div>
-                    <p className="text-xs text-muted-foreground">{getRiskDescription(riskLevel)}</p>
+                  <Slider
+                    value={[bankroll]}
+                    onValueChange={([v]) => setBankroll(v)}
+                    min={100}
+                    max={10000}
+                    step={100}
+                    data-testid="slider-bankroll"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label className="text-xs">Risk Level</Label>
+                  <div className="flex gap-2">
+                    {(["conservative", "moderate", "aggressive"] as const).map(level => (
+                      <Button
+                        key={level}
+                        size="sm"
+                        variant={riskLevel === level ? "default" : "outline"}
+                        onClick={() => setRiskLevel(level)}
+                        className="flex-1 capitalize text-xs h-8"
+                        data-testid={`button-risk-${level}`}
+                      >
+                        {level === "conservative" ? "Safe" : level === "moderate" ? "Balanced" : "Aggressive"}
+                      </Button>
+                    ))}
                   </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label className="flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        Max Legs per Ticket
-                      </Label>
-                      <span className="font-bold" data-testid="text-max-legs">{maxLegs}</span>
-                    </div>
-                    <Slider
-                      value={[maxLegs]}
-                      onValueChange={([v]) => setMaxLegs(v)}
-                      min={2}
-                      max={8}
-                      step={1}
-                      data-testid="slider-max-legs"
-                    />
+                  <p className="text-[10px] text-muted-foreground">{getRiskLabel(riskLevel)}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Max Picks per Ticket</Label>
+                    <span className="text-sm font-bold" data-testid="text-max-legs">{maxLegs}</span>
                   </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-                    <div>
-                      <Label className="flex items-center gap-2">
-                        <Users className="w-4 h-4" />
-                        Include Player Props
-                      </Label>
-                      <p className="text-xs text-muted-foreground mt-1">Add player performance bets</p>
-                    </div>
-                    <Switch
-                      checked={includeProps}
-                      onCheckedChange={setIncludeProps}
-                      data-testid="switch-include-props"
-                    />
+                  <Slider
+                    value={[maxLegs]}
+                    onValueChange={([v]) => setMaxLegs(v)}
+                    min={2}
+                    max={8}
+                    step={1}
+                    data-testid="slider-max-legs"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label className="text-xs">Include Player Props</Label>
+                    <p className="text-[10px] text-muted-foreground">Add player performance bets</p>
                   </div>
+                  <Switch
+                    checked={includeProps}
+                    onCheckedChange={setIncludeProps}
+                    data-testid="switch-include-props"
+                  />
                 </div>
               </CollapsibleContent>
             </Collapsible>
             
-            <Button 
-              size="lg" 
-              className="w-full gap-3 text-lg h-14"
-              disabled={selectedSports.length === 0 || isGenerating}
-              onClick={handleGenerate}
-              data-testid="button-generate"
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing Games...
-                </>
-              ) : (
-                <>
-                  <Zap className="w-5 h-5" />
-                  Generate Winning Tickets
-                </>
-              )}
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                size="lg" 
+                className="flex-1 gap-2 h-12"
+                disabled={selectedSports.length === 0 || isGenerating}
+                onClick={handleGenerate}
+                data-testid="button-generate"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-4 h-4" />
+                    Generate Tickets
+                  </>
+                )}
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="gap-2 h-12"
+                onClick={handleQuickPick}
+                disabled={isGenerating}
+                data-testid="button-quick-pick"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden sm:inline">Quick Pick</span>
+              </Button>
+            </div>
             
-            {selectedSports.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground">
-                Select at least one sport to generate tickets
+            {selectedSports.length === 0 && !hasGenerated && (
+              <p className="text-center text-xs text-muted-foreground">
+                Select at least one sport above to get started
               </p>
             )}
           </CardContent>
         </Card>
         
         {isGenerating && (
-          <Card className="overflow-hidden">
-            <CardContent className="py-12">
-              <div className="text-center space-y-4">
-                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                <div className="space-y-2">
-                  <p className="text-lg font-medium">Generating Optimal Tickets</p>
-                  <p className="text-sm text-muted-foreground">Running analysis across 46 factors...</p>
-                </div>
-                <div className="max-w-md mx-auto space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Coaching Analysis</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500" />
-                    <span>Player Performance Prediction</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span>Team Dynamics & Correlations</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="w-4 h-4" />
-                    <span>ML Projections & Sharp Money</span>
-                  </div>
-                </div>
+          <Card>
+            <CardContent className="py-10">
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-sm font-medium">Finding the best picks...</p>
+                <p className="text-xs text-muted-foreground">Analyzing live games & odds from multiple sportsbooks</p>
               </div>
             </CardContent>
           </Card>
@@ -926,119 +576,52 @@ export default function AutoGenerator() {
         
         {hasGenerated && !isGenerating && tickets.length > 0 && (
           <div className="space-y-4">
-            <QuantumFusionEngineBanner />
-            
-            <SchemeAlertBanner />
-            
-            {responseSources && (
-              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-3">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                    <span className="text-sm font-medium text-green-700 dark:text-green-400">Data Sources Verified</span>
-                  </div>
-                  {lastDataRefresh && (
-                    <span className="text-xs text-muted-foreground" data-testid="text-last-refresh">
-                      Last updated: {new Date(lastDataRefresh).toLocaleTimeString()}
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {responseSources.primary && (
-                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-primary">
-                      <Radio className="w-3 h-3 text-green-500" />
-                      {responseSources.primary}
-                    </Badge>
-                  )}
-                  {responseSources.analysis && (
-                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-analysis">
-                      <Brain className="w-3 h-3 text-blue-500" />
-                      {responseSources.analysis}
-                    </Badge>
-                  )}
-                  {responseSources.agent && (
-                    <Badge variant="outline" className="text-xs gap-1" data-testid="badge-source-agent">
-                      <Activity className="w-3 h-3 text-purple-500" />
-                      {responseSources.agent}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                  Your Optimized Tickets
-                </h2>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRecalculate}
-                    disabled={isRecalculating || isGenerating}
-                    className="gap-2"
-                    data-testid="button-recalculate"
-                  >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
-                    {isRecalculating ? "Refreshing..." : "Recalculate"}
-                  </Button>
-                  <Badge variant="secondary" className="text-sm">
-                    {tickets.length} tickets generated
-                  </Badge>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Ranked best to worst. Look for Grade B+ or higher with positive EV%. Tap "Legs" to see each pick, then use "Add to Slip" or "Track This Bet" on the ones you like.
-              </p>
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-yellow-500" />
+                Your Tickets
+                <Badge variant="secondary" className="text-xs ml-1">{tickets.length}</Badge>
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleRecalculate}
+                disabled={isRecalculating || isGenerating}
+                className="gap-1.5 text-xs h-8"
+                data-testid="button-recalculate"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isRecalculating ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
             </div>
-            
+
+            <p className="text-xs text-muted-foreground -mt-2">
+              Ranked best to worst. Tap "Show Picks" to see the details, then add to your slip or track the bet.
+            </p>
+
             <AffiliateDisclosure compact />
             
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="space-y-3">
               {tickets.map((ticket, idx) => (
-                <TicketCard key={ticket.id} ticket={ticket} index={idx} onPlaceBet={handlePlaceBet} />
+                <SimpleTicketCard key={ticket.id} ticket={ticket} index={idx} onPlaceBet={handlePlaceBet} />
               ))}
             </div>
-            
-            {ticketFusions.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Brain className="w-5 h-5" />
-                  Full Factor Analysis
-                </h3>
-                {ticketFusions.map((fusion, idx) => (
-                  <TicketFusionDisplay key={fusion.ticketId} ticketFusion={fusion} />
-                ))}
-              </div>
-            )}
           </div>
         )}
         
         {hasGenerated && !isGenerating && tickets.length === 0 && (
           <Card>
-            <CardContent className="py-12 text-center">
-              <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-lg font-medium">No tickets available</p>
-              <p className="text-sm text-muted-foreground">Try selecting different sports or adjusting your settings</p>
+            <CardContent className="py-10 text-center">
+              <AlertCircle className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+              <p className="font-medium">No tickets available right now</p>
+              <p className="text-sm text-muted-foreground mt-1">Try selecting different sports or adjusting your settings</p>
             </CardContent>
           </Card>
         )}
         
-        <SchemeRecognition 
-          mode="pre-game" 
-          selectedSports={selectedSports.length > 0 ? selectedSports : (["NBA", "NFL", "MLB"] as string[])} 
-        />
-        
-        <BettingInsights />
-
-          </TabsContent>
-        </Tabs>
-        
         <footer className="pt-4 border-t text-center">
-          <p className="text-xs text-muted-foreground">
-            For educational purposes only. Please gamble responsibly.
+          <p className="text-[10px] text-muted-foreground">
+            For entertainment & educational purposes only. Not guaranteed betting advice. Please gamble responsibly.
           </p>
         </footer>
       </div>
