@@ -23,7 +23,11 @@ export interface SoccerFixture {
     away: number | null;
   };
   venue: string;
+  dataSource: "API-Football" | "ESPN (free)";
 }
+
+const API_FOOTBALL_KEY = process.env.API_FOOTBALL_KEY;
+const API_FOOTBALL_BASE = "https://v3.football.api-sports.io";
 
 const LEAGUE_MAP: Record<string, { id: number; season: number; name: string; espnSlug: string }> = {
   Soccer_EPL: { id: 39, season: 2025, name: "Premier League", espnSlug: "eng.1" },
@@ -39,12 +43,74 @@ const LEAGUE_MAP: Record<string, { id: number; season: number; name: string; esp
 const fixturesCache = new Map<string, { data: SoccerFixture[]; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
+export function isApiFootballAvailable(): boolean {
+  return !!API_FOOTBALL_KEY;
+}
+
 export function getSoccerLeagueInfo(sportId: string): { id: number; season: number; name: string; espnSlug: string } | null {
   return LEAGUE_MAP[sportId] || null;
 }
 
 export function getAllSoccerLeagueIds(): string[] {
   return Object.keys(LEAGUE_MAP);
+}
+
+async function fetchApiFootballFixtures(leagueId: number, season: number): Promise<SoccerFixture[]> {
+  if (!API_FOOTBALL_KEY) return [];
+
+  const today = new Date().toISOString().split("T")[0];
+  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
+  const url = `${API_FOOTBALL_BASE}/fixtures?league=${leagueId}&season=${season}&from=${today}&to=${nextWeek}`;
+
+  try {
+    const response = await fetch(url, {
+      headers: { "x-apisports-key": API_FOOTBALL_KEY },
+    });
+    if (!response.ok) throw new Error(`API-Football error: ${response.status}`);
+    const json = await response.json();
+    if (!json.response || !Array.isArray(json.response)) return [];
+
+    const leagueInfo = Object.values(LEAGUE_MAP).find(l => l.id === leagueId);
+
+    return json.response.map((fix: any) => ({
+      id: String(fix.fixture.id),
+      league: leagueInfo?.name || fix.league?.name || "Unknown",
+      leagueId,
+      season,
+      date: fix.fixture.date,
+      timestamp: fix.fixture.timestamp,
+      status: mapApiFootballStatus(fix.fixture.status?.short || "NS"),
+      homeTeam: {
+        id: fix.teams.home.id,
+        name: fix.teams.home.name,
+        logo: fix.teams.home.logo || "",
+      },
+      awayTeam: {
+        id: fix.teams.away.id,
+        name: fix.teams.away.name,
+        logo: fix.teams.away.logo || "",
+      },
+      goals: {
+        home: fix.goals.home,
+        away: fix.goals.away,
+      },
+      venue: fix.fixture.venue?.name || "",
+      dataSource: "API-Football" as const,
+    }));
+  } catch (error) {
+    logWarn(`[API-Football] Failed for league ${leagueId}: ${error}`);
+    return [];
+  }
+}
+
+function mapApiFootballStatus(status: string): string {
+  const map: Record<string, string> = {
+    TBD: "NS", NS: "NS", "1H": "1H", HT: "HT", "2H": "2H",
+    ET: "LIVE", P: "LIVE", FT: "FT", AET: "FT", PEN: "FT",
+    BT: "LIVE", SUSP: "SUSP", INT: "LIVE", PST: "NS",
+    CANC: "CANC", ABD: "CANC", AWD: "FT", WO: "FT", LIVE: "LIVE",
+  };
+  return map[status] || "NS";
 }
 
 async function fetchESPNSoccerScoreboard(espnSlug: string): Promise<any> {
@@ -63,20 +129,10 @@ async function fetchESPNSoccerScoreboard(espnSlug: string): Promise<any> {
   }
 }
 
-export async function fetchSoccerFixtures(sportId: string): Promise<SoccerFixture[]> {
-  const leagueInfo = getSoccerLeagueInfo(sportId);
-  if (!leagueInfo) return [];
-
-  const cacheKey = `fixtures-${sportId}`;
-  const cached = fixturesCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
-    return cached.data;
-  }
-
-  const data = await fetchESPNSoccerScoreboard(leagueInfo.espnSlug);
+function parseESPNFixtures(data: any, leagueInfo: { id: number; season: number; name: string }): SoccerFixture[] {
   if (!data?.events) return [];
 
-  const fixtures: SoccerFixture[] = data.events
+  return data.events
     .filter((event: any) => {
       const statusType = event.status?.type?.name;
       return statusType === "STATUS_SCHEDULED" ||
@@ -125,8 +181,33 @@ export async function fetchSoccerFixtures(sportId: string): Promise<SoccerFixtur
           away: awayComp?.score ? parseInt(awayComp.score) : null,
         },
         venue: competition?.venue?.fullName || competition?.venue?.name || "",
+        dataSource: "ESPN (free)" as const,
       };
     });
+}
+
+export async function fetchSoccerFixtures(sportId: string): Promise<SoccerFixture[]> {
+  const leagueInfo = getSoccerLeagueInfo(sportId);
+  if (!leagueInfo) return [];
+
+  const cacheKey = `fixtures-${sportId}`;
+  const cached = fixturesCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp) < CACHE_TTL) {
+    return cached.data;
+  }
+
+  if (API_FOOTBALL_KEY) {
+    const apiFixtures = await fetchApiFootballFixtures(leagueInfo.id, leagueInfo.season);
+    if (apiFixtures.length > 0) {
+      fixturesCache.set(cacheKey, { data: apiFixtures, timestamp: Date.now() });
+      logInfo(`[API-Football] Fetched ${apiFixtures.length} fixtures for ${sportId} (${leagueInfo.name})`);
+      return apiFixtures;
+    }
+    logWarn(`[API-Football] No fixtures for ${sportId}, falling back to ESPN`);
+  }
+
+  const data = await fetchESPNSoccerScoreboard(leagueInfo.espnSlug);
+  const fixtures = parseESPNFixtures(data, leagueInfo);
 
   fixturesCache.set(cacheKey, { data: fixtures, timestamp: Date.now() });
   logInfo(`[Soccer-ESPN] Fetched ${fixtures.length} fixtures for ${sportId} (${leagueInfo.name})`);
