@@ -37,6 +37,16 @@ import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 
+type BetCategory = "game" | "halves" | "player_props" | "alt_lines" | "soccer_special";
+
+const betCategories: { id: BetCategory; name: string; description: string; betTypes: string[] }[] = [
+  { id: "game", name: "Game Lines", description: "ML, Spread, Totals", betTypes: ["moneyline", "spread", "total", "team_total"] },
+  { id: "halves", name: "Half/Quarter", description: "1H & 1Q lines", betTypes: ["first_half_spread", "first_half_total", "first_quarter_spread", "first_quarter_total"] },
+  { id: "player_props", name: "Player Props", description: "Points, yards, goals", betTypes: ["player_points", "player_rebounds", "player_assists", "player_threes", "player_pts_rebs_asts", "player_double_double", "player_passing_yds", "player_rushing_yds", "player_receiving_yds", "player_tds", "player_strikeouts", "player_hits_runs_rbis", "player_goals", "player_shots", "player_saves", "anytime_scorer", "prop"] },
+  { id: "alt_lines", name: "Alt Lines", description: "Alternate spreads & totals", betTypes: ["alt_spread", "alt_total"] },
+  { id: "soccer_special", name: "Soccer Specials", description: "BTTS, DNB, Correct Score", betTypes: ["btts", "draw_no_bet", "correct_score", "asian_handicap", "match_result_btts"] },
+];
+
 const sportConfig: { id: string; name: string; color: string }[] = [
   { id: "NBA", name: "Basketball", color: "bg-orange-500" },
   { id: "NFL", name: "Football", color: "bg-green-600" },
@@ -258,6 +268,7 @@ export default function AutoGenerator() {
   const [riskLevel, setRiskLevel] = useState<"conservative" | "moderate" | "aggressive">("moderate");
   const [maxLegs, setMaxLegs] = useState(4);
   const [includeProps, setIncludeProps] = useState(true);
+  const [selectedBetCategories, setSelectedBetCategories] = useState<BetCategory[]>(["game", "player_props"]);
   const [showSettings, setShowSettings] = useState(false);
   const [showSoccer, setShowSoccer] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -309,6 +320,19 @@ export default function AutoGenerator() {
     );
   };
   
+  const getSelectedBetTypes = (): string[] => {
+    return selectedBetCategories.flatMap(cat => {
+      const category = betCategories.find(c => c.id === cat);
+      return category ? category.betTypes : [];
+    });
+  };
+
+  const toggleBetCategory = (cat: BetCategory) => {
+    setSelectedBetCategories(prev => 
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
   const fetchTicketsFromBackend = async (
     sports: string[],
     reqBankroll: number,
@@ -318,12 +342,14 @@ export default function AutoGenerator() {
     endpoint: string = "/api/generate-tickets",
   ) => {
     try {
+      const betTypes = getSelectedBetTypes();
       const response = await apiRequest("POST", endpoint, {
         sports,
         bankroll: reqBankroll,
         riskLevel: reqRiskLevel,
         maxLegs: reqMaxLegs,
         includeProps: reqIncludeProps,
+        betTypes: betTypes.length > 0 ? betTypes : undefined,
       });
       
       const data = await response.json();
@@ -375,13 +401,15 @@ export default function AutoGenerator() {
   const handleGenerate = async () => {
     if (selectedSports.length === 0) return;
     setIsGenerating(true);
-    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps);
+    const hasProps = selectedBetCategories.includes("player_props");
+    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, hasProps);
   };
   
   const handleRecalculate = async () => {
     if (selectedSports.length === 0) return;
     setIsRecalculating(true);
-    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, includeProps, "/api/recalculate-predictions");
+    const hasProps = selectedBetCategories.includes("player_props");
+    await fetchTicketsFromBackend(selectedSports, bankroll, riskLevel, maxLegs, hasProps, "/api/recalculate-predictions");
     toast({
       title: "Refreshed",
       description: "Tickets updated with the latest live data.",
@@ -553,16 +581,33 @@ export default function AutoGenerator() {
                   />
                 </div>
                 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label className="text-xs">Include Player Props</Label>
-                    <p className="text-[10px] text-muted-foreground">Add player performance bets</p>
+                <div className="space-y-2">
+                  <Label className="text-xs">Bet Types</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {betCategories.map(cat => {
+                      const isSelected = selectedBetCategories.includes(cat.id);
+                      const isSoccerCat = cat.id === "soccer_special";
+                      const hasSoccer = selectedSports.some(s => s.startsWith("Soccer_"));
+                      if (isSoccerCat && !hasSoccer) return null;
+                      return (
+                        <Button
+                          key={cat.id}
+                          size="sm"
+                          variant={isSelected ? "default" : "outline"}
+                          onClick={() => toggleBetCategory(cat.id)}
+                          className="text-[10px] h-7 px-2"
+                          data-testid={`button-betcat-${cat.id}`}
+                        >
+                          <span>{cat.name}</span>
+                        </Button>
+                      );
+                    })}
                   </div>
-                  <Switch
-                    checked={includeProps}
-                    onCheckedChange={setIncludeProps}
-                    data-testid="switch-include-props"
-                  />
+                  <p className="text-[10px] text-muted-foreground">
+                    {selectedBetCategories.length === 0 
+                      ? "Select at least one bet type" 
+                      : selectedBetCategories.map(c => betCategories.find(b => b.id === c)?.description).join(" + ")}
+                  </p>
                 </div>
               </CollapsibleContent>
             </Collapsible>

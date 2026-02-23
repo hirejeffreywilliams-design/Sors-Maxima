@@ -1385,7 +1385,7 @@ Format your response clearly with sections and bullet points.`;
 
   app.post("/api/generate-tickets", async (req, res) => {
     try {
-      const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
+      const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
       if (!sports || !Array.isArray(sports) || sports.length === 0) {
         return res.status(400).json({ error: "At least one sport must be selected" });
@@ -1402,6 +1402,7 @@ Format your response clearly with sections and bullet points.`;
         riskLevel: riskLevel || "moderate",
         maxLegs: maxLegs || 4,
         includeProps: includeProps !== false,
+        betTypes: Array.isArray(betTypes) ? betTypes : undefined,
       };
 
       const result = await generateSmartTickets(request);
@@ -1432,7 +1433,7 @@ Format your response clearly with sections and bullet points.`;
 
   app.post("/api/recalculate-predictions", async (req, res) => {
     try {
-      const { sports, bankroll, riskLevel, maxLegs, includeProps } = req.body;
+      const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
       if (!sports || !Array.isArray(sports) || sports.length === 0) {
         return res.status(400).json({ error: "At least one sport must be selected" });
@@ -1449,6 +1450,7 @@ Format your response clearly with sections and bullet points.`;
         riskLevel: riskLevel || "moderate",
         maxLegs: maxLegs || 4,
         includeProps: includeProps !== false,
+        betTypes: Array.isArray(betTypes) ? betTypes : undefined,
       };
 
       const result = await regenerateTicketsWithLatestData(request);
