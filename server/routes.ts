@@ -3183,66 +3183,135 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  // === Notifications ===
-  const notificationTypes = [
-    { type: "line_movement", titles: ["Line Movement Alert", "Odds Shift Detected", "Spread Change"], descriptions: [
-      "Knicks vs Bucks spread moved from -3.5 to -5.0",
-      "Chiefs ML shifted from -150 to -170 after injury report",
-      "Over/Under adjusted from 224.5 to 221.0 for Bucks vs Heat",
-      "49ers spread moved from -7 to -6.5, reverse line movement detected",
-    ]},
-    { type: "injury_report", titles: ["Injury Update", "Player Status Change", "Roster Alert"], descriptions: [
-      "Jalen Brunson (Knicks) - Questionable with ankle soreness",
-      "Patrick Mahomes (Chiefs) - Cleared to play, was listed as probable",
-      "Giannis Antetokounmpo (Bucks) - Out tonight with knee injury",
-      "Tyreek Hill (Dolphins) - Limited practice, game-time decision",
-    ]},
-    { type: "sharp_money", titles: ["Sharp Money Alert", "Professional Action Detected", "Smart Money Flow"], descriptions: [
-      "Sharp bettors loading up on Bucks +5.5 at -110",
-      "Reverse line movement on Mavericks ML despite 72% public on Knicks",
-      "Large syndicate action detected on Under 221.5 in Bucks vs Heat",
-      "Steam move on Bills -3 across multiple offshore books",
-    ]},
-    { type: "game_start", titles: ["Game Starting Soon", "Tipoff Reminder", "Kickoff Alert"], descriptions: [
-      "Knicks vs Bucks tips off in 15 minutes",
-      "Chiefs vs Bills kicks off in 30 minutes - last chance to bet",
-      "Bucks vs Heat starting in 10 minutes",
-      "NFL Sunday Night Football begins in 1 hour",
-    ]},
-  ];
-
+  // === Notifications (Real Data) ===
   let serverNotifications: any[] = [];
   let notificationIdCounter = 1;
 
-  function generateNotification() {
-    const typeGroup = notificationTypes[Math.floor(Math.random() * notificationTypes.length)];
-    const title = typeGroup.titles[Math.floor(Math.random() * typeGroup.titles.length)];
-    const description = typeGroup.descriptions[Math.floor(Math.random() * typeGroup.descriptions.length)];
-    const minutesAgo = Math.floor(Math.random() * 120);
-    const timestamp = new Date(Date.now() - minutesAgo * 60000).toISOString();
+  async function generateRealNotification(): Promise<any | null> {
+    try {
+      const { getAllSportsScoreboard } = await import("./espn-scoreboard-provider");
+      const { generateMarketSnapshot } = await import("./marketSnapshotEngine");
 
-    return {
-      id: notificationIdCounter++,
-      type: typeGroup.type,
-      title,
-      description,
-      timestamp,
-      read: false,
-    };
+      const allGames = await getAllSportsScoreboard();
+      if (allGames.length === 0) return null;
+
+      const notifTypes = ["line_movement", "sharp_money", "game_start"];
+      const chosenType = notifTypes[Math.floor(Math.random() * notifTypes.length)];
+
+      if (chosenType === "game_start") {
+        const preGames = allGames.filter(g => g.status.state === "pre");
+        if (preGames.length === 0) return null;
+        const game = preGames[Math.floor(Math.random() * preGames.length)];
+        const gameDate = new Date(game.date);
+        const now = new Date();
+        const diffMs = gameDate.getTime() - now.getTime();
+        const diffMins = Math.max(0, Math.round(diffMs / 60000));
+        let timeStr = diffMins > 60 ? `${Math.round(diffMins / 60)} hours` : `${diffMins} minutes`;
+        if (diffMins <= 0) timeStr = "soon";
+
+        const sportVerb: Record<string, string> = { NBA: "tips off", NFL: "kicks off", MLB: "first pitch", NHL: "puck drops", NCAAF: "kicks off", NCAAB: "tips off" };
+        const verb = sportVerb[game.sport] || "starts";
+
+        return {
+          id: notificationIdCounter++,
+          type: "game_start",
+          title: "Game Starting Soon",
+          description: `${game.awayTeam.shortDisplayName} @ ${game.homeTeam.shortDisplayName} ${verb} in ${timeStr}`,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+      }
+
+      const sportsList = ["NBA", "NFL", "MLB", "NHL"] as const;
+      const sport = sportsList[Math.floor(Math.random() * sportsList.length)];
+      let snapshot;
+      try {
+        snapshot = await generateMarketSnapshot(sport);
+      } catch { return null; }
+
+      const gamesWithMovement = snapshot.games.filter(g => g.lineMovement.length > 0);
+
+      if (chosenType === "line_movement" && gamesWithMovement.length > 0) {
+        const game = gamesWithMovement[Math.floor(Math.random() * gamesWithMovement.length)];
+        const move = game.lineMovement[Math.floor(Math.random() * game.lineMovement.length)];
+        const dirLabel = move.direction === "up" ? "up" : move.direction === "down" ? "down" : "holding steady";
+        let desc: string;
+        if (move.market === "spread") {
+          desc = `${game.shortName} spread moved from ${move.opening > 0 ? "+" : ""}${move.opening} to ${move.current > 0 ? "+" : ""}${move.current} (${dirLabel})`;
+        } else {
+          desc = `${game.shortName} total moved from ${move.opening} to ${move.current} (${dirLabel})`;
+        }
+
+        return {
+          id: notificationIdCounter++,
+          type: "line_movement",
+          title: move.velocity === "steam" ? "Steam Move Detected" : "Line Movement Alert",
+          description: desc,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+      }
+
+      if (chosenType === "sharp_money" && gamesWithMovement.length > 0) {
+        const sharpGames = gamesWithMovement.filter(g => g.lineMovement.some(m => m.sharpAction));
+        const pool = sharpGames.length > 0 ? sharpGames : gamesWithMovement;
+        const game = pool[Math.floor(Math.random() * pool.length)];
+        const move = game.lineMovement.find(m => m.sharpAction) || game.lineMovement[0];
+
+        let desc: string;
+        if (move.market === "spread") {
+          const side = move.direction === "down" ? game.awayTeam.abbreviation : game.homeTeam.abbreviation;
+          desc = `Sharp action detected on ${side} in ${game.shortName} - spread ${move.velocity === "steam" ? "steam moving" : "shifting"} from ${move.opening > 0 ? "+" : ""}${move.opening} to ${move.current > 0 ? "+" : ""}${move.current}`;
+        } else {
+          const side = move.direction === "down" ? "Under" : "Over";
+          desc = `Professional money flowing to ${side} ${move.current} in ${game.shortName}`;
+        }
+
+        return {
+          id: notificationIdCounter++,
+          type: "sharp_money",
+          title: move.velocity === "steam" ? "Steam Move Alert" : "Sharp Money Alert",
+          description: desc,
+          timestamp: new Date().toISOString(),
+          read: false,
+        };
+      }
+
+      const game = allGames[Math.floor(Math.random() * allGames.length)];
+      return {
+        id: notificationIdCounter++,
+        type: "game_start",
+        title: `${game.sport} Update`,
+        description: `${game.awayTeam.shortDisplayName} @ ${game.homeTeam.shortDisplayName} - ${game.status.detail || game.status.shortDetail || "Scheduled"}`,
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
+    } catch (err) {
+      console.error("[Notifications] Error generating real notification:", err);
+      return null;
+    }
   }
 
-  for (let i = 0; i < 12; i++) {
-    serverNotifications.push(generateNotification());
-  }
-  serverNotifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  (async () => {
+    for (let i = 0; i < 12; i++) {
+      const notif = await generateRealNotification();
+      if (notif) {
+        const minutesAgo = Math.floor(Math.random() * 120);
+        notif.timestamp = new Date(Date.now() - minutesAgo * 60000).toISOString();
+        serverNotifications.push(notif);
+      }
+    }
+    serverNotifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  })();
 
-  setInterval(() => {
+  setInterval(async () => {
     if (serverNotifications.length > 50) {
       serverNotifications = serverNotifications.slice(0, 40);
     }
-    const newNotif = generateNotification();
-    newNotif.read = false;
-    serverNotifications.unshift(newNotif);
+    const newNotif = await generateRealNotification();
+    if (newNotif) {
+      serverNotifications.unshift(newNotif);
+    }
   }, 45000);
 
   app.get("/api/notifications", (_req, res) => {
@@ -3403,13 +3472,7 @@ Format your response clearly with sections and bullet points.`;
   const feedPosts: Array<{
     id: string; username: string; content: string; timestamp: string;
     likes: number; comments: number; likedBy: Set<string>;
-  }> = [
-    { id: "post-1", username: "SharpShooter99", content: "Just hit a 5-leg parlay! Chiefs, Knicks, and three overs all cashed. Trust the process.", timestamp: new Date(Date.now() - 3600000).toISOString(), likes: 24, comments: 8, likedBy: new Set() },
-    { id: "post-2", username: "ParlayKing", content: "NFL Week 14 breakdown: Sharp money is heavy on the unders this week. Weather plays are underrated.", timestamp: new Date(Date.now() - 7200000).toISOString(), likes: 18, comments: 12, likedBy: new Set() },
-    { id: "post-3", username: "EdgeMaster", content: "Hot take: Player props are the most +EV market in sports betting right now. Books are slow to adjust.", timestamp: new Date(Date.now() - 14400000).toISOString(), likes: 31, comments: 15, likedBy: new Set() },
-    { id: "post-4", username: "MoneyMoves", content: "Bankroll management tip: Never risk more than 3% of your bankroll on a single bet. Consistency wins.", timestamp: new Date(Date.now() - 28800000).toISOString(), likes: 42, comments: 6, likedBy: new Set() },
-    { id: "post-5", username: "ValueSeeker", content: "Found a great line discrepancy between books on tonight's game. DM for details.", timestamp: new Date(Date.now() - 43200000).toISOString(), likes: 15, comments: 22, likedBy: new Set() },
-  ];
+  }> = [];
 
   app.get("/api/social-feed", (_req, res) => {
     const posts = feedPosts.map(p => ({
@@ -3461,13 +3524,7 @@ Format your response clearly with sections and bullet points.`;
   });
 
   // === Copy Betting ===
-  const tipsters = [
-    { id: "tip-1", username: "SharpShooter99", winRate: 62, roi: 34.5, streak: 8, totalPicks: 245, sport: "NFL", recentPicks: [{ pick: "Chiefs -3.5", odds: "-110", result: "win" }, { pick: "Bills ML", odds: "-130", result: "win" }, { pick: "Over 48.5 Cowboys/Eagles", odds: "-105", result: "loss" }] },
-    { id: "tip-2", username: "ParlayKing", winRate: 58, roi: 28.2, streak: 5, totalPicks: 312, sport: "NBA", recentPicks: [{ pick: "Knicks -4.5", odds: "-110", result: "win" }, { pick: "Bucks ML", odds: "-150", result: "win" }, { pick: "Under 220.5 Suns/Mavs", odds: "-110", result: "win" }] },
-    { id: "tip-3", username: "EdgeMaster", winRate: 56, roi: 25.8, streak: 3, totalPicks: 189, sport: "MLB", recentPicks: [{ pick: "Yankees ML", odds: "+120", result: "win" }, { pick: "Dodgers -1.5", odds: "+130", result: "loss" }, { pick: "Over 8.5 Mets/Braves", odds: "-115", result: "win" }] },
-    { id: "tip-4", username: "PropHunter", winRate: 53, roi: 17.8, streak: 2, totalPicks: 287, sport: "NFL", recentPicks: [{ pick: "Mahomes Over 285.5 yds", odds: "-115", result: "win" }, { pick: "Henry Over 89.5 rush", odds: "-110", result: "loss" }] },
-    { id: "tip-5", username: "ValueSeeker", winRate: 52, roi: 15.2, streak: 1, totalPicks: 198, sport: "NBA", recentPicks: [{ pick: "Mavericks +5.5", odds: "-110", result: "win" }, { pick: "Nuggets ML", odds: "-140", result: "win" }] },
-  ];
+  const tipsters: Array<{ id: string; username: string; winRate: number; roi: number; streak: number; totalPicks: number; sport: string; recentPicks: Array<{ pick: string; odds: string; result: string }> }> = [];
   const followedTipsters = new Set<string>();
 
   app.get("/api/copy-betting/tipsters", (_req, res) => {
@@ -5967,7 +6024,7 @@ Follow these rules:
         return res.json(allPredictions);
       }
 
-      const prediction = proToolsEngine.getPlayerPrediction(sport as any, teamId, playerId);
+      const prediction = await proToolsEngine.getPlayerPrediction(sport as any, teamId, playerId);
       if (!prediction) return res.status(404).json({ error: "No player data available", dataSource: "ESPN roster cache" });
       res.json(prediction);
     } catch (e: any) {

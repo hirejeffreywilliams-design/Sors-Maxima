@@ -1,87 +1,58 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plane, Moon, Clock, AlertTriangle, TrendingUp, TrendingDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plane, MapPin, TrendingUp, TrendingDown, Info } from "lucide-react";
 
 interface TravelRestData {
   id: string;
-  team: string;
-  opponent: string;
-  restDays: number;
-  opponentRestDays: number;
-  travelMiles: number;
-  timeZoneChange: number;
-  backToBack: boolean;
+  game: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeRecord: string;
+  awayRecord: string;
+  homeWinPct: number;
+  awayWinPct: number;
+  venue: string;
+  homeAdvantage: boolean;
   advantageScore: number;
-  recommendation: string;
-  sport: string;
 }
 
-function generateMockTravelData(): TravelRestData[] {
-  return [
-    {
-      id: "tr-1",
-      team: "Heat",
-      opponent: "76ers",
-      restDays: 1,
-      opponentRestDays: 3,
-      travelMiles: 2500,
-      timeZoneChange: 3,
-      backToBack: true,
-      advantageScore: -12,
-      recommendation: "Fade Heat - significant rest and travel disadvantage",
-      sport: "NBA",
-    },
-    {
-      id: "tr-2",
-      team: "Chiefs",
-      opponent: "Raiders",
-      restDays: 7,
-      opponentRestDays: 7,
-      travelMiles: 600,
-      timeZoneChange: 1,
-      backToBack: false,
-      advantageScore: 2,
-      recommendation: "Slight advantage to Chiefs (short travel)",
-      sport: "NFL",
-    },
-    {
-      id: "tr-3",
-      team: "Pacers",
-      opponent: "Nuggets",
-      restDays: 2,
-      opponentRestDays: 1,
-      travelMiles: 950,
-      timeZoneChange: 1,
-      backToBack: false,
-      advantageScore: 5,
-      recommendation: "Pacers have rest edge - lean their way",
-      sport: "NBA",
-    },
-    {
-      id: "tr-4",
-      team: "Bucks",
-      opponent: "Heat",
-      restDays: 0,
-      opponentRestDays: 2,
-      travelMiles: 1200,
-      timeZoneChange: 0,
-      backToBack: true,
-      advantageScore: -8,
-      recommendation: "Bucks on B2B with travel - fade or avoid",
-      sport: "NBA",
-    },
-  ];
+function deriveTravelData(games: any[]): TravelRestData[] {
+  return games.map((g: any) => {
+    const homeWinPct = g.homeTeam.winPct || 50;
+    const awayWinPct = g.awayTeam.winPct || 50;
+    const winPctDiff = homeWinPct - awayWinPct;
+    const homeCourtBonus = 3;
+    const advantageScore = Math.round((winPctDiff + homeCourtBonus) * 10) / 10;
+
+    return {
+      id: g.id,
+      game: g.shortName,
+      homeTeam: g.homeTeam.name,
+      awayTeam: g.awayTeam.name,
+      homeRecord: g.homeTeam.record,
+      awayRecord: g.awayTeam.record,
+      homeWinPct,
+      awayWinPct,
+      venue: g.venue || "TBD",
+      homeAdvantage: advantageScore > 0,
+      advantageScore,
+    };
+  }).sort((a: TravelRestData, b: TravelRestData) => Math.abs(b.advantageScore) - Math.abs(a.advantageScore));
 }
 
 export function TravelRestAnalyzer() {
-  const [sport, setSport] = useState("all");
-  const [data] = useState<TravelRestData[]>(generateMockTravelData());
+  const [sport, setSport] = useState("NFL");
 
-  const filteredData = sport === "all" 
-    ? data 
-    : data.filter(d => d.sport.toLowerCase() === sport);
+  const { data, isLoading, error } = useQuery<any>({
+    queryKey: ["/api/market-snapshot", sport],
+    queryFn: () => fetch(`/api/market-snapshot?sport=${sport}`).then(r => r.json()),
+  });
+
+  const items = data?.games ? deriveTravelData(data.games) : [];
 
   return (
     <Card>
@@ -96,21 +67,44 @@ export function TravelRestAnalyzer() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="nba">NBA</SelectItem>
-              <SelectItem value="nfl">NFL</SelectItem>
+              <SelectItem value="NFL">NFL</SelectItem>
+              <SelectItem value="NBA">NBA</SelectItem>
+              <SelectItem value="MLB">MLB</SelectItem>
+              <SelectItem value="NHL">NHL</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-          <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
+        <div className="flex items-start gap-2 p-2 bg-muted/50 rounded-lg text-xs text-muted-foreground">
+          <Info className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>Home/away advantage estimated from team records and home-court factor. Detailed travel and rest data not available from current data sources.</span>
         </div>
-        {filteredData.map((item) => (
+
+        {isLoading && (
+          <div className="space-y-3" data-testid="loading-travel">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-28 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 text-center text-sm text-destructive" data-testid="error-travel">
+            Failed to load game data. Please try again.
+          </div>
+        )}
+
+        {!isLoading && !error && items.length === 0 && (
+          <div className="p-4 text-center text-sm text-muted-foreground" data-testid="empty-travel">
+            No games available for {sport}.
+          </div>
+        )}
+
+        {items.map((item) => (
           <div
             key={item.id}
+            data-testid={`card-travel-${item.id}`}
             className={`p-3 rounded-lg border ${
               item.advantageScore > 5
                 ? "bg-green-500/10 border-green-500/30"
@@ -122,8 +116,12 @@ export function TravelRestAnalyzer() {
             <div className="flex items-start justify-between gap-2 mb-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">{item.sport}</Badge>
-                  <p className="font-medium text-sm">{item.team} @ {item.opponent}</p>
+                  <Badge variant="outline" className="text-xs">{sport}</Badge>
+                  <p className="font-medium text-sm" data-testid={`text-travel-game-${item.id}`}>{item.game}</p>
+                </div>
+                <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3 h-3" />
+                  <span>{item.venue}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
@@ -138,38 +136,32 @@ export function TravelRestAnalyzer() {
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 text-xs mb-3">
+            <div className="grid grid-cols-3 gap-2 text-xs">
               <div className="text-center p-2 bg-background/50 rounded">
-                <Moon className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-muted-foreground">Rest</p>
-                <p className="font-bold">{item.restDays}d vs {item.opponentRestDays}d</p>
+                <p className="text-muted-foreground">Home</p>
+                <p className="font-bold">{item.homeRecord}</p>
+                <p className="text-muted-foreground">{item.homeWinPct}%</p>
               </div>
               <div className="text-center p-2 bg-background/50 rounded">
-                <Plane className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-muted-foreground">Travel</p>
-                <p className="font-bold">{item.travelMiles} mi</p>
+                <p className="text-muted-foreground">Away</p>
+                <p className="font-bold">{item.awayRecord}</p>
+                <p className="text-muted-foreground">{item.awayWinPct}%</p>
               </div>
               <div className="text-center p-2 bg-background/50 rounded">
-                <Clock className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-muted-foreground">TZ Change</p>
-                <p className="font-bold">{item.timeZoneChange}h</p>
-              </div>
-              <div className="text-center p-2 bg-background/50 rounded">
-                <AlertTriangle className="w-3 h-3 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-muted-foreground">B2B</p>
-                <p className={`font-bold ${item.backToBack ? "text-red-500" : "text-green-500"}`}>
-                  {item.backToBack ? "Yes" : "No"}
+                <p className="text-muted-foreground">H/A Edge</p>
+                <p className={`font-bold ${item.homeAdvantage ? "text-green-500" : "text-red-500"}`}>
+                  {item.homeAdvantage ? "Home" : "Away"}
                 </p>
               </div>
             </div>
-
-            <p className="text-xs text-muted-foreground">{item.recommendation}</p>
           </div>
         ))}
 
-        <div className="pt-2 text-xs text-muted-foreground text-center">
-          Historical data shows rest advantages worth 2-3 points in NBA
-        </div>
+        {data?.meta?.dataSources && (
+          <div className="pt-2 text-xs text-muted-foreground text-center" data-testid="text-datasource-travel">
+            Data: {data.meta.dataSources.join(", ")}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

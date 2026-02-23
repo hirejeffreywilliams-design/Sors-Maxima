@@ -1,130 +1,182 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link2, TrendingUp, AlertTriangle, CheckCircle, Plus, Zap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Link2, CheckCircle, AlertTriangle, Plus, Zap, AlertCircle } from "lucide-react";
 
-interface CorrelatedStack {
+interface MarketGame {
+  id: string;
+  shortName: string;
+  name: string;
+  homeTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  awayTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  consensus: { spread?: number; total?: number; homeImpliedProb?: number; awayImpliedProb?: number };
+  leaders?: { team: string; category: string; playerName: string; value: string }[];
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+interface StackLeg {
+  player: string;
+  prop: string;
+  line: number;
+  recommendation: string;
+}
+
+interface DerivedStack {
   id: string;
   name: string;
-  sport: string;
   game: string;
-  legs: { player: string; prop: string; line: number; recommendation: string }[];
+  legs: StackLeg[];
   correlationScore: number;
   combinedEV: number;
   synergy: "strong" | "moderate" | "weak";
   reason: string;
   warnings: string[];
+  gameId: string;
 }
 
-function getMockStacks(): CorrelatedStack[] {
-  return [
-    {
-      id: "1",
-      name: "Bills Passing Game Stack",
-      sport: "NFL",
-      game: "BUF vs MIA",
-      legs: [
-        { player: "Josh Allen", prop: "Passing Yards O285.5", line: 285.5, recommendation: "strong_over" },
-        { player: "Stefon Diggs", prop: "Receiving Yards O78.5", line: 78.5, recommendation: "lean_over" },
-        { player: "Dalton Kincaid", prop: "Receptions O4.5", line: 4.5, recommendation: "lean_over" },
-      ],
-      correlationScore: 0.82,
-      combinedEV: 12.4,
-      synergy: "strong",
-      reason: "When Allen throws for 285+, Diggs averages 95 yards and Kincaid sees 6+ targets",
-      warnings: [],
-    },
-    {
-      id: "2",
-      name: "Knicks High-Scoring Game",
-      sport: "NBA",
-      game: "NYK vs MIL",
-      legs: [
-        { player: "Jalen Brunson", prop: "Points O26.5", line: 26.5, recommendation: "lean_over" },
-        { player: "Karl-Anthony Towns", prop: "Rebounds O11.5", line: 11.5, recommendation: "lean_over" },
-        { player: "Game Total", prop: "Over 228.5", line: 228.5, recommendation: "lean_over" },
-      ],
-      correlationScore: 0.71,
-      combinedEV: 8.8,
-      synergy: "strong",
-      reason: "Brunson + KAT scoring correlates with game pace. High totals benefit both players.",
-      warnings: [],
-    },
-    {
-      id: "3",
-      name: "Ohtani + Dodgers Run Stack",
-      sport: "MLB",
-      game: "LAD vs SF",
-      legs: [
-        { player: "Shohei Ohtani", prop: "Total Bases O1.5", line: 1.5, recommendation: "lean_over" },
-        { player: "Mookie Betts", prop: "Hits O1.5", line: 1.5, recommendation: "lean_over" },
-        { player: "Dodgers", prop: "Team Total O4.5", line: 4.5, recommendation: "lean_over" },
-      ],
-      correlationScore: 0.65,
-      combinedEV: 7.2,
-      synergy: "moderate",
-      reason: "Top of lineup production drives team totals. Ohtani-Betts back-to-back in order.",
-      warnings: ["LHP on mound - monitor lineup"],
-    },
-    {
-      id: "4",
-      name: "McDavid Points Stack",
-      sport: "NHL",
-      game: "EDM vs CGY",
-      legs: [
-        { player: "Connor McDavid", prop: "Points O1.5", line: 1.5, recommendation: "lean_over" },
-        { player: "Leon Draisaitl", prop: "Points O1.5", line: 1.5, recommendation: "lean_over" },
-        { player: "Oilers", prop: "Goals O3.5", line: 3.5, recommendation: "lean_over" },
-      ],
-      correlationScore: 0.78,
-      combinedEV: 9.5,
-      synergy: "strong",
-      reason: "McDavid + Draisaitl on same PP unit. They combine for 48% of team's goals.",
-      warnings: [],
-    },
-    {
-      id: "5",
-      name: "NEGATIVE: Avoid This Stack",
-      sport: "NFL",
-      game: "KC vs LV",
-      legs: [
-        { player: "Patrick Mahomes", prop: "Passing TDs O2.5", line: 2.5, recommendation: "lean_over" },
-        { player: "Isiah Pacheco", prop: "Rushing Yards O75.5", line: 75.5, recommendation: "lean_over" },
-      ],
-      correlationScore: -0.35,
-      combinedEV: -2.1,
-      synergy: "weak",
-      reason: "NEGATIVE CORRELATION: When Mahomes throws 3+ TDs, game script reduces rushing attempts",
-      warnings: ["Negatively correlated legs", "Reduces combined probability"],
-    },
-  ];
+function deriveStacks(games: MarketGame[]): DerivedStack[] {
+  const stacks: DerivedStack[] = [];
+
+  for (const game of games) {
+    if (!game.leaders || game.leaders.length < 2) continue;
+
+    const homeLeaders = game.leaders.filter(l =>
+      l.team === game.homeTeam.abbreviation || l.team === game.homeTeam.name
+    );
+    const awayLeaders = game.leaders.filter(l =>
+      l.team === game.awayTeam.abbreviation || l.team === game.awayTeam.name
+    );
+
+    const buildTeamStack = (leaders: typeof game.leaders, teamAbbr: string, teamName: string, teamWinPct: number) => {
+      if (leaders.length < 2) return;
+
+      const legs: StackLeg[] = leaders.map(leader => {
+        const rawVal = parseFloat(leader.value) || 0;
+        const line = Math.round(rawVal * 0.95 * 2) / 2;
+        return {
+          player: leader.playerName,
+          prop: `${leader.category} O${line}`,
+          line,
+          recommendation: teamWinPct > 55 ? "lean_over" : "neutral",
+        };
+      });
+
+      if (game.consensus.total) {
+        legs.push({
+          player: "Game Total",
+          prop: `Over ${game.consensus.total}`,
+          line: game.consensus.total,
+          recommendation: "lean_over",
+        });
+      }
+
+      const avgWinPct = teamWinPct / 100;
+      const correlationScore = Math.round((0.5 + avgWinPct * 0.35 + (leaders.length > 2 ? 0.1 : 0)) * 100) / 100;
+      const clampedCorr = Math.min(0.95, Math.max(0.3, correlationScore));
+
+      const combinedEV = Math.round((clampedCorr * 10 + (teamWinPct - 50) * 0.3) * 10) / 10;
+
+      const synergy: DerivedStack["synergy"] =
+        clampedCorr >= 0.75 ? "strong" : clampedCorr >= 0.55 ? "moderate" : "weak";
+
+      const warnings: string[] = [];
+      if (teamWinPct < 45) warnings.push("Below .500 team - higher variance");
+      if (leaders.length < 2) warnings.push("Limited player data available");
+
+      stacks.push({
+        id: `${game.id}-${teamAbbr}-stack`,
+        name: `${teamName} Game Stack`,
+        game: game.shortName,
+        legs,
+        correlationScore: clampedCorr,
+        combinedEV,
+        synergy,
+        reason: `${teamName} leaders (${leaders.map(l => l.playerName).join(", ")}) production correlates in ${game.shortName}.`,
+        warnings,
+        gameId: game.id,
+      });
+    };
+
+    if (homeLeaders.length >= 2) {
+      buildTeamStack(homeLeaders, game.homeTeam.abbreviation, game.homeTeam.abbreviation, game.homeTeam.winPct);
+    }
+    if (awayLeaders.length >= 2) {
+      buildTeamStack(awayLeaders, game.awayTeam.abbreviation, game.awayTeam.abbreviation, game.awayTeam.winPct);
+    }
+  }
+
+  return stacks.sort((a, b) => b.correlationScore - a.correlationScore);
 }
 
 export function CorrelationEngine() {
-  const [stacks] = useState<CorrelatedStack[]>(getMockStacks());
-  const [sport, setSport] = useState("all");
+  const [sport, setSport] = useState("NFL");
   const [minCorrelation, setMinCorrelation] = useState("0.5");
 
-  const filtered = stacks
-    .filter(s => sport === "all" || s.sport === sport)
-    .filter(s => s.correlationScore >= parseFloat(minCorrelation));
+  const { data, isLoading, error } = useQuery<MarketSnapshot>({
+    queryKey: [`/api/market-snapshot?sport=${sport}`],
+  });
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+  const allStacks = data ? deriveStacks(data.games) : [];
+  const filtered = allStacks.filter(s => s.correlationScore >= parseFloat(minCorrelation));
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4" data-testid="correlation-engine-loading">
         <div className="flex items-center gap-2">
           <Link2 className="w-5 h-5 text-primary" />
-          <span className="font-medium">Correlation Engine 2.0</span>
+          <span className="font-medium">Correlation Engine</span>
         </div>
+        {[1, 2, 3].map(i => (
+          <Card key={i}>
+            <CardHeader className="pb-2"><Skeleton className="h-5 w-48" /></CardHeader>
+            <CardContent className="space-y-3">
+              {[1, 2, 3].map(j => <Skeleton key={j} className="h-10" />)}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-4" data-testid="correlation-engine-error">
         <div className="flex items-center gap-2">
+          <Link2 className="w-5 h-5 text-primary" />
+          <span className="font-medium">Correlation Engine</span>
+        </div>
+        <Card>
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Failed to load correlation data. Please try again.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4" data-testid="correlation-engine-container">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Link2 className="w-5 h-5 text-primary" />
+          <span className="font-medium">Correlation Engine</span>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
           <Select value={sport} onValueChange={setSport}>
             <SelectTrigger className="w-32" data-testid="select-correlation-sport">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Sports</SelectItem>
               <SelectItem value="NFL">NFL</SelectItem>
               <SelectItem value="NBA">NBA</SelectItem>
               <SelectItem value="MLB">MLB</SelectItem>
@@ -144,93 +196,105 @@ export function CorrelationEngine() {
         </div>
       </div>
 
-      <div className="grid gap-4">
-        {filtered.map(stack => (
-          <Card 
-            key={stack.id} 
-            className={`${
-              stack.correlationScore < 0 
-                ? "border-red-500/30 bg-red-500/5" 
-                : stack.synergy === "strong" 
-                  ? "border-green-500/30 bg-green-500/5" 
+      {data?.meta?.dataSources && (
+        <p className="text-xs text-muted-foreground" data-testid="text-correlation-data-source">
+          Data: {data.meta.dataSources.join(", ")}
+        </p>
+      )}
+
+      {filtered.length === 0 ? (
+        <Card>
+          <CardContent className="p-6 text-center" data-testid="correlation-engine-empty">
+            <Link2 className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">
+              No correlation stacks found for {sport} with minimum correlation {minCorrelation}.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {filtered.map(stack => (
+            <Card
+              key={stack.id}
+              className={`${
+                stack.synergy === "strong"
+                  ? "border-green-500/30 bg-green-500/5"
                   : "border-border"
-            }`}
-          >
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <Badge>{stack.sport}</Badge>
-                  <CardTitle className="text-base">{stack.name}</CardTitle>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={stack.correlationScore >= 0.7 ? "default" : stack.correlationScore >= 0 ? "secondary" : "destructive"}
-                  >
-                    {stack.correlationScore.toFixed(2)} Correlation
-                  </Badge>
-                  <Badge 
-                    className={`${
-                      stack.combinedEV > 8 ? "bg-green-500" : 
-                      stack.combinedEV > 0 ? "bg-green-400" : 
-                      "bg-red-500"
-                    } text-white`}
-                  >
-                    {stack.combinedEV > 0 ? "+" : ""}{stack.combinedEV.toFixed(1)}% EV
-                  </Badge>
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">{stack.game}</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="space-y-2">
-                {stack.legs.map((leg, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-background/50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Plus className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{leg.player}</span>
-                      <span className="text-muted-foreground">{leg.prop}</span>
-                    </div>
-                    <Badge variant="outline" className={
-                      leg.recommendation.includes("over") ? "text-green-500 border-green-500/30" : "text-red-500 border-red-500/30"
-                    }>
-                      {leg.recommendation.replace("_", " ").toUpperCase()}
+              }`}
+              data-testid={`card-stack-${stack.id}`}
+            >
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline">{sport}</Badge>
+                    <CardTitle className="text-base" data-testid={`text-stack-name-${stack.id}`}>{stack.name}</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge
+                      variant={stack.correlationScore >= 0.7 ? "default" : "secondary"}
+                    >
+                      {stack.correlationScore.toFixed(2)} Correlation
+                    </Badge>
+                    <Badge
+                      className={`${
+                        stack.combinedEV > 8 ? "bg-green-500" :
+                        stack.combinedEV > 0 ? "bg-green-400" :
+                        "bg-red-500"
+                      } text-white`}
+                    >
+                      {stack.combinedEV > 0 ? "+" : ""}{stack.combinedEV.toFixed(1)}% EV
                     </Badge>
                   </div>
-                ))}
-              </div>
-
-              <div className="p-3 bg-muted/30 rounded-lg">
-                <div className="flex items-start gap-2">
-                  {stack.correlationScore >= 0 ? (
-                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
-                  ) : (
-                    <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5" />
-                  )}
-                  <p className="text-sm">{stack.reason}</p>
                 </div>
-              </div>
-
-              {stack.warnings.length > 0 && (
-                <div className="space-y-1">
-                  {stack.warnings.map((warning, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-yellow-500">
-                      <AlertTriangle className="w-4 h-4" />
-                      {warning}
+                <p className="text-sm text-muted-foreground">{stack.game}</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  {stack.legs.map((leg, i) => (
+                    <div key={i} className="flex items-center justify-between gap-2 p-2 bg-background/50 rounded-md">
+                      <div className="flex items-center gap-2">
+                        <Plus className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium">{leg.player}</span>
+                        <span className="text-muted-foreground">{leg.prop}</span>
+                      </div>
+                      <Badge variant="outline" className={
+                        leg.recommendation.includes("over") ? "text-green-500 border-green-500/30" : "text-muted-foreground"
+                      }>
+                        {leg.recommendation.replace("_", " ").toUpperCase()}
+                      </Badge>
                     </div>
                   ))}
                 </div>
-              )}
 
-              <div className="flex gap-2">
-                <Button size="sm" className="flex-1" data-testid={`button-add-stack-${stack.id}`}>
-                  <Zap className="w-4 h-4 mr-2" />
-                  Add to Builder
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <div className="p-3 bg-muted/30 rounded-md">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500 mt-0.5" />
+                    <p className="text-sm">{stack.reason}</p>
+                  </div>
+                </div>
+
+                {stack.warnings.length > 0 && (
+                  <div className="space-y-1">
+                    {stack.warnings.map((warning, i) => (
+                      <div key={i} className="flex items-center gap-2 text-sm text-yellow-500">
+                        <AlertTriangle className="w-4 h-4" />
+                        {warning}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  <Button size="sm" className="flex-1" data-testid={`button-add-stack-${stack.id}`}>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Add to Builder
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

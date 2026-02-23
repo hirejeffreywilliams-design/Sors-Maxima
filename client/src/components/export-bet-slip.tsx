@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileOutput, Copy, CheckCircle, ExternalLink, Smartphone } from "lucide-react";
+import { FileOutput, Copy, CheckCircle, ExternalLink, Smartphone, Plus, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const SPORTSBOOKS = [
@@ -15,14 +17,20 @@ const SPORTSBOOKS = [
   { id: "betrivers", name: "BetRivers", deepLink: "https://betrivers.com" },
 ];
 
-const SAMPLE_LEGS = [
-  { sport: "NBA", event: "Nuggets vs Suns", pick: "Over 218.5", odds: "-110", type: "Total" },
-  { sport: "NFL", event: "Chiefs vs Bills", pick: "Chiefs -3.5", odds: "-105", type: "Spread" },
-  { sport: "NBA", event: "Knicks vs Heat", pick: "Jalen Brunson O28.5 Pts", odds: "+115", type: "Player Prop" },
-];
+interface BetLeg {
+  sport: string;
+  event: string;
+  pick: string;
+  odds: string;
+  type: string;
+}
 
-function formatForSportsbook(bookId: string, legs: typeof SAMPLE_LEGS): string {
-  const header = SPORTSBOOKS.find(b => b.id === bookId)?.name || bookId;
+interface ExportBetSlipProps {
+  legs?: BetLeg[];
+}
+
+function formatForSportsbook(bookId: string, legs: BetLeg[]): string {
+  const header = SPORTSBOOKS.find((b) => b.id === bookId)?.name || bookId;
   const divider = "---";
 
   switch (bookId) {
@@ -76,20 +84,49 @@ function formatForSportsbook(bookId: string, legs: typeof SAMPLE_LEGS): string {
       ].join("\n");
 
     default:
-      return legs.map(l => `${l.event}: ${l.pick} (${l.odds})`).join("\n");
+      return legs.map((l) => `${l.event}: ${l.pick} (${l.odds})`).join("\n");
   }
 }
 
-export function ExportBetSlip() {
+export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
   const { toast } = useToast();
   const [selectedBook, setSelectedBook] = useState("");
   const [generated, setGenerated] = useState(false);
   const [formattedSlip, setFormattedSlip] = useState("");
   const [copied, setCopied] = useState(false);
+  const [manualLegs, setManualLegs] = useState<BetLeg[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const [formSport, setFormSport] = useState("NBA");
+  const [formEvent, setFormEvent] = useState("");
+  const [formPick, setFormPick] = useState("");
+  const [formOdds, setFormOdds] = useState("");
+  const [formType, setFormType] = useState("Spread");
+
+  const activeLegs = externalLegs && externalLegs.length > 0 ? externalLegs : manualLegs;
+  const isUsingExternal = externalLegs && externalLegs.length > 0;
+
+  function handleAddLeg() {
+    if (!formEvent || !formPick || !formOdds) return;
+    setManualLegs((prev) => [
+      ...prev,
+      { sport: formSport, event: formEvent, pick: formPick, odds: formOdds, type: formType },
+    ]);
+    setFormEvent("");
+    setFormPick("");
+    setFormOdds("");
+    setShowAddForm(false);
+    setGenerated(false);
+  }
+
+  function handleRemoveLeg(index: number) {
+    setManualLegs((prev) => prev.filter((_, i) => i !== index));
+    setGenerated(false);
+  }
 
   const handleGenerate = () => {
-    if (!selectedBook) return;
-    const slip = formatForSportsbook(selectedBook, SAMPLE_LEGS);
+    if (!selectedBook || activeLegs.length === 0) return;
+    const slip = formatForSportsbook(selectedBook, activeLegs);
     setFormattedSlip(slip);
     setGenerated(true);
   };
@@ -101,7 +138,39 @@ export function ExportBetSlip() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const selectedBookData = SPORTSBOOKS.find(b => b.id === selectedBook);
+  const selectedBookData = SPORTSBOOKS.find((b) => b.id === selectedBook);
+
+  if (activeLegs.length === 0 && !showAddForm) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileOutput className="h-5 w-5" />
+              Export Bet Slip
+            </CardTitle>
+            <CardDescription>Generate a formatted bet slip for your sportsbook</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-8 text-center" data-testid="empty-bet-slip">
+              <FileOutput className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
+              <p className="font-medium">No legs to export</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Build a parlay first, then export it here.
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Or manually add legs below.
+              </p>
+              <Button variant="outline" className="mt-4" onClick={() => setShowAddForm(true)} data-testid="button-start-adding-legs">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Legs Manually
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -115,8 +184,14 @@ export function ExportBetSlip() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Sportsbook</label>
-            <Select value={selectedBook} onValueChange={(val) => { setSelectedBook(val); setGenerated(false); }}>
+            <Label>Select Sportsbook</Label>
+            <Select
+              value={selectedBook}
+              onValueChange={(val) => {
+                setSelectedBook(val);
+                setGenerated(false);
+              }}
+            >
               <SelectTrigger data-testid="select-sportsbook">
                 <SelectValue placeholder="Choose a sportsbook" />
               </SelectTrigger>
@@ -131,9 +206,77 @@ export function ExportBetSlip() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Current Parlay Legs</label>
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <Label>Parlay Legs ({activeLegs.length})</Label>
+              {!isUsingExternal && (
+                <Button variant="outline" size="sm" onClick={() => setShowAddForm(true)} data-testid="button-add-leg">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Leg
+                </Button>
+              )}
+            </div>
+
+            {showAddForm && !isUsingExternal && (
+              <Card data-testid="card-add-leg-form">
+                <CardContent className="p-3 space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="leg-sport">Sport</Label>
+                      <Select value={formSport} onValueChange={setFormSport}>
+                        <SelectTrigger data-testid="select-leg-sport">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NBA">NBA</SelectItem>
+                          <SelectItem value="NFL">NFL</SelectItem>
+                          <SelectItem value="MLB">MLB</SelectItem>
+                          <SelectItem value="NHL">NHL</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="leg-type">Type</Label>
+                      <Select value={formType} onValueChange={setFormType}>
+                        <SelectTrigger data-testid="select-leg-type">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Spread">Spread</SelectItem>
+                          <SelectItem value="Moneyline">Moneyline</SelectItem>
+                          <SelectItem value="Total">Total</SelectItem>
+                          <SelectItem value="Player Prop">Player Prop</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="leg-event">Event</Label>
+                    <Input id="leg-event" placeholder="e.g. Nuggets vs Suns" value={formEvent} onChange={(e) => setFormEvent(e.target.value)} data-testid="input-leg-event" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label htmlFor="leg-pick">Pick</Label>
+                      <Input id="leg-pick" placeholder="e.g. Over 218.5" value={formPick} onChange={(e) => setFormPick(e.target.value)} data-testid="input-leg-pick" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor="leg-odds">Odds</Label>
+                      <Input id="leg-odds" placeholder="e.g. -110" value={formOdds} onChange={(e) => setFormOdds(e.target.value)} data-testid="input-leg-odds" />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddLeg} disabled={!formEvent || !formPick || !formOdds} className="flex-1" data-testid="button-confirm-add-leg">
+                      Add Leg
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowAddForm(false)} data-testid="button-cancel-add-leg">
+                      Cancel
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="space-y-2">
-              {SAMPLE_LEGS.map((leg, i) => (
+              {activeLegs.map((leg, i) => (
                 <div key={i} className="flex items-center justify-between gap-2 p-3 border rounded-md" data-testid={`row-bet-leg-${i}`}>
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="secondary" data-testid={`badge-sport-leg-${i}`}>{leg.sport}</Badge>
@@ -142,6 +285,11 @@ export function ExportBetSlip() {
                   <div className="flex items-center gap-2 shrink-0">
                     <span className="text-sm">{leg.pick}</span>
                     <Badge variant="outline" data-testid={`badge-odds-leg-${i}`}>{leg.odds}</Badge>
+                    {!isUsingExternal && (
+                      <Button size="icon" variant="ghost" onClick={() => handleRemoveLeg(i)} data-testid={`button-remove-leg-${i}`}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -150,7 +298,7 @@ export function ExportBetSlip() {
 
           <Button
             className="w-full"
-            disabled={!selectedBook}
+            disabled={!selectedBook || activeLegs.length === 0}
             onClick={handleGenerate}
             data-testid="button-generate-slip"
           >
@@ -199,7 +347,7 @@ export function ExportBetSlip() {
                     Deep Link
                   </p>
                   <p className="text-xs text-muted-foreground break-all font-mono" data-testid="text-deep-link">
-                    {selectedBookData?.deepLink}/betslip?parlay=true&legs={SAMPLE_LEGS.length}
+                    {selectedBookData?.deepLink}/betslip?parlay=true&legs={activeLegs.length}
                   </p>
                   <Button
                     variant="outline"
@@ -207,7 +355,7 @@ export function ExportBetSlip() {
                     className="w-full"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `${selectedBookData?.deepLink}/betslip?parlay=true&legs=${SAMPLE_LEGS.length}`
+                        `${selectedBookData?.deepLink}/betslip?parlay=true&legs=${activeLegs.length}`
                       );
                       toast({ title: "Deep link copied" });
                     }}

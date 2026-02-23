@@ -1,102 +1,140 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { Users, TrendingUp, Target, Award, Eye, Zap, CheckCircle, Atom } from "lucide-react";
-import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
+import { Users, TrendingUp, Target, Zap, AlertCircle, Database } from "lucide-react";
 
-interface SharpPick {
-  id: string;
-  game: string;
-  sport: string;
-  pick: string;
-  odds: number;
-  sharpConsensus: number;
-  publicConsensus: number;
-  sharpSources: { name: string; pick: string; confidence: number }[];
-  roi7Day: number;
-  roi30Day: number;
-  grade: "A" | "B" | "C" | "D";
-  reasoning: string;
+interface LineMovementData {
+  market: string;
+  opening: number;
+  current: number;
+  movement: number;
+  direction: "up" | "down" | "stable";
+  velocity: "slow" | "moderate" | "fast" | "steam";
+  sharpAction: boolean;
 }
 
-function getMockSharpPicks(): SharpPick[] {
-  return [
-    {
-      id: "1",
-      game: "Chiefs vs Raiders",
-      sport: "NFL",
-      pick: "Chiefs -6.5",
-      odds: -110,
-      sharpConsensus: 82,
-      publicConsensus: 68,
-      sharpSources: [
-        { name: "Vegas Insider Pro", pick: "Chiefs -6.5", confidence: 88 },
-        { name: "Sharp Action Report", pick: "Chiefs -6.5", confidence: 85 },
-        { name: "Steam Moves", pick: "Chiefs -7", confidence: 78 },
-        { name: "RAS Analytics", pick: "Chiefs -6.5", confidence: 82 },
-      ],
-      roi7Day: 8.2,
-      roi30Day: 12.5,
-      grade: "A",
-      reasoning: "Strong RLM on Chiefs. Line moved from -5.5 to -7 despite 68% public on Chiefs. Sharp money loading.",
-    },
-    {
-      id: "2",
-      game: "Bills vs Dolphins",
-      sport: "NFL",
-      pick: "Under 49.5",
-      odds: -108,
-      sharpConsensus: 75,
-      publicConsensus: 35,
-      sharpSources: [
-        { name: "Contrarian Report", pick: "Under 49.5", confidence: 82 },
-        { name: "Weather Model", pick: "Under 50", confidence: 78 },
-        { name: "Sharp Action Report", pick: "Under 49.5", confidence: 71 },
-      ],
-      roi7Day: 5.8,
-      roi30Day: 9.2,
-      grade: "B",
-      reasoning: "Classic fade spot. 65% of public on Over but line moving down. Wind expected 15+ mph.",
-    },
-    {
-      id: "3",
-      game: "Suns vs Nuggets",
-      sport: "NBA",
-      pick: "Nuggets -5",
-      odds: -105,
-      sharpConsensus: 71,
-      publicConsensus: 52,
-      sharpSources: [
-        { name: "NBA Analytics Pro", pick: "Nuggets -5", confidence: 75 },
-        { name: "Sharp Action Report", pick: "Nuggets -4.5", confidence: 68 },
-        { name: "Situational Model", pick: "Nuggets -5", confidence: 72 },
-      ],
-      roi7Day: 4.2,
-      roi30Day: 7.8,
-      grade: "B",
-      reasoning: "Jokic dominance vs AD. Nuggets 18-3 at home this season. Rest advantage.",
-    },
-    {
-      id: "4",
-      game: "Cowboys vs Eagles",
-      sport: "NFL",
-      pick: "Eagles +1.5",
-      odds: -110,
-      sharpConsensus: 68,
-      publicConsensus: 42,
-      sharpSources: [
-        { name: "Divisional Expert", pick: "Eagles +1.5", confidence: 72 },
-        { name: "Sharp Action Report", pick: "Eagles PK", confidence: 65 },
-      ],
-      roi7Day: 3.5,
-      roi30Day: 6.1,
-      grade: "C",
-      reasoning: "Divisional dog spot. Eagles 8-2 ATS as road underdog. Cowboys overvalued at home.",
-    },
-  ];
+interface MarketGame {
+  id: string;
+  shortName: string;
+  name: string;
+  venue?: string;
+  homeTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  awayTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  consensus: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number; homeImpliedProb?: number; awayImpliedProb?: number };
+  bookmakers: { book: string; homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number }[];
+  lineMovement: LineMovementData[];
+  edgeAnalysis: { homeEV: number; awayEV: number; valueSide?: string; hasArbitrage: boolean };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+interface SharpPickDerived {
+  id: string;
+  game: string;
+  pick: string;
+  odds: number | undefined;
+  confidence: number;
+  sharpIndicators: string[];
+  market: string;
+  movement: LineMovementData;
+  bookmakerCount: number;
+  homeEV: number;
+  awayEV: number;
+  valueSide: string;
+  grade: "A" | "B" | "C";
+}
+
+function deriveSharpPicks(games: MarketGame[]): SharpPickDerived[] {
+  const picks: SharpPickDerived[] = [];
+
+  for (const game of games) {
+    for (const lm of game.lineMovement) {
+      if (!lm.sharpAction && lm.velocity !== "steam" && lm.velocity !== "fast") continue;
+
+      const indicators: string[] = [];
+      let confidence = 50;
+
+      if (lm.sharpAction) {
+        indicators.push("Sharp action detected");
+        confidence += 15;
+      }
+      if (lm.velocity === "steam") {
+        indicators.push("Steam move");
+        confidence += 20;
+      } else if (lm.velocity === "fast") {
+        indicators.push("Fast movement");
+        confidence += 10;
+      }
+
+      if (game.edgeAnalysis.valueSide && game.edgeAnalysis.valueSide !== "none") {
+        indicators.push(`Value on ${game.edgeAnalysis.valueSide === "home" ? game.homeTeam.abbreviation : game.awayTeam.abbreviation}`);
+        confidence += 10;
+      }
+
+      if (game.bookmakers.length >= 5) {
+        indicators.push(`${game.bookmakers.length} books tracked`);
+        confidence += 5;
+      }
+
+      confidence = Math.min(confidence, 95);
+
+      let pick = "";
+      let odds: number | undefined;
+
+      if (lm.market === "spread") {
+        if (lm.direction === "down") {
+          pick = `${game.homeTeam.abbreviation} ${lm.current}`;
+          odds = game.consensus.homeMoneyline;
+        } else {
+          pick = `${game.awayTeam.abbreviation} ${-lm.current}`;
+          odds = game.consensus.awayMoneyline;
+        }
+      } else if (lm.market === "total") {
+        if (lm.direction === "up") {
+          pick = `Over ${lm.current}`;
+        } else {
+          pick = `Under ${lm.current}`;
+        }
+        odds = -110;
+      }
+
+      if (game.edgeAnalysis.valueSide === "home" && lm.market === "spread") {
+        pick = `${game.homeTeam.abbreviation} ${lm.current}`;
+        odds = game.consensus.homeMoneyline;
+      } else if (game.edgeAnalysis.valueSide === "away" && lm.market === "spread") {
+        pick = `${game.awayTeam.abbreviation} ${-lm.current}`;
+        odds = game.consensus.awayMoneyline;
+      }
+
+      const grade: SharpPickDerived["grade"] = confidence >= 80 ? "A" : confidence >= 65 ? "B" : "C";
+
+      picks.push({
+        id: `${game.id}-${lm.market}`,
+        game: game.shortName,
+        pick,
+        odds,
+        confidence,
+        sharpIndicators: indicators,
+        market: lm.market,
+        movement: lm,
+        bookmakerCount: game.bookmakers.length,
+        homeEV: game.edgeAnalysis.homeEV,
+        awayEV: game.edgeAnalysis.awayEV,
+        valueSide: game.edgeAnalysis.valueSide || "none",
+        grade,
+      });
+    }
+  }
+
+  return picks.sort((a, b) => b.confidence - a.confidence);
 }
 
 function getGradeColor(grade: string) {
@@ -104,25 +142,30 @@ function getGradeColor(grade: string) {
     case "A": return "bg-green-500 text-white";
     case "B": return "bg-green-400 text-white";
     case "C": return "bg-yellow-500 text-black";
-    case "D": return "bg-red-500 text-white";
     default: return "bg-muted";
   }
 }
 
 export function SharpConsensus() {
-  const [picks] = useState<SharpPick[]>(getMockSharpPicks());
-  const [sport, setSport] = useState("all");
+  const [sport, setSport] = useState("NBA");
 
-  const filtered = sport === "all" ? picks : picks.filter(p => p.sport === sport);
+  const { data, isLoading, error } = useQuery<MarketSnapshot>({
+    queryKey: [`/api/market-snapshot?sport=${sport}`],
+  });
+
+  const picks = useMemo(() => {
+    if (!data?.games) return [];
+    return deriveSharpPicks(data.games);
+  }, [data]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" data-testid="sharp-consensus">
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           <Users className="w-5 h-5 text-primary" />
-          <span className="font-medium">Sharp Analysis</span>
+          <span className="font-medium">Sharp Consensus</span>
           <Badge variant="outline" className="gap-1">
-            <Atom className="w-3 h-3" />
+            <Zap className="w-3 h-3" />
             Pro Intel
           </Badge>
         </div>
@@ -131,39 +174,79 @@ export function SharpConsensus() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Sports</SelectItem>
-            <SelectItem value="NFL">NFL</SelectItem>
             <SelectItem value="NBA">NBA</SelectItem>
+            <SelectItem value="NFL">NFL</SelectItem>
+            <SelectItem value="MLB">MLB</SelectItem>
             <SelectItem value="NHL">NHL</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      <QuantumAnalysisIndicator compact />
+      {isLoading && (
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-32" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">Failed to load sharp consensus data. Please try again.</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && !error && picks.length === 0 && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Users className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground" data-testid="text-no-sharp-picks">
+              No sharp action detected for {sport} games right now.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4">
-        {filtered.map(pick => (
-          <Card 
+        {picks.map(pick => (
+          <Card
             key={pick.id}
-            className={`${pick.sharpConsensus >= 75 ? "border-green-500/30 bg-green-500/5" : ""}`}
+            className={pick.confidence >= 75 ? "border-green-500/30 bg-green-500/5" : ""}
+            data-testid={`card-sharp-${pick.id}`}
           >
             <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge>{pick.sport}</Badge>
-                    <span className="font-medium">{pick.game}</span>
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <Badge>{sport}</Badge>
+                    <span className="font-medium" data-testid={`text-game-${pick.id}`}>{pick.game}</span>
                     <Badge className={getGradeColor(pick.grade)}>Grade: {pick.grade}</Badge>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">{pick.pick}</span>
-                    <Badge variant="outline">{pick.odds > 0 ? "+" : ""}{pick.odds}</Badge>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-lg font-bold" data-testid={`text-pick-${pick.id}`}>{pick.pick}</span>
+                    {pick.odds !== undefined && (
+                      <Badge variant="outline">{pick.odds > 0 ? "+" : ""}{pick.odds}</Badge>
+                    )}
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Sharp Consensus</p>
-                  <p className={`text-2xl font-bold ${pick.sharpConsensus >= 75 ? "text-green-500" : ""}`}>
-                    {pick.sharpConsensus}%
+                  <p className="text-sm text-muted-foreground">Confidence</p>
+                  <p className={`text-2xl font-bold ${pick.confidence >= 75 ? "text-green-500" : ""}`} data-testid={`text-confidence-${pick.id}`}>
+                    {pick.confidence}%
                   </p>
                 </div>
               </div>
@@ -171,65 +254,67 @@ export function SharpConsensus() {
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="p-3 bg-background/50 rounded-lg">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Sharp Money</span>
-                    <span className={pick.sharpConsensus >= 70 ? "text-green-500 font-medium" : ""}>
-                      {pick.sharpConsensus}%
+                    <span>Sharp Confidence</span>
+                    <span className={pick.confidence >= 70 ? "text-green-500 font-medium" : ""}>
+                      {pick.confidence}%
                     </span>
                   </div>
-                  <Progress value={pick.sharpConsensus} className="h-2" />
+                  <Progress value={pick.confidence} className="h-2" />
                 </div>
                 <div className="p-3 bg-background/50 rounded-lg">
                   <div className="flex justify-between text-sm mb-1">
-                    <span>Public Money</span>
-                    <span>{pick.publicConsensus}%</span>
+                    <span>Line Movement</span>
+                    <span className="capitalize">{pick.movement.velocity}</span>
                   </div>
-                  <Progress value={pick.publicConsensus} className="h-2" />
+                  <Progress value={pick.movement.velocity === "steam" ? 100 : pick.movement.velocity === "fast" ? 75 : pick.movement.velocity === "moderate" ? 50 : 25} className="h-2" />
                 </div>
               </div>
 
               <div className="space-y-2 mb-4">
-                <p className="text-sm font-medium">Sharp Sources ({pick.sharpSources.length})</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {pick.sharpSources.map((source, i) => (
-                    <div key={i} className="p-2 bg-muted/30 rounded-lg flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="w-3 h-3 text-green-500" />
-                        <span className="truncate">{source.name}</span>
-                      </div>
-                      <Badge variant="outline" className="text-xs">{source.confidence}%</Badge>
-                    </div>
+                <p className="text-sm font-medium">Sharp Indicators ({pick.sharpIndicators.length})</p>
+                <div className="flex flex-wrap gap-2">
+                  {pick.sharpIndicators.map((indicator, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">
+                      {indicator}
+                    </Badge>
                   ))}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
-                  <p className="text-xs text-muted-foreground">7-Day ROI</p>
-                  <p className={`font-bold ${pick.roi7Day > 0 ? "text-green-500" : "text-red-500"}`}>
-                    {pick.roi7Day > 0 ? "+" : ""}{pick.roi7Day}%
-                  </p>
+                  <p className="text-xs text-muted-foreground">Market</p>
+                  <p className="font-bold capitalize">{pick.market}</p>
                 </div>
                 <div className="p-3 bg-muted/30 rounded-lg text-center">
-                  <p className="text-xs text-muted-foreground">30-Day ROI</p>
-                  <p className={`font-bold ${pick.roi30Day > 0 ? "text-green-500" : "text-red-500"}`}>
-                    {pick.roi30Day > 0 ? "+" : ""}{pick.roi30Day}%
+                  <p className="text-xs text-muted-foreground">Movement</p>
+                  <p className="font-bold">
+                    {pick.movement.opening} <TrendingUp className="w-3 h-3 inline" /> {pick.movement.current}
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 bg-primary/5 rounded-lg mb-3">
-                <p className="text-xs text-muted-foreground mb-1">Analysis</p>
-                <p className="text-sm">{pick.reasoning}</p>
-              </div>
-
-              <Button className="w-full" data-testid={`button-add-sharp-${pick.id}`}>
-                <Zap className="w-4 h-4 mr-2" />
-                Add to Parlay
-              </Button>
+              {pick.valueSide !== "none" && (
+                <div className="p-3 bg-primary/5 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-primary" />
+                    <p className="text-sm">
+                      EV Analysis: Home {pick.homeEV > 0 ? "+" : ""}{pick.homeEV.toFixed(2)} | Away {pick.awayEV > 0 ? "+" : ""}{pick.awayEV.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {data?.meta && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="text-data-source">
+          <Database className="w-3 h-3" />
+          <span>Data: {data.meta.dataSources.join(", ")} | {data.meta.bookmakerCount} bookmakers | Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,18 +1,57 @@
 import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Percent, Calculator, CircleDot, Clock, CircleOff } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Percent, Calculator, CircleDot, AlertCircle, Database } from "lucide-react";
 
-type ArbStatus = "active" | "closing" | "expired";
+interface BookmakerOdds {
+  book: string;
+  homeMoneyline?: number;
+  awayMoneyline?: number;
+  spread?: number;
+  total?: number;
+}
 
-interface ArbOpportunity {
+interface BestLineEntry {
+  odds: number;
+  book: string;
+  line?: number;
+  total?: number;
+}
+
+interface MarketGame {
+  id: string;
+  shortName: string;
+  name: string;
+  venue?: string;
+  homeTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  awayTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  consensus: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number; homeImpliedProb?: number; awayImpliedProb?: number };
+  bookmakers: BookmakerOdds[];
+  bestLines: {
+    bestHomeML?: BestLineEntry;
+    bestAwayML?: BestLineEntry;
+    bestSpreadHome?: BestLineEntry;
+    bestSpreadAway?: BestLineEntry;
+    bestOver?: BestLineEntry;
+    bestUnder?: BestLineEntry;
+  };
+  edgeAnalysis: { homeEV: number; awayEV: number; hasArbitrage: boolean; arbProfit?: number; valueSide?: string };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+interface DerivedArb {
   id: string;
   event: string;
-  sport: string;
-  market: string;
   bookA: string;
   bookAOdds: number;
   bookASide: string;
@@ -20,122 +59,97 @@ interface ArbOpportunity {
   bookBOdds: number;
   bookBSide: string;
   arbPct: number;
-  status: ArbStatus;
+  bookmakerCount: number;
 }
 
-const SAMPLE_ARBS: ArbOpportunity[] = [
-  {
-    id: "arb1",
-    event: "Knicks vs Mavericks",
-    sport: "NBA",
-    market: "Moneyline",
-    bookA: "DraftKings",
-    bookAOdds: 2.45,
-    bookASide: "Knicks ML",
-    bookB: "FanDuel",
-    bookBOdds: 1.72,
-    bookBSide: "Mavericks ML",
-    arbPct: 2.3,
-    status: "active",
-  },
-  {
-    id: "arb2",
-    event: "Chiefs vs Bills",
-    sport: "NFL",
-    market: "Spread",
-    bookA: "BetMGM",
-    bookAOdds: 2.15,
-    bookASide: "Chiefs +3.5",
-    bookB: "Caesars",
-    bookBOdds: 2.05,
-    bookBSide: "Bills -3.5",
-    arbPct: 1.8,
-    status: "active",
-  },
-  {
-    id: "arb3",
-    event: "Dodgers vs Giants",
-    sport: "MLB",
-    market: "Moneyline",
-    bookA: "FanDuel",
-    bookAOdds: 2.60,
-    bookASide: "Giants ML",
-    bookB: "DraftKings",
-    bookBOdds: 1.58,
-    bookBSide: "Dodgers ML",
-    arbPct: 1.5,
-    status: "closing",
-  },
-  {
-    id: "arb4",
-    event: "Oilers vs Flames",
-    sport: "NHL",
-    market: "Total",
-    bookA: "Caesars",
-    bookAOdds: 2.10,
-    bookASide: "Over 5.5",
-    bookB: "BetMGM",
-    bookBOdds: 2.00,
-    bookBSide: "Under 5.5",
-    arbPct: 2.6,
-    status: "active",
-  },
-  {
-    id: "arb5",
-    event: "Bucks vs 76ers",
-    sport: "NBA",
-    market: "Moneyline",
-    bookA: "DraftKings",
-    bookAOdds: 1.90,
-    bookASide: "Bucks ML",
-    bookB: "FanDuel",
-    bookBOdds: 2.25,
-    bookBSide: "76ers ML",
-    arbPct: 0.9,
-    status: "expired",
-  },
-  {
-    id: "arb6",
-    event: "Cowboys vs Eagles",
-    sport: "NFL",
-    market: "Moneyline",
-    bookA: "BetMGM",
-    bookAOdds: 3.10,
-    bookASide: "Cowboys ML",
-    bookB: "Caesars",
-    bookBOdds: 1.45,
-    bookBSide: "Eagles ML",
-    arbPct: 1.2,
-    status: "closing",
-  },
-];
+function americanToDecimal(american: number): number {
+  if (american > 0) return american / 100 + 1;
+  return 100 / Math.abs(american) + 1;
+}
 
-function getStatusIndicator(status: ArbStatus) {
-  switch (status) {
-    case "active":
-      return { icon: CircleDot, color: "text-green-500", label: "Active" };
-    case "closing":
-      return { icon: Clock, color: "text-yellow-500", label: "Closing Soon" };
-    case "expired":
-      return { icon: CircleOff, color: "text-muted-foreground", label: "Expired" };
+function deriveArbs(games: MarketGame[]): DerivedArb[] {
+  const arbs: DerivedArb[] = [];
+
+  for (const game of games) {
+    if (game.edgeAnalysis.hasArbitrage && game.edgeAnalysis.arbProfit && game.bestLines.bestHomeML && game.bestLines.bestAwayML) {
+      arbs.push({
+        id: `${game.id}-ml`,
+        event: game.shortName,
+        bookA: game.bestLines.bestHomeML.book,
+        bookAOdds: americanToDecimal(game.bestLines.bestHomeML.odds),
+        bookASide: `${game.homeTeam.abbreviation} ML`,
+        bookB: game.bestLines.bestAwayML.book,
+        bookBOdds: americanToDecimal(game.bestLines.bestAwayML.odds),
+        bookBSide: `${game.awayTeam.abbreviation} ML`,
+        arbPct: game.edgeAnalysis.arbProfit,
+        bookmakerCount: game.bookmakers.length,
+      });
+    }
+
+    if (game.bookmakers.length >= 2) {
+      let bestHomeML = -Infinity;
+      let bestAwayML = -Infinity;
+      let bestHomeBook = "";
+      let bestAwayBook = "";
+      for (const bk of game.bookmakers) {
+        if (bk.homeMoneyline !== undefined && bk.homeMoneyline > bestHomeML) {
+          bestHomeML = bk.homeMoneyline;
+          bestHomeBook = bk.book;
+        }
+        if (bk.awayMoneyline !== undefined && bk.awayMoneyline > bestAwayML) {
+          bestAwayML = bk.awayMoneyline;
+          bestAwayBook = bk.book;
+        }
+      }
+      if (bestHomeML > -Infinity && bestAwayML > -Infinity) {
+        const homeDecimal = americanToDecimal(bestHomeML);
+        const awayDecimal = americanToDecimal(bestAwayML);
+        const totalImplied = 1 / homeDecimal + 1 / awayDecimal;
+        if (totalImplied < 1 && !game.edgeAnalysis.hasArbitrage) {
+          const profit = Math.round((1 / totalImplied - 1) * 10000) / 100;
+          arbs.push({
+            id: `${game.id}-ml-derived`,
+            event: game.shortName,
+            bookA: bestHomeBook,
+            bookAOdds: homeDecimal,
+            bookASide: `${game.homeTeam.abbreviation} ML`,
+            bookB: bestAwayBook,
+            bookBOdds: awayDecimal,
+            bookBSide: `${game.awayTeam.abbreviation} ML`,
+            arbPct: profit,
+            bookmakerCount: game.bookmakers.length,
+          });
+        }
+      }
+    }
   }
+
+  return arbs.sort((a, b) => b.arbPct - a.arbPct);
 }
 
 export function ArbitrageFinder() {
-  const [sportFilter, setSportFilter] = useState("all");
+  const [sport, setSport] = useState("NBA");
   const [minProfit, setMinProfit] = useState("0");
   const [bankroll, setBankroll] = useState("1000");
   const [selectedArb, setSelectedArb] = useState<string | null>(null);
 
+  const { data, isLoading, error } = useQuery<MarketSnapshot>({
+    queryKey: [`/api/market-snapshot?sport=${sport}`],
+  });
+
+  const arbs = useMemo(() => {
+    if (!data?.games) return [];
+    return deriveArbs(data.games);
+  }, [data]);
+
   const filtered = useMemo(() => {
-    return SAMPLE_ARBS.filter((arb) => {
-      if (sportFilter !== "all" && arb.sport !== sportFilter) return false;
+    return arbs.filter((arb) => {
       if (arb.arbPct < parseFloat(minProfit)) return false;
       return true;
     });
-  }, [sportFilter, minProfit]);
+  }, [arbs, minProfit]);
 
-  function calcStakes(arb: ArbOpportunity) {
+  function calcStakes(arb: DerivedArb) {
     const total = parseFloat(bankroll) || 0;
     const impliedA = 1 / arb.bookAOdds;
     const impliedB = 1 / arb.bookBOdds;
@@ -147,20 +161,21 @@ export function ArbitrageFinder() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
+    <div className="space-y-4" data-testid="arbitrage-finder">
+      <div className="flex items-center gap-2 flex-wrap">
         <Percent className="w-5 h-5 text-chart-1" />
         <span className="font-medium">Arbitrage Finder</span>
-        <Badge variant="secondary" data-testid="badge-arb-count">{filtered.length} opportunities</Badge>
+        {!isLoading && (
+          <Badge variant="secondary" data-testid="badge-arb-count">{filtered.length} opportunities</Badge>
+        )}
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <Select value={sportFilter} onValueChange={setSportFilter}>
+        <Select value={sport} onValueChange={setSport}>
           <SelectTrigger className="w-36" data-testid="select-arb-sport">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Sports</SelectItem>
             <SelectItem value="NBA">NBA</SelectItem>
             <SelectItem value="NFL">NFL</SelectItem>
             <SelectItem value="MLB">MLB</SelectItem>
@@ -201,34 +216,68 @@ export function ArbitrageFinder() {
         </CardContent>
       </Card>
 
+      {isLoading && (
+        <div className="grid gap-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-32" />
+                <div className="grid grid-cols-2 gap-3">
+                  <Skeleton className="h-20" />
+                  <Skeleton className="h-20" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">Failed to load arbitrage data. Please try again.</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && !error && filtered.length === 0 && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Percent className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground" data-testid="text-no-arbs">
+              No arbitrage opportunities found for {sport}. Markets are efficiently priced right now.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-3">
         {filtered.map((arb) => {
-          const status = getStatusIndicator(arb.status);
-          const StatusIcon = status.icon;
           const stakes = calcStakes(arb);
           const isSelected = selectedArb === arb.id;
 
           return (
-            <Card
-              key={arb.id}
-              className={arb.status === "expired" ? "opacity-60" : ""}
-            >
+            <Card key={arb.id} data-testid={`card-arb-${arb.id}`}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2 flex-wrap">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <StatusIcon className={`w-4 h-4 ${status.color}`} />
-                      <span className="font-semibold">{arb.event}</span>
-                      <Badge variant="outline" data-testid={`badge-sport-${arb.id}`}>{arb.sport}</Badge>
+                      <CircleDot className="w-4 h-4 text-green-500" />
+                      <span className="font-semibold" data-testid={`text-event-${arb.id}`}>{arb.event}</span>
+                      <Badge variant="outline" data-testid={`badge-sport-${arb.id}`}>{sport}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">{arb.market}</p>
+                    <p className="text-sm text-muted-foreground">Moneyline - {arb.bookmakerCount} books compared</p>
                   </div>
                   <Badge
                     variant="default"
                     className="text-sm"
                     data-testid={`badge-profit-${arb.id}`}
                   >
-                    +{arb.arbPct}% profit
+                    +{arb.arbPct.toFixed(2)}% profit
                   </Badge>
                 </div>
 
@@ -286,6 +335,13 @@ export function ArbitrageFinder() {
           );
         })}
       </div>
+
+      {data?.meta && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="text-data-source">
+          <Database className="w-3 h-3" />
+          <span>Data: {data.meta.dataSources.join(", ")} | {data.meta.gamesWithOdds} games with odds | Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}</span>
+        </div>
+      )}
     </div>
   );
 }

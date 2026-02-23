@@ -6,37 +6,22 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, TrendingUp, Zap, Shield, Target, MessageSquare, Activity, Heart, Award, AlertTriangle, Info } from "lucide-react";
+import { Users, TrendingUp, Zap, Shield, Target, Activity, Award, AlertTriangle, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-
-interface TeamFactor {
-  id: string;
-  name: string;
-  value: number;
-  impact: "positive" | "negative" | "neutral";
-  confidence: number;
-  bettingImplication: string;
-}
 
 interface TeamAnalysis {
   teamName: string;
-  opponent: string;
-  isHome: boolean;
-  winProbability: number;
-  spreadPrediction: number;
-  totalPrediction: number;
-  overallConfidence: number;
-  factors: TeamFactor[];
-  teamDynamics: {
-    communication: number;
-    morale: number;
-    chemistry: number;
-    focus: number;
-  };
-  fanEngagement: number;
-  distractionLevel: number;
-  efficiencyRating: number;
-  plusMinusProjection: number;
+  sport: string;
+  record: string;
+  winPct: number;
+  recentForm: string;
+  strengths: string[];
+  weaknesses: string[];
+  keyPlayers: string[];
+  offenseRating: number;
+  defenseRating: number;
+  overallRating: number;
+  dataSource: string;
 }
 
 const sports = [
@@ -176,29 +161,33 @@ export function QuantumTeamDynamics() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Win Probability</p>
-                <p className="text-3xl font-bold text-green-500" data-testid="text-win-probability">
-                  {(analysis.winProbability * 100).toFixed(0)}%
+                <p className="text-sm text-muted-foreground mb-1">Record</p>
+                <p className="text-3xl font-bold" data-testid="text-record">
+                  {analysis.record}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Spread</p>
-                <p className="text-3xl font-bold">{analysis.spreadPrediction}</p>
+                <p className="text-sm text-muted-foreground mb-1">Win Rate</p>
+                <p className={`text-3xl font-bold ${analysis.winPct >= 50 ? "text-green-500" : "text-red-500"}`} data-testid="text-win-pct">
+                  {analysis.winPct}%
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Total</p>
-                <p className="text-3xl font-bold">{analysis.totalPrediction}</p>
+                <p className="text-sm text-muted-foreground mb-1">Overall Rating</p>
+                <p className="text-3xl font-bold text-purple-500" data-testid="text-overall-rating">
+                  {analysis.overallRating}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center">
-                <p className="text-sm text-muted-foreground mb-1">Confidence</p>
-                <p className="text-3xl font-bold text-purple-500">
-                  {(analysis.overallConfidence * 100).toFixed(0)}%
+                <p className="text-sm text-muted-foreground mb-1">Form</p>
+                <p className={`text-2xl font-bold ${analysis.recentForm === "Hot" ? "text-green-500" : analysis.recentForm === "Cold" ? "text-red-500" : "text-yellow-500"}`}>
+                  {analysis.recentForm}
                 </p>
               </CardContent>
             </Card>
@@ -208,46 +197,37 @@ export function QuantumTeamDynamics() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Heart className="w-4 h-4 text-pink-500" />
-                  Team Dynamics Score
+                  <Activity className="w-4 h-4 text-blue-500" />
+                  Performance Ratings
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-1">
-                      <MessageSquare className="w-4 h-4" /> Communication
+                      <TrendingUp className="w-4 h-4" /> Offense
                     </span>
-                    <span className="font-mono">{analysis.teamDynamics.communication}%</span>
+                    <span className="font-mono">{analysis.offenseRating}</span>
                   </div>
-                  <Progress value={analysis.teamDynamics.communication} className="h-2" />
+                  <Progress value={analysis.offenseRating} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" /> Morale
+                      <Shield className="w-4 h-4" /> Defense
                     </span>
-                    <span className="font-mono">{analysis.teamDynamics.morale}%</span>
+                    <span className="font-mono">{analysis.defenseRating}</span>
                   </div>
-                  <Progress value={analysis.teamDynamics.morale} className="h-2" />
+                  <Progress value={analysis.defenseRating} className="h-2" />
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="flex items-center gap-1">
-                      <Users className="w-4 h-4" /> Chemistry
+                      <Target className="w-4 h-4" /> Overall
                     </span>
-                    <span className="font-mono">{analysis.teamDynamics.chemistry}%</span>
+                    <span className="font-mono">{analysis.overallRating}</span>
                   </div>
-                  <Progress value={analysis.teamDynamics.chemistry} className="h-2" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="flex items-center gap-1">
-                      <Target className="w-4 h-4" /> Focus
-                    </span>
-                    <span className="font-mono">{analysis.teamDynamics.focus}%</span>
-                  </div>
-                  <Progress value={analysis.teamDynamics.focus} className="h-2" />
+                  <Progress value={analysis.overallRating} className="h-2" />
                 </div>
               </CardContent>
             </Card>
@@ -255,98 +235,62 @@ export function QuantumTeamDynamics() {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-blue-500" />
-                  Advanced Metrics
+                  <Zap className="w-4 h-4 text-yellow-500" />
+                  Strengths & Weaknesses
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-muted/50 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Efficiency Rating</p>
-                    <p className="text-2xl font-bold text-green-500">{analysis.efficiencyRating}</p>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                    <TrendingUp className="w-3 h-3 text-green-500" /> Strengths
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {analysis.strengths.map((s, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs bg-green-500/10 text-green-600 dark:text-green-400">
+                        {s}
+                      </Badge>
+                    ))}
                   </div>
-                  <div className="p-3 bg-muted/50 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">+/- Projection</p>
-                    <p className="text-2xl font-bold text-blue-500">+{analysis.plusMinusProjection}</p>
-                  </div>
-                  <div className="p-3 bg-muted/50 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Fan Engagement</p>
-                    <p className="text-2xl font-bold text-orange-500">{analysis.fanEngagement}%</p>
-                  </div>
-                  <div className="p-3 bg-muted/50 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Distraction Level</p>
-                    <p className={`text-2xl font-bold ${analysis.distractionLevel < 25 ? "text-green-500" : "text-yellow-500"}`}>
-                      {analysis.distractionLevel}%
-                    </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3 text-red-500" /> Weaknesses
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {analysis.weaknesses.map((w, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs bg-red-500/10 text-red-600 dark:text-red-400">
+                        {w}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Zap className="w-4 h-4 text-yellow-500" />
-                Factor Breakdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {analysis.factors.map((factor) => (
-                <div key={factor.id} className="p-3 bg-muted/50 rounded-lg" data-testid={`team-factor-${factor.id}`}>
-                  <div className="flex items-start justify-between gap-3 mb-2 flex-wrap">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {factor.impact === "positive" ? (
-                        <TrendingUp className="w-4 h-4 text-green-500" />
-                      ) : factor.impact === "negative" ? (
-                        <AlertTriangle className="w-4 h-4 text-red-500" />
-                      ) : (
-                        <Shield className="w-4 h-4 text-gray-500" />
-                      )}
-                      <span className="font-medium" data-testid={`text-factor-name-${factor.id}`}>{factor.name}</span>
-                    </div>
-                    <Badge variant="outline" data-testid={`text-factor-impact-${factor.id}`}>
-                      {factor.value >= 0 ? "+" : ""}{(factor.value * 100).toFixed(1)}%
+          {analysis.keyPlayers.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Award className="w-4 h-4 text-green-500" />
+                  Key Players
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {analysis.keyPlayers.map((player, i) => (
+                    <Badge key={i} variant="outline" className="text-sm" data-testid={`badge-player-${i}`}>
+                      {player}
                     </Badge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{factor.bettingImplication}</p>
-                  <div className="flex items-center gap-2 mt-2 text-xs">
-                    <span className="text-muted-foreground">Confidence:</span>
-                    <Progress value={factor.confidence * 100} className="h-1 w-24" />
-                    <span className="font-mono">{(factor.confidence * 100).toFixed(0)}%</span>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Award className="w-4 h-4 text-green-500" />
-                Betting Recommendations
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-4 bg-green-500/10 rounded-lg text-center">
-                  <Badge className="bg-green-500 mb-2">SPREAD</Badge>
-                  <p className="font-bold text-lg">{analysis.teamName.split(" ").pop()} {analysis.spreadPrediction}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{(analysis.overallConfidence * 100).toFixed(0)}% confidence</p>
-                </div>
-                <div className="p-4 bg-blue-500/10 rounded-lg text-center">
-                  <Badge className="bg-blue-500 mb-2">TOTAL</Badge>
-                  <p className="font-bold text-lg">OVER {analysis.totalPrediction}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{(analysis.overallConfidence * 100).toFixed(0)}% confidence</p>
-                </div>
-                <div className="p-4 bg-purple-500/10 rounded-lg text-center">
-                  <Badge className="bg-purple-500 mb-2">MONEYLINE</Badge>
-                  <p className="font-bold text-lg">{analysis.teamName.split(" ").pop()} ML</p>
-                  <p className="text-xs text-muted-foreground mt-1">Moderate value</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-xs text-muted-foreground text-center">
+            Data: {analysis.dataSource}
+          </div>
         </>
       )}
     </div>

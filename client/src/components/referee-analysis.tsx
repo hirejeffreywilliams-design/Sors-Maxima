@@ -1,241 +1,278 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Progress } from "@/components/ui/progress";
-import { Scale, TrendingUp, TrendingDown, AlertTriangle, Target, Users } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Scale, TrendingUp, TrendingDown, Target, MapPin, AlertCircle, Database, Minus } from "lucide-react";
 
-interface RefereeProfile {
-  id: string;
-  name: string;
-  sport: string;
-  game: string;
-  gamesOfficiated: number;
-  overUnderRecord: { over: number; under: number };
-  avgTotal: number;
-  leagueAvgTotal: number;
-  foulRate: number;
-  leagueFoulRate: number;
-  homeTeamCoverRate: number;
-  tendencies: string[];
-  impact: "high" | "medium" | "low";
-  recommendation: string;
+interface LineMovementData {
+  market: string;
+  opening: number;
+  current: number;
+  movement: number;
+  direction: "up" | "down" | "stable";
+  velocity: "slow" | "moderate" | "fast" | "steam";
+  sharpAction: boolean;
 }
 
-function getMockReferees(): RefereeProfile[] {
-  return [
-    {
-      id: "1",
-      name: "Scott Foster",
-      sport: "NBA",
-      game: "Suns vs Nuggets",
-      gamesOfficiated: 1842,
-      overUnderRecord: { over: 48, under: 52 },
-      avgTotal: 218.4,
-      leagueAvgTotal: 225.2,
-      foulRate: 42.8,
-      leagueFoulRate: 40.2,
-      homeTeamCoverRate: 54,
-      tendencies: ["High foul calls", "Under-leaning games", "Tight whistles late in games"],
-      impact: "high",
-      recommendation: "Consider Under - Foster games average 6.8 fewer points than league avg",
-    },
-    {
-      id: "2",
-      name: "Tony Brothers",
-      sport: "NBA",
-      game: "Bucks vs 76ers",
-      gamesOfficiated: 1654,
-      overUnderRecord: { over: 55, under: 45 },
-      avgTotal: 228.6,
-      leagueAvgTotal: 225.2,
-      foulRate: 38.5,
-      leagueFoulRate: 40.2,
-      homeTeamCoverRate: 51,
-      tendencies: ["Lets teams play", "Higher scoring games", "Quick technicals"],
-      impact: "medium",
-      recommendation: "Slight lean Over - Brothers games run 3.4 points above average",
-    },
-    {
-      id: "3",
-      name: "Brad Allen",
-      sport: "NFL",
-      game: "Chiefs vs Raiders",
-      gamesOfficiated: 142,
-      overUnderRecord: { over: 52, under: 48 },
-      avgTotal: 46.2,
-      leagueAvgTotal: 44.8,
-      foulRate: 12.4,
-      leagueFoulRate: 11.8,
-      homeTeamCoverRate: 56,
-      tendencies: ["Flag-happy crew", "Pass interference calls up", "Favors home team slightly"],
-      impact: "medium",
-      recommendation: "Monitor penalty trends - more flags = more stoppages = higher totals",
-    },
-    {
-      id: "4",
-      name: "Wes McCauley",
-      sport: "NHL",
-      game: "Oilers vs Flames",
-      gamesOfficiated: 1124,
-      overUnderRecord: { over: 47, under: 53 },
-      avgTotal: 5.8,
-      leagueAvgTotal: 6.2,
-      foulRate: 7.2,
-      leagueFoulRate: 6.8,
-      homeTeamCoverRate: 52,
-      tendencies: ["Penalty-heavy", "Calls tight games", "Consistent standard"],
-      impact: "medium",
-      recommendation: "Slight Under lean - more penalties = more special teams = lower scoring",
-    },
-    {
-      id: "5",
-      name: "Angel Hernandez",
-      sport: "MLB",
-      game: "Dodgers vs Giants",
-      gamesOfficiated: 2456,
-      overUnderRecord: { over: 51, under: 49 },
-      avgTotal: 8.4,
-      leagueAvgTotal: 8.6,
-      foulRate: 0,
-      leagueFoulRate: 0,
-      homeTeamCoverRate: 49,
-      tendencies: ["Inconsistent strike zone", "More walks issued", "Controversial calls"],
-      impact: "low",
-      recommendation: "Minimal impact on totals - focus on other factors",
-    },
-  ];
+interface MarketGame {
+  id: string;
+  shortName: string;
+  name: string;
+  venue?: string;
+  homeTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  awayTeam: { name: string; abbreviation: string; record: string; winPct: number };
+  consensus: { homeMoneyline?: number; awayMoneyline?: number; spread?: number; total?: number; homeImpliedProb?: number; awayImpliedProb?: number };
+  lineMovement: LineMovementData[];
+  edgeAnalysis: { homeEV: number; awayEV: number; valueSide?: string };
+  dataSource: string;
+}
+
+interface MarketSnapshot {
+  games: MarketGame[];
+  meta: { sport: string; totalGames: number; gamesWithOdds: number; bookmakerCount: number; dataSources: string[]; generatedAt: string };
+}
+
+interface GameContext {
+  id: string;
+  game: MarketGame;
+  factors: { factor: string; impact: "positive" | "negative" | "neutral"; description: string }[];
+  impactLevel: "high" | "medium" | "low";
+}
+
+function deriveGameContexts(games: MarketGame[]): GameContext[] {
+  return games
+    .filter(g => g.consensus.total !== undefined || g.consensus.spread !== undefined)
+    .map(game => {
+      const factors: GameContext["factors"] = [];
+      let impactScore = 0;
+
+      if (game.homeTeam.winPct >= 65) {
+        factors.push({ factor: "Strong Home Team", impact: "positive", description: `${game.homeTeam.name} (${game.homeTeam.record}) - ${game.homeTeam.winPct}% win rate` });
+        impactScore += 2;
+      } else if (game.homeTeam.winPct <= 35) {
+        factors.push({ factor: "Weak Home Team", impact: "negative", description: `${game.homeTeam.name} (${game.homeTeam.record}) - ${game.homeTeam.winPct}% win rate` });
+        impactScore += 1;
+      }
+
+      if (game.venue) {
+        factors.push({ factor: "Venue", impact: "neutral", description: game.venue });
+      }
+
+      const spreadMovement = game.lineMovement.find(lm => lm.market === "spread");
+      if (spreadMovement) {
+        const dir = spreadMovement.direction === "up" ? "positive" : spreadMovement.direction === "down" ? "negative" : "neutral";
+        factors.push({
+          factor: "Spread Movement",
+          impact: dir,
+          description: `${spreadMovement.opening} -> ${spreadMovement.current} (${spreadMovement.velocity}${spreadMovement.sharpAction ? ", sharp action" : ""})`,
+        });
+        if (spreadMovement.sharpAction) impactScore += 2;
+        if (spreadMovement.velocity === "steam" || spreadMovement.velocity === "fast") impactScore += 1;
+      }
+
+      const totalMovement = game.lineMovement.find(lm => lm.market === "total");
+      if (totalMovement) {
+        const dir = totalMovement.direction === "up" ? "positive" : totalMovement.direction === "down" ? "negative" : "neutral";
+        factors.push({
+          factor: "Total Movement",
+          impact: dir,
+          description: `${totalMovement.opening} -> ${totalMovement.current} (${totalMovement.velocity}${totalMovement.sharpAction ? ", sharp action" : ""})`,
+        });
+        if (totalMovement.sharpAction) impactScore += 2;
+      }
+
+      if (game.edgeAnalysis.valueSide && game.edgeAnalysis.valueSide !== "none") {
+        factors.push({
+          factor: "Value Edge",
+          impact: "positive",
+          description: `${game.edgeAnalysis.valueSide === "home" ? game.homeTeam.name : game.awayTeam.name} shows positive expected value`,
+        });
+        impactScore += 1;
+      }
+
+      const impactLevel: GameContext["impactLevel"] = impactScore >= 4 ? "high" : impactScore >= 2 ? "medium" : "low";
+
+      return { id: game.id, game, factors, impactLevel };
+    })
+    .sort((a, b) => {
+      const order = { high: 0, medium: 1, low: 2 };
+      return order[a.impactLevel] - order[b.impactLevel];
+    });
 }
 
 export function RefereeAnalysis() {
-  const [referees] = useState<RefereeProfile[]>(getMockReferees());
-  const [sport, setSport] = useState("all");
+  const [sport, setSport] = useState("NBA");
 
-  const filtered = sport === "all" ? referees : referees.filter(r => r.sport === sport);
+  const { data, isLoading, error } = useQuery<MarketSnapshot>({
+    queryKey: [`/api/market-snapshot?sport=${sport}`],
+  });
+
+  const contexts = useMemo(() => {
+    if (!data?.games) return [];
+    return deriveGameContexts(data.games);
+  }, [data]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-md mb-3">
-        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-        <p className="text-xs text-amber-600 dark:text-amber-400">Demo data shown for illustration. Connect live feeds for real-time results.</p>
-      </div>
+    <div className="space-y-4" data-testid="game-context-analysis">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Scale className="w-5 h-5 text-primary" />
-          <span className="font-medium">Referee/Umpire Tendency Analysis</span>
-          <Badge variant="outline">Official Impact</Badge>
+          <span className="font-medium">Game Context Analysis</span>
+          <Badge variant="outline">Situational Factors</Badge>
         </div>
         <Select value={sport} onValueChange={setSport}>
           <SelectTrigger className="w-32" data-testid="select-referee-sport">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Sports</SelectItem>
-            <SelectItem value="NFL">NFL</SelectItem>
             <SelectItem value="NBA">NBA</SelectItem>
-            <SelectItem value="NHL">NHL</SelectItem>
+            <SelectItem value="NFL">NFL</SelectItem>
             <SelectItem value="MLB">MLB</SelectItem>
+            <SelectItem value="NHL">NHL</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
+      {isLoading && (
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-5 w-48" />
+                <Skeleton className="h-4 w-64" />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                  <Skeleton className="h-16" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {error && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span className="text-sm">Failed to load game context data. Please try again.</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!isLoading && !error && contexts.length === 0 && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <Scale className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+            <p className="text-sm text-muted-foreground" data-testid="text-no-contexts">
+              No upcoming games with context data available for {sport}.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid gap-4">
-        {filtered.map(ref => (
-          <Card 
-            key={ref.id}
-            className={`${ref.impact === "high" ? "border-primary/30 bg-primary/5" : ""}`}
+        {contexts.map(ctx => (
+          <Card
+            key={ctx.id}
+            className={ctx.impactLevel === "high" ? "border-primary/30 bg-primary/5" : ""}
+            data-testid={`card-context-${ctx.id}`}
           >
             <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge>{ref.sport}</Badge>
-                    <span className="font-semibold text-lg">{ref.name}</span>
-                    <Badge 
-                      variant={ref.impact === "high" ? "default" : ref.impact === "medium" ? "secondary" : "outline"}
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <Badge>{sport}</Badge>
+                    <span className="font-semibold text-lg" data-testid={`text-game-${ctx.id}`}>{ctx.game.shortName}</span>
+                    <Badge
+                      variant={ctx.impactLevel === "high" ? "default" : ctx.impactLevel === "medium" ? "secondary" : "outline"}
                     >
-                      {ref.impact.toUpperCase()} IMPACT
+                      {ctx.impactLevel.toUpperCase()} IMPACT
                     </Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground">{ref.game}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Games Officiated</p>
-                  <p className="font-bold">{ref.gamesOfficiated.toLocaleString()}</p>
+                  {ctx.game.venue && (
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <MapPin className="w-3 h-3" />
+                      <span>{ctx.game.venue}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
                 <div className="p-3 bg-background/50 rounded-lg text-center">
-                  <p className="text-xs text-muted-foreground">O/U Record</p>
-                  <p className="font-bold">
-                    <span className={ref.overUnderRecord.over > 52 ? "text-green-500" : ""}>
-                      {ref.overUnderRecord.over}%
-                    </span>
-                    {" / "}
-                    <span className={ref.overUnderRecord.under > 52 ? "text-red-500" : ""}>
-                      {ref.overUnderRecord.under}%
-                    </span>
+                  <p className="text-xs text-muted-foreground">Spread</p>
+                  <p className="font-bold" data-testid={`text-spread-${ctx.id}`}>
+                    {ctx.game.consensus.spread !== undefined ? ctx.game.consensus.spread : "N/A"}
                   </p>
                 </div>
                 <div className="p-3 bg-background/50 rounded-lg text-center">
-                  <p className="text-xs text-muted-foreground">Avg Total</p>
-                  <p className={`font-bold ${
-                    ref.avgTotal > ref.leagueAvgTotal ? "text-green-500" : 
-                    ref.avgTotal < ref.leagueAvgTotal ? "text-red-500" : ""
-                  }`}>
-                    {ref.avgTotal} 
-                    <span className="text-xs text-muted-foreground ml-1">
-                      ({ref.avgTotal > ref.leagueAvgTotal ? "+" : ""}{(ref.avgTotal - ref.leagueAvgTotal).toFixed(1)})
-                    </span>
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="font-bold" data-testid={`text-total-${ctx.id}`}>
+                    {ctx.game.consensus.total !== undefined ? ctx.game.consensus.total : "N/A"}
                   </p>
                 </div>
-                {ref.foulRate > 0 && (
-                  <div className="p-3 bg-background/50 rounded-lg text-center">
-                    <p className="text-xs text-muted-foreground">Foul Rate</p>
-                    <p className={`font-bold ${
-                      ref.foulRate > ref.leagueFoulRate ? "text-yellow-500" : "text-green-500"
-                    }`}>
-                      {ref.foulRate}
-                      <span className="text-xs text-muted-foreground ml-1">
-                        (avg {ref.leagueFoulRate})
-                      </span>
-                    </p>
-                  </div>
-                )}
                 <div className="p-3 bg-background/50 rounded-lg text-center">
-                  <p className="text-xs text-muted-foreground">Home Cover %</p>
-                  <p className={`font-bold ${ref.homeTeamCoverRate > 52 ? "text-green-500" : ""}`}>
-                    {ref.homeTeamCoverRate}%
-                  </p>
+                  <p className="text-xs text-muted-foreground">Home Record</p>
+                  <p className="font-bold text-green-500">{ctx.game.homeTeam.record}</p>
+                </div>
+                <div className="p-3 bg-background/50 rounded-lg text-center">
+                  <p className="text-xs text-muted-foreground">Away Record</p>
+                  <p className="font-bold">{ctx.game.awayTeam.record}</p>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {ref.tendencies.map((tendency, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs">
-                    {tendency}
-                  </Badge>
+              <div className="space-y-2 mb-4">
+                {ctx.factors.map((factor, i) => (
+                  <div
+                    key={i}
+                    className={`p-2 rounded-lg flex items-center justify-between gap-2 ${
+                      factor.impact === "positive" ? "bg-green-500/10" :
+                      factor.impact === "negative" ? "bg-red-500/10" :
+                      "bg-muted/30"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {factor.impact === "positive" ? (
+                        <TrendingUp className="w-4 h-4 text-green-500 shrink-0" />
+                      ) : factor.impact === "negative" ? (
+                        <TrendingDown className="w-4 h-4 text-red-500 shrink-0" />
+                      ) : (
+                        <Minus className="w-4 h-4 text-muted-foreground shrink-0" />
+                      )}
+                      <span className="font-medium text-sm">{factor.factor}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground text-right">{factor.description}</span>
+                  </div>
                 ))}
               </div>
 
-              <div className={`p-3 rounded-lg ${
-                ref.recommendation.includes("Under") || ref.recommendation.includes("lower")
-                  ? "bg-red-500/10 border border-red-500/30"
-                  : ref.recommendation.includes("Over") || ref.recommendation.includes("higher")
-                    ? "bg-green-500/10 border border-green-500/30"
-                    : "bg-muted/50"
-              }`}>
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
-                  <p className="text-sm">{ref.recommendation}</p>
+              {ctx.game.edgeAnalysis.valueSide && ctx.game.edgeAnalysis.valueSide !== "none" && (
+                <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-green-500" />
+                    <p className="text-sm">
+                      Value detected on {ctx.game.edgeAnalysis.valueSide === "home" ? ctx.game.homeTeam.name : ctx.game.awayTeam.name} (EV: {ctx.game.edgeAnalysis.valueSide === "home" ? ctx.game.edgeAnalysis.homeEV.toFixed(2) : ctx.game.edgeAnalysis.awayEV.toFixed(2)})
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
+
+      {data?.meta && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="text-data-source">
+          <Database className="w-3 h-3" />
+          <span>Data: {data.meta.dataSources.join(", ")} | {data.meta.totalGames} games | Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}</span>
+        </div>
+      )}
     </div>
   );
 }

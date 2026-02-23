@@ -1,92 +1,73 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Swords, TrendingUp, TrendingDown, Shield, Target, AlertTriangle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Swords, TrendingUp, TrendingDown, Target } from "lucide-react";
 
 interface MatchupData {
   id: string;
-  player: string;
-  team: string;
-  opponent: string;
-  category: string;
-  seasonAvg: number;
-  vsOpponentAvg: number;
-  last3VsOpponent: number[];
-  defenseRank: number;
-  edge: number;
+  gameId: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeRecord: string;
+  awayRecord: string;
+  homeWinPct: number;
+  awayWinPct: number;
+  strengthDiff: number;
+  leaders: { team: string; category: string; playerName: string; value: string }[];
   recommendation: "smash" | "lean" | "fade" | "avoid";
+  edge: number;
 }
 
-function generateMockMatchups(): MatchupData[] {
-  return [
-    {
-      id: "matchup-1",
-      player: "Tyreek Hill",
-      team: "Dolphins",
-      opponent: "Patriots",
-      category: "Receiving Yards",
-      seasonAvg: 98.5,
-      vsOpponentAvg: 142.3,
-      last3VsOpponent: [156, 134, 137],
-      defenseRank: 28,
-      edge: 18.5,
-      recommendation: "smash",
-    },
-    {
-      id: "matchup-2",
-      player: "Derrick Henry",
-      team: "Titans",
-      opponent: "Jaguars",
-      category: "Rushing Yards",
-      seasonAvg: 105.2,
-      vsOpponentAvg: 128.7,
-      last3VsOpponent: [142, 118, 126],
-      defenseRank: 24,
-      edge: 12.3,
-      recommendation: "smash",
-    },
-    {
-      id: "matchup-3",
-      player: "Justin Jefferson",
-      team: "Vikings",
-      opponent: "Bears",
-      category: "Receptions",
-      seasonAvg: 7.2,
-      vsOpponentAvg: 8.5,
-      last3VsOpponent: [9, 8, 9],
-      defenseRank: 22,
-      edge: 8.1,
-      recommendation: "lean",
-    },
-    {
-      id: "matchup-4",
-      player: "Ja'Marr Chase",
-      team: "Bengals",
-      opponent: "Ravens",
-      category: "Receiving Yards",
-      seasonAvg: 92.1,
-      vsOpponentAvg: 68.4,
-      last3VsOpponent: [54, 72, 79],
-      defenseRank: 4,
-      edge: -15.2,
-      recommendation: "fade",
-    },
-  ];
+function deriveMatchups(games: any[]): MatchupData[] {
+  return games.map((g: any) => {
+    const homeWinPct = g.homeTeam.winPct || 50;
+    const awayWinPct = g.awayTeam.winPct || 50;
+    const diff = homeWinPct - awayWinPct;
+    const absDiff = Math.abs(diff);
+
+    let recommendation: MatchupData["recommendation"] = "avoid";
+    if (absDiff > 15) recommendation = "smash";
+    else if (absDiff > 8) recommendation = "lean";
+    else if (absDiff > 3) recommendation = "fade";
+
+    return {
+      id: g.id,
+      gameId: g.id,
+      homeTeam: g.homeTeam.name,
+      awayTeam: g.awayTeam.name,
+      homeRecord: g.homeTeam.record,
+      awayRecord: g.awayTeam.record,
+      homeWinPct,
+      awayWinPct,
+      strengthDiff: Math.round(diff * 10) / 10,
+      leaders: g.leaders || [],
+      recommendation,
+      edge: Math.round(absDiff * 10) / 10,
+    };
+  }).sort((a: MatchupData, b: MatchupData) => b.edge - a.edge);
+}
+
+function getRecommendationColor(rec: string) {
+  switch (rec) {
+    case "smash": return "text-green-500 bg-green-500/10 border-green-500/30";
+    case "lean": return "text-chart-1 bg-chart-1/10 border-chart-1/30";
+    case "fade": return "text-red-500 bg-red-500/10 border-red-500/30";
+    default: return "text-muted-foreground bg-muted/50 border-border";
+  }
 }
 
 export function MatchupAnalyzer() {
-  const [category, setCategory] = useState("all");
-  const [matchups] = useState<MatchupData[]>(generateMockMatchups());
+  const [sport, setSport] = useState("NFL");
 
-  const getRecommendationColor = (rec: string) => {
-    switch (rec) {
-      case "smash": return "text-green-500 bg-green-500/10 border-green-500/30";
-      case "lean": return "text-chart-1 bg-chart-1/10 border-chart-1/30";
-      case "fade": return "text-red-500 bg-red-500/10 border-red-500/30";
-      default: return "text-muted-foreground bg-muted/50 border-border";
-    }
-  };
+  const { data, isLoading, error } = useQuery<any>({
+    queryKey: ["/api/market-snapshot", sport],
+    queryFn: () => fetch(`/api/market-snapshot?sport=${sport}`).then(r => r.json()),
+  });
+
+  const matchups = data?.games ? deriveMatchups(data.games) : [];
 
   return (
     <Card>
@@ -96,34 +77,53 @@ export function MatchupAnalyzer() {
             <Swords className="w-5 h-5 text-chart-3" />
             Matchup Analyzer
           </CardTitle>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-32" data-testid="select-matchup-category">
+          <Select value={sport} onValueChange={setSport}>
+            <SelectTrigger className="w-24" data-testid="select-matchup-sport">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Props</SelectItem>
-              <SelectItem value="rushing">Rushing</SelectItem>
-              <SelectItem value="receiving">Receiving</SelectItem>
-              <SelectItem value="passing">Passing</SelectItem>
+              <SelectItem value="NFL">NFL</SelectItem>
+              <SelectItem value="NBA">NBA</SelectItem>
+              <SelectItem value="MLB">MLB</SelectItem>
+              <SelectItem value="NHL">NHL</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-matchup">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
-        </div>
+        {isLoading && (
+          <div className="space-y-3" data-testid="loading-matchups">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-32 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 text-center text-sm text-destructive" data-testid="error-matchups">
+            Failed to load matchup data. Please try again.
+          </div>
+        )}
+
+        {!isLoading && !error && matchups.length === 0 && (
+          <div className="p-4 text-center text-sm text-muted-foreground" data-testid="empty-matchups">
+            No matchup data available for {sport}.
+          </div>
+        )}
+
         {matchups.map((matchup) => (
           <div
             key={matchup.id}
+            data-testid={`card-matchup-${matchup.id}`}
             className={`p-3 rounded-lg border ${getRecommendationColor(matchup.recommendation)}`}
           >
             <div className="flex items-start justify-between gap-2 mb-3">
               <div>
-                <p className="font-medium">{matchup.player}</p>
+                <p className="font-medium" data-testid={`text-matchup-teams-${matchup.id}`}>
+                  {matchup.awayTeam} @ {matchup.homeTeam}
+                </p>
                 <p className="text-xs text-muted-foreground">
-                  {matchup.team} vs {matchup.opponent} • {matchup.category}
+                  {matchup.awayRecord} vs {matchup.homeRecord}
                 </p>
               </div>
               <Badge
@@ -139,47 +139,59 @@ export function MatchupAnalyzer() {
               </Badge>
             </div>
 
-            <div className="grid grid-cols-4 gap-2 text-xs">
+            <div className="grid grid-cols-3 gap-2 text-xs mb-3">
               <div className="text-center p-2 bg-background/50 rounded">
-                <p className="text-muted-foreground mb-1">Season Avg</p>
-                <p className="font-bold">{matchup.seasonAvg}</p>
+                <p className="text-muted-foreground mb-1">Home Win%</p>
+                <p className="font-bold">{matchup.homeWinPct}%</p>
               </div>
               <div className="text-center p-2 bg-background/50 rounded">
-                <p className="text-muted-foreground mb-1">vs {matchup.opponent}</p>
-                <p className={`font-bold ${matchup.vsOpponentAvg > matchup.seasonAvg ? "text-green-500" : "text-red-500"}`}>
-                  {matchup.vsOpponentAvg}
-                </p>
-              </div>
-              <div className="text-center p-2 bg-background/50 rounded">
-                <div className="flex items-center justify-center gap-1 mb-1">
-                  <Shield className="w-3 h-3 text-muted-foreground" />
-                  <p className="text-muted-foreground">Def Rank</p>
-                </div>
-                <p className={`font-bold ${matchup.defenseRank > 20 ? "text-green-500" : matchup.defenseRank < 10 ? "text-red-500" : ""}`}>
-                  #{matchup.defenseRank}
-                </p>
+                <p className="text-muted-foreground mb-1">Away Win%</p>
+                <p className="font-bold">{matchup.awayWinPct}%</p>
               </div>
               <div className="text-center p-2 bg-background/50 rounded">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Target className="w-3 h-3 text-muted-foreground" />
                   <p className="text-muted-foreground">Edge</p>
                 </div>
-                <p className={`font-bold ${matchup.edge > 0 ? "text-green-500" : "text-red-500"}`}>
-                  {matchup.edge > 0 ? "+" : ""}{matchup.edge}%
+                <p className={`font-bold ${matchup.strengthDiff > 0 ? "text-green-500" : matchup.strengthDiff < 0 ? "text-red-500" : ""}`}>
+                  {matchup.strengthDiff > 0 ? "+" : ""}{matchup.strengthDiff}%
                 </p>
               </div>
             </div>
 
+            {matchup.leaders.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground">Key Players</p>
+                <div className="flex flex-wrap gap-1">
+                  {matchup.leaders.slice(0, 4).map((leader, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">
+                      {leader.playerName} ({leader.value} {leader.category})
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-              <span>Last 3 vs opponent:</span>
-              {matchup.last3VsOpponent.map((val, i) => (
-                <Badge key={i} variant="secondary" className="text-xs">
-                  {val}
-                </Badge>
-              ))}
+              {matchup.strengthDiff > 0 ? (
+                <TrendingUp className="w-3 h-3 text-green-500" />
+              ) : (
+                <TrendingDown className="w-3 h-3 text-red-500" />
+              )}
+              <span>
+                {matchup.strengthDiff > 0
+                  ? `Home team favored by win% differential of ${matchup.edge}%`
+                  : `Away team favored by win% differential of ${matchup.edge}%`}
+              </span>
             </div>
           </div>
         ))}
+
+        {data?.meta?.dataSources && (
+          <div className="pt-2 text-xs text-muted-foreground text-center" data-testid="text-datasource-matchups">
+            Data: {data.meta.dataSources.join(", ")}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

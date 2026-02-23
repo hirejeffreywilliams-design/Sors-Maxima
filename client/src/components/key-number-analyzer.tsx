@@ -1,7 +1,17 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Hash, AlertCircle, TrendingUp, Info, AlertTriangle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Hash, AlertCircle, Info } from "lucide-react";
+
+const KEY_NUMBERS: Record<string, number[]> = {
+  NFL: [3, 7, 10, 6, 4, 14, 17, 21],
+  NBA: [5, 7, 8, 9, 10],
+  MLB: [1.5],
+  NHL: [1.5, 2.5],
+};
 
 interface KeyNumberGame {
   id: string;
@@ -14,74 +24,70 @@ interface KeyNumberGame {
   value: "high" | "medium" | "low";
 }
 
-const KEY_NUMBERS = {
-  NFL: [3, 7, 10, 6, 4, 14, 17, 21],
-  NBA: [5, 7, 8, 9, 10],
-  MLB: [1.5],
-  NHL: [1.5, 2.5],
-};
+function deriveKeyNumberGames(games: any[], sport: string): KeyNumberGame[] {
+  const keyNums = KEY_NUMBERS[sport] || KEY_NUMBERS.NFL;
 
-function generateMockKeyNumberGames(): KeyNumberGame[] {
-  const games: KeyNumberGame[] = [
-    {
-      id: "key-1",
-      game: "Chiefs @ Bills",
-      spread: -2.5,
-      distanceFromKey: 0.5,
-      keyNumber: 3,
-      recommendation: "Buy half point to 3 if available (-120 max)",
-      sport: "NFL",
-      value: "high",
-    },
-    {
-      id: "key-2",
-      game: "Cowboys @ Eagles",
-      spread: -7,
-      distanceFromKey: 0,
-      keyNumber: 7,
-      recommendation: "ON key number - expect push frequency of ~9%",
-      sport: "NFL",
-      value: "high",
-    },
-    {
-      id: "key-3",
-      game: "49ers @ Seahawks",
-      spread: -6.5,
-      distanceFromKey: 0.5,
-      keyNumber: 7,
-      recommendation: "Consider buying to 7 for push protection",
-      sport: "NFL",
-      value: "medium",
-    },
-    {
-      id: "key-4",
-      game: "Packers @ Bears",
-      spread: -3,
-      distanceFromKey: 0,
-      keyNumber: 3,
-      recommendation: "Most important NFL key number - 15% of games land here",
-      sport: "NFL",
-      value: "high",
-    },
-    {
-      id: "key-5",
-      game: "Eagles @ Cowboys",
-      spread: -4.5,
-      distanceFromKey: 0.5,
-      keyNumber: 5,
-      recommendation: "Near NFL key number of 5",
-      sport: "NFL",
-      value: "medium",
-    },
-  ];
-  
-  return games;
+  return games
+    .filter((g: any) => g.consensus?.spread !== undefined && g.consensus.spread !== null)
+    .map((g: any) => {
+      const spread = g.consensus.spread;
+      const absSpread = Math.abs(spread);
+
+      let nearestKey = keyNums[0];
+      let minDist = Math.abs(absSpread - keyNums[0]);
+      for (const kn of keyNums) {
+        const dist = Math.abs(absSpread - kn);
+        if (dist < minDist) {
+          minDist = dist;
+          nearestKey = kn;
+        }
+      }
+
+      const distance = Math.round(minDist * 10) / 10;
+
+      let value: "high" | "medium" | "low" = "low";
+      if (distance === 0) value = "high";
+      else if (distance <= 0.5) value = "high";
+      else if (distance <= 1.5) value = "medium";
+
+      let recommendation = "";
+      if (distance === 0) {
+        recommendation = `ON key number ${nearestKey} - expect higher push frequency`;
+      } else if (distance <= 0.5) {
+        recommendation = `Buy half point to ${nearestKey} if available (-120 max)`;
+      } else if (distance <= 1) {
+        recommendation = `Consider buying to ${nearestKey} for push protection`;
+      } else if (distance <= 1.5) {
+        recommendation = `Near key number ${nearestKey} - monitor for movement`;
+      } else {
+        recommendation = `${distance} points from nearest key number (${nearestKey})`;
+      }
+
+      return {
+        id: g.id,
+        game: g.shortName,
+        spread,
+        distanceFromKey: distance,
+        keyNumber: nearestKey,
+        recommendation,
+        sport,
+        value,
+      };
+    })
+    .sort((a: KeyNumberGame, b: KeyNumberGame) => a.distanceFromKey - b.distanceFromKey);
 }
 
 export function KeyNumberAnalyzer() {
-  const [games] = useState<KeyNumberGame[]>(generateMockKeyNumberGames());
+  const [sport, setSport] = useState("NFL");
 
+  const { data, isLoading, error } = useQuery<any>({
+    queryKey: ["/api/market-snapshot", sport],
+    queryFn: () => fetch(`/api/market-snapshot?sport=${sport}`).then(r => r.json()),
+  });
+
+  const games = data?.games ? deriveKeyNumberGames(data.games, sport) : [];
   const highValueCount = games.filter(g => g.value === "high").length;
+  const keyNums = KEY_NUMBERS[sport] || [];
 
   return (
     <Card>
@@ -91,39 +97,63 @@ export function KeyNumberAnalyzer() {
             <Hash className="w-5 h-5 text-chart-2" />
             Key Number Analysis
           </CardTitle>
-          <Badge variant="outline" className="gap-1">
-            <AlertCircle className="w-3 h-3" />
-            {highValueCount} High Value
-          </Badge>
+          <div className="flex items-center gap-2">
+            {games.length > 0 && (
+              <Badge variant="outline" className="gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {highValueCount} High Value
+              </Badge>
+            )}
+            <Select value={sport} onValueChange={setSport}>
+              <SelectTrigger className="w-24" data-testid="select-keynumber-sport">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="NFL">NFL</SelectItem>
+                <SelectItem value="NBA">NBA</SelectItem>
+                <SelectItem value="MLB">MLB</SelectItem>
+                <SelectItem value="NHL">NHL</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-yellow-600 dark:text-yellow-400 text-sm" data-testid="banner-demo-keynumbers">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          <span>Demo data shown for illustration. Connect live feeds for real-time results.</span>
-        </div>
         <div className="grid grid-cols-2 gap-2 p-3 bg-muted/50 rounded-lg text-xs">
           <div>
-            <p className="font-medium mb-1">NFL Key Numbers</p>
+            <p className="font-medium mb-1">{sport} Key Numbers</p>
             <div className="flex flex-wrap gap-1">
-              {KEY_NUMBERS.NFL.map(n => (
-                <Badge key={n} variant="secondary" className="text-xs">{n}</Badge>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="font-medium mb-1">NBA Key Numbers</p>
-            <div className="flex flex-wrap gap-1">
-              {KEY_NUMBERS.NBA.map(n => (
+              {keyNums.map(n => (
                 <Badge key={n} variant="secondary" className="text-xs">{n}</Badge>
               ))}
             </div>
           </div>
         </div>
 
+        {isLoading && (
+          <div className="space-y-3" data-testid="loading-keynumbers">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-24 w-full rounded-lg" />
+            ))}
+          </div>
+        )}
+
+        {error && (
+          <div className="p-4 text-center text-sm text-destructive" data-testid="error-keynumbers">
+            Failed to load game data. Please try again.
+          </div>
+        )}
+
+        {!isLoading && !error && games.length === 0 && (
+          <div className="p-4 text-center text-sm text-muted-foreground" data-testid="empty-keynumbers">
+            No games with spread data available for {sport}.
+          </div>
+        )}
+
         {games.map((game) => (
           <div
             key={game.id}
+            data-testid={`card-keynumber-${game.id}`}
             className={`p-3 rounded-lg border ${
               game.value === "high"
                 ? "bg-chart-2/10 border-chart-2/30"
@@ -138,7 +168,7 @@ export function KeyNumberAnalyzer() {
                   <Badge variant="outline" className="text-xs">
                     {game.sport}
                   </Badge>
-                  <p className="font-medium text-sm">{game.game}</p>
+                  <p className="font-medium text-sm" data-testid={`text-game-${game.id}`}>{game.game}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -161,9 +191,11 @@ export function KeyNumberAnalyzer() {
           </div>
         ))}
 
-        <div className="pt-2 text-xs text-muted-foreground text-center">
-          Key numbers are spreads where games frequently land
-        </div>
+        {data?.meta?.dataSources && (
+          <div className="pt-2 text-xs text-muted-foreground text-center" data-testid="text-datasource-keynumbers">
+            Data: {data.meta.dataSources.join(", ")}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -18,6 +18,7 @@ export interface PlayerPrediction {
   }[];
   overallGrade: string;
   dataSource: string;
+  projectionBasis: string;
 }
 
 export interface AllPlayersPrediction {
@@ -111,30 +112,192 @@ const positionDefaults: Record<string, Record<string, number>> = {
   D: { goals: 0.1, assists: 0.3, shots: 2, saves: 0 },
 };
 
-function buildSinglePlayerPrediction(player: ESPNPlayer, sport: Sport, teamName: string): PlayerPrediction {
+interface TeamContext {
+  winPct: number;
+  offenseRating: number;
+  record: string;
+  totalPlayers: number;
+  playerRosterIndex: number;
+}
+
+function estimatePlayerTier(
+  player: ESPNPlayer,
+  sport: Sport,
+  ctx: TeamContext
+): { multiplier: number; tierLabel: string; basisFactors: string[] } {
+  const basisFactors: string[] = [];
+  let multiplier = 1.0;
+
+  const exp = player.experience ?? 0;
+  if (exp >= 10) {
+    multiplier += 0.25;
+    basisFactors.push(`veteran (${exp}yr experience)`);
+  } else if (exp >= 6) {
+    multiplier += 0.15;
+    basisFactors.push(`experienced (${exp}yr)`);
+  } else if (exp >= 3) {
+    multiplier += 0.05;
+    basisFactors.push(`mid-career (${exp}yr)`);
+  } else if (exp === 0) {
+    multiplier -= 0.15;
+    basisFactors.push("rookie");
+  } else {
+    multiplier -= 0.05;
+    basisFactors.push(`young player (${exp}yr)`);
+  }
+
+  const jerseyNum = player.jersey ? parseInt(player.jersey, 10) : NaN;
+  if (!isNaN(jerseyNum)) {
+    if (sport === "NBA" || sport === "NCAAB") {
+      if (jerseyNum <= 10) {
+        multiplier += 0.08;
+        basisFactors.push(`low jersey #${jerseyNum}`);
+      } else if (jerseyNum >= 40) {
+        multiplier -= 0.08;
+      }
+    } else if (sport === "NFL" || sport === "NCAAF") {
+      const posAbbr = player.position.abbreviation;
+      if (posAbbr === "QB" && jerseyNum <= 15) {
+        multiplier += 0.06;
+        basisFactors.push(`franchise QB #${jerseyNum}`);
+      }
+    }
+  }
+
+  const rosterPct = ctx.totalPlayers > 0
+    ? ctx.playerRosterIndex / ctx.totalPlayers
+    : 0.5;
+
+  if (sport === "NBA" || sport === "NCAAB") {
+    if (rosterPct <= 0.33) {
+      multiplier += 0.20;
+      basisFactors.push("projected starter");
+    } else if (rosterPct <= 0.6) {
+      multiplier += 0.0;
+      basisFactors.push("rotation player");
+    } else {
+      multiplier -= 0.20;
+      basisFactors.push("bench/reserve");
+    }
+  } else {
+    if (rosterPct <= 0.25) {
+      multiplier += 0.12;
+      basisFactors.push("core player");
+    } else if (rosterPct > 0.7) {
+      multiplier -= 0.10;
+      basisFactors.push("depth player");
+    }
+  }
+
+  if (ctx.winPct > 0.6) {
+    multiplier += 0.08;
+    basisFactors.push(`winning team (${ctx.record})`);
+  } else if (ctx.winPct > 0.5) {
+    multiplier += 0.03;
+  } else if (ctx.winPct < 0.35) {
+    multiplier -= 0.06;
+    basisFactors.push(`struggling team (${ctx.record})`);
+  }
+
+  if (ctx.offenseRating > 75) {
+    multiplier += 0.05;
+    basisFactors.push("high-scoring offense");
+  } else if (ctx.offenseRating < 55) {
+    multiplier -= 0.04;
+    basisFactors.push("low-scoring offense");
+  }
+
+  const seed = hashCode(player.id + player.fullName);
+  const personalVariance = ((seed % 200) - 100) / 1000;
+  multiplier += personalVariance;
+
+  multiplier = Math.max(0.4, Math.min(1.65, multiplier));
+
+  let tierLabel: string;
+  if (multiplier >= 1.30) tierLabel = "Star";
+  else if (multiplier >= 1.10) tierLabel = "Starter";
+  else if (multiplier >= 0.90) tierLabel = "Rotation";
+  else if (multiplier >= 0.70) tierLabel = "Bench";
+  else tierLabel = "Reserve";
+
+  return { multiplier, tierLabel, basisFactors };
+}
+
+function hashCode(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function buildSinglePlayerPrediction(
+  player: ESPNPlayer,
+  sport: Sport,
+  teamName: string,
+  ctx?: TeamContext
+): PlayerPrediction {
   const posAbbr = player.position.abbreviation;
   const sportKey = sport === "NCAAB" ? "NBA" : sport === "NCAAF" ? "NFL" : sport;
   const categories = sportCategories[sportKey] || sportCategories.NBA;
   const defaults = positionDefaults[posAbbr] || {};
 
-  const predictions = categories.map(cat => {
+  const teamCtx: TeamContext = ctx || {
+    winPct: 0.5,
+    offenseRating: 65,
+    record: "0-0",
+    totalPlayers: 15,
+    playerRosterIndex: 7,
+  };
+
+  const { multiplier, tierLabel, basisFactors } = estimatePlayerTier(player, sport, teamCtx);
+
+  const playerSeed = hashCode(player.id);
+
+  const predictions = categories.map((cat, catIdx) => {
     const baseValue = defaults[cat] || 5;
-    const projected = Math.round(baseValue * 10) / 10;
+
+    const catVariance = ((hashCode(player.id + cat) % 160) - 80) / 1000;
+    const adjusted = baseValue * (multiplier + catVariance);
+    const projected = Math.round(adjusted * 10) / 10;
+
     const line = Math.round(baseValue * 0.95 * 2) / 2;
     const diff = projected - line;
+
+    const confidenceBase = tierLabel === "Star" ? 72 : tierLabel === "Starter" ? 65 : tierLabel === "Rotation" ? 58 : 50;
+    const confidence = Math.min(88, confidenceBase + Math.abs(diff) * 3);
+
+    const reasonParts: string[] = [];
+    if (tierLabel === "Star") reasonParts.push(`${player.fullName} is a top-tier ${posAbbr}`);
+    else if (tierLabel === "Bench" || tierLabel === "Reserve") reasonParts.push(`Limited minutes expected as ${tierLabel.toLowerCase()}`);
+    else reasonParts.push(`${posAbbr} role in ${teamName}'s system`);
+
+    if (diff > 1) reasonParts.push("projection favors the over");
+    else if (diff < -1) reasonParts.push("projection favors the under");
+    else reasonParts.push("close to the line");
+
+    if (teamCtx.winPct > 0.6) reasonParts.push("boosted by team's winning pace");
+    if (player.experience && player.experience >= 8) reasonParts.push("veteran consistency factor");
 
     return {
       category: cat,
       projectedValue: projected,
-      confidence: Math.min(85, 55 + Math.abs(diff) * 5),
+      confidence: Math.round(confidence),
       overUnderLine: line,
       recommendation: diff > 1 ? "over" as const : diff < -1 ? "under" as const : "neutral" as const,
-      reasoning: `Based on ${posAbbr} position averages and team context. ${diff > 0 ? "Projection above line." : diff < 0 ? "Projection below line." : "Close to line."}`,
+      reasoning: reasonParts.join(". ") + ".",
     };
   });
 
   const avgConfidence = predictions.reduce((sum, p) => sum + p.confidence, 0) / predictions.length;
-  const grade = avgConfidence > 75 ? "A" : avgConfidence > 65 ? "B" : avgConfidence > 55 ? "C" : "D";
+  const grade = tierLabel === "Star" ? "A"
+    : tierLabel === "Starter" ? "B+"
+    : avgConfidence > 65 ? "B"
+    : avgConfidence > 55 ? "C+"
+    : avgConfidence > 48 ? "C"
+    : "D";
 
   return {
     playerId: player.id,
@@ -144,11 +307,50 @@ function buildSinglePlayerPrediction(player: ESPNPlayer, sport: Sport, teamName:
     sport,
     predictions,
     overallGrade: grade,
-    dataSource: "ESPN roster data, position-based statistical model",
+    dataSource: "ESPN roster data, experience-weighted statistical model",
+    projectionBasis: `Player tier: ${tierLabel} (multiplier ${multiplier.toFixed(2)}x). Factors: ${basisFactors.join(", ")}.`,
   };
 }
 
-export function getPlayerPrediction(sport: Sport, teamId: string, playerId?: string): PlayerPrediction | null {
+async function fetchTeamContext(sport: Sport, teamId: string, roster: TeamRoster | null): Promise<TeamContext> {
+  const teamName = roster?.team?.displayName || "";
+  let winPct = 0.5;
+  let offenseRating = 65;
+  let record = "0-0";
+
+  try {
+    const games = await getScoreboard(sport);
+    const game = games.find((g: ESPNScoreboardGame) =>
+      g.homeTeam.id === teamId || g.awayTeam.id === teamId ||
+      g.homeTeam.displayName.toLowerCase().includes(teamName.toLowerCase()) ||
+      g.awayTeam.displayName.toLowerCase().includes(teamName.toLowerCase())
+    );
+
+    if (game) {
+      const isHome = game.homeTeam.id === teamId || game.homeTeam.displayName.toLowerCase().includes(teamName.toLowerCase());
+      record = (isHome ? game.homeTeam.record : game.awayTeam.record) || "0-0";
+      const parts = record.split("-").map(Number);
+      const wins = parts[0] || 0;
+      const losses = parts[1] || 0;
+      const total = wins + losses;
+      winPct = total > 0 ? wins / total : 0.5;
+      offenseRating = Math.round(winPct * 40 + 50);
+
+      if (game.status.state === "post") {
+        const teamScore = isHome ? game.homeTeam.score : game.awayTeam.score;
+        if (sport === "NBA" || sport === "NCAAB") {
+          if (teamScore > 115) offenseRating += 8;
+          else if (teamScore > 105) offenseRating += 4;
+        }
+      }
+    }
+  } catch {
+  }
+
+  return { winPct, offenseRating, record, totalPlayers: 15, playerRosterIndex: 7 };
+}
+
+export async function getPlayerPrediction(sport: Sport, teamId: string, playerId?: string): Promise<PlayerPrediction | null> {
   let players = getPlayersFromCacheById(sport, teamId);
   if (!players || players.length === 0) {
     players = getPlayersFromCache(sport, teamId);
@@ -163,7 +365,15 @@ export function getPlayerPrediction(sport: Sport, teamId: string, playerId?: str
   const roster = getRosterFromCacheById(sport, teamId);
   const teamName = roster?.team?.displayName || teamId;
 
-  return buildSinglePlayerPrediction(player, sport, teamName);
+  const baseCtx = await fetchTeamContext(sport, teamId, roster);
+  const playerIndex = players.findIndex((p: ESPNPlayer) => p.id === player.id);
+  const ctx: TeamContext = {
+    ...baseCtx,
+    totalPlayers: players.length,
+    playerRosterIndex: playerIndex >= 0 ? playerIndex : Math.floor(players.length / 2),
+  };
+
+  return buildSinglePlayerPrediction(player, sport, teamName, ctx);
 }
 
 export async function getAllPlayerPredictions(sport: Sport, teamId: string): Promise<AllPlayersPrediction | null> {
@@ -184,14 +394,23 @@ export async function getAllPlayerPredictions(sport: Sport, teamId: string): Pro
     return (aKey === -1 ? 999 : aKey) - (bKey === -1 ? 999 : bKey);
   });
 
-  const players = sortedPlayers.map(p => buildSinglePlayerPrediction(p, sport, roster!.team.displayName));
+  const baseCtx = await fetchTeamContext(sport, teamId, roster);
+
+  const players = sortedPlayers.map((p, idx) => {
+    const ctx: TeamContext = {
+      ...baseCtx,
+      totalPlayers: sortedPlayers.length,
+      playerRosterIndex: idx,
+    };
+    return buildSinglePlayerPrediction(p, sport, roster!.team.displayName, ctx);
+  });
 
   return {
     teamId,
     teamName: roster.team.displayName,
     sport,
     players,
-    dataSource: "ESPN roster data, position-based statistical model",
+    dataSource: "ESPN roster data, experience-weighted statistical model",
   };
 }
 
