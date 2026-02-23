@@ -65,7 +65,11 @@ import CorrelationMatrix from "@/pages/correlation-matrix";
 import SharedTickets from "@/pages/shared-tickets";
 import OddsCenter from "@/pages/odds-center";
 import PropParlayBuilder from "@/pages/prop-parlay-builder";
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal } from "lucide-react";
+import StraightBets from "@/pages/straight-bets";
+import SGPGenerator from "@/pages/sgp-generator";
+import TeaserGenerator from "@/pages/teaser-generator";
+import RoundRobinGenerator from "@/pages/round-robin-generator";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal, Target, Layers, ArrowUpDown, Shuffle } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -211,6 +215,10 @@ function Router({ authState }: { authState: AuthState }) {
       <Route path="/betting-profile" component={BettingProfile} />
       <Route path="/pro-tools" component={ProTools} />
       <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
+      <Route path="/straight-bets" component={StraightBets} />
+      <Route path="/sgp" component={SGPGenerator} />
+      <Route path="/teasers" component={TeaserGenerator} />
+      <Route path="/round-robin" component={RoundRobinGenerator} />
       <Route path="/shared-tickets" component={SharedTickets} />
       <Route component={NotFound} />
     </Switch>
@@ -302,6 +310,10 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">More</div>
         <nav className="space-y-1 pb-2">
           {([
+            { href: "/straight-bets", icon: Target, label: "Straight Bets", testId: "mobile-nav-straight-bets" },
+            { href: "/sgp", icon: Layers, label: "Same Game Parlays", testId: "mobile-nav-sgp" },
+            { href: "/teasers", icon: ArrowUpDown, label: "Teasers", testId: "mobile-nav-teasers" },
+            { href: "/round-robin", icon: Shuffle, label: "Round Robin", testId: "mobile-nav-round-robin" },
             { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
             { href: "/prop-parlay-builder", icon: Brain, label: "Prop Parlay Builder", testId: "mobile-nav-prop-parlay" },
             { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },

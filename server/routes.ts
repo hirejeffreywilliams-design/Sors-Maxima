@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 import { getOddsForSport, getOddsForSportAsync, refreshOddsForSport, eventsToLegs } from "./odds-provider";
+import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions, getVegasInsights } from "./vegas-engine";
 import { stripeService } from "./stripeService";
 import { WebhookHandlers } from "./webhookHandlers";
@@ -6922,6 +6923,506 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     } catch (e: any) {
       console.error("[real-props] Error:", e.message);
       res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ==================== PREDICTION GENERATORS ====================
+
+  app.get("/api/predictions/straight-bets", async (req, res) => {
+    try {
+      const sport = req.query.sport as string | undefined;
+      const betType = req.query.betType as string | undefined;
+      const minConfidence = parseInt(req.query.minConfidence as string) || 0;
+
+      const validSport = sport && sports.includes(sport as any) ? sport as any : undefined;
+
+      const predictions = await generateVegasPredictions(validSport);
+
+      let filtered = predictions;
+      if (betType && ["moneyline", "spread", "total"].includes(betType)) {
+        filtered = filtered.filter(p => p.betType === betType);
+      }
+      if (minConfidence > 0) {
+        filtered = filtered.filter(p => p.confidence >= minConfidence);
+      }
+
+      const rankedPicks = filtered.map((pred, idx) => {
+        const fusionResult = analyzeLeg(
+          pred.sport,
+          `${pred.prediction} (${pred.game})`,
+          pred.betType === "moneyline" ? pred.vegasLine : -110,
+          { hasRealOdds: true }
+        );
+
+        let unitRecommendation: number;
+        if (pred.confidenceTier === "LOCK") unitRecommendation = 3;
+        else if (pred.confidenceTier === "STRONG") unitRecommendation = 2;
+        else if (pred.confidenceTier === "LEAN") unitRecommendation = 1;
+        else unitRecommendation = 0.5;
+
+        return {
+          id: pred.id,
+          rank: idx + 1,
+          sport: pred.sport,
+          game: pred.game,
+          homeTeam: pred.homeTeam,
+          awayTeam: pred.awayTeam,
+          pick: pred.prediction,
+          betType: pred.betType,
+          odds: pred.betType === "spread" || pred.betType === "total" ? -110 : pred.vegasLine,
+          line: pred.vegasLine,
+          projectedLine: pred.projectedLine,
+          fairLine: pred.fairLine,
+          confidence: pred.confidence,
+          confidenceTier: pred.confidenceTier,
+          edge: pred.edge,
+          expectedValue: pred.expectedValue,
+          trueProbability: pred.trueProbability,
+          impliedProbability: pred.impliedProbability,
+          sharpMoney: pred.sharpMoney,
+          publicMoney: pred.publicMoney,
+          steamMove: pred.steamMove,
+          reverseLineMove: pred.reverseLineMove,
+          modelAgreement: pred.modelAgreement,
+          factors: pred.factors,
+          fusionGrade: fusionResult.grade,
+          fusionConfidence: fusionResult.confidence,
+          unitRecommendation,
+        };
+      });
+
+      return res.json({
+        picks: rankedPicks,
+        meta: {
+          totalPicks: rankedPicks.length,
+          lockCount: rankedPicks.filter(p => p.confidenceTier === "LOCK").length,
+          strongCount: rankedPicks.filter(p => p.confidenceTier === "STRONG").length,
+          averageEdge: rankedPicks.length > 0 ? Math.round(rankedPicks.reduce((s, p) => s + p.edge, 0) / rankedPicks.length * 10) / 10 : 0,
+          generatedAt: new Date().toISOString(),
+          sport: validSport || "all",
+        },
+        disclaimer: "For entertainment purposes only. No guarantees — betting involves risk. Gamble responsibly.",
+      });
+    } catch (err) {
+      console.error("Straight bets error:", err);
+      return res.status(500).json({ error: "Failed to generate straight bet predictions" });
+    }
+  });
+
+  app.get("/api/predictions/sgp", async (req, res) => {
+    try {
+      const sport = (req.query.sport as string) || "NBA";
+      const validSport = sports.includes(sport as any) ? sport as any : "NBA";
+
+      const games = await getMultiDayScoreboard(validSport, 3);
+      const upcomingGames = games.filter(g => g.status?.state === "pre" || g.status?.state === "in");
+
+      if (upcomingGames.length === 0) {
+        return res.json({ sgps: [], meta: { sport: validSport, gamesAnalyzed: 0 } });
+      }
+
+      const sgps: any[] = [];
+
+      for (const game of upcomingGames.slice(0, 12)) {
+        const homeName = game.homeTeam?.displayName || "Home";
+        const awayName = game.awayTeam?.displayName || "Away";
+        const homeRecord = game.homeTeam?.record || "";
+        const awayRecord = game.awayTeam?.record || "";
+
+        const parseWinPct = (record: string) => {
+          if (!record) return 0.5;
+          const parts = record.split("-");
+          const wins = parseFloat(parts[0]);
+          const losses = parseFloat(parts[1]);
+          return (wins + losses) > 0 ? wins / (wins + losses) : 0.5;
+        };
+        const homeWinPct = parseWinPct(homeRecord);
+        const awayWinPct = parseWinPct(awayRecord);
+
+        const leaders = (game.leaders || []).map(l => ({
+          name: l.playerName,
+          team: l.team,
+          category: l.category,
+          value: parseFloat(l.value) || 0,
+        }));
+
+        const spreadEstimate = Math.round((homeWinPct - awayWinPct) * 15 * 2) / 2;
+        const totalEstimate = validSport === "NBA" ? 220 + Math.round((homeWinPct + awayWinPct - 1) * 20) :
+          validSport === "NFL" ? 44 + Math.round((homeWinPct + awayWinPct - 1) * 10) :
+          validSport === "MLB" ? 8.5 : validSport === "NHL" ? 6 : 220;
+
+        const combos: { name: string; legs: any[]; rationale: string; correlation: string }[] = [];
+
+        const favoriteIsHome = homeWinPct > awayWinPct;
+        const favName = favoriteIsHome ? homeName : awayName;
+        const underdogName = favoriteIsHome ? awayName : homeName;
+        const favSpreadOdds = -110;
+        const totalOddsVal = -110;
+        const mlOdds = favoriteIsHome
+          ? Math.round(-100 - (homeWinPct - 0.5) * 400)
+          : Math.round(100 + (0.5 - homeWinPct) * 400);
+
+        const topScorer = leaders.find((l: any) => l.category === "Points Per Game" || l.category === "Rating");
+
+        combos.push({
+          name: `${favName} Win + Over ${totalEstimate}`,
+          legs: [
+            { type: "moneyline", pick: `${favName} ML`, odds: mlOdds, line: 0 },
+            { type: "total", pick: `Over ${totalEstimate}`, odds: totalOddsVal, line: totalEstimate },
+          ],
+          rationale: `${favName} favored with strong offense, expect high-scoring game`,
+          correlation: "moderate-positive",
+        });
+
+        combos.push({
+          name: `${favName} Spread + Under ${totalEstimate}`,
+          legs: [
+            { type: "spread", pick: `${favName} ${spreadEstimate > 0 ? "-" : "+"}${Math.abs(spreadEstimate)}`, odds: favSpreadOdds, line: spreadEstimate },
+            { type: "total", pick: `Under ${totalEstimate}`, odds: totalOddsVal, line: totalEstimate },
+          ],
+          rationale: `Defensive game expected with ${favName} controlling tempo`,
+          correlation: "low-positive",
+        });
+
+        if (topScorer) {
+          const scorerLine = validSport === "NBA" ? Math.round(topScorer.value - 2) + 0.5 :
+            validSport === "NFL" ? 0.5 : 0.5;
+          combos.push({
+            name: `${favName} Win + ${topScorer.name} Over ${scorerLine}`,
+            legs: [
+              { type: "moneyline", pick: `${favName} ML`, odds: mlOdds, line: 0 },
+              { type: "player_prop", pick: `${topScorer.name} Over ${scorerLine} ${topScorer.category}`, odds: -115, line: scorerLine },
+            ],
+            rationale: `${topScorer.name} averaging ${topScorer.value} - correlated with team win`,
+            correlation: "high-positive",
+          });
+
+          combos.push({
+            name: `Over ${totalEstimate} + ${topScorer.name} Over ${scorerLine}`,
+            legs: [
+              { type: "total", pick: `Over ${totalEstimate}`, odds: totalOddsVal, line: totalEstimate },
+              { type: "player_prop", pick: `${topScorer.name} Over ${scorerLine} ${topScorer.category}`, odds: -115, line: scorerLine },
+            ],
+            rationale: `High-scoring games boost star player stats`,
+            correlation: "high-positive",
+          });
+        }
+
+        combos.push({
+          name: `${underdogName} Spread + Under ${totalEstimate}`,
+          legs: [
+            { type: "spread", pick: `${underdogName} +${Math.abs(spreadEstimate)}`, odds: -110, line: -spreadEstimate },
+            { type: "total", pick: `Under ${totalEstimate}`, odds: totalOddsVal, line: totalEstimate },
+          ],
+          rationale: `Low-scoring games favor underdogs covering the spread`,
+          correlation: "moderate-positive",
+        });
+
+        for (const combo of combos) {
+          const combinedDecimal = combo.legs.reduce((acc: number, leg: any) => {
+            const dec = leg.odds > 0 ? (leg.odds / 100) + 1 : (100 / Math.abs(leg.odds)) + 1;
+            return acc * dec;
+          }, 1);
+          const combinedAmerican = combinedDecimal >= 2
+            ? Math.round((combinedDecimal - 1) * 100)
+            : Math.round(-100 / (combinedDecimal - 1));
+
+          const fusionResult = analyzeLeg(
+            validSport,
+            combo.name,
+            combinedAmerican,
+            { hasRealOdds: false }
+          );
+
+          const correlationBoost = combo.correlation === "high-positive" ? 8 :
+            combo.correlation === "moderate-positive" ? 4 : 0;
+          const confidence = Math.min(92, Math.max(35, fusionResult.confidence + correlationBoost));
+
+          sgps.push({
+            id: `sgp-${game.id}-${combos.indexOf(combo)}`,
+            gameId: game.id,
+            game: `${awayName} @ ${homeName}`,
+            homeTeam: homeName,
+            awayTeam: awayName,
+            homeRecord,
+            awayRecord,
+            gameTime: game.date,
+            sport: validSport,
+            name: combo.name,
+            legs: combo.legs,
+            combinedOdds: combinedAmerican,
+            combinedDecimal: Math.round(combinedDecimal * 100) / 100,
+            confidence,
+            grade: fusionResult.grade,
+            correlation: combo.correlation,
+            rationale: combo.rationale,
+            ev: Math.round(fusionResult.edgePercentage * 10) / 10,
+          });
+        }
+      }
+
+      sgps.sort((a, b) => b.confidence - a.confidence);
+
+      return res.json({
+        sgps,
+        meta: {
+          sport: validSport,
+          gamesAnalyzed: upcomingGames.length,
+          totalSGPs: sgps.length,
+          generatedAt: new Date().toISOString(),
+        },
+        disclaimer: "For entertainment purposes only. SGP odds are estimates. Gamble responsibly.",
+      });
+    } catch (err) {
+      console.error("SGP generation error:", err);
+      return res.status(500).json({ error: "Failed to generate same game parlays" });
+    }
+  });
+
+  app.get("/api/predictions/teasers", async (req, res) => {
+    try {
+      const sport = (req.query.sport as string) || "NBA";
+      const validSport = sports.includes(sport as any) ? sport as any : "NBA";
+      const legs = parseInt(req.query.legs as string) || 2;
+      const teaserLegs = Math.min(Math.max(legs, 2), 5);
+
+      const teaserPoints: Record<string, number[]> = {
+        NBA: [4, 4.5, 5],
+        NFL: [6, 6.5, 7],
+        NCAAB: [4, 4.5, 5],
+        NCAAF: [6, 6.5, 7],
+        MLB: [1.5, 2],
+        NHL: [1, 1.5],
+      };
+      const availablePoints = teaserPoints[validSport] || [4, 4.5, 5];
+
+      const games = await getMultiDayScoreboard(validSport, 3);
+      const upcomingGames = games.filter(g => g.status?.state === "pre");
+
+      if (upcomingGames.length < teaserLegs) {
+        return res.json({ teasers: [], meta: { sport: validSport, gamesAvailable: upcomingGames.length, legsRequired: teaserLegs } });
+      }
+
+      const gameData = upcomingGames.slice(0, 20).map(game => {
+        const homeName = game.homeTeam?.displayName || "Home";
+        const awayName = game.awayTeam?.displayName || "Away";
+        const homeRecord = game.homeTeam?.record || "";
+        const awayRecord = game.awayTeam?.record || "";
+        const parseWinPctLocal = (record: string) => {
+          if (!record) return 0.5;
+          const parts = record.split("-");
+          const wins = parseFloat(parts[0]);
+          const losses = parseFloat(parts[1]);
+          return (wins + losses) > 0 ? wins / (wins + losses) : 0.5;
+        };
+        const homeWinPct = parseWinPctLocal(homeRecord);
+        const awayWinPct = parseWinPctLocal(awayRecord);
+        const spreadEstimate = Math.round((homeWinPct - awayWinPct) * 15 * 2) / 2;
+        const totalEstimate = validSport === "NBA" ? 220 + Math.round((homeWinPct + awayWinPct - 1) * 20) :
+          validSport === "NFL" ? 44 + Math.round((homeWinPct + awayWinPct - 1) * 10) :
+          validSport === "MLB" ? 8.5 : 6;
+
+        return {
+          gameId: game.id,
+          game: `${awayName} @ ${homeName}`,
+          homeName, awayName, homeRecord, awayRecord,
+          homeWinPct, awayWinPct,
+          spread: spreadEstimate,
+          total: totalEstimate,
+          gameTime: game.date,
+        };
+      });
+
+      const teasers: any[] = [];
+
+      for (const pts of availablePoints) {
+        for (let startIdx = 0; startIdx <= gameData.length - teaserLegs; startIdx++) {
+          const selectedGames = gameData.slice(startIdx, startIdx + teaserLegs);
+          if (selectedGames.length < teaserLegs) continue;
+
+          const spreadTeaser = {
+            id: `teaser-spread-${pts}-${startIdx}`,
+            type: "spread" as const,
+            teaserPoints: pts,
+            sport: validSport,
+            legs: selectedGames.map(g => {
+              const favorHome = g.homeWinPct > g.awayWinPct;
+              const origSpread = favorHome ? g.spread : -g.spread;
+              const teasedSpread = origSpread - pts;
+              const pickTeam = favorHome ? g.homeName : g.awayName;
+              return {
+                game: g.game,
+                gameId: g.gameId,
+                gameTime: g.gameTime,
+                team: pickTeam,
+                originalSpread: origSpread,
+                teasedSpread: Math.round(teasedSpread * 2) / 2,
+                pick: `${pickTeam} ${teasedSpread > 0 ? "+" : ""}${Math.round(teasedSpread * 2) / 2}`,
+              };
+            }),
+            combinedOdds: 0,
+            winProbability: 0,
+            grade: "",
+            rationale: "",
+          };
+
+          const totalTeaser = {
+            id: `teaser-total-${pts}-${startIdx}`,
+            type: "total" as const,
+            teaserPoints: pts,
+            sport: validSport,
+            legs: selectedGames.map(g => {
+              const teasedTotal = g.total - pts;
+              return {
+                game: g.game,
+                gameId: g.gameId,
+                gameTime: g.gameTime,
+                team: "Over/Under",
+                originalTotal: g.total,
+                teasedTotal: Math.round(teasedTotal * 2) / 2,
+                pick: `Over ${Math.round(teasedTotal * 2) / 2}`,
+              };
+            }),
+            combinedOdds: 0,
+            winProbability: 0,
+            grade: "",
+            rationale: "",
+          };
+
+          for (const teaser of [spreadTeaser, totalTeaser]) {
+            const baseProbPerLeg = 0.55 + (pts / (validSport === "NFL" || validSport === "NCAAF" ? 30 : 20));
+            const combinedProb = Math.pow(Math.min(0.85, baseProbPerLeg), teaser.legs.length);
+            const decimalOdds = teaserLegs === 2 ? (pts <= 5 ? 1.91 : pts <= 6.5 ? 1.83 : 1.77) :
+              teaserLegs === 3 ? (pts <= 5 ? 2.73 : pts <= 6.5 ? 2.5 : 2.35) :
+              teaserLegs === 4 ? (pts <= 5 ? 4.55 : pts <= 6.5 ? 4.0 : 3.65) : 7.0;
+            const americanOdds = decimalOdds >= 2 ? Math.round((decimalOdds - 1) * 100) : Math.round(-100 / (decimalOdds - 1));
+
+            const fusionResult = analyzeLeg(validSport, teaser.type === "spread" ? "Teaser Spread" : "Teaser Total", americanOdds, {});
+
+            teaser.combinedOdds = americanOdds;
+            teaser.winProbability = Math.round(combinedProb * 1000) / 10;
+            teaser.grade = fusionResult.grade;
+            teaser.rationale = teaser.type === "spread"
+              ? `${pts}-point teaser moves all spreads ${pts} points in your favor`
+              : `${pts}-point teaser lowers all totals by ${pts} points`;
+          }
+
+          teasers.push(spreadTeaser, totalTeaser);
+        }
+      }
+
+      teasers.sort((a, b) => b.winProbability - a.winProbability);
+
+      return res.json({
+        teasers: teasers.slice(0, 20),
+        meta: {
+          sport: validSport,
+          gamesAvailable: gameData.length,
+          teaserPointOptions: availablePoints,
+          generatedAt: new Date().toISOString(),
+        },
+        disclaimer: "For entertainment purposes only. Teaser odds are standard industry payouts. Gamble responsibly.",
+      });
+    } catch (err) {
+      console.error("Teaser generation error:", err);
+      return res.status(500).json({ error: "Failed to generate teasers" });
+    }
+  });
+
+  app.post("/api/predictions/round-robin", async (req, res) => {
+    try {
+      const { picks, parlaySize, stake } = req.body;
+
+      if (!picks || !Array.isArray(picks) || picks.length < 3) {
+        return res.status(400).json({ error: "At least 3 picks required for round robin" });
+      }
+      if (picks.length > 10) {
+        return res.status(400).json({ error: "Maximum 10 picks allowed" });
+      }
+
+      const size = Math.min(Math.max(parlaySize || 2, 2), picks.length - 1);
+      const betStake = stake || 10;
+
+      function getCombinations<T>(arr: T[], k: number): T[][] {
+        if (k === 1) return arr.map(item => [item]);
+        if (k === arr.length) return [arr];
+        const result: T[][] = [];
+        for (let i = 0; i <= arr.length - k; i++) {
+          const head = arr[i];
+          const tailCombos = getCombinations(arr.slice(i + 1), k - 1);
+          for (const tail of tailCombos) {
+            result.push([head, ...tail]);
+          }
+        }
+        return result;
+      }
+
+      const combinations = getCombinations(picks, size);
+
+      const parlays = combinations.map((combo, idx) => {
+        const combinedDecimal = combo.reduce((acc: number, pick: any) => {
+          const odds = pick.odds || -110;
+          const dec = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+          return acc * dec;
+        }, 1);
+        const combinedAmerican = combinedDecimal >= 2
+          ? Math.round((combinedDecimal - 1) * 100)
+          : Math.round(-100 / (combinedDecimal - 1));
+
+        const winProb = combo.reduce((acc: number, pick: any) => {
+          const prob = pick.confidence ? pick.confidence / 100 : 0.5;
+          return acc * prob;
+        }, 1);
+
+        const potentialPayout = Math.round(betStake * combinedDecimal * 100) / 100;
+        const ev = Math.round((winProb * potentialPayout - betStake) * 100) / 100;
+
+        const fusionResult = analyzeLeg(
+          combo[0]?.sport || "NBA",
+          combo.map((p: any) => p.pick).join(" + "),
+          combinedAmerican,
+          {}
+        );
+
+        return {
+          id: `rr-${idx}`,
+          legs: combo,
+          parlaySize: size,
+          combinedOdds: combinedAmerican,
+          combinedDecimal: Math.round(combinedDecimal * 100) / 100,
+          winProbability: Math.round(winProb * 1000) / 10,
+          stake: betStake,
+          potentialPayout,
+          ev,
+          grade: fusionResult.grade,
+          confidence: Math.round(fusionResult.confidence),
+        };
+      });
+
+      parlays.sort((a, b) => b.ev - a.ev);
+
+      const totalInvestment = parlays.length * betStake;
+      const bestCase = parlays.reduce((sum, p) => sum + p.potentialPayout, 0);
+      const worstCase = -totalInvestment;
+      const avgEv = parlays.reduce((sum, p) => sum + p.ev, 0) / parlays.length;
+
+      return res.json({
+        parlays,
+        summary: {
+          totalParlays: parlays.length,
+          parlaySize: size,
+          stakePerParlay: betStake,
+          totalInvestment,
+          bestCasePayout: Math.round(bestCase * 100) / 100,
+          worstCaseLoss: worstCase,
+          averageEV: Math.round(avgEv * 100) / 100,
+          expectedHits: Math.round(parlays.filter(p => p.winProbability > 50).length),
+        },
+        disclaimer: "For entertainment purposes only. Gamble responsibly.",
+      });
+    } catch (err) {
+      console.error("Round robin error:", err);
+      return res.status(500).json({ error: "Failed to generate round robin" });
     }
   });
 
