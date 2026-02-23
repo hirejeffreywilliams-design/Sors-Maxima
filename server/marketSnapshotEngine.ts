@@ -479,7 +479,7 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
           valueSide,
         },
         leaders: game.leaders,
-        dataSource: bookmakers.length > 0 ? "ESPN + The Odds API" : "ESPN",
+        dataSource: bookmakers.length > 0 ? "Real-time ESPN + The Odds API" : "Real-time ESPN",
       } as MarketGame;
     });
 
@@ -491,7 +491,7 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
       gamesWithOdds,
       bookmakerCount: allBookNames.size,
       generatedAt: new Date().toISOString(),
-      dataSources: Array.from(dataSources),
+      dataSources: ["Real-time ESPN", "The Odds API (Market Lines)"],
     },
   };
 
