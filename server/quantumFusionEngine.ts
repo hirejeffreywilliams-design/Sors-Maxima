@@ -1,5 +1,5 @@
 /**
- * Quantum Fusion Engine™ (Server-Side)
+ * Quantum Fusion Engine™ (Server-Side) — Proprietary Algorithm
  * 
  * A revolutionary unified intelligence system that integrates all analysis components
  * into a seamless, self-learning algorithm. This engine combines 45+ contributing factors:
@@ -70,6 +70,7 @@
 
 import type { Sport } from "../shared/schema";
 import { getSportSignalModifiers, generateSportSpecificInsights, analyzeSportSpecificFactors } from "./sportFactorsEngine";
+import { protectionSuite } from "./algorithmProtection";
 
 // === Core Types ===
 
@@ -427,11 +428,89 @@ function detectSynergies(signals: FusionSignal[]): SynergyEffect[] {
 
 // === Signal Generation ===
 
+export interface MarketContext {
+  lineMovement?: { direction: "up" | "down" | "stable"; magnitude: number };
+  sharpMoney?: { direction: "home" | "away"; percentage: number };
+  publicMoney?: { homePercent: number; awayPercent: number };
+  winPct?: { home: number; away: number };
+  spreadLine?: number;
+  totalLine?: number;
+  homeMoneyline?: number;
+  awayMoneyline?: number;
+  bookmakerCount?: number;
+}
+
 function getDirection(bullishProb: number): "bullish" | "bearish" | "neutral" {
   const roll = Math.random();
   if (roll < bullishProb) return "bullish";
   if (roll < bullishProb + 0.2) return "bearish";
   return "neutral";
+}
+
+function getDataDrivenDirection(
+  source: string,
+  bullishProb: number,
+  marketContext?: MarketContext
+): { direction: "bullish" | "bearish" | "neutral"; strengthBoost: number; confidenceBoost: number } {
+  if (!marketContext) {
+    return { direction: getDirection(bullishProb), strengthBoost: 0, confidenceBoost: 0 };
+  }
+
+  let strengthBoost = 0;
+  let confidenceBoost = 0;
+
+  if (marketContext.bookmakerCount && marketContext.bookmakerCount > 5) {
+    confidenceBoost += 10;
+  }
+
+  if (source === "sharp_money_flow" && marketContext.sharpMoney) {
+    const dir: "bullish" | "bearish" = marketContext.sharpMoney.direction === "home" ? "bullish" : "bearish";
+    if (marketContext.sharpMoney.percentage > 70) {
+      strengthBoost += 15 + Math.min(10, (marketContext.sharpMoney.percentage - 70) / 3);
+    }
+    return { direction: dir, strengthBoost, confidenceBoost };
+  }
+
+  if (source === "line_movement" && marketContext.lineMovement) {
+    const lm = marketContext.lineMovement;
+    let dir: "bullish" | "bearish" | "neutral" = "neutral";
+    if (lm.direction === "up") dir = "bullish";
+    else if (lm.direction === "down") dir = "bearish";
+    if (lm.magnitude > 2) {
+      strengthBoost += Math.min(20, lm.magnitude * 4);
+    }
+    return { direction: dir, strengthBoost, confidenceBoost };
+  }
+
+  if (source === "home_field" && marketContext.winPct) {
+    if (marketContext.winPct.home > 0.55) return { direction: "bullish", strengthBoost, confidenceBoost };
+    if (marketContext.winPct.home < 0.45) return { direction: "bearish", strengthBoost, confidenceBoost };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "public_fade" && marketContext.publicMoney) {
+    const pm = marketContext.publicMoney;
+    if (pm.homePercent > 60) return { direction: "bearish", strengthBoost, confidenceBoost };
+    if (pm.awayPercent > 60) return { direction: "bullish", strengthBoost, confidenceBoost };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "momentum_score" && marketContext.winPct) {
+    const avgWinPct = (marketContext.winPct.home + marketContext.winPct.away) / 2;
+    if (marketContext.winPct.home > avgWinPct + 0.1) return { direction: "bullish", strengthBoost, confidenceBoost };
+    if (marketContext.winPct.home < avgWinPct - 0.1) return { direction: "bearish", strengthBoost, confidenceBoost };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if ((source === "monte_carlo" || source === "predictive_model" || source === "win_probability") && marketContext.homeMoneyline !== undefined) {
+    const ml = marketContext.homeMoneyline;
+    const impliedProb = ml < 0 ? Math.abs(ml) / (Math.abs(ml) + 100) : 100 / (ml + 100);
+    if (impliedProb > 0.55) return { direction: "bullish", strengthBoost, confidenceBoost };
+    if (impliedProb < 0.45) return { direction: "bearish", strengthBoost, confidenceBoost };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  return { direction: getDirection(bullishProb), strengthBoost, confidenceBoost };
 }
 
 interface SignalConfig {
@@ -506,7 +585,7 @@ const SIGNAL_CONFIGS: SignalConfig[] = [
   { source: "team_investment", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Team investment level in player development and facilities", impact: 1.04, category: "financial" },
 ];
 
-function generateSignals(sport: Sport, odds: number, context: Record<string, unknown>): FusionSignal[] {
+function generateSignals(sport: Sport, odds: number, context: Record<string, unknown>, marketContext?: MarketContext): FusionSignal[] {
   const signals: FusionSignal[] = [];
   
   const sportModifiers = getSportSignalModifiers(sport);
@@ -522,9 +601,10 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
   for (const config of SIGNAL_CONFIGS) {
     const sportMod = sportModifiers[config.source] || 1.0;
     
-    let direction = getDirection(config.bullishProb * oddsAdjustment);
-    let strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMod));
-    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + Math.random() * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0)));
+    const dataDriven = getDataDrivenDirection(config.source, config.bullishProb * oddsAdjustment, marketContext);
+    let direction = dataDriven.direction;
+    let strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMod + dataDriven.strengthBoost));
+    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + Math.random() * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0) + dataDriven.confidenceBoost));
     let reasoning = config.reasoning;
 
     if (hasRealOdds) {
@@ -704,9 +784,10 @@ export function analyzeLeg(
   sport: Sport,
   description: string,
   odds: number,
-  context: Record<string, unknown> = {}
+  context: Record<string, unknown> = {},
+  marketContext?: MarketContext
 ): FusionAnalysis {
-  const signals = generateSignals(sport, odds, context);
+  const signals = generateSignals(sport, odds, context, marketContext);
   
   const quantumState = calculateQuantumState(signals);
   
@@ -745,7 +826,24 @@ export function analyzeLeg(
   
   const impliedProb = odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
   const edgeFactor = (fusedScore - 50) / 100;
-  const estimatedProb = Math.min(0.95, Math.max(0.05, impliedProb * (1 + edgeFactor * 0.35)));
+
+  const signalInputs = signals.map(s => ({
+    value: s.direction === "bullish" ? s.strength / 100 : s.direction === "bearish" ? (100 - s.strength) / 100 : 0.5,
+    confidence: s.confidence,
+  }));
+  const entropyWeighted = protectionSuite.transform.applyEntropyWeighting(signalInputs);
+
+  const rawEstimated = impliedProb * (1 + edgeFactor * 0.35);
+  const bayesianAdjusted = protectionSuite.transform.applyBayesianUpdate(
+    rawEstimated,
+    entropyWeighted,
+    impliedProb
+  );
+  const estimatedProb = protectionSuite.transform.applySigmoidWarp(
+    Math.min(0.95, Math.max(0.05, bayesianAdjusted)),
+    1.1
+  );
+
   const ev = (estimatedProb - impliedProb) * 100;
   
   const b = odds > 0 ? odds / 100 : 100 / Math.abs(odds);
@@ -781,14 +879,14 @@ export function analyzeLeg(
 // === Ticket-Level Fusion ===
 
 export function analyzeTicket(
-  legs: Array<{ id: string; sport: Sport; description: string; odds: number; context?: Record<string, unknown> }>,
+  legs: Array<{ id: string; sport: Sport; description: string; odds: number; context?: Record<string, unknown>; marketContext?: MarketContext }>,
   riskLevel: "conservative" | "moderate" | "aggressive" = "moderate"
 ): TicketFusion {
   const legAnalyses: LegAnalysis[] = legs.map(leg => ({
     legId: leg.id,
     description: leg.description,
     odds: leg.odds,
-    fusion: analyzeLeg(leg.sport, leg.description, leg.odds, leg.context || {})
+    fusion: analyzeLeg(leg.sport, leg.description, leg.odds, leg.context || {}, leg.marketContext)
   }));
   
   const avgScore = legAnalyses.reduce((sum, l) => sum + l.fusion.overallScore, 0) / legAnalyses.length;

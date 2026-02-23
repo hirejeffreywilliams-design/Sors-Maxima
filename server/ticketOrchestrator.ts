@@ -1,10 +1,11 @@
 import type { Sport, ParlayLeg, GeneratedParlay } from "../shared/schema";
-import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal } from "./quantumFusionEngine";
+import { analyzeLeg, analyzeTicket, type FusionAnalysis, type TicketFusion, type FusionSignal, type MarketContext } from "./quantumFusionEngine";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { analyticsAgent } from "./analyticsAgentEngine";
 import { getPlayersFromCacheById, getTeamsFromCache, type ESPNPlayer } from "./espn-roster-provider";
 import { getModelWeights, applyModelWeights } from "./historicalLearningEngine";
 import { fetchRealOddsForGame } from "./odds-provider";
+import { protectionSuite } from "./algorithmProtection";
 
 function generateUniqueId(): string {
   return Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -65,6 +66,8 @@ export interface GeneratedTicket {
     trendDirection: "up" | "down" | "stable";
     confidenceBoost: number;
   };
+  algorithmSignature?: string;
+  nonce?: string;
 }
 
 export interface AlternativeTicket {
@@ -1387,8 +1390,8 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
     const realOddsMap = new Map<string, Awaited<ReturnType<typeof fetchRealOddsForGame>>>();
     if (sportForESPN && espnGames.length > 0) {
       const oddsPromises = espnGames.map(async (game) => {
-        const homeTeamName = game.homeTeam.name || game.homeTeam.displayName || "";
-        const awayTeamName = game.awayTeam.name || game.awayTeam.displayName || "";
+        const homeTeamName = game.homeTeam.displayName || game.homeTeam.shortDisplayName || "";
+        const awayTeamName = game.awayTeam.displayName || game.awayTeam.shortDisplayName || "";
         if (homeTeamName && awayTeamName) {
           const realOdds = await fetchRealOddsForGame(sportForESPN, homeTeamName, awayTeamName);
           if (realOdds) {
@@ -1617,7 +1620,33 @@ export async function generateTickets(request: TicketRequest): Promise<Generated
     return scoreB - scoreA;
   });
   
-  return sortedTickets.slice(0, 6);
+  const finalTickets = sortedTickets.slice(0, 6);
+
+  for (const ticket of finalTickets) {
+    const nonce = protectionSuite.nonce.generate();
+    const signaturePayload = {
+      id: ticket.id,
+      sport: ticket.sport,
+      ev: ticket.evPercent,
+      conf: ticket.confidenceScore,
+      legs: ticket.legs.length,
+      ts: Date.now(),
+      n: nonce,
+    };
+    ticket.algorithmSignature = protectionSuite.fingerprint.sign(signaturePayload as Record<string, unknown>);
+    ticket.nonce = nonce;
+
+    ticket.winProbability = protectionSuite.transform.applySigmoidWarp(
+      ticket.winProbability, 
+      1.2
+    );
+    ticket.confidenceScore = protectionSuite.transform.applySigmoidWarp(
+      ticket.confidenceScore, 
+      1.15
+    );
+  }
+
+  return finalTickets;
 }
 
 function getFusionSortScore(ticket: GeneratedTicket): number {
