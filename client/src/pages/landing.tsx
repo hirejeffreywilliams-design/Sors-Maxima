@@ -78,36 +78,28 @@ const stats = [
 
 const pricingTiers = [
   {
-    name: "Starter",
-    price: 0,
-    description: "Try the engine free",
-    features: ["3 ticket generations/day", "4 US sports", "Power Score grading", "Community access"],
-    cta: "Start Free",
-    variant: "outline" as const,
-  },
-  {
     name: "Sharp",
-    price: 29,
-    description: "All sports, smarter parlays",
-    features: ["Unlimited generations", "14+ sports & leagues", "46-factor engine", "+EV finder"],
-    cta: "Go Sharp",
+    price: 49,
+    description: "The Starting Line",
+    features: ["25 ticket generations/day", "14+ sports & leagues", "Full 46-factor engine", "+EV finder"],
+    cta: "Join Sharp",
     variant: "secondary" as const,
   },
   {
     name: "Edge",
-    price: 59,
-    description: "Pro tools & AI assistant",
-    features: ["200 AI credits/day", "AI Betting Assistant", "ML prop projections", "Arbitrage scanner"],
-    cta: "Go Edge",
+    price: 99,
+    description: "Where Sharps Play",
+    features: ["Unlimited generations", "AI Betting Assistant", "ML prop projections", "Arbitrage scanner"],
+    cta: "Join Edge",
     variant: "default" as const,
     popular: true,
   },
   {
     name: "Max",
-    price: 119,
-    description: "Unlimited everything",
+    price: 249,
+    description: "Zero Limits. Maximum Depth.",
     features: ["Unlimited AI credits", "Custom model builder", "Priority processing", "Early access"],
-    cta: "Go Max",
+    cta: "Join Max",
     variant: "secondary" as const,
   },
 ];
@@ -151,8 +143,8 @@ export default function LandingPage() {
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-center">
               <Link href="/login">
-                <Button size="lg" data-testid="button-hero-start-free">
-                  Start Free
+                <Button size="lg" data-testid="button-hero-join-now">
+                  Request Access
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
@@ -352,9 +344,9 @@ export default function LandingPage() {
               </div>
 
               <div className="text-center pt-2">
-                <Link href="/login">
-                  <Button size="lg" data-testid="button-roi-start-trial">
-                    Start Free Trial
+                <Link href="/pricing">
+                  <Button size="lg" data-testid="button-roi-view-plans">
+                    View Membership Plans
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
                 </Link>
@@ -375,11 +367,11 @@ export default function LandingPage() {
               Simple, Transparent Pricing
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Start free and upgrade when you are ready. No hidden fees.
+              Three exclusive tiers built for serious bettors. No hidden fees. Cancel anytime.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {pricingTiers.map((tier) => (
               <Card
                 key={tier.name}
@@ -449,9 +441,9 @@ export default function LandingPage() {
             Join thousands of bettors using Sors Maxima to turn data into an unfair advantage.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <Link href="/login">
-              <Button size="lg" data-testid="button-footer-start-free">
-                Start Free Today
+            <Link href="/pricing">
+              <Button size="lg" data-testid="button-footer-join-now">
+                Become a Member
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
