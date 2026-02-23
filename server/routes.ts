@@ -6641,7 +6641,10 @@ Follow these rules:
       if (!message) return res.status(400).json({ error: "Message required" });
 
       const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI();
+      const openai = new OpenAI({
+        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+      });
 
       const bets = userDataEngine.getBets();
       const stats = userDataEngine.getBetStats();
@@ -6663,7 +6666,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           { role: "system", content: systemPrompt },
           { role: "user", content: message },
         ],
-        max_tokens: 500,
+        max_completion_tokens: 500,
       });
 
       res.json({ response: completion.choices[0]?.message?.content || "I couldn't generate a response." });
