@@ -6161,6 +6161,42 @@ Follow these rules:
     res.json(socialDataEngine.getCopyBettors());
   });
 
+  app.get("/api/live-games", async (_req, res) => {
+    try {
+      const { getAllSportsScoreboard } = await import("./espn-scoreboard-provider");
+      const allGames = await getAllSportsScoreboard();
+      const liveGames = allGames.map((g: any) => {
+        let status = "scheduled";
+        if (g.status?.state === "in") status = "in_progress";
+        else if (g.status?.state === "post") status = "final";
+        return {
+          id: g.id,
+          sport: g.sport || "NBA",
+          homeTeam: g.homeTeam?.displayName || "TBD",
+          awayTeam: g.awayTeam?.displayName || "TBD",
+          homeScore: g.homeTeam?.score || 0,
+          awayScore: g.awayTeam?.score || 0,
+          status,
+          startTime: g.date || new Date().toISOString(),
+          period: g.status?.period || 0,
+          clock: g.status?.clock || "",
+          venue: g.venue?.name || "",
+          broadcast: g.broadcast || "",
+          spread: g.odds?.spread || "",
+          overUnder: g.odds?.overUnder || null,
+        };
+      });
+      res.json(liveGames);
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/cashout-advisor", (_req, res) => {
+    const bets = userDataEngine.getBets().filter((b: any) => b.result === "pending");
+    res.json(bets);
+  });
+
   // ==================== LIVE ANALYTICS ENGINE ====================
   const liveAnalyticsEngine = await import("./liveAnalyticsEngine");
 

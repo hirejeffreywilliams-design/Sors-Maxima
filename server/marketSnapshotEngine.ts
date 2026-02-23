@@ -417,14 +417,64 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
         bookmakers.forEach(b => allBookNames.add(b.book));
       }
 
-      const consensus = computeConsensus(bookmakers);
-      const bestLines = computeBestLines(bookmakers);
+      let consensus = computeConsensus(bookmakers);
+      let bestLines = computeBestLines(bookmakers);
       const lineMovement = computeLineMovement(bookmakers, game.odds);
       const arb = detectArbitrage(bookmakers);
       const middle = detectMiddle(bookmakers);
 
       const homeWinPct = parseWinPct(game.homeTeam.record || "0-0");
       const awayWinPct = parseWinPct(game.awayTeam.record || "0-0");
+
+      if (bookmakers.length === 0 && (homeWinPct > 0 || awayWinPct > 0)) {
+        const totalWinPct = homeWinPct + awayWinPct;
+        const homeProb = totalWinPct > 0 ? homeWinPct / totalWinPct : 0.5;
+        const awayProb = 1 - homeProb;
+        const homeAdjProb = Math.min(0.92, Math.max(0.08, homeProb));
+        const awayAdjProb = 1 - homeAdjProb;
+
+        const probToAmerican = (p: number): number => {
+          if (p >= 0.5) return Math.round(-100 * p / (1 - p));
+          return Math.round(100 * (1 - p) / p);
+        };
+
+        const derivedHomeML = probToAmerican(homeAdjProb);
+        const derivedAwayML = probToAmerican(awayAdjProb);
+
+        let derivedSpread: number | undefined;
+        if (game.odds?.spread) {
+          const spreadMatch = game.odds.spread.match(/-?\d+\.?\d*/);
+          if (spreadMatch) derivedSpread = parseFloat(spreadMatch[0]);
+        }
+        if (derivedSpread === undefined) {
+          const diff = (homeProb - 0.5) * 14;
+          derivedSpread = Math.round(diff * 2) / 2;
+        }
+
+        const derivedTotal = game.odds?.overUnder || undefined;
+
+        consensus = {
+          homeMoneyline: derivedHomeML,
+          awayMoneyline: derivedAwayML,
+          spread: derivedSpread,
+          total: derivedTotal,
+          homeImpliedProb: Math.round(homeAdjProb * 1000) / 10,
+          awayImpliedProb: Math.round(awayAdjProb * 1000) / 10,
+        };
+
+        bestLines = {
+          bestHomeML: { odds: derivedHomeML, book: "ESPN" },
+          bestAwayML: { odds: derivedAwayML, book: "ESPN" },
+        };
+        if (derivedSpread !== undefined) {
+          bestLines.bestSpreadHome = { line: derivedSpread, odds: -110, book: "ESPN" };
+          bestLines.bestSpreadAway = { line: -derivedSpread, odds: -110, book: "ESPN" };
+        }
+        if (derivedTotal !== undefined) {
+          bestLines.bestOver = { total: derivedTotal, odds: -110, book: "ESPN" };
+          bestLines.bestUnder = { total: derivedTotal, odds: -110, book: "ESPN" };
+        }
+      }
 
       let valueSide: "home" | "away" | "none" = "none";
       if (consensus.homeImpliedProb && consensus.awayImpliedProb) {
@@ -490,7 +540,7 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
           valueSide,
         },
         leaders: game.leaders,
-        dataSource: bookmakers.length > 0 ? "Real-time ESPN + The Odds API" : "Real-time ESPN",
+        dataSource: bookmakers.length > 0 ? "Real-time ESPN + The Odds API" : "ESPN-derived analysis",
       } as MarketGame;
     });
 
@@ -502,7 +552,9 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
       gamesWithOdds,
       bookmakerCount: allBookNames.size,
       generatedAt: new Date().toISOString(),
-      dataSources: ["Real-time ESPN", "The Odds API (Market Lines)"],
+      dataSources: oddsGames.length > 0 
+        ? ["Real-time ESPN", "The Odds API (Market Lines)"] 
+        : ["Real-time ESPN", "ESPN-derived odds estimates"],
     },
   };
 
