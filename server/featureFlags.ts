@@ -199,18 +199,15 @@ class FeatureFlagService {
     if (flag.rolloutPercentage >= 100) return true;
     if (flag.rolloutPercentage <= 0) return false;
 
-    if (userId) {
-      let hash = 0;
-      const str = `${flagId}:${userId}`;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash = hash & hash;
-      }
-      return (Math.abs(hash) % 100) < flag.rolloutPercentage;
+    const seed = userId || `anon-${Date.now().toString(36)}`;
+    let hash = 0;
+    const str = `${flagId}:${seed}`;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
     }
-
-    return Math.random() * 100 < flag.rolloutPercentage;
+    return (Math.abs(hash) % 100) < flag.rolloutPercentage;
   }
 
   getFlag(flagId: string): FeatureFlag | undefined {
