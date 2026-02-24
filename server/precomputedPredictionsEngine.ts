@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions } from "./vegas-engine";
 import { analyzeLeg } from "./quantumFusionEngine";
@@ -201,7 +202,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
     picks.push({
-      id: `precomp-vegas-${sport}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+      id: `precomp-vegas-${sport}-${crypto.randomUUID().slice(0, 12)}`,
       sport,
       game: vp.game || "Unknown",
       homeTeam: vp.homeTeam || "",

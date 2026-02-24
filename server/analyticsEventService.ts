@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { Request } from "express";
 
 export interface AnalyticsEvent {
@@ -60,7 +61,7 @@ class AnalyticsEventService {
   private userConsent: Map<string, { analytics: boolean; marketing: boolean; dataSharing: boolean }> = new Map();
 
   generateEventId(): string {
-    return `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `evt_${crypto.randomUUID()}`;
   }
 
   checkRateLimit(sessionId: string): boolean {

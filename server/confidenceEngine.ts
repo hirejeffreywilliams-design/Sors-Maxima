@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { randomBytes, createHash } from "crypto";
 
 export interface CalibrationBin {
   binStart: number;
@@ -194,7 +194,7 @@ export function generateRecommendation(input: {
     },
     provenance: {
       inputsSnapshot: `inputs_${now.getTime()}`,
-      seed: Math.floor(Math.random() * 2147483647),
+      seed: randomBytes(4).readUInt32BE(0) % 2147483647,
       datasetSnapshotId: `ds-${now.toISOString().split("T")[0]}`,
       preprocessingVersion: "preproc-v2.3",
       featureSet: ["team_stats", "player_injuries", "historical_odds", "weather", "venue_factor", "momentum"],
@@ -466,8 +466,9 @@ function seedRecommendations() {
   for (let i = 0; i < 40; i++) {
     const sport = sports[i % sports.length];
     const match = matches[i % matches.length];
-    const winProb = 0.35 + Math.random() * 0.35;
-    const odds = 1.5 + Math.random() * 3;
+    const hashBuf = createHash('md5').update(`seed-${i}`).digest();
+    const winProb = 0.35 + (hashBuf.readUInt32BE(0) / 0xFFFFFFFF) * 0.35;
+    const odds = 1.5 + (hashBuf.readUInt32BE(4) / 0xFFFFFFFF) * 3;
     const rec = generateRecommendation({
       userId: `user_${1000 + (i % 10)}`,
       sport,
@@ -483,7 +484,7 @@ function seedRecommendations() {
         `signal://injuries/${sport.toLowerCase()}`,
         `data://odds_history/${match.replace(/\s/g, "_")}`,
       ],
-      userBankroll: 500 + Math.random() * 4500,
+      userBankroll: 500 + (createHash('md5').update(`bankroll-${i}`).digest().readUInt32BE(0) / 0xFFFFFFFF) * 4500,
     });
 
     const outcome = outcomes[i % outcomes.length];

@@ -21,6 +21,14 @@ interface SimulationResult {
   percentiles: { p10: number; p25: number; p50: number; p75: number; p90: number };
 }
 
+function seededRandom(seed: number): () => number {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    return (s >>> 0) / 0xffffffff;
+  };
+}
+
 function runSimulation(bankroll: number, avgEdge: number, kellyFraction: number, betsPerDay: number, days: number): SimulationResult {
   const totalBets = betsPerDay * days;
   const simulations = 10000;
@@ -29,16 +37,17 @@ function runSimulation(bankroll: number, avgEdge: number, kellyFraction: number,
   let doubleCount = 0;
 
   for (let sim = 0; sim < simulations; sim++) {
+    const rng = seededRandom(sim * 7919 + totalBets);
     let bank = bankroll;
     let peak = bankroll;
     let low = bankroll;
 
     for (let bet = 0; bet < totalBets; bet++) {
-      const edge = avgEdge / 100 + (Math.random() - 0.5) * 0.04;
+      const edge = avgEdge / 100 + Math.sin(bet * 0.1 + sim) * 0.02;
       const winProb = 0.5 + edge / 2;
       const stake = bank * (kellyFraction / 100) * Math.max(0.01, edge);
       
-      if (Math.random() < winProb) {
+      if (rng() < winProb) {
         bank += stake * 0.9;
       } else {
         bank -= stake;

@@ -251,8 +251,11 @@ const propsBySport: Record<Sport, string[]> = {
   NCAAF: ["Passing Yards", "Rushing Yards", "Receiving Yards", "TDs"],
 };
 
+let oddsCounter = 0;
 function generateRandomOdds(min: number, max: number): number {
-  return Math.round((Math.random() * (max - min) + min) * 100) / 100;
+  const idx = oddsCounter++;
+  const t = ((idx * 2654435761) >>> 0) / 0xffffffff;
+  return Math.round((min + t * (max - min)) * 100) / 100;
 }
 
 function decimalToAmerican(decimal: number): number {
@@ -286,17 +289,23 @@ function extractCategoryScore(signals: FusionSignal[], factorNames: string[]): n
   return count > 0 ? total / count : 0.5;
 }
 
+let legCounter = 0;
+function seededHash(seed: number): number {
+  return ((seed * 2654435761) >>> 0) / 0xffffffff;
+}
+
 function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" | "prop", includeProps: boolean): TicketLeg {
+  const lc = legCounter++;
   const teams = teamsByLeague[sport];
-  const homeTeamIdx = Math.floor(Math.random() * teams.length);
-  let awayTeamIdx = Math.floor(Math.random() * teams.length);
+  const homeTeamIdx = Math.floor(seededHash(lc * 31) * teams.length);
+  let awayTeamIdx = Math.floor(seededHash(lc * 37 + 1) * teams.length);
   while (awayTeamIdx === homeTeamIdx) {
-    awayTeamIdx = Math.floor(Math.random() * teams.length);
+    awayTeamIdx = (awayTeamIdx + 1) % teams.length;
   }
   
   const homeTeam = teams[homeTeamIdx];
   const awayTeam = teams[awayTeamIdx];
-  const isHomeTeam = Math.random() > 0.5;
+  const isHomeTeam = seededHash(lc * 41 + 2) > 0.5;
   const selectedTeam = isHomeTeam ? homeTeam : awayTeam;
   const opponent = isHomeTeam ? awayTeam : homeTeam;
   
@@ -313,7 +322,7 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
     outcome = `${selectedTeam.city} ${selectedTeam.name} ML`;
   } else if (marketType === "spread") {
     market = "Spread";
-    const spreadValue = Math.round((Math.random() * 14 - 7) * 2) / 2;
+    const spreadValue = Math.round((seededHash(lc * 43 + 3) * 14 - 7) * 2) / 2;
     line = spreadValue;
     decimalOdds = generateRandomOdds(1.85, 1.95);
     outcome = `${selectedTeam.city} ${selectedTeam.name} ${spreadValue > 0 ? "+" : ""}${spreadValue}`;
@@ -328,17 +337,17 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
       NCAAF: { min: 45, max: 65 },
     };
     const range = totalMap[sport];
-    const totalValue = Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
+    const totalValue = Math.round((seededHash(lc * 47 + 4) * (range.max - range.min) + range.min) * 2) / 2;
     line = totalValue;
-    const isOver = Math.random() > 0.5;
+    const isOver = seededHash(lc * 53 + 5) > 0.5;
     decimalOdds = generateRandomOdds(1.85, 1.95);
     outcome = `${isOver ? "Over" : "Under"} ${totalValue}`;
   } else if (marketType === "prop" && includeProps) {
     market = "Player Prop";
     const players = playersBySport[sport];
-    const player = players[Math.floor(Math.random() * players.length)];
+    const player = players[Math.floor(seededHash(lc * 59 + 6) * players.length)];
     const props = propsBySport[sport];
-    const prop = props[Math.floor(Math.random() * props.length)];
+    const prop = props[Math.floor(seededHash(lc * 61 + 7) * props.length)];
     playerName = player.name;
     propCategory = prop;
     
@@ -367,9 +376,9 @@ function generateLeg(sport: Sport, marketType: "moneyline" | "spread" | "total" 
     };
     
     const range = propLineRanges[prop] || { min: 5, max: 25 };
-    const propLine = Math.round((Math.random() * (range.max - range.min) + range.min) * 2) / 2;
+    const propLine = Math.round((seededHash(lc * 67 + 8) * (range.max - range.min) + range.min) * 2) / 2;
     line = propLine;
-    const isOver = Math.random() > 0.5;
+    const isOver = seededHash(lc * 71 + 9) > 0.5;
     decimalOdds = generateRandomOdds(1.7, 2.2);
     outcome = `${player.name} ${isOver ? "Over" : "Under"} ${propLine} ${prop}`;
   } else {
@@ -435,7 +444,7 @@ function generateTicketName(sport: Sport, index: number, riskLevel: string): str
     aggressive: ["Power", "High-Value", "Bold", "Premium", "Elite"],
   };
   
-  const prefix = prefixes[riskLevel as keyof typeof prefixes][Math.floor(Math.random() * 5)];
+  const prefix = prefixes[riskLevel as keyof typeof prefixes][index % 5];
   return `${prefix} ${sport} Ticket #${index + 1}`;
 }
 
@@ -513,7 +522,7 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
     const sport = sportId as Sport;
     for (let i = 0; i < ticketsToGenerate; i++) {
       const numLegs = Math.min(
-        legCounts[Math.floor(Math.random() * legCounts.length)],
+        legCounts[i % legCounts.length],
         request.maxLegs
       );
       
@@ -524,7 +533,7 @@ export function generateTickets(request: TicketRequest): GeneratedTicket[] {
       
       const legs: TicketLeg[] = [];
       for (let j = 0; j < numLegs; j++) {
-        const marketType = marketTypes[Math.floor(Math.random() * marketTypes.length)];
+        const marketType = marketTypes[j % marketTypes.length];
         legs.push(generateLeg(sport, marketType, request.includeProps));
       }
       

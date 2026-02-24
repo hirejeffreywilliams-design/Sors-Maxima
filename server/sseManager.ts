@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import type { Response } from "express";
 import { generateIntelligenceFeed } from "./unifiedIntelligenceHub";
 import { logError } from "./errorLogger";
@@ -17,7 +18,7 @@ let broadcastInterval: NodeJS.Timeout | null = null;
 let lastFeedHash = "";
 
 function generateClientId(): string {
-  return `sse-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `sse-${crypto.randomUUID()}`;
 }
 
 export function registerSSEClient(res: Response, channels: string[] = ["all"]): string {

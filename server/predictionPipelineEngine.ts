@@ -1,4 +1,4 @@
-import { randomBytes, createHash } from "crypto";
+import { randomBytes, createHash, randomInt } from "crypto";
 import type { Sport } from "../shared/schema";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type FusionSignal, type TicketFusion, getAllFactors, type FusionWeight } from "./quantumFusionEngine";
 
@@ -335,8 +335,9 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 function gaussianRandom(mean: number, stdDev: number): number {
-  const u1 = Math.random();
-  const u2 = Math.random();
+  const buf = randomBytes(8);
+  const u1 = (buf.readUInt32BE(0) + 1) / 0x100000000;
+  const u2 = (buf.readUInt32BE(4) + 1) / 0x100000000;
   const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
   return z0 * stdDev + mean;
 }
@@ -571,11 +572,12 @@ function generateCandidates(
 
   for (let i = 0; i < count; i++) {
     const ticketId = generateId("TKT");
-    const legCount = riskLevel === "conservative" ? 2 + Math.floor(Math.random() * 2) : riskLevel === "aggressive" ? 3 + Math.floor(Math.random() * 4) : 2 + Math.floor(Math.random() * 3);
+    const legCount = riskLevel === "conservative" ? 2 + (i % 2) : riskLevel === "aggressive" ? 3 + (i % 4) : 2 + (i % 3);
 
     const legs: CandidateLeg[] = [];
     for (let j = 0; j < legCount; j++) {
-      const odds = baseOddsRange[0] + Math.random() * (baseOddsRange[1] - baseOddsRange[0]);
+      const hashVal = createHash('md5').update(`odds-${i}-${j}`).digest().readUInt32BE(0) / 0xFFFFFFFF;
+      const odds = baseOddsRange[0] + hashVal * (baseOddsRange[1] - baseOddsRange[0]);
       const impliedProb = 1 / odds;
       const edgeSignal = gaussianRandom(0.03, 0.04) * riskMultiplier;
       const fusionScore = clamp(gaussianRandom(65, 15), 20, 98);
@@ -584,8 +586,8 @@ function generateCandidates(
         legId: generateId("LEG"),
         team: `Team-${String.fromCharCode(65 + j)}`,
         opponent: `Team-${String.fromCharCode(75 + j)}`,
-        market: ["Moneyline", "Spread", "Total O/U", "Player Prop"][Math.floor(Math.random() * 4)],
-        selection: ["Home ML", "Away +3.5", "Over 215.5", "Under 45.5", "To Score 25+"][Math.floor(Math.random() * 5)],
+        market: ["Moneyline", "Spread", "Total O/U", "Player Prop"][(i + j) % 4],
+        selection: ["Home ML", "Away +3.5", "Over 215.5", "Under 45.5", "To Score 25+"][(i + j) % 5],
         odds: Math.round(odds * 100) / 100,
         impliedProb: Math.round(impliedProb * 1000) / 1000,
         edgePct: Math.round(edgeSignal * 10000) / 100,
@@ -603,7 +605,8 @@ function generateCandidates(
       .slice(0, 5);
 
     const confidenceBase = featureNames.reduce((sum, f) => sum + features[f], 0) / featureNames.length;
-    const confidence = clamp(confidenceBase * 0.8 + Math.random() * 0.2, 0.2, 0.95);
+    const confHash = createHash('md5').update(`conf-${i}`).digest().readUInt32BE(0) / 0xFFFFFFFF;
+    const confidence = clamp(confidenceBase * 0.8 + confHash * 0.2, 0.2, 0.95);
 
     const riskScore = clamp(1 - confidence + (legCount - 2) * 0.08, 0, 1);
 
@@ -667,7 +670,7 @@ function applyDiversityConstraints(candidates: CandidateTicket[]): CandidateTick
 
   const centroids: number[] = [];
   for (let i = 0; i < k; i++) {
-    centroids.push(candidates[Math.floor(Math.random() * n)].probability);
+    centroids.push(candidates[Math.floor((i / k) * n) % n].probability);
   }
 
   for (let iter = 0; iter < 20; iter++) {
@@ -1024,7 +1027,7 @@ function generateRecentTrend(): { date: string; winRate: number; count: number }
     trend.push({
       date: date.toISOString().split("T")[0],
       winRate: Math.round(clamp(baseWinRate, 0.3, 0.7) * 1000) / 1000,
-      count: 15 + Math.floor(Math.random() * 20),
+      count: 15 + ((6 - i) * 3),
     });
   }
   return trend;

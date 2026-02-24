@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 interface AuditEntry {
   id: string;
   timestamp: string;
@@ -46,7 +48,7 @@ class AuditTrail {
   private maxEntries = 10000;
 
   private generateId(): string {
-    return `audit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `audit_${crypto.randomUUID()}`;
   }
 
   record(

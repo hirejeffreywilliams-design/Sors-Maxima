@@ -172,15 +172,19 @@ const generateHistoricalEvents = (count: number): HistoricalEvent[] => {
   const markets = ["Moneyline", "Spread", "Over/Under", "Player Props"];
   const events: HistoricalEvent[] = [];
 
+  function btHash(seed: number): number {
+    return ((seed * 2654435761) >>> 0) / 0xffffffff;
+  }
+
   for (let i = 0; i < count; i++) {
-    const sport = sports[Math.floor(Math.random() * sports.length)];
-    const matchup = teams[sport][Math.floor(Math.random() * teams[sport].length)];
-    const market = markets[Math.floor(Math.random() * markets.length)];
-    const daysAgo = Math.floor(Math.random() * 90);
+    const sport = sports[Math.floor(btHash(i * 31) * sports.length)];
+    const matchup = teams[sport][Math.floor(btHash(i * 37 + 1) * teams[sport].length)];
+    const market = markets[Math.floor(btHash(i * 41 + 2) * markets.length)];
+    const daysAgo = Math.floor(btHash(i * 43 + 3) * 90);
     
-    const homeWinProb = 0.4 + Math.random() * 0.2;
-    const isHomeWin = Math.random() < homeWinProb;
-    const isPush = Math.random() < 0.03;
+    const homeWinProb = 0.4 + btHash(i * 47 + 4) * 0.2;
+    const isHomeWin = btHash(i * 53 + 5) < homeWinProb;
+    const isPush = btHash(i * 59 + 6) < 0.03;
     
     events.push({
       id: `hist-${i}-${Date.now()}`,
@@ -189,12 +193,12 @@ const generateHistoricalEvents = (count: number): HistoricalEvent[] => {
       homeTeam: matchup.home,
       awayTeam: matchup.away,
       market,
-      line: market === "Spread" ? (Math.random() > 0.5 ? -3.5 : 3.5) : undefined,
-      odds: -110 + Math.floor(Math.random() * 40) - 20,
+      line: market === "Spread" ? (btHash(i * 61 + 7) > 0.5 ? -3.5 : 3.5) : undefined,
+      odds: -110 + Math.floor(btHash(i * 67 + 8) * 40) - 20,
       outcome: isPush ? "push" : (isHomeWin ? "win" : "loss"),
       finalScore: {
-        home: Math.floor(Math.random() * 30) + 80,
-        away: Math.floor(Math.random() * 30) + 80,
+        home: Math.floor(btHash(i * 71 + 9) * 30) + 80,
+        away: Math.floor(btHash(i * 73 + 10) * 30) + 80,
       },
     });
   }
@@ -712,9 +716,13 @@ class BacktestingEngine {
     const testEvents: HistoricalEvent[] = [];
     const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
     
+    function stressHash(seed: number): number {
+      return ((seed * 2654435761) >>> 0) / 0xffffffff;
+    }
+
     for (let i = 0; i < config.count; i++) {
-      const sport = sports[Math.floor(Math.random() * sports.length)];
-      const odds = config.oddsRange.min + Math.floor(Math.random() * (config.oddsRange.max - config.oddsRange.min));
+      const sport = sports[Math.floor(stressHash(i * 31) * sports.length)];
+      const odds = config.oddsRange.min + Math.floor(stressHash(i * 37 + 1) * (config.oddsRange.max - config.oddsRange.min));
       const adjustedOdds = odds === 0 ? 100 : odds;
       
       testEvents.push({
@@ -725,7 +733,7 @@ class BacktestingEngine {
         awayTeam: "Test Away",
         market: "Moneyline",
         odds: adjustedOdds,
-        outcome: Math.random() > 0.5 ? "win" : "loss",
+        outcome: stressHash(i * 41 + 2) > 0.5 ? "win" : "loss",
       });
     }
 

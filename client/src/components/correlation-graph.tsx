@@ -74,11 +74,10 @@ function calculateCorrelations(legs: ParlayLeg[]): CorrelationLink[] {
       }
       
       else {
-        correlation = 0.05 + Math.random() * 0.1;
+        correlation = 0.05;
         reason = "Independent events - low correlation";
       }
       
-      correlation += (Math.random() - 0.5) * 0.1;
       correlation = Math.max(-1, Math.min(1, correlation));
       
       if (Math.abs(correlation) > 0.1) {
@@ -120,7 +119,7 @@ function generateSuggestions(legs: ParlayLeg[], links: CorrelationLink[]): Diver
         suggestedTeam: otherTeam,
         suggestedMarket: otherMarket,
         reason: `Replace with ${otherTeam} ${otherMarket} to reduce correlation`,
-        impactScore: 0.6 + Math.random() * 0.3,
+        impactScore: 0.75,
       });
     }
   });

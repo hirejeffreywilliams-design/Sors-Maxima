@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 interface KPIMetric {
   id: string;
   name: string;
@@ -168,7 +170,7 @@ interface IncidentPlaybook {
 }
 
 function generateId(prefix: string): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
 function generateTimeSeries(days: number, baseValue: number, _variance: number): TimeSeriesPoint[] {

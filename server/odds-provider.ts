@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 import { Sport, SportEvent, ParlayLeg, PlayerProp, InjuryStatus, WeatherData, SituationalFactor, HistoricalTrend, LineMovement, BettingPercentages, EVAnalysis } from "@shared/schema";
 type AmericanOdds = number;
 type DecimalOdds = number;
@@ -296,100 +296,14 @@ const nhlTeams = [
   "Minnesota Wild", "Winnipeg Jets", "Florida Panthers", "Detroit Red Wings"
 ];
 
-interface MockPlayer {
+interface PlayerInfo {
   id: string;
   name: string;
   position: string;
   team: string;
 }
 
-const nflPlayers: Record<string, MockPlayer[]> = {
-  "Kansas City Chiefs": [
-    { id: "kc1", name: "Patrick Mahomes", position: "QB", team: "Kansas City Chiefs" },
-    { id: "kc2", name: "Travis Kelce", position: "TE", team: "Kansas City Chiefs" },
-    { id: "kc3", name: "Isiah Pacheco", position: "RB", team: "Kansas City Chiefs" },
-    { id: "kc4", name: "Rashee Rice", position: "WR", team: "Kansas City Chiefs" },
-  ],
-  "Philadelphia Eagles": [
-    { id: "phi1", name: "Jalen Hurts", position: "QB", team: "Philadelphia Eagles" },
-    { id: "phi2", name: "A.J. Brown", position: "WR", team: "Philadelphia Eagles" },
-    { id: "phi3", name: "Saquon Barkley", position: "RB", team: "Philadelphia Eagles" },
-    { id: "phi4", name: "DeVonta Smith", position: "WR", team: "Philadelphia Eagles" },
-  ],
-  "San Francisco 49ers": [
-    { id: "sf1", name: "Brock Purdy", position: "QB", team: "San Francisco 49ers" },
-    { id: "sf2", name: "Christian McCaffrey", position: "RB", team: "San Francisco 49ers" },
-    { id: "sf3", name: "Deebo Samuel", position: "WR", team: "San Francisco 49ers" },
-    { id: "sf4", name: "George Kittle", position: "TE", team: "San Francisco 49ers" },
-  ],
-  "Buffalo Bills": [
-    { id: "buf1", name: "Josh Allen", position: "QB", team: "Buffalo Bills" },
-    { id: "buf2", name: "Stefon Diggs", position: "WR", team: "Buffalo Bills" },
-    { id: "buf3", name: "James Cook", position: "RB", team: "Buffalo Bills" },
-    { id: "buf4", name: "Dalton Kincaid", position: "TE", team: "Buffalo Bills" },
-  ],
-};
-
-const nbaPlayers: Record<string, MockPlayer[]> = {
-  "New York Knicks": [
-    { id: "nyk1", name: "Jalen Brunson", position: "PG", team: "New York Knicks" },
-    { id: "nyk2", name: "Julius Randle", position: "PF", team: "New York Knicks" },
-    { id: "nyk3", name: "OG Anunoby", position: "SF", team: "New York Knicks" },
-  ],
-  "Dallas Mavericks": [
-    { id: "dal1", name: "Luka Doncic", position: "PG", team: "Dallas Mavericks" },
-    { id: "dal2", name: "Kyrie Irving", position: "SG", team: "Dallas Mavericks" },
-    { id: "dal3", name: "Dereck Lively", position: "C", team: "Dallas Mavericks" },
-  ],
-  "Denver Nuggets": [
-    { id: "den1", name: "Nikola Jokic", position: "C", team: "Denver Nuggets" },
-    { id: "den2", name: "Jamal Murray", position: "PG", team: "Denver Nuggets" },
-    { id: "den3", name: "Michael Porter Jr", position: "SF", team: "Denver Nuggets" },
-  ],
-  "Milwaukee Bucks": [
-    { id: "mil1", name: "Giannis Antetokounmpo", position: "PF", team: "Milwaukee Bucks" },
-    { id: "mil2", name: "Damian Lillard", position: "PG", team: "Milwaukee Bucks" },
-    { id: "mil3", name: "Khris Middleton", position: "SF", team: "Milwaukee Bucks" },
-  ],
-};
-
-const mlbPlayers: Record<string, MockPlayer[]> = {
-  "Los Angeles Dodgers": [
-    { id: "lad1", name: "Shohei Ohtani", position: "DH", team: "Los Angeles Dodgers" },
-    { id: "lad2", name: "Mookie Betts", position: "RF", team: "Los Angeles Dodgers" },
-    { id: "lad3", name: "Freddie Freeman", position: "1B", team: "Los Angeles Dodgers" },
-  ],
-  "New York Yankees": [
-    { id: "nyy1", name: "Aaron Judge", position: "RF", team: "New York Yankees" },
-    { id: "nyy2", name: "Juan Soto", position: "LF", team: "New York Yankees" },
-    { id: "nyy3", name: "Giancarlo Stanton", position: "DH", team: "New York Yankees" },
-  ],
-  "Atlanta Braves": [
-    { id: "atl1", name: "Ronald Acuña Jr.", position: "RF", team: "Atlanta Braves" },
-    { id: "atl2", name: "Matt Olson", position: "1B", team: "Atlanta Braves" },
-    { id: "atl3", name: "Austin Riley", position: "3B", team: "Atlanta Braves" },
-  ],
-};
-
-const nhlPlayers: Record<string, MockPlayer[]> = {
-  "Edmonton Oilers": [
-    { id: "edm1", name: "Connor McDavid", position: "C", team: "Edmonton Oilers" },
-    { id: "edm2", name: "Leon Draisaitl", position: "C", team: "Edmonton Oilers" },
-    { id: "edm3", name: "Stuart Skinner", position: "G", team: "Edmonton Oilers" },
-  ],
-  "Toronto Maple Leafs": [
-    { id: "tor1", name: "Auston Matthews", position: "C", team: "Toronto Maple Leafs" },
-    { id: "tor2", name: "Mitch Marner", position: "RW", team: "Toronto Maple Leafs" },
-    { id: "tor3", name: "Joseph Woll", position: "G", team: "Toronto Maple Leafs" },
-  ],
-  "Colorado Avalanche": [
-    { id: "col1", name: "Nathan MacKinnon", position: "C", team: "Colorado Avalanche" },
-    { id: "col2", name: "Cale Makar", position: "D", team: "Colorado Avalanche" },
-    { id: "col3", name: "Mikko Rantanen", position: "RW", team: "Colorado Avalanche" },
-  ],
-};
-
-function getPlayersForTeam(team: string, sport: Sport, teamId?: string): MockPlayer[] {
+function getPlayersForTeam(team: string, sport: Sport, teamId?: string): PlayerInfo[] {
   let espnPlayers: ESPNPlayer[] = [];
 
   if (teamId) {
@@ -408,41 +322,7 @@ function getPlayersForTeam(team: string, sport: Sport, teamId?: string): MockPla
     }));
   }
 
-  let roster: Record<string, MockPlayer[]>;
-  switch (sport) {
-    case "NFL":
-    case "NCAAF":
-      roster = nflPlayers;
-      break;
-    case "NBA":
-    case "NCAAB":
-      roster = nbaPlayers;
-      break;
-    case "MLB":
-      roster = mlbPlayers;
-      break;
-    case "NHL":
-      roster = nhlPlayers;
-      break;
-    default:
-      roster = nbaPlayers;
-  }
-  
-  if (roster[team]) {
-    return roster[team];
-  }
-  
-  const genericNames = ["Player A", "Player B", "Player C"];
-  const positions = sport === "NFL" ? ["QB", "RB", "WR"] : 
-                    sport === "NBA" ? ["PG", "SF", "C"] :
-                    sport === "MLB" ? ["P", "1B", "OF"] : ["C", "RW", "G"];
-  
-  return genericNames.map((name, i) => ({
-    id: randomUUID(),
-    name: `${team.split(" ").pop()} ${name}`,
-    position: positions[i],
-    team,
-  }));
+  return [];
 }
 
 function getPropLinesForCategory(category: string, position: string): { line: number; variance: number } {
@@ -577,9 +457,9 @@ function getTeamsForSport(sport: Sport): string[] {
 function generateRandomOdds(favorite: boolean): { americanOdds: number; decimalOdds: number } {
   let american: number;
   if (favorite) {
-    american = -100 - Math.floor(Math.random() * 200);
+    american = -150;
   } else {
-    american = 100 + Math.floor(Math.random() * 200);
+    american = 130;
   }
   return {
     americanOdds: american,
@@ -588,8 +468,8 @@ function generateRandomOdds(favorite: boolean): { americanOdds: number; decimalO
 }
 
 function generateSpread(): { line: number; homeOdds: { americanOdds: number; decimalOdds: number }; awayOdds: { americanOdds: number; decimalOdds: number } } {
-  const spread = (Math.floor(Math.random() * 15) + 1) * (Math.random() > 0.5 ? 1 : -1) + 0.5;
-  const homeOdds = generateRandomOdds(Math.random() > 0.5);
+  const spread = -3.5;
+  const homeOdds = generateRandomOdds(true);
   const awayOdds = { americanOdds: -110, decimalOdds: americanToDecimal(-110) };
   return { line: spread, homeOdds, awayOdds };
 }
@@ -599,17 +479,17 @@ function generateTotal(sport: Sport): { line: number; overOdds: { americanOdds: 
   switch (sport) {
     case "NBA":
     case "NCAAB":
-      baseLine = 210 + Math.floor(Math.random() * 40);
+      baseLine = 225;
       break;
     case "NFL":
     case "NCAAF":
-      baseLine = 40 + Math.floor(Math.random() * 20);
+      baseLine = 47;
       break;
     case "MLB":
-      baseLine = 7 + Math.floor(Math.random() * 4);
+      baseLine = 9;
       break;
     case "NHL":
-      baseLine = 5 + Math.floor(Math.random() * 3);
+      baseLine = 6;
       break;
     default:
       baseLine = 200;
@@ -623,8 +503,11 @@ function generateTotal(sport: Sport): { line: number; overOdds: { americanOdds: 
 
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
+  const seed = createHash('md5').update(JSON.stringify(array)).digest().readUInt32BE(0);
+  let s = seed;
   for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    s = (s * 1664525 + 1013904223) >>> 0;
+    const j = s % (i + 1);
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
   return shuffled;
@@ -639,9 +522,9 @@ function generateGameStartTime(gameIndex: number, totalGames: number): Date {
     if (currentHour < 12) {
       startTime.setHours(13 + gameIndex * 2, 0, 0, 0);
     } else if (currentHour < 18) {
-      startTime.setHours(currentHour + 1 + gameIndex, Math.floor(Math.random() * 30) + 15, 0, 0);
+      startTime.setHours(currentHour + 1 + gameIndex, 0, 0, 0);
     } else {
-      startTime.setHours(19 + gameIndex, Math.floor(Math.random() * 30), 0, 0);
+      startTime.setHours(19 + gameIndex, 0, 0, 0);
     }
     
     if (startTime <= now) {
@@ -651,12 +534,12 @@ function generateGameStartTime(gameIndex: number, totalGames: number): Date {
   } else if (gameIndex < Math.ceil(totalGames * 0.8)) {
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(12 + (gameIndex - Math.ceil(totalGames * 0.5)) * 3, Math.floor(Math.random() * 30), 0, 0);
+    tomorrow.setHours(12 + (gameIndex - Math.ceil(totalGames * 0.5)) * 3, 0, 0, 0);
     return tomorrow;
   } else {
     const dayAfter = new Date(now);
     dayAfter.setDate(dayAfter.getDate() + 2);
-    dayAfter.setHours(14 + (gameIndex - Math.ceil(totalGames * 0.8)) * 2, Math.floor(Math.random() * 30), 0, 0);
+    dayAfter.setHours(14 + (gameIndex - Math.ceil(totalGames * 0.8)) * 2, 0, 0, 0);
     return dayAfter;
   }
 }
@@ -862,9 +745,8 @@ function estimateMoneylineFromSpread(spread: number, isHome: boolean): number {
 
 function generateSpreadFromValue(value: number): { line: number; homeOdds: { americanOdds: number; decimalOdds: number }; awayOdds: { americanOdds: number; decimalOdds: number } } {
   const line = Math.round(value * 2) / 2 || 0.5;
-  const variation = Math.floor(Math.random() * 10) - 5;
-  const homeAmerican = -110 + variation;
-  const awayAmerican = -110 - variation;
+  const homeAmerican = -110;
+  const awayAmerican = -110;
   return {
     line,
     homeOdds: { americanOdds: homeAmerican, decimalOdds: americanToDecimal(homeAmerican) },
@@ -906,7 +788,7 @@ function generateFallbackEvents(sport: Sport): SportEvent[] {
   for (let i = 0; i < numGames; i++) {
     const homeTeam = teams[i * 2];
     const awayTeam = teams[i * 2 + 1];
-    const homeIsFavorite = Math.random() > 0.5;
+    const homeIsFavorite = homeTeam < awayTeam;
     const gameId = randomUUID();
 
     const moneylineHome = generateRandomOdds(homeIsFavorite);
@@ -946,8 +828,8 @@ function generateFallbackEvents(sport: Sport): SportEvent[] {
   return events;
 }
 
-export function generateMockEvents(sport: Sport): SportEvent[] {
-  return generateFallbackEvents(sport);
+export function generateMockEvents(_sport: Sport): SportEvent[] {
+  return [];
 }
 
 export function eventsToLegs(events: SportEvent[]): ParlayLeg[] {

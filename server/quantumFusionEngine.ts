@@ -68,9 +68,15 @@
  * learns from every prediction outcome to continuously improve accuracy.
  */
 
+import crypto from "crypto";
 import type { Sport } from "../shared/schema";
 import { getSportSignalModifiers, generateSportSpecificInsights, analyzeSportSpecificFactors } from "./sportFactorsEngine";
 import { protectionSuite } from "./algorithmProtection";
+
+function deterministicValue(seed: string, min: number, max: number): number {
+  const hash = crypto.createHash('md5').update(seed).digest().readUInt32BE(0);
+  return min + (hash / 0xFFFFFFFF) * (max - min);
+}
 
 // === Core Types ===
 
@@ -440,8 +446,8 @@ export interface MarketContext {
   bookmakerCount?: number;
 }
 
-function getDirection(bullishProb: number): "bullish" | "bearish" | "neutral" {
-  const roll = Math.random();
+function getDirection(bullishProb: number, seed: string): "bullish" | "bearish" | "neutral" {
+  const roll = deterministicValue(seed, 0, 1);
   if (roll < bullishProb) return "bullish";
   if (roll < bullishProb + 0.2) return "bearish";
   return "neutral";
@@ -453,7 +459,7 @@ function getDataDrivenDirection(
   marketContext?: MarketContext
 ): { direction: "bullish" | "bearish" | "neutral"; strengthBoost: number; confidenceBoost: number } {
   if (!marketContext) {
-    return { direction: getDirection(bullishProb), strengthBoost: 0, confidenceBoost: 0 };
+    return { direction: getDirection(bullishProb, `direction-${source}-${bullishProb}`), strengthBoost: 0, confidenceBoost: 0 };
   }
 
   let strengthBoost = 0;
@@ -603,8 +609,8 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
     
     const dataDriven = getDataDrivenDirection(config.source, config.bullishProb * oddsAdjustment, marketContext);
     let direction = dataDriven.direction;
-    let strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMod + dataDriven.strengthBoost));
-    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + Math.random() * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0) + dataDriven.confidenceBoost));
+    let strength = Math.round(Math.min(100, (config.baseStrength[0] + deterministicValue(`strength-${sport}-${config.source}`, 0, 1) * config.baseStrength[1]) * sportMod + dataDriven.strengthBoost));
+    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + deterministicValue(`confidence-${sport}-${config.source}`, 0, 1) * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0) + dataDriven.confidenceBoost));
     let reasoning = config.reasoning;
 
     if (hasRealOdds) {
@@ -945,7 +951,7 @@ export function analyzeTicket(
   };
   
   return {
-    ticketId: `fusion-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    ticketId: `fusion-${Date.now()}-${crypto.randomUUID().slice(0, 9)}`,
     legs: legAnalyses,
     combinedFusion,
     correlationBonus: Math.round(correlationBonus * 10) / 10,

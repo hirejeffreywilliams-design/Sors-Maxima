@@ -39,7 +39,7 @@ function deriveCombos(games: any[]): PropCombo[] {
         for (let j = i + 1; j < teamLeaders.length; j++) {
           const p1 = teamLeaders[i];
           const p2 = teamLeaders[j];
-          const correlation = 0.55 + Math.random() * 0.3;
+          const correlation = 0.55 + ((i * 7 + j * 3) % 30) / 100;
 
           combos.push({
             id: `${game.id}-${p1.playerName}-${p2.playerName}`.replace(/\s/g, "-"),
@@ -64,7 +64,7 @@ function deriveCombos(games: any[]): PropCombo[] {
       if (homeLeaders.length > 0 && awayLeaders.length > 0) {
         const p1 = homeLeaders[0];
         const p2 = awayLeaders[0];
-        const correlation = 0.25 + Math.random() * 0.25;
+        const correlation = 0.35;
 
         combos.push({
           id: `${game.id}-cross-${p1.playerName}-${p2.playerName}`.replace(/\s/g, "-"),

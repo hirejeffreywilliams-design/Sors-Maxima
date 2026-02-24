@@ -441,8 +441,10 @@ function detectSynergies(signals: FusionSignal[]): SynergyEffect[] {
 // === Signal Generation ===
 
 // Helper to generate direction based on probability
+let directionCounter = 0;
 function getDirection(bullishProb: number): "bullish" | "bearish" | "neutral" {
-  const roll = Math.random();
+  const idx = directionCounter++;
+  const roll = ((idx * 2654435761) >>> 0) / 0xffffffff;
   if (roll < bullishProb) return "bullish";
   if (roll < bullishProb + 0.3) return "bearish";
   return "neutral";
@@ -533,8 +535,9 @@ function generateSignals(sport: Sport, odds: number, _context: Record<string, un
   
   for (const config of SIGNAL_CONFIGS) {
     const direction = getDirection(config.bullishProb * oddsAdjustment);
-    const strength = Math.round(Math.min(100, (config.baseStrength[0] + Math.random() * config.baseStrength[1]) * sportMultiplier));
-    const confidence = Math.round(config.baseConfidence[0] + Math.random() * config.baseConfidence[1]);
+    const sigIdx = signals.length;
+    const strength = Math.round(Math.min(100, (config.baseStrength[0] + ((sigIdx * 17) % config.baseStrength[1])) * sportMultiplier));
+    const confidence = Math.round(config.baseConfidence[0] + ((sigIdx * 13) % config.baseConfidence[1]));
     
     signals.push({
       source: config.source,

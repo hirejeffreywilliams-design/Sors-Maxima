@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { logInfo, logWarn } from "./errorLogger";
 import { americanToDecimal } from "@shared/schema";
 import {
@@ -98,7 +99,7 @@ const CORRELATION_MAP: Record<string, Record<string, number>> = {
 };
 
 function generateId(): string {
-  return Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+  return crypto.randomUUID() + Date.now().toString(36);
 }
 
 function calcEdge(modelProb: number, impliedProb: number): number {

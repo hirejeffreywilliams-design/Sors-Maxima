@@ -147,6 +147,10 @@ interface SimulationResult {
   trajectory: number[];
 }
 
+function simHash(seed: number): number {
+  return ((seed * 2654435761) >>> 0) / 0xffffffff;
+}
+
 function runMonteCarloSimulation(
   startingBankroll: number,
   strategy: BetStrategy,
@@ -163,9 +167,9 @@ function runMonteCarloSimulation(
       continue;
     }
 
-    const americanOdds = Math.round((Math.random() * 400) - 200);
+    const americanOdds = Math.round((simHash(i * 31) * 400) - 200);
     const impliedProb = moneylineToImpliedProb(americanOdds);
-    const edge = 0.02 + Math.random() * 0.03;
+    const edge = 0.02 + simHash(i * 37 + 1) * 0.03;
     const winProb = Math.min(0.95, impliedProb + edge);
 
     let betSize: number;
@@ -180,7 +184,7 @@ function runMonteCarloSimulation(
     }
 
     betSize = Math.min(betSize, bankroll);
-    const won = Math.random() < winProb;
+    const won = simHash(i * 41 + 2) < winProb;
 
     if (won) {
       const decimalOdds = americanOdds > 0 ? (americanOdds / 100) + 1 : (100 / Math.abs(americanOdds)) + 1;

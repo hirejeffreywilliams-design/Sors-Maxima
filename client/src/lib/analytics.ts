@@ -7,7 +7,7 @@ const EXPERIMENT_KEY = "sors_experiments";
 function getSessionId(): string {
   let sessionId = sessionStorage.getItem(SESSION_KEY);
   if (!sessionId) {
-    sessionId = `ses_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    sessionId = `ses_${Date.now()}_${crypto.randomUUID().slice(0, 9)}`;
     sessionStorage.setItem(SESSION_KEY, sessionId);
   }
   return sessionId;
@@ -124,7 +124,8 @@ export function getExperimentVariant(experimentId: string, variants: string[]): 
     return experiments[experimentId];
   }
 
-  const variant = variants[Math.floor(Math.random() * variants.length)];
+  const hash = experimentId.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const variant = variants[hash % variants.length];
   experiments[experimentId] = variant;
   localStorage.setItem(EXPERIMENT_KEY, JSON.stringify(experiments));
 

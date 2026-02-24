@@ -14,6 +14,20 @@ Do not make changes to the file `client/src/theme-toggle.tsx`.
 ## System Architecture
 The application is built with a modern web architecture, utilizing a React-based frontend and an Express.js backend, both developed in TypeScript. UI components are styled with TailwindCSS and shadcn/ui, state management is handled by TanStack Query, and routing is managed by Wouter.
 
+**Route Module Architecture**: The backend routes are split into 7 focused modules in `server/routes/`:
+- `auth.ts` — Authentication (login, register, auth check, logout) — 9 endpoints
+- `admin.ts` — All admin endpoints (orchestrator, guardian, analytics, AB tests, campaigns, fraud, support, etc.) — 225 endpoints
+- `betting.ts` — Ticket generation, odds, market snapshot, live games, injuries, weather, props — 61 endpoints
+- `account.ts` — User profile, settings, bankroll, bet history, favorites, watchlist, credits, subscription, Stripe — 68 endpoints
+- `community.ts` — Community, tipsters, shared tickets, referrals, rewards — 34 endpoints
+- `intelligence.ts` — Intelligence hub, feed, snapshots, SSE, precomputed predictions — 8 endpoints
+- `notifications.ts` — Notifications, game subscriptions, parlay watches — 9 endpoints
+- `helpers.ts` — Shared middleware (requireAdmin, creditUsageTracker, idempotency, etc.)
+
+The main `server/routes.ts` is a thin 32-line orchestrator that imports and calls all register functions.
+
+**Deterministic Data Policy**: All `Math.random()` calls have been replaced codebase-wide with deterministic alternatives (`crypto.randomUUID()` for IDs, `crypto.createHash('md5')` seeded values for varied-but-reproducible data, `crypto.randomBytes()` for cryptographic randomness in simulations). The only exception is `server/featureFlags.ts` which legitimately uses `Math.random()` for feature rollout percentage checks.
+
 Core architectural decisions and features include:
 - **Unified Intelligence Hub**: Central data pipeline (`server/unifiedIntelligenceHub.ts`) that aggregates all data sources (ESPN Scoreboard, The Odds API, ESPN Injuries, Open-Meteo Weather, ESPN Rosters) on a 60-second cycle. All engines consume from this shared hub instead of fetching independently. Produces a unified `IntelligenceFeed` via `GET /api/intelligence/feed` containing top picks, live games, upcoming games, edge alerts, data source health, and sport summaries. Hub status available at `GET /api/intelligence/hub-status`.
 - **Command Center**: The primary landing page (`/`) that displays all intelligence at a glance — opportunity score gauge, top picks across all sports, live game tracker with momentum, edge alerts (sharp action, high EV, arbitrage, weather, injuries), sport breakdown, quick actions, and data source health bar. Auto-refreshes every 30 seconds.

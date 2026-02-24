@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { getPipelineHealth, getPipelineRuns, getAlertHistory } from "./predictionPipelineEngine";
 import { getTicketMetrics, getAllTickets, getConfidenceTickets } from "./ticketingEngine";
 import { getRecommendationStats, getBankrollConfig, getModelPerformanceList } from "./confidenceEngine";
@@ -115,7 +116,7 @@ const assistantHistory: AssistantOutput[] = [];
 const MAX_HISTORY = 50;
 
 function generateTraceId(): string {
-  return `trace_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`;
+  return `trace_${crypto.randomUUID()}`;
 }
 
 export function collectRunContext(period: "daily" | "weekly" | "monthly" = "daily", adminId: string = "admin"): RunContext {

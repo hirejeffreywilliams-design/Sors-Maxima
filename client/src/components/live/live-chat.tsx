@@ -47,7 +47,7 @@ export function LiveChat() {
   const simulationIndex = useRef(0);
 
   useEffect(() => {
-    const delay = 8000 + Math.random() * 2000;
+    const delay = 10000;
     const interval = setInterval(() => {
       const simMsg = simulatedMessages[simulationIndex.current % simulatedMessages.length];
       simulationIndex.current += 1;

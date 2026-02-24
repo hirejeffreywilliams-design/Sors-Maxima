@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 interface ErrorLog {
   id: string;
   timestamp: string;
@@ -17,7 +19,7 @@ class ErrorLogger {
   private maxLogs = 1000;
 
   generateId(): string {
-    return `err_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `err_${crypto.randomUUID()}`;
   }
 
   log(

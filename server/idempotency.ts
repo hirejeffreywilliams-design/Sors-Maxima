@@ -1,3 +1,5 @@
+import crypto from 'crypto';
+
 interface IdempotencyRecord {
   key: string;
   response: {
@@ -18,7 +20,7 @@ class IdempotencyStore {
   }
 
   generateKey(): string {
-    return `idem_${Date.now()}_${Math.random().toString(36).substr(2, 12)}`;
+    return `idem_${crypto.randomUUID()}`;
   }
 
   get(key: string): IdempotencyRecord | null {

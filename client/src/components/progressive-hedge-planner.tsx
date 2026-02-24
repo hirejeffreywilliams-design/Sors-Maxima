@@ -45,7 +45,7 @@ function calculateHedgeSteps(legs: ParlayLeg[], stake: number, payout: number): 
     const remainingLegs = legs.length - idx - 1;
     const remainingOdds = legs.slice(idx + 1).reduce((acc, l) => acc * (l.decimalOdds || 1.9), 1);
     
-    const hedgeOdds = 1.9 + Math.random() * 0.5;
+    const hedgeOdds = 2.0;
     const optimalHedge = (currentValue - stake * 1.1) / (hedgeOdds + 1);
     const hedgeAmount = Math.max(0, optimalHedge);
     
@@ -91,7 +91,7 @@ function calculateCashoutScenarios(legs: ParlayLeg[], stake: number, payout: num
     const completedLegs = legs.slice(0, completed);
     const completedOdds = completedLegs.reduce((acc, l) => acc * (l.decimalOdds || 1.9), 1);
     const fairValue = stake * completedOdds;
-    const vig = 0.08 + Math.random() * 0.07;
+    const vig = 0.1;
     const estimatedCashout = fairValue * (1 - vig);
     
     let recommendation: CashoutScenario["recommendation"] = "hold";

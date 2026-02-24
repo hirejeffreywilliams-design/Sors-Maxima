@@ -41,7 +41,7 @@ function runScenarioAnalysis(legs: ParlayLeg[], baseProbability: number): Scenar
   const scenarios: ScenarioResult[] = [];
   
   legs.forEach((leg, idx) => {
-    const injuryImpact = 0.3 + Math.random() * 0.4;
+    const injuryImpact = 0.3 + (idx * 0.1) % 0.4;
     scenarios.push({
       id: `injury-${idx}`,
       name: `Star Player Injury: ${leg.team}`,
@@ -53,7 +53,7 @@ function runScenarioAnalysis(legs: ParlayLeg[], baseProbability: number): Scenar
       severity: injuryImpact > 0.5 ? "severe" : injuryImpact > 0.35 ? "moderate" : "minor",
       hedgeSuggestion: {
         action: `Bet opposite ${leg.team} spread`,
-        stake: 50 + Math.floor(Math.random() * 100),
+        stake: 50 + (idx + 1) * 25,
         expectedSavings: injuryImpact * 100,
       },
     });

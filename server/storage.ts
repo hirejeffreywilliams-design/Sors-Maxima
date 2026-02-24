@@ -595,7 +595,7 @@ async function runQuantumMonteCarloSimulation(
     }
   }
 
-  const rng = new HighPrecisionRNG(Date.now() + Math.floor(Math.random() * 1000000));
+  const rng = new HighPrecisionRNG(Date.now());
   
   let totalWins = 0;
   let totalRuns = 0;

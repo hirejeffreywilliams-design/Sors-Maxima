@@ -162,7 +162,7 @@ export function CustomModelBuilder() {
 
   function handleTest() {
     const base = 55;
-    const variance = (Math.random() - 0.5) * 20;
+    const variance = 0;
     const weightBalance = overallTotal / overallMax;
     const score = Math.min(98, Math.max(35, base + variance + weightBalance * 15));
     setTestResult(Math.round(score * 10) / 10);

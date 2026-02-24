@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { errorLogger, logError, logWarn, logInfo } from "./errorLogger";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
@@ -129,7 +130,7 @@ class AppGuardianEngine {
   }
 
   private genId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    return `${prefix}_${crypto.randomUUID()}`;
   }
 
   private addAlert(

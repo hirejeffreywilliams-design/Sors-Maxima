@@ -512,8 +512,8 @@ class AnalyticsAgentService {
       const retryState = this.feedRetryState.get(feed.id);
       if (retryState && Date.now() < retryState.nextRetryAt) continue;
 
-      const success = Math.random() < feed.reliability;
-      const latency = feed.baseLatencyMs + Math.random() * feed.baseLatencyMs * 0.5;
+      const success = true;
+      const latency = feed.baseLatencyMs;
 
       if (success) {
         health.status = "healthy";
@@ -608,7 +608,7 @@ class AnalyticsAgentService {
         const providerSnapshots = this.generateProviderSnapshots(decimalOdds);
         const canonical = this.selectCanonicalOdds(providerSnapshots);
         const rawProb = impliedProbability(canonical.decimal);
-        const totalOverround = 1.05 + Math.random() * 0.08;
+        const totalOverround = 1.05;
         const vigAdj = vigAdjustedProbability(rawProb, totalOverround);
 
         const modelProb = this.runModelPrediction(game, mkt, rawProb);
@@ -639,7 +639,7 @@ class AnalyticsAgentService {
           dataQuality: {
             status: qualityStatus,
             details: qualityStatus === "ok" ? "All feeds healthy" : `Data age: ${Math.round(dataAge / 1000)}s`,
-            lastLatencyMs: Math.round(Math.random() * 80 + 20),
+            lastLatencyMs: 50,
             lastTimestamp: new Date().toISOString(),
           },
           odds: {
@@ -673,14 +673,15 @@ class AnalyticsAgentService {
 
   private generateProviderSnapshots(baseDecimal: number): ProviderSnapshot[] {
     const providers = ["DraftKings", "FanDuel", "BetMGM", "Caesars", "PointsBet", "BetRivers"];
-    return providers.map(provider => {
-      const variance = (Math.random() - 0.5) * 0.15;
-      const decimal = Math.max(1.01, baseDecimal + variance);
+    const variances = [-0.03, 0.02, -0.01, 0.03, -0.02, 0.01];
+    const liquidities = [400000, 350000, 300000, 250000, 150000, 100000];
+    return providers.map((provider, i) => {
+      const decimal = Math.max(1.01, baseDecimal + variances[i]);
       return {
         provider,
         decimal: Math.round(decimal * 100) / 100,
         american: decimalToAmerican(decimal),
-        liquidity: Math.round(Math.random() * 500000 + 50000),
+        liquidity: liquidities[i],
         timestamp: new Date().toISOString(),
       };
     });
@@ -698,16 +699,16 @@ class AnalyticsAgentService {
   }
 
   private runModelPrediction(game: LiveGame, market: { type: string; specifier: string }, rawProb: number): ModelOutput {
-    const edge = (Math.random() - 0.4) * 0.2;
+    const edge = 0;
     const pModel = Math.min(0.95, Math.max(0.05, rawProb + edge));
-    const halfWidth = 0.05 + Math.random() * 0.08;
+    const halfWidth = 0.05;
 
     const features = [
-      { feature: "Historical Win Rate", contribution: Math.random() * 0.3 },
-      { feature: "Home Field Advantage", contribution: Math.random() * 0.2 },
-      { feature: "Injury Impact", contribution: -Math.random() * 0.15 },
-      { feature: "Line Movement", contribution: (Math.random() - 0.5) * 0.15 },
-      { feature: "Sharp Money Flow", contribution: Math.random() * 0.12 },
+      { feature: "Historical Win Rate", contribution: 0.15 },
+      { feature: "Home Field Advantage", contribution: 0.10 },
+      { feature: "Injury Impact", contribution: -0.05 },
+      { feature: "Line Movement", contribution: 0.02 },
+      { feature: "Sharp Money Flow", contribution: 0.08 },
     ].sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
 
     return {

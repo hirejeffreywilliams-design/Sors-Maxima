@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 // Tipster Communities Service - In-app community feature with monetization
 
 interface Community {
@@ -147,7 +148,7 @@ class CommunityService {
   }
 
   generateId(prefix: string): string {
-    return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `${prefix}_${crypto.randomUUID()}`;
   }
 
   // Community Management
@@ -168,7 +169,7 @@ class CommunityService {
       description: data.description,
       creatorId: data.creatorId,
       creatorUsername: data.creatorUsername,
-      bannerColor: this.getRandomBannerColor(),
+      bannerColor: this.getDeterministicBannerColor(data.name),
       isPublic: data.isPublic,
       isPremium: data.isPremium,
       monthlyPrice: data.monthlyPrice,
@@ -208,7 +209,7 @@ class CommunityService {
     return community;
   }
 
-  private getRandomBannerColor(): string {
+  private getDeterministicBannerColor(name: string): string {
     const colors = [
       'from-blue-500 to-purple-600',
       'from-green-500 to-teal-600',
@@ -217,7 +218,11 @@ class CommunityService {
       'from-indigo-500 to-blue-600',
       'from-yellow-500 to-orange-600',
     ];
-    return colors[Math.floor(Math.random() * colors.length)];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+    }
+    return colors[Math.abs(hash) % colors.length];
   }
 
   getCommunities(options?: { 

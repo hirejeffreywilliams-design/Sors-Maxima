@@ -42,7 +42,7 @@ class EventTracker {
   }
 
   private generateSessionId(): string {
-    return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `session_${Date.now()}_${crypto.randomUUID().slice(0, 9)}`;
   }
 
   setUserId(userId: string) {
@@ -55,7 +55,7 @@ class EventTracker {
     metadata?: Record<string, unknown>;
   }) {
     const event: TrackedEvent = {
-      id: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `evt_${Date.now()}_${crypto.randomUUID().slice(0, 6)}`,
       category,
       action,
       label: options?.label,
