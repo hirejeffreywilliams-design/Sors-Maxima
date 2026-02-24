@@ -12,16 +12,39 @@ interface SSEClient {
 }
 
 const ALL_CHANNEL = "all";
+const MAX_CLIENTS_PER_IP = 5;
+const MAX_TOTAL_CLIENTS = 200;
+const EVENT_BUFFER_SIZE = 100;
 const clients = new Map<string, SSEClient>();
+const ipConnectionCount = new Map<string, number>();
 let eventCounter = 0;
 let broadcastInterval: NodeJS.Timeout | null = null;
 let lastFeedHash = "";
+const eventBuffer: { id: number; eventType: string; data: any; channel: string; timestamp: number }[] = [];
 
 function generateClientId(): string {
   return `sse-${crypto.randomUUID()}`;
 }
 
-export function registerSSEClient(res: Response, channels: string[] = ["all"]): string {
+export function registerSSEClient(res: Response, channels: string[] = ["all"], clientIp?: string, lastEventId?: number): string | null {
+  if (clients.size >= MAX_TOTAL_CLIENTS) {
+    res.writeHead(503, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" });
+    res.write(`data: ${JSON.stringify({ type: "error", message: "Too many SSE connections" })}\n\n`);
+    res.end();
+    return null;
+  }
+
+  if (clientIp) {
+    const currentCount = ipConnectionCount.get(clientIp) || 0;
+    if (currentCount >= MAX_CLIENTS_PER_IP) {
+      res.writeHead(429, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" });
+      res.write(`data: ${JSON.stringify({ type: "error", message: "Too many SSE connections from this IP" })}\n\n`);
+      res.end();
+      return null;
+    }
+    ipConnectionCount.set(clientIp, currentCount + 1);
+  }
+
   const id = generateClientId();
 
   res.writeHead(200, {
@@ -38,12 +61,29 @@ export function registerSSEClient(res: Response, channels: string[] = ["all"]): 
     res,
     channels: new Set(channels),
     connectedAt: Date.now(),
-    lastEventId: 0,
+    lastEventId: lastEventId || 0,
   };
   clients.set(id, client);
 
+  if (lastEventId && lastEventId > 0) {
+    const missedEvents = eventBuffer.filter(e => e.id > lastEventId);
+    for (const event of missedEvents) {
+      if (client.channels.has(ALL_CHANNEL) || client.channels.has(event.channel)) {
+        sendEvent(client, event.eventType, event.data);
+      }
+    }
+  }
+
   res.on("close", () => {
     clients.delete(id);
+    if (clientIp) {
+      const count = ipConnectionCount.get(clientIp) || 1;
+      if (count <= 1) {
+        ipConnectionCount.delete(clientIp);
+      } else {
+        ipConnectionCount.set(clientIp, count - 1);
+      }
+    }
   });
 
   return id;
@@ -66,6 +106,11 @@ function sendEvent(client: SSEClient, eventType: string, data: any): boolean {
 }
 
 export function broadcastEvent(eventType: string, data: any, channel = "all"): void {
+  eventBuffer.push({ id: eventCounter + 1, eventType, data, channel, timestamp: Date.now() });
+  if (eventBuffer.length > EVENT_BUFFER_SIZE) {
+    eventBuffer.splice(0, eventBuffer.length - EVENT_BUFFER_SIZE);
+  }
+
   for (const [, client] of Array.from(clients.entries())) {
     if (client.channels.has(ALL_CHANNEL) || client.channels.has(channel)) {
       sendEvent(client, eventType, data);

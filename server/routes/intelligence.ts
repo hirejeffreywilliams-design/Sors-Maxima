@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus } from "../precomputedPredictionsEngine";
+import { getClientIp } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
   startIntelligenceHub();
@@ -49,7 +50,11 @@ export function registerIntelligenceRoutes(app: Express): void {
   app.get("/api/sse/stream", (req: Request, res: Response) => {
     const channelsParam = (req.query.channels as string) || "all";
     const channels = channelsParam.split(",").map(c => c.trim()).filter(Boolean);
-    registerSSEClient(res, channels);
+    const clientIp = getClientIp(req);
+    const lastEventIdHeader = req.headers["last-event-id"] as string | undefined;
+    const lastEventIdQuery = req.query.lastEventId as string | undefined;
+    const lastEventId = lastEventIdHeader ? parseInt(lastEventIdHeader, 10) : lastEventIdQuery ? parseInt(lastEventIdQuery, 10) : undefined;
+    registerSSEClient(res, channels, clientIp, lastEventId);
   });
 
   app.get("/api/sse/status", (_req: Request, res: Response) => {

@@ -56,6 +56,7 @@ export function useSSE(options: UseSSEOptions = {}) {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
+  const lastEventIdRef = useRef<string | null>(null);
 
   const connect = useCallback(() => {
     if (!enabled || !mountedRef.current) return;
@@ -65,7 +66,10 @@ export function useSSE(options: UseSSEOptions = {}) {
     }
 
     const channelParam = channels.join(",");
-    const url = `/api/sse/stream?channels=${encodeURIComponent(channelParam)}`;
+    let url = `/api/sse/stream?channels=${encodeURIComponent(channelParam)}`;
+    if (lastEventIdRef.current) {
+      url += `&lastEventId=${encodeURIComponent(lastEventIdRef.current)}`;
+    }
     const es = new EventSource(url);
     eventSourceRef.current = es;
 
@@ -87,6 +91,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     es.addEventListener("intelligence-update", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "intelligence-update", data, timestamp: data.timestamp };
         setState(prev => ({
@@ -107,6 +112,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     es.addEventListener("live-scores", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "live-scores", data, timestamp: data.timestamp };
         setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp }));
@@ -117,6 +123,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     es.addEventListener("edge-alerts", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "edge-alerts", data, timestamp: data.timestamp };
         setState(prev => ({
@@ -132,6 +139,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     es.addEventListener("notification", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "notification", data, timestamp: data.timestamp };
         setState(prev => ({
@@ -144,8 +152,9 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     });
 
-    es.addEventListener("heartbeat", () => {
+    es.addEventListener("heartbeat", (event: MessageEvent) => {
       if (!mountedRef.current) return;
+      if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
       setState(prev => ({ ...prev, connected: true }));
     });
 
