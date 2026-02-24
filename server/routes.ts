@@ -31,6 +31,7 @@ import { getAllTests, getTest, createTest, updateTest, deleteTest, getTestStats 
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, stopPrecomputedEngine } from "./precomputedPredictionsEngine";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "./unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "./sseManager";
+import { startNotificationEngine, subscribeToGame, unsubscribeFromGame, getUserGameSubscriptions, watchParlay, unwatchParlay, getUserParlayWatches, getNotifications as getCustomNotifications, markNotificationsRead as markCustomNotificationsRead, getNotificationStats } from "./notificationEngine";
 import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCampaign, getCampaignStats } from "./lifecycleCampaignEngine";
 import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
@@ -7727,6 +7728,67 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
   app.get("/api/precomputed-engine/status", (_req: Request, res: Response) => {
     return res.json(getPrecomputedEngineStatus());
+  });
+
+  // ==================== CUSTOM NOTIFICATION ENGINE ====================
+
+  startNotificationEngine();
+
+  app.get("/api/custom-notifications", (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 50;
+    const types = req.query.types ? (req.query.types as string).split(",") : undefined;
+    return res.json(getCustomNotifications(limit, types));
+  });
+
+  app.put("/api/custom-notifications/read", (req: Request, res: Response) => {
+    const { ids } = req.body;
+    markCustomNotificationsRead(ids);
+    return res.json({ success: true });
+  });
+
+  app.get("/api/custom-notifications/stats", (_req: Request, res: Response) => {
+    return res.json(getNotificationStats());
+  });
+
+  app.post("/api/game-subscriptions", (req: Request, res: Response) => {
+    const { gameId, sport, gameName, alerts } = req.body;
+    if (!gameId || !sport) {
+      return res.status(400).json({ error: "gameId and sport are required" });
+    }
+    const userId = "default-user";
+    const sub = subscribeToGame(userId, gameId, sport, gameName || "", alerts);
+    return res.json(sub);
+  });
+
+  app.delete("/api/game-subscriptions/:gameId", (req: Request, res: Response) => {
+    const userId = "default-user";
+    const removed = unsubscribeFromGame(userId, req.params.gameId);
+    return res.json({ success: removed });
+  });
+
+  app.get("/api/game-subscriptions", (_req: Request, res: Response) => {
+    const userId = "default-user";
+    return res.json(getUserGameSubscriptions(userId));
+  });
+
+  app.post("/api/parlay-watches", (req: Request, res: Response) => {
+    const { ticketId, legs } = req.body;
+    if (!ticketId || !legs || !Array.isArray(legs)) {
+      return res.status(400).json({ error: "ticketId and legs array are required" });
+    }
+    const userId = "default-user";
+    const watch = watchParlay(ticketId, userId, legs);
+    return res.json(watch);
+  });
+
+  app.delete("/api/parlay-watches/:ticketId", (req: Request, res: Response) => {
+    const removed = unwatchParlay(req.params.ticketId);
+    return res.json({ success: removed });
+  });
+
+  app.get("/api/parlay-watches", (_req: Request, res: Response) => {
+    const userId = "default-user";
+    return res.json(getUserParlayWatches(userId));
   });
 
   // ==================== END ALL FEATURE ROUTES ====================

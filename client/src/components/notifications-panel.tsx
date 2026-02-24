@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Bell,
@@ -15,22 +14,32 @@ import {
   Clock,
   CheckCheck,
   Settings2,
+  Trophy,
+  XCircle,
+  Zap,
 } from "lucide-react";
+import { useSSE } from "@/hooks/use-sse";
 
 interface Notification {
   id: number;
-  type: "line_movement" | "injury_report" | "sharp_money" | "game_start";
+  type: "line_movement" | "injury_report" | "sharp_money" | "game_start" | "score_change" | "parlay_hit" | "parlay_miss";
   title: string;
   description: string;
   timestamp: string;
   read: boolean;
+  gameId?: string;
+  sport?: string;
+  meta?: Record<string, any>;
 }
 
 const typeConfig: Record<string, { icon: typeof Bell; color: string; label: string }> = {
+  game_start: { icon: Clock, color: "text-purple-500", label: "Game Updates" },
+  score_change: { icon: Zap, color: "text-yellow-500", label: "Score Changes" },
+  parlay_hit: { icon: Trophy, color: "text-green-500", label: "Parlay Hits" },
+  parlay_miss: { icon: XCircle, color: "text-red-500", label: "Parlay Misses" },
   line_movement: { icon: TrendingUp, color: "text-blue-500", label: "Line Movement" },
   injury_report: { icon: AlertTriangle, color: "text-orange-500", label: "Injury Report" },
-  sharp_money: { icon: DollarSign, color: "text-green-500", label: "Sharp Money" },
-  game_start: { icon: Clock, color: "text-purple-500", label: "Game Start" },
+  sharp_money: { icon: DollarSign, color: "text-emerald-500", label: "Sharp Money" },
 };
 
 function formatTimeAgo(timestamp: string): string {
@@ -47,32 +56,57 @@ export function NotificationsPanel() {
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState({
+    game_start: true,
+    score_change: true,
+    parlay_hit: true,
+    parlay_miss: true,
     line_movement: true,
     injury_report: true,
     sharp_money: true,
-    game_start: true,
   });
 
-  const { data: notifications = [], refetch } = useQuery<Notification[]>({
+  const { data: customNotifications = [], refetch: refetchCustom } = useQuery<Notification[]>({
+    queryKey: ["/api/custom-notifications"],
+    refetchInterval: 30000,
+  });
+
+  const { data: legacyNotifications = [], refetch: refetchLegacy } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     refetchInterval: 30000,
   });
 
+  const sse = useSSE({
+    enabled: true,
+    onEvent: (event) => {
+      if (event.type === "notification") {
+        queryClient.invalidateQueries({ queryKey: ["/api/custom-notifications"] });
+      }
+    },
+  });
+
+  const allNotifications = [...customNotifications, ...legacyNotifications]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
   useEffect(() => {
     if (open) {
-      refetch();
+      refetchCustom();
+      refetchLegacy();
     }
-  }, [open, refetch]);
+  }, [open, refetchCustom, refetchLegacy]);
 
   const markReadMutation = useMutation({
-    mutationFn: (ids: number[] | undefined) => apiRequest("PUT", "/api/notifications/read", ids ? { ids } : {}),
+    mutationFn: async (ids: number[] | undefined) => {
+      await apiRequest("PUT", "/api/custom-notifications/read", ids ? { ids } : {});
+      await apiRequest("PUT", "/api/notifications/read", ids ? { ids } : {});
+    },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-notifications"] });
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
-  const filteredNotifications = notifications.filter(
-    (n) => preferences[n.type as keyof typeof preferences]
+  const filteredNotifications = allNotifications.filter(
+    (n) => preferences[n.type as keyof typeof preferences] !== false
   );
 
   const unreadCount = filteredNotifications.filter((n) => !n.read).length;
@@ -87,6 +121,8 @@ export function NotificationsPanel() {
     return acc;
   }, {});
 
+  const sortedTypes = ["parlay_hit", "parlay_miss", "score_change", "game_start", "line_movement", "sharp_money", "injury_report"];
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -99,7 +135,7 @@ export function NotificationsPanel() {
           <Bell className="w-4 h-4" />
           {unreadCount > 0 && (
             <span
-              className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1"
+              className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-pulse"
               data-testid="badge-notification-count"
             >
               {unreadCount > 99 ? "99+" : unreadCount}
@@ -107,9 +143,16 @@ export function NotificationsPanel() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-96 p-0" data-testid="panel-notifications">
+      <PopoverContent align="end" className="w-[420px] p-0" data-testid="panel-notifications">
         <div className="flex items-center justify-between gap-2 p-3 border-b">
-          <h3 className="font-semibold text-sm">Notifications</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="font-semibold text-sm">Notifications</h3>
+            {sse.connected && (
+              <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-green-500/30 text-green-500" data-testid="badge-sse-live">
+                Live
+              </Badge>
+            )}
+          </div>
           <div className="flex items-center gap-1">
             {unreadCount > 0 && (
               <Button
@@ -135,13 +178,13 @@ export function NotificationsPanel() {
         </div>
 
         {showSettings && (
-          <div className="p-3 border-b space-y-3" data-testid="panel-notification-settings">
-            <p className="text-xs text-muted-foreground font-medium">Notification Preferences</p>
+          <div className="p-3 border-b space-y-2" data-testid="panel-notification-settings">
+            <p className="text-xs text-muted-foreground font-medium mb-2">Alert Preferences</p>
             {Object.entries(typeConfig).map(([key, config]) => (
               <div key={key} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <config.icon className={`w-4 h-4 ${config.color}`} />
-                  <span className="text-sm">{config.label}</span>
+                  <config.icon className={`w-3.5 h-3.5 ${config.color}`} />
+                  <span className="text-xs">{config.label}</span>
                 </div>
                 <Switch
                   checked={preferences[key as keyof typeof preferences]}
@@ -155,31 +198,38 @@ export function NotificationsPanel() {
           </div>
         )}
 
-        <ScrollArea className="max-h-[400px]">
+        <ScrollArea className="max-h-[420px]">
           {filteredNotifications.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground" data-testid="text-no-notifications">
-              No notifications
+            <div className="p-8 text-center" data-testid="text-no-notifications">
+              <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">No notifications yet</p>
+              <p className="text-xs text-muted-foreground/70 mt-1">Subscribe to games or watch parlays to get alerts</p>
             </div>
           ) : (
-            Object.entries(grouped).map(([type, items]) => {
+            sortedTypes.map(type => {
+              const items = grouped[type];
+              if (!items || items.length === 0) return null;
               const config = typeConfig[type];
               if (!config) return null;
               const Icon = config.icon;
+              const unreadInGroup = items.filter(n => !n.read).length;
               return (
                 <div key={type}>
-                  <div className="px-3 py-1.5 bg-muted/50">
+                  <div className="px-3 py-1.5 bg-muted/50 sticky top-0 z-10">
                     <span className={`text-xs font-medium flex items-center gap-1.5 ${config.color}`}>
                       <Icon className="w-3 h-3" />
                       {config.label}
-                      <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1.5" data-testid={`badge-unread-count-${type}`}>
-                        {items.filter((n) => !n.read).length}
-                      </Badge>
+                      {unreadInGroup > 0 && (
+                        <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1.5" data-testid={`badge-unread-count-${type}`}>
+                          {unreadInGroup} new
+                        </Badge>
+                      )}
                     </span>
                   </div>
-                  {items.slice(0, 3).map((notification) => (
+                  {items.slice(0, 5).map((notification) => (
                     <div
-                      key={notification.id}
-                      className={`px-3 py-2.5 border-b last:border-b-0 ${
+                      key={`${notification.type}-${notification.id}`}
+                      className={`px-3 py-2.5 border-b last:border-b-0 transition-colors ${
                         notification.read ? "opacity-60" : "bg-muted/20"
                       }`}
                       data-testid={`notification-item-${notification.id}`}
@@ -189,6 +239,11 @@ export function NotificationsPanel() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium">{notification.title}</span>
+                            {notification.sport && (
+                              <Badge variant="outline" className="text-[10px] h-4 px-1" data-testid={`badge-sport-${notification.id}`}>
+                                {notification.sport}
+                              </Badge>
+                            )}
                             {!notification.read && (
                               <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
                             )}
@@ -208,6 +263,13 @@ export function NotificationsPanel() {
             })
           )}
         </ScrollArea>
+
+        <div className="p-2 border-t bg-muted/30">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+            <span data-testid="text-notification-total">{filteredNotifications.length} notifications</span>
+            <span>{unreadCount} unread</span>
+          </div>
+        </div>
       </PopoverContent>
     </Popover>
   );

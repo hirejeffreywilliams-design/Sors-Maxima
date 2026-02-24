@@ -1,0 +1,449 @@
+import { getAllSportsScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
+import { broadcastEvent } from "./sseManager";
+import { logError } from "./errorLogger";
+
+export interface CustomNotification {
+  id: number;
+  type: "game_start" | "score_change" | "parlay_hit" | "parlay_miss" | "line_movement" | "sharp_money" | "injury_report";
+  title: string;
+  description: string;
+  timestamp: string;
+  read: boolean;
+  gameId?: string;
+  sport?: string;
+  meta?: Record<string, any>;
+}
+
+interface GameSubscription {
+  gameId: string;
+  userId: string;
+  sport: string;
+  gameName: string;
+  alerts: {
+    gameStart: boolean;
+    scoreChange: boolean;
+  };
+  subscribedAt: string;
+}
+
+interface ParlayWatch {
+  ticketId: string;
+  userId: string;
+  legs: ParlayLeg[];
+  createdAt: string;
+}
+
+interface ParlayLeg {
+  id: string;
+  gameId?: string;
+  team: string;
+  opponent: string;
+  market: string;
+  outcome: string;
+  status: "pending" | "won" | "lost" | "push";
+}
+
+interface GameSnapshot {
+  id: string;
+  homeScore: number;
+  awayScore: number;
+  state: string;
+  period: number;
+  clock: string;
+  homeTeam: string;
+  awayTeam: string;
+  sport: string;
+  detail: string;
+}
+
+const gameSubscriptions = new Map<string, GameSubscription[]>();
+const parlayWatches = new Map<string, ParlayWatch>();
+const notifications: CustomNotification[] = [];
+let notifIdCounter = 1;
+let previousGameSnapshots = new Map<string, GameSnapshot>();
+let monitorInterval: NodeJS.Timeout | null = null;
+
+function addNotification(notif: Omit<CustomNotification, "id" | "timestamp" | "read">): CustomNotification {
+  const full: CustomNotification = {
+    ...notif,
+    id: notifIdCounter++,
+    timestamp: new Date().toISOString(),
+    read: false,
+  };
+  notifications.unshift(full);
+  if (notifications.length > 200) {
+    notifications.length = 150;
+  }
+  broadcastEvent("notification", {
+    type: "notification",
+    notification: full,
+    timestamp: full.timestamp,
+  });
+  return full;
+}
+
+function takeGameSnapshot(game: ESPNScoreboardGame): GameSnapshot {
+  return {
+    id: game.id,
+    homeScore: game.homeTeam.score ?? 0,
+    awayScore: game.awayTeam.score ?? 0,
+    state: game.status.state,
+    period: game.status.period,
+    clock: game.status.clock,
+    homeTeam: game.homeTeam.shortDisplayName || game.homeTeam.displayName,
+    awayTeam: game.awayTeam.shortDisplayName || game.awayTeam.displayName,
+    sport: game.sport,
+    detail: game.status.detail || "",
+  };
+}
+
+async function monitorGames(): Promise<void> {
+  try {
+    const allGames = await getAllSportsScoreboard();
+    const currentSnapshots = new Map<string, GameSnapshot>();
+
+    for (const game of allGames) {
+      const snap = takeGameSnapshot(game);
+      currentSnapshots.set(game.id, snap);
+      const prev = previousGameSnapshots.get(game.id);
+
+      if (!prev) continue;
+
+      const subs = getSubscriptionsForGame(game.id);
+      if (subs.length === 0) continue;
+
+      if (prev.state === "pre" && snap.state === "in") {
+        for (const sub of subs) {
+          if (sub.alerts.gameStart) {
+            addNotification({
+              type: "game_start",
+              title: "Game Started!",
+              description: `${snap.awayTeam} @ ${snap.homeTeam} is now live`,
+              gameId: game.id,
+              sport: snap.sport,
+              meta: { homeTeam: snap.homeTeam, awayTeam: snap.awayTeam },
+            });
+          }
+        }
+      }
+
+      const scoreChanged =
+        prev.homeScore !== snap.homeScore || prev.awayScore !== snap.awayScore;
+
+      if (scoreChanged && snap.state === "in") {
+        for (const sub of subs) {
+          if (sub.alerts.scoreChange) {
+            const scoringTeam = prev.homeScore !== snap.homeScore ? snap.homeTeam : snap.awayTeam;
+            const pointsScored = snap.state === "in"
+              ? (snap.homeScore + snap.awayScore) - (prev.homeScore + prev.awayScore)
+              : 0;
+            addNotification({
+              type: "score_change",
+              title: `Score Update`,
+              description: `${snap.awayTeam} ${snap.awayScore} - ${snap.homeTeam} ${snap.homeScore} (${snap.detail})`,
+              gameId: game.id,
+              sport: snap.sport,
+              meta: {
+                homeTeam: snap.homeTeam,
+                awayTeam: snap.awayTeam,
+                homeScore: snap.homeScore,
+                awayScore: snap.awayScore,
+                scoringTeam,
+                pointsScored,
+                period: snap.period,
+                clock: snap.clock,
+              },
+            });
+          }
+        }
+      }
+
+      if (prev.state === "in" && snap.state === "post") {
+        for (const sub of subs) {
+          const winner = snap.homeScore > snap.awayScore ? snap.homeTeam : snap.awayTeam;
+          addNotification({
+            type: "game_start",
+            title: "Game Final",
+            description: `${snap.awayTeam} ${snap.awayScore} - ${snap.homeTeam} ${snap.homeScore} | ${winner} wins`,
+            gameId: game.id,
+            sport: snap.sport,
+            meta: {
+              homeTeam: snap.homeTeam,
+              awayTeam: snap.awayTeam,
+              homeScore: snap.homeScore,
+              awayScore: snap.awayScore,
+              winner,
+              final: true,
+            },
+          });
+        }
+      }
+    }
+
+    checkParlayLegs(allGames);
+
+    previousGameSnapshots = currentSnapshots;
+  } catch (err) {
+    logError("[NotificationEngine] Monitor cycle error", { error: String(err) });
+  }
+}
+
+function checkParlayLegs(allGames: ESPNScoreboardGame[]): void {
+  const completedGames = allGames.filter(g => g.status.state === "post");
+  if (completedGames.length === 0) return;
+
+  for (const [ticketId, watch] of Array.from(parlayWatches.entries())) {
+    let changed = false;
+    for (const leg of watch.legs) {
+      if (leg.status !== "pending") continue;
+
+      const matchedGame = completedGames.find(g => {
+        const homeShort = g.homeTeam.shortDisplayName || g.homeTeam.displayName;
+        const awayShort = g.awayTeam.shortDisplayName || g.awayTeam.displayName;
+        return (
+          homeShort === leg.team || awayShort === leg.team ||
+          homeShort === leg.opponent || awayShort === leg.opponent ||
+          (leg.gameId && g.id === leg.gameId)
+        );
+      });
+
+      if (!matchedGame) continue;
+
+      const homeScore = matchedGame.homeTeam.score ?? 0;
+      const awayScore = matchedGame.awayTeam.score ?? 0;
+      const homeShort = matchedGame.homeTeam.shortDisplayName || matchedGame.homeTeam.displayName;
+      const awayShort = matchedGame.awayTeam.shortDisplayName || matchedGame.awayTeam.displayName;
+      const teamIsHome = homeShort === leg.team;
+      const teamScore = teamIsHome ? homeScore : awayScore;
+      const oppScore = teamIsHome ? awayScore : homeScore;
+
+      let result: "won" | "lost" | "push" = "pending" as any;
+
+      if (leg.market === "moneyline" || leg.market === "match_winner" || leg.market === "h2h") {
+        if (teamScore > oppScore) result = "won";
+        else if (teamScore < oppScore) result = "lost";
+        else result = "push";
+      } else if (leg.market === "spread") {
+        result = "pending" as any;
+      } else if (leg.market === "total" || leg.market === "total_over_under") {
+        result = "pending" as any;
+      }
+
+      if (result === ("pending" as any)) continue;
+
+      leg.status = result;
+      changed = true;
+
+      const gameName = `${awayShort} @ ${homeShort}`;
+
+      if (result === "won") {
+        addNotification({
+          type: "parlay_hit",
+          title: "Leg Hit!",
+          description: `${leg.team} ${leg.market} hit in ${gameName} (${awayScore}-${homeScore})`,
+          sport: matchedGame.sport,
+          gameId: matchedGame.id,
+          meta: {
+            ticketId,
+            legId: leg.id,
+            team: leg.team,
+            market: leg.market,
+            result: "won",
+          },
+        });
+      } else if (result === "lost") {
+        addNotification({
+          type: "parlay_miss",
+          title: "Leg Missed",
+          description: `${leg.team} ${leg.market} missed in ${gameName} (${awayScore}-${homeScore})`,
+          sport: matchedGame.sport,
+          gameId: matchedGame.id,
+          meta: {
+            ticketId,
+            legId: leg.id,
+            team: leg.team,
+            market: leg.market,
+            result: "lost",
+          },
+        });
+      } else if (result === "push") {
+        addNotification({
+          type: "parlay_hit",
+          title: "Leg Push",
+          description: `${leg.team} ${leg.market} pushed in ${gameName} (${awayScore}-${homeScore})`,
+          sport: matchedGame.sport,
+          gameId: matchedGame.id,
+          meta: {
+            ticketId,
+            legId: leg.id,
+            team: leg.team,
+            market: leg.market,
+            result: "push",
+          },
+        });
+      }
+    }
+
+    if (changed) {
+      const allSettled = watch.legs.every(l => l.status !== "pending");
+      if (allSettled) {
+        const allWon = watch.legs.every(l => l.status === "won" || l.status === "push");
+        const anyLost = watch.legs.some(l => l.status === "lost");
+        if (allWon) {
+          addNotification({
+            type: "parlay_hit",
+            title: "Parlay Winner!",
+            description: `All ${watch.legs.length} legs hit on ticket ${ticketId.slice(0, 8)}!`,
+            meta: { ticketId, legs: watch.legs.length, result: "won" },
+          });
+        } else if (anyLost) {
+          const hitCount = watch.legs.filter(l => l.status === "won").length;
+          addNotification({
+            type: "parlay_miss",
+            title: "Parlay Lost",
+            description: `Ticket ${ticketId.slice(0, 8)} missed (${hitCount}/${watch.legs.length} legs hit)`,
+            meta: { ticketId, legs: watch.legs.length, hit: hitCount, result: "lost" },
+          });
+        }
+        parlayWatches.delete(ticketId);
+      }
+    }
+  }
+}
+
+function getSubscriptionsForGame(gameId: string): GameSubscription[] {
+  return gameSubscriptions.get(gameId) || [];
+}
+
+export function subscribeToGame(
+  userId: string,
+  gameId: string,
+  sport: string,
+  gameName: string,
+  alerts: { gameStart: boolean; scoreChange: boolean } = { gameStart: true, scoreChange: true }
+): GameSubscription {
+  if (!gameSubscriptions.has(gameId)) {
+    gameSubscriptions.set(gameId, []);
+  }
+  const subs = gameSubscriptions.get(gameId)!;
+  const existing = subs.find(s => s.userId === userId);
+  if (existing) {
+    existing.alerts = alerts;
+    return existing;
+  }
+  const sub: GameSubscription = {
+    gameId,
+    userId,
+    sport,
+    gameName,
+    alerts,
+    subscribedAt: new Date().toISOString(),
+  };
+  subs.push(sub);
+  return sub;
+}
+
+export function unsubscribeFromGame(userId: string, gameId: string): boolean {
+  const subs = gameSubscriptions.get(gameId);
+  if (!subs) return false;
+  const idx = subs.findIndex(s => s.userId === userId);
+  if (idx === -1) return false;
+  subs.splice(idx, 1);
+  if (subs.length === 0) gameSubscriptions.delete(gameId);
+  return true;
+}
+
+export function getUserGameSubscriptions(userId: string): GameSubscription[] {
+  const result: GameSubscription[] = [];
+  for (const [, subs] of Array.from(gameSubscriptions.entries())) {
+    for (const sub of subs) {
+      if (sub.userId === userId) result.push(sub);
+    }
+  }
+  return result;
+}
+
+export function watchParlay(ticketId: string, userId: string, legs: ParlayLeg[]): ParlayWatch {
+  const watch: ParlayWatch = {
+    ticketId,
+    userId,
+    legs: legs.map(l => ({ ...l, status: l.status || "pending" })),
+    createdAt: new Date().toISOString(),
+  };
+  parlayWatches.set(ticketId, watch);
+  return watch;
+}
+
+export function unwatchParlay(ticketId: string): boolean {
+  return parlayWatches.delete(ticketId);
+}
+
+export function getUserParlayWatches(userId: string): ParlayWatch[] {
+  const result: ParlayWatch[] = [];
+  for (const [, watch] of Array.from(parlayWatches.entries())) {
+    if (watch.userId === userId) result.push(watch);
+  }
+  return result;
+}
+
+export function getNotifications(limit = 50, types?: string[]): CustomNotification[] {
+  let filtered = notifications;
+  if (types && types.length > 0) {
+    filtered = notifications.filter(n => types.includes(n.type));
+  }
+  return filtered.slice(0, limit);
+}
+
+export function markNotificationsRead(ids?: number[]): void {
+  if (ids && ids.length > 0) {
+    for (const n of notifications) {
+      if (ids.includes(n.id)) n.read = true;
+    }
+  } else {
+    for (const n of notifications) {
+      n.read = true;
+    }
+  }
+}
+
+export function getNotificationStats() {
+  return {
+    total: notifications.length,
+    unread: notifications.filter(n => !n.read).length,
+    gameSubscriptions: Array.from(gameSubscriptions.values()).reduce((sum, subs) => sum + subs.length, 0),
+    parlayWatches: parlayWatches.size,
+    byType: {
+      game_start: notifications.filter(n => n.type === "game_start").length,
+      score_change: notifications.filter(n => n.type === "score_change").length,
+      parlay_hit: notifications.filter(n => n.type === "parlay_hit").length,
+      parlay_miss: notifications.filter(n => n.type === "parlay_miss").length,
+      line_movement: notifications.filter(n => n.type === "line_movement").length,
+      sharp_money: notifications.filter(n => n.type === "sharp_money").length,
+    },
+  };
+}
+
+export async function startNotificationEngine(): Promise<void> {
+  if (monitorInterval) return;
+  console.log("[NotificationEngine] Starting game & parlay monitor (30s interval)...");
+
+  try {
+    const allGames = await getAllSportsScoreboard();
+    for (const game of allGames) {
+      previousGameSnapshots.set(game.id, takeGameSnapshot(game));
+    }
+    console.log(`[NotificationEngine] Initialized with ${allGames.length} game snapshots`);
+  } catch (err) {
+    logError("[NotificationEngine] Failed to initialize snapshots", { error: String(err) });
+  }
+
+  monitorInterval = setInterval(monitorGames, 30_000);
+}
+
+export function stopNotificationEngine(): void {
+  if (monitorInterval) {
+    clearInterval(monitorInterval);
+    monitorInterval = null;
+  }
+  console.log("[NotificationEngine] Stopped.");
+}

@@ -26,6 +26,7 @@ interface SSEState {
   dataSourceHealth: any[];
   lastUpdate: string | null;
   reconnectAttempts: number;
+  pendingNotifications: any[];
 }
 
 export function useSSE(options: UseSSEOptions = {}) {
@@ -49,6 +50,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     dataSourceHealth: [],
     lastUpdate: null,
     reconnectAttempts: 0,
+    pendingNotifications: [],
   });
 
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -121,6 +123,21 @@ export function useSSE(options: UseSSEOptions = {}) {
           ...prev,
           lastEvent: sseEvent,
           edgeAlerts: data.alerts || prev.edgeAlerts,
+          lastUpdate: data.timestamp,
+        }));
+        onEvent?.(sseEvent);
+      } catch {}
+    });
+
+    es.addEventListener("notification", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "notification", data, timestamp: data.timestamp };
+        setState(prev => ({
+          ...prev,
+          lastEvent: sseEvent,
+          pendingNotifications: [data.notification, ...prev.pendingNotifications].slice(0, 50),
           lastUpdate: data.timestamp,
         }));
         onEvent?.(sseEvent);
