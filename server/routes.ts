@@ -238,6 +238,8 @@ function idempotencyMiddleware(req: Request, res: Response, next: NextFunction) 
   next();
 }
 
+const creditUsageTracker = new Map<string, number>();
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -1080,17 +1082,24 @@ export async function registerRoutes(
         if (sub.subscriptionTier !== 'free' && sub.subscriptionStatus === 'active') paidSubscribers++;
       });
 
-      // Calculate mock metrics (in production, these would come from real analytics)
+      let proCount = 0, eliteCount = 0, whaleCount = 0;
+      allSubs.forEach((sub) => {
+        if (sub.subscriptionTier === 'pro') proCount++;
+        else if (sub.subscriptionTier === 'elite') eliteCount++;
+        else if (sub.subscriptionTier === 'whale') whaleCount++;
+      });
+      const realRevenue = (proCount * 49) + (eliteCount * 99) + (whaleCount * 249);
+      const totalAll = allSubs.size;
+      const convRate = totalAll > 0 ? Math.round((paidSubscribers / totalAll) * 100 * 10) / 10 : 0;
       const metrics = {
-        totalUsers: allSubs.size || 12847,
-        activeTrials: activeTrials || 1523,
-        paidSubscribers: paidSubscribers || 3892,
-        conversionRate: paidSubscribers > 0 && activeTrials > 0 ? 
-          Math.round((paidSubscribers / (paidSubscribers + activeTrials)) * 100 * 10) / 10 : 32.4,
-        monthlyRevenue: paidSubscribers * 50 || 156780,
-        churnRate: 4.2,
-        lifetimeValue: 287,
-        acquisitionCost: 45,
+        totalUsers: totalAll,
+        activeTrials,
+        paidSubscribers,
+        conversionRate: convRate,
+        monthlyRevenue: realRevenue,
+        churnRate: 0,
+        lifetimeValue: paidSubscribers > 0 ? Math.round(realRevenue / paidSubscribers) : 0,
+        acquisitionCost: 0,
       };
 
       res.json(metrics);
@@ -3821,17 +3830,26 @@ Format your response clearly with sections and bullet points.`;
 
   // === AI Credits ===
   app.get("/api/credits", (_req, res) => {
-    const tier = _req.session?.isAuthenticated ? "sharp" : "none";
+    const username = _req.session?.isAuthenticated ? _req.session.username : null;
+    let tier = "free";
+    if (username) {
+      const subscription = stripeService.getUserSubscription(username);
+      tier = subscription.subscriptionTier || "free";
+    }
     const now = new Date();
     const tomorrow = new Date(now);
     tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
     tomorrow.setUTCHours(0, 0, 0, 0);
 
-    const creditLimits: Record<string, number> = { sharp: 50, edge: 300, max: 9999, none: 0 };
-    const total = creditLimits[tier] || 50;
+    const creditLimits: Record<string, number> = { free: 5, pro: 50, elite: 300, whale: 9999 };
+    const total = creditLimits[tier] || 5;
+
+    const dayKey = now.toISOString().slice(0, 10);
+    const usageKey = `credits:${username || 'anon'}:${dayKey}`;
+    const used = creditUsageTracker.get(usageKey) || 0;
 
     res.json({
-      used: 2,
+      used,
       total,
       tier,
       resetsAt: tomorrow.toISOString(),
@@ -3840,21 +3858,14 @@ Format your response clearly with sections and bullet points.`;
 
   // === Referral Program ===
   app.get("/api/referral", (_req, res) => {
+    const username = _req.session?.isAuthenticated ? _req.session.username : "anon";
+    const code = `SORS-${username?.toUpperCase().slice(0, 4) || "ANON"}${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
     res.json({
-      code: "SORS-7X92KM",
-      totalReferrals: 8,
-      conversions: 5,
-      earned: 50,
-      referrals: [
-        { name: "Alex M.", date: "2026-02-04", status: "completed", reward: 10 },
-        { name: "Jordan K.", date: "2026-02-03", status: "completed", reward: 10 },
-        { name: "Sam R.", date: "2026-02-02", status: "pending", reward: 0 },
-        { name: "Taylor W.", date: "2026-01-30", status: "completed", reward: 10 },
-        { name: "Casey B.", date: "2026-01-28", status: "completed", reward: 10 },
-        { name: "Morgan L.", date: "2026-01-25", status: "completed", reward: 10 },
-        { name: "Riley P.", date: "2026-01-22", status: "pending", reward: 0 },
-        { name: "Jamie D.", date: "2026-01-20", status: "pending", reward: 0 },
-      ],
+      code,
+      totalReferrals: 0,
+      conversions: 0,
+      earned: 0,
+      referrals: [],
     });
   });
 
