@@ -965,9 +965,191 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   const userDataEngine = await import("../userDataEngine");
 
-  app.get("/api/cashout-advisor", (_req, res) => {
-    const bets = userDataEngine.getBets().filter((b: any) => b.result === "pending");
-    res.json(bets);
+  app.get("/api/cashout-advisor", async (_req, res) => {
+    try {
+      const sessionId = _req.session?.userId;
+      const pendingBets = userDataEngine.getBets(sessionId).filter((b: any) => b.result === "pending");
+      if (pendingBets.length === 0) return res.json([]);
+
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { generateMarketSnapshot } = await import("../marketSnapshotEngine");
+      const { getAllInjuries } = await import("../espn-injury-provider");
+      const { getVenueWeather } = await import("../weather-provider");
+
+      const allGames = await getAllSportsScoreboard();
+      const injuryData: Record<string, any> = {};
+      for (const sport of ["NBA", "NFL", "MLB", "NHL"] as const) {
+        try { injuryData[sport] = await getAllInjuries(sport); } catch { injuryData[sport] = []; }
+      }
+
+      const cashoutBets = await Promise.all(pendingBets.map(async (bet: any) => {
+        const betSport = bet.sport?.toUpperCase() || "NBA";
+        const betTeams = (bet.legs || []).map((l: any) => l.team).filter(Boolean);
+        const betOpponents = (bet.legs || []).map((l: any) => l.opponent).filter(Boolean);
+        const allBetTeams = [...betTeams, ...betOpponents];
+
+        const matchedGames = allGames.filter(g =>
+          allBetTeams.some(t =>
+            g.homeTeam.displayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.awayTeam.displayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.awayTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
+            g.awayTeam.abbreviation?.toLowerCase() === t.toLowerCase()
+          )
+        );
+
+        let momentum = 50;
+        let injuryRisk = 0;
+        let weatherImpact = 0;
+        let timeRemaining = "Unknown";
+        let legsCompleted = 0;
+        const legsTotal = bet.legs?.length || 1;
+
+        for (const leg of (bet.legs || [])) {
+          if (leg.result === "won") legsCompleted++;
+        }
+
+        if (matchedGames.length > 0) {
+          const game = matchedGames[0];
+          const state = game.status?.state;
+
+          if (state === "in") {
+            const homeScore = game.homeTeam.score || 0;
+            const awayScore = game.awayTeam.score || 0;
+            const period = game.status?.period || 1;
+            const clock = game.status?.clock || "";
+            timeRemaining = `${game.status?.shortDetail || `Q${period} ${clock}`}`;
+
+            const betOnHome = betTeams.some(t =>
+              game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
+              game.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase())
+            );
+
+            const scoreDiff = betOnHome ? homeScore - awayScore : awayScore - homeScore;
+            momentum = Math.min(95, Math.max(5, 50 + scoreDiff * 3));
+          } else if (state === "pre") {
+            const gameDate = new Date(game.date);
+            const diffMs = gameDate.getTime() - Date.now();
+            const diffHours = Math.max(0, Math.round(diffMs / 3600000));
+            timeRemaining = diffHours > 24 ? `${Math.round(diffHours / 24)}d` : `${diffHours}h to start`;
+            momentum = 50;
+          } else if (state === "post") {
+            timeRemaining = "Final";
+            const homeScore = game.homeTeam.score || 0;
+            const awayScore = game.awayTeam.score || 0;
+            const betOnHome = betTeams.some(t =>
+              game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase()
+            );
+            momentum = (betOnHome && homeScore > awayScore) || (!betOnHome && awayScore > homeScore) ? 90 : 15;
+          }
+
+          try {
+            const weather = await getVenueWeather(game.venue || "", game.date);
+            if (weather) {
+              const isOutdoor = ["NFL", "MLB", "NCAAF"].includes(betSport);
+              if (isOutdoor) {
+                const windSpeed = weather.windSpeed || 0;
+                const precip = weather.precipitationProbability || 0;
+                weatherImpact = Math.min(100, Math.round(windSpeed * 2 + precip * 0.5));
+              }
+            }
+          } catch {}
+        }
+
+        const sportInjuries = injuryData[betSport] || [];
+        const relevantInjuries = sportInjuries.filter((inj: any) =>
+          allBetTeams.some(t =>
+            inj.team?.toLowerCase().includes(t.toLowerCase()) ||
+            inj.teamAbbreviation?.toLowerCase() === t.toLowerCase()
+          )
+        );
+        const criticalInjuries = relevantInjuries.filter((inj: any) =>
+          inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
+        );
+        injuryRisk = Math.min(100, criticalInjuries.length * 25);
+
+        const betDecimalOdds = bet.legs?.reduce((acc: number, l: any) => {
+          const o = l.odds || -110;
+          const decimal = o < 0 ? 1 + (100 / Math.abs(o)) : 1 + (o / 100);
+          return acc * decimal;
+        }, 1) || 2.0;
+
+        const stake = bet.stake || 10;
+        const potentialPayout = Math.round(stake * betDecimalOdds * 100) / 100;
+
+        const momentumFactor = momentum / 100;
+        const injuryPenalty = injuryRisk / 100 * 0.3;
+        const weatherPenalty = weatherImpact / 100 * 0.15;
+        const completionBonus = legsCompleted / Math.max(legsTotal, 1) * 0.2;
+        const cashoutRatio = Math.min(0.95, Math.max(0.15,
+          0.3 + momentumFactor * 0.4 - injuryPenalty - weatherPenalty + completionBonus
+        ));
+        const currentCashout = Math.round(potentialPayout * cashoutRatio * 100) / 100;
+
+        let recommendation: "hold" | "cash_out" | "partial";
+        let confidence: number;
+
+        if (momentum < 25 || injuryRisk > 60) {
+          recommendation = "cash_out";
+          confidence = Math.min(92, 60 + injuryRisk * 0.3 + (50 - momentum) * 0.3);
+        } else if (momentum < 40 || (injuryRisk > 30 && weatherImpact > 30)) {
+          recommendation = "partial";
+          confidence = Math.min(85, 50 + injuryRisk * 0.2 + weatherImpact * 0.15);
+        } else {
+          recommendation = "hold";
+          confidence = Math.min(90, 50 + momentum * 0.3 + completionBonus * 50);
+        }
+        confidence = Math.round(confidence);
+
+        const factors: Record<string, any> = {
+          momentum: {
+            label: "Game Momentum",
+            value: momentum,
+            impact: momentum > 60 ? "positive" : momentum < 40 ? "negative" : "neutral",
+          },
+          timeRemaining: {
+            label: "Time Remaining",
+            value: matchedGames.length > 0 && matchedGames[0].status?.state === "in" ?
+              Math.max(10, 100 - ((matchedGames[0].status?.period || 1) * 25)) : 80,
+            impact: "neutral",
+          },
+          injuryRisk: {
+            label: "Injury Risk",
+            value: injuryRisk,
+            impact: injuryRisk > 30 ? "negative" : injuryRisk > 10 ? "neutral" : "positive",
+          },
+          weatherChanges: {
+            label: "Weather Impact",
+            value: weatherImpact,
+            impact: weatherImpact > 30 ? "negative" : weatherImpact > 10 ? "neutral" : "positive",
+          },
+        };
+
+        return {
+          id: bet.id,
+          description: bet.legs?.map((l: any) => `${l.team} ${l.market} ${l.selection}`).join(" | ") || `${betSport} bet`,
+          type: legsTotal > 1 ? `${legsTotal}-Leg Parlay` : "Straight",
+          stake,
+          potentialPayout,
+          currentCashout,
+          legsCompleted,
+          legsTotal,
+          timeRemaining,
+          momentum,
+          injuryRisk,
+          weatherImpact,
+          recommendation,
+          confidence,
+          factors,
+        };
+      }));
+
+      res.json(cashoutBets);
+    } catch (err) {
+      logError(err as Error, { context: "cashout-advisor" });
+      res.status(500).json({ error: "Failed to generate cashout analysis" });
+    }
   });
 
   // ==================== LIVE ANALYTICS ENGINE ====================
