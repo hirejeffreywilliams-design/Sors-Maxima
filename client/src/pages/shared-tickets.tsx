@@ -76,17 +76,7 @@ function computeUserStats(tickets: SavedTicket[]) {
   return { roi, winRate, totalProfit: totalPL, longestStreak, wins, losses };
 }
 
-const MOCK_COMPETITORS = [
-  { name: "SharpShooter42", roi: 34.2, winRate: 67.5, totalProfit: 4820, longestStreak: 11 },
-  { name: "VegasKing", roi: 28.7, winRate: 62.1, totalProfit: 3650, longestStreak: 9 },
-  { name: "ParlayPete", roi: 22.1, winRate: 58.9, totalProfit: 2940, longestStreak: 8 },
-  { name: "EdgeHunter", roi: 18.5, winRate: 55.3, totalProfit: 2100, longestStreak: 7 },
-  { name: "MoneyMoves", roi: 14.3, winRate: 53.8, totalProfit: 1580, longestStreak: 6 },
-  { name: "StatMaster", roi: 10.8, winRate: 51.2, totalProfit: 920, longestStreak: 5 },
-  { name: "BetWizard", roi: 7.2, winRate: 49.5, totalProfit: 540, longestStreak: 5 },
-  { name: "OddsOracle", roi: 3.1, winRate: 47.8, totalProfit: 210, longestStreak: 4 },
-  { name: "RookieBets", roi: -2.4, winRate: 44.1, totalProfit: -180, longestStreak: 3 },
-];
+const MOCK_COMPETITORS: { name: string; roi: number; winRate: number; totalProfit: number; longestStreak: number }[] = [];
 
 type RankCriteria = "roi" | "winRate" | "totalProfit" | "longestStreak";
 

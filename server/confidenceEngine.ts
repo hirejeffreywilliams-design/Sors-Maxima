@@ -303,7 +303,7 @@ export function getRecommendationStats(): RecommendationStats {
     avgConfidenceScore: all.length > 0 ? parseFloat((all.reduce((s, r) => s + r.confidenceScore, 0) / all.length).toFixed(3)) : 0,
     avgPredictedEV: all.length > 0 ? parseFloat((all.reduce((s, r) => s + r.expectedValue, 0) / all.length).toFixed(4)) : 0,
     avgRealizedEV: withOutcome.length > 0 ? parseFloat(((totalReturn / totalStake - 1)).toFixed(4)) : 0,
-    calibrationDrift: parseFloat((Math.random() * 0.05).toFixed(4)),
+    calibrationDrift: withOutcome.length > 10 ? parseFloat((Math.abs(all.reduce((s, r) => s + r.confidenceScore, 0) / all.length - (won.length / Math.max(1, withOutcome.length)))).toFixed(4)) : 0,
     modelPerformance: Array.from(modelPerformanceData.values()),
     sportBreakdown,
     dailyStats: Object.entries(dailyMap).map(([date, d]) => ({
@@ -429,20 +429,23 @@ function seedModelPerformance() {
   }
 }
 
-function generateCalibrationBins(noise: number): CalibrationBin[] {
+function generateCalibrationBins(_noise: number): CalibrationBin[] {
+  const all = Array.from(recommendations.values());
   const bins: CalibrationBin[] = [];
   for (let i = 0; i < 10; i++) {
     const binStart = i * 0.1;
     const binEnd = (i + 1) * 0.1;
     const predicted = (binStart + binEnd) / 2;
-    const actual = Math.max(0, Math.min(1, predicted + (Math.random() - 0.5) * noise * 2));
+    const inBin = all.filter(r => r.confidenceScore >= binStart && r.confidenceScore < binEnd);
+    const withOutcome = inBin.filter(r => r.outcome === "won" || r.outcome === "lost");
+    const actualRate = withOutcome.length > 0 ? withOutcome.filter(r => r.outcome === "won").length / withOutcome.length : predicted;
     bins.push({
       binStart: parseFloat(binStart.toFixed(1)),
       binEnd: parseFloat(binEnd.toFixed(1)),
       predictedAvg: parseFloat(predicted.toFixed(3)),
-      actualRate: parseFloat(actual.toFixed(3)),
-      count: 100 + Math.floor(Math.random() * 500),
-      deviation: parseFloat(Math.abs(predicted - actual).toFixed(4)),
+      actualRate: parseFloat(actualRate.toFixed(3)),
+      count: inBin.length,
+      deviation: parseFloat(Math.abs(predicted - actualRate).toFixed(4)),
     });
   }
   return bins;
@@ -501,4 +504,3 @@ function seedRecommendations() {
 }
 
 seedModelPerformance();
-seedRecommendations();

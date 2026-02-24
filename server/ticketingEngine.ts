@@ -310,8 +310,8 @@ export function createConfidenceTicket(input: {
     userRiskProfileSnapshot: input.userRiskProfileSnapshot,
     suggestedActions: input.suggestedActions,
     calibrationData: {
-      binAccuracy: 0.87 + Math.random() * 0.08,
-      brierScore: 0.12 + Math.random() * 0.06,
+      binAccuracy: input.predictedWinProb || 0,
+      brierScore: input.predictedWinProb ? Math.round((1 - input.predictedWinProb) * input.predictedWinProb * 1000) / 1000 : 0,
       lastCalibrationDate: now,
     },
     autoSendEligible: false,
@@ -481,91 +481,3 @@ export function processFailoverQueue(): number {
   return processed;
 }
 
-function seedTickets() {
-  const sports = ["NBA", "NFL", "MLB", "NHL", "Soccer", "Tennis"];
-  const teams = [
-    ["Knicks vs Bucks", "Heat vs Bucks", "Mavericks vs Suns"],
-    ["Chiefs vs Eagles", "49ers vs Cowboys", "Bills vs Ravens"],
-    ["Yankees vs Dodgers", "Astros vs Braves"],
-    ["Bruins vs Rangers", "Oilers vs Avalanche"],
-    ["Man City vs Liverpool", "Real Madrid vs Barcelona", "PSG vs Bayern"],
-    ["Djokovic vs Alcaraz", "Sinner vs Medvedev"],
-  ];
-  const marketTypes = ["match_winner", "spread", "total_over_under", "player_props", "first_half", "live_moneyline"];
-  const models = ["ensemble-v4.2", "gradient-boost-v3.1", "neural-v5.0", "hybrid-v2.8"];
-
-  for (let i = 0; i < 25; i++) {
-    const sportIdx = i % sports.length;
-    const sport = sports[sportIdx];
-    const matchPool = teams[sportIdx];
-    const match = matchPool[i % matchPool.length];
-    const marketType = marketTypes[i % marketTypes.length];
-    const confidence = 0.35 + Math.random() * 0.60;
-    const winProb = 0.30 + Math.random() * 0.45;
-    const odds = 1.5 + Math.random() * 3.5;
-    const ev = winProb * odds - 1;
-    const stake = 5 + Math.random() * 95;
-
-    createConfidenceTicket({
-      requestId: `req_seed_${i}`,
-      userId: `user_${1000 + (i % 8)}`,
-      featureName: "RecommendationEngine",
-      recommendationId: `rec_${randomBytes(6).toString("hex")}`,
-      market: { sport, match, marketType },
-      selection: `Selection_${i + 1}`,
-      oddsOffered: parseFloat(odds.toFixed(2)),
-      predictedWinProb: parseFloat(winProb.toFixed(3)),
-      expectedValue: parseFloat(ev.toFixed(4)),
-      suggestedStake: parseFloat(stake.toFixed(2)),
-      confidenceScore: parseFloat(confidence.toFixed(3)),
-      modelVersion: models[i % models.length],
-      modelType: i % 3 === 0 ? "ensemble" : i % 3 === 1 ? "gradient_boost" : "neural_network",
-      trainingDataSnapshotId: `ds-2026-02-${String(1 + (i % 20)).padStart(2, "0")}`,
-      evidenceLinks: [
-        `data://stat_features/${sport.toLowerCase()}/team_stats`,
-        `signal://injury_api/${sport.toLowerCase()}`,
-        `data://historical_odds/${match.replace(/\s/g, "_")}`,
-      ],
-      businessRulesApplied: ["bankroll_pct<=2%", "no_reco_if_self_excluded", "max_exposure_check"],
-      userRiskProfileSnapshot: ["risk_v2-low", "risk_v2-medium", "risk_v2-high"][i % 3],
-      suggestedActions: confidence > 0.7 ? ["place_bet"] : ["review", "hold"],
-    });
-  }
-
-  const incidentTypes: TicketType[] = ["incident", "human_review", "fraud_alert", "payment_issue", "system_alert", "kyc_issue", "business_rule_violation"];
-  const incidentTitles: Record<TicketType, string[]> = {
-    incident: ["API latency spike detected", "Model prediction service timeout", "Database connection pool exhausted"],
-    human_review: ["High-stake recommendation needs review", "Unusual betting pattern flagged", "New user large deposit review"],
-    fraud_alert: ["Potential collusion detected", "Account velocity anomaly", "Geo-location mismatch"],
-    payment_issue: ["Withdrawal processing delay", "Payment gateway timeout", "Chargeback dispute received"],
-    system_alert: ["Memory usage above 90%", "Error rate spike on /api/bets", "Cache invalidation failure"],
-    kyc_issue: ["Document verification failed", "Address mismatch detected", "Age verification pending"],
-    business_rule_violation: ["Max exposure limit exceeded", "Odds margin below threshold", "Settlement discrepancy"],
-    confidence_ticket: [],
-  };
-
-  for (const type of incidentTypes) {
-    const titles = incidentTitles[type];
-    for (let j = 0; j < titles.length; j++) {
-      const ticket = createTicket({
-        requestId: `req_inc_${type}_${j}`,
-        userId: `system`,
-        featureName: type === "fraud_alert" ? "FraudDetection" : type === "payment_issue" ? "PaymentService" : type === "kyc_issue" ? "KYCService" : "SystemMonitor",
-        type,
-        title: titles[j],
-        description: `Automated detection: ${titles[j]}. Requires investigation and resolution.`,
-        tags: [type, "automated"],
-        suggestedAssignee: type === "fraud_alert" ? "fraud_team" : type === "payment_issue" ? "payment_ops" : "ops_team",
-      });
-
-      if (ticket && j === 0) {
-        updateTicketStatus(ticket.ticketId, "in_progress", "Assigned to on-call team");
-      }
-      if (ticket && j === 1) {
-        updateTicketStatus(ticket.ticketId, "resolved", "Root cause identified and fixed");
-      }
-    }
-  }
-}
-
-seedTickets();

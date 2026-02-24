@@ -1219,13 +1219,22 @@ Use technical but accessible language. Reference specific system components when
     }
   });
 
-  // Get system health status for diagnostics
   app.get("/api/admin/diagnostics/health", requireAdmin, async (_req, res) => {
     try {
       const errorLogs = errorLogger.getLogs({ limit: 100 });
       const factorWeights = await getAllFactorWeights();
       const factorWeightsArray = Object.entries(factorWeights);
       const allSubs = stripeService.getAllSubscriptions();
+      const hubStatus = getHubStatus();
+      const pipelineHealth = getPipelineHealth();
+      const quantumStats = getQuantumEngineStats();
+
+      const coherenceLevel = hubStatus.running && hubStatus.totalCycles > 0
+        ? Math.min(100, Math.round((hubStatus.totalCycles / Math.max(hubStatus.totalCycles + 1, 1)) * 100))
+        : 0;
+      const predictionAccuracy = pipelineHealth.metrics?.accuracy
+        ? Math.round(pipelineHealth.metrics.accuracy * 100)
+        : (pipelineHealth.totalRuns > 0 ? Math.round(pipelineHealth.successRate * 100) : 0);
 
       const healthStatus = {
         overall: errorLogs.length < 5 ? 'healthy' : errorLogs.length < 20 ? 'warning' : 'critical',
@@ -1233,8 +1242,8 @@ Use technical but accessible language. Reference specific system components when
           learningEngine: { status: 'operational', factorsActive: factorWeightsArray.length },
           errorLogging: { status: 'operational', recentErrors: errorLogs.length },
           subscriptions: { status: 'operational', activeCount: allSubs.size },
-          quantumAnalysis: { status: 'operational', coherenceLevel: 95 },
-          predictionEngine: { status: 'operational', accuracy: 87 },
+          quantumAnalysis: { status: hubStatus.running ? 'operational' : 'degraded', coherenceLevel, totalAnalyses: quantumStats.totalAnalyses || 0 },
+          predictionEngine: { status: pipelineHealth.status === 'healthy' ? 'operational' : pipelineHealth.status, accuracy: predictionAccuracy, totalRuns: pipelineHealth.totalRuns },
         },
         lastCheck: new Date().toISOString(),
         uptime: process.uptime(),
@@ -3637,30 +3646,9 @@ Format your response clearly with sections and bullet points.`;
   // === Live Chat ===
   const chatMessages: Record<string, Array<{ id: string; username: string; content: string; timestamp: string }>> = {};
 
-  function generateSampleChat(gameId: string) {
-    const sampleMessages = [
-      { username: "SharpShooter99", content: "This line is moving fast, get in now" },
-      { username: "ParlayKing", content: "Defense looking solid in the first quarter" },
-      { username: "EdgeMaster", content: "Over is looking good with this pace" },
-      { username: "BetWizard", content: "Anyone else on the spread here?" },
-      { username: "MoneyMoves", content: "Live odds just shifted, interesting" },
-      { username: "PropHunter", content: "Player props are where the value is tonight" },
-      { username: "ValueSeeker", content: "Great hedge opportunity right now" },
-      { username: "SharpBetter", content: "The momentum has completely shifted" },
-    ];
-    const msgs = sampleMessages.map((m, i) => ({
-      id: `msg-${gameId}-${i}`,
-      username: m.username,
-      content: m.content,
-      timestamp: new Date(Date.now() - (sampleMessages.length - i) * 60000).toISOString(),
-    }));
-    chatMessages[gameId] = msgs;
-    return msgs;
-  }
-
   app.get("/api/live-chat/:gameId", (req, res) => {
     const { gameId } = req.params;
-    const msgs = chatMessages[gameId] || generateSampleChat(gameId);
+    const msgs = chatMessages[gameId] || [];
     res.json(msgs);
   });
 
@@ -3672,7 +3660,7 @@ Format your response clearly with sections and bullet points.`;
       return res.status(400).json({ error: "Content is required" });
     }
     if (!chatMessages[gameId]) {
-      generateSampleChat(gameId);
+      chatMessages[gameId] = [];
     }
     const newMsg = {
       id: `msg-${gameId}-${Date.now()}`,
@@ -3765,46 +3753,7 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
-  // === Pick Competitions ===
-  const competitions = [
-    {
-      id: "comp-1", name: "Weekly NFL Challenge", sport: "NFL", type: "weekly",
-      entries: 1247, maxEntries: 5000, prize: "$500 Free Bets",
-      startDate: new Date(Date.now() - 3 * 86400000).toISOString(),
-      endDate: new Date(Date.now() + 4 * 86400000).toISOString(),
-      leaderboard: [
-        { rank: 1, username: "SharpShooter99", points: 285, record: "12-3" },
-        { rank: 2, username: "ParlayKing", points: 270, record: "11-4" },
-        { rank: 3, username: "EdgeMaster", points: 255, record: "10-5" },
-        { rank: 4, username: "BetWizard", points: 240, record: "9-6" },
-        { rank: 5, username: "MoneyMoves", points: 225, record: "9-6" },
-      ],
-    },
-    {
-      id: "comp-2", name: "Monthly NBA Picks", sport: "NBA", type: "monthly",
-      entries: 3421, maxEntries: 10000, prize: "$2,000 Free Bets",
-      startDate: new Date(Date.now() - 15 * 86400000).toISOString(),
-      endDate: new Date(Date.now() + 15 * 86400000).toISOString(),
-      leaderboard: [
-        { rank: 1, username: "ValueSeeker", points: 890, record: "34-16" },
-        { rank: 2, username: "PropHunter", points: 855, record: "32-18" },
-        { rank: 3, username: "SharpBetter", points: 820, record: "31-19" },
-        { rank: 4, username: "MoneyMoves", points: 800, record: "30-20" },
-        { rank: 5, username: "SharpShooter99", points: 785, record: "29-21" },
-      ],
-    },
-    {
-      id: "comp-3", name: "Weekend Parlay Showdown", sport: "Multi-Sport", type: "weekly",
-      entries: 856, maxEntries: 2000, prize: "$250 Free Bets",
-      startDate: new Date(Date.now() - 1 * 86400000).toISOString(),
-      endDate: new Date(Date.now() + 2 * 86400000).toISOString(),
-      leaderboard: [
-        { rank: 1, username: "ParlayKing", points: 150, record: "6-1" },
-        { rank: 2, username: "EdgeMaster", points: 135, record: "5-2" },
-        { rank: 3, username: "BetWizard", points: 120, record: "5-2" },
-      ],
-    },
-  ];
+  const competitions: any[] = [];
   const enteredCompetitions = new Set<string>();
 
   app.get("/api/competitions", (_req, res) => {
@@ -4226,83 +4175,90 @@ Follow these rules:
     res.json(analyticsEventService.getStats());
   });
 
-  // === Model Performance Dashboard ===
-  app.get("/api/admin/model-performance", requireAdmin, (_req, res) => {
-    const outcomes = (global as any).__ticketOutcomes || [];
-    const totalPredictions = Math.max(outcomes.length, 247);
-    const wins = outcomes.filter((o: any) => o.actualOutcome === "win").length || 142;
-    const losses = outcomes.filter((o: any) => o.actualOutcome === "loss").length || 89;
-    const pushes = outcomes.filter((o: any) => o.actualOutcome === "push").length || 16;
-    const hitRate = totalPredictions > 0 ? wins / totalPredictions : 0.575;
+  app.get("/api/admin/model-performance", requireAdmin, async (_req, res) => {
+    try {
+      const outcomes = (global as any).__ticketOutcomes || [];
+      const totalPredictions = outcomes.length;
+      const wins = outcomes.filter((o: any) => o.actualOutcome === "win").length;
+      const losses = outcomes.filter((o: any) => o.actualOutcome === "loss").length;
+      const pushes = outcomes.filter((o: any) => o.actualOutcome === "push").length;
+      const hitRate = totalPredictions > 0 ? wins / totalPredictions : 0;
 
-    const calibrationBuckets = [
-      { predicted: 0.1, actual: 0.08, count: 34 },
-      { predicted: 0.2, actual: 0.18, count: 52 },
-      { predicted: 0.3, actual: 0.27, count: 41 },
-      { predicted: 0.4, actual: 0.38, count: 38 },
-      { predicted: 0.5, actual: 0.52, count: 29 },
-      { predicted: 0.6, actual: 0.57, count: 22 },
-      { predicted: 0.7, actual: 0.68, count: 18 },
-      { predicted: 0.8, actual: 0.75, count: 9 },
-      { predicted: 0.9, actual: 0.83, count: 4 },
-    ];
+      const pipelineHealth = getPipelineHealth();
+      const canonicalStats = getCanonicalStoreStats();
+      const { getOrchestratorStatus } = await import("./continuousLearningOrchestrator");
+      const orchStatus = getOrchestratorStatus();
 
-    const driftMetrics = {
-      featureDrift: 0.023,
-      predictionDrift: 0.018,
-      dataDrift: 0.031,
-      driftThreshold: 0.05,
-      status: "stable" as const,
-      lastChecked: new Date().toISOString(),
-      trendHistory: Array.from({ length: 30 }, (_, i) => ({
-        date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
-        featureDrift: 0.01 + Math.random() * 0.03,
-        predictionDrift: 0.008 + Math.random() * 0.025,
-      })),
-    };
+      const calibrationDrift = orchStatus.accuracyMetrics?.calibrationDrift || 0;
+      const overallAccuracy = orchStatus.accuracyMetrics?.overall || 0;
+      const sportAccuracy = orchStatus.accuracyMetrics?.bySport || {};
 
-    const modelVersions = [
-      { version: "v3.2.1", deployedAt: "2026-02-18", hitRate: 0.581, evRealized: 3.2, status: "active" },
-      { version: "v3.1.0", deployedAt: "2026-02-01", hitRate: 0.564, evRealized: 2.8, status: "retired" },
-      { version: "v3.0.0", deployedAt: "2026-01-15", hitRate: 0.551, evRealized: 2.1, status: "retired" },
-      { version: "v2.9.0", deployedAt: "2025-12-20", hitRate: 0.542, evRealized: 1.7, status: "retired" },
-    ];
+      const calibrationBuckets = totalPredictions > 0
+        ? [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9].map(bucket => {
+            const inBucket = outcomes.filter((o: any) => {
+              const conf = o.confidence || 0;
+              return conf >= bucket - 0.05 && conf < bucket + 0.05;
+            });
+            const actual = inBucket.length > 0
+              ? inBucket.filter((o: any) => o.actualOutcome === "win").length / inBucket.length
+              : 0;
+            return { predicted: bucket, actual: Math.round(actual * 100) / 100, count: inBucket.length };
+          })
+        : [];
 
-    const evRealized = {
-      totalEVGenerated: outcomes.reduce((s: number, o: any) => s + (o.profitLoss || 0), 0) || 1247.50,
-      avgEVPerTicket: 4.2,
-      bestPerformingSport: "NBA",
-      bestPerformingMarket: "Player Props",
-      weeklyEV: Array.from({ length: 12 }, (_, i) => ({
-        week: `W${i + 1}`,
-        evRealized: 80 + Math.random() * 120,
-        ticketCount: 15 + Math.floor(Math.random() * 25),
-      })),
-    };
+      const driftMetrics = {
+        featureDrift: calibrationDrift,
+        predictionDrift: overallAccuracy > 0 ? Math.abs(overallAccuracy - hitRate) : 0,
+        dataDrift: canonicalStats.totalRecords > 0 ? canonicalStats.rejected / Math.max(canonicalStats.totalRecords, 1) : 0,
+        driftThreshold: 0.05,
+        status: calibrationDrift < 0.05 ? "stable" as const : "drifting" as const,
+        lastChecked: new Date().toISOString(),
+      };
 
-    const adversarialStats = {
-      suspiciousQueries: 3,
-      rateLimitHits: 47,
-      modelProbingAttempts: 1,
-      dataIntegrityScore: 99.7,
-      lastIncident: "2026-02-10T14:30:00Z",
-    };
+      const totalEV = outcomes.reduce((s: number, o: any) => s + (o.profitLoss || 0), 0);
+      const avgEV = totalPredictions > 0 ? totalEV / totalPredictions : 0;
 
-    res.json({
-      overview: {
-        totalPredictions,
-        wins, losses, pushes,
-        hitRate: Math.round(hitRate * 1000) / 1000,
-        avgConfidence: 0.62,
-        sharpeRatio: 1.34,
-        maxDrawdown: -8.2,
-      },
-      calibration: calibrationBuckets,
-      drift: driftMetrics,
-      versions: modelVersions,
-      evRealized,
-      adversarial: adversarialStats,
-    });
+      const sportCounts: Record<string, { wins: number; total: number; ev: number }> = {};
+      for (const o of outcomes) {
+        const sport = o.sport || "unknown";
+        if (!sportCounts[sport]) sportCounts[sport] = { wins: 0, total: 0, ev: 0 };
+        sportCounts[sport].total++;
+        if (o.actualOutcome === "win") sportCounts[sport].wins++;
+        sportCounts[sport].ev += o.profitLoss || 0;
+      }
+      const bestSport = Object.entries(sportCounts).sort(([,a], [,b]) => b.ev - a.ev)[0];
+
+      const evRealized = {
+        totalEVGenerated: Math.round(totalEV * 100) / 100,
+        avgEVPerTicket: Math.round(avgEV * 100) / 100,
+        bestPerformingSport: bestSport ? bestSport[0] : "N/A",
+        bestPerformingMarket: "N/A",
+      };
+
+      const confidences = outcomes.map((o: any) => o.confidence || 0);
+      const avgConfidence = confidences.length > 0
+        ? Math.round(confidences.reduce((s: number, c: number) => s + c, 0) / confidences.length * 1000) / 1000
+        : 0;
+
+      res.json({
+        overview: {
+          totalPredictions,
+          wins, losses, pushes,
+          hitRate: Math.round(hitRate * 1000) / 1000,
+          avgConfidence,
+          pipelineSuccessRate: pipelineHealth.successRate,
+          pipelineRuns: pipelineHealth.totalRuns,
+        },
+        calibration: calibrationBuckets,
+        drift: driftMetrics,
+        canonicalStore: canonicalStats,
+        sportBreakdown: sportAccuracy,
+        evRealized,
+      });
+    } catch (err) {
+      console.error("Model performance error:", err);
+      res.status(500).json({ error: "Failed to get model performance" });
+    }
   });
 
   // === Age Verification ===
@@ -4327,106 +4283,117 @@ Follow these rules:
     res.json({ verified });
   });
 
-  // === Data Provenance & Lineage ===
-  app.get("/api/admin/data-provenance", requireAdmin, (_req, res) => {
-    const sources = [
-      { id: "espn-api", name: "ESPN API", type: "live", status: "active", lastRefresh: new Date(Date.now() - 300000).toISOString(), refreshInterval: "5m", dataPoints: 15420, quality: 98.5, coverage: ["NBA", "NFL", "MLB", "NHL", "MLS", "NCAAF", "NCAAB", "WNBA"], latency: 230 },
-      { id: "odds-feed", name: "Odds Aggregator", type: "live", status: "active", lastRefresh: new Date(Date.now() - 60000).toISOString(), refreshInterval: "1m", dataPoints: 8730, quality: 97.2, coverage: ["DraftKings", "FanDuel", "BetMGM", "Caesars", "PointsBet", "BetRivers"], latency: 180 },
-      { id: "player-stats", name: "Player Statistics DB", type: "batch", status: "active", lastRefresh: new Date(Date.now() - 3600000).toISOString(), refreshInterval: "1h", dataPoints: 42150, quality: 99.1, coverage: ["Season Stats", "Career Stats", "Advanced Metrics", "Splits"], latency: 450 },
-      { id: "injury-reports", name: "Injury Reports Feed", type: "live", status: "active", lastRefresh: new Date(Date.now() - 900000).toISOString(), refreshInterval: "15m", dataPoints: 1240, quality: 94.8, coverage: ["Active Roster", "IR", "Day-to-Day", "Probable", "Doubtful", "Out"], latency: 320 },
-      { id: "weather-api", name: "Weather Service", type: "live", status: "active", lastRefresh: new Date(Date.now() - 1800000).toISOString(), refreshInterval: "30m", dataPoints: 890, quality: 96.3, coverage: ["Temperature", "Wind", "Precipitation", "Humidity", "Dome Detection"], latency: 150 },
-      { id: "sharp-action", name: "Sharp Money Tracker", type: "live", status: "active", lastRefresh: new Date(Date.now() - 120000).toISOString(), refreshInterval: "2m", dataPoints: 3280, quality: 93.7, coverage: ["Line Movement", "Steam Moves", "Reverse Line", "Public %"], latency: 280 },
-      { id: "historical-db", name: "Historical Outcomes DB", type: "batch", status: "active", lastRefresh: new Date(Date.now() - 86400000).toISOString(), refreshInterval: "24h", dataPoints: 187500, quality: 99.8, coverage: ["Game Results", "Box Scores", "Betting Results", "ATS Records"], latency: 600 },
-      { id: "sentiment", name: "News & Sentiment Engine", type: "batch", status: "active", lastRefresh: new Date(Date.now() - 7200000).toISOString(), refreshInterval: "2h", dataPoints: 5670, quality: 88.4, coverage: ["News Articles", "Social Sentiment", "Expert Analysis", "Injury Tweets"], latency: 850 },
-    ];
+  app.get("/api/admin/data-provenance", requireAdmin, async (_req, res) => {
+    try {
+      const hubStatus = getHubStatus();
+      const rosterStats = getRosterCacheStats();
+      const oddsApiStatus = sportsDataService.getApiStatus();
+      const pipelineHealth = getPipelineHealth();
+      const canonicalStats = getCanonicalStoreStats();
 
-    const pipelines = [
-      { id: "ingest-espn", name: "ESPN Ingestion", source: "espn-api", status: "running", lastRun: new Date(Date.now() - 300000).toISOString(), avgDuration: "12s", successRate: 99.2, recordsProcessed: 15420 },
-      { id: "ingest-odds", name: "Odds Processing", source: "odds-feed", status: "running", lastRun: new Date(Date.now() - 60000).toISOString(), avgDuration: "8s", successRate: 98.8, recordsProcessed: 8730 },
-      { id: "transform-features", name: "Feature Engineering", source: "multiple", status: "running", lastRun: new Date(Date.now() - 600000).toISOString(), avgDuration: "45s", successRate: 97.5, recordsProcessed: 72000 },
-      { id: "model-inference", name: "Model Inference Pipeline", source: "transform-features", status: "running", lastRun: new Date(Date.now() - 120000).toISOString(), avgDuration: "22s", successRate: 99.6, recordsProcessed: 3800 },
-      { id: "backtest-daily", name: "Daily Backtesting", source: "historical-db", status: "idle", lastRun: new Date(Date.now() - 43200000).toISOString(), avgDuration: "5m", successRate: 100, recordsProcessed: 50000 },
-    ];
+      const totalGames = Object.values(hubStatus.sportStatus || {}).reduce((s: number, info: any) => s + (info.games || 0), 0);
+      const totalRosterPlayers = rosterStats.reduce((s, r) => s + r.players, 0);
 
-    const dataContracts = [
-      { id: "dc-odds", name: "Odds Data Contract", version: "2.1", owner: "Data Engineering", consumers: ["Ticket Generator", "Edge Finder", "Arbitrage Scanner"], sla: "99.5% uptime, <500ms latency", status: "compliant" },
-      { id: "dc-roster", name: "Roster Data Contract", version: "1.3", owner: "Data Engineering", consumers: ["Roster Page", "Injury Analysis", "Prop Projections"], sla: "99% uptime, <1s latency", status: "compliant" },
-      { id: "dc-predictions", name: "Prediction Output Contract", version: "3.0", owner: "ML Team", consumers: ["Auto Generator", "Visual Builder", "Daily Parlays"], sla: "99.9% uptime, <2s latency", status: "compliant" },
-    ];
+      const sources = [
+        { id: "espn-api", name: "ESPN API", type: "live", status: hubStatus.running ? "active" : "inactive", lastRefresh: hubStatus.lastCycleAt || null, refreshInterval: "60s", dataPoints: totalGames, coverage: Object.keys(hubStatus.sportStatus || {}) },
+        { id: "odds-feed", name: "The Odds API", type: "live", status: oddsApiStatus.available ? "active" : "fallback", lastRefresh: new Date().toISOString(), refreshInterval: "60s", dataPoints: oddsApiStatus.requestsRemaining || 0, coverage: oddsApiStatus.available ? ["DraftKings", "FanDuel", "BetMGM", "Caesars", "PointsBet", "BetRivers"] : ["ESPN-derived"] },
+        { id: "roster-cache", name: "ESPN Rosters", type: "batch", status: totalRosterPlayers > 0 ? "active" : "inactive", lastRefresh: new Date().toISOString(), refreshInterval: "6h", dataPoints: totalRosterPlayers, coverage: rosterStats.map(r => r.sport) },
+        { id: "weather-api", name: "Open-Meteo Weather", type: "live", status: "active", lastRefresh: new Date().toISOString(), refreshInterval: "on-demand", dataPoints: 0, coverage: ["Temperature", "Wind", "Precipitation", "Humidity"] },
+        { id: "canonical-store", name: "Canonical Data Store", type: "batch", status: canonicalStats.totalRecords > 0 ? "active" : "idle", lastRefresh: new Date().toISOString(), refreshInterval: "continuous", dataPoints: canonicalStats.totalRecords, coverage: ["Predictions", "Outcomes", "Quality Scores"] },
+      ];
 
-    res.json({
-      sources,
-      pipelines,
-      dataContracts,
-      overallHealth: {
-        activeSources: sources.filter(s => s.status === "active").length,
-        totalSources: sources.length,
-        avgQuality: Math.round(sources.reduce((s, src) => s + src.quality, 0) / sources.length * 10) / 10,
-        totalDataPoints: sources.reduce((s, src) => s + src.dataPoints, 0),
-        pipelineSuccessRate: Math.round(pipelines.reduce((s, p) => s + p.successRate, 0) / pipelines.length * 10) / 10,
-      },
-    });
+      const pipelines = [
+        { id: "hub-cycle", name: "Intelligence Hub Cycle", source: "espn-api", status: hubStatus.running ? "running" : "stopped", lastRun: hubStatus.lastCycleAt || null, avgDuration: hubStatus.lastCycleTimeMs ? `${hubStatus.lastCycleTimeMs}ms` : "N/A", successRate: hubStatus.totalCycles > 0 ? 100 : 0, recordsProcessed: totalGames },
+        { id: "prediction-pipeline", name: "Prediction Pipeline", source: "multiple", status: pipelineHealth.status === "healthy" ? "running" : pipelineHealth.status, lastRun: new Date().toISOString(), avgDuration: pipelineHealth.avgLatencyMs > 0 ? `${pipelineHealth.avgLatencyMs}ms` : "N/A", successRate: Math.round(pipelineHealth.successRate * 100 * 10) / 10, recordsProcessed: pipelineHealth.totalRuns },
+        { id: "canonical-ingest", name: "Canonical Ingestion", source: "prediction-pipeline", status: canonicalStats.totalRecords > 0 ? "running" : "idle", lastRun: new Date().toISOString(), avgDuration: "N/A", successRate: canonicalStats.totalRecords > 0 ? Math.round((canonicalStats.accepted / Math.max(canonicalStats.totalRecords, 1)) * 100 * 10) / 10 : 0, recordsProcessed: canonicalStats.totalRecords },
+      ];
+
+      res.json({
+        sources,
+        pipelines,
+        overallHealth: {
+          activeSources: sources.filter(s => s.status === "active").length,
+          totalSources: sources.length,
+          avgQuality: canonicalStats.avgQuality > 0 ? Math.round(canonicalStats.avgQuality * 100 * 10) / 10 : 0,
+          totalDataPoints: sources.reduce((s, src) => s + src.dataPoints, 0),
+          pipelineSuccessRate: pipelines.length > 0 ? Math.round(pipelines.reduce((s, p) => s + p.successRate, 0) / pipelines.length * 10) / 10 : 0,
+        },
+      });
+    } catch (err) {
+      console.error("Data provenance error:", err);
+      res.status(500).json({ error: "Failed to get data provenance" });
+    }
   });
 
-  // === Risk Register ===
-  app.get("/api/admin/risk-register", requireAdmin, (_req, res) => {
-    const risks = [
-      { id: "R001", category: "Legal", title: "Regulatory classification change", description: "Regulators reclassify analysis tools as gambling operators", likelihood: "medium", impact: "critical", status: "monitored", mitigation: "Maintain clear education/analysis positioning; no direct wagering; legal counsel on retainer", owner: "Legal", lastReview: "2026-02-15" },
-      { id: "R002", category: "Technical", title: "Model accuracy degradation", description: "Prediction models lose edge due to market adaptation or data quality issues", likelihood: "medium", impact: "high", status: "mitigated", mitigation: "Continuous retraining, A/B testing, concept drift monitoring, ensemble diversity", owner: "ML Engineering", lastReview: "2026-02-18" },
-      { id: "R003", category: "Data", title: "Data source disruption", description: "Key data provider (ESPN, odds feeds) changes terms or goes offline", likelihood: "low", impact: "high", status: "mitigated", mitigation: "Multi-source redundancy, cached fallbacks, contractual SLAs where possible", owner: "Data Engineering", lastReview: "2026-02-12" },
-      { id: "R004", category: "Security", title: "Model theft / reverse engineering", description: "Competitors scrape outputs to replicate proprietary models", likelihood: "medium", impact: "medium", status: "mitigated", mitigation: "Rate limiting, output obfuscation, IP monitoring, legal protections", owner: "Security", lastReview: "2026-02-19" },
-      { id: "R005", category: "Reputational", title: "Responsible gambling incident", description: "User harm attributed to platform recommendations", likelihood: "low", impact: "critical", status: "mitigated", mitigation: "Self-exclusion tools, loss limits, mandatory disclaimers, cooling-off periods", owner: "Product", lastReview: "2026-02-17" },
-      { id: "R006", category: "Financial", title: "Negative unit economics", description: "CAC exceeds LTV due to high compute costs or low conversion", likelihood: "low", impact: "high", status: "monitored", mitigation: "Tiered pricing, compute cost optimization, credit system, premium upsells", owner: "Finance", lastReview: "2026-02-14" },
-      { id: "R007", category: "Competitive", title: "Competitor undercutting", description: "Well-funded competitor offers similar features at lower cost", likelihood: "high", impact: "medium", status: "monitored", mitigation: "Proprietary data moats, community network effects, continuous innovation velocity", owner: "Strategy", lastReview: "2026-02-16" },
-      { id: "R008", category: "Data", title: "Data poisoning attack", description: "Adversarial actors inject false data to manipulate predictions", likelihood: "low", impact: "high", status: "mitigated", mitigation: "Input validation, anomaly detection, multi-source cross-verification, audit trails", owner: "Security", lastReview: "2026-02-20" },
-      { id: "R009", category: "Technical", title: "Infrastructure failure", description: "Cloud provider outage or scaling failure during peak events", likelihood: "low", impact: "high", status: "mitigated", mitigation: "Multi-region deployment, auto-scaling, graceful degradation, DR plan", owner: "DevOps", lastReview: "2026-02-13" },
-      { id: "R010", category: "Legal", title: "Platform delisting", description: "App stores or ad platforms ban sports betting-adjacent apps", likelihood: "medium", impact: "medium", status: "monitored", mitigation: "PWA support, direct web access, alternative distribution channels", owner: "Product", lastReview: "2026-02-11" },
-    ];
+  app.get("/api/admin/risk-register", requireAdmin, async (_req, res) => {
+    try {
+      const hubStatus = getHubStatus();
+      const oddsApiStatus = sportsDataService.getApiStatus();
+      const pipelineHealth = getPipelineHealth();
+      const errorLogs = errorLogger.getLogs({ limit: 100 });
+      const { getOrchestratorStatus } = await import("./continuousLearningOrchestrator");
+      const orchStatus = getOrchestratorStatus();
 
-    const sops = [
-      { id: "SOP001", title: "New Data Source Onboarding", category: "Data", steps: ["Evaluate source quality and coverage", "Negotiate data licensing terms", "Implement ingestion pipeline", "Validate data against existing sources", "Set up monitoring and alerting", "Update data contracts", "Document in data catalog"], lastUpdated: "2026-02-10", owner: "Data Engineering" },
-      { id: "SOP002", title: "Model Deployment & Rollback", category: "ML", steps: ["Complete offline evaluation against holdout set", "Run shadow mode for 48 hours", "Compare metrics against production model", "Gradual traffic ramp (10% → 50% → 100%)", "Monitor real-time KPIs for 24 hours", "If regression detected: immediate rollback to previous version", "Post-deployment review within 48 hours"], lastUpdated: "2026-02-15", owner: "ML Engineering" },
-      { id: "SOP003", title: "Incident Response", category: "Security", steps: ["Detect and classify incident severity (P1-P4)", "Notify on-call engineer and incident commander", "Contain the issue (block IPs, disable features)", "Investigate root cause with logs and traces", "Implement fix and verify resolution", "Post-incident review within 72 hours", "Update runbook and monitoring"], lastUpdated: "2026-02-18", owner: "Security" },
-      { id: "SOP004", title: "Legal Review for Campaigns", category: "Marketing", steps: ["Draft campaign copy and targeting criteria", "Submit to legal for responsible gambling compliance", "Verify age-gating and geo-restrictions", "Review affiliate disclosure requirements", "Obtain sign-off from compliance officer", "Schedule campaign with monitoring in place"], lastUpdated: "2026-02-08", owner: "Legal" },
-      { id: "SOP005", title: "Partner Onboarding Checklist", category: "Partnerships", steps: ["Execute NDA and data sharing agreement", "Define data schema and delivery format", "Set up secure data transfer (SFTP/API)", "Validate initial data batch quality", "Integrate into feature pipeline", "Establish SLA and escalation contacts", "Quarterly partnership review cadence"], lastUpdated: "2026-02-05", owner: "Partnerships" },
-      { id: "SOP006", title: "Experiment Design & Evaluation", category: "Product", steps: ["Define hypothesis and success metrics", "Calculate required sample size and duration", "Implement feature flag and tracking", "Run experiment with holdout group", "Analyze results with statistical significance", "Document findings and recommendation", "Ship or kill based on data"], lastUpdated: "2026-02-12", owner: "Product" },
-    ];
+      const risks: any[] = [];
+      if (!oddsApiStatus.available) {
+        risks.push({ id: `R-${Date.now()}-1`, category: "Data", title: "Odds API unavailable", description: "The Odds API is not responding; using ESPN-derived odds as fallback", likelihood: "active", impact: "medium", status: "active", mitigation: "ESPN-derived odds fallback active", detectedAt: new Date().toISOString() });
+      }
+      if (!hubStatus.running) {
+        risks.push({ id: `R-${Date.now()}-2`, category: "Technical", title: "Intelligence Hub offline", description: "The unified intelligence hub is not running", likelihood: "active", impact: "critical", status: "active", mitigation: "Restart the application", detectedAt: new Date().toISOString() });
+      }
+      if (pipelineHealth.status === "degraded" || pipelineHealth.status === "critical") {
+        risks.push({ id: `R-${Date.now()}-3`, category: "Technical", title: `Prediction pipeline ${pipelineHealth.status}`, description: `Pipeline has ${pipelineHealth.activeAlerts} active alerts, success rate: ${Math.round(pipelineHealth.successRate * 100)}%`, likelihood: "active", impact: pipelineHealth.status === "critical" ? "critical" : "high", status: "active", mitigation: "Check pipeline alerts and module health", detectedAt: new Date().toISOString() });
+      }
+      if (errorLogs.length > 20) {
+        risks.push({ id: `R-${Date.now()}-4`, category: "Technical", title: "High error rate", description: `${errorLogs.length} errors logged in recent window`, likelihood: "active", impact: "medium", status: "active", mitigation: "Review error logs in diagnostics", detectedAt: new Date().toISOString() });
+      }
+      if (orchStatus.errors && orchStatus.errors.length > 0) {
+        risks.push({ id: `R-${Date.now()}-5`, category: "Technical", title: "Orchestrator errors", description: `${orchStatus.errors.length} error(s) in learning orchestrator`, likelihood: "active", impact: "medium", status: "active", mitigation: "Check orchestrator status", detectedAt: new Date().toISOString() });
+      }
+      const sportStatuses = hubStatus.sportStatus || {};
+      for (const [sport, info] of Object.entries(sportStatuses as Record<string, any>)) {
+        if (info.games === 0) {
+          risks.push({ id: `R-${Date.now()}-${sport}`, category: "Data", title: `No ${sport} data`, description: `Intelligence Hub has 0 games for ${sport}`, likelihood: "active", impact: "low", status: "informational", mitigation: "May be off-season or no games scheduled", detectedAt: new Date().toISOString() });
+        }
+      }
 
-    res.json({ risks, sops, summary: { totalRisks: risks.length, critical: risks.filter(r => r.impact === "critical").length, mitigated: risks.filter(r => r.status === "mitigated").length, monitored: risks.filter(r => r.status === "monitored").length } });
+      res.json({ risks, summary: { totalRisks: risks.length, critical: risks.filter(r => r.impact === "critical").length, active: risks.filter(r => r.status === "active").length, informational: risks.filter(r => r.status === "informational").length } });
+    } catch (err) {
+      console.error("Risk register error:", err);
+      res.status(500).json({ error: "Failed to get risk register" });
+    }
   });
 
-  // === Financial Projections ===
   app.get("/api/admin/financial-projections", requireAdmin, (_req, res) => {
-    const months = ["Mar 2026", "Apr 2026", "May 2026", "Jun 2026", "Jul 2026", "Aug 2026", "Sep 2026", "Oct 2026", "Nov 2026", "Dec 2026", "Jan 2027", "Feb 2027"];
-    const scenarios = {
-      bull: months.map((m, i) => ({ month: m, mrr: 12000 + i * 3500, subscribers: 340 + i * 85, arpu: 35 + i * 1.5, cac: 28 - i * 0.5, ltv: 420 + i * 25, churn: 4.2 - i * 0.15 })),
-      baseline: months.map((m, i) => ({ month: m, mrr: 10000 + i * 2000, subscribers: 285 + i * 50, arpu: 33 + i * 0.8, cac: 32 - i * 0.3, ltv: 360 + i * 15, churn: 5.5 - i * 0.1 })),
-      bear: months.map((m, i) => ({ month: m, mrr: 8000 + i * 800, subscribers: 240 + i * 20, arpu: 30 + i * 0.3, cac: 38 + i * 0.2, ltv: 280 + i * 5, churn: 7.0 + i * 0.1 })),
-    };
+    try {
+      const allSubs = stripeService.getAllSubscriptions();
+      const tierPrices: Record<string, number> = { free: 0, pro: 29, elite: 79, whale: 199 };
+      let currentMRR = 0;
+      let totalPaid = 0;
+      const tierCounts: Record<string, number> = { free: 0, pro: 0, elite: 0, whale: 0 };
+      for (const [, sub] of Array.from(allSubs.entries())) {
+        const tier = (sub as any).tier || "free";
+        tierCounts[tier] = (tierCounts[tier] || 0) + 1;
+        const price = tierPrices[tier] || 0;
+        currentMRR += price;
+        if (price > 0) totalPaid++;
+      }
+      const totalSubs = allSubs.size;
+      const currentARPU = totalSubs > 0 ? Math.round(currentMRR / totalSubs * 100) / 100 : 0;
 
-    const unitEconomics = {
-      currentMRR: 9850,
-      currentARPU: 33.20,
-      currentCAC: 31.50,
-      currentLTV: 348,
-      ltvCacRatio: 11.0,
-      grossMargin: 72.5,
-      paybackMonths: 3.2,
-      revenuePerTicket: 0.85,
-      computeCostPerTicket: 0.12,
-      marginPerTicket: 0.73,
-    };
+      const unitEconomics = {
+        currentMRR,
+        currentARPU,
+        totalSubscribers: totalSubs,
+        paidSubscribers: totalPaid,
+        tierBreakdown: tierCounts,
+      };
 
-    const capitalAllocation = {
-      rd: { percent: 35, amount: 3450 },
-      dataAcquisition: { percent: 15, amount: 1478 },
-      infrastructure: { percent: 20, amount: 1970 },
-      legalCompliance: { percent: 10, amount: 985 },
-      growth: { percent: 15, amount: 1478 },
-      reserves: { percent: 5, amount: 493 },
-    };
-
-    res.json({ scenarios, unitEconomics, capitalAllocation, projectionDate: new Date().toISOString() });
+      res.json({ unitEconomics, projectionDate: new Date().toISOString(), note: "Financial data derived from live Stripe subscriptions" });
+    } catch (err) {
+      console.error("Financial projections error:", err);
+      res.status(500).json({ error: "Failed to get financial projections" });
+    }
   });
 
   // === ROI Uplift Calculator ===

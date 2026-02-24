@@ -112,13 +112,13 @@ function americanToDecimal(american: number): number {
 }
 
 function generateOppositeOdds(primaryOdds: number): number {
-  if (primaryOdds < -200) return Math.round(180 + Math.random() * 40);
-  if (primaryOdds < -150) return Math.round(130 + Math.random() * 30);
-  if (primaryOdds < -110) return Math.round(-105 - Math.random() * 15);
-  if (primaryOdds > 200) return Math.round(-220 - Math.random() * 40);
-  if (primaryOdds > 150) return Math.round(-160 - Math.random() * 30);
-  if (primaryOdds > 110) return Math.round(-115 - Math.random() * 15);
-  return primaryOdds < 0 ? Math.round(-primaryOdds - 10 + Math.random() * 20) : Math.round(-primaryOdds + 10 - Math.random() * 20);
+  if (primaryOdds < -200) return Math.round(Math.abs(primaryOdds) - 20);
+  if (primaryOdds < -150) return Math.round(Math.abs(primaryOdds) - 15);
+  if (primaryOdds < -110) return Math.round(Math.abs(primaryOdds) - 5);
+  if (primaryOdds > 200) return Math.round(-primaryOdds - 20);
+  if (primaryOdds > 150) return Math.round(-primaryOdds - 15);
+  if (primaryOdds > 110) return Math.round(-primaryOdds - 5);
+  return primaryOdds < 0 ? Math.round(-primaryOdds) : Math.round(-primaryOdds);
 }
 
 function calculateTrueProbabilityWithVigRemoval(
@@ -171,76 +171,26 @@ function generateSituationalFactors(
 ): VegasFactor[] {
   const factors: VegasFactor[] = [];
   
-  const restDays = Math.floor(Math.random() * 5) + 1;
-  const awayRestDays = Math.floor(Math.random() * 5) + 1;
-  const restAdvantage = restDays - awayRestDays;
-  
-  if (Math.abs(restAdvantage) >= 2) {
+  const homePower = TEAM_POWER_RATINGS[homeTeam] || 100;
+  const awayPower = TEAM_POWER_RATINGS[awayTeam] || 100;
+  const powerDiff = homePower - awayPower;
+  if (Math.abs(powerDiff) > 3) {
     factors.push({
-      name: restAdvantage > 0 ? "Rest Advantage" : "Rest Disadvantage",
-      impact: Math.abs(restAdvantage) * 3.5,
-      direction: restAdvantage > 0 ? "positive" : "negative",
-      weight: config.restWeight,
-      description: `${homeTeam} has ${Math.abs(restAdvantage)} ${Math.abs(restAdvantage) > 1 ? "days" : "day"} ${restAdvantage > 0 ? "more" : "less"} rest`,
+      name: "Power Rating Edge",
+      impact: Math.abs(powerDiff) * 0.8,
+      direction: powerDiff > 0 ? "positive" : "negative",
+      weight: 0.18,
+      description: `${powerDiff > 0 ? homeTeam : awayTeam} has a ${Math.abs(powerDiff).toFixed(1)} point power rating advantage`,
     });
   }
-  
-  const travelMiles = Math.floor(Math.random() * 2500);
-  if (travelMiles > 1500) {
+
+  if (sport === "NFL" || sport === "MLB" || sport === "NCAAF") {
     factors.push({
-      name: "Travel Fatigue",
-      impact: (travelMiles / 500) * 2,
-      direction: "negative",
-      weight: config.travelWeight,
-      description: `${awayTeam} traveled ${travelMiles} miles`,
-    });
-  }
-  
-  const injuryImpact = Math.random() * 12;
-  if (injuryImpact > 5) {
-    const isHomeInjury = Math.random() > 0.5;
-    factors.push({
-      name: "Injury Report",
-      impact: injuryImpact,
-      direction: isHomeInjury ? "negative" : "positive",
-      weight: config.injuryWeight,
-      description: `Key player ${isHomeInjury ? "out" : "returning"} for ${isHomeInjury ? homeTeam : awayTeam}`,
-    });
-  }
-  
-  if (sport === "NFL" || sport === "MLB") {
-    const weatherImpact = Math.random() * 8;
-    if (weatherImpact > 4) {
-      const isIndoorTeam = Math.random() > 0.5;
-      factors.push({
-        name: "Weather Factor",
-        impact: weatherImpact,
-        direction: isIndoorTeam ? "negative" : "positive",
-        weight: config.weatherWeight,
-        description: `${isIndoorTeam ? "Dome team in outdoor conditions" : "Favorable weather conditions"}`,
-      });
-    }
-  }
-  
-  const recentFormDiff = (Math.random() * 20) - 10;
-  if (Math.abs(recentFormDiff) > 5) {
-    factors.push({
-      name: "Recent Form",
-      impact: Math.abs(recentFormDiff),
-      direction: recentFormDiff > 0 ? "positive" : "negative",
-      weight: 0.12,
-      description: `${homeTeam} ${recentFormDiff > 0 ? "trending up" : "slumping"} over last 10 games`,
-    });
-  }
-  
-  const h2hAdvantage = (Math.random() * 15) - 7.5;
-  if (Math.abs(h2hAdvantage) > 5) {
-    factors.push({
-      name: "Head-to-Head History",
-      impact: Math.abs(h2hAdvantage),
-      direction: h2hAdvantage > 0 ? "positive" : "negative",
-      weight: config.historicalWeight,
-      description: `${homeTeam} is ${h2hAdvantage > 0 ? "6-2" : "2-6"} ATS in last 8 meetings`,
+      name: "Weather Consideration",
+      impact: 2.0,
+      direction: "neutral",
+      weight: config.weatherWeight,
+      description: `Outdoor sport — real weather data applied via Intelligence Hub`,
     });
   }
   
@@ -256,19 +206,12 @@ function generateSituationalFactors(
 }
 
 function generateSharpMoneyData(): { sharpMoney: number; publicMoney: number; lineMovement: number; steamMove: boolean; reverseLineMove: boolean } {
-  const sharpMoney = Math.floor(Math.random() * 60) + 20;
-  const publicMoney = 100 - sharpMoney + (Math.random() * 20 - 10);
-  const lineMovement = (Math.random() * 3) - 1.5;
-  
-  const steamMove = sharpMoney > 65 && Math.abs(lineMovement) > 1;
-  const reverseLineMove = (sharpMoney > publicMoney && lineMovement * (sharpMoney - 50) < 0);
-  
   return {
-    sharpMoney: Math.round(sharpMoney),
-    publicMoney: Math.round(Math.max(0, Math.min(100, publicMoney))),
-    lineMovement: Math.round(lineMovement * 10) / 10,
-    steamMove,
-    reverseLineMove,
+    sharpMoney: 50,
+    publicMoney: 50,
+    lineMovement: 0,
+    steamMove: false,
+    reverseLineMove: false,
   };
 }
 
@@ -339,17 +282,16 @@ export async function generateVegasPredictions(sport?: Sport): Promise<VegasPred
     let betType: "spread" | "moneyline" | "total";
     let prediction: string;
     
-    const marketRoll = Math.random();
-    if (marketRoll < 0.45) {
+    const betTypeSelector = index % 3;
+    if (betTypeSelector === 0) {
       betType = "spread";
-      vegasLine = Math.round((powerDiff + (Math.random() * 4 - 2)) * 2) / 2;
+      vegasLine = Math.round(powerDiff * 2) / 2;
       prediction = vegasLine < 0 ? `${game.home} ${vegasLine}` : `${game.away} +${Math.abs(vegasLine)}`;
-    } else if (marketRoll < 0.75) {
+    } else if (betTypeSelector === 1) {
       betType = "total";
       const baseTotal = game.sport === "NBA" ? 220 : game.sport === "NFL" ? 45 : game.sport === "MLB" ? 8.5 : 6;
-      vegasLine = baseTotal + (Math.random() * 10 - 5);
-      vegasLine = Math.round(vegasLine * 2) / 2;
-      prediction = Math.random() > 0.5 ? `Over ${vegasLine}` : `Under ${vegasLine}`;
+      vegasLine = Math.round(baseTotal * 2) / 2;
+      prediction = powerDiff > 0 ? `Over ${vegasLine}` : `Under ${vegasLine}`;
     } else {
       betType = "moneyline";
       vegasLine = powerDiff > 3 ? -150 - (powerDiff * 10) : powerDiff < -3 ? 150 + (Math.abs(powerDiff) * 10) : -110;
@@ -410,12 +352,12 @@ export async function generateVegasPredictions(sport?: Sport): Promise<VegasPred
     const sharpBonus = sharpData.sharpMoney > 60 ? 8 : sharpData.sharpMoney > 55 ? 4 : 0;
     const confidence = Math.max(35, Math.min(95, baseConfidence + edgeBonus + sharpBonus + situationalScore * 0.5));
     
-    const modelAgreement = Math.floor((confidence / 100) * 5) + (Math.random() > 0.5 ? 1 : 0);
+    const modelAgreement = Math.floor((confidence / 100) * 5);
     
     const projectedLine = betType === "spread" 
       ? vegasLine + (trueProbability - impliedProbability) * 10
       : betType === "total"
-      ? vegasLine + (Math.random() * 4 - 2)
+      ? vegasLine + (trueProbability - impliedProbability) * 5
       : vegasLine * (1 + (trueProbability - impliedProbability));
     
     const fairLine = betType === "spread"
@@ -466,7 +408,7 @@ export async function getVegasInsights(): Promise<{
   const predictions = await generateVegasPredictions();
   
   return {
-    marketEfficiency: Math.round(85 + Math.random() * 10),
+    marketEfficiency: predictions.length > 0 ? Math.round(100 - (predictions.reduce((acc, p) => acc + p.edge, 0) / predictions.length)) : 90,
     sharpSidePercentage: Math.round(predictions.filter(p => p.sharpMoney > 55).length / predictions.length * 100),
     topEdgePlays: predictions.filter(p => p.edge > 5).length,
     steamMoveCount: predictions.filter(p => p.steamMove).length,

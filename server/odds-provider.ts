@@ -448,62 +448,59 @@ function getPlayersForTeam(team: string, sport: Sport, teamId?: string): MockPla
 function getPropLinesForCategory(category: string, position: string): { line: number; variance: number } {
   switch (category) {
     case "passing_yards":
-      return { line: 240 + Math.floor(Math.random() * 60), variance: 0.5 };
+      return { line: 250.5, variance: 0.5 };
     case "passing_tds":
-      return { line: 1.5 + (Math.random() > 0.5 ? 0.5 : 0), variance: 0.5 };
+      return { line: 1.5, variance: 0.5 };
     case "rushing_yards":
-      return position === "QB" 
-        ? { line: 25 + Math.floor(Math.random() * 20), variance: 0.5 }
-        : { line: 60 + Math.floor(Math.random() * 40), variance: 0.5 };
+      return position === "QB" ? { line: 29.5, variance: 0.5 } : { line: 69.5, variance: 0.5 };
     case "rushing_tds":
       return { line: 0.5, variance: 0.5 };
     case "receiving_yards":
-      return { line: 50 + Math.floor(Math.random() * 40), variance: 0.5 };
+      return { line: 59.5, variance: 0.5 };
     case "receptions":
-      return { line: 4 + Math.floor(Math.random() * 4), variance: 0.5 };
+      return { line: 4.5, variance: 0.5 };
     case "receiving_tds":
       return { line: 0.5, variance: 0.5 };
     case "anytime_td":
       return { line: 0.5, variance: 0.5 };
     case "points":
-      return { line: 20 + Math.floor(Math.random() * 15), variance: 0.5 };
+      return { line: 24.5, variance: 0.5 };
     case "rebounds":
-      return { line: 6 + Math.floor(Math.random() * 6), variance: 0.5 };
+      return { line: 7.5, variance: 0.5 };
     case "assists":
-      return { line: 4 + Math.floor(Math.random() * 5), variance: 0.5 };
+      return { line: 5.5, variance: 0.5 };
     case "threes":
-      return { line: 2 + Math.floor(Math.random() * 3), variance: 0.5 };
+      return { line: 2.5, variance: 0.5 };
     case "pts_rebs_asts":
-      return { line: 30 + Math.floor(Math.random() * 20), variance: 0.5 };
+      return { line: 39.5, variance: 0.5 };
     case "steals_blocks":
-      return { line: 1.5 + Math.floor(Math.random() * 2), variance: 0.5 };
+      return { line: 1.5, variance: 0.5 };
     case "hits":
-      return { line: 0.5 + (Math.random() > 0.5 ? 0.5 : 0), variance: 0.5 };
+      return { line: 0.5, variance: 0.5 };
     case "rbis":
-      return { line: 0.5 + (Math.random() > 0.5 ? 0.5 : 0), variance: 0.5 };
+      return { line: 0.5, variance: 0.5 };
     case "runs":
-      return { line: 0.5 + (Math.random() > 0.5 ? 0.5 : 0), variance: 0.5 };
+      return { line: 0.5, variance: 0.5 };
     case "total_bases":
-      return { line: 1.5 + Math.floor(Math.random() * 2), variance: 0.5 };
+      return { line: 1.5, variance: 0.5 };
     case "strikeouts_pitcher":
-      return { line: 5 + Math.floor(Math.random() * 4), variance: 0.5 };
+      return { line: 6.5, variance: 0.5 };
     case "hits_allowed":
-      return { line: 5 + Math.floor(Math.random() * 3), variance: 0.5 };
+      return { line: 5.5, variance: 0.5 };
     case "goals":
       return { line: 0.5, variance: 0.5 };
     case "shots":
-      return { line: 3 + Math.floor(Math.random() * 3), variance: 0.5 };
+      return { line: 3.5, variance: 0.5 };
     case "saves":
-      return { line: 25 + Math.floor(Math.random() * 10), variance: 0.5 };
+      return { line: 27.5, variance: 0.5 };
     default:
       return { line: 10, variance: 0.5 };
   }
 }
 
 function generatePropOdds(): { overOdds: { americanOdds: number; decimalOdds: number }; underOdds: { americanOdds: number; decimalOdds: number } } {
-  const variation = Math.floor(Math.random() * 30) - 15;
-  const overAmerican = -110 + variation;
-  const underAmerican = -110 - variation;
+  const overAmerican = -110;
+  const underAmerican = -110;
   
   return {
     overOdds: { americanOdds: overAmerican, decimalOdds: americanToDecimal(overAmerican) },

@@ -276,7 +276,7 @@ function LoadingSkeleton() {
   );
 }
 
-function generateMockCLV(games: MarketGame[]) {
+function generateCLVFromMovement(games: MarketGame[]) {
   const examples: { label: string; yourLine: number; closingLine: number; clv: number; won: boolean }[] = [];
 
   games.slice(0, 8).forEach((game) => {
@@ -288,7 +288,7 @@ function generateMockCLV(games: MarketGame[]) {
         yourLine: spreadMove.opening,
         closingLine: spreadMove.current,
         clv: Math.round(clv * 10) / 10,
-        won: Math.random() > 0.4,
+        won: spreadMove.current < spreadMove.opening,
       });
     }
     const totalMove = game.lineMovement.find(m => m.market === "total");
@@ -299,28 +299,23 @@ function generateMockCLV(games: MarketGame[]) {
         yourLine: totalMove.opening,
         closingLine: totalMove.current,
         clv: Math.round(clv * 10) / 10,
-        won: Math.random() > 0.45,
+        won: totalMove.current > totalMove.opening,
       });
     }
   });
 
   if (examples.length === 0) {
     return {
-      examples: [
-        { label: "Sample Spread", yourLine: -3, closingLine: -4.5, clv: 1.5, won: true },
-        { label: "Sample Total", yourLine: 220, closingLine: 222, clv: 2, won: true },
-        { label: "Sample ML", yourLine: -150, closingLine: -170, clv: 1.2, won: false },
-        { label: "Sample Spread 2", yourLine: 7, closingLine: 5.5, clv: 1.5, won: true },
-      ],
-      avgCLV: 1.55,
-      winRate: 56,
-      profit: 12.3,
+      examples: [],
+      avgCLV: 0,
+      winRate: 0,
+      profit: 0,
     };
   }
 
-  const avgCLV = examples.length > 0 ? examples.reduce((s, e) => s + e.clv, 0) / examples.length : 0;
-  const winRate = examples.length > 0 ? Math.round((examples.filter(e => e.won).length / examples.length) * 100) : 0;
-  const profit = Math.round(avgCLV * 8.2 * 10) / 10;
+  const avgCLV = examples.reduce((s, e) => s + e.clv, 0) / examples.length;
+  const winRate = Math.round((examples.filter(e => e.won).length / examples.length) * 100);
+  const profit = Math.round(avgCLV * examples.length * 10) / 10;
 
   return { examples: examples.slice(0, 8), avgCLV: Math.round(avgCLV * 100) / 100, winRate, profit };
 }
@@ -357,7 +352,7 @@ export default function LineMovementPage() {
   });
 
   const games = data?.games || [];
-  const clvData = generateMockCLV(games);
+  const clvData = generateCLVFromMovement(games);
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 space-y-8" data-testid="line-movement-page">

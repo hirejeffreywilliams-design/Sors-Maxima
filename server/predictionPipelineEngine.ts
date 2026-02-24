@@ -1573,16 +1573,16 @@ export function getExplanation(ticketId: string): ExplainabilityResponse | null 
   const delivered = deliveredTickets.get(ticketId);
   if (!delivered) return null;
 
-  const dummyVerification: VerificationResult = {
+  const inferredVerification: VerificationResult = {
     status: "OK",
     checks: [],
-    overallConfidence: 0.85,
-    independentModelAgreement: 0.9,
+    overallConfidence: delivered.ticket.confidence || 0,
+    independentModelAgreement: delivered.ticket.confidence ? delivered.ticket.confidence * 0.95 : 0,
     issues: [],
     escalationRequired: false,
   };
 
-  return generateExplanation(delivered.ticket, dummyVerification);
+  return generateExplanation(delivered.ticket, inferredVerification);
 }
 
 export function getPipelineHealth(): {
@@ -1618,7 +1618,7 @@ export function getPipelineHealth(): {
 
   return {
     status: criticalAlerts > 0 ? "critical" : successRate < 0.8 || activeAlerts > 3 ? "degraded" : "healthy",
-    uptime: 99.7 + gaussianRandom(0, 0.1),
+    uptime: pipelineRuns.length > 0 ? Math.round(successRate * 100 * 10) / 10 : 0,
     totalRuns: pipelineRuns.length,
     successRate: Math.round(successRate * 1000) / 1000,
     avgLatencyMs: Math.round(avgLatency),

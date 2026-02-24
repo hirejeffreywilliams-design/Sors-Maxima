@@ -171,63 +171,49 @@ function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-function randomBetween(min: number, max: number): number {
-  return Math.round((Math.random() * (max - min) + min) * 100) / 100;
-}
-
-function generateTimeSeries(days: number, baseValue: number, variance: number): TimeSeriesPoint[] {
+function generateTimeSeries(days: number, baseValue: number, _variance: number): TimeSeriesPoint[] {
   const points: TimeSeriesPoint[] = [];
   const now = new Date();
   for (let i = days; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
-    const trend = (days - i) / days * variance * 0.3;
     points.push({
       timestamp: date.toISOString().split("T")[0],
-      value: Math.round((baseValue + trend + (Math.random() - 0.5) * variance) * 100) / 100,
+      value: 0,
     });
   }
   return points;
 }
 
 const kpis: KPIMetric[] = [
-  { id: "kpi_dau", name: "Daily Active Users", value: 2847, previousValue: 2631, change: 216, changePercent: 8.2, trend: "up", unit: "users", category: "engagement" },
-  { id: "kpi_mau", name: "Monthly Active Users", value: 18432, previousValue: 17105, change: 1327, changePercent: 7.8, trend: "up", unit: "users", category: "engagement" },
-  { id: "kpi_dau_mau", name: "DAU/MAU Ratio", value: 15.4, previousValue: 15.4, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "engagement" },
-  { id: "kpi_retention_d1", name: "Day 1 Retention", value: 42.3, previousValue: 39.8, change: 2.5, changePercent: 6.3, trend: "up", unit: "%", category: "retention" },
-  { id: "kpi_retention_d7", name: "Day 7 Retention", value: 28.1, previousValue: 26.5, change: 1.6, changePercent: 6.0, trend: "up", unit: "%", category: "retention" },
-  { id: "kpi_retention_d30", name: "Day 30 Retention", value: 15.7, previousValue: 14.2, change: 1.5, changePercent: 10.6, trend: "up", unit: "%", category: "retention" },
-  { id: "kpi_signup_conv", name: "Signup Conversion", value: 34.2, previousValue: 31.8, change: 2.4, changePercent: 7.5, trend: "up", unit: "%", category: "conversion" },
-  { id: "kpi_trial_conv", name: "Trial→Paid Conversion", value: 12.8, previousValue: 11.5, change: 1.3, changePercent: 11.3, trend: "up", unit: "%", category: "conversion" },
-  { id: "kpi_arpu", name: "ARPU", value: 18.42, previousValue: 16.95, change: 1.47, changePercent: 8.7, trend: "up", unit: "$", category: "revenue" },
-  { id: "kpi_mrr", name: "Monthly Recurring Revenue", value: 47820, previousValue: 43150, change: 4670, changePercent: 10.8, trend: "up", unit: "$", category: "revenue" },
-  { id: "kpi_churn", name: "Monthly Churn Rate", value: 4.2, previousValue: 5.1, change: -0.9, changePercent: -17.6, trend: "down", unit: "%", category: "retention" },
-  { id: "kpi_ltv", name: "Customer LTV", value: 142.30, previousValue: 128.50, change: 13.80, changePercent: 10.7, trend: "up", unit: "$", category: "revenue" },
-  { id: "kpi_error_rate", name: "Error Rate", value: 0.42, previousValue: 0.68, change: -0.26, changePercent: -38.2, trend: "down", unit: "%", category: "health" },
-  { id: "kpi_latency_p95", name: "P95 Latency", value: 245, previousValue: 312, change: -67, changePercent: -21.5, trend: "down", unit: "ms", category: "health" },
-  { id: "kpi_crash_free", name: "Crash-Free Users", value: 99.7, previousValue: 99.4, change: 0.3, changePercent: 0.3, trend: "up", unit: "%", category: "health" },
+  { id: "kpi_dau", name: "Daily Active Users", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "users", category: "engagement" },
+  { id: "kpi_mau", name: "Monthly Active Users", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "users", category: "engagement" },
+  { id: "kpi_dau_mau", name: "DAU/MAU Ratio", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "engagement" },
+  { id: "kpi_retention_d1", name: "Day 1 Retention", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "retention" },
+  { id: "kpi_retention_d7", name: "Day 7 Retention", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "retention" },
+  { id: "kpi_retention_d30", name: "Day 30 Retention", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "retention" },
+  { id: "kpi_signup_conv", name: "Signup Conversion", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "conversion" },
+  { id: "kpi_trial_conv", name: "Trial to Paid Conversion", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "conversion" },
+  { id: "kpi_arpu", name: "ARPU", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "$", category: "revenue" },
+  { id: "kpi_mrr", name: "Monthly Recurring Revenue", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "$", category: "revenue" },
+  { id: "kpi_churn", name: "Monthly Churn Rate", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "retention" },
+  { id: "kpi_ltv", name: "Customer LTV", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "$", category: "revenue" },
+  { id: "kpi_error_rate", name: "Error Rate", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "health" },
+  { id: "kpi_latency_p95", name: "P95 Latency", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "ms", category: "health" },
+  { id: "kpi_crash_free", name: "Crash-Free Users", value: 0, previousValue: 0, change: 0, changePercent: 0, trend: "flat", unit: "%", category: "health" },
 ];
 
 const funnelData: FunnelStep[] = [
-  { step: "install", label: "App Install / Visit", count: 12450, conversionRate: 100, dropoff: 0, avgTimeToNext: 0 },
-  { step: "signup_start", label: "Signup Started", count: 7230, conversionRate: 58.1, dropoff: 41.9, avgTimeToNext: 45 },
-  { step: "signup_complete", label: "Signup Completed", count: 4260, conversionRate: 58.9, dropoff: 41.1, avgTimeToNext: 120 },
-  { step: "first_ticket", label: "First Ticket Generated", count: 3180, conversionRate: 74.6, dropoff: 25.4, avgTimeToNext: 300 },
-  { step: "deposit", label: "Deposit / Subscribe", count: 1890, conversionRate: 59.4, dropoff: 40.6, avgTimeToNext: 1800 },
-  { step: "repeat_use", label: "Repeat Use (7d)", count: 1240, conversionRate: 65.6, dropoff: 34.4, avgTimeToNext: 604800 },
-  { step: "retained_30d", label: "Retained (30d)", count: 780, conversionRate: 62.9, dropoff: 37.1, avgTimeToNext: 0 },
+  { step: "install", label: "App Install / Visit", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "signup_start", label: "Signup Started", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "signup_complete", label: "Signup Completed", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "first_ticket", label: "First Ticket Generated", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "deposit", label: "Deposit / Subscribe", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "repeat_use", label: "Repeat Use (7d)", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
+  { step: "retained_30d", label: "Retained (30d)", count: 0, conversionRate: 0, dropoff: 0, avgTimeToNext: 0 },
 ];
 
-const cohortRetention: CohortRetention[] = [
-  { cohort: "2026-W01", cohortSize: 850, day1: 48, day3: 38, day7: 29, day14: 22, day30: 16, day60: 11, day90: 8 },
-  { cohort: "2026-W02", cohortSize: 920, day1: 51, day3: 41, day7: 31, day14: 24, day30: 17, day60: 12, day90: 9 },
-  { cohort: "2026-W03", cohortSize: 1050, day1: 45, day3: 36, day7: 27, day14: 20, day30: 15, day60: 10, day90: 7 },
-  { cohort: "2026-W04", cohortSize: 980, day1: 52, day3: 42, day7: 32, day14: 25, day30: 18, day60: 13, day90: 0 },
-  { cohort: "2026-W05", cohortSize: 1120, day1: 47, day3: 37, day7: 28, day14: 21, day30: 16, day60: 0, day90: 0 },
-  { cohort: "2026-W06", cohortSize: 1200, day1: 53, day3: 43, day7: 33, day14: 25, day30: 0, day60: 0, day90: 0 },
-  { cohort: "2026-W07", cohortSize: 1340, day1: 50, day3: 40, day7: 30, day14: 0, day30: 0, day60: 0, day90: 0 },
-  { cohort: "2026-W08", cohortSize: 1150, day1: 55, day3: 44, day7: 0, day14: 0, day30: 0, day60: 0, day90: 0 },
-];
+const cohortRetention: CohortRetention[] = [];
 
 const revenueMetrics: RevenueMetric[] = (() => {
   const data: RevenueMetric[] = [];
@@ -235,16 +221,15 @@ const revenueMetrics: RevenueMetric[] = (() => {
   for (let i = 29; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
-    const base = 1400 + (30 - i) * 15;
     data.push({
       date: date.toISOString().split("T")[0],
-      revenue: Math.round(base + Math.random() * 300),
-      subscriptions: Math.round(80 + Math.random() * 30),
-      arpu: Math.round((16 + Math.random() * 4) * 100) / 100,
-      newMRR: Math.round(500 + Math.random() * 200),
-      churnedMRR: Math.round(100 + Math.random() * 80),
-      netMRR: Math.round(350 + Math.random() * 200),
-      ltv: Math.round((130 + Math.random() * 30) * 100) / 100,
+      revenue: 0,
+      subscriptions: 0,
+      arpu: 0,
+      newMRR: 0,
+      churnedMRR: 0,
+      netMRR: 0,
+      ltv: 0,
     });
   }
   return data;
@@ -313,20 +298,18 @@ const paymentMetrics: PaymentMetric[] = (() => {
   for (let i = 29; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(date.getDate() - i);
-    const transactions = Math.round(40 + Math.random() * 25);
-    const successful = Math.round(transactions * (0.96 + Math.random() * 0.03));
     data.push({
       date: date.toISOString().split("T")[0],
-      totalTransactions: transactions,
-      successfulPayments: successful,
-      failedPayments: transactions - successful,
-      successRate: Math.round((successful / transactions) * 100 * 10) / 10,
-      totalRevenue: Math.round((successful * (15 + Math.random() * 10)) * 100) / 100,
-      avgTransactionValue: Math.round((15 + Math.random() * 10) * 100) / 100,
-      chargebacks: Math.random() > 0.8 ? 1 : 0,
-      chargebackRate: Math.round(Math.random() * 0.5 * 100) / 100,
-      refunds: Math.round(Math.random() * 3),
-      refundAmount: Math.round(Math.random() * 50 * 100) / 100,
+      totalTransactions: 0,
+      successfulPayments: 0,
+      failedPayments: 0,
+      successRate: 0,
+      totalRevenue: 0,
+      avgTransactionValue: 0,
+      chargebacks: 0,
+      chargebackRate: 0,
+      refunds: 0,
+      refundAmount: 0,
     });
   }
   return data;
@@ -383,20 +366,41 @@ const incidentPlaybooks: IncidentPlaybook[] = [
   },
 ];
 
+let requestCounter = 0;
+let errorCounter = 0;
+let responseTimeSum = 0;
+let responseTimeCount = 0;
+const healthStartTime = Date.now();
+
+export function trackRequest(responseTimeMs: number, isError: boolean) {
+  requestCounter++;
+  responseTimeSum += responseTimeMs;
+  responseTimeCount++;
+  if (isError) errorCounter++;
+}
+
 function getRealTimeHealth(): RealTimeHealth {
+  const memUsage = process.memoryUsage();
+  const uptimeSeconds = process.uptime();
+  const uptimePercent = Math.min(99.99, Math.round((uptimeSeconds / (uptimeSeconds + 1)) * 10000) / 100);
+  const avgRespTime = responseTimeCount > 0 ? Math.round(responseTimeSum / responseTimeCount) : 0;
+  const elapsedMinutes = Math.max(1, (Date.now() - healthStartTime) / 60000);
+  const rpm = Math.round(requestCounter / elapsedMinutes);
+  const errRate = requestCounter > 0 ? Math.round((errorCounter / requestCounter) * 10000) / 100 : 0;
+
   return {
-    activeUsers: Math.round(200 + Math.random() * 150),
-    activeSessions: Math.round(250 + Math.random() * 200),
-    requestsPerMinute: Math.round(800 + Math.random() * 400),
-    avgResponseTime: Math.round(80 + Math.random() * 60),
-    errorRate: Math.round(Math.random() * 100) / 100,
-    cpuUsage: Math.round((30 + Math.random() * 25) * 10) / 10,
-    memoryUsage: Math.round((45 + Math.random() * 20) * 10) / 10,
-    uptime: 99.94,
-    lastDeployment: "2026-02-20T08:30:00Z",
-    dbConnections: Math.round(15 + Math.random() * 10),
-    cacheHitRate: Math.round((85 + Math.random() * 12) * 10) / 10,
-    queueDepth: Math.round(Math.random() * 15),
+    activeUsers: 0,
+    activeSessions: 0,
+    requestsPerMinute: rpm,
+    avgResponseTime: avgRespTime,
+    errorRate: errRate,
+    cpuUsage: 0,
+    memoryUsage: Math.round(memUsage.heapUsed / memUsage.heapTotal * 1000) / 10,
+    uptime: uptimePercent,
+    lastDeployment: new Date(Date.now() - uptimeSeconds * 1000).toISOString(),
+    dbConnections: 0,
+    cacheHitRate: 0,
+    queueDepth: 0,
   };
 }
 
@@ -427,14 +431,16 @@ function getFunnelAnalysis() {
 }
 
 function getRetentionAnalysis() {
+  const d7 = cohortRetention.filter(c => c.day7 > 0);
+  const d30 = cohortRetention.filter(c => c.day30 > 0);
   return {
     cohorts: cohortRetention,
     averageRetention: {
-      day1: Math.round(cohortRetention.reduce((s, c) => s + c.day1, 0) / cohortRetention.length),
-      day7: Math.round(cohortRetention.reduce((s, c) => s + c.day7, 0) / cohortRetention.filter(c => c.day7 > 0).length),
-      day30: Math.round(cohortRetention.reduce((s, c) => s + c.day30, 0) / cohortRetention.filter(c => c.day30 > 0).length),
+      day1: cohortRetention.length > 0 ? Math.round(cohortRetention.reduce((s, c) => s + c.day1, 0) / cohortRetention.length) : 0,
+      day7: d7.length > 0 ? Math.round(d7.reduce((s, c) => s + c.day7, 0) / d7.length) : 0,
+      day30: d30.length > 0 ? Math.round(d30.reduce((s, c) => s + c.day30, 0) / d30.length) : 0,
     },
-    trend: "improving",
+    trend: "no data",
   };
 }
 
