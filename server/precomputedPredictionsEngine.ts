@@ -3,7 +3,7 @@ import { generateVegasPredictions } from "./vegas-engine";
 import { analyzeLeg } from "./quantumFusionEngine";
 import type { Sport } from "@shared/schema";
 
-interface PrecomputedPick {
+export interface PrecomputedPick {
   id: string;
   sport: string;
   game: string;
@@ -22,7 +22,7 @@ interface PrecomputedPick {
   gameTime?: string;
 }
 
-interface PrecomputedSnapshot {
+export interface PrecomputedSnapshot {
   picks: PrecomputedPick[];
   generatedAt: string;
   dataSource: "live" | "cached";

@@ -1,0 +1,705 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "wouter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useParlaySlip } from "@/hooks/use-parlay-slip";
+import {
+  Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check,
+  ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
+  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle
+} from "lucide-react";
+
+interface TopPick {
+  id: string;
+  sport: string;
+  game: string;
+  pick: string;
+  betType: string;
+  odds: number;
+  confidence: number;
+  grade: string;
+  edge: number;
+  ev: number;
+  factors: { name: string; impact: number; direction: string }[];
+  gameTime?: string;
+  homeTeam: string;
+  awayTeam: string;
+  reasoning: string;
+}
+
+interface UnifiedGame {
+  id: string;
+  sport: string;
+  name: string;
+  shortName: string;
+  date: string;
+  homeTeam: {
+    name: string;
+    abbreviation: string;
+    record: string;
+    score: number;
+    logo?: string;
+    color?: string;
+    winPct: number;
+  };
+  awayTeam: {
+    name: string;
+    abbreviation: string;
+    record: string;
+    score: number;
+    logo?: string;
+    color?: string;
+    winPct: number;
+  };
+  status: {
+    state: "pre" | "in" | "post";
+    detail: string;
+    period: number;
+    clock: string;
+    completed: boolean;
+  };
+  odds?: {
+    homeMoneyline?: number;
+    awayMoneyline?: number;
+    spread?: number;
+    total?: number;
+  };
+  bookmakerCount: number;
+  injuries: {
+    home: { total: number; starters: number; keyPlayers: string[] };
+    away: { total: number; starters: number; keyPlayers: string[] };
+  };
+  weather?: {
+    temperature: number;
+    windSpeed: number;
+    precipitation: number;
+    impactLevel: string;
+    factors: string[];
+  };
+  momentum?: {
+    direction: "home" | "away" | "neutral";
+    score: number;
+  };
+}
+
+interface EdgeAlert {
+  id: string;
+  type: string;
+  severity: "info" | "warning" | "critical";
+  sport: string;
+  game: string;
+  title: string;
+  description: string;
+  timestamp: string;
+  actionable: boolean;
+}
+
+interface DataSourceHealth {
+  name: string;
+  status: "live" | "stale" | "down";
+  lastUpdated: string;
+  latencyMs: number;
+  recordCount: number;
+}
+
+interface SportSummary {
+  sport: string;
+  gamesCount: number;
+  liveCount: number;
+  upcomingCount: number;
+  picksAvailable: number;
+  topEdge: number;
+  hasWeatherAlerts: boolean;
+  hasInjuryAlerts: boolean;
+}
+
+interface IntelligenceFeed {
+  topPicks: TopPick[];
+  liveGames: UnifiedGame[];
+  upcomingGames: UnifiedGame[];
+  edgeAlerts: EdgeAlert[];
+  dataSourceHealth: DataSourceHealth[];
+  sportSummaries: SportSummary[];
+  opportunityScore: number;
+  generatedAt: string;
+  nextRefresh: string;
+}
+
+function OpportunityGauge({ score }: { score: number }) {
+  const getColor = () => {
+    if (score >= 80) return "text-green-500";
+    if (score >= 60) return "text-yellow-500";
+    if (score >= 40) return "text-orange-500";
+    return "text-red-500";
+  };
+  const getLabel = () => {
+    if (score >= 80) return "Excellent";
+    if (score >= 60) return "Good";
+    if (score >= 40) return "Moderate";
+    return "Low";
+  };
+  const getBg = () => {
+    if (score >= 80) return "bg-green-500/10 border-green-500/20";
+    if (score >= 60) return "bg-yellow-500/10 border-yellow-500/20";
+    if (score >= 40) return "bg-orange-500/10 border-orange-500/20";
+    return "bg-red-500/10 border-red-500/20";
+  };
+
+  return (
+    <Card className={`border ${getBg()}`} data-testid="card-opportunity-gauge">
+      <CardContent className="p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Market Opportunity</p>
+            <div className="flex items-baseline gap-2">
+              <span className={`text-3xl sm:text-4xl font-bold tabular-nums ${getColor()}`} data-testid="text-opportunity-score">
+                {score}
+              </span>
+              <span className="text-sm text-muted-foreground">/ 100</span>
+            </div>
+            <p className={`text-sm font-medium ${getColor()}`}>{getLabel()}</p>
+          </div>
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20">
+            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+              <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-muted/30" />
+              <circle
+                cx="50" cy="50" r="42" fill="none" strokeWidth="8"
+                strokeDasharray={`${score * 2.64} 264`}
+                strokeLinecap="round"
+                className={score >= 80 ? "stroke-green-500" : score >= 60 ? "stroke-yellow-500" : score >= 40 ? "stroke-orange-500" : "stroke-red-500"}
+              />
+            </svg>
+            <Zap className={`absolute inset-0 m-auto w-6 h-6 ${getColor()}`} />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function gradeColor(grade: string): string {
+  if (grade.startsWith("A")) return "text-green-500";
+  if (grade.startsWith("B")) return "text-blue-500";
+  if (grade.startsWith("C")) return "text-yellow-500";
+  return "text-red-500";
+}
+
+function gradeBg(grade: string): string {
+  if (grade.startsWith("A")) return "bg-green-500/10 border-green-500/30";
+  if (grade.startsWith("B")) return "bg-blue-500/10 border-blue-500/30";
+  if (grade.startsWith("C")) return "bg-yellow-500/10 border-yellow-500/30";
+  return "bg-red-500/10 border-red-500/30";
+}
+
+function sportColor(sport: string): string {
+  const colors: Record<string, string> = {
+    NBA: "bg-orange-500/15 text-orange-600 dark:text-orange-400",
+    NFL: "bg-green-500/15 text-green-600 dark:text-green-400",
+    MLB: "bg-blue-500/15 text-blue-600 dark:text-blue-400",
+    NHL: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400",
+    NCAAB: "bg-purple-500/15 text-purple-600 dark:text-purple-400",
+    NCAAF: "bg-rose-500/15 text-rose-600 dark:text-rose-400",
+  };
+  return colors[sport] || "bg-muted text-muted-foreground";
+}
+
+function formatOdds(odds: number): string {
+  return odds > 0 ? `+${odds}` : `${odds}`;
+}
+
+function PickCard({ pick }: { pick: TopPick }) {
+  const { legs, addLeg } = useParlaySlip();
+  const legId = `cmd-${pick.id}`;
+  const inSlip = legs.some(l => l.id === legId);
+
+  const handleAdd = () => {
+    if (inSlip) return;
+    const decimalOdds = pick.odds < 0
+      ? 1 + (100 / Math.abs(pick.odds))
+      : 1 + (pick.odds / 100);
+
+    const validMarket = ["moneyline", "spread", "total", "player_prop"].includes(pick.betType)
+      ? pick.betType
+      : "moneyline";
+
+    addLeg({
+      id: legId,
+      team: pick.homeTeam,
+      opponent: pick.awayTeam,
+      market: validMarket as any,
+      outcome: pick.pick,
+      decimalOdds,
+      americanOdds: pick.odds,
+      addedFrom: "Command Center",
+      addedAt: new Date().toISOString(),
+      sport: pick.sport,
+      confidence: pick.confidence,
+      evPercent: pick.ev,
+    });
+  };
+
+  return (
+    <div
+      className="group relative p-3 sm:p-4 rounded-md bg-card border hover:border-primary/30 transition-colors"
+      data-testid={`card-pick-${pick.id}`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sportColor(pick.sport)}`}>
+              {pick.sport}
+            </Badge>
+            <span className="text-xs text-muted-foreground truncate">{pick.game}</span>
+          </div>
+          <p className="font-semibold text-sm" data-testid={`text-pick-${pick.id}`}>{pick.pick}</p>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span className="font-mono font-medium text-foreground">{formatOdds(pick.odds)}</span>
+            <span>Conf: {pick.confidence}%</span>
+            <span className={pick.ev > 0 ? "text-green-500" : "text-red-500"}>
+              EV: {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
+            </span>
+          </div>
+          {pick.reasoning && (
+            <p className="text-[11px] text-muted-foreground italic">{pick.reasoning}</p>
+          )}
+        </div>
+        <div className="flex flex-col items-center gap-1.5 shrink-0">
+          <Badge variant="outline" className={`font-mono font-bold text-sm ${gradeBg(pick.grade)}`}>
+            {pick.grade}
+          </Badge>
+          <Button
+            size="icon"
+            variant={inSlip ? "secondary" : "outline"}
+            className="h-7 w-7"
+            onClick={handleAdd}
+            disabled={inSlip}
+            data-testid={`button-add-pick-${pick.id}`}
+          >
+            {inSlip ? <Check className="w-3.5 h-3.5" /> : <Star className="w-3.5 h-3.5" />}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiveGameCard({ game }: { game: UnifiedGame }) {
+  return (
+    <div className="p-3 rounded-md bg-card border" data-testid={`card-live-${game.id}`}>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <Badge variant="outline" className={sportColor(game.sport)}>{game.sport}</Badge>
+        <div className="flex items-center gap-1.5 text-xs">
+          <Radio className="w-3 h-3 text-red-500 animate-pulse" />
+          <span className="text-red-500 font-medium">{game.status.detail}</span>
+        </div>
+      </div>
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium truncate">{game.awayTeam.abbreviation}</span>
+          <span className="font-bold tabular-nums">{game.awayTeam.score}</span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="font-medium truncate">{game.homeTeam.abbreviation}</span>
+          <span className="font-bold tabular-nums">{game.homeTeam.score}</span>
+        </div>
+      </div>
+      {game.momentum && (
+        <div className="mt-2 text-[10px] text-muted-foreground">
+          Momentum: <span className="font-medium text-foreground">
+            {game.momentum.direction === "home" ? game.homeTeam.abbreviation : game.momentum.direction === "away" ? game.awayTeam.abbreviation : "Even"}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UpcomingGameRow({ game }: { game: UnifiedGame }) {
+  const gameTime = new Date(game.date);
+  const timeStr = gameTime.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  const hasInjuries = game.injuries.home.starters > 0 || game.injuries.away.starters > 0;
+  const hasWeather = game.weather && game.weather.impactLevel !== "none" && game.weather.impactLevel !== "low";
+
+  return (
+    <div className="flex items-center gap-3 py-2 border-b last:border-0" data-testid={`row-upcoming-${game.id}`}>
+      <Badge variant="outline" className={`text-[10px] shrink-0 ${sportColor(game.sport)}`}>{game.sport}</Badge>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium truncate">{game.shortName}</p>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <Clock className="w-3 h-3" />
+          <span>{timeStr}</span>
+          {game.odds?.spread !== undefined && (
+            <span className="font-mono">Sprd: {game.odds.spread > 0 ? "+" : ""}{game.odds.spread}</span>
+          )}
+          {game.odds?.total !== undefined && (
+            <span className="font-mono">O/U: {game.odds.total}</span>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center gap-1 shrink-0">
+        {hasInjuries && (
+          <Heart className="w-3.5 h-3.5 text-red-400" />
+        )}
+        {hasWeather && (
+          <Cloud className="w-3.5 h-3.5 text-blue-400" />
+        )}
+        {game.bookmakerCount > 0 && (
+          <Badge variant="secondary" className="text-[10px] px-1 py-0">{game.bookmakerCount} books</Badge>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function AlertCard({ alert }: { alert: EdgeAlert }) {
+  const iconMap: Record<string, typeof AlertTriangle> = {
+    arbitrage: Target,
+    high_ev: TrendingUp,
+    sharp_action: Flame,
+    weather_impact: Cloud,
+    injury_update: Heart,
+    line_movement: BarChart3,
+  };
+  const Icon = iconMap[alert.type] || AlertCircle;
+
+  const severityStyle: Record<string, string> = {
+    critical: "border-red-500/30 bg-red-500/5",
+    warning: "border-yellow-500/30 bg-yellow-500/5",
+    info: "border-blue-500/30 bg-blue-500/5",
+  };
+  const severityIcon: Record<string, string> = {
+    critical: "text-red-500",
+    warning: "text-yellow-500",
+    info: "text-blue-500",
+  };
+
+  return (
+    <div className={`flex items-start gap-2.5 p-2.5 rounded-md border ${severityStyle[alert.severity]}`} data-testid={`alert-${alert.id}`}>
+      <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${severityIcon[alert.severity]}`} />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-semibold">{alert.title}</p>
+          <Badge variant="outline" className={`text-[9px] px-1 py-0 ${sportColor(alert.sport)}`}>{alert.sport}</Badge>
+        </div>
+        <p className="text-[11px] text-muted-foreground mt-0.5">{alert.description}</p>
+      </div>
+    </div>
+  );
+}
+
+function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
+  return (
+    <div className="flex items-center gap-3 flex-wrap" data-testid="bar-data-sources">
+      {sources.map(src => (
+        <div key={src.name} className="flex items-center gap-1.5 text-xs">
+          <div className={`w-1.5 h-1.5 rounded-full ${
+            src.status === "live" ? "bg-green-500" : src.status === "stale" ? "bg-yellow-500" : "bg-red-500"
+          }`} />
+          <span className="text-muted-foreground">{src.name}</span>
+          {src.recordCount > 0 && (
+            <span className="text-[10px] text-muted-foreground/60">({src.recordCount})</span>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default function CommandCenter() {
+  const [activeSportTab, setActiveSportTab] = useState("all");
+
+  const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
+    queryKey: ["/api/intelligence/feed"],
+    refetchInterval: 30000,
+  });
+
+  if (isLoading || !feed) {
+    return (
+      <div className="min-h-full flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Brain className="w-10 h-10 text-primary animate-pulse" />
+          <p className="text-sm text-muted-foreground">Loading intelligence feed...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const filteredPicks = activeSportTab === "all"
+    ? feed.topPicks
+    : feed.topPicks.filter(p => p.sport === activeSportTab);
+
+  const filteredUpcoming = activeSportTab === "all"
+    ? feed.upcomingGames
+    : feed.upcomingGames.filter(g => g.sport === activeSportTab);
+
+  const filteredAlerts = activeSportTab === "all"
+    ? feed.edgeAlerts
+    : feed.edgeAlerts.filter(a => a.sport === activeSportTab);
+
+  const activeSports = feed.sportSummaries.filter(s => s.gamesCount > 0 || s.picksAvailable > 0);
+  const totalGames = feed.sportSummaries.reduce((s, a) => s + a.gamesCount, 0);
+  const totalPicks = feed.topPicks.length;
+  const totalLive = feed.liveGames.length;
+
+  const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) : "";
+
+  return (
+    <div className="min-h-full">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-5">
+
+        <header className="space-y-3">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2" data-testid="heading-command-center">
+                <Brain className="w-6 h-6 text-primary" />
+                Command Center
+              </h1>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Unified intelligence across {activeSports.length} sports, {totalGames} games
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <DataSourceBar sources={feed.dataSourceHealth} />
+              <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <RefreshCw className="w-3 h-3" />
+                {lastUpdate}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <OpportunityGauge score={feed.opportunityScore} />
+
+          <Card data-testid="card-stat-picks">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-primary/10">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Top Picks</p>
+                  <p className="text-2xl font-bold tabular-nums" data-testid="text-total-picks">{totalPicks}</p>
+                  <p className="text-[10px] text-muted-foreground">across {activeSports.length} sports</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-stat-live">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-red-500/10">
+                  <Activity className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Live Games</p>
+                  <p className="text-2xl font-bold tabular-nums" data-testid="text-live-count">{totalLive}</p>
+                  <p className="text-[10px] text-muted-foreground">{totalLive > 0 ? "tracking now" : "none in progress"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-stat-alerts">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-yellow-500/10">
+                  <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Edge Alerts</p>
+                  <p className="text-2xl font-bold tabular-nums" data-testid="text-alert-count">{feed.edgeAlerts.length}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {feed.edgeAlerts.filter(a => a.severity === "critical").length} critical
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs value={activeSportTab} onValueChange={setActiveSportTab}>
+          <TabsList className="h-8">
+            <TabsTrigger value="all" className="text-xs px-3 h-7" data-testid="tab-sport-all">All Sports</TabsTrigger>
+            {activeSports.map(s => (
+              <TabsTrigger key={s.sport} value={s.sport} className="text-xs px-3 h-7" data-testid={`tab-sport-${s.sport}`}>
+                {s.sport}
+                {s.liveCount > 0 && <Radio className="w-2.5 h-2.5 ml-1 text-red-500" />}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            <div className="lg:col-span-2 space-y-4">
+              <Card data-testid="card-top-picks">
+                <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    Top Picks
+                  </CardTitle>
+                  <Link href="/daily">
+                    <Button variant="ghost" size="sm" className="text-xs gap-1" data-testid="link-view-all-picks">
+                      View All <ArrowRight className="w-3 h-3" />
+                    </Button>
+                  </Link>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {filteredPicks.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No picks available for this sport right now</p>
+                  ) : (
+                    filteredPicks.slice(0, 8).map(pick => (
+                      <PickCard key={pick.id} pick={pick} />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              {feed.liveGames.length > 0 && (
+                <Card data-testid="card-live-games">
+                  <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Radio className="w-4 h-4 text-red-500 animate-pulse" />
+                      Live Games
+                    </CardTitle>
+                    <Link href="/live">
+                      <Button variant="ghost" size="sm" className="text-xs gap-1" data-testid="link-live-center">
+                        Live Center <ArrowRight className="w-3 h-3" />
+                      </Button>
+                    </Link>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {feed.liveGames.slice(0, 6).map(game => (
+                        <LiveGameCard key={game.id} game={game} />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Card data-testid="card-upcoming-games">
+                <CardHeader className="pb-3 flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                    Upcoming Games
+                  </CardTitle>
+                  <Badge variant="secondary" className="text-xs">{filteredUpcoming.length} games</Badge>
+                </CardHeader>
+                <CardContent>
+                  {filteredUpcoming.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No upcoming games for this sport</p>
+                  ) : (
+                    filteredUpcoming.slice(0, 10).map(game => (
+                      <UpcomingGameRow key={game.id} game={game} />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-4">
+              <Card data-testid="card-edge-alerts">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 text-yellow-500" />
+                    Edge Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {filteredAlerts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No alerts right now</p>
+                  ) : (
+                    filteredAlerts.slice(0, 10).map(alert => (
+                      <AlertCard key={alert.id} alert={alert} />
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card data-testid="card-sport-breakdown">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                    Sport Breakdown
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {activeSports.map(s => (
+                    <div key={s.sport} className="flex items-center justify-between py-1.5 border-b last:border-0" data-testid={`row-sport-${s.sport}`}>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={`text-[10px] px-1.5 ${sportColor(s.sport)}`}>{s.sport}</Badge>
+                        <span className="text-xs text-muted-foreground">{s.gamesCount} games</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {s.liveCount > 0 && (
+                          <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-red-500/10 text-red-500">
+                            {s.liveCount} live
+                          </Badge>
+                        )}
+                        <span className="text-xs font-medium">{s.picksAvailable} picks</span>
+                        {s.hasInjuryAlerts && <Heart className="w-3 h-3 text-red-400" />}
+                        {s.hasWeatherAlerts && <Cloud className="w-3 h-3 text-blue-400" />}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card data-testid="card-quick-actions">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-primary" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Link href="/daily">
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs" data-testid="action-daily-picks">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Browse All Daily Picks
+                      <ChevronRight className="w-3 h-3 ml-auto" />
+                    </Button>
+                  </Link>
+                  <Link href="/builder">
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs" data-testid="action-build-parlay">
+                      <Target className="w-3.5 h-3.5" />
+                      Build Custom Parlay
+                      <ChevronRight className="w-3 h-3 ml-auto" />
+                    </Button>
+                  </Link>
+                  <Link href="/odds-center">
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs" data-testid="action-odds-center">
+                      <TrendingUp className="w-3.5 h-3.5" />
+                      Odds & Line Movement
+                      <ChevronRight className="w-3 h-3 ml-auto" />
+                    </Button>
+                  </Link>
+                  <Link href="/live">
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs" data-testid="action-live-center">
+                      <Activity className="w-3.5 h-3.5" />
+                      Live Game Tracker
+                      <ChevronRight className="w-3 h-3 ml-auto" />
+                    </Button>
+                  </Link>
+                  <Link href="/pro-tools">
+                    <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs" data-testid="action-pro-tools">
+                      <Shield className="w-3.5 h-3.5" />
+                      Pro Analysis Tools
+                      <ChevronRight className="w-3 h-3 ml-auto" />
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </Tabs>
+      </div>
+    </div>
+  );
+}

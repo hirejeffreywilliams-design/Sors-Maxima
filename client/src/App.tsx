@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/login";
 import LandingPage from "@/pages/landing";
+const CommandCenter = lazy(() => import("@/pages/command-center"));
 const AutoGenerator = lazy(() => import("@/pages/auto-generator"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DailyParlays = lazy(() => import("@/pages/daily-parlays"));
@@ -206,7 +207,8 @@ function Router({ authState }: { authState: AuthState }) {
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        <Route path="/" component={AutoGenerator} />
+        <Route path="/" component={CommandCenter} />
+        <Route path="/generate" component={AutoGenerator} />
         <Route path="/builder" component={Dashboard} />
         <Route path="/daily" component={DailyParlays} />
         <Route path="/tools" component={Tools} />
@@ -259,13 +261,12 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real ESPN game data" },
-  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Parlays - Top picks from today's real games" },
+  { href: "/", icon: Brain, label: "Intelligence", testId: "nav-command-center", tooltip: "Command Center - All intelligence at a glance" },
+  { href: "/daily", icon: Calendar, label: "Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
+  { href: "/generate", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
-  { href: "/watchlist", icon: Star, label: "Watchlist", testId: "nav-watchlist", tooltip: "Your Watchlist - Track favorite teams and games" },
-  { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage scanner" },
-  { href: "/ticket-history", icon: History, label: "History", testId: "nav-history", tooltip: "Track your ticket performance and ROI" },
-  { href: "/pro-tools", icon: Calculator, label: "Pro Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - What-If, Optimizer, Cash-Out Calculator" },
+  { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
+  { href: "/pro-tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - Calculators, optimizers, analysis" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
 
@@ -327,25 +328,69 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
       </div>
       
       <div className="border-t pt-4 pb-6 px-4 space-y-3">
-        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">More</div>
+        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Build</div>
         <nav className="space-y-1 pb-2">
           {([
+            { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
+            { href: "/prop-parlay-builder", icon: Brain, label: "Prop Parlay Builder", testId: "mobile-nav-prop-parlay" },
             { href: "/straight-bets", icon: Target, label: "Straight Bets", testId: "mobile-nav-straight-bets" },
             { href: "/sgp", icon: Layers, label: "Same Game Parlays", testId: "mobile-nav-sgp" },
             { href: "/teasers", icon: ArrowUpDown, label: "Teasers", testId: "mobile-nav-teasers" },
             { href: "/round-robin", icon: Shuffle, label: "Round Robin", testId: "mobile-nav-round-robin" },
-            { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
-            { href: "/prop-parlay-builder", icon: Brain, label: "Prop Parlay Builder", testId: "mobile-nav-prop-parlay" },
-            { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },
+          ] as const).map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href} onClick={onClose}>
+                <div 
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  data-testid={item.testId}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Analyze</div>
+        <nav className="space-y-1 pb-2">
+          {([
+            { href: "/ev-heatmap", icon: Flame, label: "EV Heatmap", testId: "mobile-nav-ev" },
+            { href: "/line-movement", icon: TrendingUp, label: "Line Movement", testId: "mobile-nav-lines" },
+            { href: "/power-rankings", icon: BarChart3, label: "Power Rankings", testId: "mobile-nav-rankings" },
+            { href: "/rosters", icon: UsersRound, label: "Rosters & Injuries", testId: "mobile-nav-rosters" },
+            { href: "/watchlist", icon: Star, label: "Watchlist", testId: "mobile-nav-watchlist" },
             { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
-            { href: "/rosters", icon: UsersRound, label: "Rosters", testId: "mobile-nav-rosters" },
+          ] as const).map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href} onClick={onClose}>
+                <div 
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  data-testid={item.testId}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Account</div>
+        <nav className="space-y-1 pb-2">
+          {([
             { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "mobile-nav-finance" },
-            { href: "/shared-tickets", icon: Users, label: "Shared Tickets", testId: "mobile-nav-shared" },
+            { href: "/ticket-history", icon: History, label: "Bet History", testId: "mobile-nav-history" },
+            { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },
+            { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
             { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
-            { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
-            { href: "/rewards", icon: Trophy, label: "Rewards", testId: "mobile-nav-rewards" },
-            { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
             { href: "/changelog", icon: Megaphone, label: "What's New", testId: "mobile-nav-changelog" },
           ] as const).map((item) => {

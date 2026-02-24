@@ -29,6 +29,7 @@ import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice,
 import { analyticsEventService } from "./analyticsEventService";
 import { getAllTests, getTest, createTest, updateTest, deleteTest, getTestStats } from "./abTestEngine";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, stopPrecomputedEngine } from "./precomputedPredictionsEngine";
+import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "./unifiedIntelligenceHub";
 import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCampaign, getCampaignStats } from "./lifecycleCampaignEngine";
 import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
@@ -7555,6 +7556,48 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
       console.error("Round robin error:", err);
       return res.status(500).json({ error: "Failed to generate round robin" });
     }
+  });
+
+  // ==================== UNIFIED INTELLIGENCE HUB ====================
+
+  startIntelligenceHub();
+
+  app.get("/api/intelligence/feed", async (_req: Request, res: Response) => {
+    try {
+      const feed = await generateIntelligenceFeed();
+      return res.json(feed);
+    } catch (err) {
+      console.error("Intelligence feed error:", err);
+      return res.status(500).json({ error: "Failed to generate intelligence feed" });
+    }
+  });
+
+  app.get("/api/intelligence/snapshot/:sport", async (req: Request, res: Response) => {
+    try {
+      const sport = req.params.sport?.toUpperCase();
+      if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport" });
+      }
+      const snapshot = await getUnifiedSnapshot(sport as any);
+      if (!snapshot) {
+        return res.status(404).json({ error: "No data available yet, hub is initializing" });
+      }
+      return res.json({
+        sport: snapshot.sport,
+        games: snapshot.games.length,
+        marketData: snapshot.marketData ? snapshot.marketData.games.length : 0,
+        injuries: snapshot.injuries.length,
+        weatherStations: snapshot.weatherMap.size,
+        timestamp: new Date(snapshot.timestamp).toISOString(),
+      });
+    } catch (err) {
+      console.error("Intelligence snapshot error:", err);
+      return res.status(500).json({ error: "Failed to fetch intelligence snapshot" });
+    }
+  });
+
+  app.get("/api/intelligence/hub-status", (_req: Request, res: Response) => {
+    return res.json(getHubStatus());
   });
 
   // ==================== PRECOMPUTED PREDICTIONS ENGINE ====================
