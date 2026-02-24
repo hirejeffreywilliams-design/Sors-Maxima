@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
+import { useSSE } from "@/hooks/use-sse";
+import { queryClient } from "@/lib/queryClient";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check,
   ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
-  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle
+  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff
 } from "lucide-react";
 
 interface TopPick {
@@ -412,6 +415,15 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
 export default function CommandCenter() {
   const [activeSportTab, setActiveSportTab] = useState("all");
 
+  const sse = useSSE({
+    enabled: true,
+    onEvent: (event) => {
+      if (event.type === "intelligence-update") {
+        queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+      }
+    },
+  });
+
   const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
     queryKey: ["/api/intelligence/feed"],
     refetchInterval: 30000,
@@ -463,6 +475,27 @@ export default function CommandCenter() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1 cursor-default" data-testid="indicator-sse-status">
+                    {sse.connected ? (
+                      <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-emerald-500/10 border-emerald-500/30 text-emerald-500">
+                        <Wifi className="w-2.5 h-2.5" />
+                        Live
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-red-500/10 border-red-500/30 text-red-500">
+                        <WifiOff className="w-2.5 h-2.5" />
+                        Offline
+                      </Badge>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{sse.connected ? "Real-time updates active via SSE" : "Reconnecting... Polling every 30s as fallback"}</p>
+                  {sse.lastUpdate && <p className="text-[10px] text-muted-foreground">Last update: {new Date(sse.lastUpdate).toLocaleTimeString()}</p>}
+                </TooltipContent>
+              </Tooltip>
               <DataSourceBar sources={feed.dataSourceHealth} />
               <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                 <RefreshCw className="w-3 h-3" />

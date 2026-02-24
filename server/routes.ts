@@ -30,6 +30,7 @@ import { analyticsEventService } from "./analyticsEventService";
 import { getAllTests, getTest, createTest, updateTest, deleteTest, getTestStats } from "./abTestEngine";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, stopPrecomputedEngine } from "./precomputedPredictionsEngine";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "./unifiedIntelligenceHub";
+import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "./sseManager";
 import { getAllCampaigns, getCampaign, createCampaign, updateCampaign, deleteCampaign, getCampaignStats } from "./lifecycleCampaignEngine";
 import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersonalizationRules, getSegmentationStats } from "./segmentationEngine";
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "./promoOffersEngine";
@@ -7609,6 +7610,18 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
   app.get("/api/intelligence/hub-status", (_req: Request, res: Response) => {
     return res.json(getHubStatus());
+  });
+
+  startSSEBroadcaster();
+
+  app.get("/api/sse/stream", (req: Request, res: Response) => {
+    const channelsParam = (req.query.channels as string) || "all";
+    const channels = channelsParam.split(",").map(c => c.trim()).filter(Boolean);
+    registerSSEClient(res, channels);
+  });
+
+  app.get("/api/sse/status", (_req: Request, res: Response) => {
+    return res.json(getSSEStatus());
   });
 
   // ==================== PRECOMPUTED PREDICTIONS ENGINE ====================
