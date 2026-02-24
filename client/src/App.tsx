@@ -61,6 +61,7 @@ const LineMovement = lazy(() => import("@/pages/line-movement"));
 const PowerRankings = lazy(() => import("@/pages/power-rankings"));
 const TicketHistory = lazy(() => import("@/pages/ticket-history"));
 const BettingProfile = lazy(() => import("@/pages/betting-profile"));
+const PersonalizedInsights = lazy(() => import("@/pages/personalized-insights"));
 const ProTools = lazy(() => import("@/pages/pro-tools"));
 const CorrelationMatrix = lazy(() => import("@/pages/correlation-matrix"));
 const SharedTickets = lazy(() => import("@/pages/shared-tickets"));
@@ -231,6 +232,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/power-rankings" component={PowerRankings} />
         <Route path="/ticket-history" component={TicketHistory} />
         <Route path="/betting-profile" component={BettingProfile} />
+        <Route path="/insights" component={PersonalizedInsights} />
         <Route path="/pro-tools" component={ProTools} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/straight-bets" component={StraightBets} />
@@ -263,6 +265,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/", icon: Brain, label: "Intelligence", testId: "nav-command-center", tooltip: "Command Center - All intelligence at a glance" },
   { href: "/daily", icon: Calendar, label: "Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
+  { href: "/insights", icon: Star, label: "Insights", testId: "nav-insights", tooltip: "Personalized Insights - Tailored analysis based on your betting history" },
   { href: "/generate", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
@@ -358,6 +361,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Analyze</div>
         <nav className="space-y-1 pb-2">
           {([
+            { href: "/insights", icon: Star, label: "My Insights", testId: "mobile-nav-insights" },
             { href: "/ev-heatmap", icon: Flame, label: "EV Heatmap", testId: "mobile-nav-ev" },
             { href: "/line-movement", icon: TrendingUp, label: "Line Movement", testId: "mobile-nav-lines" },
             { href: "/power-rankings", icon: BarChart3, label: "Power Rankings", testId: "mobile-nav-rankings" },

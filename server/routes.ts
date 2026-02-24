@@ -6267,6 +6267,17 @@ Follow these rules:
     res.json(userDataEngine.getStreakData());
   });
 
+  app.get("/api/user/personalized-insights", async (_req, res) => {
+    try {
+      const { getPersonalizedInsights } = await import("./personalizedInsightsEngine");
+      const insights = await getPersonalizedInsights();
+      res.json(insights);
+    } catch (err) {
+      console.error("[PersonalizedInsights] Error:", err);
+      res.status(500).json({ error: "Failed to generate personalized insights" });
+    }
+  });
+
   app.get("/api/user/paper-account", (_req, res) => {
     res.json(userDataEngine.getPaperAccount());
   });
