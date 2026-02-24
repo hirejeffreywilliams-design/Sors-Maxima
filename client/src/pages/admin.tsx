@@ -521,11 +521,11 @@ export default function AdminDashboard() {
             </div>
           ) : snapshot?.executive && (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" data-testid="executive-snapshot-row">
-              <Card data-testid="card-runway">
+              <Card data-testid="card-revenue">
                 <CardContent className="p-4">
-                  <p className="text-xs text-muted-foreground">Runway</p>
-                  <p className="text-2xl font-bold mt-1" data-testid="stat-runway">
-                    {snapshot.executive.runwayMonths?.toFixed(1)}<span className="text-sm font-normal text-muted-foreground ml-1">mo</span>
+                  <p className="text-xs text-muted-foreground">Monthly Revenue</p>
+                  <p className="text-2xl font-bold mt-1" data-testid="stat-revenue">
+                    ${snapshot.executive.monthlyRevenue?.toLocaleString() ?? 0}
                   </p>
                 </CardContent>
               </Card>
@@ -537,12 +537,20 @@ export default function AdminDashboard() {
                   </p>
                 </CardContent>
               </Card>
-              <Card data-testid="card-reserve">
+              <Card data-testid="card-systems">
                 <CardContent className="p-4">
-                  <p className="text-xs text-muted-foreground">Reserve Ratio</p>
-                  <p className="text-2xl font-bold mt-1" data-testid="stat-reserve">
-                    {snapshot.executive.reserveRatio?.toFixed(1)}<span className="text-sm font-normal text-muted-foreground ml-1">%</span>
-                  </p>
+                  <p className="text-xs text-muted-foreground">Systems</p>
+                  <div className="mt-2">
+                    <Badge
+                      variant={
+                        (snapshot as any).systems?.filter((s: any) => s.status === 'running' || s.status === 'healthy').length === (snapshot as any).systems?.length ? 'default' :
+                        'secondary'
+                      }
+                      data-testid="stat-systems"
+                    >
+                      {(snapshot as any).systems?.filter((s: any) => s.status === 'running' || s.status === 'healthy').length || 0}/{(snapshot as any).systems?.length || 0} up
+                    </Badge>
+                  </div>
                 </CardContent>
               </Card>
               <Card data-testid="card-critical-alerts">
@@ -692,6 +700,9 @@ export default function AdminDashboard() {
                 <TabsTrigger value="compliance" data-testid="tab-compliance">
                   <ShieldAlert className="h-3.5 w-3.5 mr-1" />Compliance
                 </TabsTrigger>
+                <TabsTrigger value="systems" data-testid="tab-systems">
+                  <Cpu className="h-3.5 w-3.5 mr-1" />Systems
+                </TabsTrigger>
                 <TabsTrigger value="ops" data-testid="tab-ops">
                   <Server className="h-3.5 w-3.5 mr-1" />Ops
                 </TabsTrigger>
@@ -714,35 +725,19 @@ export default function AdminDashboard() {
               ) : snapshot?.financials ? (
                 <>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <Card data-testid="card-handle-24h">
+                    <Card data-testid="card-monthly-revenue">
                       <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground">Handle (24h)</p>
-                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-24h">
-                          ${snapshot.financials.handle24h?.toLocaleString()}
+                        <p className="text-xs text-muted-foreground">Monthly Revenue</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-monthly-revenue">
+                          ${snapshot.financials.monthlyRevenue?.toLocaleString() ?? 0}
                         </p>
                       </CardContent>
                     </Card>
-                    <Card data-testid="card-handle-7d">
+                    <Card data-testid="card-paid-users">
                       <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground">Handle (7d)</p>
-                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-7d">
-                          ${snapshot.financials.handle7d?.toLocaleString()}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card data-testid="card-handle-30d">
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground">Handle (30d)</p>
-                        <p className="text-xl font-bold mt-1" data-testid="stat-handle-30d">
-                          ${snapshot.financials.handle30d?.toLocaleString()}
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card data-testid="card-gross-win">
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground">Gross Win</p>
-                        <p className="text-xl font-bold mt-1" data-testid="stat-gross-win">
-                          ${snapshot.financials.grossWin?.toLocaleString()}
+                        <p className="text-xs text-muted-foreground">Paid Subscribers</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-paid-users">
+                          {snapshot.financials.paidUsers ?? 0}
                         </p>
                       </CardContent>
                     </Card>
@@ -751,14 +746,6 @@ export default function AdminDashboard() {
                         <p className="text-xs text-muted-foreground">Margin</p>
                         <p className="text-xl font-bold mt-1" data-testid="stat-fin-margin">
                           {snapshot.financials.margin?.toFixed(1)}%
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card data-testid="card-payout-rate">
-                      <CardContent className="p-4">
-                        <p className="text-xs text-muted-foreground">Payout Rate</p>
-                        <p className="text-xl font-bold mt-1" data-testid="stat-payout-rate">
-                          {snapshot.financials.payoutRate?.toFixed(1)}%
                         </p>
                       </CardContent>
                     </Card>
@@ -774,24 +761,42 @@ export default function AdminDashboard() {
                       <CardContent className="p-4">
                         <p className="text-xs text-muted-foreground">Reserve Ratio</p>
                         <p className="text-xl font-bold mt-1" data-testid="stat-fin-reserve">
-                          {snapshot.financials.reserveRatio}
+                          {snapshot.financials.reserveRatio}%
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card data-testid="card-runway-detail">
+                      <CardContent className="p-4">
+                        <p className="text-xs text-muted-foreground">Runway</p>
+                        <p className="text-xl font-bold mt-1" data-testid="stat-fin-runway">
+                          {snapshot.financials.runwayMonths}<span className="text-sm font-normal text-muted-foreground ml-1">mo</span>
                         </p>
                       </CardContent>
                     </Card>
                   </div>
-                  <Card data-testid="card-runway-detail">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div>
-                          <p className="text-sm font-medium">Runway</p>
-                          <p className="text-xs text-muted-foreground">Current cash position vs monthly burn</p>
+                  {snapshot.financials.revenueBreakdown && (
+                    <Card data-testid="card-revenue-breakdown">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Revenue by Tier</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="p-3 border rounded-md" data-testid="rev-pro">
+                            <p className="text-xs text-muted-foreground">Pro ($49/mo)</p>
+                            <p className="text-lg font-bold">${snapshot.financials.revenueBreakdown.pro?.toLocaleString() ?? 0}</p>
+                          </div>
+                          <div className="p-3 border rounded-md" data-testid="rev-elite">
+                            <p className="text-xs text-muted-foreground">Elite ($99/mo)</p>
+                            <p className="text-lg font-bold">${snapshot.financials.revenueBreakdown.elite?.toLocaleString() ?? 0}</p>
+                          </div>
+                          <div className="p-3 border rounded-md" data-testid="rev-whale">
+                            <p className="text-xs text-muted-foreground">Whale ($249/mo)</p>
+                            <p className="text-lg font-bold">${snapshot.financials.revenueBreakdown.whale?.toLocaleString() ?? 0}</p>
+                          </div>
                         </div>
-                        <p className="text-2xl font-bold" data-testid="stat-fin-runway">
-                          {snapshot.financials.runwayMonths}<span className="text-sm font-normal text-muted-foreground ml-1">months</span>
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                      </CardContent>
+                    </Card>
+                  )}
                 </>
               ) : (
                 <div className="text-center py-12 text-muted-foreground">No financial data available</div>
@@ -804,57 +809,42 @@ export default function AdminDashboard() {
               ) : snapshot?.exposure?.length > 0 ? (
                 <Card data-testid="card-exposure-table">
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Market Exposure</CardTitle>
-                    <CardDescription>Current liability across markets</CardDescription>
+                    <CardTitle className="text-base">Sport Coverage</CardTitle>
+                    <CardDescription>Live data coverage across sports from Intelligence Hub</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Market</TableHead>
-                            <TableHead className="text-right">Liability</TableHead>
-                            <TableHead className="text-right">Limit %</TableHead>
-                            <TableHead className="text-right">Threshold %</TableHead>
-                            <TableHead>Proximity</TableHead>
+                            <TableHead>Sport</TableHead>
+                            <TableHead className="text-right">Picks</TableHead>
+                            <TableHead className="text-right">Hub Games</TableHead>
+                            <TableHead>Market Data</TableHead>
+                            <TableHead>Data Age</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {snapshot.exposure.map((row: any, i: number) => {
-                            const proximity = row.threshold > 0 ? (row.limitPct / row.threshold) * 100 : 0;
-                            const isNearThreshold = proximity >= 80;
-                            return (
-                              <TableRow
-                                key={i}
-                                className={isNearThreshold ? 'bg-red-500/5' : ''}
-                                data-testid={`row-exposure-${i}`}
-                              >
-                                <TableCell className="font-medium">{row.market}</TableCell>
-                                <TableCell className="text-right font-mono">${row.liability?.toLocaleString()}</TableCell>
-                                <TableCell className="text-right font-mono">{row.limitPct?.toFixed(1)}%</TableCell>
-                                <TableCell className="text-right font-mono">{row.threshold?.toFixed(1)}%</TableCell>
-                                <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <Progress
-                                      value={Math.min(proximity, 100)}
-                                      className={`h-2 w-24 ${isNearThreshold ? '[&>div]:bg-red-500' : ''}`}
-                                      data-testid={`progress-exposure-${i}`}
-                                    />
-                                    <span className={`text-xs font-mono ${isNearThreshold ? 'text-red-500' : 'text-muted-foreground'}`}>
-                                      {proximity.toFixed(0)}%
-                                    </span>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
+                          {snapshot.exposure.map((row: any, i: number) => (
+                            <TableRow key={i} data-testid={`row-exposure-${i}`}>
+                              <TableCell className="font-medium">{row.market}</TableCell>
+                              <TableCell className="text-right font-mono">{row.pickCount}</TableCell>
+                              <TableCell className="text-right font-mono">{row.hubGames}</TableCell>
+                              <TableCell>
+                                <Badge variant={row.hasMarketData ? 'default' : 'secondary'}>
+                                  {row.hasMarketData ? 'Live' : 'No Data'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground font-mono">{row.dataAge}</TableCell>
+                            </TableRow>
+                          ))}
                         </TableBody>
                       </Table>
                     </div>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="text-center py-12 text-muted-foreground">No exposure data available</div>
+                <div className="text-center py-12 text-muted-foreground">No sport coverage data available</div>
               )}
             </TabsContent>
 
@@ -1016,6 +1006,52 @@ export default function AdminDashboard() {
               )}
             </TabsContent>
 
+            <TabsContent value="systems" className="space-y-4">
+              {snapshotLoading ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <Skeleton key={i} className="h-28 w-full" />
+                  ))}
+                </div>
+              ) : (snapshot as any)?.systems?.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {(snapshot as any).systems.map((sys: any, i: number) => {
+                    const isUp = sys.status === 'running' || sys.status === 'healthy';
+                    const isDegraded = sys.status === 'degraded';
+                    return (
+                      <Card key={i} data-testid={`card-system-${i}`}>
+                        <CardContent className="p-4 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium truncate">{sys.name}</p>
+                            <Badge
+                              variant={isUp ? 'default' : isDegraded ? 'secondary' : 'destructive'}
+                              className={isUp ? 'bg-green-600 text-white' : ''}
+                              data-testid={`badge-system-status-${i}`}
+                            >
+                              {sys.status}
+                            </Badge>
+                          </div>
+                          <div className="space-y-1 text-xs text-muted-foreground">
+                            <div className="flex justify-between">
+                              <span>Uptime</span>
+                              <span className="font-mono">{sys.uptime}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Last Cycle</span>
+                              <span className="font-mono">{sys.lastCycle}</span>
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground truncate">{sys.details}</p>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">No systems data available</div>
+              )}
+            </TabsContent>
+
             <TabsContent value="ops" className="space-y-4">
               {snapshotLoading ? (
                 <div className="space-y-3">
@@ -1155,28 +1191,36 @@ export default function AdminDashboard() {
               ) : (
                 <>
                   {snapshot?.users && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      <Card data-testid="card-active-users">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <Card data-testid="card-total-users">
                         <CardContent className="p-4">
-                          <p className="text-xs text-muted-foreground">Active Users</p>
-                          <p className="text-xl font-bold mt-1" data-testid="stat-active-users">
-                            {snapshot.users.activeUsers?.toLocaleString()}
+                          <p className="text-xs text-muted-foreground">Total Users</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-total-users-count">
+                            {snapshot.users.totalUsers?.toLocaleString() ?? 0}
                           </p>
                         </CardContent>
                       </Card>
-                      <Card data-testid="card-new-users">
+                      <Card data-testid="card-paid-users-tab">
                         <CardContent className="p-4">
-                          <p className="text-xs text-muted-foreground">New Users</p>
-                          <p className="text-xl font-bold mt-1" data-testid="stat-new-users">
-                            {snapshot.users.newUsers?.toLocaleString()}
+                          <p className="text-xs text-muted-foreground">Paid</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-paid-users-count">
+                            {snapshot.users.paidUsers?.toLocaleString() ?? 0}
                           </p>
                         </CardContent>
                       </Card>
-                      <Card data-testid="card-churn">
+                      <Card data-testid="card-free-users">
                         <CardContent className="p-4">
-                          <p className="text-xs text-muted-foreground">Churn Rate</p>
-                          <p className="text-xl font-bold mt-1" data-testid="stat-churn">
-                            {snapshot.users.churnRate?.toFixed(1)}%
+                          <p className="text-xs text-muted-foreground">Free</p>
+                          <p className="text-xl font-bold mt-1" data-testid="stat-free-users-count">
+                            {snapshot.users.freeUsers?.toLocaleString() ?? 0}
+                          </p>
+                        </CardContent>
+                      </Card>
+                      <Card data-testid="card-tier-breakdown">
+                        <CardContent className="p-4">
+                          <p className="text-xs text-muted-foreground">Tier Split</p>
+                          <p className="text-xs font-mono mt-1" data-testid="stat-tier-breakdown">
+                            P:{snapshot.users.tierBreakdown?.pro ?? 0} E:{snapshot.users.tierBreakdown?.elite ?? 0} W:{snapshot.users.tierBreakdown?.whale ?? 0}
                           </p>
                         </CardContent>
                       </Card>

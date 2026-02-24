@@ -5799,6 +5799,10 @@ Follow these rules:
       const { getAllTests } = await import("./abTestEngine");
       const { getRealTimeHealth, getSLOs, getErrorsAndPerformance } = await import("./analyticsDashboardEngine");
       const { getLatestReport } = await import("./adminAssistantEngine");
+      const { getOrchestratorStatus } = await import("./continuousLearningOrchestrator");
+      const { getHistoricalLearningStatus } = await import("./historicalLearningEngine");
+      const { appGuardian } = await import("./appGuardianEngine");
+      const { analyticsAgent } = await import("./analyticsAgentEngine");
 
       const pipelineHealth = getPipelineHealth();
       const ticketMetrics = getTicketMetrics();
@@ -5816,20 +5820,109 @@ Follow these rules:
       const openTickets = getAllTickets({ status: "open" });
       const latestReport = getLatestReport();
 
+      const hubStatus = getHubStatus();
+      const sseStatus = getSSEStatus();
+      const precomputedStatus = getPrecomputedEngineStatus();
+      const guardianStatus = appGuardian.getStatus();
+      const analyticsAgentStatus = analyticsAgent.getStatus();
+      const orchestratorStatus = getOrchestratorStatus();
+      const historicalStatus = getHistoricalLearningStatus();
+
+      const allSubs = stripeService.getAllSubscriptions();
+      let totalUsers = 0;
+      let proUsers = 0;
+      let eliteUsers = 0;
+      let whaleUsers = 0;
+      allSubs.forEach((sub) => {
+        totalUsers++;
+        if (sub.subscriptionTier === 'pro') proUsers++;
+        else if (sub.subscriptionTier === 'elite') eliteUsers++;
+        else if (sub.subscriptionTier === 'whale') whaleUsers++;
+      });
+      const paidUsers = proUsers + eliteUsers + whaleUsers;
+      const monthlyRevenue = (proUsers * 49) + (eliteUsers * 99) + (whaleUsers * 249);
       const cashOnHand = bankrollConfig.houseLimitTotal;
-      const monthlyBurn = 45000;
+      const monthlyBurn = monthlyRevenue > 0 ? monthlyRevenue * 0.6 : 0;
       const reservedLiquidity = cashOnHand * 0.3;
-      const runwayMonths = cashOnHand / monthlyBurn;
+      const runwayMonths = monthlyBurn > 0 ? cashOnHand / monthlyBurn : 0;
+      const margin = totalUsers > 0 && monthlyRevenue > 0 ? ((monthlyRevenue - monthlyBurn) / monthlyRevenue) * 100 : 0;
+      const payoutRate = margin > 0 ? 100 - margin : 0;
+
+      const sportPickCounts: Record<string, number> = {};
+      const precomputedCache = precomputedStatus.cacheStatus || {};
+      for (const [sport, info] of Object.entries(precomputedCache as Record<string, any>)) {
+        sportPickCounts[sport.toUpperCase()] = info.pickCount || 0;
+      }
+
+      const systemsList = [
+        {
+          name: "Intelligence Hub",
+          status: hubStatus.running ? "running" : "stopped",
+          uptime: hubStatus.running ? `${hubStatus.totalCycles} cycles` : "N/A",
+          lastCycle: hubStatus.lastCycleTimeMs ? `${hubStatus.lastCycleTimeMs}ms` : "N/A",
+          details: Object.entries(hubStatus.sportStatus || {}).map(([sport, info]: [string, any]) => `${sport}: ${info.games} games (${info.age})`).join(", "),
+        },
+        {
+          name: "SSE Broadcaster",
+          status: sseStatus.activeClients >= 0 ? "running" : "stopped",
+          uptime: `${sseStatus.totalEventsSent} events sent`,
+          lastCycle: `${sseStatus.activeClients} clients`,
+          details: `Active connections: ${sseStatus.activeClients}`,
+        },
+        {
+          name: "Precomputed Engine",
+          status: precomputedStatus.running ? "running" : "stopped",
+          uptime: `${precomputedStatus.totalRuns || 0} runs`,
+          lastCycle: precomputedStatus.lastRunTime ? new Date(precomputedStatus.lastRunTime).toLocaleTimeString() : "N/A",
+          details: Object.entries(sportPickCounts).map(([s, c]) => `${s}: ${c} picks`).join(", "),
+        },
+        {
+          name: "App Guardian",
+          status: guardianStatus.overallStatus || "unknown",
+          uptime: guardianStatus.vitals?.uptimeFormatted || "N/A",
+          lastCycle: `Health: ${guardianStatus.healthScore || 0}%`,
+          details: `Services: ${guardianStatus.services?.length || 0}, Alerts: ${guardianStatus.activeAlerts?.length || 0}`,
+        },
+        {
+          name: "Analytics Agent",
+          status: analyticsAgentStatus.running ? "running" : "stopped",
+          uptime: `${analyticsAgentStatus.totalCycles || 0} cycles`,
+          lastCycle: analyticsAgentStatus.lastCycleAt ? new Date(analyticsAgentStatus.lastCycleAt).toLocaleTimeString() : "N/A",
+          details: `Feeds: ${analyticsAgentStatus.feedsActive || 0} active, ${analyticsAgentStatus.feedsStale || 0} stale, Markets: ${analyticsAgentStatus.marketsAnalyzed || 0}`,
+        },
+        {
+          name: "Learning Orchestrator",
+          status: orchestratorStatus.isRunning ? "running" : "stopped",
+          uptime: `${orchestratorStatus.totalCycles || 0} cycles`,
+          lastCycle: orchestratorStatus.lastSettlementRun ? new Date(orchestratorStatus.lastSettlementRun).toLocaleTimeString() : "N/A",
+          details: `Settled: ${orchestratorStatus.totalSettled || 0}, Retrained: ${orchestratorStatus.totalRetrained || 0}, Synced: ${orchestratorStatus.totalWeightSyncs || 0}`,
+        },
+        {
+          name: "Historical Learning",
+          status: historicalStatus.isRunning ? "running" : "idle",
+          uptime: `${historicalStatus.gamesProcessed} games processed`,
+          lastCycle: "N/A",
+          details: `${historicalStatus.trainingRecords} training records`,
+        },
+        {
+          name: "Prediction Pipeline",
+          status: pipelineHealth.status || "unknown",
+          uptime: "N/A",
+          lastCycle: "N/A",
+          details: `Status: ${pipelineHealth.status}`,
+        },
+      ];
 
       res.json({
         timestamp: new Date().toISOString(),
         executive: {
           cashOnHand,
+          monthlyRevenue,
           monthlyBurn,
           reservedLiquidity,
-          reserveRatio: Math.round(reservedLiquidity / cashOnHand * 100),
+          reserveRatio: cashOnHand > 0 ? Math.round(reservedLiquidity / cashOnHand * 100) : 0,
           runwayMonths,
-          marginTrend: 6.5,
+          marginTrend: margin,
           criticalAlerts: openAlerts.filter(a => a.severity === "critical").length,
           openIncidents: openTickets.length,
           pipelineStatus: pipelineHealth.status,
@@ -5845,24 +5938,22 @@ Follow these rules:
           remediation: a.remediation,
         })),
         financials: {
-          handle24h: recStats.totalGenerated * 250,
-          handle7d: recStats.totalGenerated * 250 * 7,
-          handle30d: recStats.totalGenerated * 250 * 30,
-          grossWin: recStats.totalGenerated * 250 * 0.065,
-          margin: 6.5,
-          payoutRate: 93.5,
+          monthlyRevenue,
+          paidUsers,
+          revenueBreakdown: { pro: proUsers * 49, elite: eliteUsers * 99, whale: whaleUsers * 249 },
+          margin: parseFloat(margin.toFixed(1)),
+          payoutRate: parseFloat(payoutRate.toFixed(1)),
           cashOnHand,
-          reserveRatio: (reservedLiquidity / cashOnHand * 100).toFixed(1),
-          runwayMonths: runwayMonths.toFixed(1),
+          reserveRatio: cashOnHand > 0 ? (reservedLiquidity / cashOnHand * 100).toFixed(1) : "0.0",
+          runwayMonths: monthlyBurn > 0 ? runwayMonths.toFixed(1) : "N/A",
         },
-        exposure: [
-          { market: "NFL", liability: Math.round(cashOnHand * 0.12), limitPct: 12, threshold: 15 },
-          { market: "NBA", liability: Math.round(cashOnHand * 0.18), limitPct: 18, threshold: 20 },
-          { market: "MLB", liability: Math.round(cashOnHand * 0.08), limitPct: 8, threshold: 15 },
-          { market: "NHL", liability: Math.round(cashOnHand * 0.06), limitPct: 6, threshold: 15 },
-          { market: "Soccer", liability: Math.round(cashOnHand * 0.05), limitPct: 5, threshold: 15 },
-          { market: "Tennis", liability: Math.round(cashOnHand * 0.03), limitPct: 3, threshold: 10 },
-        ],
+        exposure: Object.entries(sportPickCounts).map(([sport, pickCount]) => ({
+          market: sport,
+          pickCount,
+          hubGames: (hubStatus.sportStatus as any)?.[sport.toLowerCase()]?.games || 0,
+          hasMarketData: (hubStatus.sportStatus as any)?.[sport.toLowerCase()]?.hasMarketData || false,
+          dataAge: (hubStatus.sportStatus as any)?.[sport.toLowerCase()]?.age || "N/A",
+        })),
         featureHealth: features.map(f => ({
           name: f.name,
           status: f.status === "healthy" ? "OK" : f.status === "degraded" ? "DEGRADED" : f.status === "maintenance" ? "MAINTENANCE" : "DOWN",
@@ -5890,11 +5981,13 @@ Follow these rules:
           signupsLastHour: fraudStats.signupsLastHour,
         },
         users: {
-          activeUsers: 1247,
-          newUsers: 89,
-          churnRate: 4.2,
+          totalUsers,
+          paidUsers,
+          freeUsers: totalUsers - paidUsers,
+          tierBreakdown: { pro: proUsers, elite: eliteUsers, whale: whaleUsers },
           topCohorts: acquisition.channels?.slice(0, 5) || [],
         },
+        systems: systemsList,
         infrastructure: {
           health: realTimeHealth,
           slos,
