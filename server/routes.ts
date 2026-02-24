@@ -7564,8 +7564,8 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
   app.get("/api/precomputed-predictions/:sport", async (req: Request, res: Response) => {
     try {
       const sport = req.params.sport?.toUpperCase();
-      if (!["NBA", "NFL", "MLB", "NHL"].includes(sport)) {
-        return res.status(400).json({ error: "Invalid sport. Use NBA, NFL, MLB, or NHL." });
+      if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport. Use NBA, NFL, MLB, NHL, NCAAB, or NCAAF." });
       }
       const snapshot = await getPrecomputedPredictions(sport as any);
       return res.json(snapshot);
@@ -7577,7 +7577,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
   app.get("/api/precomputed-predictions/:sport/cache", (req: Request, res: Response) => {
     const sport = req.params.sport?.toUpperCase();
-    if (!["NBA", "NFL", "MLB", "NHL"].includes(sport)) {
+    if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
       return res.status(400).json({ error: "Invalid sport" });
     }
     const cached = getPrecomputedCache(sport as any);

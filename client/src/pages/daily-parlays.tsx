@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DollarSign, Clock, Target, Users, AlertCircle } from "lucide-react";
+import { PrecomputedPicks } from "@/components/precomputed-picks";
 
 function useCountdown() {
   const [timeLeft, setTimeLeft] = useState("");
@@ -131,6 +132,8 @@ export default function DailyParlays() {
             )}
           </CardContent>
         </Card>
+
+        <PrecomputedPicks />
 
         <DailyParlayGenerator bankroll={bankroll} />
       </div>

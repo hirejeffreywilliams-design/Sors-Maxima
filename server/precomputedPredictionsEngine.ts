@@ -150,7 +150,9 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     const totalEstimate = sport === "NBA" ? 220 + Math.round((homeWinPct + awayWinPct - 1) * 20) :
       sport === "NFL" ? 44 + Math.round((homeWinPct + awayWinPct - 1) * 10) :
-      sport === "MLB" ? 8.5 : sport === "NHL" ? 6 : 220;
+      sport === "MLB" ? 8.5 : sport === "NHL" ? 6 :
+      sport === "NCAAB" ? 145 + Math.round((homeWinPct + awayWinPct - 1) * 15) :
+      sport === "NCAAF" ? 50 + Math.round((homeWinPct + awayWinPct - 1) * 12) : 220;
 
     const mlOdds = favoriteIsHome
       ? Math.round(-100 - (homeWinPct - 0.5) * 400)
@@ -239,7 +241,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 }
 
 async function runPredictionCycle(): Promise<void> {
-  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
+  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
   totalRuns++;
 
   console.log(`[PrecomputedEngine] Starting prediction cycle #${totalRuns}...`);
