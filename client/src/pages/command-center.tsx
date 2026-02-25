@@ -11,7 +11,7 @@ import { useSSE } from "@/hooks/use-sse";
 import { queryClient } from "@/lib/queryClient";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
-  ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
+  ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
   Trophy, DollarSign, Layers, Plus, Calendar
 } from "lucide-react";
@@ -216,6 +216,49 @@ interface OptimalTicketsResponse {
   ticketCount: number;
   sports: string[];
   riskLevel: string;
+  generatedAt: string;
+  engineSources: string[];
+}
+
+interface MatchupTicket {
+  id: string;
+  matchupGame: string;
+  homeTeam: string;
+  awayTeam: string;
+  sport: string;
+  legs: OptimalTicketLeg[];
+  legCount: number;
+  totalOdds: number;
+  americanOdds: number;
+  combinedGrade: string;
+  combinedConfidence: number;
+  combinedEV: number;
+  winProbability: number;
+  recommendedStake: number;
+  potentialPayout: number;
+  reasoning: string;
+  marketBreakdown: {
+    spreads: OptimalTicketLeg[];
+    totals: OptimalTicketLeg[];
+    moneylines: OptimalTicketLeg[];
+    playerProps: OptimalTicketLeg[];
+    other: OptimalTicketLeg[];
+  };
+  engineConvergence: {
+    quantumFusion: boolean;
+    monteCarlo: boolean;
+    situational: boolean;
+    injury: boolean;
+    vegas: boolean;
+    market: boolean;
+  };
+  generatedAt: string;
+}
+
+interface MatchupTicketsResponse {
+  matchupTickets: MatchupTicket[];
+  ticketCount: number;
+  sports: string[];
   generatedAt: string;
   engineSources: string[];
 }
@@ -654,6 +697,174 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
   );
 }
 
+function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const allInSlip = ticket.legs.every(l => legs.some(sl => sl.id === `matchup-${l.pickId}`));
+  const someInSlip = ticket.legs.some(l => legs.some(sl => sl.id === `matchup-${l.pickId}`));
+  const inSlipCount = ticket.legs.filter(l => legs.some(sl => sl.id === `matchup-${l.pickId}`)).length;
+
+  const handleAddAll = () => {
+    for (const leg of ticket.legs) {
+      const legId = `matchup-${leg.pickId}`;
+      if (legs.some(sl => sl.id === legId)) continue;
+      addLeg({
+        id: legId,
+        team: leg.team,
+        opponent: leg.opponent,
+        market: leg.market as any,
+        outcome: leg.outcome,
+        decimalOdds: leg.decimalOdds,
+        americanOdds: leg.americanOdds,
+        addedFrom: `Matchup: ${ticket.matchupGame}`,
+        addedAt: new Date().toISOString(),
+        sport: leg.sport,
+        confidence: leg.confidence,
+        evPercent: leg.ev,
+        grade: leg.grade,
+        edge: leg.edge,
+        reasoning: leg.reasoning,
+        gameTime: leg.gameTime,
+      });
+    }
+  };
+
+  const renderLegGroup = (title: string, groupLegs: OptimalTicketLeg[]) => {
+    if (groupLegs.length === 0) return null;
+    return (
+      <div className="space-y-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground px-1">{title} ({groupLegs.length})</p>
+        {groupLegs.map((leg) => {
+          const inSlip = legs.some(sl => sl.id === `matchup-${leg.pickId}`);
+          return (
+            <div key={leg.id} className={`flex items-center gap-2 text-xs p-1.5 rounded ${inSlip ? "bg-primary/5 border border-primary/20" : "bg-muted/30"}`} data-testid={`row-matchup-leg-${leg.id}`}>
+              <span className="font-medium truncate flex-1">{leg.outcome}</span>
+              <span className="font-mono text-muted-foreground shrink-0">{formatOdds(leg.americanOdds)}</span>
+              <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${gradeBg(leg.grade)}`}>{leg.grade}</Badge>
+              <span className="text-[10px] text-muted-foreground shrink-0">{leg.confidence}%</span>
+              {inSlip && <Check className="w-3 h-3 text-primary shrink-0" />}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <Card className="border hover:border-primary/30 transition-all duration-200 overflow-hidden" data-testid={`card-matchup-${ticket.id}`}>
+      <div className={`h-1 w-full ${ticket.combinedGrade.startsWith("A") ? "bg-green-500" : ticket.combinedGrade.startsWith("B") ? "bg-blue-500" : "bg-yellow-500"}`} />
+      <CardContent className="p-0">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="w-full p-4 text-left"
+          aria-expanded={expanded}
+          data-testid={`button-expand-matchup-${ticket.id}`}
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sportColor(ticket.sport)}`}>{ticket.sport}</Badge>
+                <span className="font-semibold text-sm truncate" data-testid={`text-matchup-game-${ticket.id}`}>{ticket.matchupGame}</span>
+              </div>
+              <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
+                <span className="font-mono font-medium text-foreground">{formatOdds(ticket.americanOdds)}</span>
+                <span>{ticket.legCount} legs</span>
+                <span className="text-emerald-500 font-medium">${ticket.potentialPayout.toLocaleString()} payout</span>
+                {ticket.combinedEV > 0 && (
+                  <span className="text-green-500">EV: +{ticket.combinedEV}%</span>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="outline" className={`font-mono font-bold text-sm px-2 py-0.5 ${gradeBg(ticket.combinedGrade)}`}>
+                {ticket.combinedGrade}
+              </Badge>
+              <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${expanded ? "rotate-180" : ""}`} />
+            </div>
+          </div>
+          {someInSlip && (
+            <div className="mt-1.5">
+              <Badge variant="secondary" className="text-[10px]">{inSlipCount}/{ticket.legCount} in slip</Badge>
+            </div>
+          )}
+        </button>
+
+        {expanded && (
+          <div className="px-4 pb-4 space-y-3 border-t pt-3">
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <div className="p-1.5 rounded-md bg-muted/50">
+                <p className="text-[9px] text-muted-foreground uppercase">Odds</p>
+                <p className="font-mono font-bold text-xs">{formatOdds(ticket.americanOdds)}</p>
+              </div>
+              <div className="p-1.5 rounded-md bg-muted/50">
+                <p className="text-[9px] text-muted-foreground uppercase">Stake</p>
+                <p className="font-mono font-bold text-xs">${ticket.recommendedStake}</p>
+              </div>
+              <div className="p-1.5 rounded-md bg-emerald-500/10">
+                <p className="text-[9px] text-muted-foreground uppercase">Payout</p>
+                <p className="font-mono font-bold text-xs text-emerald-500">${ticket.potentialPayout.toLocaleString()}</p>
+              </div>
+              <div className="p-1.5 rounded-md bg-muted/50">
+                <p className="text-[9px] text-muted-foreground uppercase">Win %</p>
+                <p className="font-mono font-bold text-xs">{ticket.winProbability}%</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {renderLegGroup("Spreads", ticket.marketBreakdown?.spreads || [])}
+              {renderLegGroup("Totals", ticket.marketBreakdown?.totals || [])}
+              {renderLegGroup("Moneylines", ticket.marketBreakdown?.moneylines || [])}
+              {renderLegGroup("Player Props", ticket.marketBreakdown?.playerProps || [])}
+              {renderLegGroup("Other Markets", ticket.marketBreakdown?.other || [])}
+            </div>
+
+            <div className="px-2.5 py-1.5 rounded-md bg-primary/5 border border-primary/10">
+              <div className="flex items-start gap-1.5">
+                <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                <p className="text-[11px] text-foreground/80 leading-relaxed">{ticket.reasoning}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {Object.entries(ticket.engineConvergence).map(([key, active]) => {
+                const eng = ENGINE_LABELS[key];
+                if (!eng) return null;
+                return (
+                  <span
+                    key={key}
+                    className={`inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border ${
+                      active ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted/50 border-muted text-muted-foreground/40"
+                    }`}
+                  >
+                    {active ? <CheckCircle2 className="w-2.5 h-2.5" /> : <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />}
+                    {eng.label}
+                  </span>
+                );
+              })}
+            </div>
+
+            <Button
+              onClick={handleAddAll}
+              disabled={allInSlip}
+              className="w-full gap-2"
+              size="sm"
+              variant={allInSlip ? "secondary" : "default"}
+              data-testid={`button-add-matchup-${ticket.id}`}
+            >
+              {allInSlip ? (
+                <><Check className="w-3.5 h-3.5" /> All {ticket.legCount} Legs in Slip</>
+              ) : someInSlip ? (
+                <><Plus className="w-3.5 h-3.5" /> Add Remaining {ticket.legCount - inSlipCount} Legs</>
+              ) : (
+                <><Layers className="w-3.5 h-3.5" /> Add All {ticket.legCount} Legs to Slip</>
+              )}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function CommandCenter() {
   useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
   const [activeSportTab, setActiveSportTab] = useState("all");
@@ -681,6 +892,16 @@ export default function CommandCenter() {
     queryFn: async () => {
       const res = await fetch(`/api/optimal-tickets?date=${ticketDateFilter}`);
       if (!res.ok) throw new Error("Failed to fetch tickets");
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
+  const { data: matchupData } = useQuery<MatchupTicketsResponse>({
+    queryKey: ["/api/matchup-tickets"],
+    queryFn: async () => {
+      const res = await fetch("/api/matchup-tickets?maxLegs=20");
+      if (!res.ok) throw new Error("Failed to fetch matchup tickets");
       return res.json();
     },
     refetchInterval: 60000,
@@ -885,6 +1106,24 @@ export default function CommandCenter() {
             </Card>
           )}
         </section>
+
+        {matchupData && matchupData.matchupTickets.length > 0 && (
+          <section data-testid="section-matchup-tickets">
+            <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold">Game Matchup Parlays</h2>
+                <Badge variant="secondary" className="text-[10px]">{matchupData.matchupTickets.length} matchups</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">Full game breakdowns with 10-20 leg parlays</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {matchupData.matchupTickets.map(ticket => (
+                <MatchupTicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card data-testid="card-stat-best-grade">

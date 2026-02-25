@@ -1279,6 +1279,172 @@ export function buildOptimalTickets(options: {
     .slice(0, 6);
 }
 
+export interface MatchupTicket {
+  id: string;
+  matchupGame: string;
+  homeTeam: string;
+  awayTeam: string;
+  sport: string;
+  legs: OptimalTicketLeg[];
+  legCount: number;
+  totalOdds: number;
+  americanOdds: number;
+  combinedGrade: string;
+  combinedConfidence: number;
+  combinedEV: number;
+  winProbability: number;
+  recommendedStake: number;
+  potentialPayout: number;
+  reasoning: string;
+  marketBreakdown: {
+    spreads: OptimalTicketLeg[];
+    totals: OptimalTicketLeg[];
+    moneylines: OptimalTicketLeg[];
+    playerProps: OptimalTicketLeg[];
+    other: OptimalTicketLeg[];
+  };
+  engineConvergence: {
+    quantumFusion: boolean;
+    monteCarlo: boolean;
+    situational: boolean;
+    injury: boolean;
+    vegas: boolean;
+    market: boolean;
+  };
+  generatedAt: string;
+}
+
+export function buildMatchupTickets(options: {
+  sports: string[];
+  maxLegs: number;
+  bankroll: number;
+}): MatchupTicket[] {
+  const { sports, maxLegs = 20, bankroll = 1000 } = options;
+
+  const allPicks: PrecomputedPick[] = [];
+  for (const sport of sports) {
+    const cached = predictionCache.get(sport as Sport);
+    if (cached?.snapshot?.picks) {
+      allPicks.push(...cached.snapshot.picks);
+    }
+  }
+
+  if (allPicks.length === 0) return [];
+
+  const gameGroups = new Map<string, PrecomputedPick[]>();
+  for (const pick of allPicks) {
+    const existing = gameGroups.get(pick.game) || [];
+    existing.push(pick);
+    gameGroups.set(pick.game, existing);
+  }
+
+  const tickets: MatchupTicket[] = [];
+
+  for (const [gameName, gamePicks] of gameGroups) {
+    const eligible = gamePicks
+      .filter(p => {
+        const gs = gradeToScore(p.grade);
+        return gs >= 2 && p.confidence >= 45 && p.recommendation !== "fade";
+      })
+      .sort((a, b) => {
+        const scoreA = gradeToScore(a.grade) * 2 + a.ev + a.confidence / 20 + a.edge;
+        const scoreB = gradeToScore(b.grade) * 2 + b.ev + b.confidence / 20 + b.edge;
+        return scoreB - scoreA;
+      });
+
+    if (eligible.length < 3) continue;
+
+    const ticketLegs: PrecomputedPick[] = [];
+    for (const pick of eligible) {
+      if (ticketLegs.length >= maxLegs) break;
+      let conflicts = false;
+      for (const existing of ticketLegs) {
+        if (hasConflict(pick, existing)) {
+          conflicts = true;
+          break;
+        }
+      }
+      if (!conflicts) {
+        ticketLegs.push(pick);
+      }
+    }
+
+    if (ticketLegs.length < 3) continue;
+
+    const legs = ticketLegs.map(pickToLeg);
+    const totalOdds = legs.reduce((acc, l) => acc * l.decimalOdds, 1);
+    const totalAmerican = decimalToAmerican(totalOdds);
+    const avgGradeScore = legs.reduce((s, l) => s + gradeToScore(l.grade), 0) / legs.length;
+    const combinedGrade = scoreToGrade(avgGradeScore);
+    const combinedConf = legs.reduce((s, l) => s + l.confidence, 0) / legs.length;
+    const combinedEV = legs.reduce((s, l) => s + l.ev, 0) / legs.length;
+    const winProb = legs.reduce((acc, l) => acc * (l.winProbability / 100), 1);
+
+    const kellyEdge = (winProb * totalOdds - 1) / (totalOdds - 1);
+    const kellyFraction = Math.max(0, kellyEdge) * 0.15;
+    const stake = Math.max(5, Math.round(bankroll * Math.min(kellyFraction, 0.03)));
+    const payout = Math.round(stake * totalOdds * 100) / 100;
+
+    const spreads: OptimalTicketLeg[] = [];
+    const totals: OptimalTicketLeg[] = [];
+    const moneylines: OptimalTicketLeg[] = [];
+    const playerProps: OptimalTicketLeg[] = [];
+    const other: OptimalTicketLeg[] = [];
+
+    for (const leg of legs) {
+      const m = leg.market.toLowerCase();
+      if (m.includes("spread")) spreads.push(leg);
+      else if (m.includes("total") || m.includes("over") || m.includes("under")) totals.push(leg);
+      else if (m.includes("moneyline") || m === "h2h") moneylines.push(leg);
+      else if (m.includes("player") || m.includes("prop")) playerProps.push(leg);
+      else other.push(leg);
+    }
+
+    const hasMC = legs.some(l => l.monteCarloData);
+    const hasSit = legs.some(l => l.situationalData);
+    const hasInj = legs.some(l => l.injuryData);
+    const hasFactors = legs.every(l => l.factors.length > 0);
+
+    const firstPick = ticketLegs[0];
+    const reasoning = buildTicketReasoning(legs);
+
+    tickets.push({
+      id: `matchup-${crypto.randomUUID().slice(0, 8)}`,
+      matchupGame: gameName,
+      homeTeam: firstPick.homeTeam,
+      awayTeam: firstPick.awayTeam,
+      sport: firstPick.sport,
+      legs,
+      legCount: legs.length,
+      totalOdds: Math.round(totalOdds * 100) / 100,
+      americanOdds: totalAmerican,
+      combinedGrade,
+      combinedConfidence: Math.round(combinedConf * 10) / 10,
+      combinedEV: Math.round(combinedEV * 10) / 10,
+      winProbability: Math.round(winProb * 10000) / 100,
+      recommendedStake: stake,
+      potentialPayout: payout,
+      reasoning,
+      marketBreakdown: { spreads, totals, moneylines, playerProps, other },
+      engineConvergence: {
+        quantumFusion: hasFactors,
+        monteCarlo: hasMC,
+        situational: hasSit,
+        injury: hasInj,
+        vegas: true,
+        market: true,
+      },
+      generatedAt: new Date().toISOString(),
+    });
+  }
+
+  return tickets.sort((a, b) => {
+    const scoreA = gradeToScore(a.combinedGrade) * 3 + a.combinedEV + a.combinedConfidence / 10 + a.legCount;
+    const scoreB = gradeToScore(b.combinedGrade) * 3 + b.combinedEV + b.combinedConfidence / 10 + b.legCount;
+    return scoreB - scoreA;
+  });
+}
+
 export function getEngineStatus() {
   const cacheStatus: Record<string, { hasPicks: boolean; pickCount: number; dataSource: string; age: string; generatedAt: string }> = {};
   const entries = Array.from(predictionCache.entries());

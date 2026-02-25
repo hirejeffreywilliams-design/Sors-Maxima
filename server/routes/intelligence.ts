@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
-import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket } from "../precomputedPredictionsEngine";
+import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
 import {
@@ -123,6 +123,38 @@ export function registerIntelligenceRoutes(app: Express): void {
     } catch (err) {
       console.error("Optimal tickets error:", err);
       return res.status(500).json({ error: "Failed to build optimal tickets" });
+    }
+  });
+
+  app.get("/api/matchup-tickets", async (req: Request, res: Response) => {
+    try {
+      const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
+      const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
+        ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(s)
+      );
+      const maxLegs = Math.max(3, Math.min(Number(req.query.maxLegs) || 20, 30));
+      const bankroll = Math.max(10, Math.min(Number(req.query.bankroll) || 1000, 100000));
+
+      const matchupTickets = buildMatchupTickets({ sports, maxLegs, bankroll });
+
+      return res.json({
+        matchupTickets,
+        ticketCount: matchupTickets.length,
+        sports,
+        generatedAt: new Date().toISOString(),
+        engineSources: [
+          "Quantum Fusion (46 factors)",
+          "Monte Carlo Simulations",
+          "Situational Analysis",
+          "Injury Impact",
+          "Vegas Power Ratings",
+          "Market Odds (The Odds API)",
+          "ESPN Live Data",
+        ],
+      });
+    } catch (err) {
+      console.error("Matchup tickets error:", err);
+      return res.status(500).json({ error: "Failed to build matchup tickets" });
     }
   });
 
