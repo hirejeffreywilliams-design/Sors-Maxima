@@ -13,7 +13,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
-  Trophy, DollarSign, Layers, Plus
+  Trophy, DollarSign, Layers, Plus, Calendar
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
@@ -709,6 +709,7 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
 export default function CommandCenter() {
   useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
   const [activeSportTab, setActiveSportTab] = useState("all");
+  const [ticketDateFilter, setTicketDateFilter] = useState<"today" | "future" | "all">("all");
   const { legs, addLeg } = useParlaySlip();
 
   const handleSSEEvent = useCallback((event: { type: string }) => {
@@ -728,7 +729,12 @@ export default function CommandCenter() {
   });
 
   const { data: ticketsData } = useQuery<OptimalTicketsResponse>({
-    queryKey: ["/api/optimal-tickets"],
+    queryKey: ["/api/optimal-tickets", ticketDateFilter],
+    queryFn: async () => {
+      const res = await fetch(`/api/optimal-tickets?date=${ticketDateFilter}`);
+      if (!res.ok) throw new Error("Failed to fetch tickets");
+      return res.json();
+    },
     refetchInterval: 60000,
   });
 
@@ -870,13 +876,38 @@ export default function CommandCenter() {
           </div>
         </header>
 
-        {ticketsData && ticketsData.tickets.length > 0 && (
-          <section data-testid="section-best-tickets">
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-bold">Today's Best Tickets</h2>
+        <section data-testid="section-best-tickets">
+          <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-primary" />
+              <h2 className="text-lg font-bold">
+                {ticketDateFilter === "today" ? "Today's" : ticketDateFilter === "future" ? "Upcoming" : "Best"} Tickets
+              </h2>
+              {ticketsData && (
                 <Badge variant="secondary" className="text-[10px]">{ticketsData.tickets.length} ready</Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center bg-muted rounded-lg p-0.5" data-testid="filter-ticket-date">
+                {([
+                  { value: "today" as const, label: "Today", icon: Clock },
+                  { value: "future" as const, label: "Upcoming", icon: Calendar },
+                  { value: "all" as const, label: "All Games", icon: Layers },
+                ]).map(({ value, label, icon: Icon }) => (
+                  <button
+                    key={value}
+                    onClick={() => setTicketDateFilter(value)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                      ticketDateFilter === value
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    data-testid={`button-date-${value}`}
+                  >
+                    <Icon className="w-3 h-3" />
+                    {label}
+                  </button>
+                ))}
               </div>
               <Link href="/generate">
                 <Button variant="ghost" size="sm" className="text-xs gap-1" data-testid="link-generate-more">
@@ -884,13 +915,28 @@ export default function CommandCenter() {
                 </Button>
               </Link>
             </div>
+          </div>
+          {ticketsData && ticketsData.tickets.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
               {ticketsData.tickets.slice(0, 6).map(ticket => (
                 <TicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
               ))}
             </div>
-          </section>
-        )}
+          ) : (
+            <Card>
+              <CardContent className="p-6 text-center">
+                <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground">
+                  {ticketDateFilter === "today"
+                    ? "No same-day games with strong enough picks right now. Try \"Upcoming\" or \"All Games\"."
+                    : ticketDateFilter === "future"
+                    ? "No upcoming games with strong picks yet. Try \"Today\" or \"All Games\"."
+                    : "No tickets available right now. Picks are generated every 5 minutes as games load."}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </section>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card data-testid="card-stat-best-grade">

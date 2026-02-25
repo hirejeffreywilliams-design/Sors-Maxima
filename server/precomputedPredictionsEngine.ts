@@ -932,8 +932,9 @@ export function buildOptimalTickets(options: {
   riskLevel: string;
   bankroll: number;
   maxLegs: number;
+  dateFilter?: "today" | "future" | "all";
 }): OptimalTicket[] {
-  const { sports, riskLevel, bankroll, maxLegs } = options;
+  const { sports, riskLevel, bankroll, maxLegs, dateFilter = "all" } = options;
 
   const allPicks: PrecomputedPick[] = [];
   for (const sport of sports) {
@@ -943,10 +944,24 @@ export function buildOptimalTickets(options: {
     }
   }
 
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+
   const eligible = allPicks
     .filter(p => {
       const gs = gradeToScore(p.grade);
-      return gs >= 5 && p.ev > 0 && p.confidence >= 50 && p.recommendation !== "fade" && p.recommendation !== "avoid";
+      if (!(gs >= 5 && p.ev > 0 && p.confidence >= 50 && p.recommendation !== "fade" && p.recommendation !== "avoid")) return false;
+
+      if (dateFilter !== "all" && p.gameTime) {
+        const gameDate = new Date(p.gameTime);
+        if (dateFilter === "today") {
+          return gameDate >= todayStart && gameDate < todayEnd;
+        } else if (dateFilter === "future") {
+          return gameDate >= todayEnd;
+        }
+      }
+      return true;
     })
     .sort((a, b) => {
       const scoreA = gradeToScore(a.grade) * 2 + a.ev + a.confidence / 20 + a.edge;

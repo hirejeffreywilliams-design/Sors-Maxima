@@ -99,8 +99,10 @@ export function registerIntelligenceRoutes(app: Express): void {
       const riskLevel = ["conservative", "moderate", "aggressive"].includes(rawRisk) ? rawRisk : "moderate";
       const bankroll = Math.max(10, Math.min(Number(req.query.bankroll) || 1000, 100000));
       const maxLegs = Math.max(2, Math.min(Number(req.query.maxLegs) || 4, 10));
+      const rawDate = (req.query.date as string) || "all";
+      const dateFilter = (["today", "future", "all"].includes(rawDate) ? rawDate : "all") as "today" | "future" | "all";
 
-      const tickets = buildOptimalTickets({ sports, riskLevel, bankroll, maxLegs });
+      const tickets = buildOptimalTickets({ sports, riskLevel, bankroll, maxLegs, dateFilter });
 
       return res.json({
         tickets,
