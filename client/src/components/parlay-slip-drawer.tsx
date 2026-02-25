@@ -103,7 +103,18 @@ function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmerica
   const legLines = legs.map((leg, i) => {
     const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
     const matchup = leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team;
-    return `${i + 1}. ${matchup}\n   ${leg.market.replace("_", " ")} - ${leg.outcome} (${odds})`;
+    const parts = [`${i + 1}. ${matchup}`, `   ${leg.market.replace("_", " ")} - ${leg.outcome} (${odds})`];
+    if (leg.grade) parts[1] += ` [Grade: ${leg.grade}]`;
+    if (leg.confidence) parts[1] += ` ${Math.round(leg.confidence)}% conf`;
+    if (leg.evPercent !== undefined && leg.evPercent > 0) parts[1] += ` +${leg.evPercent.toFixed(1)}% EV`;
+    if (leg.monteCarloData) {
+      parts.push(`   MC: ${(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims | Proj: ${leg.monteCarloData.predictedAwayScore}-${leg.monteCarloData.predictedHomeScore}`);
+    }
+    if (leg.reasoning) {
+      const shortReasoning = leg.reasoning.length > 100 ? leg.reasoning.substring(0, 100) + "..." : leg.reasoning;
+      parts.push(`   WHY: ${shortReasoning}`);
+    }
+    return parts.join("\n");
   });
 
   return [
@@ -124,8 +135,16 @@ function getPrimarySport(legs: ParlaySlipLeg[]): string | undefined {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
 }
 
+function gradeColor(grade: string): string {
+  if (grade.startsWith("A")) return "bg-green-500/15 text-green-600 border-green-500/30";
+  if (grade.startsWith("B")) return "bg-blue-500/15 text-blue-600 border-blue-500/30";
+  if (grade.startsWith("C")) return "bg-yellow-500/15 text-yellow-600 border-yellow-500/30";
+  return "bg-red-500/15 text-red-500 border-red-500/30";
+}
+
 function LegItem({ leg, onRemove }: { leg: ParlaySlipLeg; onRemove: () => void }) {
   const Icon = marketIcons[leg.market] || TrendingUp;
+  const hasEngineData = leg.grade || leg.monteCarloData || leg.reasoning;
 
   return (
     <div className="flex items-start gap-3 py-3 px-1 group" data-testid={`slip-leg-${leg.id}`}>
@@ -143,10 +162,15 @@ function LegItem({ leg, onRemove }: { leg: ParlaySlipLeg; onRemove: () => void }
           <span className="text-xs text-muted-foreground capitalize">{leg.market.replace("_", " ")}</span>
           <span className="text-xs font-medium">{leg.outcome}</span>
         </div>
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
           <Badge variant="outline" className="text-[10px] h-4 px-1.5">
             {formatOdds(leg.americanOdds, leg.decimalOdds)}
           </Badge>
+          {leg.grade && (
+            <Badge variant="outline" className={`text-[10px] h-4 px-1.5 font-bold ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
+              {leg.grade}
+            </Badge>
+          )}
           {leg.confidence && (
             <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
               {Math.round(leg.confidence)}% conf
@@ -157,9 +181,32 @@ function LegItem({ leg, onRemove }: { leg: ParlaySlipLeg; onRemove: () => void }
               +{leg.evPercent.toFixed(1)}% EV
             </Badge>
           )}
+          {leg.edge !== undefined && leg.edge > 0 && (
+            <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-purple-500/10 text-purple-600 border-purple-500/30">
+              +{leg.edge.toFixed(1)}% edge
+            </Badge>
+          )}
         </div>
+        {leg.monteCarloData && (
+          <div className="mt-1.5 px-2 py-1.5 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Sparkles className="h-2.5 w-2.5" />
+              <span className="font-medium">Monte Carlo: {(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Projected: {leg.monteCarloData.predictedAwayScore}-{leg.monteCarloData.predictedHomeScore}</span>
+              <span className="text-muted-foreground">|</span>
+              <span>Win: {leg.monteCarloData.homeWinProb}% / {leg.monteCarloData.awayWinProb}%</span>
+            </div>
+          </div>
+        )}
+        {leg.reasoning && (
+          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2" data-testid={`slip-reasoning-${leg.id}`}>
+            {leg.reasoning}
+          </p>
+        )}
         {leg.sport && (
-          <span className="text-[10px] text-muted-foreground mt-0.5 block">{leg.sport} · from {leg.addedFrom}</span>
+          <span className="text-[10px] text-muted-foreground mt-0.5 block">{leg.sport} · {leg.addedFrom}</span>
         )}
       </div>
       <Button

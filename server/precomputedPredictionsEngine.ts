@@ -40,6 +40,28 @@ export interface PrecomputedPick {
   timingAdvice: string;
   releaseSchedule: PickReleaseSchedule;
   isExclusive: boolean;
+  monteCarloData?: {
+    simulations: number;
+    predictedHomeScore: number;
+    predictedAwayScore: number;
+    homeWinProb: number;
+    awayWinProb: number;
+    convergenceScore: number;
+  };
+  situationalData?: {
+    homeRestDays: number;
+    awayRestDays: number;
+    homeB2B: boolean;
+    awayB2B: boolean;
+    spotType: string;
+    spotDescription: string;
+  };
+  injuryData?: {
+    homeInjuryCount: number;
+    awayInjuryCount: number;
+    homeStartersOut: number;
+    awayStartersOut: number;
+  };
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -488,15 +510,34 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       ? Math.round(-100 - (homeWinPct - 0.5) * 400)
       : Math.round(100 + (0.5 - homeWinPct) * 400);
 
-    const betOptions = [
-      { pick: `${favName} ML`, betType: "moneyline", odds: mlOdds, desc: `${favName} Moneyline` },
-      { pick: `${homeName} ${spreadEstimate > 0 ? "-" : "+"}${Math.abs(spreadEstimate)}`, betType: "spread", odds: -110, desc: `${homeName} Spread` },
-      { pick: `Over ${totalEstimate}`, betType: "total", odds: -110, desc: `Over ${totalEstimate}` },
-      { pick: `Under ${totalEstimate}`, betType: "total", odds: -110, desc: `Under ${totalEstimate}` },
-    ];
-
     const marketGame = marketData?.games.find(mg => mg.id === game.id);
     const gameLineMovements: LineMovementData[] = marketGame?.lineMovement || [];
+
+    const underdogName = favoriteIsHome ? awayName : homeName;
+    const underdogMlOdds = favoriteIsHome
+      ? Math.round(100 + (homeWinPct - 0.5) * 400)
+      : Math.round(-100 - (0.5 - homeWinPct) * 400);
+
+    const marketSpread = marketGame?.consensus?.spread;
+    const marketTotal = marketGame?.consensus?.total;
+    const actualSpread = marketSpread != null ? marketSpread : spreadEstimate;
+    const actualTotal = marketTotal != null ? marketTotal : totalEstimate;
+
+    const actualHomeML = marketGame?.consensus?.homeMoneyline || (favoriteIsHome ? mlOdds : underdogMlOdds);
+    const actualAwayML = marketGame?.consensus?.awayMoneyline || (favoriteIsHome ? underdogMlOdds : mlOdds);
+    const actualOverOdds = marketGame?.bookmakers?.[0]?.overPrice || -110;
+    const actualUnderOdds = marketGame?.bookmakers?.[0]?.underPrice || -110;
+    const actualSpreadHomeOdds = marketGame?.bookmakers?.[0]?.spreadHome || -110;
+    const actualSpreadAwayOdds = marketGame?.bookmakers?.[0]?.spreadAway || -110;
+
+    const betOptions = [
+      { pick: `${favName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualHomeML : actualAwayML, desc: `${favName} Moneyline` },
+      { pick: `${underdogName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualAwayML : actualHomeML, desc: `${underdogName} Moneyline` },
+      { pick: `${homeName} ${actualSpread > 0 ? "+" : ""}${actualSpread}`, betType: "spread", odds: actualSpreadHomeOdds, desc: `${homeName} Spread ${actualSpread}` },
+      { pick: `${awayName} ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}`, betType: "spread", odds: actualSpreadAwayOdds, desc: `${awayName} Spread ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}` },
+      { pick: `Over ${actualTotal}`, betType: "total", odds: actualOverOdds, desc: `Over ${actualTotal}` },
+      { pick: `Under ${actualTotal}`, betType: "total", odds: actualUnderOdds, desc: `Under ${actualTotal}` },
+    ];
 
     for (const bet of betOptions) {
       const fusion = analyzeLeg(sport, bet.desc, bet.odds, {
@@ -510,12 +551,25 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       if (mcSim) {
         let mcConfBoost = 0;
         if (bet.betType === "moneyline") {
-          const winProb = favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb;
-          mcConfBoost = Math.round((winProb - 0.5) * 20);
+          const isFavPick = bet.pick.includes(favName);
+          const pickWinProb = isFavPick
+            ? (favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb)
+            : (favoriteIsHome ? mcSim.awayWinProb : mcSim.homeWinProb);
+          mcConfBoost = Math.round((pickWinProb - 0.5) * 20);
         } else if (bet.betType === "spread") {
-          mcConfBoost = Math.round((mcSim.convergenceScore - 0.5) * 10);
+          const predictedMargin = mcSim.predictedHomeScore - mcSim.predictedAwayScore;
+          const spreadLine = actualSpread;
+          const coverMargin = bet.pick.includes(homeName)
+            ? predictedMargin + spreadLine
+            : -predictedMargin + spreadLine;
+          mcConfBoost = Math.min(15, Math.max(-10, Math.round(coverMargin * 2)));
         } else if (bet.betType === "total") {
-          mcConfBoost = Math.round(mcSim.convergenceScore * 5);
+          const predictedTotal = mcSim.predictedHomeScore + mcSim.predictedAwayScore;
+          const totalLine = actualTotal;
+          const diff = bet.pick.toLowerCase().includes("over")
+            ? predictedTotal - totalLine
+            : totalLine - predictedTotal;
+          mcConfBoost = Math.min(15, Math.max(-10, Math.round(diff * 1.5)));
         }
         confidence = Math.min(95, Math.max(25, confidence + mcConfBoost));
       }
@@ -565,6 +619,28 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         timingAdvice: pickTiming.timingAdvice,
         releaseSchedule: buildReleaseSchedule(now),
         isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: gradeFromConfidence(confidence) }),
+        monteCarloData: mcSim ? {
+          simulations: mcSim.simulations || 10000,
+          predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
+          predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
+          homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
+          awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
+          convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
+        } : undefined,
+        situationalData: sitFactors ? {
+          homeRestDays: sitFactors.homeRestDays,
+          awayRestDays: sitFactors.awayRestDays,
+          homeB2B: sitFactors.homeB2B,
+          awayB2B: sitFactors.awayB2B,
+          spotType: sitFactors.spotType,
+          spotDescription: sitFactors.spotDescription,
+        } : undefined,
+        injuryData: (homeInjuryCount + awayInjuryCount > 0) ? {
+          homeInjuryCount,
+          awayInjuryCount,
+          homeStartersOut,
+          awayStartersOut,
+        } : undefined,
       });
     }
   }

@@ -7,6 +7,23 @@ export interface ParlaySlipLeg extends ParlayLeg {
   sport?: string;
   confidence?: number;
   evPercent?: number;
+  grade?: string;
+  edge?: number;
+  reasoning?: string;
+  recommendation?: string;
+  winProbability?: number;
+  timing?: "bet_now" | "wait" | "line_locked";
+  timingAdvice?: string;
+  insights?: string[];
+  monteCarloData?: {
+    simulations: number;
+    predictedHomeScore: number;
+    predictedAwayScore: number;
+    homeWinProb: number;
+    awayWinProb: number;
+    convergenceScore: number;
+  };
+  factors?: { name: string; impact: number; direction: string }[];
 }
 
 interface ParlaySlipContextValue {

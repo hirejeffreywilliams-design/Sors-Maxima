@@ -40,6 +40,12 @@ interface PrecomputedPick {
   factors: { name: string; impact: number; direction: string }[];
   generatedAt: string;
   dataSource: string;
+  reasoning?: string;
+  recommendation?: string;
+  winProbability?: number;
+  insights?: string[];
+  timing?: "bet_now" | "wait" | "line_locked";
+  timingAdvice?: string;
   isExclusive?: boolean;
   releaseSchedule?: {
     whaleRelease: string;
@@ -48,6 +54,28 @@ interface PrecomputedPick {
     freeRelease: string;
   };
   capacity?: CapacityInfo;
+  monteCarloData?: {
+    simulations: number;
+    predictedHomeScore: number;
+    predictedAwayScore: number;
+    homeWinProb: number;
+    awayWinProb: number;
+    convergenceScore: number;
+  };
+  situationalData?: {
+    homeRestDays: number;
+    awayRestDays: number;
+    homeB2B: boolean;
+    awayB2B: boolean;
+    spotType: string;
+    spotDescription: string;
+  };
+  injuryData?: {
+    homeInjuryCount: number;
+    awayInjuryCount: number;
+    homeStartersOut: number;
+    awayStartersOut: number;
+  };
 }
 
 interface PredictionSnapshot {
@@ -166,13 +194,25 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
       outcome: pick.pick || `${pick.homeTeam} vs ${pick.awayTeam}`,
       decimalOdds,
       americanOdds: pick.odds,
-      addedFrom: "Top Picks",
+      addedFrom: "Quantum Prediction Engine",
       addedAt: new Date().toISOString(),
       sport: pick.sport as any,
+      confidence: pick.confidence,
+      evPercent: pick.ev,
+      grade: pick.grade,
+      edge: pick.edge,
+      reasoning: pick.reasoning,
+      recommendation: pick.recommendation,
+      winProbability: pick.winProbability,
+      timing: pick.timing,
+      timingAdvice: pick.timingAdvice,
+      insights: pick.insights,
+      monteCarloData: pick.monteCarloData,
+      factors: pick.factors,
     };
     if (addLeg(slipLeg)) {
       tailMutation.mutate();
-      toast({ title: "Added to Slip", description: `${slipLeg.outcome} added to your parlay slip` });
+      toast({ title: "Added to Slip", description: `${slipLeg.outcome} (Grade ${pick.grade}) added to your parlay slip` });
     }
   };
 
