@@ -152,8 +152,56 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
   };
   
   const copyToClipboard = () => {
-    const text = ticket.legs.map(l => `${l.outcome} @ ${formatOdds(l.americanOdds)}`).join("\n");
-    navigator.clipboard.writeText(text);
+    const gradeIcon = ticket.grade.startsWith("A") ? "\u{1F7E2}" : ticket.grade.startsWith("B") ? "\u{1F535}" : ticket.grade.startsWith("C") ? "\u{1F7E1}" : "\u{1F534}";
+    const totalOddsStr = ticket.americanOdds > 0 ? `+${ticket.americanOdds}` : `${ticket.americanOdds}`;
+    const lines: string[] = [
+      "\u26A1 SORS MAXIMA TICKET",
+      `${gradeIcon} ${ticket.name} | Grade: ${ticket.grade}`,
+      `\u{1F3AF} ${ticket.legs.length} Legs | ${totalOddsStr} Odds | $${ticket.recommendedStake.toFixed(0)} \u2192 $${ticket.potentialPayout.toFixed(0)}`,
+      "\u2500".repeat(28),
+    ];
+
+    ticket.legs.forEach((leg, i) => {
+      const odds = formatOdds(leg.americanOdds);
+      const matchup = `${leg.team} vs ${leg.opponent}`;
+      const legIcon = leg.edgePercent > 3 ? "\u{1F7E2}" : leg.edgePercent > 0 ? "\u{1F535}" : "\u{1F7E1}";
+
+      lines.push("");
+      lines.push(`${legIcon} Leg ${i + 1}: ${leg.outcome}`);
+      lines.push(`   \u{1F3C0} ${matchup}`);
+
+      const meta: string[] = [odds];
+      if (leg.winProbability) meta.push(`${Math.round(leg.winProbability * 100)}% win`);
+      if (leg.edgePercent > 0) meta.push(`+${leg.edgePercent.toFixed(1)}% edge`);
+      lines.push(`   ${meta.join(" \u2022 ")}`);
+    });
+
+    if (ticket.rationale?.length > 0) {
+      lines.push("");
+      lines.push("\u2500".repeat(28));
+      lines.push(`\u{1F4A1} ${ticket.rationale[0]}`);
+    }
+
+    lines.push("");
+    lines.push("\u2500".repeat(28));
+    lines.push(`\u{1F4B0} Stake: $${ticket.recommendedStake.toFixed(0)} | Payout: $${ticket.potentialPayout.toFixed(0)}`);
+    lines.push(`\u{1F4C8} Win: ${(ticket.winProbability * 100).toFixed(0)}% | EV: ${evPercent >= 0 ? "+" : ""}${evPercent.toFixed(0)}%`);
+    lines.push("");
+    lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
+
+    const text = lines.join("\n");
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
