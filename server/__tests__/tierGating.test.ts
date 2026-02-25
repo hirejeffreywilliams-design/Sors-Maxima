@@ -51,16 +51,16 @@ export default async function runTests(): Promise<{ file: string; passed: number
     const allowedAllTiers = ["pro", "elite", "whale"];
     assert(allowedAllTiers.includes(whaleSub.subscriptionTier), "Whale tier passes all gating levels");
 
-    // Test 6: Trialing user has pro access
+    // Test 6: Legacy trialing user gets auto-converted to free (no trials allowed)
     await pool.query(`
       INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, trial_start_date, trial_end_date, is_trial_user)
       VALUES ('test_trial_gate', 'pro', 'trialing', NOW(), NOW() + INTERVAL '7 days', true)
     `);
     const trialSub = await stripeService.getUserSubscription("test_trial_gate");
-    assert(trialSub.subscriptionTier === "pro", "Trialing user has pro tier access");
-    assert(allowedProTiers.includes(trialSub.subscriptionTier), "Trialing user passes pro gating");
+    assert(trialSub.subscriptionTier === "free", "Legacy trialing user auto-converted to free");
+    assert(!allowedProTiers.includes(trialSub.subscriptionTier), "Legacy trialing user blocked from pro endpoints");
 
-    // Test 7: Expired trial does NOT have pro access
+    // Test 7: Expired trial also gets converted to free
     await pool.query(`
       INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, trial_start_date, trial_end_date, is_trial_user, trial_converted)
       VALUES ('test_expired_gate', 'pro', 'trialing', NOW() - INTERVAL '14 days', NOW() - INTERVAL '7 days', true, false)

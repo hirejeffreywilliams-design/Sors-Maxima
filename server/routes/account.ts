@@ -86,44 +86,11 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
     
     const subscription = await stripeService.getUserSubscription(req.session.username);
-    const trialStatus = await stripeService.getTrialStatus(req.session.username);
     
     res.json({
       tier: subscription.subscriptionTier,
       status: subscription.subscriptionStatus,
       customerId: subscription.stripeCustomerId,
-      trial: trialStatus,
-    });
-  });
-
-  app.get("/api/trial/status", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.username) {
-      return res.json({ isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none' });
-    }
-    
-    const trialStatus = await stripeService.getTrialStatus(req.session.username);
-    res.json(trialStatus);
-  });
-
-  app.post("/api/trial/start", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.username) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    
-    const trialStatus = await stripeService.getTrialStatus(req.session.username);
-    if (trialStatus.hadTrial) {
-      return res.status(400).json({ error: "Trial already used or expired" });
-    }
-    
-    const subscription = await stripeService.startTrial(req.session.username);
-    if (!subscription) {
-      return res.status(400).json({ error: "Unable to start trial" });
-    }
-    
-    res.json({ 
-      success: true, 
-      trial: await stripeService.getTrialStatus(req.session.username),
-      subscription,
     });
   });
 

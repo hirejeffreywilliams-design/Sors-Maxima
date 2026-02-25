@@ -31,39 +31,27 @@ export default async function runTests(): Promise<{ file: string; passed: number
     assert(defaultSub.subscriptionTier === "free", "getUserSubscription returns free tier for unknown user");
     assert(defaultSub.subscriptionStatus === "none", "getUserSubscription returns none status for unknown user");
 
-    // Test 2: startTrial sets correct tier and status
+    // Test 2: New user starts on free tier (no trial)
     await cleanup();
-    await pool.query("INSERT INTO user_subscriptions (username) VALUES ('test_trial_user')");
-    const trialResult = await stripeService.startTrial("test_trial_user");
-    assert(trialResult !== null, "startTrial returns a subscription object");
-    assert(trialResult!.subscriptionTier === "pro", "startTrial sets tier to pro");
-    assert(trialResult!.subscriptionStatus === "trialing", "startTrial sets status to trialing");
-    assert(trialResult!.isTrialUser === true, "startTrial sets isTrialUser to true");
-    assert(trialResult!.trialEndDate !== null, "startTrial sets trialEndDate");
+    await stripeService.createCustomer("test@example.com", "test_new_user");
+    const newUserSub = await stripeService.getUserSubscription("test_new_user");
+    assert(newUserSub.subscriptionTier === "free", "New user starts on free tier");
+    assert(newUserSub.subscriptionStatus === "active", "New user has active status");
+    assert(newUserSub.isTrialUser === false, "New user is not a trial user");
 
-    // Test 3: Trial has 7-day window
-    const trialEnd = new Date(trialResult!.trialEndDate!);
-    const now = new Date();
-    const daysDiff = Math.round((trialEnd.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
-    assert(daysDiff >= 6 && daysDiff <= 7, `Trial window is ~7 days (got ${daysDiff})`);
-
-    // Test 4: Cannot start trial twice
-    const secondTrial = await stripeService.startTrial("test_trial_user");
-    assert(secondTrial === null, "Cannot start trial for user who already had one");
-
-    // Test 5: Trial expiration - simulate expired trial
+    // Test 3: Legacy trialing users auto-convert to free
     await cleanup();
-    const pastDate = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000); // 8 days ago
-    const pastEnd = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000); // 1 day ago
+    const pastDate = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
+    const pastEnd = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
     await pool.query(`
       INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, trial_start_date, trial_end_date, is_trial_user, trial_converted)
-      VALUES ('test_expired_trial', 'pro', 'trialing', $1, $2, true, false)
+      VALUES ('test_legacy_trial', 'pro', 'trialing', $1, $2, true, false)
     `, [pastDate, pastEnd]);
 
-    const expiredSub = await stripeService.getUserSubscription("test_expired_trial");
-    assert(expiredSub.subscriptionTier === "free", "Expired trial downgrades to free tier");
-    assert(expiredSub.subscriptionStatus === "expired", "Expired trial sets status to expired");
-    assert(expiredSub.isTrialUser === false, "Expired trial sets isTrialUser to false");
+    const legacySub = await stripeService.getUserSubscription("test_legacy_trial");
+    assert(legacySub.subscriptionTier === "free", "Legacy trial auto-converts to free tier");
+    assert(legacySub.subscriptionStatus === "active", "Legacy trial converts to active status");
+    assert(legacySub.isTrialUser === false, "Legacy trial clears isTrialUser flag");
 
     // Test 6: Webhook tier mapping - subscription created
     await cleanup();

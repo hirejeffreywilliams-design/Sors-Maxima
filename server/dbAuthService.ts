@@ -3,7 +3,7 @@ import { users, subscriptions } from "./dbSchema";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { logError, logWarn, logInfo } from "./errorLogger";
-import { evaluateRegistrationRisk, onTrialGranted, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
+import { evaluateRegistrationRisk, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
 
 const SALT_ROUNDS = 12;
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -75,7 +75,6 @@ export async function registerUser(
     });
 
     remapUserId(tempUserId, String(newUser.id));
-    onTrialGranted(String(newUser.id));
 
     if (fraudRisk.action === 'verify') {
       logWarn(`Registration flagged for verification: ${username} (score: ${fraudRisk.riskScore})`);

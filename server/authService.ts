@@ -1,7 +1,7 @@
 // Authentication & Fraud Prevention Service
 import { randomBytes, scrypt, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { evaluateRegistrationRisk, onTrialGranted, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
+import { evaluateRegistrationRisk, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
 
 const scryptAsync = promisify(scrypt);
 
@@ -223,9 +223,7 @@ class AuthService {
     }
     ipToUsers.get(ip)!.add(userId);
 
-    // Map temp fraud engine userId to actual user ID and track trial signals
-    remapUserId(userId, userId); // userId is already the real ID in authService
-    onTrialGranted(userId);
+    remapUserId(userId, userId);
 
     if (fraudRisk.action === 'verify') {
       this.logSuspiciousActivity({

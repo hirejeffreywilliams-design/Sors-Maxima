@@ -36,11 +36,6 @@ export function registerAuthRoutes(app: Express): void {
         username,
         email,
         requiresVerification: result.fraudRisk?.action === 'verify',
-        trialInfo: {
-          autoUpgradeEnabled: true,
-          postTrialTier: 'whale',
-          trialDays: 7,
-        },
       });
     } catch (err) {
       console.error("Registration error:", err);

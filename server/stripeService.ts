@@ -35,9 +35,6 @@ export interface UserSubscription {
   grantedAt?: string | null;
 }
 
-const TRIAL_DAYS = 7;
-const TRIAL_TIER: 'pro' | 'elite' | 'whale' = 'pro';
-const POST_TRIAL_TIER: 'free' | 'pro' | 'elite' | 'whale' = 'free';
 
 function rowToSubscription(row: any): UserSubscription {
   return {
@@ -117,13 +114,12 @@ export class StripeService {
     await this.ensureInit();
 
     const now = new Date();
-    const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
 
     await pool.query(`
-      INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, trial_start_date, trial_end_date, is_trial_user, trial_converted, registered_at)
-      VALUES ($1, $2, $3, $4, $5, true, false, $6)
+      INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, is_trial_user, trial_converted, registered_at)
+      VALUES ($1, 'free', 'active', false, false, $2)
       ON CONFLICT (username) DO NOTHING
-    `, [username, TRIAL_TIER, 'trialing', now, trialEnd, now]);
+    `, [username, now]);
 
     const stripe = await getUncachableStripeClient();
     if (stripe) {
@@ -141,7 +137,7 @@ export class StripeService {
       }
     }
 
-    console.log(`[STRIPE] Demo mode - created local subscription for ${username} with 7-day trial`);
+    console.log(`[STRIPE] Created local subscription for ${username} on free tier — subscription required for access`);
     return { id: `demo_${username}_${Date.now()}`, email, metadata: { username } };
   }
 
@@ -196,20 +192,17 @@ export class StripeService {
     if (result.rows.length > 0) {
       const sub = rowToSubscription(result.rows[0]);
 
-      if (sub.subscriptionStatus === 'trialing' && sub.trialEndDate && !sub.trialConverted) {
-        const trialEnd = new Date(sub.trialEndDate);
-        if (new Date() > trialEnd) {
-          await pool.query(`
-            UPDATE user_subscriptions
-            SET subscription_tier = $1, subscription_status = 'expired', is_trial_user = false, trial_converted = false, updated_at = NOW()
-            WHERE username = $2
-          `, [POST_TRIAL_TIER, username]);
-          sub.subscriptionTier = POST_TRIAL_TIER;
-          sub.subscriptionStatus = 'expired';
-          sub.isTrialUser = false;
-          sub.trialConverted = false;
-          console.log(`[TRIAL] Trial expired for ${username}, downgraded to free tier — upgrade required for premium features`);
-        }
+      if (sub.subscriptionStatus === 'trialing') {
+        await pool.query(`
+          UPDATE user_subscriptions
+          SET subscription_tier = 'free', subscription_status = 'active', is_trial_user = false, trial_converted = false, updated_at = NOW()
+          WHERE username = $1
+        `, [username]);
+        sub.subscriptionTier = 'free';
+        sub.subscriptionStatus = 'active';
+        sub.isTrialUser = false;
+        sub.trialConverted = false;
+        console.log(`[SUBSCRIPTION] Legacy trial cleared for ${username}, set to free tier — subscription required`);
       }
       return sub;
     }
@@ -221,90 +214,6 @@ export class StripeService {
     return defaultSubscription(username);
   }
 
-  async getTrialStatus(username: string): Promise<{
-    isOnTrial: boolean;
-    daysRemaining: number;
-    trialExpired: boolean;
-    trialTier: string;
-    hadTrial: boolean;
-  }> {
-    await this.ensureInit();
-
-    const result = await pool.query(
-      'SELECT * FROM user_subscriptions WHERE username = $1',
-      [username]
-    );
-
-    if (result.rows.length === 0) {
-      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: false };
-    }
-
-    const sub = rowToSubscription(result.rows[0]);
-
-    if (sub.trialConverted) {
-      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: true };
-    }
-
-    if (!sub.trialEndDate) {
-      return { isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none', hadTrial: false };
-    }
-
-    const now = new Date();
-    const trialEnd = new Date(sub.trialEndDate);
-    const msRemaining = trialEnd.getTime() - now.getTime();
-    const daysRemaining = Math.max(0, Math.ceil(msRemaining / (24 * 60 * 60 * 1000)));
-    const isOnTrial = sub.subscriptionStatus === 'trialing' && msRemaining > 0;
-    const trialExpired = msRemaining <= 0 && !sub.trialConverted;
-
-    return {
-      isOnTrial,
-      daysRemaining,
-      trialExpired,
-      trialTier: isOnTrial ? TRIAL_TIER : 'none',
-      hadTrial: true,
-    };
-  }
-
-  async startTrial(username: string): Promise<UserSubscription | null> {
-    await this.ensureInit();
-
-    const trialStatus = await this.getTrialStatus(username);
-
-    if (trialStatus.hadTrial) {
-      console.log(`[TRIAL] Cannot start trial for ${username} - trial already used`);
-      return null;
-    }
-
-    const now = new Date();
-    const trialEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-
-    await pool.query(`
-      INSERT INTO user_subscriptions (username, subscription_tier, subscription_status, trial_start_date, trial_end_date, is_trial_user, trial_converted)
-      VALUES ($1, $2, 'trialing', $3, $4, true, false)
-      ON CONFLICT (username) DO UPDATE SET
-        subscription_tier = $2,
-        subscription_status = 'trialing',
-        trial_start_date = $3,
-        trial_end_date = $4,
-        is_trial_user = true,
-        trial_converted = false,
-        updated_at = NOW()
-    `, [username, TRIAL_TIER, now, trialEnd]);
-
-    console.log(`[TRIAL] Started 7-day ${TRIAL_TIER} trial for ${username}, expires ${trialEnd.toISOString()}`);
-    return await this.getUserSubscription(username);
-  }
-
-  async convertTrialToSubscription(username: string, tier: 'pro' | 'elite' | 'whale'): Promise<void> {
-    await this.ensureInit();
-
-    await pool.query(`
-      UPDATE user_subscriptions
-      SET trial_converted = true, subscription_status = 'active', subscription_tier = $1, is_trial_user = false, updated_at = NOW()
-      WHERE username = $2 AND trial_end_date IS NOT NULL
-    `, [tier, username]);
-    console.log(`[TRIAL] ${username} converted from trial to paid ${tier} subscription`);
-  }
 
   async updateUserSubscription(username: string, updates: Partial<UserSubscription>): Promise<UserSubscription> {
     await this.ensureInit();
