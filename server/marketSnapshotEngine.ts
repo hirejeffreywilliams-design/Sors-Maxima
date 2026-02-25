@@ -180,6 +180,7 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
     }
     oddsApiWarned = false;
     const data: OddsApiGame[] = await res.json();
+    console.log(`[MarketSnapshot] Odds API returned ${data.length} games for ${sport} (${sportKey})`);
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (e) {
@@ -424,6 +425,9 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
       if (bookmakers.length > 0) {
         gamesWithOdds++;
         bookmakers.forEach(b => allBookNames.add(b.book));
+      }
+      if (oddsGames.length > 0 && !oddsMatch) {
+        console.log(`[MarketSnapshot] No odds match for: ${game.homeTeam.displayName} vs ${game.awayTeam.displayName} (${game.status.state})`);
       }
 
       let consensus = computeConsensus(bookmakers);
