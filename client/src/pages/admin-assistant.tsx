@@ -22,6 +22,7 @@ import {
   Calendar, ChevronDown, ChevronUp, BarChart3, Briefcase, Scale,
   RefreshCw, History, Eye, Lightbulb,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface PriorityTask {
   task_id: string;
@@ -120,6 +121,7 @@ function ConfidenceMeter({ value }: { value: number }) {
 }
 
 export default function AdminAssistant() {
+  useSEO({ title: "Admin Assistant", description: "AI-powered operational reporting and task management" });
   const { toast } = useToast();
   const [period, setPeriod] = useState<"daily" | "weekly" | "monthly">("daily");
   const [expandedTask, setExpandedTask] = useState<string | null>(null);

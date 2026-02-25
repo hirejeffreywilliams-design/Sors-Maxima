@@ -12,8 +12,10 @@ import {
   ArrowLeft, Database, Activity, GitBranch, FileCheck, Clock,
   RefreshCw, CheckCircle, AlertTriangle, Server, Layers, Zap
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function AdminDataProvenance() {
+  useSEO({ title: "Data Provenance", description: "Track data lineage, quality, and pipeline health" });
   const [, setLocation] = useLocation();
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/data-provenance"] });
 

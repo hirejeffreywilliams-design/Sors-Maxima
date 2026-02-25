@@ -19,6 +19,7 @@ import {
   Loader2, Heart, Zap, Eye, Brain, Wrench, Bell, TrendingUp,
   CircleDot, Wifi, WifiOff, ArrowUpRight,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 function SeverityBadge({ severity }: { severity: string }) {
   const map: Record<string, string> = {
@@ -81,6 +82,7 @@ function timeAgo(ts: string): string {
 }
 
 export default function AdminGuardian() {
+  useSEO({ title: "App Guardian", description: "Continuous monitoring, auto-healing, and AI diagnostics" });
   const { toast } = useToast();
   const [tab, setTab] = useState("overview");
 

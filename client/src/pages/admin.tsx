@@ -89,6 +89,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSEO } from "@/hooks/use-seo";
 
 interface SubscriptionStats {
   total: number;
@@ -211,6 +212,7 @@ const navCategories: NavCategory[] = [
 ];
 
 export default function AdminDashboard() {
+  useSEO({ title: "Admin Dashboard", description: "Platform administration and management hub" });
   const [searchTerm, setSearchTerm] = useState("");
   const [banDialogOpen, setBanDialogOpen] = useState(false);
   const [grantAccessDialogOpen, setGrantAccessDialogOpen] = useState(false);

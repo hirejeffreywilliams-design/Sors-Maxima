@@ -25,6 +25,7 @@ import {
   Calendar,
 } from "lucide-react";
 import type { Sport } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface ESPNTeam {
   id: string;
@@ -358,6 +359,7 @@ function RosterView({ sport, teamId, onBack }: { sport: Sport; teamId: string; o
 }
 
 export default function RostersPage() {
+  useSEO({ title: "Rosters", description: "Team rosters, injuries, and lineup information" });
   const [selectedSport, setSelectedSport] = useState<Sport>("NBA");
   const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
   const [teamSearch, setTeamSearch] = useState("");

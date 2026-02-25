@@ -48,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSEO } from "@/hooks/use-seo";
 
 interface TrustedDeviceInfo {
   id: string;
@@ -350,6 +351,7 @@ function DeviceManagement() {
 }
 
 export default function Settings() {
+  useSEO({ title: "Settings", description: "Customize your application preferences" });
   const { toast } = useToast();
   const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
   const [newAlert, setNewAlert] = useState({ alertType: "daily_limit", threshold: 100 });

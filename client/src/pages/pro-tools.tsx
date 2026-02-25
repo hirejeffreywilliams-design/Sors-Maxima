@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const sports = [
   { id: "NBA", name: "NBA", color: "bg-orange-500" },
@@ -553,6 +554,7 @@ function CashOutTab() {
 }
 
 export default function ProTools() {
+  useSEO({ title: "Pro Tools", description: "Advanced betting tools for serious bettors" });
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-6" data-testid="page-pro-tools">
       <div className="space-y-1">

@@ -26,6 +26,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 
 interface WatchlistItem {
   id: string;
@@ -57,6 +58,7 @@ const POPULAR_TEAMS: Record<string, string[]> = {
 };
 
 export default function WatchlistPage() {
+  useSEO({ title: "Watchlist", description: "Track your favorite games and betting opportunities" });
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("teams");

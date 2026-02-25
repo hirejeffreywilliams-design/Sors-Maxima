@@ -4,6 +4,7 @@ import { Home, ArrowLeft, Sparkles, BarChart3, Zap, ChevronRight } from "lucide-
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
+import { useSEO } from "@/hooks/use-seo";
 
 const quickLinks = [
   { href: "/", label: "Smart Ticket Generator", description: "Build parlays from real ESPN data", icon: Sparkles },
@@ -12,6 +13,7 @@ const quickLinks = [
 ];
 
 export default function NotFound() {
+  useSEO({ title: "Page Not Found", description: "The requested page could not be found" });
   const [, navigate] = useLocation();
   const [countdown, setCountdown] = useState(8);
 

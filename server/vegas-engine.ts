@@ -244,24 +244,7 @@ async function loadRealGames(): Promise<Array<{ home: string; away: string; spor
 }
 
 function getStaticFallbackGames(): Array<{ home: string; away: string; sport: Sport }> {
-  return [
-    { home: "Knicks", away: "Heat", sport: "NBA" },
-    { home: "Bucks", away: "Mavericks", sport: "NBA" },
-    { home: "Nuggets", away: "Suns", sport: "NBA" },
-    { home: "Heat", away: "76ers", sport: "NBA" },
-    { home: "Bills", away: "Chiefs", sport: "NFL" },
-    { home: "Eagles", away: "49ers", sport: "NFL" },
-    { home: "Lions", away: "Cowboys", sport: "NFL" },
-    { home: "Ravens", away: "Bengals", sport: "NFL" },
-    { home: "Dodgers", away: "Yankees", sport: "MLB" },
-    { home: "Braves", away: "Mets", sport: "MLB" },
-    { home: "Astros", away: "Rangers", sport: "MLB" },
-    { home: "Padres", away: "Phillies", sport: "MLB" },
-    { home: "Panthers", away: "Bruins", sport: "NHL" },
-    { home: "Avalanche", away: "Oilers", sport: "NHL" },
-    { home: "Golden Knights", away: "Stars", sport: "NHL" },
-    { home: "Lightning", away: "Maple Leafs", sport: "NHL" },
-  ];
+  return [];
 }
 
 export async function generateVegasPredictions(sport?: Sport): Promise<VegasPrediction[]> {

@@ -44,6 +44,7 @@ import { eventTracker } from "@/lib/event-tracker";
 import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
+import { useSEO } from "@/hooks/use-seo";
 
 type BetCategory = "game" | "halves" | "player_props" | "alt_lines" | "soccer_special";
 
@@ -383,6 +384,7 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
 }
 
 export default function AutoGenerator() {
+  useSEO({ title: "Auto Generator", description: "Automated parlay generation with AI optimization" });
   const [selectedSports, setSelectedSports] = useState<string[]>([]);
   const [bankroll, setBankroll] = useState(1000);
   const [riskLevel, setRiskLevel] = useState<"conservative" | "moderate" | "aggressive">("moderate");

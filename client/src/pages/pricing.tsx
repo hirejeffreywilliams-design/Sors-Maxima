@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useSEO } from "@/hooks/use-seo";
 
 interface PricingTier {
   id: string;
@@ -116,6 +117,7 @@ const tiers: PricingTier[] = [
 ];
 
 export default function Pricing() {
+  useSEO({ title: "Pricing", description: "Choose the plan that fits your betting strategy" });
   const [isYearly, setIsYearly] = useState(false);
   const { toast } = useToast();
 

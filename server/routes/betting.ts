@@ -1177,9 +1177,154 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/hedge-bets", (_req, res) => {
-    const bets = userDataEngine.getBets().filter((b: any) => b.result === "pending");
-    res.json(bets);
+  app.get("/api/live/hedge-bets", async (req, res) => {
+    try {
+      const sessionId = req.session?.userId;
+      const pendingBets = userDataEngine.getBets(sessionId).filter((b: any) => b.result === "pending");
+      if (pendingBets.length === 0) return res.json([]);
+
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { getAllInjuries } = await import("../espn-injury-provider");
+      const { getVenueWeather } = await import("../weather-provider");
+
+      const allGames = await getAllSportsScoreboard();
+      const injuryData: Record<string, any> = {};
+      for (const sport of ["NBA", "NFL", "MLB", "NHL"] as const) {
+        try { injuryData[sport] = await getAllInjuries(sport); } catch { injuryData[sport] = []; }
+      }
+
+      const enrichedBets = await Promise.all(pendingBets.map(async (bet: any) => {
+        const betSport = bet.sport?.toUpperCase() || "NBA";
+        const betTeams = (bet.legs || []).map((l: any) => l.team).filter(Boolean);
+        const betOpponents = (bet.legs || []).map((l: any) => l.opponent).filter(Boolean);
+        const allBetTeams = [...betTeams, ...betOpponents];
+
+        const matchedGames = allGames.filter(g =>
+          allBetTeams.some(t =>
+            g.homeTeam.displayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.awayTeam.displayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.awayTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase()) ||
+            g.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
+            g.awayTeam.abbreviation?.toLowerCase() === t.toLowerCase()
+          )
+        );
+
+        let momentum = 50;
+        let injuryRisk = 0;
+        let weatherImpact = 0;
+        let liveScore = "";
+        let gameState = "unknown";
+
+        if (matchedGames.length > 0) {
+          const game = matchedGames[0];
+          const state = game.status?.state;
+          gameState = state || "unknown";
+
+          if (state === "in") {
+            const homeScore = game.homeTeam.score || 0;
+            const awayScore = game.awayTeam.score || 0;
+            liveScore = `${game.homeTeam.shortDisplayName || game.homeTeam.abbreviation} ${homeScore} - ${awayScore} ${game.awayTeam.shortDisplayName || game.awayTeam.abbreviation}`;
+
+            const betOnHome = betTeams.some(t =>
+              game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
+              game.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase())
+            );
+            const scoreDiff = betOnHome ? homeScore - awayScore : awayScore - homeScore;
+            momentum = Math.min(95, Math.max(5, 50 + scoreDiff * 3));
+          } else if (state === "post") {
+            const homeScore = game.homeTeam.score || 0;
+            const awayScore = game.awayTeam.score || 0;
+            liveScore = `Final: ${game.homeTeam.shortDisplayName} ${homeScore} - ${awayScore} ${game.awayTeam.shortDisplayName}`;
+            const betOnHome = betTeams.some(t =>
+              game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase()
+            );
+            momentum = (betOnHome && homeScore > awayScore) || (!betOnHome && awayScore > homeScore) ? 90 : 15;
+          }
+
+          try {
+            const weather = await getVenueWeather(game.venue || "", game.date);
+            if (weather) {
+              const isOutdoor = ["NFL", "MLB", "NCAAF"].includes(betSport);
+              if (isOutdoor) {
+                weatherImpact = Math.min(100, Math.round((weather.windSpeed || 0) * 2 + (weather.precipitationProbability || 0) * 0.5));
+              }
+            }
+          } catch {}
+        }
+
+        const sportInjuries = injuryData[betSport] || [];
+        const relevantInjuries = sportInjuries.filter((inj: any) =>
+          allBetTeams.some(t =>
+            inj.team?.toLowerCase().includes(t.toLowerCase()) ||
+            inj.teamAbbreviation?.toLowerCase() === t.toLowerCase()
+          )
+        );
+        const criticalInjuries = relevantInjuries.filter((inj: any) =>
+          inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
+        );
+        injuryRisk = Math.min(100, criticalInjuries.length * 25);
+
+        const betDecimalOdds = bet.legs?.reduce((acc: number, l: any) => {
+          const o = l.odds || -110;
+          const decimal = o < 0 ? 1 + (100 / Math.abs(o)) : 1 + (o / 100);
+          return acc * decimal;
+        }, 1) || 2.0;
+
+        const stake = bet.stake || 10;
+        const payout = Math.round(stake * betDecimalOdds * 100) / 100;
+
+        let hedgeRecommendation: "hedge_now" | "monitor" | "no_hedge_needed";
+        let confidence: number;
+        let reasoning: string;
+
+        if (momentum < 30 || injuryRisk > 50) {
+          hedgeRecommendation = "hedge_now";
+          confidence = Math.min(92, 55 + injuryRisk * 0.3 + (50 - momentum) * 0.3);
+          reasoning = momentum < 30
+            ? "Bet is trending against you. Consider hedging to protect your stake."
+            : "Critical injury risk detected. Hedging recommended to reduce exposure.";
+        } else if (momentum < 45 || (injuryRisk > 20 && weatherImpact > 25)) {
+          hedgeRecommendation = "monitor";
+          confidence = Math.min(80, 50 + injuryRisk * 0.15 + weatherImpact * 0.1);
+          reasoning = "Mixed signals. Keep monitoring — hedge if conditions worsen.";
+        } else {
+          hedgeRecommendation = "no_hedge_needed";
+          confidence = Math.min(88, 50 + momentum * 0.3);
+          reasoning = "Bet is trending positively. No immediate hedge needed.";
+        }
+        confidence = Math.round(confidence);
+
+        const optimalHedgeStake = hedgeRecommendation === "hedge_now"
+          ? Math.round(payout / betDecimalOdds * 0.5)
+          : hedgeRecommendation === "monitor"
+          ? Math.round(payout / betDecimalOdds * 0.25)
+          : 0;
+
+        return {
+          ...bet,
+          payout,
+          hedgeAnalysis: {
+            recommendation: hedgeRecommendation,
+            confidence,
+            reasoning,
+            suggestedHedgeStake: optimalHedgeStake,
+            liveScore,
+            gameState,
+            factors: {
+              momentum: { value: momentum, impact: momentum > 60 ? "positive" : momentum < 40 ? "negative" : "neutral" },
+              injuryRisk: { value: injuryRisk, impact: injuryRisk > 30 ? "negative" : injuryRisk > 10 ? "neutral" : "positive" },
+              weatherImpact: { value: weatherImpact, impact: weatherImpact > 30 ? "negative" : weatherImpact > 10 ? "neutral" : "positive" },
+            },
+          },
+        };
+      }));
+
+      res.json(enrichedBets);
+    } catch (err) {
+      logError(err as Error, { context: "live-hedge-bets" });
+      res.status(500).json({ error: "Failed to compute hedge analysis" });
+    }
   });
 
   // ==================== PRO TOOLS ENGINE ====================
@@ -1226,13 +1371,140 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/tools/cashout-analysis", (req, res) => {
-    const { betOdds, currentOdds, stake, legsRemaining } = req.body;
-    if (!betOdds || !stake) return res.status(400).json({ error: "Missing required fields" });
-    const analysis = proToolsEngine.analyzeCashout(
-      Number(betOdds), Number(currentOdds || betOdds), Number(stake), Number(legsRemaining || 1)
-    );
-    res.json(analysis);
+  app.post("/api/tools/cashout-analysis", async (req, res) => {
+    try {
+      const { betOdds, currentOdds, stake, legsRemaining, gameId, sport } = req.body;
+      if (!betOdds || !stake) return res.status(400).json({ error: "Missing required fields" });
+
+      const baseAnalysis = proToolsEngine.analyzeCashout(
+        Number(betOdds), Number(currentOdds || betOdds), Number(stake), Number(legsRemaining || 1)
+      );
+
+      const legs = Number(legsRemaining || 1);
+      const decimalOdds = Number(betOdds);
+      const currentDecimal = Number(currentOdds || betOdds);
+      const stakeNum = Number(stake);
+
+      let momentumScore = 50;
+      let injuryScore = 0;
+      let weatherScore = 0;
+
+      if (gameId && sport) {
+        try {
+          const { getMultiDayScoreboard } = await import("../espn-scoreboard-provider");
+          const { getAllInjuries } = await import("../espn-injury-provider");
+          const { getVenueWeather } = await import("../weather-provider");
+
+          const games = await getMultiDayScoreboard(sport, 3);
+          const matched = games.find(g => g.id === gameId);
+
+          if (matched) {
+            if (matched.status?.state === "in") {
+              const homeScore = matched.homeTeam.score || 0;
+              const awayScore = matched.awayTeam.score || 0;
+              const scoreDiff = homeScore - awayScore;
+              momentumScore = Math.min(95, Math.max(5, 50 + scoreDiff * 3));
+            }
+
+            try {
+              const weather = await getVenueWeather(matched.venue || "", matched.date);
+              if (weather && ["NFL", "MLB", "NCAAF"].includes(sport)) {
+                weatherScore = Math.min(100, Math.round((weather.windSpeed || 0) * 2 + (weather.precipitationProbability || 0) * 0.5));
+              }
+            } catch {}
+          }
+
+          try {
+            const injuries = await getAllInjuries(sport);
+            const criticalCount = injuries.filter((inj: any) =>
+              inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
+            ).length;
+            injuryScore = Math.min(100, criticalCount * 10);
+          } catch {}
+        } catch {}
+      }
+
+      const factors = [
+        {
+          id: "ev_analysis",
+          name: "Expected Value",
+          description: `Current EV: $${baseAnalysis.currentEV} vs projected: $${baseAnalysis.projectedEV}`,
+          weight: 0.35,
+          score: baseAnalysis.currentEV >= baseAnalysis.projectedEV * 0.8 ? 80 : baseAnalysis.currentEV >= baseAnalysis.projectedEV * 0.5 ? 50 : 25,
+          status: (baseAnalysis.currentEV >= baseAnalysis.projectedEV * 0.8 ? "good" : baseAnalysis.currentEV >= baseAnalysis.projectedEV * 0.5 ? "warning" : "bad") as "good" | "warning" | "bad",
+          recommendation: baseAnalysis.reasoning,
+        },
+        {
+          id: "leg_complexity",
+          name: "Leg Complexity",
+          description: `${legs} leg${legs > 1 ? "s" : ""} remaining — ${baseAnalysis.riskLevel} risk`,
+          weight: 0.2,
+          score: legs <= 2 ? 85 : legs <= 4 ? 55 : 25,
+          status: (legs <= 2 ? "good" : legs <= 4 ? "warning" : "bad") as "good" | "warning" | "bad",
+          recommendation: legs > 4 ? "High leg count reduces cashout availability" : undefined,
+        },
+        {
+          id: "momentum",
+          name: "Game Momentum",
+          description: gameId ? `Live momentum score: ${momentumScore}%` : "No live game linked",
+          weight: 0.2,
+          score: momentumScore,
+          status: (momentumScore > 60 ? "good" : momentumScore > 35 ? "warning" : "bad") as "good" | "warning" | "bad",
+        },
+        {
+          id: "injury_risk",
+          name: "Injury Risk",
+          description: injuryScore > 30 ? "Critical injuries detected" : "No significant injury concerns",
+          weight: 0.15,
+          score: Math.max(0, 100 - injuryScore),
+          status: (injuryScore > 30 ? "bad" : injuryScore > 10 ? "warning" : "good") as "good" | "warning" | "bad",
+        },
+        {
+          id: "weather",
+          name: "Weather Conditions",
+          description: weatherScore > 30 ? "Adverse weather may impact game" : "No weather concerns",
+          weight: 0.1,
+          score: Math.max(0, 100 - weatherScore),
+          status: (weatherScore > 30 ? "bad" : weatherScore > 10 ? "warning" : "good") as "good" | "warning" | "bad",
+        },
+      ];
+
+      const overallScore = Math.round(factors.reduce((acc, f) => acc + f.score * f.weight, 0));
+      const grade = overallScore >= 80 ? "A" : overallScore >= 65 ? "B" : overallScore >= 50 ? "C" : overallScore >= 35 ? "D" : "F";
+
+      const platformScores = [
+        { platform: "DraftKings", probability: Math.min(95, overallScore + 10), features: ["Full cashout", "Partial cashout"], limitations: ["Some props excluded"], tips: ["Pre-game cashout most reliable"] },
+        { platform: "FanDuel", probability: Math.min(92, overallScore + 5), features: ["Full cashout", "Auto cashout"], limitations: ["Live cashout limited"], tips: ["Set auto-cashout thresholds"] },
+        { platform: "BetMGM", probability: Math.min(88, overallScore), features: ["Full cashout"], limitations: ["No partial cashout"], tips: ["Check cashout value before game time changes"] },
+      ];
+
+      const suggestions = [];
+      if (legs > 4) {
+        suggestions.push({ current: `${legs} legs`, suggested: "3-4 legs", reason: "Fewer legs increase cashout availability", cashoutImpact: 20 });
+      }
+      if (injuryScore > 30) {
+        suggestions.push({ current: "Injury-affected legs", suggested: "Replace with safer markets", reason: "Key player injuries reduce cashout value", cashoutImpact: -15 });
+      }
+      if (weatherScore > 30) {
+        suggestions.push({ current: "Outdoor game", suggested: "Monitor weather updates", reason: "Weather conditions may shift lines", cashoutImpact: -10 });
+      }
+
+      res.json({
+        overallScore,
+        grade,
+        factors,
+        platformScores,
+        suggestions,
+        optimalLegCount: { min: 2, max: 4 },
+        bestMarkets: ["Moneyline", "Spread", "Over/Under"],
+        avoidMarkets: ["Player Props", "Alt Lines", "First Half"],
+        ...baseAnalysis,
+        liveFactors: gameId ? { momentum: momentumScore, injuryRisk: injuryScore, weatherImpact: weatherScore } : undefined,
+      });
+    } catch (err) {
+      logError(err as Error, { context: "cashout-analysis" });
+      res.status(500).json({ error: "Failed to run cashout analysis" });
+    }
   });
 
   app.get("/api/tools/player-props/:sport", async (req, res) => {

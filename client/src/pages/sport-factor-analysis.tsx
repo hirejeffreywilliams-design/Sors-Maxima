@@ -42,6 +42,7 @@ import {
   Compass,
   GaugeCircle,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const SPORT_ICONS: Record<string, any> = {
   "NBA": Dribbble,
@@ -804,6 +805,7 @@ function FactorDatabaseTab() {
 }
 
 export default function SportFactorAnalysis() {
+  useSEO({ title: "Sport Factor Analysis", description: "Deep analysis of sport-specific betting factors" });
   return (
     <ScrollArea className="h-full">
       <div className="max-w-screen-2xl mx-auto p-4 lg:p-6 space-y-6">

@@ -19,6 +19,7 @@ import { Flag, Settings, ToggleLeft, Plus, ArrowLeft, Percent, Loader2, XCircle 
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 interface FeatureFlag {
   id: string;
@@ -31,6 +32,7 @@ interface FeatureFlag {
 }
 
 export default function AdminFeatureFlags() {
+  useSEO({ title: "Feature Flags", description: "Manage feature flags and rollout configurations" });
   const { toast } = useToast();
 
   const [newFlagId, setNewFlagId] = useState("");

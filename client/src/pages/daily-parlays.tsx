@@ -20,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import type { Sport, GeneratedParlay } from "@shared/schema";
 import { sports } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 interface PrecomputedPick {
   id: string;
@@ -390,6 +391,7 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
 }
 
 export default function DailyParlays() {
+  useSEO({ title: "Daily Parlays", description: "Today's AI-generated parlay recommendations" });
   const [, navigate] = useLocation();
   const [activeSport, setActiveSport] = useState<string>("NBA");
   const [sortBy, setSortBy] = useState<SortMode>("confidence");

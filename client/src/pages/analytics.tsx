@@ -14,8 +14,10 @@ import {
   Award,
   Activity
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Analytics() {
+  useSEO({ title: "Analytics", description: "Your betting analytics and performance insights" });
   const { data: analytics, isLoading } = useQuery<any>({
     queryKey: ["/api/analytics"],
   });

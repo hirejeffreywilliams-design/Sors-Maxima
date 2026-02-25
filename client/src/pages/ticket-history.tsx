@@ -26,6 +26,7 @@ import {
   Minus,
 } from "lucide-react";
 import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
+import { useSEO } from "@/hooks/use-seo";
 
 export interface SavedTicket {
   id: string;
@@ -375,6 +376,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
 }
 
 export default function TicketHistory() {
+  useSEO({ title: "Ticket History", description: "View your submitted ticket history" });
   const [tickets, setTickets] = useState<SavedTicket[]>([]);
 
   useEffect(() => {

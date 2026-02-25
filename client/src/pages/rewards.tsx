@@ -6,8 +6,10 @@ import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { PaperTrading } from "@/components/gamification/paper-trading";
 import { PickCompetitions } from "@/components/gamification/pick-competitions";
 import { Badge } from "@/components/ui/badge";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Rewards() {
+  useSEO({ title: "Rewards", description: "Earn and redeem rewards for your activity" });
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">

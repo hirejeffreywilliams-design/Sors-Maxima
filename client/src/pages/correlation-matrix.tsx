@@ -19,6 +19,7 @@ import {
   CheckCircle2,
   Info,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface MarketGame {
   id: string;
@@ -222,6 +223,7 @@ function getTopCorrelations(): { positive: CorrelationInsight[]; negative: Corre
 }
 
 export default function CorrelationMatrixPage() {
+  useSEO({ title: "Correlation Matrix", description: "Analyze statistical correlations between bet outcomes" });
   const [sport, setSport] = useState("NBA");
   const [selectedGameId, setSelectedGameId] = useState<string>("");
 

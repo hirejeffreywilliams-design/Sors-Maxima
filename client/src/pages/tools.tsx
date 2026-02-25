@@ -53,6 +53,7 @@ import { CustomModelBuilder } from "@/components/custom-model-builder";
 import { ExportBetSlip } from "@/components/export-bet-slip";
 import { ROIUpliftCalculator } from "@/components/roi-uplift-calculator";
 import { Calculator } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const TOOL_GROUPS = [
   {
@@ -108,6 +109,7 @@ const TOOL_GROUPS = [
 ];
 
 export default function Tools() {
+  useSEO({ title: "Tools", description: "Betting calculators and analysis tools" });
   const [activeGroup, setActiveGroup] = useState("analysis");
   const [activeSub, setActiveSub] = useState("predictions");
 

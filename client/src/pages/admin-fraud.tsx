@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, AlertTriangle, Users, TrendingUp, Eye, CheckCircle, XCircle, Search, Activity, Network, BarChart3, Clock, ShieldAlert, ShieldCheck } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface FraudSignal {
   type: string;
@@ -422,6 +423,7 @@ function CaseList() {
 }
 
 export default function AdminFraudDashboard() {
+  useSEO({ title: "Fraud Detection", description: "Monitor and investigate suspicious activity" });
   return (
     <div className="space-y-6">
       <div>

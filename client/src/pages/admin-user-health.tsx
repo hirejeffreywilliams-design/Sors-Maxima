@@ -35,6 +35,7 @@ import {
   TrendingDown,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 
 interface UserHealth {
   userId: string;
@@ -104,6 +105,7 @@ function getSeverityColor(severity: string) {
 }
 
 export default function AdminUserHealth() {
+  useSEO({ title: "User Health", description: "Monitor user engagement and health scores" });
   const [search, setSearch] = useState("");
   const [filterLevel, setFilterLevel] = useState<string>("all");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);

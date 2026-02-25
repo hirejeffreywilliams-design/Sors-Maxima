@@ -49,6 +49,7 @@ import {
   Bug,
   Timer,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 function TrendIcon({ trend }: { trend: string }) {
   if (trend === "up") return <TrendingUp className="h-4 w-4 text-green-500" />;
@@ -83,6 +84,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function AdminAnalytics() {
+  useSEO({ title: "Admin Analytics", description: "Platform-wide analytics and reporting dashboard" });
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
 

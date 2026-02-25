@@ -17,6 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const sportOptions = [
   { value: "NBA", label: "Basketball" },
@@ -134,6 +135,7 @@ function TeaserCard({ teaser }: { teaser: any }) {
 }
 
 export default function TeaserGenerator() {
+  useSEO({ title: "Teaser Generator", description: "Generate optimized teaser bet combinations" });
   const [sport, setSport] = useState("NBA");
   const [legs, setLegs] = useState("2");
   const [typeFilter, setTypeFilter] = useState("all");

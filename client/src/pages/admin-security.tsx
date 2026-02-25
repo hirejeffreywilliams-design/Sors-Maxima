@@ -55,6 +55,7 @@ import {
 import { Link } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 interface SecurityEvent {
   id: string;
@@ -161,6 +162,7 @@ function timeAgo(ts: string): string {
 }
 
 export default function AdminSecurityPage() {
+  useSEO({ title: "Security Center", description: "Security monitoring, audit logs, and compliance" });
   const { toast } = useToast();
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");

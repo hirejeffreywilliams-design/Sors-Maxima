@@ -59,6 +59,7 @@ import {
   Flame,
   Gauge
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface LiveGame {
   id: string;
@@ -91,6 +92,7 @@ interface GameResult {
 }
 
 export default function TrainingCenter() {
+  useSEO({ title: "Training Center", description: "Learn betting strategies and improve your skills" });
   const [isTraining, setIsTraining] = useState(false);
   const [progress, setProgress] = useState(0);
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);

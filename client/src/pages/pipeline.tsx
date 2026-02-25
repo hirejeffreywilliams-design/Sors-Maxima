@@ -12,6 +12,7 @@ import {
   Clock, Database, Eye, Filter, FlaskConical, Gauge, GitBranch, Layers, LineChart,
   Lock, Play, RefreshCw, Search, Shield, Sparkles, Target, TrendingUp, XCircle, Zap
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface PipelineStage {
   name: string;
@@ -84,6 +85,7 @@ const STATUS_BG: Record<string, string> = {
 };
 
 export default function PipelineIntelligence() {
+  useSEO({ title: "Pipeline Intelligence", description: "Data pipeline monitoring and intelligence" });
   const queryClient = useQueryClient();
   const [selectedSport, setSelectedSport] = useState("NBA");
   const [riskLevel, setRiskLevel] = useState("moderate");

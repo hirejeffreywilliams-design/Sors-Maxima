@@ -26,6 +26,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const TOTAL_STEPS = 4;
 
@@ -68,6 +69,7 @@ const features = [
 ];
 
 export default function OnboardingPage() {
+  useSEO({ title: "Get Started", description: "Set up your Sors Maxima experience" });
   const [step, setStep] = useState(1);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
@@ -88,7 +90,7 @@ export default function OnboardingPage() {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/auth/session"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
       toast({ title: "Welcome to Sors Maxima", description: "Your preferences have been saved. Let's find your edge." });
       setLocation("/dashboard");
     },

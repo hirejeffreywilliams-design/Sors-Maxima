@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const SPORTS = [
   { id: "NBA", name: "NBA", color: "bg-orange-500" },
@@ -324,6 +325,7 @@ function ParlayCard({ parlay, stake }: { parlay: ParlayRecommendation; stake: nu
 }
 
 export default function PropParlayBuilder() {
+  useSEO({ title: "Prop Parlay Builder", description: "Build player prop parlays with AI analysis" });
   const { toast } = useToast();
   const [selectedSports, setSelectedSports] = useState<string[]>(["NBA"]);
   const [legCount, setLegCount] = useState(3);

@@ -8,12 +8,14 @@ import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCachedFingerprint } from "@/lib/device-fingerprint";
+import { useSEO } from "@/hooks/use-seo";
 
 interface LoginPageProps {
   onLogin: () => void;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
+  useSEO({ title: "Sign In", description: "Sign in to your Sors Maxima account" });
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
   
   // Login form

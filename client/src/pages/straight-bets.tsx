@@ -23,6 +23,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const sportOptions = [
   { value: "all", label: "All Sports" },
@@ -186,6 +187,7 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
 }
 
 export default function StraightBets() {
+  useSEO({ title: "Straight Bets", description: "Find and analyze straight bet opportunities" });
   const [sport, setSport] = useState("all");
   const [betType, setBetType] = useState("all");
   const [minConfidence, setMinConfidence] = useState([0]);

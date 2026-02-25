@@ -25,6 +25,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 
 interface FAQItem {
   question: string;
@@ -149,6 +150,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function HelpCenter() {
+  useSEO({ title: "Help Center", description: "Guides, FAQs, and support resources" });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 

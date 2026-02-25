@@ -14,6 +14,7 @@ import {
   ArrowLeft, Users, Layers, Target, Zap, Gift, Eye, MousePointer,
   DollarSign, TrendingUp, Activity, BarChart3, CheckCircle, XCircle
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface SegmentRule {
   field: string;
@@ -477,6 +478,7 @@ function PersonalizationTab() {
 }
 
 export default function AdminSegmentation() {
+  useSEO({ title: "User Segmentation", description: "Define and analyze user segments" });
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">

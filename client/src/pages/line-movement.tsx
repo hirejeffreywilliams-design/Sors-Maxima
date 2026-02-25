@@ -18,6 +18,7 @@ import {
   DollarSign,
   Minus,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface LineMovementData {
   market: string;
@@ -344,6 +345,7 @@ function CLVBarChart({ examples }: { examples: { label: string; clv: number; won
 }
 
 export default function LineMovementPage() {
+  useSEO({ title: "Line Movement", description: "Track and analyze real-time line movements" });
   const [selectedSport, setSelectedSport] = useState("NBA");
 
   const { data, isLoading } = useQuery<MarketSnapshot>({

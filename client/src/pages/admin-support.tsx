@@ -41,6 +41,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 
 interface TicketMessage {
   id: string;
@@ -82,6 +83,7 @@ interface SupportStats {
 }
 
 export default function AdminSupportDashboard() {
+  useSEO({ title: "Support Center", description: "Customer support tickets and resolution tracking" });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);

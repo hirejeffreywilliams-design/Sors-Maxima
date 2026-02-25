@@ -40,6 +40,7 @@ import {
   Eye
 } from "lucide-react";
 import { SiX, SiFacebook, SiInstagram, SiLinkedin, SiTiktok } from "react-icons/si";
+import { useSEO } from "@/hooks/use-seo";
 
 interface GeneratedContent {
   type: string;
@@ -720,6 +721,7 @@ function AudienceSegments() {
 }
 
 export default function AdminMarketing() {
+  useSEO({ title: "Marketing Dashboard", description: "Marketing performance and campaign analytics" });
   return (
     <div className="max-w-screen-2xl mx-auto p-4 lg:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

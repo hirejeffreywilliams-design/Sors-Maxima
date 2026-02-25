@@ -31,6 +31,7 @@ import {
   Target,
   Calendar,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface ABVariant {
   id: string;
@@ -102,6 +103,7 @@ function getStatusColor(status: string): string {
 }
 
 export default function AdminABTests() {
+  useSEO({ title: "A/B Tests", description: "Manage and monitor A/B testing experiments" });
   const [statusFilter, setStatusFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");

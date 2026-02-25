@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Shield, FileText, AlertTriangle, ExternalLink } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function LegalPage() {
+  useSEO({ title: "Legal", description: "Terms of service, privacy policy, and legal information" });
   const [activeTab, setActiveTab] = useState("terms");
 
   return (

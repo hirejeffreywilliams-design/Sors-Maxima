@@ -17,6 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 const sportOptions = [
   { value: "NBA", label: "Basketball" },
@@ -151,6 +152,7 @@ function SGPCard({ sgp }: { sgp: any }) {
 }
 
 export default function SGPGenerator() {
+  useSEO({ title: "Same Game Parlay", description: "Build same game parlays with correlation analysis" });
   const [sport, setSport] = useState("NBA");
   const [groupByGame, setGroupByGame] = useState(true);
 

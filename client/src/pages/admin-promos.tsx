@@ -13,6 +13,7 @@ import {
   ArrowLeft, Gift, TrendingUp, DollarSign, Users, Percent, BarChart3, Calendar,
   Play, Pause, XCircle, Tag, Target, Clock, Zap, Heart, Timer, UserPlus
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface PromoOffer {
   id: string;
@@ -122,6 +123,7 @@ function formatCurrency(amount: number): string {
 }
 
 export default function AdminPromos() {
+  useSEO({ title: "Promotions", description: "Create and manage promotional campaigns" });
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);

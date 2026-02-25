@@ -21,6 +21,7 @@ import {
   Layers, Network, ShieldCheck, Activity, AlertTriangle, CheckCircle,
   Clock, Target, Cpu, ChevronDown, ChevronUp, Eye,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 function PriorityBadge({ priority }: { priority: string }) {
   const map: Record<string, string> = {
@@ -911,6 +912,7 @@ function PoliciesTab() {
 }
 
 export default function AdminOrchestration() {
+  useSEO({ title: "Orchestration", description: "Ticket management, feature registry, and recommendations" });
   const [activeTab, setActiveTab] = useState("overview");
 
   return (

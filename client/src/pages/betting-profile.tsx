@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Heart, Star, Trophy, Target, Shield, Zap, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 type RiskTolerance = "conservative" | "moderate" | "aggressive";
 type BankrollStrategy = "flat" | "percentage" | "kelly";
@@ -99,6 +100,7 @@ function getProfileType(profile: BettingProfile): { name: string; icon: JSX.Elem
 }
 
 export default function BettingProfile() {
+  useSEO({ title: "Betting Profile", description: "Your betting preferences and style analysis" });
   const { toast } = useToast();
 
   const [profile, setProfile] = useState<BettingProfile>(() => {

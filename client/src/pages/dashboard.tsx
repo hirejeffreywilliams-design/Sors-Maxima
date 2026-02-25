@@ -13,8 +13,10 @@ import { TodaysBestBets } from "@/components/todays-best-bets";
 import { DataFreshnessBar } from "@/components/data-freshness";
 import { useQuery } from "@tanstack/react-query";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Dashboard() {
+  useSEO({ title: "Build Your Parlay", description: "Build, analyze, and optimize your parlay bets" });
   const [activeTab, setActiveTab] = useState("generator");
   const [preloadedLegs, setPreloadedLegs] = useState<ParlayLeg[]>([]);
   const [selectedLegs, setSelectedLegs] = useState<ParlayLeg[]>([]);

@@ -16,6 +16,7 @@ import {
   CreditCard,
   Globe,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface ChangelogEntry {
   version: string;
@@ -137,6 +138,7 @@ const tagColors: Record<string, string> = {
 };
 
 export default function ChangelogPage() {
+  useSEO({ title: "Changelog", description: "Latest updates and feature releases" });
   return (
     <div className="min-h-full">
       <div className="max-w-screen-md mx-auto px-4 sm:px-6 py-6 space-y-6">

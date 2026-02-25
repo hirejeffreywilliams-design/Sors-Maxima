@@ -7,8 +7,10 @@ import {
   Rocket, Clock, Compass, Telescope, Sparkles, CheckCircle,
   Loader2, Circle, Search, RefreshCw
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Roadmap() {
+  useSEO({ title: "Roadmap", description: "Upcoming features and development roadmap" });
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/roadmap"] });
 
   if (isLoading) {

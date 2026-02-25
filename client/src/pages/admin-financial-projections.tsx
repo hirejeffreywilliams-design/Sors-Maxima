@@ -13,8 +13,10 @@ import {
   ArrowLeft, DollarSign, TrendingUp, TrendingDown, BarChart3,
   PieChart, RefreshCw, ArrowUpRight, ArrowDownRight, Target
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function AdminFinancialProjections() {
+  useSEO({ title: "Financial Projections", description: "Revenue forecasting, unit economics, and capital allocation" });
   const [, setLocation] = useLocation();
   const [activeScenario, setActiveScenario] = useState<"bull" | "baseline" | "bear">("baseline");
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/financial-projections"] });

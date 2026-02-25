@@ -9,8 +9,10 @@ import { SchemeRecognition } from "@/components/scheme-recognition";
 import { CashoutAdvisor } from "@/components/live/cashout-advisor";
 import { LiveChat } from "@/components/live/live-chat";
 import { Badge } from "@/components/ui/badge";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Live() {
+  useSEO({ title: "Live Betting", description: "Real-time live betting tools and analysis" });
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">

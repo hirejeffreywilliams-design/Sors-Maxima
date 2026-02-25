@@ -12,6 +12,7 @@ import {
   ArrowRight, Clock, BarChart3, Search, RefreshCw, Plus,
   ArrowUpDown, AlertTriangle, Minus, DollarSign, Eye,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const SPORTS = [
   { id: "NBA", label: "NBA", emoji: "🏀" },
@@ -559,6 +560,7 @@ type SortMode = "ev" | "time" | "movement";
 type FilterMode = "all" | "live" | "upcoming" | "value" | "arb";
 
 export default function OddsCenter() {
+  useSEO({ title: "Odds Center", description: "Compare odds across sportsbooks and markets" });
   const [sport, setSport] = useState("NBA");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortMode>("ev");

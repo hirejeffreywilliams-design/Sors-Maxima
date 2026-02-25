@@ -22,6 +22,7 @@ import {
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSEO } from "@/hooks/use-seo";
 
 interface Pick {
   id: string;
@@ -37,6 +38,7 @@ function formatOdds(odds: number) {
 }
 
 export default function RoundRobinGenerator() {
+  useSEO({ title: "Round Robin Generator", description: "Generate optimized round robin combinations" });
   const [picks, setPicks] = useState<Pick[]>([]);
   const [parlaySize, setParlaySize] = useState("2");
   const [stake, setStake] = useState("10");

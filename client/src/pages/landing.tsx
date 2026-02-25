@@ -23,6 +23,7 @@ import {
   Atom,
 } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
+import { useSEO } from "@/hooks/use-seo";
 
 const features = [
   {
@@ -105,6 +106,7 @@ const pricingTiers = [
 ];
 
 export default function LandingPage() {
+  useSEO({ title: "Sors Maxima", description: "Quantum sports betting intelligence powered by AI" });
   const [betSize, setBetSize] = useState(50);
   const [betsPerWeek, setBetsPerWeek] = useState(10);
   const [winRate, setWinRate] = useState(48);

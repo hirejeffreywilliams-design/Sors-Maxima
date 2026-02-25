@@ -24,6 +24,7 @@ import {
   Star,
   ChevronRight,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface BettingDNA {
   favoriteSport: string | null;
@@ -138,6 +139,7 @@ function formatOdds(odds: number) {
 }
 
 export default function PersonalizedInsightsPage() {
+  useSEO({ title: "Personalized Insights", description: "AI-driven insights tailored to your betting style" });
   const [, navigate] = useLocation();
 
   const { data: insights, isLoading } = useQuery<PersonalizedInsights>({

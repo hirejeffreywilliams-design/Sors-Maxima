@@ -6,8 +6,10 @@ import { TaxExport } from "@/components/financial/tax-export";
 import { Badge } from "@/components/ui/badge";
 import { PerformanceAnalytics } from "@/components/financial/performance-analytics";
 import { BetTracker } from "@/components/bet-tracker";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Bankroll() {
+  useSEO({ title: "Bankroll Manager", description: "Track and manage your betting bankroll" });
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">

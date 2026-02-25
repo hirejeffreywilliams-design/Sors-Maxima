@@ -16,6 +16,7 @@ import {
   Zap,
   Target,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const SPORTS = [
   { id: "NBA", label: "NBA" },
@@ -315,6 +316,7 @@ function LoadingSkeleton() {
 }
 
 export default function EvHeatmap() {
+  useSEO({ title: "EV Heatmap", description: "Expected value heatmap across sports and markets" });
   const [sport, setSport] = useState("NBA");
 
   const { data, isLoading, isFetching, dataUpdatedAt } = useQuery<MarketSnapshot>({

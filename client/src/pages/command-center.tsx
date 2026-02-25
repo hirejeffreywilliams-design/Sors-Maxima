@@ -14,6 +14,7 @@ import {
   ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface TopPick {
   id: string;
@@ -413,6 +414,7 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
 }
 
 export default function CommandCenter() {
+  useSEO({ title: "Command Center", description: "Real-time betting command center and overview" });
   const [activeSportTab, setActiveSportTab] = useState("all");
 
   const sse = useSSE({

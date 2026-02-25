@@ -31,8 +31,10 @@ import {
   Calendar,
   CreditCard,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function ProfilePage() {
+  useSEO({ title: "Profile", description: "Manage your account and preferences" });
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");

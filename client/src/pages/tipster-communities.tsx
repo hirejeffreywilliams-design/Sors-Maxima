@@ -33,6 +33,7 @@ import {
   Gift
 } from "lucide-react";
 import { SiDiscord } from "react-icons/si";
+import { useSEO } from "@/hooks/use-seo";
 
 interface Community {
   id: string;
@@ -437,6 +438,7 @@ function TipDialog({ pick, onClose }: { pick: Pick | null; onClose: () => void }
 }
 
 export default function TipsterCommunities() {
+  useSEO({ title: "Tipster Communities", description: "Join and follow expert tipster communities" });
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [selectedCommunity, setSelectedCommunity] = useState<Community | null>(null);

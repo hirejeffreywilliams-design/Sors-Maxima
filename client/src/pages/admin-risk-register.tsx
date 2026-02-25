@@ -12,8 +12,10 @@ import {
   ArrowLeft, ShieldAlert, BookOpen, AlertTriangle, CheckCircle,
   XCircle, RefreshCw, FileText, ListChecks, ChevronDown, ChevronUp
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function AdminRiskRegister() {
+  useSEO({ title: "Risk Register", description: "Track and mitigate operational and business risks" });
   const [, setLocation] = useLocation();
   const [expandedSop, setExpandedSop] = useState<string | null>(null);
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/risk-register"] });

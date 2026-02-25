@@ -13,6 +13,7 @@ import {
   Users, TrendingUp, DollarSign, Send, Eye, BarChart3,
   Play, Pause, Archive, Zap, Target, Clock,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface CampaignStep {
   id: string;
@@ -89,6 +90,7 @@ function getStatusColor(status: string): string {
 }
 
 export default function AdminLifecycleCampaigns() {
+  useSEO({ title: "Lifecycle Campaigns", description: "Manage automated user lifecycle campaigns" });
   const [, navigate] = useLocation();
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);

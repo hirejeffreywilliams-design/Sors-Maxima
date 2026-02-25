@@ -15,8 +15,10 @@ import {
   Crosshair, DollarSign, Layers, RefreshCw
 } from "lucide-react";
 import { Link } from "wouter";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function AdminModelPerformance() {
+  useSEO({ title: "Model Performance", description: "ML model accuracy, calibration, and drift monitoring" });
   const [, setLocation] = useLocation();
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/model-performance"] });
 

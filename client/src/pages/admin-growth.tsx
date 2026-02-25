@@ -32,6 +32,7 @@ import {
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, Activity } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const funnelStages = [
   { label: "Visitors", value: 15420, color: "bg-blue-500" },
@@ -193,6 +194,7 @@ interface LiveExperiment {
 }
 
 export default function AdminGrowth() {
+  useSEO({ title: "Growth Dashboard", description: "Growth metrics, cohort analysis, and retention tracking" });
   const [activeTab, setActiveTab] = useState("funnel");
   const maxMrr = Math.max(...mrrHistory.map((m) => m.value));
 

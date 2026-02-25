@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useSEO } from "@/hooks/use-seo";
 
 interface AcquisitionSummary {
   totalSpend: number;
@@ -126,6 +127,7 @@ function TrendIcon({ trend }: { trend: "up" | "down" | "stable" }) {
 }
 
 export default function AdminAcquisition() {
+  useSEO({ title: "Acquisition Analytics", description: "Track user acquisition channels and performance" });
   const [activeTab, setActiveTab] = useState("channels");
 
   const { data, isLoading } = useQuery<AcquisitionDashboard>({

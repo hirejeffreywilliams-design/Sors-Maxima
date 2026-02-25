@@ -8,8 +8,10 @@ import { SocialFeed } from "@/components/social/social-feed";
 import { CopyBetting } from "@/components/social/copy-betting";
 import { Badge } from "@/components/ui/badge";
 import { TipsterContent } from "@/components/community/tipster-content";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Community() {
+  useSEO({ title: "Community", description: "Connect with fellow bettors and share insights" });
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">

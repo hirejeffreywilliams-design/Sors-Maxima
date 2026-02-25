@@ -30,6 +30,7 @@ import {
   Shield,
   Sparkles
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 interface HealthStatus {
   overall: 'healthy' | 'warning' | 'critical';
@@ -113,6 +114,7 @@ function StatusIndicator({ status }: { status: string }) {
 }
 
 export default function AdminDiagnostics() {
+  useSEO({ title: "Diagnostics", description: "System diagnostics and health monitoring" });
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [issueDescription, setIssueDescription] = useState("");

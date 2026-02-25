@@ -18,6 +18,7 @@ import {
   ArrowDown,
   ArrowUp,
 } from "lucide-react";
+import { useSEO } from "@/hooks/use-seo";
 
 const sports = [
   { id: "NBA", label: "NBA" },
@@ -250,6 +251,7 @@ function BankrollChart({ trajectory }: { trajectory: number[] }) {
 }
 
 export default function PowerRankings() {
+  useSEO({ title: "Power Rankings", description: "Team and player power rankings analysis" });
   const [selectedSport, setSelectedSport] = useState("NBA");
   const [startingBankroll, setStartingBankroll] = useState(1000);
   const [betStrategy, setBetStrategy] = useState<BetStrategy>("flat");

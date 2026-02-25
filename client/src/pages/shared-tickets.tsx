@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Share2,
   Trophy,
@@ -18,7 +19,9 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import type { SavedTicket } from "@/pages/ticket-history";
+import { useSEO } from "@/hooks/use-seo";
 
 const STORAGE_KEY = "sors_ticket_history";
 const DAILY_USAGE_KEY = "sors_daily_usage";
@@ -76,7 +79,7 @@ function computeUserStats(tickets: SavedTicket[]) {
   return { roi, winRate, totalProfit: totalPL, longestStreak, wins, losses };
 }
 
-const MOCK_COMPETITORS: { name: string; roi: number; winRate: number; totalProfit: number; longestStreak: number }[] = [];
+type LeaderboardEntry = { name: string; roi: number; winRate: number; totalProfit: number; longestStreak: number };
 
 type RankCriteria = "roi" | "winRate" | "totalProfit" | "longestStreak";
 
@@ -274,6 +277,10 @@ function LeaderboardTab() {
   const [criteria, setCriteria] = useState<RankCriteria>("roi");
   const userStats = useMemo(() => computeUserStats(loadTickets()), []);
 
+  const { data: competitors = [], isLoading } = useQuery<LeaderboardEntry[]>({
+    queryKey: ["/api/community/leaderboard"],
+  });
+
   const allEntries = useMemo(() => {
     const userEntry = {
       name: "You",
@@ -284,7 +291,7 @@ function LeaderboardTab() {
       isUser: true,
     };
     const entries = [
-      ...MOCK_COMPETITORS.map((c) => ({ ...c, isUser: false })),
+      ...competitors.map((c) => ({ ...c, isUser: false })),
       userEntry,
     ];
     entries.sort((a, b) => {
@@ -293,7 +300,7 @@ function LeaderboardTab() {
       return (bVal as number) - (aVal as number);
     });
     return entries;
-  }, [criteria, userStats]);
+  }, [criteria, userStats, competitors]);
 
   const criteriaOptions: { value: RankCriteria; label: string }[] = [
     { value: "roi", label: "ROI %" },
@@ -318,6 +325,15 @@ function LeaderboardTab() {
         ))}
       </div>
 
+      {isLoading ? (
+        <Card>
+          <CardContent className="p-4 space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardContent className="p-0">
           <div className="divide-y">
@@ -361,6 +377,7 @@ function LeaderboardTab() {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
@@ -502,6 +519,7 @@ function TierAccessTab() {
 }
 
 export default function SharedTickets() {
+  useSEO({ title: "Shared Tickets", description: "Community shared betting tickets and leaderboard" });
   const [location] = useLocation();
   const hasSharedId = typeof window !== "undefined" && window.location.search.includes("id=");
   const defaultTab = hasSharedId ? "share" : "share";
