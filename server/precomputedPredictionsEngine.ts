@@ -21,6 +21,109 @@ export interface PrecomputedPick {
   generatedAt: string;
   dataSource: "live" | "cached";
   gameTime?: string;
+  reasoning: string;
+  recommendation: string;
+  winProbability: number;
+  insights: string[];
+}
+
+const FACTOR_LABELS: Record<string, string> = {
+  scheme_mismatch: "Favorable Matchup",
+  coaching_tendency: "Coaching Edge",
+  sharp_money_flow: "Sharp Money",
+  public_fade: "Contrarian Value",
+  line_movement: "Line Movement",
+  momentum_score: "Team Momentum",
+  situational_spot: "Situational Advantage",
+  historical_h2h: "Head-to-Head History",
+  rest_advantage: "Rest Advantage",
+  home_field: "Home Court/Field",
+  tipster_consensus: "Expert Consensus",
+  monte_carlo: "Simulation Model",
+  predictive_model: "Predictive Model",
+  player_efficiency: "Player Performance",
+  scouting_data: "Scouting Report",
+  pace_tempo: "Pace & Tempo",
+  clutch_index: "Clutch Factor",
+  strength_schedule: "Strength of Schedule",
+  point_differential: "Point Differential",
+  win_probability: "Win Probability Model",
+  injury_adjustment: "Injury Impact",
+  weather_impact: "Weather Factor",
+  travel_fatigue: "Travel Fatigue",
+  mental_state: "Team Mentality",
+  confidence_index: "Confidence Level",
+  pressure_response: "Pressure Performance",
+  motivation_level: "Motivation Factor",
+  team_chemistry: "Team Chemistry",
+};
+
+function humanizeFactorName(name: string): string {
+  return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const REC_LABELS: Record<string, string> = {
+  strong_bet: "Strong Bet",
+  moderate_bet: "Good Bet",
+  lean_bet: "Lean",
+  avoid: "Risky",
+  fade: "Fade",
+};
+
+function buildPickReasoning(
+  pick: string,
+  betType: string,
+  confidence: number,
+  ev: number,
+  factors: { name: string; impact: number; direction: string }[],
+  recommendation: string,
+  winProbability: number,
+  homeTeam: string,
+  awayTeam: string,
+): string {
+  const parts: string[] = [];
+
+  const bullishFactors = factors
+    .filter(f => f.direction === "bullish" && f.impact >= 50)
+    .sort((a, b) => b.impact - a.impact)
+    .slice(0, 3);
+
+  if (betType === "moneyline") {
+    const team = pick.replace(" ML", "").trim();
+    if (winProbability >= 65) {
+      parts.push(`${team} has a ${winProbability}% model-projected win probability`);
+    } else if (winProbability >= 55) {
+      parts.push(`${team} is favored at ${winProbability}% win probability`);
+    } else {
+      parts.push(`${team} has value at ${winProbability}% win probability vs the posted odds`);
+    }
+  } else if (betType === "spread") {
+    if (ev > 3) {
+      parts.push(`The spread offers strong value with +${ev.toFixed(1)}% expected edge`);
+    } else {
+      parts.push(`Spread line is favorable based on projected scoring`);
+    }
+  } else if (betType === "total") {
+    const isOver = pick.toLowerCase().includes("over");
+    if (isOver) {
+      parts.push(`Pace and scoring trends suggest this game goes over the total`);
+    } else {
+      parts.push(`Defensive matchup and tempo point to this game staying under`);
+    }
+  }
+
+  if (bullishFactors.length > 0) {
+    const factorDescs = bullishFactors.map(f => humanizeFactorName(f.name).toLowerCase());
+    parts.push(`backed by ${factorDescs.join(", ")}`);
+  }
+
+  if (confidence >= 75 && ev > 5) {
+    parts.push(`high confidence pick with strong +${ev.toFixed(1)}% expected value`);
+  } else if (ev > 2) {
+    parts.push(`+${ev.toFixed(1)}% expected value edge over the market`);
+  }
+
+  return parts.join(" — ");
 }
 
 export interface PrecomputedSnapshot {
@@ -210,6 +313,11 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const trueProb = confidence / 100;
       const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
+      const mappedFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+      const evRounded = Math.round(ev * 100) / 100;
+      const rec = fusion.recommendation || "lean_bet";
+      const winProb = fusion.winProbability || Math.round(confidence * 0.95);
+
       picks.push({
         id: `precomp-${sport}-${game.id}-${bet.betType}-${Date.now().toString(36)}`,
         sport,
@@ -222,11 +330,15 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         confidence,
         grade: gradeFromConfidence(confidence),
         edge: Math.round(ev * 10) / 10,
-        ev: Math.round(ev * 100) / 100,
-        factors: (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" })),
+        ev: evRounded,
+        factors: mappedFactors,
         generatedAt: now,
         dataSource,
         gameTime: game.date,
+        reasoning: buildPickReasoning(bet.pick, bet.betType, confidence, evRounded, mappedFactors, rec, winProb, homeName, awayName),
+        recommendation: rec,
+        winProbability: winProb,
+        insights: (fusion.insights || []).slice(0, 3),
       });
     }
   }
@@ -238,23 +350,34 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const trueProb = confidence / 100;
     const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
+    const vpFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+    const vpEvRounded = Math.round(ev * 100) / 100;
+    const vpRec = fusion.recommendation || "lean_bet";
+    const vpWinProb = fusion.winProbability || Math.round(confidence * 0.95);
+    const vpPick = vp.pick || vp.description || "";
+    const vpBetType = vp.betType || "moneyline";
+
     picks.push({
       id: `precomp-vegas-${sport}-${crypto.randomUUID().slice(0, 12)}`,
       sport,
       game: vp.game || "Unknown",
       homeTeam: vp.homeTeam || "",
       awayTeam: vp.awayTeam || "",
-      pick: vp.pick || vp.description || "",
-      betType: vp.betType || "moneyline",
+      pick: vpPick,
+      betType: vpBetType,
       odds: vp.odds || -110,
       confidence,
       grade: gradeFromConfidence(confidence),
       edge: Math.round(ev * 10) / 10,
-      ev: Math.round(ev * 100) / 100,
-      factors: (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" })),
+      ev: vpEvRounded,
+      factors: vpFactors,
       generatedAt: now,
       dataSource,
       gameTime: vp.gameTime,
+      reasoning: buildPickReasoning(vpPick, vpBetType, confidence, vpEvRounded, vpFactors, vpRec, vpWinProb, vp.homeTeam || "", vp.awayTeam || ""),
+      recommendation: vpRec,
+      winProbability: vpWinProb,
+      insights: (fusion.insights || []).slice(0, 3),
     });
   }
 

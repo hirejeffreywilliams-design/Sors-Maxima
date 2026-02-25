@@ -39,7 +39,38 @@ interface PrecomputedPick {
   generatedAt: string;
   dataSource: string;
   gameTime?: string;
+  reasoning?: string;
+  recommendation?: string;
+  winProbability?: number;
+  insights?: string[];
 }
+
+const FACTOR_LABELS: Record<string, string> = {
+  scheme_mismatch: "Favorable Matchup", coaching_tendency: "Coaching Edge",
+  sharp_money_flow: "Sharp Money", public_fade: "Contrarian Value",
+  line_movement: "Line Movement", momentum_score: "Team Momentum",
+  monte_carlo: "Simulation Model", player_efficiency: "Player Performance",
+  injury_adjustment: "Injury Impact", weather_impact: "Weather Factor",
+  home_field: "Home Court/Field", rest_advantage: "Rest Advantage",
+  pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
+  point_differential: "Point Differential", strength_schedule: "Schedule Strength",
+  historical_h2h: "Head-to-Head", predictive_model: "Predictive Model",
+  situational_spot: "Situational Advantage", tipster_consensus: "Expert Consensus",
+  win_probability: "Win Probability", scouting_data: "Scouting Report",
+  confidence_index: "Confidence Level", team_chemistry: "Team Chemistry",
+};
+
+function humanFactor(name: string): string {
+  return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const REC_CONFIG: Record<string, { label: string; color: string; icon: string }> = {
+  strong_bet: { label: "Strong Bet", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", icon: "fire" },
+  moderate_bet: { label: "Good Bet", color: "bg-blue-500/15 text-blue-400 border-blue-500/30", icon: "target" },
+  lean_bet: { label: "Lean", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "eye" },
+  avoid: { label: "Risky", color: "bg-red-500/15 text-red-400 border-red-500/30", icon: "shield" },
+  fade: { label: "Fade", color: "bg-red-500/15 text-red-400 border-red-500/30", icon: "shield" },
+};
 
 interface PredictionSnapshot {
   sport: string;
@@ -96,7 +127,7 @@ function formatDecimalOdds(decimal: number): string {
 }
 
 function formatFactorName(name: string): string {
-  return name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return humanFactor(name);
 }
 
 function directionIcon(dir: string) {
@@ -183,13 +214,41 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
 
         {pick.pick && (
           <div className="px-3 py-2.5 rounded-lg bg-muted/40 border border-border/40">
-            <p className="text-sm font-semibold" data-testid={`text-pick-value-${pick.id}`}>
-              {pick.pick}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-sm font-semibold" data-testid={`text-pick-value-${pick.id}`}>
+                {pick.pick}
+              </p>
+              {pick.recommendation && REC_CONFIG[pick.recommendation] && (
+                <Badge variant="outline" className={`text-[10px] px-2 py-0.5 shrink-0 ${REC_CONFIG[pick.recommendation].color}`}>
+                  {pick.recommendation === "strong_bet" && <Flame className="w-2.5 h-2.5 mr-0.5" />}
+                  {pick.recommendation === "moderate_bet" && <Target className="w-2.5 h-2.5 mr-0.5" />}
+                  {REC_CONFIG[pick.recommendation].label}
+                </Badge>
+              )}
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2">
+        {pick.reasoning && (
+          <div className="px-3 py-2 rounded-lg bg-primary/5 border border-primary/10">
+            <div className="flex items-start gap-2">
+              <Brain className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+              <p className="text-[11px] text-foreground/80 leading-relaxed" data-testid={`text-reasoning-${pick.id}`}>
+                {pick.reasoning}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className={`grid gap-2 ${pick.winProbability ? "grid-cols-4" : "grid-cols-3"}`}>
+          {pick.winProbability && (
+            <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
+              <p className="text-lg font-bold font-mono text-primary" data-testid={`text-pick-winprob-${pick.id}`}>
+                {pick.winProbability}%
+              </p>
+              <p className="text-[10px] text-muted-foreground font-medium">Win Prob</p>
+            </div>
+          )}
           <div className="p-2 rounded-lg bg-muted/30 text-center">
             <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
               {pick.confidence}%
@@ -209,6 +268,17 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
             <p className="text-[10px] text-muted-foreground font-medium">Odds</p>
           </div>
         </div>
+
+        {pick.insights && pick.insights.length > 0 && (
+          <div className="space-y-1">
+            {pick.insights.map((insight, i) => (
+              <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
+                <Sparkles className="w-2.5 h-2.5 text-amber-400 mt-0.5 shrink-0" />
+                <span>{insight}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {topFactors.length > 0 && (
           <div className="space-y-1.5">

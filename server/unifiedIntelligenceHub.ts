@@ -86,6 +86,9 @@ export interface TopPick {
   homeTeam: string;
   awayTeam: string;
   reasoning: string;
+  recommendation: string;
+  winProbability: number;
+  insights: string[];
 }
 
 export interface EdgeAlert {
@@ -435,7 +438,10 @@ function gatherTopPicks(): TopPick[] {
         gameTime: p.gameTime,
         homeTeam: p.homeTeam,
         awayTeam: p.awayTeam,
-        reasoning: buildReasoning(p),
+        reasoning: p.reasoning || buildReasoning(p),
+        recommendation: p.recommendation || "lean_bet",
+        winProbability: p.winProbability || Math.round(p.confidence * 0.95),
+        insights: p.insights || [],
       });
     }
   }

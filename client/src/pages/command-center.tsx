@@ -32,7 +32,34 @@ interface TopPick {
   homeTeam: string;
   awayTeam: string;
   reasoning: string;
+  recommendation?: string;
+  winProbability?: number;
+  insights?: string[];
 }
+
+const FACTOR_LABELS: Record<string, string> = {
+  scheme_mismatch: "Favorable Matchup", coaching_tendency: "Coaching Edge",
+  sharp_money_flow: "Sharp Money", public_fade: "Contrarian Value",
+  line_movement: "Line Movement", momentum_score: "Team Momentum",
+  monte_carlo: "Simulation Model", player_efficiency: "Player Performance",
+  injury_adjustment: "Injury Impact", weather_impact: "Weather Factor",
+  home_field: "Home Court/Field", rest_advantage: "Rest Advantage",
+  pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
+  point_differential: "Point Differential", strength_schedule: "Schedule Strength",
+  historical_h2h: "Head-to-Head", predictive_model: "Predictive Model",
+};
+
+function humanFactor(name: string): string {
+  return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+const REC_STYLES: Record<string, { label: string; color: string }> = {
+  strong_bet: { label: "Strong Bet", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" },
+  moderate_bet: { label: "Good Bet", color: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+  lean_bet: { label: "Lean", color: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
+  avoid: { label: "Risky", color: "bg-red-500/15 text-red-400 border-red-500/30" },
+  fade: { label: "Fade", color: "bg-red-500/15 text-red-400 border-red-500/30" },
+};
 
 interface UnifiedGame {
   id: string;
@@ -245,29 +272,58 @@ function PickCard({ pick }: { pick: TopPick }) {
     });
   };
 
+  const rec = pick.recommendation ? REC_STYLES[pick.recommendation] : null;
+  const topFactors = (pick.factors || []).filter(f => f.direction === "bullish").slice(0, 3);
+
   return (
     <div
-      className="group relative p-3 sm:p-4 rounded-md bg-card border hover:border-primary/30 transition-colors"
+      className="group relative p-3 sm:p-4 rounded-lg bg-card border hover:border-primary/30 transition-all duration-200"
       data-testid={`card-pick-${pick.id}`}
     >
       <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sportColor(pick.sport)}`}>
               {pick.sport}
             </Badge>
+            {rec && (
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${rec.color}`}>
+                {rec.label}
+              </Badge>
+            )}
             <span className="text-xs text-muted-foreground truncate">{pick.game}</span>
           </div>
           <p className="font-semibold text-sm" data-testid={`text-pick-${pick.id}`}>{pick.pick}</p>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span className="font-mono font-medium text-foreground">{formatOdds(pick.odds)}</span>
-            <span>Conf: {pick.confidence}%</span>
+            {pick.winProbability ? (
+              <span className="text-primary font-medium">Win: {pick.winProbability}%</span>
+            ) : (
+              <span>Conf: {pick.confidence}%</span>
+            )}
             <span className={pick.ev > 0 ? "text-green-500" : "text-red-500"}>
               EV: {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
             </span>
           </div>
           {pick.reasoning && (
-            <p className="text-[11px] text-muted-foreground italic">{pick.reasoning}</p>
+            <div className="mt-1 px-2.5 py-1.5 rounded-md bg-primary/5 border border-primary/10">
+              <div className="flex items-start gap-1.5">
+                <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                <p className="text-[11px] text-foreground/80 leading-relaxed" data-testid={`text-reasoning-${pick.id}`}>
+                  {pick.reasoning}
+                </p>
+              </div>
+            </div>
+          )}
+          {topFactors.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {topFactors.map((f, i) => (
+                <span key={i} className="inline-flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                  <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
+                  {humanFactor(f.name)}
+                </span>
+              ))}
+            </div>
           )}
         </div>
         <div className="flex flex-col items-center gap-1.5 shrink-0">
