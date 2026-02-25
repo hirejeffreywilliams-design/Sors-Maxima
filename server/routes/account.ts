@@ -660,10 +660,10 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       tier = subscription.subscriptionTier || "free";
     }
     const tierFeatures: Record<string, string> = {
-      free: "Limited preview access",
-      pro: "Full engine access — unlimited daily usage",
-      elite: "All pro tools — unlimited daily usage",
-      whale: "Maximum depth — zero limits, priority processing",
+      free: "Guest preview — limited access",
+      pro: "Sharp member — unrestricted engine access",
+      elite: "Edge member — full arsenal, unrestricted",
+      whale: "Max member — zero restrictions, first-in-line processing",
     };
     res.json({
       tier,

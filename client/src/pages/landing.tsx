@@ -81,16 +81,16 @@ const pricingTiers = [
   {
     name: "Sharp",
     price: 49,
-    description: "The Starting Line",
-    features: ["25 ticket generations/day", "14+ sports & leagues", "Full 46-factor engine", "+EV finder"],
+    description: "Members Only",
+    features: ["Unlimited ticket generations", "14+ sports & leagues", "Full 46-factor engine", "+EV finder"],
     cta: "Join Sharp",
     variant: "secondary" as const,
   },
   {
     name: "Edge",
     price: 99,
-    description: "Where Sharps Play",
-    features: ["Unlimited generations", "AI Betting Assistant", "ML prop projections", "Arbitrage scanner"],
+    description: "By Application",
+    features: ["Full Edge tool access", "AI Betting Assistant", "ML prop projections", "Arbitrage scanner"],
     cta: "Join Edge",
     variant: "default" as const,
     popular: true,
@@ -106,7 +106,7 @@ const pricingTiers = [
 ];
 
 export default function LandingPage() {
-  useSEO({ title: "Sors Maxima", description: "Quantum sports betting intelligence powered by AI" });
+  useSEO({ title: "Sors Maxima — Private Betting Intelligence", description: "Exclusive sports betting intelligence platform. 46 analysis factors, real-time data, advanced simulations. Members only." });
   const [betSize, setBetSize] = useState(50);
   const [betsPerWeek, setBetsPerWeek] = useState(10);
   const [winRate, setWinRate] = useState(48);
@@ -134,14 +134,14 @@ export default function LandingPage() {
             />
             <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-300 backdrop-blur-sm">
               <Atom className="w-3 h-3" />
-              AI-Powered Betting Intelligence
+              Private Betting Intelligence Platform
             </Badge>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white max-w-4xl leading-tight">
-              Stop Guessing. Start Winning with Data.
+              The Edge the Books Don't Want You to Have.
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">
-              Harness 46 analysis factors, advanced simulations, and live ESPN data across 14+ sports and leagues
-              to gain a competitive edge the sportsbooks fear.
+              46 analysis factors. Real-time ESPN data. Advanced simulations across 14+ sports.
+              Sors Maxima is a closed-door intelligence platform for serious bettors only.
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-center">
               <Link href="/login">
@@ -168,10 +168,10 @@ export default function LandingPage() {
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-features">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Everything You Need to Bet Smarter
+            Your Unfair Advantage
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            A full suite of AI-driven tools designed to find edges, manage risk, and maximize returns.
+            A private suite of AI-driven tools built to find edges, manage risk, and maximize returns — available only to members.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

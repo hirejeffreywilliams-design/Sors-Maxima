@@ -32,15 +32,15 @@ const tiers: PricingTier[] = [
   {
     id: 'pro',
     name: 'Sharp',
-    tagline: 'The Starting Line',
-    description: 'Full engine access. Smarter parlays. Real analysis that recreational bettors never see.',
+    tagline: 'Members Only',
+    description: 'Full engine access. Real analysis that recreational bettors never see. This is where serious betting begins.',
     monthlyPrice: 49,
     yearlyPrice: 468,
     monthlyPriceId: 'price_1SskcQIp7f8yVoSO8uj04w8T',
     yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
     features: [
-      '25 ticket generations per day',
-      'Unlimited daily usage',
+      'Unlimited ticket generations',
+      'Unrestricted daily access to all Sharp tools',
       'All 6 US sports + 8 international soccer leagues',
       'Full 46-factor Prediction Engine',
       'Visual drag-and-drop ticket builder',
@@ -59,16 +59,15 @@ const tiers: PricingTier[] = [
   {
     id: 'elite',
     name: 'Edge',
-    tagline: 'Where Sharps Play',
-    description: 'AI assistant, live alerts, prop projections, and the tools that separate winners from everyone else.',
+    tagline: 'By Application',
+    description: 'AI-driven assistant, live alerts, prop projections — the full arsenal that separates winners from everyone else.',
     monthlyPrice: 99,
     yearlyPrice: 948,
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOEKOx5hde',
     yearlyPriceId: 'price_1SskcRIp7f8yVoSOOBNZTk3V',
     features: [
       'Everything in Sharp, plus:',
-      'Unlimited ticket generations',
-      'Unlimited daily usage',
+      'Unrestricted access to every Edge tool',
       'AI Betting Assistant (unlimited chats)',
       'Player prop projections (ML-powered)',
       'Real-time line movement alerts',
@@ -89,14 +88,14 @@ const tiers: PricingTier[] = [
     id: 'whale',
     name: 'Max',
     tagline: 'Invite Only',
-    description: 'Zero limits. Maximum depth. The full arsenal — built for high-volume bettors who demand every edge.',
+    description: 'Zero restrictions. Maximum depth. Built for high-volume bettors who refuse to leave any edge on the table.',
     monthlyPrice: 249,
     yearlyPrice: 2388,
     monthlyPriceId: 'price_1SskcRIp7f8yVoSOWQe60fFw',
     yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
     features: [
       'Everything in Edge, plus:',
-      'Zero limits — priority processing on all analyses',
+      'Zero restrictions — first-in-line processing on all analyses',
       'Deep-scan analysis (2x simulation depth)',
       'Custom model builder (adjust all 46 weights)',
       'Hedge calculator & optimizer',
@@ -104,7 +103,6 @@ const tiers: PricingTier[] = [
       'Export bet slips to 6 sportsbooks',
       'Pattern recognition engine (pre-game & live)',
       'Closing line value tracking',
-      'Priority processing on all analyses',
       'Early access to new features & beta tools',
       'Automated tax export reports',
       'Direct support channel',
@@ -192,11 +190,11 @@ export default function Pricing() {
             </Badge>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight" data-testid="text-pricing-headline">
-            Built for Bettors Who Refuse to Lose Blind
+            Access Is Limited. The Edge Is Not.
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Sors Maxima isn't for everyone. If you're still guessing, this isn't for you.
-            If you want the math, the models, and the edge — pick your tier.
+            Sors Maxima is a closed platform. We don't sell tips — we sell intelligence.
+            If you want the math, the models, and the edge the books don't want you to have — choose your level.
           </p>
 
           <div className="flex items-center justify-center gap-3 pt-4">
@@ -288,7 +286,7 @@ export default function Pricing() {
                   onClick={() => handleSubscribe(tier)}
                   data-testid={`button-subscribe-${tier.id}`}
                 >
-                  {currentTier === tier.id ? 'Current Plan' : `Get ${tier.name} Access`}
+                  {currentTier === tier.id ? 'Current Membership' : `Join ${tier.name}`}
                 </Button>
               </CardFooter>
             </Card>
@@ -300,21 +298,21 @@ export default function Pricing() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                Your Access Level
+                Your Membership
               </CardTitle>
-              <CardDescription>Unlimited usage within your tier</CardDescription>
+              <CardDescription>Exclusive access within your tier</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm font-medium" data-testid="text-tier-access">
-                  {currentTier === 'none' ? 'No active plan' : `${currentTier.charAt(0).toUpperCase() + currentTier.slice(1)} member`}
+                  {currentTier === 'none' ? 'No active membership' : `${currentTier.charAt(0).toUpperCase() + currentTier.slice(1)} member`}
                 </span>
                 <Badge variant="secondary" data-testid="text-current-tier">
-                  {currentTier === 'none' ? 'Free' : currentTier}
+                  {currentTier === 'none' ? 'Guest' : currentTier}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Every tier includes unlimited daily usage of all features in your plan. No credit limits, no caps — just results.
+                Members get unrestricted access to every tool in their tier. No usage caps, no throttling — the full engine, all day.
               </p>
             </CardContent>
           </Card>
@@ -348,7 +346,7 @@ export default function Pricing() {
         <div className="bg-card rounded-xl p-8 border">
           <h2 className="text-2xl font-bold mb-2 text-center">Why Sors Maxima?</h2>
           <p className="text-sm text-muted-foreground text-center mb-8 max-w-xl mx-auto">
-            This isn't a tip sheet. It's the most advanced betting intelligence engine available to retail bettors.
+            This isn't a tip sheet or a tout service. It's a private intelligence platform built for bettors who treat this like a business.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center space-y-3">

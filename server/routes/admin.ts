@@ -2172,7 +2172,7 @@ Follow these rules:
       category: "billing",
       keywords: ["subscription", "tiers", "plans", "pricing", "sharp", "edge", "max", "upgrade", "downgrade", "plan"],
       question: "What subscription tiers are available?",
-      answer: "Sors Maxima offers three exclusive subscription tiers: Sharp ($49/month - full 46-factor engine, unlimited daily usage, +EV finder, and bet grading), Edge ($99/month - everything in Sharp plus AI assistant, prop projections, line movement alerts, and SGP optimizer), and Max ($249/month - everything in Edge plus custom model builder, hedge & arbitrage tools, priority processing, and direct support). Every tier includes unlimited usage of all features in your plan. Visit the Pricing page for full details.",
+      answer: "Sors Maxima is a members-only platform with three tiers: Sharp ($49/month - full 46-factor engine, unrestricted access, +EV finder, and bet grading), Edge ($99/month - everything in Sharp plus AI assistant, prop projections, line movement alerts, and SGP optimizer), and Max ($249/month, invite only - everything in Edge plus custom model builder, hedge & arbitrage tools, first-in-line processing, and direct support). Every membership includes unrestricted daily access to all tools in your tier.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -2307,7 +2307,7 @@ Follow these rules:
       category: "billing",
       keywords: ["limits", "usage", "rate limit", "too many requests", "slow down", "throttle", "daily limit"],
       question: "Are there any usage limits?",
-      answer: "Every subscription tier includes unlimited daily usage of all features in your plan — no credit limits, no daily caps. Higher tiers unlock more advanced tools. In rare cases, extremely high-volume automated usage may be rate-limited to ensure platform performance for all members. If you ever hit a rate limit, just wait a moment and try again.",
+      answer: "Every membership tier includes unrestricted daily access to all tools in your plan — no caps, no throttling. Higher tiers unlock more advanced tools. In rare cases, automated high-volume usage may be rate-limited to ensure premium performance for all members.",
       actionable: false,
       autoResolveEligible: true
     },

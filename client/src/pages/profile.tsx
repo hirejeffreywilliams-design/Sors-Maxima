@@ -170,9 +170,9 @@ export default function ProfilePage() {
                 </Badge>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Access</Label>
+                <Label className="text-xs text-muted-foreground">Membership</Label>
                 <p className="font-medium text-sm" data-testid="text-profile-access">
-                  {tierInfo?.access || "Unlimited usage"}
+                  {tierInfo?.access || "Unrestricted member access"}
                 </p>
               </div>
             </div>
