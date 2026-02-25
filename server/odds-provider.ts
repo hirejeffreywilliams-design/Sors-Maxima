@@ -72,7 +72,7 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
   }
 
   const regions = "us";
-  const markets = "h2h,spreads,totals";
+  const markets = "h2h,spreads,totals,h2h_h1,spreads_h1,totals_h1,alternate_spreads,alternate_totals";
   const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=american`;
 
   try {
@@ -950,6 +950,14 @@ export async function fetchRealOddsForGame(
   awayMoneyline?: number;
   spread?: number;
   total?: number;
+  h1HomeMoneyline?: number;
+  h1AwayMoneyline?: number;
+  h1Spread?: number;
+  h1SpreadHome?: number;
+  h1SpreadAway?: number;
+  h1Total?: number;
+  h1OverPrice?: number;
+  h1UnderPrice?: number;
   bookmakerCount: number;
   source: "The Odds API" | "none";
 } | null> {
@@ -980,6 +988,14 @@ export async function fetchRealOddsForGame(
     awayMoneyline?: number;
     spread?: number;
     total?: number;
+    h1HomeMoneyline?: number;
+    h1AwayMoneyline?: number;
+    h1Spread?: number;
+    h1SpreadHome?: number;
+    h1SpreadAway?: number;
+    h1Total?: number;
+    h1OverPrice?: number;
+    h1UnderPrice?: number;
     bookmakerCount: number;
     source: "The Odds API" | "none";
   } = {
@@ -987,7 +1003,9 @@ export async function fetchRealOddsForGame(
     source: "The Odds API",
   };
 
-  const h2h = match.bookmakers[0]?.markets?.find(m => m.key === "h2h");
+  const bk = match.bookmakers[0];
+
+  const h2h = bk?.markets?.find(m => m.key === "h2h");
   if (h2h) {
     const homeO = h2h.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
     const awayO = h2h.outcomes.find(o => o.name.toLowerCase().includes(awayNorm));
@@ -995,16 +1013,46 @@ export async function fetchRealOddsForGame(
     if (awayO) result.awayMoneyline = awayO.price;
   }
 
-  const spreads = match.bookmakers[0]?.markets?.find(m => m.key === "spreads");
+  const spreads = bk?.markets?.find(m => m.key === "spreads");
   if (spreads) {
     const homeSpread = spreads.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
     if (homeSpread?.point !== undefined) result.spread = homeSpread.point;
   }
 
-  const totals = match.bookmakers[0]?.markets?.find(m => m.key === "totals");
+  const totals = bk?.markets?.find(m => m.key === "totals");
   if (totals) {
     const over = totals.outcomes.find(o => o.name === "Over");
     if (over?.point !== undefined) result.total = over.point;
+  }
+
+  const h2hH1 = bk?.markets?.find(m => m.key === "h2h_h1");
+  if (h2hH1) {
+    const homeH1 = h2hH1.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
+    const awayH1 = h2hH1.outcomes.find(o => o.name.toLowerCase().includes(awayNorm));
+    if (homeH1) result.h1HomeMoneyline = homeH1.price;
+    if (awayH1) result.h1AwayMoneyline = awayH1.price;
+  }
+
+  const spreadsH1 = bk?.markets?.find(m => m.key === "spreads_h1");
+  if (spreadsH1) {
+    const homeH1S = spreadsH1.outcomes.find(o => o.name.toLowerCase().includes(homeNorm));
+    const awayH1S = spreadsH1.outcomes.find(o => o.name.toLowerCase().includes(awayNorm));
+    if (homeH1S?.point !== undefined) {
+      result.h1Spread = homeH1S.point;
+      result.h1SpreadHome = homeH1S.price;
+    }
+    if (awayH1S) result.h1SpreadAway = awayH1S.price;
+  }
+
+  const totalsH1 = bk?.markets?.find(m => m.key === "totals_h1");
+  if (totalsH1) {
+    const overH1 = totalsH1.outcomes.find(o => o.name === "Over");
+    const underH1 = totalsH1.outcomes.find(o => o.name === "Under");
+    if (overH1?.point !== undefined) {
+      result.h1Total = overH1.point;
+      result.h1OverPrice = overH1.price;
+    }
+    if (underH1) result.h1UnderPrice = underH1.price;
   }
 
   return result;

@@ -530,6 +530,18 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const actualSpreadHomeOdds = marketGame?.bookmakers?.[0]?.spreadHome || -110;
     const actualSpreadAwayOdds = marketGame?.bookmakers?.[0]?.spreadAway || -110;
 
+    const h1Spread = Math.round((actualSpread * 0.55) * 2) / 2;
+    const h1Total = Math.round((actualTotal * 0.48) * 2) / 2;
+    const homeTeamTotal = Math.round((actualTotal / 2 + actualSpread * -0.5) * 2) / 2;
+    const awayTeamTotal = Math.round((actualTotal / 2 + actualSpread * 0.5) * 2) / 2;
+
+    const h1SpreadOdds = marketGame?.bookmakers?.[0]?.h1SpreadHome || -110;
+    const h1SpreadAwayOdds = marketGame?.bookmakers?.[0]?.h1SpreadAway || -110;
+    const h1OverOdds = marketGame?.bookmakers?.[0]?.h1OverPrice || -110;
+    const h1UnderOdds = marketGame?.bookmakers?.[0]?.h1UnderPrice || -110;
+    const actualH1Spread = marketGame?.bookmakers?.[0]?.h1Spread ?? h1Spread;
+    const actualH1Total = marketGame?.bookmakers?.[0]?.h1Total ?? h1Total;
+
     const betOptions = [
       { pick: `${favName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualHomeML : actualAwayML, desc: `${favName} Moneyline` },
       { pick: `${underdogName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualAwayML : actualHomeML, desc: `${underdogName} Moneyline` },
@@ -537,6 +549,14 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       { pick: `${awayName} ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}`, betType: "spread", odds: actualSpreadAwayOdds, desc: `${awayName} Spread ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}` },
       { pick: `Over ${actualTotal}`, betType: "total", odds: actualOverOdds, desc: `Over ${actualTotal}` },
       { pick: `Under ${actualTotal}`, betType: "total", odds: actualUnderOdds, desc: `Under ${actualTotal}` },
+      { pick: `1H ${homeName} ${actualH1Spread > 0 ? "+" : ""}${actualH1Spread}`, betType: "first_half_spread", odds: h1SpreadOdds, desc: `1H ${homeName} Spread ${actualH1Spread}` },
+      { pick: `1H ${awayName} ${actualH1Spread > 0 ? "-" : "+"}${Math.abs(actualH1Spread)}`, betType: "first_half_spread", odds: h1SpreadAwayOdds, desc: `1H ${awayName} Spread ${actualH1Spread}` },
+      { pick: `1H Over ${actualH1Total}`, betType: "first_half_total", odds: h1OverOdds, desc: `1H Over ${actualH1Total}` },
+      { pick: `1H Under ${actualH1Total}`, betType: "first_half_total", odds: h1UnderOdds, desc: `1H Under ${actualH1Total}` },
+      { pick: `${homeName} Over ${homeTeamTotal}`, betType: "team_total", odds: -110, desc: `${homeName} Team Total Over ${homeTeamTotal}` },
+      { pick: `${homeName} Under ${homeTeamTotal}`, betType: "team_total", odds: -110, desc: `${homeName} Team Total Under ${homeTeamTotal}` },
+      { pick: `${awayName} Over ${awayTeamTotal}`, betType: "team_total", odds: -110, desc: `${awayName} Team Total Over ${awayTeamTotal}` },
+      { pick: `${awayName} Under ${awayTeamTotal}`, betType: "team_total", odds: -110, desc: `${awayName} Team Total Under ${awayTeamTotal}` },
     ];
 
     for (const bet of betOptions) {
@@ -556,20 +576,32 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             ? (favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb)
             : (favoriteIsHome ? mcSim.awayWinProb : mcSim.homeWinProb);
           mcConfBoost = Math.round((pickWinProb - 0.5) * 20);
-        } else if (bet.betType === "spread") {
+        } else if (bet.betType === "spread" || bet.betType === "first_half_spread") {
           const predictedMargin = mcSim.predictedHomeScore - mcSim.predictedAwayScore;
-          const spreadLine = actualSpread;
+          const lineToUse = bet.betType === "first_half_spread" ? actualH1Spread : actualSpread;
+          const marginScale = bet.betType === "first_half_spread" ? 0.55 : 1;
           const coverMargin = bet.pick.includes(homeName)
-            ? predictedMargin + spreadLine
-            : -predictedMargin + spreadLine;
+            ? (predictedMargin * marginScale) + lineToUse
+            : -(predictedMargin * marginScale) + lineToUse;
           mcConfBoost = Math.min(15, Math.max(-10, Math.round(coverMargin * 2)));
-        } else if (bet.betType === "total") {
+        } else if (bet.betType === "total" || bet.betType === "first_half_total") {
           const predictedTotal = mcSim.predictedHomeScore + mcSim.predictedAwayScore;
-          const totalLine = actualTotal;
+          const totalScale = bet.betType === "first_half_total" ? 0.48 : 1;
+          const lineToUse = bet.betType === "first_half_total" ? actualH1Total : actualTotal;
           const diff = bet.pick.toLowerCase().includes("over")
-            ? predictedTotal - totalLine
-            : totalLine - predictedTotal;
+            ? (predictedTotal * totalScale) - lineToUse
+            : lineToUse - (predictedTotal * totalScale);
           mcConfBoost = Math.min(15, Math.max(-10, Math.round(diff * 1.5)));
+        } else if (bet.betType === "team_total") {
+          const predictedHome = mcSim.predictedHomeScore;
+          const predictedAway = mcSim.predictedAwayScore;
+          const isHomePick = bet.pick.includes(homeName);
+          const predictedTeamScore = isHomePick ? predictedHome : predictedAway;
+          const teamLine = isHomePick ? homeTeamTotal : awayTeamTotal;
+          const diff = bet.pick.toLowerCase().includes("over")
+            ? predictedTeamScore - teamLine
+            : teamLine - predictedTeamScore;
+          mcConfBoost = Math.min(12, Math.max(-8, Math.round(diff * 1.2)));
         }
         confidence = Math.min(95, Math.max(25, confidence + mcConfBoost));
       }
@@ -643,6 +675,143 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         } : undefined,
       });
     }
+
+    const propCategoriesBySport: Record<string, { category: string; avgLine: number; leaderKey: string }[]> = {
+      NBA: [
+        { category: "Points", avgLine: 22.5, leaderKey: "Points Per Game" },
+        { category: "Rebounds", avgLine: 8.5, leaderKey: "Rebounds Per Game" },
+        { category: "Assists", avgLine: 6.5, leaderKey: "Assists Per Game" },
+      ],
+      NFL: [
+        { category: "Passing Yards", avgLine: 250.5, leaderKey: "Passing Yards" },
+        { category: "Rushing Yards", avgLine: 65.5, leaderKey: "Rushing Yards" },
+        { category: "Receiving Yards", avgLine: 55.5, leaderKey: "Receiving Yards" },
+      ],
+      MLB: [
+        { category: "Strikeouts", avgLine: 5.5, leaderKey: "Strikeouts" },
+      ],
+      NHL: [
+        { category: "Shots on Goal", avgLine: 3.5, leaderKey: "Shots on Goal" },
+        { category: "Goals", avgLine: 0.5, leaderKey: "Goals" },
+      ],
+      NCAAB: [
+        { category: "Points", avgLine: 18.5, leaderKey: "Points Per Game" },
+        { category: "Rebounds", avgLine: 7.5, leaderKey: "Rebounds Per Game" },
+      ],
+    };
+
+    const sportProps = propCategoriesBySport[sport] || [];
+    const leaders = game.leaders || [];
+
+    for (const propDef of sportProps) {
+      const leader = leaders.find(l =>
+        l.category === propDef.leaderKey ||
+        l.category.includes(propDef.category) ||
+        propDef.category.includes(l.category.replace(" Per Game", ""))
+      );
+      if (!leader) continue;
+
+      const leaderValue = parseFloat(leader.value) || 0;
+      if (leaderValue <= 0) continue;
+
+      const propLine = Math.round(leaderValue * 2) / 2;
+      if (propLine <= 0) continue;
+
+      const predictedScore = mcSim
+        ? (leader.team === homeName ? mcSim.predictedHomeScore : mcSim.predictedAwayScore)
+        : null;
+
+      const scoringPace = predictedScore && actualTotal > 0
+        ? predictedScore / (actualTotal / 2)
+        : 1.0;
+
+      const adjustedProjection = leaderValue * (scoringPace > 0 ? Math.min(1.15, Math.max(0.85, scoringPace)) : 1.0);
+
+      for (const direction of ["Over", "Under"] as const) {
+        const isOver = direction === "Over";
+        const edge = isOver ? adjustedProjection - propLine : propLine - adjustedProjection;
+
+        if (Math.abs(edge) < 0.1) continue;
+
+        const propBetType = `player_${propDef.category.toLowerCase().replace(/ /g, "_")}`;
+        const pickStr = `${leader.playerName} ${direction} ${propLine} ${propDef.category}`;
+        const propOdds = -110;
+
+        const propFusion = analyzeLeg(sport, pickStr, propOdds, {
+          hasRealOdds: false,
+          gameId: game.id,
+          bookmakerCount: 0,
+          oddsSource: "ESPN-derived",
+        }, marketCtx);
+
+        let propConf = Math.min(88, Math.max(35, propFusion.confidence));
+        if (mcSim) {
+          const boostDir = isOver ? edge : -edge;
+          propConf = Math.min(90, Math.max(30, propConf + Math.round(boostDir * 3)));
+        }
+
+        const propImplied = Math.abs(propOdds) / (Math.abs(propOdds) + 100);
+        const propTrue = propConf / 100;
+        const propEv = ((propTrue * (1 / propImplied - 1)) - (1 - propTrue)) * 100;
+        const propEvRounded = Math.round(propEv * 100) / 100;
+
+        if (propEvRounded <= -5) continue;
+
+        const propFactors = (propFusion.signals || []).slice(0, 4).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+        propFactors.push({ name: "Player Avg", impact: Math.round(leaderValue * 10) / 10, direction: isOver ? "bullish" : "bearish" });
+
+        const propTiming = determinePickTiming(game.date, gameLineMovements, propEvRounded);
+
+        picks.push({
+          id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.randomUUID().slice(0, 6)}`,
+          sport,
+          game: `${awayName} @ ${homeName}`,
+          homeTeam: homeName,
+          awayTeam: awayName,
+          pick: pickStr,
+          betType: propBetType,
+          odds: propOdds,
+          confidence: propConf,
+          grade: gradeFromConfidence(propConf),
+          edge: Math.round(propEv * 10) / 10,
+          ev: propEvRounded,
+          factors: propFactors,
+          generatedAt: now,
+          dataSource,
+          gameTime: game.date,
+          reasoning: `${leader.playerName} averages ${leaderValue} ${propDef.category} per game. ${isOver ? "Over" : "Under"} ${propLine} is ${Math.abs(edge) > 1 ? "well" : "slightly"} ${isOver ? "supported" : "favored"} by season stats${mcSim ? " and Monte Carlo scoring projections" : ""}${sitFactors ? `. ${sitFactors.spotDescription || ""}` : ""}.`,
+          recommendation: propFusion.recommendation || "lean_bet",
+          winProbability: propFusion.winProbability || Math.round(propConf * 0.95),
+          insights: (propFusion.insights || []).slice(0, 2),
+          timing: propTiming.timing,
+          timingAdvice: propTiming.timingAdvice,
+          releaseSchedule: buildReleaseSchedule(now),
+          isExclusive: false,
+          monteCarloData: mcSim ? {
+            simulations: mcSim.simulations || 10000,
+            predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
+            predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
+            homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
+            awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
+            convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
+          } : undefined,
+          situationalData: sitFactors ? {
+            homeRestDays: sitFactors.homeRestDays,
+            awayRestDays: sitFactors.awayRestDays,
+            homeB2B: sitFactors.homeB2B,
+            awayB2B: sitFactors.awayB2B,
+            spotType: sitFactors.spotType,
+            spotDescription: sitFactors.spotDescription,
+          } : undefined,
+          injuryData: (homeInjuryCount + awayInjuryCount > 0) ? {
+            homeInjuryCount,
+            awayInjuryCount,
+            homeStartersOut,
+            awayStartersOut,
+          } : undefined,
+        });
+      }
+    }
   }
 
   for (const vp of vegasPicks) {
@@ -701,7 +870,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     return acc;
   }, []);
 
-  const finalPicks = dedupedPicks.slice(0, 50);
+  const finalPicks = dedupedPicks.slice(0, 80);
   const exclusiveCount = finalPicks.filter(p => p.isExclusive).length;
 
   const snapshot: PrecomputedSnapshot = {
@@ -885,10 +1054,28 @@ function hasConflict(a: PrecomputedPick, b: PrecomputedPick): boolean {
   if (a.game !== b.game) return false;
   if (a.betType === "moneyline" && b.betType === "moneyline") return true;
   if (a.betType === "spread" && b.betType === "spread") return true;
+  if (a.betType === "first_half_spread" && b.betType === "first_half_spread") return true;
   if (a.betType === "total" && b.betType === "total") {
     const aIsOver = a.pick.toLowerCase().includes("over");
     const bIsOver = b.pick.toLowerCase().includes("over");
-    return aIsOver === bIsOver ? false : true;
+    return aIsOver !== bIsOver;
+  }
+  if (a.betType === "first_half_total" && b.betType === "first_half_total") {
+    const aIsOver = a.pick.toLowerCase().includes("over");
+    const bIsOver = b.pick.toLowerCase().includes("over");
+    return aIsOver !== bIsOver;
+  }
+  if (a.betType === "team_total" && b.betType === "team_total") {
+    const sameTeam = a.pick.split(" ")[0] === b.pick.split(" ")[0];
+    if (!sameTeam) return false;
+    const aIsOver = a.pick.toLowerCase().includes("over");
+    const bIsOver = b.pick.toLowerCase().includes("over");
+    return aIsOver !== bIsOver;
+  }
+  if (a.betType.startsWith("player_") && b.betType.startsWith("player_")) {
+    const aPlayer = a.pick.split(" Over ")[0] || a.pick.split(" Under ")[0] || "";
+    const bPlayer = b.pick.split(" Over ")[0] || b.pick.split(" Under ")[0] || "";
+    if (aPlayer === bPlayer && a.betType === b.betType) return true;
   }
   return false;
 }

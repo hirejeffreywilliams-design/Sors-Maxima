@@ -13,6 +13,16 @@ export interface BookmakerOdds {
   total?: number;
   overPrice?: number;
   underPrice?: number;
+  h1HomeMoneyline?: number;
+  h1AwayMoneyline?: number;
+  h1Spread?: number;
+  h1SpreadHome?: number;
+  h1SpreadAway?: number;
+  h1Total?: number;
+  h1OverPrice?: number;
+  h1UnderPrice?: number;
+  altSpreads?: { line: number; homePrice: number; awayPrice: number }[];
+  altTotals?: { line: number; overPrice: number; underPrice: number }[];
 }
 
 export interface LineMovementData {
@@ -163,7 +173,7 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   if (cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000) return cached.data;
 
   try {
-    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
+    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals,h2h_h1,spreads_h1,totals_h1,alternate_spreads,alternate_totals&oddsFormat=american`;
     const res = await fetch(url);
     if (!res.ok) {
       if (res.status === 401 || res.status === 429) {
@@ -249,6 +259,57 @@ function extractBookmakerOdds(oddsGame: OddsApiGame): BookmakerOdds[] {
       const under = totals.outcomes.find(o => o.name === "Under");
       if (over) { result.total = over.point; result.overPrice = over.price; }
       if (under) result.underPrice = under.price;
+    }
+
+    const h2hH1 = bk.markets.find(m => m.key === "h2h_h1");
+    if (h2hH1) {
+      const homeH1 = h2hH1.outcomes.find(o => o.name === oddsGame.home_team);
+      const awayH1 = h2hH1.outcomes.find(o => o.name === oddsGame.away_team);
+      if (homeH1) result.h1HomeMoneyline = homeH1.price;
+      if (awayH1) result.h1AwayMoneyline = awayH1.price;
+    }
+
+    const spreadsH1 = bk.markets.find(m => m.key === "spreads_h1");
+    if (spreadsH1) {
+      const homeH1Spread = spreadsH1.outcomes.find(o => o.name === oddsGame.home_team);
+      const awayH1Spread = spreadsH1.outcomes.find(o => o.name === oddsGame.away_team);
+      if (homeH1Spread) {
+        result.h1Spread = homeH1Spread.point;
+        result.h1SpreadHome = homeH1Spread.price;
+      }
+      if (awayH1Spread) result.h1SpreadAway = awayH1Spread.price;
+    }
+
+    const totalsH1 = bk.markets.find(m => m.key === "totals_h1");
+    if (totalsH1) {
+      const overH1 = totalsH1.outcomes.find(o => o.name === "Over");
+      const underH1 = totalsH1.outcomes.find(o => o.name === "Under");
+      if (overH1) { result.h1Total = overH1.point; result.h1OverPrice = overH1.price; }
+      if (underH1) result.h1UnderPrice = underH1.price;
+    }
+
+    const altSpreads = bk.markets.filter(m => m.key === "alternate_spreads");
+    if (altSpreads.length > 0) {
+      result.altSpreads = [];
+      for (const market of altSpreads) {
+        const homeAlt = market.outcomes.find(o => o.name === oddsGame.home_team);
+        const awayAlt = market.outcomes.find(o => o.name === oddsGame.away_team);
+        if (homeAlt?.point !== undefined && homeAlt?.price !== undefined && awayAlt?.price !== undefined) {
+          result.altSpreads.push({ line: homeAlt.point, homePrice: homeAlt.price, awayPrice: awayAlt.price });
+        }
+      }
+    }
+
+    const altTotals = bk.markets.filter(m => m.key === "alternate_totals");
+    if (altTotals.length > 0) {
+      result.altTotals = [];
+      for (const market of altTotals) {
+        const overAlt = market.outcomes.find(o => o.name === "Over");
+        const underAlt = market.outcomes.find(o => o.name === "Under");
+        if (overAlt?.point !== undefined && overAlt?.price !== undefined && underAlt?.price !== undefined) {
+          result.altTotals.push({ line: overAlt.point, overPrice: overAlt.price, underPrice: underAlt.price });
+        }
+      }
     }
 
     return result;

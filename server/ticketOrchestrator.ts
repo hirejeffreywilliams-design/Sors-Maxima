@@ -926,18 +926,22 @@ function generateLegFromESPNGame(
     outcome = `${direction.isOver ? "Over" : "Under"} ${totalValue}`;
   } else if (marketType === "first_half_spread") {
     market = "1H Spread";
-    const rawSpread = resolved.spread;
-    const halfSpread = Math.round((rawSpread * 0.55) * 2) / 2;
+    const rawSpread = realOdds?.h1Spread ?? resolved.spread;
+    const halfSpread = realOdds?.h1Spread != null ? Math.abs(rawSpread) : Math.round((rawSpread * 0.55) * 2) / 2;
     const sv = isHomeTeam ? -halfSpread : halfSpread;
     line = sv;
-    decimalOdds = americanToDecimal(-110);
+    const h1SOdds = isHomeTeam ? (realOdds?.h1SpreadHome || -110) : (realOdds?.h1SpreadAway || -110);
+    decimalOdds = americanToDecimal(h1SOdds);
+    if (realOdds?.h1Spread != null) oddsSource = "The Odds API";
     outcome = `1H ${selectedTeam.city} ${selectedTeam.name} ${sv > 0 ? "+" : ""}${sv}`;
   } else if (marketType === "first_half_total") {
     market = "1H Total";
-    const halfTotal = Math.round((resolved.total * 0.48) * 2) / 2;
+    const halfTotal = realOdds?.h1Total ?? Math.round((resolved.total * 0.48) * 2) / 2;
     line = halfTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, halfTotal, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
-    decimalOdds = americanToDecimal(-110);
+    const h1TOdds = direction.isOver ? (realOdds?.h1OverPrice || -110) : (realOdds?.h1UnderPrice || -110);
+    decimalOdds = americanToDecimal(h1TOdds);
+    if (realOdds?.h1Total != null) oddsSource = "The Odds API";
     outcome = `1H ${direction.isOver ? "Over" : "Under"} ${halfTotal}`;
   } else if (marketType === "first_quarter_spread") {
     market = "1Q Spread";

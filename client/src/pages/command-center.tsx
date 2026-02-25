@@ -375,58 +375,6 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
   );
 }
 
-function OpportunityGauge({ score }: { score: number }) {
-  const getColor = () => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    if (score >= 40) return "text-orange-500";
-    return "text-red-500";
-  };
-  const getLabel = () => {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Moderate";
-    return "Low";
-  };
-  const getBg = () => {
-    if (score >= 80) return "bg-green-500/10 border-green-500/20";
-    if (score >= 60) return "bg-yellow-500/10 border-yellow-500/20";
-    if (score >= 40) return "bg-orange-500/10 border-orange-500/20";
-    return "bg-red-500/10 border-red-500/20";
-  };
-
-  return (
-    <Card className={`border ${getBg()}`} data-testid="card-opportunity-gauge">
-      <CardContent className="p-4 sm:p-6">
-        <div className="flex items-center justify-between gap-4">
-          <div className="space-y-1">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Market Opportunity</p>
-            <div className="flex items-baseline gap-2">
-              <span className={`text-3xl sm:text-4xl font-bold tabular-nums ${getColor()}`} data-testid="text-opportunity-score">
-                {score}
-              </span>
-              <span className="text-sm text-muted-foreground">/ 100</span>
-            </div>
-            <p className={`text-sm font-medium ${getColor()}`}>{getLabel()}</p>
-          </div>
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20">
-            <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
-              <circle cx="50" cy="50" r="42" fill="none" strokeWidth="8" className="stroke-muted/30" />
-              <circle
-                cx="50" cy="50" r="42" fill="none" strokeWidth="8"
-                strokeDasharray={`${score * 2.64} 264`}
-                strokeLinecap="round"
-                className={score >= 80 ? "stroke-green-500" : score >= 60 ? "stroke-yellow-500" : score >= 40 ? "stroke-orange-500" : "stroke-red-500"}
-              />
-            </svg>
-            <Zap className={`absolute inset-0 m-auto w-6 h-6 ${getColor()}`} />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 function gradeColor(grade: string): string {
   if (grade.startsWith("A")) return "text-green-500";
   if (grade.startsWith("B")) return "text-blue-500";
