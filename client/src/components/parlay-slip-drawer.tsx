@@ -38,6 +38,27 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 
+function copyToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "-9999px";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  return new Promise((resolve, reject) => {
+    const success = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (success) resolve();
+    else reject(new Error("Copy failed"));
+  });
+}
+
 const SPORTSBOOKS = [
   { id: "draftkings", name: "DraftKings", shortName: "DK", deepLink: "https://sportsbook.draftkings.com", color: "bg-[#53d337]", textColor: "text-black", hoverColor: "hover:bg-[#47b82f]" },
   { id: "fanduel", name: "FanDuel", shortName: "FD", deepLink: "https://sportsbook.fanduel.com", color: "bg-[#1493ff]", textColor: "text-white", hoverColor: "hover:bg-[#1080e0]" },
@@ -64,14 +85,14 @@ function formatOdds(american: number | undefined, decimal: number): string {
 
 function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmericanOdds: number, stake: number): string {
   const header = `Sors Maxima Parlay (${legs.length} legs)`;
-  const divider = "─".repeat(32);
+  const divider = "-".repeat(32);
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
   const payout = (totalOdds * stake).toFixed(2);
 
   const legLines = legs.map((leg, i) => {
     const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
     const matchup = leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team;
-    return `${i + 1}. ${matchup}\n   ${leg.market.replace("_", " ")} · ${leg.outcome} (${odds})`;
+    return `${i + 1}. ${matchup}\n   ${leg.market.replace("_", " ")} - ${leg.outcome} (${odds})`;
   });
 
   return [
@@ -80,7 +101,7 @@ function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmerica
     ...legLines,
     divider,
     `Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`,
-    `Stake: $${stake.toFixed(2)} → Payout: $${payout}`,
+    `Stake: $${stake.toFixed(2)} | Payout: $${payout}`,
   ].join("\n");
 }
 
@@ -102,7 +123,7 @@ function formatSlipForBook(bookId: string, legs: ParlaySlipLeg[], totalAmericanO
     divider,
     ...legLines,
     divider,
-    `${legs.length} legs · ${formattedOdds}`,
+    `${legs.length} legs | ${formattedOdds}`,
   ].join("\n");
 }
 
@@ -163,13 +184,19 @@ function SportsbookButtons({ legs, totalAmericanOdds }: { legs: ParlaySlipLeg[];
 
   const handlePlaceAt = (book: typeof SPORTSBOOKS[0]) => {
     const slipText = formatSlipForBook(book.id, legs, totalAmericanOdds);
-    navigator.clipboard.writeText(slipText).then(() => {
+    copyToClipboard(slipText).then(() => {
       setCopiedBook(book.id);
       toast({
         title: `Slip copied for ${book.name}`,
         description: "Paste your selections into the sportsbook",
       });
       setTimeout(() => setCopiedBook(null), 3000);
+    }).catch(() => {
+      toast({
+        title: "Could not copy automatically",
+        description: "Please copy the slip text manually",
+        variant: "destructive",
+      });
     });
     window.open(book.deepLink, "_blank", "noopener,noreferrer");
   };
@@ -225,10 +252,12 @@ export function ParlaySlipDrawer() {
 
   const handleCopySlip = () => {
     const slipText = formatSlipAsText(legs, totalOdds, totalAmericanOdds, stake);
-    navigator.clipboard.writeText(slipText).then(() => {
+    copyToClipboard(slipText).then(() => {
       setCopied(true);
       toast({ title: "Bet slip copied to clipboard" });
       setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast({ title: "Could not copy", description: "Please try again", variant: "destructive" });
     });
   };
 
@@ -240,9 +269,9 @@ export function ParlaySlipDrawer() {
         text: slipText,
       }).catch(() => {});
     } else {
-      navigator.clipboard.writeText(slipText).then(() => {
-        toast({ title: "Slip copied — paste to share" });
-      });
+      copyToClipboard(slipText).then(() => {
+        toast({ title: "Slip copied - paste to share" });
+      }).catch(() => {});
     }
   };
 

@@ -10,6 +10,27 @@ import { useToast } from "@/hooks/use-toast";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 
+function copyToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  }
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.top = "-9999px";
+  textarea.style.opacity = "0";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  return new Promise((resolve, reject) => {
+    const success = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    if (success) resolve();
+    else reject(new Error("Copy failed"));
+  });
+}
+
 const SPORTSBOOKS = [
   { id: "draftkings", name: "DraftKings", deepLink: "https://sportsbook.draftkings.com", color: "bg-[#53d337]", textColor: "text-black" },
   { id: "fanduel", name: "FanDuel", deepLink: "https://sportsbook.fanduel.com", color: "bg-[#1493ff]", textColor: "text-white" },
@@ -155,21 +176,26 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
   };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(formattedSlip);
-    setCopied(true);
-    toast({ title: "Bet slip copied to clipboard" });
-    setTimeout(() => setCopied(false), 2000);
+    copyToClipboard(formattedSlip).then(() => {
+      setCopied(true);
+      toast({ title: "Bet slip copied to clipboard" });
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast({ title: "Could not copy", description: "Please try again", variant: "destructive" });
+    });
   };
 
   const selectedBookData = SPORTSBOOKS.find((b) => b.id === selectedBook);
 
   const handlePlaceAt = (book: typeof SPORTSBOOKS[0]) => {
     const slip = formatForSportsbook(book.id, activeLegs);
-    navigator.clipboard.writeText(slip).then(() => {
+    copyToClipboard(slip).then(() => {
       toast({
         title: `Slip copied for ${book.name}`,
         description: "Paste your selections into the sportsbook",
       });
+    }).catch(() => {
+      toast({ title: "Could not copy automatically", description: "Please copy manually", variant: "destructive" });
     });
     window.open(book.deepLink, "_blank", "noopener,noreferrer");
   };
