@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions } from "./vegas-engine";
-import { analyzeLeg } from "./quantumFusionEngine";
+import { analyzeLeg, type MarketContext } from "./quantumFusionEngine";
+import { getAllInjuries } from "./espn-injury-provider";
 import type { Sport } from "@shared/schema";
 
 export interface PrecomputedPick {
@@ -232,11 +233,20 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
   const picks: PrecomputedPick[] = [];
   const now = new Date().toISOString();
 
+  let allInjuries: Record<string, any[]> = {};
+  try {
+    allInjuries = getAllInjuries();
+  } catch {}
+
+  const sportInjuries = allInjuries[sport] || allInjuries[sport.toLowerCase()] || [];
+
   for (const game of upcomingGames.slice(0, 15)) {
     const homeName = game.homeTeam?.displayName || "Home";
     const awayName = game.awayTeam?.displayName || "Away";
     const homeRecord = game.homeTeam?.record || "";
     const awayRecord = game.awayTeam?.record || "";
+    const homeAbbr = game.homeTeam?.abbreviation || "";
+    const awayAbbr = game.awayTeam?.abbreviation || "";
 
     const parseWinPct = (record: string) => {
       if (!record) return 0.5;
@@ -248,6 +258,18 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     const homeWinPct = parseWinPct(homeRecord);
     const awayWinPct = parseWinPct(awayRecord);
+
+    let homeInjuryCount = 0, awayInjuryCount = 0;
+    let homeStartersOut = 0, awayStartersOut = 0;
+    for (const inj of sportInjuries) {
+      const teamName = (inj.team || "").toLowerCase();
+      const isHome = teamName.includes(homeName.toLowerCase().split(" ").pop() || "") || teamName.includes(homeAbbr.toLowerCase());
+      const isAway = teamName.includes(awayName.toLowerCase().split(" ").pop() || "") || teamName.includes(awayAbbr.toLowerCase());
+      const count = inj.injuries?.length || 0;
+      const starters = (inj.injuries || []).filter((i: any) => i.status === "Out" || i.status === "Doubtful").length;
+      if (isHome) { homeInjuryCount += count; homeStartersOut += starters; }
+      if (isAway) { awayInjuryCount += count; awayStartersOut += starters; }
+    }
 
     let mcSim: any = null;
     try {
@@ -263,9 +285,34 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           awayWinPct: awayWinPct * 100,
           isHomeGame: true,
           gameState: game.status?.state === "in" ? "live" : "pre",
+          injuryImpact: { home: homeStartersOut * 0.03, away: awayStartersOut * 0.03 },
         });
       }
     } catch {}
+
+    const marketCtx: MarketContext = {
+      winPct: { home: homeWinPct, away: awayWinPct },
+      homeRecord,
+      awayRecord,
+      injuryCount: { home: homeInjuryCount, away: awayInjuryCount },
+      startersOut: { home: homeStartersOut, away: awayStartersOut },
+      homeMoneyline: game.odds?.homeMoneyline || undefined,
+      awayMoneyline: game.odds?.awayMoneyline || undefined,
+      spreadLine: game.odds?.spread || undefined,
+      totalLine: game.odds?.total || undefined,
+      venue: game.venue || undefined,
+    };
+
+    if (mcSim) {
+      marketCtx.mcSimulation = {
+        homeWinProb: mcSim.homeWinProb,
+        awayWinProb: mcSim.awayWinProb,
+        predictedHomeScore: mcSim.predictedHomeScore,
+        predictedAwayScore: mcSim.predictedAwayScore,
+        convergenceScore: mcSim.convergenceScore || 1.0,
+        simulations: mcSim.simulations || 10000,
+      };
+    }
 
     const spreadEstimate = mcSim
       ? Math.round((mcSim.predictedHomeScore - mcSim.predictedAwayScore) * 2) / 2
@@ -293,7 +340,12 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     ];
 
     for (const bet of betOptions) {
-      const fusion = analyzeLeg(sport, bet.desc, bet.odds, { hasRealOdds: false });
+      const fusion = analyzeLeg(sport, bet.desc, bet.odds, {
+        hasRealOdds: !!(game.odds?.homeMoneyline),
+        gameId: game.id,
+        bookmakerCount: game.bookmakers?.length || 0,
+        oddsSource: game.odds?.homeMoneyline ? "ESPN" : "model-estimated",
+      }, marketCtx);
       let confidence = Math.min(92, Math.max(30, fusion.confidence));
 
       if (mcSim) {
@@ -344,7 +396,12 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
   }
 
   for (const vp of vegasPicks) {
-    const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds });
+    const vpMarketCtx: MarketContext = {
+      winPct: vp.homeWinPct && vp.awayWinPct ? { home: vp.homeWinPct / 100, away: vp.awayWinPct / 100 } : undefined,
+      homeMoneyline: vp.homeMoneyline || undefined,
+      awayMoneyline: vp.awayMoneyline || undefined,
+    };
+    const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds }, vpMarketCtx);
     const confidence = Math.min(92, Math.max(30, fusion.confidence));
     const impliedProb = (vp.odds || -110) < 0 ? Math.abs(vp.odds || -110) / (Math.abs(vp.odds || -110) + 100) : 100 / ((vp.odds || -110) + 100);
     const trueProb = confidence / 100;

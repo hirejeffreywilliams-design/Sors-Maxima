@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import type { ParlayLeg, EvaluationResult, Sport, GeneratedParlay, User } from "@shared/schema";
 import { runSimulation as mcRunSimulation, getRiskMetrics as mcGetRiskMetrics } from "./monteCarloEngine";
+import { analyzeLeg } from "./quantumFusionEngine";
 
 export interface IStorage {
   evaluateParlay(
@@ -66,8 +67,20 @@ function estimateLegProbability(leg: ParlayLeg): number {
     return Math.max(0.0001, Math.min(0.9999, leg.probOverride));
   }
   if (leg.decimalOdds) {
-    const p = impliedProbabilityFromDecimal(leg.decimalOdds);
-    return calibrateProbability(p);
+    const impliedProb = impliedProbabilityFromDecimal(leg.decimalOdds);
+    const calibrated = calibrateProbability(impliedProb);
+
+    try {
+      const sport = (leg.sport as import("@shared/schema").Sport) || "NBA";
+      const americanOdds = leg.decimalOdds >= 2 ? Math.round((leg.decimalOdds - 1) * 100) : Math.round(-100 / (leg.decimalOdds - 1));
+      const desc = leg.outcome || `${leg.team || "Team"} ${leg.market || "moneyline"}`;
+      const fusion = analyzeLeg(sport, desc, americanOdds, { hasRealOdds: true });
+      const fusionProb = fusion.winProbability / 100;
+      const blended = calibrated * 0.6 + fusionProb * 0.4;
+      return Math.max(0.0001, Math.min(0.9999, blended));
+    } catch {
+      return calibrated;
+    }
   }
   return 0.5;
 }

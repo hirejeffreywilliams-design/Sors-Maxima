@@ -118,6 +118,9 @@ export interface TicketLeg {
   edgePercent: number;
   playerName?: string;
   propCategory?: string;
+  espnGameId?: string;
+  homeWinPct?: number;
+  awayWinPct?: number;
   analysis: {
     sharpAction: boolean;
     lineMovement: "steam" | "reverse" | "stable";
@@ -1208,7 +1211,22 @@ function generateLegFromESPNGame(
   const americanOdds = decimalToAmerican(decimalOdds);
   const description = `${selectedTeam.city} ${selectedTeam.name} ${market} ${outcome}`;
 
-  const legFusion = analyzeLeg(sport, description, americanOdds);
+  const legMarketCtx: import("./quantumFusionEngine").MarketContext = {
+    winPct: { home: homePct, away: awayPct },
+    homeMoneyline: resolved.homeMoneyline,
+    awayMoneyline: resolved.awayMoneyline,
+    spreadLine: resolved.spread,
+    totalLine: resolved.total,
+    homeRecord: game.homeTeam.record,
+    awayRecord: game.awayTeam.record,
+    venue: game.venue || undefined,
+  };
+  const legFusion = analyzeLeg(sport, description, americanOdds, {
+    hasRealOdds: oddsSource !== "model-estimated",
+    gameId: game.id,
+    bookmakerCount: realOdds?.bookmakerCount || 0,
+    oddsSource,
+  }, legMarketCtx);
 
   let winProbability = legFusion.winProbability / 100;
   winProbability = Math.min(0.95, Math.max(0.05, winProbability + (confidenceBias / 100) * (isHomeTeam ? 1 : -1)));
@@ -1267,6 +1285,9 @@ function generateLegFromESPNGame(
     decimalOdds,
     americanOdds,
     winProbability,
+    espnGameId: game.id,
+    homeWinPct: homePct,
+    awayWinPct: awayPct,
     edgePercent,
     playerName,
     propCategory,
@@ -2137,7 +2158,7 @@ export async function generateTickets(request: TicketRequest): Promise<{ tickets
       const fusionSport = sport as Sport;
       
       const fusionData = analyzeTicket(
-        legs.map((leg, idx) => ({
+        legs.map((leg) => ({
           id: leg.id,
           sport: fusionSport,
           description: `${leg.team} ${leg.market} ${leg.outcome}`,
@@ -2147,7 +2168,11 @@ export async function generateTickets(request: TicketRequest): Promise<{ tickets
             bookmakerCount: 0,
             oddsSource: leg.dataSources?.odds || "model-estimated",
             lineMovement: 0,
+            gameId: leg.espnGameId || "",
           },
+          marketContext: leg.homeWinPct !== undefined && leg.awayWinPct !== undefined ? {
+            winPct: { home: leg.homeWinPct, away: leg.awayWinPct },
+          } : undefined,
         })),
         request.riskLevel
       );

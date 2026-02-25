@@ -444,6 +444,15 @@ export interface MarketContext {
   homeMoneyline?: number;
   awayMoneyline?: number;
   bookmakerCount?: number;
+  injuryCount?: { home: number; away: number };
+  startersOut?: { home: number; away: number };
+  weatherImpact?: { temperature?: number; windSpeed?: number; precipitation?: number; impactLevel?: string };
+  restDays?: { home: number; away: number };
+  isPlayoff?: boolean;
+  venue?: string;
+  homeRecord?: string;
+  awayRecord?: string;
+  mcSimulation?: { homeWinProb: number; awayWinProb: number; predictedHomeScore: number; predictedAwayScore: number; convergenceScore: number; simulations: number };
 }
 
 function getDirection(bullishProb: number, seed: string): "bullish" | "bearish" | "neutral" {
@@ -503,9 +512,65 @@ function getDataDrivenDirection(
 
   if (source === "momentum_score" && marketContext.winPct) {
     const avgWinPct = (marketContext.winPct.home + marketContext.winPct.away) / 2;
-    if (marketContext.winPct.home > avgWinPct + 0.1) return { direction: "bullish", strengthBoost, confidenceBoost };
-    if (marketContext.winPct.home < avgWinPct - 0.1) return { direction: "bearish", strengthBoost, confidenceBoost };
+    if (marketContext.winPct.home > avgWinPct + 0.1) return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 5 };
+    if (marketContext.winPct.home < avgWinPct - 0.1) return { direction: "bearish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 5 };
     return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "injury_adjustment" && marketContext.injuryCount) {
+    const homeDiff = marketContext.injuryCount.away - marketContext.injuryCount.home;
+    const starterDiff = (marketContext.startersOut?.away || 0) - (marketContext.startersOut?.home || 0);
+    const totalImpact = homeDiff * 3 + starterDiff * 8;
+    if (totalImpact > 5) return { direction: "bullish", strengthBoost: strengthBoost + Math.min(20, totalImpact), confidenceBoost: confidenceBoost + 10 };
+    if (totalImpact < -5) return { direction: "bearish", strengthBoost: strengthBoost + Math.min(20, Math.abs(totalImpact)), confidenceBoost: confidenceBoost + 10 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "weather_impact" && marketContext.weatherImpact) {
+    const w = marketContext.weatherImpact;
+    const hasImpact = (w.windSpeed && w.windSpeed > 15) || (w.precipitation && w.precipitation > 1) || (w.temperature !== undefined && w.temperature < 32);
+    if (hasImpact) {
+      const boost = Math.min(15, (w.windSpeed && w.windSpeed > 15 ? (w.windSpeed - 15) * 2 : 0) + (w.precipitation && w.precipitation > 1 ? w.precipitation * 3 : 0));
+      return { direction: "bearish", strengthBoost: strengthBoost + boost, confidenceBoost: confidenceBoost + 8 };
+    }
+    if (w.impactLevel === "none") return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "rest_advantage" && marketContext.restDays) {
+    const diff = marketContext.restDays.home - marketContext.restDays.away;
+    if (diff >= 2) return { direction: "bullish", strengthBoost: strengthBoost + diff * 5, confidenceBoost: confidenceBoost + 8 };
+    if (diff <= -2) return { direction: "bearish", strengthBoost: strengthBoost + Math.abs(diff) * 5, confidenceBoost: confidenceBoost + 8 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "scheme_mismatch" && marketContext.winPct) {
+    const diff = marketContext.winPct.home - marketContext.winPct.away;
+    if (diff > 0.15) return { direction: "bullish", strengthBoost: strengthBoost + Math.round(diff * 40), confidenceBoost: confidenceBoost + 8 };
+    if (diff < -0.15) return { direction: "bearish", strengthBoost: strengthBoost + Math.round(Math.abs(diff) * 40), confidenceBoost: confidenceBoost + 8 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "point_differential" && marketContext.winPct) {
+    const diff = marketContext.winPct.home - marketContext.winPct.away;
+    if (diff > 0.1) return { direction: "bullish", strengthBoost: strengthBoost + Math.round(diff * 30), confidenceBoost: confidenceBoost + 5 };
+    if (diff < -0.1) return { direction: "bearish", strengthBoost: strengthBoost + Math.round(Math.abs(diff) * 30), confidenceBoost: confidenceBoost + 5 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "strength_schedule" && marketContext.winPct) {
+    const avgPct = (marketContext.winPct.home + marketContext.winPct.away) / 2;
+    if (avgPct > 0.55) { confidenceBoost += 5; strengthBoost += 5; }
+    return { direction: getDirection(bullishProb, `direction-${source}-${bullishProb}`), strengthBoost, confidenceBoost };
+  }
+
+  if ((source === "monte_carlo" || source === "predictive_model" || source === "win_probability") && marketContext.mcSimulation) {
+    const mc = marketContext.mcSimulation;
+    const favProb = Math.max(mc.homeWinProb, mc.awayWinProb);
+    const dir: "bullish" | "bearish" | "neutral" = mc.homeWinProb > 0.55 ? "bullish" : mc.homeWinProb < 0.45 ? "bearish" : "neutral";
+    const simBoost = Math.round(Math.abs(mc.homeWinProb - 0.5) * 40);
+    const convBoost = Math.round(mc.convergenceScore * 10);
+    return { direction: dir, strengthBoost: strengthBoost + simBoost, confidenceBoost: confidenceBoost + convBoost };
   }
 
   if ((source === "monte_carlo" || source === "predictive_model" || source === "win_probability") && marketContext.homeMoneyline !== undefined) {
@@ -516,7 +581,11 @@ function getDataDrivenDirection(
     return { direction: "neutral", strengthBoost, confidenceBoost };
   }
 
-  return { direction: getDirection(bullishProb), strengthBoost, confidenceBoost };
+  if (source === "travel_fatigue" && marketContext.venue) {
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 3 };
+  }
+
+  return { direction: getDirection(bullishProb, `direction-${source}-${bullishProb}`), strengthBoost, confidenceBoost };
 }
 
 interface SignalConfig {
