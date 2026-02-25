@@ -92,11 +92,11 @@ export default function OnboardingPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
       toast({ title: "Welcome to Sors Maxima", description: "Your preferences have been saved. Let's find your edge." });
-      setLocation("/dashboard");
+      setLocation("/");
     },
     onError: () => {
       toast({ title: "Preferences saved locally", description: "Redirecting to your dashboard." });
-      setLocation("/dashboard");
+      setLocation("/");
     },
   });
 

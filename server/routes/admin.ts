@@ -2,8 +2,10 @@ import type { Express, Request, Response } from "express";
 import crypto from "crypto";
 import { fromError } from "zod-validation-error";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 import { requireAdmin, getClientIp, formatUptime, abTestCreateSchema, campaignCreateSchema, segmentCreateSchema, promoCreateSchema } from "./helpers";
 import { storage } from "../storage";
+import { db } from "../db";
 import { getAllUsers, banUser, unbanUser } from "../dbAuthService";
 import { errorLogger, logError } from "../errorLogger";
 import { securityService, sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
@@ -1458,28 +1460,51 @@ Follow these rules:
     res.json({ success: true, eventId: event.id });
   });
 
-  const onboardingPreferences = new Map<string, any>();
-
-  app.post("/api/user/onboarding", (req, res) => {
+  app.post("/api/user/onboarding", async (req, res) => {
     const userId = req.session?.userId;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    const { sports, experience, betTypes, bankrollSize, onboardingCompleted } = req.body;
-    onboardingPreferences.set(userId, {
-      sports: sports || [],
-      experience: experience || "",
-      betTypes: betTypes || [],
-      bankrollSize: bankrollSize || "",
-      onboardingCompleted: !!onboardingCompleted,
-      completedAt: new Date().toISOString(),
-    });
-    res.json({ success: true });
+    try {
+      const { sports, experience, betTypes, bankrollSize, onboardingCompleted } = req.body;
+      await db.execute(sql`
+        INSERT INTO user_onboarding (user_id, sports, experience, bet_types, bankroll_size, onboarding_completed, completed_at)
+        VALUES (${userId}, ${sql.raw(`ARRAY[${(sports || []).map((s: string) => `'${s.replace(/'/g, "''")}'`).join(",")}]::text[]`)}, ${experience || ""}, ${sql.raw(`ARRAY[${(betTypes || []).map((b: string) => `'${b.replace(/'/g, "''")}'`).join(",")}]::text[]`)}, ${bankrollSize || ""}, ${!!onboardingCompleted}, NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          sports = EXCLUDED.sports,
+          experience = EXCLUDED.experience,
+          bet_types = EXCLUDED.bet_types,
+          bankroll_size = EXCLUDED.bankroll_size,
+          onboarding_completed = EXCLUDED.onboarding_completed,
+          completed_at = NOW()
+      `);
+      res.json({ success: true });
+    } catch (e: any) {
+      console.error("[Onboarding] Save error:", e.message);
+      res.json({ success: true });
+    }
   });
 
-  app.get("/api/user/onboarding", (req, res) => {
+  app.get("/api/user/onboarding", async (req, res) => {
     const userId = req.session?.userId;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    const prefs = onboardingPreferences.get(userId);
-    res.json(prefs || { onboardingCompleted: false });
+    try {
+      const result = await db.execute(sql`SELECT * FROM user_onboarding WHERE user_id = ${userId} LIMIT 1`);
+      const row = (result as any).rows?.[0];
+      if (row) {
+        res.json({
+          sports: row.sports || [],
+          experience: row.experience || "",
+          betTypes: row.bet_types || [],
+          bankrollSize: row.bankroll_size || "",
+          onboardingCompleted: row.onboarding_completed || false,
+          completedAt: row.completed_at,
+        });
+      } else {
+        res.json({ onboardingCompleted: false });
+      }
+    } catch (e: any) {
+      console.error("[Onboarding] Load error:", e.message);
+      res.json({ onboardingCompleted: false });
+    }
   });
 
   app.get("/api/user/consent", (req, res) => {

@@ -279,6 +279,8 @@ const navItems: NavItem[] = [
   { href: "/generate", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
+  { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Community - Leaderboards, social feed, and tipster groups" },
+  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Rewards - Challenges, achievements, and practice mode" },
   { href: "/pro-tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - Calculators, optimizers, analysis" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
@@ -341,11 +343,11 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
       </div>
       
       <div className="border-t pt-4 pb-6 px-4 space-y-3">
-        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Build</div>
+        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Build Bets</div>
         <nav className="space-y-1 pb-2">
           {([
-            { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
-            { href: "/prop-parlay-builder", icon: Brain, label: "Prop Parlay Builder", testId: "mobile-nav-prop-parlay" },
+            { href: "/builder", icon: LayoutGrid, label: "Visual Parlay Builder", testId: "mobile-nav-builder" },
+            { href: "/prop-parlay-builder", icon: Brain, label: "Player Prop Parlays", testId: "mobile-nav-prop-parlay" },
             { href: "/straight-bets", icon: Target, label: "Straight Bets", testId: "mobile-nav-straight-bets" },
             { href: "/sgp", icon: Layers, label: "Same Game Parlays", testId: "mobile-nav-sgp" },
             { href: "/teasers", icon: ArrowUpDown, label: "Teasers", testId: "mobile-nav-teasers" },
@@ -378,6 +380,31 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
             { href: "/rosters", icon: UsersRound, label: "Rosters & Injuries", testId: "mobile-nav-rosters" },
             { href: "/watchlist", icon: Star, label: "Watchlist", testId: "mobile-nav-watchlist" },
             { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
+          ] as const).map((item) => {
+            const Icon = item.icon;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href} onClick={onClose}>
+                <div 
+                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
+                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
+                  }`}
+                  data-testid={item.testId}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Social</div>
+        <nav className="space-y-1 pb-2">
+          {([
+            { href: "/community", icon: Users, label: "Community Hub", testId: "mobile-nav-community" },
+            { href: "/tipster-communities", icon: UsersRound, label: "Tipster Groups", testId: "mobile-nav-tipsters" },
+            { href: "/shared-tickets", icon: GitBranch, label: "Shared Tickets", testId: "mobile-nav-shared" },
+            { href: "/rewards", icon: Trophy, label: "Rewards & Practice", testId: "mobile-nav-rewards" },
           ] as const).map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
@@ -635,6 +662,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
               <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
               <Link href="/help" className="hover:text-primary">Help</Link>
               <Link href="/changelog" className="hover:text-primary">What's New</Link>
+              <Link href="/roadmap" className="hover:text-primary">Roadmap</Link>
               <AffiliateDisclosure compact />
             </div>
           </div>

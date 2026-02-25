@@ -20,25 +20,25 @@ export function registerNotificationRoutes(app: Express): void {
     return res.json(getNotificationStats());
   });
 
-  app.post("/api/game-subscriptions", (req: Request, res: Response) => {
+  app.post("/api/game-subscriptions", async (req: Request, res: Response) => {
     const { gameId, sport, gameName, alerts } = req.body;
     if (!gameId || !sport) {
       return res.status(400).json({ error: "gameId and sport are required" });
     }
-    const userId = "default-user";
-    const sub = subscribeToGame(userId, gameId, sport, gameName || "", alerts);
+    const userId = (req.session as any)?.userId || "default-user";
+    const sub = await subscribeToGame(userId, gameId, sport, gameName || "", alerts);
     return res.json(sub);
   });
 
-  app.delete("/api/game-subscriptions/:gameId", (req: Request, res: Response) => {
-    const userId = "default-user";
-    const removed = unsubscribeFromGame(userId, req.params.gameId);
+  app.delete("/api/game-subscriptions/:gameId", async (req: Request, res: Response) => {
+    const userId = (req.session as any)?.userId || "default-user";
+    const removed = await unsubscribeFromGame(userId, req.params.gameId);
     return res.json({ success: removed });
   });
 
-  app.get("/api/game-subscriptions", (_req: Request, res: Response) => {
-    const userId = "default-user";
-    return res.json(getUserGameSubscriptions(userId));
+  app.get("/api/game-subscriptions", async (_req: Request, res: Response) => {
+    const userId = (_req.session as any)?.userId || "default-user";
+    return res.json(await getUserGameSubscriptions(userId));
   });
 
   app.post("/api/parlay-watches", (req: Request, res: Response) => {

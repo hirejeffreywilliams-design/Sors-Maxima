@@ -1,6 +1,8 @@
 import { getAllSportsScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { broadcastEvent } from "./sseManager";
 import { logError } from "./errorLogger";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
 
 export interface CustomNotification {
   id: number;
@@ -315,13 +317,13 @@ function getSubscriptionsForGame(gameId: string): GameSubscription[] {
   return gameSubscriptions.get(gameId) || [];
 }
 
-export function subscribeToGame(
+export async function subscribeToGame(
   userId: string,
   gameId: string,
   sport: string,
   gameName: string,
   alerts: { gameStart: boolean; scoreChange: boolean } = { gameStart: true, scoreChange: true }
-): GameSubscription {
+): Promise<GameSubscription> {
   if (!gameSubscriptions.has(gameId)) {
     gameSubscriptions.set(gameId, []);
   }
@@ -329,6 +331,13 @@ export function subscribeToGame(
   const existing = subs.find(s => s.userId === userId);
   if (existing) {
     existing.alerts = alerts;
+    try {
+      await db.execute(sql`
+        UPDATE notification_subscriptions
+        SET alert_game_start = ${alerts.gameStart}, alert_score_change = ${alerts.scoreChange}
+        WHERE game_id = ${gameId} AND user_id = ${userId}
+      `);
+    } catch (e: any) { logError("[NotificationEngine] DB update error", { error: e.message }); }
     return existing;
   }
   const sub: GameSubscription = {
@@ -340,20 +349,32 @@ export function subscribeToGame(
     subscribedAt: new Date().toISOString(),
   };
   subs.push(sub);
+  try {
+    await db.execute(sql`
+      INSERT INTO notification_subscriptions (game_id, user_id, sport, game_name, alert_game_start, alert_score_change)
+      VALUES (${gameId}, ${userId}, ${sport}, ${gameName}, ${alerts.gameStart}, ${alerts.scoreChange})
+      ON CONFLICT (game_id, user_id) DO UPDATE SET
+        alert_game_start = EXCLUDED.alert_game_start,
+        alert_score_change = EXCLUDED.alert_score_change
+    `);
+  } catch (e: any) { logError("[NotificationEngine] DB insert error", { error: e.message }); }
   return sub;
 }
 
-export function unsubscribeFromGame(userId: string, gameId: string): boolean {
+export async function unsubscribeFromGame(userId: string, gameId: string): Promise<boolean> {
   const subs = gameSubscriptions.get(gameId);
   if (!subs) return false;
   const idx = subs.findIndex(s => s.userId === userId);
   if (idx === -1) return false;
   subs.splice(idx, 1);
   if (subs.length === 0) gameSubscriptions.delete(gameId);
+  try {
+    await db.execute(sql`DELETE FROM notification_subscriptions WHERE game_id = ${gameId} AND user_id = ${userId}`);
+  } catch (e: any) { logError("[NotificationEngine] DB delete error", { error: e.message }); }
   return true;
 }
 
-export function getUserGameSubscriptions(userId: string): GameSubscription[] {
+export async function getUserGameSubscriptions(userId: string): Promise<GameSubscription[]> {
   const result: GameSubscription[] = [];
   for (const [, subs] of Array.from(gameSubscriptions.entries())) {
     for (const sub of subs) {
@@ -423,9 +444,40 @@ export function getNotificationStats() {
   };
 }
 
+async function loadSubscriptionsFromDB(): Promise<void> {
+  try {
+    const result = await db.execute(sql`SELECT * FROM notification_subscriptions`);
+    const rows = (result as any).rows || [];
+    for (const row of rows) {
+      const sub: GameSubscription = {
+        gameId: row.game_id,
+        userId: row.user_id,
+        sport: row.sport,
+        gameName: row.game_name || "",
+        alerts: {
+          gameStart: row.alert_game_start ?? true,
+          scoreChange: row.alert_score_change ?? true,
+        },
+        subscribedAt: row.subscribed_at ? new Date(row.subscribed_at).toISOString() : new Date().toISOString(),
+      };
+      if (!gameSubscriptions.has(sub.gameId)) {
+        gameSubscriptions.set(sub.gameId, []);
+      }
+      gameSubscriptions.get(sub.gameId)!.push(sub);
+    }
+    if (rows.length > 0) {
+      console.log(`[NotificationEngine] Loaded ${rows.length} game subscriptions from database`);
+    }
+  } catch (e: any) {
+    logError("[NotificationEngine] Failed to load subscriptions from DB", { error: e.message });
+  }
+}
+
 export async function startNotificationEngine(): Promise<void> {
   if (monitorInterval) return;
   console.log("[NotificationEngine] Starting game & parlay monitor (30s interval)...");
+
+  await loadSubscriptionsFromDB();
 
   try {
     const allGames = await getAllSportsScoreboard();

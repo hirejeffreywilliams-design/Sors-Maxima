@@ -45,7 +45,7 @@ const userSubscriptions = new Map<string, UserSubscription>();
 // Trial configuration
 const TRIAL_DAYS = 7;
 const TRIAL_TIER: 'pro' | 'elite' | 'whale' = 'pro'; // Trial gives Pro access
-const POST_TRIAL_TIER: 'pro' | 'elite' | 'whale' = 'whale'; // Auto-upgrade tier after trial expires
+const POST_TRIAL_TIER: 'free' | 'pro' | 'elite' | 'whale' = 'free'; // Downgrade to free after trial expires
 
 export class StripeService {
   async isAvailable(): Promise<boolean> {
@@ -140,11 +140,11 @@ export class StripeService {
         const trialEnd = new Date(sub.trialEndDate);
         if (new Date() > trialEnd) {
           sub.subscriptionTier = POST_TRIAL_TIER;
-          sub.subscriptionStatus = 'active';
+          sub.subscriptionStatus = 'expired';
           sub.isTrialUser = false;
-          sub.trialConverted = true;
+          sub.trialConverted = false;
           userSubscriptions.set(username, sub);
-          console.log(`[TRIAL] Trial expired for ${username}, auto-upgraded to ${POST_TRIAL_TIER} tier`);
+          console.log(`[TRIAL] Trial expired for ${username}, downgraded to free tier — upgrade required for premium features`);
         }
       }
       return sub;
