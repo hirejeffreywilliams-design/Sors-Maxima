@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Brain, Database, TrendingUp, TrendingDown, Target, BarChart3,
   Activity, Zap, Users, ArrowLeft, Award, Flame, Shield,
-  Calendar, RefreshCw, ChevronRight, Heart
+  Calendar, RefreshCw, ChevronRight, Heart, Dices
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -77,6 +77,21 @@ export default function PlatformIntelligencePage() {
   const { data: engineStatus } = useQuery<any>({
     queryKey: ["/api/platform-intelligence/engine-status"],
     refetchInterval: 30000,
+  });
+
+  const { data: mcStatus } = useQuery<any>({
+    queryKey: ["/api/monte-carlo/status"],
+    refetchInterval: 30000,
+  });
+
+  const { data: mcCalibration } = useQuery<any>({
+    queryKey: ["/api/monte-carlo/calibration"],
+    refetchInterval: 60000,
+  });
+
+  const { data: mcPreSimulated } = useQuery<any[]>({
+    queryKey: ["/api/monte-carlo/pre-simulated"],
+    refetchInterval: 60000,
   });
 
   if (isLoading) {
@@ -178,6 +193,9 @@ export default function PlatformIntelligencePage() {
             </TabsTrigger>
             <TabsTrigger value="growth" data-testid="tab-growth">
               <TrendingUp className="w-3 h-3 mr-1" /> Data Growth
+            </TabsTrigger>
+            <TabsTrigger value="montecarlo" data-testid="tab-montecarlo">
+              <Dices className="w-3 h-3 mr-1" /> Monte Carlo
             </TabsTrigger>
           </TabsList>
 
@@ -546,6 +564,237 @@ export default function PlatformIntelligencePage() {
                   <div>
                     <span className="text-muted-foreground block text-xs">Data File</span>
                     <span className="font-mono text-xs">{((engineStatus?.totalDataPoints || 0) / 1000).toFixed(1)}k points</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="montecarlo" className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                    <Activity className="w-3 h-3" /> Engine Status
+                  </div>
+                  <div className="text-2xl font-bold" data-testid="text-mc-status">
+                    {mcStatus?.running ? (
+                      <span className="text-green-500">Active</span>
+                    ) : (
+                      <span className="text-red-500">Offline</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Uptime: {mcStatus?.uptime ? `${Math.round(mcStatus.uptime / 60)}m` : "0m"}
+                  </p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                    <Dices className="w-3 h-3" /> Total Simulations
+                  </div>
+                  <div className="text-2xl font-bold" data-testid="text-mc-sims">
+                    {((mcStatus?.totalSimulations || 0) / 1000000).toFixed(1)}M
+                  </div>
+                  <p className="text-xs text-muted-foreground">{mcStatus?.preSimCacheSize || 0} games cached</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                    <Target className="w-3 h-3" /> Accuracy
+                  </div>
+                  <div className="text-2xl font-bold" data-testid="text-mc-accuracy">
+                    {mcCalibration?.overallAccuracy ? `${(mcCalibration.overallAccuracy * 100).toFixed(1)}%` : "Learning"}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{mcCalibration?.totalPredictions || 0} outcomes tracked</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                    <Shield className="w-3 h-3" /> Drift Status
+                  </div>
+                  <div className="text-2xl font-bold" data-testid="text-mc-drift">
+                    <Badge variant={mcStatus?.driftStatus === "healthy" ? "default" : "destructive"}>
+                      {mcStatus?.driftStatus || "Unknown"}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{mcStatus?.predictionRecords || 0} learning records</p>
+                </CardContent>
+              </Card>
+            </div>
+
+            {mcCalibration?.improvementTrend && mcCalibration.improvementTrend.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4" /> Self-Improvement Trend
+                  </CardTitle>
+                  <CardDescription>Model accuracy over time — the engine learns from every outcome</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {mcCalibration.improvementTrend.map((t: any) => (
+                      <div key={t.period} className="text-center p-3 rounded-lg bg-muted/50">
+                        <p className="text-xs text-muted-foreground mb-1">{t.period}</p>
+                        <p className="text-lg font-bold">{t.accuracy ? `${(t.accuracy * 100).toFixed(1)}%` : "—"}</p>
+                        <p className="text-xs text-muted-foreground">Brier: {t.brierScore ? t.brierScore.toFixed(3) : "—"}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {mcCalibration?.byProbBucket && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4" /> Calibration Buckets
+                  </CardTitle>
+                  <CardDescription>Predicted probability vs actual hit rate — well-calibrated models have equal values</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Probability Range</TableHead>
+                        <TableHead>Predicted</TableHead>
+                        <TableHead>Actual</TableHead>
+                        <TableHead>Count</TableHead>
+                        <TableHead>Error</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {mcCalibration.byProbBucket.map((b: any) => (
+                        <TableRow key={b.bucket}>
+                          <TableCell className="font-medium">{b.bucket}</TableCell>
+                          <TableCell>{(b.predicted * 100).toFixed(1)}%</TableCell>
+                          <TableCell>{b.count > 0 ? `${(b.actual * 100).toFixed(1)}%` : "—"}</TableCell>
+                          <TableCell>{b.count}</TableCell>
+                          <TableCell>
+                            {b.count > 0 ? (
+                              <Badge variant={b.calibrationError < 0.05 ? "default" : b.calibrationError < 0.15 ? "secondary" : "destructive"}>
+                                {(b.calibrationError * 100).toFixed(1)}%
+                              </Badge>
+                            ) : "—"}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+
+            {mcPreSimulated && mcPreSimulated.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Zap className="w-4 h-4" /> Pre-Simulated Games
+                  </CardTitle>
+                  <CardDescription>{mcPreSimulated.length} games with {((mcPreSimulated[0]?.simulations || 25000) / 1000).toFixed(0)}k simulations each</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Game</TableHead>
+                          <TableHead>Sport</TableHead>
+                          <TableHead>Home Win</TableHead>
+                          <TableHead>Away Win</TableHead>
+                          <TableHead>Predicted Score</TableHead>
+                          <TableHead>Over/Under</TableHead>
+                          <TableHead>Spread Cover</TableHead>
+                          <TableHead>Convergence</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {mcPreSimulated.slice(0, 20).map((sim: any) => (
+                          <TableRow key={sim.gameId} data-testid={`row-mc-sim-${sim.gameId}`}>
+                            <TableCell className="font-medium text-xs">
+                              {sim.awayTeam} @ {sim.homeTeam}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className="text-xs">{sim.sport}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <span className={sim.homeWinProb > 0.55 ? "text-green-500 font-bold" : ""}>
+                                {(sim.homeWinProb * 100).toFixed(1)}%
+                              </span>
+                            </TableCell>
+                            <TableCell>
+                              <span className={sim.awayWinProb > 0.55 ? "text-green-500 font-bold" : ""}>
+                                {(sim.awayWinProb * 100).toFixed(1)}%
+                              </span>
+                            </TableCell>
+                            <TableCell className="font-mono text-xs">
+                              {sim.predictedHomeScore}-{sim.predictedAwayScore}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              O: {(sim.overProb * 100).toFixed(0)}% / U: {(sim.underProb * 100).toFixed(0)}%
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={sim.homeSpreadCoverProb > 0.55 ? "default" : "secondary"}>
+                                {(sim.homeSpreadCoverProb * 100).toFixed(0)}%
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={sim.convergenceScore > 0.9 ? "default" : "secondary"}>
+                                {(sim.convergenceScore * 100).toFixed(0)}%
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Brain className="w-4 h-4" /> Engine Details
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Started At</span>
+                    <span className="font-mono text-xs">{mcStatus?.engineStartedAt ? new Date(mcStatus.engineStartedAt).toLocaleTimeString() : "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Last Pre-Sim</span>
+                    <span className="font-mono text-xs">{mcStatus?.lastPreSimCycle ? new Date(mcStatus.lastPreSimCycle).toLocaleTimeString() : "Pending"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Sports Covered</span>
+                    <span className="font-mono text-xs">{(mcStatus?.sportsCovered || []).join(", ") || "Loading..."}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Learning Version</span>
+                    <span className="font-bold">v{mcStatus?.learningVersion || 1}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Calibration Entries</span>
+                    <span className="font-bold">{mcStatus?.calibrationEntries || 0}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Last Calibration</span>
+                    <span className="font-mono text-xs">{mcCalibration?.lastCalibration ? new Date(mcCalibration.lastCalibration).toLocaleTimeString() : "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Total Sims Run</span>
+                    <span className="font-bold">{((mcCalibration?.totalSimulationsRun || 0) / 1000000).toFixed(1)}M</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground block text-xs">Drift Score</span>
+                    <span className="font-bold">{mcCalibration?.driftScore ? (mcCalibration.driftScore * 100).toFixed(1) + "%" : "0%"}</span>
                   </div>
                 </div>
               </CardContent>

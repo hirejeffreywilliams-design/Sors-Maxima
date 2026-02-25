@@ -145,15 +145,38 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     const homeWinPct = parseWinPct(homeRecord);
     const awayWinPct = parseWinPct(awayRecord);
-    const spreadEstimate = Math.round((homeWinPct - awayWinPct) * 15 * 2) / 2;
-    const favoriteIsHome = homeWinPct > awayWinPct;
+
+    let mcSim: any = null;
+    try {
+      const { simulateMatchup, getPreSimulated } = await import("./monteCarloEngine");
+      mcSim = getPreSimulated(game.id);
+      if (!mcSim) {
+        mcSim = simulateMatchup({
+          gameId: game.id,
+          sport,
+          homeTeam: homeName,
+          awayTeam: awayName,
+          homeWinPct: homeWinPct * 100,
+          awayWinPct: awayWinPct * 100,
+          isHomeGame: true,
+          gameState: game.status?.state === "in" ? "live" : "pre",
+        });
+      }
+    } catch {}
+
+    const spreadEstimate = mcSim
+      ? Math.round((mcSim.predictedHomeScore - mcSim.predictedAwayScore) * 2) / 2
+      : Math.round((homeWinPct - awayWinPct) * 15 * 2) / 2;
+    const favoriteIsHome = mcSim ? mcSim.homeWinProb > 0.5 : homeWinPct > awayWinPct;
     const favName = favoriteIsHome ? homeName : awayName;
 
-    const totalEstimate = sport === "NBA" ? 220 + Math.round((homeWinPct + awayWinPct - 1) * 20) :
-      sport === "NFL" ? 44 + Math.round((homeWinPct + awayWinPct - 1) * 10) :
-      sport === "MLB" ? 8.5 : sport === "NHL" ? 6 :
-      sport === "NCAAB" ? 145 + Math.round((homeWinPct + awayWinPct - 1) * 15) :
-      sport === "NCAAF" ? 50 + Math.round((homeWinPct + awayWinPct - 1) * 12) : 220;
+    const totalEstimate = mcSim
+      ? Math.round((mcSim.predictedHomeScore + mcSim.predictedAwayScore) * 2) / 2
+      : sport === "NBA" ? 220 + Math.round((homeWinPct + awayWinPct - 1) * 20) :
+        sport === "NFL" ? 44 + Math.round((homeWinPct + awayWinPct - 1) * 10) :
+        sport === "MLB" ? 8.5 : sport === "NHL" ? 6 :
+        sport === "NCAAB" ? 145 + Math.round((homeWinPct + awayWinPct - 1) * 15) :
+        sport === "NCAAF" ? 50 + Math.round((homeWinPct + awayWinPct - 1) * 12) : 220;
 
     const mlOdds = favoriteIsHome
       ? Math.round(-100 - (homeWinPct - 0.5) * 400)
@@ -168,7 +191,21 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     for (const bet of betOptions) {
       const fusion = analyzeLeg(sport, bet.desc, bet.odds, { hasRealOdds: false });
-      const confidence = Math.min(92, Math.max(30, fusion.confidence));
+      let confidence = Math.min(92, Math.max(30, fusion.confidence));
+
+      if (mcSim) {
+        let mcConfBoost = 0;
+        if (bet.betType === "moneyline") {
+          const winProb = favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb;
+          mcConfBoost = Math.round((winProb - 0.5) * 20);
+        } else if (bet.betType === "spread") {
+          mcConfBoost = Math.round((mcSim.convergenceScore - 0.5) * 10);
+        } else if (bet.betType === "total") {
+          mcConfBoost = Math.round(mcSim.convergenceScore * 5);
+        }
+        confidence = Math.min(95, Math.max(25, confidence + mcConfBoost));
+      }
+
       const impliedProb = bet.odds < 0 ? Math.abs(bet.odds) / (Math.abs(bet.odds) + 100) : 100 / (bet.odds + 100);
       const trueProb = confidence / 100;
       const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;

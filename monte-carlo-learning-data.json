@@ -1,0 +1,16 @@
+{
+  "predictions": [],
+  "bayesianParams": {},
+  "sportAdjustments": {},
+  "calibrationHistory": [
+    {
+      "date": "2026-02-25",
+      "accuracy": 0,
+      "brierScore": 0,
+      "driftScore": 0,
+      "predictions": 0
+    }
+  ],
+  "totalSimulations": 1500000,
+  "engineVersion": 1
+}

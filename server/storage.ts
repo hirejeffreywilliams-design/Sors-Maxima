@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import type { ParlayLeg, EvaluationResult, Sport, GeneratedParlay, User } from "@shared/schema";
+import { runSimulation as mcRunSimulation, getRiskMetrics as mcGetRiskMetrics } from "./monteCarloEngine";
 
 export interface IStorage {
   evaluateParlay(
@@ -755,7 +756,19 @@ export class MemStorage implements IStorage {
     const combinedOdds = legs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
     const correlationMatrix = buildCorrelationMatrix(legs);
 
-    const simResult = await runQuantumMonteCarloSimulation(legs, effectiveSimulations);
+    let simResult;
+    try {
+      const mcResult = await mcRunSimulation(legs, effectiveSimulations);
+      simResult = {
+        winProbability: mcResult.winProbability,
+        method: mcResult.method === "importance_sampling" ? "montecarlo" as const : mcResult.method,
+        sims: mcResult.sims,
+        standardError: mcResult.standardError,
+        confidenceInterval: mcResult.confidenceInterval,
+      };
+    } catch {
+      simResult = await runQuantumMonteCarloSimulation(legs, effectiveSimulations);
+    }
 
     const impliedWinProb = 1 / combinedOdds;
     const expectedValue = simResult.winProbability / impliedWinProb - 1;
@@ -860,7 +873,18 @@ export class MemStorage implements IStorage {
     const results: GeneratedParlay[] = [];
 
     for (const candidate of topCandidates) {
-      const simResult = await runQuantumMonteCarloSimulation(candidate.legs, 50000);
+      let simResult;
+      try {
+        const mcResult = await mcRunSimulation(candidate.legs, 50000);
+        simResult = {
+          winProbability: mcResult.winProbability,
+          standardError: mcResult.standardError,
+          confidenceInterval: mcResult.confidenceInterval,
+        };
+      } catch {
+        const fallback = await runQuantumMonteCarloSimulation(candidate.legs, 50000);
+        simResult = fallback;
+      }
 
       const kellyResult = calculateAdvancedKelly(
         simResult.winProbability,

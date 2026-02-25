@@ -235,6 +235,16 @@ async function accumulateGameOutcomes(): Promise<number> {
       newOutcomes++;
 
       updateTeamRecord(outcome);
+
+      try {
+        const { recordOutcome, getPreSimulated } = await import("./monteCarloEngine");
+        const preSim = getPreSimulated(game.id);
+        if (preSim) {
+          const actualHomeWin = winner === "home" ? 1 : 0;
+          recordOutcome(game.id, sportStr, "moneyline", preSim.homeWinProb, actualHomeWin);
+        }
+      } catch {}
+
     }
 
     if (data.gameOutcomes.length > MAX_GAME_HISTORY) {

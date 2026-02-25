@@ -15,6 +15,16 @@ import {
   getDailySummaries,
   getEngineStatus as getPlatformEngineStatus,
 } from "../platformIntelligenceEngine";
+import {
+  startMonteCarloEngine,
+  getMonteCarloEngineStatus,
+  getCalibrationReport,
+  simulateMatchup,
+  getAllPreSimulated,
+  getPreSimulated,
+  getRiskMetrics,
+} from "../monteCarloEngine";
+import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getClientIp } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
@@ -159,5 +169,56 @@ export function registerIntelligenceRoutes(app: Express): void {
 
   app.get("/api/platform-intelligence/engine-status", (_req: Request, res: Response) => {
     return res.json(getPlatformEngineStatus());
+  });
+
+  startMonteCarloEngine();
+
+  app.get("/api/monte-carlo/status", (_req: Request, res: Response) => {
+    return res.json(getMonteCarloEngineStatus());
+  });
+
+  app.get("/api/monte-carlo/calibration", (_req: Request, res: Response) => {
+    return res.json(getCalibrationReport());
+  });
+
+  app.get("/api/monte-carlo/pre-simulated", (_req: Request, res: Response) => {
+    return res.json(getAllPreSimulated());
+  });
+
+  app.get("/api/monte-carlo/simulate/:gameId", (req: Request, res: Response) => {
+    const { gameId } = req.params;
+    const cached = getPreSimulated(gameId);
+    if (cached) {
+      return res.json(cached);
+    }
+    return res.json({ error: "Game not found in pre-simulation cache", gameId });
+  });
+
+  app.post("/api/monte-carlo/simulate", (req: Request, res: Response) => {
+    try {
+      const { gameId, sport, homeTeam, awayTeam, homeWinPct, awayWinPct, spread, totalLine, homeMoneyline, awayMoneyline } = req.body;
+      if (!gameId || !sport || !homeTeam || !awayTeam) {
+        return res.status(400).json({ error: "Missing required fields: gameId, sport, homeTeam, awayTeam" });
+      }
+      const input: MatchupSimulationInput = {
+        gameId,
+        sport: sport as any,
+        homeTeam,
+        awayTeam,
+        homeWinPct: homeWinPct || 50,
+        awayWinPct: awayWinPct || 50,
+        spread,
+        totalLine,
+        homeMoneyline,
+        awayMoneyline,
+        isHomeGame: true,
+        gameState: "pre",
+      };
+      const result = simulateMatchup(input);
+      return res.json(result);
+    } catch (err) {
+      console.error("Monte Carlo simulation error:", err);
+      return res.status(500).json({ error: "Simulation failed" });
+    }
   });
 }

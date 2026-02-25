@@ -630,9 +630,27 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
       } else if (config.source === "public_fade" && bookmakerCount >= 3) {
         confidence = Math.min(85, confidence + 10);
         reasoning = `Market consensus across ${bookmakerCount} books indicates public betting distribution`;
-      } else if (config.source === "monte_carlo" && hasRealOdds) {
-        confidence = Math.min(90, confidence + 8);
-        reasoning = `Simulations calibrated with real-time market pricing from ${bookmakerCount} sportsbooks`;
+      } else if (config.source === "monte_carlo") {
+        try {
+          const { getPreSimulated } = require("./monteCarloEngine");
+          const gameId = (context.gameId as string) || "";
+          const preSim = gameId ? getPreSimulated(gameId) : null;
+          if (preSim) {
+            const simWinProb = marketContext?.homeMoneyline && marketContext.homeMoneyline < 0 ? preSim.homeWinProb : preSim.awayWinProb;
+            direction = simWinProb > 0.55 ? "bullish" : simWinProb < 0.45 ? "bearish" : "neutral";
+            strength = Math.min(95, Math.round(Math.abs(simWinProb - 0.5) * 200));
+            confidence = Math.min(95, Math.round(preSim.convergenceScore * 85 + 10));
+            reasoning = `${preSim.simulations.toLocaleString()} Monte Carlo simulations: ${(simWinProb * 100).toFixed(1)}% win probability (predicted ${preSim.predictedHomeScore}-${preSim.predictedAwayScore})`;
+          } else if (hasRealOdds) {
+            confidence = Math.min(90, confidence + 8);
+            reasoning = `Simulations calibrated with real-time market pricing from ${bookmakerCount} sportsbooks`;
+          }
+        } catch (e) {
+          if (hasRealOdds) {
+            confidence = Math.min(90, confidence + 8);
+            reasoning = `Simulations calibrated with real-time market pricing from ${bookmakerCount} sportsbooks`;
+          }
+        }
       } else if (config.source === "predictive_model" && hasRealOdds) {
         confidence = Math.min(90, confidence + 5);
         reasoning = `AI model validated against live market odds (source: ${oddsSource})`;

@@ -602,6 +602,14 @@ async function runCalibrationCheck(): Promise<void> {
       await scheduledRetraining();
     }
 
+    try {
+      const { getCalibrationReport } = await import("./monteCarloEngine");
+      const mcCal = getCalibrationReport();
+      if (mcCal.driftDetected) {
+        logWarn(`[Orchestrator] Monte Carlo drift detected — accuracy ${(mcCal.overallAccuracy * 100).toFixed(1)}%, recalibrating`);
+      }
+    } catch {}
+
     if (status.totalCycles % 50 === 0) {
       logInfo(`[Orchestrator] Calibration: overall accuracy ${(status.accuracyMetrics.overall * 100).toFixed(1)}%, drift ${(status.accuracyMetrics.calibrationDrift * 100).toFixed(1)}%, EV accuracy ${(status.accuracyMetrics.evAccuracy * 100).toFixed(1)}%`);
     }
