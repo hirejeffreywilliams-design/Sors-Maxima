@@ -185,7 +185,7 @@ function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boo
           onClick={onToggle}
           data-testid={`button-expand-${game.id}`}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-start gap-2 sm:gap-3">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
                 {isLive && (
@@ -206,54 +206,54 @@ function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boo
                 )}
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-5 h-5" />}
-                    <span className="font-semibold text-sm truncate" data-testid={`text-away-${game.id}`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
+                    {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    <span className="font-semibold text-xs sm:text-sm truncate" data-testid={`text-away-${game.id}`}>
                       {game.awayTeam.abbreviation}
                     </span>
-                    <span className="text-xs text-muted-foreground">{game.awayTeam.record}</span>
-                    {isLive && <span className="text-sm font-bold ml-auto">{game.awayTeam.score}</span>}
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">{game.awayTeam.record}</span>
+                    {isLive && <span className="text-xs sm:text-sm font-bold ml-auto">{game.awayTeam.score}</span>}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-5 h-5" />}
-                    <span className="font-semibold text-sm truncate" data-testid={`text-home-${game.id}`}>
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />}
+                    <span className="font-semibold text-xs sm:text-sm truncate" data-testid={`text-home-${game.id}`}>
                       {game.homeTeam.abbreviation}
                     </span>
-                    <span className="text-xs text-muted-foreground">{game.homeTeam.record}</span>
-                    {isLive && <span className="text-sm font-bold ml-auto">{game.homeTeam.score}</span>}
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">{game.homeTeam.record}</span>
+                    {isLive && <span className="text-xs sm:text-sm font-bold ml-auto">{game.homeTeam.score}</span>}
                   </div>
                 </div>
               </div>
               <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {game.status.detail}
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate">{game.status.detail}</span>
               </p>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center shrink-0">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-3 text-center shrink-0">
               <div>
-                <p className="text-[9px] text-muted-foreground uppercase mb-0.5">Spread</p>
-                <p className="text-sm font-semibold" data-testid={`text-spread-${game.id}`}>
+                <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase mb-0.5">Spread</p>
+                <p className="text-xs sm:text-sm font-semibold" data-testid={`text-spread-${game.id}`}>
                   {game.consensus.spread !== undefined ? (game.consensus.spread > 0 ? `+${game.consensus.spread}` : game.consensus.spread) : "—"}
                 </p>
               </div>
               <div>
-                <p className="text-[9px] text-muted-foreground uppercase mb-0.5">Total</p>
-                <p className="text-sm font-semibold" data-testid={`text-total-${game.id}`}>
+                <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase mb-0.5">Total</p>
+                <p className="text-xs sm:text-sm font-semibold" data-testid={`text-total-${game.id}`}>
                   {game.consensus.total ?? "—"}
                 </p>
               </div>
               <div>
-                <p className="text-[9px] text-muted-foreground uppercase mb-0.5">ML</p>
-                <p className="text-sm font-semibold" data-testid={`text-ml-${game.id}`}>
+                <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase mb-0.5">ML</p>
+                <p className="text-xs sm:text-sm font-semibold" data-testid={`text-ml-${game.id}`}>
                   {fmt(game.consensus.homeMoneyline)}
                 </p>
               </div>
             </div>
 
-            <div className="text-right shrink-0 w-16">
+            <div className="text-right shrink-0 w-12 sm:w-16">
               <p className="text-[9px] text-muted-foreground uppercase mb-0.5">EV</p>
               <p className={`text-sm ${evColor(maxEV)}`} data-testid={`text-ev-${game.id}`}>
                 {maxEV > 0 ? "+" : ""}{(maxEV * 100).toFixed(1)}%
@@ -1844,41 +1844,45 @@ export default function OddsCenter() {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        {SPORTS.map(s => (
-          <Button
-            key={s.id}
-            variant={sport === s.id ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSport(s.id)}
-            className="text-xs"
-            data-testid={`btn-sport-${s.id}`}
-          >
-            <span className="mr-1">{s.emoji}</span>
-            {s.label}
-          </Button>
-        ))}
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="inline-flex items-center gap-1.5 min-w-max">
+          {SPORTS.map(s => (
+            <Button
+              key={s.id}
+              variant={sport === s.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSport(s.id)}
+              className="text-xs shrink-0"
+              data-testid={`btn-sport-${s.id}`}
+            >
+              <span className="mr-1">{s.emoji}</span>
+              {s.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} data-testid="odds-center-tabs">
-        <TabsList className="flex flex-wrap gap-1" data-testid="odds-center-tabs-list">
-          <TabsTrigger value="odds" data-testid="tab-odds-comparison">
-            <DollarSign className="w-3.5 h-3.5 mr-1" />
-            Odds Comparison
-          </TabsTrigger>
-          <TabsTrigger value="ev-heatmap" data-testid="tab-ev-heatmap">
-            <Flame className="w-3.5 h-3.5 mr-1" />
-            EV Heatmap
-          </TabsTrigger>
-          <TabsTrigger value="line-movement" data-testid="tab-line-movement">
-            <Activity className="w-3.5 h-3.5 mr-1" />
-            Line Movement
-          </TabsTrigger>
-          <TabsTrigger value="power-rankings" data-testid="tab-power-rankings">
-            <Trophy className="w-3.5 h-3.5 mr-1" />
-            Power Rankings
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          <TabsList className="inline-flex w-auto min-w-full sm:w-full gap-0.5" data-testid="odds-center-tabs-list">
+            <TabsTrigger value="odds" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-odds-comparison">
+              <DollarSign className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Odds</span> <span className="sm:hidden">Odds</span>
+            </TabsTrigger>
+            <TabsTrigger value="ev-heatmap" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-ev-heatmap">
+              <Flame className="w-3.5 h-3.5 shrink-0" />
+              EV <span className="hidden sm:inline">Heatmap</span>
+            </TabsTrigger>
+            <TabsTrigger value="line-movement" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-line-movement">
+              <Activity className="w-3.5 h-3.5 shrink-0" />
+              Lines
+            </TabsTrigger>
+            <TabsTrigger value="power-rankings" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-power-rankings">
+              <Trophy className="w-3.5 h-3.5 shrink-0" />
+              Rankings
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="odds" className="mt-4">
           <OddsComparisonTab

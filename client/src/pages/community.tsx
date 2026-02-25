@@ -29,17 +29,17 @@ export default function Community() {
 
         <Tabs defaultValue="feed" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="feed" className="gap-1" data-testid="tab-feed">
-              <Users className="w-4 h-4" />
+            <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-feed">
+              <Users className="w-4 h-4 shrink-0" />
               Feed
             </TabsTrigger>
-            <TabsTrigger value="tipster-groups" className="gap-1" data-testid="tab-tipster-groups">
-              <MessageCircle className="w-4 h-4" />
-              Tipster Groups
+            <TabsTrigger value="tipster-groups" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-tipster-groups">
+              <MessageCircle className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Tipster</span> Groups
             </TabsTrigger>
-            <TabsTrigger value="shared-tickets" className="gap-1" data-testid="tab-shared-tickets">
-              <Share2 className="w-4 h-4" />
-              Shared Tickets
+            <TabsTrigger value="shared-tickets" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-shared-tickets">
+              <Share2 className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Shared</span> Tickets
             </TabsTrigger>
           </TabsList>
 

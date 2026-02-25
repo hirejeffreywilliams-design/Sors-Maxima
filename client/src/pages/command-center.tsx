@@ -703,15 +703,17 @@ export default function CommandCenter() {
         </div>
 
         <Tabs value={activeSportTab} onValueChange={setActiveSportTab}>
-          <TabsList className="h-8">
-            <TabsTrigger value="all" className="text-xs px-3 h-7" data-testid="tab-sport-all">All Sports</TabsTrigger>
-            {activeSports.map(s => (
-              <TabsTrigger key={s.sport} value={s.sport} className="text-xs px-3 h-7" data-testid={`tab-sport-${s.sport}`}>
-                {s.sport}
-                {s.liveCount > 0 && <Radio className="w-2.5 h-2.5 ml-1 text-red-500" />}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-max h-8">
+              <TabsTrigger value="all" className="text-xs px-2.5 sm:px-3 h-7 shrink-0" data-testid="tab-sport-all">All</TabsTrigger>
+              {activeSports.map(s => (
+                <TabsTrigger key={s.sport} value={s.sport} className="text-xs px-2.5 sm:px-3 h-7 shrink-0" data-testid={`tab-sport-${s.sport}`}>
+                  {s.sport}
+                  {s.liveCount > 0 && <Radio className="w-2.5 h-2.5 ml-1 text-red-500" />}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
 
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
 

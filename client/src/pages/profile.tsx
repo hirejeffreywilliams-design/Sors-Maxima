@@ -1180,19 +1180,19 @@ function BetHistoryTab() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <Table className="min-w-[640px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="whitespace-nowrap">Date</TableHead>
-                      <TableHead>Ticket</TableHead>
-                      <TableHead className="text-center">Legs</TableHead>
-                      <TableHead>Odds</TableHead>
-                      <TableHead>Stake</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Payout</TableHead>
-                      <TableHead>P/L</TableHead>
-                      <TableHead className="w-40">Actions</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Date</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Ticket</TableHead>
+                      <TableHead className="text-center whitespace-nowrap text-xs">Legs</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Odds</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Stake</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Status</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">Payout</TableHead>
+                      <TableHead className="whitespace-nowrap text-xs">P/L</TableHead>
+                      <TableHead className="w-32 whitespace-nowrap text-xs">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1234,18 +1234,18 @@ export default function ProfilePage() {
         </header>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="w-full justify-start flex-wrap gap-1" data-testid="profile-tabs">
-            <TabsTrigger value="profile" data-testid="tab-profile">
-              <User className="w-4 h-4 mr-1.5" />
+          <TabsList className="grid w-full grid-cols-3 max-w-md" data-testid="profile-tabs">
+            <TabsTrigger value="profile" className="gap-1 text-xs sm:text-sm" data-testid="tab-profile">
+              <User className="w-4 h-4 shrink-0" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="betting-dna" data-testid="tab-betting-dna">
-              <Target className="w-4 h-4 mr-1.5" />
-              Betting DNA
+            <TabsTrigger value="betting-dna" className="gap-1 text-xs sm:text-sm" data-testid="tab-betting-dna">
+              <Target className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Betting</span> DNA
             </TabsTrigger>
-            <TabsTrigger value="bet-history" data-testid="tab-bet-history">
-              <History className="w-4 h-4 mr-1.5" />
-              Bet History
+            <TabsTrigger value="bet-history" className="gap-1 text-xs sm:text-sm" data-testid="tab-bet-history">
+              <History className="w-4 h-4 shrink-0" />
+              History
             </TabsTrigger>
           </TabsList>
 

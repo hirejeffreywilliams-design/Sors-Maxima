@@ -997,35 +997,35 @@ export default function Dashboard() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <div className="flex justify-center">
-            <TabsList className="flex flex-wrap gap-1 h-auto p-1">
-              <TabsTrigger value="generator" className="gap-1.5" data-testid="tab-generator">
-                <Sparkles className="w-4 h-4" />
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:w-full h-auto p-1 gap-0.5">
+              <TabsTrigger value="generator" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-generator">
+                <Sparkles className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Quick</span> Picks
               </TabsTrigger>
-              <TabsTrigger value="visual" className="gap-1.5" data-testid="tab-visual">
-                <GripVertical className="w-4 h-4" />
+              <TabsTrigger value="visual" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-visual">
+                <GripVertical className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Visual</span> Builder
               </TabsTrigger>
-              <TabsTrigger value="builder" className="gap-1.5" data-testid="tab-builder">
-                <Wrench className="w-4 h-4" />
+              <TabsTrigger value="builder" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-builder">
+                <Wrench className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Manual</span> Entry
               </TabsTrigger>
-              <TabsTrigger value="straight" className="gap-1.5" data-testid="tab-straight">
-                <Target className="w-4 h-4" />
+              <TabsTrigger value="straight" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-straight">
+                <Target className="w-4 h-4 shrink-0" />
                 Straight
               </TabsTrigger>
-              <TabsTrigger value="sgp" className="gap-1.5" data-testid="tab-sgp">
-                <Layers className="w-4 h-4" />
+              <TabsTrigger value="sgp" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-sgp">
+                <Layers className="w-4 h-4 shrink-0" />
                 SGP
               </TabsTrigger>
-              <TabsTrigger value="teasers" className="gap-1.5" data-testid="tab-teasers">
-                <ArrowUpDown className="w-4 h-4" />
+              <TabsTrigger value="teasers" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-teasers">
+                <ArrowUpDown className="w-4 h-4 shrink-0" />
                 Teasers
               </TabsTrigger>
-              <TabsTrigger value="roundrobin" className="gap-1.5" data-testid="tab-roundrobin">
-                <Shuffle className="w-4 h-4" />
-                Round Robin
+              <TabsTrigger value="roundrobin" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-roundrobin">
+                <Shuffle className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Round</span> Robin
               </TabsTrigger>
             </TabsList>
           </div>
