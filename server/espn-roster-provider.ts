@@ -299,13 +299,13 @@ export function getRosterCacheStats(): { sport: string; teams: number; players: 
 }
 
 const preloadedSports = new Set<string>();
-const ALL_SPORTS: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+const PRELOAD_SPORTS: Sport[] = ["NBA", "NFL", "MLB", "NHL"];
 
 export async function preloadAllRosters(): Promise<void> {
   const startTime = Date.now();
   console.log("[Rosters] Starting background preload for all sports...");
 
-  for (const sport of ALL_SPORTS) {
+  for (const sport of PRELOAD_SPORTS) {
     if (preloadedSports.has(sport)) continue;
     try {
       const teams = await getTeams(sport);

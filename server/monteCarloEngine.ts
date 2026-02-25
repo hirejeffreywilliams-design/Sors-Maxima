@@ -333,8 +333,8 @@ const DEFAULT_SPORT_PARAMS: Record<string, { scoreMean: number; scoreStdDev: num
   NCAAF: { scoreMean: 25, scoreStdDev: 12, totalMean: 50, homeAdvantage: 3.0, isPoisson: false },
 };
 
-const MATCHUP_SIMS = 25000;
-const PARLAY_SIMS = 100000;
+const MATCHUP_SIMS = 10000;
+const PARLAY_SIMS = 50000;
 const BATCH_SIZE = 10000;
 const CONVERGENCE_THRESHOLD = 0.00005;
 const MIN_BATCHES = 5;
@@ -1132,7 +1132,10 @@ export function getMonteCarloEngineStatus(): {
     calibrationEntries: learningData.calibrationHistory.length,
     engineStartedAt: engineStartedAt ? new Date(engineStartedAt).toISOString() : "",
     lastPreSimCycle: lastPreSimCycle ? new Date(lastPreSimCycle).toISOString() : "",
-    sportsCovered: [...new Set(learningData.predictions.map(p => p.sport))],
+    sportsCovered: [...new Set([
+      ...learningData.predictions.map(p => p.sport),
+      ...Array.from(preSimCache.values()).map(s => s.sport),
+    ])],
     learningVersion: learningData.engineVersion,
     driftStatus: calibration.driftStatus,
     uptime: engineStartedAt ? Math.round((Date.now() - engineStartedAt) / 1000) : 0,
@@ -1149,7 +1152,13 @@ async function runPreSimulationCycle(): Promise<void> {
     const allGames = [...(feed.liveGames || []), ...(feed.upcomingGames || [])];
     let simulated = 0;
 
-    for (const game of allGames.slice(0, 50)) {
+    for (const [key, val] of preSimCache) {
+      if (Date.now() - val.simulatedAt > val.ttl * 2) {
+        preSimCache.delete(key);
+      }
+    }
+
+    for (const game of allGames.slice(0, 30)) {
       try {
         const homeWinPct = game.homeTeam?.winPct || 50;
         const awayWinPct = game.awayTeam?.winPct || 50;

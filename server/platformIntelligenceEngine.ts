@@ -347,28 +347,40 @@ async function accumulatePredictions(): Promise<number> {
 
     for (const sport of ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as Sport[]) {
       const cached = getPrecomputedCache(sport);
-      if (!cached || !cached.predictions) continue;
+      if (!cached || !cached.picks || cached.picks.length === 0) continue;
 
-      for (const pred of cached.predictions) {
-        const predId = crypto.createHash("md5").update(`${pred.gameId}-${sport}-${pred.predictedWinner}`).digest("hex").slice(0, 12);
+      for (const pick of cached.picks) {
+        if (pick.betType !== "moneyline") continue;
+
+        const predId = crypto.createHash("md5").update(`${pick.id}-${sport}-${pick.pick}`).digest("hex").slice(0, 12);
         if (existingIds.has(predId)) continue;
 
-        const matchedOutcome = data.gameOutcomes.find(o => o.gameId === pred.gameId);
+        const pickTeamName = pick.pick.replace(" ML", "").trim();
+        const isHomePick = pickTeamName.toLowerCase() === (pick.homeTeam || "").toLowerCase();
+
+        const matchedOutcome = data.gameOutcomes.find(o => {
+          const gameStr = `${pick.awayTeam} @ ${pick.homeTeam}`;
+          return o.sport === sport && (
+            pick.game === gameStr ||
+            (o.homeTeam.toLowerCase().includes((pick.homeTeam || "").toLowerCase().slice(0, 5)) &&
+             o.awayTeam.toLowerCase().includes((pick.awayTeam || "").toLowerCase().slice(0, 5)))
+          );
+        });
 
         if (matchedOutcome) {
-          const correct = matchedOutcome.winner === "home"
-            ? (pred.predictedWinner || "").toLowerCase().includes(matchedOutcome.homeTeam.toLowerCase())
-            : (pred.predictedWinner || "").toLowerCase().includes(matchedOutcome.awayTeam.toLowerCase());
+          const predictedWinner = pickTeamName;
+          const actualWinner = matchedOutcome.winner === "home" ? matchedOutcome.homeTeam : matchedOutcome.awayTeam;
+          const correct = (isHomePick && matchedOutcome.winner === "home") || (!isHomePick && matchedOutcome.winner === "away");
 
           data.predictionRecords.push({
             id: predId,
             sport,
-            date: pred.gameDate || new Date().toISOString(),
-            predictedWinner: pred.predictedWinner || "unknown",
-            actualWinner: matchedOutcome.winner === "home" ? matchedOutcome.homeTeam : matchedOutcome.awayTeam,
-            confidence: pred.confidence || 50,
+            date: pick.gameTime || pick.generatedAt || new Date().toISOString(),
+            predictedWinner,
+            actualWinner,
+            confidence: pick.confidence || 50,
             correct,
-            market: pred.market || "moneyline",
+            market: pick.betType || "moneyline",
             recordedAt: new Date().toISOString(),
           });
           existingIds.add(predId);
@@ -453,11 +465,13 @@ async function accumulateInjuryData(): Promise<number> {
     const { getAllInjuries } = await import("./espn-injury-provider");
     let newRecords = 0;
 
+    const allInjuries = await getAllInjuries();
+
     for (const sport of ["NBA", "NFL", "MLB", "NHL"] as Sport[]) {
       try {
-        const injuries = await getAllInjuries(sport);
+        const injuries = allInjuries[sport] || [];
         for (const teamInjury of injuries) {
-          const teamName = teamInjury.team || teamInjury.teamAbbreviation || "unknown";
+          const teamName = teamInjury.team || (teamInjury as any).teamAbbreviation || "unknown";
           for (const player of (teamInjury.injuries || [])) {
             if (player.status !== "Out" && player.status !== "Doubtful") continue;
 
@@ -521,12 +535,12 @@ async function accumulateInjuryData(): Promise<number> {
 
 async function accumulateCommunityData(): Promise<void> {
   try {
-    const communityService = await import("./communityService");
-    const communities = communityService.getAllCommunities();
+    const { communityService } = await import("./communityService");
+    const communities = communityService.getCommunities();
     const sportPicks: Record<string, { total: number; wins: number; teams: Record<string, number>; markets: Record<string, number>; confidenceSum: number }> = {};
 
     for (const community of communities) {
-      const picks = communityService.getCommunityPicks(community.id);
+      const picks = communityService.getPicks(community.id);
       for (const pick of picks) {
         const sport = (pick.sport || "NBA").toUpperCase();
         if (!sportPicks[sport]) {
