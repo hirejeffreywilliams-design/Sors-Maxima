@@ -7,8 +7,10 @@ import { getPlayersFromCache, getPlayersFromCacheById, getInjuredPlayersFromCach
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { logInfo, logWarn, logError } from "./errorLogger";
 
-const THE_ODDS_API_KEY = process.env.THE_ODDS_API_KEY;
 const THE_ODDS_API_BASE = "https://api.the-odds-api.com/v4/sports";
+function getOddsApiKey(): string | undefined {
+  return process.env.THE_ODDS_API_KEY?.trim();
+}
 
 interface OddsApiBookmaker {
   key: string;
@@ -57,7 +59,8 @@ function mapSportToOddsApiKey(sport: string): string | null {
 }
 
 async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
-  if (!THE_ODDS_API_KEY) return [];
+  const apiKey = getOddsApiKey();
+  if (!apiKey) return [];
 
   const sportKey = mapSportToOddsApiKey(sport);
   if (!sportKey) return [];
@@ -70,7 +73,7 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
 
   const regions = "us";
   const markets = "h2h,spreads,totals";
-  const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${THE_ODDS_API_KEY}&regions=${regions}&markets=${markets}&oddsFormat=american`;
+  const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=american`;
 
   try {
     const response = await fetch(url);
@@ -1071,7 +1074,8 @@ const playerPropsCache = new Map<string, { data: RealPlayerProp[]; timestamp: nu
 const PROPS_CACHE_TTL = 5 * 60 * 1000;
 
 async function fetchEventIds(sport: string): Promise<{ id: string; home_team: string; away_team: string; commence_time: string }[]> {
-  if (!THE_ODDS_API_KEY) return [];
+  const apiKey = getOddsApiKey();
+  if (!apiKey) return [];
   const sportKey = mapSportToOddsApiKey(sport);
   if (!sportKey) return [];
 
@@ -1081,7 +1085,7 @@ async function fetchEventIds(sport: string): Promise<{ id: string; home_team: st
     return cached.data.map(g => ({ id: g.id, home_team: g.home_team, away_team: g.away_team, commence_time: g.commence_time }));
   }
 
-  const url = `${THE_ODDS_API_BASE}/${sportKey}/events?apiKey=${THE_ODDS_API_KEY}`;
+  const url = `${THE_ODDS_API_BASE}/${sportKey}/events?apiKey=${apiKey}`;
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Events API error: ${response.status}`);
@@ -1098,12 +1102,13 @@ async function fetchPlayerPropsForEvent(
   eventId: string,
   markets: string[]
 ): Promise<any> {
-  if (!THE_ODDS_API_KEY) return null;
+  const apiKey = getOddsApiKey();
+  if (!apiKey) return null;
   const sportKey = mapSportToOddsApiKey(sport);
   if (!sportKey) return null;
 
   const marketsStr = markets.join(",");
-  const url = `${THE_ODDS_API_BASE}/${sportKey}/events/${eventId}/odds?apiKey=${THE_ODDS_API_KEY}&regions=us&markets=${marketsStr}&oddsFormat=american`;
+  const url = `${THE_ODDS_API_BASE}/${sportKey}/events/${eventId}/odds?apiKey=${apiKey}&regions=us&markets=${marketsStr}&oddsFormat=american`;
 
   try {
     const response = await fetch(url);
@@ -1127,7 +1132,7 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
 
   const sportUpper = sport.toUpperCase();
   const markets = PLAYER_PROP_MARKETS[sportUpper];
-  if (!markets || !THE_ODDS_API_KEY) return [];
+  if (!markets || !getOddsApiKey()) return [];
 
   const events = await fetchEventIds(sport);
   const now = Date.now();
@@ -1231,7 +1236,7 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
 }
 
 export function isOddsApiAvailable(): boolean {
-  return !!THE_ODDS_API_KEY;
+  return !!getOddsApiKey();
 }
 
 export { mapSportToOddsApiKey, fetchOddsApi, MARKET_LABELS, PLAYER_PROP_MARKETS };

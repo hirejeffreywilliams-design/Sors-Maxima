@@ -103,8 +103,10 @@ export interface MarketSnapshot {
   };
 }
 
-const THE_ODDS_API_KEY = process.env.THE_ODDS_API_KEY;
 const THE_ODDS_API_BASE = "https://api.the-odds-api.com/v4/sports";
+function getOddsApiKey(): string | undefined {
+  return process.env.THE_ODDS_API_KEY?.trim();
+}
 
 const snapshotCache = new Map<string, { data: MarketSnapshot; timestamp: number }>();
 const SNAPSHOT_CACHE_TTL = 3 * 60 * 1000;
@@ -148,7 +150,11 @@ const oddsFullCache = new Map<string, { data: OddsApiGame[]; timestamp: number }
 let oddsApiWarned = false;
 
 async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
-  if (!THE_ODDS_API_KEY) return [];
+  const apiKey = getOddsApiKey();
+  if (!apiKey) {
+    console.warn(`[MarketSnapshot] No Odds API key found in environment`);
+    return [];
+  }
   const sportKey = mapSportToOddsApiKey(sport);
   if (!sportKey) return [];
 
@@ -157,12 +163,15 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   if (cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000) return cached.data;
 
   try {
-    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${THE_ODDS_API_KEY}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
+    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
     const res = await fetch(url);
     if (!res.ok) {
       if (res.status === 401 || res.status === 429) {
         if (!oddsApiWarned) {
-          console.warn(`[MarketSnapshot] Odds API returned ${res.status} — odds data unavailable (key may be expired or rate-limited)`);
+          const body = await res.text().catch(() => "");
+          const parsed = JSON.parse(body || "{}").error_code || "";
+          const reason = parsed === "OUT_OF_USAGE_CREDITS" ? "monthly quota exhausted" : res.status === 429 ? "rate limited" : "invalid key";
+          console.warn(`[MarketSnapshot] Odds API ${res.status}: ${reason}. Multi-book odds unavailable, using ESPN fallback.`);
           oddsApiWarned = true;
         }
         return oddsFullCache.get(cacheKey)?.data || [];

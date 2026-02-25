@@ -77,11 +77,11 @@ class SportsDataService {
   private requestsUsed: number | null = null;
 
   constructor() {
-    this.apiKey = process.env.THE_ODDS_API_KEY;
+    this.apiKey = process.env.THE_ODDS_API_KEY?.trim() || null;
   }
 
   isAvailable(): boolean {
-    return !!this.apiKey;
+    return !!(this.apiKey || process.env.THE_ODDS_API_KEY?.trim());
   }
 
   getApiStatus(): { available: boolean; requestsRemaining: number | null; requestsUsed: number | null } {
