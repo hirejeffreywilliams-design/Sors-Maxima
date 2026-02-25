@@ -427,7 +427,7 @@ function TierAccessTab() {
       icon: <Crown className="w-5 h-5 text-amber-500" />,
       features: [
         "Everything in Edge",
-        "Unlimited AI credits",
+        "Zero limits — priority processing",
         "Custom model builder",
         "Hedge & arbitrage tools",
         "Priority processing",

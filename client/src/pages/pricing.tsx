@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Check, Crown, Gem, Atom, Star, Trophy, Shield, Bot, LineChart, Bell, Users, Wallet, Target, AlertTriangle, Sparkles, Lock, Flame, Eye, Swords } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
+
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -40,7 +40,7 @@ const tiers: PricingTier[] = [
     yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
     features: [
       '25 ticket generations per day',
-      '50 AI credits per day',
+      'Unlimited daily usage',
       'All 6 US sports + 8 international soccer leagues',
       'Full 46-factor Prediction Engine',
       'Visual drag-and-drop ticket builder',
@@ -68,7 +68,7 @@ const tiers: PricingTier[] = [
     features: [
       'Everything in Sharp, plus:',
       'Unlimited ticket generations',
-      '300 AI credits per day',
+      'Unlimited daily usage',
       'AI Betting Assistant (unlimited chats)',
       'Player prop projections (ML-powered)',
       'Real-time line movement alerts',
@@ -96,7 +96,7 @@ const tiers: PricingTier[] = [
     yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
     features: [
       'Everything in Edge, plus:',
-      'Unlimited AI credits (no daily cap)',
+      'Zero limits — priority processing on all analyses',
       'Deep-scan analysis (2x simulation depth)',
       'Custom model builder (adjust all 46 weights)',
       'Hedge calculator & optimizer',
@@ -163,14 +163,7 @@ export default function Pricing() {
     checkoutMutation.mutate(priceId);
   };
 
-  const { data: credits } = useQuery<{ used: number; total: number; tier: string; resetsAt: string }>({
-    queryKey: ['/api/credits'],
-  });
-
   const currentTier = subscription?.tier || 'none';
-  const creditsRemaining = credits ? credits.total - credits.used : 0;
-  const creditsTotal = credits?.total || 50;
-  const creditsUsedPercent = credits ? (credits.used / credits.total) * 100 : 0;
 
   return (
     <div className="min-h-full">
@@ -303,26 +296,25 @@ export default function Pricing() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card data-testid="card-credits-usage">
+          <Card data-testid="card-tier-access">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5" />
-                AI Credits Usage
+                Your Access Level
               </CardTitle>
-              <CardDescription>Track your daily AI credit consumption</CardDescription>
+              <CardDescription>Unlimited usage within your tier</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium" data-testid="text-credits-remaining">
-                  {creditsRemaining} of {creditsTotal} remaining
+                <span className="text-sm font-medium" data-testid="text-tier-access">
+                  {currentTier === 'none' ? 'No active plan' : `${currentTier.charAt(0).toUpperCase() + currentTier.slice(1)} member`}
                 </span>
-                <Badge variant="secondary" data-testid="text-credits-tier">
-                  {credits?.tier || currentTier} tier
+                <Badge variant="secondary" data-testid="text-current-tier">
+                  {currentTier === 'none' ? 'Free' : currentTier}
                 </Badge>
               </div>
-              <Progress value={100 - creditsUsedPercent} className="h-2" data-testid="progress-credits" />
               <p className="text-sm text-muted-foreground">
-                Credits reset daily at midnight UTC. Each credit = one action (ticket generation, analysis, projection).
+                Every tier includes unlimited daily usage of all features in your plan. No credit limits, no caps — just results.
               </p>
             </CardContent>
           </Card>

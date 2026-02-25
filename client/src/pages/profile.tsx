@@ -54,7 +54,7 @@ export default function ProfilePage() {
     queryKey: ["/api/sessions"],
   });
 
-  const { data: credits } = useQuery<any>({
+  const { data: tierInfo } = useQuery<any>({
     queryKey: ["/api/credits"],
   });
 
@@ -122,7 +122,7 @@ export default function ProfilePage() {
     changePasswordMutation.mutate({ currentPassword: passwordCurrent, newPassword: passwordNew });
   };
 
-  const tierName = subscription?.tier || credits?.tier || "Free";
+  const tierName = subscription?.tier || tierInfo?.tier || "Free";
   const tierColors: Record<string, string> = {
     free: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
     pro: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -170,9 +170,9 @@ export default function ProfilePage() {
                 </Badge>
               </div>
               <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">AI Credits Today</Label>
-                <p className="font-medium" data-testid="text-profile-credits">
-                  {credits?.remaining ?? "N/A"} / {credits?.daily ?? "N/A"}
+                <Label className="text-xs text-muted-foreground">Access</Label>
+                <p className="font-medium text-sm" data-testid="text-profile-access">
+                  {tierInfo?.access || "Unlimited usage"}
                 </p>
               </div>
             </div>

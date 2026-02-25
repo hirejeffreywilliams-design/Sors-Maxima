@@ -82,7 +82,7 @@ const faqItems: FAQItem[] = [
   {
     category: "Account & Billing",
     question: "What subscription tiers are available?",
-    answer: "We offer Free (5 AI credits/day), Pro ($29/mo, 50 credits), Elite ($79/mo, 200 credits), and Whale ($199/mo, unlimited credits). Higher tiers unlock more Pro Tools, advanced analytics, and priority support."
+    answer: "We offer three paid tiers: Sharp ($49/mo — full 46-factor engine, unlimited usage, bet grading), Edge ($99/mo — everything in Sharp plus AI assistant, prop projections, line movement alerts), and Max ($249/mo — everything in Edge plus custom model builder, hedge tools, priority processing). Every tier includes unlimited daily usage. No credit limits, no caps."
   },
   {
     category: "Account & Billing",

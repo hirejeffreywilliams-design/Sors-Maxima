@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
-import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, creditUsageTracker } from "./helpers";
+import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier } from "./helpers";
 import { stripeService } from "../stripeService";
 import { WebhookHandlers } from "../webhookHandlers";
 import * as featuresService from "../featuresService";
@@ -651,7 +651,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
-  // === AI Credits ===
+  // === Subscription Tier Info ===
   app.get("/api/credits", (_req, res) => {
     const username = _req.session?.isAuthenticated ? _req.session.username : null;
     let tier = "free";
@@ -659,23 +659,16 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       const subscription = stripeService.getUserSubscription(username);
       tier = subscription.subscriptionTier || "free";
     }
-    const now = new Date();
-    const tomorrow = new Date(now);
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
-    tomorrow.setUTCHours(0, 0, 0, 0);
-
-    const creditLimits: Record<string, number> = { free: 5, pro: 50, elite: 300, whale: 9999 };
-    const total = creditLimits[tier] || 5;
-
-    const dayKey = now.toISOString().slice(0, 10);
-    const usageKey = `credits:${username || 'anon'}:${dayKey}`;
-    const used = creditUsageTracker.get(usageKey) || 0;
-
+    const tierFeatures: Record<string, string> = {
+      free: "Limited preview access",
+      pro: "Full engine access — unlimited daily usage",
+      elite: "All pro tools — unlimited daily usage",
+      whale: "Maximum depth — zero limits, priority processing",
+    };
     res.json({
-      used,
-      total,
       tier,
-      resetsAt: tomorrow.toISOString(),
+      access: tierFeatures[tier] || tierFeatures.free,
+      unlimited: true,
     });
   });
 

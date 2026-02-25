@@ -110,7 +110,51 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
   next();
 }
 
-export const creditUsageTracker = new Map<string, number>();
+const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
+
+export function rateLimitByTier(endpoint: string, limits: Record<string, number>, windowMs: number = 60000) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const username = req.session?.username || "anon";
+    const tier = req.session?.isAdmin ? "whale" : ((() => {
+      try {
+        const sub = stripeService.getUserSubscription(username);
+        return sub.subscriptionTier || "free";
+      } catch { return "free"; }
+    })());
+
+    const maxRequests = limits[tier] ?? limits["free"] ?? 10;
+    const key = `rl:${endpoint}:${username}`;
+    const now = Date.now();
+    const entry = rateLimitStore.get(key);
+
+    if (!entry || now - entry.windowStart > windowMs) {
+      rateLimitStore.set(key, { count: 1, windowStart: now });
+      return next();
+    }
+
+    if (entry.count >= maxRequests) {
+      const retryAfter = Math.ceil((entry.windowStart + windowMs - now) / 1000);
+      res.set("Retry-After", String(retryAfter));
+      return res.status(429).json({
+        error: "Rate limit exceeded",
+        limit: maxRequests,
+        tier,
+        retryAfterSeconds: retryAfter,
+        upgradePath: tier === "whale" ? null : "/pricing",
+      });
+    }
+
+    entry.count++;
+    next();
+  };
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitStore) {
+    if (now - entry.windowStart > 300000) rateLimitStore.delete(key);
+  }
+}, 60000);
 
 export const abTestCreateSchema = z.object({
   name: z.string().min(1).max(200),

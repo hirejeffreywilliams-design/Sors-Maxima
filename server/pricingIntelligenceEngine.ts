@@ -453,7 +453,7 @@ export function getPricingRecommendations() {
       priority: "high",
       category: "Conversion",
       title: "Gate High-Value Features Behind Paywall",
-      description: `${Math.round(freeToTotal * 100)}% of your users are on free tier. Tighten the free tier: limit to 2 AI credits/day (from 5), remove edge alerts, and show 'blurred' premium picks to create FOMO.`,
+      description: `${Math.round(freeToTotal * 100)}% of your users are on free tier. Tighten the free tier: remove edge alerts, limit preview data, and show 'blurred' premium picks to create FOMO.`,
       expectedImpact: "+20-40% free-to-paid conversion",
       implementation: "Update free tier limits in feature flags, add blur overlays on premium content",
       timeframe: "1-2 weeks",
@@ -539,7 +539,7 @@ export function getGrowthStageStrategy() {
       pricingActions: [
         "A/B test 10-15% price increases on new subscribers",
         "Introduce annual billing prominently",
-        "Consider usage-based add-ons (API access, extra AI credits)",
+        "Consider usage-based add-ons (API access, premium data feeds)",
         "Raise Max tier price — whales are price-insensitive",
         "Implement grandfathering for loyal early users",
       ],
@@ -644,7 +644,7 @@ export function getGrowthStageStrategy() {
     },
     {
       name: "Free Tier Restriction Test",
-      description: "Reduce free tier from 5 to 2 AI credits. Measure free-to-paid conversion rate change.",
+      description: "Restrict free tier preview data to 3 games max. Measure free-to-paid conversion rate change.",
       expectedImpact: "+20-40% conversion, -10-15% free signups",
       difficulty: "Easy",
       timeToImplement: "1 day",

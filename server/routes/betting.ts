@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
-import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, creditUsageTracker, formatUptime } from "./helpers";
+import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier, formatUptime } from "./helpers";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
@@ -124,7 +124,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/generate-tickets", requireTier("pro", "elite", "whale"), async (req, res) => {
+  app.post("/api/generate-tickets", requireTier("pro", "elite", "whale"), rateLimitByTier("generate-tickets", { pro: 25, elite: 100, whale: 500 }, 3600000), async (req, res) => {
     try {
       const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
@@ -191,7 +191,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/recalculate-predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
+  app.post("/api/recalculate-predictions", requireTier("pro", "elite", "whale"), rateLimitByTier("recalculate", { pro: 25, elite: 100, whale: 500 }, 3600000), async (req, res) => {
     try {
       const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
@@ -437,7 +437,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/generate-parlays", requireTier("pro", "elite", "whale"), idempotencyMiddleware, async (req, res) => {
+  app.post("/api/generate-parlays", requireTier("pro", "elite", "whale"), rateLimitByTier("generate-parlays", { pro: 25, elite: 100, whale: 500 }, 3600000), idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = generateParlaysRequestSchema.safeParse(req.body);
 
@@ -564,7 +564,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/evaluate", requireTier("pro", "elite", "whale"), idempotencyMiddleware, async (req, res) => {
+  app.post("/api/evaluate", requireTier("pro", "elite", "whale"), rateLimitByTier("evaluate", { pro: 50, elite: 200, whale: 1000 }, 3600000), idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = evaluateRequestSchema.safeParse(req.body);
 
@@ -601,7 +601,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/grade-parlay", requireTier("pro", "elite", "whale"), async (req, res) => {
+  app.post("/api/grade-parlay", requireTier("pro", "elite", "whale"), rateLimitByTier("grade-parlay", { pro: 50, elite: 200, whale: 1000 }, 3600000), async (req, res) => {
     try {
       const { legs } = req.body;
       if (!legs || !Array.isArray(legs) || legs.length < 2) {

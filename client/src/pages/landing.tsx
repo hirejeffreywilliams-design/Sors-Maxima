@@ -99,7 +99,7 @@ const pricingTiers = [
     name: "Max",
     price: 249,
     description: "Zero Limits. Maximum Depth.",
-    features: ["Unlimited AI credits", "Custom model builder", "Priority processing", "Early access"],
+    features: ["Zero limits — priority processing", "Custom model builder", "Hedge & arbitrage tools", "Early access"],
     cta: "Join Max",
     variant: "secondary" as const,
   },

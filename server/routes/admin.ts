@@ -2172,7 +2172,7 @@ Follow these rules:
       category: "billing",
       keywords: ["subscription", "tiers", "plans", "pricing", "sharp", "edge", "max", "upgrade", "downgrade", "plan"],
       question: "What subscription tiers are available?",
-      answer: "Sors Maxima offers three exclusive subscription tiers: Sharp ($49/month - full 46-factor engine, 25 daily tickets, +EV finder, and bet grading), Edge ($99/month - everything in Sharp plus unlimited tickets, AI assistant, prop projections, line movement alerts, and SGP optimizer), and Max ($249/month - everything in Edge plus unlimited AI credits, custom model builder, hedge & arbitrage tools, priority processing, and direct support). Visit the Pricing page for full details.",
+      answer: "Sors Maxima offers three exclusive subscription tiers: Sharp ($49/month - full 46-factor engine, unlimited daily usage, +EV finder, and bet grading), Edge ($99/month - everything in Sharp plus AI assistant, prop projections, line movement alerts, and SGP optimizer), and Max ($249/month - everything in Edge plus custom model builder, hedge & arbitrage tools, priority processing, and direct support). Every tier includes unlimited usage of all features in your plan. Visit the Pricing page for full details.",
       actionable: false,
       autoResolveEligible: true
     },
@@ -2303,11 +2303,11 @@ Follow these rules:
       autoResolveEligible: true
     },
     {
-      id: "kb_ai_credits",
+      id: "kb_usage_limits",
       category: "billing",
-      keywords: ["ai credits", "credits", "credit limit", "out of credits", "buy credits", "credit balance", "ai usage", "credit system"],
-      question: "How does the AI credits system work?",
-      answer: "AI credits are used for advanced AI-powered features like the Smart Ticket Generator, Sors Prediction Engine analysis, and AI betting assistant chat. Sharp members get 50 credits/day, Edge members get 300 credits/day, and Max members get unlimited credits. Credits reset daily at midnight UTC. You can track your credit usage on the Pricing page or in Settings.",
+      keywords: ["limits", "usage", "rate limit", "too many requests", "slow down", "throttle", "daily limit"],
+      question: "Are there any usage limits?",
+      answer: "Every subscription tier includes unlimited daily usage of all features in your plan — no credit limits, no daily caps. Higher tiers unlock more advanced tools. In rare cases, extremely high-volume automated usage may be rate-limited to ensure platform performance for all members. If you ever hit a rate limit, just wait a moment and try again.",
       actionable: false,
       autoResolveEligible: true
     },
