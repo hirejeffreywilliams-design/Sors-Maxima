@@ -15,6 +15,7 @@ import { getAllSegments, getSegment, createSegment, updateSegment, getAllPersona
 import { getAllOffers, getOffer, createOffer, updateOffer, deleteOffer, getPromoStats } from "../promoOffersEngine";
 import { getAcquisitionDashboard } from "../acquisitionAnalyticsEngine";
 import { stripeService } from "../stripeService";
+import { getPricingIntelligence, getOwnerWealthProjection, getCompetitorBenchmark, getPricingRecommendations, getGrowthStageStrategy } from "../pricingIntelligenceEngine";
 import { featureFlags } from "../featureFlags";
 import { auditTrail } from "../auditTrail";
 import { idempotencyStore } from "../idempotency";
@@ -3683,5 +3684,52 @@ Follow these rules:
   });
 
   // ==================== PROP PARLAY BUILDER ====================
+
+  // ==================== PRICING INTELLIGENCE ====================
+
+  app.get("/api/admin/pricing-intelligence", requireAdmin, async (_req, res) => {
+    try {
+      const result = getPricingIntelligence();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to get pricing intelligence" });
+    }
+  });
+
+  app.get("/api/admin/owner-wealth", requireAdmin, async (_req, res) => {
+    try {
+      const result = getOwnerWealthProjection();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to get owner wealth projection" });
+    }
+  });
+
+  app.get("/api/admin/competitor-benchmark", requireAdmin, async (_req, res) => {
+    try {
+      const result = getCompetitorBenchmark();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to get competitor benchmark" });
+    }
+  });
+
+  app.get("/api/admin/pricing-recommendations", requireAdmin, async (_req, res) => {
+    try {
+      const result = getPricingRecommendations();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to get pricing recommendations" });
+    }
+  });
+
+  app.get("/api/admin/growth-strategy", requireAdmin, async (_req, res) => {
+    try {
+      const result = getGrowthStageStrategy();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || "Failed to get growth strategy" });
+    }
+  });
 
 }

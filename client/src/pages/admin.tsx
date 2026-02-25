@@ -183,6 +183,7 @@ const navCategories: NavCategory[] = [
       { href: "/admin/data-provenance", label: "Data Lineage", description: "Sources, pipelines & contracts", icon: Database, testId: "link-admin-data-provenance" },
       { href: "/admin/risk-register", label: "Risk & SOPs", description: "Risks & standard procedures", icon: ShieldAlert, testId: "link-admin-risk-register" },
       { href: "/admin/financial-projections", label: "Financials", description: "Revenue forecasts & economics", icon: DollarSign, testId: "link-admin-financial-projections" },
+      { href: "/admin/pricing-intelligence", label: "Pricing & Wealth", description: "Revenue optimization & owner projections", icon: DollarSign, testId: "link-admin-pricing-intelligence" },
     ],
   },
   {
