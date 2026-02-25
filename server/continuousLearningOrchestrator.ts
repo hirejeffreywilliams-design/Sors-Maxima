@@ -94,6 +94,7 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
       .orderBy(desc(predictions.createdAt))
       .limit(200);
 
+    status.lastSettlementRun = new Date().toISOString();
     if (unsettled.length === 0) return { settled: 0, checked: 0 };
 
     const sportGames = new Map<string, Map<string, any>>();
@@ -693,6 +694,24 @@ export function startContinuousLearningOrchestrator(): void {
 
   status.isRunning = true;
   status.startedAt = new Date().toISOString();
+
+  (async () => {
+    try {
+      const settledCount = await db.select({ count: sql<number>`count(*)` })
+        .from(predictions)
+        .where(sql`actual_result IS NOT NULL`);
+      const weightCount = await db.select({ count: sql<number>`count(*)` })
+        .from(modelWeights);
+      const logCount = await db.select({ count: sql<number>`count(*)` })
+        .from(learningLogs);
+      status.totalSettled = Number(settledCount[0]?.count || 0);
+      status.totalRetrained = Number(logCount[0]?.count || 0);
+      status.totalWeightSyncs = Number(weightCount[0]?.count || 0);
+      logInfo(`[Orchestrator] Loaded cumulative stats: ${status.totalSettled} settled, ${status.totalRetrained} learning logs, ${status.totalWeightSyncs} model weights`);
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Failed to load cumulative stats: ${e.message}`);
+    }
+  })();
 
   settlementInterval = setInterval(async () => {
     try {
