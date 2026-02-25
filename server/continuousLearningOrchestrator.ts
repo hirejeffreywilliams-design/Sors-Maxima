@@ -3,6 +3,7 @@ import { predictions, modelWeights, learningLogs } from "./dbSchema";
 import { eq, isNull, desc, sql, and, lt, gt } from "drizzle-orm";
 import { logError, logInfo, logWarn } from "./errorLogger";
 import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
+import { recordGameOutcome } from "./platformIntelligenceEngine";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
@@ -255,6 +256,29 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             legResult,
             selection: matchesHome ? "home" : "away",
           });
+
+          try {
+            const predictedWinner = matchesHome ? game.homeTeam : game.awayTeam;
+            const actualWinner = game.homeScore > game.awayScore ? game.homeTeam : game.awayTeam;
+            const predictionCorrect = legResult === "won";
+
+            recordGameOutcome({
+              gameId: game.id,
+              sport: sport || "NBA",
+              homeTeam: game.homeTeam,
+              awayTeam: game.awayTeam,
+              homeScore: game.homeScore,
+              awayScore: game.awayScore,
+              predictedWinner,
+              actualWinner,
+              predictionCorrect,
+              market,
+              confidence: pred.predictedWinProb ? Math.round(pred.predictedWinProb * 100) : 50,
+              venue: game.venue,
+            });
+          } catch (e: any) {
+            logWarn(`[Orchestrator] Failed to record game outcome for ${game.id}: ${e.message}`);
+          }
         }
       } catch (e: any) {
         logWarn(`[Orchestrator] Failed to settle prediction ${pred.id}: ${e.message}`);

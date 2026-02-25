@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { idempotencyStore } from "../idempotency";
+import { stripeService } from "../stripeService";
 import { z } from "zod";
 
 declare module "express-session" {
@@ -31,6 +32,40 @@ export function getClientIp(req: Request): string {
     return forwarded.split(',')[0].trim();
   }
   return req.socket.remoteAddress || 'unknown';
+}
+
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
+  if (!req.session?.isAuthenticated) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  next();
+}
+
+export function requireTier(...allowedTiers: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.session?.isAuthenticated) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const username = req.session.username;
+    if (!username) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const subscription = stripeService.getUserSubscription(username);
+    const userTier = subscription?.subscriptionTier || "free";
+    if (allowedTiers.includes(userTier)) {
+      return next();
+    }
+    if (req.session.isAdmin) {
+      return next();
+    }
+    return res.status(403).json({
+      error: "Upgrade required",
+      message: `This feature requires a ${allowedTiers[0]} subscription or higher`,
+      requiredTier: allowedTiers[0],
+      currentTier: userTier,
+      upgradePath: "/pricing",
+    });
+  };
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {

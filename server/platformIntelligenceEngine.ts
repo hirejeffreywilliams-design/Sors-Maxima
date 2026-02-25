@@ -817,6 +817,84 @@ export function getFullIntelligenceReport(): {
   };
 }
 
+export function recordGameOutcome(params: {
+  gameId: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  predictedWinner?: string;
+  actualWinner?: string;
+  predictionCorrect?: boolean;
+  market?: string;
+  confidence?: number;
+  venue?: string;
+}): void {
+  try {
+    const existingIds = new Set(data.gameOutcomes.map(o => o.gameId));
+    const sportTyped = params.sport as Sport;
+    const winner: "home" | "away" = params.homeScore > params.awayScore ? "home" : "away";
+
+    if (!existingIds.has(params.gameId)) {
+      const outcome: GameOutcome = {
+        gameId: params.gameId,
+        sport: sportTyped,
+        date: new Date().toISOString(),
+        homeTeam: params.homeTeam,
+        awayTeam: params.awayTeam,
+        homeScore: params.homeScore,
+        awayScore: params.awayScore,
+        winner,
+        venue: params.venue,
+        recordedAt: new Date().toISOString(),
+      };
+
+      data.gameOutcomes.push(outcome);
+      updateTeamRecord(outcome);
+
+      if (data.gameOutcomes.length > MAX_GAME_HISTORY) {
+        data.gameOutcomes = data.gameOutcomes.slice(-MAX_GAME_HISTORY);
+      }
+    }
+
+    if (params.predictedWinner && params.actualWinner !== undefined) {
+      const predId = `settled-${params.gameId}-${Date.now()}`;
+      const actualWinnerStr = params.actualWinner || (winner === "home" ? params.homeTeam : params.awayTeam);
+      const isCorrect = params.predictionCorrect !== undefined
+        ? params.predictionCorrect
+        : params.predictedWinner.toLowerCase() === actualWinnerStr.toLowerCase();
+
+      data.predictionRecords.push({
+        id: predId,
+        sport: sportTyped,
+        date: new Date().toISOString(),
+        predictedWinner: params.predictedWinner,
+        actualWinner: actualWinnerStr,
+        confidence: params.confidence || 50,
+        correct: isCorrect,
+        market: params.market || "moneyline",
+        recordedAt: new Date().toISOString(),
+      });
+
+      if (data.predictionRecords.length > MAX_PREDICTION_HISTORY) {
+        data.predictionRecords = data.predictionRecords.slice(-MAX_PREDICTION_HISTORY);
+      }
+    }
+
+    const correctPredictions = data.predictionRecords.filter(p => p.correct).length;
+    data.platformStats.totalGamesTracked = data.gameOutcomes.length;
+    data.platformStats.totalPredictionsMade = data.predictionRecords.length;
+    data.platformStats.overallPredictionAccuracy = data.predictionRecords.length > 0
+      ? Math.round((correctPredictions / data.predictionRecords.length) * 1000) / 10
+      : 0;
+
+    saveData();
+  } catch (err) {
+    console.error("[PlatformIntelligence] recordGameOutcome error:", err);
+  }
+}
+
 export function getEngineStatus(): {
   running: boolean;
   cycles: number;

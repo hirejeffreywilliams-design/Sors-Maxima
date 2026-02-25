@@ -1719,7 +1719,7 @@ Follow these rules:
   app.get("/api/admin/financial-projections", requireAdmin, (_req, res) => {
     try {
       const allSubs = stripeService.getAllSubscriptions();
-      const tierPrices: Record<string, number> = { free: 0, pro: 29, elite: 79, whale: 199 };
+      const tierPrices: Record<string, number> = { free: 0, pro: 49, elite: 99, whale: 249 };
       let currentMRR = 0;
       let totalPaid = 0;
       const tierCounts: Record<string, number> = { free: 0, pro: 0, elite: 0, whale: 0 };
@@ -1820,7 +1820,7 @@ Follow these rules:
     const currentMonthlyPL = monthlyBets * avgStake * (currentHitRate * avgOdds - 1);
     const improvedMonthlyPL = monthlyBets * avgStake * (improvedHitRate * avgOdds - 1);
     const monthlyUplift = improvedMonthlyPL - currentMonthlyPL;
-    const subscriptionCost = subscriptionTier === "elite" ? 49.99 : subscriptionTier === "pro" ? 29.99 : 9.99;
+    const subscriptionCost = subscriptionTier === "whale" ? 249 : subscriptionTier === "elite" ? 99 : subscriptionTier === "pro" ? 49 : 0;
     const netROI = monthlyUplift - subscriptionCost;
     const roiMultiple = subscriptionCost > 0 ? monthlyUplift / subscriptionCost : 0;
 

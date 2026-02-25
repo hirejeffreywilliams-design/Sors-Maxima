@@ -1,6 +1,6 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
-import { requireAdmin, getClientIp, idempotencyMiddleware, creditUsageTracker, formatUptime } from "./helpers";
+import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, creditUsageTracker, formatUptime } from "./helpers";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
@@ -42,7 +42,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     res.json(sportsList);
   });
 
-  app.get("/api/odds", async (req, res) => {
+  app.get("/api/odds", requireAuth, async (req, res) => {
     try {
       const sport = req.query.sport as string;
       
@@ -105,7 +105,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/scheme-analysis", async (req, res) => {
+  app.get("/api/scheme-analysis", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";
       const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
@@ -124,7 +124,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/generate-tickets", async (req, res) => {
+  app.post("/api/generate-tickets", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
@@ -191,7 +191,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/recalculate-predictions", async (req, res) => {
+  app.post("/api/recalculate-predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
@@ -344,7 +344,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     });
   });
 
-  app.get("/api/quantum-engine/stats", async (_req, res) => {
+  app.get("/api/quantum-engine/stats", requireTier("pro", "elite", "whale"), async (_req, res) => {
     try {
       const stats = getQuantumEngineStats();
       const categories = getQuantumFactorCategories();
@@ -406,7 +406,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/sport-factors/:sport/fusion-analysis", async (req, res) => {
+  app.post("/api/sport-factors/:sport/fusion-analysis", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { sport } = req.params;
       const { description, odds } = req.body;
@@ -437,7 +437,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/generate-parlays", idempotencyMiddleware, async (req, res) => {
+  app.post("/api/generate-parlays", requireTier("pro", "elite", "whale"), idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = generateParlaysRequestSchema.safeParse(req.body);
 
@@ -564,7 +564,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/evaluate", idempotencyMiddleware, async (req, res) => {
+  app.post("/api/evaluate", requireTier("pro", "elite", "whale"), idempotencyMiddleware, async (req, res) => {
     try {
       const parseResult = evaluateRequestSchema.safeParse(req.body);
 
@@ -601,7 +601,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/grade-parlay", async (req, res) => {
+  app.post("/api/grade-parlay", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const { legs } = req.body;
       if (!legs || !Array.isArray(legs) || legs.length < 2) {
@@ -801,7 +801,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   // === LIVE SPORTS DATA API ===
   
-  app.get("/api/live/odds/:sport", async (req, res) => {
+  app.get("/api/live/odds/:sport", requireAuth, async (req, res) => {
     try {
       const { sport } = req.params;
       const odds = await sportsDataService.fetchOdds(sport);
@@ -817,7 +817,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/odds", async (_req, res) => {
+  app.get("/api/live/odds", requireAuth, async (_req, res) => {
     try {
       const allOdds = await sportsDataService.fetchAllSportsOdds();
       res.json({
@@ -831,7 +831,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/sports", async (_req, res) => {
+  app.get("/api/live/sports", requireAuth, async (_req, res) => {
     try {
       const sports = await sportsDataService.getAvailableSports();
       res.json({
@@ -844,7 +844,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/status", (_req, res) => {
+  app.get("/api/live/status", requireAuth, (_req, res) => {
     res.json(sportsDataService.getApiStatus());
   });
 
@@ -965,7 +965,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   const userDataEngine = await import("../userDataEngine");
 
-  app.get("/api/cashout-advisor", async (_req, res) => {
+  app.get("/api/cashout-advisor", requireTier("whale"), async (_req, res) => {
     try {
       const sessionId = _req.session?.userId;
       const pendingBets = userDataEngine.getBets(sessionId).filter((b: any) => b.result === "pending");
@@ -1153,7 +1153,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
   // ==================== LIVE ANALYTICS ENGINE ====================
   const liveAnalyticsEngine = await import("../liveAnalyticsEngine");
 
-  app.get("/api/live/momentum", async (_req, res) => {
+  app.get("/api/live/momentum", requireTier("whale"), async (_req, res) => {
     try {
       const games = await liveAnalyticsEngine.getMomentumGames();
       res.json(games);
@@ -1162,11 +1162,11 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/clv", (_req, res) => {
+  app.get("/api/live/clv", requireTier("whale"), (_req, res) => {
     res.json(liveAnalyticsEngine.getCLVData());
   });
 
-  app.get("/api/live/public-sharp", async (_req, res) => {
+  app.get("/api/live/public-sharp", requireTier("whale"), async (_req, res) => {
     try {
       const splits = await liveAnalyticsEngine.getPublicSharpSplits();
       res.json(splits);
@@ -1175,7 +1175,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/live/hedge-bets", async (req, res) => {
+  app.get("/api/live/hedge-bets", requireTier("whale"), async (req, res) => {
     try {
       const sessionId = req.session?.userId;
       const pendingBets = userDataEngine.getBets(sessionId).filter((b: any) => b.result === "pending");
@@ -1326,7 +1326,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
   // ==================== PRO TOOLS ENGINE ====================
   const proToolsEngine = await import("../proToolsEngine");
 
-  app.get("/api/tools/player-prediction/:sport/:teamId", async (req, res) => {
+  app.get("/api/tools/player-prediction/:sport/:teamId", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { sport, teamId } = req.params;
       const all = req.query.all === "true";
@@ -1346,7 +1346,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/tools/team-analysis/:sport/:teamName", async (req, res) => {
+  app.get("/api/tools/team-analysis/:sport/:teamName", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { sport, teamName } = req.params;
       const analysis = await proToolsEngine.getTeamAnalysis(sport as any, decodeURIComponent(teamName));
@@ -1357,7 +1357,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/tools/coaching-analysis/:sport/:teamId", async (req, res) => {
+  app.get("/api/tools/coaching-analysis/:sport/:teamId", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { sport, teamId } = req.params;
       const analysis = await proToolsEngine.getCoachingAnalysisByTeamId(sport as any, teamId);
@@ -1367,7 +1367,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/tools/cashout-analysis", async (req, res) => {
+  app.post("/api/tools/cashout-analysis", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { betOdds, currentOdds, stake, legsRemaining, gameId, sport } = req.body;
       if (!betOdds || !stake) return res.status(400).json({ error: "Missing required fields" });
@@ -1504,7 +1504,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/tools/player-props/:sport", async (req, res) => {
+  app.get("/api/tools/player-props/:sport", requireTier("elite", "whale"), async (req, res) => {
     try {
       const sport = req.params.sport as any;
       const teams = await getTeams(sport);
@@ -1626,7 +1626,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/tools/matchups/:sport", async (req, res) => {
+  app.get("/api/tools/matchups/:sport", requireTier("elite", "whale"), async (req, res) => {
     try {
       const sport = req.params.sport as any;
       const { getScoreboard } = await import("../espn-scoreboard-provider");
@@ -2007,7 +2007,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
   // ==================== PREDICTION GENERATORS ====================
 
-  app.get("/api/predictions/straight-bets", async (req, res) => {
+  app.get("/api/predictions/straight-bets", requireTier("elite", "whale"), async (req, res) => {
     try {
       const sport = req.query.sport as string | undefined;
       const betType = req.query.betType as string | undefined;
@@ -2088,7 +2088,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     }
   });
 
-  app.get("/api/predictions/sgp", async (req, res) => {
+  app.get("/api/predictions/sgp", requireTier("elite", "whale"), async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";
       const validSport = sports.includes(sport as any) ? sport as any : "NBA";
@@ -2258,7 +2258,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     }
   });
 
-  app.get("/api/predictions/teasers", async (req, res) => {
+  app.get("/api/predictions/teasers", requireTier("elite", "whale"), async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";
       const validSport = sports.includes(sport as any) ? sport as any : "NBA";
@@ -2408,7 +2408,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
     }
   });
 
-  app.post("/api/predictions/round-robin", async (req, res) => {
+  app.post("/api/predictions/round-robin", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { picks, parlaySize, stake } = req.body;
 

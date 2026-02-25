@@ -25,7 +25,7 @@ import {
   getRiskMetrics,
 } from "../monteCarloEngine";
 import type { MatchupSimulationInput } from "../monteCarloEngine";
-import { getClientIp } from "./helpers";
+import { getClientIp, requireAuth, requireTier } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
   startIntelligenceHub();
@@ -86,7 +86,7 @@ export function registerIntelligenceRoutes(app: Express): void {
 
   startPrecomputedEngine();
 
-  app.get("/api/precomputed-predictions/:sport", async (req: Request, res: Response) => {
+  app.get("/api/precomputed-predictions/:sport", requireAuth, async (req: Request, res: Response) => {
     try {
       const sport = req.params.sport?.toUpperCase();
       if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {

@@ -1,21 +1,21 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
-import { requireAdmin, getClientIp, idempotencyMiddleware, creditUsageTracker } from "./helpers";
+import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, creditUsageTracker } from "./helpers";
 import { stripeService } from "../stripeService";
 import { WebhookHandlers } from "../webhookHandlers";
 import * as featuresService from "../featuresService";
 import { generateVegasPredictions, getVegasInsights } from "../vegas-engine";
 import { sports } from "@shared/schema";
+import { db } from "../db";
+import { sql } from "drizzle-orm";
 
 const ticketOutcomes: Map<string, { ticketId: string; predictedProb: number; consensusProb: number; evPercent: number; actualOutcome: "win" | "loss" | "push" | "pending"; profitLoss: number; isFollowedByUser: boolean; settledAt?: string }> = new Map();
 
 const utmEvents: Array<{ source: string; medium: string; campaign: string; content?: string; term?: string; timestamp: string; ip: string }> = [];
 
-const watchlistStore = new Map<string, { id: string; type: string; name: string; sport: string; details: string; addedAt: string; alerts: boolean }[]>();
-
 export async function registerAccountRoutes(app: Express): Promise<void> {
 
-  app.get("/api/vegas/predictions", async (req, res) => {
+  app.get("/api/vegas/predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const sport = req.query.sport as string | undefined;
       const validSport = sport && sports.includes(sport as any) ? sport as any : undefined;
@@ -692,63 +692,70 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     });
   });
 
-  // ==================== WATCHLIST ENGINE ====================
-  app.get("/api/user/watchlist", (req, res) => {
-    const userId = req.session?.userId;
+  // ==================== WATCHLIST ENGINE (DB-backed) ====================
+  app.get("/api/user/watchlist", requireAuth, async (req, res) => {
+    const userId = req.session?.username;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    res.json(watchlistStore.get(userId) || []);
+    try {
+      const rows = await db.execute(sql`SELECT id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts FROM user_watchlist WHERE user_id = ${userId} ORDER BY added_at DESC`);
+      res.json(rows.rows || []);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch watchlist" });
+    }
   });
 
-  app.post("/api/user/watchlist", (req, res) => {
-    const userId = req.session?.userId;
+  app.post("/api/user/watchlist", requireAuth, async (req, res) => {
+    const userId = req.session?.username;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const { type, name, sport } = req.body;
     if (!type || !name || !sport) return res.status(400).json({ error: "type, name, and sport are required" });
-
-    const items = watchlistStore.get(userId) || [];
-    const existing = items.find(i => i.type === type && i.name === name && i.sport === sport);
-    if (existing) return res.status(409).json({ error: "Already in watchlist" });
-
-    const newItem = {
-      id: `wl-${crypto.randomUUID()}`,
-      type, name, sport,
-      details: "",
-      addedAt: new Date().toISOString(),
-      alerts: true,
-    };
-    items.push(newItem);
-    watchlistStore.set(userId, items);
-    res.json(newItem);
-  });
-
-  app.delete("/api/user/watchlist/:id", (req, res) => {
-    const userId = req.session?.userId;
-    if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    const items = watchlistStore.get(userId) || [];
-    const filtered = items.filter(i => i.id !== req.params.id);
-    watchlistStore.set(userId, filtered);
-    res.json({ success: true });
-  });
-
-  app.patch("/api/user/watchlist/:id/alerts", (req, res) => {
-    const userId = req.session?.userId;
-    if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    const items = watchlistStore.get(userId) || [];
-    const item = items.find(i => i.id === req.params.id);
-    if (!item) return res.status(404).json({ error: "Not found" });
-    item.alerts = !item.alerts;
-    watchlistStore.set(userId, items);
-    res.json(item);
-  });
-
-  app.get("/api/user/watchlist/live", async (req, res) => {
-    const userId = req.session?.userId;
-    if (!userId) return res.status(401).json({ error: "Not authenticated" });
-    const items = watchlistStore.get(userId) || [];
-    const teamNames = items.filter(i => i.type === "team").map(i => i.name.toLowerCase());
-    if (teamNames.length === 0) return res.json([]);
-
+    const validTypes = ["team", "game", "player"];
+    if (!validTypes.includes(type)) return res.status(400).json({ error: `type must be one of: ${validTypes.join(", ")}` });
     try {
+      const existing = await db.execute(sql`SELECT id FROM user_watchlist WHERE user_id = ${userId} AND item_type = ${type} AND item_name = ${name} AND sport = ${sport}`);
+      if (existing.rows.length > 0) return res.status(409).json({ error: "Already in watchlist" });
+      const result = await db.execute(sql`INSERT INTO user_watchlist (user_id, item_type, item_name, sport, details, alerts) VALUES (${userId}, ${type}, ${name}, ${sport}, ${""},  ${true}) RETURNING id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts`);
+      res.json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to add to watchlist" });
+    }
+  });
+
+  app.delete("/api/user/watchlist/:id", requireAuth, async (req, res) => {
+    const userId = req.session?.username;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const itemId = parseInt(req.params.id);
+    if (!Number.isFinite(itemId)) return res.status(400).json({ error: "Invalid watchlist item ID" });
+    try {
+      await db.execute(sql`DELETE FROM user_watchlist WHERE id = ${itemId} AND user_id = ${userId}`);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to delete from watchlist" });
+    }
+  });
+
+  app.patch("/api/user/watchlist/:id/alerts", requireAuth, async (req, res) => {
+    const userId = req.session?.username;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const itemId = parseInt(req.params.id);
+    if (!Number.isFinite(itemId)) return res.status(400).json({ error: "Invalid watchlist item ID" });
+    try {
+      const result = await db.execute(sql`UPDATE user_watchlist SET alerts = NOT alerts WHERE id = ${itemId} AND user_id = ${userId} RETURNING id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts`);
+      if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+      res.json(result.rows[0]);
+    } catch (err) {
+      res.status(500).json({ error: "Failed to update alert" });
+    }
+  });
+
+  app.get("/api/user/watchlist/live", requireAuth, async (req, res) => {
+    const userId = req.session?.username;
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const rows = await db.execute(sql`SELECT item_name as name, item_type as type FROM user_watchlist WHERE user_id = ${userId} AND item_type = 'team'`);
+      const teamNames = (rows.rows || []).map((r: any) => r.name.toLowerCase());
+      if (teamNames.length === 0) return res.json([]);
+
       const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
       const allGames = await getAllSportsScoreboard();
       const matchingGames = allGames.filter(g =>
