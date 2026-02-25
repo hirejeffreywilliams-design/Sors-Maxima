@@ -797,6 +797,7 @@ export interface OptimalTicketLeg {
   timing: PrecomputedPick["timing"];
   timingAdvice: string;
   sport: string;
+  gameTime?: string;
 }
 
 export interface OptimalTicket {
@@ -859,6 +860,7 @@ function pickToLeg(pick: PrecomputedPick): OptimalTicketLeg {
     timing: pick.timing,
     timingAdvice: pick.timingAdvice,
     sport: pick.sport,
+    gameTime: pick.gameTime,
   };
 }
 

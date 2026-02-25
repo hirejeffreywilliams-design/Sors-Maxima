@@ -94,37 +94,66 @@ function formatOdds(american: number | undefined, decimal: number): string {
   return am > 0 ? `+${am}` : `${am}`;
 }
 
+function formatGameDate(gameTime?: string): string {
+  if (!gameTime) return "";
+  try {
+    const d = new Date(gameTime);
+    return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })
+      + " " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  } catch { return ""; }
+}
+
+function gradeEmoji(grade?: string): string {
+  if (!grade) return "";
+  if (grade.startsWith("A")) return "\u{1F7E2}";
+  if (grade.startsWith("B")) return "\u{1F535}";
+  if (grade.startsWith("C")) return "\u{1F7E1}";
+  return "\u{1F534}";
+}
+
 function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmericanOdds: number, stake: number): string {
-  const header = `Sors Maxima Parlay (${legs.length} legs)`;
-  const divider = "-".repeat(32);
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
   const payout = (totalOdds * stake).toFixed(2);
 
-  const legLines = legs.map((leg, i) => {
+  const lines: string[] = [
+    "\u26A1 SORS MAXIMA PARLAY",
+    `\u{1F3AF} ${legs.length} Legs | ${formattedOdds} Odds | $${stake} \u2192 $${payout}`,
+    "\u2500".repeat(30),
+  ];
+
+  legs.forEach((leg, i) => {
     const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
     const matchup = leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team;
-    const parts = [`${i + 1}. ${matchup}`, `   ${leg.market.replace("_", " ")} - ${leg.outcome} (${odds})`];
-    if (leg.grade) parts[1] += ` [Grade: ${leg.grade}]`;
-    if (leg.confidence) parts[1] += ` ${Math.round(leg.confidence)}% conf`;
-    if (leg.evPercent !== undefined && leg.evPercent > 0) parts[1] += ` +${leg.evPercent.toFixed(1)}% EV`;
+    const dateStr = formatGameDate(leg.gameTime);
+    const emoji = gradeEmoji(leg.grade);
+
+    lines.push("");
+    lines.push(`${emoji} Leg ${i + 1}: ${leg.outcome}`);
+    lines.push(`\u{1F3C0} ${matchup}${dateStr ? ` \u{1F4C5} ${dateStr}` : ""}`);
+
+    const meta: string[] = [`${odds}`];
+    if (leg.grade) meta.push(`Grade: ${leg.grade}`);
+    if (leg.confidence) meta.push(`${Math.round(leg.confidence)}% conf`);
+    if (leg.evPercent !== undefined && leg.evPercent > 0) meta.push(`+${leg.evPercent.toFixed(1)}% EV`);
+    lines.push(`   ${meta.join(" \u2022 ")}`);
+
     if (leg.monteCarloData) {
-      parts.push(`   MC: ${(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims | Proj: ${leg.monteCarloData.predictedAwayScore}-${leg.monteCarloData.predictedHomeScore}`);
+      lines.push(`   \u{1F4CA} Projected: ${Math.round(leg.monteCarloData.predictedAwayScore)}-${Math.round(leg.monteCarloData.predictedHomeScore)}`);
     }
+
     if (leg.reasoning) {
-      const shortReasoning = leg.reasoning.length > 100 ? leg.reasoning.substring(0, 100) + "..." : leg.reasoning;
-      parts.push(`   WHY: ${shortReasoning}`);
+      lines.push(`   \u{1F4A1} ${leg.reasoning}`);
     }
-    return parts.join("\n");
   });
 
-  return [
-    header,
-    divider,
-    ...legLines,
-    divider,
-    `Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`,
-    `Stake: $${stake.toFixed(2)} | Payout: $${payout}`,
-  ].join("\n");
+  lines.push("");
+  lines.push("\u2500".repeat(30));
+  lines.push(`\u{1F4B0} Stake: $${stake.toFixed(2)} | Payout: $${payout}`);
+  lines.push(`\u{1F4C8} Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`);
+  lines.push("");
+  lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
+
+  return lines.join("\n");
 }
 
 function getPrimarySport(legs: ParlaySlipLeg[]): string | undefined {

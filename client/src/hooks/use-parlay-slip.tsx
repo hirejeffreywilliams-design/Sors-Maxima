@@ -15,6 +15,7 @@ export interface ParlaySlipLeg extends ParlayLeg {
   timing?: "bet_now" | "wait" | "line_locked";
   timingAdvice?: string;
   insights?: string[];
+  gameTime?: string;
   monteCarloData?: {
     simulations: number;
     predictedHomeScore: number;

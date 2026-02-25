@@ -72,10 +72,24 @@ function formatOdds(american: number | undefined, decimal: number): string {
 }
 
 function formatSlipText(legs: BetLeg[]): string {
-  const header = `Sors Maxima Parlay (${legs.length} legs)`;
-  const divider = "-".repeat(32);
-  const legLines = legs.map((l, i) => `${i + 1}. ${l.event}\n   ${l.type}: ${l.pick} (${l.odds})`);
-  return [header, divider, ...legLines, divider, `Legs: ${legs.length} | Type: Parlay`].join("\n");
+  const lines: string[] = [
+    "\u26A1 SORS MAXIMA PARLAY",
+    `\u{1F3AF} ${legs.length} Legs`,
+    "\u2500".repeat(30),
+  ];
+
+  legs.forEach((l, i) => {
+    lines.push("");
+    lines.push(`\u{1F535} Leg ${i + 1}: ${l.pick}`);
+    lines.push(`\u{1F3C0} ${l.event}`);
+    lines.push(`   ${l.type} \u2022 ${l.odds}`);
+  });
+
+  lines.push("");
+  lines.push("\u2500".repeat(30));
+  lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
+
+  return lines.join("\n");
 }
 
 function getPrimarySport(legs: BetLeg[]): string | undefined {

@@ -182,6 +182,7 @@ interface OptimalTicketLeg {
   timing: string;
   timingAdvice: string;
   sport: string;
+  gameTime?: string;
 }
 
 interface OptimalTicket {
@@ -252,6 +253,7 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
         grade: leg.grade,
         edge: leg.edge,
         reasoning: leg.reasoning,
+        gameTime: leg.gameTime,
       });
     }
   };
@@ -482,6 +484,7 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
       sport: pick.sport,
       confidence: pick.confidence,
       evPercent: pick.ev,
+      gameTime: pick.gameTime,
     });
   };
 

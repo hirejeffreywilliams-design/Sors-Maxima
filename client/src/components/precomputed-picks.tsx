@@ -209,6 +209,7 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
       insights: pick.insights,
       monteCarloData: pick.monteCarloData,
       factors: pick.factors,
+      gameTime: pick.gameTime,
     };
     if (addLeg(slipLeg)) {
       tailMutation.mutate();
