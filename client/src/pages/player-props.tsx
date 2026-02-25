@@ -86,23 +86,21 @@ function sportColor(sport: string): string {
 function recBadge(rec: "over" | "under" | "push", confidence: number) {
   if (rec === "over") {
     return (
-      <Badge variant="outline" className="gap-1 bg-emerald-500/10 border-emerald-500/30 text-emerald-500">
-        <ArrowUp className="w-3 h-3" /> OVER
-        <span className="text-[10px] opacity-70">{confidence}%</span>
+      <Badge variant="outline" className="gap-0.5 text-[10px] px-1.5 py-0 bg-emerald-500/10 border-emerald-500/30 text-emerald-500 whitespace-nowrap">
+        <ArrowUp className="w-2.5 h-2.5" /> O {confidence}%
       </Badge>
     );
   }
   if (rec === "under") {
     return (
-      <Badge variant="outline" className="gap-1 bg-red-500/10 border-red-500/30 text-red-500">
-        <ArrowDown className="w-3 h-3" /> UNDER
-        <span className="text-[10px] opacity-70">{confidence}%</span>
+      <Badge variant="outline" className="gap-0.5 text-[10px] px-1.5 py-0 bg-red-500/10 border-red-500/30 text-red-500 whitespace-nowrap">
+        <ArrowDown className="w-2.5 h-2.5" /> U {confidence}%
       </Badge>
     );
   }
   return (
-    <Badge variant="outline" className="gap-1 bg-muted text-muted-foreground">
-      <Minus className="w-3 h-3" /> PUSH
+    <Badge variant="outline" className="gap-0.5 text-[10px] px-1.5 py-0 bg-muted text-muted-foreground whitespace-nowrap">
+      <Minus className="w-2.5 h-2.5" /> PUSH
     </Badge>
   );
 }
@@ -139,63 +137,62 @@ function PropRow({ prop, playerName, sport, addLeg, isInSlip }: {
   return (
     <div className="border rounded-lg overflow-hidden" data-testid={`prop-${playerName}-${prop.market}`}>
       <div
-        className="flex items-center gap-2 p-2.5 cursor-pointer hover:bg-muted/30 transition-colors"
+        className="p-2.5 cursor-pointer hover:bg-muted/30 transition-colors"
         onClick={() => setShowDetail(!showDetail)}
       >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold">{prop.marketLabel}</span>
-            <span className="font-mono text-xs text-muted-foreground">Line: {prop.line}</span>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="text-xs font-semibold whitespace-nowrap">{prop.marketLabel}</span>
+            <span className="font-mono text-xs text-muted-foreground whitespace-nowrap">{prop.line}</span>
             {prop.seasonAvg !== null && (
-              <span className="text-[10px] text-muted-foreground">Avg: {prop.seasonAvg}</span>
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap hidden xs:inline">Avg: {prop.seasonAvg}</span>
             )}
             {prop.bookmaker && (
               <span className="text-[9px] text-blue-500 font-medium hidden sm:inline">{prop.bookmaker}</span>
             )}
             {prop.allBookmakers && prop.allBookmakers.length > 1 && (
-              <span className="text-[9px] text-muted-foreground hidden sm:inline">+{prop.allBookmakers.length - 1} books</span>
+              <span className="text-[9px] text-muted-foreground hidden sm:inline">+{prop.allBookmakers.length - 1}</span>
             )}
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          {recBadge(prop.recommendation, prop.confidence)}
-
-          <button
-            onClick={(e) => { e.stopPropagation(); handleAdd("over"); }}
-            disabled={isInSlip}
-            className={`px-2 py-1 rounded text-xs font-mono border transition-colors ${
-              prop.recommendation === "over"
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
-                : "border-muted hover:bg-muted/50 text-muted-foreground"
-            }`}
-            data-testid={`button-over-${playerName}-${prop.market}`}
-          >
-            O {formatOdds(prop.overOdds)}
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); handleAdd("under"); }}
-            disabled={isInSlip}
-            className={`px-2 py-1 rounded text-xs font-mono border transition-colors ${
-              prop.recommendation === "under"
-                ? "border-red-500/40 bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                : "border-muted hover:bg-muted/50 text-muted-foreground"
-            }`}
-            data-testid={`button-under-${playerName}-${prop.market}`}
-          >
-            U {formatOdds(prop.underOdds)}
-          </button>
-          {isInSlip && <Check className="w-3.5 h-3.5 text-primary" />}
-          {showDetail ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {recBadge(prop.recommendation, prop.confidence)}
+            <button
+              onClick={(e) => { e.stopPropagation(); handleAdd("over"); }}
+              disabled={isInSlip}
+              className={`px-1.5 py-0.5 rounded text-[11px] font-mono border transition-colors ${
+                prop.recommendation === "over"
+                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20"
+                  : "border-muted hover:bg-muted/50 text-muted-foreground"
+              }`}
+              data-testid={`button-over-${playerName}-${prop.market}`}
+            >
+              O {formatOdds(prop.overOdds)}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleAdd("under"); }}
+              disabled={isInSlip}
+              className={`px-1.5 py-0.5 rounded text-[11px] font-mono border transition-colors ${
+                prop.recommendation === "under"
+                  ? "border-red-500/40 bg-red-500/10 text-red-500 hover:bg-red-500/20"
+                  : "border-muted hover:bg-muted/50 text-muted-foreground"
+              }`}
+              data-testid={`button-under-${playerName}-${prop.market}`}
+            >
+              U {formatOdds(prop.underOdds)}
+            </button>
+            {isInSlip && <Check className="w-3 h-3 text-primary" />}
+            {showDetail ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+          </div>
         </div>
       </div>
 
       {showDetail && (
-        <div className="px-3 pb-3 space-y-2 border-t bg-muted/10">
-          <p className="text-[11px] text-foreground/80 pt-2 leading-relaxed" data-testid={`text-reasoning-${playerName}-${prop.market}`}>
+        <div className="px-2.5 sm:px-3 pb-2.5 sm:pb-3 space-y-2 border-t bg-muted/10">
+          <p className="text-[10px] sm:text-[11px] text-foreground/80 pt-2 leading-relaxed" data-testid={`text-reasoning-${playerName}-${prop.market}`}>
             {prop.reasoning}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
             <div className="p-1.5 rounded bg-muted/40 text-center">
               <p className="text-[9px] text-muted-foreground uppercase">Over Implied</p>
               <p className="text-xs font-mono font-medium">{prop.overImpliedProb}%</p>
@@ -222,30 +219,31 @@ function PropRow({ prop, playerName, sport, addLeg, isInSlip }: {
           {prop.allBookmakers && prop.allBookmakers.length > 0 && (
             <div className="space-y-1">
               <p className="text-[9px] text-muted-foreground uppercase font-medium flex items-center gap-1">
-                <Activity className="w-3 h-3" /> Live Odds Comparison — The Odds API
+                <Activity className="w-3 h-3" /> Odds Comparison
               </p>
-              <div className="rounded border overflow-hidden">
-                <table className="w-full text-[11px]">
+              <div className="rounded border overflow-hidden overflow-x-auto">
+                <table className="w-full text-[10px] sm:text-[11px]">
                   <thead>
                     <tr className="bg-muted/50">
-                      <th className="text-left px-2 py-1 font-medium text-muted-foreground">Sportsbook</th>
-                      <th className="text-center px-2 py-1 font-medium text-muted-foreground">Line</th>
-                      <th className="text-center px-2 py-1 font-medium text-emerald-500">Over</th>
-                      <th className="text-center px-2 py-1 font-medium text-red-500">Under</th>
+                      <th className="text-left px-1.5 sm:px-2 py-1 font-medium text-muted-foreground">Book</th>
+                      <th className="text-center px-1 sm:px-2 py-1 font-medium text-muted-foreground">Line</th>
+                      <th className="text-center px-1 sm:px-2 py-1 font-medium text-emerald-500">Over</th>
+                      <th className="text-center px-1 sm:px-2 py-1 font-medium text-red-500">Under</th>
                     </tr>
                   </thead>
                   <tbody>
                     {prop.allBookmakers.map((bk, idx) => {
                       const isBestOver = prop.bestOver && bk.bookmaker === prop.bestOver.bookmaker;
                       const isBestUnder = prop.bestUnder && bk.bookmaker === prop.bestUnder.bookmaker;
+                      const shortName = bk.bookmaker.replace(".ag", "").replace("Sportsbook", "").replace("Online", "").trim();
                       return (
                         <tr key={idx} className={idx % 2 === 0 ? "bg-background" : "bg-muted/20"}>
-                          <td className="px-2 py-1 font-medium">{bk.bookmaker}</td>
-                          <td className="px-2 py-1 text-center font-mono">{bk.line}</td>
-                          <td className={`px-2 py-1 text-center font-mono ${isBestOver ? "text-emerald-500 font-bold" : ""}`}>
+                          <td className="px-1.5 sm:px-2 py-1 font-medium truncate max-w-[80px] sm:max-w-none">{shortName}</td>
+                          <td className="px-1 sm:px-2 py-1 text-center font-mono">{bk.line}</td>
+                          <td className={`px-1 sm:px-2 py-1 text-center font-mono ${isBestOver ? "text-emerald-500 font-bold" : ""}`}>
                             {formatOdds(bk.overOdds)}{isBestOver ? " ★" : ""}
                           </td>
-                          <td className={`px-2 py-1 text-center font-mono ${isBestUnder ? "text-red-500 font-bold" : ""}`}>
+                          <td className={`px-1 sm:px-2 py-1 text-center font-mono ${isBestUnder ? "text-red-500 font-bold" : ""}`}>
                             {formatOdds(bk.underOdds)}{isBestUnder ? " ★" : ""}
                           </td>
                         </tr>
@@ -256,7 +254,7 @@ function PropRow({ prop, playerName, sport, addLeg, isInSlip }: {
               </div>
               {prop.consensusLine && prop.consensusLine !== prop.line && (
                 <p className="text-[10px] text-muted-foreground">
-                  Consensus line: <span className="font-mono font-medium">{prop.consensusLine.toFixed(1)}</span>
+                  Consensus: <span className="font-mono font-medium">{prop.consensusLine.toFixed(1)}</span>
                 </p>
               )}
             </div>
@@ -286,40 +284,32 @@ function PlayerCard({ player, sport, addLeg, slipLegIds }: {
   return (
     <div className="border rounded-lg overflow-hidden" data-testid={`card-player-${player.playerName}`}>
       <div
-        className="flex items-center gap-3 p-3 cursor-pointer hover:bg-muted/30 transition-colors"
+        className="flex items-center gap-2 p-2.5 sm:p-3 cursor-pointer hover:bg-muted/30 transition-colors"
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-          <Users className="w-4 h-4 text-primary" />
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm truncate" data-testid={`text-player-name-${player.playerName}`}>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-semibold text-xs sm:text-sm truncate" data-testid={`text-player-name-${player.playerName}`}>
               {player.playerName}
             </span>
-            {player.team && (
-              <Badge variant="outline" className="text-[10px] px-1 py-0">{player.team}</Badge>
-            )}
             {player.position && (
-              <span className="text-[10px] text-muted-foreground">{player.position}</span>
+              <span className="text-[9px] text-muted-foreground">{player.position}</span>
             )}
             {player.injury && (
-              <Badge variant="outline" className="text-[10px] px-1 py-0 bg-red-500/10 border-red-500/30 text-red-500 gap-0.5">
-                <Heart className="w-2.5 h-2.5" />
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-red-500/10 border-red-500/30 text-red-500 gap-0.5">
+                <Heart className="w-2 h-2" />
                 {player.injury.status}
               </Badge>
             )}
-          </div>
-          <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5 flex-wrap">
-            {player.leaderStats.slice(0, 3).map((ls, i) => (
-              <span key={i}>{ls.category}: <span className="font-medium text-foreground">{ls.value}</span></span>
-            ))}
             {player.markets.length > 0 && (
-              <span className="text-primary font-medium">{player.markets.length} props</span>
+              <span className="text-[9px] text-primary font-medium">{player.markets.length} props</span>
             )}
             {strongRecs.length > 0 && (
               <Badge variant="outline" className="text-[9px] px-1 py-0 bg-primary/10 border-primary/30 text-primary">
-                {strongRecs.length} strong pick{strongRecs.length > 1 ? "s" : ""}
+                {strongRecs.length} strong
               </Badge>
             )}
           </div>
@@ -374,52 +364,48 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
   return (
     <Card className="overflow-hidden" data-testid={`card-game-${game.gameId}`}>
       <div
-        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/30 transition-colors border-b"
+        className="p-3 sm:p-4 cursor-pointer hover:bg-muted/30 transition-colors border-b"
         onClick={() => setExpanded(!expanded)}
       >
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-7 h-7" />}
-            <div className="text-center">
-              <p className="text-xs font-bold">{game.awayTeam.abbreviation}</p>
-              <p className="text-[10px] text-muted-foreground">{game.awayTeam.record}</p>
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1.5">
+              {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-6 h-6 sm:w-7 sm:h-7" />}
+              <span className="text-xs font-bold">{game.awayTeam.abbreviation}</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">@</span>
+            <div className="flex items-center gap-1.5">
+              {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-6 h-6 sm:w-7 sm:h-7" />}
+              <span className="text-xs font-bold">{game.homeTeam.abbreviation}</span>
             </div>
           </div>
-          <span className="text-xs text-muted-foreground font-medium">@</span>
-          <div className="flex items-center gap-2">
-            {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-7 h-7" />}
-            <div className="text-center">
-              <p className="text-xs font-bold">{game.homeTeam.abbreviation}</p>
-              <p className="text-[10px] text-muted-foreground">{game.homeTeam.record}</p>
-            </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isLive ? (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-red-500/10 border-red-500/30 text-red-500 gap-0.5">
+                <Activity className="w-2.5 h-2.5 animate-pulse" /> LIVE
+              </Badge>
+            ) : (
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap">{timeStr}</span>
+            )}
+            <Badge variant="secondary" className="text-[9px] px-1 py-0 hidden sm:inline-flex">{game.totalProps} props</Badge>
+            {strongPicks > 0 && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hidden sm:inline-flex">
+                {strongPicks} picks
+              </Badge>
+            )}
+            <Badge variant="outline" className={`text-[9px] px-1 py-0 ${
+              game.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted text-muted-foreground"
+            }`}>
+              {game.dataSource.includes("Odds API") ? "Live" : "ESPN"}
+            </Badge>
+            {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
           </div>
         </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          {isLive ? (
-            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-red-500/10 border-red-500/30 text-red-500 gap-1">
-              <Activity className="w-2.5 h-2.5 animate-pulse" /> LIVE
-            </Badge>
-          ) : (
-            <div className="text-right">
-              <p className="text-[10px] text-muted-foreground">{dateStr}</p>
-              <p className="text-xs font-medium">{timeStr}</p>
-            </div>
-          )}
-          {game.totalProps > 0 && (
-            <Badge variant="secondary" className="text-[10px]">{game.totalProps} props</Badge>
-          )}
-          {strongPicks > 0 && (
-            <Badge variant="outline" className="text-[10px] bg-emerald-500/10 border-emerald-500/30 text-emerald-500">
-              {strongPicks} picks
-            </Badge>
-          )}
-          <Badge variant="outline" className={`text-[9px] px-1 py-0 ${
-            game.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted text-muted-foreground"
-          }`}>
-            {game.dataSource.includes("Odds API") ? "Live Odds" : "ESPN"}
-          </Badge>
-          {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        <div className="flex items-center gap-2 mt-1 sm:hidden">
+          <span className="text-[10px] text-muted-foreground">{dateStr}</span>
+          <span className="text-[10px] text-muted-foreground">{game.totalProps} props</span>
+          {strongPicks > 0 && <span className="text-[10px] text-emerald-500">{strongPicks} strong picks</span>}
         </div>
       </div>
 
@@ -493,30 +479,30 @@ export default function PlayerPropsPage() {
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-5">
         <header className="space-y-2">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2" data-testid="heading-player-props">
-                <Star className="w-6 h-6 text-primary" />
-                Player Props Analyzer
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2" data-testid="heading-player-props">
+                <Star className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+                Player Props
               </h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Live odds from The Odds API across FanDuel, DraftKings, BetMGM, Caesars & more
-              </p>
+              <div className="flex items-center gap-1.5 shrink-0">
+                {data && (
+                  <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
+                    data.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted text-muted-foreground"
+                  }`} data-testid="badge-data-source">
+                    {data.dataSource.includes("Odds API") ? "Odds API" : "ESPN"}
+                  </Badge>
+                )}
+                {lastUpdate && (
+                  <span className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                    <Clock className="w-3 h-3" /> {lastUpdate}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {data && (
-                <Badge variant="outline" className={`text-[10px] ${
-                  data.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted text-muted-foreground"
-                }`} data-testid="badge-data-source">
-                  {data.dataSource}
-                </Badge>
-              )}
-              {lastUpdate && (
-                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                  <Clock className="w-3 h-3" /> {lastUpdate}
-                </span>
-              )}
-            </div>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              Live odds from FanDuel, DraftKings, BetMGM, Caesars & more
+            </p>
           </div>
 
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1" data-testid="sport-tabs">
@@ -576,31 +562,31 @@ export default function PlayerPropsPage() {
         {data && !isLoading && (
           <>
             {data.totalProps > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">Games</p>
-                    <p className="text-xl font-bold" data-testid="text-total-games">{data.totalGames}</p>
+                  <CardContent className="p-2.5 sm:p-3 text-center">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">Games</p>
+                    <p className="text-lg sm:text-xl font-bold" data-testid="text-total-games">{data.totalGames}</p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">Player Props</p>
-                    <p className="text-xl font-bold text-primary" data-testid="text-total-props">{data.totalProps}</p>
+                  <CardContent className="p-2.5 sm:p-3 text-center">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">Props</p>
+                    <p className="text-lg sm:text-xl font-bold text-primary" data-testid="text-total-props">{data.totalProps}</p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">Strong Picks</p>
-                    <p className="text-xl font-bold text-emerald-500" data-testid="text-strong-picks">
+                  <CardContent className="p-2.5 sm:p-3 text-center">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">Strong Picks</p>
+                    <p className="text-lg sm:text-xl font-bold text-emerald-500" data-testid="text-strong-picks">
                       {data.games.reduce((sum, g) => sum + g.players.reduce((ps, p) => ps + p.markets.filter(m => m.confidence >= 60 && m.recommendation !== "push").length, 0), 0)}
                     </p>
                   </CardContent>
                 </Card>
                 <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-[10px] text-muted-foreground uppercase">Sportsbooks</p>
-                    <p className="text-xl font-bold text-blue-500" data-testid="text-sportsbooks">
+                  <CardContent className="p-2.5 sm:p-3 text-center">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase">Books</p>
+                    <p className="text-lg sm:text-xl font-bold text-blue-500" data-testid="text-sportsbooks">
                       {(() => {
                         const books = new Set<string>();
                         for (const g of data.games) {
