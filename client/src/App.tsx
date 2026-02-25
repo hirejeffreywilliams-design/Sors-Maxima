@@ -72,7 +72,6 @@ import { CookieConsentBanner } from "@/components/cookie-consent";
 import { CommandPalette, SearchButton } from "@/components/command-palette";
 import { FeedbackWidget } from "@/components/feedback-widget";
 import { useUTMCapture } from "@/lib/utm-tracker";
-import { AgeVerificationGate } from "@/components/age-verification-gate";
 import { ErrorRecoveryInterceptor } from "@/components/error-recovery-interceptor";
 import { SupportChat } from "@/components/support-chat";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -637,9 +636,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       
       <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
         <ParlaySlipProvider>
-          <AgeVerificationGate>
             <Router authState={authState} />
-          </AgeVerificationGate>
           <ParlaySlipDrawer />
         </ParlaySlipProvider>
       </main>

@@ -7,12 +7,28 @@ import { getClientIp, requireAdmin } from "./helpers";
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
-      const { email, username, password, deviceFingerprint } = req.body;
+      const { email, username, password, deviceFingerprint, dateOfBirth } = req.body;
       const ip = getClientIp(req);
       const userAgent = req.headers['user-agent'] || 'unknown';
 
       if (!email || !username || !password) {
         return res.status(400).json({ error: "Email, username, and password are required" });
+      }
+
+      if (!dateOfBirth) {
+        return res.status(400).json({ error: "Date of birth is required for age verification" });
+      }
+
+      const dob = new Date(dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        return res.status(400).json({ error: "Invalid date of birth" });
+      }
+      const now = new Date();
+      let age = now.getFullYear() - dob.getFullYear();
+      const monthDiff = now.getMonth() - dob.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < dob.getDate())) age--;
+      if (age < 21) {
+        return res.status(403).json({ error: "You must be at least 21 years old to create an account on this platform" });
       }
 
       const result = await registerUser(username, email, password, ip, userAgent, deviceFingerprint);

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Lock, User, AlertCircle, Mail, Eye, EyeOff, Shield, CheckCircle2, ArrowLeft, KeyRound } from "lucide-react";
+import { Lock, User, AlertCircle, Mail, Eye, EyeOff, Shield, CheckCircle2, ArrowLeft, KeyRound, Calendar } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,6 +28,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [regUsername, setRegUsername] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
+  const [regDateOfBirth, setRegDateOfBirth] = useState("");
   
   // Reset form
   const [resetUsername, setResetUsername] = useState("");
@@ -95,6 +96,23 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     setLoading(true);
 
     try {
+      if (!regDateOfBirth) {
+        setError("Date of birth is required");
+        setLoading(false);
+        return;
+      }
+
+      const dob = new Date(regDateOfBirth);
+      const now = new Date();
+      let age = now.getFullYear() - dob.getFullYear();
+      const md = now.getMonth() - dob.getMonth();
+      if (md < 0 || (md === 0 && now.getDate() < dob.getDate())) age--;
+      if (age < 21) {
+        setError("You must be at least 21 years old to create an account");
+        setLoading(false);
+        return;
+      }
+
       const deviceFingerprint = getCachedFingerprint();
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -104,6 +122,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           username: regUsername, 
           password: regPassword,
           deviceFingerprint,
+          dateOfBirth: regDateOfBirth,
         }),
         credentials: "include",
       });
@@ -445,6 +464,24 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             <TabsContent value="register">
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="reg-dob">Date of Birth</Label>
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="reg-dob"
+                      type="date"
+                      value={regDateOfBirth}
+                      onChange={(e) => setRegDateOfBirth(e.target.value)}
+                      max={new Date().toISOString().split("T")[0]}
+                      className="pl-10"
+                      required
+                      data-testid="input-reg-dob"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">You must be at least 21 years old to use this platform</p>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="reg-email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -561,7 +598,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 <Button 
                   type="submit" 
                   className="w-full" 
-                  disabled={loading || passwordStrength < 4 || regPassword !== regConfirmPassword}
+                  disabled={loading || passwordStrength < 4 || regPassword !== regConfirmPassword || !regDateOfBirth}
                   data-testid="button-register"
                 >
                   {loading ? "Creating account..." : "Create Account"}
