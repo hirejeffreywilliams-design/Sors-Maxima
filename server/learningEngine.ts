@@ -260,8 +260,7 @@ export function startContinuousLearning(): void {
   }
 
   initializeModelWeights().then(() => {
-    learningInterval = setInterval(runLearningCycle, 1000);
-    logInfo("Continuous learning engine started (1-second cycles)");
+    logInfo("Learning engine initialized (weight updates handled by orchestrator)");
   });
 }
 

@@ -31,7 +31,6 @@ const AdminGrowth = lazy(() => import("@/pages/admin-growth"));
 const AdminFeatureFlags = lazy(() => import("@/pages/admin-feature-flags"));
 const LegalPage = lazy(() => import("@/pages/legal"));
 const Settings = lazy(() => import("@/pages/settings"));
-const TipsterCommunities = lazy(() => import("@/pages/tipster-communities"));
 const TrainingCenter = lazy(() => import("@/pages/training-center"));
 const RostersPage = lazy(() => import("@/pages/rosters"));
 const HelpCenter = lazy(() => import("@/pages/help"));
@@ -57,25 +56,14 @@ const AdminGuardian = lazy(() => import("@/pages/admin-guardian"));
 const AdminPricingIntelligence = lazy(() => import("@/pages/admin-pricing-intelligence"));
 const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
 const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
-const EVHeatmap = lazy(() => import("@/pages/ev-heatmap"));
-const LineMovement = lazy(() => import("@/pages/line-movement"));
-const PowerRankings = lazy(() => import("@/pages/power-rankings"));
-const TicketHistory = lazy(() => import("@/pages/ticket-history"));
-const BettingProfile = lazy(() => import("@/pages/betting-profile"));
 const PersonalizedInsights = lazy(() => import("@/pages/personalized-insights"));
-const ProTools = lazy(() => import("@/pages/pro-tools"));
 const CorrelationMatrix = lazy(() => import("@/pages/correlation-matrix"));
-const SharedTickets = lazy(() => import("@/pages/shared-tickets"));
 const OddsCenter = lazy(() => import("@/pages/odds-center"));
 const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
-const StraightBets = lazy(() => import("@/pages/straight-bets"));
-const SGPGenerator = lazy(() => import("@/pages/sgp-generator"));
-const TeaserGenerator = lazy(() => import("@/pages/teaser-generator"));
-const RoundRobinGenerator = lazy(() => import("@/pages/round-robin-generator"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, X, Settings as SettingsIcon, Brain, GraduationCap, UsersRound, HelpCircle, Megaphone, User, LayoutGrid, Map, FlaskConical, GitBranch, Calendar, ChevronRight, Flame, TrendingUp, BarChart3, History, UserCog, Calculator, MoreHorizontal, Target, Layers, ArrowUpDown, Shuffle, Star, Database } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -247,28 +235,29 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/legal" component={LegalPage} />
         <Route path="/roadmap" component={Roadmap} />
         <Route path="/settings" component={Settings} />
-        <Route path="/tipster-communities" component={TipsterCommunities} />
+        <Route path="/tipster-communities">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
         <Route path="/rosters" component={RostersPage} />
         <Route path="/help" component={HelpCenter} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/changelog" component={ChangelogPage} />
         <Route path="/odds-center" component={OddsCenter} />
-        <Route path="/ev-heatmap" component={EVHeatmap} />
-        <Route path="/line-movement" component={LineMovement} />
-        <Route path="/power-rankings" component={PowerRankings} />
-        <Route path="/ticket-history" component={TicketHistory} />
-        <Route path="/betting-profile" component={BettingProfile} />
+        <Route path="/ev-heatmap">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
+        <Route path="/line-movement">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
+        <Route path="/power-rankings">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
+        <Route path="/ticket-history">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
+        <Route path="/betting-profile">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
+        <Route path="/bet-history">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
         <Route path="/insights" component={PersonalizedInsights} />
         <Route path="/pro-tools">{() => { const [, setLocation] = useLocation(); setLocation("/tools"); return null; }}</Route>
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
-        <Route path="/straight-bets" component={StraightBets} />
-        <Route path="/sgp" component={SGPGenerator} />
-        <Route path="/teasers" component={TeaserGenerator} />
-        <Route path="/round-robin" component={RoundRobinGenerator} />
+        <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
+        <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
+        <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
+        <Route path="/round-robin">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/platform-intelligence" component={PlatformIntelligencePage} />
-        <Route path="/shared-tickets" component={SharedTickets} />
+        <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -366,12 +355,8 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Build Bets</div>
         <nav className="space-y-1 pb-2">
           {([
-            { href: "/builder", icon: LayoutGrid, label: "Visual Parlay Builder", testId: "mobile-nav-builder" },
+            { href: "/builder", icon: LayoutGrid, label: "Bet Builder", testId: "mobile-nav-builder" },
             { href: "/prop-parlay-builder", icon: Brain, label: "Player Prop Parlays", testId: "mobile-nav-prop-parlay" },
-            { href: "/straight-bets", icon: Target, label: "Straight Bets", testId: "mobile-nav-straight-bets" },
-            { href: "/sgp", icon: Layers, label: "Same Game Parlays", testId: "mobile-nav-sgp" },
-            { href: "/teasers", icon: ArrowUpDown, label: "Teasers", testId: "mobile-nav-teasers" },
-            { href: "/round-robin", icon: Shuffle, label: "Round Robin", testId: "mobile-nav-round-robin" },
           ] as const).map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
@@ -443,7 +428,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <nav className="space-y-1 pb-2">
           {([
             { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "mobile-nav-finance" },
-            { href: "/ticket-history", icon: History, label: "Bet History", testId: "mobile-nav-history" },
+            { href: "/profile", icon: History, label: "Bet History", testId: "mobile-nav-history" },
             { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
             { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },

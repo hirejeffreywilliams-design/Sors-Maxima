@@ -20,8 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import type { SavedTicket } from "@/pages/ticket-history";
-import { useSEO } from "@/hooks/use-seo";
+import type { SavedTicket } from "@/pages/profile";
 
 const STORAGE_KEY = "sors_ticket_history";
 const DAILY_USAGE_KEY = "sors_daily_usage";
@@ -57,15 +56,15 @@ function computeUserStats(tickets: SavedTicket[]) {
   const settled = tickets.filter((t) => t.status !== "pending");
   const wins = tickets.filter((t) => t.status === "won").length;
   const losses = tickets.filter((t) => t.status === "lost").length;
-  const totalStaked = settled.reduce((sum, t) => sum + t.recommendedStake, 0);
-  const totalPL = settled.reduce((sum, t) => sum + (t.actualPL ?? 0), 0);
+  const totalStaked = settled.reduce((sum, t) => sum + t.recommended_stake, 0);
+  const totalPL = settled.reduce((sum, t) => sum + (t.actual_pl ?? 0), 0);
   const roi = totalStaked > 0 ? (totalPL / totalStaked) * 100 : 0;
   const winRate = wins + losses > 0 ? (wins / (wins + losses)) * 100 : 0;
 
   let longestStreak = 0;
   let currentStreak = 0;
   const sorted = [...tickets].sort(
-    (a, b) => new Date(a.savedAt).getTime() - new Date(b.savedAt).getTime(),
+    (a, b) => new Date(a.saved_at).getTime() - new Date(b.saved_at).getTime(),
   );
   for (const t of sorted) {
     if (t.status === "won") {
@@ -145,13 +144,13 @@ function ShareTab() {
 
   const handleGenerateLink = () => {
     const tickets = loadTickets();
-    const found = tickets.find((t) => t.id === ticketId || t.id.includes(ticketId));
+    const found = tickets.find((t) => String(t.id) === ticketId || String(t.id).includes(ticketId));
     if (!found) {
       toast({ title: "Not Found", description: "No ticket found with that ID.", variant: "destructive" });
       return;
     }
     const encoded = btoa(JSON.stringify(found));
-    const link = `${window.location.origin}/shared-tickets?id=${encoded}`;
+    const link = `${window.location.origin}/community?id=${encoded}`;
     setShareLink(link);
     setSharedTicket(found);
   };
@@ -164,7 +163,7 @@ function ShareTab() {
   };
 
   const displayTicket = sharedTicket;
-  const shortId = displayTicket ? displayTicket.id.slice(0, 8) : "";
+  const shortId = displayTicket ? String(displayTicket.id).slice(0, 8) : "";
 
   return (
     <div className="space-y-6" data-testid="share-tab">
@@ -229,7 +228,7 @@ function ShareTab() {
               <div className="text-right shrink-0">
                 <p className="text-xs text-muted-foreground">Odds</p>
                 <p className="text-lg font-bold" data-testid="text-shared-odds">
-                  {formatOdds(displayTicket.americanOdds)}
+                  {formatOdds(displayTicket.american_odds)}
                 </p>
               </div>
             </div>
@@ -518,28 +517,20 @@ function TierAccessTab() {
   );
 }
 
-export default function SharedTickets() {
-  useSEO({ title: "Shared Tickets", description: "Community shared betting tickets and leaderboard" });
+export function SharedTicketsContent() {
   const [location] = useLocation();
   const hasSharedId = typeof window !== "undefined" && window.location.search.includes("id=");
   const defaultTab = hasSharedId ? "share" : "share";
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto" data-testid="shared-tickets-page">
-      <div className="flex items-center gap-3 flex-wrap">
-        <Share2 className="w-6 h-6 text-primary" />
-        <h1 className="text-2xl font-bold" data-testid="text-page-title">
-          Shared Tickets
-        </h1>
-      </div>
-
+    <div className="space-y-4">
       <Tabs defaultValue={defaultTab} className="space-y-4">
         <TabsList data-testid="tabs-list">
-          <TabsTrigger value="share" data-testid="tab-share">
+          <TabsTrigger value="share" data-testid="tab-share-ticket">
             <Share2 className="w-4 h-4 mr-1.5" />
             Share a Ticket
           </TabsTrigger>
-          <TabsTrigger value="leaderboard" data-testid="tab-leaderboard">
+          <TabsTrigger value="leaderboard" data-testid="tab-shared-leaderboard">
             <Trophy className="w-4 h-4 mr-1.5" />
             Leaderboard
           </TabsTrigger>

@@ -472,8 +472,77 @@ function settleLeg(leg: any, game: any): "won" | "lost" | "push" | "unknown" {
   return "unknown";
 }
 
+async function runLearningWeightUpdate(): Promise<void> {
+  try {
+    const { isNotNull } = await import("drizzle-orm");
+    const LEARNING_RATE = 0.05;
+    const MIN_PREDICTIONS_FOR_UPDATE = 10;
+
+    const settledPredictions = await db.select()
+      .from(predictions)
+      .where(isNotNull(predictions.actualResult))
+      .orderBy(desc(predictions.settledAt))
+      .limit(1000);
+
+    if (settledPredictions.length < MIN_PREDICTIONS_FOR_UPDATE) return;
+
+    const allWeights = await db.select().from(modelWeights);
+    if (allWeights.length === 0) return;
+
+    const factorPerformance: Record<string, { wins: number; losses: number }> = {};
+    for (const w of allWeights) {
+      factorPerformance[w.factorName] = { wins: 0, losses: 0 };
+    }
+
+    for (const pred of settledPredictions) {
+      const isWin = pred.actualResult === "won";
+      const confidence = pred.confidenceScore;
+      for (const factorName of Object.keys(factorPerformance)) {
+        if (isWin) {
+          factorPerformance[factorName].wins += confidence;
+        } else if (pred.actualResult === "lost") {
+          factorPerformance[factorName].losses += confidence;
+        }
+      }
+    }
+
+    let weightsAdjusted = 0;
+    for (const [factor, perf] of Object.entries(factorPerformance)) {
+      const total = perf.wins + perf.losses;
+      if (total < 5) continue;
+
+      const factorAccuracy = perf.wins / total;
+      const currentWeight = allWeights.find(w => w.factorName === factor);
+      if (!currentWeight) continue;
+
+      const performanceDiff = factorAccuracy - 0.5;
+      const adjustment = performanceDiff * LEARNING_RATE;
+      const newWeight = Math.max(0.1, Math.min(2.0, currentWeight.weight + adjustment));
+
+      await db.update(modelWeights).set({
+        weight: newWeight,
+        totalPredictions: currentWeight.totalPredictions + Math.round(total),
+        correctPredictions: currentWeight.correctPredictions + Math.round(perf.wins),
+        accuracy: factorAccuracy,
+        lastUpdated: new Date(),
+      }).where(eq(modelWeights.factorName, factor));
+
+      weightsAdjusted++;
+    }
+
+    if (weightsAdjusted > 0) {
+      logInfo(`[Orchestrator] Learning weight update: adjusted ${weightsAdjusted} factor weights from ${settledPredictions.length} predictions`);
+    }
+  } catch (error: any) {
+    addError("learningWeightUpdate", error.message);
+    logError(error, { context: "runLearningWeightUpdate" });
+  }
+}
+
 async function scheduledRetraining(): Promise<void> {
   try {
+    await runLearningWeightUpdate();
+
     const { runHistoricalLearning } = await import("./historicalLearningEngine");
 
     logInfo("[Orchestrator] Starting scheduled historical retraining...");
@@ -609,7 +678,7 @@ async function checkDataFreshness(): Promise<void> {
           try {
             const { getLearningStats } = await import("./learningEngine");
             const stats = await getLearningStats();
-            return { fresh: stats.isRunning, age: 0, detail: `${stats.cyclesCompleted} cycles, ${stats.modelWeights.length} weights` };
+            return { fresh: stats.modelWeights.length > 0, age: 0, detail: `${stats.modelWeights.length} weights (managed by orchestrator)` };
           } catch (e: any) {
             return { fresh: false, age: -1, detail: e.message };
           }
@@ -666,9 +735,9 @@ async function attemptFeedRecovery(feedName: string): Promise<void> {
         break;
 
       case "Learning Engine":
-        const { startContinuousLearning } = await import("./learningEngine");
-        startContinuousLearning();
-        logInfo(`[Orchestrator] Self-healed: Restarted learning engine`);
+        const { initializeModelWeights } = await import("./learningEngine");
+        await initializeModelWeights();
+        logInfo(`[Orchestrator] Self-healed: Re-initialized learning engine weights`);
         break;
 
       case "Analytics Agent":

@@ -339,10 +339,11 @@ const BATCH_SIZE = 10000;
 const CONVERGENCE_THRESHOLD = 0.00005;
 const MIN_BATCHES = 5;
 const MAX_BATCHES = 30;
-const PRE_SIM_INTERVAL = 120000;
+const PRE_SIM_INTERVAL = 300000;
 const PRE_SIM_TTL = 300000;
 const LIVE_SIM_TTL = 60000;
 const MAX_PREDICTIONS = 5000;
+const MAX_CACHE_ENTRIES = 200;
 
 let engineRunning = false;
 let preSimInterval: ReturnType<typeof setInterval> | null = null;
@@ -548,6 +549,11 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
   };
 
   preSimCache.set(input.gameId, result);
+  while (preSimCache.size > MAX_CACHE_ENTRIES) {
+    const firstKey = preSimCache.keys().next().value;
+    if (firstKey) preSimCache.delete(firstKey);
+    else break;
+  }
   return result;
 }
 
@@ -603,7 +609,7 @@ export async function runSimulation(
   if (!L) {
     L = cholDecomp(corr);
     choleskyCache.set(cacheKey, L);
-    if (choleskyCache.size > 200) {
+    if (choleskyCache.size > MAX_CACHE_ENTRIES) {
       const firstKey = choleskyCache.keys().next().value;
       if (firstKey) choleskyCache.delete(firstKey);
     }
@@ -753,9 +759,10 @@ export async function runSimulation(
   };
 
   parlayCache.set(cacheKey, { result, timestamp: Date.now() });
-  if (parlayCache.size > 150) {
+  while (parlayCache.size > MAX_CACHE_ENTRIES) {
     const firstKey = parlayCache.keys().next().value;
     if (firstKey) parlayCache.delete(firstKey);
+    else break;
   }
 
   return result;
@@ -1230,7 +1237,7 @@ export function startMonteCarloEngine(): void {
   engineRunning = true;
   engineStartedAt = Date.now();
 
-  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started (${MATCHUP_SIMS} matchup sims, ${PARLAY_SIMS} parlay sims, ${PRE_SIM_INTERVAL / 1000}s cycle)`);
+  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started (${MATCHUP_SIMS} matchup sims, ${PARLAY_SIMS} parlay sims, ${PRE_SIM_INTERVAL / 1000}s cycle, max ${MAX_CACHE_ENTRIES} cache entries)`);
 
   setTimeout(() => runPreSimulationCycle(), 15000);
 

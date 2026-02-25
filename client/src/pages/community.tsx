@@ -8,6 +8,7 @@ import { SocialFeed } from "@/components/social/social-feed";
 import { CopyBetting } from "@/components/social/copy-betting";
 import { Badge } from "@/components/ui/badge";
 import { TipsterContent } from "@/components/community/tipster-content";
+import { SharedTicketsContent } from "@/components/community/shared-tickets-content";
 import { useSEO } from "@/hooks/use-seo";
 
 export default function Community() {
@@ -26,19 +27,23 @@ export default function Community() {
           <p className="text-sm text-muted-foreground">Connect with bettors, follow tipsters, and share wins</p>
         </header>
 
-        <Tabs defaultValue="social" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-xs">
-            <TabsTrigger value="social" className="gap-1" data-testid="tab-social">
+        <Tabs defaultValue="feed" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsTrigger value="feed" className="gap-1" data-testid="tab-feed">
               <Users className="w-4 h-4" />
-              Social
+              Feed
             </TabsTrigger>
-            <TabsTrigger value="tipsters" className="gap-1" data-testid="tab-tipsters">
+            <TabsTrigger value="tipster-groups" className="gap-1" data-testid="tab-tipster-groups">
               <MessageCircle className="w-4 h-4" />
-              Tipsters
+              Tipster Groups
+            </TabsTrigger>
+            <TabsTrigger value="shared-tickets" className="gap-1" data-testid="tab-shared-tickets">
+              <Share2 className="w-4 h-4" />
+              Shared Tickets
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="social" className="space-y-6">
+          <TabsContent value="feed" className="space-y-6">
             <Tabs defaultValue="leaderboard" className="space-y-4">
               <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
                 <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 sm:max-w-2xl">
@@ -58,7 +63,7 @@ export default function Community() {
                     <Bell className="w-4 h-4 shrink-0" />
                     <span className="hidden sm:inline">Alerts</span>
                   </TabsTrigger>
-                  <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-feed">
+                  <TabsTrigger value="social-feed" className="gap-1 text-xs sm:text-sm px-2 sm:px-3" data-testid="tab-social-feed">
                     <Rss className="w-4 h-4 shrink-0" />
                     <span className="hidden sm:inline">Feed</span>
                   </TabsTrigger>
@@ -85,7 +90,7 @@ export default function Community() {
                 <SmartAlerts />
               </TabsContent>
 
-              <TabsContent value="feed">
+              <TabsContent value="social-feed">
                 <SocialFeed />
               </TabsContent>
 
@@ -95,8 +100,12 @@ export default function Community() {
             </Tabs>
           </TabsContent>
 
-          <TabsContent value="tipsters" className="space-y-6">
+          <TabsContent value="tipster-groups" className="space-y-6">
             <TipsterContent />
+          </TabsContent>
+
+          <TabsContent value="shared-tickets" className="space-y-6">
+            <SharedTicketsContent />
           </TabsContent>
         </Tabs>
       </div>

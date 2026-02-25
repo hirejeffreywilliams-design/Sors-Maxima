@@ -39,7 +39,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { OnboardingTutorial, TutorialButton } from "@/components/onboarding-tutorial";
 import { StakeConfirmationDialog } from "@/components/stake-confirmation-dialog";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
-import { saveTicketToHistory } from "@/pages/ticket-history";
+import { saveTicketToHistory } from "@/pages/profile";
 import { eventTracker } from "@/lib/event-tracker";
 import { trackTicketGenerate, trackPageView } from "@/lib/analytics";
 import { useToast } from "@/hooks/use-toast";

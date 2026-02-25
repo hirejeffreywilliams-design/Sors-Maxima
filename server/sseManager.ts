@@ -212,8 +212,8 @@ async function pushIntelligenceUpdate(): Promise<void> {
 
 export function startSSEBroadcaster(): void {
   if (broadcastInterval) return;
-  console.log("[SSE] Starting SSE broadcaster (15s interval)...");
-  broadcastInterval = setInterval(pushIntelligenceUpdate, 15_000);
+  console.log("[SSE] Starting SSE broadcaster (30s interval)...");
+  broadcastInterval = setInterval(pushIntelligenceUpdate, 30_000);
 
   setTimeout(pushIntelligenceUpdate, 5_000);
 }
