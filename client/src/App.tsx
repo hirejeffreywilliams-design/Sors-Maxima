@@ -447,7 +447,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
             const Icon = item.icon;
             const isActive = location === item.href;
             return (
-              <Link key={item.href} href={item.href} onClick={onClose}>
+              <Link key={item.testId} href={item.href} onClick={onClose}>
                 <div 
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
                     isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
