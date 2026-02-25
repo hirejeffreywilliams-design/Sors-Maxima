@@ -894,4 +894,90 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     if (!alert) return res.status(404).json({ error: "Alert not found" });
     res.json(alert);
   });
+
+  // ==================== CLV PICK TRACKER ====================
+  app.post("/api/user/picks", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const { sport, gameId, pick, betType, oddsAtPick } = req.body;
+      if (!sport || !gameId || !pick || !betType || oddsAtPick === undefined) {
+        return res.status(400).json({ error: "Missing required fields: sport, gameId, pick, betType, oddsAtPick" });
+      }
+      const result = await db.execute(sql`
+        INSERT INTO user_picks (username, sport, game_id, pick, bet_type, odds_at_pick)
+        VALUES (${username}, ${sport}, ${gameId}, ${pick}, ${betType}, ${oddsAtPick})
+        RETURNING *
+      `);
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Failed to save pick:", err);
+      res.status(500).json({ error: "Failed to save pick" });
+    }
+  });
+
+  app.get("/api/user/picks", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const result = await db.execute(sql`
+        SELECT * FROM user_picks
+        WHERE username = ${username}
+        ORDER BY placed_at DESC
+        LIMIT 200
+      `);
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Failed to get picks:", err);
+      res.status(500).json({ error: "Failed to get picks" });
+    }
+  });
+
+  app.get("/api/user/picks/clv-summary", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const result = await db.execute(sql`
+        SELECT * FROM user_picks
+        WHERE username = ${username}
+        ORDER BY placed_at DESC
+      `);
+      const picks = result.rows as any[];
+      const totalPicks = picks.length;
+      const picksWithClv = picks.filter(p => p.clv_result !== null && p.clv_result !== undefined);
+      const clvPositive = picksWithClv.filter(p => p.clv_result > 0);
+      const clvPlusRate = picksWithClv.length > 0 ? clvPositive.length / picksWithClv.length : 0;
+      const avgClv = picksWithClv.length > 0
+        ? picksWithClv.reduce((sum: number, p: any) => sum + (p.clv_result || 0), 0) / picksWithClv.length
+        : 0;
+
+      let currentStreak = 0;
+      let streakType: "clv+" | "clv-" | "none" = "none";
+      for (const p of picksWithClv) {
+        if (streakType === "none") {
+          streakType = p.clv_result > 0 ? "clv+" : "clv-";
+          currentStreak = 1;
+        } else if ((streakType === "clv+" && p.clv_result > 0) || (streakType === "clv-" && p.clv_result <= 0)) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+
+      const settledPicks = picks.filter(p => p.settled);
+      const wonPicks = settledPicks.filter(p => p.won);
+      const winRate = settledPicks.length > 0 ? wonPicks.length / settledPicks.length : 0;
+
+      res.json({
+        totalPicks,
+        settledPicks: settledPicks.length,
+        wonPicks: wonPicks.length,
+        winRate: Math.round(winRate * 1000) / 1000,
+        picksWithClv: picksWithClv.length,
+        clvPlusRate: Math.round(clvPlusRate * 1000) / 1000,
+        avgClv: Math.round(avgClv * 100) / 100,
+        streak: { type: streakType, count: currentStreak },
+      });
+    } catch (err) {
+      console.error("Failed to compute CLV summary:", err);
+      res.status(500).json({ error: "Failed to compute CLV summary" });
+    }
+  });
 }

@@ -203,8 +203,16 @@ export const FACTOR_CATEGORIES = {
   }
 };
 
+const LOW_DATA_RELIABILITY_FACTORS = new Set([
+  "sleep_quality", "nutrition_hydration", "wearable_data", "equipment_advantage",
+  "training_tech", "team_investment", "salary_dynamics", "field_conditions",
+  "temperature_impact", "media_impact", "confidence_index", "mental_state",
+  "team_chemistry", "pressure_response", "altitude_adjustment", "timezone_disruption",
+  "video_analysis", "roster_stability", "contract_motivation", "motivation_level",
+]);
+
 const FUSION_WEIGHTS: FusionWeight[] = [
-  // CORE BETTING ANALYSIS (12 factors)
+  // CORE BETTING ANALYSIS (12 factors) — data-driven weights boosted
   { factor: "scheme_mismatch", weight: 0.08, confidence: 85, historicalAccuracy: 0.67, recentTrend: "improving", learningRate: 0.05 },
   { factor: "coaching_tendency", weight: 0.07, confidence: 78, historicalAccuracy: 0.62, recentTrend: "stable", learningRate: 0.03 },
   { factor: "sharp_money_flow", weight: 0.09, confidence: 82, historicalAccuracy: 0.71, recentTrend: "improving", learningRate: 0.04 },
@@ -213,20 +221,20 @@ const FUSION_WEIGHTS: FusionWeight[] = [
   { factor: "momentum_score", weight: 0.05, confidence: 76, historicalAccuracy: 0.59, recentTrend: "improving", learningRate: 0.04 },
   { factor: "situational_spot", weight: 0.05, confidence: 77, historicalAccuracy: 0.63, recentTrend: "improving", learningRate: 0.03 },
   { factor: "historical_h2h", weight: 0.04, confidence: 70, historicalAccuracy: 0.55, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "rest_advantage", weight: 0.03, confidence: 74, historicalAccuracy: 0.57, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "home_field", weight: 0.03, confidence: 79, historicalAccuracy: 0.61, recentTrend: "declining", learningRate: 0.02 },
+  { factor: "rest_advantage", weight: 0.05, confidence: 74, historicalAccuracy: 0.57, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "home_field", weight: 0.04, confidence: 79, historicalAccuracy: 0.61, recentTrend: "declining", learningRate: 0.02 },
   { factor: "tipster_consensus", weight: 0.04, confidence: 73, historicalAccuracy: 0.60, recentTrend: "stable", learningRate: 0.03 },
-  { factor: "monte_carlo", weight: 0.06, confidence: 81, historicalAccuracy: 0.66, recentTrend: "improving", learningRate: 0.04 },
+  { factor: "monte_carlo", weight: 0.07, confidence: 81, historicalAccuracy: 0.66, recentTrend: "improving", learningRate: 0.04 },
   
-  // ADVANCED ANALYTICS (8 factors)
+  // ADVANCED ANALYTICS (8 factors) — data-driven weights boosted
   { factor: "predictive_model", weight: 0.05, confidence: 84, historicalAccuracy: 0.69, recentTrend: "improving", learningRate: 0.05 },
   { factor: "player_efficiency", weight: 0.04, confidence: 80, historicalAccuracy: 0.64, recentTrend: "stable", learningRate: 0.03 },
   { factor: "scouting_data", weight: 0.03, confidence: 75, historicalAccuracy: 0.58, recentTrend: "stable", learningRate: 0.02 },
   { factor: "pace_tempo", weight: 0.03, confidence: 77, historicalAccuracy: 0.61, recentTrend: "stable", learningRate: 0.03 },
   { factor: "clutch_index", weight: 0.03, confidence: 71, historicalAccuracy: 0.56, recentTrend: "improving", learningRate: 0.04 },
   { factor: "strength_schedule", weight: 0.02, confidence: 76, historicalAccuracy: 0.59, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "point_differential", weight: 0.03, confidence: 79, historicalAccuracy: 0.63, recentTrend: "stable", learningRate: 0.03 },
-  { factor: "win_probability", weight: 0.04, confidence: 82, historicalAccuracy: 0.67, recentTrend: "improving", learningRate: 0.04 },
+  { factor: "point_differential", weight: 0.04, confidence: 79, historicalAccuracy: 0.63, recentTrend: "stable", learningRate: 0.03 },
+  { factor: "win_probability", weight: 0.06, confidence: 82, historicalAccuracy: 0.67, recentTrend: "improving", learningRate: 0.04 },
   
   // PSYCHOLOGICAL FACTORS (6 factors)
   { factor: "mental_state", weight: 0.03, confidence: 68, historicalAccuracy: 0.54, recentTrend: "improving", learningRate: 0.05 },
@@ -234,35 +242,35 @@ const FUSION_WEIGHTS: FusionWeight[] = [
   { factor: "pressure_response", weight: 0.02, confidence: 67, historicalAccuracy: 0.53, recentTrend: "stable", learningRate: 0.03 },
   { factor: "motivation_level", weight: 0.02, confidence: 70, historicalAccuracy: 0.55, recentTrend: "improving", learningRate: 0.04 },
   { factor: "team_chemistry", weight: 0.02, confidence: 66, historicalAccuracy: 0.51, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "media_impact", weight: 0.01, confidence: 62, historicalAccuracy: 0.48, recentTrend: "declining", learningRate: 0.02 },
+  { factor: "media_impact", weight: 0.005, confidence: 62, historicalAccuracy: 0.48, recentTrend: "declining", learningRate: 0.02 },
   
-  // PHYSICAL & HEALTH (6 factors)
-  { factor: "injury_adjustment", weight: 0.05, confidence: 83, historicalAccuracy: 0.68, recentTrend: "stable", learningRate: 0.03 },
+  // PHYSICAL & HEALTH (6 factors) — injury_adjustment boosted, noise factors reduced
+  { factor: "injury_adjustment", weight: 0.07, confidence: 83, historicalAccuracy: 0.68, recentTrend: "stable", learningRate: 0.03 },
   { factor: "biomech_fatigue", weight: 0.02, confidence: 72, historicalAccuracy: 0.57, recentTrend: "improving", learningRate: 0.04 },
   { factor: "recovery_status", weight: 0.02, confidence: 74, historicalAccuracy: 0.59, recentTrend: "stable", learningRate: 0.03 },
-  { factor: "nutrition_hydration", weight: 0.01, confidence: 63, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "sleep_quality", weight: 0.01, confidence: 64, historicalAccuracy: 0.51, recentTrend: "improving", learningRate: 0.03 },
+  { factor: "nutrition_hydration", weight: 0.005, confidence: 63, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "sleep_quality", weight: 0.005, confidence: 64, historicalAccuracy: 0.51, recentTrend: "improving", learningRate: 0.03 },
   { factor: "load_management", weight: 0.02, confidence: 75, historicalAccuracy: 0.60, recentTrend: "stable", learningRate: 0.03 },
   
-  // TECHNOLOGY & EQUIPMENT (4 factors)
-  { factor: "wearable_data", weight: 0.02, confidence: 76, historicalAccuracy: 0.61, recentTrend: "improving", learningRate: 0.05 },
-  { factor: "equipment_advantage", weight: 0.01, confidence: 60, historicalAccuracy: 0.48, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "training_tech", weight: 0.01, confidence: 65, historicalAccuracy: 0.52, recentTrend: "improving", learningRate: 0.03 },
+  // TECHNOLOGY & EQUIPMENT (4 factors) — noise factors reduced
+  { factor: "wearable_data", weight: 0.008, confidence: 76, historicalAccuracy: 0.61, recentTrend: "improving", learningRate: 0.05 },
+  { factor: "equipment_advantage", weight: 0.005, confidence: 60, historicalAccuracy: 0.48, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "training_tech", weight: 0.005, confidence: 65, historicalAccuracy: 0.52, recentTrend: "improving", learningRate: 0.03 },
   { factor: "video_analysis", weight: 0.02, confidence: 73, historicalAccuracy: 0.58, recentTrend: "stable", learningRate: 0.03 },
   
-  // ENVIRONMENTAL (6 factors)
+  // ENVIRONMENTAL (6 factors) — noise factors reduced
   { factor: "weather_impact", weight: 0.03, confidence: 75, historicalAccuracy: 0.60, recentTrend: "declining", learningRate: 0.02 },
-  { factor: "field_conditions", weight: 0.02, confidence: 71, historicalAccuracy: 0.56, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "field_conditions", weight: 0.01, confidence: 71, historicalAccuracy: 0.56, recentTrend: "stable", learningRate: 0.02 },
   { factor: "travel_fatigue", weight: 0.02, confidence: 74, historicalAccuracy: 0.59, recentTrend: "stable", learningRate: 0.03 },
   { factor: "altitude_adjustment", weight: 0.01, confidence: 68, historicalAccuracy: 0.53, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "temperature_impact", weight: 0.01, confidence: 69, historicalAccuracy: 0.54, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "temperature_impact", weight: 0.008, confidence: 69, historicalAccuracy: 0.54, recentTrend: "stable", learningRate: 0.02 },
   { factor: "timezone_disruption", weight: 0.01, confidence: 70, historicalAccuracy: 0.55, recentTrend: "stable", learningRate: 0.02 },
   
-  // FINANCIAL & REGULATORY (4 factors)
-  { factor: "salary_dynamics", weight: 0.01, confidence: 64, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
+  // FINANCIAL & REGULATORY (4 factors) — noise factors reduced
+  { factor: "salary_dynamics", weight: 0.005, confidence: 64, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
   { factor: "contract_motivation", weight: 0.02, confidence: 69, historicalAccuracy: 0.55, recentTrend: "improving", learningRate: 0.03 },
   { factor: "roster_stability", weight: 0.02, confidence: 72, historicalAccuracy: 0.57, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "team_investment", weight: 0.01, confidence: 66, historicalAccuracy: 0.52, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "team_investment", weight: 0.005, confidence: 66, historicalAccuracy: 0.52, recentTrend: "stable", learningRate: 0.02 },
 ];
 
 const totalWeight = FUSION_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
@@ -448,6 +456,9 @@ export interface MarketContext {
   startersOut?: { home: number; away: number };
   weatherImpact?: { temperature?: number; windSpeed?: number; precipitation?: number; impactLevel?: string };
   restDays?: { home: number; away: number };
+  homeB2B?: boolean;
+  awayB2B?: boolean;
+  situationalSpot?: { spotType: string; spotDescription: string };
   isPlayoff?: boolean;
   venue?: string;
   homeRecord?: string;
@@ -581,7 +592,41 @@ function getDataDrivenDirection(
     return { direction: "neutral", strengthBoost, confidenceBoost };
   }
 
-  if (source === "travel_fatigue" && marketContext.venue) {
+  if (source === "situational_spot" && marketContext.situationalSpot) {
+    const spot = marketContext.situationalSpot;
+    if (spot.spotType === "revenge") return { direction: "bullish", strengthBoost: strengthBoost + 15, confidenceBoost: confidenceBoost + 12 };
+    if (spot.spotType === "letdown") return { direction: "bearish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    if (spot.spotType === "look-ahead") return { direction: "bearish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    if (spot.spotType === "trap") return { direction: "bearish", strengthBoost: strengthBoost + 8, confidenceBoost: confidenceBoost + 8 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+  }
+
+  if (source === "biomech_fatigue" && marketContext.restDays) {
+    const homeB2B = marketContext.homeB2B;
+    const awayB2B = marketContext.awayB2B;
+    if (homeB2B && !awayB2B) return { direction: "bearish", strengthBoost: strengthBoost + 15, confidenceBoost: confidenceBoost + 10 };
+    if (awayB2B && !homeB2B) return { direction: "bullish", strengthBoost: strengthBoost + 15, confidenceBoost: confidenceBoost + 10 };
+    if (homeB2B && awayB2B) return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+    const diff = marketContext.restDays.home - marketContext.restDays.away;
+    if (diff >= 2) return { direction: "bullish", strengthBoost: strengthBoost + 8, confidenceBoost: confidenceBoost + 6 };
+    if (diff <= -2) return { direction: "bearish", strengthBoost: strengthBoost + 8, confidenceBoost: confidenceBoost + 6 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "load_management" && marketContext.restDays) {
+    const homeB2B = marketContext.homeB2B;
+    const awayB2B = marketContext.awayB2B;
+    if (homeB2B) return { direction: "bearish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 8 };
+    if (awayB2B) return { direction: "bullish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 8 };
+    if (marketContext.restDays.home >= 3) return { direction: "bullish", strengthBoost: strengthBoost + 5, confidenceBoost: confidenceBoost + 5 };
+    if (marketContext.restDays.away >= 3) return { direction: "bearish", strengthBoost: strengthBoost + 5, confidenceBoost: confidenceBoost + 5 };
+    return { direction: "neutral", strengthBoost, confidenceBoost };
+  }
+
+  if (source === "travel_fatigue" && (marketContext.venue || marketContext.restDays)) {
+    const awayB2B = marketContext.awayB2B;
+    if (awayB2B) return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    if (marketContext.restDays && marketContext.restDays.away <= 1) return { direction: "bullish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 5 };
     return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 3 };
   }
 
@@ -726,6 +771,11 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
       }
     }
     
+    if (LOW_DATA_RELIABILITY_FACTORS.has(config.source)) {
+      confidence = Math.min(confidence, 40);
+      strength = Math.min(strength, 50);
+    }
+
     const sportReasoningSuffix = getSportSpecificReasoning(sport, config.source);
     
     signals.push({

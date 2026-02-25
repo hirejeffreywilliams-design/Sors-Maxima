@@ -26,6 +26,8 @@ interface EdgeAlert {
   game: string;
   title: string;
   description: string;
+  reason: string;
+  timing: "early_value" | "settled" | "steam" | "unknown";
   timestamp: string;
   actionable: boolean;
 }

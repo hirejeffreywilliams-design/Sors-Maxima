@@ -125,6 +125,8 @@ interface EdgeAlert {
   game: string;
   title: string;
   description: string;
+  reason: string;
+  timing: "early_value" | "settled" | "steam" | "unknown";
   timestamp: string;
   actionable: boolean;
 }
@@ -437,15 +439,36 @@ function AlertCard({ alert }: { alert: EdgeAlert }) {
     info: "text-blue-500",
   };
 
+  const timingLabel: Record<string, string> = {
+    early_value: "Early Value",
+    settled: "Line Settled",
+    steam: "Steam Move",
+    unknown: "",
+  };
+  const timingStyle: Record<string, string> = {
+    early_value: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    settled: "bg-muted text-muted-foreground",
+    steam: "bg-red-500/10 text-red-600 dark:text-red-400",
+    unknown: "bg-muted text-muted-foreground",
+  };
+
   return (
     <div className={`flex items-start gap-2.5 p-2.5 rounded-md border ${severityStyle[alert.severity]}`} data-testid={`alert-${alert.id}`}>
       <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${severityIcon[alert.severity]}`} />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <p className="text-xs font-semibold">{alert.title}</p>
           <Badge variant="outline" className={`text-[9px] px-1 py-0 ${sportColor(alert.sport)}`}>{alert.sport}</Badge>
+          {alert.timing && alert.timing !== "unknown" && (
+            <Badge variant="secondary" className={`text-[9px] px-1 py-0 no-default-hover-elevate no-default-active-elevate ${timingStyle[alert.timing]}`} data-testid={`badge-timing-${alert.id}`}>
+              {timingLabel[alert.timing]}
+            </Badge>
+          )}
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">{alert.description}</p>
+        {alert.reason && (
+          <p className="text-[10px] text-foreground/60 mt-1 leading-relaxed" data-testid={`text-reason-${alert.id}`}>{alert.reason}</p>
+        )}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import type { Sport } from "@shared/schema";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { getInjuries, getInjurySummary, type InjuryReport } from "./espn-injury-provider";
 import { getWeatherForGames, isOutdoorVenue, type VenueWeather } from "./weather-provider";
-import { generateMarketSnapshot, type MarketSnapshot, type MarketGame } from "./marketSnapshotEngine";
+import { generateMarketSnapshot, type MarketSnapshot, type MarketGame, type LineMovementData } from "./marketSnapshotEngine";
 import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 import { getMomentumGames, type MomentumGame } from "./liveAnalyticsEngine";
 import { logError, logWarn } from "./errorLogger";
@@ -99,6 +99,8 @@ export interface EdgeAlert {
   game: string;
   title: string;
   description: string;
+  reason: string;
+  timing: "early_value" | "settled" | "steam" | "unknown";
   timestamp: string;
   actionable: boolean;
 }
@@ -315,6 +317,71 @@ function buildUnifiedGame(game: ESPNScoreboardGame, snapshot: SportSnapshot): Un
   };
 }
 
+function determineMovementTiming(game: MarketGame, lm?: LineMovementData): "early_value" | "settled" | "steam" | "unknown" {
+  const gameTime = new Date(game.date).getTime();
+  const now = Date.now();
+  const hoursUntilGame = (gameTime - now) / (1000 * 60 * 60);
+
+  if (lm?.velocity === "steam") return "steam";
+  if (hoursUntilGame > 24) return "early_value";
+  if (hoursUntilGame < 6) return "settled";
+  if (lm?.velocity === "slow" || lm?.direction === "stable") return "settled";
+  return "early_value";
+}
+
+function buildLineMovementReason(
+  game: MarketGame,
+  lm: LineMovementData,
+  snapshot: SportSnapshot,
+): string {
+  const parts: string[] = [];
+  const moveDesc = `Line moved ${lm.market} ${lm.opening} → ${lm.current}`;
+  parts.push(moveDesc);
+
+  const homeInjuries = snapshot.injuries.find(
+    r => r.teamAbbreviation === game.homeTeam.abbreviation || r.teamName.includes(game.homeTeam.name)
+  );
+  const awayInjuries = snapshot.injuries.find(
+    r => r.teamAbbreviation === game.awayTeam.abbreviation || r.teamName.includes(game.awayTeam.name)
+  );
+
+  const homeOut = homeInjuries?.injuries.filter(p =>
+    p.status.toLowerCase().includes("out") || p.status.toLowerCase().includes("doubtful")
+  ) || [];
+  const awayOut = awayInjuries?.injuries.filter(p =>
+    p.status.toLowerCase().includes("out") || p.status.toLowerCase().includes("doubtful")
+  ) || [];
+
+  const hasInjuryContext = homeOut.length > 0 || awayOut.length > 0;
+
+  if (hasInjuryContext) {
+    if (homeOut.length > 0 && lm.direction === "down") {
+      parts.push(`Possible injury factor: ${homeOut.slice(0, 2).map(p => p.playerName).join(", ")} listed OUT for ${game.homeTeam.abbreviation}.`);
+    } else if (awayOut.length > 0 && lm.direction === "up") {
+      parts.push(`Possible injury factor: ${awayOut.slice(0, 2).map(p => p.playerName).join(", ")} listed OUT for ${game.awayTeam.abbreviation}.`);
+    } else {
+      parts.push("No injury news aligns with this move.");
+    }
+  } else {
+    parts.push("No injury news — likely professional money driving the move.");
+  }
+
+  if (lm.sharpAction) {
+    if (lm.direction === "down") {
+      parts.push("Sharp action detected on the underdog side.");
+    } else if (lm.direction === "up") {
+      parts.push("Favorite getting more expensive — could be public or sharp money.");
+    }
+  }
+
+  const weather = game.venue ? snapshot.weatherMap.get(game.venue) : undefined;
+  if (weather && (weather.bettingImpact.level === "high" || weather.bettingImpact.level === "extreme")) {
+    parts.push(`Weather change may be a factor: ${weather.bettingImpact.factors.slice(0, 2).join(", ")}.`);
+  }
+
+  return parts.join(" ");
+}
+
 function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
   const alerts: EdgeAlert[] = [];
   const now = new Date().toISOString();
@@ -333,6 +400,8 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
           game: game.shortName,
           title: "Arbitrage Detected",
           description: `${game.edgeAnalysis.arbProfit.toFixed(1)}% guaranteed profit on ${game.shortName}`,
+          reason: `Cross-book price discrepancy creates a ${game.edgeAnalysis.arbProfit.toFixed(1)}% risk-free profit opportunity. Act fast — arbitrage windows close quickly.`,
+          timing: determineMovementTiming(game),
           timestamp: now,
           actionable: true,
         });
@@ -341,6 +410,12 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
       const maxEV = Math.max(Math.abs(game.edgeAnalysis?.homeEV || 0), Math.abs(game.edgeAnalysis?.awayEV || 0));
       if (maxEV > 0.08) {
         const side = (game.edgeAnalysis?.homeEV || 0) > (game.edgeAnalysis?.awayEV || 0) ? game.homeTeam.name : game.awayTeam.name;
+        const timing = determineMovementTiming(game);
+        const timingAdvice = timing === "early_value"
+          ? "Line still settling — value may increase or disappear."
+          : timing === "steam"
+            ? "Line moving fast — value disappearing."
+            : "Line relatively stable — window may hold.";
         alerts.push({
           id: `alert-${alertId++}`,
           type: "high_ev",
@@ -349,6 +424,8 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
           game: game.shortName,
           title: "High Expected Value",
           description: `${side} shows +${(maxEV * 100).toFixed(1)}% EV in ${game.shortName}`,
+          reason: `Model projects ${side} at higher win probability than the market implies, creating a +${(maxEV * 100).toFixed(1)}% expected value edge. ${timingAdvice}`,
+          timing,
           timestamp: now,
           actionable: true,
         });
@@ -356,14 +433,35 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
 
       for (const lm of game.lineMovement) {
         if (lm.sharpAction) {
+          const movementReason = buildLineMovementReason(game, lm, snapshot);
+          const timing = determineMovementTiming(game, lm);
           alerts.push({
             id: `alert-${alertId++}`,
             type: "sharp_action",
-            severity: "warning",
+            severity: lm.velocity === "steam" ? "critical" : "warning",
             sport: snapshot.sport,
             game: game.shortName,
-            title: "Sharp Money Detected",
+            title: lm.velocity === "steam" ? "Steam Move Detected" : "Sharp Money Detected",
             description: `${lm.market} moved ${lm.direction} (${lm.velocity}) on ${game.shortName}`,
+            reason: movementReason,
+            timing,
+            timestamp: now,
+            actionable: true,
+          });
+        }
+
+        if (!lm.sharpAction && Math.abs(lm.movement) >= 1.5) {
+          const movementReason = buildLineMovementReason(game, lm, snapshot);
+          alerts.push({
+            id: `alert-${alertId++}`,
+            type: "line_movement",
+            severity: "info",
+            sport: snapshot.sport,
+            game: game.shortName,
+            title: "Significant Line Movement",
+            description: `${lm.market} shifted ${lm.opening} → ${lm.current} on ${game.shortName}`,
+            reason: movementReason,
+            timing: determineMovementTiming(game, lm),
             timestamp: now,
             actionable: true,
           });
@@ -375,6 +473,7 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
       if (!game.venue?.name) continue;
       const weather = snapshot.weatherMap.get(game.venue.name);
       if (weather && (weather.bettingImpact.level === "high" || weather.bettingImpact.level === "extreme")) {
+        const factors = weather.bettingImpact.factors.slice(0, 3).join(", ");
         alerts.push({
           id: `alert-${alertId++}`,
           type: "weather_impact",
@@ -383,6 +482,8 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
           game: game.shortName,
           title: "Weather Alert",
           description: `${weather.bettingImpact.level} weather impact: ${weather.bettingImpact.factors.slice(0, 2).join(", ")}`,
+          reason: `Weather conditions at ${game.venue.name} could affect game play: ${factors}. Consider totals and outdoor-dependent props.`,
+          timing: "unknown",
           timestamp: now,
           actionable: true,
         });
@@ -400,6 +501,8 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
         game: `${snapshot.sport} Games`,
         title: "Significant Injury Load",
         description: `${totalOut} players listed as OUT across ${snapshot.sport} today`,
+        reason: `${totalOut} players are confirmed OUT across ${snapshot.sport} games today. Lines may shift as books adjust for missing personnel.`,
+        timing: "unknown",
         timestamp: now,
         actionable: false,
       });

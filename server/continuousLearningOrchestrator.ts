@@ -308,12 +308,106 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
     if (settled > 0 || mcRecorded > 0) {
       logInfo(`[Orchestrator] Auto-settled ${settled}/${checked} predictions, MC outcomes recorded: ${mcRecorded}`);
     }
+
+    try {
+      await updateClosingOdds(sportGames);
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Failed to update closing odds for user picks: ${e.message}`);
+    }
   } catch (error: any) {
     addError("settlement", error.message);
     logError(error, { context: "autoSettlePredictions" });
   }
 
   return { settled, checked };
+}
+
+async function updateClosingOdds(sportGames: Map<string, Map<string, any>>): Promise<void> {
+  try {
+    const unsettledPicks = await db.execute(sql`
+      SELECT * FROM user_picks WHERE settled = false
+    `);
+    const picks = unsettledPicks.rows as any[];
+    if (picks.length === 0) return;
+
+    let updated = 0;
+    for (const pick of picks) {
+      const sport = (pick.sport || "").toUpperCase();
+      const gameMap = sportGames.get(sport);
+      if (!gameMap) continue;
+
+      let game: any = null;
+      if (pick.game_id) {
+        game = gameMap.get(pick.game_id);
+      }
+      if (!game) {
+        const pickLower = (pick.pick || "").toLowerCase();
+        gameMap.forEach((g: any) => {
+          if (!game && (pickLower.includes(g.homeTeam) || pickLower.includes(g.awayTeam) ||
+              pickLower.includes(g.homeAbbr) || pickLower.includes(g.awayAbbr))) {
+            game = g;
+          }
+        });
+      }
+      if (!game) continue;
+
+      let closingOdds: number | null = null;
+      const betType = (pick.bet_type || "").toLowerCase();
+      const pickText = (pick.pick || "").toLowerCase();
+      const matchesHome = pickText.includes(game.homeTeam) || pickText.includes(game.homeAbbr) || pickText.includes("home");
+
+      if (betType.includes("moneyline") || betType === "h2h") {
+        closingOdds = matchesHome ? (game.homeML || null) : (game.awayML || null);
+      } else if (betType.includes("spread")) {
+        closingOdds = game.spread !== undefined ? (matchesHome ? Math.round(game.spread * 10) : Math.round(-game.spread * 10)) : null;
+      } else if (betType.includes("total") || betType.includes("over_under")) {
+        closingOdds = game.overUnder ? Math.round(game.overUnder * 10) : null;
+      }
+
+      const homeWon = game.homeScore > game.awayScore;
+      let won: boolean | null = null;
+      if (betType.includes("moneyline") || betType === "h2h") {
+        won = matchesHome ? homeWon : !homeWon;
+      } else if (betType.includes("spread") && game.spread !== undefined) {
+        const margin = matchesHome ? game.scoreDiff + game.spread : -game.scoreDiff - game.spread;
+        won = margin > 0;
+      } else if ((betType.includes("total") || betType.includes("over_under")) && game.overUnder !== undefined) {
+        const isOver = pickText.includes("over");
+        won = isOver ? game.totalScore > game.overUnder : game.totalScore < game.overUnder;
+      }
+
+      let clvResult: number | null = null;
+      if (closingOdds !== null && pick.odds_at_pick) {
+        const openImplied = oddsToImpliedProb(pick.odds_at_pick);
+        const closeImplied = oddsToImpliedProb(closingOdds);
+        if (openImplied !== null && closeImplied !== null) {
+          clvResult = Math.round((closeImplied - openImplied) * 10000) / 100;
+        }
+      }
+
+      await db.execute(sql`
+        UPDATE user_picks
+        SET closing_odds = ${closingOdds},
+            clv_result = ${clvResult},
+            settled = true,
+            won = ${won}
+        WHERE id = ${pick.id}
+      `);
+      updated++;
+    }
+
+    if (updated > 0) {
+      logInfo(`[Orchestrator] Updated closing odds for ${updated} user picks`);
+    }
+  } catch (e: any) {
+    logWarn(`[Orchestrator] updateClosingOdds error: ${e.message}`);
+  }
+}
+
+function oddsToImpliedProb(odds: number): number | null {
+  if (odds === 0) return null;
+  if (odds > 0) return 100 / (odds + 100);
+  return Math.abs(odds) / (Math.abs(odds) + 100);
 }
 
 function settleLeg(leg: any, game: any): "won" | "lost" | "push" | "unknown" {

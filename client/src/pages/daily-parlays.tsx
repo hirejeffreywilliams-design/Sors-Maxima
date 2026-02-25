@@ -13,7 +13,7 @@ import {
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Star,
   Check, Activity, Crown, Brain, Shield,
   Sparkles, Filter, ArrowRight, ChevronRight, Eye, Plus,
-  Trophy,
+  Trophy, Timer, Lock, AlertTriangle,
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
@@ -43,6 +43,8 @@ interface PrecomputedPick {
   recommendation?: string;
   winProbability?: number;
   insights?: string[];
+  timing?: "bet_now" | "wait" | "line_locked";
+  timingAdvice?: string;
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -70,6 +72,12 @@ const REC_CONFIG: Record<string, { label: string; color: string; icon: string }>
   lean_bet: { label: "Lean", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", icon: "eye" },
   avoid: { label: "Risky", color: "bg-red-500/15 text-red-400 border-red-500/30", icon: "shield" },
   fade: { label: "Fade", color: "bg-red-500/15 text-red-400 border-red-500/30", icon: "shield" },
+};
+
+const TIMING_CONFIG: Record<string, { label: string; color: string; Icon: typeof Zap }> = {
+  bet_now: { label: "Bet Now", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", Icon: Zap },
+  wait: { label: "Wait", color: "bg-amber-500/15 text-amber-400 border-amber-500/30", Icon: Timer },
+  line_locked: { label: "Locked", color: "bg-blue-500/15 text-blue-400 border-blue-500/30", Icon: Lock },
 };
 
 interface PredictionSnapshot {
@@ -218,13 +226,34 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
               <p className="text-sm font-semibold" data-testid={`text-pick-value-${pick.id}`}>
                 {pick.pick}
               </p>
-              {pick.recommendation && REC_CONFIG[pick.recommendation] && (
-                <Badge variant="outline" className={`text-[10px] px-2 py-0.5 shrink-0 ${REC_CONFIG[pick.recommendation].color}`}>
-                  {pick.recommendation === "strong_bet" && <Flame className="w-2.5 h-2.5 mr-0.5" />}
-                  {pick.recommendation === "moderate_bet" && <Target className="w-2.5 h-2.5 mr-0.5" />}
-                  {REC_CONFIG[pick.recommendation].label}
-                </Badge>
-              )}
+              <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                {pick.timing && TIMING_CONFIG[pick.timing] && (() => {
+                  const tc = TIMING_CONFIG[pick.timing!];
+                  const TimingIcon = tc.Icon;
+                  return (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Badge variant="outline" className={`text-[10px] px-2 py-0.5 gap-0.5 ${tc.color}`} data-testid={`badge-timing-${pick.id}`}>
+                          <TimingIcon className="w-2.5 h-2.5" />
+                          {tc.label}
+                        </Badge>
+                      </TooltipTrigger>
+                      {pick.timingAdvice && (
+                        <TooltipContent side="top" className="max-w-xs">
+                          <p className="text-xs">{pick.timingAdvice}</p>
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  );
+                })()}
+                {pick.recommendation && REC_CONFIG[pick.recommendation] && (
+                  <Badge variant="outline" className={`text-[10px] px-2 py-0.5 ${REC_CONFIG[pick.recommendation].color}`}>
+                    {pick.recommendation === "strong_bet" && <Flame className="w-2.5 h-2.5 mr-0.5" />}
+                    {pick.recommendation === "moderate_bet" && <Target className="w-2.5 h-2.5 mr-0.5" />}
+                    {REC_CONFIG[pick.recommendation].label}
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
         )}

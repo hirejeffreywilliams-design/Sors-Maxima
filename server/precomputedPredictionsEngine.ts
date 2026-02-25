@@ -3,6 +3,8 @@ import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions } from "./vegas-engine";
 import { analyzeLeg, type MarketContext } from "./quantumFusionEngine";
 import { getAllInjuries } from "./espn-injury-provider";
+import { getGameSituationalFactors, type SituationalFactors } from "./situationalEngine";
+import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import type { Sport } from "@shared/schema";
 
 export interface PrecomputedPick {
@@ -26,6 +28,8 @@ export interface PrecomputedPick {
   recommendation: string;
   winProbability: number;
   insights: string[];
+  timing: "bet_now" | "wait" | "line_locked";
+  timingAdvice: string;
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -71,6 +75,19 @@ const REC_LABELS: Record<string, string> = {
   fade: "Fade",
 };
 
+interface ReasoningContext {
+  homeRecord?: string;
+  awayRecord?: string;
+  mcSim?: { predictedHomeScore: number; predictedAwayScore: number; homeWinProb: number; simulations?: number };
+  sitFactors?: SituationalFactors | null;
+  homeInjuryCount?: number;
+  awayInjuryCount?: number;
+  homeStartersOut?: number;
+  awayStartersOut?: number;
+  venue?: string;
+  odds?: number;
+}
+
 function buildPickReasoning(
   pick: string,
   betType: string,
@@ -81,26 +98,58 @@ function buildPickReasoning(
   winProbability: number,
   homeTeam: string,
   awayTeam: string,
+  ctx?: ReasoningContext,
 ): string {
   const parts: string[] = [];
 
-  const bullishFactors = factors
-    .filter(f => f.direction === "bullish" && f.impact >= 50)
-    .sort((a, b) => b.impact - a.impact)
-    .slice(0, 3);
+  if (ctx?.homeRecord && ctx?.awayRecord) {
+    parts.push(`${awayTeam} (${ctx.awayRecord}) @ ${homeTeam} (${ctx.homeRecord})`);
+  }
+
+  if (ctx?.mcSim) {
+    const sims = ctx.mcSim.simulations || 10000;
+    parts.push(`${(sims / 1000).toFixed(0)}K simulations project ${Math.round(ctx.mcSim.predictedHomeScore)}-${Math.round(ctx.mcSim.predictedAwayScore)} final`);
+  }
+
+  if (ctx?.sitFactors) {
+    const sf = ctx.sitFactors;
+    const restParts: string[] = [];
+    if (sf.homeB2B) restParts.push(`${homeTeam} on back-to-back`);
+    if (sf.awayB2B) restParts.push(`${awayTeam} on back-to-back`);
+    if (!sf.homeB2B && !sf.awayB2B && Math.abs(sf.homeRestDays - sf.awayRestDays) >= 2) {
+      const rested = sf.homeRestDays > sf.awayRestDays ? homeTeam : awayTeam;
+      const tired = sf.homeRestDays > sf.awayRestDays ? awayTeam : homeTeam;
+      const restedDays = Math.max(sf.homeRestDays, sf.awayRestDays);
+      const tiredDays = Math.min(sf.homeRestDays, sf.awayRestDays);
+      restParts.push(`${rested} with ${restedDays} days rest vs ${tired} with ${tiredDays}`);
+    }
+    if (sf.spotType !== "normal") {
+      restParts.push(sf.spotDescription);
+    }
+    if (restParts.length > 0) parts.push(restParts.join("; "));
+  }
+
+  if (ctx && (ctx.homeStartersOut || 0) + (ctx.awayStartersOut || 0) > 0) {
+    const homeOut = ctx.homeStartersOut || 0;
+    const awayOut = ctx.awayStartersOut || 0;
+    if (awayOut > homeOut && awayOut >= 2) {
+      parts.push(`${awayOut} starters out for ${awayTeam} shifts matchup`);
+    } else if (homeOut > awayOut && homeOut >= 2) {
+      parts.push(`${homeOut} starters out for ${homeTeam} shifts matchup`);
+    }
+  }
 
   if (betType === "moneyline") {
     const team = pick.replace(" ML", "").trim();
-    if (winProbability >= 65) {
-      parts.push(`${team} has a ${winProbability}% model-projected win probability`);
-    } else if (winProbability >= 55) {
-      parts.push(`${team} is favored at ${winProbability}% win probability`);
+    const impliedProb = ctx?.odds ? (ctx.odds < 0 ? Math.abs(ctx.odds) / (Math.abs(ctx.odds) + 100) * 100 : 100 / (ctx.odds + 100) * 100) : 0;
+    if (impliedProb > 0 && Math.abs(winProbability - impliedProb) >= 3) {
+      parts.push(`Model estimates ${winProbability}% win probability vs ${Math.round(impliedProb)}% implied by odds = +${Math.round(winProbability - impliedProb)}% edge`);
     } else {
-      parts.push(`${team} has value at ${winProbability}% win probability vs the posted odds`);
+      parts.push(`${team} at ${winProbability}% model-projected win probability`);
     }
   } else if (betType === "spread") {
     if (ev > 3) {
-      parts.push(`The spread offers strong value with +${ev.toFixed(1)}% expected edge`);
+      parts.push(`Spread offers strong value with +${ev.toFixed(1)}% expected edge`);
     } else {
       parts.push(`Spread line is favorable based on projected scoring`);
     }
@@ -113,15 +162,14 @@ function buildPickReasoning(
     }
   }
 
+  const bullishFactors = factors
+    .filter(f => f.direction === "bullish" && f.impact >= 50)
+    .sort((a, b) => b.impact - a.impact)
+    .slice(0, 2);
   if (bullishFactors.length > 0) {
-    const factorDescs = bullishFactors.map(f => humanizeFactorName(f.name).toLowerCase());
-    parts.push(`backed by ${factorDescs.join(", ")}`);
-  }
-
-  if (confidence >= 75 && ev > 5) {
-    parts.push(`high confidence pick with strong +${ev.toFixed(1)}% expected value`);
-  } else if (ev > 2) {
-    parts.push(`+${ev.toFixed(1)}% expected value edge over the market`);
+    const primary = humanizeFactorName(bullishFactors[0].name);
+    const secondary = bullishFactors.length > 1 ? ` + ${humanizeFactorName(bullishFactors[1].name).toLowerCase()}` : "";
+    parts.push(`PRIMARY EDGE: ${primary}${secondary}`);
   }
 
   return parts.join(" — ");
@@ -153,6 +201,76 @@ let lastRunTime: number | null = null;
 let totalRuns = 0;
 let failedRuns = 0;
 let intervalHandle: ReturnType<typeof setInterval> | null = null;
+
+function determinePickTiming(
+  gameTime: string | undefined,
+  lineMovements: LineMovementData[],
+  ev: number,
+): { timing: "bet_now" | "wait" | "line_locked"; timingAdvice: string } {
+  const now = Date.now();
+  const gameDate = gameTime ? new Date(gameTime).getTime() : 0;
+  const hoursUntilGame = gameDate > 0 ? (gameDate - now) / (1000 * 60 * 60) : 12;
+
+  const hasSteam = lineMovements.some(lm => lm.velocity === "steam");
+  const hasSharp = lineMovements.some(lm => lm.sharpAction);
+  const isStable = lineMovements.length === 0 ||
+    lineMovements.every(lm => lm.velocity === "slow" || lm.direction === "stable");
+
+  if (hasSteam) {
+    const steamMove = lineMovements.find(lm => lm.velocity === "steam");
+    return {
+      timing: "bet_now",
+      timingAdvice: `Bet now — steam move detected${steamMove ? ` on ${steamMove.market} (${steamMove.opening} → ${steamMove.current})` : ""}, value disappearing fast`,
+    };
+  }
+
+  if (hoursUntilGame < 6) {
+    return {
+      timing: "line_locked",
+      timingAdvice: `Line locked — game starts in ${hoursUntilGame < 1 ? "under an hour" : `${Math.round(hoursUntilGame)}h`}, not much more movement expected`,
+    };
+  }
+
+  if (hoursUntilGame > 24 && hasSharp) {
+    return {
+      timing: "bet_now",
+      timingAdvice: "Bet now — sharp money detected, line will move away from current value",
+    };
+  }
+
+  if (hoursUntilGame > 24 && isStable) {
+    return {
+      timing: "wait",
+      timingAdvice: "Wait — line opened stable with no sharp action, may settle to better value by game time",
+    };
+  }
+
+  if (hasSharp) {
+    return {
+      timing: "bet_now",
+      timingAdvice: "Bet now — sharp action detected, grab current value before line adjusts",
+    };
+  }
+
+  if (ev > 5 && hoursUntilGame > 6) {
+    return {
+      timing: "bet_now",
+      timingAdvice: `Bet now — strong +${ev.toFixed(1)}% edge available, don't risk line movement eroding value`,
+    };
+  }
+
+  if (isStable && hoursUntilGame > 12) {
+    return {
+      timing: "wait",
+      timingAdvice: "Wait — line is stable and game is not imminent, monitor for better entry",
+    };
+  }
+
+  return {
+    timing: "bet_now",
+    timingAdvice: "Bet now — current odds offer solid value at this price point",
+  };
+}
 
 function gradeFromConfidence(confidence: number): string {
   if (confidence >= 80) return "A";
@@ -230,6 +348,13 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     console.log(`[PrecomputedEngine] Vegas predictions unavailable for ${sport}, using game analysis`);
   }
 
+  let marketData: MarketSnapshot | null = null;
+  try {
+    marketData = await generateMarketSnapshot(sport);
+  } catch {
+    console.log(`[PrecomputedEngine] Market snapshot unavailable for ${sport}`);
+  }
+
   const picks: PrecomputedPick[] = [];
   const now = new Date().toISOString();
 
@@ -271,6 +396,11 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       if (isAway) { awayInjuryCount += count; awayStartersOut += starters; }
     }
 
+    let sitFactors: SituationalFactors | null = null;
+    try {
+      sitFactors = getGameSituationalFactors(sport, game, games);
+    } catch {}
+
     let mcSim: any = null;
     try {
       const { simulateMatchup, getPreSimulated } = await import("./monteCarloEngine");
@@ -301,6 +431,10 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       spreadLine: game.odds?.spread || undefined,
       totalLine: game.odds?.total || undefined,
       venue: game.venue || undefined,
+      restDays: sitFactors ? { home: sitFactors.homeRestDays, away: sitFactors.awayRestDays } : undefined,
+      homeB2B: sitFactors?.homeB2B,
+      awayB2B: sitFactors?.awayB2B,
+      situationalSpot: sitFactors ? { spotType: sitFactors.spotType, spotDescription: sitFactors.spotDescription } : undefined,
     };
 
     if (mcSim) {
@@ -339,6 +473,9 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       { pick: `Under ${totalEstimate}`, betType: "total", odds: -110, desc: `Under ${totalEstimate}` },
     ];
 
+    const marketGame = marketData?.games.find(mg => mg.id === game.id);
+    const gameLineMovements: LineMovementData[] = marketGame?.lineMovement || [];
+
     for (const bet of betOptions) {
       const fusion = analyzeLeg(sport, bet.desc, bet.odds, {
         hasRealOdds: !!(game.odds?.homeMoneyline),
@@ -370,6 +507,15 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const rec = fusion.recommendation || "lean_bet";
       const winProb = fusion.winProbability || Math.round(confidence * 0.95);
 
+      const betLineMovements = gameLineMovements.filter(lm =>
+        lm.market.toLowerCase().includes(bet.betType) ||
+        (bet.betType === "moneyline" && lm.market.toLowerCase().includes("h2h")) ||
+        (bet.betType === "spread" && lm.market.toLowerCase().includes("spread")) ||
+        (bet.betType === "total" && (lm.market.toLowerCase().includes("total") || lm.market.toLowerCase().includes("over")))
+      );
+      const relevantMovements = betLineMovements.length > 0 ? betLineMovements : gameLineMovements;
+      const pickTiming = determinePickTiming(game.date, relevantMovements, evRounded);
+
       picks.push({
         id: `precomp-${sport}-${game.id}-${bet.betType}-${crypto.randomUUID().slice(0, 8)}`,
         sport,
@@ -387,10 +533,14 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         generatedAt: now,
         dataSource,
         gameTime: game.date,
-        reasoning: buildPickReasoning(bet.pick, bet.betType, confidence, evRounded, mappedFactors, rec, winProb, homeName, awayName),
+        reasoning: buildPickReasoning(bet.pick, bet.betType, confidence, evRounded, mappedFactors, rec, winProb, homeName, awayName, {
+          homeRecord, awayRecord, mcSim, sitFactors, homeInjuryCount, awayInjuryCount, homeStartersOut, awayStartersOut, venue: game.venue, odds: bet.odds,
+        }),
         recommendation: rec,
         winProbability: winProb,
         insights: (fusion.insights || []).slice(0, 3),
+        timing: pickTiming.timing,
+        timingAdvice: pickTiming.timingAdvice,
       });
     }
   }
@@ -414,6 +564,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const vpPick = vp.pick || vp.description || "";
     const vpBetType = vp.betType || "moneyline";
 
+    const vpTiming = determinePickTiming(vp.gameTime, [], vpEvRounded);
+
     picks.push({
       id: `precomp-vegas-${sport}-${crypto.randomUUID().slice(0, 12)}`,
       sport,
@@ -435,6 +587,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       recommendation: vpRec,
       winProbability: vpWinProb,
       insights: (fusion.insights || []).slice(0, 3),
+      timing: vpTiming.timing,
+      timingAdvice: vpTiming.timingAdvice,
     });
   }
 
