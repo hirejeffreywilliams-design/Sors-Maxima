@@ -42,7 +42,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 export function requireTier(...allowedTiers: string[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     if (!req.session?.isAuthenticated) {
       return res.status(401).json({ error: "Authentication required" });
     }
@@ -50,7 +50,7 @@ export function requireTier(...allowedTiers: string[]) {
     if (!username) {
       return res.status(401).json({ error: "Authentication required" });
     }
-    const subscription = stripeService.getUserSubscription(username);
+    const subscription = await stripeService.getUserSubscription(username);
     const userTier = subscription?.subscriptionTier || "free";
     if (allowedTiers.includes(userTier)) {
       return next();
@@ -113,14 +113,17 @@ export function idempotencyMiddleware(req: Request, res: Response, next: NextFun
 const rateLimitStore = new Map<string, { count: number; windowStart: number }>();
 
 export function rateLimitByTier(endpoint: string, limits: Record<string, number>, windowMs: number = 60000) {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const username = req.session?.username || "anon";
-    const tier = req.session?.isAdmin ? "whale" : ((() => {
+    let tier = "free";
+    if (req.session?.isAdmin) {
+      tier = "whale";
+    } else {
       try {
-        const sub = stripeService.getUserSubscription(username);
-        return sub.subscriptionTier || "free";
-      } catch { return "free"; }
-    })());
+        const sub = await stripeService.getUserSubscription(username);
+        tier = sub.subscriptionTier || "free";
+      } catch { tier = "free"; }
+    }
 
     const maxRequests = limits[tier] ?? limits["free"] ?? 10;
     const key = `rl:${endpoint}:${username}`;

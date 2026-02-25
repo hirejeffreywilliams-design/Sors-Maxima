@@ -522,7 +522,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
   // ==================== END SECURITY & DEBUG CENTER ====================
 
   // Grant free premium access to a user
-  app.post("/api/admin/grant-access", requireAdmin, (req, res) => {
+  app.post("/api/admin/grant-access", requireAdmin, async (req, res) => {
     try {
       const { username, tier } = req.body;
       
@@ -535,7 +535,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       }
       
       const adminUsername = req.session?.username || 'admin';
-      const subscription = stripeService.grantFreeAccess(username, tier, adminUsername);
+      const subscription = await stripeService.grantFreeAccess(username, tier, adminUsername);
       
       res.json({ 
         success: true, 
@@ -549,7 +549,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
   });
 
   // Revoke free premium access from a user
-  app.post("/api/admin/revoke-access", requireAdmin, (req, res) => {
+  app.post("/api/admin/revoke-access", requireAdmin, async (req, res) => {
     try {
       const { username } = req.body;
       
@@ -558,7 +558,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       }
       
       const adminUsername = req.session?.username || 'admin';
-      const subscription = stripeService.revokeFreeAccess(username, adminUsername);
+      const subscription = await stripeService.revokeFreeAccess(username, adminUsername);
       
       res.json({ 
         success: true, 
@@ -572,11 +572,11 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
   });
 
   // Get subscription stats for admin
-  app.get("/api/admin/subscription-stats", requireAdmin, (_req, res) => {
+  app.get("/api/admin/subscription-stats", requireAdmin, async (_req, res) => {
     try {
-      const allSubs = stripeService.getAllSubscriptions();
-      const stats = {
-        total: allSubs.size,
+      const allSubs = await stripeService.getAllSubscriptions();
+      const stats: Record<string, number> = {
+        total: allSubs.length,
         free: 0,
         pro: 0,
         elite: 0,
@@ -586,7 +586,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       
       allSubs.forEach((sub) => {
         stats[sub.subscriptionTier]++;
-        if ((sub as any).grantedFreeAccess) {
+        if (sub.grantedFreeAccess) {
           stats.grantedFree++;
         }
       });
@@ -652,9 +652,9 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
   });
 
   // AI Marketing Tools - Growth Metrics
-  app.get("/api/admin/marketing/metrics", requireAdmin, (_req, res) => {
+  app.get("/api/admin/marketing/metrics", requireAdmin, async (_req, res) => {
     try {
-      const allSubs = stripeService.getAllSubscriptions();
+      const allSubs = await stripeService.getAllSubscriptions();
       let activeTrials = 0;
       let paidSubscribers = 0;
       
@@ -670,7 +670,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
         else if (sub.subscriptionTier === 'whale') whaleCount++;
       });
       const realRevenue = (proCount * 49) + (eliteCount * 99) + (whaleCount * 249);
-      const totalAll = allSubs.size;
+      const totalAll = allSubs.length;
       const convRate = totalAll > 0 ? Math.round((paidSubscribers / totalAll) * 100 * 10) / 10 : 0;
       const metrics = {
         totalUsers: totalAll,
@@ -731,7 +731,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       const learningStats = await getLearningStats();
       const factorWeights = await getAllFactorWeights();
       const factorWeightsArray = Object.entries(factorWeights).map(([name, weight]) => ({ name, weight }));
-      const allSubs = stripeService.getAllSubscriptions();
+      const allSubs = await stripeService.getAllSubscriptions();
 
       const systemContext = {
         errorCount: errorLogs.length,
@@ -741,7 +741,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
           topPerformingFactors: factorWeightsArray.slice(0, 5),
         },
         subscriptionStats: {
-          total: allSubs.size,
+          total: allSubs.length,
         },
         category: category || 'general'
       };
@@ -805,7 +805,7 @@ Use technical but accessible language. Reference specific system components when
       const errorLogs = errorLogger.getLogs({ limit: 100 });
       const factorWeights = await getAllFactorWeights();
       const factorWeightsArray = Object.entries(factorWeights);
-      const allSubs = stripeService.getAllSubscriptions();
+      const allSubs = await stripeService.getAllSubscriptions();
       const hubStatus = getHubStatus();
       const pipelineHealth = getPipelineHealth();
       const quantumStats = getQuantumEngineStats();
@@ -822,7 +822,7 @@ Use technical but accessible language. Reference specific system components when
         components: {
           learningEngine: { status: 'operational', factorsActive: factorWeightsArray.length },
           errorLogging: { status: 'operational', recentErrors: errorLogs.length },
-          subscriptions: { status: 'operational', activeCount: allSubs.size },
+          subscriptions: { status: 'operational', activeCount: allSubs.length },
           quantumAnalysis: { status: hubStatus.running ? 'operational' : 'degraded', coherenceLevel, totalAnalyses: quantumStats.totalAnalyses || 0 },
           predictionEngine: { status: pipelineHealth.status === 'healthy' ? 'operational' : pipelineHealth.status, accuracy: predictionAccuracy, totalRuns: pipelineHealth.totalRuns },
         },
@@ -1741,21 +1741,21 @@ Follow these rules:
     }
   });
 
-  app.get("/api/admin/financial-projections", requireAdmin, (_req, res) => {
+  app.get("/api/admin/financial-projections", requireAdmin, async (_req, res) => {
     try {
-      const allSubs = stripeService.getAllSubscriptions();
+      const allSubs = await stripeService.getAllSubscriptions();
       const tierPrices: Record<string, number> = { free: 0, pro: 49, elite: 99, whale: 249 };
       let currentMRR = 0;
       let totalPaid = 0;
       const tierCounts: Record<string, number> = { free: 0, pro: 0, elite: 0, whale: 0 };
-      for (const [, sub] of Array.from(allSubs.entries())) {
-        const tier = (sub as any).tier || "free";
+      for (const sub of allSubs) {
+        const tier = sub.subscriptionTier || "free";
         tierCounts[tier] = (tierCounts[tier] || 0) + 1;
         const price = tierPrices[tier] || 0;
         currentMRR += price;
         if (price > 0) totalPaid++;
       }
-      const totalSubs = allSubs.size;
+      const totalSubs = allSubs.length;
       const currentARPU = totalSubs > 0 ? Math.round(currentMRR / totalSubs * 100) / 100 : 0;
 
       const avgCAC = 35;
@@ -3247,7 +3247,7 @@ Follow these rules:
       const orchestratorStatus = getOrchestratorStatus();
       const historicalStatus = getHistoricalLearningStatus();
 
-      const allSubs = stripeService.getAllSubscriptions();
+      const allSubs = await stripeService.getAllSubscriptions();
       let totalUsers = 0;
       let proUsers = 0;
       let eliteUsers = 0;
@@ -3714,7 +3714,7 @@ Follow these rules:
 
   app.get("/api/admin/pricing-intelligence", requireAdmin, async (_req, res) => {
     try {
-      const result = getPricingIntelligence();
+      const result = await getPricingIntelligence();
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Failed to get pricing intelligence" });
@@ -3723,7 +3723,7 @@ Follow these rules:
 
   app.get("/api/admin/owner-wealth", requireAdmin, async (_req, res) => {
     try {
-      const result = getOwnerWealthProjection();
+      const result = await getOwnerWealthProjection();
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Failed to get owner wealth projection" });
@@ -3732,7 +3732,7 @@ Follow these rules:
 
   app.get("/api/admin/competitor-benchmark", requireAdmin, async (_req, res) => {
     try {
-      const result = getCompetitorBenchmark();
+      const result = await getCompetitorBenchmark();
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Failed to get competitor benchmark" });
@@ -3741,7 +3741,7 @@ Follow these rules:
 
   app.get("/api/admin/pricing-recommendations", requireAdmin, async (_req, res) => {
     try {
-      const result = getPricingRecommendations();
+      const result = await getPricingRecommendations();
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Failed to get pricing recommendations" });
@@ -3750,7 +3750,7 @@ Follow these rules:
 
   app.get("/api/admin/growth-strategy", requireAdmin, async (_req, res) => {
     try {
-      const result = getGrowthStageStrategy();
+      const result = await getGrowthStageStrategy();
       res.json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message || "Failed to get growth strategy" });

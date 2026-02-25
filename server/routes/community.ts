@@ -130,9 +130,9 @@ async function generateRealNotification(): Promise<any | null> {
 export function registerCommunityRoutes(app: Express): void {
   // === Community / Tipster Routes ===
 
-  app.get("/api/communities", (_req, res) => {
+  app.get("/api/communities", async (_req, res) => {
     try {
-      const communities = communityService.getCommunities({ publicOnly: true });
+      const communities = await communityService.getCommunitiesAsync({ publicOnly: true });
       res.json(communities);
     } catch (err) {
       console.error("Get communities error:", err);
@@ -140,9 +140,9 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/communities/:id", (req, res) => {
+  app.get("/api/communities/:id", async (req, res) => {
     try {
-      const community = communityService.getCommunity(req.params.id);
+      const community = await communityService.getCommunityAsync(req.params.id);
       if (!community) {
         return res.status(404).json({ error: "Community not found" });
       }
@@ -153,7 +153,7 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/communities", idempotencyMiddleware, (req, res) => {
+  app.post("/api/communities", idempotencyMiddleware, async (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
@@ -165,7 +165,7 @@ export function registerCommunityRoutes(app: Express): void {
         return res.status(400).json({ error: "Name and description required" });
       }
 
-      const community = communityService.createCommunity({
+      const community = await communityService.createCommunity({
         name,
         description,
         creatorId: req.session.userId || req.session.username,
@@ -184,14 +184,14 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/communities/:id/join", (req, res) => {
+  app.post("/api/communities/:id/join", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
       const { isPaid } = req.body;
-      const result = communityService.joinCommunity(
+      const result = await communityService.joinCommunity(
         req.params.id,
         req.session.userId || req.session.username,
         req.session.username,
@@ -209,11 +209,11 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/communities/:id/picks", (req, res) => {
+  app.get("/api/communities/:id/picks", async (req, res) => {
     try {
       const userId = req.session?.userId || req.session?.username;
-      const isMember = userId ? communityService.isMember(req.params.id, userId) : false;
-      const picks = communityService.getPicks(req.params.id, { includePremium: isMember });
+      const isMember = userId ? await communityService.isMemberAsync(req.params.id, userId) : false;
+      const picks = await communityService.getPicksAsync(req.params.id, { includePremium: isMember });
       res.json(picks);
     } catch (err) {
       console.error("Get picks error:", err);
@@ -221,20 +221,20 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/communities/:id/picks", (req, res) => {
+  app.post("/api/communities/:id/picks", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
       const userId = req.session.userId || req.session.username;
-      if (!communityService.isMember(req.params.id, userId)) {
+      if (!(await communityService.isMemberAsync(req.params.id, userId))) {
         return res.status(403).json({ error: "Must be a member to post picks" });
       }
 
       const { title, sport, description, odds, stake, confidence, isPremium, price } = req.body;
       
-      const pick = communityService.createPick({
+      const pick = await communityService.createPick({
         communityId: req.params.id,
         authorId: userId,
         authorUsername: req.session.username,
@@ -255,7 +255,7 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.patch("/api/picks/:id/settle", (req, res) => {
+  app.patch("/api/picks/:id/settle", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated) {
         return res.status(401).json({ error: "Not authenticated" });
@@ -266,7 +266,7 @@ export function registerCommunityRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid status" });
       }
 
-      const pick = communityService.settlePick(req.params.id, status);
+      const pick = await communityService.settlePick(req.params.id, status);
       if (!pick) {
         return res.status(404).json({ error: "Pick not found" });
       }
@@ -278,7 +278,7 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/tips", (req, res) => {
+  app.post("/api/tips", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated || !req.session?.username) {
         return res.status(401).json({ error: "Not authenticated" });
@@ -290,7 +290,7 @@ export function registerCommunityRoutes(app: Express): void {
         return res.status(400).json({ error: "Invalid tip amount" });
       }
 
-      const result = communityService.sendTip({
+      const result = await communityService.sendTip({
         fromUserId: req.session.userId || req.session.username,
         fromUsername: req.session.username,
         toUserId,
@@ -311,14 +311,14 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/creator/earnings", (req, res) => {
+  app.get("/api/creator/earnings", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
       const userId = req.session.userId || req.session.username || '';
-      const earnings = communityService.getCreatorEarnings(userId);
+      const earnings = await communityService.getCreatorEarnings(userId);
       res.json(earnings);
     } catch (err) {
       console.error("Get earnings error:", err);
@@ -326,14 +326,14 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/creator/communities", (req, res) => {
+  app.get("/api/creator/communities", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
       const userId = req.session.userId || req.session.username;
-      const communities = communityService.getCommunities({ creatorId: userId });
+      const communities = await communityService.getCommunitiesAsync({ creatorId: userId });
       res.json(communities);
     } catch (err) {
       console.error("Get creator communities error:", err);
@@ -341,9 +341,9 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/admin/platform-revenue", requireAdmin, (_req, res) => {
+  app.get("/api/admin/platform-revenue", requireAdmin, async (_req, res) => {
     try {
-      const revenue = communityService.getPlatformRevenue();
+      const revenue = await communityService.getPlatformRevenue();
       res.json(revenue);
     } catch (err) {
       console.error("Get platform revenue error:", err);
@@ -351,14 +351,14 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  app.patch("/api/communities/:id/discord", (req, res) => {
+  app.patch("/api/communities/:id/discord", async (req, res) => {
     try {
       if (!req.session?.isAuthenticated) {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
       const { webhook } = req.body;
-      const success = communityService.updateDiscordWebhook(req.params.id, webhook);
+      const success = await communityService.updateDiscordWebhook(req.params.id, webhook);
       
       if (!success) {
         return res.status(404).json({ error: "Community not found" });
@@ -415,13 +415,13 @@ export function registerCommunityRoutes(app: Express): void {
   });
 
   // === Community Leaderboard ===
-  app.get("/api/community/leaderboard", (_req, res) => {
+  app.get("/api/community/leaderboard", async (_req, res) => {
     try {
-      const communities = communityService.getCommunities({ publicOnly: true });
+      const communities = await communityService.getCommunitiesAsync({ publicOnly: true });
       const userStatsMap = new Map<string, { wins: number; losses: number; totalStaked: number; totalPL: number; longestStreak: number; currentStreak: number }>();
 
       for (const community of communities) {
-        const picks = communityService.getPicks(community.id, { includePremium: true });
+        const picks = await communityService.getPicksAsync(community.id, { includePremium: true });
         for (const pick of picks) {
           const author = pick.authorUsername || pick.authorId;
           if (!userStatsMap.has(author)) {

@@ -394,9 +394,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <nav className="space-y-1 pb-2">
           {([
             { href: "/insights", icon: Star, label: "My Insights", testId: "mobile-nav-insights" },
-            { href: "/ev-heatmap", icon: Flame, label: "EV Heatmap", testId: "mobile-nav-ev" },
-            { href: "/line-movement", icon: TrendingUp, label: "Line Movement", testId: "mobile-nav-lines" },
-            { href: "/power-rankings", icon: BarChart3, label: "Power Rankings", testId: "mobile-nav-rankings" },
+            { href: "/odds-center", icon: TrendingUp, label: "Odds & Lines", testId: "mobile-nav-odds" },
             { href: "/rosters", icon: UsersRound, label: "Rosters & Injuries", testId: "mobile-nav-rosters" },
             { href: "/watchlist", icon: Star, label: "Watchlist", testId: "mobile-nav-watchlist" },
             { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
@@ -422,8 +420,6 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         <nav className="space-y-1 pb-2">
           {([
             { href: "/community", icon: Users, label: "Community Hub", testId: "mobile-nav-community" },
-            { href: "/tipster-communities", icon: UsersRound, label: "Tipster Groups", testId: "mobile-nav-tipsters" },
-            { href: "/shared-tickets", icon: GitBranch, label: "Shared Tickets", testId: "mobile-nav-shared" },
             { href: "/rewards", icon: Trophy, label: "Rewards & Practice", testId: "mobile-nav-rewards" },
           ] as const).map((item) => {
             const Icon = item.icon;
@@ -448,12 +444,10 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
           {([
             { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "mobile-nav-finance" },
             { href: "/ticket-history", icon: History, label: "Bet History", testId: "mobile-nav-history" },
-            { href: "/betting-profile", icon: UserCog, label: "Betting Profile", testId: "mobile-nav-betting-profile" },
             { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
             { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
             { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
             { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
-            { href: "/changelog", icon: Megaphone, label: "What's New", testId: "mobile-nav-changelog" },
           ] as const).map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;

@@ -539,11 +539,11 @@ async function accumulateInjuryData(): Promise<number> {
 async function accumulateCommunityData(): Promise<void> {
   try {
     const { communityService } = await import("./communityService");
-    const communities = communityService.getCommunities();
+    const communities = await communityService.getCommunitiesAsync();
     const sportPicks: Record<string, { total: number; wins: number; teams: Record<string, number>; markets: Record<string, number>; confidenceSum: number }> = {};
 
     for (const community of communities) {
-      const picks = communityService.getPicks(community.id);
+      const picks = await communityService.getPicksAsync(community.id);
       for (const pick of picks) {
         const sport = (pick.sport || "NBA").toUpperCase();
         if (!sportPicks[sport]) {

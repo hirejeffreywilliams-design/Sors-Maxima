@@ -7,10 +7,16 @@ import {
   createHash,
 } from "crypto";
 
-const BASE_SECRET = process.env.ADMIN_PASSWORD || "sors-maxima-default-key";
+const BASE_SECRET = process.env.ADMIN_PASSWORD || (() => {
+  const generated = randomBytes(32).toString('hex');
+  console.warn('[SECURITY] No ADMIN_PASSWORD env var set — using auto-generated key for algorithm protection.');
+  return generated;
+})();
+
+const DERIVED_SALT = process.env.ADMIN_PASSWORD ? "sors-maxima-salt-v1" : randomBytes(16).toString('hex');
 
 function deriveKey(purpose: string, length: number = 32): Buffer {
-  return scryptSync(BASE_SECRET + purpose, "sors-maxima-salt-v1", length);
+  return scryptSync(BASE_SECRET + purpose, DERIVED_SALT, length);
 }
 
 export class AlgorithmFingerprint {

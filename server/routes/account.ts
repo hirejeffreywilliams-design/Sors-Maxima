@@ -80,13 +80,13 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/subscription", (req, res) => {
+  app.get("/api/subscription", async (req, res) => {
     if (!req.session?.isAuthenticated || !req.session?.username) {
       return res.json({ tier: 'none', status: 'none' });
     }
     
-    const subscription = stripeService.getUserSubscription(req.session.username);
-    const trialStatus = stripeService.getTrialStatus(req.session.username);
+    const subscription = await stripeService.getUserSubscription(req.session.username);
+    const trialStatus = await stripeService.getTrialStatus(req.session.username);
     
     res.json({
       tier: subscription.subscriptionTier,
@@ -96,33 +96,33 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     });
   });
 
-  app.get("/api/trial/status", (req, res) => {
+  app.get("/api/trial/status", async (req, res) => {
     if (!req.session?.isAuthenticated || !req.session?.username) {
       return res.json({ isOnTrial: false, daysRemaining: 0, trialExpired: false, trialTier: 'none' });
     }
     
-    const trialStatus = stripeService.getTrialStatus(req.session.username);
+    const trialStatus = await stripeService.getTrialStatus(req.session.username);
     res.json(trialStatus);
   });
 
-  app.post("/api/trial/start", (req, res) => {
+  app.post("/api/trial/start", async (req, res) => {
     if (!req.session?.isAuthenticated || !req.session?.username) {
       return res.status(401).json({ error: "Not authenticated" });
     }
     
-    const trialStatus = stripeService.getTrialStatus(req.session.username);
+    const trialStatus = await stripeService.getTrialStatus(req.session.username);
     if (trialStatus.hadTrial) {
       return res.status(400).json({ error: "Trial already used or expired" });
     }
     
-    const subscription = stripeService.startTrial(req.session.username);
+    const subscription = await stripeService.startTrial(req.session.username);
     if (!subscription) {
       return res.status(400).json({ error: "Unable to start trial" });
     }
     
     res.json({ 
       success: true, 
-      trial: stripeService.getTrialStatus(req.session.username),
+      trial: await stripeService.getTrialStatus(req.session.username),
       subscription,
     });
   });
@@ -139,7 +139,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       }
 
       const username = req.session.username;
-      let subscription = stripeService.getUserSubscription(username);
+      let subscription = await stripeService.getUserSubscription(username);
       
       let customerId = subscription.stripeCustomerId;
       if (!customerId) {
@@ -174,7 +174,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
-      const subscription = stripeService.getUserSubscription(req.session.username);
+      const subscription = await stripeService.getUserSubscription(req.session.username);
       if (!subscription.stripeCustomerId) {
         return res.status(400).json({ error: "No subscription found" });
       }
@@ -652,11 +652,11 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   // === Subscription Tier Info ===
-  app.get("/api/credits", (_req, res) => {
+  app.get("/api/credits", async (_req, res) => {
     const username = _req.session?.isAuthenticated ? _req.session.username : null;
     let tier = "free";
     if (username) {
-      const subscription = stripeService.getUserSubscription(username);
+      const subscription = await stripeService.getUserSubscription(username);
       tier = subscription.subscriptionTier || "free";
     }
     const tierFeatures: Record<string, string> = {

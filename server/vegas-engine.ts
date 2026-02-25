@@ -1,5 +1,7 @@
 import type { Sport } from "@shared/schema";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
+import { getTeamDetail } from "./platformIntelligenceEngine";
+import { generateIntelligenceFeed, type EdgeAlert } from "./unifiedIntelligenceHub";
 
 export interface VegasFactor {
   name: string;
@@ -92,6 +94,83 @@ const TEAM_POWER_RATINGS: Record<string, number> = {
   "Devils": 104.2, "Wild": 103.8, "Flames": 102.9, "Kraken": 103.5,
 };
 
+function getDynamicPowerRating(teamName: string, sport: Sport): number {
+  const staticRating = TEAM_POWER_RATINGS[teamName];
+  const baseRating = staticRating || (sport === "NFL" || sport === "NCAAF" ? 25 : 100);
+
+  try {
+    const detail = getTeamDetail(teamName, sport);
+    if (detail.record && detail.record.totalGamesTracked >= 3) {
+      const { wins, losses, avgPointsFor, avgPointsAgainst } = detail.record;
+      const totalGames = wins + losses;
+      if (totalGames === 0) return baseRating;
+
+      const winPct = (wins / totalGames) * 100;
+      const isFootball = sport === "NFL" || sport === "NCAAF";
+      const scaleFactor = isFootball ? 0.08 : 0.15;
+      const adjustFactor = isFootball ? 0.12 : 0.06;
+
+      const rating = baseRating + (winPct - 50) * scaleFactor + (avgPointsFor - avgPointsAgainst) * adjustFactor;
+      return Math.round(rating * 10) / 10;
+    }
+  } catch {}
+
+  return baseRating;
+}
+
+async function generateSharpMoneyDataFromHub(
+  gameId?: string,
+  sport?: Sport,
+  gameName?: string,
+): Promise<{ sharpMoney: number; publicMoney: number; lineMovement: number; steamMove: boolean; reverseLineMove: boolean }> {
+  const neutral = { sharpMoney: 50, publicMoney: 50, lineMovement: 0, steamMove: false, reverseLineMove: false };
+
+  if (!gameName && !gameId) return neutral;
+
+  try {
+    const feed = await generateIntelligenceFeed();
+    const matchingAlerts = feed.edgeAlerts.filter((alert: EdgeAlert) => {
+      if (sport && alert.sport !== sport) return false;
+      if (gameName && alert.game) {
+        const alertGameNorm = alert.game.toLowerCase();
+        const gameNameNorm = gameName.toLowerCase();
+        if (alertGameNorm.includes(gameNameNorm) || gameNameNorm.includes(alertGameNorm)) return true;
+        const gameParts = gameNameNorm.split(/\s*[@vs.]+\s*/);
+        return gameParts.some(part => part.length > 2 && alertGameNorm.includes(part.trim()));
+      }
+      return false;
+    });
+
+    if (matchingAlerts.length === 0) return neutral;
+
+    let sharpMoney = 50;
+    let lineMovement = 0;
+    let steamMove = false;
+    let reverseLineMove = false;
+
+    for (const alert of matchingAlerts) {
+      if (alert.type === "sharp_action") {
+        sharpMoney = Math.min(85, sharpMoney + 12);
+        if (alert.title.toLowerCase().includes("steam")) {
+          steamMove = true;
+          sharpMoney = Math.min(85, sharpMoney + 5);
+        }
+      }
+      if (alert.type === "line_movement") {
+        lineMovement += alert.severity === "critical" ? 2.5 : alert.severity === "warning" ? 1.5 : 0.5;
+        if (alert.description.toLowerCase().includes("reverse")) {
+          reverseLineMove = true;
+        }
+      }
+    }
+
+    const publicMoney = 100 - sharpMoney;
+    return { sharpMoney: Math.round(sharpMoney), publicMoney: Math.round(publicMoney), lineMovement: Math.round(lineMovement * 10) / 10, steamMove, reverseLineMove };
+  } catch {
+    return neutral;
+  }
+}
+
 function removeVig(odds1: number, odds2: number): { fair1: number; fair2: number; hold: number } {
   const implied1 = 1 / odds1;
   const implied2 = 1 / odds2;
@@ -171,8 +250,8 @@ function generateSituationalFactors(
 ): VegasFactor[] {
   const factors: VegasFactor[] = [];
   
-  const homePower = TEAM_POWER_RATINGS[homeTeam] || 100;
-  const awayPower = TEAM_POWER_RATINGS[awayTeam] || 100;
+  const homePower = getDynamicPowerRating(homeTeam, sport);
+  const awayPower = getDynamicPowerRating(awayTeam, sport);
   const powerDiff = homePower - awayPower;
   if (Math.abs(powerDiff) > 3) {
     factors.push({
@@ -203,16 +282,6 @@ function generateSituationalFactors(
   });
   
   return factors;
-}
-
-function generateSharpMoneyData(): { sharpMoney: number; publicMoney: number; lineMovement: number; steamMove: boolean; reverseLineMove: boolean } {
-  return {
-    sharpMoney: 50,
-    publicMoney: 50,
-    lineMovement: 0,
-    steamMove: false,
-    reverseLineMove: false,
-  };
 }
 
 let vegasGamesCache: { games: Array<{ home: string; away: string; sport: Sport }>; timestamp: number } | null = null;
@@ -253,13 +322,20 @@ export async function generateVegasPredictions(sport?: Sport): Promise<VegasPred
   const filteredGames = sport ? games.filter(g => g.sport === sport) : games;
   const config = DEFAULT_CONFIG;
   
+  const sharpDataMap = new Map<number, { sharpMoney: number; publicMoney: number; lineMovement: number; steamMove: boolean; reverseLineMove: boolean }>();
+  await Promise.all(filteredGames.map(async (game, index) => {
+    const gameName = `${game.away} @ ${game.home}`;
+    const result = await generateSharpMoneyDataFromHub(undefined, game.sport, gameName);
+    sharpDataMap.set(index, result);
+  }));
+
   return filteredGames.map((game, index) => {
-    const homePower = TEAM_POWER_RATINGS[game.home] || 100;
-    const awayPower = TEAM_POWER_RATINGS[game.away] || 100;
+    const homePower = getDynamicPowerRating(game.home, game.sport);
+    const awayPower = getDynamicPowerRating(game.away, game.sport);
     const powerDiff = homePower - awayPower + config.homeAdvantage[game.sport];
     
     const factors = generateSituationalFactors(game.home, game.away, game.sport, config);
-    const sharpData = generateSharpMoneyData();
+    const sharpData = sharpDataMap.get(index) || { sharpMoney: 50, publicMoney: 50, lineMovement: 0, steamMove: false, reverseLineMove: false };
     
     let vegasLine: number;
     let betType: "spread" | "moneyline" | "total";

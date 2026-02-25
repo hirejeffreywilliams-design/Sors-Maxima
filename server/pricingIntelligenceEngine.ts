@@ -25,18 +25,18 @@ const COST_STRUCTURE = {
 
 const TAX_RATE = 0.35;
 
-function getSubscriberData() {
-  const allSubs = stripeService.getAllSubscriptions();
+async function getSubscriberData() {
+  const allSubs = await stripeService.getAllSubscriptions();
   const tierCounts: Record<string, number> = { free: 0, pro: 0, elite: 0, whale: 0 };
   let totalPaid = 0;
 
-  for (const [, sub] of Array.from(allSubs.entries())) {
-    const tier = (sub as any).tier || "free";
+  for (const sub of allSubs) {
+    const tier = sub.subscriptionTier || "free";
     tierCounts[tier] = (tierCounts[tier] || 0) + 1;
     if (tier !== "free") totalPaid++;
   }
 
-  const totalSubs = allSubs.size || Object.values(tierCounts).reduce((a, b) => a + b, 0);
+  const totalSubs = allSubs.length || Object.values(tierCounts).reduce((a, b) => a + b, 0);
   return { tierCounts, totalSubs, totalPaid };
 }
 
@@ -111,8 +111,8 @@ function calculateValuation(arr: number, monthlyGrowthRate: number) {
   };
 }
 
-export function getPricingIntelligence() {
-  const { tierCounts, totalSubs, totalPaid } = getSubscriberData();
+export async function getPricingIntelligence() {
+  const { tierCounts, totalSubs, totalPaid } = await getSubscriberData();
   const currentMRR = calculateMRR(tierCounts);
   const currentARR = currentMRR * 12;
   const arpu = totalSubs > 0 ? currentMRR / totalSubs : 0;
@@ -174,8 +174,8 @@ export function getPricingIntelligence() {
   };
 }
 
-export function getOwnerWealthProjection() {
-  const { tierCounts, totalSubs, totalPaid } = getSubscriberData();
+export async function getOwnerWealthProjection() {
+  const { tierCounts, totalSubs, totalPaid } = await getSubscriberData();
   const currentMRR = calculateMRR(tierCounts);
   const monthlyBreakdown = calculateCosts(currentMRR, totalPaid);
 
@@ -256,7 +256,7 @@ export function getOwnerWealthProjection() {
   };
 }
 
-export function getCompetitorBenchmark() {
+export async function getCompetitorBenchmark() {
   const competitors = [
     {
       name: "Action Network",
@@ -320,7 +320,7 @@ export function getCompetitorBenchmark() {
     },
   ];
 
-  const { tierCounts, totalPaid } = getSubscriberData();
+  const { tierCounts, totalPaid } = await getSubscriberData();
   const currentMRR = calculateMRR(tierCounts);
 
   const positioning = {
@@ -351,8 +351,8 @@ export function getCompetitorBenchmark() {
   return { competitors, positioning, generatedAt: new Date().toISOString() };
 }
 
-export function getPricingRecommendations() {
-  const { tierCounts, totalSubs, totalPaid } = getSubscriberData();
+export async function getPricingRecommendations() {
+  const { tierCounts, totalSubs, totalPaid } = await getSubscriberData();
   const currentMRR = calculateMRR(tierCounts);
   const freeToTotal = totalSubs > 0 ? tierCounts.free / totalSubs : 0;
   const currentStage = totalSubs < 100 ? "launch" : totalSubs < 1000 ? "traction" : totalSubs < 10000 ? "growth" : "scale";
@@ -495,8 +495,8 @@ export function getPricingRecommendations() {
   };
 }
 
-export function getGrowthStageStrategy() {
-  const { tierCounts, totalSubs, totalPaid } = getSubscriberData();
+export async function getGrowthStageStrategy() {
+  const { tierCounts, totalSubs, totalPaid } = await getSubscriberData();
   const currentMRR = calculateMRR(tierCounts);
   const assumedGrowthRate = 0.08;
 

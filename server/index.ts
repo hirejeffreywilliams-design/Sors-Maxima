@@ -54,7 +54,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use(session({
-  secret: process.env.SESSION_SECRET || "sors-maxima-default-session-secret",
+  secret: process.env.SESSION_SECRET || (() => {
+    const generated = require('crypto').randomBytes(64).toString('hex');
+    console.warn('[SECURITY] No SESSION_SECRET env var set — using auto-generated secret. Sessions will not persist across restarts.');
+    return generated;
+  })(),
   resave: false,
   saveUninitialized: false,
   cookie: {

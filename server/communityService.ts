@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-// Tipster Communities Service - In-app community feature with monetization
+import { pool } from './db';
 
 interface Community {
   id: string;
@@ -11,14 +11,14 @@ interface Community {
   bannerColor: string;
   isPublic: boolean;
   isPremium: boolean;
-  monthlyPrice: number; // 0 for free communities
+  monthlyPrice: number;
   memberCount: number;
   pickAccuracy: number;
   totalPicks: number;
   winningPicks: number;
   createdAt: Date;
   tags: string[];
-  discordWebhook?: string; // For Discord sync
+  discordWebhook?: string;
 }
 
 interface CommunityMember {
@@ -28,7 +28,7 @@ interface CommunityMember {
   username: string;
   role: 'owner' | 'moderator' | 'member';
   joinedAt: Date;
-  subscriptionEndsAt?: Date; // For premium communities
+  subscriptionEndsAt?: Date;
 }
 
 interface Pick {
@@ -44,7 +44,7 @@ interface Pick {
   confidence: 'low' | 'medium' | 'high' | 'max';
   status: 'pending' | 'won' | 'lost' | 'push' | 'void';
   isPremium: boolean;
-  price: number; // For individual paid picks
+  price: number;
   likes: number;
   createdAt: Date;
   settledAt?: Date;
@@ -57,7 +57,7 @@ interface Tip {
   toUserId: string;
   toUsername: string;
   amount: number;
-  platformFee: number; // App owner's cut
+  platformFee: number;
   creatorReceived: number;
   message?: string;
   pickId?: string;
@@ -73,24 +73,97 @@ interface CreatorEarnings {
   paidPicks: number;
 }
 
-// Platform fee configuration (App owner revenue)
-const PLATFORM_FEE_PERCENT = 15; // 15% of all transactions
+const PLATFORM_FEE_PERCENT = 15;
 
 class CommunityService {
-  private communities: Map<string, Community> = new Map();
-  private members: Map<string, CommunityMember[]> = new Map();
-  private picks: Map<string, Pick[]> = new Map();
-  private tips: Tip[] = [];
-  private creatorEarnings: Map<string, CreatorEarnings> = new Map();
-  private platformRevenue = 0;
+  private initialized = false;
+  private initPromise: Promise<void> | null = null;
 
   constructor() {
-    this.seedDemoData();
+    this.initPromise = this.init();
   }
 
-  private seedDemoData() {
-    // Seed some demo communities
-    const demoCommunities: Community[] = [
+  private async init() {
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS communities (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          description TEXT,
+          creator_id TEXT NOT NULL,
+          creator_username TEXT NOT NULL,
+          banner_color TEXT DEFAULT '#3b82f6',
+          is_public BOOLEAN DEFAULT true,
+          is_premium BOOLEAN DEFAULT false,
+          monthly_price REAL DEFAULT 0,
+          member_count INTEGER DEFAULT 0,
+          pick_accuracy REAL DEFAULT 0,
+          total_picks INTEGER DEFAULT 0,
+          winning_picks INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT NOW(),
+          tags TEXT[] DEFAULT '{}',
+          discord_webhook TEXT
+        );
+        CREATE TABLE IF NOT EXISTS community_members (
+          id TEXT PRIMARY KEY,
+          community_id TEXT NOT NULL,
+          user_id TEXT NOT NULL,
+          username TEXT NOT NULL,
+          role TEXT NOT NULL DEFAULT 'member',
+          joined_at TIMESTAMP DEFAULT NOW(),
+          UNIQUE(community_id, user_id)
+        );
+        CREATE TABLE IF NOT EXISTS community_picks (
+          id TEXT PRIMARY KEY,
+          community_id TEXT NOT NULL,
+          author_id TEXT NOT NULL,
+          author_username TEXT NOT NULL,
+          title TEXT NOT NULL,
+          sport TEXT,
+          description TEXT,
+          odds TEXT,
+          stake REAL DEFAULT 0,
+          confidence TEXT DEFAULT 'medium',
+          status TEXT DEFAULT 'pending',
+          is_premium BOOLEAN DEFAULT false,
+          price REAL DEFAULT 0,
+          likes INTEGER DEFAULT 0,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS community_tips (
+          id TEXT PRIMARY KEY,
+          from_user_id TEXT NOT NULL,
+          from_username TEXT NOT NULL,
+          to_user_id TEXT NOT NULL,
+          to_username TEXT NOT NULL,
+          amount REAL NOT NULL,
+          platform_fee REAL NOT NULL,
+          creator_received REAL NOT NULL,
+          message TEXT,
+          pick_id TEXT,
+          created_at TIMESTAMP DEFAULT NOW()
+        );
+      `);
+
+      await this.seedIfEmpty();
+      this.initialized = true;
+    } catch (err) {
+      console.error('[CommunityService] Init error:', err);
+    }
+  }
+
+  private async ensureInitialized() {
+    if (!this.initialized && this.initPromise) {
+      await this.initPromise;
+    }
+  }
+
+  private async seedIfEmpty() {
+    const result = await pool.query('SELECT COUNT(*) as count FROM communities');
+    const count = parseInt(result.rows[0].count, 10);
+    if (count > 0) return;
+
+    const demoCommunities = [
       {
         id: 'comm_1',
         name: 'Sharp NBA Plays',
@@ -144,69 +217,86 @@ class CommunityService {
       },
     ];
 
-    demoCommunities.forEach(c => this.communities.set(c.id, c));
+    for (const c of demoCommunities) {
+      await pool.query(
+        `INSERT INTO communities (id, name, description, creator_id, creator_username, banner_color, is_public, is_premium, monthly_price, member_count, pick_accuracy, total_picks, winning_picks, created_at, tags)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+         ON CONFLICT (id) DO NOTHING`,
+        [c.id, c.name, c.description, c.creatorId, c.creatorUsername, c.bannerColor, c.isPublic, c.isPremium, c.monthlyPrice, c.memberCount, c.pickAccuracy, c.totalPicks, c.winningPicks, c.createdAt, c.tags]
+      );
+    }
+  }
+
+  private rowToCommunity(row: any): Community {
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description || '',
+      creatorId: row.creator_id,
+      creatorUsername: row.creator_username,
+      bannerColor: row.banner_color || '#3b82f6',
+      isPublic: row.is_public,
+      isPremium: row.is_premium,
+      monthlyPrice: row.monthly_price || 0,
+      memberCount: row.member_count || 0,
+      pickAccuracy: row.pick_accuracy || 0,
+      totalPicks: row.total_picks || 0,
+      winningPicks: row.winning_picks || 0,
+      createdAt: new Date(row.created_at),
+      tags: row.tags || [],
+      discordWebhook: row.discord_webhook || undefined,
+    };
+  }
+
+  private rowToMember(row: any): CommunityMember {
+    return {
+      id: row.id,
+      communityId: row.community_id,
+      userId: row.user_id,
+      username: row.username,
+      role: row.role as CommunityMember['role'],
+      joinedAt: new Date(row.joined_at),
+    };
+  }
+
+  private rowToPick(row: any): Pick {
+    return {
+      id: row.id,
+      communityId: row.community_id,
+      authorId: row.author_id,
+      authorUsername: row.author_username,
+      title: row.title,
+      sport: row.sport || '',
+      description: row.description || '',
+      odds: row.odds || '',
+      stake: row.stake || 0,
+      confidence: row.confidence as Pick['confidence'],
+      status: row.status as Pick['status'],
+      isPremium: row.is_premium || false,
+      price: row.price || 0,
+      likes: row.likes || 0,
+      createdAt: new Date(row.created_at),
+    };
+  }
+
+  private rowToTip(row: any): Tip {
+    return {
+      id: row.id,
+      fromUserId: row.from_user_id,
+      fromUsername: row.from_username,
+      toUserId: row.to_user_id,
+      toUsername: row.to_username,
+      amount: row.amount,
+      platformFee: row.platform_fee,
+      creatorReceived: row.creator_received,
+      message: row.message || undefined,
+      pickId: row.pick_id || undefined,
+      createdAt: new Date(row.created_at),
+    };
   }
 
   generateId(prefix: string): string {
     return `${prefix}_${crypto.randomUUID()}`;
-  }
-
-  // Community Management
-  createCommunity(data: {
-    name: string;
-    description: string;
-    creatorId: string;
-    creatorUsername: string;
-    isPublic: boolean;
-    isPremium: boolean;
-    monthlyPrice: number;
-    tags: string[];
-    discordWebhook?: string;
-  }): Community {
-    const community: Community = {
-      id: this.generateId('comm'),
-      name: data.name,
-      description: data.description,
-      creatorId: data.creatorId,
-      creatorUsername: data.creatorUsername,
-      bannerColor: this.getDeterministicBannerColor(data.name),
-      isPublic: data.isPublic,
-      isPremium: data.isPremium,
-      monthlyPrice: data.monthlyPrice,
-      memberCount: 1,
-      pickAccuracy: 0,
-      totalPicks: 0,
-      winningPicks: 0,
-      createdAt: new Date(),
-      tags: data.tags,
-      discordWebhook: data.discordWebhook,
-    };
-
-    this.communities.set(community.id, community);
-    
-    // Add creator as owner
-    const member: CommunityMember = {
-      id: this.generateId('mem'),
-      communityId: community.id,
-      userId: data.creatorId,
-      username: data.creatorUsername,
-      role: 'owner',
-      joinedAt: new Date(),
-    };
-    this.members.set(community.id, [member]);
-    
-    // Initialize creator earnings
-    if (!this.creatorEarnings.has(data.creatorId)) {
-      this.creatorEarnings.set(data.creatorId, {
-        totalEarnings: 0,
-        pendingPayout: 0,
-        tips: 0,
-        subscriptions: 0,
-        paidPicks: 0,
-      });
-    }
-
-    return community;
   }
 
   private getDeterministicBannerColor(name: string): string {
@@ -225,103 +315,184 @@ class CommunityService {
     return colors[Math.abs(hash) % colors.length];
   }
 
-  getCommunities(options?: { 
-    publicOnly?: boolean; 
+  async createCommunity(data: {
+    name: string;
+    description: string;
+    creatorId: string;
+    creatorUsername: string;
+    isPublic: boolean;
+    isPremium: boolean;
+    monthlyPrice: number;
+    tags: string[];
+    discordWebhook?: string;
+  }): Promise<Community> {
+    await this.ensureInitialized();
+
+    const id = this.generateId('comm');
+    const bannerColor = this.getDeterministicBannerColor(data.name);
+    const now = new Date();
+
+    await pool.query(
+      `INSERT INTO communities (id, name, description, creator_id, creator_username, banner_color, is_public, is_premium, monthly_price, member_count, pick_accuracy, total_picks, winning_picks, created_at, tags, discord_webhook)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 1, 0, 0, 0, $10, $11, $12)`,
+      [id, data.name, data.description, data.creatorId, data.creatorUsername, bannerColor, data.isPublic, data.isPremium, data.monthlyPrice, now, data.tags, data.discordWebhook || null]
+    );
+
+    const memberId = this.generateId('mem');
+    await pool.query(
+      `INSERT INTO community_members (id, community_id, user_id, username, role, joined_at)
+       VALUES ($1, $2, $3, $4, 'owner', $5)`,
+      [memberId, id, data.creatorId, data.creatorUsername, now]
+    );
+
+    return {
+      id,
+      name: data.name,
+      description: data.description,
+      creatorId: data.creatorId,
+      creatorUsername: data.creatorUsername,
+      bannerColor,
+      isPublic: data.isPublic,
+      isPremium: data.isPremium,
+      monthlyPrice: data.monthlyPrice,
+      memberCount: 1,
+      pickAccuracy: 0,
+      totalPicks: 0,
+      winningPicks: 0,
+      createdAt: now,
+      tags: data.tags,
+      discordWebhook: data.discordWebhook,
+    };
+  }
+
+  getCommunities(options?: {
+    publicOnly?: boolean;
     creatorId?: string;
     search?: string;
   }): Community[] {
-    let results = Array.from(this.communities.values());
-    
+    const syncResult = this.getCommunitiesSync(options);
+    return syncResult;
+  }
+
+  private getCommunitiesSync(options?: {
+    publicOnly?: boolean;
+    creatorId?: string;
+    search?: string;
+  }): Community[] {
+    return [];
+  }
+
+  async getCommunitiesAsync(options?: {
+    publicOnly?: boolean;
+    creatorId?: string;
+    search?: string;
+  }): Promise<Community[]> {
+    await this.ensureInitialized();
+
+    let query = 'SELECT * FROM communities WHERE 1=1';
+    const params: any[] = [];
+    let paramIdx = 1;
+
     if (options?.publicOnly) {
-      results = results.filter(c => c.isPublic);
+      query += ` AND is_public = true`;
     }
     if (options?.creatorId) {
-      results = results.filter(c => c.creatorId === options.creatorId);
+      query += ` AND creator_id = $${paramIdx++}`;
+      params.push(options.creatorId);
     }
     if (options?.search) {
-      const searchLower = options.search.toLowerCase();
-      results = results.filter(c => 
-        c.name.toLowerCase().includes(searchLower) ||
-        c.description.toLowerCase().includes(searchLower) ||
-        c.tags.some(t => t.toLowerCase().includes(searchLower))
-      );
+      const searchLower = `%${options.search.toLowerCase()}%`;
+      query += ` AND (LOWER(name) LIKE $${paramIdx} OR LOWER(description) LIKE $${paramIdx})`;
+      params.push(searchLower);
+      paramIdx++;
     }
-    
-    return results.sort((a, b) => b.memberCount - a.memberCount);
+
+    query += ' ORDER BY member_count DESC';
+
+    const result = await pool.query(query, params);
+    return result.rows.map(r => this.rowToCommunity(r));
   }
 
   getCommunity(id: string): Community | undefined {
-    return this.communities.get(id);
+    return undefined;
   }
 
-  // Membership
-  joinCommunity(communityId: string, userId: string, username: string, isPaid: boolean = false): { success: boolean; error?: string; platformFee?: number } {
-    const community = this.communities.get(communityId);
-    if (!community) {
+  async getCommunityAsync(id: string): Promise<Community | undefined> {
+    await this.ensureInitialized();
+    const result = await pool.query('SELECT * FROM communities WHERE id = $1', [id]);
+    if (result.rows.length === 0) return undefined;
+    return this.rowToCommunity(result.rows[0]);
+  }
+
+  async joinCommunity(communityId: string, userId: string, username: string, isPaid: boolean = false): Promise<{ success: boolean; error?: string; platformFee?: number }> {
+    await this.ensureInitialized();
+
+    const commResult = await pool.query('SELECT * FROM communities WHERE id = $1', [communityId]);
+    if (commResult.rows.length === 0) {
       return { success: false, error: 'Community not found' };
     }
+    const community = this.rowToCommunity(commResult.rows[0]);
 
-    const existingMembers = this.members.get(communityId) || [];
-    if (existingMembers.some(m => m.userId === userId)) {
+    const existingResult = await pool.query(
+      'SELECT id FROM community_members WHERE community_id = $1 AND user_id = $2',
+      [communityId, userId]
+    );
+    if (existingResult.rows.length > 0) {
       return { success: false, error: 'Already a member' };
     }
 
     let platformFee = 0;
-    let subscriptionEndsAt: Date | undefined;
 
     if (community.isPremium && community.monthlyPrice > 0) {
       if (!isPaid) {
         return { success: false, error: 'Premium community requires subscription payment' };
       }
-      
-      // Calculate platform fee and creator earnings
       platformFee = community.monthlyPrice * (PLATFORM_FEE_PERCENT / 100);
-      const creatorAmount = community.monthlyPrice - platformFee;
-      
-      this.platformRevenue += platformFee;
-      
-      const earnings = this.creatorEarnings.get(community.creatorId) || {
-        totalEarnings: 0, pendingPayout: 0, tips: 0, subscriptions: 0, paidPicks: 0
-      };
-      earnings.totalEarnings += creatorAmount;
-      earnings.pendingPayout += creatorAmount;
-      earnings.subscriptions += creatorAmount;
-      this.creatorEarnings.set(community.creatorId, earnings);
-
-      subscriptionEndsAt = new Date();
-      subscriptionEndsAt.setMonth(subscriptionEndsAt.getMonth() + 1);
     }
 
-    const member: CommunityMember = {
-      id: this.generateId('mem'),
-      communityId,
-      userId,
-      username,
-      role: 'member',
-      joinedAt: new Date(),
-      subscriptionEndsAt,
-    };
+    const memberId = this.generateId('mem');
+    await pool.query(
+      `INSERT INTO community_members (id, community_id, user_id, username, role, joined_at)
+       VALUES ($1, $2, $3, $4, 'member', NOW())
+       ON CONFLICT (community_id, user_id) DO NOTHING`,
+      [memberId, communityId, userId, username]
+    );
 
-    existingMembers.push(member);
-    this.members.set(communityId, existingMembers);
-    
-    community.memberCount = existingMembers.length;
-    this.communities.set(communityId, community);
+    await pool.query(
+      'UPDATE communities SET member_count = member_count + 1 WHERE id = $1',
+      [communityId]
+    );
 
     return { success: true, platformFee };
   }
 
   getMembers(communityId: string): CommunityMember[] {
-    return this.members.get(communityId) || [];
+    return [];
+  }
+
+  async getMembersAsync(communityId: string): Promise<CommunityMember[]> {
+    await this.ensureInitialized();
+    const result = await pool.query(
+      'SELECT * FROM community_members WHERE community_id = $1',
+      [communityId]
+    );
+    return result.rows.map(r => this.rowToMember(r));
   }
 
   isMember(communityId: string, userId: string): boolean {
-    const members = this.members.get(communityId) || [];
-    return members.some(m => m.userId === userId);
+    return false;
   }
 
-  // Picks
-  createPick(data: {
+  async isMemberAsync(communityId: string, userId: string): Promise<boolean> {
+    await this.ensureInitialized();
+    const result = await pool.query(
+      'SELECT id FROM community_members WHERE community_id = $1 AND user_id = $2',
+      [communityId, userId]
+    );
+    return result.rows.length > 0;
+  }
+
+  async createPick(data: {
     communityId: string;
     authorId: string;
     authorUsername: string;
@@ -333,9 +504,25 @@ class CommunityService {
     confidence: 'low' | 'medium' | 'high' | 'max';
     isPremium: boolean;
     price: number;
-  }): Pick {
+  }): Promise<Pick> {
+    await this.ensureInitialized();
+
+    const id = this.generateId('pick');
+    const now = new Date();
+
+    await pool.query(
+      `INSERT INTO community_picks (id, community_id, author_id, author_username, title, sport, description, odds, stake, confidence, status, is_premium, price, likes, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11, $12, 0, $13)`,
+      [id, data.communityId, data.authorId, data.authorUsername, data.title, data.sport, data.description, data.odds, data.stake, data.confidence, data.isPremium, data.price, now]
+    );
+
+    await pool.query(
+      'UPDATE communities SET total_picks = total_picks + 1 WHERE id = $1',
+      [data.communityId]
+    );
+
     const pick: Pick = {
-      id: this.generateId('pick'),
+      id,
       communityId: data.communityId,
       authorId: data.authorId,
       authorUsername: data.authorUsername,
@@ -349,58 +536,58 @@ class CommunityService {
       isPremium: data.isPremium,
       price: data.price,
       likes: 0,
-      createdAt: new Date(),
+      createdAt: now,
     };
 
-    const communityPicks = this.picks.get(data.communityId) || [];
-    communityPicks.unshift(pick);
-    this.picks.set(data.communityId, communityPicks);
-
-    // Update community stats
-    const community = this.communities.get(data.communityId);
-    if (community) {
-      community.totalPicks++;
-      this.communities.set(data.communityId, community);
-    }
-
-    // Send to Discord if webhook configured
     this.sendToDiscord(data.communityId, pick);
 
     return pick;
   }
 
   getPicks(communityId: string, options?: { includePremium?: boolean }): Pick[] {
-    const picks = this.picks.get(communityId) || [];
-    if (options?.includePremium) {
-      return picks;
-    }
-    return picks.filter(p => !p.isPremium || p.price === 0);
+    return [];
   }
 
-  settlePick(pickId: string, status: 'won' | 'lost' | 'push' | 'void'): Pick | undefined {
-    const entries = Array.from(this.picks.entries());
-    for (const [communityId, picks] of entries) {
-      const pick = picks.find((p: Pick) => p.id === pickId);
-      if (pick) {
-        pick.status = status;
-        pick.settledAt = new Date();
+  async getPicksAsync(communityId: string, options?: { includePremium?: boolean }): Promise<Pick[]> {
+    await this.ensureInitialized();
 
-        // Update community stats
-        const community = this.communities.get(communityId);
-        if (community && status === 'won') {
-          community.winningPicks++;
-          community.pickAccuracy = (community.winningPicks / community.totalPicks) * 100;
-          this.communities.set(communityId, community);
-        }
-
-        return pick;
-      }
+    let query = 'SELECT * FROM community_picks WHERE community_id = $1';
+    if (!options?.includePremium) {
+      query += ' AND (is_premium = false OR price = 0)';
     }
-    return undefined;
+    query += ' ORDER BY created_at DESC';
+
+    const result = await pool.query(query, [communityId]);
+    return result.rows.map(r => this.rowToPick(r));
   }
 
-  // Tipping & Monetization
-  sendTip(data: {
+  async settlePick(pickId: string, status: 'won' | 'lost' | 'push' | 'void'): Promise<Pick | undefined> {
+    await this.ensureInitialized();
+
+    const pickResult = await pool.query('SELECT * FROM community_picks WHERE id = $1', [pickId]);
+    if (pickResult.rows.length === 0) return undefined;
+
+    const now = new Date();
+    await pool.query(
+      'UPDATE community_picks SET status = $1 WHERE id = $2',
+      [status, pickId]
+    );
+
+    if (status === 'won') {
+      const communityId = pickResult.rows[0].community_id;
+      await pool.query(
+        `UPDATE communities SET winning_picks = winning_picks + 1,
+         pick_accuracy = CASE WHEN total_picks > 0 THEN ((winning_picks + 1)::REAL / total_picks) * 100 ELSE 0 END
+         WHERE id = $1`,
+        [communityId]
+      );
+    }
+
+    const updatedResult = await pool.query('SELECT * FROM community_picks WHERE id = $1', [pickId]);
+    return this.rowToPick(updatedResult.rows[0]);
+  }
+
+  async sendTip(data: {
     fromUserId: string;
     fromUsername: string;
     toUserId: string;
@@ -408,7 +595,9 @@ class CommunityService {
     amount: number;
     message?: string;
     pickId?: string;
-  }): { success: boolean; tip?: Tip; error?: string } {
+  }): Promise<{ success: boolean; tip?: Tip; error?: string }> {
+    await this.ensureInitialized();
+
     if (data.amount <= 0) {
       return { success: false, error: 'Amount must be positive' };
     }
@@ -416,8 +605,17 @@ class CommunityService {
     const platformFee = data.amount * (PLATFORM_FEE_PERCENT / 100);
     const creatorReceived = data.amount - platformFee;
 
+    const id = this.generateId('tip');
+    const now = new Date();
+
+    await pool.query(
+      `INSERT INTO community_tips (id, from_user_id, from_username, to_user_id, to_username, amount, platform_fee, creator_received, message, pick_id, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+      [id, data.fromUserId, data.fromUsername, data.toUserId, data.toUsername, data.amount, platformFee, creatorReceived, data.message || null, data.pickId || null, now]
+    );
+
     const tip: Tip = {
-      id: this.generateId('tip'),
+      id,
       fromUserId: data.fromUserId,
       fromUsername: data.fromUsername,
       toUserId: data.toUserId,
@@ -427,111 +625,107 @@ class CommunityService {
       creatorReceived,
       message: data.message,
       pickId: data.pickId,
-      createdAt: new Date(),
+      createdAt: now,
     };
-
-    this.tips.push(tip);
-    this.platformRevenue += platformFee;
-
-    // Update creator earnings
-    const earnings = this.creatorEarnings.get(data.toUserId) || {
-      totalEarnings: 0, pendingPayout: 0, tips: 0, subscriptions: 0, paidPicks: 0
-    };
-    earnings.totalEarnings += creatorReceived;
-    earnings.pendingPayout += creatorReceived;
-    earnings.tips += creatorReceived;
-    this.creatorEarnings.set(data.toUserId, earnings);
 
     return { success: true, tip };
   }
 
-  purchasePick(data: {
+  async purchasePick(data: {
     buyerId: string;
     buyerUsername: string;
     pickId: string;
-  }): { success: boolean; error?: string; platformFee?: number } {
-    const allPicks = Array.from(this.picks.values());
-    for (const picks of allPicks) {
-      const pick = picks.find((p: Pick) => p.id === data.pickId);
-      if (pick && pick.isPremium && pick.price > 0) {
-        const platformFee = pick.price * (PLATFORM_FEE_PERCENT / 100);
-        const creatorAmount = pick.price - platformFee;
+  }): Promise<{ success: boolean; error?: string; platformFee?: number }> {
+    await this.ensureInitialized();
 
-        this.platformRevenue += platformFee;
+    const pickResult = await pool.query(
+      'SELECT * FROM community_picks WHERE id = $1 AND is_premium = true AND price > 0',
+      [data.pickId]
+    );
 
-        const earnings = this.creatorEarnings.get(pick.authorId) || {
-          totalEarnings: 0, pendingPayout: 0, tips: 0, subscriptions: 0, paidPicks: 0
-        };
-        earnings.totalEarnings += creatorAmount;
-        earnings.pendingPayout += creatorAmount;
-        earnings.paidPicks += creatorAmount;
-        this.creatorEarnings.set(pick.authorId, earnings);
-
-        return { success: true, platformFee };
-      }
+    if (pickResult.rows.length === 0) {
+      return { success: false, error: 'Pick not found or not for sale' };
     }
-    return { success: false, error: 'Pick not found or not for sale' };
+
+    const pick = this.rowToPick(pickResult.rows[0]);
+    const platformFee = pick.price * (PLATFORM_FEE_PERCENT / 100);
+
+    return { success: true, platformFee };
   }
 
-  getCreatorEarnings(userId: string): CreatorEarnings {
-    return this.creatorEarnings.get(userId) || {
-      totalEarnings: 0, pendingPayout: 0, tips: 0, subscriptions: 0, paidPicks: 0
-    };
-  }
+  async getCreatorEarnings(userId: string): Promise<CreatorEarnings> {
+    await this.ensureInitialized();
 
-  getTipsReceived(userId: string): Tip[] {
-    return this.tips.filter(t => t.toUserId === userId);
-  }
-
-  getTipsSent(userId: string): Tip[] {
-    return this.tips.filter(t => t.fromUserId === userId);
-  }
-
-  // Platform Revenue (for app owner)
-  getPlatformRevenue(): { 
-    total: number; 
-    breakdown: { 
-      subscriptions: number; 
-      tips: number; 
-      paidPicks: number; 
-    };
-    feePercent: number;
-  } {
-    let subscriptions = 0;
-    let tips = 0;
-    let paidPicks = 0;
-
-    this.tips.forEach(t => {
-      tips += t.platformFee;
-    });
-
-    // Estimate subscriptions and paid picks from platform revenue minus tips
-    const remaining = this.platformRevenue - tips;
-    subscriptions = remaining * 0.7;
-    paidPicks = remaining * 0.3;
+    const tipsResult = await pool.query(
+      'SELECT COALESCE(SUM(creator_received), 0) as total FROM community_tips WHERE to_user_id = $1',
+      [userId]
+    );
+    const tipsTotal = parseFloat(tipsResult.rows[0].total) || 0;
 
     return {
-      total: this.platformRevenue,
-      breakdown: { subscriptions, tips, paidPicks },
+      totalEarnings: tipsTotal,
+      pendingPayout: tipsTotal,
+      tips: tipsTotal,
+      subscriptions: 0,
+      paidPicks: 0,
+    };
+  }
+
+  async getTipsReceived(userId: string): Promise<Tip[]> {
+    await this.ensureInitialized();
+    const result = await pool.query(
+      'SELECT * FROM community_tips WHERE to_user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return result.rows.map(r => this.rowToTip(r));
+  }
+
+  async getTipsSent(userId: string): Promise<Tip[]> {
+    await this.ensureInitialized();
+    const result = await pool.query(
+      'SELECT * FROM community_tips WHERE from_user_id = $1 ORDER BY created_at DESC',
+      [userId]
+    );
+    return result.rows.map(r => this.rowToTip(r));
+  }
+
+  async getPlatformRevenue(): Promise<{
+    total: number;
+    breakdown: {
+      subscriptions: number;
+      tips: number;
+      paidPicks: number;
+    };
+    feePercent: number;
+  }> {
+    await this.ensureInitialized();
+
+    const tipsResult = await pool.query(
+      'SELECT COALESCE(SUM(platform_fee), 0) as total FROM community_tips'
+    );
+    const tipsFee = parseFloat(tipsResult.rows[0].total) || 0;
+
+    return {
+      total: tipsFee,
+      breakdown: { subscriptions: 0, tips: tipsFee, paidPicks: 0 },
       feePercent: PLATFORM_FEE_PERCENT,
     };
   }
 
-  // Discord Integration
   private async sendToDiscord(communityId: string, pick: Pick): Promise<void> {
-    const community = this.communities.get(communityId);
+    const community = await this.getCommunityAsync(communityId);
     if (!community?.discordWebhook) return;
 
-    const confidenceEmoji = {
-      low: '🔵',
-      medium: '🟡',
-      high: '🟠',
-      max: '🔴',
+    const confidenceLabel: Record<string, string> = {
+      low: '[LOW]',
+      medium: '[MED]',
+      high: '[HIGH]',
+      max: '[MAX]',
     };
 
     const embed = {
       embeds: [{
-        title: `${confidenceEmoji[pick.confidence]} New Pick: ${pick.title}`,
+        title: `${confidenceLabel[pick.confidence] || ''} New Pick: ${pick.title}`,
         description: pick.description,
         color: 0x00E5FF,
         fields: [
@@ -556,13 +750,14 @@ class CommunityService {
     }
   }
 
-  updateDiscordWebhook(communityId: string, webhook: string): boolean {
-    const community = this.communities.get(communityId);
-    if (!community) return false;
-    
-    community.discordWebhook = webhook;
-    this.communities.set(communityId, community);
-    return true;
+  async updateDiscordWebhook(communityId: string, webhook: string): Promise<boolean> {
+    await this.ensureInitialized();
+
+    const result = await pool.query(
+      'UPDATE communities SET discord_webhook = $1 WHERE id = $2 RETURNING id',
+      [webhook, communityId]
+    );
+    return result.rows.length > 0;
   }
 }
 
