@@ -8,7 +8,8 @@ import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSEO } from "@/hooks/use-seo";
 import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
-  AlertTriangle, Check, TrendingUp, Activity, Heart
+  AlertTriangle, Check, TrendingUp, Activity, Heart,
+  Zap, Star, Target, Shield
 } from "lucide-react";
 
 interface MarketProp {
@@ -62,6 +63,44 @@ interface PropsResponse {
   totalProps: number;
   dataSource: string;
   generatedAt: string;
+}
+
+interface TopPick {
+  rank: number;
+  grade: string;
+  playerName: string;
+  team: string;
+  market: string;
+  marketLabel: string;
+  line: number;
+  seasonAvg: number;
+  recommendation: "over" | "under";
+  confidence: number;
+  reasoning: string;
+  edge: number;
+  overOdds: number;
+  underOdds: number;
+  overImpliedProb: number;
+  underImpliedProb: number;
+  bookmaker: string;
+  bestOver?: { bookmaker: string; odds: number };
+  bestUnder?: { bookmaker: string; odds: number };
+  allBookmakers?: { bookmaker: string; overOdds: number; underOdds: number; line: number }[];
+  gameId: string;
+  gameName: string;
+  gameTime: string;
+  injury: { status: string; details: string } | null;
+  score: number;
+  dataSource: string;
+}
+
+interface TopPropsResponse {
+  topPicks: TopPick[];
+  sport: string;
+  totalAnalyzed: number;
+  totalGames: number;
+  generatedAt: string;
+  dataSource: string;
 }
 
 const SPORT_TABS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF"];
@@ -368,6 +407,212 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
   );
 }
 
+function gradeColor(grade: string): string {
+  if (grade.startsWith("A")) return "text-emerald-500";
+  if (grade.startsWith("B")) return "text-amber-500";
+  return "text-muted-foreground";
+}
+
+function gradeBg(grade: string): string {
+  if (grade.startsWith("A")) return "bg-emerald-500/10 border-emerald-500/30";
+  if (grade.startsWith("B")) return "bg-amber-500/10 border-amber-500/30";
+  return "bg-muted/50 border-border";
+}
+
+function TopPickCard({ pick, addLeg, slipLegIds, sport }: {
+  pick: TopPick;
+  addLeg: (leg: any) => boolean;
+  slipLegIds: Set<string>;
+  sport: string;
+}) {
+  const isOver = pick.recommendation === "over";
+  const side = pick.recommendation;
+  const odds = isOver ? pick.overOdds : pick.underOdds;
+  const decOdds = odds < 0 ? 1 + 100 / Math.abs(odds) : 1 + odds / 100;
+  const legId = `prop-${pick.playerName}-${pick.market}-${side}`.replace(/\s+/g, "-").toLowerCase();
+  const inSlip = slipLegIds.has(legId);
+
+  const handleAdd = () => {
+    if (inSlip) return;
+    addLeg({
+      id: legId,
+      team: pick.playerName,
+      opponent: `${pick.marketLabel} ${pick.line}`,
+      market: "player_prop" as any,
+      outcome: `${pick.playerName} ${isOver ? "Over" : "Under"} ${pick.line} ${pick.marketLabel}`,
+      decimalOdds: decOdds,
+      americanOdds: odds,
+      addedFrom: "Top Props Engine",
+      addedAt: new Date().toISOString(),
+      sport,
+      confidence: pick.confidence,
+      evPercent: pick.edge,
+      reasoning: pick.reasoning,
+    });
+  };
+
+  return (
+    <div
+      className={`rounded-xl border-2 p-3 sm:p-4 space-y-2 min-w-[260px] sm:min-w-[300px] snap-start shrink-0 ${gradeBg(pick.grade)}`}
+      data-testid={`top-pick-card-${pick.rank}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className={`text-lg font-bold font-mono ${gradeColor(pick.grade)}`} data-testid={`text-grade-${pick.rank}`}>
+            {pick.grade}
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-bold truncate" data-testid={`text-top-player-${pick.rank}`}>{pick.playerName}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{pick.gameName}</p>
+          </div>
+        </div>
+        <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0">
+          #{pick.rank}
+        </Badge>
+      </div>
+
+      <div className="flex items-center gap-2 text-xs">
+        <span className="font-medium">{pick.marketLabel}</span>
+        <span className="text-muted-foreground">Line: <span className="font-mono font-bold text-foreground">{pick.line}</span></span>
+        <span className="text-muted-foreground">Avg: <span className="font-mono font-bold text-foreground">{pick.seasonAvg}</span></span>
+      </div>
+
+      <button
+        onClick={handleAdd}
+        disabled={inSlip}
+        className={`w-full flex items-center justify-between rounded-lg border-2 p-3 transition-all touch-target ${
+          isOver
+            ? "border-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20"
+            : "border-red-500 bg-red-500/10 hover:bg-red-500/20"
+        } ${inSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
+        aria-label={`Add ${pick.playerName} ${isOver ? "Over" : "Under"} ${pick.line} ${pick.marketLabel}`}
+        data-testid={`button-add-top-pick-${pick.rank}`}
+      >
+        <div className="flex items-center gap-2">
+          {isOver ? (
+            <ArrowUp className="w-5 h-5 text-emerald-500" />
+          ) : (
+            <ArrowDown className="w-5 h-5 text-red-500" />
+          )}
+          <span className={`text-base font-bold ${isOver ? "text-emerald-500" : "text-red-500"}`}>
+            {isOver ? "OVER" : "UNDER"} {pick.line}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-lg font-mono font-bold ${isOver ? "text-emerald-500" : "text-red-500"}`}>
+            {formatOdds(odds)}
+          </span>
+          {inSlip ? (
+            <Check className="w-5 h-5 text-primary" />
+          ) : (
+            <span className="text-[10px] text-muted-foreground">+ Slip</span>
+          )}
+        </div>
+      </button>
+
+      <div className="flex items-center justify-between text-[10px]">
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-0.5 text-muted-foreground">
+            <Target className="w-3 h-3" /> {pick.confidence}%
+          </span>
+          <span className={`flex items-center gap-0.5 font-medium ${pick.edge > 0 ? "text-emerald-500" : "text-red-500"}`}>
+            <TrendingUp className="w-3 h-3" /> {pick.edge > 0 ? "+" : ""}{pick.edge}%
+          </span>
+        </div>
+        {pick.bestOver && isOver && (
+          <span className="text-muted-foreground">Best: {pick.bestOver.bookmaker.replace(".ag", "").split(" ")[0]} {formatOdds(pick.bestOver.odds)}</span>
+        )}
+        {pick.bestUnder && !isOver && (
+          <span className="text-muted-foreground">Best: {pick.bestUnder.bookmaker.replace(".ag", "").split(" ")[0]} {formatOdds(pick.bestUnder.odds)}</span>
+        )}
+      </div>
+
+      <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid={`text-top-reasoning-${pick.rank}`}>
+        {pick.reasoning}
+      </p>
+    </div>
+  );
+}
+
+function TopPicksHero({ sport, addLeg, slipLegIds }: {
+  sport: string;
+  addLeg: (leg: any) => boolean;
+  slipLegIds: Set<string>;
+}) {
+  const { data, isLoading } = useQuery<TopPropsResponse>({
+    queryKey: ["/api/top-props", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/top-props/${sport}`);
+      if (!res.ok) throw new Error("Failed to fetch top props");
+      return res.json();
+    },
+    refetchInterval: 90000,
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Skeleton className="w-5 h-5 rounded" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <div className="flex gap-3 overflow-hidden">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-44 w-[280px] rounded-xl shrink-0" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!data || data.topPicks.length === 0) return null;
+
+  return (
+    <Card className="border-primary/20 bg-primary/[0.02]" data-testid="section-top-picks">
+      <CardContent className="p-3 sm:p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Zap className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm sm:text-base font-bold" data-testid="heading-top-picks">Engine Top Picks</h2>
+              <p className="text-[10px] text-muted-foreground">
+                {data.totalAnalyzed} props analyzed across {data.totalGames} games
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary">
+              <Shield className="w-3 h-3 mr-0.5" /> {data.topPicks.length} picks
+            </Badge>
+          </div>
+        </div>
+
+        <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-1 px-1" data-testid="top-picks-scroll">
+          {data.topPicks.map((pick) => (
+            <TopPickCard
+              key={`${pick.playerName}-${pick.market}`}
+              pick={pick}
+              addLeg={addLeg}
+              slipLegIds={slipLegIds}
+              sport={sport}
+            />
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground border-t pt-2 flex-wrap">
+          <span className="flex items-center gap-1"><Star className="w-3 h-3 text-emerald-500" /> A+ = highest conviction</span>
+          <span className="flex items-center gap-1"><Target className="w-3 h-3" /> Edge = season avg vs line</span>
+          <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> Live from {data.dataSource}</span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function PlayerPropsPage() {
   useSEO({ title: "Player Props — Over/Under", description: "Real-time player prop over/under picks from The Odds API" });
   const [selectedSport, setSelectedSport] = useState("NBA");
@@ -433,6 +678,8 @@ export default function PlayerPropsPage() {
             </div>
           )}
         </header>
+
+        <TopPicksHero sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
 
         {isLoading && (
           <div className="space-y-4" data-testid="loading-skeleton">

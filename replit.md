@@ -40,7 +40,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Hidden Analytics Agent**: A real-time, server-side agent continuously ingests ESPN data, performs market analysis, and monitors model drift.
 - **Platform Intelligence Engine**: A self-growing data engine accumulates game outcomes, prediction accuracy, odds snapshots, and community consensus for continuous learning.
 - **App Guardian Engine**: A continuous health monitoring system performs health checks, service monitoring, error analysis, auto-healing, and AI diagnostics.
-- **Player Props Analyzer**: A dedicated `/player-props` page shows real-time over/under prop lines from various bookmakers for every player in every game, with recommendations and confidence levels.
+- **Player Props Analyzer**: A dedicated `/player-props` page shows real-time over/under prop lines from various bookmakers for every player in every game, with recommendations and confidence levels. Mobile-first design with clear OVER/UNDER tappable buttons, collapsible game/player sections, and per-side slip tracking.
+- **Top Props Engine**: A `GET /api/top-props/:sport` endpoint that automatically ranks and surfaces the best player prop picks across all games. Scores props using a composite formula (confidence, edge magnitude, bookmaker count, leader stats availability, injury status), filters to only props with >8% stat-to-line edge and verified season averages, excludes unreliable markets (3-Pointers), and returns the top 15 graded picks. Displayed as a horizontally scrollable hero section at the top of the Player Props page with one-tap add-to-slip.
 - **Expanded 1H Odds Pipeline**: The odds provider now returns first-half markets (spread, total, moneyline) from The Odds API for more accurate calculations.
 
 ## External Dependencies

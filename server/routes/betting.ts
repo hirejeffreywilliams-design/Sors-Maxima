@@ -2087,7 +2087,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           for (const ls of leaderStats) {
             const lsCat = ls.category.toLowerCase();
             if (
-              (marketCat.includes("point") && lsCat.includes("point")) ||
+              (marketCat.includes("point") && !marketCat.includes("3-point") && !marketCat.includes("three") && lsCat.includes("point")) ||
               (marketCat.includes("rebound") && lsCat.includes("rebound")) ||
               (marketCat.includes("assist") && lsCat.includes("assist")) ||
               (marketCat.includes("pass") && lsCat.includes("pass")) ||
@@ -2123,6 +2123,8 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
                 if (ppg && rpg && apg) {
                   seasonAvg = Math.round((parseFloat(ppg[1]) + parseFloat(rpg[1]) + parseFloat(apg[1])) * 10) / 10;
                 }
+              } else if (marketCat.includes("3-point") || marketCat.includes("three")) {
+                // 3-Pointers: no reliable season avg from ESPN leaders — skip stat match
               } else {
                 for (const [statKey, regex] of Object.entries(statMatchers)) {
                   if (marketCat.includes(statKey.split("-")[0])) {
@@ -2294,6 +2296,245 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
       });
     } catch (e: any) {
       console.error("[game-player-props] Error:", e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/top-props/:sport", async (req, res) => {
+    try {
+      const { fetchRealPlayerProps, isOddsApiAvailable, MARKET_LABELS } = await import("../odds-provider");
+      const { getScoreboard } = await import("../espn-scoreboard-provider");
+      const { getInjuries } = await import("../espn-injury-provider");
+      const sport = req.params.sport?.toUpperCase();
+      if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport" });
+      }
+
+      const games = await getScoreboard(sport as any);
+      const injuryReports = await getInjuries(sport as any);
+      const injuryMap = new Map<string, { status: string; details: string }>();
+      for (const report of injuryReports) {
+        for (const inj of report.injuries) {
+          injuryMap.set(inj.playerName.toLowerCase(), { status: inj.status, details: inj.details || "" });
+        }
+      }
+
+      const relevantGames = games
+        .filter(g => {
+          const gTime = new Date(g.date).getTime();
+          return g.status.state === "pre" || (g.status.state === "in" && gTime > Date.now() - 12 * 60 * 60 * 1000);
+        })
+        .slice(0, 15);
+
+      if (relevantGames.length === 0) {
+        return res.json({ topPicks: [], sport, message: "No upcoming games", generatedAt: new Date().toISOString() });
+      }
+
+      let realProps: any[] = [];
+      if (isOddsApiAvailable()) {
+        realProps = await fetchRealPlayerProps(sport, 10);
+      }
+
+      if (realProps.length === 0) {
+        return res.json({ topPicks: [], sport, message: "No prop data available yet", generatedAt: new Date().toISOString() });
+      }
+
+      const propsByEvent = new Map<string, any[]>();
+      for (const prop of realProps) {
+        const eventKey = `${prop.homeTeam}|${prop.awayTeam}`;
+        if (!propsByEvent.has(eventKey)) propsByEvent.set(eventKey, []);
+        propsByEvent.get(eventKey)!.push(prop);
+      }
+
+      const allAnalyzed: any[] = [];
+
+      for (const game of relevantGames) {
+        const homeTeamName = game.homeTeam.displayName || game.homeTeam.shortDisplayName || "";
+        const awayTeamName = game.awayTeam.displayName || game.awayTeam.shortDisplayName || "";
+        const homeName = homeTeamName.toLowerCase();
+        const awayName = awayTeamName.toLowerCase();
+
+        let matchedProps: any[] = [];
+        for (const [eventKey, props] of propsByEvent.entries()) {
+          const [h, a] = eventKey.toLowerCase().split("|");
+          const hToken = h.split(" ").pop() || "";
+          const aToken = a.split(" ").pop() || "";
+          const homeToken = homeName.split(" ").pop() || "";
+          const awayToken = awayName.split(" ").pop() || "";
+          if ((hToken === homeToken || h.includes(homeToken) || homeToken.includes(hToken)) &&
+              (aToken === awayToken || a.includes(awayToken) || awayToken.includes(aToken))) {
+            matchedProps = props;
+            break;
+          }
+        }
+
+        if (matchedProps.length === 0) continue;
+
+        const leaders = (game as any).leaders || [];
+        const leaderMap = new Map<string, { category: string; value: string; team: string }[]>();
+        for (const l of leaders) {
+          const name = (l.playerName || "").toLowerCase();
+          if (!leaderMap.has(name)) leaderMap.set(name, []);
+          leaderMap.get(name)!.push({ category: l.category, value: l.value, team: l.team });
+        }
+
+        for (const prop of matchedProps) {
+          const pKey = prop.playerName.toLowerCase();
+          const injury = injuryMap.get(pKey);
+          if (injury && (injury.status === "Out" || injury.status === "Injured Reserve")) continue;
+
+          const leaderStats = leaderMap.get(pKey) || [];
+          const overImplied = prop.overImpliedProb || 0.5;
+          const underImplied = prop.underImpliedProb || 0.5;
+          const marketCat = (prop.marketLabel || "").toLowerCase();
+
+          const is3Pointer = marketCat.includes("3-point") || marketCat.includes("three");
+
+          let seasonAvg: number | null = null;
+          if (!is3Pointer) {
+            for (const ls of leaderStats) {
+              const lsCat = ls.category.toLowerCase();
+              if (
+                (marketCat.includes("point") && lsCat.includes("point")) ||
+                (marketCat.includes("rebound") && lsCat.includes("rebound")) ||
+                (marketCat.includes("assist") && lsCat.includes("assist")) ||
+                (marketCat.includes("pass") && lsCat.includes("pass")) ||
+                (marketCat.includes("rush") && lsCat.includes("rush")) ||
+                (marketCat.includes("rec") && lsCat.includes("rec")) ||
+                (marketCat.includes("shot") && lsCat.includes("shot")) ||
+                (marketCat.includes("goal") && lsCat.includes("goal")) ||
+                (marketCat.includes("hit") && lsCat.includes("hit")) ||
+                (marketCat.includes("strikeout") && lsCat.includes("strikeout"))
+              ) {
+                seasonAvg = parseFloat(ls.value);
+                break;
+              }
+            }
+
+            if (seasonAvg === null && leaderStats.length > 0) {
+              const ratingEntry = leaderStats.find(ls => ls.category.toLowerCase().includes("rating"));
+              if (ratingEntry) {
+                const ratingStr = ratingEntry.value;
+                const statMatchers: Record<string, RegExp> = {
+                  "points": /([0-9.]+)\s*PPG/i,
+                  "rebounds": /([0-9.]+)\s*RPG/i,
+                  "assists": /([0-9.]+)\s*APG/i,
+                  "steals": /([0-9.]+)\s*SPG/i,
+                  "blocks": /([0-9.]+)\s*BPG/i,
+                };
+                if (marketCat.includes("pts+reb+ast")) {
+                  const ppg = ratingStr.match(/([0-9.]+)\s*PPG/i);
+                  const rpg = ratingStr.match(/([0-9.]+)\s*RPG/i);
+                  const apg = ratingStr.match(/([0-9.]+)\s*APG/i);
+                  if (ppg && rpg && apg) {
+                    seasonAvg = Math.round((parseFloat(ppg[1]) + parseFloat(rpg[1]) + parseFloat(apg[1])) * 10) / 10;
+                  }
+                } else {
+                  for (const [statKey, regex] of Object.entries(statMatchers)) {
+                    if (marketCat.includes(statKey.split("-")[0])) {
+                      const match = ratingStr.match(regex);
+                      if (match) seasonAvg = parseFloat(match[1]);
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          if (seasonAvg === null) continue;
+
+          const diff = seasonAvg - prop.line;
+          const pctDiff = diff / prop.line;
+          const absEdge = Math.abs(pctDiff);
+
+          if (absEdge < 0.08) continue;
+
+          const recommendation: "over" | "under" = pctDiff > 0 ? "over" : "under";
+          let confidence = Math.min(82, Math.round(55 + absEdge * 100));
+          let reasoning = pctDiff > 0
+            ? `Season avg ${seasonAvg} exceeds line ${prop.line} by ${(pctDiff * 100).toFixed(1)}%. Lean OVER.`
+            : `Season avg ${seasonAvg} is below line ${prop.line} by ${(absEdge * 100).toFixed(1)}%. Lean UNDER.`;
+
+          if (injury) {
+            if (injury.status === "Questionable" || injury.status === "Day-To-Day") {
+              reasoning += ` ⚠️ ${injury.status}: ${injury.details}. Monitor status.`;
+              confidence = Math.max(40, confidence - 10);
+            } else if (injury.status === "Doubtful") {
+              reasoning += ` ⚠️ Doubtful: ${injury.details}. High risk.`;
+              confidence = Math.max(30, confidence - 20);
+            }
+          }
+
+          const edge = Math.round((seasonAvg - prop.line) / prop.line * 100 * 10) / 10;
+
+          const bookmakerCount = (prop.allBookmakers || []).length;
+          const bestOver = prop.bestOver;
+          const bestUnder = prop.bestUnder;
+
+          const score = (confidence * 2) + (absEdge * 200) + (bookmakerCount * 3) +
+            (leaderStats.length > 0 ? 10 : 0) +
+            (!injury ? 5 : 0);
+
+          allAnalyzed.push({
+            playerName: prop.playerName,
+            team: leaderStats[0]?.team || "",
+            market: prop.market,
+            marketLabel: prop.marketLabel,
+            line: prop.line,
+            seasonAvg,
+            recommendation,
+            confidence,
+            reasoning,
+            edge,
+            overOdds: prop.overOdds,
+            underOdds: prop.underOdds,
+            overImpliedProb: Math.round(overImplied * 1000) / 10,
+            underImpliedProb: Math.round(underImplied * 1000) / 10,
+            bookmaker: prop.bookmaker,
+            bestOver,
+            bestUnder,
+            allBookmakers: (prop.allBookmakers || []).slice(0, 5),
+            gameId: game.id,
+            gameName: game.shortName,
+            gameTime: game.date,
+            injury: injury || null,
+            score,
+            dataSource: prop.dataSource || "The Odds API (live)",
+          });
+        }
+      }
+
+      allAnalyzed.sort((a, b) => b.score - a.score);
+
+      const topPicks = allAnalyzed.slice(0, 15);
+
+      const gradeByScore = (s: number): string => {
+        if (s >= 200) return "A+";
+        if (s >= 180) return "A";
+        if (s >= 160) return "A-";
+        if (s >= 145) return "B+";
+        if (s >= 130) return "B";
+        if (s >= 115) return "B-";
+        return "C+";
+      };
+
+      const enriched = topPicks.map((p, idx) => ({
+        rank: idx + 1,
+        grade: gradeByScore(p.score),
+        ...p,
+      }));
+
+      return res.json({
+        topPicks: enriched,
+        sport,
+        totalAnalyzed: allAnalyzed.length,
+        totalGames: relevantGames.length,
+        generatedAt: new Date().toISOString(),
+        dataSource: "The Odds API + ESPN",
+      });
+    } catch (e: any) {
+      console.error("[top-props] Error:", e.message);
       res.status(500).json({ error: e.message });
     }
   });
