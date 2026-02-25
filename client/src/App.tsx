@@ -63,6 +63,7 @@ const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
+const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -248,6 +249,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/bet-history">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
         <Route path="/insights" component={PersonalizedInsights} />
         <Route path="/pro-tools">{() => { const [, setLocation] = useLocation(); setLocation("/tools"); return null; }}</Route>
+        <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
@@ -283,6 +285,7 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Your Picks - All engines converging to find your edge" },
   { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
   { href: "/generate", icon: Brain, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
+  { href: "/player-props", icon: Star, label: "Props", testId: "nav-player-props", tooltip: "Player Props - Over/under analysis for every player in every game" },
   { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Bet Builder - Manually build your parlays" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
