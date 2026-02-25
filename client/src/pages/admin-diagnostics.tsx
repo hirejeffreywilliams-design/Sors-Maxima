@@ -125,7 +125,7 @@ export default function AdminDiagnostics() {
 
   const { data: healthStatus, isLoading: healthLoading, refetch: refetchHealth, error: healthError } = useQuery<HealthStatus>({
     queryKey: ["/api/admin/diagnostics/health"],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
     retry: false,
   });
 

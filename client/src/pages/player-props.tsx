@@ -599,7 +599,7 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
       if (!res.ok) throw new Error("Failed to fetch top props");
       return res.json();
     },
-    refetchInterval: 90000,
+    refetchInterval: 30000,
   });
 
   if (isLoading) {
@@ -680,7 +680,7 @@ export default function PlayerPropsPage() {
       if (!res.ok) throw new Error("Failed to fetch player props");
       return res.json();
     },
-    refetchInterval: 60000,
+    refetchInterval: 30000,
   });
 
   const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) : "";

@@ -36,7 +36,7 @@ interface OddsApiGame {
 }
 
 const oddsApiCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
-const ODDS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const ODDS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for real-time accuracy
 
 function mapSportToOddsApiKey(sport: string): string | null {
   const mapping: Record<string, string> = {
@@ -1119,7 +1119,7 @@ const MARKET_LABELS: Record<string, string> = {
 };
 
 const playerPropsCache = new Map<string, { data: RealPlayerProp[]; timestamp: number }>();
-const PROPS_CACHE_TTL = 5 * 60 * 1000;
+const PROPS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for real-time player props
 
 async function fetchEventIds(sport: string): Promise<{ id: string; home_team: string; away_team: string; commence_time: string }[]> {
   const apiKey = getOddsApiKey();

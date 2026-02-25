@@ -200,17 +200,17 @@ export default function AdminGrowth() {
 
   const { data: liveKPIs, isLoading: kpisLoading } = useQuery<LiveKPIs>({
     queryKey: ["/api/admin/analytics/kpis"],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const { data: liveFunnel } = useQuery<LiveFunnelStep[]>({
     queryKey: ["/api/admin/analytics/funnel"],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const { data: liveExperiments } = useQuery<LiveExperiment[]>({
     queryKey: ["/api/admin/analytics/experiments"],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   return (

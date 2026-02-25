@@ -228,15 +228,17 @@ export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const { data: snapshot, isLoading: snapshotLoading } = useQuery<any>({
     queryKey: ["/api/admin/console-snapshot"],
-    refetchInterval: 30000,
+    refetchInterval: 15000,
   });
 
   const { data: users = [], isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
+    refetchInterval: 30000,
   });
 
   const { data: fraudAlerts = [], isLoading: alertsLoading } = useQuery<FraudAlert[]>({
     queryKey: ['/api/admin/fraud-alerts'],
+    refetchInterval: 20000,
   });
 
   const errorQueryUrl = errorLevelFilter === "all" 
@@ -249,11 +251,13 @@ export default function AdminDashboard() {
       const res = await fetch(errorQueryUrl, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch error logs');
       return res.json();
-    }
+    },
+    refetchInterval: 15000,
   });
 
   const { data: errorStats } = useQuery<ErrorStats>({
     queryKey: ['/api/admin/error-stats'],
+    refetchInterval: 15000,
   });
 
   const { data: subscriptionStats } = useQuery<SubscriptionStats>({
