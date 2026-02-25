@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import {
   ChevronRight,
@@ -181,19 +180,28 @@ export default function OnboardingPage() {
                 <Label className="text-sm font-medium">Sports You Follow</Label>
                 <div className="grid grid-cols-2 gap-2">
                   {sportOptions.map((sport) => (
-                    <button
+                    <div
                       key={sport.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => toggleSport(sport.id)}
-                      className={`flex items-center gap-2 p-3 rounded-lg border text-sm font-medium transition-all text-left ${
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSport(sport.id); } }}
+                      className={`flex items-center gap-2 p-3 rounded-lg border text-sm font-medium transition-all text-left cursor-pointer ${
                         selectedSports.includes(sport.id)
                           ? "border-primary bg-primary/10 text-primary"
                           : "border-border hover:border-primary/50 text-foreground"
                       }`}
                       data-testid={`sport-option-${sport.id}`}
                     >
-                      <Checkbox checked={selectedSports.includes(sport.id)} className="pointer-events-none" />
+                      <div className={`w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 ${
+                        selectedSports.includes(sport.id)
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "border-muted-foreground/40"
+                      }`}>
+                        {selectedSports.includes(sport.id) && <CheckCircle2 className="w-3 h-3" />}
+                      </div>
                       {sport.label}
-                    </button>
+                    </div>
                   ))}
                 </div>
               </div>
