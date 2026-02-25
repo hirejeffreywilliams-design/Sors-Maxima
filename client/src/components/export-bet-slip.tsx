@@ -5,16 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileOutput, Copy, CheckCircle, ExternalLink, Smartphone, Plus, Trash2 } from "lucide-react";
+import { FileOutput, Copy, CheckCircle, ExternalLink, Plus, Trash2, Ticket } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useParlaySlip } from "@/hooks/use-parlay-slip";
+import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 
 const SPORTSBOOKS = [
-  { id: "draftkings", name: "DraftKings", deepLink: "https://sportsbook.draftkings.com" },
-  { id: "fanduel", name: "FanDuel", deepLink: "https://sportsbook.fanduel.com" },
-  { id: "betmgm", name: "BetMGM", deepLink: "https://sports.betmgm.com" },
-  { id: "caesars", name: "Caesars", deepLink: "https://sportsbook.caesars.com" },
-  { id: "pointsbet", name: "PointsBet", deepLink: "https://pointsbet.com" },
-  { id: "betrivers", name: "BetRivers", deepLink: "https://betrivers.com" },
+  { id: "draftkings", name: "DraftKings", deepLink: "https://sportsbook.draftkings.com", color: "bg-[#53d337]", textColor: "text-black" },
+  { id: "fanduel", name: "FanDuel", deepLink: "https://sportsbook.fanduel.com", color: "bg-[#1493ff]", textColor: "text-white" },
+  { id: "betmgm", name: "BetMGM", deepLink: "https://sports.betmgm.com", color: "bg-[#c4a24f]", textColor: "text-black" },
+  { id: "caesars", name: "Caesars", deepLink: "https://sportsbook.caesars.com", color: "bg-[#0a3d2a]", textColor: "text-white" },
+  { id: "pointsbet", name: "PointsBet", deepLink: "https://pointsbet.com", color: "bg-[#ed1c24]", textColor: "text-white" },
+  { id: "betrivers", name: "BetRivers", deepLink: "https://betrivers.com", color: "bg-[#1a1a2e]", textColor: "text-white" },
 ];
 
 interface BetLeg {
@@ -88,8 +90,26 @@ function formatForSportsbook(bookId: string, legs: BetLeg[]): string {
   }
 }
 
+function formatOdds(american: number | undefined, decimal: number): string {
+  if (american !== undefined) {
+    return american > 0 ? `+${american}` : `${american}`;
+  }
+  const am = decimal >= 2 ? Math.round((decimal - 1) * 100) : Math.round(-100 / (decimal - 1));
+  return am > 0 ? `+${am}` : `${am}`;
+}
+
 export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
   const { toast } = useToast();
+  const parlaySlip = useParlaySlip();
+
+  const slipLegs: BetLeg[] = parlaySlip.legs.map((leg) => ({
+    sport: leg.sport || "Sports",
+    event: leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team,
+    pick: leg.outcome,
+    odds: formatOdds(leg.americanOdds, leg.decimalOdds),
+    type: leg.market.replace("_", " "),
+  }));
+
   const [selectedBook, setSelectedBook] = useState("");
   const [generated, setGenerated] = useState(false);
   const [formattedSlip, setFormattedSlip] = useState("");
@@ -103,8 +123,11 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
   const [formOdds, setFormOdds] = useState("");
   const [formType, setFormType] = useState("Spread");
 
-  const activeLegs = externalLegs && externalLegs.length > 0 ? externalLegs : manualLegs;
-  const isUsingExternal = externalLegs && externalLegs.length > 0;
+  const hasExternalLegs = externalLegs && externalLegs.length > 0;
+  const hasSlipLegs = slipLegs.length > 0;
+  const activeLegs = hasExternalLegs ? externalLegs : hasSlipLegs ? slipLegs : manualLegs;
+  const isUsingExternal = hasExternalLegs || hasSlipLegs;
+  const source = hasExternalLegs ? "external" : hasSlipLegs ? "slip" : "manual";
 
   function handleAddLeg() {
     if (!formEvent || !formPick || !formOdds) return;
@@ -140,6 +163,17 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
 
   const selectedBookData = SPORTSBOOKS.find((b) => b.id === selectedBook);
 
+  const handlePlaceAt = (book: typeof SPORTSBOOKS[0]) => {
+    const slip = formatForSportsbook(book.id, activeLegs);
+    navigator.clipboard.writeText(slip).then(() => {
+      toast({
+        title: `Slip copied for ${book.name}`,
+        description: "Paste your selections into the sportsbook",
+      });
+    });
+    window.open(book.deepLink, "_blank", "noopener,noreferrer");
+  };
+
   if (activeLegs.length === 0 && !showAddForm) {
     return (
       <div className="space-y-6">
@@ -156,15 +190,14 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
               <FileOutput className="w-10 h-10 mx-auto mb-3 text-muted-foreground opacity-50" />
               <p className="font-medium">No legs to export</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Build a parlay first, then export it here.
+                Add picks to your bet slip from anywhere in the app, or manually add legs below.
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Or manually add legs below.
-              </p>
-              <Button variant="outline" className="mt-4" onClick={() => setShowAddForm(true)} data-testid="button-start-adding-legs">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Legs Manually
-              </Button>
+              <div className="flex gap-2 justify-center mt-4">
+                <Button variant="outline" onClick={() => setShowAddForm(true)} data-testid="button-start-adding-legs">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Legs Manually
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -174,37 +207,27 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
 
   return (
     <div className="space-y-6">
+      {source === "slip" && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-3 px-4 flex items-center gap-3">
+            <Ticket className="h-5 w-5 text-primary shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">Using your active bet slip ({slipLegs.length} leg{slipLegs.length !== 1 ? "s" : ""})</p>
+              <p className="text-xs text-muted-foreground">Picks added from across the platform</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileOutput className="h-5 w-5" />
             Export Bet Slip
           </CardTitle>
-          <CardDescription>Generate a formatted bet slip for your sportsbook</CardDescription>
+          <CardDescription>Format and place your parlay at any sportsbook</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Select Sportsbook</Label>
-            <Select
-              value={selectedBook}
-              onValueChange={(val) => {
-                setSelectedBook(val);
-                setGenerated(false);
-              }}
-            >
-              <SelectTrigger data-testid="select-sportsbook">
-                <SelectValue placeholder="Choose a sportsbook" />
-              </SelectTrigger>
-              <SelectContent>
-                {SPORTSBOOKS.map((book) => (
-                  <SelectItem key={book.id} value={book.id} data-testid={`option-sportsbook-${book.id}`}>
-                    {book.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <Label>Parlay Legs ({activeLegs.length})</Label>
@@ -296,6 +319,28 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label>Select Sportsbook to Format</Label>
+            <Select
+              value={selectedBook}
+              onValueChange={(val) => {
+                setSelectedBook(val);
+                setGenerated(false);
+              }}
+            >
+              <SelectTrigger data-testid="select-sportsbook">
+                <SelectValue placeholder="Choose a sportsbook" />
+              </SelectTrigger>
+              <SelectContent>
+                {SPORTSBOOKS.map((book) => (
+                  <SelectItem key={book.id} value={book.id} data-testid={`option-sportsbook-${book.id}`}>
+                    {book.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <Button
             className="w-full"
             disabled={!selectedBook || activeLegs.length === 0}
@@ -303,7 +348,7 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
             data-testid="button-generate-slip"
           >
             <FileOutput className="h-4 w-4 mr-2" />
-            Generate Bet Slip
+            Generate Formatted Slip
           </Button>
         </CardContent>
       </Card>
@@ -331,45 +376,45 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card>
-                <CardContent className="p-4 flex flex-col items-center justify-center gap-2 min-h-[120px]">
-                  <Smartphone className="h-8 w-8 text-muted-foreground" />
-                  <p className="text-sm font-medium">Scan to open in app</p>
-                  <p className="text-xs text-muted-foreground">QR code for mobile sportsbook</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4 space-y-2">
-                  <p className="text-sm font-medium flex items-center gap-1">
-                    <ExternalLink className="h-4 w-4" />
-                    Deep Link
-                  </p>
-                  <p className="text-xs text-muted-foreground break-all font-mono" data-testid="text-deep-link">
-                    {selectedBookData?.deepLink}/betslip?parlay=true&legs={activeLegs.length}
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        `${selectedBookData?.deepLink}/betslip?parlay=true&legs=${activeLegs.length}`
-                      );
-                      toast({ title: "Deep link copied" });
-                    }}
-                    data-testid="button-copy-deep-link"
-                  >
-                    <Copy className="h-3 w-3 mr-1" />
-                    Copy Link
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
+            <Button
+              className={`w-full ${selectedBookData ? `${selectedBookData.color} ${selectedBookData.textColor}` : ""} border-0`}
+              onClick={() => selectedBookData && handlePlaceAt(selectedBookData)}
+              data-testid="button-open-sportsbook"
+            >
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Copy & Open {selectedBookData?.name}
+            </Button>
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ExternalLink className="h-5 w-5" />
+            Quick Place
+          </CardTitle>
+          <CardDescription>Copy your slip and open a sportsbook in one tap</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {SPORTSBOOKS.map((book) => (
+              <Button
+                key={book.id}
+                variant="outline"
+                className={`h-12 font-bold ${book.color} ${book.textColor} border-0`}
+                onClick={() => handlePlaceAt(book)}
+                data-testid={`button-quick-place-${book.id}`}
+              >
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                {book.name}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <AffiliateDisclosure />
     </div>
   );
 }
