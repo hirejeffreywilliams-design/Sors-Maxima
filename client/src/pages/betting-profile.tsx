@@ -1,27 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { User, Heart, Star, Trophy, Target, Shield, Zap, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/use-seo";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 type RiskTolerance = "conservative" | "moderate" | "aggressive";
 type BankrollStrategy = "flat" | "percentage" | "kelly";
 type BetFrequency = "1-2" | "3-5" | "5+";
 
-interface BettingProfile {
+interface BettingProfileData {
   riskTolerance: RiskTolerance;
   preferredBetTypes: string[];
   bankrollStrategy: BankrollStrategy;
   betFrequency: BetFrequency;
+  favoriteTeams: string[];
+  favoriteLeagues: string[];
 }
 
-const defaultProfile: BettingProfile = {
+const defaultProfile: BettingProfileData = {
   riskTolerance: "moderate",
   preferredBetTypes: [],
   bankrollStrategy: "flat",
   betFrequency: "1-2",
+  favoriteTeams: [],
+  favoriteLeagues: [],
 };
 
 const betTypeOptions = ["Moneylines", "Spreads", "Props", "Totals", "Mix of everything"];
@@ -50,7 +57,7 @@ const leagueOptions = [
   { id: "Soccer_UCL", label: "Champions League" },
 ];
 
-function getProfileType(profile: BettingProfile): { name: string; icon: JSX.Element; tips: string[] } {
+function getProfileType(profile: BettingProfileData): { name: string; icon: JSX.Element; tips: string[] } {
   if (profile.betFrequency === "5+") {
     return {
       name: "The Grinder",
@@ -103,68 +110,81 @@ export default function BettingProfile() {
   useSEO({ title: "Betting Profile", description: "Your betting preferences and style analysis" });
   const { toast } = useToast();
 
-  const [profile, setProfile] = useState<BettingProfile>(() => {
-    try {
-      const saved = localStorage.getItem("sors_betting_profile");
-      return saved ? JSON.parse(saved) : defaultProfile;
-    } catch {
-      return defaultProfile;
-    }
+  const { data: savedProfile, isLoading } = useQuery<BettingProfileData>({
+    queryKey: ['/api/user/betting-profile'],
   });
 
-  const [favoriteTeams, setFavoriteTeams] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("sors_favorite_teams");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+  const [profile, setProfile] = useState<BettingProfileData | null>(null);
+  const [favoriteTeams, setFavoriteTeams] = useState<string[] | null>(null);
+  const [favoriteLeagues, setFavoriteLeagues] = useState<string[] | null>(null);
+
+  const currentProfile = profile ?? savedProfile ?? defaultProfile;
+  const currentTeams = favoriteTeams ?? savedProfile?.favoriteTeams ?? [];
+  const currentLeagues = favoriteLeagues ?? savedProfile?.favoriteLeagues ?? [];
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: BettingProfileData) => {
+      const res = await apiRequest("POST", "/api/user/betting-profile", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/user/betting-profile'] });
+      toast({ title: "Profile saved!", description: "Your betting preferences have been updated." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to save profile. Please try again.", variant: "destructive" });
+    },
   });
-
-  const [favoriteLeagues, setFavoriteLeagues] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem("sors_favorite_leagues");
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem("sors_favorite_teams", JSON.stringify(favoriteTeams));
-  }, [favoriteTeams]);
-
-  useEffect(() => {
-    localStorage.setItem("sors_favorite_leagues", JSON.stringify(favoriteLeagues));
-  }, [favoriteLeagues]);
 
   const toggleBetType = (bt: string) => {
-    setProfile(prev => ({
+    const prev = profile ?? savedProfile ?? defaultProfile;
+    setProfile({
       ...prev,
       preferredBetTypes: prev.preferredBetTypes.includes(bt)
         ? prev.preferredBetTypes.filter(t => t !== bt)
         : [...prev.preferredBetTypes, bt],
-    }));
+    });
   };
 
   const toggleTeam = (team: string) => {
-    setFavoriteTeams(prev =>
+    const prev = favoriteTeams ?? savedProfile?.favoriteTeams ?? [];
+    setFavoriteTeams(
       prev.includes(team) ? prev.filter(t => t !== team) : [...prev, team]
     );
   };
 
   const toggleLeague = (league: string) => {
-    setFavoriteLeagues(prev =>
+    const prev = favoriteLeagues ?? savedProfile?.favoriteLeagues ?? [];
+    setFavoriteLeagues(
       prev.includes(league) ? prev.filter(l => l !== league) : [...prev, league]
     );
   };
 
   const saveProfile = () => {
-    localStorage.setItem("sors_betting_profile", JSON.stringify(profile));
-    toast({ title: "Profile saved!", description: "Your betting preferences have been updated." });
+    saveMutation.mutate({
+      ...currentProfile,
+      favoriteTeams: currentTeams,
+      favoriteLeagues: currentLeagues,
+    });
   };
 
-  const profileType = getProfileType(profile);
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6" data-testid="betting-profile-page">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-72" />
+        <Card><CardContent className="p-5 space-y-4">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </CardContent></Card>
+      </div>
+    );
+  }
+
+  const profileType = getProfileType(currentProfile);
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6" data-testid="betting-profile-page">
@@ -190,10 +210,10 @@ export default function BettingProfile() {
                 {(["conservative", "moderate", "aggressive"] as RiskTolerance[]).map(option => (
                   <Button
                     key={option}
-                    variant={profile.riskTolerance === option ? "default" : "outline"}
+                    variant={currentProfile.riskTolerance === option ? "default" : "outline"}
                     size="sm"
-                    className={`capitalize toggle-elevate ${profile.riskTolerance === option ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...prev, riskTolerance: option }))}
+                    className={`capitalize toggle-elevate ${currentProfile.riskTolerance === option ? "toggle-elevated" : ""}`}
+                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), riskTolerance: option }))}
                     data-testid={`button-risk-${option}`}
                   >
                     {option}
@@ -208,9 +228,9 @@ export default function BettingProfile() {
                 {betTypeOptions.map(bt => (
                   <Button
                     key={bt}
-                    variant={profile.preferredBetTypes.includes(bt) ? "default" : "outline"}
+                    variant={currentProfile.preferredBetTypes.includes(bt) ? "default" : "outline"}
                     size="sm"
-                    className={`toggle-elevate ${profile.preferredBetTypes.includes(bt) ? "toggle-elevated" : ""}`}
+                    className={`toggle-elevate ${currentProfile.preferredBetTypes.includes(bt) ? "toggle-elevated" : ""}`}
                     onClick={() => toggleBetType(bt)}
                     data-testid={`button-bettype-${bt.toLowerCase().replace(/\s+/g, "-")}`}
                   >
@@ -230,10 +250,10 @@ export default function BettingProfile() {
                 ]).map(option => (
                   <Button
                     key={option.value}
-                    variant={profile.bankrollStrategy === option.value ? "default" : "outline"}
+                    variant={currentProfile.bankrollStrategy === option.value ? "default" : "outline"}
                     size="sm"
-                    className={`toggle-elevate ${profile.bankrollStrategy === option.value ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...prev, bankrollStrategy: option.value }))}
+                    className={`toggle-elevate ${currentProfile.bankrollStrategy === option.value ? "toggle-elevated" : ""}`}
+                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), bankrollStrategy: option.value }))}
                     data-testid={`button-bankroll-${option.value}`}
                   >
                     {option.label}
@@ -252,10 +272,10 @@ export default function BettingProfile() {
                 ]).map(option => (
                   <Button
                     key={option.value}
-                    variant={profile.betFrequency === option.value ? "default" : "outline"}
+                    variant={currentProfile.betFrequency === option.value ? "default" : "outline"}
                     size="sm"
-                    className={`toggle-elevate ${profile.betFrequency === option.value ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...prev, betFrequency: option.value }))}
+                    className={`toggle-elevate ${currentProfile.betFrequency === option.value ? "toggle-elevated" : ""}`}
+                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), betFrequency: option.value }))}
                     data-testid={`button-frequency-${option.value}`}
                   >
                     {option.label}
@@ -280,9 +300,9 @@ export default function BettingProfile() {
             </ul>
           </div>
 
-          <Button onClick={saveProfile} className="w-full gap-2" data-testid="button-save-profile">
+          <Button onClick={saveProfile} className="w-full gap-2" disabled={saveMutation.isPending} data-testid="button-save-profile">
             <Shield className="w-4 h-4" />
-            Save Profile
+            {saveMutation.isPending ? "Saving..." : "Save Profile"}
           </Button>
         </CardContent>
       </Card>
@@ -301,7 +321,7 @@ export default function BettingProfile() {
               <div className="flex flex-wrap gap-2">
                 {teams.map(team => {
                   const key = `${league}-${team}`;
-                  const selected = favoriteTeams.includes(key);
+                  const selected = currentTeams.includes(key);
                   return (
                     <Badge
                       key={key}
@@ -331,7 +351,7 @@ export default function BettingProfile() {
 
           <div className="flex flex-wrap gap-2">
             {leagueOptions.map(league => {
-              const selected = favoriteLeagues.includes(league.id);
+              const selected = currentLeagues.includes(league.id);
               return (
                 <Button
                   key={league.id}

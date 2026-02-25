@@ -895,6 +895,180 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     res.json(alert);
   });
 
+  // ==================== BETTING PROFILE (DB-backed) ====================
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS user_betting_profile (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL UNIQUE,
+      risk_tolerance TEXT NOT NULL DEFAULT 'moderate',
+      preferred_bet_types TEXT[] NOT NULL DEFAULT '{}',
+      bankroll_strategy TEXT NOT NULL DEFAULT 'flat',
+      bet_frequency TEXT NOT NULL DEFAULT '1-2',
+      favorite_teams TEXT[] NOT NULL DEFAULT '{}',
+      favorite_leagues TEXT[] NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+
+  app.get("/api/user/betting-profile", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId!);
+    try {
+      const result = await db.execute(sql`SELECT * FROM user_betting_profile WHERE user_id = ${userId}`);
+      if (result.rows.length === 0) {
+        return res.json({
+          riskTolerance: "moderate",
+          preferredBetTypes: [],
+          bankrollStrategy: "flat",
+          betFrequency: "1-2",
+          favoriteTeams: [],
+          favoriteLeagues: [],
+        });
+      }
+      const row = result.rows[0] as any;
+      res.json({
+        riskTolerance: row.risk_tolerance,
+        preferredBetTypes: row.preferred_bet_types || [],
+        bankrollStrategy: row.bankroll_strategy,
+        betFrequency: row.bet_frequency,
+        favoriteTeams: row.favorite_teams || [],
+        favoriteLeagues: row.favorite_leagues || [],
+      });
+    } catch (err) {
+      console.error("Failed to get betting profile:", err);
+      res.status(500).json({ error: "Failed to get betting profile" });
+    }
+  });
+
+  app.post("/api/user/betting-profile", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId!);
+    const { riskTolerance, preferredBetTypes, bankrollStrategy, betFrequency, favoriteTeams, favoriteLeagues } = req.body;
+    try {
+      const result = await db.execute(sql`
+        INSERT INTO user_betting_profile (user_id, risk_tolerance, preferred_bet_types, bankroll_strategy, bet_frequency, favorite_teams, favorite_leagues, updated_at)
+        VALUES (${userId}, ${riskTolerance || 'moderate'}, ${preferredBetTypes || []}, ${bankrollStrategy || 'flat'}, ${betFrequency || '1-2'}, ${favoriteTeams || []}, ${favoriteLeagues || []}, NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          risk_tolerance = EXCLUDED.risk_tolerance,
+          preferred_bet_types = EXCLUDED.preferred_bet_types,
+          bankroll_strategy = EXCLUDED.bankroll_strategy,
+          bet_frequency = EXCLUDED.bet_frequency,
+          favorite_teams = EXCLUDED.favorite_teams,
+          favorite_leagues = EXCLUDED.favorite_leagues,
+          updated_at = NOW()
+        RETURNING *
+      `);
+      const row = result.rows[0] as any;
+      res.json({
+        riskTolerance: row.risk_tolerance,
+        preferredBetTypes: row.preferred_bet_types || [],
+        bankrollStrategy: row.bankroll_strategy,
+        betFrequency: row.bet_frequency,
+        favoriteTeams: row.favorite_teams || [],
+        favoriteLeagues: row.favorite_leagues || [],
+      });
+    } catch (err) {
+      console.error("Failed to save betting profile:", err);
+      res.status(500).json({ error: "Failed to save betting profile" });
+    }
+  });
+
+  // ==================== TICKET HISTORY (DB-backed) ====================
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS ticket_history (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      ticket_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      sport TEXT NOT NULL,
+      legs JSONB NOT NULL DEFAULT '[]',
+      total_odds REAL NOT NULL,
+      american_odds INTEGER NOT NULL,
+      recommended_stake REAL NOT NULL,
+      potential_payout REAL NOT NULL,
+      grade TEXT NOT NULL DEFAULT 'C',
+      saved_at TIMESTAMP DEFAULT NOW(),
+      status TEXT NOT NULL DEFAULT 'pending',
+      settled_at TIMESTAMP,
+      actual_pl REAL
+    );
+  `);
+
+  app.get("/api/user/ticket-history", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId || "0");
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const result = await db.execute(sql`
+        SELECT id, ticket_id, name, sport, legs, total_odds, american_odds,
+               recommended_stake, potential_payout, grade, saved_at, status,
+               settled_at, actual_pl
+        FROM ticket_history
+        WHERE user_id = ${userId}
+        ORDER BY saved_at DESC
+      `);
+      res.json(result.rows);
+    } catch (err) {
+      console.error("Failed to fetch ticket history:", err);
+      res.status(500).json({ error: "Failed to fetch ticket history" });
+    }
+  });
+
+  app.post("/api/user/ticket-history", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId || "0");
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const { ticketId, name, sport, legs, totalOdds, americanOdds, recommendedStake, potentialPayout, grade } = req.body;
+      if (!ticketId || !name || !sport) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+      const result = await db.execute(sql`
+        INSERT INTO ticket_history (user_id, ticket_id, name, sport, legs, total_odds, american_odds, recommended_stake, potential_payout, grade)
+        VALUES (${userId}, ${ticketId}, ${name}, ${sport}, ${JSON.stringify(legs || [])}, ${totalOdds || 0}, ${americanOdds || 0}, ${recommendedStake || 0}, ${potentialPayout || 0}, ${grade || 'C'})
+        RETURNING id, ticket_id, name, sport, legs, total_odds, american_odds, recommended_stake, potential_payout, grade, saved_at, status, settled_at, actual_pl
+      `);
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Failed to save ticket:", err);
+      res.status(500).json({ error: "Failed to save ticket" });
+    }
+  });
+
+  app.patch("/api/user/ticket-history/:id", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId || "0");
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const ticketDbId = parseInt(req.params.id);
+    if (!Number.isFinite(ticketDbId)) return res.status(400).json({ error: "Invalid ticket ID" });
+    try {
+      const { status, actualPL } = req.body;
+      const settledAt = status && status !== "pending" ? new Date() : null;
+      const result = await db.execute(sql`
+        UPDATE ticket_history
+        SET status = COALESCE(${status}, status),
+            actual_pl = COALESCE(${actualPL ?? null}, actual_pl),
+            settled_at = COALESCE(${settledAt}, settled_at)
+        WHERE id = ${ticketDbId} AND user_id = ${userId}
+        RETURNING id, ticket_id, name, sport, legs, total_odds, american_odds, recommended_stake, potential_payout, grade, saved_at, status, settled_at, actual_pl
+      `);
+      if (result.rows.length === 0) return res.status(404).json({ error: "Ticket not found" });
+      res.json(result.rows[0]);
+    } catch (err) {
+      console.error("Failed to update ticket:", err);
+      res.status(500).json({ error: "Failed to update ticket" });
+    }
+  });
+
+  app.delete("/api/user/ticket-history/:id", requireAuth, async (req, res) => {
+    const userId = parseInt(req.session!.userId || "0");
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    const ticketDbId = parseInt(req.params.id);
+    if (!Number.isFinite(ticketDbId)) return res.status(400).json({ error: "Invalid ticket ID" });
+    try {
+      await db.execute(sql`DELETE FROM ticket_history WHERE id = ${ticketDbId} AND user_id = ${userId}`);
+      res.json({ success: true });
+    } catch (err) {
+      console.error("Failed to delete ticket:", err);
+      res.status(500).json({ error: "Failed to delete ticket" });
+    }
+  });
+
   // ==================== CLV PICK TRACKER ====================
   app.post("/api/user/picks", requireAuth, async (req, res) => {
     try {

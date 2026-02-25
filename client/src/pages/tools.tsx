@@ -129,7 +129,7 @@ export default function Tools() {
       <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
           <div>
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Pro Tools</h1>
+            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Tools & Analytics</h1>
             <p className="text-xs sm:text-sm text-muted-foreground">Advanced betting analytics and research</p>
           </div>
           <Select value={activeGroup} onValueChange={handleGroupChange}>

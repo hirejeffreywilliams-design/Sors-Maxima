@@ -158,9 +158,13 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSaveToHistory = () => {
-    saveTicketToHistory(ticket);
-    toast({ title: "Saved", description: "Ticket saved to your history" });
+  const handleSaveToHistory = async () => {
+    try {
+      await saveTicketToHistory(ticket);
+      toast({ title: "Saved", description: "Ticket saved to your history" });
+    } catch {
+      toast({ title: "Error", description: "Failed to save ticket", variant: "destructive" });
+    }
   };
   
   return (

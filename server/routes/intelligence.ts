@@ -25,6 +25,7 @@ import {
   getRiskMetrics,
 } from "../monteCarloEngine";
 import type { MatchupSimulationInput } from "../monteCarloEngine";
+import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireTier } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
@@ -169,6 +170,10 @@ export function registerIntelligenceRoutes(app: Express): void {
 
   app.get("/api/platform-intelligence/engine-status", (_req: Request, res: Response) => {
     return res.json(getPlatformEngineStatus());
+  });
+
+  app.get("/api/sports/in-season", (_req: Request, res: Response) => {
+    return res.json(getInSeasonSports());
   });
 
   startMonteCarloEngine();

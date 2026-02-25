@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -98,7 +98,7 @@ interface EngineStatus {
   cacheStatus: Record<string, { hasPicks: boolean; pickCount: number; dataSource: string; age: string; generatedAt: string }>;
 }
 
-const engineSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
+const fallbackSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 
 type GradeFilter = "all" | "A" | "B" | "C";
 type SortMode = "confidence" | "ev" | "grade" | "odds";
@@ -492,7 +492,7 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
 export default function DailyParlays() {
   useSEO({ title: "Daily Parlays", description: "Today's AI-generated parlay recommendations" });
   const [, navigate] = useLocation();
-  const [activeSport, setActiveSport] = useState<string>("NBA");
+  const [activeSport, setActiveSport] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortMode>("confidence");
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
   const [showCount, setShowCount] = useState(12);
@@ -503,6 +503,19 @@ export default function DailyParlays() {
 
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
+
+  const { data: inSeasonSports } = useQuery<string[]>({
+    queryKey: ["/api/sports/in-season"],
+    staleTime: 300_000,
+  });
+
+  const sportTabs = inSeasonSports && inSeasonSports.length > 0 ? inSeasonSports : [...fallbackSports];
+
+  useEffect(() => {
+    if (sportTabs.length > 0 && (activeSport === "" || !sportTabs.includes(activeSport))) {
+      setActiveSport(sportTabs[0]);
+    }
+  }, [sportTabs, activeSport]);
 
   const { data: engineStatus } = useQuery<EngineStatus>({
     queryKey: ["/api/precomputed-engine/status"],
@@ -765,7 +778,7 @@ export default function DailyParlays() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-muted/30 border border-border/40">
-              {engineSports.map(sport => {
+              {sportTabs.map(sport => {
                 const cache = engineStatus?.cacheStatus?.[sport];
                 const isActive = activeSport === sport;
                 return (

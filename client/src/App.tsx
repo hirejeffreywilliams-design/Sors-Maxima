@@ -210,9 +210,28 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
   );
 }
 
+function OnboardingGuard({ children }: { children: React.ReactNode }) {
+  const [location, setLocation] = useLocation();
+  const { data: onboardingData } = useQuery<{ onboardingCompleted: boolean }>({
+    queryKey: ['/api/user/onboarding'],
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+  });
+
+  useEffect(() => {
+    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help'];
+    if (onboardingData && !onboardingData.onboardingCompleted && !skipPaths.includes(location)) {
+      setLocation('/onboarding');
+    }
+  }, [onboardingData, location, setLocation]);
+
+  return <>{children}</>;
+}
+
 function Router({ authState }: { authState: AuthState }) {
   return (
     <ErrorBoundary>
+    <OnboardingGuard>
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
@@ -240,7 +259,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/ticket-history" component={TicketHistory} />
         <Route path="/betting-profile" component={BettingProfile} />
         <Route path="/insights" component={PersonalizedInsights} />
-        <Route path="/pro-tools" component={ProTools} />
+        <Route path="/pro-tools">{() => { const [, setLocation] = useLocation(); setLocation("/tools"); return null; }}</Route>
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/straight-bets" component={StraightBets} />
         <Route path="/sgp" component={SGPGenerator} />
@@ -253,6 +272,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route component={NotFound} />
       </Switch>
     </Suspense>
+    </OnboardingGuard>
     </ErrorBoundary>
   );
 }
@@ -281,7 +301,7 @@ const navItems: NavItem[] = [
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Community - Leaderboards, social feed, and tipster groups" },
   { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Rewards - Challenges, achievements, and practice mode" },
-  { href: "/pro-tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Pro Tools - Calculators, optimizers, analysis" },
+  { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Tools & Analytics - Calculators, optimizers, analysis" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
 

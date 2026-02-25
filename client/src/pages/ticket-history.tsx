@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -10,7 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   History,
   Trophy,
@@ -27,42 +28,30 @@ import {
 } from "lucide-react";
 import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
 import { useSEO } from "@/hooks/use-seo";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export interface SavedTicket {
-  id: string;
+  id: number;
+  ticket_id: string;
   name: string;
   sport: string;
   legs: TicketLeg[];
-  totalOdds: number;
-  americanOdds: number;
-  recommendedStake: number;
-  potentialPayout: number;
+  total_odds: number;
+  american_odds: number;
+  recommended_stake: number;
+  potential_payout: number;
   grade: string;
-  savedAt: string;
+  saved_at: string;
   status: "pending" | "won" | "lost" | "push";
-  settledAt?: string;
-  actualPL?: number;
+  settled_at?: string;
+  actual_pl?: number;
 }
 
-const STORAGE_KEY = "sors_ticket_history";
+const TICKET_HISTORY_KEY = ["/api/user/ticket-history"];
 
-function loadTickets(): SavedTicket[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as SavedTicket[];
-  } catch {
-    return [];
-  }
-}
-
-function persistTickets(tickets: SavedTicket[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
-}
-
-export function saveTicketToHistory(ticket: GeneratedTicket): SavedTicket {
-  const saved: SavedTicket = {
-    id: ticket.id + "_" + Date.now(),
+export async function saveTicketToHistory(ticket: GeneratedTicket): Promise<void> {
+  await apiRequest("POST", "/api/user/ticket-history", {
+    ticketId: ticket.id + "_" + Date.now(),
     name: ticket.name,
     sport: ticket.sport,
     legs: ticket.legs,
@@ -71,13 +60,8 @@ export function saveTicketToHistory(ticket: GeneratedTicket): SavedTicket {
     recommendedStake: ticket.recommendedStake,
     potentialPayout: ticket.potentialPayout,
     grade: ticket.grade,
-    savedAt: new Date().toISOString(),
-    status: "pending",
-  };
-  const existing = loadTickets();
-  existing.unshift(saved);
-  persistTickets(existing);
-  return saved;
+  });
+  queryClient.invalidateQueries({ queryKey: TICKET_HISTORY_KEY });
 }
 
 function formatOdds(american: number) {
@@ -114,16 +98,16 @@ function SummaryStats({ tickets }: { tickets: SavedTicket[] }) {
   const losses = tickets.filter((t) => t.status === "lost").length;
   const pushes = tickets.filter((t) => t.status === "push").length;
   const winRate = settled.length > 0 ? (wins / (wins + losses)) * 100 : 0;
-  const totalStaked = settled.reduce((sum, t) => sum + t.recommendedStake, 0);
-  const totalPL = settled.reduce((sum, t) => sum + (t.actualPL ?? 0), 0);
+  const totalStaked = settled.reduce((sum, t) => sum + t.recommended_stake, 0);
+  const totalPL = settled.reduce((sum, t) => sum + (t.actual_pl ?? 0), 0);
   const roi = totalStaked > 0 ? (totalPL / totalStaked) * 100 : 0;
 
   const stats = [
     { label: "Total Tickets", value: tickets.length.toString(), icon: History, testId: "stat-total" },
     { label: "Won / Lost / Push", value: `${wins} / ${losses} / ${pushes}`, icon: Trophy, testId: "stat-record" },
-    { label: "Win Rate", value: settled.length > 0 ? `${winRate.toFixed(1)}%` : "—", icon: TrendingUp, testId: "stat-winrate" },
-    { label: "ROI", value: settled.length > 0 ? `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%` : "—", icon: BarChart3, testId: "stat-roi", color: roi >= 0 ? "text-green-500" : "text-red-400" },
-    { label: "Profit / Loss", value: settled.length > 0 ? `${totalPL >= 0 ? "+" : ""}$${totalPL.toFixed(2)}` : "—", icon: totalPL >= 0 ? TrendingUp : TrendingDown, testId: "stat-pl", color: totalPL >= 0 ? "text-green-500" : "text-red-400" },
+    { label: "Win Rate", value: settled.length > 0 ? `${winRate.toFixed(1)}%` : "\u2014", icon: TrendingUp, testId: "stat-winrate" },
+    { label: "ROI", value: settled.length > 0 ? `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%` : "\u2014", icon: BarChart3, testId: "stat-roi", color: roi >= 0 ? "text-green-500" : "text-red-400" },
+    { label: "Profit / Loss", value: settled.length > 0 ? `${totalPL >= 0 ? "+" : ""}$${totalPL.toFixed(2)}` : "\u2014", icon: totalPL >= 0 ? TrendingUp : TrendingDown, testId: "stat-pl", color: totalPL >= 0 ? "text-green-500" : "text-red-400" },
   ];
 
   return (
@@ -147,13 +131,13 @@ function SummaryStats({ tickets }: { tickets: SavedTicket[] }) {
 
 function PerformanceChart({ tickets }: { tickets: SavedTicket[] }) {
   const settled = tickets
-    .filter((t) => t.status !== "pending" && t.actualPL !== undefined)
+    .filter((t) => t.status !== "pending" && t.actual_pl !== undefined && t.actual_pl !== null)
     .slice(0, 20)
     .reverse();
 
   if (settled.length === 0) return null;
 
-  const maxAbs = Math.max(...settled.map((t) => Math.abs(t.actualPL ?? 0)), 1);
+  const maxAbs = Math.max(...settled.map((t) => Math.abs(t.actual_pl ?? 0)), 1);
 
   return (
     <Card>
@@ -166,7 +150,7 @@ function PerformanceChart({ tickets }: { tickets: SavedTicket[] }) {
       <CardContent className="pb-4">
         <div className="flex items-end gap-1 h-40" data-testid="performance-chart">
           {settled.map((t, i) => {
-            const pl = t.actualPL ?? 0;
+            const pl = t.actual_pl ?? 0;
             const pct = (Math.abs(pl) / maxAbs) * 100;
             const isPositive = pl >= 0;
             return (
@@ -220,8 +204,8 @@ function ROIBySport({ tickets }: { tickets: SavedTicket[] }) {
     if (t.status === "won") entry.wins++;
     if (t.status === "lost") entry.losses++;
     if (t.status === "push") entry.pushes++;
-    entry.staked += t.recommendedStake;
-    entry.pl += t.actualPL ?? 0;
+    entry.staked += t.recommended_stake;
+    entry.pl += t.actual_pl ?? 0;
     sportMap.set(t.sport, entry);
   });
 
@@ -245,7 +229,7 @@ function ROIBySport({ tickets }: { tickets: SavedTicket[] }) {
                 <div className="min-w-0">
                   <p className="font-medium text-sm">{sport}</p>
                   <p className="text-xs text-muted-foreground">
-                    {data.wins}W – {data.losses}L – {data.pushes}P
+                    {data.wins}W \u2013 {data.losses}L \u2013 {data.pushes}P
                   </p>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
@@ -269,17 +253,19 @@ function ROIBySport({ tickets }: { tickets: SavedTicket[] }) {
   );
 }
 
-function TicketRow({ ticket, onSettle, onDelete }: {
+function TicketRow({ ticket, onSettle, onDelete, isSettling, isDeleting }: {
   ticket: SavedTicket;
-  onSettle: (id: string, status: "won" | "lost" | "push") => void;
-  onDelete: (id: string) => void;
+  onSettle: (id: number, status: "won" | "lost" | "push") => void;
+  onDelete: (id: number) => void;
+  isSettling: boolean;
+  isDeleting: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
   const pl = ticket.status === "won"
-    ? ticket.potentialPayout - ticket.recommendedStake
+    ? ticket.potential_payout - ticket.recommended_stake
     : ticket.status === "lost"
-    ? -ticket.recommendedStake
+    ? -ticket.recommended_stake
     : 0;
 
   return (
@@ -290,7 +276,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
         data-testid={`ticket-row-${ticket.id}`}
       >
         <TableCell className="text-xs text-muted-foreground whitespace-nowrap" data-testid={`text-date-${ticket.id}`}>
-          {formatDate(ticket.savedAt)}
+          {formatDate(ticket.saved_at)}
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2 min-w-0">
@@ -298,13 +284,13 @@ function TicketRow({ ticket, onSettle, onDelete }: {
             <Badge variant="outline" className="text-[10px] shrink-0">{ticket.sport}</Badge>
           </div>
         </TableCell>
-        <TableCell className="text-center text-sm" data-testid={`text-legs-${ticket.id}`}>{ticket.legs.length}</TableCell>
-        <TableCell className="text-sm font-medium whitespace-nowrap" data-testid={`text-odds-${ticket.id}`}>{formatOdds(ticket.americanOdds)}</TableCell>
-        <TableCell className="text-sm whitespace-nowrap" data-testid={`text-stake-${ticket.id}`}>${ticket.recommendedStake.toFixed(0)}</TableCell>
+        <TableCell className="text-center text-sm" data-testid={`text-legs-${ticket.id}`}>{Array.isArray(ticket.legs) ? ticket.legs.length : 0}</TableCell>
+        <TableCell className="text-sm font-medium whitespace-nowrap" data-testid={`text-odds-${ticket.id}`}>{formatOdds(ticket.american_odds)}</TableCell>
+        <TableCell className="text-sm whitespace-nowrap" data-testid={`text-stake-${ticket.id}`}>${ticket.recommended_stake.toFixed(0)}</TableCell>
         <TableCell><StatusBadge status={ticket.status} /></TableCell>
-        <TableCell className="text-sm whitespace-nowrap" data-testid={`text-payout-${ticket.id}`}>${ticket.potentialPayout.toFixed(0)}</TableCell>
+        <TableCell className="text-sm whitespace-nowrap" data-testid={`text-payout-${ticket.id}`}>${ticket.potential_payout.toFixed(0)}</TableCell>
         <TableCell className={`text-sm font-bold whitespace-nowrap ${ticket.status === "pending" ? "text-muted-foreground" : pl >= 0 ? "text-green-500" : "text-red-400"}`} data-testid={`text-pl-${ticket.id}`}>
-          {ticket.status === "pending" ? "—" : `${pl >= 0 ? "+" : ""}$${pl.toFixed(2)}`}
+          {ticket.status === "pending" ? "\u2014" : `${pl >= 0 ? "+" : ""}$${pl.toFixed(2)}`}
         </TableCell>
         <TableCell onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center gap-1">
@@ -314,6 +300,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
                   size="icon"
                   variant="ghost"
                   onClick={() => onSettle(ticket.id, "won")}
+                  disabled={isSettling}
                   data-testid={`button-mark-won-${ticket.id}`}
                   title="Mark as Won"
                 >
@@ -323,6 +310,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
                   size="icon"
                   variant="ghost"
                   onClick={() => onSettle(ticket.id, "lost")}
+                  disabled={isSettling}
                   data-testid={`button-mark-lost-${ticket.id}`}
                   title="Mark as Lost"
                 >
@@ -332,6 +320,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
                   size="icon"
                   variant="ghost"
                   onClick={() => onSettle(ticket.id, "push")}
+                  disabled={isSettling}
                   data-testid={`button-mark-push-${ticket.id}`}
                   title="Mark as Push"
                 >
@@ -343,6 +332,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
               size="icon"
               variant="ghost"
               onClick={() => onDelete(ticket.id)}
+              disabled={isDeleting}
               data-testid={`button-delete-${ticket.id}`}
               title="Delete"
             >
@@ -357,7 +347,7 @@ function TicketRow({ ticket, onSettle, onDelete }: {
           <TableCell colSpan={9} className="bg-muted/20 p-3">
             <div className="space-y-2">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Leg Details</p>
-              {ticket.legs.map((leg) => (
+              {(Array.isArray(ticket.legs) ? ticket.legs : []).map((leg) => (
                 <div key={leg.id} className="flex items-center justify-between gap-3 p-2.5 bg-muted/30 rounded-lg" data-testid={`leg-detail-${leg.id}`}>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{leg.outcome}</p>
@@ -375,37 +365,77 @@ function TicketRow({ ticket, onSettle, onDelete }: {
   );
 }
 
+function LoadingSkeleton() {
+  return (
+    <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto" data-testid="ticket-history-loading">
+      <div className="flex items-center gap-3">
+        <Skeleton className="w-6 h-6 rounded" />
+        <Skeleton className="w-48 h-8" />
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Card key={i}>
+            <CardContent className="p-4 flex flex-col gap-2">
+              <Skeleton className="w-24 h-4" />
+              <Skeleton className="w-16 h-6" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardContent className="p-4 space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="w-full h-12" />
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function TicketHistory() {
   useSEO({ title: "Ticket History", description: "View your submitted ticket history" });
-  const [tickets, setTickets] = useState<SavedTicket[]>([]);
 
-  useEffect(() => {
-    setTickets(loadTickets());
-  }, []);
+  const { data: tickets = [], isLoading } = useQuery<SavedTicket[]>({
+    queryKey: TICKET_HISTORY_KEY,
+  });
 
-  const handleSettle = useCallback((id: string, status: "won" | "lost" | "push") => {
-    setTickets((prev) => {
-      const updated = prev.map((t) => {
-        if (t.id !== id) return t;
-        let actualPL = 0;
-        if (status === "won") actualPL = t.potentialPayout - t.recommendedStake;
-        if (status === "lost") actualPL = -t.recommendedStake;
-        return { ...t, status, settledAt: new Date().toISOString(), actualPL };
-      });
-      persistTickets(updated);
-      return updated;
-    });
-  }, []);
+  const settleMutation = useMutation({
+    mutationFn: async ({ id, status, actualPL }: { id: number; status: string; actualPL: number }) => {
+      await apiRequest("PATCH", `/api/user/ticket-history/${id}`, { status, actualPL });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TICKET_HISTORY_KEY });
+    },
+  });
 
-  const handleDelete = useCallback((id: string) => {
-    setTickets((prev) => {
-      const updated = prev.filter((t) => t.id !== id);
-      persistTickets(updated);
-      return updated;
-    });
-  }, []);
+  const deleteMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/user/ticket-history/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TICKET_HISTORY_KEY });
+    },
+  });
 
-  const sorted = [...tickets].sort((a, b) => new Date(b.savedAt).getTime() - new Date(a.savedAt).getTime());
+  const handleSettle = (id: number, status: "won" | "lost" | "push") => {
+    const ticket = tickets.find((t) => t.id === id);
+    if (!ticket) return;
+    let actualPL = 0;
+    if (status === "won") actualPL = ticket.potential_payout - ticket.recommended_stake;
+    if (status === "lost") actualPL = -ticket.recommended_stake;
+    settleMutation.mutate({ id, status, actualPL });
+  };
+
+  const handleDelete = (id: number) => {
+    deleteMutation.mutate(id);
+  };
+
+  if (isLoading) {
+    return <LoadingSkeleton />;
+  }
+
+  const sorted = [...tickets].sort((a, b) => new Date(b.saved_at).getTime() - new Date(a.saved_at).getTime());
 
   return (
     <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto" data-testid="ticket-history-page">
@@ -470,6 +500,8 @@ export default function TicketHistory() {
                         ticket={ticket}
                         onSettle={handleSettle}
                         onDelete={handleDelete}
+                        isSettling={settleMutation.isPending}
+                        isDeleting={deleteMutation.isPending}
                       />
                     ))}
                   </TableBody>
