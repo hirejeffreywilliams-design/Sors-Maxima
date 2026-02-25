@@ -2,6 +2,19 @@ import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus } from "../precomputedPredictionsEngine";
+import {
+  startPlatformIntelligenceEngine,
+  getFullIntelligenceReport,
+  getTeamTrends,
+  getTeamDetail,
+  getPredictionAccuracy,
+  getBookmakerRankings,
+  getInjuryImpactDatabase,
+  getCommunityInsights,
+  getPlatformStats,
+  getDailySummaries,
+  getEngineStatus as getPlatformEngineStatus,
+} from "../platformIntelligenceEngine";
 import { getClientIp } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
@@ -91,5 +104,60 @@ export function registerIntelligenceRoutes(app: Express): void {
 
   app.get("/api/precomputed-engine/status", (_req: Request, res: Response) => {
     return res.json(getPrecomputedEngineStatus());
+  });
+
+  startPlatformIntelligenceEngine();
+
+  app.get("/api/platform-intelligence", (_req: Request, res: Response) => {
+    try {
+      return res.json(getFullIntelligenceReport());
+    } catch (err) {
+      console.error("Platform intelligence error:", err);
+      return res.status(500).json({ error: "Failed to get platform intelligence" });
+    }
+  });
+
+  app.get("/api/platform-intelligence/team-trends", (req: Request, res: Response) => {
+    const sport = req.query.sport as string | undefined;
+    const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+    const sportFilter = sport && validSports.includes(sport.toUpperCase()) ? sport.toUpperCase() as any : undefined;
+    return res.json(getTeamTrends(sportFilter));
+  });
+
+  app.get("/api/platform-intelligence/team/:sport/:team", (req: Request, res: Response) => {
+    const { sport, team } = req.params;
+    return res.json(getTeamDetail(decodeURIComponent(team), sport.toUpperCase() as any));
+  });
+
+  app.get("/api/platform-intelligence/prediction-accuracy", (_req: Request, res: Response) => {
+    return res.json(getPredictionAccuracy());
+  });
+
+  app.get("/api/platform-intelligence/bookmaker-rankings", (_req: Request, res: Response) => {
+    return res.json(getBookmakerRankings());
+  });
+
+  app.get("/api/platform-intelligence/injury-impact", (req: Request, res: Response) => {
+    const sport = req.query.sport as string | undefined;
+    const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+    const sportFilter = sport && validSports.includes(sport.toUpperCase()) ? sport.toUpperCase() as any : undefined;
+    return res.json(getInjuryImpactDatabase(sportFilter));
+  });
+
+  app.get("/api/platform-intelligence/community", (_req: Request, res: Response) => {
+    return res.json(getCommunityInsights());
+  });
+
+  app.get("/api/platform-intelligence/stats", (_req: Request, res: Response) => {
+    return res.json(getPlatformStats());
+  });
+
+  app.get("/api/platform-intelligence/daily-summaries", (req: Request, res: Response) => {
+    const limit = parseInt(req.query.limit as string) || 30;
+    return res.json(getDailySummaries(limit));
+  });
+
+  app.get("/api/platform-intelligence/engine-status", (_req: Request, res: Response) => {
+    return res.json(getPlatformEngineStatus());
   });
 }
