@@ -347,6 +347,17 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
               </Link>
             );
           })}
+          <button
+            onClick={() => {
+              onLogout();
+              onClose();
+            }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-destructive/10 text-destructive mt-2"
+            data-testid="mobile-nav-logout"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Logout</span>
+          </button>
         </nav>
       </div>
       
@@ -599,7 +610,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
               variant="ghost" 
               size="sm" 
               onClick={handleLogout}
-              className="gap-2 hidden lg:flex"
+              className="gap-2 hidden lg:flex text-destructive hover:text-destructive hover:bg-destructive/10"
               data-testid="button-logout"
             >
               <LogOut className="w-4 h-4" />
