@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -242,8 +242,7 @@ function formatOdds(odds: number): string {
   return odds > 0 ? `+${odds}` : `${odds}`;
 }
 
-function PickCard({ pick }: { pick: TopPick }) {
-  const { legs, addLeg } = useParlaySlip();
+function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const legId = `cmd-${pick.id}`;
   const inSlip = legs.some(l => l.id === legId);
 
@@ -473,14 +472,17 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
 export default function CommandCenter() {
   useSEO({ title: "Command Center", description: "Real-time betting command center and overview" });
   const [activeSportTab, setActiveSportTab] = useState("all");
+  const { legs, addLeg } = useParlaySlip();
+
+  const handleSSEEvent = useCallback((event: { type: string }) => {
+    if (event.type === "intelligence-update") {
+      queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+    }
+  }, []);
 
   const sse = useSSE({
     enabled: true,
-    onEvent: (event) => {
-      if (event.type === "intelligence-update") {
-        queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
-      }
-    },
+    onEvent: handleSSEEvent,
   });
 
   const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
@@ -708,7 +710,7 @@ export default function CommandCenter() {
                     <p className="text-sm text-muted-foreground py-4 text-center">No picks available for this sport right now</p>
                   ) : (
                     filteredPicks.slice(0, 8).map(pick => (
-                      <PickCard key={pick.id} pick={pick} />
+                      <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
                     ))
                   )}
                 </CardContent>

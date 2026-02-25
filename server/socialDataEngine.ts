@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 
 export interface LeaderboardEntry {
   id: string;
@@ -72,14 +72,20 @@ const feedItems: FeedItem[] = [];
 const competitions: Competition[] = [];
 const followedUsers = new Map<string, Set<string>>();
 
+function generateMemberUsername(index: number): string {
+  const hash = createHash("sha256").update(`member-${index}`).digest("hex");
+  const memberId = parseInt(hash.slice(0, 4), 16) % 10000;
+  return `Member #${memberId}`;
+}
+
 function ensureInitialData(): void {
   if (leaderboard.length > 0) return;
 
-  const names = ["SharpShooter", "ParlaySam", "ValueHunter", "StatsMaster", "OddsOracle", "LineWatcher", "PropKing", "BetBrain", "EdgeFinder", "DataDriven"];
-  for (let i = 0; i < names.length; i++) {
+  for (let i = 0; i < 10; i++) {
+    const username = generateMemberUsername(i);
     leaderboard.push({
       id: randomUUID(),
-      username: names[i],
+      username: username,
       rank: i + 1,
       winRate: 45 + (10 - i) * 2,
       profit: Math.round((1000 - i * 100) * 100) / 100,
@@ -92,7 +98,7 @@ function ensureInitialData(): void {
 
     socialBettors.push({
       id: leaderboard[i].id,
-      username: names[i],
+      username: username,
       winRate: leaderboard[i].winRate,
       totalBets: leaderboard[i].totalBets,
       profit: leaderboard[i].profit,
@@ -104,10 +110,10 @@ function ensureInitialData(): void {
   }
 
   feedItems.push(
-    { id: randomUUID(), type: "bet_won", userId: leaderboard[0].id, username: "SharpShooter", message: "Won a 4-leg NBA parlay (+850)", timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { id: randomUUID(), type: "streak", userId: leaderboard[1].id, username: "ParlaySam", message: "Hit a 7-game winning streak!", timestamp: new Date(Date.now() - 7200000).toISOString() },
-    { id: randomUUID(), type: "achievement", userId: leaderboard[2].id, username: "ValueHunter", message: "Unlocked 'Sharp Bettor' achievement", timestamp: new Date(Date.now() - 14400000).toISOString() },
-    { id: randomUUID(), type: "tip_shared", userId: leaderboard[3].id, username: "StatsMaster", message: "Shared an MLB analysis for today's games", timestamp: new Date(Date.now() - 21600000).toISOString() },
+    { id: randomUUID(), type: "bet_won", userId: leaderboard[0].id, username: leaderboard[0].username, message: "Won a 4-leg NBA parlay (+850)", timestamp: new Date(Date.now() - 3600000).toISOString() },
+    { id: randomUUID(), type: "streak", userId: leaderboard[1].id, username: leaderboard[1].username, message: "Hit a 7-game winning streak!", timestamp: new Date(Date.now() - 7200000).toISOString() },
+    { id: randomUUID(), type: "achievement", userId: leaderboard[2].id, username: leaderboard[2].username, message: "Unlocked 'Sharp Bettor' achievement", timestamp: new Date(Date.now() - 14400000).toISOString() },
+    { id: randomUUID(), type: "tip_shared", userId: leaderboard[3].id, username: leaderboard[3].username, message: "Shared an MLB analysis for today's games", timestamp: new Date(Date.now() - 21600000).toISOString() },
   );
 
   const now = new Date();
@@ -119,9 +125,9 @@ function ensureInitialData(): void {
       sport: "NBA", entryFee: 0, prizePool: 0, participants: 24, maxParticipants: 100,
       startsAt: now.toISOString(), endsAt: tomorrow.toISOString(), status: "active",
       leaderboard: [
-        { username: "SharpShooter", picks: 5, correct: 4, winRate: 80 },
-        { username: "ParlaySam", picks: 5, correct: 3, winRate: 60 },
-        { username: "ValueHunter", picks: 4, correct: 3, winRate: 75 },
+        { username: leaderboard[0].username, picks: 5, correct: 4, winRate: 80 },
+        { username: leaderboard[1].username, picks: 5, correct: 3, winRate: 60 },
+        { username: leaderboard[2].username, picks: 4, correct: 3, winRate: 75 },
       ],
     },
     {
@@ -129,9 +135,9 @@ function ensureInitialData(): void {
       sport: "All", entryFee: 0, prizePool: 0, participants: 42, maxParticipants: 200,
       startsAt: now.toISOString(), endsAt: nextWeek.toISOString(), status: "active",
       leaderboard: [
-        { username: "DataDriven", picks: 12, correct: 9, winRate: 75 },
-        { username: "OddsOracle", picks: 15, correct: 10, winRate: 67 },
-        { username: "StatsMaster", picks: 10, correct: 7, winRate: 70 },
+        { username: leaderboard[9].username, picks: 12, correct: 9, winRate: 75 },
+        { username: leaderboard[6].username, picks: 15, correct: 10, winRate: 67 },
+        { username: leaderboard[3].username, picks: 10, correct: 7, winRate: 70 },
       ],
     },
   );

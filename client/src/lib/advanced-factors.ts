@@ -122,10 +122,22 @@ export function analyzeSituationalFactors(
     });
   }
   
-  // Rivalry detection (mock - would use real rivalry data)
+  // Rivalry detection
   const rivalries = [
-    ['Chiefs', 'Bills'], ['Yankees', 'Red Sox'], ['Cowboys', 'Eagles'],
-    ['Duke', 'UNC'], ['Michigan', 'Ohio State'], ['Chiefs', 'Raiders']
+    // NFL
+    ['Packers', 'Bears'], ['Steelers', 'Ravens'], ['49ers', 'Seahawks'], ['Rams', '49ers'], ['Patriots', 'Jets'],
+    // MLB
+    ['Yankees', 'Red Sox'],
+    // NBA
+    ['Lakers', 'Celtics'], ['Heat', 'Knicks'], ['Warriors', 'Cavaliers'], ['Bulls', 'Pistons'],
+    // NFL
+    ['Chiefs', 'Bills'], ['Cowboys', 'Eagles'], ['Chiefs', 'Raiders'],
+    // MLB
+    ['Dodgers', 'Giants'], ['Cubs', 'Cardinals'], ['Mets', 'Phillies'],
+    // NHL
+    ['Bruins', 'Canadiens'], ['Penguins', 'Flyers'], ['Rangers', 'Islanders'],
+    // NCAAB
+    ['Duke', 'UNC'], ['Kentucky', 'Louisville'], ['Kansas', 'Missouri'], ['UCLA', 'USC'], ['North Carolina', 'Duke']
   ];
   
   const isRivalry = rivalries.some(

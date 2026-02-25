@@ -1592,17 +1592,29 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
           if (props.length === 0) continue;
 
-          const baseVal = defaults[categories[0]] || 10;
-          const last5 = Array.from({ length: 5 }, (_, i) =>
-            Math.round((baseVal + (deterministicValue(`${player.id}-last5-${i}`, 0, baseVal * 0.4) - baseVal * 0.2)) * 10) / 10
-          );
-          const seasonAvg = Math.round(baseVal * 10) / 10;
-          const vsOpponent = Array.from({ length: 4 }, (_, i) =>
-            Math.round((baseVal * 1.05 + (deterministicValue(`${player.id}-vs-${i}`, 0, baseVal * 0.3) - baseVal * 0.15)) * 10) / 10
-          );
-          const projections = Array.from({ length: 4 }, (_, i) =>
-            Math.round((baseVal * 1.02 + (deterministicValue(`${player.id}-proj-${i}`, 0, baseVal * 0.2) - baseVal * 0.1)) * 10) / 10
-          );
+          const primaryCat = categories[0];
+          const primaryDefault = defaults[primaryCat] || 10;
+          const primaryJitter = 1 + (deterministicValue(`${player.id}-${primaryCat}`, 0, 0.3) - 0.15);
+          const playerSeasonAvg = Math.round(primaryDefault * primaryJitter * 10) / 10;
+
+          const seasonAvg = playerSeasonAvg;
+          const last5 = Array.from({ length: 5 }, (_, i) => {
+            const hashSeed = `${player.id}-l5-${primaryCat}-${i}`;
+            const variance = deterministicValue(hashSeed, -0.15, 0.15);
+            return Math.round((playerSeasonAvg * (1 + variance)) * 10) / 10;
+          });
+          const vsOpponent = Array.from({ length: 4 }, (_, i) => {
+            const hashSeed = `${player.id}-vs-${primaryCat}-${i}`;
+            const variance = deterministicValue(hashSeed, -0.12, 0.18);
+            return Math.round((playerSeasonAvg * (1 + variance)) * 10) / 10;
+          });
+          const propLine = props[0] ? (props[0] as any).line : playerSeasonAvg * 0.95;
+          const projections = Array.from({ length: 4 }, (_, i) => {
+            const hashSeed = `${player.id}-proj-${primaryCat}-${i}`;
+            const variance = deterministicValue(hashSeed, -0.08, 0.12);
+            const base = (playerSeasonAvg * 0.6 + propLine * 0.4);
+            return Math.round((base * (1 + variance)) * 10) / 10;
+          });
 
           allPlayers.push({
             id: player.id,
@@ -1713,11 +1725,11 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             const confidence = Math.min(85, Math.max(45, 55 + Math.abs(diff) * 4));
             const edge = Math.round(((projection - line) / line) * 100 * 10) / 10;
 
-            const seasonAvg = Math.round(baseValue * 10) / 10;
-            const last5Avg = Math.round((baseValue * (1 + deterministicValue(`${player.id}-${propType}-l5`, 0, 0.2) - 0.1)) * 10) / 10;
-            const last10Avg = Math.round((baseValue * (1 + deterministicValue(`${player.id}-${propType}-l10`, 0, 0.1) - 0.05)) * 10) / 10;
-            const high = Math.round(baseValue * 1.8);
-            const low = Math.round(baseValue * 0.3);
+            const seasonAvg = Math.round(projection * 10) / 10;
+            const last5Avg = Math.round((projection * (1 + deterministicValue(`${player.id}-${propType}-l5`, -0.12, 0.12))) * 10) / 10;
+            const last10Avg = Math.round((projection * (1 + deterministicValue(`${player.id}-${propType}-l10`, -0.06, 0.06))) * 10) / 10;
+            const high = Math.round(projection * 1.6);
+            const low = Math.round(projection * 0.35);
 
             const recommendation = edge > 8 ? "strong_over" :
               edge > 3 ? "lean_over" :
@@ -1726,7 +1738,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
             const overHitRate = Math.round(50 + edge * 2);
             const recentResults = Array.from({ length: 5 }, (_, i) =>
-              Math.round(baseValue + (deterministicValue(`${player.id}-${propType}-recent-${i}`, 0, baseValue * 0.5) - baseValue * 0.25))
+              Math.round(projection * (1 + deterministicValue(`${player.id}-${propType}-recent-${i}`, -0.2, 0.2)))
             );
 
             matchups.push({
@@ -1757,7 +1769,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               },
               vsOpponentHistory: {
                 games: Math.round(3 + deterministicValue(`${player.id}-vsGames`, 0, 7)),
-                avg: Math.round((baseValue * 1.05) * 10) / 10,
+                avg: Math.round((projection * 1.03) * 10) / 10,
                 overHitRate: Math.min(95, Math.max(20, overHitRate)),
                 recentResults,
               },

@@ -371,7 +371,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const winProb = fusion.winProbability || Math.round(confidence * 0.95);
 
       picks.push({
-        id: `precomp-${sport}-${game.id}-${bet.betType}-${Date.now().toString(36)}`,
+        id: `precomp-${sport}-${game.id}-${bet.betType}-${crypto.randomUUID().slice(0, 8)}`,
         sport,
         game: `${awayName} @ ${homeName}`,
         homeTeam: homeName,

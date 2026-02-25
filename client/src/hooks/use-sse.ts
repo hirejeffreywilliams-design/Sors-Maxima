@@ -57,6 +57,10 @@ export function useSSE(options: UseSSEOptions = {}) {
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mountedRef = useRef(true);
   const lastEventIdRef = useRef<string | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const onEventRef = useRef(onEvent);
+
+  onEventRef.current = onEvent;
 
   const connect = useCallback(() => {
     if (!enabled || !mountedRef.current) return;
@@ -75,6 +79,7 @@ export function useSSE(options: UseSSEOptions = {}) {
 
     es.onopen = () => {
       if (!mountedRef.current) return;
+      reconnectAttemptsRef.current = 0;
       setState(prev => ({ ...prev, connected: true, reconnectAttempts: 0 }));
     };
 
@@ -105,7 +110,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           dataSourceHealth: data.dataSourceHealth || prev.dataSourceHealth,
           lastUpdate: data.timestamp,
         }));
-        onEvent?.(sseEvent);
+        onEventRef.current?.(sseEvent);
       } catch {}
     });
 
@@ -116,7 +121,7 @@ export function useSSE(options: UseSSEOptions = {}) {
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "live-scores", data, timestamp: data.timestamp };
         setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp }));
-        onEvent?.(sseEvent);
+        onEventRef.current?.(sseEvent);
       } catch {}
     });
 
@@ -132,7 +137,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           edgeAlerts: data.alerts || prev.edgeAlerts,
           lastUpdate: data.timestamp,
         }));
-        onEvent?.(sseEvent);
+        onEventRef.current?.(sseEvent);
       } catch {}
     });
 
@@ -148,7 +153,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           pendingNotifications: [data.notification, ...prev.pendingNotifications].slice(0, 50),
           lastUpdate: data.timestamp,
         }));
-        onEvent?.(sseEvent);
+        onEventRef.current?.(sseEvent);
       } catch {}
     });
 
@@ -161,14 +166,16 @@ export function useSSE(options: UseSSEOptions = {}) {
     es.onerror = () => {
       if (!mountedRef.current) return;
       es.close();
-      setState(prev => {
-        const nextAttempts = prev.reconnectAttempts + 1;
-        if (nextAttempts <= maxReconnectAttempts) {
-          const delay = Math.min(reconnectDelay * Math.pow(1.5, nextAttempts - 1), 30000);
-          reconnectTimeoutRef.current = setTimeout(connect, delay);
+      reconnectAttemptsRef.current += 1;
+      const nextAttempts = reconnectAttemptsRef.current;
+      setState(prev => ({ ...prev, connected: false, reconnectAttempts: nextAttempts }));
+      if (nextAttempts <= maxReconnectAttempts) {
+        const delay = Math.min(reconnectDelay * Math.pow(1.5, nextAttempts - 1), 30000);
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
         }
-        return { ...prev, connected: false, reconnectAttempts: nextAttempts };
-      });
+        reconnectTimeoutRef.current = setTimeout(connect, delay);
+      }
     };
   }, [enabled, channels.join(","), reconnectDelay, maxReconnectAttempts]);
 
