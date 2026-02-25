@@ -55,7 +55,9 @@ async function generateRealNotification(): Promise<any | null> {
       };
     }
 
-    const sportsList = ["NBA", "NFL", "MLB", "NHL"] as const;
+    const { getInSeasonSports } = await import("../sportSeasons");
+    const sportsList = getInSeasonSports();
+    if (sportsList.length === 0) return null;
     const sport = sportsList[Date.now() % sportsList.length];
     let snapshot;
     try {

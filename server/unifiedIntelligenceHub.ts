@@ -6,8 +6,7 @@ import { generateMarketSnapshot, type MarketSnapshot, type MarketGame } from "./
 import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 import { getMomentumGames, type MomentumGame } from "./liveAnalyticsEngine";
 import { logError, logWarn } from "./errorLogger";
-
-const ACTIVE_SPORTS: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+import { getInSeasonSports } from "./sportSeasons";
 const HUB_REFRESH_INTERVAL = 60_000;
 
 export interface UnifiedGame {
@@ -415,7 +414,7 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
 function gatherTopPicks(): TopPick[] {
   const allPicks: TopPick[] = [];
 
-  for (const sport of ACTIVE_SPORTS) {
+  for (const sport of getInSeasonSports()) {
     const cached = getPrecomputedCache(sport);
     if (!cached || !cached.picks) continue;
 
@@ -586,7 +585,7 @@ export async function generateIntelligenceFeed(): Promise<IntelligenceFeed> {
   const topPicks = gatherTopPicks();
   const edgeAlerts = generateEdgeAlerts(snapshots);
 
-  const sportSummaries: SportSummary[] = ACTIVE_SPORTS.map(sport => {
+  const sportSummaries: SportSummary[] = getInSeasonSports().map(sport => {
     const snapshot = sportSnapshots.get(sport);
     const sportGames = allGames.filter(g => g.sport === sport);
     const cached = getPrecomputedCache(sport);
@@ -637,7 +636,7 @@ async function runHubCycle(): Promise<void> {
   console.log(`[IntelligenceHub] Starting cycle #${totalCycles}...`);
 
   const results = await Promise.allSettled(
-    ACTIVE_SPORTS.map(async sport => {
+    getInSeasonSports().map(async sport => {
       try {
         const snapshot = await fetchSportSnapshot(sport);
         sportSnapshots.set(sport, snapshot);

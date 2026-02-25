@@ -977,10 +977,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       const { getVenueWeather } = await import("../weather-provider");
 
       const allGames = await getAllSportsScoreboard();
-      const injuryData: Record<string, any> = {};
-      for (const sport of ["NBA", "NFL", "MLB", "NHL"] as const) {
-        try { injuryData[sport] = await getAllInjuries(sport); } catch { injuryData[sport] = []; }
-      }
+      let injuryData: Record<string, any> = {};
+      try { injuryData = await getAllInjuries(); } catch { injuryData = {}; }
 
       const cashoutBets = await Promise.all(pendingBets.map(async (bet: any) => {
         const betSport = bet.sport?.toUpperCase() || "NBA";
@@ -1188,10 +1186,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       const { getVenueWeather } = await import("../weather-provider");
 
       const allGames = await getAllSportsScoreboard();
-      const injuryData: Record<string, any> = {};
-      for (const sport of ["NBA", "NFL", "MLB", "NHL"] as const) {
-        try { injuryData[sport] = await getAllInjuries(sport); } catch { injuryData[sport] = []; }
-      }
+      let injuryData: Record<string, any> = {};
+      try { injuryData = await getAllInjuries(); } catch { injuryData = {}; }
 
       const enrichedBets = await Promise.all(pendingBets.map(async (bet: any) => {
         const betSport = bet.sport?.toUpperCase() || "NBA";
@@ -1415,7 +1411,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           }
 
           try {
-            const injuries = await getAllInjuries(sport);
+            const allInj = await getAllInjuries();
+            const injuries = allInj[sport] || [];
             const criticalCount = injuries.filter((inj: any) =>
               inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
             ).length;

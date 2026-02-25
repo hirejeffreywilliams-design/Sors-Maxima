@@ -279,7 +279,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 }
 
 async function runPredictionCycle(): Promise<void> {
-  const sports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+  const { getInSeasonSports } = await import("./sportSeasons");
+  const sports = getInSeasonSports();
   totalRuns++;
 
   console.log(`[PrecomputedEngine] Starting prediction cycle #${totalRuns}...`);

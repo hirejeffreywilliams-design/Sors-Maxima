@@ -345,7 +345,8 @@ async function accumulatePredictions(): Promise<number> {
     let newPredictions = 0;
     const existingIds = new Set(data.predictionRecords.map(p => p.id));
 
-    for (const sport of ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as Sport[]) {
+    const { getInSeasonSports } = await import("./sportSeasons");
+    for (const sport of getInSeasonSports()) {
       const cached = getPrecomputedCache(sport);
       if (!cached || !cached.picks || cached.picks.length === 0) continue;
 
@@ -405,7 +406,8 @@ async function accumulateOddsData(): Promise<number> {
     const { generateMarketSnapshot } = await import("./marketSnapshotEngine");
     let newSnapshots = 0;
 
-    for (const sport of ["NBA", "NFL", "MLB", "NHL"] as Sport[]) {
+    const { getInSeasonSports } = await import("./sportSeasons");
+    for (const sport of getInSeasonSports()) {
       try {
         const snapshot = await generateMarketSnapshot(sport);
         if (!snapshot || !snapshot.games) continue;
@@ -467,7 +469,8 @@ async function accumulateInjuryData(): Promise<number> {
 
     const allInjuries = await getAllInjuries();
 
-    for (const sport of ["NBA", "NFL", "MLB", "NHL"] as Sport[]) {
+    const inSeasonSports = (await import("./sportSeasons")).getInSeasonSports();
+    for (const sport of inSeasonSports) {
       try {
         const injuries = allInjuries[sport] || [];
         for (const teamInjury of injuries) {

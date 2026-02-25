@@ -749,9 +749,10 @@ async function getESPNGamesForSport(sport: Sport): Promise<ESPNScoreboardGame[]>
 }
 
 export async function getActiveSports(): Promise<{ sport: string; gameCount: number; active: boolean }[]> {
-  const allSports: Sport[] = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+  const { getInSeasonSports } = await import("./sportSeasons");
+  const activeSports = getInSeasonSports();
   const espnResults = await Promise.all(
-    allSports.map(async (sport) => {
+    activeSports.map(async (sport) => {
       const games = await getESPNGamesForSport(sport);
       return { sport, gameCount: games.length, active: games.length > 0 };
     })
