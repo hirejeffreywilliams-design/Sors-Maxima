@@ -209,6 +209,66 @@ export async function getUserSubscription(userId: number): Promise<{
   }
 }
 
+export async function resetPassword(
+  username: string,
+  email: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const [user] = await db.select().from(users)
+      .where(and(eq(users.username, username), eq(users.email, email)))
+      .limit(1);
+
+    if (!user) {
+      return { success: false, error: "No account found matching that username and email combination" };
+    }
+
+    if (user.isBanned) {
+      return { success: false, error: "This account has been suspended. Contact support for assistance." };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await db.update(users).set({
+      passwordHash,
+      loginAttempts: 0,
+      lockedUntil: null,
+    }).where(eq(users.id, user.id));
+
+    logInfo(`Password reset for user: ${username}`);
+    return { success: true };
+  } catch (error: any) {
+    logError(error, { context: "resetPassword", username });
+    return { success: false, error: "Password reset failed. Please try again." };
+  }
+}
+
+export async function adminResetPassword(
+  userId: number,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await db.update(users).set({
+      passwordHash,
+      loginAttempts: 0,
+      lockedUntil: null,
+    }).where(eq(users.id, userId));
+
+    logInfo(`Admin reset password for user: ${user.username} (id: ${userId})`);
+    return { success: true };
+  } catch (error: any) {
+    logError(error, { context: "adminResetPassword", userId });
+    return { success: false, error: "Password reset failed" };
+  }
+}
+
 export async function updateSubscription(
   userId: number,
   updates: {

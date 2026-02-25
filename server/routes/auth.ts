@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { registerUser, loginUser, getUserById } from "../dbAuthService";
+import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword } from "../dbAuthService";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "../trustedDeviceService";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
@@ -118,6 +118,60 @@ export function registerAuthRoutes(app: Express): void {
     } catch (err) {
       console.error("Login error:", err);
       return res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", sensitiveRouteRateLimitMiddleware, async (req, res) => {
+    try {
+      const { username, email, newPassword } = req.body;
+
+      if (!username || !email || !newPassword) {
+        return res.status(400).json({ error: "Username, email, and new password are all required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters" });
+      }
+
+      if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        return res.status(400).json({ error: "Password must include uppercase, lowercase, and a number" });
+      }
+
+      const result = await resetPassword(username, email, newPassword);
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      return res.json({ success: true, message: "Password has been reset. You can now sign in with your new password." });
+    } catch (err) {
+      console.error("Password reset error:", err);
+      return res.status(500).json({ error: "Password reset failed" });
+    }
+  });
+
+  app.post("/api/admin/reset-user-password", requireAdmin, async (req, res) => {
+    try {
+      const { userId, newPassword } = req.body;
+
+      if (!userId || !newPassword) {
+        return res.status(400).json({ error: "User ID and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters" });
+      }
+
+      const result = await adminResetPassword(Number(userId), newPassword);
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      return res.json({ success: true, message: "User password has been reset" });
+    } catch (err) {
+      console.error("Admin password reset error:", err);
+      return res.status(500).json({ error: "Password reset failed" });
     }
   });
 
