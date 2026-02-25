@@ -280,15 +280,13 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: Brain, label: "Intelligence", testId: "nav-command-center", tooltip: "Command Center - All intelligence at a glance" },
-  { href: "/daily", icon: Calendar, label: "Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
-  { href: "/insights", icon: Star, label: "Insights", testId: "nav-insights", tooltip: "Personalized Insights - Tailored analysis based on your betting history" },
-  { href: "/platform-intelligence", icon: Database, label: "Data Engine", testId: "nav-platform-intelligence", tooltip: "Platform Intelligence - Self-growing data engine with team trends, accuracy, and market intel" },
-  { href: "/generate", icon: Zap, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
-  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
+  { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Your Picks - All engines converging to find your edge" },
+  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
+  { href: "/generate", icon: Brain, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
+  { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Bet Builder - Manually build your parlays" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
+  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Community - Leaderboards, social feed, and tipster groups" },
-  { href: "/rewards", icon: Trophy, label: "Rewards", testId: "nav-rewards", tooltip: "Rewards - Challenges, achievements, and practice mode" },
   { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Tools & Analytics - Calculators, optimizers, analysis" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
 ];
@@ -527,12 +525,19 @@ function DesktopNav({ authState }: { authState: AuthState }) {
 function BottomNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
   
+  const bottomNavItems: NavItem[] = [
+    navItems[0],
+    navItems[1],
+    navItems[2],
+    navItems[3],
+    navItems.find(item => item.href === "/live")!,
+  ];
   const adminItem = navItems.find(item => item.adminOnly);
   let mobileNavItems: NavItem[];
   if (authState.isAdmin && adminItem) {
-    mobileNavItems = [...navItems.slice(0, 4), adminItem];
+    mobileNavItems = [...bottomNavItems.slice(0, 4), adminItem];
   } else {
-    mobileNavItems = navItems.slice(0, 5);
+    mobileNavItems = bottomNavItems;
   }
   
   return (

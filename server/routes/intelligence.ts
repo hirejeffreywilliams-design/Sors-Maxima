@@ -1,7 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
-import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, type PrecomputedSnapshot, type PrecomputedPick } from "../precomputedPredictionsEngine";
+import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket } from "../precomputedPredictionsEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
 import {
@@ -88,6 +88,41 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
   startPrecomputedEngine();
+
+  app.get("/api/optimal-tickets", async (req: Request, res: Response) => {
+    try {
+      const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
+      const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
+        ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(s)
+      );
+      const rawRisk = (req.query.risk as string) || "moderate";
+      const riskLevel = ["conservative", "moderate", "aggressive"].includes(rawRisk) ? rawRisk : "moderate";
+      const bankroll = Math.max(10, Math.min(Number(req.query.bankroll) || 1000, 100000));
+      const maxLegs = Math.max(2, Math.min(Number(req.query.maxLegs) || 4, 10));
+
+      const tickets = buildOptimalTickets({ sports, riskLevel, bankroll, maxLegs });
+
+      return res.json({
+        tickets,
+        ticketCount: tickets.length,
+        sports,
+        riskLevel,
+        generatedAt: new Date().toISOString(),
+        engineSources: [
+          "Quantum Fusion (46 factors)",
+          "Monte Carlo Simulations",
+          "Situational Analysis",
+          "Injury Impact",
+          "Vegas Power Ratings",
+          "Market Odds (The Odds API)",
+          "ESPN Live Data",
+        ],
+      });
+    } catch (err) {
+      console.error("Optimal tickets error:", err);
+      return res.status(500).json({ error: "Failed to build optimal tickets" });
+    }
+  });
 
   app.get("/api/precomputed-predictions/:sport", requireAuth, async (req: Request, res: Response) => {
     try {

@@ -10,9 +10,10 @@ import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSSE } from "@/hooks/use-sse";
 import { queryClient } from "@/lib/queryClient";
 import {
-  Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check,
+  Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
-  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff
+  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
+  Trophy, DollarSign, Layers, Plus
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
@@ -160,6 +161,216 @@ interface IntelligenceFeed {
   opportunityScore: number;
   generatedAt: string;
   nextRefresh: string;
+}
+
+interface OptimalTicketLeg {
+  id: string;
+  pickId: string;
+  team: string;
+  opponent: string;
+  market: string;
+  outcome: string;
+  americanOdds: number;
+  decimalOdds: number;
+  confidence: number;
+  grade: string;
+  edge: number;
+  ev: number;
+  reasoning: string;
+  winProbability: number;
+  factors: { name: string; impact: number; direction: string }[];
+  timing: string;
+  timingAdvice: string;
+  sport: string;
+}
+
+interface OptimalTicket {
+  id: string;
+  name: string;
+  legs: OptimalTicketLeg[];
+  totalOdds: number;
+  americanOdds: number;
+  combinedGrade: string;
+  combinedConfidence: number;
+  combinedEV: number;
+  winProbability: number;
+  recommendedStake: number;
+  potentialPayout: number;
+  riskRating: "low" | "medium" | "high";
+  reasoning: string;
+  sports: string[];
+  engineConvergence: {
+    quantumFusion: boolean;
+    monteCarlo: boolean;
+    situational: boolean;
+    injury: boolean;
+    vegas: boolean;
+    market: boolean;
+  };
+  generatedAt: string;
+}
+
+interface OptimalTicketsResponse {
+  tickets: OptimalTicket[];
+  ticketCount: number;
+  sports: string[];
+  riskLevel: string;
+  generatedAt: string;
+  engineSources: string[];
+}
+
+const ENGINE_LABELS: Record<string, { label: string; icon: typeof Brain }> = {
+  quantumFusion: { label: "Quantum Fusion", icon: Brain },
+  monteCarlo: { label: "Monte Carlo", icon: Target },
+  situational: { label: "Situational", icon: Clock },
+  injury: { label: "Injury", icon: Heart },
+  vegas: { label: "Vegas", icon: DollarSign },
+  market: { label: "Market", icon: TrendingUp },
+};
+
+function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+  const allInSlip = ticket.legs.every(l => legs.some(sl => sl.id === `ticket-${l.pickId}`));
+  const someInSlip = ticket.legs.some(l => legs.some(sl => sl.id === `ticket-${l.pickId}`));
+
+  const handleAddAll = () => {
+    for (const leg of ticket.legs) {
+      const legId = `ticket-${leg.pickId}`;
+      if (legs.some(sl => sl.id === legId)) continue;
+      addLeg({
+        id: legId,
+        team: leg.team,
+        opponent: leg.opponent,
+        market: leg.market as any,
+        outcome: leg.outcome,
+        decimalOdds: leg.decimalOdds,
+        americanOdds: leg.americanOdds,
+        addedFrom: `Ticket: ${ticket.name}`,
+        addedAt: new Date().toISOString(),
+        sport: leg.sport,
+        confidence: leg.confidence,
+        evPercent: leg.ev,
+        grade: leg.grade,
+        edge: leg.edge,
+        reasoning: leg.reasoning,
+      });
+    }
+  };
+
+  const riskStyles: Record<string, string> = {
+    low: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+    medium: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+    high: "bg-red-500/10 text-red-500 border-red-500/30",
+  };
+
+  return (
+    <Card className="group border hover:border-primary/40 transition-all duration-200 overflow-hidden" data-testid={`card-ticket-${ticket.id}`}>
+      <div className={`h-1 w-full ${ticket.combinedGrade.startsWith("A") ? "bg-green-500" : ticket.combinedGrade.startsWith("B") ? "bg-blue-500" : "bg-yellow-500"}`} />
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-primary" />
+              <span className="font-semibold text-sm" data-testid={`text-ticket-name-${ticket.id}`}>{ticket.name}</span>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              {ticket.sports.map(s => (
+                <Badge key={s} variant="outline" className={`text-[10px] px-1.5 py-0 ${sportColor(s)}`}>{s}</Badge>
+              ))}
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${riskStyles[ticket.riskRating]}`}>
+                {ticket.riskRating === "low" ? "Conservative" : ticket.riskRating === "medium" ? "Moderate" : "Aggressive"}
+              </Badge>
+            </div>
+          </div>
+          <Badge variant="outline" className={`font-mono font-bold text-base px-2.5 py-1 ${gradeBg(ticket.combinedGrade)}`} data-testid={`badge-grade-${ticket.id}`}>
+            {ticket.combinedGrade}
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="p-2 rounded-md bg-muted/50">
+            <p className="text-[10px] text-muted-foreground uppercase">Odds</p>
+            <p className="font-mono font-bold text-sm" data-testid={`text-odds-${ticket.id}`}>{formatOdds(ticket.americanOdds)}</p>
+          </div>
+          <div className="p-2 rounded-md bg-muted/50">
+            <p className="text-[10px] text-muted-foreground uppercase">Stake</p>
+            <p className="font-mono font-bold text-sm" data-testid={`text-stake-${ticket.id}`}>${ticket.recommendedStake}</p>
+          </div>
+          <div className="p-2 rounded-md bg-emerald-500/10">
+            <p className="text-[10px] text-muted-foreground uppercase">Payout</p>
+            <p className="font-mono font-bold text-sm text-emerald-500" data-testid={`text-payout-${ticket.id}`}>${ticket.potentialPayout.toLocaleString()}</p>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          {ticket.legs.map((leg, i) => {
+            const inSlip = legs.some(sl => sl.id === `ticket-${leg.pickId}`);
+            return (
+              <div key={leg.id} className={`flex items-center gap-2 text-xs p-1.5 rounded ${inSlip ? "bg-primary/5 border border-primary/20" : "bg-muted/30"}`} data-testid={`row-leg-${leg.id}`}>
+                <span className="text-muted-foreground w-4 shrink-0">L{i + 1}</span>
+                <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${sportColor(leg.sport)}`}>{leg.sport}</Badge>
+                <span className="font-medium truncate flex-1">{leg.outcome}</span>
+                <span className="font-mono text-muted-foreground shrink-0">{formatOdds(leg.americanOdds)}</span>
+                <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${gradeBg(leg.grade)}`}>{leg.grade}</Badge>
+                {inSlip && <Check className="w-3 h-3 text-primary shrink-0" />}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="px-2.5 py-1.5 rounded-md bg-primary/5 border border-primary/10">
+          <div className="flex items-start gap-1.5">
+            <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+            <p className="text-[11px] text-foreground/80 leading-relaxed" data-testid={`text-ticket-reasoning-${ticket.id}`}>
+              {ticket.reasoning}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {Object.entries(ticket.engineConvergence).map(([key, active]) => {
+            const eng = ENGINE_LABELS[key];
+            if (!eng) return null;
+            return (
+              <span
+                key={key}
+                className={`inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border ${
+                  active ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted/50 border-muted text-muted-foreground/40"
+                }`}
+              >
+                {active ? <CheckCircle2 className="w-2.5 h-2.5" /> : <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />}
+                {eng.label}
+              </span>
+            );
+          })}
+        </div>
+
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          <span>Conf: {ticket.combinedConfidence}%</span>
+          <span className="text-muted-foreground/30">|</span>
+          <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 0 ? "+" : ""}{ticket.combinedEV}%</span>
+          <span className="text-muted-foreground/30">|</span>
+          <span>Win: {ticket.winProbability}%</span>
+        </div>
+
+        <Button
+          onClick={handleAddAll}
+          disabled={allInSlip}
+          className="w-full gap-2"
+          size="sm"
+          variant={allInSlip ? "secondary" : "default"}
+          data-testid={`button-add-ticket-${ticket.id}`}
+        >
+          {allInSlip ? (
+            <><Check className="w-3.5 h-3.5" /> All Legs in Slip</>
+          ) : someInSlip ? (
+            <><Plus className="w-3.5 h-3.5" /> Add Remaining Legs</>
+          ) : (
+            <><Layers className="w-3.5 h-3.5" /> Add All {ticket.legs.length} Legs to Slip</>
+          )}
+        </Button>
+      </CardContent>
+    </Card>
+  );
 }
 
 function OpportunityGauge({ score }: { score: number }) {
@@ -493,7 +704,7 @@ function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
 }
 
 export default function CommandCenter() {
-  useSEO({ title: "Command Center", description: "Real-time betting command center and overview" });
+  useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
   const [activeSportTab, setActiveSportTab] = useState("all");
   const { legs, addLeg } = useParlaySlip();
 
@@ -511,6 +722,11 @@ export default function CommandCenter() {
   const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
     queryKey: ["/api/intelligence/feed"],
     refetchInterval: 30000,
+  });
+
+  const { data: ticketsData } = useQuery<OptimalTicketsResponse>({
+    queryKey: ["/api/optimal-tickets"],
+    refetchInterval: 60000,
   });
 
   if (isLoading || !feed) {
@@ -601,10 +817,10 @@ export default function CommandCenter() {
             <div>
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2" data-testid="heading-command-center">
                 <Brain className="w-6 h-6 text-primary" />
-                Command Center
+                Your Picks
               </h1>
               <p className="text-sm text-muted-foreground mt-0.5">
-                Unified intelligence across {activeSports.length} sports, {totalGames} games
+                All engines converging to find your edge
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -651,19 +867,60 @@ export default function CommandCenter() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <OpportunityGauge score={feed.opportunityScore} />
+        {ticketsData && ticketsData.tickets.length > 0 && (
+          <section data-testid="section-best-tickets">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold">Today's Best Tickets</h2>
+                <Badge variant="secondary" className="text-[10px]">{ticketsData.tickets.length} ready</Badge>
+              </div>
+              <Link href="/generate">
+                <Button variant="ghost" size="sm" className="text-xs gap-1" data-testid="link-generate-more">
+                  Generate Custom <ArrowRight className="w-3 h-3" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              {ticketsData.tickets.slice(0, 6).map(ticket => (
+                <TicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
+              ))}
+            </div>
+          </section>
+        )}
 
-          <Card data-testid="card-stat-picks">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Card data-testid="card-stat-best-grade">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-primary/10">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                  <Trophy className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Top Picks</p>
-                  <p className="text-2xl font-bold tabular-nums" data-testid="text-total-picks">{totalPicks}</p>
-                  <p className="text-[10px] text-muted-foreground">across {activeSports.length} sports</p>
+                  <p className="text-xs text-muted-foreground">Best Grade Today</p>
+                  <p className={`text-2xl font-bold tabular-nums ${gradeColor(ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–")}`} data-testid="text-best-grade">
+                    {ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{totalPicks} picks across {activeSports.length} sports</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-stat-highest-ev">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-md bg-emerald-500/10">
+                  <TrendingUp className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Highest EV Ticket</p>
+                  <p className="text-2xl font-bold tabular-nums text-emerald-500" data-testid="text-highest-ev">
+                    {ticketsData?.tickets[0]?.combinedEV ? `+${ticketsData.tickets[0].combinedEV}%` : feed.topPicks[0]?.ev ? `+${feed.topPicks[0].ev.toFixed(1)}%` : "–"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {ticketsData?.tickets[0]?.name || "analyzing markets"}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -679,23 +936,6 @@ export default function CommandCenter() {
                   <p className="text-xs text-muted-foreground">Live Games</p>
                   <p className="text-2xl font-bold tabular-nums" data-testid="text-live-count">{totalLive}</p>
                   <p className="text-[10px] text-muted-foreground">{totalLive > 0 ? "tracking now" : "none in progress"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-stat-alerts">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-yellow-500/10">
-                  <AlertTriangle className="w-5 h-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Edge Alerts</p>
-                  <p className="text-2xl font-bold tabular-nums" data-testid="text-alert-count">{feed.edgeAlerts.length}</p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {feed.edgeAlerts.filter(a => a.severity === "critical").length} critical
-                  </p>
                 </div>
               </div>
             </CardContent>
@@ -803,32 +1043,44 @@ export default function CommandCenter() {
                 </CardContent>
               </Card>
 
-              <Card data-testid="card-sport-breakdown">
+              <Card data-testid="card-engine-status">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                    Sport Breakdown
+                    <Brain className="w-4 h-4 text-primary" />
+                    Engine Convergence
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {activeSports.map(s => (
-                    <div key={s.sport} className="flex items-center justify-between py-1.5 border-b last:border-0" data-testid={`row-sport-${s.sport}`}>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="outline" className={`text-[10px] px-1.5 ${sportColor(s.sport)}`}>{s.sport}</Badge>
-                        <span className="text-xs text-muted-foreground">{s.gamesCount} games</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {s.liveCount > 0 && (
-                          <Badge variant="secondary" className="text-[10px] px-1 py-0 bg-red-500/10 text-red-500">
-                            {s.liveCount} live
-                          </Badge>
-                        )}
+                  {ticketsData?.tickets[0] ? (
+                    Object.entries(ticketsData.tickets[0].engineConvergence).map(([key, active]) => {
+                      const eng = ENGINE_LABELS[key];
+                      if (!eng) return null;
+                      const Icon = eng.icon;
+                      return (
+                        <div key={key} className="flex items-center justify-between py-1.5 border-b last:border-0" data-testid={`row-engine-${key}`}>
+                          <div className="flex items-center gap-2">
+                            <Icon className={`w-3.5 h-3.5 ${active ? "text-emerald-500" : "text-muted-foreground/40"}`} />
+                            <span className="text-xs">{eng.label}</span>
+                          </div>
+                          {active ? (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-emerald-500/10 border-emerald-500/30 text-emerald-500">Active</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground/40">Inactive</Badge>
+                          )}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    activeSports.map(s => (
+                      <div key={s.sport} className="flex items-center justify-between py-1.5 border-b last:border-0" data-testid={`row-sport-${s.sport}`}>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className={`text-[10px] px-1.5 ${sportColor(s.sport)}`}>{s.sport}</Badge>
+                          <span className="text-xs text-muted-foreground">{s.gamesCount} games</span>
+                        </div>
                         <span className="text-xs font-medium">{s.picksAvailable} picks</span>
-                        {s.hasInjuryAlerts && <Heart className="w-3 h-3 text-red-400" />}
-                        {s.hasWeatherAlerts && <Cloud className="w-3 h-3 text-blue-400" />}
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
