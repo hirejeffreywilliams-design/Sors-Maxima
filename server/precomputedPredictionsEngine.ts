@@ -5,7 +5,15 @@ import { analyzeLeg, type MarketContext } from "./quantumFusionEngine";
 import { getAllInjuries } from "./espn-injury-provider";
 import { getGameSituationalFactors, type SituationalFactors } from "./situationalEngine";
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
+import { isExclusivePick } from "./pickProtectionEngine";
 import type { Sport } from "@shared/schema";
+
+export interface PickReleaseSchedule {
+  whaleRelease: string;
+  eliteRelease: string;
+  proRelease: string;
+  freeRelease: string;
+}
 
 export interface PrecomputedPick {
   id: string;
@@ -30,6 +38,8 @@ export interface PrecomputedPick {
   insights: string[];
   timing: "bet_now" | "wait" | "line_locked";
   timingAdvice: string;
+  releaseSchedule: PickReleaseSchedule;
+  isExclusive: boolean;
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -182,6 +192,8 @@ export interface PrecomputedSnapshot {
   sport: string;
   gamesAnalyzed: number;
   nextRefresh: string;
+  exclusivePickCount: number;
+  totalPickPool: number;
 }
 
 interface CacheEntry {
@@ -195,6 +207,16 @@ const lastSuccessfulData = new Map<string, any[]>();
 
 const REFRESH_INTERVAL = 5 * 60 * 1000;
 const STALE_THRESHOLD = 30 * 60 * 1000;
+
+function buildReleaseSchedule(generatedAt: string): PickReleaseSchedule {
+  const genTime = new Date(generatedAt).getTime();
+  return {
+    whaleRelease: generatedAt,
+    eliteRelease: new Date(genTime + 15 * 60 * 1000).toISOString(),
+    proRelease: new Date(genTime + 30 * 60 * 1000).toISOString(),
+    freeRelease: new Date(genTime + 60 * 60 * 1000).toISOString(),
+  };
+}
 
 let engineRunning = false;
 let lastRunTime: number | null = null;
@@ -541,6 +563,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         insights: (fusion.insights || []).slice(0, 3),
         timing: pickTiming.timing,
         timingAdvice: pickTiming.timingAdvice,
+        releaseSchedule: buildReleaseSchedule(now),
+        isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: gradeFromConfidence(confidence) }),
       });
     }
   }
@@ -589,6 +613,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       insights: (fusion.insights || []).slice(0, 3),
       timing: vpTiming.timing,
       timingAdvice: vpTiming.timingAdvice,
+      releaseSchedule: buildReleaseSchedule(now),
+      isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: gradeFromConfidence(confidence) }),
     });
   }
 
@@ -599,13 +625,18 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     return acc;
   }, []);
 
+  const finalPicks = dedupedPicks.slice(0, 50);
+  const exclusiveCount = finalPicks.filter(p => p.isExclusive).length;
+
   const snapshot: PrecomputedSnapshot = {
-    picks: dedupedPicks.slice(0, 50),
+    picks: finalPicks,
     generatedAt: now,
     dataSource,
     sport,
     gamesAnalyzed: upcomingGames.length,
     nextRefresh: new Date(Date.now() + REFRESH_INTERVAL).toISOString(),
+    exclusivePickCount: exclusiveCount,
+    totalPickPool: finalPicks.length,
   };
 
   predictionCache.set(sport, { snapshot, timestamp: Date.now(), sport });

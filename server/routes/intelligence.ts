@@ -1,7 +1,9 @@
 import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
-import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus } from "../precomputedPredictionsEngine";
+import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, type PrecomputedSnapshot, type PrecomputedPick } from "../precomputedPredictionsEngine";
+import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
+import { stripeService } from "../stripeService";
 import {
   startPlatformIntelligenceEngine,
   getFullIntelligenceReport,
@@ -93,12 +95,101 @@ export function registerIntelligenceRoutes(app: Express): void {
       if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
         return res.status(400).json({ error: "Invalid sport. Use NBA, NFL, MLB, NHL, NCAAB, or NCAAF." });
       }
+
+      const username = req.session?.username || "";
+      const subscription = await stripeService.getUserSubscription(username);
+      const userTier = subscription?.subscriptionTier || "free";
+      const isAdmin = req.session?.isAdmin || false;
+      const effectiveTier = isAdmin ? "whale" : userTier;
+
       const snapshot = await getPrecomputedPredictions(sport as any);
-      return res.json(snapshot);
+
+      let filteredPicks = snapshot.picks.filter(pick =>
+        isPickReleasedForTier(pick.generatedAt, effectiveTier)
+      );
+
+      if (effectiveTier !== "whale") {
+        filteredPicks = filteredPicks.filter(pick => !pick.isExclusive);
+      }
+
+      filteredPicks = diversifyPicksForUser(filteredPicks, username, effectiveTier);
+
+      const picksWithCapacity = filteredPicks.map(pick => ({
+        ...pick,
+        capacity: getCapacityStatus(pick.id, effectiveTier),
+      }));
+
+      let eligiblePending = snapshot.picks.filter(pick =>
+        !isPickReleasedForTier(pick.generatedAt, effectiveTier)
+      );
+      if (effectiveTier !== "whale") {
+        eligiblePending = eligiblePending.filter(pick => !pick.isExclusive);
+      }
+      eligiblePending.sort((a, b) =>
+        new Date(getPickReleaseTime(a.generatedAt, effectiveTier)).getTime() -
+        new Date(getPickReleaseTime(b.generatedAt, effectiveTier)).getTime()
+      );
+
+      const protectedSnapshot = {
+        ...snapshot,
+        picks: picksWithCapacity,
+        totalPickPool: snapshot.picks.length,
+        exclusivePickCount: snapshot.exclusivePickCount,
+        userTier: effectiveTier,
+        pendingReleaseCount: eligiblePending.length,
+        nextPickRelease: eligiblePending.length > 0 ? getPickReleaseTime(eligiblePending[0].generatedAt, effectiveTier) : null,
+        pickProtection: {
+          staggeredRelease: true,
+          capacityLimits: true,
+          diversifiedDistribution: effectiveTier !== "whale",
+          exclusiveAccess: effectiveTier === "whale",
+        },
+      };
+
+      return res.json(protectedSnapshot);
     } catch (err) {
       console.error("Precomputed predictions error:", err);
       return res.status(500).json({ error: "Failed to fetch precomputed predictions" });
     }
+  });
+
+  app.post("/api/picks/:pickId/tail", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { pickId } = req.params;
+      const username = req.session?.username || "";
+      const subscription = await stripeService.getUserSubscription(username);
+      const userTier = subscription?.subscriptionTier || "free";
+      const effectiveTier = req.session?.isAdmin ? "whale" : userTier;
+
+      const allCaches = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
+      let targetPick: any = null;
+      for (const sport of allCaches) {
+        const cached = getPrecomputedCache(sport as any);
+        if (cached) {
+          targetPick = cached.picks.find((p: any) => p.id === pickId);
+          if (targetPick) break;
+        }
+      }
+
+      if (targetPick) {
+        if (!isPickReleasedForTier(targetPick.generatedAt, effectiveTier)) {
+          return res.status(403).json({ error: "Pick not yet released for your tier" });
+        }
+        if (targetPick.isExclusive && effectiveTier !== "whale") {
+          return res.status(403).json({ error: "Exclusive pick requires Max tier" });
+        }
+      }
+
+      const result = recordTail(pickId, username, effectiveTier);
+      return res.json(result);
+    } catch (err) {
+      console.error("Tail recording error:", err);
+      return res.status(500).json({ error: "Failed to record tail" });
+    }
+  });
+
+  app.get("/api/pick-protection/stats", requireAuth, (_req: Request, res: Response) => {
+    return res.json(getProtectionStats());
   });
 
   app.get("/api/precomputed-predictions/:sport/cache", (req: Request, res: Response) => {

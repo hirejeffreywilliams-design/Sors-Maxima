@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,19 @@ import {
   Atom, TrendingUp, TrendingDown, ChevronDown, ChevronUp,
   Zap, Target, BarChart3, Clock, Shield, Flame,
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Star,
-  Check, Info, Activity
+  Check, Info, Activity, Lock, Crown, Users, AlertTriangle,
+  Timer
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+
+interface CapacityInfo {
+  tailCount: number;
+  capacityStatus: "available" | "filling" | "diminished";
+  tailersRemaining: number;
+  capacityLimit: number;
+}
 
 interface PrecomputedPick {
   id: string;
@@ -31,6 +40,14 @@ interface PrecomputedPick {
   factors: { name: string; impact: number; direction: string }[];
   generatedAt: string;
   dataSource: string;
+  isExclusive?: boolean;
+  releaseSchedule?: {
+    whaleRelease: string;
+    eliteRelease: string;
+    proRelease: string;
+    freeRelease: string;
+  };
+  capacity?: CapacityInfo;
 }
 
 interface PredictionSnapshot {
@@ -40,6 +57,17 @@ interface PredictionSnapshot {
   gamesAnalyzed: number;
   dataSource: string;
   nextRefresh: string;
+  exclusivePickCount?: number;
+  totalPickPool?: number;
+  userTier?: string;
+  pendingReleaseCount?: number;
+  nextPickRelease?: string | null;
+  pickProtection?: {
+    staggeredRelease: boolean;
+    capacityLimits: boolean;
+    diversifiedDistribution: boolean;
+    exclusiveAccess: boolean;
+  };
 }
 
 interface EngineStatus {
@@ -84,13 +112,49 @@ function directionIcon(dir: string) {
   return <Minus className="w-3 h-3 text-muted-foreground" />;
 }
 
-function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
+function CapacityBar({ capacity }: { capacity: CapacityInfo }) {
+  if (capacity.capacityLimit === -1) return null;
+
+  const used = capacity.tailCount;
+  const total = capacity.capacityLimit;
+  const pct = Math.min(100, (used / total) * 100);
+
+  const barColor = capacity.capacityStatus === "diminished"
+    ? "bg-red-500"
+    : capacity.capacityStatus === "filling"
+    ? "bg-yellow-500"
+    : "bg-green-500";
+
+  return (
+    <div className="flex items-center gap-2 text-[10px]" data-testid="capacity-bar">
+      <Users className="w-3 h-3 text-muted-foreground shrink-0" />
+      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+        <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-muted-foreground whitespace-nowrap">
+        {capacity.tailCount}/{total}
+      </span>
+    </div>
+  );
+}
+
+function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick; rank: number; userTier: string; activeSport: string }) {
   const [expanded, setExpanded] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
 
   const legId = pick.id;
   const inSlip = isInSlip(legId);
+
+  const tailMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/picks/${pick.id}/tail`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/precomputed-predictions", activeSport.toLowerCase()] });
+    },
+  });
 
   const handleAdd = () => {
     const decimalOdds = pick.odds > 0 ? (pick.odds / 100) + 1 : (-100 / pick.odds) + 1;
@@ -107,19 +171,41 @@ function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
       sport: pick.sport as any,
     };
     if (addLeg(slipLeg)) {
+      tailMutation.mutate();
       toast({ title: "Added to Slip", description: `${slipLeg.outcome} added to your parlay slip` });
     }
   };
 
   const topFactors = pick.factors?.slice(0, 3) || [];
+  const isDiminished = pick.capacity?.capacityStatus === "diminished";
 
   return (
     <div
       className={`group relative rounded-xl border transition-all duration-200 ${
-        rank <= 3 ? "border-primary/20 bg-gradient-to-br from-primary/3 to-transparent" : "border-border hover:border-primary/20"
-      }`}
+        pick.isExclusive
+          ? "border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-yellow-500/5 ring-1 ring-amber-500/10"
+          : rank <= 3
+          ? "border-primary/20 bg-gradient-to-br from-primary/3 to-transparent"
+          : "border-border hover:border-primary/20"
+      } ${isDiminished ? "opacity-75" : ""}`}
       data-testid={`card-pick-${pick.id}`}
     >
+      {isDiminished && (
+        <div className="absolute top-2 right-2 z-10">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className="text-[9px] h-4 px-1 bg-red-500/10 border-red-500/30 text-red-500 gap-0.5">
+                <AlertTriangle className="w-2.5 h-2.5" />
+                Line Risk
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p className="text-xs">Many users have tailed this pick. Line value may be diminished.</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
@@ -143,6 +229,18 @@ function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
                     Live
                   </Badge>
                 )}
+                {pick.isExclusive && (
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 gap-0.5">
+                    <Crown className="w-2.5 h-2.5" />
+                    Exclusive
+                  </Badge>
+                )}
+                {userTier !== "free" && (
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400 gap-0.5">
+                    <Zap className="w-2.5 h-2.5" />
+                    Early Access
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -155,7 +253,7 @@ function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
               variant={inSlip ? "secondary" : "outline"}
               className="h-7 w-7"
               onClick={handleAdd}
-              disabled={inSlip}
+              disabled={inSlip || isDiminished}
               data-testid={`button-add-pick-${pick.id}`}
             >
               {inSlip ? <Check className="w-3.5 h-3.5" /> : <Star className="w-3.5 h-3.5" />}
@@ -191,6 +289,10 @@ function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
             <p className="text-[10px] text-muted-foreground">Odds</p>
           </div>
         </div>
+
+        {pick.capacity && pick.capacity.capacityLimit !== -1 && (
+          <CapacityBar capacity={pick.capacity} />
+        )}
 
         {topFactors.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -239,6 +341,112 @@ function PickCard({ pick, rank }: { pick: PrecomputedPick; rank: number }) {
         )}
       </div>
     </div>
+  );
+}
+
+function ExclusivePicksBanner({ count, userTier }: { count: number; userTier: string }) {
+  if (count === 0 || userTier === "whale") return null;
+
+  return (
+    <Card className="border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-yellow-500/5 to-amber-500/5" data-testid="banner-exclusive-picks">
+      <CardContent className="py-3 px-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center">
+              <Crown className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                {count} Exclusive Max Pick{count > 1 ? "s" : ""} Available
+              </p>
+              <p className="text-xs text-muted-foreground">
+                High-confidence picks visible only to Max tier members
+              </p>
+            </div>
+          </div>
+          <Button size="sm" variant="outline" className="border-amber-500/30 text-amber-600 hover:bg-amber-500/10 shrink-0" asChild data-testid="button-upgrade-exclusive">
+            <a href="/pricing">Upgrade to Max</a>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PendingReleaseBanner({ count, nextRelease, userTier }: { count: number; nextRelease: string | null; userTier: string }) {
+  const [timeLeft, setTimeLeft] = useState("");
+
+  useEffect(() => {
+    if (!nextRelease) return;
+    const update = () => {
+      const diff = new Date(nextRelease).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft("Available now");
+        return;
+      }
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setTimeLeft(`${mins}m ${secs}s`);
+    };
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [nextRelease]);
+
+  if (count === 0 || !nextRelease) return null;
+
+  const tierUpgrade = userTier === "free" ? "Sharp" : userTier === "pro" ? "Edge" : "Max";
+  const upgradeDelay = userTier === "free" ? "60→30 min" : userTier === "pro" ? "30→15 min" : "15→0 min";
+
+  return (
+    <Card className="border-blue-500/20 bg-gradient-to-r from-blue-500/5 to-cyan-500/5" data-testid="banner-pending-picks">
+      <CardContent className="py-3 px-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+              <Timer className="w-4 h-4 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                {count} Pick{count > 1 ? "s" : ""} Releasing in {timeLeft}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Upgrade to {tierUpgrade} for faster access ({upgradeDelay} delay)
+              </p>
+            </div>
+          </div>
+          <Button size="sm" variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10 shrink-0" asChild data-testid="button-upgrade-early-access">
+            <a href="/pricing">Get Earlier Access</a>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ProtectionShield({ protection }: { protection: PredictionSnapshot["pickProtection"] }) {
+  if (!protection) return null;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-emerald-600 dark:text-emerald-400 cursor-help">
+          <Shield className="w-3 h-3" />
+          <span>Line Protected</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="max-w-xs">
+        <div className="space-y-1 text-xs">
+          <p className="font-medium">Pick Protection Active</p>
+          <ul className="space-y-0.5 text-muted-foreground">
+            {protection.staggeredRelease && <li>Staggered release by tier</li>}
+            {protection.capacityLimits && <li>Tail capacity limits prevent line moves</li>}
+            {protection.diversifiedDistribution && <li>Diversified pick distribution</li>}
+            {protection.exclusiveAccess && <li>Full exclusive pick access</li>}
+          </ul>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -296,6 +504,7 @@ export function PrecomputedPicks() {
 
   const lastUpdate = snapshot?.generatedAt ? new Date(snapshot.generatedAt) : null;
   const timeAgo = lastUpdate ? getTimeAgo(lastUpdate) : "—";
+  const userTier = snapshot?.userTier || "free";
 
   return (
     <div className="space-y-4" data-testid="section-precomputed-picks">
@@ -315,10 +524,14 @@ export function PrecomputedPicks() {
                       Engine Active
                     </Badge>
                   )}
+                  <ProtectionShield protection={snapshot?.pickProtection} />
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
                   Auto-generated from 46-factor Quantum Fusion analysis
                   {lastUpdate && <span> &middot; Updated {timeAgo}</span>}
+                  {snapshot?.totalPickPool && snapshot.totalPickPool > (snapshot?.picks?.length || 0) && (
+                    <span> &middot; Showing {snapshot.picks.length} of {snapshot.totalPickPool} picks</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -333,6 +546,7 @@ export function PrecomputedPicks() {
                   <p className="text-xs">
                     Predictions are automatically refreshed every 5 minutes using live ESPN data through the Quantum Fusion engine.
                     Each pick is scored across 46 factors including sharp money flow, scheme analysis, and line movement.
+                    Picks are protected with staggered release timing and capacity limits to preserve line value.
                   </p>
                 </TooltipContent>
               </Tooltip>
@@ -343,7 +557,7 @@ export function PrecomputedPicks() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="p-3 rounded-lg bg-muted/50 text-center">
               <p className="text-2xl font-bold text-purple-500" data-testid="text-total-picks">{snapshot?.picks?.length || 0}</p>
-              <p className="text-[10px] text-muted-foreground">Top Picks</p>
+              <p className="text-[10px] text-muted-foreground">Your Picks</p>
             </div>
             <div className="p-3 rounded-lg bg-muted/50 text-center">
               <p className="text-2xl font-bold text-blue-500" data-testid="text-games-analyzed">{snapshot?.gamesAnalyzed || 0}</p>
@@ -362,6 +576,13 @@ export function PrecomputedPicks() {
           </div>
         </CardContent>
       </Card>
+
+      <ExclusivePicksBanner count={snapshot?.exclusivePickCount || 0} userTier={userTier} />
+      <PendingReleaseBanner
+        count={snapshot?.pendingReleaseCount || 0}
+        nextRelease={snapshot?.nextPickRelease || null}
+        userTier={userTier}
+      />
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Tabs value={activeSport} onValueChange={setActiveSport} className="flex-1">
@@ -433,7 +654,7 @@ export function PrecomputedPicks() {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {visiblePicks.map((pick, i) => (
-              <PickCard key={pick.id} pick={pick} rank={i + 1} />
+              <PickCard key={pick.id} pick={pick} rank={i + 1} userTier={userTier} activeSport={activeSport} />
             ))}
           </div>
 
