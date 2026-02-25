@@ -280,7 +280,7 @@ function PlayerSection({ player, sport, addLeg, slipLegIds }: {
   addLeg: (leg: any) => boolean;
   slipLegIds: Set<string>;
 }) {
-  const [expanded, setExpanded] = useState(player.hasOddsData && player.markets.length > 0);
+  const [expanded, setExpanded] = useState(false);
 
   if (player.markets.length === 0) return null;
 
@@ -383,23 +383,76 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
       </button>
 
       {expanded && (
-        <CardContent className="p-3 sm:p-4">
+        <CardContent className="p-3 sm:p-4 space-y-4">
           {playersWithProps.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               No player props available yet. Props typically post 1-2 days before game time.
             </p>
           ) : (
-            <div className="divide-y">
-              {playersWithProps.map((player) => (
-                <PlayerSection
-                  key={player.playerName}
-                  player={player}
-                  sport={sport}
-                  addLeg={addLeg}
-                  slipLegIds={slipLegIds}
-                />
-              ))}
-            </div>
+            <>
+              {[
+                { label: game.awayTeam.abbreviation, logo: game.awayTeam.logo, name: game.awayTeam.name },
+                { label: game.homeTeam.abbreviation, logo: game.homeTeam.logo, name: game.homeTeam.name },
+              ].map((teamInfo) => {
+                const teamPlayers = playersWithProps.filter(p => {
+                  const pTeam = (p.team || "").toLowerCase();
+                  const abbr = teamInfo.label.toLowerCase();
+                  const tName = teamInfo.name.toLowerCase();
+                  return pTeam === abbr || pTeam === tName || tName.includes(pTeam) || pTeam.includes(abbr);
+                });
+                if (teamPlayers.length === 0) return null;
+                return (
+                  <div key={teamInfo.label} data-testid={`team-section-${teamInfo.label}`}>
+                    <div className="flex items-center gap-2 py-1.5 mb-1 border-b border-border/50">
+                      {teamInfo.logo && <img src={teamInfo.logo} alt="" className="w-5 h-5" />}
+                      <span className="text-xs font-bold uppercase tracking-wide text-muted-foreground">{teamInfo.label}</span>
+                      <span className="text-[10px] text-muted-foreground">{teamPlayers.length} players</span>
+                    </div>
+                    <div className="divide-y divide-border/30">
+                      {teamPlayers.map((player) => (
+                        <PlayerSection
+                          key={player.playerName}
+                          player={player}
+                          sport={sport}
+                          addLeg={addLeg}
+                          slipLegIds={slipLegIds}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+              {(() => {
+                const categorized = new Set<string>();
+                [game.awayTeam, game.homeTeam].forEach(t => {
+                  playersWithProps.forEach(p => {
+                    const pTeam = (p.team || "").toLowerCase();
+                    const abbr = t.abbreviation.toLowerCase();
+                    const tName = t.name.toLowerCase();
+                    if (pTeam === abbr || pTeam === tName || tName.includes(pTeam) || pTeam.includes(abbr)) {
+                      categorized.add(p.playerName);
+                    }
+                  });
+                });
+                const uncategorized = playersWithProps.filter(p => !categorized.has(p.playerName));
+                if (uncategorized.length === 0) return null;
+                return (
+                  <div>
+                    <div className="divide-y divide-border/30">
+                      {uncategorized.map((player) => (
+                        <PlayerSection
+                          key={player.playerName}
+                          player={player}
+                          sport={sport}
+                          addLeg={addLeg}
+                          slipLegIds={slipLegIds}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
           )}
         </CardContent>
       )}

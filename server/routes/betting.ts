@@ -2071,8 +2071,23 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           if (!playersByName.has(pKey)) {
             const injury = injuryMap.get(pKey);
             const leaderStats = leaderMap.get(pKey) || [];
+            const playerTeam = leaderStats.length > 0 ? leaderStats[0].team : (prop.team || "");
+            let teamAbbr = "";
+            if (playerTeam) {
+              const ptLower = playerTeam.toLowerCase();
+              const homeNameL = homeTeamName.toLowerCase();
+              const awayNameL = awayTeamName.toLowerCase();
+              if (ptLower === homeNameL || homeNameL.includes(ptLower) || ptLower.includes(homeName.split(" ").pop() || "")) {
+                teamAbbr = game.homeTeam.abbreviation || "";
+              } else if (ptLower === awayNameL || awayNameL.includes(ptLower) || ptLower.includes(awayName.split(" ").pop() || "")) {
+                teamAbbr = game.awayTeam.abbreviation || "";
+              } else {
+                teamAbbr = playerTeam;
+              }
+            }
             playersByName.set(pKey, {
               playerName: pName,
+              team: teamAbbr,
               injury: injury || null,
               leaderStats,
               markets: [],
@@ -2241,10 +2256,23 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
         processRosterPlayers(homePlayers, homeTeamName, game.homeTeam.abbreviation || "");
         processRosterPlayers(awayPlayers, awayTeamName, game.awayTeam.abbreviation || "");
 
-        const allPlayersArr = Array.from(playersByName.values()).map(p => ({
-          ...p,
-          hasOddsData: true,
-        }));
+        const homeRosterNames = new Set<string>();
+        const awayRosterNames = new Set<string>();
+        if (homePlayers) homePlayers.forEach(p => homeRosterNames.add(p.fullName.toLowerCase()));
+        if (awayPlayers) awayPlayers.forEach(p => awayRosterNames.add(p.fullName.toLowerCase()));
+
+        const allPlayersArr = Array.from(playersByName.values()).map(p => {
+          let team = p.team || "";
+          if (!team) {
+            const pKey = p.playerName.toLowerCase();
+            if (homeRosterNames.has(pKey)) {
+              team = game.homeTeam.abbreviation || "";
+            } else if (awayRosterNames.has(pKey)) {
+              team = game.awayTeam.abbreviation || "";
+            }
+          }
+          return { ...p, team, hasOddsData: true };
+        });
 
         allPlayersArr.push(...rosterPlayers);
 
