@@ -2,6 +2,7 @@ import { db } from "./db";
 import { predictions, modelWeights, learningLogs } from "./dbSchema";
 import { eq, isNull, desc, sql, and, lt, gt } from "drizzle-orm";
 import { logError, logInfo, logWarn } from "./errorLogger";
+import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
@@ -170,6 +171,8 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
       sportGames.set(sport, gameMap);
     }
 
+    const settledLegsForMC: { gameId: string; sport: string; market: string; legResult: string; selection: string }[] = [];
+
     for (const pred of unsettled) {
       checked++;
       const legs = pred.legs as any[];
@@ -182,6 +185,8 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
       let allSettled = true;
       let anyLoss = false;
       let anyPush = false;
+
+      const matchedLegs: { leg: any; game: any; legResult: string }[] = [];
 
       for (const leg of legs) {
         const eventId = leg.eventId || leg.gameId;
@@ -218,6 +223,10 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
         if (legResult === "lost") anyLoss = true;
         else if (legResult === "push") anyPush = true;
         else if (legResult === "unknown") allSettled = false;
+
+        if (legResult !== "unknown" && game) {
+          matchedLegs.push({ leg, game, legResult });
+        }
       }
 
       if (!allSettled) continue;
@@ -230,16 +239,49 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
           settledAt: new Date(),
         }).where(eq(predictions.id, pred.id));
         settled++;
+
+        for (const { leg, game, legResult } of matchedLegs) {
+          const market = (leg.type || leg.market || "moneyline").toLowerCase();
+          const selection = (leg.selection || leg.outcome || "").toLowerCase();
+          const matchesHome = selection.includes(game.homeTeam) ||
+            selection.includes(game.homeAbbr) ||
+            selection.includes(game.homeShort || "") ||
+            selection.includes("home");
+
+          settledLegsForMC.push({
+            gameId: game.id,
+            sport: sport || "NBA",
+            market,
+            legResult,
+            selection: matchesHome ? "home" : "away",
+          });
+        }
       } catch (e: any) {
         logWarn(`[Orchestrator] Failed to settle prediction ${pred.id}: ${e.message}`);
+      }
+    }
+
+    let mcRecorded = 0;
+    for (const sl of settledLegsForMC) {
+      try {
+        const preSim = getPreSimulated(sl.gameId);
+        let predictedProb = 0.5;
+        if (preSim) {
+          predictedProb = sl.selection === "home" ? preSim.homeWinProb : preSim.awayWinProb;
+        }
+        const actualOutcome = sl.legResult === "won" ? 1 : 0;
+        recordOutcome(sl.gameId, sl.sport, sl.market, predictedProb, actualOutcome);
+        mcRecorded++;
+      } catch (e: any) {
+        logWarn(`[Orchestrator] Failed to record MC outcome for ${sl.gameId}: ${e.message}`);
       }
     }
 
     status.totalSettled += settled;
     status.lastSettlementRun = new Date().toISOString();
 
-    if (settled > 0) {
-      logInfo(`[Orchestrator] Auto-settled ${settled}/${checked} predictions`);
+    if (settled > 0 || mcRecorded > 0) {
+      logInfo(`[Orchestrator] Auto-settled ${settled}/${checked} predictions, MC outcomes recorded: ${mcRecorded}`);
     }
   } catch (error: any) {
     addError("settlement", error.message);

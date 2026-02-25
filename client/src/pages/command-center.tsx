@@ -14,6 +14,7 @@ import {
   ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
 
 interface TopPick {
@@ -489,10 +490,59 @@ export default function CommandCenter() {
 
   if (isLoading || !feed) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Brain className="w-10 h-10 text-primary animate-pulse" />
-          <p className="text-sm text-muted-foreground">Loading intelligence feed...</p>
+      <div className="min-h-full" data-testid="loading-skeleton-command-center">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-5">
+          <div className="flex items-center gap-2">
+            <Brain className="w-6 h-6 text-primary animate-pulse" />
+            <Skeleton className="h-7 w-48" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-10 h-10 rounded-md" />
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-6 w-12" />
+                      <Skeleton className="h-2 w-24" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-4 space-y-3">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-10 w-full" />
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-5/6" />
+                    <Skeleton className="h-3 w-4/6" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Card key={i}>
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-2.5">
+                    <Skeleton className="w-4 h-4 rounded-full shrink-0 mt-0.5" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-3 w-2/3" />
+                      <Skeleton className="h-3 w-full" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -555,6 +605,19 @@ export default function CommandCenter() {
                 </TooltipContent>
               </Tooltip>
               <DataSourceBar sources={feed.dataSourceHealth} />
+              {(() => {
+                const oddsApi = feed.dataSourceHealth.find(s => s.name.toLowerCase().includes("odds api") || s.name.toLowerCase().includes("odds-api") || s.name.toLowerCase().includes("the odds"));
+                const isMultiBook = oddsApi && oddsApi.status === "live";
+                return (
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] px-1.5 py-0 ${isMultiBook ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-orange-500/10 border-orange-500/30 text-orange-500"}`}
+                    data-testid="indicator-odds-source"
+                  >
+                    {isMultiBook ? "Multi-Book" : "ESPN Only"}
+                  </Badge>
+                );
+              })()}
               <div className="text-[10px] text-muted-foreground flex items-center gap-1">
                 <RefreshCw className="w-3 h-3" />
                 {lastUpdate}
