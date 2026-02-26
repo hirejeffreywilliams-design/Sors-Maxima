@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
+import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
@@ -384,6 +385,40 @@ export function registerIntelligenceRoutes(app: Express): void {
     } catch (err) {
       console.error("Monte Carlo simulation error:", err);
       return res.status(500).json({ error: "Simulation failed" });
+    }
+  });
+
+  app.get("/api/strategy/templates", (_req: Request, res: Response) => {
+    const templates = getStrategyTemplates();
+    return res.json({ templates, count: templates.length });
+  });
+
+  app.get("/api/strategy/templates/:id", (req: Request, res: Response) => {
+    const template = getStrategyById(req.params.id);
+    if (!template) return res.status(404).json({ error: "Strategy not found" });
+    return res.json(template);
+  });
+
+  app.post("/api/strategy/analyze", async (req: Request, res: Response) => {
+    try {
+      const { legs } = req.body;
+      if (!Array.isArray(legs)) return res.status(400).json({ error: "legs must be an array" });
+      const analysis = await analyzeTicket(legs);
+      return res.json(analysis);
+    } catch (err) {
+      console.error("Strategy analysis error:", err);
+      return res.status(500).json({ error: "Analysis failed" });
+    }
+  });
+
+  app.post("/api/strategy/suggestions", async (req: Request, res: Response) => {
+    try {
+      const { currentLegs, strategy } = req.body;
+      const suggestions = await getSmartSuggestions(currentLegs ?? [], strategy);
+      return res.json({ suggestions, count: suggestions.length });
+    } catch (err) {
+      console.error("Strategy suggestions error:", err);
+      return res.status(500).json({ error: "Suggestions failed" });
     }
   });
 }

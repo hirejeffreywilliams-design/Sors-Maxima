@@ -64,7 +64,8 @@ const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database } from "lucide-react";
+const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database, Compass } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -224,6 +225,7 @@ function Router({ authState }: { authState: AuthState }) {
       <Switch>
         <Route path="/" component={CommandCenter} />
         <Route path="/generate" component={AutoGenerator} />
+        <Route path="/strategy" component={StrategyAdvisor} />
         <Route path="/builder" component={Dashboard} />
         <Route path="/daily" component={DailyParlays} />
         <Route path="/tools" component={Tools} />
@@ -285,6 +287,7 @@ const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Your Picks - All engines converging to find your edge" },
   { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
   { href: "/generate", icon: Brain, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
+  { href: "/strategy", icon: Compass, label: "Strategy", testId: "nav-strategy", tooltip: "Strategy Advisor - Expert guidance to build winning tickets" },
   { href: "/player-props", icon: Star, label: "Props", testId: "nav-player-props", tooltip: "Player Props - Over/under analysis for every player in every game" },
   { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Bet Builder - Manually build your parlays" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
