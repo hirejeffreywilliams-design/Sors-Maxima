@@ -69,7 +69,7 @@ export function registerSSEClient(res: Response, channels: string[] = ["all"], c
     const missedEvents = eventBuffer.filter(e => e.id > lastEventId);
     for (const event of missedEvents) {
       if (client.channels.has(ALL_CHANNEL) || client.channels.has(event.channel)) {
-        sendEvent(client, event.eventType, event.data);
+        sendEventWithId(client, event.id, event.eventType, event.data);
       }
     }
   }
@@ -89,15 +89,14 @@ export function registerSSEClient(res: Response, channels: string[] = ["all"], c
   return id;
 }
 
-function sendEvent(client: SSEClient, eventType: string, data: any): boolean {
+function sendEventWithId(client: SSEClient, eventId: number, eventType: string, data: any): boolean {
   try {
     if (client.res.writableEnded) {
       clients.delete(client.id);
       return false;
     }
-    eventCounter++;
-    client.lastEventId = eventCounter;
-    client.res.write(`id: ${eventCounter}\nevent: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`);
+    client.lastEventId = eventId;
+    client.res.write(`id: ${eventId}\nevent: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`);
     return true;
   } catch {
     clients.delete(client.id);
@@ -106,14 +105,16 @@ function sendEvent(client: SSEClient, eventType: string, data: any): boolean {
 }
 
 export function broadcastEvent(eventType: string, data: any, channel = "all"): void {
-  eventBuffer.push({ id: eventCounter + 1, eventType, data, channel, timestamp: Date.now() });
+  eventCounter++;
+  const eventId = eventCounter;
+  eventBuffer.push({ id: eventId, eventType, data, channel, timestamp: Date.now() });
   if (eventBuffer.length > EVENT_BUFFER_SIZE) {
     eventBuffer.splice(0, eventBuffer.length - EVENT_BUFFER_SIZE);
   }
 
   for (const [, client] of Array.from(clients.entries())) {
     if (client.channels.has(ALL_CHANNEL) || client.channels.has(channel)) {
-      sendEvent(client, eventType, data);
+      sendEventWithId(client, eventId, eventType, data);
     }
   }
 }
@@ -137,8 +138,10 @@ async function pushIntelligenceUpdate(): Promise<void> {
     const currentHash = hashFeed(feed);
 
     if (currentHash === lastFeedHash) {
+      eventCounter++;
+      const heartbeatId = eventCounter;
       for (const [, client] of Array.from(clients.entries())) {
-        sendEvent(client, "heartbeat", { timestamp: new Date().toISOString(), clients: clients.size });
+        sendEventWithId(client, heartbeatId, "heartbeat", { timestamp: new Date().toISOString(), clients: clients.size });
       }
       return;
     }

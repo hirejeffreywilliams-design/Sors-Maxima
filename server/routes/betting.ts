@@ -2028,6 +2028,8 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
         realProps = await fetchRealPlayerProps(sport, 10);
       }
 
+      const { getCachedPropsForGame } = await import("../odds-provider");
+
       const propsByEvent = new Map<string, any[]>();
       for (const prop of realProps) {
         const eventKey = `${prop.homeTeam}|${prop.awayTeam}`;
@@ -2044,6 +2046,7 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
         const awayName = awayTeamName.toLowerCase();
 
         let matchedProps: any[] = [];
+        let propsFromCache = false;
         for (const [eventKey, props] of propsByEvent.entries()) {
           const [h, a] = eventKey.toLowerCase().split("|");
           const hToken = h.split(" ").pop() || "";
@@ -2054,6 +2057,84 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
               (aToken === awayToken || a.includes(awayToken) || awayToken.includes(aToken))) {
             matchedProps = props;
             break;
+          }
+        }
+
+        if (matchedProps.length === 0) {
+          const homeToken = homeName.split(" ").pop() || "";
+          const awayToken = awayName.split(" ").pop() || "";
+          const directCache = getCachedPropsForGame(`${homeTeamName}|${awayTeamName}`);
+          if (directCache && directCache.length > 0) {
+            matchedProps = directCache;
+            propsFromCache = true;
+          } else {
+            const allCached = (await import("../odds-provider")).getAllCachedGameProps();
+            for (const [gk, gp] of allCached) {
+              const [h, a] = gk.split("|");
+              const hT = h.split(" ").pop() || "";
+              const aT = a.split(" ").pop() || "";
+              if ((hT === homeToken || h.includes(homeToken) || homeToken.includes(hT)) &&
+                  (aT === awayToken || a.includes(awayToken) || awayToken.includes(aT))) {
+                matchedProps = gp;
+                propsFromCache = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (matchedProps.length === 0 && sport === "NBA") {
+          try {
+            const { isBDLAvailable, getTodaysGames, getPlayerProps } = await import("../balldontlie-provider");
+            if (isBDLAvailable()) {
+              const bdlGames = await getTodaysGames();
+              const homeAbbr = (game.homeTeam.abbreviation || "").toUpperCase();
+              const awayAbbr = (game.awayTeam.abbreviation || "").toUpperCase();
+              const bdlMatch = bdlGames.find(bg =>
+                (bg.home_team.abbreviation === homeAbbr && bg.visitor_team.abbreviation === awayAbbr) ||
+                (bg.home_team.abbreviation === awayAbbr && bg.visitor_team.abbreviation === homeAbbr)
+              );
+              if (bdlMatch) {
+                const bdlProps = await getPlayerProps(bdlMatch.id);
+                if (bdlProps.length > 0) {
+                  const { MARKET_LABELS } = await import("../odds-provider");
+                  for (const bp of bdlProps) {
+                    const marketKey = bp.prop_type || bp.market?.type || "";
+                    const lineVal = parseFloat(bp.line_value) || 0;
+                    const overOdds = bp.market?.over_odds || -110;
+                    const underOdds = bp.market?.under_odds || -110;
+                    const overDec = overOdds > 0 ? 1 + overOdds / 100 : 1 + 100 / Math.abs(overOdds);
+                    const underDec = underOdds > 0 ? 1 + underOdds / 100 : 1 + 100 / Math.abs(underOdds);
+                    matchedProps.push({
+                      eventId: String(bdlMatch.id),
+                      sportKey: "NBA",
+                      homeTeam: bdlMatch.home_team.full_name,
+                      awayTeam: bdlMatch.visitor_team.full_name,
+                      commenceTime: bdlMatch.date,
+                      playerName: `Player #${bp.player_id}`,
+                      market: marketKey,
+                      marketLabel: MARKET_LABELS[marketKey] || marketKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+                      line: lineVal,
+                      overOdds,
+                      underOdds,
+                      overDecimal: overDec,
+                      underDecimal: underDec,
+                      bookmaker: bp.vendor || "BallDontLie",
+                      allBookmakers: [{ bookmaker: bp.vendor || "BallDontLie", overOdds, underOdds, line: lineVal }],
+                      bestOver: { bookmaker: bp.vendor || "BallDontLie", odds: overOdds },
+                      bestUnder: { bookmaker: bp.vendor || "BallDontLie", odds: underOdds },
+                      consensusLine: lineVal,
+                      overImpliedProb: 1 / overDec,
+                      underImpliedProb: 1 / underDec,
+                      dataSource: "BallDontLie (live)",
+                    });
+                  }
+                  propsFromCache = false;
+                }
+              }
+            }
+          } catch (bdlErr: any) {
+            // BDL fallback failed silently
           }
         }
 
@@ -2428,7 +2509,9 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           },
           players: allPlayersArr,
           totalProps: allPlayersArr.reduce((sum, p) => sum + p.markets.length, 0),
-          dataSource: matchedProps.length > 0 ? "The Odds API (live)" : "ESPN roster",
+          dataSource: matchedProps.length > 0
+            ? (propsFromCache ? "The Odds API (pre-game cached)" : (matchedProps[0]?.dataSource || "The Odds API (live)"))
+            : "ESPN roster",
         });
       }
 
@@ -2487,8 +2570,16 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
         realProps = await fetchRealPlayerProps(sport, 10);
       }
 
+      const { getCachedPropsForGame, getAllCachedGameProps } = await import("../odds-provider");
+
       if (realProps.length === 0) {
-        return res.json({ topPicks: [], sport, message: "No prop data available yet", generatedAt: new Date().toISOString() });
+        const allCached = getAllCachedGameProps();
+        if (allCached.size === 0) {
+          return res.json({ topPicks: [], sport, message: "No prop data available yet", generatedAt: new Date().toISOString() });
+        }
+        for (const [, gp] of allCached) {
+          realProps.push(...gp);
+        }
       }
 
       const propsByEvent = new Map<string, any[]>();
@@ -2517,6 +2608,27 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
               (aToken === awayToken || a.includes(awayToken) || awayToken.includes(aToken))) {
             matchedProps = props;
             break;
+          }
+        }
+
+        if (matchedProps.length === 0) {
+          const homeToken = homeName.split(" ").pop() || "";
+          const awayToken = awayName.split(" ").pop() || "";
+          const directCache = getCachedPropsForGame(`${homeTeamName}|${awayTeamName}`);
+          if (directCache && directCache.length > 0) {
+            matchedProps = directCache;
+          } else {
+            const allCached = getAllCachedGameProps();
+            for (const [gk, gp] of allCached) {
+              const [h, a] = gk.split("|");
+              const hT = h.split(" ").pop() || "";
+              const aT = a.split(" ").pop() || "";
+              if ((hT === homeToken || h.includes(homeToken) || homeToken.includes(hT)) &&
+                  (aT === awayToken || a.includes(awayToken) || awayToken.includes(aT))) {
+                matchedProps = gp;
+                break;
+              }
+            }
           }
         }
 

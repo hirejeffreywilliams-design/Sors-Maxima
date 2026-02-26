@@ -1331,6 +1331,28 @@ const MARKET_LABELS: Record<string, string> = {
 const playerPropsCache = new Map<string, { data: RealPlayerProp[]; timestamp: number }>();
 const PROPS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for real-time player props
 
+const perGamePropsCache = new Map<string, { data: RealPlayerProp[]; timestamp: number }>();
+const PER_GAME_PROPS_TTL = 6 * 60 * 60 * 1000; // 6 hours — persists props through live games
+
+export function getCachedPropsForGame(eventKey: string): RealPlayerProp[] | null {
+  const cached = perGamePropsCache.get(eventKey.toLowerCase());
+  if (cached && (Date.now() - cached.timestamp) < PER_GAME_PROPS_TTL) {
+    return cached.data;
+  }
+  return null;
+}
+
+export function getAllCachedGameProps(): Map<string, RealPlayerProp[]> {
+  const result = new Map<string, RealPlayerProp[]>();
+  const now = Date.now();
+  for (const [key, val] of perGamePropsCache) {
+    if (now - val.timestamp < PER_GAME_PROPS_TTL) {
+      result.set(key, val.data);
+    }
+  }
+  return result;
+}
+
 async function fetchEventIds(sport: string): Promise<{ id: string; home_team: string; away_team: string; commence_time: string }[]> {
   const apiKey = getOddsApiKey();
   if (!apiKey) return [];
@@ -1394,17 +1416,30 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
 
   const events = await fetchEventIds(sport);
   const now = Date.now();
-  const upcomingEvents = events
-    .filter(e => new Date(e.commence_time).getTime() > now)
+  const sixHoursAgo = now - 6 * 60 * 60 * 1000;
+  const relevantEvents = events
+    .filter(e => {
+      const eTime = new Date(e.commence_time).getTime();
+      return eTime > sixHoursAgo;
+    })
+    .sort((a, b) => {
+      const aTime = new Date(a.commence_time).getTime();
+      const bTime = new Date(b.commence_time).getTime();
+      const aIsLive = aTime <= now;
+      const bIsLive = bTime <= now;
+      if (aIsLive && !bIsLive) return 1;
+      if (!aIsLive && bIsLive) return -1;
+      return aTime - bTime;
+    })
     .slice(0, maxEvents);
 
-  if (upcomingEvents.length === 0) return [];
+  if (relevantEvents.length === 0) return [];
 
   const allProps: RealPlayerProp[] = [];
 
   const batchSize = 3;
-  for (let i = 0; i < upcomingEvents.length; i += batchSize) {
-    const batch = upcomingEvents.slice(i, i + batchSize);
+  for (let i = 0; i < relevantEvents.length; i += batchSize) {
+    const batch = relevantEvents.slice(i, i + batchSize);
     const results = await Promise.all(
       batch.map(event => fetchPlayerPropsForEvent(sport, event.id, markets))
     );
@@ -1489,7 +1524,18 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
   }
 
   playerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
-  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${upcomingEvents.length} events`);
+
+  const propsByGame = new Map<string, RealPlayerProp[]>();
+  for (const prop of allProps) {
+    const gameKey = `${prop.homeTeam}|${prop.awayTeam}`.toLowerCase();
+    if (!propsByGame.has(gameKey)) propsByGame.set(gameKey, []);
+    propsByGame.get(gameKey)!.push(prop);
+  }
+  for (const [gameKey, gameProps] of propsByGame) {
+    perGamePropsCache.set(gameKey, { data: gameProps, timestamp: Date.now() });
+  }
+
+  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${relevantEvents.length} events (${propsByGame.size} games cached)`);
   return allProps;
 }
 
