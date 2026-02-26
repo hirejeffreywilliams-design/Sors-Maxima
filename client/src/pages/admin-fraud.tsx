@@ -429,10 +429,10 @@ export default function AdminFraudDashboard() {
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Shield className="h-6 w-6 text-orange-500" />
-          Trial Fraud Detection
+          Subscription Fraud Detection
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Monitor and prevent trial abuse. Detect users attempting multiple free trials via different accounts.
+          Monitor and prevent subscription abuse. Detect users attempting to bypass payment or share credentials across accounts.
         </p>
       </div>
 

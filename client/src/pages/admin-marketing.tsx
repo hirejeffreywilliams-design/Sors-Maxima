@@ -145,7 +145,7 @@ function ContentGenerator() {
             <div>
               <Label>Custom Instructions (Optional)</Label>
               <Textarea
-                placeholder="E.g., Focus on the 7-day free trial, target sports bettors aged 25-40..."
+                placeholder="E.g., Focus on the exclusive members-only experience, target sports bettors aged 25-40..."
                 value={customPrompt}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 className="min-h-[100px]"
@@ -272,7 +272,7 @@ function GrowthAnalytics() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{m.activeTrials.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">7-day Pro trials</p>
+            <p className="text-xs text-muted-foreground">Active paid members</p>
           </CardContent>
         </Card>
 
@@ -409,10 +409,10 @@ function CampaignManager() {
 
   const campaignTemplates = [
     { 
-      name: "7-Day Trial Ending", 
+      name: "Upgrade Incentive", 
       type: "email",
-      description: "Remind users their trial is ending and encourage upgrade",
-      audience: "Trial users with 1-2 days remaining",
+      description: "Encourage Sharp members to upgrade to Edge or Max for premium features",
+      audience: "Sharp tier members active for 30+ days",
     },
     { 
       name: "New Feature Announcement", 

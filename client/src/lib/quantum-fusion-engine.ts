@@ -173,14 +173,14 @@ export const FACTOR_CATEGORIES = {
   physical_health: {
     name: "Physical & Health",
     icon: "Heart",
-    description: "Player health and recovery status",
-    factors: ["injury_adjustment", "biomech_fatigue", "recovery_status", "nutrition_hydration", "sleep_quality", "load_management"]
+    description: "Player health, conditioning, and availability",
+    factors: ["injury_adjustment", "biomech_fatigue", "recovery_status", "conditioning_trend", "availability_pattern", "load_management"]
   },
   technology: {
-    name: "Technology & Equipment",
+    name: "Performance Metrics",
     icon: "Cpu",
-    description: "Modern training and equipment data",
-    factors: ["wearable_data", "equipment_advantage", "training_tech", "video_analysis"]
+    description: "Advanced performance and efficiency metrics",
+    factors: ["roster_depth", "matchup_efficiency", "usage_patterns", "film_tendency"]
   },
   environmental: {
     name: "Environmental Factors",
@@ -233,15 +233,15 @@ const FUSION_WEIGHTS: FusionWeight[] = [
   { factor: "injury_adjustment", weight: 0.05, confidence: 83, historicalAccuracy: 0.68, recentTrend: "stable", learningRate: 0.03 },
   { factor: "biomech_fatigue", weight: 0.02, confidence: 72, historicalAccuracy: 0.57, recentTrend: "improving", learningRate: 0.04 },
   { factor: "recovery_status", weight: 0.02, confidence: 74, historicalAccuracy: 0.59, recentTrend: "stable", learningRate: 0.03 },
-  { factor: "nutrition_hydration", weight: 0.01, confidence: 63, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "sleep_quality", weight: 0.01, confidence: 64, historicalAccuracy: 0.51, recentTrend: "improving", learningRate: 0.03 },
+  { factor: "conditioning_trend", weight: 0.01, confidence: 63, historicalAccuracy: 0.50, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "availability_pattern", weight: 0.01, confidence: 64, historicalAccuracy: 0.51, recentTrend: "improving", learningRate: 0.03 },
   { factor: "load_management", weight: 0.02, confidence: 75, historicalAccuracy: 0.60, recentTrend: "stable", learningRate: 0.03 },
   
-  // TECHNOLOGY & EQUIPMENT (4 factors)
-  { factor: "wearable_data", weight: 0.02, confidence: 76, historicalAccuracy: 0.61, recentTrend: "improving", learningRate: 0.05 },
-  { factor: "equipment_advantage", weight: 0.01, confidence: 60, historicalAccuracy: 0.48, recentTrend: "stable", learningRate: 0.02 },
-  { factor: "training_tech", weight: 0.01, confidence: 65, historicalAccuracy: 0.52, recentTrend: "improving", learningRate: 0.03 },
-  { factor: "video_analysis", weight: 0.02, confidence: 73, historicalAccuracy: 0.58, recentTrend: "stable", learningRate: 0.03 },
+  // PERFORMANCE METRICS (4 factors)
+  { factor: "roster_depth", weight: 0.02, confidence: 76, historicalAccuracy: 0.61, recentTrend: "improving", learningRate: 0.05 },
+  { factor: "matchup_efficiency", weight: 0.01, confidence: 60, historicalAccuracy: 0.48, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "usage_patterns", weight: 0.01, confidence: 65, historicalAccuracy: 0.52, recentTrend: "improving", learningRate: 0.03 },
+  { factor: "film_tendency", weight: 0.02, confidence: 73, historicalAccuracy: 0.58, recentTrend: "stable", learningRate: 0.03 },
   
   // ENVIRONMENTAL (6 factors)
   { factor: "weather_impact", weight: 0.03, confidence: 75, historicalAccuracy: 0.60, recentTrend: "declining", learningRate: 0.02 },
@@ -309,7 +309,7 @@ const SYNERGY_RULES = [
   // ANALYTICS SYNERGIES
   { factors: ["predictive_model", "player_efficiency"], type: "amplifying" as const, multiplier: 1.22, description: "AI predictions validated by advanced player metrics" },
   { factors: ["pace_tempo", "point_differential"], type: "amplifying" as const, multiplier: 1.18, description: "Tempo advantage correlates with scoring margin" },
-  { factors: ["scouting_data", "video_analysis"], type: "amplifying" as const, multiplier: 1.20, description: "Scouting intel confirmed by video breakdown" },
+  { factors: ["scouting_data", "film_tendency"], type: "amplifying" as const, multiplier: 1.20, description: "Scouting intel confirmed by tendency analysis" },
   { factors: ["clutch_index", "pressure_response"], type: "amplifying" as const, multiplier: 1.25, description: "Clutch performers thrive under pressure" },
   
   // PSYCHOLOGICAL SYNERGIES
@@ -320,13 +320,13 @@ const SYNERGY_RULES = [
   
   // PHYSICAL SYNERGIES
   { factors: ["recovery_status", "load_management"], type: "amplifying" as const, multiplier: 1.18, description: "Well-rested players with managed workload" },
-  { factors: ["sleep_quality", "biomech_fatigue"], type: "transforming" as const, multiplier: 1.15, description: "Quality sleep offsets physical fatigue" },
-  { factors: ["nutrition_hydration", "wearable_data"], type: "amplifying" as const, multiplier: 1.12, description: "Optimal nutrition validated by biometrics" },
+  { factors: ["availability_pattern", "biomech_fatigue"], type: "transforming" as const, multiplier: 1.15, description: "Consistent availability offsets physical fatigue concerns" },
+  { factors: ["conditioning_trend", "roster_depth"], type: "amplifying" as const, multiplier: 1.12, description: "Strong conditioning trend with deep roster support" },
   { factors: ["injury_adjustment", "load_management"], type: "dampening" as const, multiplier: 0.90, description: "Injury concerns require careful load management" },
   
-  // TECHNOLOGY SYNERGIES
-  { factors: ["wearable_data", "training_tech"], type: "amplifying" as const, multiplier: 1.15, description: "Advanced tech optimizing training effectiveness" },
-  { factors: ["video_analysis", "scheme_mismatch"], type: "amplifying" as const, multiplier: 1.22, description: "Film study reveals exploitable scheme gaps" },
+  // PERFORMANCE METRICS SYNERGIES
+  { factors: ["roster_depth", "usage_patterns"], type: "amplifying" as const, multiplier: 1.15, description: "Deep roster with optimized player usage" },
+  { factors: ["film_tendency", "scheme_mismatch"], type: "amplifying" as const, multiplier: 1.22, description: "Tendency analysis reveals exploitable scheme gaps" },
   
   // ENVIRONMENTAL SYNERGIES
   { factors: ["weather_impact", "scheme_mismatch"], type: "transforming" as const, multiplier: 1.15, description: "Weather conditions favor scheme advantage" },
@@ -498,15 +498,15 @@ const SIGNAL_CONFIGS: SignalConfig[] = [
   { source: "injury_adjustment", bullishProb: 0.5, baseStrength: [55, 35], baseConfidence: [72, 23], reasoning: "Injury report analysis shows net advantage", impact: 1.15, category: "physical_health" },
   { source: "biomech_fatigue", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "Biomechanical fatigue analysis shows optimal physical condition", impact: 1.08, category: "physical_health" },
   { source: "recovery_status", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [65, 25], reasoning: "Recovery protocols indicate full fitness and readiness", impact: 1.08, category: "physical_health" },
-  { source: "nutrition_hydration", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Nutrition and hydration optimization for peak performance", impact: 1.03, category: "physical_health" },
-  { source: "sleep_quality", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Sleep quality metrics show well-rested athletes", impact: 1.04, category: "physical_health" },
+  { source: "conditioning_trend", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Recent conditioning and minutes trend analysis", impact: 1.03, category: "physical_health" },
+  { source: "availability_pattern", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Player availability and games-played consistency", impact: 1.04, category: "physical_health" },
   { source: "load_management", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [65, 25], reasoning: "Load management strategy indicates fresh key players", impact: 1.10, category: "physical_health" },
   
-  // TECHNOLOGY & EQUIPMENT (4 factors)
-  { source: "wearable_data", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Wearable biometric data shows optimal performance readiness", impact: 1.08, category: "technology" },
-  { source: "equipment_advantage", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [50, 30], reasoning: "Equipment and gear analysis shows competitive edge", impact: 1.02, category: "technology" },
-  { source: "training_tech", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Advanced training technology utilized effectively", impact: 1.05, category: "technology" },
-  { source: "video_analysis", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Film study reveals exploitable patterns in opponent", impact: 1.10, category: "technology" },
+  // PERFORMANCE METRICS (4 factors)
+  { source: "roster_depth", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Roster depth and bench contribution analysis", impact: 1.08, category: "technology" },
+  { source: "matchup_efficiency", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [50, 30], reasoning: "Historical matchup efficiency against opponent style", impact: 1.02, category: "technology" },
+  { source: "usage_patterns", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Player usage rate and rotation pattern analysis", impact: 1.05, category: "technology" },
+  { source: "film_tendency", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Tendency analysis reveals exploitable patterns in opponent", impact: 1.10, category: "technology" },
   
   // ENVIRONMENTAL (6 factors)
   { source: "weather_impact", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "Weather conditions favor this team's style of play", impact: 1.06, category: "environmental" },

@@ -79,9 +79,9 @@ export function ROIUpliftCalculator() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="basic">Basic ($9.99/mo)</SelectItem>
-                <SelectItem value="pro">Pro ($29.99/mo)</SelectItem>
-                <SelectItem value="elite">Elite ($49.99/mo)</SelectItem>
+                <SelectItem value="pro">Sharp ($49/mo)</SelectItem>
+                <SelectItem value="elite">Edge ($99/mo)</SelectItem>
+                <SelectItem value="whale">Max ($249/mo)</SelectItem>
               </SelectContent>
             </Select>
           </div>

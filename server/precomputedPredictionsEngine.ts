@@ -94,6 +94,12 @@ const FACTOR_LABELS: Record<string, string> = {
   pressure_response: "Pressure Performance",
   motivation_level: "Motivation Factor",
   team_chemistry: "Team Chemistry",
+  conditioning_trend: "Conditioning Trend",
+  availability_pattern: "Availability Pattern",
+  roster_depth: "Roster Depth",
+  matchup_efficiency: "Matchup Efficiency",
+  usage_patterns: "Usage Patterns",
+  film_tendency: "Tendency Analysis",
 };
 
 function humanizeFactorName(name: string): string {

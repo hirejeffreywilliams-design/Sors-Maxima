@@ -1500,9 +1500,9 @@ export default function AdminDashboard() {
                   <SelectValue placeholder="Select a tier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pro">Pro ($29/mo value)</SelectItem>
-                  <SelectItem value="elite">Elite ($99/mo value)</SelectItem>
-                  <SelectItem value="whale">Whale ($499/mo value)</SelectItem>
+                  <SelectItem value="pro">Sharp ($49/mo value)</SelectItem>
+                  <SelectItem value="elite">Edge ($99/mo value)</SelectItem>
+                  <SelectItem value="whale">Max ($249/mo value)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -1510,6 +1510,7 @@ export default function AdminDashboard() {
               <p className="font-medium mb-1">Tier Benefits:</p>
               {selectedTier === 'pro' && (
                 <ul className="text-muted-foreground space-y-1">
+                  <li>Sharp tier ($49/mo)</li>
                   <li>Unlimited tickets</li>
                   <li>All 46 analysis factors</li>
                   <li>14 sports coverage</li>
@@ -1518,7 +1519,8 @@ export default function AdminDashboard() {
               )}
               {selectedTier === 'elite' && (
                 <ul className="text-muted-foreground space-y-1">
-                  <li>Everything in Pro</li>
+                  <li>Edge tier ($99/mo)</li>
+                  <li>Everything in Sharp</li>
                   <li>Real-time alerts</li>
                   <li>AI betting assistant</li>
                   <li>CLV tracking</li>
@@ -1527,7 +1529,8 @@ export default function AdminDashboard() {
               )}
               {selectedTier === 'whale' && (
                 <ul className="text-muted-foreground space-y-1">
-                  <li>Everything in Elite</li>
+                  <li>Max tier ($249/mo)</li>
+                  <li>Everything in Edge</li>
                   <li>VIP picks</li>
                   <li>1-on-1 coaching</li>
                   <li>Priority support</li>

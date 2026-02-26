@@ -604,17 +604,17 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       const { contentType, customPrompt } = req.body;
       
       const contentPrompts: Record<string, string> = {
-        social_twitter: "Create a compelling Twitter/X post (max 280 chars) promoting Sors Maxima's AI-powered sports betting intelligence. Highlight the 7-day free Pro trial. Make it engaging and include relevant hashtags.",
-        social_facebook: "Write an engaging Facebook post promoting Sors Maxima. Focus on how our AI helps users make smarter bets. Mention the 7-day free trial and include a call to action.",
-        social_instagram: "Create an Instagram caption for Sors Maxima. Focus on lifestyle and winning potential. Include relevant hashtags. Mention the free 7-day Pro trial.",
+        social_twitter: "Create a compelling Twitter/X post (max 280 chars) promoting Sors Maxima's exclusive members-only sports betting intelligence. Highlight the data-driven 46-factor analysis and real-time odds convergence. Make it engaging and include relevant hashtags.",
+        social_facebook: "Write an engaging Facebook post promoting Sors Maxima. Focus on how our data-driven engines help members make smarter bets with real ESPN, odds, and Monte Carlo analysis. Include a call to action to join.",
+        social_instagram: "Create an Instagram caption for Sors Maxima. Focus on the exclusive members-only experience and winning potential. Include relevant hashtags. Emphasize data-driven intelligence over gut feelings.",
         social_linkedin: "Write a professional LinkedIn post about Sors Maxima's advanced betting intelligence platform. Focus on the technology and data-driven approach. Target professional sports enthusiasts.",
-        social_tiktok: "Write a TikTok script (30 seconds) showing how Sors Maxima helps users pick winning bets. Make it energetic and relatable for younger audience. Include trending audio suggestions.",
-        email_welcome: "Write a welcome email for new Sors Maxima users. Thank them for joining, explain their 7-day Pro trial benefits, and guide them to create their first smart ticket.",
-        email_trial_ending: "Write an email for users whose 7-day trial ends in 2 days. Create urgency, highlight what they'll lose, and offer special upgrade pricing. Be persuasive but not pushy.",
-        email_conversion: "Write a conversion email for users whose trial just expired. Offer 20% off first month, show success stories, and make upgrading easy.",
-        ad_google: "Write Google Ads copy (headline max 30 chars, description max 90 chars) for Sors Maxima. Focus on free trial and AI-powered analysis.",
-        ad_facebook: "Create Facebook ad copy with headline, primary text, and description. Target sports bettors aged 25-45. Emphasize the free 7-day Pro trial.",
-        push_notification: "Write a push notification (max 100 chars) encouraging users to check their daily smart ticket picks. Make it urgent and valuable.",
+        social_tiktok: "Write a TikTok script (30 seconds) showing how Sors Maxima helps members pick winning bets with real-time data convergence. Make it energetic and relatable for younger audience. Include trending audio suggestions.",
+        email_welcome: "Write a welcome email for new Sors Maxima members. Thank them for subscribing, explain their tier benefits (Sharp/Edge/Max), and guide them to create their first smart ticket.",
+        email_upgrade: "Write an email encouraging Sharp ($49/mo) members to upgrade to Edge ($99/mo) or Max ($249/mo). Highlight exclusive features they're missing: real-time alerts, AI assistant, VIP picks, and priority support. Be persuasive but not pushy.",
+        email_retention: "Write a retention email for members who haven't logged in recently. Show them what they're missing: new picks, improved accuracy, and recent winning tickets. Make returning easy.",
+        ad_google: "Write Google Ads copy (headline max 30 chars, description max 90 chars) for Sors Maxima. Focus on exclusive members-only intelligence and AI-powered analysis.",
+        ad_facebook: "Create Facebook ad copy with headline, primary text, and description. Target sports bettors aged 25-45. Emphasize the exclusive data-driven betting intelligence platform.",
+        push_notification: "Write a push notification (max 100 chars) encouraging members to check their daily smart ticket picks. Make it urgent and valuable.",
       };
 
       const basePrompt = contentPrompts[contentType] || "Create marketing content for Sors Maxima sports betting platform.";
@@ -631,7 +631,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
         messages: [
           {
             role: "system",
-            content: "You are a marketing expert for Sors Maxima, an exclusive AI-powered sports betting intelligence platform. Create compelling, conversion-focused content. The platform offers three members-only tiers: Sharp ($49/mo), Edge ($99/mo), and Max ($249/mo), each with AI-powered 46-factor betting analysis."
+            content: "You are a marketing expert for Sors Maxima, an exclusive members-only sports betting intelligence platform. There is NO free trial — all access requires a paid subscription. Create compelling, conversion-focused content. The platform offers three members-only tiers: Sharp ($49/mo), Edge ($99/mo), and Max ($249/mo), each with data-driven 46-factor betting analysis powered by real ESPN data, The Odds API odds, Monte Carlo simulations, and advanced analytics engines."
           },
           { role: "user", content: fullPrompt }
         ],
@@ -1155,14 +1155,18 @@ Format your response clearly with sections and bullet points.`;
   app.get("/api/admin/revenue/summary", requireAdmin, async (_req, res) => {
     try {
       const users = await storage.getUsers();
-      const premiumUsers = users.filter((u: any) => u.subscriptionTier === "pro" || u.subscriptionTier === "premium");
+      const allPaid = users.filter((u: any) => u.subscriptionTier && u.subscriptionTier !== "free");
+      const proUsers = allPaid.filter((u: any) => u.subscriptionTier === "pro");
+      const eliteUsers = allPaid.filter((u: any) => u.subscriptionTier === "elite");
+      const whaleUsers = allPaid.filter((u: any) => u.subscriptionTier === "whale");
       const today = new Date().toISOString().split("T")[0];
       
       res.json({
         date: today,
         totalUsers: users.length,
-        premiumUsers: premiumUsers.length,
-        estimatedMRR: premiumUsers.length * 29.99,
+        premiumUsers: allPaid.length,
+        estimatedMRR: (proUsers.length * 49) + (eliteUsers.length * 99) + (whaleUsers.length * 249),
+        tierBreakdown: { sharp: proUsers.length, edge: eliteUsers.length, max: whaleUsers.length },
         tipsterPlatformFee: "15%",
         reconciliationStatus: "current",
       });

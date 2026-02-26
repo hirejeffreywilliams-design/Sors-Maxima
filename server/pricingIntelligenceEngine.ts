@@ -383,10 +383,10 @@ export async function getPricingRecommendations() {
       id: "launch-2",
       priority: "high",
       category: "Growth",
-      title: "Offer 14-Day Free Trial on Edge Tier",
-      description: "Extend trial from 7 to 14 days on the Edge (middle) tier. Middle tier trials convert best because users experience premium features without the top-tier price shock.",
-      expectedImpact: "+30-50% trial-to-paid conversion rate",
-      implementation: "Update trial duration, add onboarding email sequence, track conversion funnel",
+      title: "Launch Limited-Time Founding Member Discount",
+      description: "Offer first 50 subscribers 25% off their first 3 months on any tier. Creates urgency and rewards early adopters without devaluing the product long-term.",
+      expectedImpact: "+30-50% early subscriber conversion rate",
+      implementation: "Create Stripe coupon codes, add countdown timer on pricing page, email campaign",
       timeframe: "1-2 weeks",
     });
     recommendations.push({
@@ -510,7 +510,7 @@ export async function getGrowthStageStrategy() {
       description: "Prove product-market fit. Every user interaction is a learning opportunity. Don't optimize for revenue yet — optimize for retention and feedback.",
       pricingActions: [
         "Keep prices stable — validate willingness to pay",
-        "Offer generous free trial (14 days on Edge tier)",
+        "Offer founding member discounts to early subscribers",
         "Create founding member perks (lifetime price lock)",
         "Test pricing page copy and layouts",
       ],

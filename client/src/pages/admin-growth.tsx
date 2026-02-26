@@ -75,10 +75,10 @@ const mrrHistory = [
 ];
 
 const revenueTiers = [
-  { name: "Starter", percent: 0, color: "bg-gray-400" },
-  { name: "Sharp", percent: 42, color: "bg-blue-500" },
-  { name: "Elite", percent: 38, color: "bg-purple-500" },
-  { name: "Whale", percent: 20, color: "bg-amber-500" },
+  { name: "Free", percent: 0, color: "bg-gray-400" },
+  { name: "Sharp ($49)", percent: 42, color: "bg-blue-500" },
+  { name: "Edge ($99)", percent: 38, color: "bg-purple-500" },
+  { name: "Max ($249)", percent: 20, color: "bg-amber-500" },
 ];
 
 const utmSources = [
@@ -111,10 +111,10 @@ const experiments = [
     lift: "+5.1%",
   },
   {
-    name: "Free Trial Duration",
+    name: "Founding Member Discount",
     status: "Running" as const,
-    variantA: "7-Day Trial",
-    variantB: "14-Day Trial",
+    variantA: "25% Off First 3 Months",
+    variantB: "20% Off First Month",
     sampleSize: 2640,
     confidence: 88.3,
     winner: null,
@@ -260,7 +260,7 @@ export default function AdminGrowth() {
                 <p className="text-lg font-bold" data-testid="kpi-tickets-saved">{liveKPIs.ticketsSaved}</p>
               </div>
               <div className="rounded-md border p-3 space-y-1">
-                <p className="text-xs text-muted-foreground">Trial-to-Paid</p>
+                <p className="text-xs text-muted-foreground">Visitor-to-Paid</p>
                 <p className="text-lg font-bold" data-testid="kpi-trial-conversion">{liveKPIs.trialToPayConversion}%</p>
               </div>
               <div className="rounded-md border p-3 space-y-1">
