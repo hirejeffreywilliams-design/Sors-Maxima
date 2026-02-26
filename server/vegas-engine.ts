@@ -2,6 +2,7 @@ import type { Sport } from "@shared/schema";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { getTeamDetail } from "./platformIntelligenceEngine";
 import { generateIntelligenceFeed, type EdgeAlert } from "./unifiedIntelligenceHub";
+import { isBDLAvailable, getEnrichedTeamData, type BDLEnrichedTeamData } from "./balldontlie-provider";
 
 export interface VegasFactor {
   name: string;
@@ -94,9 +95,52 @@ const TEAM_POWER_RATINGS: Record<string, number> = {
   "Devils": 104.2, "Wild": 103.8, "Flames": 102.9, "Kraken": 103.5,
 };
 
-function getDynamicPowerRating(teamName: string, sport: Sport): number {
+let bdlTeamCache: { data: BDLEnrichedTeamData[]; timestamp: number } | null = null;
+const BDL_VEGAS_CACHE_TTL = 10 * 60 * 1000;
+
+async function getBDLTeamsForVegas(): Promise<BDLEnrichedTeamData[]> {
+  if (bdlTeamCache && Date.now() - bdlTeamCache.timestamp < BDL_VEGAS_CACHE_TTL) {
+    return bdlTeamCache.data;
+  }
+  if (!isBDLAvailable()) return [];
+  try {
+    const teams = await getEnrichedTeamData();
+    if (teams.length > 0) {
+      bdlTeamCache = { data: teams, timestamp: Date.now() };
+    }
+    return teams;
+  } catch {
+    return bdlTeamCache?.data || [];
+  }
+}
+
+function findBDLTeam(teams: BDLEnrichedTeamData[], teamName: string): BDLEnrichedTeamData | undefined {
+  const nameLower = teamName.toLowerCase();
+  return teams.find(t =>
+    t.teamName.toLowerCase().includes(nameLower) ||
+    t.abbreviation.toLowerCase() === nameLower ||
+    nameLower.includes(t.teamName.split(" ").pop()!.toLowerCase())
+  );
+}
+
+function getDynamicPowerRating(teamName: string, sport: Sport, bdlTeams?: BDLEnrichedTeamData[]): number {
   const staticRating = TEAM_POWER_RATINGS[teamName];
   const baseRating = staticRating || (sport === "NFL" || sport === "NCAAF" ? 25 : 100);
+
+  if (sport === "NBA" && bdlTeams && bdlTeams.length > 0) {
+    const bdlTeam = findBDLTeam(bdlTeams, teamName);
+    if (bdlTeam) {
+      const totalGames = bdlTeam.wins + bdlTeam.losses;
+      if (totalGames > 0) {
+        const winPct = (bdlTeam.wins / totalGames) * 100;
+        const offRating = bdlTeam.offRating || 110;
+        const defRating = bdlTeam.defRating || 110;
+        const netRating = bdlTeam.netRating ?? (offRating - defRating);
+        const rating = baseRating + (winPct - 50) * 0.15 + netRating * 0.5;
+        return Math.round(rating * 10) / 10;
+      }
+    }
+  }
 
   try {
     const detail = getTeamDetail(teamName, sport);
@@ -246,12 +290,13 @@ function generateSituationalFactors(
   homeTeam: string,
   awayTeam: string,
   sport: Sport,
-  config: VegasModelConfig
+  config: VegasModelConfig,
+  bdlTeams?: BDLEnrichedTeamData[]
 ): VegasFactor[] {
   const factors: VegasFactor[] = [];
   
-  const homePower = getDynamicPowerRating(homeTeam, sport);
-  const awayPower = getDynamicPowerRating(awayTeam, sport);
+  const homePower = getDynamicPowerRating(homeTeam, sport, bdlTeams);
+  const awayPower = getDynamicPowerRating(awayTeam, sport, bdlTeams);
   const powerDiff = homePower - awayPower;
   if (Math.abs(powerDiff) > 3) {
     factors.push({
@@ -321,6 +366,9 @@ export async function generateVegasPredictions(sport?: Sport): Promise<VegasPred
   
   const filteredGames = sport ? games.filter(g => g.sport === sport) : games;
   const config = DEFAULT_CONFIG;
+
+  const hasNBA = filteredGames.some(g => g.sport === "NBA");
+  const bdlTeams = hasNBA ? await getBDLTeamsForVegas() : [];
   
   const sharpDataMap = new Map<number, { sharpMoney: number; publicMoney: number; lineMovement: number; steamMove: boolean; reverseLineMove: boolean }>();
   await Promise.all(filteredGames.map(async (game, index) => {
@@ -330,11 +378,11 @@ export async function generateVegasPredictions(sport?: Sport): Promise<VegasPred
   }));
 
   return filteredGames.map((game, index) => {
-    const homePower = getDynamicPowerRating(game.home, game.sport);
-    const awayPower = getDynamicPowerRating(game.away, game.sport);
+    const homePower = getDynamicPowerRating(game.home, game.sport, bdlTeams);
+    const awayPower = getDynamicPowerRating(game.away, game.sport, bdlTeams);
     const powerDiff = homePower - awayPower + config.homeAdvantage[game.sport];
     
-    const factors = generateSituationalFactors(game.home, game.away, game.sport, config);
+    const factors = generateSituationalFactors(game.home, game.away, game.sport, config, bdlTeams);
     const sharpData = sharpDataMap.get(index) || { sharpMoney: 50, publicMoney: 50, lineMovement: 0, steamMove: false, reverseLineMove: false };
     
     let vegasLine: number;

@@ -222,6 +222,12 @@ export interface MatchupSimulationInput {
   isHomeGame?: boolean;
   venue?: string;
   gameState?: "pre" | "in" | "post";
+  homeAvgPts?: number;
+  awayAvgPts?: number;
+  homeDefRating?: number;
+  awayDefRating?: number;
+  homePace?: number;
+  awayPace?: number;
 }
 
 export interface MatchupSimulationResult {
@@ -440,8 +446,39 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
   const injuryAway = input.injuryImpact?.away || 0;
   const weatherAdj = input.weatherImpact || 0;
 
-  const homeScoreMean = params.scoreMean + strengthDiff * params.scoreMean * 0.3 + homeAdv - injuryHome * 2 - weatherAdj * 0.5;
-  const awayScoreMean = params.scoreMean - strengthDiff * params.scoreMean * 0.3 - homeAdv - injuryAway * 2 - weatherAdj * 0.5;
+  const hasRealScoring = input.homeAvgPts && input.awayAvgPts && input.homeAvgPts > 0 && input.awayAvgPts > 0;
+  let baseHomeScore = params.scoreMean;
+  let baseAwayScore = params.scoreMean;
+
+  if (hasRealScoring) {
+    baseHomeScore = input.homeAvgPts!;
+    baseAwayScore = input.awayAvgPts!;
+
+    const leagueAvgRating = 112;
+    if (input.awayDefRating && input.awayDefRating > 0) {
+      const defFactor = input.awayDefRating / leagueAvgRating;
+      baseHomeScore = baseHomeScore / defFactor;
+    }
+    if (input.homeDefRating && input.homeDefRating > 0) {
+      const defFactor = input.homeDefRating / leagueAvgRating;
+      baseAwayScore = baseAwayScore / defFactor;
+    }
+
+    if (input.homePace && input.awayPace) {
+      const avgPace = (input.homePace + input.awayPace) / 2;
+      const leaguePace = params.scoreMean > 100 ? 100 : 48;
+      const paceFactor = avgPace / leaguePace;
+      baseHomeScore *= Math.max(0.9, Math.min(1.1, paceFactor));
+      baseAwayScore *= Math.max(0.9, Math.min(1.1, paceFactor));
+    }
+  }
+
+  const homeScoreMean = (hasRealScoring
+    ? baseHomeScore + homeAdv - injuryHome * 2 - weatherAdj * 0.5
+    : params.scoreMean + strengthDiff * params.scoreMean * 0.3 + homeAdv - injuryHome * 2 - weatherAdj * 0.5);
+  const awayScoreMean = (hasRealScoring
+    ? baseAwayScore - homeAdv - injuryAway * 2 - weatherAdj * 0.5
+    : params.scoreMean - strengthDiff * params.scoreMean * 0.3 - homeAdv - injuryAway * 2 - weatherAdj * 0.5);
 
   const spreadLine = input.spread !== undefined ? input.spread : Math.round((homeScoreMean - awayScoreMean) * 2) / 2;
   const totalLine = input.totalLine !== undefined ? input.totalLine : Math.round((homeScoreMean + awayScoreMean) * 2) / 2;
@@ -1165,14 +1202,36 @@ async function runPreSimulationCycle(): Promise<void> {
       }
     }
 
+    let bdlTeams: any[] = [];
+    const hasNBA = allGames.some(g => (g.sport || "NBA") === "NBA");
+    if (hasNBA) {
+      try {
+        const { isBDLAvailable, getEnrichedTeamData } = await import("./balldontlie-provider");
+        if (isBDLAvailable()) {
+          bdlTeams = await getEnrichedTeamData();
+        }
+      } catch {}
+    }
+
+    const findBDL = (name: string, abbr?: string) => {
+      if (!bdlTeams.length) return null;
+      const nameLower = name.toLowerCase();
+      return bdlTeams.find((t: any) =>
+        t.teamName?.toLowerCase().includes(nameLower) ||
+        (abbr && t.abbreviation?.toLowerCase() === abbr.toLowerCase()) ||
+        nameLower.includes(t.teamName?.split(" ").pop()!.toLowerCase())
+      ) || null;
+    };
+
     for (const game of allGames.slice(0, 30)) {
       try {
         const homeWinPct = game.homeTeam?.winPct || 50;
         const awayWinPct = game.awayTeam?.winPct || 50;
+        const sport = (game.sport || "NBA") as Sport;
 
         const input: MatchupSimulationInput = {
           gameId: game.id,
-          sport: (game.sport || "NBA") as Sport,
+          sport,
           homeTeam: game.homeTeam?.name || "Home",
           awayTeam: game.awayTeam?.name || "Away",
           homeWinPct,
@@ -1184,6 +1243,21 @@ async function runPreSimulationCycle(): Promise<void> {
           isHomeGame: true,
           gameState: game.status?.state === "in" ? "in" : "pre",
         };
+
+        if (sport === "NBA") {
+          const homeBDL = findBDL(game.homeTeam?.name || "", game.homeTeam?.abbreviation);
+          const awayBDL = findBDL(game.awayTeam?.name || "", game.awayTeam?.abbreviation);
+          if (homeBDL) {
+            input.homeAvgPts = homeBDL.avgPts;
+            input.homeDefRating = homeBDL.defRating;
+            input.homePace = homeBDL.pace;
+          }
+          if (awayBDL) {
+            input.awayAvgPts = awayBDL.avgPts;
+            input.awayDefRating = awayBDL.defRating;
+            input.awayPace = awayBDL.pace;
+          }
+        }
 
         simulateMatchup(input);
         simulated++;

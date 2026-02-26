@@ -463,7 +463,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const { simulateMatchup, getPreSimulated } = await import("./monteCarloEngine");
       mcSim = getPreSimulated(game.id);
       if (!mcSim) {
-        mcSim = simulateMatchup({
+        const mcInput: any = {
           gameId: game.id,
           sport,
           homeTeam: homeName,
@@ -473,7 +473,18 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           isHomeGame: true,
           gameState: game.status?.state === "in" ? "live" : "pre",
           injuryImpact: { home: homeStartersOut * 0.03, away: awayStartersOut * 0.03 },
-        });
+        };
+        if (sport === "NBA" && homeBDL) {
+          mcInput.homeAvgPts = homeBDL.avgPts;
+          mcInput.homeDefRating = homeBDL.defRating;
+          mcInput.homePace = homeBDL.pace;
+        }
+        if (sport === "NBA" && awayBDL) {
+          mcInput.awayAvgPts = awayBDL.avgPts;
+          mcInput.awayDefRating = awayBDL.defRating;
+          mcInput.awayPace = awayBDL.pace;
+        }
+        mcSim = simulateMatchup(mcInput);
       }
     } catch {}
 
