@@ -622,7 +622,7 @@ function UpcomingGameRow({ game }: { game: UnifiedGame }) {
   );
 }
 
-function AlertCard({ alert }: { alert: EdgeAlert }) {
+function AlertCard({ alert, picks, legs, addLeg }: { alert: EdgeAlert; picks?: TopPick[]; legs?: { id: string }[]; addLeg?: (leg: any) => boolean }) {
   const iconMap: Record<string, typeof AlertTriangle> = {
     arbitrage: Target,
     high_ev: TrendingUp,
@@ -657,8 +657,51 @@ function AlertCard({ alert }: { alert: EdgeAlert }) {
     unknown: "bg-muted text-muted-foreground",
   };
 
+  const matchingPick = picks?.find(p => {
+    if (p.sport.toLowerCase() !== alert.sport.toLowerCase()) return false;
+    if (p.game === alert.game) return true;
+    const alertTeams = alert.game.split(" @ ").map(t => t.trim().toLowerCase());
+    const pickTeams = p.game.split(" @ ").map(t => t.trim().toLowerCase());
+    if (alertTeams.length === 2 && pickTeams.length === 2) {
+      return (alertTeams[0] === pickTeams[0] && alertTeams[1] === pickTeams[1]) ||
+             (alertTeams[0] === pickTeams[1] && alertTeams[1] === pickTeams[0]);
+    }
+    const alertLower = alert.game.toLowerCase();
+    return p.homeTeam.toLowerCase().includes(alertLower.split(" @ ")[0]) ||
+           p.awayTeam.toLowerCase().includes(alertLower.split(" @ ")[0]);
+  });
+
+  const handleQuickBet = () => {
+    if (!matchingPick || !addLeg) return;
+    const legId = `alert-${alert.id}-${matchingPick.id}`;
+    if (legs?.some(l => l.id === legId)) return;
+    const decimalOdds = matchingPick.odds < 0
+      ? 1 + (100 / Math.abs(matchingPick.odds))
+      : 1 + (matchingPick.odds / 100);
+    const validMarket = ["moneyline", "spread", "total", "player_prop"].includes(matchingPick.betType)
+      ? matchingPick.betType
+      : "moneyline";
+    addLeg({
+      id: legId,
+      team: matchingPick.homeTeam,
+      opponent: matchingPick.awayTeam,
+      market: validMarket as any,
+      outcome: matchingPick.pick,
+      decimalOdds,
+      americanOdds: matchingPick.odds,
+      addedFrom: "Alert Quick Bet",
+      addedAt: new Date().toISOString(),
+      sport: matchingPick.sport,
+      confidence: matchingPick.confidence,
+      evPercent: matchingPick.ev,
+      gameTime: matchingPick.gameTime,
+    });
+  };
+
+  const isInSlip = matchingPick && legs?.some(l => l.id === `alert-${alert.id}-${matchingPick.id}`);
+
   return (
-    <div className={`flex items-start gap-2.5 p-2.5 rounded-md border ${severityStyle[alert.severity]}`} data-testid={`alert-${alert.id}`}>
+    <div className={`flex items-start gap-2.5 p-2.5 rounded-md border ${severityStyle[alert.severity]} ${alert.actionable ? "cursor-pointer hover:bg-accent/30 transition-colors" : ""}`} data-testid={`alert-${alert.id}`} onClick={alert.actionable && matchingPick ? handleQuickBet : undefined}>
       <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${severityIcon[alert.severity]}`} />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
@@ -673,6 +716,37 @@ function AlertCard({ alert }: { alert: EdgeAlert }) {
         <p className="text-[11px] text-muted-foreground mt-0.5">{alert.description}</p>
         {alert.reason && (
           <p className="text-[10px] text-foreground/60 mt-1 leading-relaxed" data-testid={`text-reason-${alert.id}`}>{alert.reason}</p>
+        )}
+        {alert.actionable && (
+          <div className="flex items-center gap-2 mt-1.5">
+            {matchingPick ? (
+              <Button
+                size="sm"
+                variant={isInSlip ? "secondary" : "default"}
+                className="h-6 text-[10px] px-2 gap-1"
+                onClick={(e) => { e.stopPropagation(); handleQuickBet(); }}
+                disabled={!!isInSlip}
+                data-testid={`button-quick-bet-${alert.id}`}
+              >
+                {isInSlip ? (
+                  <><Check className="w-3 h-3" /> In Slip</>
+                ) : (
+                  <><Plus className="w-3 h-3" /> Quick Bet {matchingPick.odds > 0 ? `+${matchingPick.odds}` : matchingPick.odds}</>
+                )}
+              </Button>
+            ) : (
+              <Link href={`/daily`}>
+                <Button size="sm" variant="outline" className="h-6 text-[10px] px-2 gap-1" data-testid={`button-view-picks-${alert.id}`}>
+                  <ArrowRight className="w-3 h-3" /> View Picks
+                </Button>
+              </Link>
+            )}
+            {matchingPick && (
+              <span className="text-[9px] text-muted-foreground">
+                {matchingPick.pick} · {matchingPick.confidence}% conf
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -1273,7 +1347,7 @@ export default function CommandCenter() {
                     <p className="text-sm text-muted-foreground py-4 text-center">No alerts right now</p>
                   ) : (
                     filteredAlerts.slice(0, 10).map(alert => (
-                      <AlertCard key={alert.id} alert={alert} />
+                      <AlertCard key={alert.id} alert={alert} picks={feed?.topPicks} legs={legs} addLeg={addLeg} />
                     ))
                   )}
                 </CardContent>

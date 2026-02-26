@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +18,7 @@ import {
   Trophy,
   XCircle,
   Zap,
+  ArrowRight,
 } from "lucide-react";
 import { useSSE } from "@/hooks/use-sse";
 
@@ -52,7 +54,18 @@ function formatTimeAgo(timestamp: string): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+const ACTIONABLE_TYPES = new Set(["line_movement", "sharp_money", "game_start", "score_change"]);
+
+function getNotificationRoute(notification: Notification): string | null {
+  if (!ACTIONABLE_TYPES.has(notification.type)) return null;
+  if (notification.type === "score_change" || notification.type === "game_start") return "/live";
+  if (notification.type === "sharp_money") return "/player-props";
+  if (notification.type === "line_movement") return "/";
+  return null;
+}
+
 export function NotificationsPanel() {
+  const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [preferences, setPreferences] = useState({
@@ -226,38 +239,50 @@ export function NotificationsPanel() {
                       )}
                     </span>
                   </div>
-                  {items.slice(0, 5).map((notification) => (
-                    <div
-                      key={`${notification.type}-${notification.id}`}
-                      className={`px-3 py-2.5 border-b last:border-b-0 transition-colors ${
-                        notification.read ? "opacity-60" : "bg-muted/20"
-                      }`}
-                      data-testid={`notification-item-${notification.id}`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${config.color}`} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-medium">{notification.title}</span>
-                            {notification.sport && (
-                              <Badge variant="outline" className="text-[10px] h-4 px-1" data-testid={`badge-sport-${notification.id}`}>
-                                {notification.sport}
-                              </Badge>
-                            )}
-                            {!notification.read && (
-                              <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
-                            )}
+                  {items.slice(0, 5).map((notification) => {
+                    const route = getNotificationRoute(notification);
+                    const isClickable = !!route;
+                    return (
+                      <div
+                        key={`${notification.type}-${notification.id}`}
+                        className={`px-3 py-2.5 border-b last:border-b-0 transition-colors ${
+                          notification.read ? "opacity-60" : "bg-muted/20"
+                        } ${isClickable ? "cursor-pointer hover:bg-accent/40" : ""}`}
+                        data-testid={`notification-item-${notification.id}`}
+                        onClick={isClickable ? () => { if (!notification.read) markReadMutation.mutate([notification.id]); setOpen(false); setLocation(route); } : undefined}
+                      >
+                        <div className="flex items-start gap-2">
+                          <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${config.color}`} />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium">{notification.title}</span>
+                              {notification.sport && (
+                                <Badge variant="outline" className="text-[10px] h-4 px-1" data-testid={`badge-sport-${notification.id}`}>
+                                  {notification.sport}
+                                </Badge>
+                              )}
+                              {!notification.read && (
+                                <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                              {notification.description}
+                            </p>
+                            <div className="flex items-center justify-between mt-1">
+                              <span className="text-[10px] text-muted-foreground">
+                                {formatTimeAgo(notification.timestamp)}
+                              </span>
+                              {isClickable && (
+                                <span className="flex items-center gap-0.5 text-[10px] text-primary font-medium" data-testid={`link-notif-action-${notification.id}`}>
+                                  Bet Now <ArrowRight className="w-3 h-3" />
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-                            {notification.description}
-                          </p>
-                          <span className="text-[10px] text-muted-foreground mt-1 block">
-                            {formatTimeAgo(notification.timestamp)}
-                          </span>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               );
             })
