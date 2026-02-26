@@ -438,11 +438,44 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
       {expanded && (
         <CardContent className="p-3 sm:p-4 space-y-4">
           {playersWithProps.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              {isLive
-                ? "No live prop data available. Bookmakers remove prop markets at tipoff."
-                : "No player props available yet. Props typically post 1-2 days before game time."}
-            </p>
+            <div className="space-y-3 py-2">
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-border/50">
+                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  {isLive
+                    ? "Prop markets suspended — sportsbooks pull player prop lines during live play. Game odds and analysis remain active."
+                    : "No player props available yet. Props typically post 1-2 days before game time."}
+                </p>
+              </div>
+              {game.players && game.players.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Roster ({game.players.length} players)</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                    {game.players.slice(0, 12).map((player) => (
+                      <div key={player.playerName} className="flex items-center gap-2 p-2 rounded-md bg-muted/30 border border-border/30">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{player.playerName}</p>
+                          <div className="flex items-center gap-1.5">
+                            {player.position && <span className="text-[10px] text-muted-foreground">{player.position}</span>}
+                            {player.injury && (
+                              <Badge variant="outline" className="text-[8px] px-1 py-0 border-red-500/30 text-red-400">{player.injury.status}</Badge>
+                            )}
+                          </div>
+                          {player.leaderStats && player.leaderStats.length > 0 && (
+                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                              {player.leaderStats.slice(0, 2).map(s => `${s.value} ${s.category}`).join(" · ")}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {game.players.length > 12 && (
+                    <p className="text-[10px] text-muted-foreground text-center mt-1.5">+{game.players.length - 12} more players</p>
+                  )}
+                </div>
+              )}
+            </div>
           ) : (
             <>
               {[
