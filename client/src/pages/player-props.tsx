@@ -99,6 +99,20 @@ interface TopPick {
   injury: { status: string; details: string } | null;
   score: number;
   dataSource: string;
+  monteCarlo?: {
+    simulations: number;
+    hitProbability: number;
+    missProbability: number;
+    projectedValue: number;
+    stdDev: number;
+    p10: number;
+    median: number;
+    p90: number;
+    convergenceScore: number;
+    riskLevel: string;
+    confidence95: [number, number];
+    edgeOverMarket: number;
+  };
 }
 
 interface TopPropsResponse {
@@ -108,6 +122,7 @@ interface TopPropsResponse {
   totalGames: number;
   generatedAt: string;
   dataSource: string;
+  mcSimulated?: boolean;
 }
 
 const SPORT_TABS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF"];
@@ -600,6 +615,40 @@ function TopPickCard({ pick, addLeg, slipLegIds, sport }: {
           )}
         </div>
       </button>
+
+      {pick.monteCarlo && (
+        <div className="rounded-md bg-muted/50 border px-2 py-1.5 space-y-1" data-testid={`mc-data-${pick.rank}`}>
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="flex items-center gap-1 font-medium">
+              <Activity className="w-3 h-3 text-primary" />
+              MC Hit: <span className="font-bold text-primary">{pick.monteCarlo.hitProbability.toFixed(1)}%</span>
+            </span>
+            <span className="text-muted-foreground font-mono">
+              {pick.monteCarlo.p10}–{pick.monteCarlo.p90} range
+            </span>
+          </div>
+          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${
+                pick.monteCarlo.hitProbability >= 60 ? "bg-emerald-500" :
+                pick.monteCarlo.hitProbability >= 50 ? "bg-yellow-500" : "bg-red-500"
+              }`}
+              style={{ width: `${Math.min(100, pick.monteCarlo.hitProbability)}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+            <span>Proj: {pick.monteCarlo.projectedValue}</span>
+            <span>{(pick.monteCarlo.simulations / 1000).toFixed(0)}K sims</span>
+            <Badge variant="outline" className={`text-[8px] px-1 py-0 ${
+              pick.monteCarlo.riskLevel === "low" ? "text-emerald-600 border-emerald-500/30" :
+              pick.monteCarlo.riskLevel === "medium" ? "text-yellow-600 border-yellow-500/30" :
+              "text-red-500 border-red-500/30"
+            }`}>
+              {pick.monteCarlo.riskLevel}
+            </Badge>
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-[10px]">
         <div className="flex items-center gap-2">

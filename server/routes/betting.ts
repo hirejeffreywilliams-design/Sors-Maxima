@@ -2773,17 +2773,67 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
       const topPicks = allAnalyzed.slice(0, 15);
 
+      const { simulatePlayerProp } = await import("../monteCarloEngine");
+
+      const mcEnrichedPicks = topPicks.map((p) => {
+        const mcResult = simulatePlayerProp({
+          playerName: p.playerName,
+          market: p.marketLabel || p.market,
+          line: p.line,
+          seasonAvg: p.seasonAvg,
+          sport,
+          recommendation: p.recommendation,
+          injuryStatus: p.injury?.status || null,
+        });
+
+        const mcAdjustedConfidence = Math.round(
+          p.confidence * 0.35 + mcResult.mcConfidence * 0.65
+        );
+
+        const mcScore = (mcAdjustedConfidence * 2) + (Math.abs(p.edge / 100) * 200) +
+          ((p.allBookmakers || []).length * 3) +
+          (p.seasonAvg ? 10 : 0) +
+          (!p.injury ? 5 : 0) +
+          (mcResult.hitProbability > 0.6 ? 15 : 0);
+
+        return {
+          ...p,
+          confidence: mcAdjustedConfidence,
+          score: mcScore,
+          monteCarlo: {
+            simulations: mcResult.simulations,
+            hitProbability: Math.round(mcResult.hitProbability * 1000) / 10,
+            missProbability: Math.round(mcResult.missProbability * 1000) / 10,
+            projectedValue: mcResult.projectedValue,
+            stdDev: mcResult.stdDev,
+            p10: mcResult.p10,
+            median: mcResult.median,
+            p90: mcResult.p90,
+            convergenceScore: mcResult.convergenceScore,
+            riskLevel: mcResult.riskLevel,
+            confidence95: [
+              Math.round(mcResult.confidence95[0] * 1000) / 10,
+              Math.round(mcResult.confidence95[1] * 1000) / 10,
+            ],
+            edgeOverMarket: mcResult.edgeOverMarket,
+          },
+          reasoning: p.reasoning + ` MC sim (${mcResult.simulations}x): ${Math.round(mcResult.hitProbability * 100)}% hit rate, projected ${mcResult.projectedValue} (p10: ${mcResult.p10}, p90: ${mcResult.p90}).`,
+        };
+      });
+
+      mcEnrichedPicks.sort((a, b) => b.score - a.score);
+
       const gradeByScore = (s: number): string => {
-        if (s >= 200) return "A+";
-        if (s >= 180) return "A";
-        if (s >= 160) return "A-";
-        if (s >= 145) return "B+";
-        if (s >= 130) return "B";
-        if (s >= 115) return "B-";
+        if (s >= 220) return "A+";
+        if (s >= 195) return "A";
+        if (s >= 175) return "A-";
+        if (s >= 160) return "B+";
+        if (s >= 145) return "B";
+        if (s >= 130) return "B-";
         return "C+";
       };
 
-      const enriched = topPicks.map((p, idx) => ({
+      const enriched = mcEnrichedPicks.map((p, idx) => ({
         rank: idx + 1,
         grade: gradeByScore(p.score),
         ...p,
@@ -2795,7 +2845,8 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
         totalAnalyzed: allAnalyzed.length,
         totalGames: relevantGames.length,
         generatedAt: new Date().toISOString(),
-        dataSource: "The Odds API + ESPN",
+        dataSource: "The Odds API + ESPN + Monte Carlo (5K sims/prop)",
+        mcSimulated: true,
       });
     } catch (e: any) {
       console.error("[top-props] Error:", e.message);

@@ -1,5 +1,6 @@
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,10 @@ import {
   ArrowRight,
   ChevronDown,
   ChevronUp,
+  Activity,
+  BarChart3,
+  Shield,
+  Zap,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -171,6 +176,184 @@ function gradeColor(grade: string): string {
   if (grade.startsWith("B")) return "bg-blue-500/15 text-blue-600 border-blue-500/30";
   if (grade.startsWith("C")) return "bg-yellow-500/15 text-yellow-600 border-yellow-500/30";
   return "bg-red-500/15 text-red-500 border-red-500/30";
+}
+
+interface SimulationResult {
+  simulation: {
+    winProbability: number;
+    method: string;
+    simulations: number;
+    convergenceScore: number;
+    confidenceInterval: [number, number];
+  };
+  risk: {
+    rating: "low" | "medium" | "high" | "very_high";
+    variance: number;
+    sharpeRatio: number;
+    ruinProbability: number;
+  };
+  kelly: {
+    fraction: number;
+    optimalBet: number;
+    potentialPayout: number;
+    expectedGrowthRate: number;
+  };
+  ticket: {
+    legs: number;
+    combinedOdds: number;
+    impliedProbability: number;
+  };
+}
+
+function riskColor(rating: string): string {
+  if (rating === "low") return "text-green-600 dark:text-green-400";
+  if (rating === "medium") return "text-yellow-600 dark:text-yellow-400";
+  if (rating === "high") return "text-orange-500 dark:text-orange-400";
+  return "text-red-500 dark:text-red-400";
+}
+
+function riskBg(rating: string): string {
+  if (rating === "low") return "bg-green-500/10 border-green-500/20";
+  if (rating === "medium") return "bg-yellow-500/10 border-yellow-500/20";
+  if (rating === "high") return "bg-orange-500/10 border-orange-500/20";
+  return "bg-red-500/10 border-red-500/20";
+}
+
+function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; stake: number; compact?: boolean }) {
+  const [simData, setSimData] = useState<SimulationResult | null>(null);
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const lastLegKeyRef = useRef("");
+
+  const legKey = legs.map(l => l.id).sort().join(",") + `|${stake}`;
+
+  useEffect(() => {
+    if (legs.length < 2 || legKey === lastLegKeyRef.current) return;
+    lastLegKeyRef.current = legKey;
+    const timer = setTimeout(async () => {
+      setIsSimulating(true);
+      try {
+        const resp = await fetch("/api/slip/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ legs, bankroll: stake * 10 }),
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          setSimData(data);
+        }
+      } catch {}
+      setIsSimulating(false);
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [legKey, legs, stake]);
+
+  if (legs.length < 2) return null;
+
+  if (isSimulating && !simData) {
+    return (
+      <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-primary/5 border border-primary/10 text-xs" data-testid="mc-simulating">
+        <Activity className="h-3 w-3 animate-pulse text-primary" />
+        <span className="text-muted-foreground">Running Monte Carlo simulation...</span>
+      </div>
+    );
+  }
+
+  if (!simData) return null;
+
+  const { simulation, risk, kelly } = simData;
+  const ratingLabel = risk.rating === "very_high" ? "Very High" : risk.rating.charAt(0).toUpperCase() + risk.rating.slice(1);
+
+  if (compact) {
+    return (
+      <div className={`rounded-md border px-2 py-1.5 text-[10px] space-y-1 ${riskBg(risk.rating)}`} data-testid="mc-simulation-compact">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1 font-medium">
+            <Activity className="h-2.5 w-2.5" />
+            MC: {simulation.winProbability.toFixed(1)}% win
+          </span>
+          <span className={`font-bold ${riskColor(risk.rating)}`}>{ratingLabel} Risk</span>
+        </div>
+        {kelly.optimalBet > 0 && (
+          <div className="flex items-center justify-between text-muted-foreground">
+            <span>Kelly: ${kelly.optimalBet.toFixed(2)}</span>
+            <span className="text-green-600 dark:text-green-400">${kelly.potentialPayout.toFixed(2)}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className={`rounded-md border space-y-0 overflow-hidden ${riskBg(risk.rating)}`} data-testid="mc-simulation-panel">
+      <button
+        className="w-full flex items-center justify-between px-2.5 py-1.5 text-xs hover:bg-muted/30 transition-colors"
+        onClick={() => setExpanded(!expanded)}
+        data-testid="toggle-mc-panel"
+      >
+        <span className="flex items-center gap-1.5 font-medium">
+          <Activity className="h-3 w-3 text-primary" />
+          Monte Carlo: {simulation.winProbability.toFixed(1)}% Win
+          {isSimulating && <span className="text-muted-foreground animate-pulse">(updating...)</span>}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${riskColor(risk.rating)} border-current/20`}>
+            {ratingLabel}
+          </Badge>
+          {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="px-2.5 pb-2 space-y-1.5 text-xs border-t border-current/5">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1 pt-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground flex items-center gap-1"><BarChart3 className="h-2.5 w-2.5" /> Win Prob</span>
+              <span className="font-bold">{simulation.winProbability.toFixed(2)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground flex items-center gap-1"><Shield className="h-2.5 w-2.5" /> Risk</span>
+              <span className={`font-bold ${riskColor(risk.rating)}`}>{ratingLabel}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground flex items-center gap-1"><Zap className="h-2.5 w-2.5" /> CI 95%</span>
+              <span className="font-mono text-[10px]">{simulation.confidenceInterval[0].toFixed(1)}-{simulation.confidenceInterval[1].toFixed(1)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Convergence</span>
+              <span className="font-mono text-[10px]">{(simulation.convergenceScore * 100).toFixed(0)}%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Sharpe</span>
+              <span className="font-mono text-[10px]">{risk.sharpeRatio.toFixed(2)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Ruin Prob</span>
+              <span className={`font-mono text-[10px] ${risk.ruinProbability > 50 ? "text-red-500" : "text-green-600"}`}>{risk.ruinProbability.toFixed(1)}%</span>
+            </div>
+          </div>
+
+          {kelly.optimalBet > 0 && (
+            <>
+              <Separator className="opacity-30" />
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Kelly Optimal Bet</span>
+                <span className="font-bold text-primary">${kelly.optimalBet.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Kelly Payout</span>
+                <span className="font-bold text-green-600 dark:text-green-400">${kelly.potentialPayout.toFixed(2)}</span>
+              </div>
+            </>
+          )}
+
+          <div className="text-[9px] text-muted-foreground/70 pt-0.5">
+            {simulation.method === "analytic" ? "Analytic" : `${(simulation.simulations / 1000).toFixed(0)}K sims`} | {simulation.method}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean }) {
@@ -547,6 +730,9 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             <span className="text-xs text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span></span>
             <span className="text-sm font-bold text-green-600 dark:text-green-400">Payout: ${potentialPayout}</span>
           </div>
+          <div className="mt-2">
+            <MCSimulationPanel legs={legs} stake={stake} compact />
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
@@ -653,6 +839,8 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           <span className="text-muted-foreground">Potential Payout</span>
           <span className="font-bold text-green-600 dark:text-green-400">${potentialPayout}</span>
         </div>
+
+        <MCSimulationPanel legs={legs} stake={stake} />
 
         <Separator />
 

@@ -421,4 +421,83 @@ export function registerIntelligenceRoutes(app: Express): void {
       return res.status(500).json({ error: "Suggestions failed" });
     }
   });
+
+  app.post("/api/slip/simulate", async (req: Request, res: Response) => {
+    try {
+      const { legs, bankroll } = req.body;
+      if (!Array.isArray(legs) || legs.length === 0) {
+        return res.status(400).json({ error: "legs must be a non-empty array" });
+      }
+      const { runSimulation, getRiskMetrics } = await import("../monteCarloEngine");
+      const parlayLegs = legs.map((l: any) => ({
+        id: l.id || `leg-${Math.random().toString(36).slice(2, 8)}`,
+        gameId: l.gameId || "",
+        sport: l.sport || "NBA",
+        game: l.game || l.gameName || "",
+        market: l.market || "moneyline",
+        outcome: l.outcome || l.pick || "",
+        odds: l.odds || l.overOdds || -110,
+        decimalOdds: l.decimalOdds || (l.odds > 0 ? 1 + l.odds / 100 : 1 + 100 / Math.abs(l.odds || 110)),
+        probOverride: l.winProbability || l.probOverride || undefined,
+        bookmaker: l.bookmaker || "consensus",
+      }));
+
+      const simResult = await runSimulation(parlayLegs, 25000);
+
+      const riskMetrics = getRiskMetrics(parlayLegs, bankroll || 1000);
+
+      const combinedDecimalOdds = parlayLegs.reduce((acc: number, l: any) => acc * l.decimalOdds, 1);
+      const combinedAmericanOdds = combinedDecimalOdds >= 2
+        ? Math.round((combinedDecimalOdds - 1) * 100)
+        : Math.round(-100 / (combinedDecimalOdds - 1));
+
+      let riskRating: "low" | "medium" | "high" | "very_high" = "medium";
+      if (simResult.winProbability >= 0.40) riskRating = "low";
+      else if (simResult.winProbability >= 0.20) riskRating = "medium";
+      else if (simResult.winProbability >= 0.05) riskRating = "high";
+      else riskRating = "very_high";
+
+      const kellyStake = riskMetrics.kellyFraction;
+      const optimalBet = Math.round((bankroll || 1000) * Math.max(0, Math.min(kellyStake, 0.25)) * 100) / 100;
+      const potentialPayout = Math.round(optimalBet * combinedDecimalOdds * 100) / 100;
+
+      return res.json({
+        simulation: {
+          winProbability: Math.round(simResult.winProbability * 10000) / 100,
+          method: simResult.method,
+          simulations: simResult.sims,
+          convergenceScore: Math.round(simResult.convergenceScore * 1000) / 1000,
+          confidenceInterval: [
+            Math.round(simResult.confidenceInterval[0] * 10000) / 100,
+            Math.round(simResult.confidenceInterval[1] * 10000) / 100,
+          ],
+          standardError: Math.round(simResult.standardError * 100000) / 100000,
+        },
+        risk: {
+          rating: riskRating,
+          variance: Math.round(simResult.variance * 10000) / 10000,
+          valueAtRisk95: Math.round(riskMetrics.valueAtRisk95 * 100) / 100,
+          maxDrawdown: Math.round(riskMetrics.maxDrawdown * 100) / 100,
+          ruinProbability: Math.round(riskMetrics.ruinProbability * 10000) / 100,
+          sharpeRatio: Math.round(riskMetrics.sharpeRatio * 100) / 100,
+        },
+        kelly: {
+          fraction: Math.round(kellyStake * 10000) / 10000,
+          optimalBet,
+          potentialPayout,
+          expectedGrowthRate: Math.round(riskMetrics.expectedGrowthRate * 10000) / 10000,
+        },
+        ticket: {
+          legs: parlayLegs.length,
+          combinedOdds: combinedAmericanOdds,
+          combinedDecimalOdds: Math.round(combinedDecimalOdds * 100) / 100,
+          impliedProbability: Math.round((1 / combinedDecimalOdds) * 10000) / 100,
+        },
+        simulatedAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      console.error("[slip/simulate] Error:", err.message);
+      return res.status(500).json({ error: "Simulation failed" });
+    }
+  });
 }

@@ -1328,6 +1328,171 @@ export function stopMonteCarloEngine(): void {
   console.log("[MonteCarlo] Engine stopped");
 }
 
+export interface PlayerPropSimInput {
+  playerName: string;
+  market: string;
+  line: number;
+  seasonAvg: number;
+  sport: string;
+  recommendation: "over" | "under";
+  injuryStatus?: string | null;
+  gamesPlayed?: number;
+}
+
+export interface PlayerPropSimResult {
+  playerName: string;
+  market: string;
+  line: number;
+  seasonAvg: number;
+  simulations: number;
+  hitProbability: number;
+  missProbability: number;
+  projectedValue: number;
+  stdDev: number;
+  p10: number;
+  median: number;
+  p90: number;
+  edgeOverMarket: number;
+  confidence95: [number, number];
+  convergenceScore: number;
+  recommendation: "over" | "under";
+  mcConfidence: number;
+  riskLevel: "low" | "medium" | "high" | "very_high";
+  simulatedAt: number;
+}
+
+const PROP_SIMS = 5000;
+
+const PROP_VARIANCE_MAP: Record<string, Record<string, number>> = {
+  NBA: {
+    points: 6.5, rebounds: 2.8, assists: 2.5, steals: 0.8, blocks: 0.7,
+    "pts+reb+ast": 8.0, "pts+reb": 6.0, "pts+ast": 5.5, "reb+ast": 3.5,
+    turnovers: 1.2, "3-pointers": 1.3, default: 4.0,
+  },
+  NFL: {
+    "passing yards": 55, "rushing yards": 28, "receiving yards": 25,
+    completions: 4, "pass attempts": 5, "pass touchdowns": 0.8,
+    "rush attempts": 4, receptions: 2.5, default: 15,
+  },
+  MLB: {
+    "total bases": 1.5, hits: 0.8, runs: 0.7, rbi: 0.8,
+    strikeouts: 2.0, "hits allowed": 2.0, "earned runs": 1.5,
+    "pitcher strikeouts": 2.5, default: 1.5,
+  },
+  NHL: {
+    points: 0.8, goals: 0.6, assists: 0.7, shots: 2.5,
+    saves: 6.0, "goals against": 1.2, default: 1.5,
+  },
+  NCAAB: {
+    points: 5.5, rebounds: 2.5, assists: 2.0, default: 3.5,
+  },
+};
+
+function getPropStdDev(sport: string, market: string): number {
+  const sportMap = PROP_VARIANCE_MAP[sport] || PROP_VARIANCE_MAP["NBA"];
+  const mkt = market.toLowerCase();
+  for (const [key, val] of Object.entries(sportMap)) {
+    if (key === "default") continue;
+    if (mkt.includes(key)) return val;
+  }
+  return sportMap["default"] || 4.0;
+}
+
+export function simulatePlayerProp(input: PlayerPropSimInput): PlayerPropSimResult {
+  const { playerName, market, line, seasonAvg, sport, recommendation, injuryStatus } = input;
+
+  const baseStdDev = getPropStdDev(sport, market);
+  let adjustedMean = seasonAvg;
+  let adjustedStdDev = baseStdDev;
+
+  if (injuryStatus) {
+    const status = injuryStatus.toLowerCase();
+    if (status.includes("questionable") || status.includes("day-to-day")) {
+      adjustedMean *= 0.92;
+      adjustedStdDev *= 1.15;
+    } else if (status.includes("doubtful")) {
+      adjustedMean *= 0.80;
+      adjustedStdDev *= 1.30;
+    }
+  }
+
+  const rng = new MersenneTwister(Date.now() ^ Math.floor(Math.random() * 1e9));
+
+  const results = new Float64Array(PROP_SIMS);
+  let overCount = 0;
+  let underCount = 0;
+
+  for (let i = 0; i < PROP_SIMS; i++) {
+    let val = adjustedMean + adjustedStdDev * rng.nextGaussian();
+    val = Math.max(0, val);
+    results[i] = val;
+    if (val > line) overCount++;
+    else underCount++;
+  }
+
+  const sorted = Array.from(results).sort((a, b) => a - b);
+  const p10Idx = Math.floor(PROP_SIMS * 0.10);
+  const medIdx = Math.floor(PROP_SIMS * 0.50);
+  const p90Idx = Math.floor(PROP_SIMS * 0.90);
+
+  const mean = results.reduce((a, b) => a + b, 0) / PROP_SIMS;
+  let variance = 0;
+  for (let i = 0; i < PROP_SIMS; i++) {
+    variance += (results[i] - mean) ** 2;
+  }
+  variance /= PROP_SIMS;
+  const stdDev = Math.sqrt(variance);
+
+  const hitProb = recommendation === "over"
+    ? overCount / PROP_SIMS
+    : underCount / PROP_SIMS;
+
+  const impliedFromOdds = 0.5;
+  const edgeOverMarket = Math.round((hitProb - impliedFromOdds) * 1000) / 10;
+
+  const se = Math.sqrt(hitProb * (1 - hitProb) / PROP_SIMS);
+  const ci95: [number, number] = [
+    Math.max(0, hitProb - 1.96 * se),
+    Math.min(1, hitProb + 1.96 * se),
+  ];
+
+  const mcConfidence = Math.round(hitProb * 100);
+
+  let riskLevel: "low" | "medium" | "high" | "very_high" = "medium";
+  if (hitProb >= 0.65) riskLevel = "low";
+  else if (hitProb >= 0.55) riskLevel = "medium";
+  else if (hitProb >= 0.45) riskLevel = "high";
+  else riskLevel = "very_high";
+
+  const batch1 = results.slice(0, PROP_SIMS / 2);
+  const batch2 = results.slice(PROP_SIMS / 2);
+  const mean1 = batch1.reduce((a, b) => a + b, 0) / batch1.length;
+  const mean2 = batch2.reduce((a, b) => a + b, 0) / batch2.length;
+  const convergenceScore = Math.min(1, 1 - Math.abs(mean1 - mean2) / (adjustedStdDev || 1));
+
+  return {
+    playerName,
+    market,
+    line,
+    seasonAvg,
+    simulations: PROP_SIMS,
+    hitProbability: Math.round(hitProb * 10000) / 10000,
+    missProbability: Math.round((1 - hitProb) * 10000) / 10000,
+    projectedValue: Math.round(mean * 100) / 100,
+    stdDev: Math.round(stdDev * 100) / 100,
+    p10: Math.round(sorted[p10Idx] * 100) / 100,
+    median: Math.round(sorted[medIdx] * 100) / 100,
+    p90: Math.round(sorted[p90Idx] * 100) / 100,
+    edgeOverMarket,
+    confidence95: ci95,
+    convergenceScore: Math.round(convergenceScore * 1000) / 1000,
+    recommendation,
+    mcConfidence,
+    riskLevel,
+    simulatedAt: Date.now(),
+  };
+}
+
 export {
   buildCorrelationMatrix as mcBuildCorrelationMatrix,
   cholDecomp as mcCholDecomp,
