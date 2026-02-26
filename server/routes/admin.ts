@@ -3761,4 +3761,169 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/intelligence-health", requireAdmin, async (_req, res) => {
+    try {
+      const { getOrchestratorStatus } = await import("../continuousLearningOrchestrator");
+      const { getLearningStats } = await import("../learningEngine");
+      const { getHubStatus } = await import("../unifiedIntelligenceHub");
+      const { getSSEStatus } = await import("../sseManager");
+      const { getEngineStatus: getPrecomputedStatus } = await import("../precomputedPredictionsEngine");
+      const { getHistoricalLearningStatus } = await import("../historicalLearningEngine");
+      const { appGuardian } = await import("../appGuardianEngine");
+      const { analyticsAgent } = await import("../analyticsAgentEngine");
+      const { getRecentPropMovements, getSharpPropAlerts, getNotificationStats } = await import("../notificationEngine");
+
+      const orchStatus = getOrchestratorStatus();
+      const learningStats = await getLearningStats();
+      const hubStatus = getHubStatus();
+      const sseStatus = getSSEStatus();
+      const precomputed = getPrecomputedStatus();
+      const historicalStatus = getHistoricalLearningStatus();
+      const guardianStatus = appGuardian.getStatus();
+      const analyticsAgentStatus = analyticsAgent.getStatus();
+      const propMovements = getRecentPropMovements({ limit: 10 });
+      const sharpAlerts = getSharpPropAlerts();
+      const notifStats = getNotificationStats();
+
+      const outcomes = (global as any).__ticketOutcomes || [];
+      const totalPredictions = outcomes.length;
+      const wins = outcomes.filter((o: any) => o.actualOutcome === "win").length;
+      const hitRate = totalPredictions > 0 ? wins / totalPredictions : 0;
+
+      const sportGames: Record<string, number> = {};
+      const sportPicks: Record<string, number> = {};
+      for (const [sport, info] of Object.entries(hubStatus.sportStatus || {} as Record<string, any>)) {
+        sportGames[sport.toUpperCase()] = (info as any).games || 0;
+      }
+      const cacheStatus = precomputed.cacheStatus || {};
+      for (const [sport, info] of Object.entries(cacheStatus as Record<string, any>)) {
+        sportPicks[sport.toUpperCase()] = info.pickCount || 0;
+      }
+      const totalPicks = Object.values(sportPicks).reduce((a, b) => a + b, 0);
+      const totalGames = Object.values(sportGames).reduce((a, b) => a + b, 0);
+
+      const engines = [
+        {
+          name: "Intelligence Hub",
+          status: hubStatus.running ? "running" : "stopped",
+          detail: `${hubStatus.totalCycles} cycles, ${totalGames} games tracked`,
+          lastActivity: hubStatus.lastCycleTimeMs ? `${hubStatus.lastCycleTimeMs}ms ago` : null,
+        },
+        {
+          name: "Precomputed Engine",
+          status: precomputed.running ? "running" : "stopped",
+          detail: `${precomputed.totalRuns} runs, ${totalPicks} picks cached`,
+          lastActivity: precomputed.lastRunTime,
+        },
+        {
+          name: "Learning Orchestrator",
+          status: orchStatus.isRunning ? "running" : "stopped",
+          detail: `${orchStatus.totalCycles} cycles, ${orchStatus.totalSettled} settled, ${orchStatus.totalRetrained} retrained`,
+          lastActivity: orchStatus.lastSettlementRun,
+        },
+        {
+          name: "Learning Engine",
+          status: learningStats.isRunning ? "running" : "stopped",
+          detail: `${learningStats.cyclesCompleted} cycles, ${learningStats.modelWeights.length} weights`,
+          lastActivity: null,
+        },
+        {
+          name: "Historical Learning",
+          status: historicalStatus.isRunning ? "running" : "idle",
+          detail: `${historicalStatus.gamesProcessed} games, ${historicalStatus.trainingRecords} records`,
+          lastActivity: null,
+        },
+        {
+          name: "App Guardian",
+          status: guardianStatus.overallStatus || "unknown",
+          detail: `Health: ${guardianStatus.healthScore || 0}%, ${guardianStatus.services?.length || 0} services`,
+          lastActivity: null,
+        },
+        {
+          name: "Analytics Agent",
+          status: analyticsAgentStatus.running ? "running" : "stopped",
+          detail: `${analyticsAgentStatus.totalCycles || 0} cycles, ${analyticsAgentStatus.marketsAnalyzed || 0} markets`,
+          lastActivity: analyticsAgentStatus.lastCycleAt,
+        },
+        {
+          name: "SSE Broadcaster",
+          status: sseStatus.activeClients >= 0 ? "running" : "stopped",
+          detail: `${sseStatus.totalEventsSent} events, ${sseStatus.activeClients} clients`,
+          lastActivity: null,
+        },
+      ];
+
+      const runningCount = engines.filter(e => e.status === "running" || e.status === "healthy").length;
+
+      res.json({
+        summary: {
+          enginesRunning: runningCount,
+          enginesTotal: engines.length,
+          allHealthy: runningCount === engines.length,
+          hitRate: Math.round(hitRate * 1000) / 1000,
+          totalPredictions,
+          totalWins: wins,
+          totalPicks,
+          totalGames,
+          calibrationDrift: orchStatus.accuracyMetrics?.calibrationDrift || 0,
+          overallAccuracy: orchStatus.accuracyMetrics?.overall || 0,
+          driftStatus: (orchStatus.accuracyMetrics?.calibrationDrift || 0) < 0.05 ? "stable" : "drifting",
+        },
+        engines,
+        orchestrator: {
+          isRunning: orchStatus.isRunning,
+          totalCycles: orchStatus.totalCycles,
+          totalSettled: orchStatus.totalSettled,
+          totalRetrained: orchStatus.totalRetrained,
+          totalWeightSyncs: orchStatus.totalWeightSyncs,
+          lastSettlementRun: orchStatus.lastSettlementRun,
+          lastRetrainingRun: orchStatus.lastRetrainingRun,
+          lastWeightSyncRun: orchStatus.lastWeightSyncRun,
+          lastCalibrationCheck: orchStatus.lastCalibrationCheck,
+          errors: orchStatus.errors.slice(0, 5),
+          accuracyBySport: orchStatus.accuracyMetrics?.bySport || {},
+        },
+        learning: {
+          cyclesCompleted: learningStats.cyclesCompleted,
+          isRunning: learningStats.isRunning,
+          weightsCount: learningStats.modelWeights.length,
+          topWeights: learningStats.modelWeights.slice(0, 10).map((w: any) => ({
+            factor: w.factorName,
+            weight: w.weight,
+            accuracy: w.accuracy,
+          })),
+          recentLogs: learningStats.recentLogs.slice(0, 5).map((l: any) => ({
+            sport: l.sport,
+            outcome: l.outcome,
+            confidence: l.confidence,
+            createdAt: l.createdAt,
+          })),
+        },
+        dataPipeline: {
+          sportGames,
+          sportPicks,
+          hubCycles: hubStatus.totalCycles,
+          precomputedRuns: precomputed.totalRuns,
+          failedRuns: precomputed.failedRuns,
+        },
+        propMovements: {
+          totalTracked: propMovements.length,
+          sharpAlerts: sharpAlerts.length,
+          recentMovements: propMovements.slice(0, 5).map((m: any) => ({
+            player: m.player,
+            market: m.market,
+            lineShift: m.lineShift,
+            oddsShift: m.oddsShift,
+            velocity: m.velocity,
+            timestamp: m.timestamp,
+          })),
+        },
+        notifications: notifStats,
+      });
+    } catch (error: any) {
+      console.error("[IntelligenceHealth] Error:", error.message);
+      res.status(500).json({ error: "Failed to load intelligence health" });
+    }
+  });
+
 }

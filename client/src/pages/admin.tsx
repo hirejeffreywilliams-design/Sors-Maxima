@@ -264,6 +264,11 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/subscription-stats'],
   });
 
+  const { data: intelHealth, isLoading: intelLoading } = useQuery<any>({
+    queryKey: ['/api/admin/intelligence-health'],
+    refetchInterval: 15000,
+  });
+
 
   const visibleAlerts = useMemo(() => {
     if (!snapshot?.alerts) return [];
@@ -702,7 +707,7 @@ export default function AdminDashboard() {
                   <Activity className="h-3.5 w-3.5 mr-1" />Features
                 </TabsTrigger>
                 <TabsTrigger value="models" data-testid="tab-models">
-                  <Brain className="h-3.5 w-3.5 mr-1" />Models
+                  <Brain className="h-3.5 w-3.5 mr-1" />Intelligence
                 </TabsTrigger>
                 <TabsTrigger value="compliance" data-testid="tab-compliance">
                   <ShieldAlert className="h-3.5 w-3.5 mr-1" />Compliance
@@ -895,51 +900,326 @@ export default function AdminDashboard() {
             </TabsContent>
 
             <TabsContent value="models" className="space-y-4">
-              {snapshotLoading ? (
-                <Skeleton className="h-40 w-full" />
-              ) : snapshot?.modelHealth?.length > 0 ? (
-                <Card data-testid="card-models-table">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base">Model Performance</CardTitle>
-                    <CardDescription>Accuracy, calibration, and retrain status</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Model ID</TableHead>
-                            <TableHead className="text-right">Accuracy</TableHead>
-                            <TableHead className="text-right">Precision</TableHead>
-                            <TableHead className="text-right">Recall</TableHead>
-                            <TableHead className="text-right">F1</TableHead>
-                            <TableHead className="text-right">Calibration</TableHead>
-                            <TableHead className="text-right">Predictions</TableHead>
-                            <TableHead>Last Retrain</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {snapshot.modelHealth.map((model: any, i: number) => (
-                            <TableRow key={i} data-testid={`row-model-${i}`}>
-                              <TableCell className="font-medium font-mono text-xs">{model.modelId}</TableCell>
-                              <TableCell className="text-right font-mono">{(model.accuracy * 100).toFixed(1)}%</TableCell>
-                              <TableCell className="text-right font-mono">{(model.precision * 100).toFixed(1)}%</TableCell>
-                              <TableCell className="text-right font-mono">{(model.recall * 100).toFixed(1)}%</TableCell>
-                              <TableCell className="text-right font-mono">{(model.f1Score * 100).toFixed(1)}%</TableCell>
-                              <TableCell className="text-right font-mono">{model.calibration?.toFixed(3)}</TableCell>
-                              <TableCell className="text-right font-mono">{model.totalPredictions?.toLocaleString()}</TableCell>
-                              <TableCell className="text-xs text-muted-foreground">
-                                {new Date(model.lastRetrain).toLocaleDateString()}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  </CardContent>
-                </Card>
+              {intelLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-28 w-full" />
+                  ))}
+                </div>
+              ) : intelHealth ? (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="intel-summary-row">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                          <Cpu className="w-3 h-3" /> Engines
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-engines-running">
+                          {intelHealth.summary.enginesRunning}/{intelHealth.summary.enginesTotal}
+                        </div>
+                        <Badge
+                          variant={intelHealth.summary.allHealthy ? "default" : "destructive"}
+                          className={intelHealth.summary.allHealthy ? "bg-green-600 text-white mt-1" : "mt-1"}
+                          data-testid="badge-engine-health"
+                        >
+                          {intelHealth.summary.allHealthy ? "All Healthy" : "Needs Attention"}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                          <Target className="w-3 h-3" /> Hit Rate
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-intel-hit-rate">
+                          {(intelHealth.summary?.totalPredictions || 0) > 0 ? `${((intelHealth.summary?.hitRate ?? 0) * 100).toFixed(1)}%` : "N/A"}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{intelHealth.summary.totalPredictions} predictions, {intelHealth.summary.totalWins} wins</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                          <Zap className="w-3 h-3" /> Picks Cached
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-picks-cached">{intelHealth.summary.totalPicks}</div>
+                        <p className="text-xs text-muted-foreground">{intelHealth.summary.totalGames} games tracked</p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-2 text-muted-foreground text-xs mb-1">
+                          <Activity className="w-3 h-3" /> Drift
+                        </div>
+                        <div className="text-2xl font-bold" data-testid="stat-drift-status">
+                          {(intelHealth.summary.calibrationDrift ?? 0).toFixed(3)}
+                        </div>
+                        <Badge
+                          variant={intelHealth.summary.driftStatus === "stable" ? "default" : "destructive"}
+                          className={intelHealth.summary.driftStatus === "stable" ? "bg-green-600 text-white mt-1" : "mt-1"}
+                          data-testid="badge-drift-status"
+                        >
+                          {intelHealth.summary.driftStatus === "stable" ? "Stable" : "Drifting"}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card data-testid="card-engine-status">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Server className="h-4 w-4" /> Engine Status
+                      </CardTitle>
+                      <CardDescription>Real-time status of all intelligence and learning engines</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        {intelHealth.engines.map((eng: any, i: number) => {
+                          const isUp = eng.status === "running" || eng.status === "healthy";
+                          return (
+                            <div key={i} className="border rounded-lg p-3 space-y-1" data-testid={`engine-card-${i}`}>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium truncate">{eng.name}</span>
+                                <span className={`w-2 h-2 rounded-full ${isUp ? "bg-green-500" : "bg-red-500"}`} />
+                              </div>
+                              <p className="text-xs text-muted-foreground">{eng.detail}</p>
+                              {eng.lastActivity && (
+                                <p className="text-[10px] text-muted-foreground font-mono">
+                                  Last: {new Date(eng.lastActivity).toLocaleTimeString()}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <Card data-testid="card-orchestrator-detail">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <RefreshCw className="h-4 w-4" /> Learning Orchestrator
+                        </CardTitle>
+                        <CardDescription>Settlement, retraining, weight sync cycles</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Status</span>
+                            <Badge variant={intelHealth.orchestrator.isRunning ? "default" : "destructive"} className={intelHealth.orchestrator.isRunning ? "bg-green-600 text-white" : ""} data-testid="badge-orch-status">
+                              {intelHealth.orchestrator.isRunning ? "Running" : "Stopped"}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Cycles</span>
+                            <span className="font-mono" data-testid="value-orch-cycles">{intelHealth.orchestrator.totalCycles}</span>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Settled</span>
+                            <span className="font-mono" data-testid="value-orch-settled">{intelHealth.orchestrator.totalSettled}</span>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Retrained</span>
+                            <span className="font-mono" data-testid="value-orch-retrained">{intelHealth.orchestrator.totalRetrained}</span>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Weight Syncs</span>
+                            <span className="font-mono" data-testid="value-orch-syncs">{intelHealth.orchestrator.totalWeightSyncs}</span>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Last Settlement</span>
+                            <span className="font-mono text-xs" data-testid="value-orch-last-settle">
+                              {intelHealth.orchestrator.lastSettlementRun ? new Date(intelHealth.orchestrator.lastSettlementRun).toLocaleTimeString() : "Never"}
+                            </span>
+                          </div>
+                        </div>
+                        {Object.keys(intelHealth.orchestrator.accuracyBySport).length > 0 && (
+                          <div className="space-y-1 pt-2">
+                            <p className="text-xs font-medium text-muted-foreground">Accuracy by Sport</p>
+                            {Object.entries(intelHealth.orchestrator.accuracyBySport).map(([sport, data]: [string, any]) => (
+                              <div key={sport} className="flex items-center justify-between text-xs">
+                                <span className="uppercase font-medium">{sport}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={data.accuracy * 100} className="w-20 h-1.5" />
+                                  <span className="font-mono w-12 text-right">{(data.accuracy * 100).toFixed(1)}%</span>
+                                  <span className="text-muted-foreground">({data.correct}/{data.total})</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {intelHealth.orchestrator.errors.length > 0 && (
+                          <div className="pt-2 space-y-1">
+                            <p className="text-xs font-medium text-red-500">Recent Errors</p>
+                            {intelHealth.orchestrator.errors.map((err: any, i: number) => (
+                              <div key={i} className="text-[10px] text-red-400 font-mono truncate" data-testid={`orch-error-${i}`}>
+                                [{err.module}] {err.message}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card data-testid="card-learning-detail">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Brain className="h-4 w-4" /> Learning Engine
+                        </CardTitle>
+                        <CardDescription>Factor weights and recent training activity</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Status</span>
+                            <Badge variant={intelHealth.learning.isRunning ? "default" : "secondary"} className={intelHealth.learning.isRunning ? "bg-green-600 text-white" : ""} data-testid="badge-learning-status">
+                              {intelHealth.learning.isRunning ? "Running" : "Idle"}
+                            </Badge>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Cycles</span>
+                            <span className="font-mono" data-testid="value-learning-cycles">{intelHealth.learning.cyclesCompleted}</span>
+                          </div>
+                          <div className="flex justify-between border-b pb-1">
+                            <span className="text-muted-foreground">Weights</span>
+                            <span className="font-mono" data-testid="value-learning-weights">{intelHealth.learning.weightsCount}</span>
+                          </div>
+                        </div>
+                        {intelHealth.learning.topWeights.length > 0 && (
+                          <div className="space-y-1 pt-2">
+                            <p className="text-xs font-medium text-muted-foreground">Top Factor Weights</p>
+                            {intelHealth.learning.topWeights.map((w: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between text-xs">
+                                <span className="truncate max-w-[140px]">{w.factor.replace(/_/g, " ")}</span>
+                                <div className="flex items-center gap-2">
+                                  <Progress value={Math.min(w.weight * 50, 100)} className="w-16 h-1.5" />
+                                  <span className="font-mono w-10 text-right">{w.weight.toFixed(2)}</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {intelHealth.learning.recentLogs.length > 0 && (
+                          <div className="space-y-1 pt-2">
+                            <p className="text-xs font-medium text-muted-foreground">Recent Training Logs</p>
+                            {intelHealth.learning.recentLogs.map((log: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between text-[10px] text-muted-foreground font-mono" data-testid={`learning-log-${i}`}>
+                                <span>{log.sport}</span>
+                                <Badge variant={log.outcome === "win" ? "default" : "destructive"} className={`text-[9px] px-1.5 ${log.outcome === "win" ? "bg-green-600 text-white" : ""}`}>
+                                  {log.outcome}
+                                </Badge>
+                                <span>{(log.confidence * 100).toFixed(0)}%</span>
+                                <span>{new Date(log.createdAt).toLocaleTimeString()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <Card data-testid="card-data-pipeline">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Database className="h-4 w-4" /> Data Pipeline
+                        </CardTitle>
+                        <CardDescription>Games tracked and picks generated by sport</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs text-muted-foreground border-b pb-1">
+                            <span>Hub Cycles: <span className="font-mono font-medium text-foreground">{intelHealth.dataPipeline.hubCycles}</span></span>
+                            <span>Engine Runs: <span className="font-mono font-medium text-foreground">{intelHealth.dataPipeline.precomputedRuns}</span></span>
+                            {intelHealth.dataPipeline.failedRuns > 0 && (
+                              <span className="text-red-500">Failed: {intelHealth.dataPipeline.failedRuns}</span>
+                            )}
+                          </div>
+                          {Object.keys(intelHealth.dataPipeline.sportGames).length > 0 ? (
+                            <div className="space-y-1">
+                              {Object.keys(intelHealth.dataPipeline.sportGames).map((sport) => (
+                                <div key={sport} className="flex items-center justify-between text-xs" data-testid={`pipeline-sport-${sport}`}>
+                                  <span className="font-medium uppercase">{sport}</span>
+                                  <div className="flex gap-4">
+                                    <span className="text-muted-foreground">{intelHealth.dataPipeline.sportGames[sport]} games</span>
+                                    <span className="font-mono">{intelHealth.dataPipeline.sportPicks[sport] || 0} picks</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground text-center py-2">No games currently tracked</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card data-testid="card-prop-movements">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4" /> Prop Line Movements
+                        </CardTitle>
+                        <CardDescription>Sharp money detection and line movement tracking</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs text-muted-foreground border-b pb-1">
+                            <span>Tracked: <span className="font-mono font-medium text-foreground">{intelHealth.propMovements.totalTracked}</span></span>
+                            <span className="text-amber-500 font-medium">Sharp Alerts: {intelHealth.propMovements.sharpAlerts}</span>
+                          </div>
+                          {intelHealth.propMovements.recentMovements.length > 0 ? (
+                            <div className="space-y-1">
+                              {intelHealth.propMovements.recentMovements.map((m: any, i: number) => (
+                                <div key={i} className="flex items-center justify-between text-[10px] font-mono" data-testid={`prop-movement-${i}`}>
+                                  <span className="truncate max-w-[100px]">{m.player}</span>
+                                  <span className="text-muted-foreground">{m.market}</span>
+                                  <span className={m.velocity === "steam" || m.velocity === "fast" ? "text-red-500 font-bold" : ""}>
+                                    {m.velocity}
+                                  </span>
+                                  <span>{m.lineShift > 0 ? "+" : ""}{m.lineShift.toFixed(1)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-xs text-muted-foreground text-center py-2">No recent prop movements</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <Card data-testid="card-intel-quick-links">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">Deep Dive</CardTitle>
+                      <CardDescription>Detailed intelligence sub-dashboards</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <Link href="/admin/model-performance">
+                          <Button variant="outline" className="w-full justify-start gap-2" data-testid="link-deep-model-perf">
+                            <Target className="h-4 w-4" /> Model Performance
+                            <ChevronRight className="h-3 w-3 ml-auto" />
+                          </Button>
+                        </Link>
+                        <Link href="/admin/orchestration">
+                          <Button variant="outline" className="w-full justify-start gap-2" data-testid="link-deep-orchestration">
+                            <Zap className="h-4 w-4" /> Orchestration Console
+                            <ChevronRight className="h-3 w-3 ml-auto" />
+                          </Button>
+                        </Link>
+                        <Link href="/admin/training">
+                          <Button variant="outline" className="w-full justify-start gap-2" data-testid="link-deep-training">
+                            <FlaskConical className="h-4 w-4" /> Training Center
+                            <ChevronRight className="h-3 w-3 ml-auto" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
               ) : (
-                <div className="text-center py-12 text-muted-foreground">No model health data available</div>
+                <div className="text-center py-12 text-muted-foreground">No intelligence data available</div>
               )}
             </TabsContent>
 
