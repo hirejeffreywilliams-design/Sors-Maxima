@@ -1,5 +1,6 @@
+import { useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare } from "lucide-react";
+import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
@@ -10,9 +11,24 @@ import { CashoutAdvisor } from "@/components/live/cashout-advisor";
 import { LiveChat } from "@/components/live/live-chat";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/use-seo";
+import { useSSE, type SSEEvent } from "@/hooks/use-sse";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Live() {
   useSEO({ title: "Live Betting", description: "Real-time live betting tools and analysis" });
+
+  const handleSSEEvent = useCallback((event: SSEEvent) => {
+    if (event.type === "live-scores" || event.type === "intelligence-update") {
+      queryClient.invalidateQueries({ queryKey: ["/api/live/momentum"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/market-snapshot"] });
+    }
+    if (event.type === "edge-alerts") {
+      queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+    }
+  }, []);
+
+  const sse = useSSE({ enabled: true, onEvent: handleSSEEvent });
+
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -26,6 +42,24 @@ export default function Live() {
               </Badge>
             </h1>
             <p className="text-sm text-muted-foreground">Real-time game tracking, hedging tools, and AI assistance</p>
+          </div>
+          <div className="flex items-center gap-2" data-testid="sse-live-status">
+            {sse.connected ? (
+              <Badge variant="outline" className="gap-1 text-xs bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400">
+                <Wifi className="w-3 h-3" />
+                SSE Connected
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="gap-1 text-xs bg-yellow-500/10 border-yellow-500/30 text-yellow-600 dark:text-yellow-400">
+                <WifiOff className="w-3 h-3" />
+                Reconnecting...
+              </Badge>
+            )}
+            {sse.lastUpdate && (
+              <span className="text-xs text-muted-foreground" data-testid="text-live-last-update">
+                Updated {new Date(sse.lastUpdate).toLocaleTimeString()}
+              </span>
+            )}
           </div>
         </header>
 
