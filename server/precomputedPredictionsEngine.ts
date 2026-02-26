@@ -6,6 +6,7 @@ import { getAllInjuries } from "./espn-injury-provider";
 import { getGameSituationalFactors, type SituationalFactors } from "./situationalEngine";
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import { isExclusivePick } from "./pickProtectionEngine";
+import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
 import type { Sport } from "@shared/schema";
 
 export interface PickReleaseSchedule {
@@ -409,6 +410,18 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
   const sportInjuries = allInjuries[sport] || allInjuries[sport.toLowerCase()] || [];
 
+  let bdlTeams: BDLEnrichedTeamData[] = [];
+  if (sport === "NBA" && isBDLAvailable()) {
+    try {
+      bdlTeams = await getEnrichedTeamData();
+      if (bdlTeams.length > 0) {
+        console.log(`[PrecomputedEngine] BallDontLie: loaded ${bdlTeams.length} NBA team enrichments`);
+      }
+    } catch (err) {
+      console.log(`[PrecomputedEngine] BallDontLie data unavailable: ${err}`);
+    }
+  }
+
   for (const game of upcomingGames.slice(0, 15)) {
     const homeName = game.homeTeam?.displayName || "Home";
     const awayName = game.awayTeam?.displayName || "Away";
@@ -490,8 +503,40 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       return { avgFor: Math.round(avgScore * offFactor * 10) / 10, avgAgainst: Math.round(avgScore * defFactor * 10) / 10 };
     };
 
-    const homeLastNWinPct = homeGames >= 10 ? homeWinPct + (homeWinPct > 0.5 ? 0.05 : -0.05) : homeWinPct;
-    const awayLastNWinPct = awayGames >= 10 ? awayWinPct + (awayWinPct > 0.5 ? 0.05 : -0.05) : awayWinPct;
+    let homeLastNWinPct = homeGames >= 10 ? homeWinPct + (homeWinPct > 0.5 ? 0.05 : -0.05) : homeWinPct;
+    let awayLastNWinPct = awayGames >= 10 ? awayWinPct + (awayWinPct > 0.5 ? 0.05 : -0.05) : awayWinPct;
+
+    const homeBDL = bdlTeams.find(t =>
+      t.teamName.toLowerCase().includes(homeName.toLowerCase().split(" ").pop()!) ||
+      t.abbreviation.toLowerCase() === homeAbbr.toLowerCase()
+    );
+    const awayBDL = bdlTeams.find(t =>
+      t.teamName.toLowerCase().includes(awayName.toLowerCase().split(" ").pop()!) ||
+      t.abbreviation.toLowerCase() === awayAbbr.toLowerCase()
+    );
+
+    let homeStreakData = deriveStreak(homeWinPct, homeGames);
+    let awayStreakData = deriveStreak(awayWinPct, awayGames);
+    let homeScoringData = deriveScoring(homeWinPct);
+    let awayScoringData = deriveScoring(awayWinPct);
+    let homeHomeRec = { wins: Math.round(homeRec.wins * 0.55), losses: Math.round(homeRec.losses * 0.45) };
+    let awayAwayRec = { wins: Math.round(awayRec.wins * 0.45), losses: Math.round(awayRec.losses * 0.55) };
+
+    if (homeBDL) {
+      homeStreakData = { type: homeBDL.streakType === "win" ? "W" : "L", length: homeBDL.streak };
+      homeScoringData = { avgFor: homeBDL.avgPts, avgAgainst: homeBDL.avgPts > 0 ? Math.round((homeBDL.avgPts / ((homeBDL.offRating || 110) / (homeBDL.defRating || 110))) * 10) / 10 : deriveScoring(homeWinPct).avgAgainst };
+      homeHomeRec = { wins: homeBDL.homeWins, losses: homeBDL.homeLosses };
+      homeLastNWinPct = homeBDL.last10Wins / Math.max(1, homeBDL.last10Wins + homeBDL.last10Losses);
+    }
+    if (awayBDL) {
+      awayStreakData = { type: awayBDL.streakType === "win" ? "W" : "L", length: awayBDL.streak };
+      awayScoringData = { avgFor: awayBDL.avgPts, avgAgainst: awayBDL.avgPts > 0 ? Math.round((awayBDL.avgPts / ((awayBDL.offRating || 110) / (awayBDL.defRating || 110))) * 10) / 10 : deriveScoring(awayWinPct).avgAgainst };
+      awayAwayRec = { wins: awayBDL.awayWins, losses: awayBDL.awayLosses };
+      awayLastNWinPct = awayBDL.last10Wins / Math.max(1, awayBDL.last10Wins + awayBDL.last10Losses);
+    }
+
+    const sameConference = homeBDL && awayBDL && homeBDL.abbreviation && awayBDL.abbreviation;
+    const sameDivision = false;
 
     const marketCtx: MarketContext = {
       winPct: { home: homeWinPct, away: awayWinPct },
@@ -508,15 +553,16 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       homeB2B: sitFactors?.homeB2B,
       awayB2B: sitFactors?.awayB2B,
       situationalSpot: sitFactors ? { spotType: sitFactors.spotType, spotDescription: sitFactors.spotDescription } : undefined,
-      homeStreak: deriveStreak(homeWinPct, homeGames),
-      awayStreak: deriveStreak(awayWinPct, awayGames),
-      homeScoring: deriveScoring(homeWinPct),
-      awayScoring: deriveScoring(awayWinPct),
-      homeHomeRecord: { wins: Math.round(homeRec.wins * 0.55), losses: Math.round(homeRec.losses * 0.45) },
-      awayAwayRecord: { wins: Math.round(awayRec.wins * 0.45), losses: Math.round(awayRec.losses * 0.55) },
+      homeStreak: homeStreakData,
+      awayStreak: awayStreakData,
+      homeScoring: homeScoringData,
+      awayScoring: awayScoringData,
+      homeHomeRecord: homeHomeRec,
+      awayAwayRecord: awayAwayRec,
       homeLastNWinPct: Math.max(0, Math.min(1, homeLastNWinPct)),
       awayLastNWinPct: Math.max(0, Math.min(1, awayLastNWinPct)),
       rosterChanges: { home: homeInjuryCount, away: awayInjuryCount },
+      isDivision: sameDivision,
     };
 
     if (mcSim) {
