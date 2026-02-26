@@ -1417,21 +1417,27 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
   const events = await fetchEventIds(sport);
   const now = Date.now();
   const sixHoursAgo = now - 6 * 60 * 60 * 1000;
-  const relevantEvents = events
-    .filter(e => {
-      const eTime = new Date(e.commence_time).getTime();
-      return eTime > sixHoursAgo;
-    })
-    .sort((a, b) => {
-      const aTime = new Date(a.commence_time).getTime();
-      const bTime = new Date(b.commence_time).getTime();
-      const aIsLive = aTime <= now;
-      const bIsLive = bTime <= now;
-      if (aIsLive && !bIsLive) return 1;
-      if (!aIsLive && bIsLive) return -1;
-      return aTime - bTime;
-    })
-    .slice(0, maxEvents);
+
+  const upcoming: typeof events = [];
+  const live: typeof events = [];
+  for (const e of events) {
+    const eTime = new Date(e.commence_time).getTime();
+    if (eTime <= sixHoursAgo) continue;
+    if (eTime <= now) {
+      live.push(e);
+    } else {
+      upcoming.push(e);
+    }
+  }
+  upcoming.sort((a, b) => new Date(a.commence_time).getTime() - new Date(b.commence_time).getTime());
+  live.sort((a, b) => new Date(b.commence_time).getTime() - new Date(a.commence_time).getTime());
+
+  const upcomingSlots = Math.min(upcoming.length, maxEvents);
+  const liveSlots = Math.min(live.length, Math.max(2, maxEvents - upcomingSlots));
+  const relevantEvents = [
+    ...upcoming.slice(0, upcomingSlots),
+    ...live.slice(0, liveSlots),
+  ];
 
   if (relevantEvents.length === 0) return [];
 
@@ -1523,8 +1529,6 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
     }
   }
 
-  playerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
-
   const propsByGame = new Map<string, RealPlayerProp[]>();
   for (const prop of allProps) {
     const gameKey = `${prop.homeTeam}|${prop.awayTeam}`.toLowerCase();
@@ -1535,7 +1539,21 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
     perGamePropsCache.set(gameKey, { data: gameProps, timestamp: Date.now() });
   }
 
-  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${relevantEvents.length} events (${propsByGame.size} games cached)`);
+  let cachedInjected = 0;
+  for (const event of live) {
+    const gameKey = `${event.home_team}|${event.away_team}`.toLowerCase();
+    if (!propsByGame.has(gameKey)) {
+      const cached = perGamePropsCache.get(gameKey);
+      if (cached && (Date.now() - cached.timestamp) < PER_GAME_PROPS_TTL && cached.data.length > 0) {
+        allProps.push(...cached.data);
+        cachedInjected += cached.data.length;
+      }
+    }
+  }
+
+  playerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
+
+  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${relevantEvents.length} events (${propsByGame.size} games cached, ${cachedInjected} injected from cache for live games)`);
   return allProps;
 }
 

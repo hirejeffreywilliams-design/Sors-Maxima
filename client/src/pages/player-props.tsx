@@ -439,7 +439,9 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
         <CardContent className="p-3 sm:p-4 space-y-4">
           {playersWithProps.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
-              No player props available yet. Props typically post 1-2 days before game time.
+              {isLive
+                ? "Props pulled by bookmakers at tipoff. Pre-game lines may reappear if cached."
+                : "No player props available yet. Props typically post 1-2 days before game time."}
             </p>
           ) : (
             <>

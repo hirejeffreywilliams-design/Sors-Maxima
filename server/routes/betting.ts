@@ -2085,19 +2085,39 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
 
         if (matchedProps.length === 0 && sport === "NBA") {
           try {
-            const { isBDLAvailable, getTodaysGames, getPlayerProps } = await import("../balldontlie-provider");
+            const { isBDLAvailable, getTodaysGames, getPlayerProps, getPlayerNames } = await import("../balldontlie-provider");
             if (isBDLAvailable()) {
               const bdlGames = await getTodaysGames();
               const homeAbbr = (game.homeTeam.abbreviation || "").toUpperCase();
               const awayAbbr = (game.awayTeam.abbreviation || "").toUpperCase();
+
+              const ABBR_MAP: Record<string, string[]> = {
+                GS: ["GSW"], GSW: ["GS"],
+                NO: ["NOP"], NOP: ["NO"],
+                NY: ["NYK"], NYK: ["NY"],
+                SA: ["SAS"], SAS: ["SA"],
+                UTAH: ["UTA"], UTA: ["UTAH"],
+                WSH: ["WAS"], WAS: ["WSH"],
+                PHX: ["PHO"], PHO: ["PHX"],
+                BKN: ["BRK"], BRK: ["BKN"],
+              };
+              const matchAbbr = (espn: string, bdl: string) => {
+                if (espn === bdl) return true;
+                return (ABBR_MAP[espn] || []).includes(bdl);
+              };
+
               const bdlMatch = bdlGames.find(bg =>
-                (bg.home_team.abbreviation === homeAbbr && bg.visitor_team.abbreviation === awayAbbr) ||
-                (bg.home_team.abbreviation === awayAbbr && bg.visitor_team.abbreviation === homeAbbr)
+                (matchAbbr(homeAbbr, bg.home_team.abbreviation) && matchAbbr(awayAbbr, bg.visitor_team.abbreviation)) ||
+                (matchAbbr(homeAbbr, bg.visitor_team.abbreviation) && matchAbbr(awayAbbr, bg.home_team.abbreviation))
               );
               if (bdlMatch) {
                 const bdlProps = await getPlayerProps(bdlMatch.id);
                 if (bdlProps.length > 0) {
                   const { MARKET_LABELS } = await import("../odds-provider");
+
+                  const playerIds = [...new Set(bdlProps.map(bp => bp.player_id))];
+                  const nameMap = await getPlayerNames(playerIds);
+
                   for (const bp of bdlProps) {
                     const marketKey = bp.prop_type || bp.market?.type || "";
                     const lineVal = parseFloat(bp.line_value) || 0;
@@ -2105,13 +2125,14 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
                     const underOdds = bp.market?.under_odds || -110;
                     const overDec = overOdds > 0 ? 1 + overOdds / 100 : 1 + 100 / Math.abs(overOdds);
                     const underDec = underOdds > 0 ? 1 + underOdds / 100 : 1 + 100 / Math.abs(underOdds);
+                    const resolvedName = nameMap.get(bp.player_id) || `Player #${bp.player_id}`;
                     matchedProps.push({
                       eventId: String(bdlMatch.id),
                       sportKey: "NBA",
                       homeTeam: bdlMatch.home_team.full_name,
                       awayTeam: bdlMatch.visitor_team.full_name,
                       commenceTime: bdlMatch.date,
-                      playerName: `Player #${bp.player_id}`,
+                      playerName: resolvedName,
                       market: marketKey,
                       marketLabel: MARKET_LABELS[marketKey] || marketKey.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
                       line: lineVal,

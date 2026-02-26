@@ -327,6 +327,43 @@ export async function getPlayerProps(gameId: number): Promise<BDLPlayerProp[]> {
   return allProps;
 }
 
+const playerNameCache = new Map<number, string>();
+const PLAYER_NAME_CACHE_TTL = 24 * 60 * 60 * 1000;
+let playerNameCacheTime = 0;
+
+export async function getPlayerNames(playerIds: number[]): Promise<Map<number, string>> {
+  const result = new Map<number, string>();
+  const uncached: number[] = [];
+  const now = Date.now();
+
+  if (now - playerNameCacheTime > PLAYER_NAME_CACHE_TTL) {
+    playerNameCache.clear();
+    playerNameCacheTime = now;
+  }
+
+  for (const id of playerIds) {
+    if (playerNameCache.has(id)) {
+      result.set(id, playerNameCache.get(id)!);
+    } else {
+      uncached.push(id);
+    }
+  }
+
+  const uniqueUncached = [...new Set(uncached)];
+  for (const id of uniqueUncached.slice(0, 25)) {
+    try {
+      const player = await fetchBDL<{ id: number; first_name: string; last_name: string }>(`/nba/v1/players/${id}`);
+      if (player?.first_name && player?.last_name) {
+        const name = `${player.first_name} ${player.last_name}`;
+        playerNameCache.set(id, name);
+        result.set(id, name);
+      }
+    } catch {}
+  }
+
+  return result;
+}
+
 export async function getTeamStandings(season?: number): Promise<BDLStanding[]> {
   const currentSeason = season || new Date().getFullYear() - (new Date().getMonth() < 9 ? 1 : 0);
   const result = await fetchBDL<{ data: BDLStanding[] }>(`/v1/standings`, {
