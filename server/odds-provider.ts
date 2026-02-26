@@ -38,6 +38,186 @@ interface OddsApiGame {
 const oddsApiCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
 const ODDS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for real-time accuracy
 
+interface ApiPlayerProp {
+  playerName: string;
+  market: string;
+  line: number;
+  bookmakers: { bookmaker: string; overOdds: number; underOdds: number; line: number }[];
+  bestOver: { bookmaker: string; odds: number };
+  bestUnder: { bookmaker: string; odds: number };
+  consensusLine: number;
+}
+
+const gamePlayerPropsCache = new Map<string, { data: Map<string, ApiPlayerProp[]>; timestamp: number }>();
+const GAME_PROPS_CACHE_TTL = 5 * 60 * 1000;
+
+const PROP_MARKETS_BY_SPORT: Record<string, string[]> = {
+  NBA: ["player_points", "player_rebounds", "player_assists", "player_threes", "player_points_rebounds_assists"],
+  NFL: ["player_pass_yds", "player_pass_tds", "player_rush_yds", "player_reception_yds", "player_receptions", "player_anytime_td"],
+  MLB: ["batter_hits", "batter_rbis", "batter_runs_scored", "batter_total_bases", "pitcher_strikeouts", "pitcher_hits_allowed"],
+  NHL: ["player_goals", "player_assists", "player_shots_on_goal", "goalie_saves"],
+  NCAAB: ["player_points", "player_rebounds", "player_assists"],
+  NCAAF: ["player_pass_yds", "player_rush_yds", "player_reception_yds"],
+};
+
+const API_MARKET_TO_CATEGORY: Record<string, string> = {
+  player_points: "points", player_rebounds: "rebounds", player_assists: "assists",
+  player_threes: "threes", player_points_rebounds_assists: "pts_rebs_asts",
+  player_pass_yds: "passing_yards", player_pass_tds: "passing_tds",
+  player_rush_yds: "rushing_yards", player_reception_yds: "receiving_yards",
+  player_receptions: "receptions", player_anytime_td: "anytime_td",
+  batter_hits: "hits", batter_rbis: "rbis", batter_runs_scored: "runs",
+  batter_total_bases: "total_bases", pitcher_strikeouts: "strikeouts_pitcher",
+  pitcher_hits_allowed: "hits_allowed", player_goals: "goals",
+  player_shots_on_goal: "shots", goalie_saves: "saves",
+};
+
+async function fetchPlayerPropsFromApi(sport: string, eventIds: { id: string; home: string; away: string }[]): Promise<Map<string, ApiPlayerProp[]>> {
+  const apiKey = getOddsApiKey();
+  if (!apiKey) return new Map();
+
+  const sportKey = mapSportToOddsApiKey(sport);
+  if (!sportKey) return new Map();
+
+  const cacheKey = `game-props-${sport}`;
+  const cached = gamePlayerPropsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp) < GAME_PROPS_CACHE_TTL) {
+    return cached.data;
+  }
+
+  const markets = PROP_MARKETS_BY_SPORT[sport.toUpperCase()];
+  if (!markets || markets.length === 0) return new Map();
+
+  const allProps = new Map<string, ApiPlayerProp[]>();
+  const marketsParam = markets.join(",");
+
+  const eventsToFetch = eventIds.slice(0, 8);
+
+  for (const event of eventsToFetch) {
+    try {
+      const url = `${THE_ODDS_API_BASE}/${sportKey}/events/${event.id}/odds?apiKey=${apiKey}&regions=us&markets=${marketsParam}&oddsFormat=american`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        if (response.status === 422) continue;
+        logWarn(`[Props API] Failed for event ${event.id}: ${response.status}`);
+        continue;
+      }
+
+      const data = await response.json();
+      if (!data.bookmakers || data.bookmakers.length === 0) continue;
+
+      const propsByPlayer = new Map<string, Map<string, ApiPlayerProp>>();
+
+      for (const bookmaker of data.bookmakers) {
+        for (const market of bookmaker.markets) {
+          const category = API_MARKET_TO_CATEGORY[market.key];
+          if (!category) continue;
+
+          for (let i = 0; i < market.outcomes.length; i += 2) {
+            const outcome = market.outcomes[i];
+            if (!outcome?.description) continue;
+
+            const playerName = outcome.description;
+            const overOutcome = market.outcomes.find((o: any) => o.description === playerName && o.name === "Over");
+            const underOutcome = market.outcomes.find((o: any) => o.description === playerName && o.name === "Under");
+            if (!overOutcome || !underOutcome) continue;
+
+            const key = `${playerName}-${category}`;
+            if (!propsByPlayer.has(playerName)) propsByPlayer.set(playerName, new Map());
+            const playerMap = propsByPlayer.get(playerName)!;
+
+            if (!playerMap.has(category)) {
+              playerMap.set(category, {
+                playerName,
+                market: category,
+                line: overOutcome.point ?? 0,
+                bookmakers: [],
+                bestOver: { bookmaker: bookmaker.title, odds: overOutcome.price },
+                bestUnder: { bookmaker: bookmaker.title, odds: underOutcome.price },
+                consensusLine: overOutcome.point ?? 0,
+              });
+            }
+
+            const prop = playerMap.get(category)!;
+            prop.bookmakers.push({
+              bookmaker: bookmaker.title,
+              overOdds: overOutcome.price,
+              underOdds: underOutcome.price,
+              line: overOutcome.point ?? prop.line,
+            });
+
+            if (overOutcome.price > prop.bestOver.odds) {
+              prop.bestOver = { bookmaker: bookmaker.title, odds: overOutcome.price };
+            }
+            if (underOutcome.price > prop.bestUnder.odds) {
+              prop.bestUnder = { bookmaker: bookmaker.title, odds: underOutcome.price };
+            }
+
+            const allLines = prop.bookmakers.map(b => b.line);
+            prop.consensusLine = allLines.reduce((a, b) => a + b, 0) / allLines.length;
+          }
+        }
+      }
+
+      const gameKey = `${event.home} vs ${event.away}`;
+      const gameProps: ApiPlayerProp[] = [];
+      for (const [, playerMap] of propsByPlayer) {
+        for (const [, prop] of playerMap) {
+          gameProps.push(prop);
+        }
+      }
+      if (gameProps.length > 0) {
+        allProps.set(gameKey, gameProps);
+        logInfo(`[Props API] Loaded ${gameProps.length} real player props for ${gameKey} from ${data.bookmakers.length} bookmakers`);
+      }
+    } catch (err) {
+      logWarn(`[Props API] Error fetching props for event ${event.id}: ${err}`);
+    }
+  }
+
+  if (allProps.size > 0) {
+    gamePlayerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
+  }
+
+  return allProps;
+}
+
+function mergeApiPropsIntoGenerated(
+  generatedProps: PlayerProp[],
+  apiProps: ApiPlayerProp[],
+  team: string
+): PlayerProp[] {
+  const merged = [...generatedProps];
+
+  for (const apiProp of apiProps) {
+    const existing = merged.find(
+      p => p.playerName.toLowerCase() === apiProp.playerName.toLowerCase() && p.category === apiProp.market
+    );
+
+    if (existing) {
+      existing.line = apiProp.consensusLine;
+      if (apiProp.bookmakers.length > 0) {
+        const best = apiProp.bookmakers[0];
+        existing.overOdds = { americanOdds: apiProp.bestOver.odds, decimalOdds: americanToDecimal(apiProp.bestOver.odds) };
+        existing.underOdds = { americanOdds: apiProp.bestUnder.odds, decimalOdds: americanToDecimal(apiProp.bestUnder.odds) };
+      }
+    } else {
+      merged.push({
+        playerId: `api-${apiProp.playerName.replace(/\s+/g, "-").toLowerCase()}`,
+        playerName: apiProp.playerName,
+        team,
+        position: "",
+        category: apiProp.market,
+        line: apiProp.consensusLine,
+        overOdds: { americanOdds: apiProp.bestOver.odds, decimalOdds: americanToDecimal(apiProp.bestOver.odds) },
+        underOdds: { americanOdds: apiProp.bestUnder.odds, decimalOdds: americanToDecimal(apiProp.bestUnder.odds) },
+      });
+    }
+  }
+
+  return merged;
+}
+
 function mapSportToOddsApiKey(sport: string): string | null {
   const mapping: Record<string, string> = {
     NBA: "basketball_nba",
@@ -776,7 +956,37 @@ export async function generateEventsFromESPN(sport: Sport): Promise<SportEvent[]
     }
 
     console.log(`[Odds] Building events from ${upcomingGames.length} real ${sport} games`);
-    return Promise.all(upcomingGames.map(game => espnGameToEvent(game, sport)));
+
+    const oddsApiGames = await fetchOddsApi(sport);
+    let realPropsByGame = new Map<string, ApiPlayerProp[]>();
+    if (oddsApiGames.length > 0) {
+      const eventIds = oddsApiGames.map(g => ({ id: g.id, home: g.home_team, away: g.away_team }));
+      try {
+        realPropsByGame = await fetchPlayerPropsFromApi(sport, eventIds);
+      } catch (err) {
+        logWarn(`[Odds] Player prop fetch failed for ${sport}: ${err}`);
+      }
+    }
+
+    const events = await Promise.all(upcomingGames.map(async (game) => {
+      const event = await espnGameToEvent(game, sport);
+
+      for (const [gameKey, apiProps] of realPropsByGame) {
+        const homeMatch = gameKey.toLowerCase().includes(game.homeTeam.displayName.split(" ").pop()!.toLowerCase());
+        const awayMatch = gameKey.toLowerCase().includes(game.awayTeam.displayName.split(" ").pop()!.toLowerCase());
+        if (homeMatch || awayMatch) {
+          if (event.playerProps) {
+            event.playerProps = mergeApiPropsIntoGenerated(event.playerProps, apiProps, game.homeTeam.displayName);
+            logInfo(`[Odds] Merged ${apiProps.length} real player props into ${game.homeTeam.displayName} vs ${game.awayTeam.displayName}`);
+          }
+          break;
+        }
+      }
+
+      return event;
+    }));
+
+    return events;
   } catch (error) {
     console.error(`[Odds] ESPN fetch failed for ${sport}, using fallback:`, error);
     return generateFallbackEvents(sport);

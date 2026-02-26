@@ -58,10 +58,15 @@ const LEARNING_FACTORS = [
 
 const LEARNING_RATE = 0.05;
 const MIN_PREDICTIONS_FOR_UPDATE = 10;
+const MOMENTUM_DECAY = 0.9;
+const WEIGHT_DECAY_RATE = 0.001;
+const CONFIDENCE_WEIGHT_POWER = 1.5;
 
 let learningInterval: NodeJS.Timeout | null = null;
 let cycleCount = 0;
 let isLearning = false;
+
+const momentumState: Record<string, { velocity: number; direction: number; consecutiveGains: number }> = {};
 
 export async function initializeModelWeights(): Promise<void> {
   try {
@@ -157,21 +162,24 @@ async function analyzeAndAdjustWeights(): Promise<{
     factorPerformance[factor] = { wins: 0, losses: 0, confidenceSum: 0 };
   }
 
-  for (const pred of settledPredictions) {
+  for (let i = 0; i < settledPredictions.length; i++) {
+    const pred = settledPredictions[i];
     const isWin = pred.actualResult === "won";
     const confidence = pred.confidenceScore;
-    
+    const recencyWeight = Math.pow(0.995, i);
+    const confidenceWeight = Math.pow(confidence / 100, CONFIDENCE_WEIGHT_POWER);
+    const combinedWeight = recencyWeight * confidenceWeight * confidence;
+
     if (isWin) totalWins++;
     else if (pred.actualResult === "lost") totalLosses++;
 
     for (const factor of LEARNING_FACTORS) {
-      const factorContribution = confidence;
       if (isWin) {
-        factorPerformance[factor].wins += factorContribution;
+        factorPerformance[factor].wins += combinedWeight;
       } else if (pred.actualResult === "lost") {
-        factorPerformance[factor].losses += factorContribution;
+        factorPerformance[factor].losses += combinedWeight;
       }
-      factorPerformance[factor].confidenceSum += confidence;
+      factorPerformance[factor].confidenceSum += combinedWeight;
     }
   }
 
@@ -201,8 +209,26 @@ async function analyzeAndAdjustWeights(): Promise<{
     if (!currentWeight) continue;
 
     const performanceDiff = factorAccuracy - 0.5;
-    const adjustment = performanceDiff * LEARNING_RATE;
-    const newWeight = Math.max(0.1, Math.min(2.0, currentWeight.weight + adjustment));
+
+    if (!momentumState[factor]) {
+      momentumState[factor] = { velocity: 0, direction: 0, consecutiveGains: 0 };
+    }
+    const momentum = momentumState[factor];
+
+    const currentDirection = Math.sign(performanceDiff);
+    if (currentDirection === momentum.direction && currentDirection !== 0) {
+      momentum.consecutiveGains++;
+    } else {
+      momentum.consecutiveGains = 0;
+    }
+    momentum.direction = currentDirection;
+
+    const momentumMultiplier = 1 + Math.min(0.5, momentum.consecutiveGains * 0.1);
+    momentum.velocity = MOMENTUM_DECAY * momentum.velocity + performanceDiff * LEARNING_RATE;
+    const adjustment = momentum.velocity * momentumMultiplier;
+
+    const decayedWeight = currentWeight.weight * (1 - WEIGHT_DECAY_RATE);
+    const newWeight = Math.max(0.1, Math.min(2.5, decayedWeight + adjustment));
 
     await db.update(modelWeights).set({
       weight: newWeight,

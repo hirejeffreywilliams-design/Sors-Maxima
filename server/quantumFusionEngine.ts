@@ -206,9 +206,8 @@ export const FACTOR_CATEGORIES = {
 const LOW_DATA_RELIABILITY_FACTORS = new Set([
   "sleep_quality", "nutrition_hydration", "wearable_data", "equipment_advantage",
   "training_tech", "team_investment", "salary_dynamics", "field_conditions",
-  "temperature_impact", "media_impact", "confidence_index", "mental_state",
-  "team_chemistry", "pressure_response", "altitude_adjustment", "timezone_disruption",
-  "video_analysis", "roster_stability", "contract_motivation", "motivation_level",
+  "temperature_impact", "media_impact",
+  "video_analysis",
 ]);
 
 const FUSION_WEIGHTS: FusionWeight[] = [
@@ -464,6 +463,17 @@ export interface MarketContext {
   homeRecord?: string;
   awayRecord?: string;
   mcSimulation?: { homeWinProb: number; awayWinProb: number; predictedHomeScore: number; predictedAwayScore: number; convergenceScore: number; simulations: number };
+  homeStreak?: { type: "W" | "L"; length: number };
+  awayStreak?: { type: "W" | "L"; length: number };
+  homeScoring?: { avgFor: number; avgAgainst: number };
+  awayScoring?: { avgFor: number; avgAgainst: number };
+  homeHomeRecord?: { wins: number; losses: number };
+  awayAwayRecord?: { wins: number; losses: number };
+  rosterChanges?: { home: number; away: number };
+  isRivalry?: boolean;
+  isDivision?: boolean;
+  homeLastNWinPct?: number;
+  awayLastNWinPct?: number;
 }
 
 function getDirection(bullishProb: number, seed: string): "bullish" | "bearish" | "neutral" {
@@ -628,6 +638,107 @@ function getDataDrivenDirection(
     if (awayB2B) return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
     if (marketContext.restDays && marketContext.restDays.away <= 1) return { direction: "bullish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 5 };
     return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 3 };
+  }
+
+  if (source === "mental_state" && marketContext.homeStreak && marketContext.awayStreak) {
+    const homeHot = marketContext.homeStreak.type === "W" && marketContext.homeStreak.length >= 3;
+    const homeCold = marketContext.homeStreak.type === "L" && marketContext.homeStreak.length >= 3;
+    const awayHot = marketContext.awayStreak.type === "W" && marketContext.awayStreak.length >= 3;
+    const awayCold = marketContext.awayStreak.type === "L" && marketContext.awayStreak.length >= 3;
+    if (homeHot && !awayHot) return { direction: "bullish", strengthBoost: strengthBoost + Math.min(20, marketContext.homeStreak.length * 4), confidenceBoost: confidenceBoost + 12 };
+    if (awayHot && !homeHot) return { direction: "bearish", strengthBoost: strengthBoost + Math.min(20, marketContext.awayStreak.length * 4), confidenceBoost: confidenceBoost + 12 };
+    if (homeCold) return { direction: "bearish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    if (awayCold) return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 6 };
+  }
+
+  if (source === "confidence_index" && marketContext.homeLastNWinPct !== undefined && marketContext.awayLastNWinPct !== undefined) {
+    const diff = marketContext.homeLastNWinPct - marketContext.awayLastNWinPct;
+    if (diff > 0.2) return { direction: "bullish", strengthBoost: strengthBoost + Math.round(diff * 30), confidenceBoost: confidenceBoost + 10 };
+    if (diff < -0.2) return { direction: "bearish", strengthBoost: strengthBoost + Math.round(Math.abs(diff) * 30), confidenceBoost: confidenceBoost + 10 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+  }
+
+  if (source === "motivation_level" && marketContext) {
+    let motBoost = 0;
+    if (marketContext.isPlayoff) { motBoost += 20; confidenceBoost += 15; }
+    if (marketContext.isRivalry) { motBoost += 12; confidenceBoost += 10; }
+    if (marketContext.isDivision) { motBoost += 8; confidenceBoost += 6; }
+    if (motBoost > 0) {
+      const dir = marketContext.winPct && marketContext.winPct.home > marketContext.winPct.away ? "bullish" : "bearish";
+      return { direction: dir as any, strengthBoost: strengthBoost + motBoost, confidenceBoost };
+    }
+    if (marketContext.winPct) {
+      const diff = Math.abs(marketContext.winPct.home - marketContext.winPct.away);
+      if (diff > 0.2) {
+        confidenceBoost += 8;
+        return { direction: marketContext.winPct.home > marketContext.winPct.away ? "bullish" : "bearish", strengthBoost: strengthBoost + 8, confidenceBoost };
+      }
+    }
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 3 };
+  }
+
+  if (source === "team_chemistry" && marketContext.homeStreak && marketContext.awayStreak) {
+    const homeConsistency = marketContext.homeStreak.length >= 4;
+    const awayConsistency = marketContext.awayStreak.length >= 4;
+    if (homeConsistency && marketContext.homeStreak.type === "W") return { direction: "bullish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    if (awayConsistency && marketContext.awayStreak.type === "W") return { direction: "bearish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 4 };
+  }
+
+  if (source === "pressure_response" && marketContext.winPct && marketContext.homeHomeRecord) {
+    const homeHomeWinPct = marketContext.homeHomeRecord.wins / Math.max(1, marketContext.homeHomeRecord.wins + marketContext.homeHomeRecord.losses);
+    if (homeHomeWinPct > 0.65) return { direction: "bullish", strengthBoost: strengthBoost + 15, confidenceBoost: confidenceBoost + 12 };
+    if (homeHomeWinPct < 0.4) return { direction: "bearish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 6 };
+  }
+
+  if (source === "roster_stability" && marketContext.rosterChanges) {
+    const homeDiff = marketContext.rosterChanges.home;
+    const awayDiff = marketContext.rosterChanges.away;
+    if (homeDiff < awayDiff) return { direction: "bullish", strengthBoost: strengthBoost + 8, confidenceBoost: confidenceBoost + 8 };
+    if (awayDiff < homeDiff) return { direction: "bearish", strengthBoost: strengthBoost + 8, confidenceBoost: confidenceBoost + 8 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 4 };
+  }
+
+  if (source === "pace_tempo" && marketContext.homeScoring && marketContext.awayScoring) {
+    const homePace = marketContext.homeScoring.avgFor + marketContext.homeScoring.avgAgainst;
+    const awayPace = marketContext.awayScoring.avgFor + marketContext.awayScoring.avgAgainst;
+    const paceMatch = Math.abs(homePace - awayPace);
+    if (marketContext.homeScoring.avgFor > marketContext.awayScoring.avgFor + 5) {
+      return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    }
+    if (marketContext.awayScoring.avgFor > marketContext.homeScoring.avgFor + 5) {
+      return { direction: "bearish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    }
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+  }
+
+  if (source === "player_efficiency" && marketContext.homeScoring && marketContext.awayScoring) {
+    const homeNetRating = marketContext.homeScoring.avgFor - marketContext.homeScoring.avgAgainst;
+    const awayNetRating = marketContext.awayScoring.avgFor - marketContext.awayScoring.avgAgainst;
+    const diff = homeNetRating - awayNetRating;
+    if (diff > 5) return { direction: "bullish", strengthBoost: strengthBoost + Math.min(20, Math.round(diff * 2)), confidenceBoost: confidenceBoost + 12 };
+    if (diff < -5) return { direction: "bearish", strengthBoost: strengthBoost + Math.min(20, Math.round(Math.abs(diff) * 2)), confidenceBoost: confidenceBoost + 12 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+  }
+
+  if (source === "clutch_index" && marketContext.homeScoring && marketContext.awayScoring && marketContext.winPct) {
+    const homeClutch = (marketContext.winPct.home > 0.5 && marketContext.homeScoring.avgFor > marketContext.homeScoring.avgAgainst);
+    const awayClutch = (marketContext.winPct.away > 0.5 && marketContext.awayScoring.avgFor > marketContext.awayScoring.avgAgainst);
+    if (homeClutch && !awayClutch) return { direction: "bullish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    if (awayClutch && !homeClutch) return { direction: "bearish", strengthBoost: strengthBoost + 12, confidenceBoost: confidenceBoost + 10 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 5 };
+  }
+
+  if (source === "timezone_disruption" && marketContext.restDays) {
+    if (marketContext.awayB2B) return { direction: "bullish", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
+    if (marketContext.restDays.away <= 1 && !marketContext.homeB2B) return { direction: "bullish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 6 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 3 };
+  }
+
+  if (source === "contract_motivation" && marketContext.isPlayoff) {
+    return { direction: "neutral", strengthBoost: strengthBoost + 10, confidenceBoost: confidenceBoost + 8 };
   }
 
   return { direction: getDirection(bullishProb, `direction-${source}-${bullishProb}`), strengthBoost, confidenceBoost };
