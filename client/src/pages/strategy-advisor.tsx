@@ -364,7 +364,7 @@ function ReplacementPickCard({ pick, onAdd }: { pick: ReplacementPick; onAdd: (p
 }
 
 export default function StrategyAdvisorPage() {
-  useSEO("Strategy Advisor - Sors Maxima", "Get expert betting strategy guidance and real-time ticket analysis");
+  useSEO({ title: "Strategy Advisor - Sors Maxima", description: "Get expert betting strategy guidance and real-time ticket analysis" });
   const { legs, addLeg, removeLeg } = useParlaySlip();
   const { toast } = useToast();
   const [selectedStrategy, setSelectedStrategy] = useState<string>("");

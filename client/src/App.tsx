@@ -532,10 +532,10 @@ function BottomNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
   
   const bottomNavItems: NavItem[] = [
-    navItems[0],
-    navItems[1],
-    navItems[2],
-    navItems[3],
+    navItems.find(item => item.href === "/")!,
+    navItems.find(item => item.href === "/daily")!,
+    navItems.find(item => item.href === "/generate")!,
+    navItems.find(item => item.href === "/player-props")!,
     navItems.find(item => item.href === "/live")!,
   ];
   const adminItem = navItems.find(item => item.adminOnly);
