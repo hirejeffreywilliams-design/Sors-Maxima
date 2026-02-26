@@ -70,7 +70,6 @@ export function ParlaySlipProvider({ children }: { children: ReactNode }) {
     let added = false;
     setLegs(prev => {
       if (prev.some(l => l.id === leg.id)) return prev;
-      if (prev.length >= 12) return prev;
       added = true;
       return [...prev, leg];
     });

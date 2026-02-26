@@ -37,6 +37,8 @@ import {
   MessageCircle,
   ListChecks,
   ArrowRight,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -171,77 +173,66 @@ function gradeColor(grade: string): string {
   return "bg-red-500/15 text-red-500 border-red-500/30";
 }
 
-function LegItem({ leg, onRemove }: { leg: ParlaySlipLeg; onRemove: () => void }) {
+function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean }) {
   const Icon = marketIcons[leg.market] || TrendingUp;
-  const hasEngineData = leg.grade || leg.monteCarloData || leg.reasoning;
 
   return (
-    <div className="flex items-start gap-3 py-3 px-1 group" data-testid={`slip-leg-${leg.id}`}>
-      <div className="mt-0.5 p-1.5 rounded-md bg-primary/10">
-        <Icon className="h-3.5 w-3.5 text-primary" />
+    <div className="flex items-start gap-2 py-2 px-1 group" data-testid={`slip-leg-${leg.id}`}>
+      <div className="mt-0.5 p-1 rounded-md bg-primary/10">
+        <Icon className="h-3 w-3 text-primary" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-sm truncate">{leg.team}</span>
+        <div className="flex items-center gap-1.5">
+          <span className="font-medium text-xs truncate">{leg.team}</span>
           {leg.opponent && (
-            <span className="text-xs text-muted-foreground truncate">vs {leg.opponent}</span>
+            <span className="text-[10px] text-muted-foreground truncate">vs {leg.opponent}</span>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-xs text-muted-foreground capitalize">{leg.market.replace("_", " ")}</span>
-          <span className="text-xs font-medium">{leg.outcome}</span>
+        <div className="flex items-center gap-1.5 mt-0.5">
+          <span className="text-[10px] text-muted-foreground capitalize">{leg.market.replace("_", " ")}</span>
+          <span className="text-[10px] font-medium">{leg.outcome}</span>
         </div>
-        <div className="flex items-center gap-2 mt-1 flex-wrap">
-          <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <Badge variant="outline" className="text-[10px] h-4 px-1">
             {formatOdds(leg.americanOdds, leg.decimalOdds)}
           </Badge>
           {leg.grade && (
-            <Badge variant="outline" className={`text-[10px] h-4 px-1.5 font-bold ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
+            <Badge variant="outline" className={`text-[10px] h-4 px-1 font-bold ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
               {leg.grade}
             </Badge>
           )}
           {leg.confidence && (
-            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-              {Math.round(leg.confidence)}% conf
+            <Badge variant="secondary" className="text-[10px] h-4 px-1">
+              {Math.round(leg.confidence)}%
             </Badge>
           )}
           {leg.evPercent !== undefined && leg.evPercent > 0 && (
-            <Badge className="text-[10px] h-4 px-1.5 bg-green-500/20 text-green-600 border-green-500/30">
+            <Badge className="text-[10px] h-4 px-1 bg-green-500/20 text-green-600 border-green-500/30">
               +{leg.evPercent.toFixed(1)}% EV
             </Badge>
           )}
-          {leg.edge !== undefined && leg.edge > 0 && (
-            <Badge variant="outline" className="text-[10px] h-4 px-1.5 bg-purple-500/10 text-purple-600 border-purple-500/30">
-              +{leg.edge.toFixed(1)}% edge
-            </Badge>
-          )}
         </div>
-        {leg.monteCarloData && (
-          <div className="mt-1.5 px-2 py-1.5 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
+        {!compact && leg.monteCarloData && (
+          <div className="mt-1 px-1.5 py-1 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
             <div className="flex items-center gap-1 text-muted-foreground">
               <Sparkles className="h-2.5 w-2.5" />
-              <span className="font-medium">Monte Carlo: {(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims</span>
+              <span className="font-medium">MC: {(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims</span>
             </div>
             <div className="flex items-center gap-2">
               <span>Projected: {leg.monteCarloData.predictedAwayScore}-{leg.monteCarloData.predictedHomeScore}</span>
-              <span className="text-muted-foreground">|</span>
-              <span>Win: {leg.monteCarloData.homeWinProb}% / {leg.monteCarloData.awayWinProb}%</span>
             </div>
           </div>
         )}
-        {leg.reasoning && (
-          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2" data-testid={`slip-reasoning-${leg.id}`}>
+        {!compact && leg.reasoning && (
+          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1" data-testid={`slip-reasoning-${leg.id}`}>
             {leg.reasoning}
           </p>
-        )}
-        {leg.sport && (
-          <span className="text-[10px] text-muted-foreground mt-0.5 block">{leg.sport} · {leg.addedFrom}</span>
         )}
       </div>
       <Button
         variant="ghost"
         size="icon"
-        className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
+        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
         onClick={onRemove}
         data-testid={`remove-leg-${leg.id}`}
       >
@@ -275,7 +266,7 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
   const allChecked = checkedLegs.size === legs.length;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       <div className="flex items-center gap-1.5">
         <ListChecks className="h-3.5 w-3.5 text-muted-foreground" />
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Place Your Bet</span>
@@ -288,11 +279,11 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
               <Button
                 variant="outline"
                 size="sm"
-                className={`h-9 text-xs font-bold transition-all ${selectedBook === book.id ? "ring-2 ring-primary ring-offset-1" : ""} ${book.color} ${book.textColor} ${book.hoverColor} border-0`}
+                className={`h-8 text-[10px] font-bold transition-all ${selectedBook === book.id ? "ring-2 ring-primary ring-offset-1" : ""} ${book.color} ${book.textColor} ${book.hoverColor} border-0`}
                 onClick={() => handleOpenBook(book)}
                 data-testid={`button-place-at-${book.id}`}
               >
-                <ExternalLink className="h-3 w-3 mr-1" />
+                <ExternalLink className="h-2.5 w-2.5 mr-1" />
                 {book.shortName}
               </Button>
             </TooltipTrigger>
@@ -305,10 +296,10 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
 
       {selectedBook && (
         <div className="space-y-1.5 mt-2">
-          <p className="text-xs text-muted-foreground">
-            Check off each leg as you add it to your {SPORTSBOOKS.find(b => b.id === selectedBook)?.name} bet slip:
+          <p className="text-[10px] text-muted-foreground">
+            Check off each leg as you add it to {SPORTSBOOKS.find(b => b.id === selectedBook)?.name}:
           </p>
-          <div className="space-y-1">
+          <div className="space-y-1 max-h-40 overflow-y-auto">
             {legs.map((leg, i) => {
               const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
               const matchup = leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team;
@@ -316,26 +307,24 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
               return (
                 <button
                   key={leg.id}
-                  className={`w-full text-left flex items-center gap-2 p-2 rounded-md border text-xs transition-all ${checked ? "bg-green-500/10 border-green-500/30 line-through opacity-60" : "bg-muted/50 border-border hover:bg-muted"}`}
+                  className={`w-full text-left flex items-center gap-2 p-1.5 rounded-md border text-[10px] transition-all ${checked ? "bg-green-500/10 border-green-500/30 line-through opacity-60" : "bg-muted/50 border-border hover:bg-muted"}`}
                   onClick={() => toggleLeg(i)}
                   data-testid={`checklist-leg-${i}`}
                 >
-                  <div className={`h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`}>
-                    {checked && <CheckCircle className="h-3 w-3 text-white" />}
+                  <div className={`h-3.5 w-3.5 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${checked ? "bg-green-500 border-green-500" : "border-muted-foreground/40"}`}>
+                    {checked && <CheckCircle className="h-2.5 w-2.5 text-white" />}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 truncate">
                     <span className="font-medium">{matchup}</span>
-                    <span className="text-muted-foreground ml-1">
-                      {leg.market.replace("_", " ")} · {leg.outcome} ({odds})
-                    </span>
+                    <span className="text-muted-foreground ml-1">{leg.outcome} ({odds})</span>
                   </div>
                 </button>
               );
             })}
           </div>
           {allChecked && (
-            <div className="flex items-center gap-2 p-2 rounded-md bg-green-500/10 border border-green-500/30 text-xs">
-              <CheckCircle className="h-4 w-4 text-green-500 shrink-0" />
+            <div className="flex items-center gap-2 p-1.5 rounded-md bg-green-500/10 border border-green-500/30 text-[10px]">
+              <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
               <span className="text-green-700 dark:text-green-400 font-medium">
                 All legs added! Set stake to ${stake.toFixed(0)} and place your parlay.
               </span>
@@ -347,7 +336,7 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
       {!selectedBook && (
         <p className="text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1">
           <Info className="h-2.5 w-2.5" />
-          Opens the sportsbook's {primarySport || "sports"} page — add each leg to build your slip there
+          Tap a sportsbook to open and build your slip there
         </p>
       )}
     </div>
@@ -400,16 +389,16 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
       <div className="flex gap-1.5">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={handleCopy} data-testid="button-copy-full-slip">
+            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleCopy} data-testid="button-copy-full-slip">
               {copied ? <CheckCircle className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-              Copy Text
+              Copy
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copy as text for messaging</TooltipContent>
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={handleShare} data-testid="button-share-slip">
+            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleShare} data-testid="button-share-slip">
               <MessageCircle className="h-3 w-3" />
               Share
             </Button>
@@ -418,7 +407,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={handleScreenshot} data-testid="button-screenshot-slip">
+            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleScreenshot} data-testid="button-screenshot-slip">
               <Camera className="h-3 w-3" />
               Screenshot
             </Button>
@@ -427,16 +416,16 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
         </Tooltip>
       </div>
 
-      <div ref={cardRef} className="rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-3 space-y-2" data-testid="visual-bet-card">
+      <div ref={cardRef} className="rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-2.5 space-y-1.5" data-testid="visual-bet-card">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-primary tracking-wide">SORS MAXIMA</span>
+          <span className="text-[10px] font-bold text-primary tracking-wide">SORS MAXIMA</span>
           <Badge variant="outline" className="text-[10px]">{legs.length} Leg Parlay</Badge>
         </div>
-        <div className="space-y-1">
-          {legs.map((leg, i) => {
+        <div className="space-y-0.5 max-h-32 overflow-y-auto">
+          {legs.map((leg) => {
             const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
             return (
-              <div key={leg.id} className="flex items-center justify-between text-[11px]">
+              <div key={leg.id} className="flex items-center justify-between text-[10px]">
                 <span className="truncate flex-1">
                   <span className="font-medium">{leg.team}</span>
                   {leg.opponent && <span className="text-muted-foreground"> vs {leg.opponent}</span>}
@@ -448,7 +437,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
           })}
         </div>
         <Separator />
-        <div className="flex items-center justify-between text-xs">
+        <div className="flex items-center justify-between text-[10px]">
           <span className="text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedOdds}</span></span>
           <span className="text-muted-foreground">Stake: <span className="font-bold text-foreground">${stake}</span></span>
           <span className="text-green-600 dark:text-green-400 font-bold">Payout: ${payout}</span>
@@ -458,145 +447,220 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
   );
 }
 
-export function ParlaySlipDrawer() {
+function SlipContent({ compact }: { compact?: boolean }) {
   const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds } = useParlaySlip();
   const { toast } = useToast();
-  const [open, setOpen] = useState(false);
   const [stake, setStake] = useState(10);
+  const [showPlacement, setShowPlacement] = useState(false);
+  const [showShare, setShowShare] = useState(false);
 
   const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
   const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+
+  if (legCount === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-3">
+        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+          <Sparkles className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <div>
+          <p className="font-medium text-sm">Your slip is empty</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Add picks from any page to start building your parlay
+          </p>
+        </div>
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/">
+            <Sparkles className="h-3.5 w-3.5 mr-1" />
+            Browse Picks
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="px-3 py-2 bg-muted/30 border-b flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs font-bold">
+            {legCount} leg{legCount !== 1 ? "s" : ""}
+          </Badge>
+          <span className="text-xs font-bold">{formattedTotalOdds}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-green-600 dark:text-green-400 font-bold">${potentialPayout}</span>
+          <Button variant="ghost" size="sm" onClick={clearSlip} className="text-[10px] text-destructive hover:text-destructive h-6 px-1.5" data-testid="button-clear-slip">
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1">
+        <div className="divide-y px-2">
+          {legs.map((leg) => (
+            <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} compact={compact} />
+          ))}
+        </div>
+      </ScrollArea>
+
+      <div className="border-t bg-background px-3 py-2 space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground whitespace-nowrap">Stake $</span>
+          <Input
+            type="number"
+            min={1}
+            max={100000}
+            value={stake}
+            onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
+            className="h-7 w-20 text-xs font-medium"
+            data-testid="input-stake"
+          />
+          <div className="flex gap-1 flex-1">
+            {[10, 25, 50, 100].map((amt) => (
+              <Button
+                key={amt}
+                variant={stake === amt ? "default" : "outline"}
+                size="sm"
+                className="h-7 px-1.5 text-[10px] flex-1"
+                onClick={() => setStake(amt)}
+                data-testid={`button-stake-${amt}`}
+              >
+                ${amt}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Total Odds</span>
+          <span className="font-bold">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span>
+        </div>
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Potential Payout</span>
+          <span className="font-bold text-green-600 dark:text-green-400">${potentialPayout}</span>
+        </div>
+
+        <Separator />
+
+        <button
+          className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"
+          onClick={() => setShowPlacement(!showPlacement)}
+          data-testid="toggle-placement-guide"
+        >
+          <span className="flex items-center gap-1.5">
+            <ListChecks className="h-3.5 w-3.5" />
+            Place Your Bet
+          </span>
+          {showPlacement ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
+        {showPlacement && (
+          <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+        )}
+
+        <button
+          className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"
+          onClick={() => setShowShare(!showShare)}
+          data-testid="toggle-share-section"
+        >
+          <span className="flex items-center gap-1.5">
+            <Share2 className="h-3.5 w-3.5" />
+            Share Your Picks
+          </span>
+          {showShare ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
+        {showShare && (
+          <ShareSection legs={legs} totalOdds={totalOdds} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+        )}
+
+        <div className="flex gap-2">
+          <Button className="flex-1 gap-1.5" size="sm" variant="outline" asChild data-testid="button-open-builder">
+            <Link href="/builder">
+              <ChevronRight className="h-3.5 w-3.5" />
+              Open in Builder
+            </Link>
+          </Button>
+        </div>
+
+        <AffiliateDisclosure compact className="text-center block w-full" />
+      </div>
+    </>
+  );
+}
+
+export function ParlaySlipDesktopSidebar() {
+  const { legCount, totalAmericanOdds, totalOdds } = useParlaySlip();
+  const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+
+  return (
+    <aside
+      className="hidden lg:flex fixed right-0 top-[3.5rem] bottom-0 w-[340px] xl:w-[380px] border-l bg-background flex-col z-40"
+      data-testid="desktop-bet-slip"
+    >
+      <div className="px-3 py-2.5 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex items-center gap-2">
+        <Ticket className="h-4 w-4 text-primary" />
+        <span className="font-bold text-sm">Bet Slip</span>
+        {legCount > 0 && (
+          <Badge variant="default" className="ml-auto text-[10px] h-5 px-2">
+            {legCount} leg{legCount !== 1 ? "s" : ""} · {formattedTotalOdds}
+          </Badge>
+        )}
+      </div>
+      <SlipContent compact />
+    </aside>
+  );
+}
+
+export function ParlaySlipMobileDrawer() {
+  const { legs, legCount, totalOdds, totalAmericanOdds } = useParlaySlip();
+  const [open, setOpen] = useState(false);
+  const [stake] = useState(10);
+
+  const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+  const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
-          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 h-12 gap-2 rounded-full shadow-lg px-4"
+          className="lg:hidden fixed bottom-20 right-3 z-40 h-14 gap-2 rounded-full shadow-xl px-5 bg-primary hover:bg-primary/90"
           data-testid="button-parlay-slip"
-          variant={legCount > 0 ? "default" : "secondary"}
         >
-          <Ticket className="h-4 w-4" />
-          <span className="font-semibold">Slip</span>
-          {legCount > 0 && (
-            <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full text-xs bg-white text-primary">
-              {legCount}
-            </Badge>
+          <Ticket className="h-5 w-5" />
+          {legCount > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-sm">{legCount}</span>
+              <span className="text-xs opacity-80">|</span>
+              <span className="text-xs font-medium">{formattedTotalOdds}</span>
+            </div>
+          ) : (
+            <span className="font-semibold">Slip</span>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:w-[420px] flex flex-col p-0">
-        <SheetHeader className="px-4 pt-4 pb-2">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="flex items-center gap-2">
-              <Ticket className="h-5 w-5" />
-              Bet Slip
-              {legCount > 0 && (
-                <Badge variant="outline">{legCount} leg{legCount !== 1 ? "s" : ""}</Badge>
-              )}
-            </SheetTitle>
+      <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0 rounded-t-2xl">
+        <SheetHeader className="px-4 pt-3 pb-2">
+          <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-2" />
+          <SheetTitle className="flex items-center gap-2">
+            <Ticket className="h-5 w-5 text-primary" />
+            Bet Slip
             {legCount > 0 && (
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" onClick={clearSlip} className="text-xs text-destructive hover:text-destructive h-7 px-2" data-testid="button-clear-slip">
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  Clear
-                </Button>
-              </div>
+              <Badge variant="outline">{legCount} leg{legCount !== 1 ? "s" : ""}</Badge>
             )}
-          </div>
+          </SheetTitle>
         </SheetHeader>
-
         <Separator />
-
-        {legCount === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-6 text-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-              <Sparkles className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <div>
-              <p className="font-medium">Your slip is empty</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Add picks from Daily Picks, Command Center, or the Parlay Builder to start
-              </p>
-            </div>
-            <Button variant="outline" size="sm" asChild onClick={() => setOpen(false)}>
-              <Link href="/">
-                <Sparkles className="h-4 w-4 mr-1" />
-                Browse Picks
-              </Link>
-            </Button>
-          </div>
-        ) : (
-          <>
-            <ScrollArea className="flex-1 px-4">
-              <div className="divide-y">
-                {legs.map((leg) => (
-                  <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} />
-                ))}
-              </div>
-            </ScrollArea>
-
-            <Separator />
-
-            <SheetFooter className="px-4 py-3 flex-col gap-3 block space-y-3">
-              <div className="w-full space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total Odds</span>
-                  <span className="font-bold">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">Stake $</span>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={10000}
-                    value={stake}
-                    onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
-                    className="h-8 w-24 text-sm font-medium"
-                    data-testid="input-stake"
-                  />
-                  <div className="flex gap-1 flex-1">
-                    {[10, 25, 50, 100].map((amt) => (
-                      <Button
-                        key={amt}
-                        variant={stake === amt ? "default" : "outline"}
-                        size="sm"
-                        className="h-8 px-2 text-xs flex-1"
-                        onClick={() => setStake(amt)}
-                        data-testid={`button-stake-${amt}`}
-                      >
-                        ${amt}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Potential Payout</span>
-                  <span className="font-bold text-green-600 dark:text-green-400 text-base">${potentialPayout}</span>
-                </div>
-              </div>
-
-              <Separator />
-
-              <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
-
-              <Separator />
-
-              <ShareSection legs={legs} totalOdds={totalOdds} totalAmericanOdds={totalAmericanOdds} stake={stake} />
-
-              <div className="flex gap-2">
-                <Button className="flex-1 gap-2" size="sm" variant="outline" asChild onClick={() => setOpen(false)} data-testid="button-open-builder">
-                  <Link href="/builder">
-                    <ChevronRight className="h-4 w-4" />
-                    Open in Builder
-                  </Link>
-                </Button>
-              </div>
-
-              <AffiliateDisclosure compact className="text-center block w-full" />
-            </SheetFooter>
-          </>
-        )}
+        <SlipContent />
       </SheetContent>
     </Sheet>
+  );
+}
+
+export function ParlaySlipDrawer() {
+  return (
+    <>
+      <ParlaySlipDesktopSidebar />
+      <ParlaySlipMobileDrawer />
+    </>
   );
 }
