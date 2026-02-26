@@ -20,6 +20,15 @@ import {
   csrfValidationMiddleware,
 } from "./securityMiddleware";
 
+process.on("uncaughtException", (err) => {
+  console.error("[CRASH GUARD] Uncaught exception caught — app staying alive:", err.message);
+  console.error(err.stack);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[CRASH GUARD] Unhandled promise rejection caught:", reason);
+});
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -162,17 +171,13 @@ app.use((req, res, next) => {
     () => {
       log(`serving on port ${port}`);
       
-      startContinuousLearning();
-      log("Statistical model engine started");
+      try { startContinuousLearning(); log("Statistical model engine started"); } catch (e: any) { console.error("[STARTUP] Learning engine failed:", e.message); }
       
-      startAnalyticsAgent();
-      log("ESPN data agent started — live game monitoring active");
+      try { startAnalyticsAgent(); log("ESPN data agent started — live game monitoring active"); } catch (e: any) { console.error("[STARTUP] Analytics agent failed:", e.message); }
 
-      startContinuousLearningOrchestrator();
-      log("Continuous Learning Orchestrator started — auto-settlement, retraining, weight sync, calibration");
+      try { startContinuousLearningOrchestrator(); log("Continuous Learning Orchestrator started — auto-settlement, retraining, weight sync, calibration"); } catch (e: any) { console.error("[STARTUP] Orchestrator failed:", e.message); }
 
-      startGuardian();
-      log("App Guardian Engine started — continuous monitoring, auto-healing, AI diagnostics");
+      try { startGuardian(); log("App Guardian Engine started — continuous monitoring, auto-healing, AI diagnostics"); } catch (e: any) { console.error("[STARTUP] Guardian failed:", e.message); }
 
       setTimeout(() => {
         log("Starting historical game learning from ESPN...");

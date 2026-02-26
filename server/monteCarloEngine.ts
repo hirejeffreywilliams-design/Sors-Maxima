@@ -349,7 +349,7 @@ const PRE_SIM_INTERVAL = 300000;
 const PRE_SIM_TTL = 300000;
 const LIVE_SIM_TTL = 60000;
 const MAX_PREDICTIONS = 5000;
-const MAX_CACHE_ENTRIES = 200;
+const MAX_CACHE_ENTRIES = 100;
 
 let engineRunning = false;
 let preSimInterval: ReturnType<typeof setInterval> | null = null;

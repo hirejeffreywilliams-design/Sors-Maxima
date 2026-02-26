@@ -840,7 +840,7 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground border-t pt-2 flex-wrap">
           <span className="flex items-center gap-1"><Star className="w-3 h-3 text-emerald-500" /> A+ = highest conviction</span>
           <span className="flex items-center gap-1"><Target className="w-3 h-3" /> Edge = season avg vs line</span>
-          <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> Live from {data.dataSource}</span>
+          {data.dataSource && <span className="flex items-center gap-1"><Activity className="w-3 h-3" /> Live from {data.dataSource}</span>}
         </div>
       </CardContent>
     </Card>
@@ -899,11 +899,13 @@ export default function PlayerPropsPage() {
               <span className="flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" /> {data.totalGames} games &middot; {data.totalProps} props
               </span>
-              <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
-                data.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted"
-              }`} data-testid="badge-data-source">
-                {data.dataSource}
-              </Badge>
+              {data.dataSource && (
+                <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
+                  data.dataSource.includes("Odds API") ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-muted"
+                }`} data-testid="badge-data-source">
+                  {data.dataSource}
+                </Badge>
+              )}
               {lastUpdate && (
                 <span className="flex items-center gap-0.5">
                   <Clock className="w-3 h-3" /> {lastUpdate}

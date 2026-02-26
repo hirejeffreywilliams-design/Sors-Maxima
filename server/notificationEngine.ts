@@ -639,6 +639,16 @@ function monitorPropLines(): void {
     if (newMovements > 0) {
       console.log(`[NotificationEngine] Detected ${newMovements} prop line movement(s)`);
     }
+
+    const MAX_PROP_SNAPSHOTS = 500;
+    if (propLineSnapshots.size > MAX_PROP_SNAPSHOTS) {
+      const entries = Array.from(propLineSnapshots.entries())
+        .sort((a, b) => b[1].timestamp - a[1].timestamp);
+      propLineSnapshots.clear();
+      for (const [key, val] of entries.slice(0, MAX_PROP_SNAPSHOTS)) {
+        propLineSnapshots.set(key, val);
+      }
+    }
   } catch (err) {
     logError("[NotificationEngine] Prop monitor cycle error", { error: String(err) });
   }

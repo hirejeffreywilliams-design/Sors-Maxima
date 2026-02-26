@@ -223,6 +223,9 @@ class AppGuardianEngine {
           "health_check");
         this.createIncident("critical", "Memory Exhaustion Risk",
           "Application memory usage exceeds 90%", ["Server"], [alert.id]);
+        if (global.gc) {
+          try { global.gc(); } catch (_) {}
+        }
       } else if (heapPercent > 75) {
         this.addAlert("high", "memory", "High Memory Usage",
           `Heap usage at ${heapPercent.toFixed(1)}%`, "health_check");

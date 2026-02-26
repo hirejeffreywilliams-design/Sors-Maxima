@@ -491,6 +491,13 @@ class AnalyticsAgentService {
       this.cycleTimings.push(cycleTime);
       if (this.cycleTimings.length > 100) this.cycleTimings.shift();
 
+      if (this.historicalOdds.size > 300) {
+        const keys = Array.from(this.historicalOdds.keys());
+        for (const key of keys.slice(0, keys.length - 300)) {
+          this.historicalOdds.delete(key);
+        }
+      }
+
     } catch (error: any) {
       this.recordError("system", "critical", `Cycle failed: ${error.message}`, true);
       this.status.currentPhase = "sleeping";
@@ -803,7 +810,7 @@ class AnalyticsAgentService {
     }
     const history = this.historicalOdds.get(marketKey)!;
     history.push({ timestamp: Date.now(), decimal });
-    if (history.length > 500) history.splice(0, history.length - 500);
+    if (history.length > 200) history.splice(0, history.length - 200);
   }
 
   private buildProvenance(game: LiveGame): ProvenanceEntry[] {
@@ -891,7 +898,7 @@ class AnalyticsAgentService {
     };
 
     this.errors.unshift(error);
-    if (this.errors.length > 500) this.errors = this.errors.slice(0, 500);
+    if (this.errors.length > 200) this.errors = this.errors.slice(0, 200);
 
     if (severity === "error" || severity === "critical") {
       logError(`[AnalyticsAgent] ${message}`);
