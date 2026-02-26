@@ -305,7 +305,7 @@ export async function preloadAllRosters(): Promise<void> {
   const startTime = Date.now();
   console.log("[Rosters] Starting background preload for all sports...");
 
-  const PRELOAD_SPORTS = getInSeasonSports();
+  const PRELOAD_SPORTS = getInSeasonSports().slice(0, 2);
   for (const sport of PRELOAD_SPORTS) {
     if (preloadedSports.has(sport)) continue;
     try {

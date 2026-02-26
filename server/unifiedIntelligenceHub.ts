@@ -7,7 +7,7 @@ import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 import { getMomentumGames, type MomentumGame } from "./liveAnalyticsEngine";
 import { logError, logWarn } from "./errorLogger";
 import { getInSeasonSports } from "./sportSeasons";
-const HUB_REFRESH_INTERVAL = 60_000;
+const HUB_REFRESH_INTERVAL = 120_000;
 
 export interface UnifiedGame {
   id: string;

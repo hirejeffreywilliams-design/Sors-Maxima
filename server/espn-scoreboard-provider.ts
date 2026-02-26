@@ -197,7 +197,7 @@ export async function getScoreboard(sport: Sport): Promise<ESPNScoreboardGame[]>
     const games = events.map((e: any) => parseGame(e, sport));
 
     scoreboardCache.set(cacheKey, { data: games, timestamp: Date.now() });
-    console.log(`[ESPN-Scoreboard] Fetched ${games.length} ${sport} games`);
+    // Suppress verbose per-sport logs to reduce output volume
     return games;
   } catch (error) {
     console.error(`[ESPN-Scoreboard] Error fetching ${sport}:`, error);
@@ -234,7 +234,7 @@ export async function getMultiDayScoreboard(sport: Sport, daysAhead: number = 3)
 
   const uniqueGames = Array.from(new Map(allGames.map(g => [g.id, g])).values());
   scoreboardCache.set(cacheKey, { data: uniqueGames, timestamp: Date.now() });
-  console.log(`[ESPN-Scoreboard] Fetched ${uniqueGames.length} ${sport} games across ${daysAhead + 1} days`);
+  // Suppress verbose multi-day log
   return uniqueGames;
 }
 

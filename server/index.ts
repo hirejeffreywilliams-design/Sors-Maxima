@@ -6,10 +6,6 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
-import { startAnalyticsAgent } from "./analyticsAgentEngine";
-import { runHistoricalLearning } from "./historicalLearningEngine";
-import { startContinuousLearningOrchestrator } from "./continuousLearningOrchestrator";
-import { startGuardian } from "./appGuardianEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -22,12 +18,15 @@ import {
 
 process.on("uncaughtException", (err) => {
   console.error("[CRASH GUARD] Uncaught exception caught — app staying alive:", err.message);
-  console.error(err.stack);
 });
 
 process.on("unhandledRejection", (reason) => {
-  console.error("[CRASH GUARD] Unhandled promise rejection caught:", reason);
+  console.error("[CRASH GUARD] Unhandled promise rejection caught:", String(reason));
 });
+
+process.on("SIGHUP", () => { /* ignore — workflow runner disconnects terminal */ });
+process.on("SIGTERM", () => process.exit(0));
+process.on("SIGINT", () => process.exit(0));
 
 const app = express();
 const httpServer = createServer(app);
@@ -173,25 +172,9 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
       
       try { startContinuousLearning(); log("Statistical model engine started"); } catch (e: any) { console.error("[STARTUP] Learning engine failed:", e.message); }
-      
-      try { startAnalyticsAgent(); log("ESPN data agent started — live game monitoring active"); } catch (e: any) { console.error("[STARTUP] Analytics agent failed:", e.message); }
 
-      try { startContinuousLearningOrchestrator(); log("Continuous Learning Orchestrator started — auto-settlement, retraining, weight sync, calibration"); } catch (e: any) { console.error("[STARTUP] Orchestrator failed:", e.message); }
+      log("Non-essential engines deferred to conserve memory");
 
-      try { startGuardian(); log("App Guardian Engine started — continuous monitoring, auto-healing, AI diagnostics"); } catch (e: any) { console.error("[STARTUP] Guardian failed:", e.message); }
-
-      setTimeout(() => {
-        log("Starting historical game learning from ESPN...");
-        runHistoricalLearning({ daysBack: 45 }).then((result) => {
-          if (result.success) {
-            log(`Historical learning complete: ${result.gamesProcessed} ESPN games processed, ${result.weightsUpdated} model weights trained. Home win rate: ${(result.homeWinRate * 100).toFixed(1)}%, Spread cover rate: ${(result.spreadCoverRate * 100).toFixed(1)}%`);
-          } else {
-            log("Historical learning: already running or failed to start");
-          }
-        }).catch((err) => {
-          console.error("Historical learning error:", err);
-        });
-      }, 10000);
     
     },
   );

@@ -339,17 +339,17 @@ const DEFAULT_SPORT_PARAMS: Record<string, { scoreMean: number; scoreStdDev: num
   NCAAF: { scoreMean: 25, scoreStdDev: 12, totalMean: 50, homeAdvantage: 3.0, isPoisson: false },
 };
 
-const MATCHUP_SIMS = 10000;
-const PARLAY_SIMS = 50000;
-const BATCH_SIZE = 10000;
-const CONVERGENCE_THRESHOLD = 0.00005;
-const MIN_BATCHES = 5;
-const MAX_BATCHES = 30;
+const MATCHUP_SIMS = 2000;
+const PARLAY_SIMS = 5000;
+const BATCH_SIZE = 2000;
+const CONVERGENCE_THRESHOLD = 0.0005;
+const MIN_BATCHES = 3;
+const MAX_BATCHES = 10;
 const PRE_SIM_INTERVAL = 300000;
 const PRE_SIM_TTL = 300000;
 const LIVE_SIM_TTL = 60000;
-const MAX_PREDICTIONS = 5000;
-const MAX_CACHE_ENTRIES = 100;
+const MAX_PREDICTIONS = 500;
+const MAX_CACHE_ENTRIES = 30;
 
 let engineRunning = false;
 let preSimInterval: ReturnType<typeof setInterval> | null = null;

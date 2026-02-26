@@ -293,7 +293,7 @@ export async function getVenueWeather(venueName: string, gameTimeISO?: string): 
     weatherCache.set(cacheKey, { data: result, timestamp: Date.now() });
     return result;
   } catch (err) {
-    console.error(`[Weather] Error fetching for ${venueName}:`, err);
+    // Suppress verbose weather error logs
     return null;
   }
 }

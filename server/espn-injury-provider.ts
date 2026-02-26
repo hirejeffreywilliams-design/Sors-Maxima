@@ -87,7 +87,7 @@ export async function getInjuries(sport: Sport | string): Promise<InjuryReport[]
     }
 
     injuryCache.set(sportKey, { data: reports, timestamp: Date.now() });
-    console.log(`[Injuries] Loaded ${reports.length} teams with injuries for ${sportKey}`);
+    // Suppress verbose injury load logs
     return reports;
   } catch (err) {
     console.error(`[Injuries] Error fetching ${sportKey}:`, err);

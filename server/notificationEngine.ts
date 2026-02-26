@@ -640,7 +640,7 @@ function monitorPropLines(): void {
       console.log(`[NotificationEngine] Detected ${newMovements} prop line movement(s)`);
     }
 
-    const MAX_PROP_SNAPSHOTS = 500;
+    const MAX_PROP_SNAPSHOTS = 100;
     if (propLineSnapshots.size > MAX_PROP_SNAPSHOTS) {
       const entries = Array.from(propLineSnapshots.entries())
         .sort((a, b) => b[1].timestamp - a[1].timestamp);

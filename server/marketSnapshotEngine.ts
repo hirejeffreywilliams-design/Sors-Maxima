@@ -193,7 +193,7 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (e) {
-    console.error(`[MarketSnapshot] Odds API error for ${sport}: ${(e as Error).message}`);
+    // Suppress repeated Odds API error logs to reduce output volume
     return oddsFullCache.get(cacheKey)?.data || [];
   }
 }

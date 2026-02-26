@@ -358,7 +358,7 @@ class AnalyticsAgentService {
       jurisdictionCode: "US",
       userRiskProfile: "balanced",
       maxOutputRatePerEventPerMinute: 60,
-      updateIntervalMs: 15000,
+      updateIntervalMs: 60000,
       enableArbitrageDetection: true,
       enableCorrelationAnalysis: true,
       enableRiskExposure: true,
@@ -810,7 +810,7 @@ class AnalyticsAgentService {
     }
     const history = this.historicalOdds.get(marketKey)!;
     history.push({ timestamp: Date.now(), decimal });
-    if (history.length > 200) history.splice(0, history.length - 200);
+    if (history.length > 50) history.splice(0, history.length - 50);
   }
 
   private buildProvenance(game: LiveGame): ProvenanceEntry[] {

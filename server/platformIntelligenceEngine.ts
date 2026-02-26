@@ -5,10 +5,10 @@ import type { Sport } from "@shared/schema";
 
 const DATA_FILE = path.join(process.cwd(), "platform-intelligence-data.json");
 const ACCUMULATE_INTERVAL = 5 * 60 * 1000;
-const MAX_GAME_HISTORY = 2000;
-const MAX_PREDICTION_HISTORY = 1500;
-const MAX_ODDS_HISTORY = 1000;
-const MAX_INJURY_RECORDS = 500;
+const MAX_GAME_HISTORY = 200;
+const MAX_PREDICTION_HISTORY = 300;
+const MAX_ODDS_HISTORY = 200;
+const MAX_INJURY_RECORDS = 100;
 
 interface TeamRecord {
   team: string;
@@ -662,8 +662,8 @@ function updatePlatformStats(newGames: number, newPredictions: number, newOdds: 
     });
   }
 
-  if (data.dailySummaries.length > 365) {
-    data.dailySummaries = data.dailySummaries.slice(-365);
+  if (data.dailySummaries.length > 30) {
+    data.dailySummaries = data.dailySummaries.slice(-30);
   }
 }
 
