@@ -131,13 +131,47 @@ function formatOdds(odds: number): string {
   return odds > 0 ? `+${odds}` : `${odds}`;
 }
 
-function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip }: {
+const STAT_TO_MARKET_MAP: Record<string, string[]> = {
+  points: ["player_points"],
+  pts: ["player_points"],
+  rebounds: ["player_rebounds"],
+  reb: ["player_rebounds"],
+  assists: ["player_assists"],
+  ast: ["player_assists"],
+  steals: ["player_steals"],
+  stl: ["player_steals"],
+  blocks: ["player_blocks"],
+  blk: ["player_blocks"],
+  turnovers: ["player_turnovers"],
+  goals: ["player_goals"],
+  shots: ["player_shots_on_goal"],
+  strikeouts: ["player_strikeouts", "batter_strikeouts"],
+  hits: ["player_hits", "batter_hits"],
+  "passing yards": ["player_passing_yards", "player_pass_yds"],
+  "rushing yards": ["player_rushing_yards", "player_rush_yds"],
+  "receiving yards": ["player_receiving_yards", "player_reception_yds"],
+  touchdowns: ["player_anytime_td", "player_touchdowns"],
+  receptions: ["player_receptions"],
+};
+
+function matchStatToMarket(category: string, market: string): boolean {
+  const cat = category.toLowerCase();
+  const m = market.toLowerCase();
+  const matchingMarkets = STAT_TO_MARKET_MAP[cat];
+  if (matchingMarkets) {
+    return matchingMarkets.some(mk => m === mk);
+  }
+  return false;
+}
+
+function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, currentStat }: {
   prop: MarketProp;
   playerName: string;
   sport: string;
   addLeg: (leg: any) => boolean;
   overInSlip: boolean;
   underInSlip: boolean;
+  currentStat?: { value: string; category: string } | null;
 }) {
   const [showBooks, setShowBooks] = useState(false);
 
@@ -170,10 +204,16 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip }: 
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-semibold truncate">{prop.marketLabel}</p>
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
             <span className="text-[10px] text-muted-foreground">Line: <span className="font-mono font-medium text-foreground">{prop.line}</span></span>
             {prop.seasonAvg !== null && (
               <span className="text-[10px] text-muted-foreground">Avg: <span className="font-mono font-medium text-foreground">{prop.seasonAvg}</span></span>
+            )}
+            {currentStat && (
+              <span className="text-[10px] font-medium text-amber-500 flex items-center gap-0.5">
+                <Activity className="w-2.5 h-2.5" />
+                Tonight: <span className="font-mono font-bold">{currentStat.value}</span>
+              </span>
             )}
           </div>
         </div>
@@ -327,15 +367,18 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip }: 
   );
 }
 
-function PlayerSection({ player, sport, addLeg, slipLegIds }: {
+function PlayerSection({ player, sport, addLeg, slipLegIds, isLive }: {
   player: GamePlayer;
   sport: string;
   addLeg: (leg: any) => boolean;
   slipLegIds: Set<string>;
+  isLive?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
   if (player.markets.length === 0) return null;
+
+  const hasLiveStats = isLive && player.leaderStats && player.leaderStats.length > 0;
 
   return (
     <div data-testid={`card-player-${player.playerName}`}>
@@ -352,7 +395,7 @@ function PlayerSection({ player, sport, addLeg, slipLegIds }: {
           <p className="text-sm font-semibold truncate" data-testid={`text-player-name-${player.playerName}`}>
             {player.playerName}
           </p>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             {player.position && (
               <span className="text-[10px] text-muted-foreground">{player.position}</span>
             )}
@@ -363,6 +406,16 @@ function PlayerSection({ player, sport, addLeg, slipLegIds }: {
               </span>
             )}
           </div>
+          {hasLiveStats && (
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <Activity className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+              {player.leaderStats.slice(0, 4).map((s, i) => (
+                <span key={i} className="text-[10px] font-medium text-amber-500">
+                  {s.value} <span className="text-amber-500/70 uppercase">{s.category}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
         {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
       </button>
@@ -372,6 +425,9 @@ function PlayerSection({ player, sport, addLeg, slipLegIds }: {
           {player.markets.map((prop) => {
             const overId = `prop-${player.playerName}-${prop.market}-over`.replace(/\s+/g, "-").toLowerCase();
             const underId = `prop-${player.playerName}-${prop.market}-under`.replace(/\s+/g, "-").toLowerCase();
+            const matchedStat = isLive && player.leaderStats
+              ? player.leaderStats.find(s => matchStatToMarket(s.category, prop.market)) || null
+              : null;
             return (
               <PropCard
                 key={prop.market}
@@ -381,6 +437,7 @@ function PlayerSection({ player, sport, addLeg, slipLegIds }: {
                 addLeg={addLeg}
                 overInSlip={slipLegIds.has(overId)}
                 underInSlip={slipLegIds.has(underId)}
+                currentStat={matchedStat}
               />
             );
           })}
@@ -504,6 +561,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           sport={sport}
                           addLeg={addLeg}
                           slipLegIds={slipLegIds}
+                          isLive={isLive}
                         />
                       ))}
                     </div>
@@ -534,6 +592,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           sport={sport}
                           addLeg={addLeg}
                           slipLegIds={slipLegIds}
+                          isLive={isLive}
                         />
                       ))}
                     </div>
