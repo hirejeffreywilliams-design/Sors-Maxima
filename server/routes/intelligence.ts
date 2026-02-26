@@ -3,6 +3,7 @@ import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, get
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
 import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
+import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
 import {
@@ -156,6 +157,34 @@ export function registerIntelligenceRoutes(app: Express): void {
     } catch (err) {
       console.error("Matchup tickets error:", err);
       return res.status(500).json({ error: "Failed to build matchup tickets" });
+    }
+  });
+
+  app.get("/api/prop-movements", (req: Request, res: Response) => {
+    try {
+      const sharpOnly = req.query.sharp === "true";
+      const player = req.query.player as string | undefined;
+      const limit = Math.max(1, Math.min(Number(req.query.limit) || 25, 100));
+
+      let movements;
+      if (player) {
+        movements = getPropMovementsForPlayer(player);
+      } else if (sharpOnly) {
+        movements = getSharpPropAlerts();
+      } else {
+        movements = getRecentPropMovements({ limit });
+      }
+
+      return res.json({
+        movements: movements.slice(0, limit),
+        totalCount: movements.length,
+        sharpCount: movements.filter(m => m.sharpAction).length,
+        steamCount: movements.filter(m => m.velocity === "steam").length,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error("Prop movements error:", err);
+      return res.status(500).json({ error: "Failed to fetch prop movements" });
     }
   });
 

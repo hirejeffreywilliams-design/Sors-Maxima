@@ -3,6 +3,39 @@ import { broadcastEvent } from "./sseManager";
 import { logError } from "./errorLogger";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
+import { getAllCachedGameProps, type RealPlayerProp } from "./odds-provider";
+
+export interface PropLineSnapshot {
+  playerName: string;
+  market: string;
+  consensusLine: number;
+  bestOverOdds: number;
+  bestUnderOdds: number;
+  bookmakerCount: number;
+  timestamp: number;
+}
+
+export interface PropMovement {
+  playerName: string;
+  market: string;
+  marketLabel: string;
+  gameKey: string;
+  previousLine: number;
+  currentLine: number;
+  lineShift: number;
+  previousOverOdds: number;
+  currentOverOdds: number;
+  oddsShift: number;
+  velocity: "slow" | "moderate" | "fast" | "steam";
+  sharpAction: boolean;
+  direction: "up" | "down" | "stable";
+  detectedAt: string;
+}
+
+const propLineSnapshots = new Map<string, PropLineSnapshot>();
+const recentPropMovements: PropMovement[] = [];
+const MAX_PROP_MOVEMENTS = 100;
+let propMonitorInterval: NodeJS.Timeout | null = null;
 
 export interface CustomNotification {
   id: number;
@@ -473,6 +506,164 @@ async function loadSubscriptionsFromDB(): Promise<void> {
   }
 }
 
+function monitorPropLines(): void {
+  try {
+    const allCachedProps = getAllCachedGameProps();
+    if (allCachedProps.size === 0) return;
+
+    const now = Date.now();
+    let newMovements = 0;
+
+    for (const [gameKey, props] of allCachedProps) {
+      const consolidated = new Map<string, { consensusLine: number; bestOverOdds: number; bestUnderOdds: number; bookmakerCount: number; marketLabel: string }>();
+
+      for (const prop of props) {
+        const key = `${prop.playerName}|${prop.market}`;
+        const existing = consolidated.get(key);
+        if (!existing) {
+          consolidated.set(key, {
+            consensusLine: prop.consensusLine,
+            bestOverOdds: prop.bestOver.odds,
+            bestUnderOdds: prop.bestUnder.odds,
+            bookmakerCount: prop.allBookmakers.length,
+            marketLabel: prop.marketLabel,
+          });
+        } else {
+          if (prop.bestOver.odds > existing.bestOverOdds) existing.bestOverOdds = prop.bestOver.odds;
+          if (prop.bestUnder.odds > existing.bestUnderOdds) existing.bestUnderOdds = prop.bestUnder.odds;
+          existing.bookmakerCount = Math.max(existing.bookmakerCount, prop.allBookmakers.length);
+          existing.consensusLine = (existing.consensusLine + prop.consensusLine) / 2;
+        }
+      }
+
+      for (const [key, current] of consolidated) {
+        const snapshotKey = `${gameKey}|${key}`;
+        const prev = propLineSnapshots.get(snapshotKey);
+
+        propLineSnapshots.set(snapshotKey, {
+          playerName: key.split("|")[0],
+          market: key.split("|")[1],
+          consensusLine: current.consensusLine,
+          bestOverOdds: current.bestOverOdds,
+          bestUnderOdds: current.bestUnderOdds,
+          bookmakerCount: current.bookmakerCount,
+          timestamp: now,
+        });
+
+        if (!prev) continue;
+
+        const lineShift = Math.abs(current.consensusLine - prev.consensusLine);
+        const overOddsShift = Math.abs(current.bestOverOdds - prev.bestOverOdds);
+        const underOddsShift = Math.abs(current.bestUnderOdds - prev.bestUnderOdds);
+        const oddsShift = Math.max(overOddsShift, underOddsShift);
+        const timeDelta = (now - prev.timestamp) / 60_000;
+
+        if (timeDelta < 1) continue;
+
+        const lineVelocity = lineShift / Math.max(timeDelta, 1);
+        const isSignificantLine = lineShift >= 0.5;
+        const isSignificantOdds = oddsShift >= 15;
+
+        if (!isSignificantLine && !isSignificantOdds) continue;
+
+        let velocity: PropMovement["velocity"] = "slow";
+        if (lineVelocity > 1.5 || (isSignificantOdds && oddsShift >= 40)) velocity = "steam";
+        else if (lineVelocity > 0.8 || (isSignificantOdds && oddsShift >= 25)) velocity = "fast";
+        else if (lineVelocity > 0.3 || isSignificantOdds) velocity = "moderate";
+
+        const sharpAction = velocity === "steam" || velocity === "fast" || (isSignificantLine && isSignificantOdds);
+
+        const direction: PropMovement["direction"] =
+          current.consensusLine > prev.consensusLine + 0.25 ? "up" :
+          current.consensusLine < prev.consensusLine - 0.25 ? "down" : "stable";
+
+        const playerName = key.split("|")[0];
+        const market = key.split("|")[1];
+
+        const movement: PropMovement = {
+          playerName,
+          market,
+          marketLabel: current.marketLabel,
+          gameKey,
+          previousLine: prev.consensusLine,
+          currentLine: current.consensusLine,
+          lineShift: Math.round(lineShift * 10) / 10,
+          previousOverOdds: prev.bestOverOdds,
+          currentOverOdds: current.bestOverOdds,
+          oddsShift: Math.round(oddsShift),
+          velocity,
+          sharpAction,
+          direction,
+          detectedAt: new Date().toISOString(),
+        };
+
+        recentPropMovements.unshift(movement);
+        if (recentPropMovements.length > MAX_PROP_MOVEMENTS) {
+          recentPropMovements.length = MAX_PROP_MOVEMENTS;
+        }
+        newMovements++;
+
+        if (sharpAction) {
+          const dirLabel = direction === "up" ? "↑" : direction === "down" ? "↓" : "→";
+          const notifType = velocity === "steam" ? "sharp_money" : "line_movement";
+
+          addNotification({
+            type: notifType as any,
+            title: velocity === "steam" ? "Steam Move — Player Prop" : "Sharp Prop Line Movement",
+            description: `${playerName} ${current.marketLabel} ${prev.consensusLine} → ${current.consensusLine} ${dirLabel} (${gameKey})`,
+            sport: undefined,
+            meta: {
+              playerName,
+              market,
+              marketLabel: current.marketLabel,
+              gameKey,
+              previousLine: prev.consensusLine,
+              currentLine: current.consensusLine,
+              lineShift: movement.lineShift,
+              oddsShift: movement.oddsShift,
+              velocity,
+              direction,
+              propMovement: true,
+            },
+          });
+
+          broadcastEvent("prop-sharp-movement", {
+            type: "prop-sharp-movement",
+            timestamp: new Date().toISOString(),
+            movement,
+          }, "alerts");
+        }
+      }
+    }
+
+    if (newMovements > 0) {
+      console.log(`[NotificationEngine] Detected ${newMovements} prop line movement(s)`);
+    }
+  } catch (err) {
+    logError("[NotificationEngine] Prop monitor cycle error", { error: String(err) });
+  }
+}
+
+export function getRecentPropMovements(options?: { sharpOnly?: boolean; limit?: number }): PropMovement[] {
+  let movements = recentPropMovements;
+  if (options?.sharpOnly) {
+    movements = movements.filter(m => m.sharpAction);
+  }
+  return movements.slice(0, options?.limit || 25);
+}
+
+export function getPropMovementsForPlayer(playerName: string): PropMovement[] {
+  const needle = playerName.toLowerCase().trim();
+  return recentPropMovements.filter(m => {
+    const name = m.playerName.toLowerCase();
+    return name === needle || name.includes(needle) || needle.includes(name);
+  });
+}
+
+export function getSharpPropAlerts(): PropMovement[] {
+  return recentPropMovements.filter(m => m.sharpAction);
+}
+
 export async function startNotificationEngine(): Promise<void> {
   if (monitorInterval) return;
   console.log("[NotificationEngine] Starting game & parlay monitor (30s interval)...");
@@ -490,12 +681,21 @@ export async function startNotificationEngine(): Promise<void> {
   }
 
   monitorInterval = setInterval(monitorGames, 30_000);
+
+  if (!propMonitorInterval) {
+    propMonitorInterval = setInterval(monitorPropLines, 60_000);
+    console.log("[NotificationEngine] Prop line monitor started (60s interval)");
+  }
 }
 
 export function stopNotificationEngine(): void {
   if (monitorInterval) {
     clearInterval(monitorInterval);
     monitorInterval = null;
+  }
+  if (propMonitorInterval) {
+    clearInterval(propMonitorInterval);
+    propMonitorInterval = null;
   }
   console.log("[NotificationEngine] Stopped.");
 }

@@ -7,6 +7,7 @@ import { getGameSituationalFactors, type SituationalFactors } from "./situationa
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import { isExclusivePick } from "./pickProtectionEngine";
 import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
+import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import type { Sport } from "@shared/schema";
 
 export interface PickReleaseSchedule {
@@ -62,6 +63,16 @@ export interface PrecomputedPick {
     awayInjuryCount: number;
     homeStartersOut: number;
     awayStartersOut: number;
+  };
+  sharpPropAlert?: {
+    playerName: string;
+    market: string;
+    previousLine: number;
+    currentLine: number;
+    lineShift: number;
+    velocity: string;
+    direction: string;
+    detectedAt: string;
   };
 }
 
@@ -803,6 +814,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     const sportProps = propCategoriesBySport[sport] || [];
     const leaders = game.leaders || [];
+    let sharpPropAlerts: PropMovement[] = [];
+    try { sharpPropAlerts = getSharpPropAlerts(); } catch {}
 
     for (const propDef of sportProps) {
       const leader = leaders.find(l =>
@@ -863,6 +876,22 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
         const propTiming = determinePickTiming(game.date, gameLineMovements, propEvRounded);
 
+        const matchingSharp = sharpPropAlerts.find(m =>
+          m.playerName.toLowerCase() === leader.playerName.toLowerCase() &&
+          (m.marketLabel.toLowerCase().includes(propDef.category.toLowerCase()) ||
+           propDef.category.toLowerCase().includes(m.marketLabel.toLowerCase()))
+        );
+
+        if (matchingSharp) {
+          const sharpDir = matchingSharp.direction === "up" ? "rising" : matchingSharp.direction === "down" ? "dropping" : "shifting";
+          propFactors.unshift({ name: "Sharp Prop Move", impact: matchingSharp.lineShift, direction: sharpDir });
+          if (matchingSharp.velocity === "steam") {
+            propConf = Math.min(95, propConf + 5);
+          } else if (matchingSharp.velocity === "fast") {
+            propConf = Math.min(93, propConf + 3);
+          }
+        }
+
         picks.push({
           id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.randomUUID().slice(0, 6)}`,
           sport,
@@ -880,12 +909,14 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           generatedAt: now,
           dataSource,
           gameTime: game.date,
-          reasoning: `${leader.playerName} averages ${leaderValue} ${propDef.category} per game. ${isOver ? "Over" : "Under"} ${propLine} is ${Math.abs(edge) > 1 ? "well" : "slightly"} ${isOver ? "supported" : "favored"} by season stats${mcSim ? " and Monte Carlo scoring projections" : ""}${sitFactors ? `. ${sitFactors.spotDescription || ""}` : ""}.`,
+          reasoning: `${leader.playerName} averages ${leaderValue} ${propDef.category} per game. ${isOver ? "Over" : "Under"} ${propLine} is ${Math.abs(edge) > 1 ? "well" : "slightly"} ${isOver ? "supported" : "favored"} by season stats${mcSim ? " and Monte Carlo scoring projections" : ""}${sitFactors ? `. ${sitFactors.spotDescription || ""}` : ""}${matchingSharp ? ` Sharp ${matchingSharp.velocity} move detected: line ${matchingSharp.previousLine} → ${matchingSharp.currentLine}.` : ""}.`,
           recommendation: propFusion.recommendation || "lean_bet",
           winProbability: propFusion.winProbability || Math.round(propConf * 0.95),
           insights: (propFusion.insights || []).slice(0, 2),
-          timing: propTiming.timing,
-          timingAdvice: propTiming.timingAdvice,
+          timing: matchingSharp?.velocity === "steam" ? "bet_now" : propTiming.timing,
+          timingAdvice: matchingSharp?.velocity === "steam"
+            ? `Bet now — steam move on ${leader.playerName} ${propDef.category} (${matchingSharp.previousLine} → ${matchingSharp.currentLine}), value disappearing fast`
+            : propTiming.timingAdvice,
           releaseSchedule: buildReleaseSchedule(now),
           isExclusive: false,
           monteCarloData: mcSim ? {
@@ -909,6 +940,16 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             awayInjuryCount,
             homeStartersOut,
             awayStartersOut,
+          } : undefined,
+          sharpPropAlert: matchingSharp ? {
+            playerName: matchingSharp.playerName,
+            market: matchingSharp.market,
+            previousLine: matchingSharp.previousLine,
+            currentLine: matchingSharp.currentLine,
+            lineShift: matchingSharp.lineShift,
+            velocity: matchingSharp.velocity,
+            direction: matchingSharp.direction,
+            detectedAt: matchingSharp.detectedAt,
           } : undefined,
         });
       }
