@@ -307,7 +307,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getPrecomputedEngineStatus());
   });
 
-  // startPlatformIntelligenceEngine(); // Disabled to conserve memory
+  startPlatformIntelligenceEngine();
 
   app.get("/api/platform-intelligence", (_req: Request, res: Response) => {
     try {

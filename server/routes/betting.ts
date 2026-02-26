@@ -931,7 +931,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  // liveSportsData.startSimulation(); // Disabled to conserve memory
+  liveSportsData.startSimulation();
 
   // ==================== LIVE GAMES & ANALYTICS ====================
   app.get("/api/live-games", async (_req, res) => {

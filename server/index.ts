@@ -6,6 +6,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
+import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -172,8 +173,7 @@ app.use((req, res, next) => {
       log(`serving on port ${port}`);
       
       try { startContinuousLearning(); log("Statistical model engine started"); } catch (e: any) { console.error("[STARTUP] Learning engine failed:", e.message); }
-
-      log("Non-essential engines deferred to conserve memory");
+      try { startAnalyticsAgent(); log("ESPN data agent started"); } catch (e: any) { console.error("[STARTUP] Analytics agent failed:", e.message); }
 
     
     },
