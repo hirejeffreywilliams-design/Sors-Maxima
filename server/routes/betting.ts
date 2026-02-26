@@ -2060,7 +2060,9 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           }
         }
 
-        if (matchedProps.length === 0) {
+        const gameIsLive = game.status?.state === "in";
+
+        if (matchedProps.length === 0 && !gameIsLive) {
           const homeToken = homeName.split(" ").pop() || "";
           const awayToken = awayName.split(" ").pop() || "";
           const directCache = getCachedPropsForGame(`${homeTeamName}|${awayTeamName}`);
@@ -2632,7 +2634,9 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
           }
         }
 
-        if (matchedProps.length === 0) {
+        const topPropsGameIsLive = game.status?.state === "in";
+
+        if (matchedProps.length === 0 && !topPropsGameIsLive) {
           const homeToken = homeName.split(" ").pop() || "";
           const awayToken = awayName.split(" ").pop() || "";
           const directCache = getCachedPropsForGame(`${homeTeamName}|${awayTeamName}`);

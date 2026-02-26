@@ -440,7 +440,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
           {playersWithProps.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               {isLive
-                ? "Props pulled by bookmakers at tipoff. Pre-game lines may reappear if cached."
+                ? "No live prop data available. Bookmakers remove prop markets at tipoff."
                 : "No player props available yet. Props typically post 1-2 days before game time."}
             </p>
           ) : (

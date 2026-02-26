@@ -1539,21 +1539,9 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5)
     perGamePropsCache.set(gameKey, { data: gameProps, timestamp: Date.now() });
   }
 
-  let cachedInjected = 0;
-  for (const event of live) {
-    const gameKey = `${event.home_team}|${event.away_team}`.toLowerCase();
-    if (!propsByGame.has(gameKey)) {
-      const cached = perGamePropsCache.get(gameKey);
-      if (cached && (Date.now() - cached.timestamp) < PER_GAME_PROPS_TTL && cached.data.length > 0) {
-        allProps.push(...cached.data);
-        cachedInjected += cached.data.length;
-      }
-    }
-  }
-
   playerPropsCache.set(cacheKey, { data: allProps, timestamp: Date.now() });
 
-  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${relevantEvents.length} events (${propsByGame.size} games cached, ${cachedInjected} injected from cache for live games)`);
+  logInfo(`[Props] Fetched ${allProps.length} real player props for ${sport} across ${relevantEvents.length} events (${propsByGame.size} games cached)`);
   return allProps;
 }
 
