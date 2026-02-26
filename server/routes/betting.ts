@@ -15,6 +15,8 @@ import { generateVegasPredictions, getVegasInsights } from "../vegas-engine";
 import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, getActiveSports, type TicketRequest, type GeneratedTicket } from "../ticketOrchestrator";
 import { analyzeCorrelations, gradeTicket, calculateSharpPublicSplit, generateHedgeAdvice, buildCorrelationMatrix } from "../ticketIntelligence";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "../quantumFusionEngine";
+import { getPreSimulated, simulateMatchup } from "../monteCarloEngine";
+import { getGameSituationalFactors } from "../situationalEngine";
 import { getLearningStats, getAllFactorWeights } from "../learningEngine";
 import { runHistoricalLearning, getHistoricalLearningStatus } from "../historicalLearningEngine";
 import { sportsDataService } from "../sportsDataService";
@@ -2200,7 +2202,122 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
             }
           }
 
+          let quantumScore: number | null = null;
+          let quantumGrade: string | null = null;
+          let quantumInsights: string[] = [];
+          let mcProjection: { predictedTotal: number; overProb: number; convergence: number } | null = null;
+          let situationalNote: string | null = null;
+          let vegasEdge: number | null = null;
+          const engineSources: string[] = ["ESPN Stats", "The Odds API"];
+
+          try {
+            const propOdds = recommendation === "over" ? (prop.overOdds || -110) : (prop.underOdds || -110);
+            const fusionResult = analyzeLeg(
+              sport as any,
+              `${pName} ${prop.marketLabel || prop.market} ${recommendation.toUpperCase()} ${prop.line}`,
+              propOdds,
+              {
+                playerName: pName,
+                market: prop.market,
+                line: prop.line,
+                seasonAvg: seasonAvg,
+                isPlayerProp: true,
+                homeTeam: homeTeamName,
+                awayTeam: awayTeamName,
+              }
+            );
+            if (fusionResult) {
+              quantumScore = fusionResult.overallScore;
+              quantumGrade = fusionResult.grade;
+              quantumInsights = (fusionResult.insights || []).slice(0, 3);
+              engineSources.push("Quantum Fusion");
+
+              if (fusionResult.confidence > confidence) {
+                confidence = Math.round((confidence * 0.6) + (fusionResult.confidence * 0.4));
+              }
+              if (fusionResult.expectedValue > 2) {
+                reasoning += ` QF: +${fusionResult.expectedValue.toFixed(1)}% EV detected.`;
+              }
+              if (fusionResult.edgePercentage > 3) {
+                confidence = Math.min(92, confidence + 3);
+              }
+            }
+          } catch {}
+
+          try {
+            const mcData = getPreSimulated(game.id);
+            if (mcData) {
+              mcProjection = {
+                predictedTotal: mcData.predictedTotal,
+                overProb: Math.round(mcData.overProb * 100),
+                convergence: mcData.convergenceScore,
+              };
+              engineSources.push("Monte Carlo");
+
+              const marketLower = (prop.marketLabel || "").toLowerCase();
+              if (marketLower.includes("point") && !marketLower.includes("3-point")) {
+                const teamIsHome = playerTeam === (game.homeTeam.abbreviation || "");
+                const projectedTeamScore = teamIsHome ? mcData.predictedHomeScore : mcData.predictedAwayScore;
+                if (seasonAvg !== null && projectedTeamScore > 0) {
+                  const teamAvgTotal = sport === "NBA" ? 112 : sport === "NFL" ? 23 : 4;
+                  const playerSharePct = seasonAvg / teamAvgTotal;
+                  const projectedPlayerPts = projectedTeamScore * playerSharePct;
+                  if (projectedPlayerPts > prop.line * 1.08) {
+                    reasoning += ` MC: Projected ${projectedPlayerPts.toFixed(1)} (${mcData.simulations.toLocaleString()} sims).`;
+                    confidence = Math.min(92, confidence + 2);
+                  } else if (projectedPlayerPts < prop.line * 0.92) {
+                    reasoning += ` MC: Projected ${projectedPlayerPts.toFixed(1)} (${mcData.simulations.toLocaleString()} sims).`;
+                    if (recommendation === "over") confidence = Math.max(45, confidence - 3);
+                  }
+                }
+              }
+            }
+          } catch {}
+
+          try {
+            const sitFactors = getGameSituationalFactors(sport as any, game, games);
+            if (sitFactors) {
+              engineSources.push("Situational");
+              const teamIsHome = playerTeam === (game.homeTeam.abbreviation || "");
+              const isB2B = teamIsHome ? sitFactors.homeB2B : sitFactors.awayB2B;
+              const restDays = teamIsHome ? sitFactors.homeRestDays : sitFactors.awayRestDays;
+
+              if (isB2B) {
+                situationalNote = "Back-to-back game — fatigue factor";
+                if (recommendation === "over") {
+                  confidence = Math.max(40, confidence - 4);
+                  reasoning += ` Sit: B2B game, fatigue risk for OVER.`;
+                } else {
+                  confidence = Math.min(90, confidence + 2);
+                  reasoning += ` Sit: B2B fatigue favors UNDER.`;
+                }
+              } else if (restDays >= 3) {
+                situationalNote = `${restDays} days rest — well rested`;
+                if (recommendation === "over") {
+                  confidence = Math.min(90, confidence + 2);
+                  reasoning += ` Sit: ${restDays}d rest, well rested.`;
+                }
+              }
+
+              if (sitFactors.spotType === "revenge" || sitFactors.spotType === "rivalry") {
+                situationalNote = (situationalNote ? situationalNote + " | " : "") + `${sitFactors.spotType} spot`;
+                reasoning += ` Sit: ${sitFactors.spotDescription}.`;
+              }
+            }
+          } catch {}
+
+          try {
+            const vegasPreds = await generateVegasPredictions(sport as any);
+            const gamePred = vegasPreds.find(vp => vp.game?.toLowerCase().includes(game.shortName?.toLowerCase().split(" ")[0] || "---"));
+            if (gamePred && gamePred.ev !== undefined) {
+              vegasEdge = gamePred.ev;
+              engineSources.push("Vegas Engine");
+            }
+          } catch {}
+
           const edge = seasonAvg ? Math.round((seasonAvg - prop.line) / prop.line * 100 * 10) / 10 : 0;
+
+          confidence = Math.min(95, Math.max(30, confidence));
 
           playersByName.get(pKey)!.markets.push({
             market: prop.market,
@@ -2221,6 +2338,13 @@ Be concise, data-driven, and honest. If you don't have enough data to make a rec
             consensusLine: prop.consensusLine,
             allBookmakers: (prop.allBookmakers || []).slice(0, 5),
             dataSource: prop.dataSource || "The Odds API (live)",
+            quantumScore,
+            quantumGrade,
+            quantumInsights,
+            mcProjection,
+            situationalNote,
+            vegasEdge,
+            engineSources,
           });
         }
 

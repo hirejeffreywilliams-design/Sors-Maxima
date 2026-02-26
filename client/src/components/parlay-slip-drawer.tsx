@@ -105,12 +105,12 @@ function formatGameDate(gameTime?: string): string {
   } catch { return ""; }
 }
 
-function gradeEmoji(grade?: string): string {
+function gradeLabel(grade?: string): string {
   if (!grade) return "";
-  if (grade.startsWith("A")) return "\u{1F7E2}";
-  if (grade.startsWith("B")) return "\u{1F535}";
-  if (grade.startsWith("C")) return "\u{1F7E1}";
-  return "\u{1F534}";
+  if (grade.startsWith("A")) return "[A]";
+  if (grade.startsWith("B")) return "[B]";
+  if (grade.startsWith("C")) return "[C]";
+  return "[D]";
 }
 
 function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmericanOdds: number, stake: number): string {
@@ -118,40 +118,40 @@ function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmerica
   const payout = (totalOdds * stake).toFixed(2);
 
   const lines: string[] = [
-    "\u26A1 SORS MAXIMA PARLAY",
-    `\u{1F3AF} ${legs.length} Legs | ${formattedOdds} Odds | $${stake} \u2192 $${payout}`,
-    "\u2500".repeat(30),
+    "SORS MAXIMA PARLAY",
+    `${legs.length} Legs | ${formattedOdds} Odds | $${stake} -> $${payout}`,
+    "-".repeat(30),
   ];
 
   legs.forEach((leg, i) => {
     const odds = formatOdds(leg.americanOdds, leg.decimalOdds);
     const matchup = leg.opponent ? `${leg.team} vs ${leg.opponent}` : leg.team;
     const dateStr = formatGameDate(leg.gameTime);
-    const emoji = gradeEmoji(leg.grade);
+    const label = gradeLabel(leg.grade);
 
     lines.push("");
-    lines.push(`${emoji} Leg ${i + 1}: ${leg.outcome}`);
-    lines.push(`\u{1F3C0} ${matchup}${dateStr ? ` \u{1F4C5} ${dateStr}` : ""}`);
+    lines.push(`${label} Leg ${i + 1}: ${leg.outcome}`);
+    lines.push(`  ${matchup}${dateStr ? ` | ${dateStr}` : ""}`);
 
     const meta: string[] = [`${odds}`];
     if (leg.grade) meta.push(`Grade: ${leg.grade}`);
     if (leg.confidence) meta.push(`${Math.round(leg.confidence)}% conf`);
     if (leg.evPercent !== undefined && leg.evPercent > 0) meta.push(`+${leg.evPercent.toFixed(1)}% EV`);
-    lines.push(`   ${meta.join(" \u2022 ")}`);
+    lines.push(`   ${meta.join(" | ")}`);
 
     if (leg.monteCarloData) {
-      lines.push(`   \u{1F4CA} Projected: ${Math.round(leg.monteCarloData.predictedAwayScore)}-${Math.round(leg.monteCarloData.predictedHomeScore)}`);
+      lines.push(`   Projected: ${Math.round(leg.monteCarloData.predictedAwayScore)}-${Math.round(leg.monteCarloData.predictedHomeScore)}`);
     }
 
     if (leg.reasoning) {
-      lines.push(`   \u{1F4A1} ${leg.reasoning}`);
+      lines.push(`   ${leg.reasoning}`);
     }
   });
 
   lines.push("");
-  lines.push("\u2500".repeat(30));
-  lines.push(`\u{1F4B0} Stake: $${stake.toFixed(2)} | Payout: $${payout}`);
-  lines.push(`\u{1F4C8} Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`);
+  lines.push("-".repeat(30));
+  lines.push(`Stake: $${stake.toFixed(2)} | Payout: $${payout}`);
+  lines.push(`Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`);
   lines.push("");
   lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
 
@@ -447,15 +447,35 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
   );
 }
 
-function SlipContent({ compact }: { compact?: boolean }) {
+function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
   const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds } = useParlaySlip();
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
   const [showPlacement, setShowPlacement] = useState(false);
-  const [showShare, setShowShare] = useState(false);
 
   const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
   const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+
+  const handleCopySlip = () => {
+    const text = formatSlipAsText(legs, totalOdds, totalAmericanOdds, stake);
+    copyToClipboard(text).then(() => {
+      toast({ title: "Bet slip copied to clipboard!" });
+    }).catch(() => {
+      toast({ title: "Could not copy", variant: "destructive" });
+    });
+  };
+
+  const handleShareSlip = () => {
+    const text = formatSlipAsText(legs, totalOdds, totalAmericanOdds, stake);
+    if (navigator.share) {
+      navigator.share({
+        title: `Sors Maxima Parlay (${legs.length} legs)`,
+        text: text,
+      }).catch(() => {});
+    } else {
+      handleCopySlip();
+    }
+  };
 
   if (legCount === 0) {
     return (
@@ -476,6 +496,99 @@ function SlipContent({ compact }: { compact?: boolean }) {
           </Link>
         </Button>
       </div>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <>
+        <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="default" className="text-xs font-bold px-2.5 py-0.5">
+                {legCount} leg{legCount !== 1 ? "s" : ""}
+              </Badge>
+              <span className="text-sm font-bold">{formattedTotalOdds}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={clearSlip} className="text-xs text-destructive hover:text-destructive h-7 px-2" data-testid="button-clear-slip">
+              <Trash2 className="h-3.5 w-3.5 mr-1" />
+              Clear
+            </Button>
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Stake $</span>
+              <Input
+                type="number"
+                min={1}
+                max={100000}
+                value={stake}
+                onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
+                className="h-8 w-20 text-sm font-medium"
+                data-testid="input-stake"
+              />
+              <div className="flex gap-1">
+                {[10, 25, 50, 100].map((amt) => (
+                  <Button
+                    key={amt}
+                    variant={stake === amt ? "default" : "outline"}
+                    size="sm"
+                    className="h-8 px-2 text-xs"
+                    onClick={() => setStake(amt)}
+                    data-testid={`button-stake-${amt}`}
+                  >
+                    ${amt}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-xs text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span></span>
+            <span className="text-sm font-bold text-green-600 dark:text-green-400">Payout: ${potentialPayout}</span>
+          </div>
+        </div>
+
+        <ScrollArea className="flex-1">
+          <div className="px-3 py-1">
+            <div className="divide-y">
+              {legs.map((leg) => (
+                <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} />
+              ))}
+            </div>
+          </div>
+        </ScrollArea>
+
+        <div className="border-t bg-background px-4 py-3 space-y-2.5 safe-area-bottom">
+          <div className="flex gap-2">
+            <Button className="flex-1 h-10 gap-2 font-bold" onClick={handleCopySlip} data-testid="button-copy-full-slip">
+              <Copy className="h-4 w-4" />
+              Copy Slip
+            </Button>
+            <Button variant="outline" className="h-10 gap-2" onClick={handleShareSlip} data-testid="button-share-slip">
+              <Share2 className="h-4 w-4" />
+              Share
+            </Button>
+          </div>
+
+          <button
+            className="w-full flex items-center justify-between p-2 rounded-md bg-muted/40 hover:bg-muted/60 transition-colors text-xs text-muted-foreground"
+            onClick={() => setShowPlacement(!showPlacement)}
+            data-testid="toggle-placement-guide"
+          >
+            <span className="flex items-center gap-1.5">
+              <ExternalLink className="h-3.5 w-3.5" />
+              Open Sportsbook to Place Bet
+            </span>
+            {showPlacement ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+          </button>
+          {showPlacement && (
+            <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+          )}
+
+          <AffiliateDisclosure compact className="text-center block w-full" />
+        </div>
+      </>
     );
   }
 
@@ -543,34 +656,30 @@ function SlipContent({ compact }: { compact?: boolean }) {
 
         <Separator />
 
+        <div className="flex gap-1.5">
+          <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleCopySlip} data-testid="button-copy-full-slip">
+            <Copy className="h-3 w-3" />
+            Copy
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleShareSlip} data-testid="button-share-slip">
+            <Share2 className="h-3 w-3" />
+            Share
+          </Button>
+        </div>
+
         <button
           className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"
           onClick={() => setShowPlacement(!showPlacement)}
           data-testid="toggle-placement-guide"
         >
           <span className="flex items-center gap-1.5">
-            <ListChecks className="h-3.5 w-3.5" />
-            Place Your Bet
+            <ExternalLink className="h-3.5 w-3.5" />
+            Open Sportsbook
           </span>
           {showPlacement ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
         {showPlacement && (
           <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
-        )}
-
-        <button
-          className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"
-          onClick={() => setShowShare(!showShare)}
-          data-testid="toggle-share-section"
-        >
-          <span className="flex items-center gap-1.5">
-            <Share2 className="h-3.5 w-3.5" />
-            Share Your Picks
-          </span>
-          {showShare ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-        </button>
-        {showShare && (
-          <ShareSection legs={legs} totalOdds={totalOdds} totalAmericanOdds={totalAmericanOdds} stake={stake} />
         )}
 
         <div className="flex gap-2">
@@ -650,7 +759,7 @@ export function ParlaySlipMobileDrawer() {
           </SheetTitle>
         </SheetHeader>
         <Separator />
-        <SlipContent />
+        <SlipContent isMobile />
       </SheetContent>
     </Sheet>
   );

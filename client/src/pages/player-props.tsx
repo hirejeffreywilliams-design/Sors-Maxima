@@ -31,6 +31,13 @@ interface MarketProp {
   consensusLine?: number;
   allBookmakers?: { bookmaker: string; overOdds: number; underOdds: number; line: number }[];
   dataSource: string;
+  quantumScore?: number | null;
+  quantumGrade?: string | null;
+  quantumInsights?: string[];
+  mcProjection?: { predictedTotal: number; overProb: number; convergence: number } | null;
+  situationalNote?: string | null;
+  vegasEdge?: number | null;
+  engineSources?: string[];
 }
 
 interface GamePlayer {
@@ -223,6 +230,37 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip }: 
         <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid={`text-reasoning-${playerName}-${prop.market}`}>
           {prop.reasoning}
         </p>
+      )}
+
+      {(prop.quantumGrade || prop.mcProjection || prop.situationalNote) && (
+        <div className="flex items-center gap-1.5 flex-wrap" data-testid={`engines-${playerName}-${prop.market}`}>
+          {prop.quantumGrade && (
+            <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
+              prop.quantumGrade.startsWith("A") ? "bg-green-500/10 text-green-600 border-green-500/30" :
+              prop.quantumGrade.startsWith("B") ? "bg-blue-500/10 text-blue-600 border-blue-500/30" :
+              "bg-yellow-500/10 text-yellow-600 border-yellow-500/30"
+            }`}>
+              <Zap className="w-2.5 h-2.5 mr-0.5" />QF: {prop.quantumGrade}
+            </Badge>
+          )}
+          {prop.mcProjection && (
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-purple-500/10 text-purple-600 border-purple-500/30">
+              <Target className="w-2.5 h-2.5 mr-0.5" />MC: {prop.mcProjection.overProb}% over
+            </Badge>
+          )}
+          {prop.situationalNote && (
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-orange-500/10 text-orange-600 border-orange-500/30">
+              <Shield className="w-2.5 h-2.5 mr-0.5" />{prop.situationalNote}
+            </Badge>
+          )}
+        </div>
+      )}
+
+      {prop.engineSources && prop.engineSources.length > 2 && (
+        <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+          <Activity className="w-2.5 h-2.5" />
+          <span>{prop.engineSources.length} engines: {prop.engineSources.join(" · ")}</span>
+        </div>
       )}
 
       {prop.allBookmakers && prop.allBookmakers.length > 1 && (
