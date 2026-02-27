@@ -252,12 +252,18 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
   }
 
   const regions = "us";
-  const markets = "h2h,spreads,totals,h2h_h1,spreads_h1,totals_h1,alternate_spreads,alternate_totals";
+  const markets = "h2h,spreads,totals";
   const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=${regions}&markets=${markets}&oddsFormat=american`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`The Odds API error: ${response.status}`);
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      let reason = `HTTP ${response.status}`;
+      try { const p = JSON.parse(body); if (p.message) reason = p.message; } catch {}
+      logWarn(`Odds API error for ${sport}: ${reason}`);
+      return [];
+    }
     const data = await response.json();
     oddsApiCache.set(cacheKey, { data, timestamp: Date.now() });
     return data;

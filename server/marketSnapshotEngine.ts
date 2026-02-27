@@ -173,24 +173,29 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   if (cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000) return cached.data;
 
   try {
-    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals,h2h_h1,spreads_h1,totals_h1,alternate_spreads,alternate_totals&oddsFormat=american`;
+    const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
     const res = await fetch(url);
     if (!res.ok) {
-      if (res.status === 401 || res.status === 429) {
-        if (!oddsApiWarned) {
-          const body = await res.text().catch(() => "");
-          const parsed = JSON.parse(body || "{}").error_code || "";
-          const reason = parsed === "OUT_OF_USAGE_CREDITS" ? "monthly quota exhausted" : res.status === 429 ? "rate limited" : "invalid key";
-          console.warn(`[MarketSnapshot] Odds API ${res.status}: ${reason}. Multi-book odds unavailable, using ESPN fallback.`);
-          oddsApiWarned = true;
-        }
-        return oddsFullCache.get(cacheKey)?.data || [];
+      if (!oddsApiWarned) {
+        const body = await res.text().catch(() => "");
+        let reason = `HTTP ${res.status}`;
+        try {
+          const parsed = JSON.parse(body || "{}");
+          if (parsed.error_code === "OUT_OF_USAGE_CREDITS") reason = "monthly quota exhausted";
+          else if (res.status === 401) reason = "invalid API key";
+          else if (res.status === 429) reason = "rate limited";
+          else if (parsed.message) reason = parsed.message;
+        } catch {}
+        console.warn(`[MarketSnapshot] Odds API error: ${reason}. Multi-book odds unavailable, using ESPN fallback.`);
+        oddsApiWarned = true;
       }
-      throw new Error(`Odds API ${res.status}`);
+      return oddsFullCache.get(cacheKey)?.data || [];
     }
     oddsApiWarned = false;
+    const remaining = res.headers.get("x-requests-remaining");
     const data: OddsApiGame[] = await res.json();
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
+    console.log(`[MarketSnapshot] Odds API OK — ${data.length} ${sport} games (${remaining} requests remaining)`);
     return data;
   } catch (e) {
     // Suppress repeated Odds API error logs to reduce output volume
