@@ -8,6 +8,7 @@ import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } fr
 import { isExclusivePick } from "./pickProtectionEngine";
 import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
+import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import type { Sport } from "@shared/schema";
 
 export interface PickReleaseSchedule {
@@ -1027,6 +1028,24 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
   };
 
   predictionCache.set(sport, { snapshot, timestamp: Date.now(), sport });
+
+  try {
+    savePrecomputedPicks(finalPicks.map(p => ({
+      id: p.id,
+      sport: p.sport,
+      game: p.game,
+      homeTeam: p.homeTeam,
+      awayTeam: p.awayTeam,
+      pick: p.pick,
+      betType: p.betType,
+      odds: p.odds,
+      grade: p.grade,
+      confidence: p.confidence,
+      ev: p.ev,
+      gameTime: p.gameTime,
+    })));
+  } catch {}
+
   return snapshot;
 }
 

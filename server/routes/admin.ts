@@ -3926,4 +3926,41 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/pick-accuracy", requireAdmin, async (_req, res) => {
+    try {
+      const { getPickAccuracyStats, getPickTrackerStatus } = await import("../pickOutcomeTracker");
+      const stats = getPickAccuracyStats();
+      const status = getPickTrackerStatus();
+      res.json({ stats, status });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to load pick accuracy stats" });
+    }
+  });
+
+  app.get("/api/admin/pick-records", requireAdmin, async (req, res) => {
+    try {
+      const { getRecentPicks } = await import("../pickOutcomeTracker");
+      const { limit = "100", sport, status = "all", grade } = req.query as Record<string, string>;
+      const picks = getRecentPicks({
+        limit: Math.min(parseInt(limit) || 100, 500),
+        sport,
+        status: status as "settled" | "pending" | "all",
+        grade,
+      });
+      res.json({ picks, total: picks.length });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to load pick records" });
+    }
+  });
+
+  app.post("/api/admin/pick-tracker/reset", requireAdmin, async (_req, res) => {
+    try {
+      const { resetPickTracker } = await import("../pickOutcomeTracker");
+      resetPickTracker();
+      res.json({ success: true, message: "Pick tracker reset" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to reset pick tracker" });
+    }
+  });
+
 }

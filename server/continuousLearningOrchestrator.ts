@@ -4,6 +4,7 @@ import { eq, isNull, desc, sql, and, lt, gt } from "drizzle-orm";
 import { logError, logInfo, logWarn } from "./errorLogger";
 import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
 import { recordGameOutcome } from "./platformIntelligenceEngine";
+import { settlePicksForGame } from "./pickOutcomeTracker";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
@@ -307,6 +308,26 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
 
     if (settled > 0 || mcRecorded > 0) {
       logInfo(`[Orchestrator] Auto-settled ${settled}/${checked} predictions, MC outcomes recorded: ${mcRecorded}`);
+    }
+
+    let picksSettled = 0;
+    for (const [sport, gameMap] of sportGames.entries()) {
+      gameMap.forEach((game: any, key: string) => {
+        if (key !== game.id) return;
+        try {
+          picksSettled += settlePicksForGame({
+            gameId: game.id,
+            homeTeam: game.homeTeam,
+            awayTeam: game.awayTeam,
+            homeScore: game.homeScore,
+            awayScore: game.awayScore,
+            sport,
+          });
+        } catch {}
+      });
+    }
+    if (picksSettled > 0) {
+      logInfo(`[Orchestrator] Settled ${picksSettled} precomputed picks from outcome tracker`);
     }
 
     try {

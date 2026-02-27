@@ -724,6 +724,9 @@ export default function AdminDashboard() {
                 <TabsTrigger value="manage" data-testid="tab-manage">
                   <Settings className="h-3.5 w-3.5 mr-1" />Manage
                 </TabsTrigger>
+                <TabsTrigger value="pick-accuracy" data-testid="tab-pick-accuracy">
+                  <Target className="h-3.5 w-3.5 mr-1" />Pick Accuracy
+                </TabsTrigger>
               </TabsList>
             </ScrollArea>
 
@@ -1714,6 +1717,10 @@ export default function AdminDashboard() {
               <FeatureFlagsPanel />
               <AuditTrailPanel />
             </TabsContent>
+
+            <TabsContent value="pick-accuracy" className="space-y-4">
+              <PickAccuracyPanel />
+            </TabsContent>
           </Tabs>
         </div>
 
@@ -2102,6 +2109,250 @@ function AuditTrailPanel() {
                   <span className="text-xs text-muted-foreground shrink-0">
                     {new Date(entry.timestamp).toLocaleString()}
                   </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function PickAccuracyPanel() {
+  const [sport, setSport] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [gradeFilter, setGradeFilter] = useState("all");
+  const queryClient = useQueryClient();
+
+  const { data: statsData, isLoading: statsLoading } = useQuery<any>({
+    queryKey: ["/api/admin/pick-accuracy"],
+    refetchInterval: 30000,
+  });
+
+  const { data: recordsData, isLoading: recordsLoading } = useQuery<any>({
+    queryKey: ["/api/admin/pick-records", sport, statusFilter, gradeFilter],
+    queryFn: async () => {
+      const params = new URLSearchParams({ limit: "100", status: statusFilter });
+      if (sport !== "all") params.set("sport", sport);
+      if (gradeFilter !== "all") params.set("grade", gradeFilter);
+      const res = await fetch(`/api/admin/pick-records?${params}`);
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/pick-tracker/reset"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pick-accuracy"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pick-records"] });
+    },
+  });
+
+  const stats = statsData?.stats;
+  const status = statsData?.status;
+  const picks = recordsData?.picks || [];
+
+  const gradeColor = (g: string) => {
+    if (!g) return "";
+    if (g.startsWith("A")) return "text-green-600 dark:text-green-400";
+    if (g.startsWith("B")) return "text-blue-600 dark:text-blue-400";
+    if (g.startsWith("C")) return "text-yellow-600 dark:text-yellow-400";
+    return "text-red-600 dark:text-red-400";
+  };
+
+  const resultBadge = (r: string) => {
+    if (r === "won") return <Badge className="bg-green-500/20 text-green-400 text-xs">Won</Badge>;
+    if (r === "lost") return <Badge className="bg-red-500/20 text-red-400 text-xs">Lost</Badge>;
+    if (r === "push") return <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">Push</Badge>;
+    return <Badge variant="outline" className="text-xs">Pending</Badge>;
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Pick Accuracy Tracker
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => resetMutation.mutate()}
+              disabled={resetMutation.isPending}
+              data-testid="button-reset-tracker"
+            >
+              <RefreshCw className="h-3.5 w-3.5 mr-1" />
+              Reset
+            </Button>
+          </div>
+          <CardDescription>
+            Tracks precomputed engine picks and settles them against real game outcomes
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {statsLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-16" />)}
+            </div>
+          ) : stats ? (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-total-picks">{stats.totalPicks}</p>
+                    <p className="text-xs text-muted-foreground">Total Picks</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-settled-picks">{stats.settledPicks}</p>
+                    <p className="text-xs text-muted-foreground">Settled</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold text-green-500" data-testid="stat-won-picks">{stats.wonPicks}</p>
+                    <p className="text-xs text-muted-foreground">Won</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold text-red-500" data-testid="stat-lost-picks">{stats.lostPicks}</p>
+                    <p className="text-xs text-muted-foreground">Lost</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-win-rate">{stats.winRate.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground">Win Rate</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-avg-grade">{stats.averageGrade || "—"}</p>
+                    <p className="text-xs text-muted-foreground">Avg Grade</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-avg-confidence">{stats.averageConfidence.toFixed(0)}%</p>
+                    <p className="text-xs text-muted-foreground">Avg Confidence</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold text-blue-500" data-testid="stat-pending-picks">{stats.pendingPicks}</p>
+                    <p className="text-xs text-muted-foreground">Pending</p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {stats.bySport && Object.keys(stats.bySport).length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">By Sport</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {Object.entries(stats.bySport).map(([sp, s]: [string, any]) => (
+                      <div key={sp} className="border rounded-md p-2 text-sm" data-testid={`sport-stats-${sp}`}>
+                        <p className="font-semibold">{sp}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {s.won}W / {s.lost}L / {s.push}P — {s.winRate.toFixed(1)}% win
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {status && (
+                <div className="text-xs text-muted-foreground flex gap-4">
+                  <span>File: {status.dataFile}</span>
+                  <span>Last save: {status.lastSaved ? new Date(status.lastSaved).toLocaleTimeString() : "Never"}</span>
+                </div>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">No accuracy data yet. Picks are saved every 5 minutes during prediction cycles.</p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm font-medium">Recent Picks</CardTitle>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <Select value={sport} onValueChange={setSport}>
+              <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-sport-filter">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sports</SelectItem>
+                <SelectItem value="NBA">NBA</SelectItem>
+                <SelectItem value="NFL">NFL</SelectItem>
+                <SelectItem value="MLB">MLB</SelectItem>
+                <SelectItem value="NHL">NHL</SelectItem>
+                <SelectItem value="NCAAB">NCAAB</SelectItem>
+                <SelectItem value="NCAAF">NCAAF</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-status-filter">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="settled">Settled</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={gradeFilter} onValueChange={setGradeFilter}>
+              <SelectTrigger className="w-28 h-8 text-xs" data-testid="select-grade-filter">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Grades</SelectItem>
+                <SelectItem value="A+">A+</SelectItem>
+                <SelectItem value="A">A</SelectItem>
+                <SelectItem value="A-">A-</SelectItem>
+                <SelectItem value="B+">B+</SelectItem>
+                <SelectItem value="B">B</SelectItem>
+                <SelectItem value="C+">C+</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {recordsLoading ? (
+            <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
+          ) : picks.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">No picks found. Waiting for next prediction cycle...</p>
+          ) : (
+            <div className="space-y-1">
+              <div className="grid grid-cols-12 gap-1 text-xs text-muted-foreground font-medium pb-1 border-b">
+                <span className="col-span-1">Grade</span>
+                <span className="col-span-2">Sport</span>
+                <span className="col-span-3">Game</span>
+                <span className="col-span-3">Pick</span>
+                <span className="col-span-1">Odds</span>
+                <span className="col-span-1">Conf</span>
+                <span className="col-span-1">Result</span>
+              </div>
+              {picks.map((p: any) => (
+                <div
+                  key={p.id}
+                  className="grid grid-cols-12 gap-1 text-xs py-1.5 border-b border-border/30 hover:bg-muted/30"
+                  data-testid={`pick-row-${p.id}`}
+                >
+                  <span className={`col-span-1 font-bold ${gradeColor(p.grade)}`}>{p.grade}</span>
+                  <span className="col-span-2 text-muted-foreground">{p.sport}</span>
+                  <span className="col-span-3 truncate">{p.game}</span>
+                  <span className="col-span-3 truncate">{p.pick}</span>
+                  <span className="col-span-1">{p.odds > 0 ? `+${p.odds}` : p.odds}</span>
+                  <span className="col-span-1">{p.confidence}%</span>
+                  <span className="col-span-1">{resultBadge(p.result)}</span>
                 </div>
               ))}
             </div>
