@@ -850,6 +850,22 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     res.json(sportsDataService.getApiStatus());
   });
 
+  app.get("/api/live/factor-adjustments", async (_req, res) => {
+    try {
+      const { getLiveFactorAdjustments } = await import("../liveAnalyticsEngine");
+      const adjustments = await getLiveFactorAdjustments();
+      res.json({
+        adjustments,
+        count: adjustments.length,
+        hasLiveGames: adjustments.length > 0,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error("[live-factor-adjustments] Error:", err);
+      res.status(500).json({ error: "Failed to compute live factor adjustments" });
+    }
+  });
+
   app.post("/api/admin/live/clear-cache", requireAdmin, (_req, res) => {
     sportsDataService.clearCache();
     res.json({ success: true, message: "Sports data cache cleared" });

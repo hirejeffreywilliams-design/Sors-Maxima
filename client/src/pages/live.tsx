@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff } from "lucide-react";
+import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
@@ -9,6 +9,7 @@ import { PublicVsSharp } from "@/components/analytics/public-vs-sharp";
 import { SchemeRecognition } from "@/components/scheme-recognition";
 import { CashoutAdvisor } from "@/components/live/cashout-advisor";
 import { LiveChat } from "@/components/live/live-chat";
+import { LiveFactorAdjuster } from "@/components/live/live-factor-adjuster";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/use-seo";
 import { useSSE, type SSEEvent } from "@/hooks/use-sse";
@@ -21,6 +22,7 @@ export default function Live() {
     if (event.type === "live-scores" || event.type === "intelligence-update") {
       queryClient.invalidateQueries({ queryKey: ["/api/live/momentum"] });
       queryClient.invalidateQueries({ queryKey: ["/api/market-snapshot"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/live/factor-adjustments"] });
     }
     if (event.type === "edge-alerts") {
       queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
@@ -63,9 +65,14 @@ export default function Live() {
           </div>
         </header>
 
-        <Tabs defaultValue="momentum" className="space-y-6">
+        <Tabs defaultValue="factors" className="space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-8 sm:max-w-3xl">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-9 sm:max-w-4xl">
+              <TabsTrigger value="factors" className="gap-1 px-2 sm:px-3 relative" data-testid="tab-factors">
+                <Sliders className="w-4 h-4 shrink-0 text-blue-500" />
+                <span className="hidden sm:inline">Factors</span>
+                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse sm:hidden" />
+              </TabsTrigger>
               <TabsTrigger value="momentum" className="gap-1 px-2 sm:px-3" data-testid="tab-momentum">
                 <Activity className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Momentum</span>
@@ -100,6 +107,10 @@ export default function Live() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="factors" className="space-y-6">
+            <LiveFactorAdjuster />
+          </TabsContent>
 
           <TabsContent value="momentum" className="space-y-6">
             <MomentumTracker />
