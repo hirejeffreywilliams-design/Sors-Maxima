@@ -4,6 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSEO } from "@/hooks/use-seo";
 import {
@@ -401,11 +407,17 @@ function PlayerSection({ player, sport, addLeg, slipLegIds, isLive }: {
             )}
             <span className="text-[10px] text-muted-foreground">{player.markets.length} props</span>
             {player.injury && (
-              <span className="text-[10px] text-red-500 flex items-center gap-0.5">
-                <Heart className="w-2.5 h-2.5" /> {player.injury.status}
+              <span className="text-[10px] text-red-500 flex items-center gap-0.5 font-medium">
+                <Heart className="w-2.5 h-2.5 shrink-0" /> {player.injury.status}
               </span>
             )}
           </div>
+          {player.injury?.details && (
+            <p className="text-[10px] text-red-400/80 mt-0.5 leading-snug flex items-start gap-0.5 line-clamp-2">
+              <AlertTriangle className="w-2.5 h-2.5 shrink-0 mt-px" />
+              <span>{player.injury.details}</span>
+            </p>
+          )}
           {hasLiveStats && (
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <Activity className="w-2.5 h-2.5 text-amber-500 shrink-0" />
@@ -422,6 +434,15 @@ function PlayerSection({ player, sport, addLeg, slipLegIds, isLive }: {
 
       {expanded && (
         <div className="grid gap-2 pt-1 pb-2">
+          {player.injury?.details && (
+            <div className="mx-1 px-2 py-1.5 rounded-md bg-red-500/10 border border-red-500/20 flex items-start gap-1.5">
+              <Heart className="w-3 h-3 text-red-500 shrink-0 mt-0.5" />
+              <div>
+                <span className="text-[10px] font-semibold text-red-500 uppercase tracking-wide">{player.injury.status}</span>
+                <p className="text-[11px] text-red-400/90 leading-relaxed mt-0.5">{player.injury.details}</p>
+              </div>
+            </div>
+          )}
           {player.markets.map((prop) => {
             const overId = `prop-${player.playerName}-${prop.market}-over`.replace(/\s+/g, "-").toLowerCase();
             const underId = `prop-${player.playerName}-${prop.market}-under`.replace(/\s+/g, "-").toLowerCase();
@@ -515,8 +536,22 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           <div className="flex items-center gap-1.5">
                             {player.position && <span className="text-[10px] text-muted-foreground">{player.position}</span>}
                             {player.injury && (
-                              <Badge variant="outline" className="text-[8px] px-1 py-0 border-red-500/30 text-red-400">{player.injury.status}</Badge>
-                            )}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="outline" className="text-[8px] px-1 py-0 border-red-500/30 text-red-400 cursor-help">
+                                    <Heart className="w-2 h-2 mr-0.5" />{player.injury.status}
+                                  </Badge>
+                                </TooltipTrigger>
+                                {player.injury.details && (
+                                  <TooltipContent side="top" className="max-w-[200px]">
+                                    <p className="text-xs font-medium">{player.injury.status}</p>
+                                    <p className="text-xs text-muted-foreground">{player.injury.details}</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                           </div>
                           {player.leaderStats && player.leaderStats.length > 0 && (
                             <p className="text-[10px] text-muted-foreground mt-0.5">
