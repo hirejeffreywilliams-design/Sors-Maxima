@@ -679,7 +679,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         bookmakerCount: game.bookmakers?.length || 0,
         oddsSource: game.odds?.homeMoneyline ? "ESPN" : "model-estimated",
       }, marketCtx);
-      let confidence = Math.min(92, Math.max(30, fusion.confidence));
+      let confidence = Math.min(68, Math.max(25, fusion.confidence));
 
       if (mcSim) {
         let mcConfBoost = 0;
@@ -716,7 +716,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             : teamLine - predictedTeamScore;
           mcConfBoost = Math.min(12, Math.max(-8, Math.round(diff * 1.2)));
         }
-        confidence = Math.min(95, Math.max(25, confidence + mcConfBoost));
+        confidence = Math.min(70, Math.max(22, confidence + mcConfBoost));
       }
 
       const impliedProb = bet.odds < 0 ? Math.abs(bet.odds) / (Math.abs(bet.odds) + 100) : 100 / (bet.odds + 100);
@@ -859,10 +859,10 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           oddsSource: "ESPN-derived",
         }, marketCtx);
 
-        let propConf = Math.min(88, Math.max(35, propFusion.confidence));
+        let propConf = Math.min(65, Math.max(22, propFusion.confidence));
         if (mcSim) {
           const boostDir = isOver ? edge : -edge;
-          propConf = Math.min(90, Math.max(30, propConf + Math.round(boostDir * 3)));
+          propConf = Math.min(68, Math.max(20, propConf + Math.round(boostDir * 2)));
         }
 
         const propImplied = Math.abs(propOdds) / (Math.abs(propOdds) + 100);
@@ -964,7 +964,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       awayMoneyline: vp.awayMoneyline || undefined,
     };
     const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds }, vpMarketCtx);
-    const confidence = Math.min(92, Math.max(30, fusion.confidence));
+    const confidence = Math.min(68, Math.max(22, fusion.confidence));
     const impliedProb = (vp.odds || -110) < 0 ? Math.abs(vp.odds || -110) / (Math.abs(vp.odds || -110) + 100) : 100 / ((vp.odds || -110) + 100);
     const trueProb = confidence / 100;
     const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;

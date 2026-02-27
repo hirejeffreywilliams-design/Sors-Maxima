@@ -756,64 +756,65 @@ interface SignalConfig {
 
 const SIGNAL_CONFIGS: SignalConfig[] = [
   // CORE BETTING ANALYSIS (12 factors)
-  { source: "scheme_mismatch", bullishProb: 0.6, baseStrength: [50, 40], baseConfidence: [70, 25], reasoning: "Offensive scheme creates favorable matchup against opponent's defensive formation", impact: 1.15, category: "core_betting" },
-  { source: "coaching_tendency", bullishProb: 0.55, baseStrength: [45, 45], baseConfidence: [65, 30], reasoning: "Coach's historical patterns favor aggressive play-calling in this situation", impact: 1.10, category: "core_betting" },
-  { source: "sharp_money_flow", bullishProb: 0.5, baseStrength: [55, 40], baseConfidence: [75, 20], reasoning: "Professional bettors showing heavy action on this side", impact: 1.25, category: "core_betting" },
-  { source: "public_fade", bullishProb: 0.4, baseStrength: [40, 35], baseConfidence: [60, 25], reasoning: "Public heavily backing opposite side, creating value opportunity", impact: 1.12, category: "core_betting" },
-  { source: "line_movement", bullishProb: 0.5, baseStrength: [50, 40], baseConfidence: [70, 25], reasoning: "Line has moved favorably indicating sharp action", impact: 1.18, category: "core_betting" },
-  { source: "momentum_score", bullishProb: 0.5, baseStrength: [45, 45], baseConfidence: [65, 30], reasoning: "Team showing strong momentum based on recent performance metrics", impact: 1.08, category: "core_betting" },
-  { source: "situational_spot", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [68, 27], reasoning: "Favorable situational spot based on schedule and rest analysis", impact: 1.10, category: "core_betting" },
-  { source: "historical_h2h", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [60, 30], reasoning: "Historical head-to-head record shows consistent advantage", impact: 1.06, category: "core_betting" },
-  { source: "rest_advantage", bullishProb: 0.55, baseStrength: [45, 35], baseConfidence: [65, 25], reasoning: "Rest differential favors this side with fresher legs", impact: 1.08, category: "core_betting" },
-  { source: "home_field", bullishProb: 0.6, baseStrength: [50, 30], baseConfidence: [70, 20], reasoning: "Home field advantage with crowd support and familiarity", impact: 1.05, category: "core_betting" },
-  { source: "tipster_consensus", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [65, 25], reasoning: "Expert tipster community shows strong consensus", impact: 1.08, category: "core_betting" },
-  { source: "monte_carlo", bullishProb: 0.55, baseStrength: [55, 35], baseConfidence: [75, 20], reasoning: "10,000+ Monte Carlo simulations show favorable probability distribution", impact: 1.15, category: "core_betting" },
+  // baseConfidence lowered to realistic ranges — even the best factors only predict correctly ~55% of the time
+  { source: "scheme_mismatch", bullishProb: 0.6, baseStrength: [50, 40], baseConfidence: [46, 14], reasoning: "Offensive scheme creates favorable matchup against opponent's defensive formation", impact: 1.15, category: "core_betting" },
+  { source: "coaching_tendency", bullishProb: 0.55, baseStrength: [45, 45], baseConfidence: [42, 14], reasoning: "Coach's historical patterns favor aggressive play-calling in this situation", impact: 1.10, category: "core_betting" },
+  { source: "sharp_money_flow", bullishProb: 0.5, baseStrength: [55, 40], baseConfidence: [50, 14], reasoning: "Professional bettors showing heavy action on this side", impact: 1.25, category: "core_betting" },
+  { source: "public_fade", bullishProb: 0.4, baseStrength: [40, 35], baseConfidence: [40, 12], reasoning: "Public heavily backing opposite side, creating value opportunity", impact: 1.12, category: "core_betting" },
+  { source: "line_movement", bullishProb: 0.5, baseStrength: [50, 40], baseConfidence: [46, 14], reasoning: "Line has moved favorably indicating sharp action", impact: 1.18, category: "core_betting" },
+  { source: "momentum_score", bullishProb: 0.5, baseStrength: [45, 45], baseConfidence: [42, 14], reasoning: "Team showing strong momentum based on recent performance metrics", impact: 1.08, category: "core_betting" },
+  { source: "situational_spot", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [44, 14], reasoning: "Favorable situational spot based on schedule and rest analysis", impact: 1.10, category: "core_betting" },
+  { source: "historical_h2h", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [40, 12], reasoning: "Historical head-to-head record shows consistent advantage", impact: 1.06, category: "core_betting" },
+  { source: "rest_advantage", bullishProb: 0.55, baseStrength: [45, 35], baseConfidence: [42, 12], reasoning: "Rest differential favors this side with fresher legs", impact: 1.08, category: "core_betting" },
+  { source: "home_field", bullishProb: 0.6, baseStrength: [50, 30], baseConfidence: [44, 12], reasoning: "Home field advantage with crowd support and familiarity", impact: 1.05, category: "core_betting" },
+  { source: "tipster_consensus", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [42, 12], reasoning: "Expert tipster community shows strong consensus", impact: 1.08, category: "core_betting" },
+  { source: "monte_carlo", bullishProb: 0.55, baseStrength: [55, 35], baseConfidence: [48, 14], reasoning: "Monte Carlo simulations show favorable probability distribution", impact: 1.15, category: "core_betting" },
   
   // ADVANCED ANALYTICS (8 factors)
-  { source: "predictive_model", bullishProb: 0.55, baseStrength: [55, 40], baseConfidence: [75, 20], reasoning: "AI/ML predictive models indicate strong outcome probability", impact: 1.18, category: "advanced_analytics" },
-  { source: "player_efficiency", bullishProb: 0.5, baseStrength: [50, 40], baseConfidence: [70, 25], reasoning: "Advanced player efficiency metrics show significant advantage", impact: 1.12, category: "advanced_analytics" },
-  { source: "scouting_data", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [65, 25], reasoning: "Deep scouting analysis reveals exploitable tendencies", impact: 1.08, category: "advanced_analytics" },
-  { source: "pace_tempo", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [65, 30], reasoning: "Pace and tempo metrics favor this team's style of play", impact: 1.06, category: "advanced_analytics" },
-  { source: "clutch_index", bullishProb: 0.5, baseStrength: [40, 45], baseConfidence: [60, 30], reasoning: "Clutch performance metrics show ability to perform under pressure", impact: 1.10, category: "advanced_analytics" },
-  { source: "strength_schedule", bullishProb: 0.5, baseStrength: [45, 35], baseConfidence: [65, 25], reasoning: "Strength of schedule analysis indicates adjusted value", impact: 1.05, category: "advanced_analytics" },
-  { source: "point_differential", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [70, 25], reasoning: "Point differential trends support expected margin", impact: 1.08, category: "advanced_analytics" },
-  { source: "win_probability", bullishProb: 0.55, baseStrength: [55, 40], baseConfidence: [75, 20], reasoning: "Win probability models show significant edge", impact: 1.15, category: "advanced_analytics" },
+  { source: "predictive_model", bullishProb: 0.55, baseStrength: [55, 40], baseConfidence: [48, 14], reasoning: "AI/ML predictive models indicate outcome probability", impact: 1.18, category: "advanced_analytics" },
+  { source: "player_efficiency", bullishProb: 0.5, baseStrength: [50, 40], baseConfidence: [45, 14], reasoning: "Advanced player efficiency metrics show advantage", impact: 1.12, category: "advanced_analytics" },
+  { source: "scouting_data", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [42, 12], reasoning: "Deep scouting analysis reveals exploitable tendencies", impact: 1.08, category: "advanced_analytics" },
+  { source: "pace_tempo", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [42, 14], reasoning: "Pace and tempo metrics favor this team's style of play", impact: 1.06, category: "advanced_analytics" },
+  { source: "clutch_index", bullishProb: 0.5, baseStrength: [40, 45], baseConfidence: [40, 14], reasoning: "Clutch performance metrics show ability to perform under pressure", impact: 1.10, category: "advanced_analytics" },
+  { source: "strength_schedule", bullishProb: 0.5, baseStrength: [45, 35], baseConfidence: [42, 12], reasoning: "Strength of schedule analysis indicates adjusted value", impact: 1.05, category: "advanced_analytics" },
+  { source: "point_differential", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [45, 14], reasoning: "Point differential trends support expected margin", impact: 1.08, category: "advanced_analytics" },
+  { source: "win_probability", bullishProb: 0.55, baseStrength: [55, 40], baseConfidence: [48, 14], reasoning: "Win probability models show edge", impact: 1.15, category: "advanced_analytics" },
   
   // PSYCHOLOGICAL FACTORS (6 factors)
-  { source: "mental_state", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Team mental state analysis shows strong focus and determination", impact: 1.08, category: "psychological" },
-  { source: "confidence_index", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Player confidence levels elevated based on recent success", impact: 1.05, category: "psychological" },
-  { source: "pressure_response", bullishProb: 0.5, baseStrength: [40, 45], baseConfidence: [55, 30], reasoning: "Team shows strong performance in high-pressure situations", impact: 1.08, category: "psychological" },
-  { source: "motivation_level", bullishProb: 0.55, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "High motivation detected: playoff implications/rivalry game", impact: 1.10, category: "psychological" },
-  { source: "team_chemistry", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Locker room chemistry and team cohesion metrics are positive", impact: 1.05, category: "psychological" },
-  { source: "media_impact", bullishProb: 0.45, baseStrength: [35, 35], baseConfidence: [50, 30], reasoning: "Media attention and external pressure assessment", impact: 0.98, category: "psychological" },
+  { source: "mental_state", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [36, 12], reasoning: "Team mental state analysis shows strong focus and determination", impact: 1.08, category: "psychological" },
+  { source: "confidence_index", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [36, 12], reasoning: "Player confidence levels elevated based on recent success", impact: 1.05, category: "psychological" },
+  { source: "pressure_response", bullishProb: 0.5, baseStrength: [40, 45], baseConfidence: [36, 12], reasoning: "Team shows strong performance in high-pressure situations", impact: 1.08, category: "psychological" },
+  { source: "motivation_level", bullishProb: 0.55, baseStrength: [45, 40], baseConfidence: [38, 12], reasoning: "High motivation detected: playoff implications/rivalry game", impact: 1.10, category: "psychological" },
+  { source: "team_chemistry", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [36, 12], reasoning: "Locker room chemistry and team cohesion metrics are positive", impact: 1.05, category: "psychological" },
+  { source: "media_impact", bullishProb: 0.45, baseStrength: [35, 35], baseConfidence: [32, 10], reasoning: "Media attention and external pressure assessment", impact: 0.98, category: "psychological" },
   
   // PHYSICAL & HEALTH (6 factors)
-  { source: "injury_adjustment", bullishProb: 0.5, baseStrength: [55, 35], baseConfidence: [72, 23], reasoning: "Injury report analysis shows net advantage", impact: 1.15, category: "physical_health" },
-  { source: "biomech_fatigue", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "Biomechanical fatigue analysis shows optimal physical condition", impact: 1.08, category: "physical_health" },
-  { source: "recovery_status", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [65, 25], reasoning: "Recovery protocols indicate full fitness and readiness", impact: 1.08, category: "physical_health" },
-  { source: "conditioning_trend", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Recent conditioning and minutes trend analysis", impact: 1.03, category: "physical_health" },
-  { source: "availability_pattern", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Player availability and games-played consistency", impact: 1.04, category: "physical_health" },
-  { source: "load_management", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [65, 25], reasoning: "Load management strategy indicates fresh key players", impact: 1.10, category: "physical_health" },
+  { source: "injury_adjustment", bullishProb: 0.5, baseStrength: [55, 35], baseConfidence: [46, 14], reasoning: "Injury report analysis shows net advantage", impact: 1.15, category: "physical_health" },
+  { source: "biomech_fatigue", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [38, 12], reasoning: "Biomechanical fatigue analysis shows optimal physical condition", impact: 1.08, category: "physical_health" },
+  { source: "recovery_status", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [42, 12], reasoning: "Recovery protocols indicate full fitness and readiness", impact: 1.08, category: "physical_health" },
+  { source: "conditioning_trend", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [36, 12], reasoning: "Recent conditioning and minutes trend analysis", impact: 1.03, category: "physical_health" },
+  { source: "availability_pattern", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [36, 12], reasoning: "Player availability and games-played consistency", impact: 1.04, category: "physical_health" },
+  { source: "load_management", bullishProb: 0.55, baseStrength: [50, 35], baseConfidence: [42, 12], reasoning: "Load management strategy indicates fresh key players", impact: 1.10, category: "physical_health" },
   
   // PERFORMANCE METRICS (4 factors)
-  { source: "roster_depth", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Roster depth and bench contribution analysis", impact: 1.08, category: "technology" },
-  { source: "matchup_efficiency", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [50, 30], reasoning: "Historical matchup efficiency against opponent style", impact: 1.02, category: "technology" },
-  { source: "usage_patterns", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [55, 30], reasoning: "Player usage rate and rotation pattern analysis", impact: 1.05, category: "technology" },
-  { source: "film_tendency", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [65, 25], reasoning: "Tendency analysis reveals exploitable patterns in opponent", impact: 1.10, category: "technology" },
+  { source: "roster_depth", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [42, 12], reasoning: "Roster depth and bench contribution analysis", impact: 1.08, category: "technology" },
+  { source: "matchup_efficiency", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [34, 12], reasoning: "Historical matchup efficiency against opponent style", impact: 1.02, category: "technology" },
+  { source: "usage_patterns", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [36, 12], reasoning: "Player usage rate and rotation pattern analysis", impact: 1.05, category: "technology" },
+  { source: "film_tendency", bullishProb: 0.55, baseStrength: [50, 40], baseConfidence: [42, 12], reasoning: "Tendency analysis reveals exploitable patterns in opponent", impact: 1.10, category: "technology" },
   
   // ENVIRONMENTAL (6 factors)
-  { source: "weather_impact", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "Weather conditions favor this team's style of play", impact: 1.06, category: "environmental" },
-  { source: "field_conditions", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [60, 30], reasoning: "Field/court conditions suit team's strengths", impact: 1.05, category: "environmental" },
-  { source: "travel_fatigue", bullishProb: 0.45, baseStrength: [40, 40], baseConfidence: [60, 30], reasoning: "Travel fatigue analysis shows minimal impact", impact: 1.06, category: "environmental" },
-  { source: "altitude_adjustment", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [55, 30], reasoning: "Altitude adjustment factor for venue elevation", impact: 1.03, category: "environmental" },
-  { source: "temperature_impact", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Temperature conditions favor team acclimation", impact: 1.03, category: "environmental" },
-  { source: "timezone_disruption", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [60, 30], reasoning: "Time zone travel impact assessment", impact: 1.05, category: "environmental" },
+  { source: "weather_impact", bullishProb: 0.5, baseStrength: [45, 40], baseConfidence: [38, 14], reasoning: "Weather conditions favor this team's style of play", impact: 1.06, category: "environmental" },
+  { source: "field_conditions", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [38, 12], reasoning: "Field/court conditions suit team's strengths", impact: 1.05, category: "environmental" },
+  { source: "travel_fatigue", bullishProb: 0.45, baseStrength: [40, 40], baseConfidence: [38, 12], reasoning: "Travel fatigue analysis shows minimal impact", impact: 1.06, category: "environmental" },
+  { source: "altitude_adjustment", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [36, 12], reasoning: "Altitude adjustment factor for venue elevation", impact: 1.03, category: "environmental" },
+  { source: "temperature_impact", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [36, 12], reasoning: "Temperature conditions favor team acclimation", impact: 1.03, category: "environmental" },
+  { source: "timezone_disruption", bullishProb: 0.5, baseStrength: [40, 40], baseConfidence: [38, 12], reasoning: "Time zone travel impact assessment", impact: 1.05, category: "environmental" },
   
   // FINANCIAL & REGULATORY (4 factors)
-  { source: "salary_dynamics", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [50, 30], reasoning: "Salary cap dynamics and roster construction analysis", impact: 1.02, category: "financial" },
-  { source: "contract_motivation", bullishProb: 0.6, baseStrength: [50, 40], baseConfidence: [60, 30], reasoning: "Contract year motivation detected for key players", impact: 1.12, category: "financial" },
-  { source: "roster_stability", bullishProb: 0.55, baseStrength: [45, 40], baseConfidence: [60, 30], reasoning: "Roster stability and team continuity metrics", impact: 1.06, category: "financial" },
-  { source: "team_investment", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [55, 30], reasoning: "Team investment level in player development and facilities", impact: 1.04, category: "financial" },
+  { source: "salary_dynamics", bullishProb: 0.5, baseStrength: [35, 35], baseConfidence: [34, 12], reasoning: "Salary cap dynamics and roster construction analysis", impact: 1.02, category: "financial" },
+  { source: "contract_motivation", bullishProb: 0.6, baseStrength: [50, 40], baseConfidence: [38, 12], reasoning: "Contract year motivation detected for key players", impact: 1.12, category: "financial" },
+  { source: "roster_stability", bullishProb: 0.55, baseStrength: [45, 40], baseConfidence: [38, 12], reasoning: "Roster stability and team continuity metrics", impact: 1.06, category: "financial" },
+  { source: "team_investment", bullishProb: 0.5, baseStrength: [40, 35], baseConfidence: [36, 12], reasoning: "Team investment level in player development and facilities", impact: 1.04, category: "financial" },
 ];
 
 function generateSignals(sport: Sport, odds: number, context: Record<string, unknown>, marketContext?: MarketContext): FusionSignal[] {
@@ -841,19 +842,19 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
     if (hasRealOdds) {
       if (config.source === "sharp_money_flow") {
         if (bookmakerCount >= 5) {
-          confidence = Math.min(95, confidence + 15);
-          strength = Math.min(95, strength + 10);
+          confidence = Math.min(66, confidence + 8);
+          strength = Math.min(75, strength + 8);
           reasoning = `Real-time odds from ${bookmakerCount} bookmakers analyzed for sharp money indicators`;
         }
       } else if (config.source === "line_movement" && lineMovementAmt !== undefined) {
         if (Math.abs(lineMovementAmt) > 1.5) {
           direction = lineMovementAmt > 0 ? "bullish" : "bearish";
-          strength = Math.min(90, 55 + Math.abs(lineMovementAmt) * 5);
-          confidence = Math.min(90, 70 + Math.abs(lineMovementAmt) * 3);
+          strength = Math.min(75, 45 + Math.abs(lineMovementAmt) * 4);
+          confidence = Math.min(65, 48 + Math.abs(lineMovementAmt) * 2);
           reasoning = `Line moved ${lineMovementAmt > 0 ? "+" : ""}${lineMovementAmt.toFixed(1)} points — significant sharp action detected`;
         }
       } else if (config.source === "public_fade" && bookmakerCount >= 3) {
-        confidence = Math.min(85, confidence + 10);
+        confidence = Math.min(60, confidence + 6);
         reasoning = `Market consensus across ${bookmakerCount} books indicates public betting distribution`;
       } else if (config.source === "monte_carlo") {
         try {
@@ -863,21 +864,21 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
           if (preSim) {
             const simWinProb = marketContext?.homeMoneyline && marketContext.homeMoneyline < 0 ? preSim.homeWinProb : preSim.awayWinProb;
             direction = simWinProb > 0.55 ? "bullish" : simWinProb < 0.45 ? "bearish" : "neutral";
-            strength = Math.min(95, Math.round(Math.abs(simWinProb - 0.5) * 200));
-            confidence = Math.min(95, Math.round(preSim.convergenceScore * 85 + 10));
+            strength = Math.min(75, Math.round(Math.abs(simWinProb - 0.5) * 160));
+            confidence = Math.min(65, Math.round(preSim.convergenceScore * 55 + 8));
             reasoning = `${preSim.simulations.toLocaleString()} Monte Carlo simulations: ${(simWinProb * 100).toFixed(1)}% win probability (predicted ${preSim.predictedHomeScore}-${preSim.predictedAwayScore})`;
           } else if (hasRealOdds) {
-            confidence = Math.min(90, confidence + 8);
+            confidence = Math.min(62, confidence + 5);
             reasoning = `Simulations calibrated with real-time market pricing from ${bookmakerCount} sportsbooks`;
           }
         } catch (e) {
           if (hasRealOdds) {
-            confidence = Math.min(90, confidence + 8);
+            confidence = Math.min(62, confidence + 5);
             reasoning = `Simulations calibrated with real-time market pricing from ${bookmakerCount} sportsbooks`;
           }
         }
       } else if (config.source === "predictive_model" && hasRealOdds) {
-        confidence = Math.min(90, confidence + 5);
+        confidence = Math.min(64, confidence + 4);
         reasoning = `AI model validated against live market odds (source: ${oddsSource})`;
       }
     }
