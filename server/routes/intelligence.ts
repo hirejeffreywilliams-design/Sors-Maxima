@@ -529,4 +529,26 @@ export function registerIntelligenceRoutes(app: Express): void {
       return res.status(500).json({ error: "Simulation failed" });
     }
   });
+
+  app.get("/api/track-record", async (_req: Request, res: Response) => {
+    try {
+      const { getTrackRecord } = await import("../calibrationEngine");
+      const record = getTrackRecord();
+      res.json(record);
+    } catch (err: any) {
+      console.error("[track-record] Error:", err.message);
+      res.status(500).json({ error: "Failed to load track record" });
+    }
+  });
+
+  app.post("/api/track-record/refresh", async (_req: Request, res: Response) => {
+    try {
+      const { invalidateCalibrationCache, getTrackRecord } = await import("../calibrationEngine");
+      invalidateCalibrationCache();
+      const record = getTrackRecord();
+      res.json(record);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to refresh track record" });
+    }
+  });
 }

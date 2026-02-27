@@ -65,6 +65,7 @@ const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligenc
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
+const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database, Compass } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -253,6 +254,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/pro-tools">{() => { const [, setLocation] = useLocation(); setLocation("/tools"); return null; }}</Route>
         <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
+        <Route path="/track-record" component={TrackRecordPage} />
         <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
@@ -759,6 +761,14 @@ function AppContent() {
 
   if (location === '/changelog') {
     return <ChangelogPage />;
+  }
+
+  if (location === '/track-record') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <TrackRecordPage />
+      </Suspense>
+    );
   }
 
   if (isLoading || isAuthenticated === null) {

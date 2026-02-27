@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
+import { PickDisclaimer } from "@/components/pick-disclaimer";
 
 interface TopPick {
   id: string;
@@ -1118,6 +1119,8 @@ export default function CommandCenter() {
             </div>
           </div>
         </header>
+
+        <PickDisclaimer variant="banner" />
 
         <section data-testid="section-best-tickets">
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">

@@ -21,6 +21,7 @@ import { apiRequest } from "@/lib/queryClient";
 import type { Sport, GeneratedParlay } from "@shared/schema";
 import { sports } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
+import { PickDisclaimer } from "@/components/pick-disclaimer";
 
 interface PrecomputedPick {
   id: string;
@@ -747,6 +748,8 @@ export default function DailyParlays() {
             </div>
           </div>
         </div>
+
+        <PickDisclaimer variant="banner" />
 
         <div className="flex items-center gap-2 p-1 rounded-xl bg-muted/30 border border-border/40" data-testid="section-view-toggle">
           <button
