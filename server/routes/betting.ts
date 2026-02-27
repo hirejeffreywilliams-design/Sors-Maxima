@@ -1574,8 +1574,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             .map(cat => {
               const baseValue = defaults[cat] || 0;
               if (baseValue === 0) return null;
-              const jitter = 1 + (deterministicValue(`${player.id}-${cat}`, 0, 0.3) - 0.15);
-              const projected = Math.round(baseValue * jitter * 10) / 10;
+              const projected = Math.round(baseValue * 10) / 10;
               const line = Math.round(baseValue * 0.95 * 2) / 2;
               const diff = projected - line;
               const overPct = Math.min(85, Math.max(35, 50 + diff * 3));
@@ -1596,27 +1595,9 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
           const primaryCat = categories[0];
           const primaryDefault = defaults[primaryCat] || 10;
-          const primaryJitter = 1 + (deterministicValue(`${player.id}-${primaryCat}`, 0, 0.3) - 0.15);
-          const playerSeasonAvg = Math.round(primaryDefault * primaryJitter * 10) / 10;
+          const playerSeasonAvg = Math.round(primaryDefault * 10) / 10;
 
           const seasonAvg = playerSeasonAvg;
-          const last5 = Array.from({ length: 5 }, (_, i) => {
-            const hashSeed = `${player.id}-l5-${primaryCat}-${i}`;
-            const variance = deterministicValue(hashSeed, -0.15, 0.15);
-            return Math.round((playerSeasonAvg * (1 + variance)) * 10) / 10;
-          });
-          const vsOpponent = Array.from({ length: 4 }, (_, i) => {
-            const hashSeed = `${player.id}-vs-${primaryCat}-${i}`;
-            const variance = deterministicValue(hashSeed, -0.12, 0.18);
-            return Math.round((playerSeasonAvg * (1 + variance)) * 10) / 10;
-          });
-          const propLine = props[0] ? (props[0] as any).line : playerSeasonAvg * 0.95;
-          const projections = Array.from({ length: 4 }, (_, i) => {
-            const hashSeed = `${player.id}-proj-${primaryCat}-${i}`;
-            const variance = deterministicValue(hashSeed, -0.08, 0.12);
-            const base = (playerSeasonAvg * 0.6 + propLine * 0.4);
-            return Math.round((base * (1 + variance)) * 10) / 10;
-          });
 
           allPlayers.push({
             id: player.id,
@@ -1624,10 +1605,10 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             team: team.abbreviation,
             position: posAbbr,
             sport,
-            last5,
+            last5: null,
             seasonAvg,
-            vsOpponent,
-            projections,
+            vsOpponent: null,
+            projections: null,
             props,
           });
         }
@@ -1720,16 +1701,15 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             const baseValue = defaults[propType] || 0;
             if (baseValue === 0) continue;
 
-            const jitter = 1 + (deterministicValue(`${player.id}-${propType}-jitter`, 0, 0.3) - 0.15);
-            const projection = Math.round(baseValue * jitter * 10) / 10;
+            const projection = Math.round(baseValue * 10) / 10;
             const line = Math.round(baseValue * 0.95 * 2) / 2;
             const diff = projection - line;
             const confidence = Math.min(85, Math.max(45, 55 + Math.abs(diff) * 4));
             const edge = Math.round(((projection - line) / line) * 100 * 10) / 10;
 
             const seasonAvg = Math.round(projection * 10) / 10;
-            const last5Avg = Math.round((projection * (1 + deterministicValue(`${player.id}-${propType}-l5`, -0.12, 0.12))) * 10) / 10;
-            const last10Avg = Math.round((projection * (1 + deterministicValue(`${player.id}-${propType}-l10`, -0.06, 0.06))) * 10) / 10;
+            const last5Avg: number | null = null;
+            const last10Avg: number | null = null;
             const high = Math.round(projection * 1.6);
             const low = Math.round(projection * 0.35);
 
@@ -1739,9 +1719,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               edge < -3 ? "lean_under" : "neutral";
 
             const overHitRate = Math.round(50 + edge * 2);
-            const recentResults = Array.from({ length: 5 }, (_, i) =>
-              Math.round(projection * (1 + deterministicValue(`${player.id}-${propType}-recent-${i}`, -0.2, 0.2)))
-            );
+            const recentResults: number[] = [];
 
             matchups.push({
               id: `${sport.toLowerCase()}-${matchupIdx++}`,
@@ -1758,20 +1736,20 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               sport,
               propType,
               line,
-              overOdds: -110 + Math.round(deterministicValue(`${player.id}-${propType}-overOdds`, 0, 20) - 10),
-              underOdds: -110 + Math.round(deterministicValue(`${player.id}-${propType}-underOdds`, 0, 20) - 10),
+              overOdds: -110,
+              underOdds: -110,
               stats: {
                 seasonAvg,
                 last5Avg,
                 last10Avg,
                 high,
                 low,
-                gamesPlayed: Math.round(20 + deterministicValue(`${player.id}-gp`, 0, 40)),
-                consistency: Math.round(55 + deterministicValue(`${player.id}-cons`, 0, 30)),
+                gamesPlayed: null,
+                consistency: null,
               },
               vsOpponentHistory: {
-                games: Math.round(3 + deterministicValue(`${player.id}-vsGames`, 0, 7)),
-                avg: Math.round((projection * 1.03) * 10) / 10,
+                games: null,
+                avg: null,
                 overHitRate: Math.min(95, Math.max(20, overHitRate)),
                 recentResults,
               },
@@ -1782,19 +1760,13 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                   description: `vs ${opponent.shortDisplayName || opponent.displayName}`,
                   weight: Math.round(Math.abs(edge) * 1.5),
                 },
-                {
-                  type: "Form",
-                  impact: last5Avg > seasonAvg ? "positive" : "negative",
-                  description: `L5 avg ${last5Avg} vs season ${seasonAvg}`,
-                  weight: Math.round(Math.abs(last5Avg - seasonAvg) * 3),
-                },
               ],
               projection,
               confidence: Math.round(confidence),
               edge,
               recommendation,
-              hotStreak: last5Avg > seasonAvg * 1.1,
-              coldStreak: last5Avg < seasonAvg * 0.9,
+              hotStreak: false,
+              coldStreak: false,
               injuryStatus: "healthy",
             });
           }

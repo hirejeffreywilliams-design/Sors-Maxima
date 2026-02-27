@@ -501,39 +501,22 @@ function generateSoccerLeg(league: string, marketType: string): TicketLeg {
 
   if (marketType === "1X2") {
     market = "1X2 (Match Result)";
-    const pick = deterministicValue(`${seedBase}-pick`, 0, 1);
-    if (pick < 0.45) {
-      decimalOdds = Math.round(deterministicValue(`${seedBase}-odds-home`, 1.5, 2.8) * 100) / 100;
-      outcome = `${homeTeam.name} to Win`;
-    } else if (pick < 0.75) {
-      decimalOdds = Math.round(deterministicValue(`${seedBase}-odds-draw`, 2.8, 3.8) * 100) / 100;
-      outcome = `Draw`;
-    } else {
-      decimalOdds = Math.round(deterministicValue(`${seedBase}-odds-away`, 1.8, 3.5) * 100) / 100;
-      outcome = `${awayTeam.name} to Win`;
-    }
+    outcome = `${homeTeam.name} to Win`;
+    decimalOdds = 1.91;
   } else if (marketType === "Both Teams to Score") {
     market = "Both Teams to Score";
-    const isYes = deterministicBool(`${seedBase}-btts`, 0.45);
-    decimalOdds = Math.round(deterministicValue(`${seedBase}-odds-btts`, 1.6, 2.2) * 100) / 100;
-    outcome = isYes ? "BTTS - Yes" : "BTTS - No";
+    outcome = "BTTS - Yes";
+    decimalOdds = 1.80;
   } else if (marketType === "Over/Under Goals") {
     market = "Over/Under Goals";
-    const lines = [1.5, 2.5, 3.5];
-    const goalLine = lines[deterministicInt(`${seedBase}-goalline`, 0, lines.length - 1)];
-    line = goalLine;
-    const isOver = deterministicBool(`${seedBase}-over`);
-    decimalOdds = goalLine === 2.5 ? Math.round(deterministicValue(`${seedBase}-odds-25`, 1.7, 2.1) * 100) / 100 : goalLine === 1.5 ? Math.round(deterministicValue(`${seedBase}-odds-15`, 1.2, 1.6) * 100) / 100 : Math.round(deterministicValue(`${seedBase}-odds-35`, 2.0, 2.8) * 100) / 100;
-    outcome = `${isOver ? "Over" : "Under"} ${goalLine} Goals`;
+    line = 2.5;
+    outcome = "Over 2.5 Goals";
+    decimalOdds = 1.91;
   } else if (marketType === "Asian Handicap") {
     market = "Asian Handicap";
-    const handicaps = [-1.5, -1, -0.5, 0, 0.5, 1, 1.5];
-    const handicap = handicaps[deterministicInt(`${seedBase}-handicap`, 0, handicaps.length - 1)];
-    line = handicap;
-    const isHome = deterministicBool(`${seedBase}-ishome`);
-    const team = isHome ? homeTeam : awayTeam;
-    decimalOdds = Math.round(deterministicValue(`${seedBase}-odds-ah`, 1.7, 2.3) * 100) / 100;
-    outcome = `${team.name} ${handicap > 0 ? "+" : ""}${handicap} AH`;
+    line = -0.5;
+    outcome = `${homeTeam.name} -0.5 AH`;
+    decimalOdds = 1.91;
   }
 
   const americanOdds = decimalToAmerican(decimalOdds);
@@ -557,11 +540,10 @@ function generateSoccerLeg(league: string, marketType: string): TicketLeg {
   const confidenceLevel: "high" | "medium" | "low" =
     legFusion.confidence >= 75 ? "high" : legFusion.confidence >= 55 ? "medium" : "low";
 
-  const oddsChangePercent = deterministicValue(`${seedBase}-oddschange`, -2, 6);
   const oddsMovement = {
-    direction: (oddsChangePercent > 2 ? "up" : oddsChangePercent < -2 ? "down" : "stable") as "up" | "down" | "stable",
-    percentChange: Math.round(Math.abs(oddsChangePercent) * 10) / 10,
-    possibleInefficiency: Math.abs(oddsChangePercent) > 4,
+    direction: "stable" as "up" | "down" | "stable",
+    percentChange: 0,
+    possibleInefficiency: false,
   };
 
   return {
@@ -594,17 +576,12 @@ function generateSoccerLeg(league: string, marketType: string): TicketLeg {
 
 function buildSoccerRationale(legs: TicketLeg[], league: string, displayName: string): string[] {
   const rationale: string[] = [];
-  const xgHome = deterministicValue(`${league}-${displayName}-xghome`, 0.8, 2.3).toFixed(2);
-  const xgAway = deterministicValue(`${league}-${displayName}-xgaway`, 0.5, 1.7).toFixed(2);
-  rationale.push(`xG analysis: ${legs[0]?.team || "Home"} ${xgHome} vs ${legs[0]?.opponent || "Away"} ${xgAway} - model-projected expected goals`);
-  const possession = Math.round(deterministicValue(`${league}-${displayName}-poss`, 45, 60));
-  rationale.push(`Possession model projects ${possession}%-${100 - possession}% split favoring ${possession > 52 ? "home" : "away"} side`);
-  rationale.push(`${displayName} form analysis factored across last 5 matches and head-to-head record`);
+  rationale.push(`${displayName} fixture pulled from API-Football live fixture data`);
   const sharpLegs = legs.filter(l => l.analysis.sharpAction);
   if (sharpLegs.length > 0) {
-    rationale.push(`Sharp money detected on ${sharpLegs.length} selection${sharpLegs.length > 1 ? "s" : ""} in ${displayName} markets`);
+    rationale.push(`Sharp money signals detected on ${sharpLegs.length} market${sharpLegs.length > 1 ? "s" : ""}`);
   }
-  rationale.push("Formation matchup analysis and defensive structure comparison applied");
+  rationale.push("Live bookmaker odds not yet available — soccer odds integration pending");
   return rationale.slice(0, 5);
 }
 
@@ -623,21 +600,20 @@ function buildSoccerAlternatives(legs: TicketLeg[]): AlternativeTicket[] {
     });
   }
 
-  const altSeed = primaryLeg.team + primaryLeg.opponent;
   alts.push({
     market: "Over/Under Goals",
     selection: "Under 2.5 Goals",
-    evPercent: Math.round(deterministicValue(`${altSeed}-alt-ou-ev`, 0.5, 3.0) * 10) / 10,
-    confidence: Math.round(deterministicValue(`${altSeed}-alt-ou-conf`, 48, 68)),
-    rationale: "xG models suggest defensive structure favors lower-scoring match",
+    evPercent: 0,
+    confidence: 50,
+    rationale: "Alternative market — live odds pending soccer bookmaker integration",
   });
 
   alts.push({
     market: "Both Teams to Score",
     selection: "BTTS - Yes",
-    evPercent: Math.round(deterministicValue(`${altSeed}-alt-btts-ev`, 0.3, 2.3) * 10) / 10,
-    confidence: Math.round(deterministicValue(`${altSeed}-alt-btts-conf`, 45, 70)),
-    rationale: "Both teams show positive attacking metrics in recent form",
+    evPercent: 0,
+    confidence: 50,
+    rationale: "Alternative market — live odds pending soccer bookmaker integration",
   });
 
   return alts.slice(0, 3);
@@ -974,7 +950,7 @@ function generateLegFromESPNGame(
     const altSpread = isHomeTeam ? -(rawSpread + altOffset) : (rawSpread + altOffset);
     line = altSpread;
     const betterLine = (isHomeTeam && altSpread > -rawSpread) || (!isHomeTeam && altSpread > rawSpread);
-    decimalOdds = betterLine ? americanToDecimal(-(130 + deterministicInt(`${game.id}-altspread-odds`, 0, 69))) : americanToDecimal(100 + deterministicInt(`${game.id}-altspread-odds2`, 0, 59));
+    decimalOdds = betterLine ? americanToDecimal(-145) : americanToDecimal(125);
     outcome = `${selectedTeam.city} ${selectedTeam.name} ${altSpread > 0 ? "+" : ""}${altSpread}`;
   } else if (marketType === "alt_total") {
     market = "Alt Total";
@@ -985,7 +961,7 @@ function generateLegFromESPNGame(
     line = altTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, altTotal, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
     const easierBet = (direction.isOver && altTotal < resolved.total) || (!direction.isOver && altTotal > resolved.total);
-    decimalOdds = easierBet ? americanToDecimal(-(130 + deterministicInt(`${game.id}-alttotal-odds`, 0, 69))) : americanToDecimal(100 + deterministicInt(`${game.id}-alttotal-odds2`, 0, 59));
+    decimalOdds = easierBet ? americanToDecimal(-145) : americanToDecimal(125);
     outcome = `${direction.isOver ? "Over" : "Under"} ${altTotal}`;
   } else if (marketType === "anytime_scorer") {
     market = "Anytime Scorer";
@@ -1025,7 +1001,7 @@ function generateLegFromESPNGame(
     }
     playerName = scorerName;
     propCategory = "Anytime Scorer";
-    decimalOdds = americanToDecimal(-(100 + deterministicInt(`${game.id}-scorer-odds`, 0, 199)));
+    decimalOdds = americanToDecimal(175);
     outcome = `${scorerName} Anytime Scorer`;
   } else if (marketType.startsWith("player_")) {
     market = "Player Prop";
@@ -1064,7 +1040,7 @@ function generateLegFromESPNGame(
       }
       if (!ddPlayerName) ddPlayerName = playersBySport[sport]?.[0]?.name || "Unknown";
       playerName = ddPlayerName;
-      decimalOdds = americanToDecimal(100 + deterministicInt(`${game.id}-dd-odds`, 0, 249));
+      decimalOdds = americanToDecimal(200);
       outcome = `${ddPlayerName} Double-Double Yes`;
     } else {
       const leaders = getLeadersForGame(game, sport);
@@ -1080,7 +1056,7 @@ function generateLegFromESPNGame(
           playerName = leader.playerName;
           const leaderValue = parseFloat(leader.value) || 0;
           const propLine = leaderValue > 0
-            ? Math.round((leaderValue + deterministicValue(`${game.id}-prop-adj-${propInfo.category}`, -1, 1)) * 2) / 2
+            ? Math.round(leaderValue * 2) / 2
             : getDefaultPropLine(propInfo.category);
           line = Math.max(0.5, propLine);
           const direction = chooseOverUnderDirection(sport, propInfo.category, leaderValue, line, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
@@ -1110,7 +1086,7 @@ function generateLegFromESPNGame(
         if (chosenPlayer) {
           playerName = chosenPlayer.fullName;
           const propLine = getDefaultPropLine(propInfo.category);
-          line = Math.max(0.5, propLine + Math.round(deterministicValue(`${game.id}-prop-lineadj-${propInfo.category}`, -1, 1) * 2) / 2);
+          line = Math.max(0.5, propLine);
           const direction = chooseOverUnderDirection(sport, propInfo.category, null, line, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
           decimalOdds = americanToDecimal(-110);
           outcome = `${chosenPlayer.fullName} ${direction.isOver ? "Over" : "Under"} ${line} ${propInfo.category}`;
@@ -1145,7 +1121,7 @@ function generateLegFromESPNGame(
 
         const leaderValue = parseFloat(leader.value) || 0;
         const propLine = leaderValue > 0
-          ? Math.round((leaderValue + deterministicValue(`${game.id}-propgen-adj`, -2, 2)) * 2) / 2
+          ? Math.round(leaderValue * 2) / 2
           : getDefaultPropLine(mappedProp);
         line = Math.max(0.5, propLine);
         const direction = chooseOverUnderDirection(sport, mappedProp, leaderValue, line, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
@@ -1186,7 +1162,7 @@ function generateLegFromESPNGame(
         propCategory = prop;
 
         const propLine = getDefaultPropLine(prop);
-        line = Math.max(0.5, propLine + Math.round(deterministicValue(`${game.id}-propgen-lineadj`, -2, 2) * 2) / 2);
+        line = Math.max(0.5, propLine);
         const direction = chooseOverUnderDirection(sport, prop, null, line, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
         decimalOdds = americanToDecimal(-110);
         outcome = `${chosenPlayer.fullName} ${direction.isOver ? "Over" : "Under"} ${line} ${prop}`;
@@ -1198,7 +1174,7 @@ function generateLegFromESPNGame(
         propCategory = prop;
 
         const propLine = getDefaultPropLine(prop);
-        line = Math.max(0.5, propLine + Math.round(deterministicValue(`${game.id}-propgen-fb-lineadj`, -2, 2) * 2) / 2);
+        line = Math.max(0.5, propLine);
         const direction = chooseOverUnderDirection(sport, prop, null, line, { homeRecord: game.homeTeam.record, awayRecord: game.awayTeam.record, totalFromOdds: resolved.total });
         decimalOdds = americanToDecimal(-110);
         outcome = `${player.name} ${direction.isOver ? "Over" : "Under"} ${line} ${prop}`;
@@ -1255,11 +1231,10 @@ function generateLegFromESPNGame(
     legFusion.confidence >= 75 ? "high" :
     legFusion.confidence >= 55 ? "medium" : "low";
 
-  const oddsChangePercent = deterministicValue(`${game.id}-${marketType}-oddschange`, -2, 6);
   const oddsMovement: { direction: "up" | "down" | "stable"; percentChange: number; possibleInefficiency: boolean } = {
-    direction: oddsChangePercent > 2 ? "up" : oddsChangePercent < -2 ? "down" : "stable",
-    percentChange: Math.round(Math.abs(oddsChangePercent) * 10) / 10,
-    possibleInefficiency: Math.abs(oddsChangePercent) > 4,
+    direction: "stable",
+    percentChange: 0,
+    possibleInefficiency: false,
   };
 
   let underSignalCount = 0;
@@ -1334,10 +1309,10 @@ function generateLegFromSoccerFixture(
   let playerName: string | undefined;
   let propCategory: string | undefined;
 
-  const homeML = realOdds?.homeMoneyline ?? (deterministicBool(`${fixSeed}-mldir`) ? -(100 + deterministicInt(`${fixSeed}-homeml`, 0, 149)) : (100 + deterministicInt(`${fixSeed}-homeml2`, 0, 199)));
-  const awayML = realOdds?.awayMoneyline ?? (homeML < 0 ? (100 + deterministicInt(`${fixSeed}-awayml`, 0, 199)) : -(100 + deterministicInt(`${fixSeed}-awayml2`, 0, 149)));
-  const spreadVal = realOdds?.spread ?? (Math.round(deterministicValue(`${fixSeed}-spread`, -1.5, 1.5) * 2) / 2);
-  const totalVal = realOdds?.total ?? (2 + Math.round(deterministicValue(`${fixSeed}-total`, 0, 2) * 2) / 2);
+  const homeML = realOdds?.homeMoneyline ?? -110;
+  const awayML = realOdds?.awayMoneyline ?? -110;
+  const spreadVal = realOdds?.spread ?? 0;
+  const totalVal = realOdds?.total ?? 2.5;
 
   if (realOdds) {
     oddsSource = "ESPN-derived";
@@ -1362,9 +1337,8 @@ function generateLegFromSoccerFixture(
     outcome = `${direction.isOver ? "Over" : "Under"} ${totalVal}`;
   } else if (marketType === "btts") {
     market = "Both Teams To Score";
-    const isBttsYes = deterministicBool(`${fixSeed}-btts`, 0.45);
-    decimalOdds = americanToDecimal(isBttsYes ? -120 : -105);
-    outcome = `BTTS ${isBttsYes ? "Yes" : "No"}`;
+    decimalOdds = americanToDecimal(-120);
+    outcome = `BTTS Yes`;
   } else if (marketType === "draw_no_bet") {
     market = "Draw No Bet";
     const ml = isHomeTeam ? homeML : awayML;
@@ -1379,31 +1353,19 @@ function generateLegFromSoccerFixture(
     outcome = `${selectedTeam} AH ${sv > 0 ? "+" : ""}${sv}`;
   } else if (marketType === "correct_score") {
     market = "Correct Score";
-    const scores = [[1,0],[2,1],[1,1],[2,0],[0,0],[3,1],[2,2],[0,1],[1,2]];
-    const score = scores[deterministicInt(`${fixSeed}-cscore`, 0, scores.length - 1)];
-    const [homeGoals, awayGoals] = isHomeTeam ? score : [score[1], score[0]];
-    decimalOdds = americanToDecimal(400 + deterministicInt(`${fixSeed}-cscore-odds`, 0, 599));
-    outcome = `${fixture.homeTeam.name} ${homeGoals}-${awayGoals} ${fixture.awayTeam.name}`;
+    decimalOdds = americanToDecimal(500);
+    outcome = `${fixture.homeTeam.name} 2-1 ${fixture.awayTeam.name}`;
   } else if (marketType === "match_result_btts") {
     market = "Result + BTTS";
-    const resultBtts = deterministicValue(`${fixSeed}-mrbtts`, 0, 1);
     const resultTeam = isHomeTeam ? homeTeam : awayTeam;
-    if (resultBtts > 0.66) {
-      decimalOdds = americanToDecimal(200 + deterministicInt(`${fixSeed}-mrbtts-odds1`, 0, 199));
-      outcome = `${resultTeam} Win & BTTS Yes`;
-    } else if (resultBtts > 0.33) {
-      decimalOdds = americanToDecimal(300 + deterministicInt(`${fixSeed}-mrbtts-odds2`, 0, 299));
-      outcome = `Draw & BTTS Yes`;
-    } else {
-      decimalOdds = americanToDecimal(250 + deterministicInt(`${fixSeed}-mrbtts-odds3`, 0, 249));
-      outcome = `${resultTeam} Win & BTTS No`;
-    }
+    decimalOdds = americanToDecimal(250);
+    outcome = `${resultTeam} Win & BTTS Yes`;
   } else if (marketType === "anytime_scorer") {
     market = "Anytime Scorer";
     const selectedName = isHomeTeam ? homeTeam : awayTeam;
     playerName = selectedName;
     propCategory = "Anytime Scorer";
-    decimalOdds = americanToDecimal(100 + deterministicInt(`${fixSeed}-scorer-odds`, 0, 249));
+    decimalOdds = americanToDecimal(175);
     outcome = `${selectedName} Anytime Scorer`;
   }
 
@@ -1416,9 +1378,9 @@ function generateLegFromSoccerFixture(
   const edgePercent = legFusion.edgePercentage;
 
   const sharpSignal = legFusion.signals.find(s => s.source === "sharp_money_flow");
-  const sharpAction = sharpSignal ? sharpSignal.direction === "bullish" : deterministicBool(`${fixSeed}-sharp`, 0.7);
-  const lineMovement: "steam" | "reverse" | "stable" = deterministicBool(`${fixSeed}-lm1`, 0.7) ? "steam" : deterministicBool(`${fixSeed}-lm2`, 0.4) ? "stable" : "reverse";
-  const publicPercent = deterministicInt(`${fixSeed}-public`, 30, 69);
+  const sharpAction = sharpSignal ? sharpSignal.direction === "bullish" : false;
+  const lineMovement: "steam" | "reverse" | "stable" = "stable";
+  const publicPercent = 50;
   const confidenceLevel: "high" | "medium" | "low" = winProbability > 0.55 ? "high" : winProbability > 0.4 ? "medium" : "low";
 
   return {
@@ -1487,8 +1449,8 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
   };
   const bltSeed = `${sport}-${selectedTeam.name}-${opponent.name}-${marketType}`;
   const totalRange = totalMap[sport];
-  const estTotal = Math.round(deterministicValue(`${bltSeed}-total`, totalRange.min, totalRange.max) * 2) / 2;
-  const estSpread = Math.round(deterministicValue(`${bltSeed}-spread`, -7, 7) * 2) / 2;
+  const estTotal = Math.round(((totalRange.min + totalRange.max) / 2) * 2) / 2;
+  const estSpread = 0;
 
   function findPlayerForProp(): string {
     const allTeams = getTeamsFromCache(sport);
@@ -1523,79 +1485,70 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
   
   if (marketType === "moneyline") {
     market = "Moneyline";
-    decimalOdds = generateRandomOdds(1.4, 2.8, `${bltSeed}-ml-odds`);
+    decimalOdds = 1.91;
     outcome = `${selectedTeam.city} ${selectedTeam.name} ML`;
   } else if (marketType === "spread") {
     market = "Spread";
     line = estSpread;
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-spread-odds`);
-    outcome = `${selectedTeam.city} ${selectedTeam.name} ${estSpread > 0 ? "+" : ""}${estSpread}`;
+    decimalOdds = 1.91;
+    outcome = `${selectedTeam.city} ${selectedTeam.name} PK (Est.)`;
   } else if (marketType === "total") {
     market = "Total";
     line = estTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, estTotal, {});
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-total-odds`);
-    outcome = `${direction.isOver ? "Over" : "Under"} ${estTotal}`;
+    decimalOdds = 1.91;
+    outcome = `${direction.isOver ? "Over" : "Under"} ${estTotal} (Est.)`;
   } else if (marketType === "first_half_spread") {
     market = "1H Spread";
-    const halfSpread = Math.round((estSpread * 0.55) * 2) / 2;
+    const halfSpread = Math.round((estTotal * 0.5) * 2) / 2;
     line = halfSpread;
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-1hs-odds`);
-    outcome = `1H ${selectedTeam.city} ${selectedTeam.name} ${halfSpread > 0 ? "+" : ""}${halfSpread}`;
+    decimalOdds = 1.91;
+    outcome = `1H ${selectedTeam.city} ${selectedTeam.name} PK (Est.)`;
   } else if (marketType === "first_half_total") {
     market = "1H Total";
     const halfTotal = Math.round((estTotal * 0.48) * 2) / 2;
     line = halfTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, halfTotal, {});
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-1ht-odds`);
-    outcome = `1H ${direction.isOver ? "Over" : "Under"} ${halfTotal}`;
+    decimalOdds = 1.91;
+    outcome = `1H ${direction.isOver ? "Over" : "Under"} ${halfTotal} (Est.)`;
   } else if (marketType === "first_quarter_spread") {
     market = "1Q Spread";
-    const qSpread = Math.round((estSpread * 0.28) * 2) / 2;
-    line = qSpread;
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-1qs-odds`);
-    outcome = `1Q ${selectedTeam.city} ${selectedTeam.name} ${qSpread > 0 ? "+" : ""}${qSpread}`;
+    line = 0;
+    decimalOdds = 1.91;
+    outcome = `1Q ${selectedTeam.city} ${selectedTeam.name} PK (Est.)`;
   } else if (marketType === "first_quarter_total") {
     market = "1Q Total";
     const qTotal = Math.round((estTotal * 0.25) * 2) / 2;
     line = qTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, qTotal, {});
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-1qt-odds`);
-    outcome = `1Q ${direction.isOver ? "Over" : "Under"} ${qTotal}`;
+    decimalOdds = 1.91;
+    outcome = `1Q ${direction.isOver ? "Over" : "Under"} ${qTotal} (Est.)`;
   } else if (marketType === "team_total") {
     market = "Team Total";
     const teamTotal = Math.round((estTotal / 2) * 2) / 2;
     line = teamTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, teamTotal, {});
-    decimalOdds = generateRandomOdds(1.85, 1.95, `${bltSeed}-tt-odds`);
-    outcome = `${selectedTeam.city} ${selectedTeam.name} ${direction.isOver ? "Over" : "Under"} ${teamTotal}`;
+    decimalOdds = 1.91;
+    outcome = `${selectedTeam.city} ${selectedTeam.name} ${direction.isOver ? "Over" : "Under"} ${teamTotal} (Est.)`;
   } else if (marketType === "alt_spread") {
     market = "Alt Spread";
-    const altDir2 = deterministicBool(`${bltSeed}-altspread-dir`) ? 1 : -1;
-    const altMag2 = deterministicInt(`${bltSeed}-altspread-mag`, 1, 3);
-    const altOffset = altDir2 * altMag2;
-    const altSpread = estSpread + altOffset;
+    const altSpread = estSpread + 1.5;
     line = altSpread;
-    const betterLine = altSpread > estSpread;
-    decimalOdds = betterLine ? americanToDecimal(-(130 + deterministicInt(`${bltSeed}-altspread-odds`, 0, 69))) : americanToDecimal(100 + deterministicInt(`${bltSeed}-altspread-odds2`, 0, 59));
-    outcome = `${selectedTeam.city} ${selectedTeam.name} ${altSpread > 0 ? "+" : ""}${altSpread}`;
+    decimalOdds = americanToDecimal(-145);
+    outcome = `${selectedTeam.city} ${selectedTeam.name} ${altSpread > 0 ? "+" : ""}${altSpread} (Est.)`;
   } else if (marketType === "alt_total") {
     market = "Alt Total";
-    const altTDir2 = deterministicBool(`${bltSeed}-alttotal-dir`) ? 1 : -1;
-    const altTMag2 = deterministicInt(`${bltSeed}-alttotal-mag`, 1, 3);
-    const altOffset = altTDir2 * altTMag2;
-    const altTotal = estTotal + altOffset;
+    const altTotal = estTotal - 2;
     line = altTotal;
     const direction = chooseOverUnderDirection(sport, "Points", null, altTotal, {});
-    const easierBet = (direction.isOver && altTotal < estTotal) || (!direction.isOver && altTotal > estTotal);
-    decimalOdds = easierBet ? americanToDecimal(-(130 + deterministicInt(`${bltSeed}-alttotal-odds`, 0, 69))) : americanToDecimal(100 + deterministicInt(`${bltSeed}-alttotal-odds2`, 0, 59));
-    outcome = `${direction.isOver ? "Over" : "Under"} ${altTotal}`;
+    decimalOdds = americanToDecimal(-145);
+    outcome = `${direction.isOver ? "Over" : "Under"} ${altTotal} (Est.)`;
   } else if (marketType === "anytime_scorer") {
     market = "Anytime Scorer";
     const scorerName = findPlayerForProp();
     playerName = scorerName;
     propCategory = "Anytime Scorer";
-    decimalOdds = americanToDecimal(-(100 + deterministicInt(`${bltSeed}-scorer-odds`, 0, 199)));
+    decimalOdds = americanToDecimal(175);
     outcome = `${scorerName} Anytime Scorer`;
   } else if (marketType.startsWith("player_")) {
     market = "Player Prop";
@@ -1622,30 +1575,30 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
     playerName = chosenPlayerName;
 
     if (marketType === "player_double_double") {
-      decimalOdds = americanToDecimal(100 + deterministicInt(`${bltSeed}-dd-odds`, 0, 249));
+      decimalOdds = americanToDecimal(175);
       outcome = `${chosenPlayerName} Double-Double Yes`;
     } else {
       const propLine = getDefaultPropLine(propInfo.category);
-      line = Math.max(0.5, propLine + Math.round(deterministicValue(`${bltSeed}-prop-lineadj`, -2, 2) * 2) / 2);
+      line = propLine;
       const direction = chooseOverUnderDirection(sport, propInfo.category, null, line, {});
-      decimalOdds = generateRandomOdds(1.7, 2.2, `${bltSeed}-prop-odds`);
-      outcome = `${chosenPlayerName} ${direction.isOver ? "Over" : "Under"} ${line} ${propInfo.category}`;
+      decimalOdds = 1.91;
+      outcome = `${chosenPlayerName} ${direction.isOver ? "Over" : "Under"} ${line} ${propInfo.category} (Est.)`;
     }
   } else if (marketType === "prop" && includeProps) {
     market = "Player Prop";
     const chosenPlayerName = findPlayerForProp();
     const props = propsBySport[sport];
-    const prop = props[deterministicInt(`${bltSeed}-propsel`, 0, props.length - 1)];
+    const prop = props[0];
     propCategory = prop;
     playerName = chosenPlayerName;
     const propLine = getDefaultPropLine(prop);
-    line = Math.max(0.5, propLine + Math.round(deterministicValue(`${bltSeed}-propgen-lineadj`, -2, 2) * 2) / 2);
+    line = propLine;
     const direction = chooseOverUnderDirection(sport, prop, null, line, {});
-    decimalOdds = generateRandomOdds(1.7, 2.2, `${bltSeed}-propgen-odds`);
-    outcome = `${chosenPlayerName} ${direction.isOver ? "Over" : "Under"} ${line} ${prop}`;
+    decimalOdds = 1.91;
+    outcome = `${chosenPlayerName} ${direction.isOver ? "Over" : "Under"} ${line} ${prop} (Est.)`;
   } else {
     market = "Moneyline";
-    decimalOdds = generateRandomOdds(1.4, 2.8, `${bltSeed}-fallback-ml`);
+    decimalOdds = 1.91;
     outcome = `${selectedTeam.city} ${selectedTeam.name} ML`;
   }
   
@@ -1676,11 +1629,10 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
     legFusion.confidence >= 75 ? "high" :
     legFusion.confidence >= 55 ? "medium" : "low";
   
-  const oddsChangePercent = deterministicValue(`${bltSeed}-oddschange`, -2, 6);
   const oddsMovement: { direction: "up" | "down" | "stable"; percentChange: number; possibleInefficiency: boolean } = {
-    direction: oddsChangePercent > 2 ? "up" : oddsChangePercent < -2 ? "down" : "stable",
-    percentChange: Math.round(Math.abs(oddsChangePercent) * 10) / 10,
-    possibleInefficiency: Math.abs(oddsChangePercent) > 4,
+    direction: "stable",
+    percentChange: 0,
+    possibleInefficiency: false,
   };
 
   let underSignalCount = 0;
@@ -1861,17 +1813,10 @@ function buildRiskFactors(legs: TicketLeg[], fusionData: TicketFusion): string[]
 }
 
 function getCalibrationInfo(marketSlice: string, modelProb: number): { historicalHitRate: number; sampleSize: number; marketSlice: string } {
-  const calibrationMap: Record<string, { hitRate: number; samples: number }> = {
-    "Total": { hitRate: 0.52 + deterministicValue(`cal-total-${marketSlice}`, -0.03, 0.03), samples: 1240 + deterministicInt(`cal-total-samples-${marketSlice}`, 0, 199) },
-    "Spread": { hitRate: 0.51 + deterministicValue(`cal-spread-${marketSlice}`, -0.02, 0.02), samples: 2100 + deterministicInt(`cal-spread-samples-${marketSlice}`, 0, 299) },
-    "Moneyline": { hitRate: 0.54 + deterministicValue(`cal-ml-${marketSlice}`, -0.04, 0.04), samples: 1800 + deterministicInt(`cal-ml-samples-${marketSlice}`, 0, 399) },
-    "Player Prop": { hitRate: 0.50 + deterministicValue(`cal-prop-${marketSlice}`, -0.03, 0.03), samples: 800 + deterministicInt(`cal-prop-samples-${marketSlice}`, 0, 199) },
-  };
-  const cal = calibrationMap[marketSlice] || { hitRate: 0.52, samples: 1000 };
   return {
-    historicalHitRate: Math.round(cal.hitRate * 1000) / 1000,
-    sampleSize: cal.samples,
-    marketSlice: `${marketSlice} (prob ${Math.round(modelProb * 100)}%-range)`,
+    historicalHitRate: 0,
+    sampleSize: 0,
+    marketSlice: `${marketSlice} (prob ${Math.round(modelProb * 100)}%-range) — accumulating real data`,
   };
 }
 
@@ -1892,23 +1837,21 @@ function buildAlternatives(legs: TicketLeg[], sport: Sport): AlternativeTicket[]
   }
   
   if (primaryLeg.market === "Spread" || primaryLeg.market === "Moneyline") {
-    const altSeed2 = `${primaryLeg.team}-${primaryLeg.opponent}-${sport}`;
     alts.push({
       market: "Total",
       selection: `Under ${sport === "NBA" ? "222.5" : sport === "NFL" ? "44.5" : "7.5"}`,
-      evPercent: Math.round(deterministicValue(`${altSeed2}-alt-total-ev`, 0.5, 3.5) * 10) / 10,
-      confidence: Math.round(deterministicValue(`${altSeed2}-alt-total-conf`, 50, 75)),
+      evPercent: 0,
+      confidence: 50,
       rationale: "Defensive efficiency metrics favor lower-scoring outcome in this matchup",
     });
   }
   
   if (primaryLeg.market === "Total" && primaryLeg.outcome.includes("Over")) {
-    const altSeed3 = `${primaryLeg.team}-${primaryLeg.opponent}-contrarian`;
     alts.push({
       market: "Total",
       selection: primaryLeg.outcome.replace("Over", "Under"),
-      evPercent: Math.round(deterministicValue(`${altSeed3}-ev`, 0.3, 2.3) * 10) / 10,
-      confidence: Math.round(deterministicValue(`${altSeed3}-conf`, 45, 65)),
+      evPercent: 0,
+      confidence: 50,
       rationale: "Contrarian under play supported by pace-adjusted models",
     });
   }

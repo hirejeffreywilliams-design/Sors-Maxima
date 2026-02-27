@@ -678,9 +678,9 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
         paidSubscribers,
         conversionRate: convRate,
         monthlyRevenue: realRevenue,
-        churnRate: 0,
+        churnRate: null,
         lifetimeValue: paidSubscribers > 0 ? Math.round(realRevenue / paidSubscribers) : 0,
-        acquisitionCost: 0,
+        acquisitionCost: null,
       };
 
       res.json(metrics);
@@ -1762,12 +1762,12 @@ Follow these rules:
       const totalSubs = allSubs.length;
       const currentARPU = totalSubs > 0 ? Math.round(currentMRR / totalSubs * 100) / 100 : 0;
 
-      const avgCAC = 35;
-      const churnRate = 0.05;
+      const avgCAC = 35; // Industry benchmark assumption — replace with real ad spend / new signups when tracked
+      const churnRate = 0.05; // Industry benchmark: 5% monthly churn — replace with real cancellation data when tracked
       const avgLifetimeMonths = churnRate > 0 ? 1 / churnRate : 24;
       const currentLTV = Math.round(currentARPU * avgLifetimeMonths);
       const ltvCacRatio = avgCAC > 0 ? Math.round((currentLTV / avgCAC) * 10) / 10 : 0;
-      const grossMargin = currentMRR > 0 ? Math.round((1 - 0.25) * 100) : 0;
+      const grossMargin = currentMRR > 0 ? Math.round((1 - 0.25) * 100) : 0; // 75% gross margin assumption (25% infra/API costs)
       const paybackMonths = currentARPU > 0 ? Math.round(avgCAC / currentARPU) : 0;
       const revenuePerTicket = currentARPU > 0 ? Math.round(currentARPU * 0.3 * 100) / 100 : 0;
       const marginPerTicket = Math.round(revenuePerTicket * 0.65 * 100) / 100;
