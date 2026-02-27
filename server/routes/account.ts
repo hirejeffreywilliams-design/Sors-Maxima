@@ -1121,4 +1121,37 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       res.status(500).json({ error: "Failed to compute CLV summary" });
     }
   });
+
+  app.post("/api/user/picks/batch", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const { picks } = req.body;
+      if (!Array.isArray(picks) || picks.length === 0) {
+        return res.status(400).json({ error: "picks must be a non-empty array" });
+      }
+      let saved = 0;
+      for (const pick of picks) {
+        const { sport, gameId, game, pick: pickText, betType, oddsAtPick } = pick;
+        if (!pickText || !betType || oddsAtPick === undefined) continue;
+        try {
+          await db.execute(sql`
+            INSERT INTO user_picks (username, sport, game_id, pick, bet_type, odds_at_pick)
+            VALUES (
+              ${username},
+              ${sport || "unknown"},
+              ${gameId || game || "unknown"},
+              ${pickText},
+              ${betType},
+              ${Number(oddsAtPick) || -110}
+            )
+          `);
+          saved++;
+        } catch {}
+      }
+      res.json({ saved, message: `Tracking ${saved} picks — we'll update results automatically when games finish` });
+    } catch (err) {
+      console.error("Failed to batch save picks:", err);
+      res.status(500).json({ error: "Failed to save picks" });
+    }
+  });
 }

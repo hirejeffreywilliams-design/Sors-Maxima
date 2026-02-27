@@ -3652,6 +3652,37 @@ Follow these rules:
     }
   });
 
+  app.post("/api/admin/settlement/backfill", requireAdmin, async (req, res) => {
+    try {
+      const days = Math.min(30, Math.max(1, parseInt(req.body?.days || "14", 10)));
+      const { runHistoricalBackfill } = await import("../settlementEngine");
+      const result = await runHistoricalBackfill(days);
+      res.json({ success: true, days, ...result });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.post("/api/admin/settlement/run", requireAdmin, async (_req, res) => {
+    try {
+      const { triggerSettlement, getSettlementStatus } = await import("../settlementEngine");
+      const settled = await triggerSettlement(5);
+      const status = getSettlementStatus();
+      res.json({ success: true, settled, status });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/admin/settlement/status", requireAdmin, async (_req, res) => {
+    try {
+      const { getSettlementStatus } = await import("../settlementEngine");
+      res.json(getSettlementStatus());
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.post("/api/admin/orchestrator/retrain", async (_req, res) => {
     try {
       const { triggerManualRetraining } = await import("../continuousLearningOrchestrator");

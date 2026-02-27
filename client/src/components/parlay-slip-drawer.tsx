@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -635,6 +636,38 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
   const [showPlacement, setShowPlacement] = useState(false);
+  const [tracked, setTracked] = useState(false);
+
+  const { data: authData } = useQuery<{ authenticated: boolean; username?: string }>({
+    queryKey: ["/api/auth/check"],
+    staleTime: 30000,
+  });
+  const isAuthenticated = authData?.authenticated ?? false;
+
+  const trackMutation = useMutation({
+    mutationFn: async () => {
+      const picks = legs.map(leg => {
+        const idParts = leg.id?.split("-") || [];
+        const gameId = idParts.length >= 3 ? idParts[2] : (leg.game || leg.id);
+        return {
+          sport: (leg as ParlaySlipLeg).sport || idParts[1] || "unknown",
+          gameId,
+          game: leg.game || "",
+          pick: leg.outcome,
+          betType: leg.type || "moneyline",
+          oddsAtPick: leg.odds || -110,
+        };
+      });
+      return apiRequest("POST", "/api/user/picks/batch", { picks });
+    },
+    onSuccess: () => {
+      setTracked(true);
+      toast({ title: "Bet tracked!", description: "We'll automatically record the result when the game finishes." });
+    },
+    onError: () => {
+      toast({ title: "Sign in to track bets", description: "Create an account to track your bets and see your accuracy over time.", variant: "destructive" });
+    },
+  });
 
   const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
   const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
@@ -757,6 +790,24 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             </Button>
           </div>
 
+          {isAuthenticated && (
+            <Button
+              variant={tracked ? "outline" : "secondary"}
+              className="w-full h-9 gap-2 text-sm"
+              onClick={() => !tracked && trackMutation.mutate()}
+              disabled={trackMutation.isPending || tracked}
+              data-testid="button-track-bet"
+            >
+              {tracked ? (
+                <><CheckCircle className="h-4 w-4 text-green-500" /> Bet Tracked — We'll Record the Result</>
+              ) : trackMutation.isPending ? (
+                <><Activity className="h-4 w-4 animate-pulse" /> Tracking...</>
+              ) : (
+                <><Target className="h-4 w-4" /> Track My Bet</>
+              )}
+            </Button>
+          )}
+
           <button
             className="w-full flex items-center justify-between p-2 rounded-md bg-muted/40 hover:bg-muted/60 transition-colors text-xs text-muted-foreground"
             onClick={() => setShowPlacement(!showPlacement)}
@@ -854,6 +905,25 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             Share
           </Button>
         </div>
+
+        {isAuthenticated && (
+          <Button
+            variant={tracked ? "outline" : "secondary"}
+            size="sm"
+            className="w-full h-7 text-[10px] gap-1"
+            onClick={() => !tracked && trackMutation.mutate()}
+            disabled={trackMutation.isPending || tracked}
+            data-testid="button-track-bet"
+          >
+            {tracked ? (
+              <><CheckCircle className="h-3 w-3 text-green-500" /> Tracked — Result Auto-Recorded</>
+            ) : trackMutation.isPending ? (
+              <><Activity className="h-3 w-3 animate-pulse" /> Saving...</>
+            ) : (
+              <><Target className="h-3 w-3" /> Track My Bet</>
+            )}
+          </Button>
+        )}
 
         <button
           className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"

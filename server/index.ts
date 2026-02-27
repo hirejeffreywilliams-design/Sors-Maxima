@@ -7,6 +7,7 @@ import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
+import { startAutoSettlement } from "./settlementEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -174,6 +175,7 @@ app.use((req, res, next) => {
       
       try { startContinuousLearning(); log("Statistical model engine started"); } catch (e: any) { console.error("[STARTUP] Learning engine failed:", e.message); }
       try { startAnalyticsAgent(); log("ESPN data agent started"); } catch (e: any) { console.error("[STARTUP] Analytics agent failed:", e.message); }
+      try { startAutoSettlement(); log("Auto-settlement engine started"); } catch (e: any) { console.error("[STARTUP] Settlement engine failed:", e.message); }
 
     
     },
