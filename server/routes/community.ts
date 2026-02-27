@@ -492,88 +492,186 @@ export function registerCommunityRoutes(app: Express): void {
     }
   });
 
-  // === Cash-Out Advisor ===
-  app.get("/api/cashout-advisor/:betId", (req, res) => {
-    const { betId } = req.params;
+  // === Cash-Out Advisor — real live ESPN data ===
+  app.get("/api/cashout-advisor/:betId", async (req, res) => {
+    try {
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { getAllInjuries } = await import("../espn-injury-provider");
+      const { getVenueWeather } = await import("../weather-provider");
 
-    const activeBets: Record<string, any> = {
-      "bet-1": {
-        id: "bet-1",
-        description: "Knicks ML + Bucks/Bulls Over 218.5",
-        type: "Parlay (2-leg)",
-        stake: 50,
-        potentialPayout: 245,
-        currentCashout: 142,
-        legsCompleted: 1,
-        legsTotal: 2,
-        timeRemaining: "4:32 3rd Q",
-        momentum: 68,
-        injuryRisk: 15,
-        weatherImpact: 0,
-        recommendation: "hold",
-        confidence: 72,
-        factors: {
-          momentum: { label: "Team Momentum", value: 68, impact: "positive" },
-          timeRemaining: { label: "Time Remaining", value: 55, impact: "neutral" },
-          injuryRisk: { label: "Injury Risk", value: 15, impact: "positive" },
-          weatherChanges: { label: "Weather Impact", value: 0, impact: "neutral" },
-        },
-      },
-      "bet-2": {
-        id: "bet-2",
-        description: "Chiefs -3.5 vs Bills",
-        type: "Straight Bet",
-        stake: 100,
-        potentialPayout: 191,
-        currentCashout: 85,
-        legsCompleted: 0,
-        legsTotal: 1,
-        timeRemaining: "8:15 2nd Q",
-        momentum: 35,
-        injuryRisk: 42,
-        weatherImpact: 28,
-        recommendation: "cash_out",
-        confidence: 81,
-        factors: {
-          momentum: { label: "Team Momentum", value: 35, impact: "negative" },
-          timeRemaining: { label: "Time Remaining", value: 65, impact: "neutral" },
-          injuryRisk: { label: "Injury Risk", value: 42, impact: "negative" },
-          weatherChanges: { label: "Weather Impact", value: 28, impact: "negative" },
-        },
-      },
-      "bet-3": {
-        id: "bet-3",
-        description: "Bucks ML + Under 224.5",
-        type: "Parlay (2-leg)",
-        stake: 75,
-        potentialPayout: 320,
-        currentCashout: 195,
-        legsCompleted: 1,
-        legsTotal: 2,
-        timeRemaining: "2:05 4th Q",
-        momentum: 82,
-        injuryRisk: 5,
-        weatherImpact: 0,
-        recommendation: "partial",
-        confidence: 65,
-        factors: {
-          momentum: { label: "Team Momentum", value: 82, impact: "positive" },
-          timeRemaining: { label: "Time Remaining", value: 25, impact: "negative" },
-          injuryRisk: { label: "Injury Risk", value: 5, impact: "positive" },
-          weatherChanges: { label: "Weather Impact", value: 0, impact: "neutral" },
-        },
-      },
-    };
+      const allGames = await getAllSportsScoreboard();
+      const liveGames = allGames.filter(g => g.status?.state === "in");
 
-    if (betId === "all") {
-      return res.json(Object.values(activeBets));
+      if (liveGames.length === 0) {
+        return res.json([]);
+      }
+
+      let injuryData: Record<string, any> = {};
+      try { injuryData = await getAllInjuries(); } catch { injuryData = {}; }
+
+      // Sport period totals for time-remaining calculation
+      const PERIOD_TOTALS: Record<string, number> = {
+        NBA: 48, NHL: 60, NFL: 60, NCAAB: 40, MLB: 27, NCAAF: 60
+      };
+      const PERIOD_COUNTS: Record<string, number> = {
+        NBA: 4, NHL: 3, NFL: 4, NCAAB: 2, MLB: 9, NCAAF: 4
+      };
+
+      function parseClockMinutes(clock: string): number {
+        if (!clock) return 0;
+        const parts = clock.split(":").map(Number);
+        return parts.length === 2 ? parts[0] + parts[1] / 60 : 0;
+      }
+
+      function logisticWinProb(scoreDiff: number, minutesLeft: number, totalMinutes: number): number {
+        // More time remaining = higher variance = closer to 50/50
+        const k = totalMinutes > 0 ? 8 / Math.sqrt(Math.max(1, minutesLeft)) : 4;
+        return 1 / (1 + Math.exp(-k * scoreDiff / 10));
+      }
+
+      const scenarios: any[] = [];
+
+      for (const game of liveGames) {
+        const homeScore = Number(game.homeTeam?.score || 0);
+        const awayScore = Number(game.awayTeam?.score || 0);
+        const period = Number(game.status?.period || 1);
+        const clock = game.status?.clock || "";
+        const sport = (game.sport || "NBA").toUpperCase();
+        const totalMinutes = PERIOD_TOTALS[sport] || 48;
+        const periodCount = PERIOD_COUNTS[sport] || 4;
+        const minutesPerPeriod = totalMinutes / periodCount;
+
+        const clockMinsLeft = parseClockMinutes(clock);
+        const periodsLeft = Math.max(0, periodCount - period);
+        const minutesLeft = periodsLeft * minutesPerPeriod + (clockMinsLeft || 0);
+        const minutesPlayed = Math.max(0, totalMinutes - minutesLeft);
+        const completionPct = Math.min(99, Math.round((minutesPlayed / totalMinutes) * 100));
+
+        const timeDetail = game.status?.shortDetail || `${sport} Live`;
+
+        // Determine which team is leading
+        const homeLeading = homeScore >= awayScore;
+        const leader = homeLeading ? game.homeTeam : game.awayTeam;
+        const trailer = homeLeading ? game.awayTeam : game.homeTeam;
+        const leaderScore = homeLeading ? homeScore : awayScore;
+        const trailerScore = homeLeading ? awayScore : homeScore;
+        const scoreDiff = leaderScore - trailerScore;
+
+        // Win probability for the leading team
+        const winProb = logisticWinProb(scoreDiff, minutesLeft, totalMinutes);
+        const winProbPct = Math.round(winProb * 100);
+
+        // Injury risk: count key injuries for leader team
+        const leaderAbbrev = leader.abbreviation?.toLowerCase() || "";
+        let injuryRisk = 0;
+        for (const [teamKey, injuries] of Object.entries(injuryData)) {
+          if (teamKey.toLowerCase().includes(leaderAbbrev) || leaderAbbrev.includes(teamKey.toLowerCase())) {
+            const injuryArr = Array.isArray(injuries) ? injuries : [];
+            const outCount = injuryArr.filter((i: any) => i.status === "Out" || i.status === "Doubtful").length;
+            injuryRisk = Math.min(80, outCount * 15);
+            break;
+          }
+        }
+
+        // Weather impact for outdoor sports
+        let weatherImpact = 0;
+        const isOutdoor = ["NFL", "MLB", "NCAAF"].includes(sport);
+        if (isOutdoor) {
+          try {
+            const weather = await getVenueWeather(game.venue || "", game.date);
+            if (weather) {
+              weatherImpact = Math.min(60, Math.round((weather.windSpeed || 0) * 1.5 + (weather.precipitationProbability || 0) * 0.4));
+            }
+          } catch {}
+        }
+
+        // Momentum: score diff adjusted for time
+        const momentum = Math.min(95, Math.max(5, 50 + scoreDiff * 4));
+
+        // Time certainty: high when little time left
+        const timeCertainty = Math.min(95, Math.round(completionPct * 0.9 + 10));
+
+        // Simulate a $100 ML bet on the leading team
+        // Estimate original odds from win probability at game start (assume 50/50 for simplicity)
+        const stake = 100;
+        const originalOdds = homeLeading ? -110 : (awayScore > homeScore ? 200 : -110);
+        const decimalOdds = originalOdds > 0 ? originalOdds / 100 + 1 : 100 / Math.abs(originalOdds) + 1;
+        const potentialPayout = Math.round(stake * decimalOdds);
+
+        // Current cashout = potential payout * win probability * (1 - 0.06 house margin)
+        const currentCashout = Math.max(
+          Math.round(stake * 0.1),
+          Math.round(potentialPayout * winProb * 0.94)
+        );
+
+        // Recommendation
+        let recommendation: "hold" | "cash_out" | "partial" = "hold";
+        let confidence = 60;
+
+        if (winProbPct >= 75 && completionPct >= 60) {
+          recommendation = "hold";
+          confidence = Math.min(92, 60 + winProbPct * 0.4);
+        } else if (winProbPct < 40 && completionPct >= 50) {
+          recommendation = "cash_out";
+          confidence = Math.min(90, 60 + (100 - winProbPct) * 0.4);
+        } else if (winProbPct < 55 && completionPct >= 70) {
+          recommendation = "partial";
+          confidence = Math.min(80, 55 + completionPct * 0.3);
+        } else if (winProbPct >= 65) {
+          recommendation = "hold";
+          confidence = Math.min(85, 50 + winProbPct * 0.4);
+        } else {
+          recommendation = "partial";
+          confidence = 58;
+        }
+
+        const momentumImpact = momentum > 60 ? "positive" : momentum < 40 ? "negative" : "neutral";
+        const timeImpact = timeCertainty > 70 ? (recommendation === "hold" ? "positive" : "negative") : "neutral";
+        const injuryImpact = injuryRisk > 30 ? "negative" : injuryRisk > 10 ? "neutral" : "positive";
+        const weatherImpactLabel = weatherImpact > 20 ? "negative" : weatherImpact > 5 ? "neutral" : "positive";
+
+        const teamDisplayName = leader.shortDisplayName || leader.displayName || "Home";
+        const opponentDisplayName = trailer.shortDisplayName || trailer.displayName || "Away";
+
+        scenarios.push({
+          id: `live-${game.id}`,
+          description: `${teamDisplayName} ML vs ${opponentDisplayName} (${leaderScore}–${trailerScore})`,
+          type: "Live Straight Bet",
+          stake,
+          potentialPayout,
+          currentCashout,
+          legsCompleted: 0,
+          legsTotal: 1,
+          timeRemaining: timeDetail,
+          momentum,
+          injuryRisk,
+          weatherImpact,
+          recommendation,
+          confidence: Math.round(confidence),
+          winProbability: winProbPct,
+          completionPct,
+          gameId: game.id,
+          sport,
+          factors: {
+            momentum: { label: "Team Momentum", value: momentum, impact: momentumImpact },
+            timeRemaining: { label: "Time Certainty", value: timeCertainty, impact: timeImpact },
+            injuryRisk: { label: "Injury Risk", value: injuryRisk, impact: injuryImpact },
+            weatherChanges: { label: "Weather Impact", value: weatherImpact, impact: weatherImpactLabel },
+          },
+        });
+      }
+
+      const { betId } = req.params;
+      if (betId === "all") {
+        return res.json(scenarios);
+      }
+      const single = scenarios.find(s => s.id === betId || s.gameId === betId);
+      if (!single) return res.status(404).json({ error: "Game not found or not currently live" });
+      return res.json(single);
+    } catch (err) {
+      console.error("[CashoutAdvisor] Error:", err);
+      return res.status(500).json({ error: "Failed to generate cashout analysis" });
     }
-
-    const bet = activeBets[betId];
-    if (!bet) {
-      return res.status(404).json({ error: "Bet not found" });
-    }
-    return res.json(bet);
   });
 
   // === Live Chat ===

@@ -37,6 +37,9 @@ interface CashoutBet {
   weatherImpact: number;
   recommendation: "hold" | "cash_out" | "partial";
   confidence: number;
+  winProbability?: number;
+  completionPct?: number;
+  sport?: string;
   factors: Record<string, Factor>;
 }
 
@@ -100,11 +103,11 @@ function CashoutCard({ bet }: { bet: CashoutBet }) {
               {bet.description}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <Badge variant="secondary" data-testid={`badge-type-${bet.id}`}>{bet.type}</Badge>
+              <Badge variant="secondary" data-testid={`badge-type-${bet.id}`}>{bet.sport || bet.type}</Badge>
               <span className="text-xs text-muted-foreground">{bet.timeRemaining}</span>
-              <span className="text-xs text-muted-foreground">
-                {bet.legsCompleted}/{bet.legsTotal} legs hit
-              </span>
+              {bet.completionPct !== undefined && (
+                <span className="text-xs text-muted-foreground">{bet.completionPct}% complete</span>
+              )}
             </div>
           </div>
           <Badge variant="outline" className={`${config.bg} ${config.border} ${config.color} shrink-0`} data-testid={`badge-recommendation-${bet.id}`}>
@@ -113,21 +116,30 @@ function CashoutCard({ bet }: { bet: CashoutBet }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-3 gap-3 text-center">
+        <div className="grid grid-cols-4 gap-2 text-center">
           <div>
             <p className="text-xs text-muted-foreground">Stake</p>
-            <p className="font-semibold" data-testid={`text-stake-${bet.id}`}>${bet.stake}</p>
+            <p className="font-semibold text-sm" data-testid={`text-stake-${bet.id}`}>${bet.stake}</p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Cash Out</p>
-            <p className={`font-semibold ${config.color}`} data-testid={`text-cashout-${bet.id}`}>
+            <p className="text-xs text-muted-foreground">Cashout</p>
+            <p className={`font-semibold text-sm ${config.color}`} data-testid={`text-cashout-${bet.id}`}>
               ${bet.currentCashout}
             </p>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Full Payout</p>
-            <p className="font-semibold" data-testid={`text-payout-${bet.id}`}>${bet.potentialPayout}</p>
+            <p className="text-xs text-muted-foreground">Payout</p>
+            <p className="font-semibold text-sm" data-testid={`text-payout-${bet.id}`}>${bet.potentialPayout}</p>
           </div>
+          {bet.winProbability !== undefined && (
+            <div>
+              <p className="text-xs text-muted-foreground">Win Prob</p>
+              <p className={`font-semibold text-sm ${bet.winProbability >= 60 ? "text-green-500" : bet.winProbability < 40 ? "text-red-500" : "text-yellow-500"}`}
+                data-testid={`text-winprob-${bet.id}`}>
+                {bet.winProbability}%
+              </p>
+            </div>
+          )}
         </div>
 
         <div>
@@ -230,9 +242,9 @@ export function CashoutAdvisor() {
       <Card>
         <CardContent className="p-8 text-center">
           <DollarSign className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-1">No Active Bets</h3>
+          <h3 className="font-semibold mb-1">No Live Games Right Now</h3>
           <p className="text-sm text-muted-foreground">
-            Place some bets to see cash-out recommendations here.
+            Cashout analysis runs on in-progress games. Check back when games are live.
           </p>
         </CardContent>
       </Card>
@@ -245,10 +257,10 @@ export function CashoutAdvisor() {
         <CardContent className="p-4">
           <div className="flex items-center gap-2 flex-wrap">
             <Gauge className="w-5 h-5 text-primary" />
-            <span className="font-medium text-sm">AI Cash-Out Advisor</span>
+            <span className="font-medium text-sm">Live Cashout Advisor</span>
             <ArrowRight className="w-3 h-3 text-muted-foreground" />
             <span className="text-xs text-muted-foreground">
-              Analyzing {bets.length} active bet{bets.length !== 1 ? "s" : ""} in real-time
+              Analyzing {bets.length} live game{bets.length !== 1 ? "s" : ""} in real-time
             </span>
           </div>
           <div className="flex items-center gap-4 mt-2 flex-wrap">
