@@ -93,6 +93,7 @@ export function registerAuthRoutes(app: Express): void {
           }
         }
 
+        await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
         return res.json({ success: true, username: ADMIN_USERNAME, isAdmin: true });
       }
 
@@ -121,6 +122,7 @@ export function registerAuthRoutes(app: Express): void {
         }
       }
 
+      await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
       return res.json({ 
         success: true, 
         username: result.user!.username,
@@ -206,6 +208,8 @@ export function registerAuthRoutes(app: Express): void {
   });
 
   app.get("/api/auth/check", async (req, res) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.set('Pragma', 'no-cache');
     if (req.session?.isAuthenticated) {
       return res.json({ 
         authenticated: true, 

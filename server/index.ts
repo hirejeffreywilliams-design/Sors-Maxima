@@ -33,6 +33,8 @@ process.on("SIGINT", () => process.exit(0));
 const app = express();
 const httpServer = createServer(app);
 
+app.set('trust proxy', 1);
+
 declare module "http" {
   interface IncomingMessage {
     rawBody: unknown;
