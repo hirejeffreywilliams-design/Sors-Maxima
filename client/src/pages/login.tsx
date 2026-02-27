@@ -11,7 +11,7 @@ import { getCachedFingerprint } from "@/lib/device-fingerprint";
 import { useSEO } from "@/hooks/use-seo";
 
 interface LoginPageProps {
-  onLogin: () => void;
+  onLogin: (isAdmin?: boolean, username?: string) => void;
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
@@ -67,7 +67,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       const data = await response.json();
       
       if (response.ok) {
-        onLogin();
+        onLogin(data.isAdmin || false, data.username);
       } else {
         setError(data.error || "Invalid credentials");
       }

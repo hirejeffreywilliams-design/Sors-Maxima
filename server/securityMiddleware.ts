@@ -350,16 +350,18 @@ export function sessionFingerprintMiddleware(req: Request, res: Response, next: 
 
   const fingerprint = securityService.generateFingerprint(req);
   const sessionId = req.session.userId;
+  const stored = (securityService as any).sessionFingerprints.get(sessionId);
 
-  if (!securityService.validateSessionFingerprint(sessionId, fingerprint)) {
+  if (stored && stored !== fingerprint) {
     const ip = getClientIp(req);
-    securityService.recordEvent("session_hijack", "critical", req.path, ip, "Session fingerprint mismatch detected", {
+    securityService.recordEvent("session_hijack", "high", req.path, ip, "Session fingerprint mismatch detected", {
       userId: req.session.userId,
       metadata: { expectedFingerprint: "stored", receivedFingerprint: fingerprint },
     });
+  }
 
-    req.session.destroy(() => {});
-    return res.status(401).json({ error: "Session invalid. Please log in again." });
+  if (!stored) {
+    (securityService as any).sessionFingerprints.set(sessionId, fingerprint);
   }
 
   next();

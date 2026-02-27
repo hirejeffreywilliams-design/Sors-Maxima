@@ -737,9 +737,12 @@ function AppContent() {
     }
   }, [authData, isLoading]);
 
-  const handleLogin = () => {
-    refetch();
+  const handleLogin = (isAdmin?: boolean, username?: string) => {
     setIsAuthenticated(true);
+    if (isAdmin !== undefined || username !== undefined) {
+      setAuthState({ isAdmin: isAdmin || false, username });
+    }
+    refetch();
   };
 
   if (location === '/legal') {
