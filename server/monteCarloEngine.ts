@@ -339,7 +339,7 @@ const DEFAULT_SPORT_PARAMS: Record<string, { scoreMean: number; scoreStdDev: num
   NCAAF: { scoreMean: 25, scoreStdDev: 12, totalMean: 50, homeAdvantage: 3.0, isPoisson: false },
 };
 
-const MATCHUP_SIMS = 2000;
+const MATCHUP_SIMS = 1500;
 const PARLAY_SIMS = 5000;
 const BATCH_SIZE = 2000;
 const CONVERGENCE_THRESHOLD = 0.0005;
@@ -349,7 +349,7 @@ const PRE_SIM_INTERVAL = 300000;
 const PRE_SIM_TTL = 300000;
 const LIVE_SIM_TTL = 60000;
 const MAX_PREDICTIONS = 500;
-const MAX_CACHE_ENTRIES = 30;
+const MAX_CACHE_ENTRIES = 25;
 
 let engineRunning = false;
 let preSimInterval: ReturnType<typeof setInterval> | null = null;
@@ -483,6 +483,19 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
   const spreadLine = input.spread !== undefined ? input.spread : Math.round((homeScoreMean - awayScoreMean) * 2) / 2;
   const totalLine = input.totalLine !== undefined ? input.totalLine : Math.round((homeScoreMean + awayScoreMean) * 2) / 2;
 
+  // Pace-scaled variance: faster games have higher scoring variance
+  let adjustedStdDev = params.scoreStdDev;
+  if (!params.isPoisson && input.homePace && input.awayPace) {
+    const avgPace = (input.homePace + input.awayPace) / 2;
+    const leaguePace = 100;
+    const paceRatio = avgPace / leaguePace;
+    adjustedStdDev = params.scoreStdDev * Math.max(0.85, Math.min(1.25, paceRatio));
+  }
+
+  // Score correlation: pace affects both teams simultaneously (r ≈ 0.35 in basketball)
+  const PACE_CORR = params.isPoisson ? 0 : 0.35;
+  const corrFactor = Math.sqrt(Math.max(0, 1 - PACE_CORR * PACE_CORR));
+
   const homeScores: number[] = [];
   const awayScores: number[] = [];
   let homeWins = 0, awayWins = 0, draws = 0, spreadCovers = 0, overs = 0;
@@ -496,8 +509,11 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
       homeScore = poissonSample(Math.max(0.5, homeScoreMean), rng);
       awayScore = poissonSample(Math.max(0.5, awayScoreMean), rng);
     } else {
-      homeScore = Math.max(0, Math.round(homeScoreMean + rng.nextGaussian() * params.scoreStdDev));
-      awayScore = Math.max(0, Math.round(awayScoreMean + rng.nextGaussian() * params.scoreStdDev));
+      // Bivariate normal: shared pace component z0 drives both scores together
+      const [z0, z1] = rng.nextGaussianPair();
+      const z2 = rng.nextGaussian();
+      homeScore = Math.max(0, Math.round(homeScoreMean + (PACE_CORR * z0 + corrFactor * z1) * adjustedStdDev));
+      awayScore = Math.max(0, Math.round(awayScoreMean + (PACE_CORR * z0 + corrFactor * z2) * adjustedStdDev));
     }
 
     homeScores.push(homeScore);
@@ -568,7 +584,7 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
       home: { mean: Math.round(homeMean * 10) / 10, stdDev: Math.round(homeStd * 10) / 10, p10: homeScores[idx10], median: homeScores[idx50], p90: homeScores[idx90] },
       away: { mean: Math.round(awayMean * 10) / 10, stdDev: Math.round(awayStd * 10) / 10, p10: awayScores[idx10], median: awayScores[idx50], p90: awayScores[idx90] },
     },
-    convergenceScore: 1.0,
+    convergenceScore: Math.round(Math.max(0.6, Math.min(1.0, 1 - winSE * 12)) * 1000) / 1000,
     confidenceInterval95: {
       homeWin: [Math.max(0, homeWinProb - 1.96 * winSE), Math.min(1, homeWinProb + 1.96 * winSE)],
       total: [Math.round((homeMean + awayMean - 1.96 * Math.sqrt(marginVariance)) * 10) / 10, Math.round((homeMean + awayMean + 1.96 * Math.sqrt(marginVariance)) * 10) / 10],
@@ -1223,7 +1239,7 @@ async function runPreSimulationCycle(): Promise<void> {
       ) || null;
     };
 
-    for (const game of allGames.slice(0, 30)) {
+    for (const game of allGames.slice(0, 25)) {
       try {
         const homeWinPct = game.homeTeam?.winPct || 50;
         const awayWinPct = game.awayTeam?.winPct || 50;

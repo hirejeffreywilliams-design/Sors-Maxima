@@ -366,7 +366,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getInSeasonSports());
   });
 
-  // startMonteCarloEngine(); // Disabled to conserve memory
+  startMonteCarloEngine();
 
   app.get("/api/monte-carlo/status", (_req: Request, res: Response) => {
     return res.json(getMonteCarloEngineStatus());
