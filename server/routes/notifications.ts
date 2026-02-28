@@ -1,8 +1,7 @@
 import type { Express, Request, Response } from "express";
-import { startNotificationEngine, subscribeToGame, unsubscribeFromGame, getUserGameSubscriptions, watchParlay, unwatchParlay, getUserParlayWatches, getNotifications as getCustomNotifications, markNotificationsRead as markCustomNotificationsRead, getNotificationStats } from "../notificationEngine";
+import { subscribeToGame, unsubscribeFromGame, getUserGameSubscriptions, watchParlay, unwatchParlay, getUserParlayWatches, getNotifications as getCustomNotifications, markNotificationsRead as markCustomNotificationsRead, getNotificationStats } from "../notificationEngine";
 
 export function registerNotificationRoutes(app: Express): void {
-  startNotificationEngine();
 
   app.get("/api/custom-notifications", (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 50;

@@ -8,6 +8,13 @@ import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import { startAutoSettlement } from "./settlementEngine";
+import { startIntelligenceHub } from "./unifiedIntelligenceHub";
+import { startPrecomputedEngine } from "./precomputedPredictionsEngine";
+import { startPlatformIntelligenceEngine } from "./platformIntelligenceEngine";
+import { startMonteCarloEngine } from "./monteCarloEngine";
+import { startNotificationEngine } from "./notificationEngine";
+import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
+import { liveSportsData } from "./live-sports-data";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -18,6 +25,7 @@ import {
   csrfValidationMiddleware,
 } from "./securityMiddleware";
 
+// ─── Crash Guards ─────────────────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
   console.error("[CRASH GUARD] Uncaught exception caught — app staying alive:", err.message);
 });
@@ -30,6 +38,7 @@ process.on("SIGHUP", () => { /* ignore — workflow runner disconnects terminal 
 process.on("SIGTERM", () => process.exit(0));
 process.on("SIGINT", () => process.exit(0));
 
+// ─── App Setup ────────────────────────────────────────────────────────────────
 const app = express();
 const httpServer = createServer(app);
 
@@ -51,6 +60,7 @@ declare module "express-session" {
   }
 }
 
+// ─── Security Middleware ──────────────────────────────────────────────────────
 app.use(securityHeadersMiddleware);
 app.use(ipBlockMiddleware);
 
@@ -87,6 +97,7 @@ app.use("/api", apiRateLimitMiddleware);
 app.use("/api", inputSanitizationMiddleware);
 app.use("/api", sessionFingerprintMiddleware);
 
+// ─── Request Logger ───────────────────────────────────────────────────────────
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -94,7 +105,6 @@ export function log(message: string, source = "express") {
     second: "2-digit",
     hour12: true,
   });
-
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
@@ -117,7 +127,6 @@ app.use((req, res, next) => {
         const bodyStr = JSON.stringify(capturedJsonResponse);
         logLine += ` :: ${bodyStr.length > 500 ? bodyStr.slice(0, 500) + "…[truncated]" : bodyStr}`;
       }
-
       log(logLine);
     }
   });
@@ -125,6 +134,77 @@ app.use((req, res, next) => {
   next();
 });
 
+// ─── Startup Orchestrator ─────────────────────────────────────────────────────
+// Engines start in deliberate phases after the server is listening.
+// Each phase waits for the previous to stabilize before adding more load.
+
+function safeStart(name: string, fn: () => void, delayMs: number): void {
+  setTimeout(() => {
+    try {
+      fn();
+      log(`[Phase] ${name} started`, "startup");
+    } catch (err: any) {
+      console.error(`[Startup] ${name} failed to start:`, err.message);
+    }
+  }, delayMs);
+}
+
+function startEnginesPhased(): void {
+  log("[Startup] Server ready — beginning phased engine startup", "startup");
+
+  // ── Phase 1 (3s): Roster data ─────────────────────────────────────────────
+  // Preload team rosters from ESPN. Lightweight — just caching JSON.
+  safeStart("Roster Preload", () => {
+    preloadAllRosters()
+      .then(() => startPeriodicRefresh(6))
+      .catch((err) => {
+        console.error("[Startup] Roster preload failed — will retry via periodic refresh:", err.message);
+        startPeriodicRefresh(6);
+      });
+  }, 3_000);
+
+  // ── Phase 2 (5s): Live Sports Data ───────────────────────────────────────
+  // Start the ESPN live scoreboard refresh cycle (60s interval).
+  // This is the base data layer everything else reads from.
+  safeStart("Live Sports Data", () => liveSportsData.startSimulation(), 5_000);
+
+  // ── Phase 3 (10s): Intelligence Hub ──────────────────────────────────────
+  // Core ESPN + odds data pipeline. Everything else depends on this.
+  // Runs its first cycle immediately, then every 60s.
+  safeStart("Intelligence Hub", startIntelligenceHub, 10_000);
+
+  // ── Phase 3 (20s): Precomputed Predictions ────────────────────────────────
+  // Builds AI picks from hub data. Waits for hub to complete at least one cycle.
+  safeStart("Precomputed Predictions Engine", startPrecomputedEngine, 20_000);
+
+  // ── Phase 4 (35s): Auto-Settlement ───────────────────────────────────────
+  // Settle picks from completed games. Runs once at startup, then every 5 min.
+  safeStart("Auto-Settlement Engine", startAutoSettlement, 35_000);
+
+  // ── Phase 5 (50s): Platform Intelligence ─────────────────────────────────
+  // Accumulates game outcomes and prediction accuracy for continuous learning.
+  safeStart("Platform Intelligence Engine", startPlatformIntelligenceEngine, 50_000);
+
+  // ── Phase 6 (70s): Monte Carlo Engine ────────────────────────────────────
+  // Heavy simulation engine. Pre-simulates matchups for fast responses.
+  safeStart("Monte Carlo Engine", startMonteCarloEngine, 70_000);
+
+  // ── Phase 7 (90s): Notification Engine ───────────────────────────────────
+  // Monitors live games and prop lines for user-subscribed alerts.
+  // Starts after ESPN game data and predictions are fully populated.
+  safeStart("Notification Engine", startNotificationEngine, 90_000);
+
+  // ── Phase 8 (2 min): Background Learning ─────────────────────────────────
+  // Continuous learning from outcomes + analytics agent. Pure background work.
+  safeStart("Continuous Learning Engine", startContinuousLearning, 120_000);
+  safeStart("Analytics Agent", startAnalyticsAgent, 135_000);
+
+  // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
+  // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.
+  // No need to start it here — this saves resources when no users are active.
+}
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
   await registerRoutes(httpServer, app);
 
@@ -151,9 +231,6 @@ app.use((req, res, next) => {
     console.error(`[${errorId}] ${req.method} ${req.path}:`, err);
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
@@ -161,10 +238,6 @@ app.use((req, res, next) => {
     await setupVite(httpServer, app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || "5000", 10);
   httpServer.listen(
     {
@@ -174,12 +247,7 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
-      
-      try { startContinuousLearning(); log("Statistical model engine started"); } catch (e: any) { console.error("[STARTUP] Learning engine failed:", e.message); }
-      try { startAnalyticsAgent(); log("ESPN data agent started"); } catch (e: any) { console.error("[STARTUP] Analytics agent failed:", e.message); }
-      try { startAutoSettlement(); log("Auto-settlement engine started"); } catch (e: any) { console.error("[STARTUP] Settlement engine failed:", e.message); }
-
-    
+      startEnginesPhased();
     },
   );
 })();

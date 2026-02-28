@@ -1,13 +1,12 @@
 import type { Express, Request, Response } from "express";
-import { startIntelligenceHub, generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
+import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
-import { registerSSEClient, startSSEBroadcaster, getSSEStatus } from "../sseManager";
-import { startPrecomputedEngine, getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
+import { registerSSEClient, getSSEStatus } from "../sseManager";
+import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
 import {
-  startPlatformIntelligenceEngine,
   getFullIntelligenceReport,
   getTeamTrends,
   getTeamDetail,
@@ -20,7 +19,6 @@ import {
   getEngineStatus as getPlatformEngineStatus,
 } from "../platformIntelligenceEngine";
 import {
-  startMonteCarloEngine,
   getMonteCarloEngineStatus,
   getCalibrationReport,
   simulateMatchup,
@@ -33,8 +31,6 @@ import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireTier } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
-  startIntelligenceHub();
-
   app.get("/api/intelligence/feed", async (_req: Request, res: Response) => {
     try {
       const feed = await generateIntelligenceFeed();
@@ -73,8 +69,6 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getHubStatus());
   });
 
-  startSSEBroadcaster();
-
   app.get("/api/sse/stream", (req: Request, res: Response) => {
     const channelsParam = (req.query.channels as string) || "all";
     const channels = channelsParam.split(",").map(c => c.trim()).filter(Boolean);
@@ -89,7 +83,6 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getSSEStatus());
   });
 
-  startPrecomputedEngine();
 
   app.get("/api/optimal-tickets", async (req: Request, res: Response) => {
     try {
@@ -307,7 +300,6 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getPrecomputedEngineStatus());
   });
 
-  startPlatformIntelligenceEngine();
 
   app.get("/api/platform-intelligence", (_req: Request, res: Response) => {
     try {
@@ -366,7 +358,6 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getInSeasonSports());
   });
 
-  startMonteCarloEngine();
 
   app.get("/api/monte-carlo/status", (_req: Request, res: Response) => {
     return res.json(getMonteCarloEngineStatus());

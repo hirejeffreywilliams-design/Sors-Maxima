@@ -45,6 +45,11 @@ export function registerSSEClient(res: Response, channels: string[] = ["all"], c
     ipConnectionCount.set(clientIp, currentCount + 1);
   }
 
+  // Lazy start: auto-start the broadcaster on first real client connection
+  if (!broadcastInterval) {
+    startSSEBroadcaster();
+  }
+
   const id = generateClientId();
 
   res.writeHead(200, {
