@@ -90,6 +90,7 @@ export default function OnboardingPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/onboarding"] });
       toast({ title: "Welcome to Sors Maxima", description: "Your preferences have been saved. Let's find your edge." });
       setLocation("/");
     },

@@ -855,7 +855,7 @@ function PublicRoutes() {
 function AppContent() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authState, setAuthState] = useState<AuthState>({});
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -884,6 +884,7 @@ function AppContent() {
       setAuthState({ isAdmin: isAdmin || false, username });
     }
     refetch();
+    setLocation('/');
   };
 
   if (location === '/legal') {
