@@ -66,7 +66,7 @@ const WatchlistPage = lazy(() => import("@/pages/watchlist"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, TrendingUp, History, Calculator, Star, Database, Compass } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -222,6 +222,8 @@ function Router({ authState }: { authState: AuthState }) {
   return (
     <ErrorBoundary>
     <OnboardingGuard>
+    <>
+    <ContextualNavBar />
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
@@ -266,6 +268,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route component={NotFound} />
       </Switch>
     </Suspense>
+    </>
     </OnboardingGuard>
     </ErrorBoundary>
   );
@@ -283,6 +286,108 @@ interface NavItem {
   testId: string;
   tooltip: string;
   adminOnly?: boolean;
+}
+
+// Map every secondary route → { label, parent }
+const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
+  "/watchlist":            { label: "Watchlist",            parent: "/" },
+  "/insights":             { label: "My Insights",          parent: "/" },
+  "/track-record":         { label: "Track Record",         parent: "/" },
+  "/bankroll":             { label: "Bankroll Manager",     parent: "/" },
+  "/rewards":              { label: "Rewards",              parent: "/" },
+  "/profile":              { label: "My Profile",           parent: "/" },
+  "/settings":             { label: "Settings",             parent: "/" },
+  "/help":                 { label: "Help Center",          parent: "/" },
+  "/changelog":            { label: "What's New",           parent: "/" },
+  "/roadmap":              { label: "Roadmap",              parent: "/" },
+  "/legal":                { label: "Legal",                parent: "/" },
+  "/pricing":              { label: "Pricing & Plans",      parent: "/" },
+  "/rosters":              { label: "Rosters & Injuries",   parent: "/tools" },
+  "/sport-factor-analysis":{ label: "Factor Analysis",      parent: "/tools" },
+  "/pipeline":             { label: "Intelligence Pipeline",parent: "/tools" },
+  "/platform-intelligence":{ label: "Platform Intelligence",parent: "/tools" },
+  "/correlation-matrix":   { label: "Correlation Matrix",  parent: "/tools" },
+  "/training":             { label: "Training Center",      parent: "/tools" },
+  "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },
+  "/strategy":             { label: "Strategy Advisor",     parent: "/" },
+  "/onboarding":           { label: "Onboarding",           parent: "/" },
+  "/dashboard":            { label: "Dashboard",            parent: "/" },
+};
+
+const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/community", "/tools"]);
+
+// Static parent labels (can't reference navItems since it's defined below)
+const PARENT_LABELS: Record<string, string> = {
+  "/":        "Home",
+  "/tools":   "Tools",
+  "/builder": "Builder",
+  "/daily":   "Daily Picks",
+  "/community": "Community",
+};
+
+function ContextualNavBar() {
+  const [location] = useLocation();
+  const route = SECONDARY_ROUTES[location];
+
+  if (!route || PRIMARY_NAV_HREFS.has(location)) return null;
+
+  const parentLabel = PARENT_LABELS[route.parent] ?? "Home";
+  const parentHref = route.parent || "/";
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = parentHref;
+    }
+  };
+
+  return (
+    <div className="w-full border-b bg-muted/30" data-testid="contextual-nav-bar">
+      <div className="max-w-screen-2xl mx-auto flex h-9 items-center gap-1.5 px-4 lg:px-6">
+        <button
+          onClick={handleBack}
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          data-testid="button-nav-back"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span className="hidden sm:inline">Back</span>
+        </button>
+
+        <span className="text-muted-foreground/30 text-xs select-none">·</span>
+
+        {parentHref !== "/" ? (
+          <>
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0" data-testid="link-nav-home-crumb">
+              Home
+            </Link>
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+            <Link href={parentHref} className="text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0" data-testid="link-nav-parent">
+              {parentLabel}
+            </Link>
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+          </>
+        ) : (
+          <>
+            <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors shrink-0" data-testid="link-nav-home-crumb">
+              Home
+            </Link>
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+          </>
+        )}
+
+        <span className="text-sm font-medium truncate" data-testid="text-nav-current-page">{route.label}</span>
+
+        <div className="ml-auto shrink-0">
+          <Link href="/" data-testid="link-nav-home">
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Go to Picks">
+              <Home className="w-3.5 h-3.5" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const navItems: NavItem[] = [
@@ -530,35 +635,28 @@ function DesktopNav({ authState }: { authState: AuthState }) {
   );
 }
 
-function BottomNav({ authState }: { authState: AuthState }) {
+function BottomNav({ authState, onOpenMenu }: { authState: AuthState; onOpenMenu: () => void }) {
   const [location] = useLocation();
-  
-  const bottomNavItems: NavItem[] = [
+  const isSecondaryPage = Boolean(SECONDARY_ROUTES[location]) && !PRIMARY_NAV_HREFS.has(location);
+
+  const coreItems: NavItem[] = [
     navItems.find(item => item.href === "/")!,
     navItems.find(item => item.href === "/daily")!,
     navItems.find(item => item.href === "/generate")!,
     navItems.find(item => item.href === "/player-props")!,
-    navItems.find(item => item.href === "/live")!,
   ];
-  const adminItem = navItems.find(item => item.adminOnly);
-  let mobileNavItems: NavItem[];
-  if (authState.isAdmin && adminItem) {
-    mobileNavItems = [...bottomNavItems.slice(0, 4), adminItem];
-  } else {
-    mobileNavItems = bottomNavItems;
-  }
   
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
       <div className="flex items-center justify-around gap-1 h-16">
-        {mobileNavItems.map((item) => {
+        {coreItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
               <div 
                 className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
-                  isActive ? 'text-primary' : item.adminOnly ? 'text-purple-500 dark:text-purple-400' : 'text-muted-foreground'
+                  isActive ? 'text-primary' : 'text-muted-foreground'
                 }`}
                 data-testid={`bottom-${item.testId}`}
               >
@@ -568,8 +666,58 @@ function BottomNav({ authState }: { authState: AuthState }) {
             </Link>
           );
         })}
+        <button
+          onClick={onOpenMenu}
+          className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
+            isSecondaryPage ? 'text-primary' : 'text-muted-foreground'
+          }`}
+          data-testid="bottom-nav-more"
+          aria-label="More navigation"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+          <span className="text-[10px] font-medium">{isSecondaryPage ? SECONDARY_ROUTES[location]?.label?.split(' ')[0] ?? 'More' : 'More'}</span>
+        </button>
       </div>
     </nav>
+  );
+}
+
+function MobileBackOrLogo() {
+  const [location] = useLocation();
+  const isSecondary = Boolean(SECONDARY_ROUTES[location]) && !PRIMARY_NAV_HREFS.has(location);
+
+  if (isSecondary) {
+    return (
+      <div className="flex items-center gap-2">
+        <button
+          onClick={() => window.history.length > 1 ? window.history.back() : (window.location.href = "/")}
+          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          data-testid="button-mobile-header-back"
+          aria-label="Go back"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <Link href="/">
+          <div className="flex items-center gap-2 cursor-pointer">
+            <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
+            <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
+              Sors Maxima
+            </span>
+          </div>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <Link href="/">
+      <div className="flex items-center gap-2 cursor-pointer">
+        <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
+        <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
+          Sors Maxima
+        </span>
+      </div>
+    </Link>
   );
 }
 
@@ -593,15 +741,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-4 lg:gap-6">
-            <Link href="/">
-              <div className="flex items-center gap-2 cursor-pointer">
-                <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
-                <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
-                  Sors Maxima
-                </span>
-              </div>
-            </Link>
-            
+            <MobileBackOrLogo />
             <DesktopNav authState={authState} />
           </div>
           
@@ -689,7 +829,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </footer>
       
-      <BottomNav authState={authState} />
+      <BottomNav authState={authState} onOpenMenu={() => setMobileMenuOpen(true)} />
       <CommandPalette />
       <CookieConsentBanner />
       <FeedbackWidget />
