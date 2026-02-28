@@ -2150,7 +2150,9 @@ function PickAccuracyPanel() {
     },
   });
 
-  const stats = statsData?.stats;
+  const overall = statsData?.stats?.overall;
+  const bySport = statsData?.stats?.bySport;
+  const byGrade = statsData?.stats?.byGrade;
   const status = statsData?.status;
   const picks = recordsData?.picks || [];
 
@@ -2198,69 +2200,71 @@ function PickAccuracyPanel() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-16" />)}
             </div>
-          ) : stats ? (
+          ) : overall ? (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
                 <Card>
                   <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold" data-testid="stat-total-picks">{stats.totalPicks}</p>
-                    <p className="text-xs text-muted-foreground">Total Picks</p>
+                    <p className="text-2xl font-bold" data-testid="stat-total-picks">{overall.total}</p>
+                    <p className="text-xs text-muted-foreground">Total Settled</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold" data-testid="stat-settled-picks">{stats.settledPicks}</p>
-                    <p className="text-xs text-muted-foreground">Settled</p>
+                    <p className="text-2xl font-bold text-blue-500" data-testid="stat-pending-picks">{overall.pending}</p>
+                    <p className="text-xs text-muted-foreground">Pending</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold text-green-500" data-testid="stat-won-picks">{stats.wonPicks}</p>
+                    <p className="text-2xl font-bold text-green-500" data-testid="stat-won-picks">{overall.won}</p>
                     <p className="text-xs text-muted-foreground">Won</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold text-red-500" data-testid="stat-lost-picks">{stats.lostPicks}</p>
+                    <p className="text-2xl font-bold text-red-500" data-testid="stat-lost-picks">{overall.lost}</p>
                     <p className="text-xs text-muted-foreground">Lost</p>
                   </CardContent>
                 </Card>
                 <Card>
                   <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold" data-testid="stat-win-rate">{stats.winRate.toFixed(1)}%</p>
+                    <p className="text-2xl font-bold text-yellow-500" data-testid="stat-push-picks">{overall.push}</p>
+                    <p className="text-xs text-muted-foreground">Push</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-3 text-center">
+                    <p className="text-2xl font-bold" data-testid="stat-win-rate">{overall.rate.toFixed(1)}%</p>
                     <p className="text-xs text-muted-foreground">Win Rate</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold" data-testid="stat-avg-grade">{stats.averageGrade || "—"}</p>
-                    <p className="text-xs text-muted-foreground">Avg Grade</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold" data-testid="stat-avg-confidence">{stats.averageConfidence.toFixed(0)}%</p>
-                    <p className="text-xs text-muted-foreground">Avg Confidence</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-3 text-center">
-                    <p className="text-2xl font-bold text-blue-500" data-testid="stat-pending-picks">{stats.pendingPicks}</p>
-                    <p className="text-xs text-muted-foreground">Pending</p>
                   </CardContent>
                 </Card>
               </div>
 
-              {stats.bySport && Object.keys(stats.bySport).length > 0 && (
+              {bySport && Object.keys(bySport).length > 0 && (
                 <div className="mb-4">
                   <p className="text-xs font-medium text-muted-foreground mb-2">By Sport</p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {Object.entries(stats.bySport).map(([sp, s]: [string, any]) => (
+                    {Object.entries(bySport).map(([sp, s]: [string, any]) => (
                       <div key={sp} className="border rounded-md p-2 text-sm" data-testid={`sport-stats-${sp}`}>
                         <p className="font-semibold">{sp}</p>
                         <p className="text-xs text-muted-foreground">
-                          {s.won}W / {s.lost}L / {s.push}P — {s.winRate.toFixed(1)}% win
+                          {s.won}W / {s.total - s.won}L — {s.rate.toFixed(1)}% win
                         </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {byGrade && Object.keys(byGrade).length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">By Grade</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(byGrade).sort(([a], [b]) => b.localeCompare(a)).map(([grade, g]: [string, any]) => (
+                      <div key={grade} className="border rounded-md px-2 py-1 text-xs" data-testid={`grade-stats-${grade}`}>
+                        <span className={`font-bold ${gradeColor(grade)}`}>{grade}</span>
+                        <span className="text-muted-foreground ml-1">{g.won}/{g.total} ({g.rate.toFixed(0)}%)</span>
                       </div>
                     ))}
                   </div>
@@ -2269,8 +2273,9 @@ function PickAccuracyPanel() {
 
               {status && (
                 <div className="text-xs text-muted-foreground flex gap-4">
-                  <span>File: {status.dataFile}</span>
-                  <span>Last save: {status.lastSaved ? new Date(status.lastSaved).toLocaleTimeString() : "Never"}</span>
+                  <span>Pending: {status.pendingCount}</span>
+                  <span>Settled: {status.settledCount}</span>
+                  <span>Updated: {status.lastUpdated ? new Date(status.lastUpdated).toLocaleTimeString() : "Never"}</span>
                 </div>
               )}
             </>
