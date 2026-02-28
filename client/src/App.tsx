@@ -222,8 +222,6 @@ function Router({ authState }: { authState: AuthState }) {
   return (
     <ErrorBoundary>
     <OnboardingGuard>
-    <>
-    <ContextualNavBar />
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
@@ -268,7 +266,6 @@ function Router({ authState }: { authState: AuthState }) {
         <Route component={NotFound} />
       </Switch>
     </Suspense>
-    </>
     </OnboardingGuard>
     </ErrorBoundary>
   );
@@ -793,7 +790,9 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           </div>
         </div>
       </header>
-      
+
+      <ContextualNavBar />
+
       <div className="max-w-screen-2xl mx-auto px-4 lg:px-6 pt-2">
         <GeoComplianceBanner />
       </div>
