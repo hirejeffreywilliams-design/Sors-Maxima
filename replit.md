@@ -50,6 +50,9 @@ The application uses a modern web architecture with a React-based frontend and a
 - **User Bet Tracking**: Allows authenticated users to save slip picks to the database for automatic settlement.
 - **Live Settlement Stats (Validated)**: The Track Record page shows real validated data on pick settlement and win rates.
 - **Monetization**: All access requires a paid subscription with three tiers: Sharp, Edge, and Max, with consistent naming across the platform.
+- **Matchup Ticket Builder (Command Center)**: `buildMatchupTickets()` in `precomputedPredictionsEngine.ts` groups precomputed picks by game matchup and builds 10-20 leg parlays. Served at `GET /api/matchup-tickets`. The "Game Matchup Parlays" section is displayed below "Best Tickets" on the Command Center, with collapsible `MatchupTicketCard` components showing legs grouped by market type (spreads, totals, moneylines, props).
+- **Admin userId Safety**: `server/routes/account.ts` uses a `numericUserId(req)` helper that returns `null` for admin sessions (userId="admin"), preventing NaN database queries. All user-specific GET endpoints return empty defaults for admin; write endpoints return 403.
+- **Login Page Fix**: `/login` route is rendered before the auth loading check in `App.tsx` (`enabled: false` on auth check query for /login previously caused indefinite loading spinner).
 
 ## External Dependencies
 - **Frontend Framework**: React

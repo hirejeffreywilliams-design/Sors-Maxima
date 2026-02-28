@@ -11,6 +11,14 @@ import { sql } from "drizzle-orm";
 
 const ticketOutcomes: Map<string, { ticketId: string; predictedProb: number; consensusProb: number; evPercent: number; actualOutcome: "win" | "loss" | "push" | "pending"; profitLoss: number; isFollowedByUser: boolean; settledAt?: string }> = new Map();
 
+/** Returns a numeric userId from session, or null if admin/non-numeric (prevents NaN DB queries) */
+function numericUserId(req: Request): number | null {
+  const raw = req.session?.userId;
+  if (!raw) return null;
+  const n = parseInt(raw, 10);
+  return isNaN(n) ? null : n;
+}
+
 const utmEvents: Array<{ source: string; medium: string; campaign: string; content?: string; term?: string; timestamp: string; ip: string }> = [];
 
 export async function registerAccountRoutes(app: Express): Promise<void> {
@@ -164,28 +172,27 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
 
   // ===== Bankroll Alerts =====
   app.get("/api/bankroll/alerts", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json([]);
     try {
-      const alerts = await featuresService.getUserBankrollAlerts(parseInt(req.session.userId));
+      const alerts = await featuresService.getUserBankrollAlerts(uid);
       res.json(alerts);
     } catch (err) {
+      console.error("Failed to get alerts:", err);
       res.status(500).json({ error: "Failed to get alerts" });
     }
   });
 
   app.post("/api/bankroll/alerts", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const alert = await featuresService.createBankrollAlert({
-        userId: parseInt(req.session.userId),
-        ...req.body
-      });
+      const alert = await featuresService.createBankrollAlert({ userId: uid, ...req.body });
       res.json(alert);
     } catch (err) {
+      console.error("Failed to create alert:", err);
       res.status(500).json({ error: "Failed to create alert" });
     }
   });
@@ -216,28 +223,27 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
 
   // Bet History & Grading
   app.get("/api/bets/history", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json([]);
     try {
-      const history = await featuresService.getUserBetHistory(parseInt(req.session.userId));
+      const history = await featuresService.getUserBetHistory(uid);
       res.json(history);
     } catch (err) {
+      console.error("Failed to get bet history:", err);
       res.status(500).json({ error: "Failed to get bet history" });
     }
   });
 
   app.post("/api/bets/record", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const bet = await featuresService.recordBet({
-        userId: parseInt(req.session.userId),
-        ...req.body
-      });
+      const bet = await featuresService.recordBet({ userId: uid, ...req.body });
       res.json(bet);
     } catch (err) {
+      console.error("Failed to record bet:", err);
       res.status(500).json({ error: "Failed to record bet" });
     }
   });
@@ -307,82 +313,82 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.get("/api/bets/grading-stats", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json({ totalBets: 0, wins: 0, losses: 0, avgOdds: 0, roi: 0 });
     try {
-      const stats = await featuresService.getBetGradingStats(parseInt(req.session.userId));
+      const stats = await featuresService.getBetGradingStats(uid);
       res.json(stats);
     } catch (err) {
+      console.error("Failed to get grading stats:", err);
       res.status(500).json({ error: "Failed to get grading stats" });
     }
   });
 
   // User Analytics
   app.get("/api/analytics", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json(null);
     try {
-      const analytics = await featuresService.getUserAnalytics(parseInt(req.session.userId));
+      const analytics = await featuresService.getUserAnalytics(uid);
       res.json(analytics);
     } catch (err) {
+      console.error("Failed to get analytics:", err);
       res.status(500).json({ error: "Failed to get analytics" });
     }
   });
 
   // Notification Preferences
   app.get("/api/notifications/preferences", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json(null);
     try {
-      const prefs = await featuresService.getNotificationPreferences(parseInt(req.session.userId));
+      const prefs = await featuresService.getNotificationPreferences(uid);
       res.json(prefs);
     } catch (err) {
+      console.error("Failed to get notification preferences:", err);
       res.status(500).json({ error: "Failed to get preferences" });
     }
   });
 
   app.put("/api/notifications/preferences", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const prefs = await featuresService.updateNotificationPreferences(
-        parseInt(req.session.userId),
-        req.body
-      );
+      const prefs = await featuresService.updateNotificationPreferences(uid, req.body);
       res.json(prefs);
     } catch (err) {
+      console.error("Failed to update notification preferences:", err);
       res.status(500).json({ error: "Failed to update preferences" });
     }
   });
 
   // Sportsbook Accounts (Multi-book tracking)
   app.get("/api/sportsbooks", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json([]);
     try {
-      const accounts = await featuresService.getUserSportsbookAccounts(parseInt(req.session.userId));
+      const accounts = await featuresService.getUserSportsbookAccounts(uid);
       res.json(accounts);
     } catch (err) {
+      console.error("Failed to get sportsbook accounts:", err);
       res.status(500).json({ error: "Failed to get sportsbook accounts" });
     }
   });
 
   app.post("/api/sportsbooks", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const account = await featuresService.addSportsbookAccount({
-        userId: parseInt(req.session.userId),
-        ...req.body
-      });
+      const account = await featuresService.addSportsbookAccount({ userId: uid, ...req.body });
       res.json(account);
     } catch (err) {
+      console.error("Failed to add sportsbook account:", err);
       res.status(500).json({ error: "Failed to add sportsbook account" });
     }
   });
@@ -412,153 +418,149 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.get("/api/sportsbooks/total-bankroll", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json({ total: 0 });
     try {
-      const total = await featuresService.getTotalBankroll(parseInt(req.session.userId));
+      const total = await featuresService.getTotalBankroll(uid);
       res.json({ total });
     } catch (err) {
+      console.error("Failed to get total bankroll:", err);
       res.status(500).json({ error: "Failed to get total bankroll" });
     }
   });
 
   // Responsible Gaming
   app.get("/api/responsible-gaming", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json(null);
     try {
-      const settings = await featuresService.getResponsibleGamingSettings(parseInt(req.session.userId));
+      const settings = await featuresService.getResponsibleGamingSettings(uid);
       res.json(settings);
     } catch (err) {
+      console.error("Failed to get responsible gaming settings:", err);
       res.status(500).json({ error: "Failed to get settings" });
     }
   });
 
   app.put("/api/responsible-gaming", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const settings = await featuresService.updateResponsibleGamingSettings(
-        parseInt(req.session.userId),
-        req.body
-      );
+      const settings = await featuresService.updateResponsibleGamingSettings(uid, req.body);
       res.json(settings);
     } catch (err) {
+      console.error("Failed to update responsible gaming settings:", err);
       res.status(500).json({ error: "Failed to update settings" });
     }
   });
 
   app.post("/api/responsible-gaming/cool-off", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
       const { days } = req.body;
-      const result = await featuresService.startCoolOffPeriod(parseInt(req.session.userId), days);
+      const result = await featuresService.startCoolOffPeriod(uid, days);
       res.json(result);
     } catch (err) {
+      console.error("Failed to start cool-off period:", err);
       res.status(500).json({ error: "Failed to start cool-off period" });
     }
   });
 
   app.post("/api/responsible-gaming/self-exclusion", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
       const { months } = req.body;
-      const result = await featuresService.startSelfExclusion(parseInt(req.session.userId), months);
+      const result = await featuresService.startSelfExclusion(uid, months);
       res.json(result);
     } catch (err) {
+      console.error("Failed to start self-exclusion:", err);
       res.status(500).json({ error: "Failed to start self-exclusion" });
     }
   });
 
   app.get("/api/responsible-gaming/can-bet", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json({ canBet: true });
     try {
-      const result = await featuresService.checkUserCanBet(parseInt(req.session.userId));
+      const result = await featuresService.checkUserCanBet(uid);
       res.json(result);
     } catch (err) {
+      console.error("Failed to check betting status:", err);
       res.status(500).json({ error: "Failed to check betting status" });
     }
   });
 
   // Bet Backup & Recovery
   app.get("/api/backups", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json([]);
     try {
-      const backups = await featuresService.getUserBackups(parseInt(req.session.userId));
+      const backups = await featuresService.getUserBackups(uid);
       res.json(backups);
     } catch (err) {
+      console.error("Failed to get backups:", err);
       res.status(500).json({ error: "Failed to get backups" });
     }
   });
 
   app.post("/api/backups", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const backup = await featuresService.createBetBackup(
-        parseInt(req.session.userId),
-        req.body.type || "manual"
-      );
+      const backup = await featuresService.createBetBackup(uid, req.body.type || "manual");
       res.json(backup);
     } catch (err) {
+      console.error("Failed to create backup:", err);
       res.status(500).json({ error: "Failed to create backup" });
     }
   });
 
   app.get("/api/backups/:id/restore", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const data = await featuresService.restoreFromBackup(
-        parseInt(req.session.userId),
-        parseInt(req.params.id)
-      );
+      const data = await featuresService.restoreFromBackup(uid, parseInt(req.params.id));
       res.json(data);
     } catch (err) {
+      console.error("Failed to restore backup:", err);
       res.status(500).json({ error: "Failed to restore backup" });
     }
   });
 
   // Tax Records
   app.get("/api/tax/:year", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.json({ message: "No tax record found for this year" });
     try {
-      const record = await featuresService.getTaxRecord(
-        parseInt(req.session.userId),
-        parseInt(req.params.year)
-      );
+      const record = await featuresService.getTaxRecord(uid, parseInt(req.params.year));
       res.json(record || { message: "No tax record found for this year" });
     } catch (err) {
+      console.error("Failed to get tax record:", err);
       res.status(500).json({ error: "Failed to get tax record" });
     }
   });
 
   app.post("/api/tax/:year/generate", async (req, res) => {
-    if (!req.session?.isAuthenticated || !req.session?.userId) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
+    if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });
+    const uid = numericUserId(req);
+    if (!uid) return res.status(403).json({ error: "Not available for this account type" });
     try {
-      const report = await featuresService.generateTaxReport(
-        parseInt(req.session.userId),
-        parseInt(req.params.year)
-      );
+      const report = await featuresService.generateTaxReport(uid, parseInt(req.params.year));
       res.json(report);
     } catch (err) {
+      console.error("Failed to generate tax report:", err);
       res.status(500).json({ error: "Failed to generate tax report" });
     }
   });

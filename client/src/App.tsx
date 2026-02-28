@@ -910,6 +910,10 @@ function AppContent() {
     );
   }
 
+  if (location === '/login') {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
   if (isLoading || isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -922,9 +926,6 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
-    if (location === '/login') {
-      return <LoginPage onLogin={handleLogin} />;
-    }
     return <LandingPage />;
   }
 
