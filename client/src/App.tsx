@@ -857,7 +857,7 @@ function AppContent() {
   const [authState, setAuthState] = useState<AuthState>({});
   const [location, setLocation] = useLocation();
 
-  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string }>({
+  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string; tier?: string }>({
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
@@ -928,6 +928,30 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <LandingPage />;
+  }
+
+  if (!authState.isAdmin) {
+    const tier = authData?.tier;
+    if (isLoading || !tier) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Verifying subscription...</p>
+          </div>
+        </div>
+      );
+    }
+    if (tier === 'free') {
+      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record'];
+      if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
+        return (
+          <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <Pricing />
+          </Suspense>
+        );
+      }
+    }
   }
 
   if (authState.isAdmin && location.startsWith('/admin')) {

@@ -28,10 +28,10 @@ import {
 } from "../monteCarloEngine";
 import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
-import { getClientIp, requireAuth, requireTier } from "./helpers";
+import { getClientIp, requireAuth, requireTier, requireSubscription } from "./helpers";
 
 export function registerIntelligenceRoutes(app: Express): void {
-  app.get("/api/intelligence/feed", async (_req: Request, res: Response) => {
+  app.get("/api/intelligence/feed", requireSubscription, async (_req: Request, res: Response) => {
     try {
       const feed = await generateIntelligenceFeed();
       return res.json(feed);
@@ -41,7 +41,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/intelligence/snapshot/:sport", async (req: Request, res: Response) => {
+  app.get("/api/intelligence/snapshot/:sport", requireSubscription, async (req: Request, res: Response) => {
     try {
       const sport = req.params.sport?.toUpperCase();
       if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {
@@ -84,7 +84,7 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
 
-  app.get("/api/optimal-tickets", async (req: Request, res: Response) => {
+  app.get("/api/optimal-tickets", requireSubscription, async (req: Request, res: Response) => {
     try {
       const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
       const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
@@ -121,7 +121,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/matchup-tickets", async (req: Request, res: Response) => {
+  app.get("/api/matchup-tickets", requireSubscription, async (req: Request, res: Response) => {
     try {
       const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
       const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
@@ -153,7 +153,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/prop-movements", (req: Request, res: Response) => {
+  app.get("/api/prop-movements", requireSubscription, (req: Request, res: Response) => {
     try {
       const sharpOnly = req.query.sharp === "true";
       const player = req.query.player as string | undefined;
@@ -181,7 +181,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/precomputed-predictions/:sport", requireAuth, async (req: Request, res: Response) => {
+  app.get("/api/precomputed-predictions/:sport", requireSubscription, async (req: Request, res: Response) => {
     try {
       const sport = req.params.sport?.toUpperCase();
       if (!["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"].includes(sport)) {

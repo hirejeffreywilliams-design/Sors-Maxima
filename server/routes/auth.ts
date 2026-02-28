@@ -3,6 +3,7 @@ import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "../trustedDeviceService";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
+import { stripeService } from "../stripeService";
 
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
@@ -211,11 +212,20 @@ export function registerAuthRoutes(app: Express): void {
     res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
     res.set('Pragma', 'no-cache');
     if (req.session?.isAuthenticated) {
+      const isAdmin = req.session.isAdmin || false;
+      let tier = 'free';
+      if (isAdmin) {
+        tier = 'whale';
+      } else if (req.session.username) {
+        const sub = await stripeService.getUserSubscription(req.session.username).catch(() => null);
+        tier = sub?.subscriptionTier || 'free';
+      }
       return res.json({ 
         authenticated: true, 
         username: req.session.username,
-        isAdmin: req.session.isAdmin || false,
-        role: req.session.role || 'user'
+        isAdmin,
+        role: req.session.role || 'user',
+        tier,
       });
     }
 
@@ -233,7 +243,7 @@ export function registerAuthRoutes(app: Express): void {
           req.session.userId = 'admin';
           req.session.isAdmin = true;
           req.session.role = 'admin';
-          return res.json({ authenticated: true, username: ADMIN_USERNAME, isAdmin: true, role: 'admin' });
+          return res.json({ authenticated: true, username: ADMIN_USERNAME, isAdmin: true, role: 'admin', tier: 'whale' });
         }
 
         try {
@@ -256,11 +266,15 @@ export function registerAuthRoutes(app: Express): void {
               });
             }
 
+            const sub = await stripeService.getUserSubscription(user.username).catch(() => null);
+            const tier = user.isAdmin ? 'whale' : (sub?.subscriptionTier || 'free');
+
             return res.json({
               authenticated: true,
               username: user.username,
               isAdmin: user.isAdmin,
               role: user.isAdmin ? 'admin' : 'user',
+              tier,
             });
           }
         } catch (err) {

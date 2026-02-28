@@ -68,6 +68,34 @@ export function requireTier(...allowedTiers: string[]) {
   };
 }
 
+export const requireSubscription = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.session?.isAuthenticated) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  if (req.session.isAdmin) {
+    return next();
+  }
+  const username = req.session.username;
+  if (!username) {
+    return res.status(401).json({ error: "Authentication required" });
+  }
+  try {
+    const subscription = await stripeService.getUserSubscription(username);
+    const tier = subscription?.subscriptionTier || 'free';
+    if (tier === 'free') {
+      return res.status(402).json({
+        error: "Subscription required",
+        message: "An active subscription is required to access this content",
+        currentTier: 'free',
+        upgradePath: "/pricing",
+      });
+    }
+    next();
+  } catch {
+    next();
+  }
+};
+
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
   if (!req.session?.isAuthenticated || !req.session?.isAdmin) {
     return res.status(403).json({ error: "Admin access required" });
