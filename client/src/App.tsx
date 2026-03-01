@@ -10,6 +10,8 @@ import { ParlaySlipDrawer } from "@/components/parlay-slip-drawer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/login";
 import LandingPage from "@/pages/landing";
@@ -68,7 +70,7 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -318,7 +320,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/dashboard":            { label: "Dashboard",            parent: "/" },
 };
 
-const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/community", "/tools"]);
+const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/community", "/tools"]);
 
 // Static parent labels (can't reference navItems since it's defined below)
 const PARENT_LABELS: Record<string, string> = {
@@ -395,206 +397,120 @@ function ContextualNavBar() {
 }
 
 const navItems: NavItem[] = [
-  { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Your Picks - All engines converging to find your edge" },
-  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "nav-daily", tooltip: "Daily Picks - Top picks from today's games" },
-  { href: "/generate", icon: Brain, label: "Generate", testId: "nav-generate", tooltip: "Smart Ticket Generator - Build parlays from real data" },
-  { href: "/strategy", icon: Compass, label: "Strategy", testId: "nav-strategy", tooltip: "Strategy Advisor - Expert guidance to build winning tickets" },
-  { href: "/player-props", icon: Star, label: "Props", testId: "nav-player-props", tooltip: "Player Props - Over/under analysis for every player in every game" },
-  { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Bet Builder - Manually build your parlays" },
-  { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
-  { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
-  { href: "/international", icon: Globe, label: "Global", testId: "nav-international", tooltip: "International Sports - Soccer leagues, draws, and underdog value" },
-  { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Community - Leaderboards, social feed, and tipster groups" },
-  { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Tools & Analytics - Calculators, optimizers, analysis" },
-  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
+  { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Command Center — all engines live" },
+  { href: "/daily", icon: Calendar, label: "Daily", testId: "nav-daily", tooltip: "Today's top picks" },
+  { href: "/generate", icon: Brain, label: "Build", testId: "nav-generate", tooltip: "Build parlays from real data" },
+  { href: "/odds-center", icon: TrendingUp, label: "Markets", testId: "nav-odds-center", tooltip: "Odds, EV & line movement" },
+  { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Analytics & calculators" },
+  { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Leaderboards, social feed & tipsters" },
+  { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center", adminOnly: true },
 ];
+
+const BUILD_SUBITEMS = [
+  { href: "/generate", icon: Brain, label: "Smart Generator", desc: "AI builds the optimal parlay for you" },
+  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", desc: "Manually drag & drop your own ticket" },
+  { href: "/strategy", icon: Compass, label: "Strategy Advisor", desc: "Expert guidance for your betting style" },
+];
+
+const MARKETS_SUBITEMS = [
+  { href: "/odds-center", icon: TrendingUp, label: "Odds Center", desc: "EV heatmap, line movement & arbitrage" },
+  { href: "/player-props", icon: Star, label: "Player Props", desc: "Over/under projections for every player" },
+  { href: "/international", icon: Globe, label: "International", desc: "Soccer leagues, draws & underdog value" },
+  { href: "/live", icon: Activity, label: "Live Scores", desc: "Real-time scores & in-game tracking" },
+];
+
+function MobileNavLink({ href, icon: Icon, label, testId, isActive, onClick }: {
+  href: string; icon: React.ComponentType<{ className?: string }>; label: string; testId: string; isActive: boolean; onClick: () => void;
+}) {
+  return (
+    <Link href={href} onClick={onClick}>
+      <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${isActive ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted text-muted-foreground'}`} data-testid={testId}>
+        <Icon className="w-4 h-4 shrink-0" />
+        <span>{label}</span>
+      </div>
+    </Link>
+  );
+}
 
 function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onLogout: () => void; onClose: () => void }) {
   const [location] = useLocation();
-  
-  const adminItems = navItems.filter(item => item.adminOnly);
-  const userItems = navItems.filter(item => !item.adminOnly);
-  
+
+  const navSection = (title: string, items: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string }[]) => (
+    <div>
+      <div className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{title}</div>
+      <nav className="space-y-0.5">
+        {items.map(item => (
+          <MobileNavLink key={item.testId} href={item.href} icon={item.icon} label={item.label} testId={item.testId} isActive={location === item.href} onClick={onClose} />
+        ))}
+      </nav>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 py-4 overflow-y-auto">
-        {authState.isAdmin && adminItems.length > 0 && (
-          <div className="mb-2">
-            <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-purple-500">Admin</div>
-            <nav className="space-y-1">
-              {adminItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location === item.href;
-                return (
-                  <Link key={item.href} href={item.href} onClick={onClose}>
-                    <div 
-                      className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                        isActive ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400' : 'hover:bg-purple-500/5 text-purple-600 dark:text-purple-400'
-                      }`}
-                      data-testid={`mobile-${item.testId}`}
-                      title={item.tooltip}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium">{item.label}</span>
-                    </div>
-                  </Link>
-                );
-              })}
+    <div className="flex flex-col h-full overflow-y-auto">
+      <div className="flex-1 py-2 space-y-1">
+        {authState.isAdmin && (
+          <div>
+            <div className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-purple-500">Admin</div>
+            <nav>
+              <Link href="/admin" onClick={onClose}>
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin' ? 'bg-purple-500/15 text-purple-500' : 'hover:bg-purple-500/10 text-purple-500'}`} data-testid="mobile-nav-admin">
+                  <Shield className="w-4 h-4" />
+                  <span>Admin Center</span>
+                </div>
+              </Link>
             </nav>
-            <div className="mx-4 my-2 border-b" />
           </div>
         )}
-        <nav className="space-y-1">
-          {userItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={onClose}>
-                <div 
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted'
-                  }`}
-                  data-testid={`mobile-${item.testId}`}
-                  title={item.tooltip}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-          <button
-            onClick={() => {
-              onLogout();
-              onClose();
-            }}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-destructive/10 text-destructive mt-2"
-            data-testid="mobile-nav-logout"
-          >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
-          </button>
-        </nav>
+
+        {navSection("Picks", [
+          { href: "/", icon: Zap, label: "Command Center", testId: "mobile-nav-picks" },
+          { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "mobile-nav-daily" },
+        ])}
+
+        {navSection("Build", [
+          { href: "/generate", icon: Brain, label: "Smart Generator", testId: "mobile-nav-generate" },
+          { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
+          { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "mobile-nav-strategy" },
+        ])}
+
+        {navSection("Markets", [
+          { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "mobile-nav-odds" },
+          { href: "/player-props", icon: Star, label: "Player Props", testId: "mobile-nav-props" },
+          { href: "/international", icon: Globe, label: "International", testId: "mobile-nav-international" },
+          { href: "/live", icon: Activity, label: "Live Scores", testId: "mobile-nav-live" },
+        ])}
+
+        {navSection("Discover", [
+          { href: "/tools", icon: Calculator, label: "Tools & Analytics", testId: "mobile-nav-tools" },
+          { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
+          { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
+          { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
+        ])}
+
+        {navSection("Account", [
+          { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
+          { href: "/bankroll", icon: Wallet, label: "Bankroll Manager", testId: "mobile-nav-bankroll" },
+          { href: "/insights", icon: LineChart, label: "My Insights", testId: "mobile-nav-insights" },
+          { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
+          { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
+          { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
+        ])}
       </div>
-      
-      <div className="border-t pt-4 pb-6 px-4 space-y-3">
-        <div className="px-4 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Build Bets</div>
-        <nav className="space-y-1 pb-2">
-          {([
-            { href: "/builder", icon: LayoutGrid, label: "Bet Builder", testId: "mobile-nav-builder" },
-            { href: "/prop-parlay-builder", icon: Brain, label: "Player Prop Parlays", testId: "mobile-nav-prop-parlay" },
-          ] as const).map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={onClose}>
-                <div 
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
-                  }`}
-                  data-testid={item.testId}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Analyze</div>
-        <nav className="space-y-1 pb-2">
-          {([
-            { href: "/insights", icon: Star, label: "My Insights", testId: "mobile-nav-insights" },
-            { href: "/odds-center", icon: TrendingUp, label: "Odds & Lines", testId: "mobile-nav-odds" },
-            { href: "/international", icon: Globe, label: "International Sports", testId: "mobile-nav-international" },
-            { href: "/rosters", icon: UsersRound, label: "Rosters & Injuries", testId: "mobile-nav-rosters" },
-            { href: "/watchlist", icon: Star, label: "Watchlist", testId: "mobile-nav-watchlist" },
-            { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },
-          ] as const).map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={onClose}>
-                <div 
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
-                  }`}
-                  data-testid={item.testId}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Social</div>
-        <nav className="space-y-1 pb-2">
-          {([
-            { href: "/community", icon: Users, label: "Community Hub", testId: "mobile-nav-community" },
-            { href: "/rewards", icon: Trophy, label: "Rewards & Practice", testId: "mobile-nav-rewards" },
-          ] as const).map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={onClose}>
-                <div 
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
-                  }`}
-                  data-testid={item.testId}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
-        <div className="px-4 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Account</div>
-        <nav className="space-y-1 pb-2">
-          {([
-            { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "mobile-nav-finance" },
-            { href: "/profile", icon: History, label: "Bet History", testId: "mobile-nav-history" },
-            { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
-            { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
-            { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
-            { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
-          ] as const).map((item) => {
-            const Icon = item.icon;
-            const isActive = location === item.href;
-            return (
-              <Link key={item.testId} href={item.href} onClick={onClose}>
-                <div 
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${
-                    isActive ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'
-                  }`}
-                  data-testid={item.testId}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </div>
-              </Link>
-            );
-          })}
-        </nav>
+
+      <div className="border-t p-4 space-y-3">
         {authState.username && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{authState.username}</span>
-            {authState.isAdmin && (
-              <span className="text-xs text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded">Admin</span>
-            )}
+          <div className="flex items-center gap-2 px-1">
+            <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+              {authState.username.charAt(0).toUpperCase()}
+            </div>
+            <div className="text-sm font-medium">{authState.username}</div>
+            {authState.isAdmin && <Badge variant="secondary" className="text-xs py-0">Admin</Badge>}
           </div>
         )}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => { onLogout(); onClose(); }}
-            className="flex-1 gap-2"
-            data-testid="mobile-button-logout"
-          >
+          <Button variant="outline" size="sm" onClick={() => { onLogout(); onClose(); }} className="flex-1 gap-2 text-destructive border-destructive/30 hover:bg-destructive/10" data-testid="mobile-button-logout">
             <LogOut className="w-4 h-4" />
             Logout
           </Button>
@@ -604,54 +520,94 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
   );
 }
 
+function NavDropdown({ label, icon: Icon, testId, subitems, isActive }: {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  testId: string;
+  subitems: { href: string; icon: React.ComponentType<{ className?: string }>; label: string; desc: string }[];
+  isActive: boolean;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant={isActive ? "secondary" : "ghost"} size="sm" className="gap-1.5" data-testid={testId}>
+          <Icon className="w-4 h-4" />
+          <span className="hidden xl:inline">{label}</span>
+          <ChevronDown className="w-3 h-3 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64 p-1.5">
+        {subitems.map(item => {
+          const SubIcon = item.icon;
+          return (
+            <Link key={item.href} href={item.href}>
+              <DropdownMenuItem className="flex items-start gap-3 p-2.5 rounded-md cursor-pointer">
+                <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0 mt-0.5">
+                  <SubIcon className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium">{item.label}</div>
+                  <div className="text-xs text-muted-foreground">{item.desc}</div>
+                </div>
+              </DropdownMenuItem>
+            </Link>
+          );
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function DesktopNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
-  
+
+  const isBuildActive = ["/generate", "/builder", "/strategy"].includes(location);
+  const isMarketsActive = ["/odds-center", "/player-props", "/international", "/live"].includes(location);
+
+  const NavBtn = ({ href, icon: Icon, label, testId, tooltip }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; tooltip: string }) => (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Link href={href}>
+          <Button variant={location === href ? "secondary" : "ghost"} size="sm" className="gap-1.5" data-testid={testId}>
+            <Icon className="w-4 h-4" />
+            <span className="hidden xl:inline">{label}</span>
+          </Button>
+        </Link>
+      </TooltipTrigger>
+      <TooltipContent side="bottom"><p>{tooltip}</p></TooltipContent>
+    </Tooltip>
+  );
+
   return (
-    <nav className="hidden lg:flex items-center gap-1">
-      {navItems.map((item) => {
-        if (item.adminOnly && !authState.isAdmin) return null;
-        const Icon = item.icon;
-        const isActive = location === item.href;
-        return (
-          <Tooltip key={item.href}>
-            <TooltipTrigger asChild>
-              <div>
-                <Link href={item.href}>
-                  <Button 
-                    variant={isActive ? "secondary" : "ghost"} 
-                    size="sm" 
-                    className="gap-2"
-                    data-testid={item.testId}
-                    title={item.tooltip}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden xl:inline">{item.label}</span>
-                  </Button>
-                </Link>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="max-w-xs">
-              <p>{item.tooltip}</p>
-            </TooltipContent>
-          </Tooltip>
-        );
-      })}
+    <nav className="hidden lg:flex items-center gap-0.5">
+      <NavBtn href="/" icon={Zap} label="Picks" testId="nav-command-center" tooltip="Command Center — all engines live" />
+      <NavBtn href="/daily" icon={Calendar} label="Daily" testId="nav-daily" tooltip="Today's top picks" />
+      <NavDropdown label="Build" icon={Brain} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
+      <NavDropdown label="Markets" icon={TrendingUp} testId="nav-markets-dropdown" subitems={MARKETS_SUBITEMS} isActive={isMarketsActive} />
+      <NavBtn href="/tools" icon={Calculator} label="Tools" testId="nav-pro-tools" tooltip="Analytics & calculators" />
+      <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
+      {authState.isAdmin && (
+        <Link href="/admin">
+          <Button variant={location === "/admin" ? "secondary" : "ghost"} size="sm" className="gap-1.5 text-purple-500" data-testid="nav-admin">
+            <Shield className="w-4 h-4" />
+            <span className="hidden xl:inline">Admin</span>
+          </Button>
+        </Link>
+      )}
     </nav>
   );
 }
 
-function BottomNav({ authState, onOpenMenu }: { authState: AuthState; onOpenMenu: () => void }) {
+function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [location] = useLocation();
-  const isSecondaryPage = Boolean(SECONDARY_ROUTES[location]) && !PRIMARY_NAV_HREFS.has(location);
 
-  const coreItems: NavItem[] = [
-    navItems.find(item => item.href === "/")!,
-    navItems.find(item => item.href === "/daily")!,
-    navItems.find(item => item.href === "/generate")!,
-    navItems.find(item => item.href === "/player-props")!,
+  const coreItems = [
+    { href: "/", icon: Zap, label: "Picks", testId: "bottom-nav-picks" },
+    { href: "/daily", icon: Calendar, label: "Daily", testId: "bottom-nav-daily" },
+    { href: "/generate", icon: Brain, label: "Build", testId: "bottom-nav-build" },
+    { href: "/odds-center", icon: TrendingUp, label: "Markets", testId: "bottom-nav-markets" },
   ];
-  
+
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
       <div className="flex items-center justify-around gap-1 h-16">
@@ -660,12 +616,7 @@ function BottomNav({ authState, onOpenMenu }: { authState: AuthState; onOpenMenu
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <div 
-                className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
-                }`}
-                data-testid={`bottom-${item.testId}`}
-              >
+              <div className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
                 <Icon className="w-5 h-5" />
                 <span className="text-[10px] font-medium">{item.label}</span>
               </div>
@@ -674,14 +625,12 @@ function BottomNav({ authState, onOpenMenu }: { authState: AuthState; onOpenMenu
         })}
         <button
           onClick={onOpenMenu}
-          className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${
-            isSecondaryPage ? 'text-primary' : 'text-muted-foreground'
-          }`}
+          className="flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target text-muted-foreground"
           data-testid="bottom-nav-more"
           aria-label="More navigation"
         >
           <MoreHorizontal className="w-5 h-5" />
-          <span className="text-[10px] font-medium">{isSecondaryPage ? SECONDARY_ROUTES[location]?.label?.split(' ')[0] ?? 'More' : 'More'}</span>
+          <span className="text-[10px] font-medium">More</span>
         </button>
       </div>
     </nav>
@@ -727,6 +676,54 @@ function MobileBackOrLogo() {
   );
 }
 
+function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () => void }) {
+  const initial = authState.username?.charAt(0).toUpperCase() ?? "U";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          className="hidden lg:flex items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-muted transition-colors"
+          data-testid="button-user-menu"
+          aria-label="Account menu"
+        >
+          <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary border border-primary/20">
+            {initial}
+          </div>
+          <ChevronDown className="w-3 h-3 text-muted-foreground" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 p-1.5">
+        <DropdownMenuLabel className="flex items-center gap-2 pb-2">
+          <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-xs font-bold text-primary">{initial}</div>
+          <div>
+            <div className="text-sm font-medium leading-none">{authState.username}</div>
+            {authState.isAdmin && <div className="text-xs text-purple-500 mt-0.5">Admin</div>}
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <Link href="/profile"><DropdownMenuItem className="gap-2 cursor-pointer"><User className="w-4 h-4" />My Profile</DropdownMenuItem></Link>
+        <Link href="/track-record"><DropdownMenuItem className="gap-2 cursor-pointer"><BarChart2 className="w-4 h-4" />Track Record</DropdownMenuItem></Link>
+        <Link href="/watchlist"><DropdownMenuItem className="gap-2 cursor-pointer"><Eye className="w-4 h-4" />Watchlist</DropdownMenuItem></Link>
+        <Link href="/bankroll"><DropdownMenuItem className="gap-2 cursor-pointer"><Wallet className="w-4 h-4" />Bankroll</DropdownMenuItem></Link>
+        <Link href="/insights"><DropdownMenuItem className="gap-2 cursor-pointer"><LineChart className="w-4 h-4" />My Insights</DropdownMenuItem></Link>
+        <DropdownMenuSeparator />
+        <Link href="/pricing"><DropdownMenuItem className="gap-2 cursor-pointer"><CreditCard className="w-4 h-4" />Plans & Pricing</DropdownMenuItem></Link>
+        <Link href="/settings"><DropdownMenuItem className="gap-2 cursor-pointer"><SettingsIcon className="w-4 h-4" />Settings</DropdownMenuItem></Link>
+        <Link href="/help"><DropdownMenuItem className="gap-2 cursor-pointer"><HelpCircle className="w-4 h-4" />Help Center</DropdownMenuItem></Link>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className="gap-2 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+          onClick={onLogout}
+          data-testid="button-logout"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -746,35 +743,18 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
-          <div className="flex items-center gap-4 lg:gap-6">
+          <div className="flex items-center gap-3 lg:gap-4">
             <MobileBackOrLogo />
             <DesktopNav authState={authState} />
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <div className="hidden sm:block">
               <SearchButton />
             </div>
-            {authState.username && (
-              <span className="text-sm text-muted-foreground hidden lg:inline">
-                {authState.username}
-                {authState.isAdmin && (
-                  <span className="ml-1 text-xs text-purple-500">(Admin)</span>
-                )}
-              </span>
-            )}
             <NotificationsPanel />
             <ThemeToggle />
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleLogout}
-              className="gap-2 hidden lg:flex text-destructive hover:text-destructive hover:bg-destructive/10"
-              data-testid="button-logout"
-            >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden xl:inline">Logout</span>
-            </Button>
+            <UserMenu authState={authState} onLogout={handleLogout} />
             
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
@@ -837,7 +817,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </footer>
       
-      <BottomNav authState={authState} onOpenMenu={() => setMobileMenuOpen(true)} />
+      <BottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
       <CommandPalette />
       <CookieConsentBanner />
       <FeedbackWidget />
