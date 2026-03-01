@@ -58,6 +58,101 @@ const LEARNING_FACTORS = [
 
 const LEARNING_RATE = 0.05;
 const MIN_PREDICTIONS_FOR_UPDATE = 10;
+
+// Maps QFE signal source names → one or more LEARNING_FACTORS keys
+// This is what allows the engine to credit only the factors that were
+// actually active in a given prediction instead of all 57 equally.
+const SIGNAL_TO_FACTOR: Record<string, string[]> = {
+  sharp_money_flow:     ["sharp_money", "steam_moves"],
+  steam_move:           ["steam_moves", "sharp_money"],
+  line_movement:        ["line_movement"],
+  public_fade:          ["public_sentiment", "reverse_line"],
+  reverse_line:         ["reverse_line"],
+  rest_advantage:       ["situational_factors", "fatigue_model"],
+  situational_spot:     ["situational_factors"],
+  historical_h2h:       ["historical_trends"],
+  home_field:           ["situational_factors"],
+  monte_carlo:          ["ml_projections", "correlation_engine"],
+  predictive_model:     ["ml_projections"],
+  player_efficiency:    ["player_analysis"],
+  pace_tempo:           ["pace_projection"],
+  clutch_index:         ["team_dynamics"],
+  coaching_tendency:    ["coaching_matchup_analysis"],
+  scheme_mismatch:      ["correlation_engine"],
+  momentum_score:       ["team_dynamics"],
+  tipster_consensus:    ["closing_line_value"],
+  scouting_data:        ["player_analysis"],
+  injury_report:        ["injury_impact"],
+  weather_impact:       ["weather_factor"],
+  arbitrage:            ["arbitrage_detection"],
+  prop_correlation:     ["prop_correlation"],
+  player_prop:          ["player_prop_correlation_matrix"],
+  defensive_assignment: ["matchup_defensive_assignments"],
+  usage_rate:           ["player_usage_distribution"],
+  minutes_fatigue:      ["minutes_fatigue_modeling"],
+  milestone:            ["career_milestone_pressure"],
+  tv_game:              ["tv_game_analysis"],
+  crowd_impact:         ["arena_crowd_impact"],
+  referee:              ["referee_assignment_patterns"],
+  rivalry:              ["rivalry_intensity_index"],
+  schedule_trap:        ["schedule_trap_spots"],
+  sportsbook_liability: ["sportsbook_liability_exposure"],
+  clv:                  ["clv_tracking_accuracy", "closing_line_value"],
+  early_movement:       ["early_vs_gameday_movement"],
+  cross_sport:          ["cross_sport_correlation"],
+  chemistry:            ["team_chemistry_index"],
+  time_zone:            ["time_zone_adjustment"],
+  altitude:             ["altitude_impact"],
+  surface:              ["stadium_surface_type"],
+  spread_performance:   ["historical_spread_performance"],
+  over_under:           ["over_under_tendency"],
+  first_half:           ["first_half_second_half_splits"],
+  garbage_time:         ["garbage_time_adjustments"],
+  motivation:           ["motivation_metrics"],
+  quantum:              ["quantum_coherence"],
+};
+
+function signalNamesToFactors(signalNames: string[]): Set<string> {
+  const factors = new Set<string>();
+  for (const sig of signalNames) {
+    const normalized = sig.toLowerCase().replace(/[^a-z0-9]+/g, "_");
+    // Exact mapping
+    if (SIGNAL_TO_FACTOR[normalized]) {
+      for (const f of SIGNAL_TO_FACTOR[normalized]) factors.add(f);
+      continue;
+    }
+    // Substring fallback: find LEARNING_FACTORS whose key is contained in
+    // the signal name or vice-versa
+    for (const [key, targets] of Object.entries(SIGNAL_TO_FACTOR)) {
+      if (normalized.includes(key) || key.includes(normalized)) {
+        for (const f of targets) factors.add(f);
+      }
+    }
+  }
+  return factors;
+}
+
+function extractFactorNamesFromPrediction(pred: any): Set<string> {
+  try {
+    const legs = Array.isArray(pred.legs) ? pred.legs : JSON.parse(pred.legs || "[]");
+    const signalNames: string[] = [];
+    for (const leg of legs) {
+      if (Array.isArray(leg.factors)) {
+        for (const f of leg.factors) {
+          if (f?.name) signalNames.push(f.name);
+        }
+      }
+    }
+    const mapped = signalNamesToFactors(signalNames);
+    // Always include quantum_coherence and ml_projections as baseline factors
+    // so they always have data and don't get starved
+    mapped.add("quantum_coherence");
+    mapped.add("ml_projections");
+    return mapped.size > 2 ? mapped : new Set<string>(); // If only baselines, return empty (use all)
+  } catch {
+    return new Set<string>(); // Parse failure → credit all factors (safe fallback)
+  }
+}
 const MOMENTUM_DECAY = 0.9;
 const WEIGHT_DECAY_RATE = 0.001;
 const CONFIDENCE_WEIGHT_POWER = 1.5;
@@ -173,7 +268,15 @@ async function analyzeAndAdjustWeights(): Promise<{
     if (isWin) totalWins++;
     else if (pred.actualResult === "lost") totalLosses++;
 
+    // Identify which specific factors were active in this prediction.
+    // Only credit/blame those factors — not all 57 equally.
+    // If we can't resolve any specific factors (old data, parse error),
+    // fall back to crediting all factors so no data is wasted.
+    const activeFaktors = extractFactorNamesFromPrediction(pred);
+    const useAllFactors = activeFaktors.size === 0;
+
     for (const factor of LEARNING_FACTORS) {
+      if (!useAllFactors && !activeFaktors.has(factor)) continue;
       if (isWin) {
         factorPerformance[factor].wins += combinedWeight;
       } else if (pred.actualResult === "lost") {

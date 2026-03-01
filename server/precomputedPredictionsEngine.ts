@@ -1008,8 +1008,14 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
   picks.sort((a, b) => b.confidence - a.confidence);
   const dedupedPicks = picks.reduce((acc: PrecomputedPick[], pick) => {
-    const key = `${pick.game}-${pick.pick}`;
-    if (!acc.find(p => `${p.game}-${p.pick}` === key)) acc.push(pick);
+    // Skip exact duplicate pick strings
+    if (acc.some(p => p.game === pick.game && p.pick === pick.pick)) return acc;
+    // Skip picks that conflict with an already-accepted pick for the same market.
+    // Because picks are sorted confidence-descending, the first pick for any
+    // market is always the highest-confidence one — we never want to track both
+    // sides of the same bet (e.g. Over AND Under for the same total).
+    if (acc.some(p => hasConflict(p, pick))) return acc;
+    acc.push(pick);
     return acc;
   }, []);
 
