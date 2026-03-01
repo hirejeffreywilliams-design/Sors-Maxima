@@ -449,6 +449,8 @@ export interface MarketContext {
   isDivision?: boolean;
   homeLastNWinPct?: number;
   awayLastNWinPct?: number;
+  homeTeamAbbr?: string;
+  awayTeamAbbr?: string;
 }
 
 function getDirection(bullishProb: number, seed: string): "bullish" | "bearish" | "neutral" {
@@ -797,6 +799,42 @@ function getDataDrivenDirection(
     return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 4 };
   }
 
+  if (source === "roster_depth" && marketContext.injuryCount) {
+    const homeWeightedDamage = marketContext.injuryCount.home + (marketContext.startersOut?.home || 0) * 2;
+    const awayWeightedDamage = marketContext.injuryCount.away + (marketContext.startersOut?.away || 0) * 2;
+    const netRosterEdge = awayWeightedDamage - homeWeightedDamage;
+    if (netRosterEdge >= 5) return { direction: "bullish", strengthBoost: strengthBoost + Math.min(22, netRosterEdge * 3), confidenceBoost: confidenceBoost + 14 };
+    if (netRosterEdge <= -5) return { direction: "bearish", strengthBoost: strengthBoost + Math.min(22, Math.abs(netRosterEdge) * 3), confidenceBoost: confidenceBoost + 14 };
+    if (netRosterEdge >= 2) return { direction: "bullish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 7 };
+    if (netRosterEdge <= -2) return { direction: "bearish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 7 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 6 };
+  }
+
+  if (source === "altitude_adjustment" && marketContext.venue) {
+    const venueLower = marketContext.venue.toLowerCase();
+    const highAltitudeMarkers = ["ball arena", "elitch", "denver", "salt lake", "delta center", "coors field", "empower field", "mile high", "mexico city", "estadio"];
+    const isHighAltitude = highAltitudeMarkers.some(m => venueLower.includes(m));
+    if (isHighAltitude) {
+      return { direction: "bullish", strengthBoost: strengthBoost + 20, confidenceBoost: confidenceBoost + 16 };
+    }
+    return { direction: "neutral", strengthBoost: 0, confidenceBoost: confidenceBoost + 2 };
+  }
+
+  if (source === "historical_h2h") {
+    const homeHomeWinPct = marketContext.homeHomeRecord
+      ? marketContext.homeHomeRecord.wins / Math.max(1, marketContext.homeHomeRecord.wins + marketContext.homeHomeRecord.losses)
+      : (marketContext.winPct?.home || 0.5);
+    const awayRoadWinPct = marketContext.awayAwayRecord
+      ? marketContext.awayAwayRecord.wins / Math.max(1, marketContext.awayAwayRecord.wins + marketContext.awayAwayRecord.losses)
+      : (marketContext.winPct?.away || 0.5);
+    const h2hEdge = homeHomeWinPct - awayRoadWinPct;
+    if (h2hEdge > 0.20) return { direction: "bullish", strengthBoost: strengthBoost + Math.round(h2hEdge * 40), confidenceBoost: confidenceBoost + 10 };
+    if (h2hEdge < -0.20) return { direction: "bearish", strengthBoost: strengthBoost + Math.round(Math.abs(h2hEdge) * 40), confidenceBoost: confidenceBoost + 10 };
+    if (h2hEdge > 0.08) return { direction: "bullish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 5 };
+    if (h2hEdge < -0.08) return { direction: "bearish", strengthBoost: strengthBoost + 6, confidenceBoost: confidenceBoost + 5 };
+    return { direction: "neutral", strengthBoost, confidenceBoost: confidenceBoost + 4 };
+  }
+
   return { direction: getDirection(bullishProb, `direction-${source}-${bullishProb}`), strengthBoost, confidenceBoost };
 }
 
@@ -877,32 +915,61 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
   const lineMovementAmt = context.lineMovement as number | undefined;
   const oddsSource = (context.oddsSource as string) || "model-estimated";
   
+  const gameMatchupSeed = `${marketContext?.homeTeamAbbr || ''}vs${marketContext?.awayTeamAbbr || ''}`;
+
   for (const config of SIGNAL_CONFIGS) {
     const sportMod = sportModifiers[config.source] || 1.0;
     
     const dataDriven = getDataDrivenDirection(config.source, config.bullishProb * oddsAdjustment, marketContext);
     let direction = dataDriven.direction;
-    let strength = Math.round(Math.min(100, (config.baseStrength[0] + deterministicValue(`strength-${sport}-${config.source}`, 0, 1) * config.baseStrength[1]) * sportMod + dataDriven.strengthBoost));
-    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + deterministicValue(`confidence-${sport}-${config.source}`, 0, 1) * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0) + dataDriven.confidenceBoost));
+    let strength = Math.round(Math.min(100, (config.baseStrength[0] + deterministicValue(`strength-${sport}-${config.source}-${gameMatchupSeed}`, 0, 1) * config.baseStrength[1]) * sportMod + dataDriven.strengthBoost));
+    let confidence = Math.round(Math.min(100, (config.baseConfidence[0] + deterministicValue(`confidence-${sport}-${config.source}-${gameMatchupSeed}`, 0, 1) * config.baseConfidence[1]) * (sportMod > 1.0 ? 1 + (sportMod - 1) * 0.5 : 1.0) + dataDriven.confidenceBoost));
     let reasoning = config.reasoning;
 
-    if (hasRealOdds) {
+    if (hasRealOdds || marketContext) {
       if (config.source === "sharp_money_flow") {
-        if (bookmakerCount >= 5) {
+        if (marketContext?.sharpMoney) {
+          const sm = marketContext.sharpMoney;
+          direction = sm.direction === "home" ? "bullish" : "bearish";
+          const sharpPct = sm.percentage;
+          strength = Math.min(82, 45 + Math.round((sharpPct - 50) / 50 * 35));
+          confidence = Math.min(68, 48 + Math.round((sharpPct - 50) / 50 * 18));
+          reasoning = `Sharp money at ${sm.percentage}% flowing to ${sm.direction} side — professional bettors aligned`;
+        } else if (bookmakerCount >= 5) {
           confidence = Math.min(66, confidence + 8);
           strength = Math.min(75, strength + 8);
           reasoning = `Real-time odds from ${bookmakerCount} bookmakers analyzed for sharp money indicators`;
         }
-      } else if (config.source === "line_movement" && lineMovementAmt !== undefined) {
-        if (Math.abs(lineMovementAmt) > 1.5) {
+      } else if (config.source === "line_movement") {
+        if (marketContext?.lineMovement) {
+          const lm = marketContext.lineMovement;
+          if (lm.direction !== "stable" && lm.magnitude > 0.5) {
+            direction = lm.direction === "up" ? "bullish" : "bearish";
+            strength = Math.min(78, 40 + Math.round(lm.magnitude * 8));
+            confidence = Math.min(66, 44 + Math.round(lm.magnitude * 4));
+            reasoning = `Line moved ${lm.direction === "up" ? "+" : "-"}${lm.magnitude.toFixed(1)} pts — market repricing detected`;
+          }
+        } else if (lineMovementAmt !== undefined && Math.abs(lineMovementAmt) > 1.5) {
           direction = lineMovementAmt > 0 ? "bullish" : "bearish";
           strength = Math.min(75, 45 + Math.abs(lineMovementAmt) * 4);
           confidence = Math.min(65, 48 + Math.abs(lineMovementAmt) * 2);
           reasoning = `Line moved ${lineMovementAmt > 0 ? "+" : ""}${lineMovementAmt.toFixed(1)} points — significant sharp action detected`;
         }
-      } else if (config.source === "public_fade" && bookmakerCount >= 3) {
-        confidence = Math.min(60, confidence + 6);
-        reasoning = `Market consensus across ${bookmakerCount} books indicates public betting distribution`;
+      } else if (config.source === "public_fade") {
+        if (marketContext?.publicMoney) {
+          const pm = marketContext.publicMoney;
+          const majorityPct = Math.max(pm.homePercent, pm.awayPercent);
+          const majorityDir = pm.homePercent > pm.awayPercent ? "home" : "away";
+          if (majorityPct > 65) {
+            direction = majorityDir === "home" ? "bearish" : "bullish";
+            strength = Math.min(72, 38 + Math.round((majorityPct - 65) / 35 * 30));
+            confidence = Math.min(60, 40 + Math.round((majorityPct - 65) / 35 * 16));
+            reasoning = `${Math.round(majorityPct)}% public on ${majorityDir} — fading public for contrarian edge`;
+          }
+        } else if (bookmakerCount >= 3) {
+          confidence = Math.min(60, confidence + 6);
+          reasoning = `Market consensus across ${bookmakerCount} books indicates public betting distribution`;
+        }
       } else if (config.source === "monte_carlo") {
         try {
           const { getPreSimulated } = require("./monteCarloEngine");

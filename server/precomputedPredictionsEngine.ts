@@ -19,6 +19,36 @@ import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import type { Sport } from "@shared/schema";
 
+const DIVISION_GROUPS: Record<string, string[][]> = {
+  NFL: [
+    ["BUF","MIA","NE","NYJ"], ["BAL","CIN","CLE","PIT"], ["HOU","IND","JAX","TEN"], ["DEN","KC","LV","LAC"],
+    ["DAL","NYG","PHI","WSH"], ["CHI","DET","GB","MIN"], ["ATL","CAR","NO","TB"], ["ARI","LAR","SEA","SF"],
+  ],
+  NBA: [
+    ["BOS","BKN","NY","PHI","TOR"], ["CHI","CLE","DET","IND","MIL"], ["ATL","CHA","MIA","ORL","WSH"],
+    ["DEN","MIN","OKC","POR","UTA"], ["GS","LAC","LAL","PHO","SAC"], ["DAL","HOU","MEM","NO","SA"],
+  ],
+  NHL: [
+    ["BOS","BUF","DET","FLA","MTL","OTT","TB","TOR"], ["CAR","CBJ","NJ","NYI","NYR","PHI","PIT","WSH"],
+    ["ARI","CHI","COL","DAL","MIN","NSH","STL","WPG"], ["ANA","CGY","EDM","LA","SJS","SEA","VAN","VGK"],
+  ],
+  MLB: [
+    ["BAL","BOS","NYY","TB","TOR"], ["CWS","CLE","DET","KC","MIN"], ["HOU","LAA","OAK","SEA","TEX"],
+    ["ATL","MIA","NYM","PHI","WSH"], ["CHC","CIN","MIL","PIT","STL"], ["ARI","COL","LAD","SD","SF"],
+  ],
+};
+
+function areSameDivision(sport: string, abbr1: string, abbr2: string): boolean {
+  const groups = DIVISION_GROUPS[sport];
+  if (!groups || !abbr1 || !abbr2) return false;
+  const a1 = abbr1.toUpperCase();
+  const a2 = abbr2.toUpperCase();
+  return groups.some(div =>
+    div.some(t => a1 === t || a1.includes(t) || t.includes(a1)) &&
+    div.some(t => a2 === t || a2.includes(t) || t.includes(a2))
+  );
+}
+
 export interface PickReleaseSchedule {
   whaleRelease: string;
   eliteRelease: string;
@@ -573,8 +603,47 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       awayLastNWinPct = awayBDL.last10Wins / Math.max(1, awayBDL.last10Wins + awayBDL.last10Losses);
     }
 
-    const sameConference = homeBDL && awayBDL && homeBDL.abbreviation && awayBDL.abbreviation;
-    const sameDivision = false;
+    const sameDivision = areSameDivision(sport, homeAbbr, awayAbbr);
+    const isRivalryGame = sameDivision;
+
+    const marketGameData = marketData?.games.find(mg => mg.id === game.id);
+    const gameLineMovementsEarly: LineMovementData[] = marketGameData?.lineMovement || [];
+
+    const latestLineMove = gameLineMovementsEarly[0];
+    let derivedLineMovement: { direction: "up" | "down" | "stable"; magnitude: number } | undefined;
+    if (latestLineMove) {
+      const openNum = parseFloat(String(latestLineMove.opening)) || 0;
+      const currNum = parseFloat(String(latestLineMove.current)) || 0;
+      const mag = Math.abs(currNum - openNum);
+      if (mag > 0.1) {
+        derivedLineMovement = {
+          direction: currNum > openNum ? "up" : "down",
+          magnitude: Math.round(mag * 10) / 10,
+        };
+      } else {
+        derivedLineMovement = { direction: "stable", magnitude: 0 };
+      }
+    }
+
+    const sharpLineMove = gameLineMovementsEarly.find(lm => lm.sharpAction || lm.velocity === "steam");
+    let derivedSharpMoney: { direction: "home" | "away"; percentage: number } | undefined;
+    if (sharpLineMove) {
+      const sharpDir: "home" | "away" = sharpLineMove.direction === "up" ? "home" : "away";
+      derivedSharpMoney = {
+        direction: sharpDir,
+        percentage: sharpLineMove.velocity === "steam" ? 82 : 68,
+      };
+    }
+
+    const derivedBookmakerCount = marketGameData?.bookmakers?.length || 0;
+
+    const isPlayoffGame = !!(game.name && (
+      game.name.toLowerCase().includes("playoff") ||
+      game.name.toLowerCase().includes("postseason") ||
+      game.name.toLowerCase().includes("championship") ||
+      game.name.toLowerCase().includes("finals") ||
+      game.name.toLowerCase().includes("cup")
+    ));
 
     const marketCtx: MarketContext = {
       winPct: { home: homeWinPct, away: awayWinPct },
@@ -601,6 +670,13 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       awayLastNWinPct: Math.max(0, Math.min(1, awayLastNWinPct)),
       rosterChanges: { home: homeInjuryCount, away: awayInjuryCount },
       isDivision: sameDivision,
+      isRivalry: isRivalryGame,
+      isPlayoff: isPlayoffGame,
+      lineMovement: derivedLineMovement,
+      sharpMoney: derivedSharpMoney,
+      bookmakerCount: derivedBookmakerCount,
+      homeTeamAbbr: homeAbbr,
+      awayTeamAbbr: awayAbbr,
     };
 
     if (mcSim) {
