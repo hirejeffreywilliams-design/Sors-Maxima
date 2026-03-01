@@ -61,9 +61,9 @@ function WinRateBadge({ rate }: { rate: number | null }) {
 
 function GapBadge({ gap }: { gap: number | null }) {
   if (gap === null) return <span className="text-muted-foreground text-xs">—</span>;
-  if (Math.abs(gap) <= 5) return <span className="text-green-400 text-xs font-mono">{gap > 0 ? "+" : ""}{gap}%</span>;
-  if (gap > 5) return <span className="text-yellow-400 text-xs font-mono">+{gap}% overconfident</span>;
-  return <span className="text-red-400 text-xs font-mono">{gap}% underconfident</span>;
+  if (Math.abs(gap) <= 5) return <span className="text-green-400 text-xs font-mono">{gap > 0 ? "+" : ""}{gap.toFixed(1)}%</span>;
+  if (gap < -5) return <span className="text-red-400 text-xs font-mono">{gap.toFixed(1)}% overconfident</span>;
+  return <span className="text-yellow-400 text-xs font-mono">+{gap.toFixed(1)}% underconfident</span>;
 }
 
 export default function TrackRecordPage() {

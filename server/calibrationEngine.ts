@@ -166,21 +166,42 @@ export function computeCalibration(): TrackRecord {
     };
   });
 
-  const betTypes = [...new Set(allPicks.map((p) => p.betType).filter(Boolean))];
-  const byBetType: BetTypeAccuracy[] = betTypes.map((bt) => {
-    const btAll = allPicks.filter((p) => p.betType === bt);
-    const btSettled = settled.filter((p) => p.betType === bt);
-    const w = btSettled.filter((p) => p.result === "won").length;
-    const l = btSettled.filter((p) => p.result === "lost").length;
-    return {
-      betType: bt,
-      total: btAll.length,
-      settled: btSettled.length,
-      won: w,
-      lost: l,
-      actualWinRate: w + l > 0 ? Math.round((w / (w + l)) * 1000) / 10 : null,
-    };
-  });
+  function normalizeBetType(bt: string): string {
+    const t = bt.toLowerCase();
+    if (t === "spread") return "Spread";
+    if (t === "total") return "Total";
+    if (t === "moneyline" || t === "h2h") return "Moneyline";
+    if (t === "team_total") return "Team Total";
+    if (t.includes("first_half") || t.includes("1h")) return "1H";
+    if (t.startsWith("player_")) return "Player Props";
+    return bt;
+  }
+  const betTypeMap = new Map<string, { total: number; settled: number; won: number; lost: number }>();
+  for (const p of allPicks) {
+    if (!p.betType) continue;
+    const key = normalizeBetType(p.betType);
+    if (!betTypeMap.has(key)) betTypeMap.set(key, { total: 0, settled: 0, won: 0, lost: 0 });
+    betTypeMap.get(key)!.total++;
+  }
+  for (const p of settled) {
+    if (!p.betType) continue;
+    const key = normalizeBetType(p.betType);
+    if (!betTypeMap.has(key)) betTypeMap.set(key, { total: 0, settled: 0, won: 0, lost: 0 });
+    const entry = betTypeMap.get(key)!;
+    entry.settled++;
+    if (p.result === "won") entry.won++;
+    else if (p.result === "lost") entry.lost++;
+  }
+  const byBetType: BetTypeAccuracy[] = Array.from(betTypeMap.entries()).map(([betType, counts]) => ({
+    betType,
+    total: counts.total,
+    settled: counts.settled,
+    won: counts.won,
+    lost: counts.lost,
+    actualWinRate: counts.won + counts.lost > 0
+      ? Math.round((counts.won / (counts.won + counts.lost)) * 1000) / 10
+      : null,
+  })).sort((a, b) => b.total - a.total);
 
   const recentSettled = [...settled].sort(
     (a, b) => new Date(b.settledAt || b.savedAt).getTime() - new Date(a.settledAt || a.savedAt).getTime()

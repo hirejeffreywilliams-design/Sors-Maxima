@@ -82,7 +82,7 @@ const pricingTiers = [
     name: "Sharp",
     price: 49,
     description: "Members Only",
-    features: ["Unlimited ticket generations", "14+ sports & leagues", "Full 38-factor engine", "+EV finder"],
+    features: ["Unlimited ticket generations", "14+ sports & leagues", "Full 46-factor engine", "+EV finder"],
     cta: "Join Sharp",
     variant: "secondary" as const,
   },

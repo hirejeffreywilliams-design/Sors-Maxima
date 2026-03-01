@@ -393,7 +393,7 @@ function TierAccessTab() {
       icon: <Shield className="w-5 h-5 text-blue-500" />,
       features: [
         "Unlimited ticket generations",
-        "Full 38-factor engine",
+        "Full 46-factor engine",
         "+EV finder & bet grading",
         "ROI dashboard",
       ],

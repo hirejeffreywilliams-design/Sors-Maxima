@@ -312,7 +312,7 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                 <p className="text-sm font-medium text-primary">Pro Tip</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  The 38-factor engine gets smarter the more you use it. Your first week of data helps calibrate predictions to your style.
+                  The 46-factor engine gets smarter the more you use it. Your first week of data helps calibrate predictions to your style.
                 </p>
               </div>
             </CardContent>

@@ -1,7 +1,7 @@
 /**
  * Multi-Factor Intelligence Engine™ (Server-Side) — Proprietary Algorithm
  * 
- * A unified intelligence system that integrates 38 data-backed factors:
+ * A unified intelligence system that integrates 46 data-backed factors:
  * All factors are grounded in real data from ESPN, The Odds API, Open-Meteo,
  * BallDontLie, and proprietary Monte Carlo simulations.
  * 

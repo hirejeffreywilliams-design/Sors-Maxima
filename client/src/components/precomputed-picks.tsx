@@ -568,7 +568,7 @@ export function PrecomputedPicks() {
                   <ProtectionShield protection={snapshot?.pickProtection} />
                 </CardTitle>
                 <p className="text-xs text-muted-foreground">
-                  Auto-generated from 38-factor model analysis
+                  Auto-generated from 46-factor model analysis
                   {lastUpdate && <span> &middot; Updated {timeAgo}</span>}
                   {snapshot?.totalPickPool && snapshot.totalPickPool > (snapshot?.picks?.length || 0) && (
                     <span> &middot; Showing {snapshot.picks.length} of {snapshot.totalPickPool} picks</span>

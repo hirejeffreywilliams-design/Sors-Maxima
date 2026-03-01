@@ -360,8 +360,15 @@ export function registerIntelligenceRoutes(app: Express): void {
     try {
       const stats = getPickAccuracyStats();
       const settledCount = stats.overall.total;
-      const winRate = stats.overall.rate;
-      const recentTrend = stats.recentForm.rate;
+      const won = stats.overall.won;
+      const lost = stats.overall.lost;
+      const winRate = won + lost > 0 ? Math.round((won / (won + lost)) * 1000) / 10 : 0;
+      const recentForm = stats.recentForm;
+      const recentWon = recentForm.won;
+      const recentLost = recentForm.lost;
+      const recentTrend = recentWon + recentLost > 0
+        ? Math.round((recentWon / (recentWon + recentLost)) * 1000) / 10
+        : 0;
       const backtestCount = getBacktestCount();
       const liveCount = settledCount - backtestCount;
 
@@ -382,7 +389,7 @@ export function registerIntelligenceRoutes(app: Express): void {
         lastUpdated: stats.lastUpdated,
         backtestCount,
         liveCount,
-        factorCount: 38
+        factorCount: 46
       });
     } catch (err) {
       console.error("Model health error:", err);

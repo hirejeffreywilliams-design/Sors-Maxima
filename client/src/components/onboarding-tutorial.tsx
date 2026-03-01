@@ -87,7 +87,7 @@ const tutorialSteps: TutorialStep[] = [
       "Grade (A+ to D) = overall quality rating. Aim for B or higher",
       "Win Prob = estimated chance this ticket wins. Higher = safer",
       "EV% = expected value. Positive means the odds are in your favor",
-      "Confidence = how strongly our 38-factor engine agrees on this pick"
+      "Confidence = how strongly our 46-factor engine agrees on this pick"
     ]
   },
   {

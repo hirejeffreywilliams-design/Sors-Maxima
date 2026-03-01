@@ -736,7 +736,7 @@ export default function DailyParlays() {
                   )}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  38-factor model analysis across all sports
+                  46-factor model analysis across all sports
                   {lastUpdate && <span className="text-primary"> · Updated {getTimeAgo(lastUpdate)}</span>}
                 </p>
               </div>
