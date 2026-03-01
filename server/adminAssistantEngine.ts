@@ -236,11 +236,8 @@ You MUST respond with valid JSON matching this exact structure (no markdown, no 
 export async function runAdminAssistant(period: "daily" | "weekly" | "monthly" = "daily", adminId: string = "admin"): Promise<AssistantOutput> {
   const runContext = collectRunContext(period, adminId);
 
-  const OpenAI = (await import("openai")).default;
-  const openai = new OpenAI({
-    apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-  });
+  const { createOpenAIClient } = await import("./openaiClient");
+  const openai = createOpenAIClient();
 
   const userPrompt = `Given the following run_context, produce: executive summary, top prioritized tasks, immediate financial & risk actions, compliance actions, a budget plan, experiment suggestions, and routine checklists. For each item include rationale, expected impact, confidence, and required approvals. If data is missing, note it in assumptions.
 

@@ -264,7 +264,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
   app.get("/api/data-sources/status", async (_req, res) => {
     try {
       const oddsApiStatus = sportsDataService.getApiStatus();
-      const hasOpenAI = !!(process.env.AI_INTEGRATIONS_OPENAI_API_KEY);
+      const hasOpenAI = !!(process.env.OPENAI_API_KEY || process.env.AI_INTEGRATIONS_OPENAI_API_KEY);
       const hasStripe = !!(process.env.STRIPE_SECRET_KEY);
 
       return res.json({
@@ -1801,11 +1801,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       const { message } = req.body;
       if (!message) return res.status(400).json({ error: "Message required" });
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({
-        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-      });
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
 
       const bets = userDataEngine.getBets();
       const stats = userDataEngine.getBetStats();
