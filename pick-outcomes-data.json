@@ -239,6 +239,198 @@
       "ev": -25.55,
       "gameTime": "2026-03-01T12:54:59.953Z",
       "savedAt": "2026-03-01T12:54:59.953Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-moneyline-ad96cc6ee8",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Charlotte Hornets ML",
+      "betType": "moneyline",
+      "odds": -138,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 10.38,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T20:38:30.622Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-spread-b9e53f5ece",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Charlotte Hornets +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T20:38:30.622Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-84f92beb23",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 217",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T20:38:30.622Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-team_total-9e1f691244",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Charlotte Hornets Over 108",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T20:38:30.622Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-team_total-abd323d9e5",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Dallas Mavericks Over 109",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T20:38:30.622Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-15908d8254",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 80",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T20:38:31.044Z"
+    },
+    {
+      "id": "precomp-NBA-401810727-spread-cec857147d",
+      "gameId": "401810727",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Indiana Pacers",
+      "homeTeam": "Indiana Pacers",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Indiana Pacers +0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-01T22:00Z",
+      "savedAt": "2026-03-01T20:40:34.979Z"
+    },
+    {
+      "id": "precomp-NBA-401810727-team_total-76f99700ca",
+      "gameId": "401810727",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Indiana Pacers",
+      "homeTeam": "Indiana Pacers",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Indiana Pacers Over 118.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-01T22:00Z",
+      "savedAt": "2026-03-01T20:40:34.979Z"
+    },
+    {
+      "id": "precomp-NBA-401810731-total-de3d8a98e5",
+      "gameId": "401810731",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Dallas Mavericks",
+      "homeTeam": "Dallas Mavericks",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Over 235",
+      "betType": "total",
+      "odds": -114,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 27.65,
+      "gameTime": "2026-03-02T01:00Z",
+      "savedAt": "2026-03-01T20:40:34.979Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-d017d28303",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers Over 69.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T20:40:35.937Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-spread-3444e4d3ee",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls +2",
+      "betType": "spread",
+      "odds": -138,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 17.28,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T20:41:56.087Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-9b3f263f0f",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls Over 115",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T20:41:56.087Z"
     }
   ],
   "settled": [
@@ -62697,16 +62889,76 @@
       "homeScore": 74,
       "awayScore": 76,
       "settledAt": "2026-03-01T20:32:28.931Z"
+    },
+    {
+      "id": "precomp-NBA-401810723-spread-1d88111b06",
+      "gameId": "401810723",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "New York Knicks -21",
+      "betType": "spread",
+      "odds": -102,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 34.67,
+      "gameTime": "2026-03-01T18:00Z",
+      "savedAt": "2026-03-01T20:34:48.113Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T20:36:00.176Z"
+    },
+    {
+      "id": "precomp-NBA-401810723-spread-cdf833133d",
+      "gameId": "401810723",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "New York Knicks -22.5",
+      "betType": "spread",
+      "odds": -122,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 23.74,
+      "gameTime": "2026-03-01T18:00Z",
+      "savedAt": "2026-03-01T20:36:43.767Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-01T20:37:55.214Z"
+    },
+    {
+      "id": "precomp-NBA-401810723-team_total-e5d10a54be",
+      "gameId": "401810723",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "San Antonio Spurs Over 91",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-01T18:00Z",
+      "savedAt": "2026-03-01T20:36:43.767Z",
+      "result": "lost",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-01T20:37:55.214Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3016,
-      "won": 1461,
-      "lost": 1530,
+      "total": 3019,
+      "won": 1462,
+      "lost": 1532,
       "push": 25,
       "rate": 48.4,
-      "pending": 15
+      "pending": 27
     },
     "bySport": {
       "NHL": {
@@ -62720,8 +62972,8 @@
         "rate": 54
       },
       "NBA": {
-        "total": 876,
-        "won": 433,
+        "total": 879,
+        "won": 434,
         "rate": 49.4
       },
       "MLB": {
@@ -62777,20 +63029,20 @@
         "rate": 58.2
       },
       "A+": {
-        "total": 193,
-        "won": 120,
-        "rate": 62.2
+        "total": 196,
+        "won": 121,
+        "rate": 61.7
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 370,
+        "total": 371,
         "won": 214,
-        "rate": 57.8
+        "rate": 57.7
       },
       "Spread": {
-        "total": 1248,
-        "won": 465,
+        "total": 1250,
+        "won": 466,
         "rate": 37.3
       },
       "Total": {
@@ -62805,12 +63057,12 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 19,
+      "won": 28,
+      "lost": 21,
       "push": 1,
-      "rate": 60
+      "rate": 56
     },
-    "lastUpdated": "2026-03-01T20:32:28.932Z"
+    "lastUpdated": "2026-03-01T20:42:04.101Z"
   },
   "version": 1
 }

@@ -65,6 +65,23 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS user_watchlist (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        item_type VARCHAR(20) NOT NULL CHECK (item_type IN ('team', 'game', 'player')),
+        item_name VARCHAR(255) NOT NULL,
+        sport VARCHAR(20) NOT NULL,
+        details TEXT DEFAULT '',
+        alerts BOOLEAN NOT NULL DEFAULT true,
+        added_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_user_watchlist_user_id ON user_watchlist(user_id)
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

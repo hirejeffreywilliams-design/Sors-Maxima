@@ -24,19 +24,19 @@ export function registerNotificationRoutes(app: Express): void {
     if (!gameId || !sport) {
       return res.status(400).json({ error: "gameId and sport are required" });
     }
-    const userId = (req.session as any)?.userId || "default-user";
+    const userId = (req.session as any)?.userId || (req.session as any)?.username || "anon";
     const sub = await subscribeToGame(userId, gameId, sport, gameName || "", alerts);
     return res.json(sub);
   });
 
   app.delete("/api/game-subscriptions/:gameId", async (req: Request, res: Response) => {
-    const userId = (req.session as any)?.userId || "default-user";
+    const userId = (req.session as any)?.userId || (req.session as any)?.username || "anon";
     const removed = await unsubscribeFromGame(userId, req.params.gameId);
     return res.json({ success: removed });
   });
 
-  app.get("/api/game-subscriptions", async (_req: Request, res: Response) => {
-    const userId = (_req.session as any)?.userId || "default-user";
+  app.get("/api/game-subscriptions", async (req: Request, res: Response) => {
+    const userId = (req.session as any)?.userId || (req.session as any)?.username || "anon";
     return res.json(await getUserGameSubscriptions(userId));
   });
 
@@ -45,7 +45,7 @@ export function registerNotificationRoutes(app: Express): void {
     if (!ticketId || !legs || !Array.isArray(legs)) {
       return res.status(400).json({ error: "ticketId and legs array are required" });
     }
-    const userId = "default-user";
+    const userId = (req.session as any)?.userId || (req.session as any)?.username || "anon";
     const watch = watchParlay(ticketId, userId, legs);
     return res.json(watch);
   });
@@ -55,8 +55,8 @@ export function registerNotificationRoutes(app: Express): void {
     return res.json({ success: removed });
   });
 
-  app.get("/api/parlay-watches", (_req: Request, res: Response) => {
-    const userId = "default-user";
+  app.get("/api/parlay-watches", (req: Request, res: Response) => {
+    const userId = (req.session as any)?.userId || (req.session as any)?.username || "anon";
     return res.json(getUserParlayWatches(userId));
   });
 }

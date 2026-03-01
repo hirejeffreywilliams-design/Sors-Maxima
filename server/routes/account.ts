@@ -656,7 +656,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
 
   // ==================== WATCHLIST ENGINE (DB-backed) ====================
   app.get("/api/user/watchlist", requireAuth, async (req, res) => {
-    const userId = req.session?.username;
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     try {
       const rows = await db.execute(sql`SELECT id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts FROM user_watchlist WHERE user_id = ${userId} ORDER BY added_at DESC`);
@@ -667,7 +667,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.post("/api/user/watchlist", requireAuth, async (req, res) => {
-    const userId = req.session?.username;
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const { type, name, sport } = req.body;
     if (!type || !name || !sport) return res.status(400).json({ error: "type, name, and sport are required" });
@@ -676,7 +676,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     try {
       const existing = await db.execute(sql`SELECT id FROM user_watchlist WHERE user_id = ${userId} AND item_type = ${type} AND item_name = ${name} AND sport = ${sport}`);
       if (existing.rows.length > 0) return res.status(409).json({ error: "Already in watchlist" });
-      const result = await db.execute(sql`INSERT INTO user_watchlist (user_id, item_type, item_name, sport, details, alerts) VALUES (${userId}, ${type}, ${name}, ${sport}, ${""},  ${true}) RETURNING id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts`);
+      const result = await db.execute(sql`INSERT INTO user_watchlist (user_id, item_type, item_name, sport, details, alerts) VALUES (${userId}, ${type}, ${name}, ${sport}, ${''},  ${true}) RETURNING id, item_type as type, item_name as name, sport, details, added_at as "addedAt", alerts`);
       res.json(result.rows[0]);
     } catch (err) {
       res.status(500).json({ error: "Failed to add to watchlist" });
@@ -684,7 +684,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.delete("/api/user/watchlist/:id", requireAuth, async (req, res) => {
-    const userId = req.session?.username;
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const itemId = parseInt(req.params.id);
     if (!Number.isFinite(itemId)) return res.status(400).json({ error: "Invalid watchlist item ID" });
@@ -697,7 +697,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.patch("/api/user/watchlist/:id/alerts", requireAuth, async (req, res) => {
-    const userId = req.session?.username;
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const itemId = parseInt(req.params.id);
     if (!Number.isFinite(itemId)) return res.status(400).json({ error: "Invalid watchlist item ID" });
@@ -711,7 +711,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.get("/api/user/watchlist/live", requireAuth, async (req, res) => {
-    const userId = req.session?.username;
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     try {
       const rows = await db.execute(sql`SELECT item_name as name, item_type as type FROM user_watchlist WHERE user_id = ${userId} AND item_type = 'team'`);
