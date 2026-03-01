@@ -1074,7 +1074,10 @@ interface LifeChangerLeg {
   gameTime?: string;
   ev: number;
   confidence: number;
+  grade: string;
+  edge: number;
   isUnderdog: boolean;
+  reasoning: string;
 }
 
 interface LifeChangerTicket {
@@ -1087,11 +1090,15 @@ interface LifeChangerTicket {
   potentialPayouts: { stake: number; payout: number; formatted: string }[];
   selectionLogic: string;
   generatedAt: string;
+  earliestGame?: string;
   disclaimer: string;
 }
 
 const SPORT_EMOJI: Record<string, string> = {
   NBA: "🏀", NHL: "🏒", NCAAB: "🏀", NFL: "🏈", MLB: "⚾", NCAAF: "🏈",
+  Soccer_EPL: "⚽", Soccer_LALIGA: "⚽", Soccer_BUNDESLIGA: "⚽",
+  Soccer_SERIEA: "⚽", Soccer_LIGUE1: "⚽", Soccer_MLS: "⚽",
+  Soccer_UCL: "⚽", Soccer_INTL: "⚽",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -1165,7 +1172,9 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
       sport: leg.sport,
       confidence: leg.confidence,
       evPercent: leg.ev,
-      reasoning: leg.selectionReason,
+      grade: leg.grade,
+      edge: leg.edge,
+      reasoning: leg.reasoning || leg.selectionReason,
       addedFrom: "life_changer",
       addedAt: new Date().toISOString(),
     };
@@ -1309,33 +1318,60 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
             {/* Leg list */}
             {expanded && (
               <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3">
-                {ticket.legs.map((leg, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5"
-                    data-testid={`row-lc-leg-${i}`}
-                  >
-                    <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-semibold">{leg.pick}</span>
-                        <Badge variant="outline" className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}>
-                          {CATEGORY_LABEL[leg.selectionCategory]}
-                        </Badge>
+                {ticket.legs.map((leg, i) => {
+                  const legInSlip = legs.some(s => s.id === legId(leg));
+                  return (
+                    <div
+                      key={i}
+                      className="rounded-lg border border-border/60 bg-background/50 px-3 py-2.5"
+                      data-testid={`row-lc-leg-${i}`}
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-semibold">{leg.pick}</span>
+                            {leg.grade && (
+                              <Badge variant="outline" className={`text-[9px] px-1 py-0 border font-bold ${gradeColor(leg.grade)}`}>
+                                {leg.grade}
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}>
+                              {CATEGORY_LABEL[leg.selectionCategory]}
+                            </Badge>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground truncate mt-0.5">{leg.game}</p>
+                          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                            {leg.gameTime && (
+                              <span className="text-[10px] text-muted-foreground/60">{new Date(leg.gameTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                            )}
+                            {leg.ev > 0 && (
+                              <span className="text-[10px] font-medium text-emerald-400">+{leg.ev.toFixed(1)}% EV</span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% conf</span>
+                          </div>
+                          <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
+                        </div>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
+                          <p className="text-[9px] text-muted-foreground">{leg.betType.replace(/_/g, " ")}</p>
+                          <button
+                            onClick={() => { addLeg(buildLcLeg(leg) as any); }}
+                            disabled={legInSlip}
+                            data-testid={`button-lc-add-leg-${i}`}
+                            className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                              legInSlip
+                                ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 cursor-default"
+                                : "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
+                            }`}
+                          >
+                            {legInSlip ? "✓ Added" : "+ Add"}
+                          </button>
+                        </div>
                       </div>
-                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{leg.game}</p>
-                      {leg.gameTime && (
-                        <p className="text-[10px] text-muted-foreground/60">{new Date(leg.gameTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
-                      )}
-                      <p className="text-[10px] text-amber-300/70 mt-0.5">{leg.selectionReason}</p>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
-                      <p className="text-[9px] text-muted-foreground">{leg.betType.replace(/_/g, " ")}</p>
-                      <p className="text-[9px] text-muted-foreground/60">{leg.confidence}% conf</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

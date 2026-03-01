@@ -1770,7 +1770,10 @@ export interface LifeChangerLeg {
   gameTime?: string;
   ev: number;
   confidence: number;
+  grade: string;
+  edge: number;
   isUnderdog: boolean;
+  reasoning: string;
 }
 
 export interface LifeChangerTicket {
@@ -1783,6 +1786,7 @@ export interface LifeChangerTicket {
   potentialPayouts: { stake: number; payout: number; formatted: string }[];
   selectionLogic: string;
   generatedAt: string;
+  earliestGame?: string;
   disclaimer: string;
 }
 
@@ -1838,6 +1842,7 @@ function soccerPickToPrecomputed(sp: SoccerPick): PrecomputedPick {
 }
 
 export function buildLifeChangerTicket(): LifeChangerTicket | null {
+  const now = Date.now();
   const allPicks: PrecomputedPick[] = [];
   const sports: Sport[] = ["NBA", "NHL", "NCAAB", "NFL", "MLB"] as Sport[];
 
@@ -1847,27 +1852,57 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     allPicks.push(...cache.snapshot.picks.filter(p => p.timing !== "line_locked"));
   }
 
-  // Inject international soccer picks into the Life Changer pool
+  // Inject international soccer picks
   const soccerPicks = getInternationalLifeChangerPicks();
   const soccerConverted = soccerPicks
-    .filter(sp => !sp.isLive) // only upcoming games
+    .filter(sp => !sp.isLive)
     .map(soccerPickToPrecomputed);
   allPicks.push(...soccerConverted);
 
-  if (allPicks.length < 6) return null;
+  // ── Filter 1: Remove games that have already started ──────────────────────
+  // Allow a 5-minute grace window for very recently started games
+  const GRACE_MS = 5 * 60 * 1000;
+  const upcoming = allPicks.filter(p => {
+    if (!p.gameTime) return true; // no time = assume future
+    const gameMs = new Date(p.gameTime).getTime();
+    return gameMs > now - GRACE_MS;
+  });
+
+  if (upcoming.length < 6) return null;
 
   const today = new Date().toISOString().slice(0, 10);
-  const shuffled = dateSeededShuffle(allPicks, today);
+  const shuffled = dateSeededShuffle(upcoming, today);
 
-  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > -2);
-  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 2.5 && !["A+", "A"].includes(p.grade));
-  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 0);
-  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 40);
+  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > 0);
+  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 3 && !["A+", "A"].includes(p.grade));
+  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 1);
+  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 42);
 
   const selectedLegs: PrecomputedPick[] = [];
   const usedGames = new Set<string>();
   const sportCounts = new Map<string, number>();
+  // Track betType per sport to avoid correlated legs (e.g. two NHL overs)
+  const sportBetTypes = new Map<string, Set<string>>();
   const MAX_PER_SPORT = 2;
+
+  function isCorrelated(pick: PrecomputedPick): boolean {
+    const sportKey = pick.sport;
+    const existing = sportBetTypes.get(sportKey);
+    if (!existing) return false;
+    // Same total/over-under market in same sport = correlated
+    const isTotal = ["total", "first_half_total", "team_total"].includes(pick.betType);
+    if (isTotal && existing.has("total_group")) return true;
+    return false;
+  }
+
+  function trackBetType(pick: PrecomputedPick) {
+    const sportKey = pick.sport;
+    if (!sportBetTypes.has(sportKey)) sportBetTypes.set(sportKey, new Set());
+    const set = sportBetTypes.get(sportKey)!;
+    const isTotal = ["total", "first_half_total", "team_total"].includes(pick.betType);
+    if (isTotal) set.add("total_group");
+    else set.add(pick.betType);
+  }
 
   function tryAdd(pool: PrecomputedPick[], needed: number) {
     let added = 0;
@@ -1875,9 +1910,11 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       if (added >= needed) break;
       if (usedGames.has(pick.game)) continue;
       if ((sportCounts.get(pick.sport) || 0) >= MAX_PER_SPORT) continue;
+      if (isCorrelated(pick)) continue;
       selectedLegs.push(pick);
       usedGames.add(pick.game);
       sportCounts.set(pick.sport, (sportCounts.get(pick.sport) || 0) + 1);
+      trackBetType(pick);
       added++;
     }
   }
@@ -1886,7 +1923,10 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   tryAdd(contrarianPool, 3);
   tryAdd(alternativePool, 2);
   tryAdd(sleeperPool, 2);
-  if (selectedLegs.length < 6) tryAdd(shuffled.filter(p => !selectedLegs.includes(p)), 8 - selectedLegs.length);
+  if (selectedLegs.length < 6) {
+    const remaining = shuffled.filter(p => !selectedLegs.includes(p));
+    tryAdd(remaining, 8 - selectedLegs.length);
+  }
 
   if (selectedLegs.length < 4) return null;
 
@@ -1900,7 +1940,9 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     return {
       stake: s,
       payout: raw,
-      formatted: raw >= 1000
+      formatted: raw >= 1000000
+        ? `$${(raw / 1000000).toFixed(2)}M`
+        : raw >= 1000
         ? `$${(raw / 1000).toFixed(1)}K`
         : `$${raw.toFixed(0)}`,
     };
@@ -1913,15 +1955,27 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     return "contrarian";
   }
 
+  // Use real pick reasoning — fall back to contextual template only if empty
   function getReason(p: PrecomputedPick): string {
+    if (p.reasoning && p.reasoning.trim().length > 20) {
+      // Truncate long reasoning to 120 chars for display
+      return p.reasoning.length > 120 ? p.reasoning.slice(0, 117) + "..." : p.reasoning;
+    }
     const cat = getCategory(p);
-    if (cat === "sleeper") return `Long-shot sleeper — most bettors ignore ${p.sport} underdogs at this price`;
-    if (cat === "underdog") return `Underdog value — model sees edge the market is underpricing`;
-    if (cat === "alternative") return `Unorthodox market — public ignores ${p.betType.replace(/_/g, " ")} lines`;
-    return `Contrarian play — going against the public lean for hidden value`;
+    const evStr = p.ev > 0 ? ` (+${p.ev.toFixed(1)}% EV)` : "";
+    if (cat === "sleeper") return `Long-shot value at ${p.odds > 0 ? "+" : ""}${p.odds}${evStr} — ${p.sport} market underprices this line`;
+    if (cat === "underdog") return `Underdog edge${evStr} — model projects ${p.confidence}% win probability vs implied ${Math.round(100 / (americanToDecimal(p.odds)))}%`;
+    if (cat === "alternative") return `${p.betType.replace(/_/g, " ")} market${evStr} — sharp value on unorthodox line`;
+    return `Contrarian play${evStr} — fading the public on ${p.game.split(" @ ")[0] || p.sport}`;
   }
 
   const uniqueSports = [...new Set(selectedLegs.map(p => p.sport))];
+
+  // Compute earliest game time for freshness indicator
+  const gameTimes = selectedLegs.map(p => p.gameTime).filter(Boolean) as string[];
+  const earliestGame = gameTimes.length > 0
+    ? gameTimes.reduce((a, b) => a < b ? a : b)
+    : undefined;
 
   return {
     id: `lc-${today}`,
@@ -1937,7 +1991,10 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       gameTime: p.gameTime,
       ev: p.ev,
       confidence: p.confidence,
+      grade: p.grade,
+      edge: p.edge,
       isUnderdog: p.odds >= 100,
+      reasoning: p.reasoning || "",
     })),
     totalDecimalOdds: Math.round(totalDecimalOdds * 100) / 100,
     americanOdds: americanOddsStr,
@@ -1946,6 +2003,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     potentialPayouts,
     selectionLogic: `${selectedLegs.length}-leg cross-sport parlay: underdogs + contrarian plays + alternative markets across ${uniqueSports.join(", ")}`,
     generatedAt: new Date().toISOString(),
+    earliestGame,
     disclaimer: "High-risk parlay for entertainment purposes. Bet responsibly. Past results do not predict future outcomes.",
   };
 }
