@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Switch, Route, Link, useLocation } from "wouter";
+import { Switch, Route, Link, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -66,6 +66,7 @@ const WatchlistPage = lazy(() => import("@/pages/watchlist"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
+const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -200,20 +201,22 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
   );
 }
 
-function OnboardingGuard({ children }: { children: React.ReactNode }) {
+function OnboardingGuard({ children, isAdmin }: { children: React.ReactNode; isAdmin?: boolean }) {
   const [location, setLocation] = useLocation();
   const { data: onboardingData } = useQuery<{ onboardingCompleted: boolean }>({
     queryKey: ['/api/user/onboarding'],
     staleTime: 1000 * 60 * 5,
     retry: false,
+    enabled: !isAdmin,
   });
 
   useEffect(() => {
-    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help'];
+    if (isAdmin) return;
+    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record'];
     if (onboardingData && !onboardingData.onboardingCompleted && !skipPaths.includes(location)) {
       setLocation('/onboarding');
     }
-  }, [onboardingData, location, setLocation]);
+  }, [onboardingData, location, setLocation, isAdmin]);
 
   return <>{children}</>;
 }
@@ -221,7 +224,7 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
 function Router({ authState }: { authState: AuthState }) {
   return (
     <ErrorBoundary>
-    <OnboardingGuard>
+    <OnboardingGuard isAdmin={authState.isAdmin}>
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
@@ -263,6 +266,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/platform-intelligence" component={PlatformIntelligencePage} />
         <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
+        <Route path="/verify-email" component={VerifyEmail} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -274,6 +278,7 @@ function Router({ authState }: { authState: AuthState }) {
 interface AuthState {
   isAdmin?: boolean;
   username?: string;
+  emailVerified?: boolean;
 }
 
 interface NavItem {
@@ -857,11 +862,11 @@ function AppContent() {
   const [authState, setAuthState] = useState<AuthState>({});
   const [location, setLocation] = useLocation();
 
-  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string; tier?: string }>({
+  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string; tier?: string; emailVerified?: boolean }>({
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email',
   });
 
   useUTMCapture();
@@ -872,7 +877,8 @@ function AppContent() {
       if (authData?.authenticated) {
         setAuthState({
           isAdmin: authData.isAdmin,
-          username: authData.username
+          username: authData.username,
+          emailVerified: authData.emailVerified
         });
       }
     }
@@ -915,6 +921,14 @@ function AppContent() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  if (location === '/verify-email') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <VerifyEmail />
+      </Suspense>
+    );
+  }
+
   if (isLoading || isAuthenticated === null) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -928,6 +942,14 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <LandingPage />;
+  }
+
+  const emailVerified = authState.emailVerified ?? true;
+  if (!emailVerified && !authState.isAdmin && location !== '/verify-email') {
+    const exemptPaths = ['/legal', '/help', '/changelog', '/pricing'];
+    if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
+      return <Redirect to="/verify-email" />;
+    }
   }
 
   if (!authState.isAdmin) {

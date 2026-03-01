@@ -166,15 +166,16 @@ const momentumState: Record<string, { velocity: number; direction: number; conse
 export async function initializeModelWeights(): Promise<void> {
   try {
     for (const factor of LEARNING_FACTORS) {
-      const existing = await db.select().from(modelWeights).where(eq(modelWeights.factorName, factor)).limit(1);
+      const existing = await db.select().from(modelWeights).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all"))).limit(1);
       if (existing.length === 0) {
         await db.insert(modelWeights).values({
           factorName: factor,
+          marketType: "all",
           weight: 1.0,
           totalPredictions: 0,
           correctPredictions: 0,
           accuracy: 0.5,
-        });
+        } as any);
       }
     }
 
@@ -321,7 +322,7 @@ export async function recalibrateWeights(): Promise<{
       correctPredictions: 0,
       accuracy: 0.5,
       lastUpdated: new Date(),
-    }).where(eq(modelWeights.factorName, factor));
+    }).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all")));
 
     weightsReset++;
     if (hasPrior) priorsApplied++;
@@ -399,14 +400,28 @@ async function analyzeAndAdjustWeights(): Promise<{
     const activeFaktors = extractFactorNamesFromPrediction(pred);
     const useAllFactors = activeFaktors.size === 0;
 
+    // CLV-gated multiplier
+    let clvMultiplier = 0.5; // neutral fallback
+    const legs = Array.isArray(pred.legs) ? (pred.legs as any[]) : JSON.parse((pred.legs as string) || "[]");
+    const clvResult = legs[0]?.clvResult; // Use the first leg's CLV if available
+
+    if (clvResult !== undefined && clvResult !== null) {
+      const isCLVPlus = clvResult > 30;
+      if (isCLVPlus && isWin) clvMultiplier = 1.0; // strong
+      else if (isCLVPlus && !isWin) clvMultiplier = 0.4; // pure_signal
+      else if (!isCLVPlus && isWin) clvMultiplier = -0.2; // noise
+      else if (!isCLVPlus && !isWin) clvMultiplier = -0.8; // true_miss
+    }
+
     for (const factor of LEARNING_FACTORS) {
       if (!useAllFactors && !activeFaktors.has(factor)) continue;
+      const factorWeight = combinedWeight * clvMultiplier;
       if (isWin) {
-        factorPerformance[factor].wins += combinedWeight;
+        factorPerformance[factor].wins += factorWeight;
       } else if (pred.actualResult === "lost") {
-        factorPerformance[factor].losses += combinedWeight;
+        factorPerformance[factor].losses += factorWeight;
       }
-      factorPerformance[factor].confidenceSum += combinedWeight;
+      factorPerformance[factor].confidenceSum += factorWeight;
     }
   }
 
@@ -417,55 +432,88 @@ async function analyzeAndAdjustWeights(): Promise<{
   let topAccuracy = 0;
   let bottomAccuracy = 1;
 
-  for (const [factor, perf] of Object.entries(factorPerformance)) {
-    const total = perf.wins + perf.losses;
-    if (total < 5) continue;
+  for (let i = 0; i < settledPredictions.length; i++) {
+    const pred = settledPredictions[i];
+    const legs = Array.isArray(pred.legs) ? (pred.legs as any[]) : JSON.parse((pred.legs as string) || "[]");
+    const marketType = legs[0]?.market || "all";
 
-    const factorAccuracy = perf.wins / total;
-    
-    if (factorAccuracy > topAccuracy) {
-      topAccuracy = factorAccuracy;
-      topFactor = factor;
+    for (const [factor, perf] of Object.entries(factorPerformance)) {
+      const total = perf.wins + perf.losses;
+      if (total < 5) continue;
+
+      const factorAccuracy = perf.wins / total;
+
+      if (factorAccuracy > topAccuracy) {
+        topAccuracy = factorAccuracy;
+        topFactor = factor;
+      }
+      if (factorAccuracy < bottomAccuracy) {
+        bottomAccuracy = factorAccuracy;
+        bottomFactor = factor;
+      }
+
+      // Fetch market-specific weight
+      let [currentWeight] = await db.select().from(modelWeights)
+        .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)))
+        .limit(1);
+
+      // Fallback to 'all' weights if market-specific sample size < 30
+      if (!currentWeight || currentWeight.totalPredictions < 30) {
+        [currentWeight] = await db.select().from(modelWeights)
+          .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all")))
+          .limit(1);
+      }
+
+      if (!currentWeight) continue;
+
+      const performanceDiff = factorAccuracy - 0.5;
+
+      if (!momentumState[`${factor}_${marketType}`]) {
+        momentumState[`${factor}_${marketType}`] = { velocity: 0, direction: 0, consecutiveGains: 0 };
+      }
+      const momentum = momentumState[`${factor}_${marketType}`];
+
+      const currentDirection = Math.sign(performanceDiff);
+      if (currentDirection === momentum.direction && currentDirection !== 0) {
+        momentum.consecutiveGains++;
+      } else {
+        momentum.consecutiveGains = 0;
+      }
+      momentum.direction = currentDirection;
+
+      const momentumMultiplier = 1 + Math.min(0.5, momentum.consecutiveGains * 0.1);
+      momentum.velocity = MOMENTUM_DECAY * momentum.velocity + performanceDiff * LEARNING_RATE;
+      const adjustment = momentum.velocity * momentumMultiplier;
+
+      const decayedWeight = currentWeight.weight * (1 - WEIGHT_DECAY_RATE);
+      const newWeight = Math.max(0.1, Math.min(2.5, decayedWeight + adjustment));
+
+      // Update or Insert market-specific weight
+      const existingMarketWeight = await db.select().from(modelWeights)
+        .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)))
+        .limit(1);
+
+      if (existingMarketWeight.length > 0) {
+        await db.update(modelWeights).set({
+          weight: newWeight,
+          totalPredictions: currentWeight.totalPredictions + Math.round(total),
+          correctPredictions: currentWeight.correctPredictions + Math.round(perf.wins),
+          accuracy: factorAccuracy,
+          lastUpdated: new Date(),
+        }).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)));
+      } else {
+        await db.insert(modelWeights).values({
+          factorName: factor,
+          marketType: marketType,
+          weight: newWeight,
+          totalPredictions: Math.round(total),
+          correctPredictions: Math.round(perf.wins),
+          accuracy: factorAccuracy,
+        } as any);
+      }
+
+      weightsAdjusted++;
     }
-    if (factorAccuracy < bottomAccuracy) {
-      bottomAccuracy = factorAccuracy;
-      bottomFactor = factor;
-    }
-
-    const [currentWeight] = await db.select().from(modelWeights).where(eq(modelWeights.factorName, factor)).limit(1);
-    if (!currentWeight) continue;
-
-    const performanceDiff = factorAccuracy - 0.5;
-
-    if (!momentumState[factor]) {
-      momentumState[factor] = { velocity: 0, direction: 0, consecutiveGains: 0 };
-    }
-    const momentum = momentumState[factor];
-
-    const currentDirection = Math.sign(performanceDiff);
-    if (currentDirection === momentum.direction && currentDirection !== 0) {
-      momentum.consecutiveGains++;
-    } else {
-      momentum.consecutiveGains = 0;
-    }
-    momentum.direction = currentDirection;
-
-    const momentumMultiplier = 1 + Math.min(0.5, momentum.consecutiveGains * 0.1);
-    momentum.velocity = MOMENTUM_DECAY * momentum.velocity + performanceDiff * LEARNING_RATE;
-    const adjustment = momentum.velocity * momentumMultiplier;
-
-    const decayedWeight = currentWeight.weight * (1 - WEIGHT_DECAY_RATE);
-    const newWeight = Math.max(0.1, Math.min(2.5, decayedWeight + adjustment));
-
-    await db.update(modelWeights).set({
-      weight: newWeight,
-      totalPredictions: currentWeight.totalPredictions + Math.round(total),
-      correctPredictions: currentWeight.correctPredictions + Math.round(perf.wins),
-      accuracy: factorAccuracy,
-      lastUpdated: new Date(),
-    }).where(eq(modelWeights.factorName, factor));
-
-    weightsAdjusted++;
   }
 
   return {

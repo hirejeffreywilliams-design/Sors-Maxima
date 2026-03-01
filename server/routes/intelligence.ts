@@ -6,6 +6,7 @@ import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getP
 import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
+import { getPickAccuracyStats, getBacktestCount } from "../pickOutcomeTracker";
 import {
   getFullIntelligenceReport,
   getTeamTrends,
@@ -106,7 +107,7 @@ export function registerIntelligenceRoutes(app: Express): void {
         riskLevel,
         generatedAt: new Date().toISOString(),
         engineSources: [
-          "Quantum Fusion (46 factors)",
+          "46-Factor Model Analysis",
           "Monte Carlo Simulations",
           "Situational Analysis",
           "Injury Impact",
@@ -138,7 +139,7 @@ export function registerIntelligenceRoutes(app: Express): void {
         sports,
         generatedAt: new Date().toISOString(),
         engineSources: [
-          "Quantum Fusion (46 factors)",
+          "46-Factor Model Analysis",
           "Monte Carlo Simulations",
           "Situational Analysis",
           "Injury Impact",
@@ -354,6 +355,40 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getPlatformEngineStatus());
   });
 
+  app.get("/api/model-health", (_req: Request, res: Response) => {
+    try {
+      const stats = getPickAccuracyStats();
+      const settledCount = stats.overall.total;
+      const winRate = stats.overall.rate;
+      const recentTrend = stats.recentForm.rate;
+      const backtestCount = getBacktestCount();
+      const liveCount = settledCount - backtestCount;
+
+      let status: 'building' | 'calibrated' | 'recalibrating' = 'building';
+      if (settledCount >= 100) {
+        if (winRate >= 48 && winRate <= 60) {
+          status = 'calibrated';
+        } else {
+          status = 'recalibrating';
+        }
+      }
+
+      return res.json({
+        status,
+        settledCount,
+        winRate,
+        recentTrend,
+        lastUpdated: stats.lastUpdated,
+        backtestCount,
+        liveCount,
+        factorCount: 57
+      });
+    } catch (err) {
+      console.error("Model health error:", err);
+      return res.status(500).json({ error: "Failed to get model health" });
+    }
+  });
+
   app.get("/api/sports/in-season", (_req: Request, res: Response) => {
     return res.json(getInSeasonSports());
   });
@@ -524,8 +559,14 @@ export function registerIntelligenceRoutes(app: Express): void {
   app.get("/api/track-record", async (_req: Request, res: Response) => {
     try {
       const { getTrackRecord } = await import("../calibrationEngine");
+      const { getRecentPicks } = await import("../pickOutcomeTracker");
       const record = getTrackRecord();
-      res.json(record);
+      
+      const settledPicks = getRecentPicks({ status: "settled", limit: 5000 });
+      const backtestPickCount = settledPicks.filter(p => p.isBacktest).length;
+      const livePickCount = settledPicks.length - backtestPickCount;
+      
+      res.json({ ...record, backtestPickCount, livePickCount });
     } catch (err: any) {
       console.error("[track-record] Error:", err.message);
       res.status(500).json({ error: "Failed to load track record" });
@@ -540,6 +581,40 @@ export function registerIntelligenceRoutes(app: Express): void {
       res.json(record);
     } catch (err: any) {
       res.status(500).json({ error: "Failed to refresh track record" });
+    }
+  });
+
+  app.get("/api/model-health", async (_req: Request, res: Response) => {
+    try {
+      const stats = getPickAccuracyStats();
+      const settledCount = stats.overall.total;
+      const winRate = stats.overall.rate;
+      const recentTrend = stats.recentForm.rate;
+      const backtestCount = getBacktestCount();
+      const liveCount = settledCount - backtestCount;
+
+      let status: 'building' | 'calibrated' | 'recalibrating' = 'building';
+      if (settledCount >= 100) {
+        if (winRate >= 48 && winRate <= 60) {
+          status = 'calibrated';
+        } else {
+          status = 'recalibrating';
+        }
+      }
+
+      res.json({
+        status,
+        settledCount,
+        winRate,
+        recentTrend,
+        lastUpdated: stats.lastUpdated,
+        backtestCount,
+        liveCount,
+        factorCount: 57
+      });
+    } catch (err: any) {
+      console.error("Model health error:", err);
+      res.status(500).json({ error: "Failed to fetch model health" });
     }
   });
 }

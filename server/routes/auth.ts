@@ -4,6 +4,8 @@ import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice,
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
 import { stripeService } from "../stripeService";
+import { generateAndStoreCode, validateCode, markEmailVerified, getEmailVerifiedStatus } from "../emailVerification";
+import { sendVerificationEmail } from "../emailService";
 
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
@@ -42,9 +44,15 @@ export function registerAuthRoutes(app: Express): void {
         });
       }
 
+      const userIdStr = String(result.userId);
+      const code = generateAndStoreCode(userIdStr, email);
+      sendVerificationEmail(email, username, code).catch(err => {
+        console.error("Failed to send verification email on registration:", err);
+      });
+
       req.session.isAuthenticated = true;
       req.session.username = username;
-      req.session.userId = String(result.userId);
+      req.session.userId = userIdStr;
       req.session.isAdmin = false;
       req.session.role = 'user';
 
@@ -57,6 +65,90 @@ export function registerAuthRoutes(app: Express): void {
     } catch (err) {
       console.error("Registration error:", err);
       return res.status(500).json({ error: "Registration failed" });
+    }
+  });
+
+  app.post("/api/auth/verify-email", async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      if (userId === "admin") {
+        return res.status(400).json({ error: "Admin account does not require email verification" });
+      }
+
+      const { code } = req.body;
+      if (!code) {
+        return res.status(400).json({ error: "Verification code is required" });
+      }
+
+      const isValid = validateCode(userId, code);
+      if (!isValid) {
+        return res.status(400).json({ error: "Invalid or expired code" });
+      }
+
+      await markEmailVerified(Number(userId));
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("Email verification error:", err);
+      return res.status(500).json({ error: "Verification failed" });
+    }
+  });
+
+  const lastVerificationSent = new Map<string, number>();
+
+  app.post("/api/auth/resend-verification", async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      if (userId === "admin") {
+        return res.status(400).json({ error: "Admin account does not require email verification" });
+      }
+
+      const now = Date.now();
+      const lastSent = lastVerificationSent.get(userId) || 0;
+      const cooldown = 60 * 1000;
+      if (now - lastSent < cooldown) {
+        const remaining = Math.ceil((cooldown - (now - lastSent)) / 1000);
+        return res.status(429).json({ error: `Please wait ${remaining} seconds before requesting a new code` });
+      }
+
+      const user = await getUserById(Number(userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      const code = generateAndStoreCode(userId, user.email);
+      await sendVerificationEmail(user.email, user.username, code);
+      lastVerificationSent.set(userId, now);
+
+      return res.json({ success: true, cooldownSeconds: 60 });
+    } catch (err) {
+      console.error("Resend verification error:", err);
+      return res.status(500).json({ error: "Failed to resend verification code" });
+    }
+  });
+
+  app.get("/api/auth/verification-status", async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      if (userId === "admin") {
+        return res.json({ email: "admin@sorsmaxima.com" });
+      }
+      const user = await getUserById(Number(userId));
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      return res.json({ email: user.email });
+    } catch (err) {
+      console.error("Verification status error:", err);
+      return res.status(500).json({ error: "Failed to get status" });
     }
   });
 
@@ -255,12 +347,16 @@ export function registerAuthRoutes(app: Express): void {
     res.set('Pragma', 'no-cache');
     if (req.session?.isAuthenticated) {
       const isAdmin = req.session.isAdmin || false;
+      const userId = req.session.userId;
       let tier = 'free';
+      let emailVerified = true;
+
       if (isAdmin) {
         tier = 'whale';
-      } else if (req.session.username) {
+      } else if (req.session.username && userId) {
         const sub = await stripeService.getUserSubscription(req.session.username).catch(() => null);
         tier = sub?.subscriptionTier || 'free';
+        emailVerified = await getEmailVerifiedStatus(Number(userId)).catch(() => false);
       }
       return res.json({ 
         authenticated: true, 
@@ -268,6 +364,7 @@ export function registerAuthRoutes(app: Express): void {
         isAdmin,
         role: req.session.role || 'user',
         tier,
+        emailVerified,
       });
     }
 
@@ -285,7 +382,7 @@ export function registerAuthRoutes(app: Express): void {
           req.session.userId = 'admin';
           req.session.isAdmin = true;
           req.session.role = 'admin';
-          return res.json({ authenticated: true, username: ADMIN_USERNAME, isAdmin: true, role: 'admin', tier: 'whale' });
+          return res.json({ authenticated: true, username: ADMIN_USERNAME, isAdmin: true, role: 'admin', tier: 'whale', emailVerified: true });
         }
 
         try {
@@ -310,6 +407,7 @@ export function registerAuthRoutes(app: Express): void {
 
             const sub = await stripeService.getUserSubscription(user.username).catch(() => null);
             const tier = user.isAdmin ? 'whale' : (sub?.subscriptionTier || 'free');
+            const emailVerified = (user as any).emailVerified ?? false;
 
             return res.json({
               authenticated: true,
@@ -317,6 +415,7 @@ export function registerAuthRoutes(app: Express): void {
               isAdmin: user.isAdmin,
               role: user.isAdmin ? 'admin' : 'user',
               tier,
+              emailVerified,
             });
           }
         } catch (err) {

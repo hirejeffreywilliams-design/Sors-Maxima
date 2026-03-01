@@ -28,6 +28,7 @@ export interface TrackedPick {
   homeScore?: number;
   awayScore?: number;
   settledAt?: string;
+  isBacktest?: boolean;
 }
 
 export interface PickAccuracyStats {
@@ -293,6 +294,47 @@ export function savePrecomputedPicks(picks: Array<{
   }
 }
 
+export function saveBacktestPicks(picks: TrackedPick[]): number {
+  try {
+    const data = getData();
+    const existingIds = new Set([
+      ...data.pending.map(p => p.id),
+      ...data.settled.map(p => p.id),
+    ]);
+
+    let added = 0;
+    const now = new Date().toISOString();
+
+    for (const pick of picks) {
+      if (existingIds.has(pick.id)) continue;
+
+      const tracked: TrackedPick = {
+        ...pick,
+        savedAt: pick.savedAt || now,
+        settledAt: pick.settledAt || now,
+        isBacktest: true,
+      };
+
+      data.settled.push(tracked);
+      existingIds.add(pick.id);
+      added++;
+    }
+
+    if (data.settled.length > MAX_SETTLED) {
+      data.settled = data.settled.slice(-MAX_SETTLED);
+    }
+
+    if (added > 0) {
+      recomputeStats(data);
+      saveData(data);
+    }
+    return added;
+  } catch (err) {
+    console.error("[PickTracker] saveBacktestPicks error:", err);
+    return 0;
+  }
+}
+
 export function settlePicksForGame(params: {
   gameId: string;
   homeTeam: string;
@@ -358,6 +400,11 @@ export function settlePicksForGame(params: {
 export function getPickAccuracyStats(): PickAccuracyStats {
   const data = getData();
   return data.stats;
+}
+
+export function getBacktestCount(): number {
+  const data = getData();
+  return data.settled.filter(p => p.isBacktest).length;
 }
 
 export function getRecentPicks(options: {

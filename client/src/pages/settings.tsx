@@ -356,6 +356,7 @@ function DeviceManagement() {
 export default function Settings() {
   useSEO({ title: "Settings", description: "Customize your application preferences" });
   const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("security");
   const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
   const [newAlert, setNewAlert] = useState({ alertType: "daily_limit", threshold: 100 });
 
@@ -460,8 +461,25 @@ export default function Settings() {
           <p className="text-muted-foreground">Manage your account preferences and limits</p>
         </div>
 
-        <Tabs defaultValue="security">
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <div className="block md:hidden mb-4">
+            <Select value={activeTab} onValueChange={setActiveTab}>
+              <SelectTrigger data-testid="select-settings-tabs">
+                <SelectValue placeholder="Select tab" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="security">Security</SelectItem>
+                <SelectItem value="notifications">Alerts</SelectItem>
+                <SelectItem value="responsible">Limits</SelectItem>
+                <SelectItem value="privacy">Privacy</SelectItem>
+                <SelectItem value="devices">Devices</SelectItem>
+                <SelectItem value="backup">Backup</SelectItem>
+                <SelectItem value="referral">Referral</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="hidden md:flex overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 h-auto">
               <TabsTrigger value="security" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-security">
                 <KeyRound className="h-4 w-4 shrink-0" />

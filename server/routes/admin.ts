@@ -27,6 +27,7 @@ import { sportsDataService } from "../sportsDataService";
 import { getDeviceStats } from "../trustedDeviceService";
 import { getLearningStats, getAllFactorWeights, recalibrateWeights } from "../learningEngine";
 import { runHistoricalLearning, getHistoricalLearningStatus } from "../historicalLearningEngine";
+import { runBacktest } from "../backtestEngine";
 import {
   getDashboardOverview,
   getFunnelAnalysis,
@@ -596,6 +597,17 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
     } catch (err) {
       console.error("Subscription stats error:", err);
       res.status(500).json({ error: "Failed to get subscription stats" });
+    }
+  });
+
+  // === Backtest Manager ===
+  app.post("/api/admin/backtest/run", requireAdmin, async (req, res) => {
+    try {
+      const { sport, daysBack } = req.body;
+      const results = await runBacktest({ sport, daysBack: daysBack ? parseInt(daysBack) : undefined });
+      res.json({ success: true, results });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
     }
   });
 

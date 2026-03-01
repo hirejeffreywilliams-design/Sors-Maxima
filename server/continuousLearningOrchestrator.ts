@@ -6,6 +6,8 @@ import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
 import { recordGameOutcome } from "./platformIntelligenceEngine";
 import { settlePicksForGame } from "./pickOutcomeTracker";
 
+import { runCalibrationCheck } from "./calibrationEngine";
+
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
   NBA: "basketball/nba",
@@ -936,7 +938,7 @@ export function startContinuousLearningOrchestrator(): void {
     } catch (e: any) {
       addError("calibration", e.message);
     }
-  }, 30 * 60 * 1000);
+  }, 7 * 24 * 60 * 60 * 1000); // Changed to weekly
 
   setTimeout(async () => {
     try {

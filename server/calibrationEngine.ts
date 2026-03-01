@@ -253,6 +253,61 @@ export function computeCalibration(): TrackRecord {
   };
 }
 
+const calibrationCorrections = new Map<string, number>();
+
+export interface CalibrationReport {
+  tiers: {
+    label: string;
+    predicted: number;
+    actual: number;
+    gap: number;
+    correction: number;
+  }[];
+}
+
+export async function runCalibrationCheck(): Promise<CalibrationReport> {
+  const stats = computeCalibration();
+  const report: CalibrationReport = { tiers: [] };
+
+  for (const tier of stats.calibrationTiers) {
+    if (tier.settled < 10) continue;
+
+    const predicted = tier.modelAvgConfidence;
+    const actual = tier.actualWinRate || 0;
+    const gap = actual - predicted;
+
+    let correction = 1.0;
+    if (Math.abs(gap) > 10) {
+      console.warn(`[Calibration] ${tier.label} tier: predicted ${predicted}%, actual ${actual}%, gap ${gap}% — applying correction`);
+      // Simple correction: if actual is 40 and predicted is 60, gap is -20.
+      // We want to scale predicted towards actual.
+      correction = actual / predicted;
+    }
+    
+    calibrationCorrections.set(tier.label, correction);
+    report.tiers.push({
+      label: tier.label,
+      predicted,
+      actual,
+      gap,
+      correction
+    });
+  }
+
+  return report;
+}
+
+export function getCalibrationCorrection(confidence: number): number {
+  const tier = confidence >= 90 ? "90%+" :
+               confidence >= 80 ? "80–89%" :
+               confidence >= 70 ? "70–79%" :
+               confidence >= 60 ? "60–69%" :
+               confidence >= 50 ? "50–59%" : null;
+  
+  if (!tier) return 1.0;
+  return calibrationCorrections.get(tier) || 1.0;
+}
+
 let cached: { data: TrackRecord; ts: number } | null = null;
 const CACHE_TTL = 5 * 60 * 1000;
 
