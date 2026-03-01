@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { TrackedPick, saveBacktestPicks, getPickAccuracyStats } from "./pickOutcomeTracker";
+import { TrackedPick, saveBacktestPicks, getPickAccuracyStats, getBacktestCount } from "./pickOutcomeTracker";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -135,11 +135,11 @@ export async function runBacktest(options: { sport?: string; daysBack?: number }
 }
 
 export function initBacktestOnStartup() {
-  const stats = getPickAccuracyStats();
   const alreadyDone = fs.existsSync(LOCK_FILE);
+  const noBacktestData = getBacktestCount() === 0;
 
-  if (stats.overall.total < 150 && !alreadyDone) {
-    console.log("[Backtest] Less than 150 settled picks. Starting background backtest...");
+  if (noBacktestData && !alreadyDone) {
+    console.log("[Backtest] No backtest picks found. Starting background historical backtest...");
     setTimeout(async () => {
       try {
         await runBacktest();

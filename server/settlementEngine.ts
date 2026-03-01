@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { settlePicksForGame, getPickTrackerStatus, cleanupPickTracker } from "./pickOutcomeTracker";
 import { triggerManualSettlement } from "./continuousLearningOrchestrator";
 import { logInfo, logWarn } from "./errorLogger";
+import { broadcastEvent } from "./sseManager";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
@@ -210,6 +211,16 @@ async function settleUserPicksFromGames(games: CompletedGame[]): Promise<number>
               closing_odds = ${closingOdds}, clv_result = ${clvResult}
           WHERE id = ${pick.id}
         `);
+
+        broadcastEvent("picks-settled", {
+          username: pick.username,
+          pickId: pick.id,
+          pick: pick.pick,
+          sport: pick.sport,
+          won,
+          game: `${game.homeTeam} vs ${game.awayTeam}`,
+          score: `${game.homeScore}-${game.awayScore}`,
+        });
 
         (pick as any).settled = true;
         settled++;

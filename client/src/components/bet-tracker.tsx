@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useSSE } from "@/hooks/use-sse";
 import { 
   TrendingUp, TrendingDown, DollarSign, Target, 
   Calendar, PieChart, BarChart3, Clock, CheckCircle2, 
@@ -48,6 +49,17 @@ interface BetStats {
   byMonth: { period: string; roi: number; profit: number; bets: number }[];
 }
 
+interface ClvSummary {
+  totalPicks: number;
+  settledPicks: number;
+  wonPicks: number;
+  winRate: number;
+  picksWithClv: number;
+  clvPlusRate: number;
+  avgClv: number;
+  streak: { type: string; count: number };
+}
+
 export function BetTracker() {
   const { data: bets = [], isLoading: betsLoading } = useQuery<BetRecord[]>({
     queryKey: ["/api/user/bets"],
@@ -57,7 +69,30 @@ export function BetTracker() {
     queryKey: ["/api/user/bet-stats"],
   });
 
+  const { data: clvData } = useQuery<ClvSummary>({
+    queryKey: ["/api/user/picks/clv-summary"],
+    staleTime: 1000 * 60 * 2,
+  });
+
   const { toast } = useToast();
+
+  const handleSSEEvent = useCallback((event: any) => {
+    if (event.type === "picks-settled") {
+      queryClient.invalidateQueries({ queryKey: ["/api/user/bets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/bet-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/picks/clv-summary"] });
+      const d = event.data;
+      if (d?.won !== null && d?.won !== undefined) {
+        toast({
+          title: d.won ? `✓ Pick Won — ${d.sport}` : `✗ Pick Lost — ${d.sport}`,
+          description: `${d.pick} | ${d.game} (${d.score})`,
+          variant: d.won ? "default" : "destructive",
+        });
+      }
+    }
+  }, [toast]);
+
+  useSSE({ onEvent: handleSSEEvent });
 
   const addBetMutation = useMutation({
     mutationFn: async (bet: Partial<BetRecord>) => {
@@ -260,6 +295,45 @@ export function BetTracker() {
         </div>
 
         <TabsContent value="overview" className="mt-4 space-y-4">
+          {clvData && clvData.settledPicks > 0 && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-primary" />
+                  Closing Line Value (CLV) Performance
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <div className={`text-xl font-bold ${clvData.clvPlusRate >= 0.5 ? "text-green-500" : "text-red-500"}`}>
+                      {Math.round(clvData.clvPlusRate * 100)}%
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">CLV+ Rate</div>
+                    <div className="text-xs text-muted-foreground">({clvData.picksWithClv} picks)</div>
+                  </div>
+                  <div>
+                    <div className={`text-xl font-bold ${clvData.avgClv >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {clvData.avgClv >= 0 ? "+" : ""}{clvData.avgClv.toFixed(1)}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">Avg CLV (bps)</div>
+                    <div className="text-xs text-muted-foreground">vs closing line</div>
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-foreground">
+                      {clvData.streak.count > 0 ? `${clvData.streak.count}` : "—"}
+                      {clvData.streak.type === "clv+" ? <span className="text-xs text-green-500 ml-1">CLV+</span> : clvData.streak.type === "clv-" ? <span className="text-xs text-red-500 ml-1">CLV-</span> : null}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">Current Streak</div>
+                    <div className="text-xs text-muted-foreground">closing line</div>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3 text-center">
+                  CLV+ means you got better odds than the closing line — the true measure of long-term edge
+                </p>
+              </CardContent>
+            </Card>
+          )}
           {s.totalBets === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">

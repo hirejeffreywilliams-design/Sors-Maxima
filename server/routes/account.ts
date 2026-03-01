@@ -744,40 +744,183 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
-  // ==================== USER DATA ENGINE (Bet Tracking, Finance, Gamification) ====================
+  // ==================== USER DATA ENGINE (Finance & Gamification — in-memory) ====================
   const userDataEngine = await import("../userDataEngine");
 
-  app.get("/api/user/bets", (_req, res) => {
-    res.json(userDataEngine.getBets());
-  });
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  function rowToBetRecord(row: any) {
+    const stake = Number(row.stake) || 100;
+    const odds = Number(row.odds_at_pick) || -110;
+    const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+    const won = row.won;
+    const settled = row.settled;
+    const result: string = settled ? (won === null ? "push" : won ? "won" : "lost") : "pending";
+    const payout = won ? stake * decimal : 0;
+    const profit = settled ? (won === null ? 0 : won ? stake * (decimal - 1) : -stake) : 0;
+    const legs = Array.isArray(row.legs) && row.legs.length > 0
+      ? row.legs
+      : [{ team: row.pick, opponent: "", market: row.bet_type, selection: row.pick, odds, result }];
+    return { id: String(row.id), sport: row.sport || "unknown", date: row.placed_at, sportsbook: row.sportsbook || "Unknown", stake, result, payout, profit, legs, notes: row.notes || "" };
+  }
 
-  app.post("/api/user/bets", (req, res) => {
+  // ── Bet Tracking — backed by user_picks PostgreSQL ────────────────────────
+  app.get("/api/user/bets", requireAuth, async (req, res) => {
     try {
-      const bet = userDataEngine.addBet(req.body);
-      res.json(bet);
-    } catch (e: any) {
-      res.status(400).json({ error: e.message });
-    }
+      const username = req.session!.username;
+      if (!username) return res.json([]);
+      const result = await db.execute(sql`SELECT * FROM user_picks WHERE username = ${username} ORDER BY placed_at DESC LIMIT 200`);
+      res.json((result.rows as any[]).map(rowToBetRecord));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.patch("/api/user/bets/:id", (req, res) => {
-    const bet = userDataEngine.updateBet(req.params.id, req.body);
-    if (!bet) return res.status(404).json({ error: "Bet not found" });
-    res.json(bet);
+  app.post("/api/user/bets", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      if (!username) return res.status(401).json({ error: "Not authenticated" });
+      const { sport, team, opponent, market, stake, odds, sportsbook, notes, legs: legArr } = req.body;
+      const pick = team || "Unknown pick";
+      const betType = market || "moneyline";
+      const oddsNum = Number(odds) || -110;
+      const stakeNum = Number(stake) || 100;
+      const legsJson = legArr || [{ team, opponent, market, selection: team, odds: oddsNum, result: "pending" }];
+      const result = await db.execute(sql`
+        INSERT INTO user_picks (username, sport, game_id, pick, bet_type, odds_at_pick, stake, sportsbook, legs, notes)
+        VALUES (${username}, ${sport || "unknown"}, ${"manual"}, ${pick}, ${betType}, ${oddsNum}, ${stakeNum}, ${sportsbook || "Unknown"}, ${JSON.stringify(legsJson)}, ${notes || null})
+        RETURNING *
+      `);
+      res.json(rowToBetRecord(result.rows[0]));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.delete("/api/user/bets/:id", (req, res) => {
-    const deleted = userDataEngine.deleteBet(req.params.id);
-    if (!deleted) return res.status(404).json({ error: "Bet not found" });
-    res.json({ success: true });
+  app.patch("/api/user/bets/:id", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const id = Number(req.params.id);
+      const { notes, sportsbook, stake } = req.body;
+      const result = await db.execute(sql`
+        UPDATE user_picks SET
+          notes = COALESCE(${notes ?? null}, notes),
+          sportsbook = COALESCE(${sportsbook ?? null}, sportsbook),
+          stake = COALESCE(${stake != null ? Number(stake) : null}, stake)
+        WHERE id = ${id} AND username = ${username}
+        RETURNING *
+      `);
+      if (!result.rows.length) return res.status(404).json({ error: "Bet not found" });
+      res.json(rowToBetRecord(result.rows[0]));
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.get("/api/user/bet-stats", (_req, res) => {
-    res.json(userDataEngine.getBetStats());
+  app.delete("/api/user/bets/:id", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      const id = Number(req.params.id);
+      const result = await db.execute(sql`DELETE FROM user_picks WHERE id = ${id} AND username = ${username} RETURNING id`);
+      if (!result.rows.length) return res.status(404).json({ error: "Bet not found" });
+      res.json({ success: true });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
-  app.get("/api/user/tax-summary", (_req, res) => {
-    res.json(userDataEngine.getTaxSummary());
+  app.get("/api/user/bet-stats", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      if (!username) return res.json({ totalBets: 0, resolvedBets: 0, pendingBets: 0, wins: 0, losses: 0, pushes: 0, winRate: 0, totalStaked: 0, totalProfit: 0, roi: 0, avgOdds: 0, bySport: [], byMarket: [], byMonth: [] });
+      const r = await db.execute(sql`SELECT * FROM user_picks WHERE username = ${username} ORDER BY placed_at DESC LIMIT 1000`);
+      const rows = r.rows as any[];
+      const settled = rows.filter(r => r.settled);
+      const wins = settled.filter(r => r.won === true);
+      const losses = settled.filter(r => r.won === false);
+      const pushes = settled.filter(r => r.won === null);
+      const totalStaked = rows.reduce((s, r) => s + (Number(r.stake) || 100), 0);
+      const totalProfit = settled.reduce((s, r) => {
+        const stake = Number(r.stake) || 100;
+        const odds = Number(r.odds_at_pick) || -110;
+        const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+        return s + (r.won === true ? stake * (decimal - 1) : r.won === false ? -stake : 0);
+      }, 0);
+      const avgOdds = rows.length > 0 ? rows.reduce((s, r) => s + (Number(r.odds_at_pick) || -110), 0) / rows.length : 0;
+
+      const bySportMap: Record<string, any> = {};
+      for (const row of settled) {
+        const sp = row.sport || "unknown";
+        if (!bySportMap[sp]) bySportMap[sp] = { sport: sp, bets: 0, wins: 0, profit: 0, staked: 0, roi: 0, winRate: 0 };
+        const s = bySportMap[sp];
+        const stake = Number(row.stake) || 100;
+        const odds = Number(row.odds_at_pick) || -110;
+        const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+        s.bets++; s.staked += stake;
+        if (row.won === true) { s.wins++; s.profit += stake * (decimal - 1); }
+        else if (row.won === false) { s.profit -= stake; }
+      }
+      for (const s of Object.values(bySportMap) as any[]) {
+        s.roi = s.staked > 0 ? Math.round((s.profit / s.staked) * 1000) / 10 : 0;
+        s.winRate = s.bets > 0 ? Math.round((s.wins / s.bets) * 1000) / 10 : 0;
+      }
+
+      const byMarketMap: Record<string, any> = {};
+      for (const row of settled) {
+        const mk = row.bet_type || "unknown";
+        if (!byMarketMap[mk]) byMarketMap[mk] = { market: mk, bets: 0, wins: 0, profit: 0, staked: 0, roi: 0, winRate: 0 };
+        const m = byMarketMap[mk];
+        const stake = Number(row.stake) || 100;
+        const odds = Number(row.odds_at_pick) || -110;
+        const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+        m.bets++; m.staked += stake;
+        if (row.won === true) { m.wins++; m.profit += stake * (decimal - 1); }
+        else if (row.won === false) { m.profit -= stake; }
+      }
+      for (const m of Object.values(byMarketMap) as any[]) {
+        m.roi = m.staked > 0 ? Math.round((m.profit / m.staked) * 1000) / 10 : 0;
+        m.winRate = m.bets > 0 ? Math.round((m.wins / m.bets) * 1000) / 10 : 0;
+      }
+
+      const byMonthMap: Record<string, any> = {};
+      for (const row of settled) {
+        const d = new Date(row.placed_at);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        if (!byMonthMap[key]) byMonthMap[key] = { period: key, roi: 0, profit: 0, bets: 0, staked: 0 };
+        const m = byMonthMap[key];
+        const stake = Number(row.stake) || 100;
+        const odds = Number(row.odds_at_pick) || -110;
+        const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+        m.bets++; m.staked += stake;
+        m.profit += row.won === true ? stake * (decimal - 1) : row.won === false ? -stake : 0;
+      }
+      for (const m of Object.values(byMonthMap) as any[]) {
+        m.roi = m.staked > 0 ? Math.round((m.profit / m.staked) * 1000) / 10 : 0;
+      }
+
+      res.json({
+        totalBets: rows.length, resolvedBets: settled.length, pendingBets: rows.length - settled.length,
+        wins: wins.length, losses: losses.length, pushes: pushes.length,
+        winRate: settled.length > 0 ? Math.round((wins.length / settled.length) * 1000) / 10 : 0,
+        totalStaked: Math.round(totalStaked * 100) / 100,
+        totalProfit: Math.round(totalProfit * 100) / 100,
+        roi: totalStaked > 0 ? Math.round((totalProfit / totalStaked) * 1000) / 10 : 0,
+        avgOdds: Math.round(avgOdds),
+        bySport: Object.values(bySportMap),
+        byMarket: Object.values(byMarketMap),
+        byMonth: Object.values(byMonthMap).sort((a: any, b: any) => a.period.localeCompare(b.period)),
+      });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.get("/api/user/tax-summary", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      if (!username) return res.json({ totalWinnings: 0, totalWagered: 0, netProfit: 0, taxableAmount: 0 });
+      const r = await db.execute(sql`SELECT * FROM user_picks WHERE username = ${username} AND settled = true`);
+      const rows = r.rows as any[];
+      let totalWinnings = 0, totalWagered = 0;
+      for (const row of rows) {
+        const stake = Number(row.stake) || 100;
+        const odds = Number(row.odds_at_pick) || -110;
+        const decimal = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
+        totalWagered += stake;
+        if (row.won === true) totalWinnings += stake * decimal;
+      }
+      const netProfit = totalWinnings - totalWagered;
+      res.json({ totalWinnings: Math.round(totalWinnings * 100) / 100, totalWagered: Math.round(totalWagered * 100) / 100, netProfit: Math.round(netProfit * 100) / 100, taxableAmount: Math.round(Math.max(0, netProfit) * 100) / 100 });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
   app.get("/api/user/sportsbooks", (_req, res) => {
@@ -795,8 +938,21 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     res.json(book);
   });
 
-  app.get("/api/user/achievements", (_req, res) => {
-    res.json(userDataEngine.getAchievements());
+  app.get("/api/user/achievements", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      if (!username) return res.json(userDataEngine.getAchievements());
+      const r = await db.execute(sql`SELECT COUNT(*) as total, SUM(CASE WHEN won = true THEN 1 ELSE 0 END) as wins, SUM(CASE WHEN won = false THEN 1 ELSE 0 END) as losses FROM user_picks WHERE username = ${username} AND settled = true`);
+      const stats = r.rows[0] as any;
+      const total = Number(stats?.total || 0);
+      const wins = Number(stats?.wins || 0);
+      const base = userDataEngine.getAchievements();
+      const enriched = base.map((a: any) => ({
+        ...a,
+        unlocked: a.id === "first_bet" ? total >= 1 : a.id === "winning_streak_3" ? wins >= 3 : a.id === "winning_streak_5" ? wins >= 5 : a.id === "sharp_bettor" ? (total >= 20 && wins / Math.max(total, 1) > 0.55) : a.unlocked,
+      }));
+      res.json(enriched);
+    } catch { res.json(userDataEngine.getAchievements()); }
   });
 
   app.get("/api/user/challenges", (_req, res) => {
@@ -808,8 +964,22 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     res.json({ success: true });
   });
 
-  app.get("/api/user/streak", (_req, res) => {
-    res.json(userDataEngine.getStreakData());
+  app.get("/api/user/streak", requireAuth, async (req, res) => {
+    try {
+      const username = req.session!.username;
+      if (!username) return res.json(userDataEngine.getStreakData());
+      const r = await db.execute(sql`SELECT won, placed_at FROM user_picks WHERE username = ${username} AND settled = true ORDER BY placed_at DESC LIMIT 50`);
+      const rows = r.rows as any[];
+      let currentStreak = 0, streakType: string = "none", longestWin = 0, longestLoss = 0, tempWin = 0, tempLoss = 0;
+      for (const row of rows) {
+        if (row.won === true) { tempWin++; tempLoss = 0; if (streakType === "none" || streakType === "win") { streakType = "win"; currentStreak = tempWin; } longestWin = Math.max(longestWin, tempWin); }
+        else if (row.won === false) { tempLoss++; tempWin = 0; if (streakType === "none" || streakType === "loss") { streakType = "loss"; currentStreak = tempLoss; } longestLoss = Math.max(longestLoss, tempLoss); }
+        else { break; }
+        if (streakType !== "none" && currentStreak > 0) break;
+      }
+      const base = userDataEngine.getStreakData();
+      res.json({ ...base, currentStreak, streakType, longestWin, longestLoss });
+    } catch { res.json(userDataEngine.getStreakData()); }
   });
 
   app.get("/api/user/personalized-insights", async (_req, res) => {
