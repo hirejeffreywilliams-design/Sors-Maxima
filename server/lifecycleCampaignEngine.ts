@@ -163,6 +163,8 @@ export function getCampaignStats() {
   const all = Array.from(campaigns.values());
   const active = all.filter((c) => c.status === "active");
   return {
+    isProjected: true,
+    dataNote: "Projected/planning figures — not derived from live user data",
     total: all.length,
     active: active.length,
     paused: all.filter((c) => c.status === "paused").length,

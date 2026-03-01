@@ -846,13 +846,13 @@ function seedBusinessConstraints() {
 function seedEvents() {
   const eventTypes = [
     { sourceFeature: "feat_recommendation_engine", targetFeature: "feat_risk_management___trading", eventType: "recommendation.generated", payload: { recommendationId: "rec_001", confidence: 0.82 } },
-    { sourceFeature: "feat_fraud___aml_detection", targetFeature: "feat_payments___wallet", eventType: "fraud.detected", payload: { userId: "user_1042", severity: "high" } },
-    { sourceFeature: "feat_responsible_gambling", targetFeature: "broadcast", eventType: "intervention.triggered", payload: { userId: "user_1087", intervention: "cool_down", duration: "2h" } },
-    { sourceFeature: "feat_user_account___kyc", targetFeature: "broadcast", eventType: "kyc.verified", payload: { userId: "user_1099", level: "enhanced" } },
+    { sourceFeature: "feat_fraud___aml_detection", targetFeature: "feat_payments___wallet", eventType: "fraud.detected", payload: { userId: "usr_example", severity: "high" } },
+    { sourceFeature: "feat_responsible_gambling", targetFeature: "broadcast", eventType: "intervention.triggered", payload: { userId: "usr_example", intervention: "cool_down", duration: "2h" } },
+    { sourceFeature: "feat_user_account___kyc", targetFeature: "broadcast", eventType: "kyc.verified", payload: { userId: "usr_example", level: "enhanced" } },
     { sourceFeature: "feat_pricing___margin_manager", targetFeature: "feat_risk_management___trading", eventType: "odds.published", payload: { marketId: "mkt_nba_001", overround: 1.058 } },
-    { sourceFeature: "feat_payments___wallet", targetFeature: "feat_fraud___aml_detection", eventType: "deposit.completed", payload: { userId: "user_1023", amount: 5000 } },
+    { sourceFeature: "feat_payments___wallet", targetFeature: "feat_fraud___aml_detection", eventType: "deposit.completed", payload: { userId: "usr_example", amount: 5000 } },
     { sourceFeature: "feat_risk_management___trading", targetFeature: "feat_notifications___ux_orchestrator", eventType: "exposure.warning", payload: { marketId: "mkt_nfl_003", utilization: 0.87 } },
-    { sourceFeature: "feat_recommendation_engine", targetFeature: "feat_responsible_gambling", eventType: "recommendation.auto_send_check", payload: { userId: "user_1005", confidenceScore: 0.78 } },
+    { sourceFeature: "feat_recommendation_engine", targetFeature: "feat_responsible_gambling", eventType: "recommendation.auto_send_check", payload: { userId: "usr_example", confidenceScore: 0.78 } },
   ];
 
   for (const evt of eventTypes) {

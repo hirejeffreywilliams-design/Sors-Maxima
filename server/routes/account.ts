@@ -1132,7 +1132,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   `);
 
   app.get("/api/user/ticket-history", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId || "0");
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     try {
       const result = await db.execute(sql`
@@ -1151,7 +1151,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.post("/api/user/ticket-history", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId || "0");
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     try {
       const { ticketId, name, sport, legs, totalOdds, americanOdds, recommendedStake, potentialPayout, grade } = req.body;
@@ -1171,7 +1171,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.patch("/api/user/ticket-history/:id", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId || "0");
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const ticketDbId = parseInt(req.params.id);
     if (!Number.isFinite(ticketDbId)) return res.status(400).json({ error: "Invalid ticket ID" });
@@ -1195,7 +1195,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.delete("/api/user/ticket-history/:id", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId || "0");
+    const userId = numericUserId(req);
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const ticketDbId = parseInt(req.params.id);
     if (!Number.isFinite(ticketDbId)) return res.status(400).json({ error: "Invalid ticket ID" });

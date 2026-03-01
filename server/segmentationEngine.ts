@@ -191,6 +191,8 @@ export function getSegmentationStats() {
   const allRules = Array.from(rules.values());
   const activeSegs = allSegs.filter((s) => s.isActive);
   return {
+    isProjected: true,
+    dataNote: "Projected/planning figures — not derived from live user data",
     totalSegments: allSegs.length,
     activeSegments: activeSegs.length,
     totalUsers: activeSegs.reduce((s, seg) => s + seg.actualSize, 0),

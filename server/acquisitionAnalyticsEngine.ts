@@ -106,6 +106,8 @@ export function getAcquisitionDashboard() {
   const totalDeposits = channels.reduce((s, c) => s + c.deposits, 0);
 
   return {
+    isProjected: true,
+    dataNote: "Projected/planning figures — not derived from live user data",
     summary: {
       totalSpend,
       totalRevenue,

@@ -238,9 +238,6 @@ export function getCopyBettors(sessionId?: string): (SocialBettor & { recentPick
   return socialBettors.slice(0, 5).map(b => ({
     ...b,
     isFollowing: following.has(b.id),
-    recentPicks: [
-      { sport: "NBA", selection: "Lakers ML", odds: -150, result: "won" },
-      { sport: "NFL", selection: "Chiefs -3.5", odds: -110, result: "pending" },
-    ],
+    recentPicks: [],
   }));
 }
