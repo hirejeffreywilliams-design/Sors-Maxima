@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -1111,22 +1112,47 @@ function formatOddsLC(american: number): string {
   return american > 0 ? `+${american.toLocaleString()}` : american.toLocaleString();
 }
 
+const LC_STAKE_PRESETS = [0.25, 1, 5, 10, 25, 50, 100];
+
+function formatLCPayout(payout: number): string {
+  if (payout >= 1_000_000) return `$${(payout / 1_000_000).toFixed(2)}M`;
+  if (payout >= 1_000) return `$${(payout / 1_000).toFixed(1)}K`;
+  return `$${payout.toFixed(2)}`;
+}
+
+function formatLCStake(v: number): string {
+  return v < 1 ? `$${v.toFixed(2)}` : `$${v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)}`;
+}
+
 function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
-  const { data, isLoading } = useQuery<{ ticket: LifeChangerTicket | null; message?: string }>({
+  const { data, isLoading, dataUpdatedAt } = useQuery<{ ticket: LifeChangerTicket | null; message?: string }>({
     queryKey: ["/api/life-changer-ticket"],
     refetchInterval: 300000,
+    staleTime: 60000,
   });
 
   const ticket = data?.ticket ?? null;
   const [expanded, setExpanded] = useState(false);
   const [addedAll, setAddedAll] = useState(false);
+  const [stake, setStake] = useState(10);
+
+  // Reset addedAll when ticket refreshes
+  useEffect(() => { setAddedAll(false); }, [dataUpdatedAt]);
+
+  const payout = useMemo(() => ticket ? stake * ticket.totalDecimalOdds : 0, [stake, ticket]);
+  const payoutFormatted = useMemo(() => formatLCPayout(payout), [payout]);
+
+  // Stable leg ID based on sport + game name + bet type
+  function legId(leg: LifeChangerLeg) {
+    return `lc-${leg.sport}-${leg.game.replace(/\s/g, "_")}-${leg.betType}`;
+  }
 
   function handleAddAll() {
     if (!ticket) return;
     let added = 0;
     ticket.legs.forEach(leg => {
       const ok = addLeg({
-        id: `lc-${leg.sport}-${leg.game}-${leg.betType}`,
+        id: legId(leg),
         label: leg.pick,
         odds: leg.americanOdds,
         sport: leg.sport,
@@ -1138,11 +1164,13 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
     if (added > 0) setAddedAll(true);
   }
 
+  const allInSlip = ticket ? ticket.legs.every(l => legs.some(s => s.id === legId(l))) : false;
+
   return (
     <section data-testid="section-life-changer" className="relative">
-      <div
-        className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-background to-amber-900/10 overflow-hidden shadow-lg"
-      >
+      <div className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-background to-amber-900/10 overflow-hidden shadow-lg">
+
+        {/* Header */}
         <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="p-2 rounded-lg bg-amber-500/15 shrink-0">
@@ -1151,12 +1179,10 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-bold text-amber-300 leading-tight">Life Changer</h2>
-                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">
-                  Daily Ticket
-                </Badge>
+                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">Daily Ticket</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                Unorthodox multi-sport underdog parlay — the kind of ticket that changes everything
+                Cross-sport underdog parlay — unorthodox picks across multiple sports
               </p>
             </div>
           </div>
@@ -1165,15 +1191,15 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
               <p className="text-2xl font-black text-amber-300 leading-none tabular-nums" data-testid="text-life-changer-odds">
                 {ticket.americanOdds}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.legCount} legs · {ticket.sports.length} sports</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.legCount} legs · {ticket.sports.join(", ")}</p>
             </div>
           )}
         </div>
 
         {isLoading && (
           <div className="px-4 pb-4 space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-14 w-full" />
+            <Skeleton className="h-8 w-full" />
           </div>
         )}
 
@@ -1188,17 +1214,67 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
 
         {ticket && (
           <>
-            <div className="px-4 pb-3">
-              <div className="grid grid-cols-4 gap-2">
-                {ticket.potentialPayouts.map(p => (
-                  <div key={p.stake} className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-center">
-                    <p className="text-[10px] text-amber-300/70">${p.stake} bet</p>
-                    <p className="text-sm font-bold text-amber-300 tabular-nums" data-testid={`text-lc-payout-${p.stake}`}>{p.formatted}</p>
-                  </div>
+            {/* Stake slider + payout display */}
+            <div className="px-4 pb-4 space-y-3 border-t border-amber-500/20 pt-3">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Your stake</p>
+                <p className="text-xs text-muted-foreground">Slide or tap a preset</p>
+              </div>
+
+              {/* Preset buttons */}
+              <div className="flex gap-1.5 flex-wrap">
+                {LC_STAKE_PRESETS.map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setStake(p)}
+                    className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors border ${
+                      stake === p
+                        ? "bg-amber-500 text-black border-amber-500"
+                        : "bg-amber-500/10 text-amber-300 border-amber-500/30 hover:bg-amber-500/20"
+                    }`}
+                    data-testid={`button-lc-preset-${p}`}
+                  >
+                    {formatLCStake(p)}
+                  </button>
                 ))}
+              </div>
+
+              {/* Slider */}
+              <div className="space-y-1.5">
+                <Slider
+                  value={[stake]}
+                  onValueChange={([v]) => setStake(v)}
+                  min={0.25}
+                  max={100}
+                  step={0.25}
+                  className="w-full [&_[role=slider]]:bg-amber-400 [&_[role=slider]]:border-amber-500 [&_.bg-primary]:bg-amber-500"
+                  data-testid="slider-lc-stake"
+                />
+                <div className="flex justify-between text-[9px] text-muted-foreground">
+                  <span>$0.25</span>
+                  <span className="font-semibold text-amber-300 text-sm tabular-nums">{formatLCStake(stake)}</span>
+                  <span>$100</span>
+                </div>
+              </div>
+
+              {/* Payout display */}
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/25 p-3 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] text-amber-300/70 uppercase tracking-wide">If all {ticket.legCount} legs hit</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {formatLCStake(stake)} × {ticket.totalDecimalOdds.toFixed(1)}x odds
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-black text-amber-300 tabular-nums leading-none" data-testid="text-lc-payout-live">
+                    {payoutFormatted}
+                  </p>
+                  <p className="text-[9px] text-amber-300/60 mt-0.5">potential win</p>
+                </div>
               </div>
             </div>
 
+            {/* Expand legs */}
             <div className="px-4 pb-2">
               <button
                 onClick={() => setExpanded(e => !e)}
@@ -1213,6 +1289,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
               </button>
             </div>
 
+            {/* Leg list */}
             {expanded && (
               <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3">
                 {ticket.legs.map((leg, i) => (
@@ -1224,35 +1301,37 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                     <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs font-semibold truncate">{leg.pick}</span>
-                        <Badge
-                          variant="outline"
-                          className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}
-                        >
+                        <span className="text-xs font-semibold">{leg.pick}</span>
+                        <Badge variant="outline" className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}>
                           {CATEGORY_LABEL[leg.selectionCategory]}
                         </Badge>
                       </div>
                       <p className="text-[10px] text-muted-foreground truncate mt-0.5">{leg.game}</p>
+                      {leg.gameTime && (
+                        <p className="text-[10px] text-muted-foreground/60">{new Date(leg.gameTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</p>
+                      )}
                       <p className="text-[10px] text-amber-300/70 mt-0.5">{leg.selectionReason}</p>
                     </div>
                     <div className="text-right shrink-0">
                       <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
                       <p className="text-[9px] text-muted-foreground">{leg.betType.replace(/_/g, " ")}</p>
+                      <p className="text-[9px] text-muted-foreground/60">{leg.confidence}% conf</p>
                     </div>
                   </div>
                 ))}
               </div>
             )}
 
+            {/* Footer actions */}
             <div className="px-4 pb-4 pt-1 flex items-center gap-2">
               <Button
                 size="sm"
                 onClick={handleAddAll}
-                disabled={addedAll}
+                disabled={allInSlip}
                 className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs"
                 data-testid="button-lc-add-all"
               >
-                {addedAll ? (
+                {allInSlip ? (
                   <><Check className="w-3.5 h-3.5 mr-1" /> All Legs in Slip</>
                 ) : (
                   <><Plus className="w-3.5 h-3.5 mr-1" /> Add All {ticket.legCount} Legs to Slip</>
@@ -1289,6 +1368,12 @@ export default function CommandCenter() {
   const handleSSEEvent = useCallback((event: { type: string }) => {
     if (event.type === "intelligence-update") {
       queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/life-changer-ticket"] });
+    }
+    if (event.type === "picks-update" || event.type === "predictions-ready") {
+      queryClient.invalidateQueries({ queryKey: ["/api/life-changer-ticket"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/optimal-tickets"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/matchup-tickets"] });
     }
   }, []);
 
