@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword } from "../dbAuthService";
+import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword, changePassword } from "../dbAuthService";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "../trustedDeviceService";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
@@ -161,6 +161,48 @@ export function registerAuthRoutes(app: Express): void {
     } catch (err) {
       console.error("Password reset error:", err);
       return res.status(500).json({ error: "Password reset failed" });
+    }
+  });
+
+  app.post("/api/auth/change-password", sensitiveRouteRateLimitMiddleware, async (req, res) => {
+    try {
+      const userId = req.session?.userId;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      if (userId === "admin") {
+        return res.status(403).json({ error: "Admin password is managed via environment configuration. Contact your system administrator to update it." });
+      }
+
+      const { currentPassword, newPassword, confirmPassword } = req.body;
+
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Current password and new password are required" });
+      }
+
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "New password must be at least 8 characters" });
+      }
+
+      if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
+        return res.status(400).json({ error: "Password must include uppercase, lowercase, and a number" });
+      }
+
+      if (confirmPassword && newPassword !== confirmPassword) {
+        return res.status(400).json({ error: "New passwords do not match" });
+      }
+
+      const result = await changePassword(Number(userId), currentPassword, newPassword);
+
+      if (!result.success) {
+        return res.status(400).json({ error: result.error });
+      }
+
+      return res.json({ success: true, message: "Password changed successfully" });
+    } catch (err) {
+      console.error("Change password error:", err);
+      return res.status(500).json({ error: "Password change failed" });
     }
   });
 

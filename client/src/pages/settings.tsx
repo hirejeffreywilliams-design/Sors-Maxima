@@ -29,7 +29,10 @@ import {
   Monitor,
   XCircle,
   Loader2,
-  Eye
+  Eye,
+  EyeOff,
+  KeyRound,
+  Lock
 } from "lucide-react";
 import { ReferralProgram } from "@/components/referral-program";
 import { LanguageSelector } from "@/components/language-selector";
@@ -356,6 +359,30 @@ export default function Settings() {
   const [addAlertDialogOpen, setAddAlertDialogOpen] = useState(false);
   const [newAlert, setNewAlert] = useState({ alertType: "daily_limit", threshold: 100 });
 
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [showPw, setShowPw] = useState({ current: false, newPw: false, confirm: false });
+
+  const { data: authData } = useQuery<{ isAdmin?: boolean; username?: string }>({ queryKey: ["/api/auth/check"] });
+  const isAdmin = authData?.isAdmin ?? false;
+
+  const changePwMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string; confirmPassword: string }) => {
+      const res = await apiRequest("POST", "/api/auth/change-password", data);
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Password change failed");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      toast({ title: "Password changed", description: "Your password has been updated successfully." });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    },
+  });
+
   // Notification Preferences
   const { data: notifPrefs } = useQuery<any>({
     queryKey: ["/api/notifications/preferences"],
@@ -433,9 +460,13 @@ export default function Settings() {
           <p className="text-muted-foreground">Manage your account preferences and limits</p>
         </div>
 
-        <Tabs defaultValue="notifications">
+        <Tabs defaultValue="security">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-6 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 h-auto">
+              <TabsTrigger value="security" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-security">
+                <KeyRound className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
               <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-notifications">
                 <Bell className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Alerts</span>
@@ -462,6 +493,159 @@ export default function Settings() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="security" className="space-y-4 mt-4">
+            {isAdmin ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-amber-500" />
+                    Admin Account Security
+                  </CardTitle>
+                  <CardDescription>Security settings for your admin account</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/40 dark:bg-amber-950/20 p-4 space-y-2">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="font-medium text-sm text-amber-800 dark:text-amber-300">Admin password is environment-managed</p>
+                        <p className="text-sm text-amber-700 dark:text-amber-400">
+                          The admin account password is set via secure environment configuration and cannot be changed from within the app.
+                          To update it, modify the <code className="font-mono bg-amber-100 dark:bg-amber-900/40 px-1 rounded text-xs">ADMIN_PASSWORD</code> environment secret in your deployment settings.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg border">
+                      <div>
+                        <p className="text-sm font-medium">Logged in as</p>
+                        <p className="text-xs text-muted-foreground">{authData?.username ?? "admin"} · Administrator</p>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">Admin</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <KeyRound className="h-5 w-5 text-primary" />
+                    Change Password
+                  </CardTitle>
+                  <CardDescription>Update your account password. Use a strong password with uppercase, lowercase, and numbers.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="current-password"
+                        type={showPw.current ? "text" : "password"}
+                        placeholder="Enter your current password"
+                        value={pwForm.currentPassword}
+                        onChange={(e) => setPwForm(f => ({ ...f, currentPassword: e.target.value }))}
+                        data-testid="input-current-password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPw(s => ({ ...s, current: !s.current }))}
+                        data-testid="button-toggle-current-password"
+                      >
+                        {showPw.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="new-password"
+                        type={showPw.newPw ? "text" : "password"}
+                        placeholder="Min 8 chars, uppercase, lowercase, number"
+                        value={pwForm.newPassword}
+                        onChange={(e) => setPwForm(f => ({ ...f, newPassword: e.target.value }))}
+                        data-testid="input-new-password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPw(s => ({ ...s, newPw: !s.newPw }))}
+                        data-testid="button-toggle-new-password"
+                      >
+                        {showPw.newPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {pwForm.newPassword && (
+                      <div className="space-y-1 text-xs">
+                        <div className={`flex items-center gap-1.5 ${pwForm.newPassword.length >= 8 ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+                          <CheckCircle className="h-3 w-3" /> At least 8 characters
+                        </div>
+                        <div className={`flex items-center gap-1.5 ${/[A-Z]/.test(pwForm.newPassword) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+                          <CheckCircle className="h-3 w-3" /> Uppercase letter
+                        </div>
+                        <div className={`flex items-center gap-1.5 ${/[a-z]/.test(pwForm.newPassword) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+                          <CheckCircle className="h-3 w-3" /> Lowercase letter
+                        </div>
+                        <div className={`flex items-center gap-1.5 ${/[0-9]/.test(pwForm.newPassword) ? "text-green-600 dark:text-green-400" : "text-muted-foreground"}`}>
+                          <CheckCircle className="h-3 w-3" /> A number
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-password">Confirm New Password</Label>
+                    <div className="relative">
+                      <Input
+                        id="confirm-password"
+                        type={showPw.confirm ? "text" : "password"}
+                        placeholder="Re-enter your new password"
+                        value={pwForm.confirmPassword}
+                        onChange={(e) => setPwForm(f => ({ ...f, confirmPassword: e.target.value }))}
+                        data-testid="input-confirm-password"
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        onClick={() => setShowPw(s => ({ ...s, confirm: !s.confirm }))}
+                        data-testid="button-toggle-confirm-password"
+                      >
+                        {showPw.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {pwForm.confirmPassword && pwForm.newPassword !== pwForm.confirmPassword && (
+                      <p className="text-xs text-destructive">Passwords do not match</p>
+                    )}
+                  </div>
+                  <Button
+                    onClick={() => changePwMutation.mutate(pwForm)}
+                    disabled={
+                      changePwMutation.isPending ||
+                      !pwForm.currentPassword ||
+                      !pwForm.newPassword ||
+                      !pwForm.confirmPassword ||
+                      pwForm.newPassword !== pwForm.confirmPassword ||
+                      pwForm.newPassword.length < 8
+                    }
+                    className="w-full sm:w-auto"
+                    data-testid="button-change-password"
+                  >
+                    {changePwMutation.isPending ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Updating...</>
+                    ) : (
+                      <><KeyRound className="h-4 w-4 mr-2" />Update Password</>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
           <TabsContent value="notifications" className="space-y-4 mt-4">
             <Card>

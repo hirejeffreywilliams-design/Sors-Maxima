@@ -242,6 +242,42 @@ export async function resetPassword(
   }
 }
 
+export async function changePassword(
+  userId: number,
+  currentPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    if (user.isBanned) {
+      return { success: false, error: "This account has been suspended" };
+    }
+
+    const validPassword = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!validPassword) {
+      return { success: false, error: "Current password is incorrect" };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    await db.update(users).set({
+      passwordHash,
+      loginAttempts: 0,
+      lockedUntil: null,
+    }).where(eq(users.id, userId));
+
+    logInfo(`Password changed by user: ${user.username} (id: ${userId})`);
+    return { success: true };
+  } catch (error: any) {
+    logError(error, { context: "changePassword", userId });
+    return { success: false, error: "Password change failed. Please try again." };
+  }
+}
+
 export async function adminResetPassword(
   userId: number,
   newPassword: string
