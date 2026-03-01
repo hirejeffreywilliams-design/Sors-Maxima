@@ -175,32 +175,34 @@ function startEnginesPhased(): void {
   // Runs its first cycle immediately, then every 60s.
   safeStart("Intelligence Hub", startIntelligenceHub, 10_000);
 
-  // ── Phase 3 (20s): Precomputed Predictions ────────────────────────────────
-  // Builds AI picks from hub data. Waits for hub to complete at least one cycle.
-  safeStart("Precomputed Predictions Engine", startPrecomputedEngine, 20_000);
+  // ── Phase 4 (14s): Precomputed Predictions ───────────────────────────────
+  // Builds AI picks from hub data. Disk cache serves instant picks while this
+  // warms up — hub will have started its first cycle by 10s so 14s is safe.
+  safeStart("Precomputed Predictions Engine", startPrecomputedEngine, 14_000);
 
-  // ── Phase 4 (35s): Auto-Settlement ───────────────────────────────────────
+  // ── Phase 5 (28s): Auto-Settlement ───────────────────────────────────────
   // Settle picks from completed games. Runs once at startup, then every 5 min.
-  safeStart("Auto-Settlement Engine", startAutoSettlement, 35_000);
+  safeStart("Auto-Settlement Engine", startAutoSettlement, 28_000);
 
-  // ── Phase 5 (50s): Platform Intelligence ─────────────────────────────────
+  // ── Phase 6 (42s): Platform Intelligence ─────────────────────────────────
   // Accumulates game outcomes and prediction accuracy for continuous learning.
-  safeStart("Platform Intelligence Engine", startPlatformIntelligenceEngine, 50_000);
+  safeStart("Platform Intelligence Engine", startPlatformIntelligenceEngine, 42_000);
 
-  // ── Phase 6 (70s): Monte Carlo Engine ────────────────────────────────────
-  // Heavy simulation engine. Pre-simulates matchups for fast responses.
-  safeStart("Monte Carlo Engine", startMonteCarloEngine, 70_000);
+  // ── Phase 7 (50s): Monte Carlo Engine ────────────────────────────────────
+  // Advanced simulation engine. Pre-simulates matchups for fast user responses.
+  // Reduced from 70s → 50s: hub + precomputed are running well by this point.
+  // First warmup cycle fires 15s after start = 65s total. 10× more sims overnight.
+  safeStart("Monte Carlo Engine", startMonteCarloEngine, 50_000);
 
-  // ── Phase 7 (90s): Notification Engine ───────────────────────────────────
+  // ── Phase 8 (70s): Notification Engine ───────────────────────────────────
   // Monitors live games and prop lines for user-subscribed alerts.
-  // Starts after ESPN game data and predictions are fully populated.
-  safeStart("Notification Engine", startNotificationEngine, 90_000);
+  safeStart("Notification Engine", startNotificationEngine, 70_000);
 
-  // ── Phase 8 (2 min): Background Learning ─────────────────────────────────
-  // Continuous learning from outcomes + analytics agent. Pure background work.
-  safeStart("Continuous Learning Engine", startContinuousLearning, 120_000);
-  safeStart("Analytics Agent", startAnalyticsAgent, 135_000);
-  safeStart("Historical Backtest", initBacktestOnStartup, 150_000);
+  // ── Phase 9 (Background): Learning + Backtest ────────────────────────────
+  // Pure background work — run last to avoid competing with user-facing engines.
+  safeStart("Continuous Learning Engine", startContinuousLearning, 100_000);
+  safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
+  safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.

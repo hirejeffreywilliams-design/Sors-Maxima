@@ -1,4 +1,7 @@
 import crypto from "crypto";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions } from "./vegas-engine";
 import {
@@ -286,6 +289,47 @@ const lastSuccessfulData = new Map<string, any[]>();
 
 const REFRESH_INTERVAL = 5 * 60 * 1000;
 const STALE_THRESHOLD = 30 * 60 * 1000;
+
+// ── Disk cache: persist predictions across restarts so users get instant results ──
+const __filename_pe = fileURLToPath(import.meta.url);
+const __dirname_pe = path.dirname(__filename_pe);
+const CACHE_PERSIST_FILE = path.join(__dirname_pe, "..", "precomputed-picks-cache.json");
+const CACHE_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours — stale beyond this
+
+function loadPersistedCache(): void {
+  try {
+    if (!fs.existsSync(CACHE_PERSIST_FILE)) return;
+    const raw = fs.readFileSync(CACHE_PERSIST_FILE, "utf8");
+    const entries: CacheEntry[] = JSON.parse(raw);
+    const now = Date.now();
+    let loaded = 0;
+    for (const entry of entries) {
+      if (!entry.sport || !entry.snapshot) continue;
+      // Accept cache up to 4 hours old — better than nothing while engine warms up
+      if (now - entry.timestamp < CACHE_MAX_AGE_MS) {
+        predictionCache.set(entry.sport, entry);
+        loaded++;
+      }
+    }
+    if (loaded > 0) {
+      console.log(`[PrecomputedEngine] Loaded ${loaded} sport(s) from disk cache — users get instant picks while engine warms up`);
+    }
+  } catch (e) {
+    // Silently ignore corrupt cache — engine will regenerate
+  }
+}
+
+function persistCacheToDisk(): void {
+  try {
+    const entries = Array.from(predictionCache.values());
+    fs.writeFileSync(CACHE_PERSIST_FILE, JSON.stringify(entries));
+  } catch {
+    // Non-critical — next cycle will retry
+  }
+}
+
+// Load immediately at module init (synchronous, runs before any engine starts)
+loadPersistedCache();
 
 function buildReleaseSchedule(generatedAt: string): PickReleaseSchedule {
   const genTime = new Date(generatedAt).getTime();
@@ -1112,6 +1156,9 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
   };
 
   predictionCache.set(sport, { snapshot, timestamp: Date.now(), sport });
+
+  // Persist to disk in the background — users get instant picks on next restart
+  setImmediate(persistCacheToDisk);
 
   try {
     savePrecomputedPicks(finalPicks.map(p => ({

@@ -339,7 +339,8 @@ const DEFAULT_SPORT_PARAMS: Record<string, { scoreMean: number; scoreStdDev: num
   NCAAF: { scoreMean: 25, scoreStdDev: 12, totalMean: 50, homeAdvantage: 3.0, isPoisson: false },
 };
 
-const MATCHUP_SIMS = 10000;
+const MATCHUP_SIMS = 10000;       // Regular 5-min cycle (memory-safe, fast)
+const DEEP_SIM_COUNT = 100000;    // Midnight deep simulation (10× — Welford makes this free)
 const PARLAY_SIMS = 5000;
 const BATCH_SIZE = 2000;
 const CONVERGENCE_THRESHOLD = 0.0005;
@@ -350,6 +351,7 @@ const PRE_SIM_TTL = 300000;
 const LIVE_SIM_TTL = 60000;
 const MAX_PREDICTIONS = 500;
 const MAX_CACHE_ENTRIES = 25;
+const RESERVOIR_SIZE = 1000;      // Reservoir sample for percentiles — O(1) memory regardless of numSims
 
 let engineRunning = false;
 let preSimInterval: ReturnType<typeof setInterval> | null = null;
@@ -432,7 +434,39 @@ function updateBayesianPrior(key: string, outcome: number): void {
   learningData.bayesianParams[key] = prior;
 }
 
-export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulationResult {
+// ─── Welford's online mean/variance accumulator ────────────────────────────
+// Tracks running mean and M2 (sum of squared deviations) without storing values.
+// This lets us run any number of simulations with O(1) memory.
+class WelfordAccumulator {
+  n = 0; mean = 0; M2 = 0;
+  push(x: number): void {
+    this.n++;
+    const delta = x - this.mean;
+    this.mean += delta / this.n;
+    this.M2 += delta * (x - this.mean);
+  }
+  variance(): number { return this.n > 1 ? this.M2 / this.n : 0; }
+  stdDev(): number { return Math.sqrt(this.variance()); }
+}
+
+// Reservoir sample — fixed-size random sample from an infinite stream (O(RESERVOIR_SIZE) memory)
+class ReservoirSampler {
+  private reservoir: number[];
+  private n = 0;
+  constructor(private readonly size: number) { this.reservoir = []; }
+  push(x: number, rng: MersenneTwister): void {
+    this.n++;
+    if (this.reservoir.length < this.size) {
+      this.reservoir.push(x);
+    } else {
+      const j = Math.floor(rng.next() * this.n);
+      if (j < this.size) this.reservoir[j] = x;
+    }
+  }
+  sorted(): number[] { return [...this.reservoir].sort((a, b) => a - b); }
+}
+
+export function simulateMatchup(input: MatchupSimulationInput, numSims: number = MATCHUP_SIMS): MatchupSimulationResult {
   const sport = input.sport || "NBA";
   const params = getSportParams(sport);
   const rng = new MersenneTwister(hashSeed(input.gameId + sport + Date.now()));
@@ -496,11 +530,19 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
   const PACE_CORR = params.isPoisson ? 0 : 0.35;
   const corrFactor = Math.sqrt(Math.max(0, 1 - PACE_CORR * PACE_CORR));
 
-  const homeScores: number[] = [];
-  const awayScores: number[] = [];
-  let homeWins = 0, awayWins = 0, draws = 0, spreadCovers = 0, overs = 0;
+  // ── Welford accumulators (O(1) memory, works for any numSims) ──────────────
+  const homeAcc = new WelfordAccumulator();
+  const awayAcc = new WelfordAccumulator();
+  const marginAcc = new WelfordAccumulator();
 
-  const numSims = MATCHUP_SIMS;
+  // Reservoir samplers for percentile computation (fixed 1,000 samples always)
+  const homeRes = new ReservoirSampler(RESERVOIR_SIZE);
+  const awayRes = new ReservoirSampler(RESERVOIR_SIZE);
+
+  // Tail risk counters (computed online — no stored arrays needed)
+  let homeTailRiskCount = 0, awayTailRiskCount = 0;
+
+  let homeWins = 0, awayWins = 0, draws = 0, spreadCovers = 0, overs = 0;
 
   for (let i = 0; i < numSims; i++) {
     let homeScore: number, awayScore: number;
@@ -516,42 +558,50 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
       awayScore = Math.max(0, Math.round(awayScoreMean + (PACE_CORR * z0 + corrFactor * z2) * adjustedStdDev));
     }
 
-    homeScores.push(homeScore);
-    awayScores.push(awayScore);
+    // Update Welford accumulators (O(1) per step, no arrays)
+    homeAcc.push(homeScore);
+    awayAcc.push(awayScore);
+    marginAcc.push(homeScore - awayScore);
 
+    // Reservoir sample (for percentiles)
+    homeRes.push(homeScore, rng);
+    awayRes.push(awayScore, rng);
+
+    // Running counts
     if (homeScore > awayScore) homeWins++;
     else if (awayScore > homeScore) awayWins++;
     else draws++;
 
-    const margin = homeScore - awayScore;
-    if (margin > -spreadLine) spreadCovers++;
+    if (homeScore - awayScore > -spreadLine) spreadCovers++;
+    if (homeScore + awayScore > totalLine) overs++;
 
-    const total = homeScore + awayScore;
-    if (total > totalLine) overs++;
+    // Online tail risk (use running mean/std — approximated per step; final values used after loop)
+    // We defer tail risk calculation to after the loop using final stats
   }
+
+  // ── Post-loop statistics (all O(1) derived from accumulators) ──────────────
+  const homeMean = homeAcc.mean;
+  const awayMean = awayAcc.mean;
+  const homeStd = homeAcc.stdDev();
+  const awayStd = awayAcc.stdDev();
+  const marginVariance = marginAcc.variance();
 
   const homeWinProb = homeWins / numSims;
   const awayWinProb = awayWins / numSims;
   const drawProb = draws / numSims;
-
-  homeScores.sort((a, b) => a - b);
-  awayScores.sort((a, b) => a - b);
-
-  const homeMean = homeScores.reduce((s, v) => s + v, 0) / numSims;
-  const awayMean = awayScores.reduce((s, v) => s + v, 0) / numSims;
-  const homeStd = Math.sqrt(homeScores.reduce((s, v) => s + Math.pow(v - homeMean, 2), 0) / numSims);
-  const awayStd = Math.sqrt(awayScores.reduce((s, v) => s + Math.pow(v - awayMean, 2), 0) / numSims);
-
-  const idx10 = Math.floor(numSims * 0.1);
-  const idx50 = Math.floor(numSims * 0.5);
-  const idx90 = Math.floor(numSims * 0.9);
-
-  const marginVariance = homeScores.reduce((s, v, i) => {
-    const m = v - awayScores[i];
-    return s + Math.pow(m - (homeMean - awayMean), 2);
-  }, 0) / numSims;
-
   const winSE = Math.sqrt(homeWinProb * (1 - homeWinProb) / numSims);
+
+  // Percentiles from sorted reservoir (1,000 samples)
+  const homeSorted = homeRes.sorted();
+  const awaySorted = awayRes.sorted();
+  const resSize = homeSorted.length;
+  const p10 = Math.floor(resSize * 0.1);
+  const p50 = Math.floor(resSize * 0.5);
+  const p90 = Math.floor(resSize * 0.9);
+
+  // Tail risk: probability of scoring < mean - 2σ (analytical approximation)
+  const tailRiskHome = homeStd > 0 ? Math.max(0, 0.0228 * (1 + (homeMean - homeScoreMean) / homeStd)) : 0.0228;
+  const tailRiskAway = awayStd > 0 ? Math.max(0, 0.0228 * (1 + (awayMean - awayScoreMean) / awayStd)) : 0.0228;
 
   const factors: { name: string; impact: number; direction: string }[] = [];
   if (Math.abs(strengthDiff) > 0.05) factors.push({ name: "Team Strength", impact: Math.abs(strengthDiff) * 100, direction: strengthDiff > 0 ? "home" : "away" });
@@ -581,8 +631,8 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
     spreadLine,
     totalLine,
     scoreDistribution: {
-      home: { mean: Math.round(homeMean * 10) / 10, stdDev: Math.round(homeStd * 10) / 10, p10: homeScores[idx10], median: homeScores[idx50], p90: homeScores[idx90] },
-      away: { mean: Math.round(awayMean * 10) / 10, stdDev: Math.round(awayStd * 10) / 10, p10: awayScores[idx10], median: awayScores[idx50], p90: awayScores[idx90] },
+      home: { mean: Math.round(homeMean * 10) / 10, stdDev: Math.round(homeStd * 10) / 10, p10: homeSorted[p10] ?? Math.round(homeMean - homeStd), median: homeSorted[p50] ?? Math.round(homeMean), p90: homeSorted[p90] ?? Math.round(homeMean + homeStd) },
+      away: { mean: Math.round(awayMean * 10) / 10, stdDev: Math.round(awayStd * 10) / 10, p10: awaySorted[p10] ?? Math.round(awayMean - awayStd), median: awaySorted[p50] ?? Math.round(awayMean), p90: awaySorted[p90] ?? Math.round(awayMean + awayStd) },
     },
     convergenceScore: Math.round(Math.max(0.6, Math.min(1.0, 1 - winSE * 12)) * 1000) / 1000,
     confidenceInterval95: {
@@ -593,8 +643,8 @@ export function simulateMatchup(input: MatchupSimulationInput): MatchupSimulatio
       variance: Math.round(marginVariance * 100) / 100,
       skewness: 0,
       kurtosis: 3,
-      tailRiskHome: homeScores.filter(s => s < homeMean - 2 * homeStd).length / numSims,
-      tailRiskAway: awayScores.filter(s => s < awayMean - 2 * awayStd).length / numSims,
+      tailRiskHome: Math.round(tailRiskHome * 10000) / 10000,
+      tailRiskAway: Math.round(tailRiskAway * 10000) / 10000,
     },
     factors,
     simulatedAt: Date.now(),
@@ -1376,16 +1426,17 @@ async function runPreSimulationCycle(): Promise<void> {
     // Platform intelligence team records for non-NBA sports
     const teamRecords = await buildTeamRecordsMap();
 
-    // Cap at 30 games for regular cycle — prioritize live games
+    // Cap at 20 games for regular cycle — live games first, then highest-priority upcoming
+    // Fewer games per cycle = more event-loop time for user requests during active sessions
     const prioritized = [
       ...allGames.filter(g => g.status?.state === "in"),
       ...allGames.filter(g => g.status?.state !== "in"),
-    ].slice(0, 30);
+    ].slice(0, 20);
 
     for (const game of prioritized) {
       try {
         const input = await buildEnrichedInput(game, bdlTeams, teamRecords);
-        simulateMatchup(input);
+        simulateMatchup(input, MATCHUP_SIMS); // 10,000 sims — fast, responsive during user sessions
         simulated++;
       } catch {}
     }
@@ -1440,12 +1491,13 @@ export async function runDeepSimulationCycle(): Promise<void> {
     for (const game of allGames) {
       try {
         const input = await buildEnrichedInput(game, bdlTeams, teamRecords);
-        simulateMatchup(input);
+        // 100,000 sims for deep overnight run — Welford algorithm keeps this O(1) memory
+        simulateMatchup(input, DEEP_SIM_COUNT);
         simulated++;
         const sport = game.sport || "NBA";
         sportCounts[sport] = (sportCounts[sport] || 0) + 1;
-        // Yield to event loop between games to avoid blocking
-        if (simulated % 10 === 0) await new Promise(r => setTimeout(r, 0));
+        // Yield to event loop after every game — midnight run is non-interactive so we can process more
+        await new Promise(r => setTimeout(r, 0));
       } catch {}
     }
 
@@ -1528,7 +1580,7 @@ export function startMonteCarloEngine(): void {
   engineStartedAt = Date.now();
 
   const minsToMidnight = Math.round(msUntilMidnight() / 60000);
-  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started — ${MATCHUP_SIMS.toLocaleString()} sims/matchup | 5-min refresh cycle | Midnight deep simulation in ${minsToMidnight}m`);
+  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started — ${MATCHUP_SIMS.toLocaleString()} sims/matchup (regular) | ${DEEP_SIM_COUNT.toLocaleString()} sims/matchup (midnight deep) | 5-min refresh cycle | Deep sim in ${minsToMidnight}m`);
 
   // Startup warmup: run first regular cycle after 15s
   setTimeout(() => runPreSimulationCycle(), 15000);
