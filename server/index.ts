@@ -14,6 +14,7 @@ import { startPlatformIntelligenceEngine } from "./platformIntelligenceEngine";
 import { startMonteCarloEngine } from "./monteCarloEngine";
 import { startNotificationEngine } from "./notificationEngine";
 import { initBacktestOnStartup } from "./backtestEngine";
+import { runMigrations } from "./dbMigrations";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
 import {
@@ -208,6 +209,7 @@ function startEnginesPhased(): void {
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 (async () => {
+  await runMigrations();
   await registerRoutes(httpServer, app);
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {

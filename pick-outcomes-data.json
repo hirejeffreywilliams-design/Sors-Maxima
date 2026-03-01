@@ -10781,13 +10781,93 @@
       "homeScore": 67,
       "awayScore": 69,
       "settledAt": "2026-03-01T13:50:42.756Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825553-total-723308af3a",
+      "gameId": "401825553",
+      "sport": "NCAAB",
+      "game": "Oregon Ducks @ Illinois Fighting Illini",
+      "homeTeam": "Illinois Fighting Illini",
+      "awayTeam": "Oregon Ducks",
+      "pick": "Over 143",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 49,
+      "ev": -6.45,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-01T13:54:24.025Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 84,
+      "settledAt": "2026-03-01T13:54:42.550Z"
+    },
+    {
+      "id": "precomp-NCAAB-401814597-team_total-e9d8e29204",
+      "gameId": "401814597",
+      "sport": "NCAAB",
+      "game": "Toledo Rockets @ Miami (OH) RedHawks",
+      "homeTeam": "Miami (OH) RedHawks",
+      "awayTeam": "Toledo Rockets",
+      "pick": "Miami (OH) RedHawks Over 70.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T13:57:08.335Z",
+      "result": "lost",
+      "homeScore": 67,
+      "awayScore": 69,
+      "settledAt": "2026-03-01T13:59:58.301Z"
+    },
+    {
+      "id": "precomp-NCAAB-401814597-team_total-b4af3b0639",
+      "gameId": "401814597",
+      "sport": "NCAAB",
+      "game": "Toledo Rockets @ Miami (OH) RedHawks",
+      "homeTeam": "Miami (OH) RedHawks",
+      "awayTeam": "Toledo Rockets",
+      "pick": "Toledo Rockets Under 72.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T13:57:08.335Z",
+      "result": "won",
+      "homeScore": 67,
+      "awayScore": 69,
+      "settledAt": "2026-03-01T13:59:58.301Z"
+    },
+    {
+      "id": "precomp-NCAAB-401814597-total-a097e408b8",
+      "gameId": "401814597",
+      "sport": "NCAAB",
+      "game": "Toledo Rockets @ Miami (OH) RedHawks",
+      "homeTeam": "Miami (OH) RedHawks",
+      "awayTeam": "Toledo Rockets",
+      "pick": "Over 143",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 51,
+      "ev": -2.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T13:57:08.335Z",
+      "result": "lost",
+      "homeScore": 67,
+      "awayScore": 69,
+      "settledAt": "2026-03-01T13:59:58.301Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 527,
-      "won": 265,
-      "lost": 244,
+      "total": 531,
+      "won": 267,
+      "lost": 246,
       "push": 18,
       "rate": 50.3,
       "pending": 15
@@ -10799,9 +10879,9 @@
         "rate": 46.5
       },
       "NCAAB": {
-        "total": 176,
-        "won": 100,
-        "rate": 56.8
+        "total": 180,
+        "won": 102,
+        "rate": 56.7
       },
       "NBA": {
         "total": 142,
@@ -10831,9 +10911,9 @@
         "rate": 49.1
       },
       "B-": {
-        "total": 42,
-        "won": 27,
-        "rate": 64.3
+        "total": 43,
+        "won": 28,
+        "rate": 65.1
       },
       "B+": {
         "total": 6,
@@ -10841,9 +10921,9 @@
         "rate": 66.7
       },
       "B": {
-        "total": 36,
+        "total": 37,
         "won": 18,
-        "rate": 50
+        "rate": 48.6
       },
       "D": {
         "total": 17,
@@ -10851,9 +10931,9 @@
         "rate": 35.3
       },
       "A-": {
-        "total": 15,
-        "won": 8,
-        "rate": 53.3
+        "total": 17,
+        "won": 9,
+        "rate": 52.9
       },
       "A": {
         "total": 9,
@@ -10863,8 +10943,8 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 209,
-        "won": 107,
+        "total": 211,
+        "won": 108,
         "rate": 51.2
       },
       "Moneyline": {
@@ -10878,18 +10958,18 @@
         "rate": 49.5
       },
       "Total": {
-        "total": 137,
-        "won": 66,
+        "total": 139,
+        "won": 67,
         "rate": 48.2
       }
     },
     "recentForm": {
-      "won": 26,
-      "lost": 22,
+      "won": 27,
+      "lost": 21,
       "push": 2,
-      "rate": 52
+      "rate": 54
     },
-    "lastUpdated": "2026-03-01T13:50:42.756Z"
+    "lastUpdated": "2026-03-01T13:59:58.301Z"
   },
   "version": 1
 }

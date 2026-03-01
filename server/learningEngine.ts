@@ -166,16 +166,15 @@ const momentumState: Record<string, { velocity: number; direction: number; conse
 export async function initializeModelWeights(): Promise<void> {
   try {
     for (const factor of LEARNING_FACTORS) {
-      const existing = await db.select().from(modelWeights).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all"))).limit(1);
+      const existing = await db.select().from(modelWeights).where(eq(modelWeights.factorName, factor)).limit(1);
       if (existing.length === 0) {
         await db.insert(modelWeights).values({
           factorName: factor,
-          marketType: "all",
           weight: 1.0,
           totalPredictions: 0,
           correctPredictions: 0,
           accuracy: 0.5,
-        } as any);
+        });
       }
     }
 
@@ -322,7 +321,7 @@ export async function recalibrateWeights(): Promise<{
       correctPredictions: 0,
       accuracy: 0.5,
       lastUpdated: new Date(),
-    }).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all")));
+    }).where(eq(modelWeights.factorName, factor));
 
     weightsReset++;
     if (hasPrior) priorsApplied++;
@@ -452,17 +451,10 @@ async function analyzeAndAdjustWeights(): Promise<{
         bottomFactor = factor;
       }
 
-      // Fetch market-specific weight
+      // Fetch weight for this factor
       let [currentWeight] = await db.select().from(modelWeights)
-        .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)))
+        .where(eq(modelWeights.factorName, factor))
         .limit(1);
-
-      // Fallback to 'all' weights if market-specific sample size < 30
-      if (!currentWeight || currentWeight.totalPredictions < 30) {
-        [currentWeight] = await db.select().from(modelWeights)
-          .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, "all")))
-          .limit(1);
-      }
 
       if (!currentWeight) continue;
 
@@ -488,29 +480,13 @@ async function analyzeAndAdjustWeights(): Promise<{
       const decayedWeight = currentWeight.weight * (1 - WEIGHT_DECAY_RATE);
       const newWeight = Math.max(0.1, Math.min(2.5, decayedWeight + adjustment));
 
-      // Update or Insert market-specific weight
-      const existingMarketWeight = await db.select().from(modelWeights)
-        .where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)))
-        .limit(1);
-
-      if (existingMarketWeight.length > 0) {
-        await db.update(modelWeights).set({
-          weight: newWeight,
-          totalPredictions: currentWeight.totalPredictions + Math.round(total),
-          correctPredictions: currentWeight.correctPredictions + Math.round(perf.wins),
-          accuracy: factorAccuracy,
-          lastUpdated: new Date(),
-        }).where(and(eq(modelWeights.factorName, factor), eq((modelWeights as any).marketType, marketType)));
-      } else {
-        await db.insert(modelWeights).values({
-          factorName: factor,
-          marketType: marketType,
-          weight: newWeight,
-          totalPredictions: Math.round(total),
-          correctPredictions: Math.round(perf.wins),
-          accuracy: factorAccuracy,
-        } as any);
-      }
+      await db.update(modelWeights).set({
+        weight: newWeight,
+        totalPredictions: currentWeight.totalPredictions + Math.round(total),
+        correctPredictions: currentWeight.correctPredictions + Math.round(perf.wins),
+        accuracy: factorAccuracy,
+        lastUpdated: new Date(),
+      }).where(eq(modelWeights.factorName, factor));
 
       weightsAdjusted++;
     }
