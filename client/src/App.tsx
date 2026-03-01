@@ -843,15 +843,21 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   );
 }
 
+const PageSpinner = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
+
 function PublicRoutes() {
   const [location] = useLocation();
   
   if (location === '/legal') {
-    return <LegalPage />;
+    return <Suspense fallback={<PageSpinner />}><LegalPage /></Suspense>;
   }
   
   if (location === '/pricing') {
-    return <Pricing />;
+    return <Suspense fallback={<PageSpinner />}><Pricing /></Suspense>;
   }
   
   return null;
@@ -894,19 +900,19 @@ function AppContent() {
   };
 
   if (location === '/legal') {
-    return <LegalPage />;
+    return <Suspense fallback={<PageSpinner />}><LegalPage /></Suspense>;
   }
 
   if (location === '/pricing') {
-    return <Pricing />;
+    return <Suspense fallback={<PageSpinner />}><Pricing /></Suspense>;
   }
 
   if (location === '/help') {
-    return <HelpCenter />;
+    return <Suspense fallback={<PageSpinner />}><HelpCenter /></Suspense>;
   }
 
   if (location === '/changelog') {
-    return <ChangelogPage />;
+    return <Suspense fallback={<PageSpinner />}><ChangelogPage /></Suspense>;
   }
 
   if (location === '/track-record') {

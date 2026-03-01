@@ -18,6 +18,8 @@ const enteredCompetitions = new Set<string>();
 
 let serverNotifications: any[] = [];
 let notificationIdCounter = 1;
+const recentNotifDescriptions = new Map<string, number>();
+const NOTIF_DEDUP_WINDOW = 15 * 60 * 1000;
 
 async function generateRealNotification(): Promise<any | null> {
   try {
@@ -34,22 +36,35 @@ async function generateRealNotification(): Promise<any | null> {
     if (chosenType === "game_start") {
       const preGames = allGames.filter(g => g.status.state === "pre");
       if (preGames.length === 0) return null;
-      const game = preGames[Date.now() % preGames.length];
-      const gameDate = new Date(game.date);
-      const now = new Date();
-      const diffMs = gameDate.getTime() - now.getTime();
-      const diffMins = Math.max(0, Math.round(diffMs / 60000));
-      let timeStr = diffMins > 60 ? `${Math.round(diffMins / 60)} hours` : `${diffMins} minutes`;
-      if (diffMins <= 0) timeStr = "soon";
-
       const sportVerb: Record<string, string> = { NBA: "tips off", NFL: "kicks off", MLB: "first pitch", NHL: "puck drops", NCAAF: "kicks off", NCAAB: "tips off" };
-      const verb = sportVerb[game.sport] || "starts";
-
+      const nowTs = Date.now();
+      for (const [key, ts] of recentNotifDescriptions.entries()) {
+        if (nowTs - ts > NOTIF_DEDUP_WINDOW) recentNotifDescriptions.delete(key);
+      }
+      const shuffledPre = [...preGames].sort((a, b) => a.id.localeCompare(b.id, undefined, { sensitivity: 'base' }));
+      let chosenGame = shuffledPre[0];
+      for (const g of shuffledPre) {
+        const gameDate = new Date(g.date);
+        const diffMins = Math.max(0, Math.round((gameDate.getTime() - nowTs) / 60000));
+        const timeStr = diffMins > 60 ? `${Math.round(diffMins / 60)} hours` : diffMins > 0 ? `${diffMins} minutes` : "soon";
+        const verb = sportVerb[g.sport] || "starts";
+        const candidate = `${g.awayTeam.shortDisplayName} @ ${g.homeTeam.shortDisplayName} ${verb} in ${timeStr}`;
+        if (!recentNotifDescriptions.has(candidate)) {
+          chosenGame = g;
+          break;
+        }
+      }
+      const gameDate = new Date(chosenGame.date);
+      const diffMins = Math.max(0, Math.round((gameDate.getTime() - nowTs) / 60000));
+      const timeStr = diffMins > 60 ? `${Math.round(diffMins / 60)} hours` : diffMins > 0 ? `${diffMins} minutes` : "soon";
+      const verb = sportVerb[chosenGame.sport] || "starts";
+      const desc = `${chosenGame.awayTeam.shortDisplayName} @ ${chosenGame.homeTeam.shortDisplayName} ${verb} in ${timeStr}`;
+      recentNotifDescriptions.set(desc, nowTs);
       return {
         id: notificationIdCounter++,
         type: "game_start",
         title: "Game Starting Soon",
-        description: `${game.awayTeam.shortDisplayName} @ ${game.homeTeam.shortDisplayName} ${verb} in ${timeStr}`,
+        description: desc,
         timestamp: new Date().toISOString(),
         read: false,
       };
@@ -79,6 +94,12 @@ async function generateRealNotification(): Promise<any | null> {
         desc = `${game.shortName} total moved from ${move.opening} to ${move.current} (${dirLabel})`;
       }
 
+      const now2 = Date.now();
+      for (const [key, ts] of recentNotifDescriptions.entries()) {
+        if (now2 - ts > NOTIF_DEDUP_WINDOW) recentNotifDescriptions.delete(key);
+      }
+      if (recentNotifDescriptions.has(desc)) return null;
+      recentNotifDescriptions.set(desc, now2);
       return {
         id: notificationIdCounter++,
         type: "line_movement",
@@ -104,6 +125,12 @@ async function generateRealNotification(): Promise<any | null> {
         desc = `Professional money flowing to ${side} ${move.current} in ${game.shortName}`;
       }
 
+      const now = Date.now();
+      for (const [key, ts] of recentNotifDescriptions.entries()) {
+        if (now - ts > NOTIF_DEDUP_WINDOW) recentNotifDescriptions.delete(key);
+      }
+      if (recentNotifDescriptions.has(desc)) return null;
+      recentNotifDescriptions.set(desc, now);
       return {
         id: notificationIdCounter++,
         type: "sharp_money",
@@ -114,12 +141,26 @@ async function generateRealNotification(): Promise<any | null> {
       };
     }
 
-    const game = allGames[Date.now() % allGames.length];
+    const shuffled = [...allGames].sort(() => (Date.now() % 7) - 3);
+    let pickedGame = shuffled[0];
+    for (const g of shuffled) {
+      const candidateDesc = `${g.awayTeam.shortDisplayName} @ ${g.homeTeam.shortDisplayName} - ${g.status.detail || g.status.shortDetail || "Scheduled"}`;
+      const now3 = Date.now();
+      for (const [key, ts] of recentNotifDescriptions.entries()) {
+        if (now3 - ts > NOTIF_DEDUP_WINDOW) recentNotifDescriptions.delete(key);
+      }
+      if (!recentNotifDescriptions.has(candidateDesc)) {
+        pickedGame = g;
+        break;
+      }
+    }
+    const gameDesc = `${pickedGame.awayTeam.shortDisplayName} @ ${pickedGame.homeTeam.shortDisplayName} - ${pickedGame.status.detail || pickedGame.status.shortDetail || "Scheduled"}`;
+    recentNotifDescriptions.set(gameDesc, Date.now());
     return {
       id: notificationIdCounter++,
       type: "game_start",
-      title: `${game.sport} Update`,
-      description: `${game.awayTeam.shortDisplayName} @ ${game.homeTeam.shortDisplayName} - ${game.status.detail || game.status.shortDetail || "Scheduled"}`,
+      title: `${pickedGame.sport} Update`,
+      description: gameDesc,
       timestamp: new Date().toISOString(),
       read: false,
     };
