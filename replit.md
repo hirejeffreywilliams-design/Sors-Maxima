@@ -53,8 +53,15 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Email Scheduler**: Hourly scheduler for admin daily summaries and weekly digests.
 - **PWA Support**: Full Progressive Web App functionality with branding and theme support.
 - **International Sports Engine**: Fetches fixtures and odds from API-Football for 8 major soccer leagues, generating diverse pick types and integrating with the frontend.
-- **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics.
+- **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics, backtestCount, liveCount, and win rate in a popover.
 - **Transparent Branding**: User-facing display text uses "46-Factor Model Analysis" and "Multi-Factor Engine".
+- **AI Pick Explainer Engine**: `server/aiPickExplainer.ts` auto-generates 2-3 sentence natural language pick explanations using gpt-4o-mini (4hr cache, 18-pick batch warmup). Graceful fallback formats factor-based sentences when OpenAI is unavailable. "AI Insight" button on each pick card in daily-parlays.tsx.
+- **AI Parlay Analyzer**: `POST /api/ai/analyze-parlay` — tier rate-limited (Sharp 5/day, Edge 15/day, Max unlimited). Returns grade, verdict, assessment, strengths, risks, correlation note, stake advice via gpt-4o with JSON mode. `ParlayAIAnalyzer` component is inside the ScrollArea at top of the bet slip (above leg items) so it expands without overflowing.
+- **AI Game Preview**: `GET /api/ai/game-preview/:gameId` — 30-min cached, tier-gated (pro+), uses live IntelligenceFeed data for context.
+- **Smart Leg Selector UX**: MatchupTicketCard has per-leg checkboxes, "Best 3"/"All"/"None" quick actions, live combined odds display, correlated leg warning, and "Add N Selected Legs" button.
+- **Bet Slip Auto-Open**: Desktop sidebar auto-opens when the first leg is added (useEffect watches legCount 0→1 transition).
+- **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces the horizontal TabsList for all 7 settings tabs.
+- **CLV-Gated Learning Engine**: Weight updates apply category multipliers (strong: 1.0, pure_signal: 0.4, noise: -0.2, true_miss: -0.8) based on CLV+ status and win/loss outcome.
 
 ## External Dependencies
 - **Frontend Framework**: React

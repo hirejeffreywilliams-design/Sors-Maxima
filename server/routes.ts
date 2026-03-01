@@ -7,6 +7,7 @@ import { registerAccountRoutes } from "./routes/account";
 import { registerCommunityRoutes } from "./routes/community";
 import { registerIntelligenceRoutes } from "./routes/intelligence";
 import { registerNotificationRoutes } from "./routes/notifications";
+import { registerAiRoutes } from "./routes/ai";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -19,6 +20,7 @@ export async function registerRoutes(
   registerCommunityRoutes(app);
   registerIntelligenceRoutes(app);
   registerNotificationRoutes(app);
+  registerAiRoutes(app);
 
   return httpServer;
 }

@@ -528,6 +528,158 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
   );
 }
 
+interface ParlayAnalysis {
+  grade: string;
+  verdict: string;
+  assessment: string;
+  strengths: string[];
+  risks: string[];
+  correlationNote: string;
+  stakeAdvice: string;
+  keyInsight: string;
+  combinedOdds: string;
+  legCount: number;
+}
+
+function ParlayAIAnalyzer({ legs }: { legs: ParlaySlipLeg[] }) {
+  const [analysis, setAnalysis] = useState<ParlayAnalysis | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const runAnalysis = async () => {
+    if (legs.length < 2) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const payload = legs.map(l => ({
+        game: l.game || `${l.team} vs ${l.opponent}`,
+        pick: l.outcome,
+        betType: l.betType || "unknown",
+        odds: l.americanOdds,
+        grade: l.grade,
+        evPercent: l.evPercent,
+        confidence: l.confidence,
+        winProbability: l.winProbability,
+      }));
+      const res = await fetch("/api/ai/analyze-parlay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ legs: payload }),
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({ error: "Analysis failed" }));
+        setError(e.error || "Analysis failed");
+        return;
+      }
+      const data = await res.json();
+      setAnalysis(data);
+      setOpen(true);
+    } catch {
+      setError("Failed to connect — try again");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const gradeColor = (g: string) => {
+    if (g === 'A') return 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10';
+    if (g === 'B') return 'text-blue-400 border-blue-500/30 bg-blue-500/10';
+    if (g === 'C') return 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10';
+    return 'text-red-400 border-red-500/30 bg-red-500/10';
+  };
+
+  const verdictColor = (v: string) => {
+    if (v === 'sharp') return 'text-emerald-400';
+    if (v === 'moderate') return 'text-blue-400';
+    if (v === 'recreational') return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
+  if (legs.length < 2) return null;
+
+  return (
+    <div className="space-y-1.5">
+      <button
+        onClick={loading ? undefined : (open ? () => setOpen(false) : analysis ? () => setOpen(!open) : runAnalysis)}
+        disabled={loading}
+        data-testid="button-ai-parlay-analyzer"
+        className="w-full flex items-center justify-between px-3 py-2 rounded-lg bg-violet-500/10 border border-violet-500/20 hover:bg-violet-500/15 transition-colors text-xs disabled:opacity-60"
+      >
+        <span className="flex items-center gap-2 text-violet-300 font-medium">
+          <Sparkles className="h-3.5 w-3.5" />
+          {loading ? "Analyzing parlay..." : analysis ? "AI Parlay Analysis" : "Analyze This Parlay"}
+        </span>
+        {analysis && !loading && (
+          <span className={`font-bold text-sm ${gradeColor(analysis.grade)} px-2 py-0.5 rounded border`}>
+            {analysis.grade}
+          </span>
+        )}
+        {!analysis && !loading && <ChevronRight className="h-3.5 w-3.5 text-violet-400" />}
+        {loading && <Activity className="h-3.5 w-3.5 text-violet-400 animate-pulse" />}
+      </button>
+
+      {open && analysis && (
+        <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-bold px-2 py-0.5 rounded border ${gradeColor(analysis.grade)}`}>
+                Grade {analysis.grade}
+              </span>
+              <span className={`text-xs font-semibold capitalize ${verdictColor(analysis.verdict)}`}>
+                {analysis.verdict}
+              </span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">{analysis.legCount} legs · {analysis.combinedOdds}</span>
+          </div>
+
+          <p className="text-xs text-foreground/90 leading-relaxed">{analysis.assessment}</p>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">Strengths</p>
+              {analysis.strengths?.map((s, i) => (
+                <p key={i} className="text-[10px] text-foreground/80 flex gap-1.5">
+                  <span className="text-emerald-400 shrink-0">+</span>{s}
+                </p>
+              ))}
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold text-red-400 uppercase tracking-wide">Risks</p>
+              {analysis.risks?.map((r, i) => (
+                <p key={i} className="text-[10px] text-foreground/80 flex gap-1.5">
+                  <span className="text-red-400 shrink-0">−</span>{r}
+                </p>
+              ))}
+            </div>
+          </div>
+
+          {analysis.correlationNote && (
+            <div className="px-2 py-1.5 rounded bg-amber-500/10 border border-amber-500/20">
+              <p className="text-[10px] text-amber-300"><span className="font-semibold">Correlation:</span> {analysis.correlationNote}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground">Recommended stake: <span className="text-foreground font-medium">{analysis.stakeAdvice}</span></span>
+          </div>
+
+          {analysis.keyInsight && (
+            <div className="px-2 py-1.5 rounded bg-primary/10 border border-primary/20">
+              <p className="text-[10px] text-foreground/90 italic"><span className="font-semibold not-italic text-primary">Key insight:</span> {analysis.keyInsight}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p className="text-[10px] text-red-400 px-1">{error}</p>
+      )}
+    </div>
+  );
+}
+
 function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: ParlaySlipLeg[]; totalOdds: number; totalAmericanOdds: number; stake: number }) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -771,6 +923,9 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
         <ScrollArea className="flex-1">
           <div className="px-3 py-1">
+            <div className="pb-2">
+              <ParlayAIAnalyzer legs={legs} />
+            </div>
             <div className="divide-y">
               {legs.map((leg) => (
                 <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} />
@@ -960,6 +1115,14 @@ export function ParlaySlipDesktopSidebar() {
   const [open, setOpen] = useState(false);
   const { legCount, totalAmericanOdds } = useParlaySlip();
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+  const prevLegCountRef = useRef(0);
+
+  useEffect(() => {
+    if (legCount > 0 && prevLegCountRef.current === 0) {
+      setOpen(true);
+    }
+    prevLegCountRef.current = legCount;
+  }, [legCount]);
 
   return (
     <>
