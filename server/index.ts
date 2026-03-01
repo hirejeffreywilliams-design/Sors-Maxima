@@ -14,6 +14,7 @@ import { startPlatformIntelligenceEngine } from "./platformIntelligenceEngine";
 import { startMonteCarloEngine } from "./monteCarloEngine";
 import { startNotificationEngine } from "./notificationEngine";
 import { initBacktestOnStartup } from "./backtestEngine";
+import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
@@ -203,6 +204,10 @@ function startEnginesPhased(): void {
   safeStart("Continuous Learning Engine", startContinuousLearning, 100_000);
   safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
   safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
+  safeStart("International Sports Engine", () => {
+    generateInternationalFeed().catch(() => {});
+    setInterval(() => generateInternationalFeed().catch(() => {}), 15 * 60 * 1000);
+  }, 145_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.

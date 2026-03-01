@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
+import { generateInternationalFeed, getLeagueEmoji } from "../internationalSportsEngine";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, getSSEStatus } from "../sseManager";
 import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
@@ -594,6 +595,47 @@ export function registerIntelligenceRoutes(app: Express): void {
     } catch (err: any) {
       console.error("[life-changer] Error:", err.message);
       res.status(500).json({ error: "Failed to generate Life Changer ticket" });
+    }
+  });
+
+  // ── International Sports ────────────────────────────────────────────────────
+  app.get("/api/international/feed", requireSubscription, async (_req: Request, res: Response) => {
+    try {
+      const feed = await generateInternationalFeed();
+      res.json(feed);
+    } catch (err: any) {
+      console.error("[international] Error:", err.message);
+      res.status(500).json({ error: "Failed to load international feed" });
+    }
+  });
+
+  app.get("/api/international/picks", requireSubscription, async (_req: Request, res: Response) => {
+    try {
+      const feed = await generateInternationalFeed();
+      res.json({
+        picks: feed.picks,
+        totalPicks: feed.totalPicks,
+        lastUpdated: feed.lastUpdated,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load international picks" });
+    }
+  });
+
+  app.get("/api/international/league/:sport", requireSubscription, async (req: Request, res: Response) => {
+    try {
+      const { sport } = req.params;
+      const feed = await generateInternationalFeed();
+      const leagueStatus = feed.leagueStatus.find(l => l.sport === sport);
+      const picks = feed.picks.filter(p => p.sport === sport);
+      if (!leagueStatus) return res.status(404).json({ error: "League not found" });
+      res.json({
+        ...leagueStatus,
+        picks,
+        emoji: getLeagueEmoji(sport),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load league data" });
     }
   });
 

@@ -239,6 +239,86 @@
       "ev": -25.55,
       "gameTime": "2026-03-01T12:54:59.953Z",
       "savedAt": "2026-03-01T12:54:59.953Z"
+    },
+    {
+      "id": "precomp-NBA-401810724-total-4015aa1659",
+      "gameId": "401810724",
+      "sport": "NBA",
+      "game": "Cleveland Cavaliers @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Cleveland Cavaliers",
+      "pick": "Over 225",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T19:48:57.108Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-cfbf4a8cee",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 77.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:48:57.667Z"
+    },
+    {
+      "id": "precomp-NBA-401810723-spread-fe951f84d2",
+      "gameId": "401810723",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "New York Knicks -8.5",
+      "betType": "spread",
+      "odds": 106,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 40.08,
+      "gameTime": "2026-03-01T18:00Z",
+      "savedAt": "2026-03-01T19:51:13.811Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-ca87bf7e58",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 77",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:51:14.457Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-92d51e0655",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers Over 71.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 69,
+      "ev": 31.73,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:51:14.457Z"
     }
   ],
   "settled": [
@@ -61377,16 +61457,216 @@
       "homeScore": 98,
       "awayScore": 127,
       "settledAt": "2026-03-01T19:33:41.661Z"
+    },
+    {
+      "id": "precomp-NBA-401810724-spread-3030df7c41",
+      "gameId": "401810724",
+      "sport": "NBA",
+      "game": "Cleveland Cavaliers @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Cleveland Cavaliers",
+      "pick": "Brooklyn Nets +13",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T19:47:12.987Z",
+      "result": "won",
+      "homeScore": 122,
+      "awayScore": 119,
+      "settledAt": "2026-03-01T19:48:23.892Z"
+    },
+    {
+      "id": "precomp-NBA-401810724-total-e9f540efa1",
+      "gameId": "401810724",
+      "sport": "NBA",
+      "game": "Cleveland Cavaliers @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Cleveland Cavaliers",
+      "pick": "Over 224.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T19:47:12.987Z",
+      "result": "won",
+      "homeScore": 122,
+      "awayScore": 119,
+      "settledAt": "2026-03-01T19:48:23.892Z"
+    },
+    {
+      "id": "precomp-NBA-401810724-team_total-b4944d74a3",
+      "gameId": "401810724",
+      "sport": "NBA",
+      "game": "Cleveland Cavaliers @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Cleveland Cavaliers",
+      "pick": "Cleveland Cavaliers Over 119",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T19:47:12.987Z",
+      "result": "push",
+      "homeScore": 122,
+      "awayScore": 119,
+      "settledAt": "2026-03-01T19:48:23.892Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-spread-0b830b5ecf",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers -0.5",
+      "betType": "spread",
+      "odds": -130,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 23.85,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:43:38.637Z",
+      "result": "won",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-spread-276b7fcccd",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers +0.5",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "A+",
+      "confidence": 69,
+      "ev": 29,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:44:52.293Z",
+      "result": "won",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-28f192e666",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 72.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 69,
+      "ev": 31.73,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:44:52.293Z",
+      "result": "lost",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-31f928e5d1",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers Over 72",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:44:52.293Z",
+      "result": "won",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-total-01b0bc8298",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Under 147.5",
+      "betType": "total",
+      "odds": -115,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 30.87,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:46:21.915Z",
+      "result": "lost",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-a5594ccb0b",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 75",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:46:21.915Z",
+      "result": "won",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825552-team_total-0e3eea1cde",
+      "gameId": "401825552",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Ohio State Buckeyes",
+      "homeTeam": "Ohio State Buckeyes",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Ohio State Buckeyes Under 75.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-01T18:30Z",
+      "savedAt": "2026-03-01T19:47:13.698Z",
+      "result": "won",
+      "homeScore": 74,
+      "awayScore": 76,
+      "settledAt": "2026-03-01T19:48:23.913Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2950,
-      "won": 1418,
-      "lost": 1509,
-      "push": 23,
+      "total": 2960,
+      "won": 1425,
+      "lost": 1511,
+      "push": 24,
       "rate": 48.1,
-      "pending": 15
+      "pending": 20
     },
     "bySport": {
       "NHL": {
@@ -61395,13 +61675,13 @@
         "rate": 40
       },
       "NCAAB": {
-        "total": 1202,
-        "won": 640,
-        "rate": 53.2
+        "total": 1209,
+        "won": 645,
+        "rate": 53.3
       },
       "NBA": {
-        "total": 841,
-        "won": 417,
+        "total": 844,
+        "won": 419,
         "rate": 49.6
       },
       "MLB": {
@@ -61457,25 +61737,25 @@
         "rate": 58.5
       },
       "A+": {
-        "total": 128,
-        "won": 78,
-        "rate": 60.9
+        "total": 138,
+        "won": 85,
+        "rate": 61.6
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 335,
-        "won": 187,
-        "rate": 55.8
+        "total": 340,
+        "won": 190,
+        "rate": 55.9
       },
       "Spread": {
-        "total": 1233,
-        "won": 460,
-        "rate": 37.3
+        "total": 1236,
+        "won": 463,
+        "rate": 37.5
       },
       "Total": {
-        "total": 1292,
-        "won": 723,
+        "total": 1294,
+        "won": 724,
         "rate": 56
       },
       "Moneyline": {
@@ -61485,12 +61765,12 @@
       }
     },
     "recentForm": {
-      "won": 31,
+      "won": 30,
       "lost": 18,
-      "push": 1,
-      "rate": 62
+      "push": 2,
+      "rate": 60
     },
-    "lastUpdated": "2026-03-01T19:33:41.662Z"
+    "lastUpdated": "2026-03-01T19:52:28.485Z"
   },
   "version": 1
 }

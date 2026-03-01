@@ -58,6 +58,7 @@ const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
 const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
 const PersonalizedInsights = lazy(() => import("@/pages/personalized-insights"));
 const CorrelationMatrix = lazy(() => import("@/pages/correlation-matrix"));
+const InternationalPage = lazy(() => import("@/pages/international"));
 const OddsCenter = lazy(() => import("@/pages/odds-center"));
 const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
@@ -67,7 +68,7 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -237,6 +238,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/rewards" component={Rewards} />
         <Route path="/bankroll" component={Bankroll} />
         <Route path="/live" component={Live} />
+        <Route path="/international" component={InternationalPage} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/legal" component={LegalPage} />
         <Route path="/roadmap" component={Roadmap} />
@@ -401,6 +403,7 @@ const navItems: NavItem[] = [
   { href: "/builder", icon: LayoutGrid, label: "Builder", testId: "nav-builder", tooltip: "Bet Builder - Manually build your parlays" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds", testId: "nav-odds-center", tooltip: "Odds Center - EV heatmap, line movement, arbitrage" },
   { href: "/live", icon: Activity, label: "Live", testId: "nav-live", tooltip: "Live Center - Track scores and games in real-time" },
+  { href: "/international", icon: Globe, label: "Global", testId: "nav-international", tooltip: "International Sports - Soccer leagues, draws, and underdog value" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Community - Leaderboards, social feed, and tipster groups" },
   { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Tools & Analytics - Calculators, optimizers, analysis" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center - Business operations", adminOnly: true },
@@ -503,6 +506,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
           {([
             { href: "/insights", icon: Star, label: "My Insights", testId: "mobile-nav-insights" },
             { href: "/odds-center", icon: TrendingUp, label: "Odds & Lines", testId: "mobile-nav-odds" },
+            { href: "/international", icon: Globe, label: "International Sports", testId: "mobile-nav-international" },
             { href: "/rosters", icon: UsersRound, label: "Rosters & Injuries", testId: "mobile-nav-rosters" },
             { href: "/watchlist", icon: Star, label: "Watchlist", testId: "mobile-nav-watchlist" },
             { href: "/tools", icon: Wrench, label: "Tools & Calculators", testId: "mobile-nav-tools" },

@@ -18,6 +18,7 @@ import { getGameSituationalFactors, type SituationalFactors } from "./situationa
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import { isExclusivePick } from "./pickProtectionEngine";
 import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
+import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import type { Sport } from "@shared/schema";
@@ -1797,6 +1798,41 @@ function dateSeededShuffle<T>(arr: T[], seed: string): T[] {
   return copy;
 }
 
+function soccerPickToPrecomputed(sp: SoccerPick): PrecomputedPick {
+  const now = new Date().toISOString();
+  return {
+    id: sp.id,
+    sport: sp.sport,
+    game: sp.game,
+    homeTeam: sp.homeTeam,
+    awayTeam: sp.awayTeam,
+    pick: sp.pick,
+    betType: sp.betType,
+    odds: sp.odds,
+    confidence: sp.confidence,
+    grade: sp.grade,
+    edge: Math.abs(sp.ev),
+    ev: sp.ev,
+    factors: [],
+    generatedAt: now,
+    dataSource: "live" as const,
+    gameTime: sp.gameTime,
+    reasoning: sp.reasoning,
+    recommendation: sp.pick,
+    winProbability: sp.confidence / 100,
+    insights: [sp.reasoning],
+    timing: "bet_now" as const,
+    timingAdvice: "Place before kickoff",
+    releaseSchedule: {
+      whaleRelease: now,
+      eliteRelease: now,
+      proRelease: now,
+      freeRelease: now,
+    },
+    isExclusive: false,
+  };
+}
+
 export function buildLifeChangerTicket(): LifeChangerTicket | null {
   const allPicks: PrecomputedPick[] = [];
   const sports: Sport[] = ["NBA", "NHL", "NCAAB", "NFL", "MLB"] as Sport[];
@@ -1806,6 +1842,13 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     if (!cache) continue;
     allPicks.push(...cache.snapshot.picks.filter(p => p.timing !== "line_locked"));
   }
+
+  // Inject international soccer picks into the Life Changer pool
+  const soccerPicks = getInternationalLifeChangerPicks();
+  const soccerConverted = soccerPicks
+    .filter(sp => !sp.isLive) // only upcoming games
+    .map(soccerPickToPrecomputed);
+  allPicks.push(...soccerConverted);
 
   if (allPicks.length < 6) return null;
 
