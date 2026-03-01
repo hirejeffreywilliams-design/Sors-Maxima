@@ -241,132 +241,20 @@
       "savedAt": "2026-03-01T12:54:59.953Z"
     },
     {
-      "id": "precomp-NCAAB-401820778-spread-ed5cb959bb",
-      "gameId": "401820778",
-      "sport": "NCAAB",
-      "game": "Duke Blue Devils @ NC State Wolfpack",
-      "homeTeam": "NC State Wolfpack",
-      "awayTeam": "Duke Blue Devils",
-      "pick": "Duke Blue Devils -10.5",
-      "betType": "spread",
-      "odds": -102,
+      "id": "precomp-NHL-401803302-team_total-136d817d23",
+      "gameId": "401803302",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Minnesota Wild Over 4",
+      "betType": "team_total",
+      "odds": -110,
       "grade": "B-",
-      "confidence": 48,
-      "ev": -4.94,
-      "gameTime": "2026-03-03T00:00Z",
-      "savedAt": "2026-03-01T17:14:29.801Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-total-a68011d318",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Over 229.5",
-      "betType": "total",
-      "odds": -106,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -35.87,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:15:57.686Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-team_total-602ceaa019",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Chicago Bulls Over 113.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -37,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:15:57.686Z"
-    },
-    {
-      "id": "precomp-NCAAB-401820821-team_total-9a5aca2bfd",
-      "gameId": "401820821",
-      "sport": "NCAAB",
-      "game": "Iowa State Cyclones @ Arizona Wildcats",
-      "homeTeam": "Arizona Wildcats",
-      "awayTeam": "Iowa State Cyclones",
-      "pick": "Arizona Wildcats Under 78",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 42,
-      "ev": -19.82,
-      "gameTime": "2026-03-03T02:00Z",
-      "savedAt": "2026-03-01T17:15:58.033Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-total-905b5a5e54",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Over 230.5",
-      "betType": "total",
-      "odds": -114,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -38.05,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:18:09.050Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-team_total-b21b3a267b",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Chicago Bulls Over 114",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -37,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:18:09.050Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-team_total-7f8faaab06",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Milwaukee Bucks Over 117",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -37,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:18:09.050Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-total-e77dbc5c3c",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Over 231",
-      "betType": "total",
-      "odds": -114,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -38.05,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T17:21:33.133Z"
+      "confidence": 45,
+      "ev": -14.09,
+      "gameTime": "2026-03-01T22:00Z",
+      "savedAt": "2026-03-01T17:26:22.969Z"
     }
   ],
   "settled": [
@@ -56865,16 +56753,176 @@
       "homeScore": 74,
       "awayScore": 76,
       "settledAt": "2026-03-01T17:13:59.616Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820778-spread-ed5cb959bb",
+      "gameId": "401820778",
+      "sport": "NCAAB",
+      "game": "Duke Blue Devils @ NC State Wolfpack",
+      "homeTeam": "NC State Wolfpack",
+      "awayTeam": "Duke Blue Devils",
+      "pick": "Duke Blue Devils -10.5",
+      "betType": "spread",
+      "odds": -102,
+      "grade": "B-",
+      "confidence": 48,
+      "ev": -4.94,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-01T17:14:29.801Z",
+      "result": "lost",
+      "homeScore": 77,
+      "awayScore": 51,
+      "settledAt": "2026-03-01T17:22:47.926Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820821-team_total-9a5aca2bfd",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Arizona Wildcats Under 78",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 42,
+      "ev": -19.82,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-01T17:15:58.033Z",
+      "result": "lost",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-01T17:22:47.946Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-total-a68011d318",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Over 229.5",
+      "betType": "total",
+      "odds": -106,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -35.87,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:15:57.686Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-602ceaa019",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls Over 113.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:15:57.686Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-total-905b5a5e54",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Over 230.5",
+      "betType": "total",
+      "odds": -114,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -38.05,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:18:09.050Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-b21b3a267b",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls Over 114",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:18:09.050Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-7f8faaab06",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Milwaukee Bucks Over 117",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:18:09.050Z",
+      "result": "won",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-total-e77dbc5c3c",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Over 231",
+      "betType": "total",
+      "odds": -114,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -38.05,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:21:33.133Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:22:47.971Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2718,
-      "won": 1280,
-      "lost": 1419,
+      "total": 2726,
+      "won": 1281,
+      "lost": 1426,
       "push": 19,
-      "rate": 47.1,
-      "pending": 23
+      "rate": 47,
+      "pending": 16
     },
     "bySport": {
       "NHL": {
@@ -56883,14 +56931,14 @@
         "rate": 38.4
       },
       "NCAAB": {
-        "total": 1122,
+        "total": 1124,
         "won": 592,
-        "rate": 52.8
+        "rate": 52.7
       },
       "NBA": {
-        "total": 726,
-        "won": 351,
-        "rate": 48.3
+        "total": 732,
+        "won": 352,
+        "rate": 48.1
       },
       "MLB": {
         "total": 320,
@@ -56900,9 +56948,9 @@
     },
     "byGrade": {
       "C-": {
-        "total": 196,
-        "won": 97,
-        "rate": 49.5
+        "total": 202,
+        "won": 98,
+        "rate": 48.5
       },
       "C": {
         "total": 128,
@@ -56910,14 +56958,14 @@
         "rate": 49.2
       },
       "C+": {
-        "total": 1191,
+        "total": 1192,
         "won": 663,
-        "rate": 55.7
+        "rate": 55.6
       },
       "B-": {
-        "total": 48,
+        "total": 49,
         "won": 32,
-        "rate": 66.7
+        "rate": 65.3
       },
       "B+": {
         "total": 6,
@@ -56947,9 +56995,9 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 230,
-        "won": 122,
-        "rate": 53
+        "total": 234,
+        "won": 123,
+        "rate": 52.6
       },
       "Moneyline": {
         "total": 79,
@@ -56957,23 +57005,23 @@
         "rate": 51.9
       },
       "Spread": {
-        "total": 1183,
+        "total": 1184,
         "won": 435,
-        "rate": 36.8
+        "rate": 36.7
       },
       "Total": {
-        "total": 1226,
+        "total": 1229,
         "won": 682,
-        "rate": 55.6
+        "rate": 55.5
       }
     },
     "recentForm": {
-      "won": 26,
-      "lost": 24,
+      "won": 22,
+      "lost": 28,
       "push": 0,
-      "rate": 52
+      "rate": 44
     },
-    "lastUpdated": "2026-03-01T17:21:42.328Z"
+    "lastUpdated": "2026-03-01T17:26:31.999Z"
   },
   "version": 1
 }
