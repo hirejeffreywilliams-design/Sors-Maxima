@@ -6,6 +6,7 @@ import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
 import { recordGameOutcome } from "./platformIntelligenceEngine";
 import { settlePicksForGame } from "./pickOutcomeTracker";
 import { updateMCWithOutcome, runMCLearningCycle } from "./mcStackedLearner";
+import { feedEnsembleOutcomeByGame, runUSMLLearningCycle } from "./unifiedStackingMetaLearner";
 
 import { runCalibrationCheck } from "./calibrationEngine";
 
@@ -303,6 +304,15 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
         // ── MC Stacked Learner: feed outcome into calibration loop ──────────
         try {
           updateMCWithOutcome(sl.gameId, sl.market, sl.legResult as "won" | "lost" | "push");
+        } catch {}
+        // ── USML: feed outcome so source weights update ──────────────────────
+        try {
+          feedEnsembleOutcomeByGame(
+            sl.gameId,
+            sl.sport,
+            sl.market,
+            sl.legResult as "won" | "lost" | "push",
+          );
         } catch {}
         mcRecorded++;
       } catch (e: any) {
@@ -918,6 +928,8 @@ export function startContinuousLearningOrchestrator(): void {
       await scheduledRetraining();
       // Run MC stacked learning cycle alongside daily retraining
       runMCLearningCycle();
+      // Run USML cross-source weight recalibration
+      runUSMLLearningCycle();
     } catch (e: any) {
       addError("retraining", e.message);
     }

@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,11 @@ export default function AdminModelPerformance() {
   const [, setLocation] = useLocation();
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/model-performance"] });
   const { data: mcStats } = useQuery<any>({ queryKey: ["/api/admin/mc-learning/stats"], refetchInterval: 60000 });
+  const { data: usmlStats, refetch: refetchUSML } = useQuery<any>({ queryKey: ["/api/admin/usml/stats"], refetchInterval: 30000 });
+  const usmlCycleMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/usml/cycle"),
+    onSuccess: () => { setTimeout(() => refetchUSML(), 1000); },
+  });
 
   if (isLoading) {
     return (
@@ -133,6 +139,9 @@ export default function AdminModelPerformance() {
             </TabsTrigger>
             <TabsTrigger value="mc-learning" data-testid="tab-mc-learning">
               <Layers className="w-3 h-3 mr-1" /> MC Learning
+            </TabsTrigger>
+            <TabsTrigger value="ensemble" data-testid="tab-ensemble">
+              <Cpu className="w-3 h-3 mr-1" /> Ensemble
             </TabsTrigger>
           </TabsList>
 
@@ -495,6 +504,131 @@ export default function AdminModelPerformance() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Learning Cycles Run: <span className="text-foreground font-medium">{mcStats?.learningCycles ?? 0}</span></span>
                   <span>Last Cycle: <span className="text-foreground font-medium font-mono">{mcStats?.lastCycleAt ? new Date(mcStats.lastCycleAt).toLocaleTimeString() : "—"}</span></span>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="ensemble" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <CardTitle className="text-base">Unified Stacking Meta-Learner (USML)</CardTitle>
+                    <CardDescription>
+                      Ensemble engine that dynamically reweights QFE, Monte Carlo, Vegas, Situational, Market, and Learning signals
+                      based on historical accuracy. Weights self-adjust after every settled outcome.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => usmlCycleMutation.mutate()}
+                    disabled={usmlCycleMutation.isPending}
+                    data-testid="button-usml-cycle"
+                  >
+                    <RefreshCw className={`w-3 h-3 mr-1 ${usmlCycleMutation.isPending ? "animate-spin" : ""}`} />
+                    Run Cycle
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Ensemble Win Rate</div>
+                    <div className="text-2xl font-bold" data-testid="text-usml-winrate">
+                      {usmlStats?.ensembleWinRate != null ? `${usmlStats.ensembleWinRate}%` : "—"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{usmlStats?.totalSettled ?? 0} settled</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">EMA Accuracy</div>
+                    <div className="text-2xl font-bold" data-testid="text-usml-ema">
+                      {usmlStats?.ensembleEMA != null ? `${usmlStats.ensembleEMA}%` : "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Momentum</div>
+                    <div className="text-xl font-bold" data-testid="text-usml-momentum">
+                      {usmlStats?.ensembleMomentum != null
+                        ? <span className={usmlStats.ensembleMomentum > 0.02 ? "text-green-500" : usmlStats.ensembleMomentum < -0.02 ? "text-red-500" : ""}>
+                            {usmlStats.ensembleMomentum > 0 ? "+" : ""}{usmlStats.ensembleMomentum}
+                          </span>
+                        : "—"}
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Total Predictions</div>
+                    <div className="text-2xl font-bold" data-testid="text-usml-preds">{usmlStats?.totalPredictions ?? 0}</div>
+                    <div className="text-xs text-muted-foreground">{usmlStats?.pendingCount ?? 0} pending</div>
+                  </div>
+                </div>
+
+                <Separator />
+                <div>
+                  <p className="text-sm font-medium mb-3">Source Weight Rankings</p>
+                  <div className="space-y-3">
+                    {(usmlStats?.sources ?? [])
+                      .sort((a: any, b: any) => b.currentWeight - a.currentWeight)
+                      .map((src: any) => {
+                        const pct = Math.round(((src.currentWeight - 0.4) / (2.0 - 0.4)) * 100);
+                        const isBase = Math.abs(src.currentWeight - src.baseWeight) < 0.01;
+                        return (
+                          <div key={src.id} className="space-y-1" data-testid={`row-usml-${src.id}`}>
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                <span className="text-sm font-medium truncate">{src.displayName}</span>
+                                <Badge variant="outline" className="text-xs shrink-0">
+                                  {src.momentumLabel}
+                                </Badge>
+                                {isBase && <span className="text-xs text-muted-foreground shrink-0">baseline</span>}
+                              </div>
+                              <div className="text-right shrink-0">
+                                <span className="text-sm font-bold font-mono">{src.currentWeight}×</span>
+                                <span className="text-xs text-muted-foreground ml-2">
+                                  {src.accuracy != null ? `${src.accuracy}% acc` : "learning"}
+                                  {" "}(n={src.totalOutcomes})
+                                </span>
+                              </div>
+                            </div>
+                            <Progress value={pct} className="h-1.5" />
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {usmlStats?.sources?.some((s: any) => s.sportBreakdown?.length > 0) && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium mb-2">Sport-Specific Calibration (top source)</p>
+                      {usmlStats.sources
+                        .filter((s: any) => s.sportBreakdown?.length > 0)
+                        .slice(0, 1)
+                        .map((src: any) => (
+                          <div key={src.id}>
+                            <p className="text-xs text-muted-foreground mb-2">{src.displayName}</p>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                              {src.sportBreakdown.map((sb: any) => (
+                                <div key={sb.sport} className="p-2 bg-muted/30 rounded text-sm">
+                                  <div className="font-medium">{sb.sport}</div>
+                                  <div className="text-muted-foreground text-xs">
+                                    {sb.ema}% EMA • {sb.weight}× wt • n={sb.total}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </>
+                )}
+
+                <Separator />
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Learning Cycles: <span className="text-foreground font-medium">{usmlStats?.learningCycles ?? 0}</span></span>
+                  <span>Last Cycle: <span className="text-foreground font-medium font-mono">{usmlStats?.lastCycleAt ? new Date(usmlStats.lastCycleAt).toLocaleTimeString() : "—"}</span></span>
                 </div>
               </CardContent>
             </Card>

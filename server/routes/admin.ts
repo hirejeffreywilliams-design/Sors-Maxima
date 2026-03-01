@@ -4059,4 +4059,23 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/usml/stats", requireAdmin, async (_req, res) => {
+    try {
+      const { getUSMLStats } = await import("../unifiedStackingMetaLearner");
+      res.json(getUSMLStats());
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get USML stats", details: error.message });
+    }
+  });
+
+  app.post("/api/admin/usml/cycle", requireAdmin, async (_req, res) => {
+    try {
+      const { runUSMLLearningCycle } = await import("../unifiedStackingMetaLearner");
+      runUSMLLearningCycle();
+      res.json({ success: true, message: "USML learning cycle triggered" });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to run USML cycle", details: error.message });
+    }
+  });
+
 }

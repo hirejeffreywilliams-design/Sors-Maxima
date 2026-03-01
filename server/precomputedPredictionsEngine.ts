@@ -22,6 +22,7 @@ import { getInternationalLifeChangerPicks, type SoccerPick } from "./internation
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
+import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
 import type { Sport } from "@shared/schema";
 
 const DIVISION_GROUPS: Record<string, string[][]> = {
@@ -814,6 +815,115 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         oddsSource: game.odds?.homeMoneyline ? "ESPN" : "model-estimated",
       }, marketCtx);
       let confidence = Math.min(68, Math.max(25, fusion.confidence));
+
+      // ── Unified Stacking Meta-Learner (USML) ────────────────────────────
+      // Collect signals from every available engine and blend them using
+      // dynamically-learned per-source weights.  The ensemble result refines
+      // the base QFE confidence before the MC stacked learner applies its
+      // variance/weight/bias corrections.
+      try {
+        const usmlSignals: SourceSignal[] = [];
+
+        // Signal 1 — QFE (46-Factor Model) — always present
+        usmlSignals.push({
+          sourceId: "qfe",
+          confidence: fusion.confidence,
+          strength: 1.0,
+        });
+
+        // Signal 2 — Monte Carlo simulation (when available)
+        if (mcSim) {
+          const isFavBet  = bet.betType === "moneyline" && bet.pick.includes(favName);
+          const mcWinProb = bet.betType === "moneyline"
+            ? (isFavBet
+                ? (favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb)
+                : (favoriteIsHome ? mcSim.awayWinProb : mcSim.homeWinProb))
+            : mcSim.homeWinProb;
+          const mcConf     = Math.min(72, Math.max(28, mcWinProb * 100));
+          const mcStrength = Math.min(1, (mcSim.convergenceScore || 0.7) * 1.3);
+          usmlSignals.push({ sourceId: "monte_carlo", confidence: mcConf, strength: mcStrength });
+        }
+
+        // Signal 3 — Vegas engine (match by game + betType)
+        const vegasNormBetType = ["first_half_spread", "first_half_total"].includes(bet.betType)
+          ? (bet.betType.includes("spread") ? "spread" : "total")
+          : bet.betType;
+        const vegasPick = (vegasPicks as any[]).find((vp: any) =>
+          vp.gameId === game.id && vp.betType === vegasNormBetType
+        );
+        if (vegasPick) {
+          const vegasConf = Math.min(72, Math.max(28, vegasPick.confidence));
+          const vegasStrength = Math.min(1, (vegasPick.modelAgreement || 3) / 5);
+          usmlSignals.push({ sourceId: "vegas", confidence: vegasConf, strength: vegasStrength });
+        }
+
+        // Signal 4 — Situational factors
+        if (sitFactors) {
+          // Favorable spots → higher confidence signal; bad spots → lower
+          const spotBonus: Record<string, number> = {
+            rest_advantage: 8, road_dog: 6, home_stand: 5, back_to_back: -8,
+            neutral_site: 0, fade_spot: -6, prime_spot: 7, letdown_spot: -5,
+          };
+          const spotAdj  = spotBonus[sitFactors.spotType] ?? 0;
+          const sitConf  = Math.min(65, Math.max(35, 52 + spotAdj));
+          const restDiff = Math.abs((sitFactors.homeRestDays || 2) - (sitFactors.awayRestDays || 2));
+          const sitStr   = Math.min(0.85, 0.4 + restDiff * 0.1 + (Math.abs(spotAdj) / 30));
+          usmlSignals.push({ sourceId: "situational", confidence: sitConf, strength: sitStr });
+        }
+
+        // Signal 5 — Market / sharp money
+        if (marketGame) {
+          const hasSharp   = gameLineMovements.some(lm => lm.sharpAction);
+          const hasSteam   = gameLineMovements.some(lm => lm.velocity === "steam");
+          const bookCount  = marketGame.bookmakers?.length || 0;
+          const sharpDir   = derivedSharpMoney?.direction;
+          // Sharp money points toward one side → use that as a confidence signal
+          if (sharpDir && (hasSharp || hasSteam)) {
+            const pickIsHome = bet.pick.toLowerCase().includes(homeName.toLowerCase());
+            const sharpAligned = (sharpDir === "home" && pickIsHome) || (sharpDir === "away" && !pickIsHome);
+            const marketConf = sharpAligned ? 62 : 40;
+            const marketStr  = Math.min(0.90, 0.35 + (bookCount * 0.04) + (hasSteam ? 0.15 : 0));
+            usmlSignals.push({ sourceId: "market", confidence: marketConf, strength: marketStr });
+          } else if (bookCount >= 4) {
+            // No sharp action but many books → mild market consensus signal
+            usmlSignals.push({ sourceId: "market", confidence: 52, strength: Math.min(0.60, bookCount * 0.07) });
+          }
+        }
+
+        // Signal 6 — Learning engine (proxy: QFE factor signal quality)
+        // The learning engine's calibrated weights are already baked into QFE;
+        // we add a learning signal whose strength reflects how many signals
+        // QFE is firing with high confidence.
+        const highConfSignals = (fusion.signals || []).filter(s => s.confidence > 75).length;
+        const learningStrength = Math.min(0.80, highConfSignals * 0.12);
+        if (learningStrength > 0.1) {
+          usmlSignals.push({
+            sourceId: "learning",
+            confidence: Math.min(68, fusion.confidence + 2),
+            strength: learningStrength,
+          });
+        }
+
+        // ── Get ensemble ─────────────────────────────────────────────────
+        const pickId = `precomp-${sport}-${game.id}-${bet.betType}-${
+          crypto.createHash("sha256").update(`${game.id}|${bet.betType}|${bet.pick}`).digest("hex").slice(0, 10)
+        }`;
+        const ensemble = getEnsembleConfidence(sport, bet.betType, usmlSignals);
+
+        // Blend: if USML has ≥3 active signals, it carries 50% weight;
+        // if only 1-2 signals, QFE stays dominant (30% USML).
+        const ensembleWeight = usmlSignals.length >= 4 ? 0.50 : usmlSignals.length >= 3 ? 0.40 : 0.30;
+        confidence = Math.round(
+          confidence * (1 - ensembleWeight) + ensemble.ensembleConfidence * ensembleWeight
+        );
+        confidence = Math.min(70, Math.max(22, confidence));
+
+        // Record for feedback learning (fire-and-forget), including gameId
+        // for the secondary index so settlement can find it by game+betType
+        recordEnsemblePrediction(pickId, sport, bet.betType, ensemble, game.id);
+      } catch (usmlErr: any) {
+        // USML is non-blocking — if it fails, fall back to QFE alone
+      }
 
       if (mcSim) {
         let mcConfBoost = 0;
