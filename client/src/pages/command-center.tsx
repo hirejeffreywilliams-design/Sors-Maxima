@@ -14,7 +14,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
-  Trophy, DollarSign, Layers, Plus, Calendar, Info
+  Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
@@ -1059,6 +1059,227 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
     </Card>
   );
 }
+// === Life Changer Feature ===
+
+interface LifeChangerLeg {
+  sport: string;
+  game: string;
+  pick: string;
+  betType: string;
+  americanOdds: number;
+  decimalOdds: number;
+  selectionReason: string;
+  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper";
+  gameTime?: string;
+  ev: number;
+  confidence: number;
+  isUnderdog: boolean;
+}
+
+interface LifeChangerTicket {
+  id: string;
+  legs: LifeChangerLeg[];
+  totalDecimalOdds: number;
+  americanOdds: string;
+  legCount: number;
+  sports: string[];
+  potentialPayouts: { stake: number; payout: number; formatted: string }[];
+  selectionLogic: string;
+  generatedAt: string;
+  disclaimer: string;
+}
+
+const SPORT_EMOJI: Record<string, string> = {
+  NBA: "🏀", NHL: "🏒", NCAAB: "🏀", NFL: "🏈", MLB: "⚾", NCAAF: "🏈",
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  underdog: "text-amber-500 bg-amber-500/10 border-amber-500/30",
+  sleeper: "text-purple-500 bg-purple-500/10 border-purple-500/30",
+  contrarian: "text-blue-500 bg-blue-500/10 border-blue-500/30",
+  alternative: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
+};
+
+const CATEGORY_LABEL: Record<string, string> = {
+  underdog: "Underdog",
+  sleeper: "Sleeper",
+  contrarian: "Contrarian",
+  alternative: "Alt Market",
+};
+
+function formatOddsLC(american: number): string {
+  return american > 0 ? `+${american.toLocaleString()}` : american.toLocaleString();
+}
+
+function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+  const { data, isLoading } = useQuery<{ ticket: LifeChangerTicket | null; message?: string }>({
+    queryKey: ["/api/life-changer-ticket"],
+    refetchInterval: 300000,
+  });
+
+  const ticket = data?.ticket ?? null;
+  const [expanded, setExpanded] = useState(false);
+  const [addedAll, setAddedAll] = useState(false);
+
+  function handleAddAll() {
+    if (!ticket) return;
+    let added = 0;
+    ticket.legs.forEach(leg => {
+      const ok = addLeg({
+        id: `lc-${leg.sport}-${leg.game}-${leg.betType}`,
+        label: leg.pick,
+        odds: leg.americanOdds,
+        sport: leg.sport,
+        game: leg.game,
+        market: leg.betType,
+      });
+      if (ok) added++;
+    });
+    if (added > 0) setAddedAll(true);
+  }
+
+  return (
+    <section data-testid="section-life-changer" className="relative">
+      <div
+        className="rounded-xl border-2 border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-background to-amber-900/10 overflow-hidden shadow-lg"
+      >
+        <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-2 rounded-lg bg-amber-500/15 shrink-0">
+              <Dice5 className="w-5 h-5 text-amber-400" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-bold text-amber-300 leading-tight">Life Changer</h2>
+                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">
+                  Daily Ticket
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                Unorthodox multi-sport underdog parlay — the kind of ticket that changes everything
+              </p>
+            </div>
+          </div>
+          {ticket && (
+            <div className="text-right shrink-0">
+              <p className="text-2xl font-black text-amber-300 leading-none tabular-nums" data-testid="text-life-changer-odds">
+                {ticket.americanOdds}
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.legCount} legs · {ticket.sports.length} sports</p>
+            </div>
+          )}
+        </div>
+
+        {isLoading && (
+          <div className="px-4 pb-4 space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        )}
+
+        {!isLoading && !ticket && (
+          <div className="px-4 pb-4">
+            <div className="rounded-lg bg-muted/30 p-4 text-center">
+              <Shuffle className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">{data?.message || "Generating today's ticket once picks load…"}</p>
+            </div>
+          </div>
+        )}
+
+        {ticket && (
+          <>
+            <div className="px-4 pb-3">
+              <div className="grid grid-cols-4 gap-2">
+                {ticket.potentialPayouts.map(p => (
+                  <div key={p.stake} className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2 text-center">
+                    <p className="text-[10px] text-amber-300/70">${p.stake} bet</p>
+                    <p className="text-sm font-bold text-amber-300 tabular-nums" data-testid={`text-lc-payout-${p.stake}`}>{p.formatted}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-4 pb-2">
+              <button
+                onClick={() => setExpanded(e => !e)}
+                className="w-full flex items-center justify-between text-xs text-muted-foreground hover:text-foreground transition-colors py-1.5 border-t border-amber-500/20"
+                data-testid="button-lc-expand"
+              >
+                <span className="flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" />
+                  {expanded ? "Hide" : "View"} all {ticket.legCount} legs
+                </span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
+              </button>
+            </div>
+
+            {expanded && (
+              <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3">
+                {ticket.legs.map((leg, i) => (
+                  <div
+                    key={i}
+                    className="flex items-start gap-2.5 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5"
+                    data-testid={`row-lc-leg-${i}`}
+                  >
+                    <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold truncate">{leg.pick}</span>
+                        <Badge
+                          variant="outline"
+                          className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}
+                        >
+                          {CATEGORY_LABEL[leg.selectionCategory]}
+                        </Badge>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate mt-0.5">{leg.game}</p>
+                      <p className="text-[10px] text-amber-300/70 mt-0.5">{leg.selectionReason}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
+                      <p className="text-[9px] text-muted-foreground">{leg.betType.replace(/_/g, " ")}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="px-4 pb-4 pt-1 flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={handleAddAll}
+                disabled={addedAll}
+                className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs"
+                data-testid="button-lc-add-all"
+              >
+                {addedAll ? (
+                  <><Check className="w-3.5 h-3.5 mr-1" /> All Legs in Slip</>
+                ) : (
+                  <><Plus className="w-3.5 h-3.5 mr-1" /> Add All {ticket.legCount} Legs to Slip</>
+                )}
+              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button className="p-1.5 rounded-md hover:bg-muted/40 text-muted-foreground" data-testid="button-lc-info">
+                    <Info className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs text-xs">
+                  <p className="font-semibold mb-1">How it works</p>
+                  <p>{ticket.selectionLogic}</p>
+                  <p className="mt-1.5 text-muted-foreground italic">{ticket.disclaimer}</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
+// === End Life Changer ===
+
 export default function CommandCenter() {
   useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
   const [activeSportTab, setActiveSportTab] = useState("all");
@@ -1323,6 +1544,8 @@ export default function CommandCenter() {
             </div>
           </section>
         )}
+
+        <LifeChangerSection legs={legs} addLeg={addLeg} />
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card data-testid="card-stat-best-grade">

@@ -1704,6 +1704,158 @@ export function buildMatchupTickets(options: {
   });
 }
 
+// === Life Changer Ticket Builder ===
+
+export interface LifeChangerLeg {
+  sport: string;
+  game: string;
+  pick: string;
+  betType: string;
+  americanOdds: number;
+  decimalOdds: number;
+  selectionReason: string;
+  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper";
+  gameTime?: string;
+  ev: number;
+  confidence: number;
+  isUnderdog: boolean;
+}
+
+export interface LifeChangerTicket {
+  id: string;
+  legs: LifeChangerLeg[];
+  totalDecimalOdds: number;
+  americanOdds: string;
+  legCount: number;
+  sports: string[];
+  potentialPayouts: { stake: number; payout: number; formatted: string }[];
+  selectionLogic: string;
+  generatedAt: string;
+  disclaimer: string;
+}
+
+function dateSeededShuffle<T>(arr: T[], seed: string): T[] {
+  const copy = [...arr];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  for (let i = copy.length - 1; i > 0; i--) {
+    hash = ((hash << 5) - hash) + i;
+    hash |= 0;
+    const j = Math.abs(hash) % (i + 1);
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+export function buildLifeChangerTicket(): LifeChangerTicket | null {
+  const allPicks: PrecomputedPick[] = [];
+  const sports: Sport[] = ["NBA", "NHL", "NCAAB", "NFL", "MLB"] as Sport[];
+
+  for (const sport of sports) {
+    const cache = predictionCache.get(sport);
+    if (!cache) continue;
+    allPicks.push(...cache.snapshot.picks.filter(p => p.timing !== "line_locked"));
+  }
+
+  if (allPicks.length < 6) return null;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const shuffled = dateSeededShuffle(allPicks, today);
+
+  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > -2);
+  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 2.5 && !["A+", "A"].includes(p.grade));
+  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 0);
+  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 40);
+
+  const selectedLegs: PrecomputedPick[] = [];
+  const usedGames = new Set<string>();
+  const sportCounts = new Map<string, number>();
+  const MAX_PER_SPORT = 2;
+
+  function tryAdd(pool: PrecomputedPick[], needed: number) {
+    let added = 0;
+    for (const pick of pool) {
+      if (added >= needed) break;
+      if (usedGames.has(pick.game)) continue;
+      if ((sportCounts.get(pick.sport) || 0) >= MAX_PER_SPORT) continue;
+      selectedLegs.push(pick);
+      usedGames.add(pick.game);
+      sportCounts.set(pick.sport, (sportCounts.get(pick.sport) || 0) + 1);
+      added++;
+    }
+  }
+
+  tryAdd(underdogPool, 4);
+  tryAdd(contrarianPool, 3);
+  tryAdd(alternativePool, 2);
+  tryAdd(sleeperPool, 2);
+  if (selectedLegs.length < 6) tryAdd(shuffled.filter(p => !selectedLegs.includes(p)), 8 - selectedLegs.length);
+
+  if (selectedLegs.length < 4) return null;
+
+  const totalDecimalOdds = selectedLegs.reduce((acc, p) => acc * americanToDecimal(p.odds), 1);
+  const rawAmerican = decimalToAmerican(totalDecimalOdds);
+  const americanOddsStr = rawAmerican > 0 ? `+${rawAmerican.toLocaleString()}` : rawAmerican.toLocaleString();
+
+  const stakes = [10, 25, 50, 100];
+  const potentialPayouts = stakes.map(s => {
+    const raw = Math.round(s * totalDecimalOdds * 100) / 100;
+    return {
+      stake: s,
+      payout: raw,
+      formatted: raw >= 1000
+        ? `$${(raw / 1000).toFixed(1)}K`
+        : `$${raw.toFixed(0)}`,
+    };
+  });
+
+  function getCategory(p: PrecomputedPick): LifeChangerLeg["selectionCategory"] {
+    if (p.odds >= 200) return "sleeper";
+    if (p.odds >= 110) return "underdog";
+    if (["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType)) return "alternative";
+    return "contrarian";
+  }
+
+  function getReason(p: PrecomputedPick): string {
+    const cat = getCategory(p);
+    if (cat === "sleeper") return `Long-shot sleeper — most bettors ignore ${p.sport} underdogs at this price`;
+    if (cat === "underdog") return `Underdog value — model sees edge the market is underpricing`;
+    if (cat === "alternative") return `Unorthodox market — public ignores ${p.betType.replace(/_/g, " ")} lines`;
+    return `Contrarian play — going against the public lean for hidden value`;
+  }
+
+  const uniqueSports = [...new Set(selectedLegs.map(p => p.sport))];
+
+  return {
+    id: `lc-${today}`,
+    legs: selectedLegs.map(p => ({
+      sport: p.sport,
+      game: p.game,
+      pick: p.pick,
+      betType: p.betType,
+      americanOdds: p.odds,
+      decimalOdds: americanToDecimal(p.odds),
+      selectionReason: getReason(p),
+      selectionCategory: getCategory(p),
+      gameTime: p.gameTime,
+      ev: p.ev,
+      confidence: p.confidence,
+      isUnderdog: p.odds >= 100,
+    })),
+    totalDecimalOdds: Math.round(totalDecimalOdds * 100) / 100,
+    americanOdds: americanOddsStr,
+    legCount: selectedLegs.length,
+    sports: uniqueSports,
+    potentialPayouts,
+    selectionLogic: `${selectedLegs.length}-leg cross-sport parlay: underdogs + contrarian plays + alternative markets across ${uniqueSports.join(", ")}`,
+    generatedAt: new Date().toISOString(),
+    disclaimer: "High-risk parlay for entertainment purposes. Bet responsibly. Past results do not predict future outcomes.",
+  };
+}
+
 export function getEngineStatus() {
   const cacheStatus: Record<string, { hasPicks: boolean; pickCount: number; dataSource: string; age: string; generatedAt: string }> = {};
   const entries = Array.from(predictionCache.entries());

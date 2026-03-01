@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, getSSEStatus } from "../sseManager";
-import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
+import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
@@ -581,6 +581,19 @@ export function registerIntelligenceRoutes(app: Express): void {
       res.json(record);
     } catch (err: any) {
       res.status(500).json({ error: "Failed to refresh track record" });
+    }
+  });
+
+  app.get("/api/life-changer-ticket", (req: Request, res: Response) => {
+    try {
+      const ticket = buildLifeChangerTicket();
+      if (!ticket) {
+        return res.json({ ticket: null, message: "Not enough picks available yet — check back once today's games are loaded." });
+      }
+      res.json({ ticket });
+    } catch (err: any) {
+      console.error("[life-changer] Error:", err.message);
+      res.status(500).json({ error: "Failed to generate Life Changer ticket" });
     }
   });
 
