@@ -262,7 +262,7 @@ class AuthService {
         isAdmin: true,
         user: {
           id: 'admin',
-          email: 'admin@sorsmaxima.com',
+          email: process.env.ADMIN_EMAIL || 'hirejeffreywilliams@gmail.com',
           username: ADMIN_USERNAME!,
           passwordHash: '',
           role: 'admin',

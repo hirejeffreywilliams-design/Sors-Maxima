@@ -139,7 +139,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(401).json({ error: "Authentication required" });
       }
       if (userId === "admin") {
-        return res.json({ email: "admin@sorsmaxima.com" });
+        return res.json({ email: process.env.ADMIN_EMAIL || "hirejeffreywilliams@gmail.com" });
       }
       const user = await getUserById(Number(userId));
       if (!user) {

@@ -95,6 +95,7 @@ class AppGuardianEngine {
   private autoHealActions = 0;
   private lastFullScan: string | null = null;
   private intervals: NodeJS.Timeout[] = [];
+  private lastAIDiagnosticAt = 0;
   private errorCounts: Map<string, number[]> = new Map();
   private responseTimeSamples: number[] = [];
 
@@ -463,10 +464,15 @@ class AppGuardianEngine {
       const activeAlerts = this.alerts.filter(a => !a.resolved);
       const downServices = Array.from(this.services.values()).filter(s => s.status === "down" || s.status === "degraded");
       const healthScore = this.calculateHealthScore();
+      const hasCriticalIssue = activeAlerts.some(a => a.severity === "critical" || a.severity === "high") || downServices.length > 0 || healthScore < 80;
+      const cooldownMs = 30 * 60 * 1000;
+      const cooldownElapsed = Date.now() - this.lastAIDiagnosticAt > cooldownMs;
 
-      if (activeAlerts.length === 0 && downServices.length === 0 && healthScore >= 90) {
+      if (!hasCriticalIssue || !cooldownElapsed) {
         return;
       }
+
+      this.lastAIDiagnosticAt = Date.now();
 
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI({
