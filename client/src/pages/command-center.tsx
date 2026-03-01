@@ -1147,18 +1147,35 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
     return `lc-${leg.sport}-${leg.game.replace(/\s/g, "_")}-${leg.betType}`;
   }
 
+  function buildLcLeg(leg: LifeChangerLeg) {
+    const parts = leg.game.split(" @ ");
+    const awayTeam = parts[0]?.trim() ?? "";
+    const homeTeam = parts[1]?.trim() ?? "";
+    const pickedTeam = leg.pick.includes(homeTeam) ? homeTeam : awayTeam;
+    const opponent = pickedTeam === homeTeam ? awayTeam : homeTeam;
+    return {
+      id: legId(leg),
+      team: pickedTeam || leg.pick,
+      opponent: opponent || undefined,
+      game: leg.game,
+      market: leg.betType as any,
+      outcome: leg.pick,
+      americanOdds: leg.americanOdds,
+      decimalOdds: leg.decimalOdds,
+      sport: leg.sport,
+      confidence: leg.confidence,
+      evPercent: leg.ev,
+      reasoning: leg.selectionReason,
+      addedFrom: "life_changer",
+      addedAt: new Date().toISOString(),
+    };
+  }
+
   function handleAddAll() {
     if (!ticket) return;
     let added = 0;
     ticket.legs.forEach(leg => {
-      const ok = addLeg({
-        id: legId(leg),
-        label: leg.pick,
-        odds: leg.americanOdds,
-        sport: leg.sport,
-        game: leg.game,
-        market: leg.betType,
-      });
+      const ok = addLeg(buildLcLeg(leg) as any);
       if (ok) added++;
     });
     if (added > 0) setAddedAll(true);
