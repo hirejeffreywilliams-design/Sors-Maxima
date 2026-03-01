@@ -363,7 +363,7 @@ function HedgeCalculator({ potentialWin, remainingLegs, stake }: { potentialWin:
           <span className="font-mono font-bold">${hedgeStake.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground">Guaranteed Profit:</span>
+          <span className="text-sm text-muted-foreground">Locked-In Profit:</span>
           <span className="font-mono font-bold text-green-400">${Math.max(0, guaranteedProfit).toFixed(2)}</span>
         </div>
         <div className="flex justify-between">

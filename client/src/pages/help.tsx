@@ -80,7 +80,7 @@ const FEATURES: Feature[] = [
     ],
     tips: [
       "Each pick card shows grade, confidence %, EV%, key factors, Monte Carlo results, and game context",
-      "Look for picks where both 'Quantum Fusion' and 'Monte Carlo' factors agree — high convergence",
+      "Look for picks where both the '46-Factor Model' and 'Monte Carlo' factors agree — high convergence",
       "Picks labeled 'Bet Now' have timing-sensitive value — lines may move quickly",
     ],
     tags: ["picks", "daily", "sport", "filter", "individual", "browse"],

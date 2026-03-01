@@ -22,7 +22,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Consolidated Navigation**: Streamlined navigation for desktop and mobile, emphasizing key functionalities like picks, daily insights, build tools, and markets.
 - **Advanced Analytics & Predictive Engines**: Incorporates Continuous Learning, Multi-Factor Intelligence Engine (46 data-backed factors), Scheme Recognition, Monte Carlo simulations with advanced Kelly Criterion, and a Strategy Advisor. The Monte Carlo engine is enhanced with BDL data for NBA.
 - **Pick Protection & Monetization System**: Prevents concentrated user action from moving betting lines through staggered pick releases and capacity limits.
-- **Precomputed Predictions Engine**: Runs every 5 minutes for in-season sports, combining Quantum Fusion analysis with Vegas engine predictions, including game-context reasoning and market timing signals.
+- **Precomputed Predictions Engine**: Runs every 5 minutes for in-season sports, combining 46-Factor Model analysis with Vegas engine predictions, including game-context reasoning and market timing signals.
 - **Situational Analysis Engine**: Calculates real rest days, back-to-back detection, schedule spot classification, and travel factors from live ESPN schedule data.
 - **CLV Tracker**: Stores user picks with odds at placement, updates closing odds, and tracks Closing Line Value (CLV+) rate, average CLV, and streaks, with CLV-gated learning.
 - **Personalized Betting Insights**: Analyzes user betting history to generate a "Betting DNA" profile, performance trends, and personalized game recommendations.
@@ -54,10 +54,9 @@ The application uses a modern web architecture with a React-based frontend and a
 - **PWA Support**: Full Progressive Web App functionality with branding and theme support.
 - **International Sports Engine**: Fetches fixtures and odds from API-Football for 8 major soccer leagues, generating diverse pick types and integrating with the frontend.
 - **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics, backtestCount, liveCount, and win rate in a popover.
-- **Transparent Branding**: User-facing display text uses "46-Factor Model Analysis" and "Multi-Factor Engine".
-- **AI Pick Explainer Engine**: `server/aiPickExplainer.ts` auto-generates 2-3 sentence natural language pick explanations using gpt-4o-mini (4hr cache, 18-pick batch warmup). Graceful fallback formats factor-based sentences when OpenAI is unavailable. "AI Insight" button on each pick card in daily-parlays.tsx.
-- **AI Parlay Analyzer**: `POST /api/ai/analyze-parlay` — tier rate-limited (Sharp 5/day, Edge 15/day, Max unlimited). Returns grade, verdict, assessment, strengths, risks, correlation note, stake advice via gpt-4o with JSON mode. `ParlayAIAnalyzer` component is inside the ScrollArea at top of the bet slip (above leg items) so it expands without overflowing.
-- **AI Game Preview**: `GET /api/ai/game-preview/:gameId` — 30-min cached, tier-gated (pro+), uses live IntelligenceFeed data for context.
+- **Transparent Branding**: User-facing display text uses "46-Factor Model Analysis" and "Multi-Factor Engine". "Guaranteed Profit" → "Locked-In Profit" in all hedge tools. No "AI Insights" labels shown to users.
+- **AI Pick Explainer Engine**: `server/aiPickExplainer.ts` — backend/admin-only. Generates pick explanations for admin QA. Not shown to end users.
+- **AI Routes — Backend/Admin Only**: `server/routes/ai.ts` — all routes (`/api/ai/pick-explanation`, `/api/ai/analyze-parlay`, `/api/ai/game-preview`, `/api/ai/status`) are restricted to admin access via `requireAdmin` middleware. OpenAI is used exclusively for system intelligence, admin assistant, and app guardian — NOT for user-facing features.
 - **Smart Leg Selector UX**: MatchupTicketCard has per-leg checkboxes, "Best 3"/"All"/"None" quick actions, live combined odds display, correlated leg warning, and "Add N Selected Legs" button.
 - **Bet Slip Auto-Open**: Desktop sidebar auto-opens when the first leg is added (useEffect watches legCount 0→1 transition).
 - **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces the horizontal TabsList for all 7 settings tabs.
@@ -75,5 +74,5 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Sports Data**: ESPN, BallDontLie API, API-Football
 - **Odds Data**: The Odds API
 - **Weather Data**: Open-Meteo
-- **AI/ML**: OpenAI (for Admin Assistant)
+- **AI/ML**: OpenAI (for Admin Assistant and system intelligence only — not user-facing)
 - **Email**: Resend (transactional emails)

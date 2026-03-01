@@ -1204,21 +1204,6 @@ async function runPredictionCycle(): Promise<void> {
   lastRunTime = Date.now();
   console.log(`[PrecomputedEngine] Prediction cycle #${totalRuns} complete`);
 
-  // Warm up AI explanations in background (non-blocking)
-  setTimeout(async () => {
-    try {
-      const { warmupExplanations } = await import("./aiPickExplainer");
-      const { getAllSports } = await import("./sportSeasons");
-      const allPicks: PrecomputedPick[] = [];
-      for (const sport of getAllSports()) {
-        const cache = getPrecomputedCache(sport);
-        if (cache?.picks) allPicks.push(...cache.picks);
-      }
-      await warmupExplanations(allPicks);
-    } catch (err: any) {
-      console.error("[PrecomputedEngine] AI warmup failed (non-fatal):", err.message);
-    }
-  }, 30_000);
 }
 
 export function startPrecomputedEngine(): void {

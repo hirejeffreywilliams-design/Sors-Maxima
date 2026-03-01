@@ -949,7 +949,7 @@ function EVHeatmapTab({ games, meta, isLoading, isFetching, dataUpdatedAt }: {
           <h2 className="text-lg font-bold">Arbitrage Scanner</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Cross-book arbitrage opportunities for guaranteed profit.
+          Cross-book arbitrage opportunities for locked-in profit potential.
         </p>
 
         {isLoading ? (

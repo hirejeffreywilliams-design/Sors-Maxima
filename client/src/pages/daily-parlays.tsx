@@ -162,25 +162,7 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
   inSlip: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [loadingAI, setLoadingAI] = useState(false);
   const topFactors = pick.factors?.slice(0, 3) || [];
-
-  const fetchAiInsight = async () => {
-    if (aiInsight || loadingAI) return;
-    setLoadingAI(true);
-    try {
-      const res = await fetch(`/api/ai/pick-explanation/${pick.id}`, { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setAiInsight(data.explanation || null);
-      }
-    } catch {
-      // silent fail
-    } finally {
-      setLoadingAI(false);
-    }
-  };
   const isTopPick = rank <= 3;
 
   return (
@@ -288,30 +270,6 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
           </div>
         )}
 
-        {/* AI Insight section */}
-        <div className="space-y-1.5">
-          {!aiInsight && (
-            <button
-              onClick={fetchAiInsight}
-              disabled={loadingAI}
-              data-testid={`button-ai-insight-${pick.id}`}
-              className="flex items-center gap-1.5 text-[11px] text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50 group"
-            >
-              <Sparkles className="w-3 h-3 group-hover:rotate-12 transition-transform" />
-              {loadingAI ? "Generating AI insight..." : "AI Insight — what's driving this pick?"}
-            </button>
-          )}
-          {aiInsight && (
-            <div className="px-3 py-2 rounded-lg bg-violet-500/8 border border-violet-500/20">
-              <div className="flex items-start gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-violet-400 mt-0.5 shrink-0" />
-                <p className="text-[11px] text-foreground/85 leading-relaxed italic" data-testid={`text-ai-insight-${pick.id}`}>
-                  {aiInsight}
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
 
         <div className={`grid gap-2 ${pick.winProbability ? "grid-cols-4" : "grid-cols-3"}`}>
           {pick.winProbability && (
@@ -1061,7 +1019,7 @@ export default function DailyParlays() {
         )}
 
         <div className="text-center text-[11px] text-muted-foreground pt-2" data-testid="text-data-source">
-          Powered by Quantum Fusion Engine · {snapshot?.dataSource || "ESPN"} data
+          Powered by 46-Factor Model Analysis · {snapshot?.dataSource || "ESPN"} data
           {lastUpdate && ` · Last analysis ${getTimeAgo(lastUpdate)}`}
           {engineStatus?.running && " · Auto-refreshing every 5 min"}
         </div>

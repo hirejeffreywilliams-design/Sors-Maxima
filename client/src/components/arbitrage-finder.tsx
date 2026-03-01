@@ -323,7 +323,7 @@ export function ArbitrageFinder() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm border-t pt-2">
-                      <span className="text-muted-foreground">Guaranteed Profit</span>
+                      <span className="text-muted-foreground">Locked-In Profit</span>
                       <span className="font-bold text-green-500" data-testid={`text-profit-${arb.id}`}>
                         ${stakes.profit}
                       </span>

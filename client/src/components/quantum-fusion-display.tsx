@@ -333,7 +333,7 @@ export function FusionScoreCard({ fusion, showDetails = true }: FusionScoreCardP
             <div>
               <div className="flex items-center gap-1 text-sm font-medium mb-2">
                 <Lightbulb className="w-4 h-4" />
-                <span>AI Insights</span>
+                <span>Model Insights</span>
               </div>
               <div className="space-y-1">
                 {fusion.insights.map((insight, i) => (

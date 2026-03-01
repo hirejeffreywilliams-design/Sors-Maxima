@@ -181,7 +181,7 @@ export function CorrelationHedgeCalculator() {
 
             <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm">Guaranteed Profit</span>
+                <span className="text-sm">Locked-In Profit</span>
                 <span className={`font-bold text-lg ${hedge.guaranteedProfit > 0 ? "text-green-500" : "text-red-500"}`}>
                   ${hedge.guaranteedProfit > 0 ? "+" : ""}{hedge.guaranteedProfit}
                 </span>
