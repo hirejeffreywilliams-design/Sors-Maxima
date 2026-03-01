@@ -3996,6 +3996,20 @@ Follow these rules:
     }
   });
 
+  app.post("/api/admin/pick-tracker/cleanup", requireAdmin, async (_req, res) => {
+    try {
+      const { cleanupPickTracker } = await import("../pickOutcomeTracker");
+      const result = cleanupPickTracker();
+      res.json({
+        success: true,
+        message: `Removed ${result.removedUnsettleable} unsettleable picks and ${result.removedDuplicates} duplicate picks`,
+        ...result,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Cleanup failed", details: error.message });
+    }
+  });
+
   app.post("/api/admin/learning/recalibrate", requireAdmin, async (_req, res) => {
     try {
       const result = await recalibrateWeights();

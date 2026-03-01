@@ -248,6 +248,14 @@ export function savePrecomputedPicks(picks: Array<{
     for (const pick of picks) {
       if (existingIds.has(pick.id)) continue;
 
+      // Skip bet types that can never produce a final result.
+      // First-half lines need halftime scores (not tracked by ESPN final score feed).
+      // Player props need individual player stat lines (not tracked here either).
+      // Tracking them permanently inflates the pending count and starves the
+      // learning engine of real settlement signal.
+      const bt = pick.betType.toLowerCase();
+      if (bt.includes("first_half") || bt.includes("1h") || bt.startsWith("player_")) continue;
+
       const gameId = pick.id.split("-").slice(2, 3).join("-") || pick.id;
 
       const tracked: TrackedPick = {
@@ -396,3 +404,52 @@ export function resetPickTracker(): void {
   saveData(cache);
   console.log("[PickTracker] Reset all pick tracking data");
 }
+
+// Removes unsettleable bet types and deduplicates picks by game+betType+pick text.
+// Safe to call multiple times — idempotent.
+export function cleanupPickTracker(): { removedUnsettleable: number; removedDuplicates: number } {
+  try {
+    const data = getData();
+    const originalPendingCount = data.pending.length;
+
+    // 1. Remove pick types that can never settle via final-score data
+    const unsettleableTypes = (bt: string) => {
+      const b = bt.toLowerCase();
+      return b.includes("first_half") || b.includes("1h") || b.startsWith("player_");
+    };
+    data.pending = data.pending.filter(p => !unsettleableTypes(p.betType));
+    const afterTypeFilter = data.pending.length;
+    const removedUnsettleable = originalPendingCount - afterTypeFilter;
+
+    // 2. Deduplicate pending picks by game + betType + pick string.
+    //    With deterministic IDs, future picks self-deduplicate via existingIds check.
+    //    This pass cleans up old random-ID duplicates already in the file.
+    const seen = new Set<string>();
+    data.pending = data.pending.filter(p => {
+      const key = `${p.game}|${p.betType}|${p.pick}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+    const removedDuplicates = afterTypeFilter - data.pending.length;
+
+    // 3. Also deduplicate settled picks the same way (keeps most recently settled)
+    const seenSettled = new Set<string>();
+    data.settled = [...data.settled].reverse().filter(p => {
+      const key = `${p.game}|${p.betType}|${p.pick}`;
+      if (seenSettled.has(key)) return false;
+      seenSettled.add(key);
+      return true;
+    }).reverse();
+
+    recomputeStats(data);
+    saveData(data);
+
+    console.log(`[PickTracker] Cleanup: removed ${removedUnsettleable} unsettleable + ${removedDuplicates} duplicate pending picks`);
+    return { removedUnsettleable, removedDuplicates };
+  } catch (err) {
+    console.error("[PickTracker] cleanup error:", err);
+    return { removedUnsettleable: 0, removedDuplicates: 0 };
+  }
+}
+

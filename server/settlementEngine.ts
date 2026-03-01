@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { sql } from "drizzle-orm";
-import { settlePicksForGame, getPickTrackerStatus } from "./pickOutcomeTracker";
+import { settlePicksForGame, getPickTrackerStatus, cleanupPickTracker } from "./pickOutcomeTracker";
 import { triggerManualSettlement } from "./continuousLearningOrchestrator";
 import { logInfo, logWarn } from "./errorLogger";
 
@@ -327,6 +327,14 @@ export function startAutoSettlement(): void {
   if (status.isRunning) return;
   status.isRunning = true;
   status.startedAt = new Date().toISOString();
+
+  // Clean up unsettleable and duplicate picks accumulated from previous runs.
+  // This is fast (synchronous file read/write) and safe to do on every startup.
+  try {
+    cleanupPickTracker();
+  } catch (e: any) {
+    logWarn(`[Settlement] Startup tracker cleanup failed: ${e.message}`);
+  }
 
   setTimeout(async () => {
     try {

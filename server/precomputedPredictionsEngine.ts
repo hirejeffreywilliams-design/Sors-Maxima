@@ -336,14 +336,17 @@ function determinePickTiming(
 }
 
 function gradeFromConfidence(confidence: number): string {
-  if (confidence >= 80) return "A";
-  if (confidence >= 70) return "A-";
-  if (confidence >= 65) return "B+";
-  if (confidence >= 58) return "B";
-  if (confidence >= 52) return "B-";
-  if (confidence >= 45) return "C+";
-  if (confidence >= 40) return "C";
-  if (confidence >= 35) return "C-";
+  // Thresholds calibrated to actual confidence range (22–70%).
+  // The pick engine caps confidence at ~70, so grades are distributed
+  // across the real distribution rather than against an unachievable scale.
+  if (confidence >= 65) return "A";
+  if (confidence >= 60) return "A-";
+  if (confidence >= 55) return "B+";
+  if (confidence >= 50) return "B";
+  if (confidence >= 45) return "B-";
+  if (confidence >= 40) return "C+";
+  if (confidence >= 35) return "C";
+  if (confidence >= 30) return "C-";
   return "D";
 }
 
@@ -738,7 +741,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const pickTiming = determinePickTiming(game.date, relevantMovements, evRounded);
 
       picks.push({
-        id: `precomp-${sport}-${game.id}-${bet.betType}-${crypto.randomUUID().slice(0, 8)}`,
+        id: `precomp-${sport}-${game.id}-${bet.betType}-${crypto.createHash('sha256').update(`${game.id}|${bet.betType}|${bet.pick}`).digest('hex').slice(0, 10)}`,
         sport,
         game: `${awayName} @ ${homeName}`,
         homeTeam: homeName,
@@ -894,7 +897,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         }
 
         picks.push({
-          id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.randomUUID().slice(0, 6)}`,
+          id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.createHash('sha256').update(`${game.id}|${propBetType}|${direction}|${leader.playerName}`).digest('hex').slice(0, 10)}`,
           sport,
           game: `${awayName} @ ${homeName}`,
           homeTeam: homeName,
@@ -979,7 +982,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const vpTiming = determinePickTiming(vp.gameTime, [], vpEvRounded);
 
     picks.push({
-      id: `precomp-vegas-${sport}-${crypto.randomUUID().slice(0, 12)}`,
+      id: `precomp-vegas-${sport}-${crypto.createHash('sha256').update(`${sport}|${vp.game || ''}|${vpBetType}|${vpPick}`).digest('hex').slice(0, 12)}`,
       sport,
       game: vp.game || "Unknown",
       homeTeam: vp.homeTeam || "",
