@@ -381,7 +381,7 @@ export function registerIntelligenceRoutes(app: Express): void {
         lastUpdated: stats.lastUpdated,
         backtestCount,
         liveCount,
-        factorCount: 57
+        factorCount: 38
       });
     } catch (err) {
       console.error("Model health error:", err);

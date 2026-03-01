@@ -815,7 +815,7 @@ function ModelHealthChip() {
           <div className="pt-2 border-t border-muted">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Info className="h-3 w-3" />
-              <span>57-factor multi-variant model</span>
+              <span>38-factor data-backed model</span>
             </div>
             <p className="text-[10px] text-muted-foreground mt-1">
               Last updated: {new Date(data.lastUpdated).toLocaleTimeString()}
@@ -1015,7 +1015,7 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
               <div className="flex items-start gap-1.5">
                 <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
                 <p className="text-[11px] text-foreground/80 leading-relaxed">
-                  Model Agreement: High synergy between 46-factor analysis and Monte Carlo simulations.
+                  Model Agreement: High synergy between 38-factor analysis and Monte Carlo simulations.
                 </p>
               </div>
             </div>

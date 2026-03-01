@@ -42,7 +42,7 @@ const tiers: PricingTier[] = [
       'Unlimited ticket generations',
       'Unrestricted daily access to all Sharp tools',
       'All 6 US sports + 8 international soccer leagues',
-      'Full 46-factor Prediction Engine',
+      'Full 38-Factor Prediction Engine',
       'Visual drag-and-drop ticket builder',
       'Bet grading (A-F) on every ticket',
       'Power Score on every leg',
@@ -327,7 +327,7 @@ export default function Pricing() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Every prediction runs through a 46-factor model built on real-time data, not gut feeling. If the engine doesn't sharpen your approach, cancel anytime — no contracts, no hassle.
+                Every prediction runs through a 38-factor model built on real-time data, not gut feeling. If the engine doesn't sharpen your approach, cancel anytime — no contracts, no hassle.
               </p>
               <div className="flex gap-4 pt-2">
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -355,7 +355,7 @@ export default function Pricing() {
               </div>
               <h3 className="font-semibold">AI-Powered Analysis</h3>
               <p className="text-sm text-muted-foreground">
-                46 factors analyzed instantly. Results in seconds, not hours.
+                38 data-backed factors analyzed instantly. Results in seconds, not hours.
               </p>
             </div>
             <div className="text-center space-y-3">

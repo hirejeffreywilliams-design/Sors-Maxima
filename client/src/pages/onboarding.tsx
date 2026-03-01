@@ -59,7 +59,7 @@ const betTypes = [
 ];
 
 const features = [
-  { icon: Brain, title: "46-Factor Prediction Engine", description: "Every pick analyzed across 46 data points including sharp money, injury impact, weather, and momentum" },
+  { icon: Brain, title: "38-Factor Prediction Engine", description: "Every pick analyzed across 46 data points including sharp money, injury impact, weather, and momentum" },
   { icon: Target, title: "Smart Ticket Generator", description: "AI builds optimized parlays with correlation detection and risk grading" },
   { icon: TrendingUp, title: "+EV Finder", description: "Identifies positive expected value bets across all major sportsbooks" },
   { icon: BarChart3, title: "Analytics Dashboard", description: "Track your performance, ROI, and betting patterns over time" },
@@ -312,7 +312,7 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-lg bg-primary/5 border border-primary/20 text-center">
                 <p className="text-sm font-medium text-primary">Pro Tip</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  The 46-factor engine gets smarter the more you use it. Your first week of data helps calibrate predictions to your style.
+                  The 38-factor engine gets smarter the more you use it. Your first week of data helps calibrate predictions to your style.
                 </p>
               </div>
             </CardContent>

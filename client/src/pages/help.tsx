@@ -43,7 +43,7 @@ const FEATURES: Feature[] = [
     category: "start",
     path: "/",
     pathLabel: "Home / Picks (Zap icon in nav)",
-    why: "Our engines analyze 46 factors — rest days, sharp money flow, line movement, weather, Monte Carlo simulations — and pre-build complete parlay tickets before you even open the app. You get the analysis output, not the raw data.",
+    why: "Our engines analyze 38 data-backed factors — rest days, sharp money flow, line movement, weather, Monte Carlo simulations — and pre-build complete parlay tickets before you even open the app. You get the analysis output, not the raw data.",
     when: "Check first thing every morning. Tickets refresh every 5 minutes as new games and odds data arrive. Best to act early before the public moves lines.",
     where: "The home page — the first screen you land on after logging in. 'Today's Best Tickets' is the top section. Below it are Game Matchup Parlays covering all legs of specific games.",
     how: [
@@ -437,8 +437,8 @@ const FAQ_ITEMS = [
   },
   {
     category: "Features",
-    q: "How does the 46-factor Quantum Fusion engine work?",
-    a: "The engine integrates 46 factors across categories: core betting (sharp money, line movement, public fade), advanced analytics (momentum, H2H history, schedule strength), situational (rest days, back-to-backs, travel), physical (injuries, lineup changes), and environmental (weather, venue). It runs continuous learning — factor weights update automatically as real results come in.",
+    q: "How does the 38-factor prediction engine work?",
+    a: "The engine integrates 38 data-backed factors across categories: core betting (sharp money, line movement, public fade), advanced analytics (momentum, H2H history, schedule strength), situational (rest days, back-to-backs, travel), physical (injuries, lineup changes), and environmental (weather, venue). It runs continuous learning — factor weights update automatically as real results come in.",
   },
   {
     category: "Features",
@@ -453,7 +453,7 @@ const FAQ_ITEMS = [
   {
     category: "Account & Billing",
     q: "What subscription tiers are available?",
-    a: "Three tiers: Sharp ($49/mo — full 46-factor engine, unlimited picks, bet grading), Edge ($99/mo — everything in Sharp plus AI strategy advisor, prop projections, line movement alerts), and Max ($249/mo — everything in Edge plus first-in-line processing, exclusive picks, and custom model access).",
+    a: "Three tiers: Sharp ($49/mo — full 38-factor engine, unlimited picks, bet grading), Edge ($99/mo — everything in Sharp plus AI strategy advisor, prop projections, line movement alerts), and Max ($249/mo — everything in Edge plus first-in-line processing, exclusive picks, and custom model access).",
   },
   {
     category: "Account & Billing",

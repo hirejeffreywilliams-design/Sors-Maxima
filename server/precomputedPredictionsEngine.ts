@@ -344,17 +344,15 @@ function determinePickTiming(
 }
 
 function gradeFromConfidence(confidence: number): string {
-  // Thresholds calibrated to actual confidence range (22–70%).
-  // The pick engine caps confidence at ~70, so grades are distributed
-  // across the real distribution rather than against an unachievable scale.
-  if (confidence >= 65) return "A";
-  if (confidence >= 60) return "A-";
+  if (confidence >= 67) return "A+";
+  if (confidence >= 63) return "A";
+  if (confidence >= 59) return "A-";
   if (confidence >= 55) return "B+";
-  if (confidence >= 50) return "B";
-  if (confidence >= 45) return "B-";
-  if (confidence >= 40) return "C+";
-  if (confidence >= 35) return "C";
-  if (confidence >= 30) return "C-";
+  if (confidence >= 51) return "B";
+  if (confidence >= 47) return "B-";
+  if (confidence >= 43) return "C+";
+  if (confidence >= 39) return "C";
+  if (confidence >= 35) return "C-";
   return "D";
 }
 
