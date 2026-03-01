@@ -507,7 +507,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
   let allInjuries: Record<string, any[]> = {};
   try {
-    allInjuries = getAllInjuries();
+    allInjuries = await getAllInjuries();
   } catch {}
 
   const sportInjuries = allInjuries[sport] || allInjuries[sport.toLowerCase()] || [];
@@ -546,9 +546,12 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     let homeInjuryCount = 0, awayInjuryCount = 0;
     let homeStartersOut = 0, awayStartersOut = 0;
     for (const inj of sportInjuries) {
-      const teamName = (inj.team || "").toLowerCase();
-      const isHome = teamName.includes(homeName.toLowerCase().split(" ").pop() || "") || teamName.includes(homeAbbr.toLowerCase());
-      const isAway = teamName.includes(awayName.toLowerCase().split(" ").pop() || "") || teamName.includes(awayAbbr.toLowerCase());
+      const teamName = (inj.teamName || inj.team || "").toLowerCase();
+      const teamAbbr = (inj.teamAbbreviation || inj.abbreviation || "").toLowerCase();
+      const homeLast = homeName.toLowerCase().split(" ").pop() || "";
+      const awayLast = awayName.toLowerCase().split(" ").pop() || "";
+      const isHome = teamName.includes(homeLast) || teamAbbr === homeAbbr.toLowerCase() || teamName.includes(homeAbbr.toLowerCase());
+      const isAway = teamName.includes(awayLast) || teamAbbr === awayAbbr.toLowerCase() || teamName.includes(awayAbbr.toLowerCase());
       const count = inj.injuries?.length || 0;
       const starters = (inj.injuries || []).filter((i: any) => i.status === "Out" || i.status === "Doubtful").length;
       if (isHome) { homeInjuryCount += count; homeStartersOut += starters; }
