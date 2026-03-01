@@ -1,0 +1,26 @@
+{
+  "name": "Sors Maxima",
+  "short_name": "Sors Maxima",
+  "description": "Members-only sports betting intelligence — 46-factor model picks, live odds, and daily tickets.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "finance"],
+  "lang": "en-US"
+}

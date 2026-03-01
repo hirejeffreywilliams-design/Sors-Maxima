@@ -82,6 +82,20 @@ export async function runMigrations(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_user_watchlist_user_id ON user_watchlist(user_id)
     `);
 
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(12) UNIQUE`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by VARCHAR(12)`);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS referral_credits (
+        id SERIAL PRIMARY KEY,
+        referrer_username TEXT NOT NULL,
+        referred_username TEXT NOT NULL,
+        referred_at TIMESTAMP DEFAULT NOW(),
+        credit_applied BOOLEAN DEFAULT FALSE,
+        credit_applied_at TIMESTAMP
+      )
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

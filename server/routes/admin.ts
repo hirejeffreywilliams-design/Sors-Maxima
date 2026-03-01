@@ -633,11 +633,8 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       const basePrompt = contentPrompts[contentType] || "Create marketing content for Sors Maxima sports betting platform.";
       const fullPrompt = customPrompt ? `${basePrompt}\n\nAdditional instructions: ${customPrompt}` : basePrompt;
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({
-        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-      });
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -733,11 +730,8 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
         return res.status(400).json({ error: "Issue description is required" });
       }
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({
-        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-      });
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
 
       // Gather system context
       const errorLogs = errorLogger.getLogs({ limit: 50 });
@@ -854,11 +848,8 @@ Use technical but accessible language. Reference specific system components when
   // Run automated diagnostics
   app.post("/api/admin/diagnostics/auto-scan", requireAdmin, async (_req, res) => {
     try {
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({
-        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-      });
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
 
       const errorLogs = errorLogger.getLogs({ limit: 50 });
       const factorWeights = await getAllFactorWeights();
@@ -1220,11 +1211,8 @@ Format your response clearly with sections and bullet points.`;
     try {
       const { sport, date, games, bankroll, riskLevel, maxLegs, preferredBetTypes, maxTickets, diversify } = req.body;
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({
-        apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-        baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-      });
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
 
       const prompt = `Create a daily parlay strategy for the user’s incoming games today. 
 Inputs: 

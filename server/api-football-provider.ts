@@ -56,19 +56,36 @@ export function getAllSoccerLeagueIds(): string[] {
 }
 
 async function fetchApiFootballFixtures(leagueId: number, season: number): Promise<SoccerFixture[]> {
-  if (!API_FOOTBALL_KEY) return [];
+  if (!API_FOOTBALL_KEY) {
+    console.warn(`[API-Football] API_FOOTBALL_KEY not set — skipping league ${leagueId}, using ESPN fallback`);
+    return [];
+  }
 
-  const today = new Date().toISOString().split("T")[0];
-  const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split("T")[0];
-  const url = `${API_FOOTBALL_BASE}/fixtures?league=${leagueId}&season=${season}&from=${today}&to=${nextWeek}`;
+  const threeDaysAgo = new Date(Date.now() - 3 * 86400000).toISOString().split("T")[0];
+  const twoWeeksAhead = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
+  const url = `${API_FOOTBALL_BASE}/fixtures?league=${leagueId}&season=${season}&from=${threeDaysAgo}&to=${twoWeeksAhead}`;
+
+  console.log(`[API-Football] Fetching league ${leagueId} season ${season}: ${threeDaysAgo} to ${twoWeeksAhead}`);
 
   try {
     const response = await fetch(url, {
       headers: { "x-apisports-key": API_FOOTBALL_KEY },
     });
-    if (!response.ok) throw new Error(`API-Football error: ${response.status}`);
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      console.error(`[API-Football] HTTP ${response.status} for league ${leagueId}: ${body.slice(0, 200)}`);
+      throw new Error(`API-Football error: ${response.status}`);
+    }
     const json = await response.json();
-    if (!json.response || !Array.isArray(json.response)) return [];
+    if (json.errors && Object.keys(json.errors).length > 0) {
+      console.error(`[API-Football] API errors for league ${leagueId}:`, JSON.stringify(json.errors));
+      return [];
+    }
+    if (!json.response || !Array.isArray(json.response)) {
+      console.warn(`[API-Football] No response array for league ${leagueId} — got:`, JSON.stringify(json).slice(0, 200));
+      return [];
+    }
+    console.log(`[API-Football] League ${leagueId}: ${json.response.length} fixtures returned`);
 
     const leagueInfo = Object.values(LEAGUE_MAP).find(l => l.id === leagueId);
 

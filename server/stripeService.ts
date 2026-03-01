@@ -155,14 +155,19 @@ export class StripeService {
       throw new Error('Stripe is not available - payment processing is disabled in demo mode');
     }
 
-    return await stripe.checkout.sessions.create({
+    const tier = PRICE_TO_TIER[priceId];
+    const sessionParams: any = {
       customer: customerId,
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       success_url: successUrl,
       cancel_url: cancelUrl,
-    });
+    };
+    if (tier === 'pro') {
+      sessionParams.subscription_data = { trial_period_days: 7 };
+    }
+    return await stripe.checkout.sessions.create(sessionParams);
   }
 
   async createCustomerPortalSession(customerId: string, returnUrl: string) {

@@ -1,7 +1,8 @@
 import { db } from "./db";
 import { users, subscriptions } from "./dbSchema";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql as drizzleSql } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { logError, logWarn, logInfo } from "./errorLogger";
 import { evaluateRegistrationRisk, remapUserId, type DeviceFingerprintData, type RegistrationRisk } from "./trialFraudEngine";
 
@@ -73,6 +74,9 @@ export async function registerUser(
       tier: "free",
       status: "active",
     });
+
+    const referralCode = crypto.randomBytes(4).toString('hex').toUpperCase();
+    await db.execute(drizzleSql`UPDATE users SET referral_code = ${referralCode} WHERE id = ${newUser.id}`);
 
     remapUserId(tempUserId, String(newUser.id));
 

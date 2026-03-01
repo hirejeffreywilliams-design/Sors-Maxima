@@ -212,6 +212,66 @@ function startEnginesPhased(): void {
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.
   // No need to start it here — this saves resources when no users are active.
+
+  // ── Email Schedulers ──────────────────────────────────────────────────────
+  // Admin daily summary at 8:00am, user weekly digest on Mondays at 9:00am.
+  startEmailSchedulers();
+}
+
+function startEmailSchedulers(): void {
+  const CHECK_INTERVAL = 60 * 60 * 1000; // check every hour
+  let lastAdminSummaryDate = "";
+  let lastWeeklyDigestDate = "";
+
+  setInterval(async () => {
+    try {
+      const now = new Date();
+      const hour = now.getHours();
+      const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon
+      const dateKey = now.toISOString().split("T")[0];
+
+      // Admin daily summary at 8am
+      if (hour === 8 && lastAdminSummaryDate !== dateKey) {
+        lastAdminSummaryDate = dateKey;
+        const { sendAdminDailySummary } = await import("./emailService");
+        const { stripeService } = await import("./stripeService");
+        try {
+          const allSubs = await stripeService.getAllSubscriptions();
+          const active = allSubs.filter(s => ['active', 'trialing'].includes(s.subscriptionStatus));
+          const proCount = active.filter(s => s.subscriptionTier === 'pro').length;
+          const eliteCount = active.filter(s => s.subscriptionTier === 'elite').length;
+          const whaleCount = active.filter(s => s.subscriptionTier === 'whale').length;
+          const { getPickAccuracyStats } = await import("./pickOutcomeTracker");
+          const stats = getPickAccuracyStats();
+          await sendAdminDailySummary({
+            newSignups: 0,
+            activeSubscribers: active.length,
+            proCount,
+            eliteCount,
+            whaleCount,
+            picksSettled: stats.overall?.total || 0,
+            modelWinRate: Math.round((stats.overall?.rate || 0) * 100),
+            alerts: [],
+          });
+          log("[EmailScheduler] Admin daily summary sent", "scheduler");
+        } catch (err: any) {
+          console.error("[EmailScheduler] Admin summary failed:", err.message);
+        }
+      }
+
+      // Weekly digest on Mondays at 9am
+      if (dayOfWeek === 1 && hour === 9 && lastWeeklyDigestDate !== dateKey) {
+        lastWeeklyDigestDate = dateKey;
+        log("[EmailScheduler] Weekly digest run triggered (Monday 9am)", "scheduler");
+        // Digest is sent per-user via the weekly digest endpoint
+        // Users who have connected recently will receive via the API route
+      }
+    } catch (err: any) {
+      console.error("[EmailScheduler] Scheduler tick failed:", err.message);
+    }
+  }, CHECK_INTERVAL);
+
+  log("[EmailScheduler] Email schedulers started (hourly check)", "startup");
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

@@ -642,16 +642,54 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   // === Referral Program ===
-  app.get("/api/referral", (_req, res) => {
-    const username = _req.session?.isAuthenticated ? _req.session.username : "anon";
-    const code = `SORS-${username?.toUpperCase().slice(0, 4) || "ANON"}${crypto.createHash('md5').update(username || 'anon').digest('hex').slice(0, 4).toUpperCase()}`;
-    res.json({
-      code,
-      totalReferrals: 0,
-      conversions: 0,
-      earned: 0,
-      referrals: [],
-    });
+  app.get("/api/referral", requireAuth, async (req, res) => {
+    const userId = numericUserId(req);
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
+    try {
+      const userRow = await db.execute(sql`SELECT referral_code, username FROM users WHERE id = ${userId}`);
+      if (!userRow.rows[0]) return res.status(404).json({ error: "User not found" });
+      let code = (userRow.rows[0] as any).referral_code as string | null;
+      if (!code) {
+        code = crypto.randomBytes(4).toString('hex').toUpperCase();
+        await db.execute(sql`UPDATE users SET referral_code = ${code} WHERE id = ${userId}`);
+      }
+      const creditsRow = await db.execute(sql`
+        SELECT referred_username, referred_at, credit_applied
+        FROM referral_credits
+        WHERE referrer_username = ${(userRow.rows[0] as any).username}
+        ORDER BY referred_at DESC
+        LIMIT 50
+      `);
+      const referrals = creditsRow.rows as any[];
+      const conversions = referrals.filter(r => r.credit_applied).length;
+      res.json({
+        code,
+        totalReferrals: referrals.length,
+        conversions,
+        earned: conversions * 10,
+        referrals: referrals.map(r => ({
+          username: r.referred_username,
+          joinedAt: r.referred_at,
+          converted: r.credit_applied,
+        })),
+        shareUrl: `${req.protocol}://${req.get('host')}/register?ref=${code}`,
+      });
+    } catch (err: any) {
+      console.error("[Referral] Failed:", err.message);
+      res.status(500).json({ error: "Failed to fetch referral info" });
+    }
+  });
+
+  app.post("/api/referral/validate", async (req, res) => {
+    const { code } = req.body;
+    if (!code || typeof code !== 'string') return res.status(400).json({ valid: false });
+    try {
+      const row = await db.execute(sql`SELECT username FROM users WHERE referral_code = ${code.toUpperCase()}`);
+      if (row.rows.length === 0) return res.json({ valid: false });
+      res.json({ valid: true, referrerUsername: (row.rows[0] as any).username });
+    } catch {
+      res.json({ valid: false });
+    }
   });
 
   // ==================== WATCHLIST ENGINE (DB-backed) ====================
