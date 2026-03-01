@@ -4035,4 +4035,31 @@ Follow these rules:
     }
   });
 
+  app.post("/api/admin/monte-carlo/deep-sim", requireAdmin, async (_req, res) => {
+    try {
+      const { runDeepSimulationCycle, getMonteCarloEngineStatus } = await import("../monteCarloEngine");
+      const statusBefore = getMonteCarloEngineStatus();
+      if (statusBefore.deepSimRunning) {
+        return res.json({ success: false, message: "Deep simulation already in progress" });
+      }
+      runDeepSimulationCycle().catch(e => console.error("[AdminDeepSim] Error:", e.message));
+      res.json({
+        success: true,
+        message: "Deep simulation triggered — running in background. Check status for progress.",
+        cacheBeforeRun: statusBefore.preSimCacheSize,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to trigger deep simulation", details: error.message });
+    }
+  });
+
+  app.get("/api/admin/monte-carlo/status", requireAdmin, async (_req, res) => {
+    try {
+      const { getMonteCarloEngineStatus } = await import("../monteCarloEngine");
+      res.json(getMonteCarloEngineStatus());
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get Monte Carlo status" });
+    }
+  });
+
 }

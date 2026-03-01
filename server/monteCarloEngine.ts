@@ -1177,12 +1177,17 @@ export function getMonteCarloEngineStatus(): {
   calibrationEntries: number;
   engineStartedAt: string;
   lastPreSimCycle: string;
+  lastDeepSimRun: string;
+  nextDeepSimIn: string;
+  deepSimRunning: boolean;
   sportsCovered: string[];
   learningVersion: number;
   driftStatus: string;
   uptime: number;
+  simulationScenarios: Record<string, string>;
 } {
   const calibration = getCalibrationReport();
+  const minsToMidnight = Math.round(msUntilMidnight() / 60000);
   return {
     running: engineRunning,
     totalSimulations: totalSimulationsRun + learningData.totalSimulations,
@@ -1192,6 +1197,9 @@ export function getMonteCarloEngineStatus(): {
     calibrationEntries: learningData.calibrationHistory.length,
     engineStartedAt: engineStartedAt ? new Date(engineStartedAt).toISOString() : "",
     lastPreSimCycle: lastPreSimCycle ? new Date(lastPreSimCycle).toISOString() : "",
+    lastDeepSimRun: lastDeepSimRun ? new Date(lastDeepSimRun).toISOString() : "never",
+    nextDeepSimIn: `${minsToMidnight}m`,
+    deepSimRunning,
     sportsCovered: [...new Set([
       ...learningData.predictions.map(p => p.sport),
       ...Array.from(preSimCache.values()).map(s => s.sport),
@@ -1199,91 +1207,264 @@ export function getMonteCarloEngineStatus(): {
     learningVersion: learningData.engineVersion,
     driftStatus: calibration.driftStatus,
     uptime: engineStartedAt ? Math.round((Date.now() - engineStartedAt) / 1000) : 0,
+    simulationScenarios: {
+      NBA: "Bivariate normal | BDL real scoring (avgPts, defRating, pace) | pace-scaled variance | injury weight 1.0x",
+      NHL: "Poisson goals | team avgGoalsFor from outcomes | injury weight 0.6x | no weather",
+      MLB: "Poisson runs | team avgRunsFor from outcomes | injury weight 0.7x | wind/rain weather",
+      NFL: "Bivariate normal | team avgPtsFor from outcomes | injury weight 1.8x (highest) | wind/rain weather",
+      NCAAB: "Bivariate normal | team avgPtsFor from outcomes | home court 3.5pt advantage | injury weight 0.9x",
+      NCAAF: "Bivariate normal | team avgPtsFor from outcomes | injury weight 1.5x | wind/rain weather",
+    },
   };
 }
 
+// === Sport-specific scenario constants ===
+// Weather impact multipliers by sport (indoor sports ignore weather)
+const OUTDOOR_SPORTS = new Set(["NFL", "MLB", "NCAAF"]);
+// Injury impact weight per sport (NFL injuries matter much more than NHL)
+const INJURY_WEIGHT: Record<string, number> = {
+  NFL: 1.8, NBA: 1.0, NHL: 0.6, MLB: 0.7, NCAAB: 0.9, NCAAF: 1.5,
+};
+
+// Build a fully-enriched simulation input for a game using all available data sources
+async function buildEnrichedInput(
+  game: any,
+  bdlTeams: any[],
+  teamRecordsMap: Map<string, { avgPointsFor: number; avgPointsAgainst: number }>
+): Promise<MatchupSimulationInput> {
+  const sport = (game.sport || "NBA") as Sport;
+  const homeWinPct = game.homeTeam?.winPct || 50;
+  const awayWinPct = game.awayTeam?.winPct || 50;
+  const homeName = game.homeTeam?.name || "Home";
+  const awayName = game.awayTeam?.name || "Away";
+  const injWeight = INJURY_WEIGHT[sport] || 1.0;
+
+  const input: MatchupSimulationInput = {
+    gameId: game.id,
+    sport,
+    homeTeam: homeName,
+    awayTeam: awayName,
+    homeWinPct,
+    awayWinPct,
+    spread: game.odds?.spread ?? game.consensus?.spread,
+    totalLine: game.odds?.total ?? undefined,
+    homeMoneyline: game.odds?.homeMoneyline ?? game.consensus?.homeMoneyline,
+    awayMoneyline: game.odds?.awayMoneyline ?? game.consensus?.awayMoneyline,
+    isHomeGame: true,
+    gameState: game.status?.state === "in" ? "in" : "pre",
+  };
+
+  // === 1. Injury impact — wired for ALL sports ===
+  const homeStarters = game.injuries?.home?.starters || 0;
+  const awayStarters = game.injuries?.away?.starters || 0;
+  const homeTotal = game.injuries?.home?.total || 0;
+  const awayTotal = game.injuries?.away?.total || 0;
+  const homeInjury = (homeStarters * 0.6 + homeTotal * 0.15) * injWeight;
+  const awayInjury = (awayStarters * 0.6 + awayTotal * 0.15) * injWeight;
+  if (homeInjury > 0 || awayInjury > 0) {
+    input.injuryImpact = { home: homeInjury, away: awayInjury };
+  }
+
+  // === 2. Weather impact — only for outdoor sports ===
+  if (OUTDOOR_SPORTS.has(sport) && game.weather) {
+    const wind = game.weather.windSpeed || 0;
+    const precip = game.weather.precipitation || 0;
+    const windFactor = Math.max(0, (wind - 10) / 40);
+    const precipFactor = precip > 0.1 ? 0.25 : 0;
+    const weatherImpact = windFactor + precipFactor;
+    if (weatherImpact > 0) input.weatherImpact = weatherImpact;
+  }
+
+  // === 3. Sport-specific scoring stats ===
+  if (sport === "NBA") {
+    const findBDL = (name: string, abbr?: string) => {
+      if (!bdlTeams.length) return null;
+      const n = name.toLowerCase();
+      return bdlTeams.find((t: any) =>
+        t.teamName?.toLowerCase().includes(n) ||
+        (abbr && t.abbreviation?.toLowerCase() === abbr?.toLowerCase()) ||
+        n.includes(t.teamName?.split(" ").pop()!.toLowerCase())
+      ) || null;
+    };
+    const homeBDL = findBDL(homeName, game.homeTeam?.abbreviation);
+    const awayBDL = findBDL(awayName, game.awayTeam?.abbreviation);
+    if (homeBDL) {
+      input.homeAvgPts = homeBDL.avgPts;
+      input.homeDefRating = homeBDL.defRating;
+      input.homePace = homeBDL.pace;
+    }
+    if (awayBDL) {
+      input.awayAvgPts = awayBDL.avgPts;
+      input.awayDefRating = awayBDL.defRating;
+      input.awayPace = awayBDL.pace;
+    }
+  } else {
+    // For NHL, MLB, NFL, NCAAB — use platformIntelligenceEngine team records if available
+    const homeKey = `${sport}:${homeName.toLowerCase()}`;
+    const awayKey = `${sport}:${awayName.toLowerCase()}`;
+    const homeRec = teamRecordsMap.get(homeKey);
+    const awayRec = teamRecordsMap.get(awayKey);
+    const params = DEFAULT_SPORT_PARAMS[sport];
+
+    if (homeRec && homeRec.avgPointsFor > 0) {
+      input.homeAvgPts = homeRec.avgPointsFor;
+    } else {
+      // Estimate from win% relative to league average scoring
+      const winFactor = (homeWinPct / 50);
+      input.homeAvgPts = params.scoreMean * (0.8 + winFactor * 0.2);
+    }
+
+    if (awayRec && awayRec.avgPointsFor > 0) {
+      input.awayAvgPts = awayRec.avgPointsFor;
+    } else {
+      const winFactor = (awayWinPct / 50);
+      input.awayAvgPts = params.scoreMean * (0.8 + winFactor * 0.2);
+    }
+
+    // Defense rating: inverse of points allowed vs league avg
+    if (homeRec && homeRec.avgPointsAgainst > 0) {
+      input.homeDefRating = (params.scoreMean / homeRec.avgPointsAgainst) * 100;
+    }
+    if (awayRec && awayRec.avgPointsAgainst > 0) {
+      input.awayDefRating = (params.scoreMean / awayRec.avgPointsAgainst) * 100;
+    }
+  }
+
+  return input;
+}
+
+// Build team records lookup map from platformIntelligenceEngine
+async function buildTeamRecordsMap(): Promise<Map<string, { avgPointsFor: number; avgPointsAgainst: number }>> {
+  const map = new Map<string, { avgPointsFor: number; avgPointsAgainst: number }>();
+  try {
+    const { getTeamTrends } = await import("./platformIntelligenceEngine");
+    const records = getTeamTrends();
+    for (const rec of records) {
+      if (rec.avgPointsFor > 0) {
+        const key = `${rec.sport}:${rec.team.toLowerCase()}`;
+        map.set(key, { avgPointsFor: rec.avgPointsFor, avgPointsAgainst: rec.avgPointsAgainst });
+      }
+    }
+  } catch {}
+  return map;
+}
+
+// Standard 5-minute refresh cycle (lightweight — updates live and upcoming games)
 async function runPreSimulationCycle(): Promise<void> {
   try {
     const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
     const feed = generateIntelligenceFeed();
-
     if (!feed) return;
 
     const allGames = [...(feed.liveGames || []), ...(feed.upcomingGames || [])];
     let simulated = 0;
 
+    // Evict stale cache entries
     for (const [key, val] of preSimCache) {
-      if (Date.now() - val.simulatedAt > val.ttl * 2) {
-        preSimCache.delete(key);
-      }
+      if (Date.now() - val.simulatedAt > val.ttl * 2) preSimCache.delete(key);
     }
 
+    // BDL enrichment for NBA
     let bdlTeams: any[] = [];
-    const hasNBA = allGames.some(g => (g.sport || "NBA") === "NBA");
-    if (hasNBA) {
+    if (allGames.some(g => (g.sport || "NBA") === "NBA")) {
       try {
         const { isBDLAvailable, getEnrichedTeamData } = await import("./balldontlie-provider");
-        if (isBDLAvailable()) {
-          bdlTeams = await getEnrichedTeamData();
-        }
+        if (isBDLAvailable()) bdlTeams = await getEnrichedTeamData();
       } catch {}
     }
 
-    const findBDL = (name: string, abbr?: string) => {
-      if (!bdlTeams.length) return null;
-      const nameLower = name.toLowerCase();
-      return bdlTeams.find((t: any) =>
-        t.teamName?.toLowerCase().includes(nameLower) ||
-        (abbr && t.abbreviation?.toLowerCase() === abbr.toLowerCase()) ||
-        nameLower.includes(t.teamName?.split(" ").pop()!.toLowerCase())
-      ) || null;
-    };
+    // Platform intelligence team records for non-NBA sports
+    const teamRecords = await buildTeamRecordsMap();
 
-    for (const game of allGames.slice(0, 25)) {
+    // Cap at 30 games for regular cycle — prioritize live games
+    const prioritized = [
+      ...allGames.filter(g => g.status?.state === "in"),
+      ...allGames.filter(g => g.status?.state !== "in"),
+    ].slice(0, 30);
+
+    for (const game of prioritized) {
       try {
-        const homeWinPct = game.homeTeam?.winPct || 50;
-        const awayWinPct = game.awayTeam?.winPct || 50;
-        const sport = (game.sport || "NBA") as Sport;
-
-        const input: MatchupSimulationInput = {
-          gameId: game.id,
-          sport,
-          homeTeam: game.homeTeam?.name || "Home",
-          awayTeam: game.awayTeam?.name || "Away",
-          homeWinPct,
-          awayWinPct,
-          spread: game.consensus?.spread,
-          totalLine: undefined,
-          homeMoneyline: game.consensus?.homeMoneyline,
-          awayMoneyline: game.consensus?.awayMoneyline,
-          isHomeGame: true,
-          gameState: game.status?.state === "in" ? "in" : "pre",
-        };
-
-        if (sport === "NBA") {
-          const homeBDL = findBDL(game.homeTeam?.name || "", game.homeTeam?.abbreviation);
-          const awayBDL = findBDL(game.awayTeam?.name || "", game.awayTeam?.abbreviation);
-          if (homeBDL) {
-            input.homeAvgPts = homeBDL.avgPts;
-            input.homeDefRating = homeBDL.defRating;
-            input.homePace = homeBDL.pace;
-          }
-          if (awayBDL) {
-            input.awayAvgPts = awayBDL.avgPts;
-            input.awayDefRating = awayBDL.defRating;
-            input.awayPace = awayBDL.pace;
-          }
-        }
-
+        const input = await buildEnrichedInput(game, bdlTeams, teamRecords);
         simulateMatchup(input);
         simulated++;
-      } catch (e) {
-        // skip individual game errors
-      }
+      } catch {}
     }
 
     lastPreSimCycle = Date.now();
+    runCalibrationAndSave(simulated, "regular");
+  } catch (e) {
+    console.error("[MonteCarlo] Pre-simulation cycle error:", e);
+  }
+}
 
+// Deep overnight simulation — runs at midnight, no game cap, all engines
+let lastDeepSimRun: number | null = null;
+let deepSimRunning = false;
+
+export async function runDeepSimulationCycle(): Promise<void> {
+  if (deepSimRunning) {
+    console.log("[MonteCarlo] Deep simulation already in progress — skipping");
+    return;
+  }
+  deepSimRunning = true;
+  const started = Date.now();
+  console.log("[MonteCarlo] === MIDNIGHT DEEP SIMULATION STARTED ===");
+
+  try {
+    const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
+    const feed = generateIntelligenceFeed();
+    if (!feed) {
+      console.log("[MonteCarlo] Deep sim: no feed available yet, will retry in 5 min");
+      setTimeout(() => runDeepSimulationCycle(), 300000);
+      return;
+    }
+
+    // All upcoming games — NO cap for deep simulation
+    const allGames = [...(feed.upcomingGames || []), ...(feed.liveGames || [])];
+    console.log(`[MonteCarlo] Deep sim: processing ${allGames.length} games across all sports`);
+
+    // Full BDL enrichment
+    let bdlTeams: any[] = [];
+    try {
+      const { isBDLAvailable, getEnrichedTeamData } = await import("./balldontlie-provider");
+      if (isBDLAvailable()) bdlTeams = await getEnrichedTeamData();
+    } catch {}
+
+    // Full platform intelligence team records
+    const teamRecords = await buildTeamRecordsMap();
+
+    // Group by sport for logging
+    const sportCounts: Record<string, number> = {};
+    let simulated = 0;
+
+    for (const game of allGames) {
+      try {
+        const input = await buildEnrichedInput(game, bdlTeams, teamRecords);
+        simulateMatchup(input);
+        simulated++;
+        const sport = game.sport || "NBA";
+        sportCounts[sport] = (sportCounts[sport] || 0) + 1;
+        // Yield to event loop between games to avoid blocking
+        if (simulated % 10 === 0) await new Promise(r => setTimeout(r, 0));
+      } catch {}
+    }
+
+    lastDeepSimRun = Date.now();
+    const elapsed = Math.round((Date.now() - started) / 1000);
+    const sportSummary = Object.entries(sportCounts).map(([s, c]) => `${s}:${c}`).join(", ");
+    console.log(`[MonteCarlo] === DEEP SIMULATION COMPLETE === ${simulated} games in ${elapsed}s [${sportSummary}]`);
+    console.log(`[MonteCarlo] Cache now holds ${preSimCache.size} pre-simulated matchups — users will get instant results all day`);
+
+    runCalibrationAndSave(simulated, "deep");
+  } catch (e) {
+    console.error("[MonteCarlo] Deep simulation error:", e);
+  } finally {
+    deepSimRunning = false;
+  }
+}
+
+function runCalibrationAndSave(simulated: number, mode: string): void {
+  try {
     const calibration = getCalibrationReport();
     if (calibration.driftStatus === "critical" && learningData.predictions.length > 50) {
       console.log("[MonteCarlo] Critical drift detected — triggering recalibration");
@@ -1299,8 +1480,7 @@ async function runPreSimulationCycle(): Promise<void> {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const existingEntry = learningData.calibrationHistory.find(h => h.date === today);
-    if (!existingEntry) {
+    if (!learningData.calibrationHistory.find(h => h.date === today)) {
       learningData.calibrationHistory.push({
         date: today,
         accuracy: calibration.overallAccuracy,
@@ -1313,11 +1493,31 @@ async function runPreSimulationCycle(): Promise<void> {
     saveLearningData();
 
     if (simulated > 0) {
-      console.log(`[MonteCarlo] Pre-simulated ${simulated} games (cache: ${preSimCache.size}, drift: ${calibration.driftStatus})`);
+      console.log(`[MonteCarlo] [${mode}] Pre-simulated ${simulated} games (cache: ${preSimCache.size}, drift: ${calibration.driftStatus})`);
     }
-  } catch (e) {
-    console.error("[MonteCarlo] Pre-simulation cycle error:", e);
-  }
+  } catch {}
+}
+
+function msUntilMidnight(): number {
+  const now = new Date();
+  const midnight = new Date(now);
+  midnight.setHours(0, 0, 0, 0);
+  midnight.setDate(midnight.getDate() + 1);
+  return midnight.getTime() - now.getTime();
+}
+
+function scheduleMidnightDeepSim(): void {
+  const ms = msUntilMidnight();
+  const minutesAway = Math.round(ms / 60000);
+  console.log(`[MonteCarlo] Midnight deep simulation scheduled in ${minutesAway}m (${new Date(Date.now() + ms).toLocaleTimeString()})`);
+
+  setTimeout(async () => {
+    await runDeepSimulationCycle();
+    // Reschedule for next midnight (24 hours later)
+    setInterval(async () => {
+      await runDeepSimulationCycle();
+    }, 24 * 60 * 60 * 1000);
+  }, ms);
 }
 
 export function startMonteCarloEngine(): void {
@@ -1327,11 +1527,17 @@ export function startMonteCarloEngine(): void {
   engineRunning = true;
   engineStartedAt = Date.now();
 
-  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started (${MATCHUP_SIMS} matchup sims, ${PARLAY_SIMS} parlay sims, ${PRE_SIM_INTERVAL / 1000}s cycle, max ${MAX_CACHE_ENTRIES} cache entries)`);
+  const minsToMidnight = Math.round(msUntilMidnight() / 60000);
+  console.log(`[MonteCarlo] Advanced Monte Carlo Engine started — ${MATCHUP_SIMS.toLocaleString()} sims/matchup | 5-min refresh cycle | Midnight deep simulation in ${minsToMidnight}m`);
 
+  // Startup warmup: run first regular cycle after 15s
   setTimeout(() => runPreSimulationCycle(), 15000);
 
+  // Regular refresh every 5 minutes (live adjustments + cache refresh)
   preSimInterval = setInterval(() => runPreSimulationCycle(), PRE_SIM_INTERVAL);
+
+  // Schedule comprehensive midnight deep simulation
+  scheduleMidnightDeepSim();
 }
 
 export function stopMonteCarloEngine(): void {
