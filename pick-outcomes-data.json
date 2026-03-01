@@ -239,70 +239,6 @@
       "ev": -25.55,
       "gameTime": "2026-03-01T12:54:59.953Z",
       "savedAt": "2026-03-01T12:54:59.953Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-spread-5db938c2f0",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Chicago Bulls +3",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -37,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T13:49:29.056Z"
-    },
-    {
-      "id": "precomp-NBA-401810725-team_total-a3d7c31c4a",
-      "gameId": "401810725",
-      "sport": "NBA",
-      "game": "Milwaukee Bucks @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Milwaukee Bucks",
-      "pick": "Milwaukee Bucks Over 116",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C-",
-      "confidence": 33,
-      "ev": -37,
-      "gameTime": "2026-03-01T20:30Z",
-      "savedAt": "2026-03-01T13:49:29.056Z"
-    },
-    {
-      "id": "precomp-NHL-401803306-spread-96ce943922",
-      "gameId": "401803306",
-      "sport": "NHL",
-      "game": "Detroit Red Wings @ Nashville Predators",
-      "homeTeam": "Nashville Predators",
-      "awayTeam": "Detroit Red Wings",
-      "pick": "Nashville Predators -0.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "D",
-      "confidence": 29,
-      "ev": -44.64,
-      "gameTime": "2026-03-02T19:00Z",
-      "savedAt": "2026-03-01T13:49:29.201Z"
-    },
-    {
-      "id": "precomp-NCAAB-401814597-total-53e42ef3de",
-      "gameId": "401814597",
-      "sport": "NCAAB",
-      "game": "Toledo Rockets @ Miami (OH) RedHawks",
-      "homeTeam": "Miami (OH) RedHawks",
-      "awayTeam": "Toledo Rockets",
-      "pick": "Over 145",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 51,
-      "ev": -2.64,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-01T13:49:29.345Z"
     }
   ],
   "settled": [
@@ -10765,31 +10701,111 @@
       "homeScore": 74,
       "awayScore": 76,
       "settledAt": "2026-03-01T13:40:02.351Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-96ce943922",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Nashville Predators -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 29,
+      "ev": -44.64,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-01T13:49:29.201Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-01T13:50:42.738Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-spread-5db938c2f0",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls +3",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T13:49:29.056Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T13:50:42.742Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-a3d7c31c4a",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Milwaukee Bucks Over 116",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T13:49:29.056Z",
+      "result": "won",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T13:50:42.742Z"
+    },
+    {
+      "id": "precomp-NCAAB-401814597-total-53e42ef3de",
+      "gameId": "401814597",
+      "sport": "NCAAB",
+      "game": "Toledo Rockets @ Miami (OH) RedHawks",
+      "homeTeam": "Miami (OH) RedHawks",
+      "awayTeam": "Toledo Rockets",
+      "pick": "Over 145",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 51,
+      "ev": -2.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-01T13:49:29.345Z",
+      "result": "lost",
+      "homeScore": 67,
+      "awayScore": 69,
+      "settledAt": "2026-03-01T13:50:42.756Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 523,
-      "won": 263,
-      "lost": 242,
+      "total": 527,
+      "won": 265,
+      "lost": 244,
       "push": 18,
       "rate": 50.3,
-      "pending": 19
+      "pending": 15
     },
     "bySport": {
       "NHL": {
-        "total": 141,
-        "won": 65,
-        "rate": 46.1
+        "total": 142,
+        "won": 66,
+        "rate": 46.5
       },
       "NCAAB": {
-        "total": 175,
+        "total": 176,
         "won": 100,
-        "rate": 57.1
+        "rate": 56.8
       },
       "NBA": {
-        "total": 140,
-        "won": 68,
+        "total": 142,
+        "won": 69,
         "rate": 48.6
       },
       "MLB": {
@@ -10800,8 +10816,8 @@
     },
     "byGrade": {
       "C-": {
-        "total": 184,
-        "won": 89,
+        "total": 186,
+        "won": 90,
         "rate": 48.4
       },
       "C": {
@@ -10825,14 +10841,14 @@
         "rate": 66.7
       },
       "B": {
-        "total": 35,
+        "total": 36,
         "won": 18,
-        "rate": 51.4
+        "rate": 50
       },
       "D": {
-        "total": 16,
-        "won": 5,
-        "rate": 31.3
+        "total": 17,
+        "won": 6,
+        "rate": 35.3
       },
       "A-": {
         "total": 15,
@@ -10847,9 +10863,9 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 208,
-        "won": 106,
-        "rate": 51
+        "total": 209,
+        "won": 107,
+        "rate": 51.2
       },
       "Moneyline": {
         "total": 78,
@@ -10857,23 +10873,23 @@
         "rate": 52.6
       },
       "Spread": {
-        "total": 101,
-        "won": 50,
+        "total": 103,
+        "won": 51,
         "rate": 49.5
       },
       "Total": {
-        "total": 136,
+        "total": 137,
         "won": 66,
-        "rate": 48.5
+        "rate": 48.2
       }
     },
     "recentForm": {
-      "won": 27,
-      "lost": 21,
+      "won": 26,
+      "lost": 22,
       "push": 2,
-      "rate": 54
+      "rate": 52
     },
-    "lastUpdated": "2026-03-01T13:49:37.891Z"
+    "lastUpdated": "2026-03-01T13:50:42.756Z"
   },
   "version": 1
 }
