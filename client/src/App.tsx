@@ -797,14 +797,14 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <GeoComplianceBanner />
       </div>
       
-      <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0 lg:mr-[340px] xl:mr-[380px]">
+      <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
         <ParlaySlipProvider>
             <Router authState={authState} />
           <ParlaySlipDrawer />
         </ParlaySlipProvider>
       </main>
       
-      <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0 lg:mr-[340px] xl:mr-[380px]">
+      <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
         <div className="max-w-screen-2xl mx-auto">
           <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
             <div className="text-center max-w-xl">

@@ -29,6 +29,7 @@ import {
   Target,
   User,
   ChevronRight,
+  ChevronLeft,
   Sparkles,
   ExternalLink,
   Copy,
@@ -956,25 +957,67 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 }
 
 export function ParlaySlipDesktopSidebar() {
-  const { legCount, totalAmericanOdds, totalOdds } = useParlaySlip();
-  const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+  const [open, setOpen] = useState(false);
+  const { legCount, totalAmericanOdds } = useParlaySlip();
+  const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
 
   return (
-    <aside
-      className="hidden lg:flex fixed right-0 top-[3.5rem] bottom-0 w-[340px] xl:w-[380px] border-l bg-background flex-col z-40"
-      data-testid="desktop-bet-slip"
-    >
-      <div className="px-3 py-2.5 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex items-center gap-2">
-        <Ticket className="h-4 w-4 text-primary" />
-        <span className="font-bold text-sm">Bet Slip</span>
-        {legCount > 0 && (
-          <Badge variant="default" className="ml-auto text-[10px] h-5 px-2">
-            {legCount} leg{legCount !== 1 ? "s" : ""} · {formattedTotalOdds}
-          </Badge>
+    <>
+      {/* Backdrop — click to close */}
+      {open && (
+        <div
+          className="hidden lg:block fixed inset-0 z-30 bg-black/30 backdrop-blur-[1px]"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Floating tab — always visible on right edge, shifts left when panel opens */}
+      <button
+        className="hidden lg:flex fixed z-50 top-[40%] -translate-y-1/2 flex-col items-center gap-2 py-5 px-2 bg-primary text-primary-foreground rounded-l-xl shadow-2xl hover:bg-primary/90 active:scale-95 transition-all duration-300 ease-out border-y border-l border-white/10"
+        style={{ right: open ? "300px" : "0px" }}
+        onClick={() => setOpen(o => !o)}
+        data-testid="button-toggle-bet-slip"
+        aria-label="Toggle bet slip"
+      >
+        <Ticket className="h-4 w-4" />
+        {legCount > 0 ? (
+          <span className="bg-white/20 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+            {legCount}
+          </span>
+        ) : null}
+        {open ? (
+          <ChevronRight className="h-3 w-3 opacity-70" />
+        ) : (
+          <ChevronLeft className="h-3 w-3 opacity-70" />
         )}
-      </div>
-      <SlipContent compact />
-    </aside>
+      </button>
+
+      {/* Sliding panel — overlays content, does NOT push it */}
+      <aside
+        className="hidden lg:flex fixed right-0 top-[3.5rem] bottom-0 w-[300px] border-l bg-background flex-col z-40 shadow-2xl transition-transform duration-300 ease-out"
+        style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
+        data-testid="desktop-bet-slip"
+      >
+        <div className="px-3 py-2.5 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex items-center gap-2 shrink-0">
+          <Ticket className="h-4 w-4 text-primary" />
+          <span className="font-bold text-sm">Bet Slip</span>
+          {legCount > 0 && (
+            <Badge variant="default" className="ml-1 text-[10px] h-5 px-2">
+              {legCount} leg{legCount !== 1 ? "s" : ""} · {formattedOdds}
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto h-6 w-6 text-muted-foreground hover:text-foreground"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+        <SlipContent compact />
+      </aside>
+    </>
   );
 }
 
