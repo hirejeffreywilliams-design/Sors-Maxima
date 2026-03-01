@@ -155,6 +155,34 @@ function getTimeAgo(date: Date): string {
   return `${Math.floor(hours / 24)}d ago`;
 }
 
+function formatGameTime(iso?: string): string {
+  if (!iso) return "";
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    const isTomorrow = d.toDateString() === new Date(now.getTime() + 86400000).toDateString();
+    const timeStr = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+    if (isToday) return `Today ${timeStr}`;
+    if (isTomorrow) return `Tomorrow ${timeStr}`;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " " + timeStr;
+  } catch {
+    return iso;
+  }
+}
+
+function isGameStarted(gameTime?: string): boolean {
+  if (!gameTime) return false;
+  try {
+    const gameMs = new Date(gameTime).getTime();
+    if (isNaN(gameMs)) return false;
+    return gameMs < Date.now() - 5 * 60 * 1000;
+  } catch {
+    return false;
+  }
+}
+
 function PickCard({ pick, rank, onAdd, inSlip }: {
   pick: PrecomputedPick;
   rank: number;
@@ -164,6 +192,7 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
   const [expanded, setExpanded] = useState(false);
   const topFactors = pick.factors?.slice(0, 3) || [];
   const isTopPick = rank <= 3;
+  const gameStarted = isGameStarted(pick.gameTime);
 
   return (
     <div
@@ -205,11 +234,17 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
                     Live
                   </Badge>
                 )}
-                {pick.gameTime && (
+                {pick.gameTime && !gameStarted && (
                   <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                     <Clock className="w-2.5 h-2.5" />
-                    {pick.gameTime}
+                    {formatGameTime(pick.gameTime)}
                   </span>
+                )}
+                {gameStarted && (
+                  <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-amber-500/10 border-amber-500/40 text-amber-400 gap-0.5" data-testid={`badge-game-started-${pick.id}`}>
+                    <AlertTriangle className="w-2.5 h-2.5" />
+                    Game In Progress
+                  </Badge>
                 )}
               </div>
             </div>
@@ -551,6 +586,8 @@ export default function DailyParlays() {
 
   const visiblePicks = sortedPicks.slice(0, showCount);
 
+  const stalePickCount = useMemo(() => sortedPicks.filter(p => isGameStarted(p.gameTime)).length, [sortedPicks]);
+
   const gradeBreakdown = useMemo(() => {
     if (!snapshot?.picks) return { a: 0, b: 0, c: 0, d: 0, total: 0 };
     const bd = snapshot.picks.reduce((acc, p) => {
@@ -751,6 +788,16 @@ export default function DailyParlays() {
         </div>
 
         <PickDisclaimer variant="banner" />
+
+        {stalePickCount > 0 && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/8 border border-amber-500/25 text-amber-400" data-testid="banner-stale-picks">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <p className="text-sm">
+              <span className="font-semibold">{stalePickCount} pick{stalePickCount !== 1 ? "s" : ""} may be for games already in progress.</span>
+              {" "}Lines may have moved — verify odds before placing bets. Picks refresh automatically every 2 minutes.
+            </p>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 p-1 rounded-xl bg-muted/30 border border-border/40" data-testid="section-view-toggle">
           <button

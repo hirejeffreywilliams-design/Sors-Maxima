@@ -110,11 +110,13 @@ class AppGuardianEngine {
     this.intervals.push(setInterval(() => this.runErrorAnalysis(), 120_000));
     this.intervals.push(setInterval(() => this.runAIDiagnostics(), 300_000));
     this.intervals.push(setInterval(() => this.runAutoHeal(), 60_000));
+    this.intervals.push(setInterval(() => this.checkStalePicks(), 300_000));
     this.intervals.push(setInterval(() => this.pruneOldData(), 3600_000));
 
     setTimeout(() => {
       this.runHealthCheck();
       this.runServiceChecks();
+      this.checkStalePicks();
     }, 5000);
   }
 
@@ -159,6 +161,16 @@ class AppGuardianEngine {
 
     if (severity === "critical" || severity === "high") {
       logWarn(`[Guardian ALERT] [${severity.toUpperCase()}] ${title}: ${message}`);
+      import("./sseManager").then(({ broadcastEvent }) => {
+        broadcastEvent("guardian-alert", {
+          id: alert.id,
+          severity: alert.severity,
+          category: alert.category,
+          title: alert.title,
+          message: alert.message,
+          timestamp: alert.timestamp,
+        }, "all");
+      }).catch(() => {});
     }
 
     return alert;
@@ -456,6 +468,54 @@ class AppGuardianEngine {
     }
   }
 
+  private async checkStalePicks() {
+    if (!this.running) return;
+    try {
+      const { getPrecomputedCache } = await import("./precomputedPredictionsEngine");
+      const sports: Array<import("./precomputedPredictionsEngine").Sport> = ["nba", "nfl", "nhl", "mlb", "ncaab", "soccer"] as any;
+      const now = Date.now();
+      const GRACE_MS = 5 * 60 * 1000;
+      let stalePicks: { sport: string; game: string; gameTime: string }[] = [];
+
+      for (const sport of sports) {
+        try {
+          const cache = getPrecomputedCache(sport as any);
+          if (!cache?.picks) continue;
+          for (const pick of cache.picks) {
+            if (!pick.gameTime) continue;
+            const gameMs = new Date(pick.gameTime).getTime();
+            if (isNaN(gameMs)) continue;
+            if (gameMs < now - GRACE_MS) {
+              stalePicks.push({ sport, game: pick.game || "", gameTime: pick.gameTime });
+            }
+          }
+        } catch {}
+      }
+
+      if (stalePicks.length > 5) {
+        this.addAlert(
+          "high",
+          "stale_picks",
+          "Stale Game Picks Detected",
+          `${stalePicks.length} picks are for games that have already started. Precomputed engine may need a refresh cycle. Games: ${stalePicks.slice(0, 3).map(p => p.game).join(", ")}${stalePicks.length > 3 ? ` +${stalePicks.length - 3} more` : ""}`,
+          "stale_check"
+        );
+        this.addDiagnostic(
+          "data_freshness",
+          "medium",
+          `${stalePicks.length} precomputed picks are for games that have already started`,
+          "The precomputed predictions engine runs every 5 minutes. If stale picks persist beyond 15 minutes after game start, check that the engine scheduler is running and ESPN game data is updating correctly.",
+          false,
+          false
+        );
+      } else {
+        this.resolveAlertsByCategory("stale_picks", true, "All picks are for future games");
+      }
+    } catch (err: any) {
+      logError(err, { context: "guardian_stale_check" });
+    }
+  }
+
   private async runAIDiagnostics() {
     if (!this.running) return;
     this.checksPerformed++;
@@ -477,13 +537,22 @@ class AppGuardianEngine {
       const { createOpenAIClient } = await import("./openaiClient");
       const openai = createOpenAIClient();
 
+      const mem = process.memoryUsage();
+      const stalePicks = this.alerts.filter(a => !a.resolved && a.category === "stale_picks");
       const context = {
+        platform: "Sors Maxima - Sports Betting Intelligence",
         healthScore,
+        uptime: Math.round(process.uptime()),
+        memHeapUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
+        memHeapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
+        memHeapPercent: Math.round((mem.heapUsed / mem.heapTotal) * 100),
+        checksPerformed: this.checksPerformed,
+        autoHealActions: this.autoHealActions,
         activeAlerts: activeAlerts.map(a => ({ severity: a.severity, category: a.category, title: a.title, message: a.message })),
-        degradedServices: downServices.map(s => ({ name: s.name, status: s.status, responseTime: s.responseTime, successRate: s.successRate })),
-        memUsage: process.memoryUsage(),
-        uptime: process.uptime(),
-        recentIncidents: this.incidents.slice(0, 5).map(i => ({ title: i.title, severity: i.severity, resolved: !!i.resolvedAt })),
+        degradedServices: downServices.map(s => ({ name: s.name, status: s.status, responseTime: s.responseTime, successRate: s.successRate, errorCount: s.errorCount })),
+        recentIncidents: this.incidents.slice(0, 5).map(i => ({ title: i.title, severity: i.severity, resolved: !!i.resolvedAt, duration: i.duration })),
+        stalePicksAlert: stalePicks.length > 0 ? stalePicks[0].message : null,
+        prevDiagnostics: this.diagnostics.slice(0, 3).map(d => ({ category: d.category, finding: d.finding, severity: d.severity })),
       };
 
       const response = await openai.chat.completions.create({
@@ -491,12 +560,28 @@ class AppGuardianEngine {
         messages: [
           {
             role: "system",
-            content: `You are the AI Guardian for Sors Maxima, a sports betting intelligence platform. Analyze the system health data and provide actionable diagnostics. Return a JSON array of diagnostics, each with: category (string), severity (critical/high/medium/low), finding (string - what you found), recommendation (string - what to do), autoFixable (boolean). Focus on the most impactful issues first. Be concise and actionable. Max 5 items.`
+            content: `You are the AI Guardian for Sors Maxima, a sports betting intelligence platform with paid members (Sharp/Edge/Max tiers). The platform uses: ESPN for live game data, The Odds API for odds, precomputed predictions engine (runs every 5 min), SSE for real-time updates, PostgreSQL for data, and continuous learning via settled picks.
+
+Key platform concerns:
+- Stale picks (games already started) reduce trust and accuracy
+- ESPN API rate limits can cause data freshness issues
+- The Odds API has monthly request limits — conserve usage
+- Memory pressure affects SSE broadcast reliability
+- The precomputed predictions engine must stay running for picks to refresh
+
+Analyze the system health snapshot and return a JSON object with key "diagnostics" — an array of up to 5 items, each with:
+- category: string (e.g. "data_freshness", "memory", "api_limits", "predictions_engine", "database", "general")
+- severity: "critical" | "high" | "medium" | "low"
+- finding: string (specific, factual description of the issue found)
+- recommendation: string (concrete admin action to take)
+- autoFixable: boolean (true only if the system can fix it without admin intervention)
+
+Prioritize the most impactful issues for the platform's paying users. Be direct and specific. Return ONLY the JSON object.`
           },
           { role: "user", content: JSON.stringify(context) }
         ],
-        temperature: 0.3,
-        max_tokens: 1000,
+        temperature: 0.2,
+        max_tokens: 1200,
         response_format: { type: "json_object" },
       });
 

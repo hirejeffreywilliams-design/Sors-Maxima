@@ -168,6 +168,17 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     });
 
+    es.addEventListener("guardian-alert", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "guardian-alert", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({ ...prev, lastEvent: sseEvent }));
+        onEventRef.current?.(sseEvent);
+      } catch {}
+    });
+
     es.addEventListener("heartbeat", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;

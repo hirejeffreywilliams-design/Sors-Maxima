@@ -40,7 +40,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **AI-Powered Admin Assistant**: An operational intelligence dashboard generates structured admin reports with prioritized tasks via OpenAI analysis.
 - **Hidden Analytics Agent**: A real-time, server-side agent continuously ingests ESPN data, performs market analysis, and monitors model drift.
 - **Platform Intelligence Engine**: A self-growing data engine accumulates game outcomes, prediction accuracy, odds snapshots, and community consensus for continuous learning.
-- **App Guardian Engine**: A continuous health monitoring system performs health checks, service monitoring, error analysis, and auto-healing.
+- **App Guardian Engine**: A continuous health monitoring system performs health checks, service monitoring, stale picks detection, error analysis, and auto-healing. Broadcasts real-time `guardian-alert` SSE events to admin when critical/high severity issues are detected. Runs OpenAI-powered diagnostics every 5 minutes when issues are present. Admin guardian page receives live toast notifications via SSE when new alerts fire.
+- **Stale Game Detection**: The daily picks page shows "Game In Progress" amber badge on picks for games that have already started (5-min grace window). A page-level warning banner appears when any picks are stale, prompting users to verify odds before placing. Game times are formatted as "Today 7:30 PM" / "Mar 2 7:30 PM" instead of raw ISO strings.
 - **Player Props Analyzer**: A dedicated page for real-time over/under prop lines with recommendations and confidence levels, powered by a "Top Props Engine".
 - **Expanded 1H Odds Pipeline**: Integrates first-half market odds for accurate calculations.
 - **Enhanced Learning Engine**: Upgraded with momentum tracking, weight decay, and confidence-weighted updates.
