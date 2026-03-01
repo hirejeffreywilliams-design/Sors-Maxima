@@ -25,7 +25,7 @@ import { analyticsEventService } from "../analyticsEventService";
 import { getTeams, getTeamRoster, getRosterCacheStats, refreshAllData, getPlayersFromCacheById } from "../espn-roster-provider";
 import { sportsDataService } from "../sportsDataService";
 import { getDeviceStats } from "../trustedDeviceService";
-import { getLearningStats, getAllFactorWeights } from "../learningEngine";
+import { getLearningStats, getAllFactorWeights, recalibrateWeights } from "../learningEngine";
 import { runHistoricalLearning, getHistoricalLearningStatus } from "../historicalLearningEngine";
 import {
   getDashboardOverview,
@@ -3993,6 +3993,19 @@ Follow these rules:
       res.json({ success: true, message: "Pick tracker reset" });
     } catch (error: any) {
       res.status(500).json({ error: "Failed to reset pick tracker" });
+    }
+  });
+
+  app.post("/api/admin/learning/recalibrate", requireAdmin, async (_req, res) => {
+    try {
+      const result = await recalibrateWeights();
+      res.json({
+        success: true,
+        message: `Recalibration complete — ${result.weightsReset} weights reset to evidence-based priors, ${result.historicalGamesUsed.toLocaleString()} historical games informed home/crowd factors`,
+        ...result,
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: "Recalibration failed", details: error.message });
     }
   });
 
