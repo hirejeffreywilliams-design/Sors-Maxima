@@ -1404,8 +1404,9 @@ export function buildOptimalTickets(options: {
     const riskLabel = riskLevel === "conservative" ? "Safe" : riskLevel === "aggressive" ? "Power" : "Smart";
     const ticketName = `${riskLabel} ${names[t % names.length]} ${legs.length}-Leg`;
 
+    const optimalHash = crypto.createHash('sha256').update(legs.map(l => l.pickId).sort().join(',')).digest('hex').slice(0, 8);
     tickets.push({
-      id: `optimal-${crypto.randomUUID().slice(0, 8)}`,
+      id: `optimal-${optimalHash}`,
       name: ticketName,
       legs,
       totalOdds: Math.round(totalOdds * 100) / 100,
@@ -1569,8 +1570,9 @@ export function buildMatchupTickets(options: {
     const firstPick = ticketLegs[0];
     const reasoning = buildTicketReasoning(legs);
 
+    const matchupHash = crypto.createHash('sha256').update(gameName).digest('hex').slice(0, 8);
     tickets.push({
-      id: `matchup-${crypto.randomUUID().slice(0, 8)}`,
+      id: `matchup-${matchupHash}`,
       matchupGame: gameName,
       homeTeam: firstPick.homeTeam,
       awayTeam: firstPick.awayTeam,

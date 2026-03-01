@@ -973,7 +973,11 @@ export function ParlaySlipDesktopSidebar() {
 
       {/* Floating tab — always visible on right edge, shifts left when panel opens */}
       <button
-        className="hidden lg:flex fixed z-50 top-[40%] -translate-y-1/2 flex-col items-center gap-2 py-5 px-2 bg-primary text-primary-foreground rounded-l-xl shadow-2xl hover:bg-primary/90 active:scale-95 transition-all duration-300 ease-out border-y border-l border-white/10"
+        className={`hidden lg:flex fixed z-50 top-[40%] -translate-y-1/2 flex-col items-center gap-2 py-4 px-2 rounded-l-xl shadow-xl active:scale-95 transition-all duration-300 ease-out border-y border-l ${
+          legCount > 0
+            ? "bg-primary text-primary-foreground hover:bg-primary/90 border-white/10 py-5"
+            : "bg-muted/80 text-muted-foreground hover:bg-muted border-border backdrop-blur-sm"
+        }`}
         style={{ right: open ? "300px" : "0px" }}
         onClick={() => setOpen(o => !o)}
         data-testid="button-toggle-bet-slip"
@@ -986,9 +990,9 @@ export function ParlaySlipDesktopSidebar() {
           </span>
         ) : null}
         {open ? (
-          <ChevronRight className="h-3 w-3 opacity-70" />
+          <ChevronRight className="h-3 w-3 opacity-60" />
         ) : (
-          <ChevronLeft className="h-3 w-3 opacity-70" />
+          <ChevronLeft className="h-3 w-3 opacity-60" />
         )}
       </button>
 

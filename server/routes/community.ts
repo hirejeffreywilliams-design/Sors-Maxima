@@ -68,8 +68,10 @@ async function generateRealNotification(): Promise<any | null> {
 
     if (chosenType === "line_movement" && gamesWithMovement.length > 0) {
       const game = gamesWithMovement[Date.now() % gamesWithMovement.length];
-      const move = game.lineMovement[Date.now() % game.lineMovement.length];
-      const dirLabel = move.direction === "up" ? "up" : move.direction === "down" ? "down" : "holding steady";
+      const actualMoves = game.lineMovement.filter(m => m.opening !== m.current && m.direction !== "stable");
+      if (actualMoves.length === 0) return null;
+      const move = actualMoves[Date.now() % actualMoves.length];
+      const dirLabel = move.direction === "up" ? "up" : "down";
       let desc: string;
       if (move.market === "spread") {
         desc = `${game.shortName} spread moved from ${move.opening > 0 ? "+" : ""}${move.opening} to ${move.current > 0 ? "+" : ""}${move.current} (${dirLabel})`;

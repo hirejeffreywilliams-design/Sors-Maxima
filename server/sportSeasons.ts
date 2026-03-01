@@ -8,7 +8,7 @@ interface SeasonWindow {
 const SEASON_WINDOWS: Record<string, SeasonWindow[]> = {
   NBA:   [{ startMonth: 10, endMonth: 12 }, { startMonth: 1, endMonth: 6 }],
   NFL:   [{ startMonth: 8, endMonth: 12 }, { startMonth: 1, endMonth: 2 }],
-  MLB:   [{ startMonth: 3, endMonth: 11 }],
+  MLB:   [{ startMonth: 4, endMonth: 11 }],
   NHL:   [{ startMonth: 10, endMonth: 12 }, { startMonth: 1, endMonth: 6 }],
   NCAAB: [{ startMonth: 11, endMonth: 12 }, { startMonth: 1, endMonth: 4 }],
   NCAAF: [{ startMonth: 8, endMonth: 12 }, { startMonth: 1, endMonth: 1 }],

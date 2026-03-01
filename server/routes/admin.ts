@@ -97,11 +97,12 @@ import {
   toggleBusinessConstraint,
   getRegistryMetrics,
 } from "../featureRegistryEngine";
+import { getHubStatus } from "../unifiedIntelligenceHub";
 
 export async function registerAdminRoutes(app: Express): Promise<void> {
   app.get("/api/admin/users", requireAdmin, async (_req, res) => {
     const usersList = await getAllUsers();
-    res.json(usersList);
+    res.json(usersList.map(({ passwordHash: _pw, ...safe }) => safe));
   });
 
   app.get("/api/admin/fraud-alerts", requireAdmin, (_req, res) => {
@@ -3884,13 +3885,14 @@ Follow these rules:
         },
       ];
 
-      const runningCount = engines.filter(e => e.status === "running" || e.status === "healthy").length;
+      const runningCount = engines.filter(e => e.status === "running" || e.status === "healthy" || e.status === "idle").length;
+      const stoppedCount = engines.filter(e => e.status === "stopped" || e.status === "error").length;
 
       res.json({
         summary: {
           enginesRunning: runningCount,
           enginesTotal: engines.length,
-          allHealthy: runningCount === engines.length,
+          allHealthy: stoppedCount === 0,
           hitRate: Math.round(hitRate * 1000) / 1000,
           totalPredictions,
           totalWins: wins,
