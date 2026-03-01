@@ -1,6 +1,14 @@
 import crypto from "crypto";
 import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { generateVegasPredictions } from "./vegas-engine";
+import {
+  getSportPropCategories,
+  isSportPropsEnabled,
+  enrichLeadersWithPerGameStats,
+  getSportLeaderForProp,
+  getPropLineForLeader,
+  logSeasonStatus,
+} from "./sport-leaders-provider";
 import { analyzeLeg, type MarketContext } from "./quantumFusionEngine";
 import { getAllInjuries } from "./espn-injury-provider";
 import { getGameSituationalFactors, type SituationalFactors } from "./situationalEngine";
@@ -792,170 +800,163 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       });
     }
 
-    const propCategoriesBySport: Record<string, { category: string; avgLine: number; leaderKey: string }[]> = {
-      NBA: [
-        { category: "Points", avgLine: 22.5, leaderKey: "Points Per Game" },
-        { category: "Rebounds", avgLine: 8.5, leaderKey: "Rebounds Per Game" },
-        { category: "Assists", avgLine: 6.5, leaderKey: "Assists Per Game" },
-      ],
-      NFL: [
-        { category: "Passing Yards", avgLine: 250.5, leaderKey: "Passing Yards" },
-        { category: "Rushing Yards", avgLine: 65.5, leaderKey: "Rushing Yards" },
-        { category: "Receiving Yards", avgLine: 55.5, leaderKey: "Receiving Yards" },
-      ],
-      MLB: [
-        { category: "Strikeouts", avgLine: 5.5, leaderKey: "Strikeouts" },
-      ],
-      NHL: [
-        { category: "Shots on Goal", avgLine: 3.5, leaderKey: "Shots on Goal" },
-        { category: "Goals", avgLine: 0.5, leaderKey: "Goals" },
-      ],
-      NCAAB: [
-        { category: "Points", avgLine: 18.5, leaderKey: "Points Per Game" },
-        { category: "Rebounds", avgLine: 7.5, leaderKey: "Rebounds Per Game" },
-      ],
-    };
+    const sportPropCats = getSportPropCategories(sport);
+    const propEnabled = isSportPropsEnabled(sport);
+    const enrichedLeaders = propEnabled
+      ? enrichLeadersWithPerGameStats(game.leaders || [], sport)
+      : [];
 
-    const sportProps = propCategoriesBySport[sport] || [];
-    const leaders = game.leaders || [];
     let sharpPropAlerts: PropMovement[] = [];
     try { sharpPropAlerts = getSharpPropAlerts(); } catch {}
 
-    for (const propDef of sportProps) {
-      const leader = leaders.find(l =>
-        l.category === propDef.leaderKey ||
-        l.category.includes(propDef.category) ||
-        propDef.category.includes(l.category.replace(" Per Game", ""))
-      );
-      if (!leader) continue;
+    if (propEnabled && enrichedLeaders.length > 0) {
+      for (const propDef of sportPropCats) {
+        const enrichedLeader = getSportLeaderForProp(enrichedLeaders, propDef);
+        if (!enrichedLeader) continue;
 
-      const leaderValue = parseFloat(leader.value) || 0;
-      if (leaderValue <= 0) continue;
+        const perGameAvg = enrichedLeader.perGameAvg;
+        if (perGameAvg <= 0) continue;
 
-      const propLine = Math.round(leaderValue * 2) / 2;
-      if (propLine <= 0) continue;
+        const propLine = getPropLineForLeader(enrichedLeader, propDef);
+        if (propLine <= 0) continue;
 
-      const predictedScore = mcSim
-        ? (leader.team === homeName ? mcSim.predictedHomeScore : mcSim.predictedAwayScore)
-        : null;
+        const predictedScore = mcSim
+          ? (enrichedLeader.team === homeName ? mcSim.predictedHomeScore : mcSim.predictedAwayScore)
+          : null;
 
-      const scoringPace = predictedScore && actualTotal > 0
-        ? predictedScore / (actualTotal / 2)
-        : 1.0;
+        const scoringPace = predictedScore && actualTotal > 0
+          ? predictedScore / (actualTotal / 2)
+          : 1.0;
 
-      const adjustedProjection = leaderValue * (scoringPace > 0 ? Math.min(1.15, Math.max(0.85, scoringPace)) : 1.0);
+        const adjustedProjection = perGameAvg * (scoringPace > 0 ? Math.min(1.15, Math.max(0.85, scoringPace)) : 1.0);
+        const minEdge = propDef.minEdgeForPick;
 
-      for (const direction of ["Over", "Under"] as const) {
-        const isOver = direction === "Over";
-        const edge = isOver ? adjustedProjection - propLine : propLine - adjustedProjection;
+        for (const direction of ["Over", "Under"] as const) {
+          const isOver = direction === "Over";
+          const edge = isOver ? adjustedProjection - propLine : propLine - adjustedProjection;
 
-        if (Math.abs(edge) < 0.1) continue;
+          if (edge < minEdge) continue;
 
-        const propBetType = `player_${propDef.category.toLowerCase().replace(/ /g, "_")}`;
-        const pickStr = `${leader.playerName} ${direction} ${propLine} ${propDef.category}`;
-        const propOdds = -110;
+          const propBetType = propDef.betTypeKey;
+          const pickStr = `${enrichedLeader.playerName} ${direction} ${propLine} ${propDef.category}`;
+          const propOdds = -110;
 
-        const propFusion = analyzeLeg(sport, pickStr, propOdds, {
-          hasRealOdds: false,
-          gameId: game.id,
-          bookmakerCount: 0,
-          oddsSource: "ESPN-derived",
-        }, marketCtx);
+          const propFusion = analyzeLeg(sport, pickStr, propOdds, {
+            hasRealOdds: false,
+            gameId: game.id,
+            bookmakerCount: 0,
+            oddsSource: "ESPN-derived",
+          }, marketCtx);
 
-        let propConf = Math.min(65, Math.max(22, propFusion.confidence));
-        if (mcSim) {
-          const boostDir = isOver ? edge : -edge;
-          propConf = Math.min(68, Math.max(20, propConf + Math.round(boostDir * 2)));
-        }
-
-        const propImplied = Math.abs(propOdds) / (Math.abs(propOdds) + 100);
-        const propTrue = propConf / 100;
-        const propEv = ((propTrue * (1 / propImplied - 1)) - (1 - propTrue)) * 100;
-        const propEvRounded = Math.round(propEv * 100) / 100;
-
-        if (propEvRounded <= -5) continue;
-
-        const propFactors = (propFusion.signals || []).slice(0, 4).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
-        propFactors.push({ name: "Player Avg", impact: Math.round(leaderValue * 10) / 10, direction: isOver ? "bullish" : "bearish" });
-
-        const propTiming = determinePickTiming(game.date, gameLineMovements, propEvRounded);
-
-        const matchingSharp = sharpPropAlerts.find(m =>
-          m.playerName.toLowerCase() === leader.playerName.toLowerCase() &&
-          (m.marketLabel.toLowerCase().includes(propDef.category.toLowerCase()) ||
-           propDef.category.toLowerCase().includes(m.marketLabel.toLowerCase()))
-        );
-
-        if (matchingSharp) {
-          const sharpDir = matchingSharp.direction === "up" ? "rising" : matchingSharp.direction === "down" ? "dropping" : "shifting";
-          propFactors.unshift({ name: "Sharp Prop Move", impact: matchingSharp.lineShift, direction: sharpDir });
-          if (matchingSharp.velocity === "steam") {
-            propConf = Math.min(95, propConf + 5);
-          } else if (matchingSharp.velocity === "fast") {
-            propConf = Math.min(93, propConf + 3);
+          const edgeRatio = edge / minEdge;
+          let propConf = Math.min(68, Math.max(53, Math.floor(50 + edgeRatio * 3)));
+          if (mcSim && scoringPace !== 1.0) {
+            const paceAdjust = Math.round((scoringPace - 1.0) * 5);
+            propConf = Math.min(68, Math.max(53, propConf + (isOver ? paceAdjust : -paceAdjust)));
           }
-        }
 
-        picks.push({
-          id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.createHash('sha256').update(`${game.id}|${propBetType}|${direction}|${leader.playerName}`).digest('hex').slice(0, 10)}`,
-          sport,
-          game: `${awayName} @ ${homeName}`,
-          homeTeam: homeName,
-          awayTeam: awayName,
-          pick: pickStr,
-          betType: propBetType,
-          odds: propOdds,
-          confidence: propConf,
-          grade: gradeFromConfidence(propConf),
-          edge: Math.round(propEv * 10) / 10,
-          ev: propEvRounded,
-          factors: propFactors,
-          generatedAt: now,
-          dataSource,
-          gameTime: game.date,
-          reasoning: `${leader.playerName} averages ${leaderValue} ${propDef.category} per game. ${isOver ? "Over" : "Under"} ${propLine} is ${Math.abs(edge) > 1 ? "well" : "slightly"} ${isOver ? "supported" : "favored"} by season stats${mcSim ? " and Monte Carlo scoring projections" : ""}${sitFactors ? `. ${sitFactors.spotDescription || ""}` : ""}${matchingSharp ? ` Sharp ${matchingSharp.velocity} move detected: line ${matchingSharp.previousLine} → ${matchingSharp.currentLine}.` : ""}.`,
-          recommendation: propFusion.recommendation || "lean_bet",
-          winProbability: propFusion.winProbability || Math.round(propConf * 0.95),
-          insights: (propFusion.insights || []).slice(0, 2),
-          timing: matchingSharp?.velocity === "steam" ? "bet_now" : propTiming.timing,
-          timingAdvice: matchingSharp?.velocity === "steam"
-            ? `Bet now — steam move on ${leader.playerName} ${propDef.category} (${matchingSharp.previousLine} → ${matchingSharp.currentLine}), value disappearing fast`
-            : propTiming.timingAdvice,
-          releaseSchedule: buildReleaseSchedule(now),
-          isExclusive: false,
-          monteCarloData: mcSim ? {
-            simulations: mcSim.simulations || 10000,
-            predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
-            predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
-            homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
-            awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
-            convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
-          } : undefined,
-          situationalData: sitFactors ? {
-            homeRestDays: sitFactors.homeRestDays,
-            awayRestDays: sitFactors.awayRestDays,
-            homeB2B: sitFactors.homeB2B,
-            awayB2B: sitFactors.awayB2B,
-            spotType: sitFactors.spotType,
-            spotDescription: sitFactors.spotDescription,
-          } : undefined,
-          injuryData: (homeInjuryCount + awayInjuryCount > 0) ? {
-            homeInjuryCount,
-            awayInjuryCount,
-            homeStartersOut,
-            awayStartersOut,
-          } : undefined,
-          sharpPropAlert: matchingSharp ? {
-            playerName: matchingSharp.playerName,
-            market: matchingSharp.market,
-            previousLine: matchingSharp.previousLine,
-            currentLine: matchingSharp.currentLine,
-            lineShift: matchingSharp.lineShift,
-            velocity: matchingSharp.velocity,
-            direction: matchingSharp.direction,
-            detectedAt: matchingSharp.detectedAt,
-          } : undefined,
-        });
+          const propImplied = Math.abs(propOdds) / (Math.abs(propOdds) + 100);
+          const propTrue = propConf / 100;
+          const propEv = ((propTrue * (1 / propImplied - 1)) - (1 - propTrue)) * 100;
+          const propEvRounded = Math.round(propEv * 100) / 100;
+
+          if (propEvRounded <= 0) continue;
+
+          const propFactors = (propFusion.signals || []).slice(0, 4).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+          propFactors.push({
+            name: "Season Avg",
+            impact: Math.round(perGameAvg * 10) / 10,
+            direction: isOver ? "bullish" : "bearish",
+          });
+          propFactors.push({
+            name: "Data",
+            impact: enrichedLeader.estimatedGamesPlayed,
+            direction: "neutral",
+          });
+
+          const propTiming = determinePickTiming(game.date, gameLineMovements, propEvRounded);
+
+          const matchingSharp = sharpPropAlerts.find(m =>
+            m.playerName.toLowerCase() === enrichedLeader.playerName.toLowerCase() &&
+            (m.marketLabel.toLowerCase().includes(propDef.category.toLowerCase()) ||
+             propDef.category.toLowerCase().includes(m.marketLabel.toLowerCase()))
+          );
+
+          if (matchingSharp) {
+            const sharpDir = matchingSharp.direction === "up" ? "rising" : matchingSharp.direction === "down" ? "dropping" : "shifting";
+            propFactors.unshift({ name: "Sharp Prop Move", impact: matchingSharp.lineShift, direction: sharpDir });
+            if (matchingSharp.velocity === "steam") {
+              propConf = Math.min(95, propConf + 5);
+            } else if (matchingSharp.velocity === "fast") {
+              propConf = Math.min(93, propConf + 3);
+            }
+          }
+
+          const avgDisplay = propLine > 5
+            ? perGameAvg.toFixed(1)
+            : perGameAvg.toFixed(2);
+
+          picks.push({
+            id: `precomp-prop-${sport}-${game.id}-${propBetType}-${direction.toLowerCase()}-${crypto.createHash('sha256').update(`${game.id}|${propBetType}|${direction}|${enrichedLeader.playerName}`).digest('hex').slice(0, 10)}`,
+            sport,
+            game: `${awayName} @ ${homeName}`,
+            homeTeam: homeName,
+            awayTeam: awayName,
+            pick: pickStr,
+            betType: propBetType,
+            odds: propOdds,
+            confidence: propConf,
+            grade: gradeFromConfidence(propConf),
+            edge: Math.round(propEv * 10) / 10,
+            ev: propEvRounded,
+            factors: propFactors,
+            generatedAt: now,
+            dataSource,
+            gameTime: game.date,
+            reasoning: `${enrichedLeader.playerName} averages ${avgDisplay} ${propDef.category}/game (${enrichedLeader.estimatedGamesPlayed} games). ${isOver ? "Over" : "Under"} ${propLine} is ${Math.abs(edge) >= minEdge * 2 ? "well" : "slightly"} ${isOver ? "supported" : "favored"} by season stats${mcSim ? " and Monte Carlo projections" : ""}${sitFactors ? `. ${sitFactors.spotDescription || ""}` : ""}${matchingSharp ? ` Sharp ${matchingSharp.velocity} move: line ${matchingSharp.previousLine} → ${matchingSharp.currentLine}.` : ""}.`,
+            recommendation: propFusion.recommendation || "lean_bet",
+            winProbability: propFusion.winProbability || Math.round(propConf * 0.95),
+            insights: (propFusion.insights || []).slice(0, 2),
+            timing: matchingSharp?.velocity === "steam" ? "bet_now" : propTiming.timing,
+            timingAdvice: matchingSharp?.velocity === "steam"
+              ? `Bet now — steam move on ${enrichedLeader.playerName} ${propDef.category} (${matchingSharp.previousLine} → ${matchingSharp.currentLine}), value disappearing fast`
+              : propTiming.timingAdvice,
+            releaseSchedule: buildReleaseSchedule(now),
+            isExclusive: false,
+            monteCarloData: mcSim ? {
+              simulations: mcSim.simulations || 10000,
+              predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
+              predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
+              homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
+              awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
+              convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
+            } : undefined,
+            situationalData: sitFactors ? {
+              homeRestDays: sitFactors.homeRestDays,
+              awayRestDays: sitFactors.awayRestDays,
+              homeB2B: sitFactors.homeB2B,
+              awayB2B: sitFactors.awayB2B,
+              spotType: sitFactors.spotType,
+              spotDescription: sitFactors.spotDescription,
+            } : undefined,
+            injuryData: (homeInjuryCount + awayInjuryCount > 0) ? {
+              homeInjuryCount,
+              awayInjuryCount,
+              homeStartersOut,
+              awayStartersOut,
+            } : undefined,
+            sharpPropAlert: matchingSharp ? {
+              playerName: matchingSharp.playerName,
+              market: matchingSharp.market,
+              previousLine: matchingSharp.previousLine,
+              currentLine: matchingSharp.currentLine,
+              lineShift: matchingSharp.lineShift,
+              velocity: matchingSharp.velocity,
+              direction: matchingSharp.direction,
+              detectedAt: matchingSharp.detectedAt,
+            } : undefined,
+          });
+        }
       }
     }
   }
@@ -1084,6 +1085,16 @@ export function startPrecomputedEngine(): void {
   engineRunning = true;
 
   console.log(`[PrecomputedEngine] Starting precomputed predictions engine (${REFRESH_INTERVAL / 1000}s interval)`);
+
+  import("./sportSeasons").then(({ getAllSports }) => {
+    for (const sport of getAllSports()) {
+      logSeasonStatus(sport);
+    }
+  }).catch(() => {});
+
+  import("./featureFlags").then(({ featureFlags }) => {
+    featureFlags.syncSeasonFlags();
+  }).catch(() => {});
 
   setTimeout(() => runPredictionCycle(), 5000);
 

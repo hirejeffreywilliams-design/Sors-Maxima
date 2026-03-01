@@ -1,3 +1,5 @@
+import { isSportInSeason } from "./sportSeasons";
+
 interface FeatureFlag {
   id: string;
   name: string;
@@ -59,6 +61,30 @@ class FeatureFlagService {
         description: "Machine learning player prop projections",
         enabled: true,
         rolloutPercentage: 100,
+      },
+      {
+        id: "nfl_player_props",
+        name: "NFL Player Props",
+        description: "NFL player prop picks (passing yards, rushing yards, receiving yards, TDs, receptions). Auto-activates when NFL preseason begins in August.",
+        enabled: false,
+        rolloutPercentage: 0,
+        metadata: { autoEnableMonth: 8, autoDisableMonth: 3, sport: "NFL" },
+      },
+      {
+        id: "mlb_player_props",
+        name: "MLB Player Props",
+        description: "MLB player prop picks (strikeouts, hits, RBIs, home runs). Auto-activates when MLB season begins in April.",
+        enabled: false,
+        rolloutPercentage: 0,
+        metadata: { autoEnableMonth: 4, autoDisableMonth: 10, sport: "MLB" },
+      },
+      {
+        id: "ncaaf_player_props",
+        name: "NCAAF Player Props",
+        description: "College football player prop picks (passing yards, rushing yards, receiving yards). Auto-activates in August.",
+        enabled: false,
+        rolloutPercentage: 0,
+        metadata: { autoEnableMonth: 8, autoDisableMonth: 1, sport: "NCAAF" },
       },
       {
         id: "paper_trading",
@@ -252,6 +278,24 @@ class FeatureFlagService {
 
     this.flags.set(flag.id, flag);
     return flag;
+  }
+
+  syncSeasonFlags(): void {
+    this.flags.forEach((flag) => {
+      const meta = flag.metadata as any;
+      if (!meta?.sport) return;
+
+      const inSeason = isSportInSeason(meta.sport);
+      const wasEnabled = flag.enabled;
+
+      flag.enabled = inSeason;
+      flag.rolloutPercentage = inSeason ? 100 : 0;
+      flag.updatedAt = new Date().toISOString();
+
+      if (wasEnabled !== inSeason) {
+        console.log(`[FeatureFlags] ${flag.name}: ${inSeason ? "AUTO-ENABLED (season active)" : "AUTO-DISABLED (offseason)"}`);
+      }
+    });
   }
 
   killSwitch(flagId: string): boolean {

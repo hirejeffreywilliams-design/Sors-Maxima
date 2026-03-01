@@ -339,7 +339,7 @@ const DEFAULT_SPORT_PARAMS: Record<string, { scoreMean: number; scoreStdDev: num
   NCAAF: { scoreMean: 25, scoreStdDev: 12, totalMean: 50, homeAdvantage: 3.0, isPoisson: false },
 };
 
-const MATCHUP_SIMS = 1500;
+const MATCHUP_SIMS = 10000;
 const PARLAY_SIMS = 5000;
 const BATCH_SIZE = 2000;
 const CONVERGENCE_THRESHOLD = 0.0005;

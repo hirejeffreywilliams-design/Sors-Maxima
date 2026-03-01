@@ -584,37 +584,4 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/model-health", async (_req: Request, res: Response) => {
-    try {
-      const stats = getPickAccuracyStats();
-      const settledCount = stats.overall.total;
-      const winRate = stats.overall.rate;
-      const recentTrend = stats.recentForm.rate;
-      const backtestCount = getBacktestCount();
-      const liveCount = settledCount - backtestCount;
-
-      let status: 'building' | 'calibrated' | 'recalibrating' = 'building';
-      if (settledCount >= 100) {
-        if (winRate >= 48 && winRate <= 60) {
-          status = 'calibrated';
-        } else {
-          status = 'recalibrating';
-        }
-      }
-
-      res.json({
-        status,
-        settledCount,
-        winRate,
-        recentTrend,
-        lastUpdated: stats.lastUpdated,
-        backtestCount,
-        liveCount,
-        factorCount: 57
-      });
-    } catch (err: any) {
-      console.error("Model health error:", err);
-      res.status(500).json({ error: "Failed to fetch model health" });
-    }
-  });
 }

@@ -241,20 +241,52 @@
       "savedAt": "2026-03-01T12:54:59.953Z"
     },
     {
-      "id": "precomp-NHL-401803302-team_total-136d817d23",
-      "gameId": "401803302",
-      "sport": "NHL",
-      "game": "St. Louis Blues @ Minnesota Wild",
-      "homeTeam": "Minnesota Wild",
-      "awayTeam": "St. Louis Blues",
-      "pick": "Minnesota Wild Over 4",
+      "id": "precomp-NBA-401810728-total-33d9c5df09",
+      "gameId": "401810728",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Atlanta Hawks",
+      "homeTeam": "Atlanta Hawks",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Over 235.5",
+      "betType": "total",
+      "odds": -114,
+      "grade": "C",
+      "confidence": 35,
+      "ev": -34.3,
+      "gameTime": "2026-03-01T23:00Z",
+      "savedAt": "2026-03-01T18:06:17.964Z"
+    },
+    {
+      "id": "precomp-NBA-401810728-team_total-a303290fd9",
+      "gameId": "401810728",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Atlanta Hawks",
+      "homeTeam": "Atlanta Hawks",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Atlanta Hawks Over 120.5",
       "betType": "team_total",
       "odds": -110,
-      "grade": "B-",
-      "confidence": 45,
-      "ev": -14.09,
-      "gameTime": "2026-03-01T22:00Z",
-      "savedAt": "2026-03-01T17:26:22.969Z"
+      "grade": "C",
+      "confidence": 35,
+      "ev": -33.18,
+      "gameTime": "2026-03-01T23:00Z",
+      "savedAt": "2026-03-01T18:06:17.964Z"
+    },
+    {
+      "id": "precomp-NBA-401810728-team_total-491c23b7be",
+      "gameId": "401810728",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Atlanta Hawks",
+      "homeTeam": "Atlanta Hawks",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Portland Trail Blazers Over 115",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 35,
+      "ev": -33.18,
+      "gameTime": "2026-03-01T23:00Z",
+      "savedAt": "2026-03-01T18:06:17.964Z"
     }
   ],
   "settled": [
@@ -5591,26 +5623,6 @@
       "grade": "C",
       "confidence": 41,
       "ev": -21.73,
-      "gameTime": "2026-03-01T22:00Z",
-      "savedAt": "2026-03-01T12:46:58.383Z",
-      "result": "lost",
-      "homeScore": 1,
-      "awayScore": 3,
-      "settledAt": "2026-03-01T12:51:19.538Z"
-    },
-    {
-      "id": "precomp-NHL-401803302-team_total-73ea0814",
-      "gameId": "401803302",
-      "sport": "NHL",
-      "game": "St. Louis Blues @ Minnesota Wild",
-      "homeTeam": "Minnesota Wild",
-      "awayTeam": "St. Louis Blues",
-      "pick": "Minnesota Wild Over 4",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C",
-      "confidence": 40,
-      "ev": -23.64,
       "gameTime": "2026-03-01T22:00Z",
       "savedAt": "2026-03-01T12:46:58.383Z",
       "result": "lost",
@@ -56913,32 +56925,192 @@
       "homeScore": 98,
       "awayScore": 127,
       "settledAt": "2026-03-01T17:22:47.971Z"
+    },
+    {
+      "id": "precomp-NHL-401803302-team_total-136d817d23",
+      "gameId": "401803302",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Minnesota Wild Over 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 45,
+      "ev": -14.09,
+      "gameTime": "2026-03-01T22:00Z",
+      "savedAt": "2026-03-01T17:26:22.969Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-01T17:27:35.492Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-total-140fc9af04",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Over 231.5",
+      "betType": "total",
+      "odds": -112,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37.54,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:37:51.382Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:39:06.161Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-14ad75d260",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Chicago Bulls Over 114.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:37:51.382Z",
+      "result": "lost",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:39:06.161Z"
+    },
+    {
+      "id": "precomp-NBA-401810725-team_total-45bb787832",
+      "gameId": "401810725",
+      "sport": "NBA",
+      "game": "Milwaukee Bucks @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Milwaukee Bucks",
+      "pick": "Milwaukee Bucks Over 117.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-01T20:30Z",
+      "savedAt": "2026-03-01T17:37:51.382Z",
+      "result": "won",
+      "homeScore": 98,
+      "awayScore": 127,
+      "settledAt": "2026-03-01T17:39:06.161Z"
+    },
+    {
+      "id": "precomp-NHL-401803307-team_total-ebacf76785",
+      "gameId": "401803307",
+      "sport": "NHL",
+      "game": "Dallas Stars @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Dallas Stars",
+      "pick": "Dallas Stars Under 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 33,
+      "ev": -37,
+      "gameTime": "2026-03-03T03:00Z",
+      "savedAt": "2026-03-01T17:55:46.940Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-01T17:57:00.013Z"
+    },
+    {
+      "id": "precomp-NHL-401803307-team_total-21029f3edc",
+      "gameId": "401803307",
+      "sport": "NHL",
+      "game": "Dallas Stars @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Dallas Stars",
+      "pick": "Vancouver Canucks Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 32,
+      "ev": -38.91,
+      "gameTime": "2026-03-03T03:00Z",
+      "savedAt": "2026-03-01T17:55:46.940Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-01T17:57:00.013Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820778-total-3944fe8900",
+      "gameId": "401820778",
+      "sport": "NCAAB",
+      "game": "Duke Blue Devils @ NC State Wolfpack",
+      "homeTeam": "NC State Wolfpack",
+      "awayTeam": "Duke Blue Devils",
+      "pick": "Under 148",
+      "betType": "total",
+      "odds": -115,
+      "grade": "C",
+      "confidence": 39,
+      "ev": -27.09,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-01T17:54:38.260Z",
+      "result": "won",
+      "homeScore": 77,
+      "awayScore": 51,
+      "settledAt": "2026-03-01T17:57:00.028Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820778-team_total-7bbc9f809c",
+      "gameId": "401820778",
+      "sport": "NCAAB",
+      "game": "Duke Blue Devils @ NC State Wolfpack",
+      "homeTeam": "NC State Wolfpack",
+      "awayTeam": "Duke Blue Devils",
+      "pick": "Duke Blue Devils Under 79.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 39,
+      "ev": -25.55,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-01T17:54:38.260Z",
+      "result": "won",
+      "homeScore": 77,
+      "awayScore": 51,
+      "settledAt": "2026-03-01T17:57:00.028Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2726,
-      "won": 1281,
-      "lost": 1426,
+      "total": 2733,
+      "won": 1286,
+      "lost": 1428,
       "push": 19,
-      "rate": 47,
-      "pending": 16
+      "rate": 47.1,
+      "pending": 18
     },
     "bySport": {
       "NHL": {
-        "total": 550,
-        "won": 211,
-        "rate": 38.4
+        "total": 552,
+        "won": 213,
+        "rate": 38.6
       },
       "NCAAB": {
-        "total": 1124,
-        "won": 592,
-        "rate": 52.7
+        "total": 1126,
+        "won": 594,
+        "rate": 52.8
       },
       "NBA": {
-        "total": 732,
-        "won": 352,
-        "rate": 48.1
+        "total": 735,
+        "won": 353,
+        "rate": 48
       },
       "MLB": {
         "total": 320,
@@ -56948,14 +57120,14 @@
     },
     "byGrade": {
       "C-": {
-        "total": 202,
-        "won": 98,
-        "rate": 48.5
+        "total": 207,
+        "won": 101,
+        "rate": 48.8
       },
       "C": {
-        "total": 128,
-        "won": 63,
-        "rate": 49.2
+        "total": 129,
+        "won": 65,
+        "rate": 50.4
       },
       "C+": {
         "total": 1192,
@@ -56963,9 +57135,9 @@
         "rate": 55.6
       },
       "B-": {
-        "total": 49,
+        "total": 50,
         "won": 32,
-        "rate": 65.3
+        "rate": 64
       },
       "B+": {
         "total": 6,
@@ -56995,9 +57167,9 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 234,
-        "won": 123,
-        "rate": 52.6
+        "total": 239,
+        "won": 127,
+        "rate": 53.1
       },
       "Moneyline": {
         "total": 79,
@@ -57010,18 +57182,18 @@
         "rate": 36.7
       },
       "Total": {
-        "total": 1229,
-        "won": 682,
+        "total": 1231,
+        "won": 683,
         "rate": 55.5
       }
     },
     "recentForm": {
-      "won": 22,
-      "lost": 28,
+      "won": 23,
+      "lost": 27,
       "push": 0,
-      "rate": 44
+      "rate": 46
     },
-    "lastUpdated": "2026-03-01T17:26:31.999Z"
+    "lastUpdated": "2026-03-01T18:06:27.069Z"
   },
   "version": 1
 }
