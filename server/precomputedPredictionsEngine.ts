@@ -21,6 +21,7 @@ import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnriched
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
+import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import type { Sport } from "@shared/schema";
 
 const DIVISION_GROUPS: Record<string, string[][]> = {
@@ -849,7 +850,45 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             : teamLine - predictedTeamScore;
           mcConfBoost = Math.min(12, Math.max(-8, Math.round(diff * 1.2)));
         }
-        confidence = Math.min(70, Math.max(22, confidence + mcConfBoost));
+        // ── MC Stacked Learning: 3-layer confidence adjustment ──────────────
+        // Layer 1: Variance adjustment — reduces confidence on uncertain games,
+        //           boosts on low-variance (highly predictable) games
+        const varAdj = getMCVarianceAdjustment(
+          sport,
+          mcSim.riskMetrics?.variance ?? 800,
+          mcSim.convergenceScore ?? 0.7
+        );
+        // Layer 2: Stacked weight — scales the entire MC boost based on
+        //           how predictive MC has been historically (0.7 – 1.3×)
+        const stackedWeight = getMCStackedWeight();
+        // Layer 3: Sport-specific bias correction — fixes systematic
+        //           over/underconfidence patterns for each sport
+        const biasCorrection = getMCBiasCorrection(sport);
+
+        const rawBoost = Math.round(mcConfBoost * varAdj * stackedWeight);
+        const finalMCBoost = rawBoost + biasCorrection;
+        confidence = Math.min(70, Math.max(22, confidence + finalMCBoost));
+
+        // Record this prediction for future learning
+        const isFavPickForRecord = bet.betType === "moneyline" && bet.pick.includes(favName);
+        const mcWinProbForRecord = bet.betType === "moneyline"
+          ? (isFavPickForRecord
+              ? (favoriteIsHome ? mcSim.homeWinProb : mcSim.awayWinProb)
+              : (favoriteIsHome ? mcSim.awayWinProb : mcSim.homeWinProb))
+          : mcSim.homeWinProb;
+
+        try {
+          recordMCPrediction({
+            gameId: game.id,
+            sport,
+            betType: bet.betType,
+            mcWinProb: mcWinProbForRecord,
+            mcVariance: mcSim.riskMetrics?.variance ?? 800,
+            mcConvergence: mcSim.convergenceScore ?? 0.7,
+            mcBoostApplied: finalMCBoost,
+            pickConfidence: confidence,
+          });
+        } catch {}
       }
 
       const impliedProb = bet.odds < 0 ? Math.abs(bet.odds) / (Math.abs(bet.odds) + 100) : 100 / (bet.odds + 100);

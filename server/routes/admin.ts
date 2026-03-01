@@ -4050,4 +4050,13 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/mc-learning/stats", requireAdmin, async (_req, res) => {
+    try {
+      const { getMCStackedStats } = await import("../mcStackedLearner");
+      res.json(getMCStackedStats());
+    } catch (error: any) {
+      res.status(500).json({ error: "Failed to get MC stacked learning stats", details: error.message });
+    }
+  });
+
 }

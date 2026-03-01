@@ -21,6 +21,7 @@ export default function AdminModelPerformance() {
   useSEO({ title: "Model Performance", description: "ML model accuracy, calibration, and drift monitoring" });
   const [, setLocation] = useLocation();
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/model-performance"] });
+  const { data: mcStats } = useQuery<any>({ queryKey: ["/api/admin/mc-learning/stats"], refetchInterval: 60000 });
 
   if (isLoading) {
     return (
@@ -129,6 +130,9 @@ export default function AdminModelPerformance() {
             </TabsTrigger>
             <TabsTrigger value="adversarial" data-testid="tab-adversarial">
               <Shield className="w-3 h-3 mr-1" /> Adversarial
+            </TabsTrigger>
+            <TabsTrigger value="mc-learning" data-testid="tab-mc-learning">
+              <Layers className="w-3 h-3 mr-1" /> MC Learning
             </TabsTrigger>
           </TabsList>
 
@@ -373,6 +377,125 @@ export default function AdminModelPerformance() {
                   <div className="text-2xl font-bold text-green-500">{adversarial?.dataIntegrityScore}%</div>
                 </div>
                 <Progress value={adversarial?.dataIntegrityScore} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="mc-learning" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">MC Stacked Learning Engine</CardTitle>
+                <CardDescription>Variance-adjusted Monte Carlo trust weight, sport calibration, and prediction learning loop</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Status</div>
+                    <Badge variant={mcStats?.status === "balanced" ? "default" : mcStats?.status === "mc_dominant" ? "default" : "secondary"} data-testid="badge-mc-status">
+                      {mcStats?.statusLabel ?? "—"}
+                    </Badge>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Trust Weight</div>
+                    <div className="text-xl font-bold" data-testid="text-mc-weight">{mcStats?.mcStackedWeight ?? "—"}</div>
+                    <div className="text-xs text-muted-foreground">range 0.7–1.3</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Total Predictions</div>
+                    <div className="text-xl font-bold" data-testid="text-mc-total-preds">{mcStats?.totalPredictions ?? 0}</div>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-xs text-muted-foreground">Win Rate (settled)</div>
+                    <div className="text-xl font-bold" data-testid="text-mc-win-rate">
+                      {mcStats?.overallWinRate != null ? `${mcStats.overallWinRate}%` : "—"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{mcStats?.totalSettled ?? 0} settled</div>
+                  </div>
+                </div>
+
+                <Separator />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm font-medium mb-2">Variance Accuracy</p>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Low Variance</span>
+                        <span data-testid="text-mc-lv-wr">{mcStats?.varianceAccuracy?.lowVariance?.winRate != null ? `${mcStats.varianceAccuracy.lowVariance.winRate}% (${mcStats.varianceAccuracy.lowVariance.total})` : "—"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">High Variance</span>
+                        <span data-testid="text-mc-hv-wr">{mcStats?.varianceAccuracy?.highVariance?.winRate != null ? `${mcStats.varianceAccuracy.highVariance.winRate}% (${mcStats.varianceAccuracy.highVariance.total})` : "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium mb-2">Convergence Accuracy</p>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">High Convergence</span>
+                        <span>{mcStats?.convergenceAccuracy?.highConvergence?.winRate != null ? `${mcStats.convergenceAccuracy.highConvergence.winRate}% (${mcStats.convergenceAccuracy.highConvergence.total})` : "—"}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Low Convergence</span>
+                        <span>{mcStats?.convergenceAccuracy?.lowConvergence?.winRate != null ? `${mcStats.convergenceAccuracy.lowConvergence.winRate}% (${mcStats.convergenceAccuracy.lowConvergence.total})` : "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {mcStats?.sportBreakdown?.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium mb-2">Sport Calibration</p>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Sport</TableHead>
+                            <TableHead className="text-right">Count</TableHead>
+                            <TableHead className="text-right">Win Rate</TableHead>
+                            <TableHead className="text-right">Bias Corr</TableHead>
+                            <TableHead className="text-right">Avg Variance</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {mcStats.sportBreakdown.map((s: any) => (
+                            <TableRow key={s.sport}>
+                              <TableCell className="font-medium">{s.sport}</TableCell>
+                              <TableCell className="text-right">{s.count}</TableCell>
+                              <TableCell className="text-right">{s.winRate ? `${s.winRate}%` : "—"}</TableCell>
+                              <TableCell className="text-right font-mono">{s.biasCorrection > 0 ? `+${s.biasCorrection}` : s.biasCorrection}</TableCell>
+                              <TableCell className="text-right">{s.avgVariance}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </>
+                )}
+
+                {mcStats?.betTypeBreakdown?.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <p className="text-sm font-medium mb-2">Bet Type Breakdown</p>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {mcStats.betTypeBreakdown.map((b: any) => (
+                          <div key={b.betType} className="p-2 bg-muted/30 rounded text-sm">
+                            <div className="font-medium capitalize">{b.betType}</div>
+                            <div className="text-muted-foreground text-xs">{b.count} picks • {b.winRate ? `${b.winRate}% WR` : "—"}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <Separator />
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Learning Cycles Run: <span className="text-foreground font-medium">{mcStats?.learningCycles ?? 0}</span></span>
+                  <span>Last Cycle: <span className="text-foreground font-medium font-mono">{mcStats?.lastCycleAt ? new Date(mcStats.lastCycleAt).toLocaleTimeString() : "—"}</span></span>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

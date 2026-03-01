@@ -5,6 +5,7 @@ import { logError, logInfo, logWarn } from "./errorLogger";
 import { recordOutcome, getPreSimulated } from "./monteCarloEngine";
 import { recordGameOutcome } from "./platformIntelligenceEngine";
 import { settlePicksForGame } from "./pickOutcomeTracker";
+import { updateMCWithOutcome, runMCLearningCycle } from "./mcStackedLearner";
 
 import { runCalibrationCheck } from "./calibrationEngine";
 
@@ -299,6 +300,10 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
         }
         const actualOutcome = sl.legResult === "won" ? 1 : 0;
         recordOutcome(sl.gameId, sl.sport, sl.market, predictedProb, actualOutcome);
+        // ── MC Stacked Learner: feed outcome into calibration loop ──────────
+        try {
+          updateMCWithOutcome(sl.gameId, sl.market, sl.legResult as "won" | "lost" | "push");
+        } catch {}
         mcRecorded++;
       } catch (e: any) {
         logWarn(`[Orchestrator] Failed to record MC outcome for ${sl.gameId}: ${e.message}`);
@@ -911,6 +916,8 @@ export function startContinuousLearningOrchestrator(): void {
   retrainingInterval = setInterval(async () => {
     try {
       await scheduledRetraining();
+      // Run MC stacked learning cycle alongside daily retraining
+      runMCLearningCycle();
     } catch (e: any) {
       addError("retraining", e.message);
     }
