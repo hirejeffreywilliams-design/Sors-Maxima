@@ -234,6 +234,14 @@ function mapSportToOddsApiKey(sport: string): string | null {
     Soccer_MLS: "soccer_usa_mls",
     Soccer_UCL: "soccer_uefa_champs_league",
     Soccer_INTL: "soccer_fifa_world_cup",
+    Soccer_EUROPA: "soccer_uefa_europa_league",
+    Soccer_CONFERENCE: "soccer_uefa_europa_conference_league",
+    Soccer_CHAMPIONSHIP: "soccer_efl_champ",
+    Soccer_LIGAMX: "soccer_mexico_ligamx",
+    Soccer_EREDIVISIE: "soccer_netherlands_eredivisie",
+    Soccer_PORTUGAL: "soccer_portugal_primeira_liga",
+    Soccer_TURKEY: "soccer_turkey_super_league",
+    Soccer_BRASIL: "soccer_brazil_campeonato",
   };
   return mapping[sport] || mapping[sport.toUpperCase()] || null;
 }

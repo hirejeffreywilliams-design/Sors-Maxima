@@ -491,27 +491,41 @@ export async function lookupTeamByName(teamName: string): Promise<BDLEnrichedTea
 // ─── BallDontLie NFL + MLB (paid tier required) ───────────────────────────────
 // isBDLAvailable() checks NBA only. Use isBDLNFLAvailable()/isBDLMLBAvailable() for other sports.
 
+// ─── BDL NFL + MLB interfaces (real team-level stats) ─────────────────────────
 export interface BDLNFLTeamData {
+  teamId: number;
   teamName: string;
-  passingYards: number;
-  rushingYards: number;
-  passingTouchdowns: number;
-  rushingTouchdowns: number;
-  pointsScored: number;
-  pointsAllowed: number;
-  sacks: number;
-  interceptions: number;
+  abbreviation: string;
+  gamesPlayed: number;
+  pointsPerGame: number;
+  pointsAllowedPerGame: number;
+  passingYardsPerGame: number;
+  rushingYardsPerGame: number;
+  oppPassingYardsPerGame: number;
+  oppRushingYardsPerGame: number;
   turnovers: number;
+  takeaways: number;
+  turnoverDifferential: number;
+  thirdDownPct: number;
+  qbRating: number;
+  completionPct: number;
+  passingTouchdowns: number;
+  defensiveInterceptions: number;
 }
 
 export interface BDLMLBTeamData {
+  teamId: number;
   teamName: string;
+  abbreviation: string;
   battingAvg: number;
   ops: number;
+  homeRuns: number;
+  rbi: number;
   era: number;
   whip: number;
-  homeRuns: number;
-  strikeoutsPerGame: number;
+  kPer9: number;
+  pitcherCount: number;
+  batterCount: number;
 }
 
 let nflAvailable: boolean | null = null;
@@ -520,6 +534,30 @@ let mlbAvailable: boolean | null = null;
 const NFL_MLB_CACHE_TTL = 6 * 60 * 60 * 1000;
 let nflCache: { data: BDLNFLTeamData[]; ts: number } | null = null;
 let mlbBDLCache: { data: BDLMLBTeamData[]; ts: number } | null = null;
+
+// Raw fetch helper for NFL/MLB — supports array query params (team_ids[])
+async function fetchBDLRaw(sport: "nfl" | "mlb", path: string, url: URL): Promise<any | null> {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: apiKey },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (res.status === 401 || res.status === 403) return null;
+    if (!res.ok) {
+      logWarn(`[BDL-${sport.toUpperCase()}] HTTP ${res.status}: ${path}`);
+      return null;
+    }
+    return await res.json();
+  } catch (err: any) {
+    if (err.name !== "AbortError") logError(err, { context: `fetchBDLRaw-${sport}`, path });
+    return null;
+  }
+}
 
 async function fetchBDLSport<T>(sport: "nfl" | "mlb", path: string, params?: Record<string, string>): Promise<T | null> {
   const apiKey = getApiKey();
@@ -535,26 +573,10 @@ async function fetchBDLSport<T>(sport: "nfl" | "mlb", path: string, params?: Rec
   const cached = getCached<T>(cacheKey);
   if (cached) return cached;
 
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-    const res = await fetch(url.toString(), {
-      headers: { Authorization: apiKey },
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
-    if (res.status === 401 || res.status === 403) return null;
-    if (!res.ok) {
-      logWarn(`[BDL-${sport.toUpperCase()}] API ${res.status}: ${path}`);
-      return null;
-    }
-    const data = await res.json() as T;
-    setCache(cacheKey, data);
-    return data;
-  } catch (err: any) {
-    if (err.name !== "AbortError") logError(err, { context: `fetchBDL-${sport}`, path });
-    return null;
-  }
+  const json = await fetchBDLRaw(sport, path, url);
+  if (!json) return null;
+  setCache(cacheKey, json);
+  return json as T;
 }
 
 export function isBDLNFLAvailable(): boolean {
@@ -568,64 +590,160 @@ export function isBDLMLBAvailable(): boolean {
 export async function getNFLTeamStatsBDL(): Promise<BDLNFLTeamData[]> {
   if (nflCache && Date.now() - nflCache.ts < NFL_MLB_CACHE_TTL) return nflCache.data;
 
-  const res = await fetchBDLSport<{ data: any[] }>("nfl", "/teams", { per_page: "5" });
-  if (!res) {
+  // Step 1: Get all 32 NFL team IDs
+  const teamsRes = await fetchBDLSport<{ data: any[] }>("nfl", "/teams", { per_page: "50" });
+  if (!teamsRes?.data) {
     if (nflAvailable === null) {
       nflAvailable = false;
       logWarn("[BDL] NFL stats unavailable on current plan — upgrade at balldontlie.io for NFL data");
     }
     return [];
   }
-
   nflAvailable = true;
-  const statsRes = await fetchBDLSport<{ data: any[] }>("nfl", "/season_stats", { season: "2024", type: "team" });
-  if (!statsRes?.data) return [];
 
-  const data: BDLNFLTeamData[] = statsRes.data.map((t: any) => ({
+  const allTeams = teamsRes.data;
+  const BATCH_SIZE = 10;
+  const allStats: any[] = [];
+
+  // Step 2: Batch-fetch team_season_stats (array params: team_ids[])
+  for (let i = 0; i < allTeams.length; i += BATCH_SIZE) {
+    const batch = allTeams.slice(i, i + BATCH_SIZE);
+    const url = new URL("/nfl/v1/team_season_stats", BASE_URL);
+    url.searchParams.set("season", "2024");
+    for (const t of batch) url.searchParams.append("team_ids[]", String(t.id));
+    const batchRes = await fetchBDLRaw("nfl", "/team_season_stats", url);
+    if (batchRes?.data) allStats.push(...batchRes.data);
+  }
+
+  if (!allStats.length) return [];
+
+  const data: BDLNFLTeamData[] = allStats.map((t: any) => ({
+    teamId: t.team?.id || 0,
     teamName: t.team?.full_name || t.team?.name || "",
-    passingYards: t.passing_yards || 0,
-    rushingYards: t.rushing_yards || 0,
-    passingTouchdowns: t.passing_tds || 0,
-    rushingTouchdowns: t.rushing_tds || 0,
-    pointsScored: t.points || 0,
-    pointsAllowed: t.points_allowed || 0,
-    sacks: t.sacks || 0,
-    interceptions: t.interceptions || 0,
-    turnovers: t.turnovers || 0,
+    abbreviation: t.team?.abbreviation || "",
+    gamesPlayed: t.games_played || 0,
+    pointsPerGame: parseFloat(t.total_points_per_game) || 0,
+    pointsAllowedPerGame: parseFloat(t.opp_total_points_per_game) || 0,
+    passingYardsPerGame: parseFloat(t.net_passing_yards_per_game || t.passing_yards_per_game) || 0,
+    rushingYardsPerGame: parseFloat(t.rushing_yards_per_game) || 0,
+    oppPassingYardsPerGame: parseFloat(t.opp_net_passing_yards_per_game || t.opp_passing_yards_per_game) || 0,
+    oppRushingYardsPerGame: parseFloat(t.opp_rushing_yards_per_game) || 0,
+    turnovers: parseInt(t.misc_total_giveaways) || 0,
+    takeaways: parseInt(t.misc_total_takeaways) || 0,
+    turnoverDifferential: parseInt(t.misc_turnover_differential) || 0,
+    thirdDownPct: parseFloat(t.misc_third_down_conv_pct) || 0,
+    qbRating: parseFloat(t.passing_qb_rating) || 0,
+    completionPct: parseFloat(t.passing_completion_pct) || 0,
+    passingTouchdowns: parseInt(t.passing_touchdowns) || 0,
+    defensiveInterceptions: parseInt(t.defensive_interceptions) || 0,
   }));
 
   nflCache = { data, ts: Date.now() };
-  logInfo(`[BDL] NFL stats loaded ${data.length} teams`);
+  const avgPPG = data.length ? (data.reduce((s, t) => s + t.pointsPerGame, 0) / data.length).toFixed(1) : "0";
+  const avgPAPG = data.length ? (data.reduce((s, t) => s + t.pointsAllowedPerGame, 0) / data.length).toFixed(1) : "0";
+  logInfo(`[BDL] NFL team_season_stats loaded ${data.length} teams — avg PPG: ${avgPPG}, avg PAPG: ${avgPAPG}`);
   return data;
 }
 
 export async function getMLBTeamStatsBDL(): Promise<BDLMLBTeamData[]> {
   if (mlbBDLCache && Date.now() - mlbBDLCache.ts < NFL_MLB_CACHE_TTL) return mlbBDLCache.data;
 
-  const res = await fetchBDLSport<{ data: any[] }>("mlb", "/teams", { per_page: "5" });
-  if (!res) {
+  // Step 1: Verify access
+  const teamsCheck = await fetchBDLSport<{ data: any[] }>("mlb", "/teams", { per_page: "5" });
+  if (!teamsCheck?.data) {
     if (mlbAvailable === null) {
       mlbAvailable = false;
       logWarn("[BDL] MLB stats unavailable on current plan — upgrade at balldontlie.io for MLB data");
     }
     return [];
   }
-
   mlbAvailable = true;
-  const statsRes = await fetchBDLSport<{ data: any[] }>("mlb", "/season_stats", { season: "2024", type: "team" });
-  if (!statsRes?.data) return [];
 
-  const data: BDLMLBTeamData[] = statsRes.data.map((t: any) => ({
-    teamName: t.team?.full_name || t.team?.name || "",
-    battingAvg: t.batting_average || 0,
-    ops: t.ops || 0,
-    era: t.era || 4.5,
-    whip: t.whip || 1.3,
-    homeRuns: t.home_runs || 0,
-    strikeoutsPerGame: t.strikeouts_per_game || 0,
-  }));
+  // Step 2: Paginate through all player season stats
+  const allRecords: any[] = [];
+  let cursor: number | null = 0;
+  let page = 0;
+  while (cursor !== null && page < 12) {
+    const url = new URL("/mlb/v1/season_stats", BASE_URL);
+    url.searchParams.set("season", "2024");
+    url.searchParams.set("postseason", "false");
+    url.searchParams.set("per_page", "100");
+    if (cursor > 0) url.searchParams.set("cursor", String(cursor));
+    const res = await fetchBDLRaw("mlb", "/season_stats", url);
+    if (!res?.data) break;
+    allRecords.push(...res.data);
+    cursor = res.meta?.next_cursor ?? null;
+    page++;
+  }
+
+  if (!allRecords.length) return [];
+
+  // Step 3: Group by team, aggregate stats
+  const teamMap = new Map<number, {
+    name: string; abbreviation: string;
+    batters: { avg: number; ops: number; hr: number; rbi: number }[];
+    pitchers: { era: number; whip: number; k9: number }[];
+  }>();
+
+  for (const record of allRecords) {
+    const team = record.player?.team;
+    if (!team?.id) continue;
+    if (!teamMap.has(team.id)) {
+      teamMap.set(team.id, {
+        name: team.display_name || team.name || "",
+        abbreviation: team.abbreviation || "",
+        batters: [],
+        pitchers: [],
+      });
+    }
+    const entry = teamMap.get(team.id)!;
+
+    // Classify as pitcher if they have meaningful pitching stats
+    const isPitcher = (record.pitching_gs || 0) >= 3 || (record.pitching_gp || 0) >= 8;
+    const isBatter = (record.batting_ab || 0) >= 50;
+
+    if (isPitcher && record.pitching_era > 0) {
+      entry.pitchers.push({
+        era: parseFloat(record.pitching_era) || 4.5,
+        whip: parseFloat(record.pitching_whip) || 1.3,
+        k9: parseFloat(record.pitching_k_per_9) || 8.5,
+      });
+    }
+    if (isBatter) {
+      entry.batters.push({
+        avg: parseFloat(record.batting_avg) || 0.245,
+        ops: parseFloat(record.batting_ops) || 0.7,
+        hr: parseInt(record.batting_hr) || 0,
+        rbi: parseInt(record.batting_rbi) || 0,
+      });
+    }
+  }
+
+  const avg = <T extends number>(arr: T[]): T => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length as T : 0 as T);
+  const sum = (arr: number[]): number => arr.reduce((a, b) => a + b, 0);
+
+  const data: BDLMLBTeamData[] = [];
+  for (const [teamId, entry] of teamMap) {
+    if (!entry.batters.length && !entry.pitchers.length) continue;
+    data.push({
+      teamId,
+      teamName: entry.name,
+      abbreviation: entry.abbreviation,
+      battingAvg: parseFloat(avg(entry.batters.map(b => b.avg)).toFixed(3)),
+      ops: parseFloat(avg(entry.batters.map(b => b.ops)).toFixed(3)),
+      homeRuns: sum(entry.batters.map(b => b.hr)),
+      rbi: sum(entry.batters.map(b => b.rbi)),
+      era: entry.pitchers.length ? parseFloat(avg(entry.pitchers.map(p => p.era)).toFixed(2)) : 4.5,
+      whip: entry.pitchers.length ? parseFloat(avg(entry.pitchers.map(p => p.whip)).toFixed(2)) : 1.3,
+      kPer9: entry.pitchers.length ? parseFloat(avg(entry.pitchers.map(p => p.k9)).toFixed(1)) : 8.5,
+      pitcherCount: entry.pitchers.length,
+      batterCount: entry.batters.length,
+    });
+  }
 
   mlbBDLCache = { data, ts: Date.now() };
-  logInfo(`[BDL] MLB stats loaded ${data.length} teams`);
+  const totalPitchers = data.reduce((s, t) => s + t.pitcherCount, 0);
+  const totalBatters = data.reduce((s, t) => s + t.batterCount, 0);
+  logInfo(`[BDL] MLB team stats aggregated for ${data.length} teams (${totalPitchers} pitchers, ${totalBatters} batters)`);
   return data;
 }

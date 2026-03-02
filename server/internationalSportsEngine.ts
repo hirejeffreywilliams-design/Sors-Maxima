@@ -48,6 +48,14 @@ const ODDS_API_SOCCER_KEYS: Record<string, string> = {
   Soccer_LIGUE1: "soccer_france_ligue_one",
   Soccer_UCL: "soccer_uefa_champs_league",
   Soccer_MLS: "soccer_usa_mls",
+  Soccer_EUROPA: "soccer_uefa_europa_league",
+  Soccer_CONFERENCE: "soccer_uefa_europa_conference_league",
+  Soccer_CHAMPIONSHIP: "soccer_efl_champ",
+  Soccer_LIGAMX: "soccer_mexico_ligamx",
+  Soccer_EREDIVISIE: "soccer_netherlands_eredivisie",
+  Soccer_PORTUGAL: "soccer_portugal_primeira_liga",
+  Soccer_TURKEY: "soccer_turkey_super_league",
+  Soccer_BRASIL: "soccer_brazil_campeonato",
 };
 
 const LEAGUE_DISPLAY: Record<string, string> = {
@@ -59,6 +67,14 @@ const LEAGUE_DISPLAY: Record<string, string> = {
   Soccer_UCL: "Champions League",
   Soccer_MLS: "MLS",
   Soccer_INTL: "International",
+  Soccer_EUROPA: "Europa League",
+  Soccer_CONFERENCE: "Conference League",
+  Soccer_CHAMPIONSHIP: "EFL Championship",
+  Soccer_LIGAMX: "Liga MX",
+  Soccer_EREDIVISIE: "Eredivisie",
+  Soccer_PORTUGAL: "Primeira Liga",
+  Soccer_TURKEY: "Super Lig",
+  Soccer_BRASIL: "Brasileirao",
 };
 
 const LEAGUE_EMOJI: Record<string, string> = {
@@ -70,6 +86,14 @@ const LEAGUE_EMOJI: Record<string, string> = {
   Soccer_UCL: "⭐",
   Soccer_MLS: "🇺🇸",
   Soccer_INTL: "🌍",
+  Soccer_EUROPA: "🏆",
+  Soccer_CONFERENCE: "🌟",
+  Soccer_CHAMPIONSHIP: "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+  Soccer_LIGAMX: "🇲🇽",
+  Soccer_EREDIVISIE: "🇳🇱",
+  Soccer_PORTUGAL: "🇵🇹",
+  Soccer_TURKEY: "🇹🇷",
+  Soccer_BRASIL: "🇧🇷",
 };
 
 // Soccer home advantage probabilities by league (based on historical data)
@@ -82,6 +106,14 @@ const LEAGUE_HOME_WIN_PROB: Record<string, number> = {
   Soccer_UCL: 0.44,
   Soccer_MLS: 0.44,
   Soccer_INTL: 0.43,
+  Soccer_EUROPA: 0.44,
+  Soccer_CONFERENCE: 0.44,
+  Soccer_CHAMPIONSHIP: 0.43,
+  Soccer_LIGAMX: 0.47,
+  Soccer_EREDIVISIE: 0.48,
+  Soccer_PORTUGAL: 0.46,
+  Soccer_TURKEY: 0.48,
+  Soccer_BRASIL: 0.46,
 };
 
 const DRAW_PROB_BASE = 0.27; // ~27% draws in soccer globally

@@ -15,26 +15,25 @@ Do not make changes to the file `client/src/theme-toggle.tsx`.
 The application uses a modern web architecture with a React-based frontend and an Express.js backend, both developed in TypeScript. UI components are styled using TailwindCSS and shadcn/ui, state management is handled by TanStack Query, and Wouter manages routing.
 
 **Core Architectural Decisions and Features**:
-- **Unified Intelligence Hub**: Aggregates data from various sources (ESPN, The Odds API, Open-Meteo) on a 60-second cycle into a unified `IntelligenceFeed`.
-- **Command Center (Ticket-First)**: The primary dashboard, featuring "Today's Best Tickets" – pre-assembled parlays from highest-graded precomputed picks, showing combined grade, total odds, Kelly-optimized stake, payout, and engine convergence indicators. Includes a `Life Changer Ticket` daily cross-sport underdog parlay generator.
-- **Intelligent Ticket Generation**: Features a Smart Ticket Generator, Visual Parlay Builder, and Matchup Ticket Builder for automated and visual construction of betting tickets with real-time data and suggestions.
-- **Persistent Bet Slip Sidebar**: A fixed, always-visible right sidebar (desktop) or bottom sheet drawer (mobile) supporting unlimited legs, dynamic payout calculation, and one-tap copy/share.
-- **Consolidated Navigation**: Streamlined navigation for desktop and mobile, emphasizing key functionalities like picks, daily insights, build tools, and markets.
-- **Advanced Analytics & Predictive Engines**: Incorporates Continuous Learning, Multi-Factor Intelligence Engine (46 data-backed factors), Scheme Recognition, Monte Carlo simulations with advanced Kelly Criterion, and a Strategy Advisor. The Monte Carlo engine is enhanced with BDL data for NBA. NHL and MLB predictions are enhanced with official free stats APIs.
-- **NHL Official Stats Provider**: `server/nhl-stats-provider.ts` — fetches per-team season stats from `api.nhle.com` (no API key required): goals for/against per game, shots for/against, power play %, penalty kill %, faceoff win %, point %. 6-hour in-memory cache. Exports `getNHLTeamStats()`, `findNHLTeam()`, `isNHLStatsAvailable()`.
-- **MLB Official Stats Provider**: `server/mlb-stats-provider.ts` — fetches standings and per-team pitching stats from `statsapi.mlb.com` (no API key required): ERA, WHIP, K/9, BB/9, runs scored/allowed, win %. Batches 5 teams at a time. 6-hour in-memory cache. Exports `getMLBTeamStats()`, `findMLBTeam()`, `isMLBStatsAvailable()`.
-- **BallDontLie NFL/MLB Expansion**: `server/balldontlie-provider.ts` — NFL (`/nfl/v1/`) and MLB (`/mlb/v1/`) endpoints added alongside existing NBA (`/v1/`). Requires paid BDL plan; gracefully falls back with one-time auth check. Exports `getNFLTeamStatsBDL()`, `getMLBTeamStatsBDL()`, `isBDLNFLAvailable()`, `isBDLMLBAvailable()`.
-- **Pick Protection & Monetization System**: Prevents concentrated user action from moving betting lines through staggered pick releases and capacity limits.
-- **Precomputed Predictions Engine**: Runs every 5 minutes for in-season sports, combining 46-Factor Model analysis with Vegas engine predictions, including game-context reasoning and market timing signals.
-- **Situational Analysis Engine**: Calculates real rest days, back-to-back detection, schedule spot classification, and travel factors from live ESPN schedule data.
-- **CLV Tracker**: Stores user picks with odds at placement, updates closing odds, and tracks Closing Line Value (CLV+) rate, average CLV, and streaks, with CLV-gated learning.
-- **Personalized Betting Insights**: Analyzes user betting history to generate a "Betting DNA" profile, performance trends, and personalized game recommendations.
+- **Unified Intelligence Hub**: Aggregates data from various sources into a unified `IntelligenceFeed` on a 60-second cycle.
+- **Command Center (Ticket-First)**: The primary dashboard, featuring "Today's Best Tickets" (pre-assembled parlays) and a `Life Changer Ticket` daily cross-sport underdog parlay generator.
+- **Intelligent Ticket Generation**: Features a Smart Ticket Generator, Visual Parlay Builder, and Matchup Ticket Builder for automated and visual construction of betting tickets.
+- **Persistent Bet Slip Sidebar**: A fixed, always-visible sidebar/drawer for managing parlay legs, dynamic payout calculation, and one-tap copy/share.
+- **Consolidated Navigation**: Streamlined navigation for desktop and mobile, emphasizing key functionalities.
+- **Advanced Analytics & Predictive Engines**: Incorporates Continuous Learning, a Multi-Factor Intelligence Engine (46 data-backed factors), Scheme Recognition, Monte Carlo simulations with advanced Kelly Criterion, and a Strategy Advisor. Enhanced with BDL data for NBA and official stats for NHL/MLB.
+- **Official Sports Stats Providers**: Integrations for NHL (`api.nhle.com`) and MLB (`statsapi.mlb.com`) to fetch per-team season stats.
+- **BallDontLie Integration**: Primary source for NFL team stats and aggregated MLB team stats, wired into Scheme Recognition and Predictions Engines. Expanded API-Football for 16 soccer leagues.
+- **Pick Protection & Monetization System**: Prevents line movement through staggered pick releases and capacity limits.
+- **Precomputed Predictions Engine**: Runs every 5 minutes for in-season sports, combining 46-Factor Model analysis with Vegas engine predictions.
+- **Situational Analysis Engine**: Calculates rest days, back-to-back detection, schedule spot classification, and travel factors from live ESPN schedule data.
+- **CLV Tracker**: Stores user picks with odds at placement, updates closing odds, and tracks Closing Line Value (CLV+).
+- **Personalized Betting Insights**: Analyzes user betting history to generate a "Betting DNA" and personalized recommendations.
 - **Unified Tools & Analytics Page**: Consolidates all betting analysis tools under a single route.
 - **Consolidated Odds Center**: Combines Odds Comparison, EV Heatmap, Line Movement, and Power Rankings as tabs.
 - **Server-Sent Events (SSE) Live Updates**: Provides real-time push updates for intelligence, live scores, and edge alerts.
-- **Custom Notification Engine**: Real-time system monitoring ESPN data for game subscriptions and parlay watches, broadcasting alerts via SSE. Tracks player prop line movements and sharp money alerts.
-- **Tier-Based Feature Gating**: API routes are protected by `requireAuth` and `requireTier` middleware, with specific rate limits per tier. Access requires a paid subscription (Sharp, Edge, Max tiers). Free-tier users are gated.
-- **Persistent Data Storage**: User watchlists, onboarding preferences, Stripe subscriptions, community data, ticket history, and betting profiles are stored persistently in PostgreSQL.
+- **Custom Notification Engine**: Real-time system monitoring ESPN data for game subscriptions and parlay watches, broadcasting alerts via SSE.
+- **Tier-Based Feature Gating**: API routes are protected by `requireAuth` and `requireTier` middleware, with specific rate limits per paid subscription tier.
+- **Persistent Data Storage**: User watchlists, onboarding preferences, subscriptions, community data, ticket history, and betting profiles are stored in PostgreSQL.
 - **Dynamic Vegas Power Ratings**: Computes power ratings from `platformIntelligenceEngine` team stats and BallDontLie data.
 - **Onboarding Guard**: New users are redirected to `/onboarding` after registration.
 - **Prediction Accuracy Pipeline**: Records game outcomes and prediction accuracy data for continuous learning.
@@ -43,31 +42,31 @@ The application uses a modern web architecture with a React-based frontend and a
 - **AI-Powered Admin Assistant**: An operational intelligence dashboard generates structured admin reports with prioritized tasks via OpenAI analysis.
 - **Hidden Analytics Agent**: A real-time, server-side agent continuously ingests ESPN data, performs market analysis, and monitors model drift.
 - **Platform Intelligence Engine**: A self-growing data engine accumulates game outcomes, prediction accuracy, odds snapshots, and community consensus for continuous learning.
-- **App Guardian Engine**: A continuous health monitoring system performs health checks, service monitoring, stale picks detection, error analysis, and auto-healing. Broadcasts real-time `guardian-alert` SSE events to admin when critical/high severity issues are detected. Runs OpenAI-powered diagnostics every 5 minutes when issues are present. Admin guardian page receives live toast notifications via SSE when new alerts fire.
-- **Stale Game Detection**: The daily picks page shows "Game In Progress" amber badge on picks for games that have already started (5-min grace window). A page-level warning banner appears when any picks are stale, prompting users to verify odds before placing. Game times are formatted as "Today 7:30 PM" / "Mar 2 7:30 PM" instead of raw ISO strings.
-- **Player Props Analyzer**: A dedicated page for real-time over/under prop lines with recommendations and confidence levels, powered by a "Top Props Engine".
+- **App Guardian Engine**: A continuous health monitoring system performing health checks, service monitoring, stale picks detection, error analysis, and auto-healing, broadcasting `guardian-alert` SSE events.
+- **Stale Game Detection**: Displays "Game In Progress" badges and warning banners for picks involving games that have already started.
+- **Player Props Analyzer**: A dedicated page for real-time over/under prop lines with recommendations.
 - **Expanded 1H Odds Pipeline**: Integrates first-half market odds for accurate calculations.
 - **Enhanced Learning Engine**: Upgraded with momentum tracking, weight decay, and confidence-weighted updates.
-- **Unified Stacking Meta-Learner (USML)**: `server/unifiedStackingMetaLearner.ts` — ensemble meta-layer treating QFE (46-Factor Model), Monte Carlo, Vegas Engine, Situational Factors, Market Snapshot, and Learning Engine as 6 weighted expert sources. Online Bayesian EMA credit assignment dynamically reweights each source per sport × bet type after every settled outcome. Includes signal agreement scoring (cross-source stddev → epistemic uncertainty penalty), momentum bonuses, and sport/bet-type-specific calibration. Integrated into every precomputed pick via `precomputedPredictionsEngine.ts`; settlement feedback wired through `continuousLearningOrchestrator.ts`. Secondary gameId index enables outcome matching without full pick text. Admin stats at `/api/admin/usml/stats` with "Ensemble" tab in model performance page showing per-source weight rankings.
-- **MC Stacked Learner**: `server/mcStackedLearner.ts` — 3-layer MC confidence adjustment (variance multiplier, stacked trust weight, sport-specific bias correction) applied after USML ensemble blend. Tracks predictions by game for per-outcome calibration.
-- **Admin Intelligence Health Dashboard**: A comprehensive "Intelligence" tab in the admin UI shows engine status, orchestrator stats, learning engine factor weights, and data pipeline breakdown.
-- **Auto-Settlement Engine**: Fetches completed game scores, matches against pending picks, calculates outcomes, and updates pick trackers.
-- **User Bet Tracking**: Allows authenticated users to save slip picks to the database for automatic settlement and displays validated settlement stats.
+- **Unified Stacking Meta-Learner (USML)**: An ensemble meta-layer treating six weighted expert sources, dynamically reweighting each source per sport and bet type. Integrated into precomputed picks with settlement feedback.
+- **MC Stacked Learner**: A 3-layer Monte Carlo confidence adjustment applied after the USML ensemble blend.
+- **Admin Intelligence Health Dashboard**: A comprehensive "Intelligence" tab in the admin UI showing engine status and performance.
+- **Auto-Settlement Engine**: Fetches completed game scores, matches against pending picks, and updates pick trackers.
+- **User Bet Tracking**: Allows authenticated users to save slip picks for automatic settlement and validated stats.
 - **Email Verification System**: 6-digit code verification via Resend.
 - **Historical Backtest Engine**: Fetches 45 days of completed ESPN games and generates retroactive picks for backtesting.
-- **Referral System**: Unique 8-char referral codes, tracking referrals, conversions, and history.
+- **Referral System**: Unique 8-character referral codes with tracking.
 - **Email Scheduler**: Hourly scheduler for admin daily summaries and weekly digests.
-- **PWA Support**: Full Progressive Web App functionality with branding and theme support.
-- **International Sports Engine**: Fetches fixtures and odds from API-Football for 8 major soccer leagues, generating diverse pick types and integrating with the frontend.
-- **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics, backtestCount, liveCount, and win rate in a popover.
-- **Transparent Branding**: User-facing display text uses "46-Factor Model Analysis" and "Multi-Factor Engine". "Guaranteed Profit" → "Locked-In Profit" in all hedge tools. No "AI Insights" labels shown to users.
-- **AI Pick Explainer Engine**: `server/aiPickExplainer.ts` — backend/admin-only. Generates pick explanations for admin QA. Not shown to end users.
-- **AI Routes — Backend/Admin Only**: `server/routes/ai.ts` — all routes (`/api/ai/pick-explanation`, `/api/ai/analyze-parlay`, `/api/ai/game-preview`, `/api/ai/status`) are restricted to admin access via `requireAdmin` middleware. OpenAI is used exclusively for system intelligence, admin assistant, and app guardian — NOT for user-facing features.
-- **Smart Leg Selector UX**: MatchupTicketCard has per-leg checkboxes, "Best 3"/"All"/"None" quick actions, live combined odds display, correlated leg warning, and "Add N Selected Legs" button.
-- **Bet Slip Auto-Open**: Desktop sidebar auto-opens when the first leg is added (useEffect watches legCount 0→1 transition). Mobile sheet also auto-opens when the first leg is added (same pattern in ParlaySlipMobileDrawer).
-- **Mobile Slip Bottom Nav Button**: The bottom navigation bar (mobile only) includes a dedicated "Slip" button (6th item, after Markets and before More) with a Ticket icon and a count badge showing the number of legs. Tapping it opens the bet slip sheet. The `ParlaySlipProvider` wraps `main`, `footer`, and `BottomNav` so all can access the context. `mobileOpen`/`setMobileOpen` are part of the ParlaySlipContext.
-- **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces the horizontal TabsList for all 7 settings tabs.
-- **CLV-Gated Learning Engine**: Weight updates apply category multipliers (strong: 1.0, pure_signal: 0.4, noise: -0.2, true_miss: -0.8) based on CLV+ status and win/loss outcome.
+- **PWA Support**: Full Progressive Web App functionality.
+- **International Sports Engine**: Fetches fixtures and odds from API-Football for 16 major soccer leagues.
+- **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics.
+- **Transparent Branding**: Uses "46-Factor Model Analysis" and "Multi-Factor Engine" for user-facing display.
+- **AI Pick Explainer Engine**: Backend/admin-only generation of pick explanations for QA.
+- **AI Routes — Backend/Admin Only**: All AI routes are restricted to admin access via `requireAdmin` middleware. OpenAI is used exclusively for system intelligence, admin assistant, and app guardian.
+- **Smart Leg Selector UX**: MatchupTicketCard includes per-leg checkboxes, quick actions, live combined odds, correlated leg warnings, and an "Add N Selected Legs" button.
+- **Bet Slip Auto-Open**: Desktop sidebar and mobile sheet auto-open when the first leg is added.
+- **Mobile Slip Bottom Nav Button**: Dedicated "Slip" button in the mobile bottom navigation with a Ticket icon and leg count badge.
+- **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces horizontal TabsList for settings.
+- **CLV-Gated Learning Engine**: Weight updates apply category multipliers based on CLV+ status and win/loss outcome.
 
 ## External Dependencies
 - **Frontend Framework**: React
@@ -81,5 +80,5 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Sports Data**: ESPN, BallDontLie API, API-Football
 - **Odds Data**: The Odds API
 - **Weather Data**: Open-Meteo
-- **AI/ML**: OpenAI (for Admin Assistant and system intelligence only — not user-facing)
+- **AI/ML**: OpenAI (for Admin Assistant and system intelligence only)
 - **Email**: Resend (transactional emails)

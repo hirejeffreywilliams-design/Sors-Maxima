@@ -2,7 +2,7 @@ import type { Sport } from "@shared/schema";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { getRosterFromCacheById, type ESPNTeam, type ESPNCoach } from "./espn-roster-provider";
 import { getOddsForSport, type SportEvent } from "./odds-provider";
-import { isBDLAvailable, getEnrichedTeamData, type BDLEnrichedTeamData } from "./balldontlie-provider";
+import { isBDLAvailable, getEnrichedTeamData, type BDLEnrichedTeamData, isBDLNFLAvailable, getNFLTeamStatsBDL, type BDLNFLTeamData } from "./balldontlie-provider";
 import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 import { getNHLTeamStats, findNHLTeam, type NHLTeamStats } from "./nhl-stats-provider";
 import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
@@ -166,6 +166,16 @@ interface SchemeStats {
   runsAllowed?: number;
   strikeoutsPer9?: number;
   walksPer9?: number;
+  // NFL-specific stats from BallDontLie (paid)
+  passingYPG?: number;
+  rushingYPG?: number;
+  pointsPerGame?: number;
+  pointsAllowedPerGame?: number;
+  turnoverDiff?: number;
+  thirdDownPct?: number;
+  qbRating?: number;
+  oppPassingYPG?: number;
+  oppRushingYPG?: number;
 }
 
 function getOffensiveScheme(sport: string, winPct: number, teamId: string, stats?: SchemeStats): TeamSchemeData["offensiveScheme"] {
@@ -219,7 +229,31 @@ function getOffensiveScheme(sport: string, winPct: number, teamId: string, stats
   const teamVariant = parseInt(teamId.slice(-2), 10) % 3;
 
   if (sport === "NFL" || sport === "NCAAF") {
-    if (winPct >= 0.65 && homeWinPct >= 0.72) {
+    const passingYPG = stats?.passingYPG;
+    const rushingYPG = stats?.rushingYPG;
+    const thirdDownPct = stats?.thirdDownPct;
+    const ppg = stats?.pointsPerGame;
+
+    if (passingYPG !== undefined && rushingYPG !== undefined) {
+      // Stats-driven scheme names using real BDL data
+      if (passingYPG >= 280 && rushingYPG < 110) {
+        name = "Air Raid"; keyPlays = ["Deep Routes", "Quick Slants", "4-Wide Sets", "Tempo Attack"];
+      } else if (passingYPG >= 265 && rushingYPG >= 130) {
+        name = "West Coast Spread"; keyPlays = ["Short Passing", "RPO", "Screen Games", "Route Trees"];
+      } else if (rushingYPG >= 160) {
+        name = "Power Run Game"; keyPlays = ["Gap Scheme Runs", "Fullback Lead", "Counter Trey", "Play Action"];
+      } else if (rushingYPG >= 140 && passingYPG < 220) {
+        name = "Pro-Style Run Game"; keyPlays = ["Zone Runs", "Play Action", "Boot Legs", "Downhill Runs"];
+      } else if (thirdDownPct !== undefined && thirdDownPct >= 0.43) {
+        name = "Efficient Offense"; keyPlays = ["Money-Down Execution", "Short Routes", "RPO", "Bootleg Passes"];
+      } else if (ppg !== undefined && ppg >= 28) {
+        name = "High-Powered Offense"; keyPlays = ["Balanced Attack", "Red-Zone Efficiency", "Play-Action", "Screen Game"];
+      } else if (passingYPG >= 240 && rushingYPG >= 100) {
+        name = "Spread Option"; keyPlays = ["Read Option", "RPO", "QB Scramble", "Constraint Routes"];
+      } else {
+        name = "Ball-Control Offense"; keyPlays = ["Short Routes", "Screen Game", "Run-Heavy Sets", "Clock Control"];
+      }
+    } else if (winPct >= 0.65 && homeWinPct >= 0.72) {
       name = "Air Raid"; keyPlays = ["Deep Routes", "Quick Slants", "4-Wide Sets", "Tempo Attack"];
     } else if (winPct >= 0.6 && isOnRoad) {
       name = "West Coast Spread"; keyPlays = ["Short Passing", "RPO", "Screen Games", "Route Trees"];
@@ -336,7 +370,33 @@ function getDefensiveScheme(sport: string, winPct: number, teamId: string, stats
   const teamVariant = parseInt(teamId.slice(-2), 10) % 3;
 
   if (sport === "NFL" || sport === "NCAAF") {
-    if (winPct >= 0.65 && homeWinPct >= 0.72) {
+    const papg = stats?.pointsAllowedPerGame;
+    const turnoverDiff = stats?.turnoverDiff;
+    const oppPassYPG = stats?.oppPassingYPG;
+    const oppRushYPG = stats?.oppRushingYPG;
+
+    if (papg !== undefined) {
+      // Stats-driven scheme names using real BDL data
+      if (papg < 17 && turnoverDiff !== undefined && turnoverDiff >= 5) {
+        name = "Turnover Machine"; formation = "Ball-Hawking Coverage + Blitz";
+      } else if (papg < 17) {
+        name = "Elite Defense"; formation = "Multiple Fronts + Pressure";
+      } else if (papg < 20 && oppPassYPG !== undefined && oppPassYPG < 200) {
+        name = "Pass-Stuffing 4-3"; formation = "4-3 Coverage Shell";
+      } else if (papg < 21 && oppRushYPG !== undefined && oppRushYPG < 90) {
+        name = "Run-Stopping 3-4"; formation = "3-4 Gap Control";
+      } else if (papg < 21) {
+        name = "Strong 4-3"; formation = "Two-High Safety Shell";
+      } else if (papg < 24 && turnoverDiff !== undefined && turnoverDiff >= 3) {
+        name = "Opportunistic Defense"; formation = "Coverage-First + Blitz Packages";
+      } else if (papg < 24) {
+        name = "Cover-2 Tampa"; formation = "Two-High Safety Shell";
+      } else if (papg >= 28) {
+        name = "High-Risk Defense"; formation = "Soft Zone + Bracket";
+      } else {
+        name = "Nickel Zone Coverage"; formation = "Zone Coverage Soft";
+      }
+    } else if (winPct >= 0.65 && homeWinPct >= 0.72) {
       name = "4-3 Under Pressure Package"; formation = "Multiple Fronts + Blitz";
     } else if (winPct >= 0.6 && awayWinPct >= 0.55) {
       name = "3-4 Odd Zone Mix"; formation = "Edge Pressure Package";
@@ -779,6 +839,15 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     } catch {}
   }
 
+  // Load BDL NFL stats (paid API — primary for NFL)
+  let nflBDLTeams: BDLNFLTeamData[] = [];
+  if (sport === "NFL" && isBDLNFLAvailable()) {
+    try {
+      nflBDLTeams = await getNFLTeamStatsBDL();
+      if (nflBDLTeams.length > 0) dataSources.add("BallDontLie NFL");
+    } catch {}
+  }
+
   // Load NHL Official API stats (free, no key)
   let nhlTeamStats: NHLTeamStats[] = [];
   if (sport === "NHL") {
@@ -816,6 +885,18 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     );
   }
 
+  function findNFLBDL(teamName: string): BDLNFLTeamData | undefined {
+    if (!nflBDLTeams.length) return undefined;
+    const lower = teamName.toLowerCase();
+    const lastWord = lower.split(" ").pop() || "";
+    return nflBDLTeams.find(t =>
+      lower.includes(t.teamName.toLowerCase()) ||
+      t.teamName.toLowerCase().includes(lastWord) ||
+      t.abbreviation.toLowerCase() === lower.split(" ").pop()?.toLowerCase() ||
+      lower.includes(t.abbreviation.toLowerCase())
+    );
+  }
+
   function findNHL(teamName: string): NHLTeamStats | undefined {
     if (!nhlTeamStats.length) return undefined;
     return findNHLTeam(teamName);
@@ -830,7 +911,8 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     teamData: { team: ESPNTeam; record: string; parsed: { wins: number; losses: number; pct: number } },
     bdl?: BDLEnrichedTeamData,
     nhl?: NHLTeamStats,
-    mlb?: MLBTeamStats
+    mlb?: MLBTeamStats,
+    nfl?: BDLNFLTeamData
   ): SchemeStats {
     const total = teamData.parsed.wins + teamData.parsed.losses;
     const homeGames = Math.round(total * 0.5);
@@ -868,6 +950,16 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
       runsAllowed: mlb?.runsAllowed,
       strikeoutsPer9: mlb?.strikeoutsPer9,
       walksPer9: mlb?.walksPer9,
+      // NFL BDL paid stats
+      passingYPG: nfl?.passingYardsPerGame,
+      rushingYPG: nfl?.rushingYardsPerGame,
+      pointsPerGame: nfl?.pointsPerGame,
+      pointsAllowedPerGame: nfl?.pointsAllowedPerGame,
+      turnoverDiff: nfl?.turnoverDifferential,
+      thirdDownPct: nfl?.thirdDownPct,
+      qbRating: nfl?.qbRating,
+      oppPassingYPG: nfl?.oppPassingYardsPerGame,
+      oppRushingYPG: nfl?.oppRushingYardsPerGame,
     };
   }
 
@@ -883,6 +975,8 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     const awayNHL = findNHL(game.awayTeam.displayName);
     const homeMLB = findMLB(game.homeTeam.displayName);
     const awayMLB = findMLB(game.awayTeam.displayName);
+    const homeNFLBDL = sport === "NFL" ? findNFLBDL(game.homeTeam.displayName) : undefined;
+    const awayNFLBDL = sport === "NFL" ? findNFLBDL(game.awayTeam.displayName) : undefined;
 
     // Use cached odds — no new API calls
     const realOdds = matchOddsToGame(
@@ -894,12 +988,12 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     const homeTeamData = { team: game.homeTeam, record: homeRecord, parsed: homeParsed };
     const awayTeamData = { team: game.awayTeam, record: awayRecord, parsed: awayParsed };
 
-    const homeStats = buildStats(homeTeamData, homeBDL, homeNHL, homeMLB);
-    const awayStats = buildStats(awayTeamData, awayBDL, awayNHL, awayMLB);
+    const homeStats = buildStats(homeTeamData, homeBDL, homeNHL, homeMLB, homeNFLBDL);
+    const awayStats = buildStats(awayTeamData, awayBDL, awayNHL, awayMLB, awayNFLBDL);
 
-    for (const [teamData, bdl, stats] of [
-      [homeTeamData, homeBDL, homeStats] as const,
-      [awayTeamData, awayBDL, awayStats] as const,
+    for (const [teamData, bdl, stats, nflBDL] of [
+      [homeTeamData, homeBDL, homeStats, homeNFLBDL] as const,
+      [awayTeamData, awayBDL, awayStats, awayNFLBDL] as const,
     ]) {
       if (seenTeams.has(teamData.team.id)) continue;
       seenTeams.add(teamData.team.id);
@@ -928,7 +1022,9 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
           underdog: Math.round(Math.max(30, Math.min(75, 35 + teamData.parsed.pct * 28 + (stats.streak && stats.streakType === "win" ? stats.streak * 1.5 : 0)))),
           favorite: Math.round(Math.max(38, Math.min(85, 45 + teamData.parsed.pct * 32))),
         },
-        dataSource: bdl
+        dataSource: nflBDL
+          ? "ESPN + BallDontLie NFL"
+          : bdl
           ? "ESPN + BallDontLie"
           : stats.goalsForPG !== undefined
           ? "ESPN + NHL Stats API"

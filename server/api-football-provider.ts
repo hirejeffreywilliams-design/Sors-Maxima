@@ -38,6 +38,15 @@ const LEAGUE_MAP: Record<string, { id: number; season: number; name: string; esp
   Soccer_MLS: { id: 253, season: 2026, name: "MLS", espnSlug: "usa.1" },
   Soccer_UCL: { id: 2, season: 2025, name: "Champions League", espnSlug: "uefa.champions" },
   Soccer_INTL: { id: 1, season: 2025, name: "International Friendlies", espnSlug: "fifa.friendly" },
+  // Expanded league coverage
+  Soccer_EUROPA: { id: 3, season: 2025, name: "UEFA Europa League", espnSlug: "uefa.europa" },
+  Soccer_CONFERENCE: { id: 848, season: 2025, name: "UEFA Conference League", espnSlug: "uefa.europa.conf" },
+  Soccer_CHAMPIONSHIP: { id: 40, season: 2024, name: "EFL Championship", espnSlug: "eng.2" },
+  Soccer_LIGAMX: { id: 262, season: 2025, name: "Liga MX", espnSlug: "mex.1" },
+  Soccer_EREDIVISIE: { id: 88, season: 2024, name: "Eredivisie", espnSlug: "ned.1" },
+  Soccer_PORTUGAL: { id: 94, season: 2024, name: "Primeira Liga", espnSlug: "por.1" },
+  Soccer_TURKEY: { id: 203, season: 2024, name: "Super Lig", espnSlug: "tur.1" },
+  Soccer_BRASIL: { id: 71, season: 2025, name: "Brasileirao", espnSlug: "bra.1" },
 };
 
 const fixturesCache = new Map<string, { data: SoccerFixture[]; timestamp: number }>();

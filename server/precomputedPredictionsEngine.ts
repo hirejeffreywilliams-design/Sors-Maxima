@@ -17,7 +17,7 @@ import { getAllInjuries } from "./espn-injury-provider";
 import { getGameSituationalFactors, type SituationalFactors } from "./situationalEngine";
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import { isExclusivePick } from "./pickProtectionEngine";
-import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
+import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData, isBDLNFLAvailable, getNFLTeamStatsBDL, type BDLNFLTeamData, isBDLMLBAvailable, getMLBTeamStatsBDL, type BDLMLBTeamData } from "./balldontlie-provider";
 import { getNHLTeamStats, findNHLTeam, type NHLTeamStats } from "./nhl-stats-provider";
 import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
@@ -550,6 +550,28 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     } catch {}
   }
 
+  // Load BDL NFL team stats (paid API — primary source for NFL)
+  let nflBDLStats: BDLNFLTeamData[] = [];
+  if (sport === "NFL" && isBDLNFLAvailable()) {
+    try {
+      nflBDLStats = await getNFLTeamStatsBDL();
+      if (nflBDLStats.length > 0) {
+        console.log(`[PrecomputedEngine] NFL BDL stats: ${nflBDLStats.length} teams loaded`);
+      }
+    } catch {}
+  }
+
+  // Load BDL MLB team stats (paid API — primary source for MLB)
+  let mlbBDLStats: BDLMLBTeamData[] = [];
+  if (sport === "MLB" && isBDLMLBAvailable()) {
+    try {
+      mlbBDLStats = await getMLBTeamStatsBDL();
+      if (mlbBDLStats.length > 0) {
+        console.log(`[PrecomputedEngine] MLB BDL stats: ${mlbBDLStats.length} teams loaded`);
+      }
+    } catch {}
+  }
+
   for (const game of upcomingGames.slice(0, 15)) {
     const homeName = game.homeTeam?.displayName || "Home";
     const awayName = game.awayTeam?.displayName || "Away";
@@ -574,6 +596,36 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const awayNHLStats = sport === "NHL" ? findNHLTeam(awayName) : undefined;
     const homeMLBStats = sport === "MLB" ? findMLBTeam(homeName) : undefined;
     const awayMLBStats = sport === "MLB" ? findMLBTeam(awayName) : undefined;
+
+    // BDL NFL stats lookup (paid — primary for NFL)
+    const findNFLBDL = (name: string): BDLNFLTeamData | undefined => {
+      if (!nflBDLStats.length) return undefined;
+      const lower = name.toLowerCase();
+      const lastWord = lower.split(" ").pop() || "";
+      return nflBDLStats.find(t =>
+        lower.includes(t.teamName.toLowerCase()) ||
+        t.teamName.toLowerCase().includes(lastWord) ||
+        t.abbreviation.toLowerCase() === homeAbbr.toLowerCase() ||
+        lower.includes(t.abbreviation.toLowerCase())
+      );
+    };
+    const homeNFLBDL = sport === "NFL" ? findNFLBDL(homeName) : undefined;
+    const awayNFLBDL = sport === "NFL" ? findNFLBDL(awayName) : undefined;
+
+    // BDL MLB stats lookup (paid — primary for MLB)
+    const findMLBBDL = (name: string): BDLMLBTeamData | undefined => {
+      if (!mlbBDLStats.length) return undefined;
+      const lower = name.toLowerCase();
+      const lastWord = lower.split(" ").pop() || "";
+      return mlbBDLStats.find(t =>
+        lower.includes(t.teamName.toLowerCase()) ||
+        t.teamName.toLowerCase().includes(lastWord) ||
+        t.abbreviation.toLowerCase() === lower ||
+        lower.includes(t.abbreviation.toLowerCase())
+      );
+    };
+    const homeMLBBDL = sport === "MLB" ? findMLBBDL(homeName) : undefined;
+    const awayMLBBDL = sport === "MLB" ? findMLBBDL(awayName) : undefined;
 
     let homeInjuryCount = 0, awayInjuryCount = 0;
     let homeStartersOut = 0, awayStartersOut = 0;
@@ -1086,6 +1138,78 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             mappedFactors.push({
               name: "Pitching Control Edge",
               impact: Math.min(7, Math.round(Math.abs(whipDiff) * 5 * 10) / 10),
+              direction: whipDiff < 0 ? "positive" : "negative",
+            });
+          }
+        }
+
+        // NFL BDL factors (paid API — most comprehensive NFL data available)
+        if (sport === "NFL" && homeNFLBDL && awayNFLBDL) {
+          const ppgDiff = homeNFLBDL.pointsPerGame - awayNFLBDL.pointsPerGame;
+          const papgDiff = homeNFLBDL.pointsAllowedPerGame - awayNFLBDL.pointsAllowedPerGame;
+          const turnoverDiff = homeNFLBDL.turnoverDifferential - awayNFLBDL.turnoverDifferential;
+          const passingDiff = homeNFLBDL.passingYardsPerGame - awayNFLBDL.passingYardsPerGame;
+          const thirdDownDiff = homeNFLBDL.thirdDownPct - awayNFLBDL.thirdDownPct;
+          if (Math.abs(ppgDiff) > 2) {
+            mappedFactors.push({
+              name: "Scoring Differential",
+              impact: Math.min(12, Math.round(Math.abs(ppgDiff) * 0.6 * 10) / 10),
+              direction: ppgDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(papgDiff) > 2) {
+            mappedFactors.push({
+              name: "Defensive Strength",
+              impact: Math.min(10, Math.round(Math.abs(papgDiff) * 0.5 * 10) / 10),
+              direction: papgDiff < 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(turnoverDiff) >= 3) {
+            mappedFactors.push({
+              name: "Turnover Edge",
+              impact: Math.min(9, Math.round(Math.abs(turnoverDiff) * 1.2 * 10) / 10),
+              direction: turnoverDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(passingDiff) > 20) {
+            mappedFactors.push({
+              name: "Passing Game Edge",
+              impact: Math.min(8, Math.round(Math.abs(passingDiff) * 0.03 * 10) / 10),
+              direction: passingDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(thirdDownDiff) > 0.03) {
+            mappedFactors.push({
+              name: "Third Down Efficiency",
+              impact: Math.min(7, Math.round(Math.abs(thirdDownDiff) * 100 * 0.12 * 10) / 10),
+              direction: thirdDownDiff > 0 ? "positive" : "negative",
+            });
+          }
+        }
+
+        // MLB BDL factors (paid API — augments free MLB Stats API)
+        if (sport === "MLB" && homeMLBBDL && awayMLBBDL) {
+          const eraDiff = homeMLBBDL.era - awayMLBBDL.era;
+          const opsDiff = homeMLBBDL.ops - awayMLBBDL.ops;
+          const whipDiff = homeMLBBDL.whip - awayMLBBDL.whip;
+          if (Math.abs(eraDiff) > 0.3 && !mappedFactors.find(f => f.name === "Starting Pitching Edge")) {
+            mappedFactors.push({
+              name: "Pitching Edge (BDL)",
+              impact: Math.min(11, Math.round(Math.abs(eraDiff) * 2.2 * 10) / 10),
+              direction: eraDiff < 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(opsDiff) > 0.02) {
+            mappedFactors.push({
+              name: "Lineup Power Edge",
+              impact: Math.min(8, Math.round(Math.abs(opsDiff) * 40 * 10) / 10),
+              direction: opsDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(whipDiff) > 0.08 && !mappedFactors.find(f => f.name === "Pitching Control Edge")) {
+            mappedFactors.push({
+              name: "Walk Rate Edge",
+              impact: Math.min(6, Math.round(Math.abs(whipDiff) * 5 * 10) / 10),
               direction: whipDiff < 0 ? "positive" : "negative",
             });
           }
