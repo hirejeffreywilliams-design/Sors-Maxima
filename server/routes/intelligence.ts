@@ -493,18 +493,37 @@ export function registerIntelligenceRoutes(app: Express): void {
         return res.status(400).json({ error: "legs must be a non-empty array" });
       }
       const { runSimulation, getRiskMetrics } = await import("../monteCarloEngine");
-      const parlayLegs = legs.map((l: any) => ({
-        id: l.id || `leg-${Math.random().toString(36).slice(2, 8)}`,
-        gameId: l.gameId || "",
-        sport: l.sport || "NBA",
-        game: l.game || l.gameName || "",
-        market: l.market || "moneyline",
-        outcome: l.outcome || l.pick || "",
-        odds: l.odds || l.overOdds || -110,
-        decimalOdds: l.decimalOdds || (l.odds > 0 ? 1 + l.odds / 100 : 1 + 100 / Math.abs(l.odds || 110)),
-        probOverride: l.winProbability || l.probOverride || undefined,
-        bookmaker: l.bookmaker || "consensus",
-      }));
+      const parlayLegs = legs.map((l: any) => {
+        const rawOdds = l.americanOdds || l.odds || l.overOdds || -110;
+        const decimalOdds = l.decimalOdds ||
+          (rawOdds > 0 ? 1 + rawOdds / 100 : 1 + 100 / Math.abs(rawOdds));
+
+        let probOverride: number | undefined;
+        if (typeof l.winProbability === "number" && l.winProbability > 0) {
+          probOverride = l.winProbability > 1 ? l.winProbability / 100 : l.winProbability;
+        } else if (typeof l.probOverride === "number" && l.probOverride > 0) {
+          probOverride = l.probOverride > 1 ? l.probOverride / 100 : l.probOverride;
+        } else if (typeof l.confidence === "number" && l.confidence > 0) {
+          probOverride = l.confidence > 1 ? (l.confidence * 0.95) / 100 : l.confidence * 0.95;
+        }
+
+        return {
+          id: l.id || `leg-${Math.random().toString(36).slice(2, 8)}`,
+          gameId: l.gameId || "",
+          eventId: l.gameId || l.eventId || "",
+          sport: l.sport || "NBA",
+          game: l.game || l.gameName || "",
+          market: l.market || "moneyline",
+          outcome: l.outcome || l.pick || "",
+          team: l.team || "",
+          odds: rawOdds,
+          decimalOdds,
+          probOverride,
+          playerId: l.playerId || undefined,
+          propCategory: l.propCategory || undefined,
+          bookmaker: l.bookmaker || "consensus",
+        };
+      });
 
       const simResult = await runSimulation(parlayLegs, 25000);
 

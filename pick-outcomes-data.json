@@ -641,20 +641,36 @@
       "savedAt": "2026-03-02T00:01:41.705Z"
     },
     {
-      "id": "precomp-NHL-401803306-spread-03174dc817",
+      "id": "precomp-NHL-401803306-spread-6242a2b5cf",
       "gameId": "401803306",
       "sport": "NHL",
       "game": "Detroit Red Wings @ Nashville Predators",
       "homeTeam": "Nashville Predators",
       "awayTeam": "Detroit Red Wings",
-      "pick": "Detroit Red Wings -1",
+      "pick": "Nashville Predators +2",
       "betType": "spread",
-      "odds": 195,
+      "odds": -148,
+      "grade": "A",
+      "confidence": 66,
+      "ev": 10.59,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:33:55.662Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-team_total-ecdb56035e",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings Under 4.5",
+      "betType": "team_total",
+      "odds": -110,
       "grade": "A",
       "confidence": 64,
-      "ev": 88.8,
+      "ev": 22.18,
       "gameTime": "2026-03-02T19:00Z",
-      "savedAt": "2026-03-02T19:11:06.073Z"
+      "savedAt": "2026-03-02T19:33:55.662Z"
     }
   ],
   "settled": [
@@ -78253,22 +78269,122 @@
       "homeScore": 120,
       "awayScore": 97,
       "settledAt": "2026-03-02T19:10:03.249Z"
+    },
+    {
+      "id": "precomp-NHL-401803313-spread-37bd6e69cd",
+      "gameId": "401803313",
+      "sport": "NHL",
+      "game": "Utah Mammoth @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Utah Mammoth",
+      "pick": "Washington Capitals -1.5",
+      "betType": "spread",
+      "odds": 195,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 82.9,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T19:13:58.919Z",
+      "result": "lost",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T19:15:09.531Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-spread-5bdf8cdc1d",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "New Jersey Devils -1",
+      "betType": "spread",
+      "odds": 215,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 95.3,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T19:13:58.919Z",
+      "result": "push",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T19:15:09.560Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-03174dc817",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings -1",
+      "betType": "spread",
+      "odds": 195,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 88.8,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:11:06.073Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:15:09.589Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-total-1e6c8b4172",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": 100,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 26,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:23:53.697Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:24:10.553Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-842d230e21",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings -1.5",
+      "betType": "spread",
+      "odds": 116,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 40.4,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:27:17.163Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:28:30.572Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3773,
+      "total": 3778,
       "won": 1896,
-      "lost": 1840,
-      "push": 37,
-      "rate": 50.3,
-      "pending": 41
+      "lost": 1844,
+      "push": 38,
+      "rate": 50.2,
+      "pending": 42
     },
     "bySport": {
       "NHL": {
-        "total": 727,
+        "total": 732,
         "won": 314,
-        "rate": 43.2
+        "rate": 42.9
       },
       "NCAAB": {
         "total": 1333,
@@ -78323,14 +78439,14 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 198,
+        "total": 200,
         "won": 101,
-        "rate": 51
+        "rate": 50.5
       },
       "A": {
-        "total": 160,
+        "total": 163,
         "won": 92,
-        "rate": 57.5
+        "rate": 56.4
       },
       "A+": {
         "total": 726,
@@ -78345,12 +78461,12 @@
         "rate": 59.2
       },
       "Spread": {
-        "total": 1436,
+        "total": 1440,
         "won": 577,
-        "rate": 40.2
+        "rate": 40.1
       },
       "Total": {
-        "total": 1512,
+        "total": 1513,
         "won": 841,
         "rate": 55.6
       },
@@ -78361,12 +78477,12 @@
       }
     },
     "recentForm": {
-      "won": 38,
-      "lost": 12,
-      "push": 0,
-      "rate": 76
+      "won": 35,
+      "lost": 14,
+      "push": 1,
+      "rate": 70
     },
-    "lastUpdated": "2026-03-02T19:12:37.843Z"
+    "lastUpdated": "2026-03-02T19:34:03.103Z"
   },
   "version": 1
 }
