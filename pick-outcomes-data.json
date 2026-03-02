@@ -75197,14 +75197,194 @@
       "homeScore": 120,
       "awayScore": 97,
       "settledAt": "2026-03-02T01:10:21.770Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-team_total-7c31d14ef5",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Milwaukee Bucks Over 104.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 18.36,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T01:28:31.350Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T01:32:28.270Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-team_total-dd702ee9ae",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Milwaukee Bucks Over 105",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T01:32:28.270Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-total-719191ba71",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Over 217",
+      "betType": "total",
+      "odds": -112,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 17.36,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "push",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T01:32:28.270Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-team_total-6c8b9b0ad1",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Boston Celtics Over 112.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 18.36,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "lost",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T01:32:28.270Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-total-171727be5d",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Over 215",
+      "betType": "total",
+      "odds": -112,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 17.36,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T01:31:17.658Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T01:32:28.270Z"
+    },
+    {
+      "id": "precomp-NBA-401810736-spread-3c1cbf2c7a",
+      "gameId": "401810736",
+      "sport": "NBA",
+      "game": "Denver Nuggets @ Utah Jazz",
+      "homeTeam": "Utah Jazz",
+      "awayTeam": "Denver Nuggets",
+      "pick": "Utah Jazz +11.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-02T01:32:28.294Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-spread-41f38596c9",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Orlando Magic +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "lost",
+      "homeScore": 92,
+      "awayScore": 106,
+      "settledAt": "2026-03-02T01:32:28.324Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-team_total-9bb31e48b8",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Washington Wizards Over 109",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "lost",
+      "homeScore": 92,
+      "awayScore": 106,
+      "settledAt": "2026-03-02T01:32:28.324Z"
+    },
+    {
+      "id": "precomp-NBA-401810734-team_total-484fc32d88",
+      "gameId": "401810734",
+      "sport": "NBA",
+      "game": "Houston Rockets @ Washington Wizards",
+      "homeTeam": "Washington Wizards",
+      "awayTeam": "Houston Rockets",
+      "pick": "Washington Wizards Over 104",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 18.36,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-02T01:30:03.570Z",
+      "result": "won",
+      "homeScore": 115,
+      "awayScore": 105,
+      "settledAt": "2026-03-02T01:32:28.350Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3621,
-      "won": 1807,
-      "lost": 1779,
-      "push": 35,
+      "total": 3630,
+      "won": 1812,
+      "lost": 1782,
+      "push": 36,
       "rate": 49.9,
       "pending": 40
     },
@@ -75220,8 +75400,8 @@
         "rate": 55
       },
       "NBA": {
-        "total": 1317,
-        "won": 677,
+        "total": 1326,
+        "won": 682,
         "rate": 51.4
       },
       "MLB": {
@@ -75267,35 +75447,35 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 116,
-        "won": 62,
-        "rate": 53.4
+        "total": 121,
+        "won": 65,
+        "rate": 53.7
       },
       "A": {
-        "total": 128,
-        "won": 69,
-        "rate": 53.9
+        "total": 129,
+        "won": 70,
+        "rate": 54.3
       },
       "A+": {
-        "total": 688,
-        "won": 417,
-        "rate": 60.6
+        "total": 691,
+        "won": 418,
+        "rate": 60.5
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 631,
-        "won": 376,
+        "total": 636,
+        "won": 379,
         "rate": 59.6
       },
       "Spread": {
-        "total": 1396,
-        "won": 550,
+        "total": 1398,
+        "won": 551,
         "rate": 39.4
       },
       "Total": {
-        "total": 1480,
-        "won": 825,
+        "total": 1482,
+        "won": 826,
         "rate": 55.7
       },
       "Moneyline": {
@@ -75306,11 +75486,11 @@
     },
     "recentForm": {
       "won": 23,
-      "lost": 27,
-      "push": 0,
+      "lost": 26,
+      "push": 1,
       "rate": 46
     },
-    "lastUpdated": "2026-03-02T01:10:21.774Z"
+    "lastUpdated": "2026-03-02T01:33:10.629Z"
   },
   "version": 1
 }
