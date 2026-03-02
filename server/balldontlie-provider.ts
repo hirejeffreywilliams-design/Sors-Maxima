@@ -1,4 +1,5 @@
 import { logError, logInfo, logWarn } from "./errorLogger";
+import { recordBDLCall } from "./api-usage-tracker";
 
 const BASE_URL = "https://api.balldontlie.io";
 const CACHE_TTL = 5 * 60 * 1000;
@@ -474,6 +475,7 @@ export async function getEnrichedTeamData(): Promise<BDLEnrichedTeamData[]> {
     };
   });
 
+  recordBDLCall("NBA", enriched.length, true);
   logInfo(`[BDL] Enriched data loaded for ${enriched.length} NBA teams`);
   return enriched;
 }
@@ -639,6 +641,7 @@ export async function getNFLTeamStatsBDL(): Promise<BDLNFLTeamData[]> {
   }));
 
   nflCache = { data, ts: Date.now() };
+  recordBDLCall("NFL", data.length, true);
   const avgPPG = data.length ? (data.reduce((s, t) => s + t.pointsPerGame, 0) / data.length).toFixed(1) : "0";
   const avgPAPG = data.length ? (data.reduce((s, t) => s + t.pointsAllowedPerGame, 0) / data.length).toFixed(1) : "0";
   logInfo(`[BDL] NFL team_season_stats loaded ${data.length} teams — avg PPG: ${avgPPG}, avg PAPG: ${avgPAPG}`);
@@ -742,6 +745,7 @@ export async function getMLBTeamStatsBDL(): Promise<BDLMLBTeamData[]> {
   }
 
   mlbBDLCache = { data, ts: Date.now() };
+  recordBDLCall("MLB", data.length, true);
   const totalPitchers = data.reduce((s, t) => s + t.pitcherCount, 0);
   const totalBatters = data.reduce((s, t) => s + t.batterCount, 0);
   logInfo(`[BDL] MLB team stats aggregated for ${data.length} teams (${totalPitchers} pitchers, ${totalBatters} batters)`);

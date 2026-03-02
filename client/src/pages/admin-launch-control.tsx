@@ -11,6 +11,7 @@ import {
   CheckCircle2, XCircle, AlertTriangle, RefreshCw, Rocket,
   ToggleLeft, ToggleRight, Zap, Trash2, Play, Shield,
   Database, Clock, TrendingUp, Activity, AlertCircle, ChevronRight,
+  Wifi, WifiOff, Radio, Key, KeyRound,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -28,12 +29,36 @@ interface ApiUsage {
   burnRatePerHour: number | null;
   daysRemaining: number | null;
   historyPoints: number;
+  lastCall?: string | null;
 }
 
 interface LaunchReport {
   checks: CheckResult[];
   summary: { pass: number; warn: number; fail: number; ready: boolean };
   usage: ApiUsage;
+  timestamp: string;
+}
+
+type PipelineStatus = "live" | "cached" | "degraded" | "offline" | "unknown";
+
+interface PipelineSource {
+  id: string;
+  name: string;
+  status: PipelineStatus;
+  lastSuccess: string | null;
+  detail: string;
+  callsTracked: number;
+  dataPoints?: number;
+  sports?: string[];
+  keyRequired: boolean;
+  keySet: boolean;
+}
+
+interface PipelineHealth {
+  sources: PipelineSource[];
+  summary: { live: number; cached: number; degraded: number; offline: number; unknown: number; total: number };
+  allHealthy: boolean;
+  anyCriticalOffline: boolean;
   timestamp: string;
 }
 
@@ -117,6 +142,13 @@ export default function AdminLaunchControl() {
     staleTime: 10_000,
     refetchInterval: 15_000,
   });
+
+  const { data: pipelineHealth, isLoading: pipelineLoading, refetch: refetchPipeline, isFetching: pipelineFetching } =
+    useQuery<PipelineHealth>({
+      queryKey: ["/api/admin/data-pipeline-health"],
+      staleTime: 20_000,
+      refetchInterval: 30_000,
+    });
 
   const toggleMaintenance = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/maintenance/toggle", { message: maintenanceMsg || undefined }),
@@ -426,6 +458,117 @@ export default function AdminLaunchControl() {
           </Card>
 
         </div>
+      </div>
+
+      {/* Data Pipeline Health */}
+      <Card data-testid="section-pipeline-health">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Radio className="w-4 h-4 text-primary" />
+              Live Data Pipeline
+              {pipelineHealth && (
+                <span className={`text-xs font-normal ml-1 ${pipelineHealth.allHealthy ? "text-emerald-400" : pipelineHealth.anyCriticalOffline ? "text-red-400" : "text-amber-400"}`}>
+                  {pipelineHealth.allHealthy ? "— All systems operational" : pipelineHealth.anyCriticalOffline ? "— Critical source offline" : "— Degraded"}
+                </span>
+              )}
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              {pipelineHealth && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  {pipelineHealth.summary.live > 0 && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />{pipelineHealth.summary.live} live</span>}
+                  {pipelineHealth.summary.cached > 0 && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-400 inline-block" />{pipelineHealth.summary.cached} cached</span>}
+                  {pipelineHealth.summary.degraded > 0 && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />{pipelineHealth.summary.degraded} degraded</span>}
+                  {pipelineHealth.summary.offline > 0 && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />{pipelineHealth.summary.offline} offline</span>}
+                </div>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0"
+                onClick={() => refetchPipeline()}
+                disabled={pipelineFetching}
+                data-testid="button-refresh-pipeline"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${pipelineFetching ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {pipelineLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+            </div>
+          ) : pipelineHealth ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {pipelineHealth.sources.map(source => (
+                <PipelineSourceCard key={source.id} source={source} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-6">Pipeline health data unavailable</p>
+          )}
+          {pipelineHealth?.timestamp && (
+            <p className="text-[10px] text-muted-foreground text-right mt-3">
+              Updated {new Date(pipelineHealth.timestamp).toLocaleTimeString()} · auto-refreshes every 30s
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+    </div>
+  );
+}
+
+// ── Pipeline Source Card ───────────────────────────────────────────────────────
+function PipelineSourceCard({ source }: { source: PipelineSource }) {
+  const statusConfig: Record<PipelineStatus, { color: string; bg: string; border: string; label: string; icon: React.ReactNode }> = {
+    live: { color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/25", label: "Live", icon: <Wifi className="w-3 h-3" /> },
+    cached: { color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/25", label: "Cached", icon: <Clock className="w-3 h-3" /> },
+    degraded: { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/25", label: "Degraded", icon: <AlertTriangle className="w-3 h-3" /> },
+    offline: { color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/25", label: "Offline", icon: <WifiOff className="w-3 h-3" /> },
+    unknown: { color: "text-muted-foreground", bg: "bg-muted/30", border: "border-border/50", label: "Unknown", icon: <AlertCircle className="w-3 h-3" /> },
+  };
+
+  const cfg = statusConfig[source.status];
+
+  return (
+    <div
+      className={`rounded-xl border p-3.5 space-y-2 ${cfg.bg} ${cfg.border}`}
+      data-testid={`pipeline-source-${source.id}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold truncate">{source.name}</p>
+        <div className={`flex items-center gap-1 text-[10px] font-medium ${cfg.color}`}>
+          {cfg.icon}
+          {cfg.label}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground leading-relaxed line-clamp-2">{source.detail}</p>
+
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          {source.keyRequired && (
+            <span className={`flex items-center gap-0.5 text-[10px] ${source.keySet ? "text-emerald-400" : "text-red-400"}`}>
+              {source.keySet ? <Key className="w-2.5 h-2.5" /> : <KeyRound className="w-2.5 h-2.5" />}
+              {source.keySet ? "Key set" : "No key"}
+            </span>
+          )}
+          {!source.keyRequired && (
+            <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400" />
+              Free API
+            </span>
+          )}
+          {source.sports && source.sports.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">{source.sports.slice(0, 3).join(", ")}</span>
+          )}
+        </div>
+        {source.lastSuccess && (
+          <span className="text-[10px] text-muted-foreground">{source.lastSuccess}</span>
+        )}
       </div>
     </div>
   );

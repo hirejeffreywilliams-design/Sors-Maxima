@@ -1,4 +1,5 @@
 import { logInfo, logWarn, logError } from "./errorLogger";
+import { recordApiFootballCall } from "./api-usage-tracker";
 
 export interface SoccerFixture {
   id: string;
@@ -226,9 +227,11 @@ export async function fetchSoccerFixtures(sportId: string): Promise<SoccerFixtur
     const apiFixtures = await fetchApiFootballFixtures(leagueInfo.id, leagueInfo.season);
     if (apiFixtures.length > 0) {
       fixturesCache.set(cacheKey, { data: apiFixtures, timestamp: Date.now() });
+      recordApiFootballCall(sportId, apiFixtures.length, true);
       logInfo(`[API-Football] Fetched ${apiFixtures.length} fixtures for ${sportId} (${leagueInfo.name})`);
       return apiFixtures;
     }
+    recordApiFootballCall(sportId, 0, false);
     logWarn(`[API-Football] No fixtures for ${sportId}, falling back to ESPN`);
   }
 

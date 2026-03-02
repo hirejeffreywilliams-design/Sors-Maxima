@@ -4138,4 +4138,14 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/data-pipeline-health", requireAdmin, async (_req, res) => {
+    try {
+      const { getDataPipelineHealth } = await import("../data-pipeline-health");
+      const health = getDataPipelineHealth();
+      res.json({ ...health, timestamp: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Pipeline health check failed", detail: err.message });
+    }
+  });
+
 }

@@ -1,4 +1,5 @@
 import type { Sport } from "@shared/schema";
+import { recordESPNCall } from "./api-usage-tracker";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 
@@ -197,10 +198,12 @@ export async function getScoreboard(sport: Sport): Promise<ESPNScoreboardGame[]>
     const games = events.map((e: any) => parseGame(e, sport));
 
     scoreboardCache.set(cacheKey, { data: games, timestamp: Date.now() });
+    recordESPNCall(sport, games.length, true);
     // Suppress verbose per-sport logs to reduce output volume
     return games;
   } catch (error) {
     console.error(`[ESPN-Scoreboard] Error fetching ${sport}:`, error);
+    recordESPNCall(sport, 0, false);
     const fallback = scoreboardCache.get(cacheKey);
     return fallback?.data || [];
   }

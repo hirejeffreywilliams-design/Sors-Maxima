@@ -3,6 +3,7 @@ import { sql } from "drizzle-orm";
 import { sportsDataService } from "./sportsDataService";
 import { getEngineStatus } from "./precomputedPredictionsEngine";
 import { isBDLAvailable } from "./balldontlie-provider";
+import { getOddsApiUsageStats } from "./api-usage-tracker";
 import fs from "fs";
 import path from "path";
 
@@ -36,40 +37,21 @@ export interface CheckResult {
   action?: string;
 }
 
-// ── API Budget Tracking ───────────────────────────────────────────────────────
-const usageHistory: { timestamp: number; remaining: number }[] = [];
-const MAX_HISTORY = 60;
-
-export function recordOddsApiUsage(remaining: number): void {
-  usageHistory.push({ timestamp: Date.now(), remaining });
-  if (usageHistory.length > MAX_HISTORY) usageHistory.shift();
-}
-
+// ── API Budget Stats (delegated to api-usage-tracker) ────────────────────────
 export function getApiUsageStats() {
   const apiStatus = sportsDataService.getApiStatus();
-  const remaining = apiStatus.requestsRemaining ?? null;
+  const tracked = getOddsApiUsageStats();
 
-  let burnRatePerHour: number | null = null;
-  if (usageHistory.length >= 2) {
-    const oldest = usageHistory[0];
-    const newest = usageHistory[usageHistory.length - 1];
-    const deltaMs = newest.timestamp - oldest.timestamp;
-    const deltaUsed = oldest.remaining - newest.remaining;
-    if (deltaMs > 0 && deltaUsed >= 0) {
-      burnRatePerHour = Math.round((deltaUsed / deltaMs) * 3600_000);
-    }
-  }
-
-  const daysRemaining = (remaining !== null && burnRatePerHour !== null && burnRatePerHour > 0)
-    ? parseFloat((remaining / (burnRatePerHour * 24)).toFixed(1))
-    : null;
+  // Prefer live tracked data; fall back to sportsDataService header value
+  const remaining = tracked.remaining ?? apiStatus.requestsRemaining ?? null;
 
   return {
     available: apiStatus.available,
     remaining,
-    burnRatePerHour,
-    daysRemaining,
-    historyPoints: usageHistory.length,
+    burnRatePerHour: tracked.burnRatePerHour,
+    daysRemaining: tracked.daysRemaining,
+    historyPoints: tracked.callCount,
+    lastCall: tracked.lastCall,
   };
 }
 

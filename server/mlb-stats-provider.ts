@@ -1,3 +1,5 @@
+import { recordMLBStatsCall } from "./api-usage-tracker";
+
 const MLB_API_BASE = "https://statsapi.mlb.com/api/v1";
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 
@@ -132,10 +134,12 @@ export async function getMLBTeamStats(): Promise<MLBTeamStats[]> {
 
     cache = { data, timestamp: Date.now() };
     fetchedSuccessfully = true;
+    recordMLBStatsCall(data.length, true);
     const withPitching = data.filter(t => t.era !== 4.5).length;
     console.log(`[MLBStats] Loaded ${data.length} teams (${withPitching} with pitching stats) — ERA range: ${Math.min(...data.map(t => t.era)).toFixed(2)}–${Math.max(...data.map(t => t.era)).toFixed(2)}`);
     return data;
   } catch (err: any) {
+    recordMLBStatsCall(0, false);
     console.warn(`[MLBStats] Fetch failed: ${err.message}`);
     return cache?.data || [];
   }

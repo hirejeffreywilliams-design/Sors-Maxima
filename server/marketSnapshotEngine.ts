@@ -2,6 +2,7 @@ import type { Sport } from "@shared/schema";
 import { getMultiDayScoreboard, getScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { getTeamsFromCache, getPlayersFromCacheById, getRosterFromCacheById } from "./espn-roster-provider";
 import { fetchRealOddsForGame } from "./odds-provider";
+import { recordOddsApiCall } from "./api-usage-tracker";
 
 export interface BookmakerOdds {
   book: string;
@@ -195,6 +196,8 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
     const remaining = res.headers.get("x-requests-remaining");
     const data: OddsApiGame[] = await res.json();
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
+    const remainingNum = parseInt(remaining || "0") || 0;
+    if (remainingNum > 0) recordOddsApiCall(sport, data.length, remainingNum, "MarketSnapshot");
     console.log(`[MarketSnapshot] Odds API OK — ${data.length} ${sport} games (${remaining} requests remaining)`);
     return data;
   } catch (e) {

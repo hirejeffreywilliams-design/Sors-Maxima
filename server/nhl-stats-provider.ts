@@ -1,3 +1,5 @@
+import { recordNHLStatsCall } from "./api-usage-tracker";
+
 const NHL_STATS_URL = "https://api.nhle.com/stats/rest/en/team/summary";
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 
@@ -71,9 +73,11 @@ export async function getNHLTeamStats(): Promise<NHLTeamStats[]> {
 
     cache = { data, timestamp: Date.now() };
     fetchedSuccessfully = true;
+    recordNHLStatsCall(data.length, true);
     console.log(`[NHLStats] Loaded ${data.length} teams — GPG range: ${Math.min(...data.map(t => t.goalsForPerGame)).toFixed(2)}–${Math.max(...data.map(t => t.goalsForPerGame)).toFixed(2)}`);
     return data;
   } catch (err: any) {
+    recordNHLStatsCall(0, false);
     console.warn(`[NHLStats] Fetch failed: ${err.message}`);
     return cache?.data || [];
   }
