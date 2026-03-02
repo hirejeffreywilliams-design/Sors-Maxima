@@ -32,6 +32,7 @@ import {
 import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireTier, requireSubscription } from "./helpers";
+import { getTwoWayMatchupImpact } from "../two-way-contracts";
 
 export function registerIntelligenceRoutes(app: Express): void {
   app.get("/api/intelligence/feed", requireSubscription, async (_req: Request, res: Response) => {
@@ -685,6 +686,24 @@ export function registerIntelligenceRoutes(app: Express): void {
       });
     } catch (err: any) {
       res.status(500).json({ error: "Failed to load league data" });
+    }
+  });
+
+  app.get("/api/nba/two-way-contracts", requireSubscription, async (req: Request, res: Response) => {
+    try {
+      const { homeTeamId, homeTeamName, awayTeamId, awayTeamName } = req.query;
+      if (!homeTeamId || !homeTeamName || !awayTeamId || !awayTeamName) {
+        return res.status(400).json({ error: "homeTeamId, homeTeamName, awayTeamId, awayTeamName required" });
+      }
+      const impact = await getTwoWayMatchupImpact(
+        homeTeamId as string,
+        homeTeamName as string,
+        awayTeamId as string,
+        awayTeamName as string
+      );
+      res.json(impact);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to analyze two-way contracts" });
     }
   });
 

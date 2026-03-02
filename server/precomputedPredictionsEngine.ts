@@ -19,6 +19,7 @@ import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } fr
 import { isExclusivePick } from "./pickProtectionEngine";
 import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData, isBDLNFLAvailable, getNFLTeamStatsBDL, type BDLNFLTeamData, isBDLMLBAvailable, getMLBTeamStatsBDL, type BDLMLBTeamData } from "./balldontlie-provider";
 import { getNHLTeamStats, findNHLTeam, type NHLTeamStats } from "./nhl-stats-provider";
+import { getTwoWayMatchupImpact } from "./two-way-contracts";
 import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
@@ -187,6 +188,7 @@ interface ReasoningContext {
   awayStartersOut?: number;
   venue?: string;
   odds?: number;
+  twoWayRiskNote?: string;
 }
 
 function buildPickReasoning(
@@ -271,6 +273,10 @@ function buildPickReasoning(
     const primary = humanizeFactorName(bullishFactors[0].name);
     const secondary = bullishFactors.length > 1 ? ` + ${humanizeFactorName(bullishFactors[1].name).toLowerCase()}` : "";
     parts.push(`PRIMARY EDGE: ${primary}${secondary}`);
+  }
+
+  if (ctx?.twoWayRiskNote) {
+    parts.push(ctx.twoWayRiskNote);
   }
 
   return parts.join(" — ");
@@ -1107,6 +1113,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
       const mappedFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+      let gameTwoWayNote: string | undefined;
 
       // Add sport-specific factors from official stats APIs
       try {
@@ -1233,6 +1240,25 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             });
           }
         }
+
+        // NBA Two-Way Contract Risk — roster depth and availability analysis
+        if (sport === "NBA" && game.homeTeam?.id && game.awayTeam?.id) {
+          const twoWayImpact = await getTwoWayMatchupImpact(
+            game.homeTeam.id,
+            homeName,
+            game.awayTeam.id,
+            awayName
+          ).catch(() => null);
+
+          if (twoWayImpact && twoWayImpact.hasMeaningfulImpact && twoWayImpact.factorImpact > 0) {
+            mappedFactors.push({
+              name: twoWayImpact.factorName,
+              impact: twoWayImpact.factorImpact,
+              direction: twoWayImpact.factorDirection,
+            });
+            gameTwoWayNote = twoWayImpact.factorExplanation;
+          }
+        }
       } catch {}
 
       const evRounded = Math.round(ev * 100) / 100;
@@ -1266,7 +1292,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         dataSource,
         gameTime: game.date,
         reasoning: buildPickReasoning(bet.pick, bet.betType, confidence, evRounded, mappedFactors, rec, winProb, homeName, awayName, {
-          homeRecord, awayRecord, mcSim, sitFactors, homeInjuryCount, awayInjuryCount, homeStartersOut, awayStartersOut, venue: game.venue, odds: bet.odds,
+          homeRecord, awayRecord, mcSim, sitFactors, homeInjuryCount, awayInjuryCount, homeStartersOut, awayStartersOut, venue: game.venue, odds: bet.odds, twoWayRiskNote: gameTwoWayNote,
         }),
         recommendation: rec,
         winProbability: winProb,
