@@ -22,6 +22,124 @@ import type { Sport, GeneratedParlay } from "@shared/schema";
 import { sports } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
+import { Link } from "wouter";
+
+interface ChampionshipContender {
+  team: string;
+  consensusOdds: number;
+  impliedProbability: number;
+  trueWinProbability: number;
+  avgOdds: number;
+  bookmakerCount: number;
+  tier: "elite" | "contender" | "darkhorse" | "longshot";
+  bookOdds: Record<string, number>;
+}
+
+interface ChampionshipFutures {
+  sport: string;
+  title: string;
+  contenders: ChampionshipContender[];
+  lastUpdated: string;
+  eventDate?: string;
+}
+
+function tierColor(tier: ChampionshipContender["tier"]): string {
+  if (tier === "elite")     return "bg-yellow-500/15 border-yellow-500/30 text-yellow-400";
+  if (tier === "contender") return "bg-blue-500/15 border-blue-500/30 text-blue-400";
+  if (tier === "darkhorse") return "bg-purple-500/15 border-purple-500/30 text-purple-400";
+  return "bg-muted/50 border-border/40 text-muted-foreground";
+}
+
+function tierLabel(tier: ChampionshipContender["tier"]): string {
+  if (tier === "elite")     return "Elite";
+  if (tier === "contender") return "Contender";
+  if (tier === "darkhorse") return "Dark Horse";
+  return "Long Shot";
+}
+
+function MarchMadnessFutures() {
+  const [open, setOpen] = useState(true);
+  const { data: futures, isLoading } = useQuery<ChampionshipFutures>({
+    queryKey: ["/api/picks/futures/ncaab"],
+    staleTime: 15 * 60_000,
+    refetchInterval: 30 * 60_000,
+  });
+
+  if (isLoading) return (
+    <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3 animate-pulse">
+      <Skeleton className="h-5 w-64" />
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        {[1,2,3,4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
+      </div>
+    </div>
+  );
+
+  if (!futures?.contenders?.length) return null;
+
+  const top8 = futures.contenders.slice(0, 8);
+
+  return (
+    <div className="rounded-xl border border-amber-500/25 bg-gradient-to-br from-amber-500/8 via-background to-orange-500/5 overflow-hidden" data-testid="section-march-madness-futures">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between gap-3 p-4 hover:bg-amber-500/5 transition-colors text-left"
+        data-testid="button-toggle-futures"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shrink-0">
+            <Trophy className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">March Madness Championship Futures</p>
+            <p className="text-[11px] text-muted-foreground">
+              {futures.contenders.length} teams tracked · Championship April 7 · Multi-book consensus
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Badge variant="outline" className="text-[10px] h-5 bg-amber-500/15 border-amber-500/30 text-amber-400">Live Futures</Badge>
+          {open ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            {top8.map((c, i) => (
+              <div
+                key={c.team}
+                className={`p-3 rounded-xl border relative overflow-hidden ${tierColor(c.tier)}`}
+                data-testid={`card-futures-${i}`}
+              >
+                {i === 0 && (
+                  <div className="absolute top-1.5 right-1.5">
+                    <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                  </div>
+                )}
+                <p className="font-semibold text-xs leading-tight pr-4">{c.team}</p>
+                <p className="text-lg font-bold font-mono mt-1">
+                  {c.avgOdds > 0 ? `+${c.avgOdds}` : c.avgOdds}
+                </p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-[10px] opacity-80">{c.trueWinProbability}% chance</span>
+                  <Badge variant="outline" className={`text-[9px] h-4 px-1 ${tierColor(c.tier)}`}>{tierLabel(c.tier)}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+          {futures.contenders.length > 8 && (
+            <p className="text-[11px] text-muted-foreground text-center">
+              +{futures.contenders.length - 8} more teams tracked · <Link href="/daily" className="text-primary hover:underline">See all contenders</Link>
+            </p>
+          )}
+          <p className="text-[10px] text-muted-foreground text-center">
+            Odds represent avg across {futures.contenders[0]?.bookmakerCount ?? 3}+ books. True probability is vig-adjusted. Not financial advice.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface PrecomputedPick {
   id: string;
@@ -788,6 +906,8 @@ export default function DailyParlays() {
         </div>
 
         <PickDisclaimer variant="banner" />
+
+        <MarchMadnessFutures />
 
         {stalePickCount > 0 && (
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/8 border border-amber-500/25 text-amber-400" data-testid="banner-stale-picks">

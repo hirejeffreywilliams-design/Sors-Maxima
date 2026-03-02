@@ -61,6 +61,7 @@ const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
 const PersonalizedInsights = lazy(() => import("@/pages/personalized-insights"));
 const CorrelationMatrix = lazy(() => import("@/pages/correlation-matrix"));
 const InternationalPage = lazy(() => import("@/pages/international"));
+const MMAPage = lazy(() => import("@/pages/mma"));
 const OddsCenter = lazy(() => import("@/pages/odds-center"));
 const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
@@ -70,7 +71,7 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -241,6 +242,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/bankroll" component={Bankroll} />
         <Route path="/live" component={Live} />
         <Route path="/international" component={InternationalPage} />
+        <Route path="/mma" component={MMAPage} />
         <Route path="/pricing" component={Pricing} />
         <Route path="/legal" component={LegalPage} />
         <Route path="/roadmap" component={Roadmap} />
@@ -320,7 +322,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/dashboard":            { label: "Dashboard",            parent: "/" },
 };
 
-const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/community", "/tools"]);
+const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools"]);
 
 // Static parent labels (can't reference navItems since it's defined below)
 const PARENT_LABELS: Record<string, string> = {
@@ -415,6 +417,7 @@ const BUILD_SUBITEMS = [
 const MARKETS_SUBITEMS = [
   { href: "/odds-center", icon: TrendingUp, label: "Odds Center", desc: "EV heatmap, line movement & arbitrage" },
   { href: "/player-props", icon: Star, label: "Player Props", desc: "Over/under projections for every player" },
+  { href: "/mma", icon: Sword, label: "MMA / UFC", desc: "Market-consensus fight picks with EV analysis" },
   { href: "/international", icon: Globe, label: "International", desc: "Soccer leagues, draws & underdog value" },
   { href: "/live", icon: Activity, label: "Live Scores", desc: "Real-time scores & in-game tracking" },
 ];
@@ -477,6 +480,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         {navSection("Markets", [
           { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "mobile-nav-odds" },
           { href: "/player-props", icon: Star, label: "Player Props", testId: "mobile-nav-props" },
+          { href: "/mma", icon: Sword, label: "MMA / UFC", testId: "mobile-nav-mma" },
           { href: "/international", icon: Globe, label: "International", testId: "mobile-nav-international" },
           { href: "/live", icon: Activity, label: "Live Scores", testId: "mobile-nav-live" },
         ])}
@@ -562,7 +566,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
 
   const isBuildActive = ["/generate", "/builder", "/strategy"].includes(location);
-  const isMarketsActive = ["/odds-center", "/player-props", "/international", "/live"].includes(location);
+  const isMarketsActive = ["/odds-center", "/player-props", "/international", "/mma", "/live"].includes(location);
 
   const NavBtn = ({ href, icon: Icon, label, testId, tooltip }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; tooltip: string }) => (
     <Tooltip>

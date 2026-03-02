@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { generateInternationalFeed, getLeagueEmoji } from "../internationalSportsEngine";
+import { generateMMAFeed, generateNCAABFutures } from "../mma-engine";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, getSSEStatus } from "../sseManager";
 import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
@@ -602,6 +603,28 @@ export function registerIntelligenceRoutes(app: Express): void {
     } catch (err: any) {
       console.error("[life-changer] Error:", err.message);
       res.status(500).json({ error: "Failed to generate Life Changer ticket" });
+    }
+  });
+
+  // ── MMA/UFC ────────────────────────────────────────────────────────────────
+  app.get("/api/mma/picks", requireSubscription, async (_req: Request, res: Response) => {
+    try {
+      const feed = await generateMMAFeed();
+      res.json(feed);
+    } catch (err: any) {
+      console.error("[mma] Error:", err.message);
+      res.status(500).json({ error: "Failed to load MMA picks" });
+    }
+  });
+
+  // ── Championship Futures ───────────────────────────────────────────────────
+  app.get("/api/picks/futures/ncaab", requireSubscription, async (_req: Request, res: Response) => {
+    try {
+      const futures = await generateNCAABFutures();
+      res.json(futures);
+    } catch (err: any) {
+      console.error("[futures] Error:", err.message);
+      res.status(500).json({ error: "Failed to load championship futures" });
     }
   });
 
