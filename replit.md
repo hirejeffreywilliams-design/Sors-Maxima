@@ -46,6 +46,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **MC Stacked Learner**: 3-layer Monte Carlo confidence adjustment after USML ensemble blend.
 - **Admin Intelligence Health Dashboard**: "Intelligence" tab in admin UI for engine status and performance.
 - **Launch Control Center**: Admin page with pre-launch checklist, maintenance mode toggle, API budget monitor, and **Live Data Pipeline panel**.
+- **Owner's Playbook**: Admin-only strategic business guide at `/admin/owner-playbook` with 5 tabs: Launch Plan (interactive 3-phase checklist with localStorage persistence), Daily Operations (daily/weekly/monthly task schedules), Growth Strategy (6 acquisition channels + retention tactics), Key Metrics (6 SaaS health metrics with formulas + interactive revenue calculator), and Legal & Risk (compliance reminders for first-time app owners).
 - **Data Pipeline Health Monitor**: Real-time status panel for all 6 data sources (The Odds API, ESPN, BallDontLie, NHL Stats API, MLB Stats API, API-Football).
 - **Auto-Settlement Engine**: Fetches completed game scores and updates pick trackers.
 - **User Bet Tracking**: Allows authenticated users to save slip picks for automatic settlement and validated stats.

@@ -60,6 +60,7 @@ import {
   X,
   Rocket,
   Sparkles,
+  BookOpen,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "wouter";
@@ -166,6 +167,7 @@ const navCategories: NavCategory[] = [
     title: "Operations",
     icon: Settings,
     items: [
+      { href: "/admin/owner-playbook", label: "Owner's Playbook", description: "Launch plan, daily ops, growth & legal guide", icon: BookOpen, testId: "link-admin-owner-playbook" },
       { href: "/admin/launch-control", label: "Launch Control", description: "Pre-launch checklist & maintenance mode", icon: Rocket, testId: "link-admin-launch-control" },
       { href: "/admin/assistant", label: "AI Assistant", description: "AI-powered ops briefings & tasks", icon: Bot, testId: "link-admin-assistant" },
       { href: "/admin/guardian", label: "App Guardian", description: "Health monitoring, auto-heal & alerts", icon: Shield, testId: "link-admin-guardian" },

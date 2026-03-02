@@ -641,20 +641,100 @@
       "savedAt": "2026-03-02T00:01:41.705Z"
     },
     {
-      "id": "precomp-NCAAB-401820779-total-b8e365e288",
-      "gameId": "401820779",
-      "sport": "NCAAB",
-      "game": "Clemson Tigers @ North Carolina Tar Heels",
-      "homeTeam": "North Carolina Tar Heels",
-      "awayTeam": "Clemson Tigers",
-      "pick": "Over 141.5",
+      "id": "precomp-NBA-401810735-total-d7b2721a90",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Over 216",
       "betType": "total",
       "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T22:03:04.337Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-team_total-a31df0bc61",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Boston Celtics Over 109",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T22:03:04.337Z"
+    },
+    {
+      "id": "precomp-NBA-401810737-total-3e60cdc829",
+      "gameId": "401810737",
+      "sport": "NBA",
+      "game": "LA Clippers @ Golden State Warriors",
+      "homeTeam": "Golden State Warriors",
+      "awayTeam": "LA Clippers",
+      "pick": "Over 215.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-03T03:00Z",
+      "savedAt": "2026-03-02T22:03:04.337Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808278-spread-f7bda411f0",
+      "gameId": "401808278",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ South Carolina Gamecocks",
+      "homeTeam": "South Carolina Gamecocks",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "South Carolina Gamecocks +10",
+      "betType": "spread",
+      "odds": -120,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 28.33,
+      "gameTime": "2026-03-03T23:00Z",
+      "savedAt": "2026-03-02T22:03:04.991Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820778-total-63f96635a0",
+      "gameId": "401820778",
+      "sport": "NCAAB",
+      "game": "Duke Blue Devils @ NC State Wolfpack",
+      "homeTeam": "NC State Wolfpack",
+      "awayTeam": "Duke Blue Devils",
+      "pick": "Under 151",
+      "betType": "total",
+      "odds": -108,
       "grade": "A+",
       "confidence": 69,
-      "ev": 31.73,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-02T21:20:43.607Z"
+      "ev": 32.89,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-02T22:03:04.991Z"
+    },
+    {
+      "id": "precomp-NHL-401803316-total-fcd9bcbb4f",
+      "gameId": "401803316",
+      "sport": "NHL",
+      "game": "Dallas Stars @ Calgary Flames",
+      "homeTeam": "Calgary Flames",
+      "awayTeam": "Dallas Stars",
+      "pick": "Over 5.5",
+      "betType": "total",
+      "odds": -118,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 12.69,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-02T22:04:04.277Z"
     }
   ],
   "settled": [
@@ -80273,16 +80353,36 @@
       "homeScore": 91,
       "awayScore": 77,
       "settledAt": "2026-03-02T21:18:49.016Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-total-b8e365e288",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "Over 141.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 69,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T21:20:43.607Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-02T21:26:19.119Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3874,
-      "won": 1944,
+      "total": 3875,
+      "won": 1945,
       "lost": 1890,
       "push": 40,
       "rate": 50.2,
-      "pending": 41
+      "pending": 46
     },
     "bySport": {
       "NHL": {
@@ -80291,8 +80391,8 @@
         "rate": 42.9
       },
       "NCAAB": {
-        "total": 1417,
-        "won": 778,
+        "total": 1418,
+        "won": 779,
         "rate": 54.9
       },
       "NBA": {
@@ -80353,9 +80453,9 @@
         "rate": 57.7
       },
       "A+": {
-        "total": 806,
-        "won": 483,
-        "rate": 59.9
+        "total": 807,
+        "won": 484,
+        "rate": 60
       }
     },
     "byMarket": {
@@ -80370,8 +80470,8 @@
         "rate": 39.8
       },
       "Total": {
-        "total": 1537,
-        "won": 857,
+        "total": 1538,
+        "won": 858,
         "rate": 55.8
       },
       "Moneyline": {
@@ -80386,7 +80486,7 @@
       "push": 0,
       "rate": 42
     },
-    "lastUpdated": "2026-03-02T21:23:56.759Z"
+    "lastUpdated": "2026-03-02T22:04:06.960Z"
   },
   "version": 1
 }
