@@ -171,7 +171,7 @@ const FEATURES: Feature[] = [
     category: "edge",
     path: "/player-props",
     pathLabel: "Props (Star icon in nav)",
-    why: "Sportsbooks often set prop lines less precisely than game lines because there are too many to track closely. Our engine combines ESPN live stats, BallDontLie historical data, and full injury reports to find props where the posted line is off from what the data projects.",
+    why: "Sportsbooks often set prop lines less precisely than game lines because there are too many to track closely. Our engine combines live player stats, historical performance data, and full injury reports to find props where the posted line is off from what the data projects.",
     when: "Check props 1–2 hours before tipoff. Reload just before game time to catch any final lineup or injury changes that shift projections.",
     where: "Navigation bar → Star icon (Props). Select sport (NBA, NHL, NCAAB) at the top.",
     how: [

@@ -630,8 +630,8 @@ export function PrecomputedPicks() {
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="max-w-xs">
                   <p className="text-xs">
-                    Predictions are automatically refreshed every 5 minutes using live ESPN data through the Quantum Fusion engine.
-                    Each pick is scored across 46 factors including sharp money flow, scheme analysis, and line movement.
+                    Predictions are automatically refreshed every 5 minutes.
+                    Each pick is scored across 46 factors including sharp money flow, matchup analysis, and line movement.
                     Picks are protected with staggered release timing and capacity limits to preserve line value.
                   </p>
                 </TooltipContent>

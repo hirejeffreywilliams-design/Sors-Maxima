@@ -639,6 +639,22 @@
       "ev": 20.27,
       "gameTime": "2026-03-02T00:01:41.705Z",
       "savedAt": "2026-03-02T00:01:41.705Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-03174dc817",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings -1",
+      "betType": "spread",
+      "odds": 195,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 88.8,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:11:06.073Z"
     }
   ],
   "settled": [
@@ -78217,16 +78233,36 @@
       "homeScore": 108,
       "awayScore": 117,
       "settledAt": "2026-03-02T19:00:12.822Z"
+    },
+    {
+      "id": "precomp-NBA-401810735-spread-e8bbd1a8ea",
+      "gameId": "401810735",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Milwaukee Bucks +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-03T00:30Z",
+      "savedAt": "2026-03-02T19:08:50.619Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-02T19:10:03.249Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3772,
-      "won": 1895,
+      "total": 3773,
+      "won": 1896,
       "lost": 1840,
       "push": 37,
-      "rate": 50.2,
-      "pending": 40
+      "rate": 50.3,
+      "pending": 41
     },
     "bySport": {
       "NHL": {
@@ -78240,9 +78276,9 @@
         "rate": 55.1
       },
       "NBA": {
-        "total": 1392,
-        "won": 720,
-        "rate": 51.7
+        "total": 1393,
+        "won": 721,
+        "rate": 51.8
       },
       "MLB": {
         "total": 320,
@@ -78297,9 +78333,9 @@
         "rate": 57.5
       },
       "A+": {
-        "total": 725,
-        "won": 443,
-        "rate": 61.1
+        "total": 726,
+        "won": 444,
+        "rate": 61.2
       }
     },
     "byMarket": {
@@ -78309,9 +78345,9 @@
         "rate": 59.2
       },
       "Spread": {
-        "total": 1435,
-        "won": 576,
-        "rate": 40.1
+        "total": 1436,
+        "won": 577,
+        "rate": 40.2
       },
       "Total": {
         "total": 1512,
@@ -78325,12 +78361,12 @@
       }
     },
     "recentForm": {
-      "won": 37,
-      "lost": 13,
+      "won": 38,
+      "lost": 12,
       "push": 0,
-      "rate": 74
+      "rate": 76
     },
-    "lastUpdated": "2026-03-02T19:00:12.823Z"
+    "lastUpdated": "2026-03-02T19:12:37.843Z"
   },
   "version": 1
 }

@@ -266,14 +266,6 @@ interface MatchupTicketsResponse {
   engineSources: string[];
 }
 
-const ENGINE_LABELS: Record<string, { label: string; icon: typeof Brain }> = {
-  quantumFusion: { label: "Multi-Factor Engine", icon: Brain },
-  monteCarlo: { label: "Monte Carlo", icon: Target },
-  situational: { label: "Situational", icon: Clock },
-  injury: { label: "Injury", icon: Heart },
-  vegas: { label: "Vegas", icon: DollarSign },
-  market: { label: "Market", icon: TrendingUp },
-};
 
 function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const allInSlip = ticket.legs.every(l => legs.some(sl => sl.id === `ticket-${l.pickId}`));
@@ -372,25 +364,6 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
               {ticket.reasoning}
             </p>
           </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {Object.entries(ticket.engineConvergence).map(([key, active]) => {
-            const eng = ENGINE_LABELS[key];
-            if (!eng) return null;
-            const label = eng.label === "Quantum Fusion" ? "Multi-Factor Engine" : eng.label;
-            return (
-              <span
-                key={key}
-                className={`inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border ${
-                  active ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted/50 border-muted text-muted-foreground/40"
-                }`}
-              >
-                {active ? <CheckCircle2 className="w-2.5 h-2.5" /> : <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />}
-                {label}
-              </span>
-            );
-          })}
         </div>
 
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -707,19 +680,14 @@ function AlertCard({ alert, feed, legs, addLeg }: { alert: EdgeAlert; feed: Inte
 }
 
 function DataSourceBar({ sources }: { sources: DataSourceHealth[] }) {
+  const allLive = sources.length > 0 && sources.every(s => s.status === "live");
+  const anyDown = sources.some(s => s.status === "down");
   return (
-    <div className="flex items-center gap-3 flex-wrap" data-testid="bar-data-sources">
-      {sources.map(src => (
-        <div key={src.name} className="flex items-center gap-1.5 text-xs">
-          <div className={`w-1.5 h-1.5 rounded-full ${
-            src.status === "live" ? "bg-green-500" : src.status === "stale" ? "bg-yellow-500" : "bg-red-500"
-          }`} />
-          <span className="text-muted-foreground">{src.name}</span>
-          {src.recordCount > 0 && (
-            <span className="text-[10px] text-muted-foreground/60">({src.recordCount})</span>
-          )}
-        </div>
-      ))}
+    <div className="flex items-center gap-1.5" data-testid="bar-data-sources">
+      <div className={`w-1.5 h-1.5 rounded-full ${anyDown ? "bg-red-500" : allLive ? "bg-green-500" : "bg-yellow-500"}`} />
+      <span className="text-[10px] text-muted-foreground">
+        {anyDown ? "Partial Data" : allLive ? "All Systems Live" : "Updating"}
+      </span>
     </div>
   );
 }
@@ -762,69 +730,20 @@ function ModelHealthChip() {
     refetchInterval: 300000 
   });
 
-  if (isLoading || !data) return <Skeleton className="h-6 w-48 rounded-full" />;
+  if (isLoading || !data) return <Skeleton className="h-6 w-40 rounded-full" />;
 
-  const statusColors = {
-    calibrated: "bg-green-500",
-    building: "bg-yellow-500",
-    recalibrating: "bg-red-500"
-  };
-
-  const dotColor = (statusColors as any)[data.status] || "bg-gray-500";
+  const isReady = data.status === "calibrated";
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <div 
-          className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/50 border border-muted-foreground/20 cursor-pointer hover:bg-muted transition-colors"
-          data-testid="chip-model-health"
-        >
-          <div className={`h-2 w-2 rounded-full ${dotColor} animate-pulse`} />
-          <span className="text-xs font-medium">
-            Model: {data.status} | {data.settledCount} picks | {data.winRate}%
-          </span>
-        </div>
-      </PopoverTrigger>
-      <PopoverContent className="w-80 p-4">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-sm">Model Health Diagnostics</h4>
-            <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
-              {data.status}
-            </Badge>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground uppercase">Settled Picks</p>
-              <p className="text-sm font-bold">{data.settledCount}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground uppercase">Win Rate</p>
-              <p className="text-sm font-bold text-green-400">{data.winRate}%</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground uppercase">Live Tracking</p>
-              <p className="text-sm font-bold">{data.liveCount}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-muted-foreground uppercase">Backtested</p>
-              <p className="text-sm font-bold">{data.backtestCount}</p>
-            </div>
-          </div>
-
-          <div className="pt-2 border-t border-muted">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Info className="h-3 w-3" />
-              <span>46-factor data-backed model</span>
-            </div>
-            <p className="text-[10px] text-muted-foreground mt-1">
-              Last updated: {new Date(data.lastUpdated).toLocaleTimeString()}
-            </p>
-          </div>
-        </div>
-      </PopoverContent>
-    </Popover>
+    <div
+      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-muted/50 border border-muted-foreground/20"
+      data-testid="chip-model-health"
+    >
+      <div className={`h-2 w-2 rounded-full ${isReady ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`} />
+      <span className="text-xs font-medium text-muted-foreground">
+        46-Factor Model {isReady ? "Active" : "Warming Up"}
+      </span>
+    </div>
   );
 }
 
@@ -1016,28 +935,9 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
               <div className="flex items-start gap-1.5">
                 <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
                 <p className="text-[11px] text-foreground/80 leading-relaxed">
-                  Model Agreement: High synergy between 46-factor analysis and Monte Carlo simulations.
+                  {ticket.reasoning}
                 </p>
               </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {Object.entries(ticket.engineConvergence).map(([key, active]) => {
-                const eng = ENGINE_LABELS[key];
-                if (!eng) return null;
-                const label = eng.label === "Quantum Fusion" ? "Multi-Factor Engine" : eng.label;
-                return (
-                  <span
-                    key={key}
-                    className={`inline-flex items-center gap-0.5 text-[9px] px-1.5 py-0.5 rounded-full border ${
-                      active ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted/50 border-muted text-muted-foreground/40"
-                    }`}
-                  >
-                    {active ? <CheckCircle2 className="w-2.5 h-2.5" /> : <div className="w-2.5 h-2.5 rounded-full bg-muted-foreground/20" />}
-                    {label}
-                  </span>
-                );
-              })}
             </div>
 
             <Button

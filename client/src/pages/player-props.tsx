@@ -320,7 +320,7 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
       {prop.engineSources && prop.engineSources.length > 2 && (
         <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
           <Activity className="w-2.5 h-2.5" />
-          <span>{prop.engineSources.length} engines: {prop.engineSources.join(" · ")}</span>
+          <span>46-Factor Model · {prop.engineSources.length} signals confirmed</span>
         </div>
       )}
 

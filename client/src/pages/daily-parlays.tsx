@@ -1093,7 +1093,7 @@ export default function DailyParlays() {
                   <div className="text-center space-y-3">
                     <Atom className="h-10 w-10 mx-auto text-muted-foreground/40" />
                     <p className="text-sm text-muted-foreground">No {activeSport} predictions available yet.</p>
-                    <p className="text-xs text-muted-foreground">The engine processes picks every 5 minutes from live ESPN data.</p>
+                    <p className="text-xs text-muted-foreground">Picks are refreshed every 5 minutes as game data updates.</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1186,7 +1186,7 @@ export default function DailyParlays() {
         )}
 
         <div className="text-center text-[11px] text-muted-foreground pt-2" data-testid="text-data-source">
-          Powered by 46-Factor Model Analysis · {snapshot?.dataSource || "ESPN"} data
+          Powered by 46-Factor Model Analysis
           {lastUpdate && ` · Last analysis ${getTimeAgo(lastUpdate)}`}
           {engineStatus?.running && " · Auto-refreshing every 5 min"}
         </div>

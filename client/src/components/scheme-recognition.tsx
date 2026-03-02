@@ -285,9 +285,8 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
         <div className="flex items-start gap-2 mt-2 p-2.5 rounded-md bg-muted/50 border text-xs text-muted-foreground">
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
-            Scheme names derived from live ESPN records{activeSport === "NBA" ? " and BallDontLie advanced stats" : ""}. 
-            Coach ATS stats are <strong>model-estimated</strong> from win% and recent form — not real ATS records.
-            Odds pulled from cached data to preserve API quota.
+            Scheme classifications are derived from live game records and advanced team stats.
+            Coach ATS stats are <strong>model-estimated</strong> from win% and recent form — not verified ATS records.
           </span>
         </div>
       </CardHeader>
