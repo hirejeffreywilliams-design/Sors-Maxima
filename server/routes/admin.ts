@@ -4148,4 +4148,47 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/bdl-stats", requireAdmin, async (_req, res) => {
+    try {
+      const {
+        isBDLAvailable, isBDLNFLAvailable, isBDLMLBAvailable,
+        getEnrichedTeamData, getNFLTeamStatsBDL, getMLBTeamStatsBDL,
+      } = await import("../balldontlie-provider");
+      const { getInsightCacheSize } = await import("../pick-insight-engine");
+
+      const nbaAvail = isBDLAvailable();
+      const nflAvail = isBDLNFLAvailable();
+      const mlbAvail = isBDLMLBAvailable();
+
+      const [nbaTeams, nflTeams, mlbTeams] = await Promise.all([
+        nbaAvail ? getEnrichedTeamData("all").catch(() => []) : Promise.resolve([]),
+        nflAvail ? getNFLTeamStatsBDL().catch(() => []) : Promise.resolve([]),
+        mlbAvail ? getMLBTeamStatsBDL().catch(() => []) : Promise.resolve([]),
+      ]);
+
+      const topNFL = nflTeams.slice(0, 5).map((t: any) => ({
+        name: t.teamName, abbreviation: t.abbreviation,
+        ppg: t.pointsPerGame, papg: t.pointsAllowedPerGame,
+        passYPG: t.passingYardsPerGame, rushYPG: t.rushingYardsPerGame,
+        turnoverDiff: t.turnoverDifferential,
+      }));
+
+      const topMLB = mlbTeams.slice(0, 5).map((t: any) => ({
+        name: t.teamName, abbreviation: t.abbreviation,
+        battingAvg: t.battingAvg, ops: t.ops, era: t.era, whip: t.whip,
+      }));
+
+      res.json({
+        availability: { nba: nbaAvail, nfl: nflAvail, mlb: mlbAvail },
+        counts: { nba: (nbaTeams as any[]).length, nfl: nflTeams.length, mlb: mlbTeams.length },
+        topNFLTeams: topNFL,
+        topMLBTeams: topMLB,
+        aiInsightsCached: getInsightCacheSize(),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "BDL stats fetch failed", detail: err.message });
+    }
+  });
+
 }

@@ -66,8 +66,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **International Sports Engine**: Fetches fixtures and odds from API-Football for 16 major soccer leagues.
 - **Model Health Monitoring**: A `ModelHealthChip` component displays status and performance metrics.
 - **Transparent Branding**: Uses "46-Factor Model Analysis" and "Multi-Factor Engine" for user-facing display.
-- **AI Pick Explainer Engine**: Backend/admin-only generation of pick explanations for QA.
-- **AI Routes — Backend/Admin Only**: All AI routes are restricted to admin access via `requireAdmin` middleware. OpenAI is used exclusively for system intelligence, admin assistant, and app guardian.
+- **AI Pick Edge Insight Engine**: `server/pick-insight-engine.ts` — async, non-blocking enrichment layer that runs after each prediction cycle. Generates a 1-2 sentence sharp edge insight for top picks (grade A+/A/A-/B+, confidence ≥62%) using GPT-4o-mini. Max 10 per cycle, 300ms throttle. Insights cached by pick ID, injected into picks when served. Displayed on pick cards with a Sparkles icon. Admin dashboard Systems tab shows insight cache count.
+- **AI Routes — Backend/Admin Only**: All AI routes are restricted to admin access via `requireAdmin` middleware. OpenAI is used for system intelligence, admin assistant, app guardian, and the async pick edge insight engine.
 - **Smart Leg Selector UX**: MatchupTicketCard includes per-leg checkboxes, quick actions, live combined odds, correlated leg warnings, and an "Add N Selected Legs" button.
 - **Bet Slip Auto-Open**: Desktop sidebar and mobile sheet auto-open when the first leg is added.
 - **Mobile Slip Bottom Nav Button**: Dedicated "Slip" button in the mobile bottom navigation with a Ticket icon and leg count badge.

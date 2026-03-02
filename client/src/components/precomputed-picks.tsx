@@ -11,7 +11,7 @@ import {
   Zap, Target, BarChart3, Clock, Shield, Flame,
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Star,
   Check, Info, Activity, Lock, Crown, Users, AlertTriangle,
-  Timer
+  Timer, Sparkles
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
@@ -76,6 +76,7 @@ interface PrecomputedPick {
     homeStartersOut: number;
     awayStartersOut: number;
   };
+  aiInsight?: string;
 }
 
 interface PredictionSnapshot {
@@ -194,7 +195,7 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
       outcome: pick.pick || `${pick.homeTeam} vs ${pick.awayTeam}`,
       decimalOdds,
       americanOdds: pick.odds,
-      addedFrom: "Quantum Prediction Engine",
+      addedFrom: "46-Factor Model Analysis",
       addedAt: new Date().toISOString(),
       sport: pick.sport as any,
       confidence: pick.confidence,
@@ -378,6 +379,16 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {pick.aiInsight && (
+          <div
+            className="rounded-lg border border-primary/20 bg-gradient-to-r from-primary/5 to-purple-500/5 px-3 py-2 flex items-start gap-2"
+            data-testid={`ai-insight-${pick.id}`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+            <p className="text-[11px] text-muted-foreground leading-relaxed">{pick.aiInsight}</p>
           </div>
         )}
       </div>

@@ -59,6 +59,7 @@ import {
   Play,
   X,
   Rocket,
+  Sparkles,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "wouter";
@@ -269,6 +270,12 @@ export default function AdminDashboard() {
   const { data: intelHealth, isLoading: intelLoading } = useQuery<any>({
     queryKey: ['/api/admin/intelligence-health'],
     refetchInterval: 15000,
+  });
+
+  const { data: bdlStats, isLoading: bdlLoading } = useQuery<any>({
+    queryKey: ['/api/admin/bdl-stats'],
+    refetchInterval: 120_000,
+    staleTime: 60_000,
   });
 
 
@@ -1342,6 +1349,80 @@ export default function AdminDashboard() {
               ) : (
                 <div className="text-center py-12 text-muted-foreground">No systems data available</div>
               )}
+
+              {/* BDL & AI Insight Stats Panel */}
+              <Card data-testid="card-bdl-ai-stats">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Database className="w-4 h-4 text-blue-400" />
+                    BallDontLie Stats Integration
+                    <Badge variant="outline" className="text-[10px] ml-auto">
+                      {bdlStats?.counts?.nba || 0} NBA · {bdlStats?.counts?.nfl || 0} NFL · {bdlStats?.counts?.mlb || 0} MLB
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {bdlLoading ? (
+                    <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
+                  ) : bdlStats ? (
+                    <>
+                      <div className="grid grid-cols-3 gap-3 text-center">
+                        {["nba", "nfl", "mlb"].map(sport => (
+                          <div key={sport} className={`rounded-lg p-2 border ${bdlStats.availability?.[sport] ? "bg-emerald-500/10 border-emerald-500/20" : "bg-muted/30 border-border/40"}`} data-testid={`bdl-status-${sport}`}>
+                            <p className="text-xs font-bold uppercase text-muted-foreground">{sport}</p>
+                            <p className={`text-sm font-semibold mt-0.5 ${bdlStats.availability?.[sport] ? "text-emerald-400" : "text-muted-foreground"}`}>
+                              {bdlStats.availability?.[sport] ? `${bdlStats.counts?.[sport]} teams` : "Offline"}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      {bdlStats.topNFLTeams?.length > 0 && (
+                        <div>
+                          <p className="text-[11px] text-muted-foreground mb-2 font-medium">Top NFL Teams (by PPG)</p>
+                          <div className="space-y-1">
+                            {bdlStats.topNFLTeams.slice(0, 5).map((t: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                                <span className="font-mono text-muted-foreground w-8">{t.abbreviation}</span>
+                                <span className="flex-1 truncate">{t.name}</span>
+                                <span className="text-emerald-400 font-mono">{t.ppg?.toFixed(1)} PPG</span>
+                                <span className="text-red-400 font-mono">{t.papg?.toFixed(1)} PAPG</span>
+                                <span className={`font-mono ${t.turnoverDiff >= 0 ? "text-emerald-400" : "text-red-400"}`}>{t.turnoverDiff >= 0 ? "+" : ""}{t.turnoverDiff} TO</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {bdlStats.topMLBTeams?.length > 0 && (
+                        <div>
+                          <p className="text-[11px] text-muted-foreground mb-2 font-medium">Top MLB Teams (by ERA)</p>
+                          <div className="space-y-1">
+                            {bdlStats.topMLBTeams.slice(0, 5).map((t: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between gap-2 text-xs">
+                                <span className="font-mono text-muted-foreground w-8">{t.abbreviation}</span>
+                                <span className="flex-1 truncate">{t.name}</span>
+                                <span className="text-blue-400 font-mono">{t.battingAvg?.toFixed(3)} AVG</span>
+                                <span className="text-amber-400 font-mono">{t.era?.toFixed(2)} ERA</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-1 border-t border-border/40">
+                        <Sparkles className="w-3.5 h-3.5 text-primary" />
+                        <p className="text-xs text-muted-foreground">
+                          <span className="font-semibold text-primary">{bdlStats.aiInsightsCached || 0}</span> AI edge insights cached
+                          {bdlStats.aiInsightsCached > 0 ? " — generating for top picks" : " — insights generated after next prediction cycle"}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">BDL stats not available — check API key configuration</p>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="ops" className="space-y-4">

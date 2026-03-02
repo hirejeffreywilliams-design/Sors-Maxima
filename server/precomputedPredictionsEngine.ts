@@ -23,6 +23,7 @@ import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-pro
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
+import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } from "./pick-insight-engine";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
 import type { Sport } from "@shared/schema";
@@ -121,6 +122,7 @@ export interface PrecomputedPick {
     direction: string;
     detectedAt: string;
   };
+  aiInsight?: string;
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -1518,10 +1520,21 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     totalPickPool: finalPicks.length,
   };
 
+  // Inject any already-generated AI insights into the new picks batch
+  injectCachedInsights(finalPicks);
+
   predictionCache.set(sport, { snapshot, timestamp: Date.now(), sport });
 
   // Persist to disk in the background — users get instant picks on next restart
   setImmediate(persistCacheToDisk);
+
+  // Async AI edge insight generation — runs after picks are stored, never blocks delivery
+  setImmediate(async () => {
+    await enrichPicksWithInsights(finalPicks);
+    // After enrichment, evict insights for picks no longer in the active set
+    const allActive = [...predictionCache.values()].flatMap(c => c.snapshot.picks);
+    evictStaleInsights(allActive);
+  });
 
   try {
     savePrecomputedPicks(finalPicks.map(p => ({
