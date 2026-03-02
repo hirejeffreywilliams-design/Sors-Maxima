@@ -2203,7 +2203,7 @@ function soccerPickToPrecomputed(sp: SoccerPick): PrecomputedPick {
 export function buildLifeChangerTicket(): LifeChangerTicket | null {
   const now = Date.now();
   const allPicks: PrecomputedPick[] = [];
-  const sports: Sport[] = ["NBA", "NHL", "NCAAB", "NFL", "MLB"] as Sport[];
+  const sports: Sport[] = ["NBA", "NHL", "NCAAB", "NFL", "MLB", "NCAAF"] as Sport[];
 
   for (const sport of sports) {
     const cache = predictionCache.get(sport);
