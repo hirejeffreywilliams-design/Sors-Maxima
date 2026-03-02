@@ -9,7 +9,7 @@ import {
   RefreshCw, Star, AlertTriangle, CheckCircle, Sparkles,
   Trophy, Flame, BarChart3, Puzzle, Atom
 } from "lucide-react";
-import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
+import { QuantumBadge } from "./quantum-analysis-badge";
 
 interface StrategyLeg {
   sport: string;
@@ -291,8 +291,6 @@ export function ParlayStrategyBuilder() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <QuantumAnalysisIndicator compact />
-        
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs text-muted-foreground">Strategy Type</label>

@@ -1,5 +1,5 @@
 import { Award, TrendingUp, TrendingDown, Percent, Shield, AlertTriangle, Flame, ThumbsUp, ThumbsDown, Minus, AlertCircle, Atom } from "lucide-react";
-import { QuantumBadge } from "./quantum-analysis-badge";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -66,7 +66,6 @@ export function BetGradeCard({ grade, evIndicator, riskAdvisory }: BetGradeCardP
           <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
             <Award className="w-5 h-5" />
             Power Score
-            <QuantumBadge />
           </CardTitle>
           {evIndicator && (
             <Badge 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Brain, Sparkles, TrendingUp, Target, Zap, RefreshCw, DollarSign, AlertTriangle, CheckCircle, Activity, BarChart3, Atom } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
-import { QuantumAnalysisIndicator, QuantumBadge } from "./quantum-analysis-badge";
+import { QuantumBadge } from "./quantum-analysis-badge";
 
 interface VegasFactor {
   name: string;
@@ -145,8 +145,6 @@ export function AIPredictions() {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <QuantumAnalysisIndicator />
-        
         {insights && (
           <div className="grid grid-cols-3 gap-2 p-3 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg border border-purple-500/20">
             <div className="text-center">

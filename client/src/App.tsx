@@ -198,6 +198,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
               <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
               <Route path="/admin/correlation-matrix">{() => <AdminGuard component={CorrelationMatrix} authState={authState} />}</Route>
+              <Route path="/admin/platform-intelligence">{() => <AdminGuard component={PlatformIntelligencePage} authState={authState} />}</Route>
               <Route component={NotFound} />
             </Switch>
           </Suspense>
@@ -272,7 +273,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/round-robin">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/watchlist" component={WatchlistPage} />
-        <Route path="/platform-intelligence" component={PlatformIntelligencePage} />
+        <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
         <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
         <Route path="/verify-email" component={VerifyEmail} />
         <Route component={NotFound} />
@@ -315,7 +316,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/rosters":              { label: "Rosters & Injuries",   parent: "/tools" },
   "/sport-factor-analysis":{ label: "Factor Analysis",      parent: "/tools" },
   "/pipeline":             { label: "Intelligence Pipeline",parent: "/tools" },
-  "/platform-intelligence":{ label: "Platform Intelligence",parent: "/tools" },
+  "/admin/platform-intelligence":{ label: "Platform Intelligence",parent: "/admin" },
   "/correlation-matrix":   { label: "Correlation Matrix",  parent: "/tools" },
   "/training":             { label: "Training Center",      parent: "/tools" },
   "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },

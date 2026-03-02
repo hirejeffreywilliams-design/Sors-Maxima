@@ -641,52 +641,36 @@
       "savedAt": "2026-03-02T00:01:41.705Z"
     },
     {
-      "id": "precomp-vegas-NHL-dd6715977729",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Penguins @ Bruins",
-      "homeTeam": "Bruins",
-      "awayTeam": "Penguins",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T16:37:32.560Z",
-      "savedAt": "2026-03-02T16:37:32.560Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-fb48929a2bb8",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Senators @ Oilers",
-      "homeTeam": "Oilers",
-      "awayTeam": "Senators",
-      "pick": "",
+      "id": "precomp-NCAAB-401820821-total-f419c34ad6",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Under 149.5",
       "betType": "total",
       "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T16:37:32.560Z",
-      "savedAt": "2026-03-02T16:37:32.560Z"
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T17:05:17.800Z"
     },
     {
-      "id": "precomp-vegas-NHL-4e78e801fd6f",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Maple Leafs @ Devils",
-      "homeTeam": "Devils",
-      "awayTeam": "Maple Leafs",
-      "pick": "",
+      "id": "precomp-NBA-401810736-spread-3748e96a92",
+      "gameId": "401810736",
+      "sport": "NBA",
+      "game": "Denver Nuggets @ Utah Jazz",
+      "homeTeam": "Utah Jazz",
+      "awayTeam": "Denver Nuggets",
+      "pick": "Utah Jazz +12",
       "betType": "spread",
       "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T16:37:32.560Z",
-      "savedAt": "2026-03-02T16:37:32.560Z"
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T17:07:03.112Z"
     }
   ],
   "settled": [
@@ -77525,32 +77509,172 @@
       "homeScore": 114,
       "awayScore": 89,
       "settledAt": "2026-03-02T16:47:49.627Z"
+    },
+    {
+      "id": "precomp-NBA-401810743-spread-3383dd113b",
+      "gameId": "401810743",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "Philadelphia 76ers +6.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 21.33,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:51:50.210Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-02T16:53:02.660Z"
+    },
+    {
+      "id": "precomp-NBA-401810743-team_total-0cfd43caaa",
+      "gameId": "401810743",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "Philadelphia 76ers Over 112.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:51:50.210Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-02T16:53:02.660Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-spread-fdce8d0662",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "New Jersey Devils -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T16:53:34.965Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:56:18.495Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-team_total-741ee1ebe2",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "Florida Panthers Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T16:53:34.965Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:56:18.495Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820821-total-298f507191",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Under 148.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T17:01:19.744Z",
+      "result": "won",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-02T17:03:27.667Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820821-total-265f84f9ba",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Under 149",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T17:02:17.079Z",
+      "result": "won",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-02T17:03:27.667Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820821-team_total-1c4679b70b",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Iowa State Cyclones Under 71",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T17:02:17.079Z",
+      "result": "won",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-02T17:03:27.667Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3735,
-      "won": 1865,
+      "total": 3742,
+      "won": 1872,
       "lost": 1833,
       "push": 37,
-      "rate": 49.9,
-      "pending": 43
+      "rate": 50,
+      "pending": 42
     },
     "bySport": {
       "NHL": {
-        "total": 720,
-        "won": 309,
-        "rate": 42.9
+        "total": 722,
+        "won": 311,
+        "rate": 43.1
       },
       "NCAAB": {
-        "total": 1321,
-        "won": 725,
-        "rate": 54.9
+        "total": 1324,
+        "won": 728,
+        "rate": 55
       },
       "NBA": {
-        "total": 1374,
-        "won": 705,
-        "rate": 51.3
+        "total": 1376,
+        "won": 707,
+        "rate": 51.4
       },
       "MLB": {
         "total": 320,
@@ -77595,35 +77719,35 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 191,
-        "won": 98,
-        "rate": 51.3
+        "total": 192,
+        "won": 99,
+        "rate": 51.6
       },
       "A": {
-        "total": 154,
-        "won": 86,
-        "rate": 55.8
+        "total": 157,
+        "won": 89,
+        "rate": 56.7
       },
       "A+": {
-        "total": 701,
-        "won": 422,
-        "rate": 60.2
+        "total": 704,
+        "won": 425,
+        "rate": 60.4
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 687,
-        "won": 403,
-        "rate": 58.7
+        "total": 690,
+        "won": 406,
+        "rate": 58.8
       },
       "Spread": {
-        "total": 1424,
-        "won": 566,
-        "rate": 39.7
+        "total": 1426,
+        "won": 568,
+        "rate": 39.8
       },
       "Total": {
-        "total": 1504,
-        "won": 836,
+        "total": 1506,
+        "won": 838,
         "rate": 55.6
       },
       "Moneyline": {
@@ -77633,12 +77757,12 @@
       }
     },
     "recentForm": {
-      "won": 26,
-      "lost": 23,
-      "push": 1,
-      "rate": 52
+      "won": 31,
+      "lost": 19,
+      "push": 0,
+      "rate": 62
     },
-    "lastUpdated": "2026-03-02T16:47:49.628Z"
+    "lastUpdated": "2026-03-02T17:07:10.900Z"
   },
   "version": 1
 }
