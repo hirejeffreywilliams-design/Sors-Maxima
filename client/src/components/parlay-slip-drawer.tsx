@@ -122,12 +122,13 @@ function gradeLabel(grade?: string): string {
 
 function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmericanOdds: number, stake: number): string {
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
-  const payout = (totalOdds * stake).toFixed(2);
+  const toWin = ((totalOdds - 1) * stake).toFixed(2);
+  const totalReturn = (totalOdds * stake).toFixed(2);
 
   const lines: string[] = [
-    "SORS MAXIMA PARLAY",
-    `${legs.length} Legs | ${formattedOdds} Odds | $${stake} -> $${payout}`,
-    "-".repeat(30),
+    "🎯 SORS MAXIMA PARLAY",
+    `${legs.length} Leg${legs.length !== 1 ? "s" : ""} | ${formattedOdds} | Stake $${stake} → Win $${toWin}`,
+    "-".repeat(36),
   ];
 
   legs.forEach((leg, i) => {
@@ -138,29 +139,33 @@ function formatSlipAsText(legs: ParlaySlipLeg[], totalOdds: number, totalAmerica
 
     lines.push("");
     lines.push(`${label} Leg ${i + 1}: ${leg.outcome}`);
-    lines.push(`  ${matchup}${dateStr ? ` | ${dateStr}` : ""}`);
+    lines.push(`  ${matchup}${dateStr ? ` (${dateStr})` : ""}`);
 
-    const meta: string[] = [`${odds}`];
+    const meta: string[] = [`Odds: ${odds}`];
     if (leg.grade) meta.push(`Grade: ${leg.grade}`);
-    if (leg.confidence) meta.push(`${Math.round(leg.confidence)}% conf`);
+    if (leg.confidence) meta.push(`${Math.round(leg.confidence)}% confidence`);
     if (leg.evPercent !== undefined && leg.evPercent > 0) meta.push(`+${leg.evPercent.toFixed(1)}% EV`);
-    lines.push(`   ${meta.join(" | ")}`);
+    if (leg.sport) meta.push(leg.sport);
+    lines.push(`  ${meta.join(" · ")}`);
 
     if (leg.monteCarloData) {
-      lines.push(`   Projected: ${Math.round(leg.monteCarloData.predictedAwayScore)}-${Math.round(leg.monteCarloData.predictedHomeScore)}`);
+      const mc = leg.monteCarloData;
+      lines.push(`  MC Projected: ${Math.round(mc.predictedAwayScore)}-${Math.round(mc.predictedHomeScore)} | Win Prob: ${(mc.homeWinProb * 100).toFixed(0)}%`);
     }
 
     if (leg.reasoning) {
-      lines.push(`   ${leg.reasoning}`);
+      const shortReason = leg.reasoning.length > 120 ? leg.reasoning.slice(0, 117) + "..." : leg.reasoning;
+      lines.push(`  "${shortReason}"`);
     }
   });
 
   lines.push("");
-  lines.push("-".repeat(30));
-  lines.push(`Stake: $${stake.toFixed(2)} | Payout: $${payout}`);
-  lines.push(`Total Odds: ${formattedOdds} (${totalOdds.toFixed(2)}x)`);
+  lines.push("-".repeat(36));
+  lines.push(`Stake: $${stake.toFixed(2)} | To Win: $${toWin} | Total Return: $${totalReturn}`);
+  lines.push(`Combined Odds: ${formattedOdds} (${totalOdds.toFixed(3)}x decimal)`);
   lines.push("");
-  lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
+  lines.push("Powered by Sors Maxima · 46-Factor Model Analysis");
+  lines.push("sorsmaxima.com");
 
   return lines.join("\n");
 }
@@ -533,6 +538,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
   const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
+  const toWin = ((totalOdds - 1) * stake).toFixed(2);
   const payout = (totalOdds * stake).toFixed(2);
 
   const handleCopy = () => {
@@ -625,7 +631,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
         <div className="flex items-center justify-between text-[10px]">
           <span className="text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedOdds}</span></span>
           <span className="text-muted-foreground">Stake: <span className="font-bold text-foreground">${stake}</span></span>
-          <span className="text-green-600 dark:text-green-400 font-bold">Payout: ${payout}</span>
+          <span className="text-green-600 dark:text-green-400 font-bold">To Win: ${toWin}</span>
         </div>
       </div>
     </div>
@@ -633,7 +639,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
 }
 
 function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
-  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds } = useParlaySlip();
+  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin } = useParlaySlip();
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
   const [showPlacement, setShowPlacement] = useState(false);
@@ -670,7 +676,8 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     },
   });
 
-  const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
+  const toWinAmount = useMemo(() => (toWin * stake).toFixed(2), [toWin, stake]);
+  const totalReturn = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
   const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
 
   const handleCopySlip = () => {
@@ -762,7 +769,10 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span></span>
-            <span className="text-sm font-bold text-green-600 dark:text-green-400">Payout: ${potentialPayout}</span>
+            <div className="text-right">
+              <span className="text-sm font-bold text-green-600 dark:text-green-400">To Win: ${toWinAmount}</span>
+              <span className="text-[10px] text-muted-foreground ml-1.5">(Return ${totalReturn})</span>
+            </div>
           </div>
           <div className="mt-2">
             <MCSimulationPanel legs={legs} stake={stake} compact />
@@ -840,7 +850,9 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           <span className="text-xs font-bold">{formattedTotalOdds}</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="text-xs text-green-600 dark:text-green-400 font-bold">${potentialPayout}</span>
+          <div className="text-right">
+            <span className="text-xs text-green-600 dark:text-green-400 font-bold">Win ${toWinAmount}</span>
+          </div>
           <Button variant="ghost" size="sm" onClick={clearSlip} className="text-[10px] text-destructive hover:text-destructive h-6 px-1.5" data-testid="button-clear-slip">
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -884,12 +896,16 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Total Odds</span>
+          <span className="text-muted-foreground">Combined Odds</span>
           <span className="font-bold">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span>
         </div>
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Potential Payout</span>
-          <span className="font-bold text-green-600 dark:text-green-400">${potentialPayout}</span>
+          <span className="text-muted-foreground font-medium">To Win</span>
+          <span className="font-bold text-green-600 dark:text-green-400">${toWinAmount}</span>
+        </div>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">Total Return (incl. stake)</span>
+          <span className="font-medium text-muted-foreground">${totalReturn}</span>
         </div>
 
         <MCSimulationPanel legs={legs} stake={stake} />

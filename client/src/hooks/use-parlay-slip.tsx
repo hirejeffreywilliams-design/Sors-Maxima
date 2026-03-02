@@ -35,6 +35,7 @@ interface ParlaySlipContextValue {
   isInSlip: (legId: string) => boolean;
   totalOdds: number;
   totalAmericanOdds: number;
+  toWin: number;
   legCount: number;
 }
 
@@ -57,6 +58,15 @@ function saveToStorage(legs: ParlaySlipLeg[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(legs));
   } catch {}
+}
+
+function safeDecimalOdds(leg: ParlaySlipLeg): number {
+  if (leg.decimalOdds && leg.decimalOdds > 1) return leg.decimalOdds;
+  if (leg.americanOdds !== undefined && leg.americanOdds !== 0) {
+    const am = leg.americanOdds;
+    return am > 0 ? am / 100 + 1 : 100 / Math.abs(am) + 1;
+  }
+  return 1.909;
 }
 
 export function ParlaySlipProvider({ children }: { children: ReactNode }) {
@@ -88,11 +98,15 @@ export function ParlaySlipProvider({ children }: { children: ReactNode }) {
     return legs.some(l => l.id === legId);
   }, [legs]);
 
-  const totalOdds = legs.reduce((acc, leg) => acc * leg.decimalOdds, 1);
+  const totalOdds = legs.reduce((acc, leg) => acc * safeDecimalOdds(leg), 1);
 
   const totalAmericanOdds = totalOdds >= 2
     ? Math.round((totalOdds - 1) * 100)
-    : Math.round(-100 / (totalOdds - 1));
+    : totalOdds > 1
+    ? Math.round(-100 / (totalOdds - 1))
+    : 0;
+
+  const toWin = totalOdds - 1;
 
   return (
     <ParlaySlipContext.Provider value={{
@@ -103,6 +117,7 @@ export function ParlaySlipProvider({ children }: { children: ReactNode }) {
       isInSlip,
       totalOdds,
       totalAmericanOdds,
+      toWin,
       legCount: legs.length,
     }}>
       {children}
