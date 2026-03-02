@@ -52,6 +52,9 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Unified Stacking Meta-Learner (USML)**: An ensemble meta-layer treating six weighted expert sources, dynamically reweighting each source per sport and bet type. Integrated into precomputed picks with settlement feedback.
 - **MC Stacked Learner**: A 3-layer Monte Carlo confidence adjustment applied after the USML ensemble blend.
 - **Admin Intelligence Health Dashboard**: A comprehensive "Intelligence" tab in the admin UI showing engine status and performance.
+- **Launch Control Center**: Admin page (`/admin/launch-control`) with pre-launch checklist, maintenance mode toggle, API budget monitor, and quick actions. `server/launch-control.ts` runs health checks for DB, predictions engine, Odds API budget, frontend build age, session store, BDL availability, and all env secrets. Routes: `GET /api/admin/launch-check`, `POST /api/admin/maintenance/toggle`, `POST /api/admin/actions/clear-prediction-cache`, `POST /api/admin/actions/force-engine-run`. Maintenance mode gates all non-admin API routes with 503 when enabled.
+- **BDL NFL Stats**: `getNFLTeamStatsBDL()` uses `/nfl/v1/team_season_stats` (batch of 10 teams) to fetch 32 teams with passing/rushing/scoring/turnover stats. Wired into scheme engine (Air Raid, Power Run Game etc.) and predictions engine (Scoring Differential, Turnover Edge, Passing Game Edge factors).
+- **BDL MLB Stats**: `getMLBTeamStatsBDL()` paginates `/mlb/v1/season_stats` and aggregates by team — batting avg, OPS, ERA, WHIP, K/9. Wired into predictions engine (ERA Edge factor) and MLB stats provider fallback chain.
 - **Auto-Settlement Engine**: Fetches completed game scores, matches against pending picks, and updates pick trackers.
 - **User Bet Tracking**: Allows authenticated users to save slip picks for automatic settlement and validated stats.
 - **Email Verification System**: 6-digit code verification via Resend.

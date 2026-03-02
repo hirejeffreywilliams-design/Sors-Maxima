@@ -4078,4 +4078,64 @@ Follow these rules:
     }
   });
 
+  // ── Launch Control ─────────────────────────────────────────────────────────
+  app.get("/api/admin/launch-check", requireAdmin, async (_req, res) => {
+    try {
+      const { runLaunchChecks, getApiUsageStats } = await import("../launch-control");
+      const [checks, usage] = await Promise.all([runLaunchChecks(), Promise.resolve(getApiUsageStats())]);
+      const summary = {
+        pass: checks.filter(c => c.status === "pass").length,
+        warn: checks.filter(c => c.status === "warn").length,
+        fail: checks.filter(c => c.status === "fail").length,
+        ready: checks.every(c => c.status !== "fail"),
+      };
+      res.json({ checks, summary, usage, timestamp: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Launch check failed", detail: err.message });
+    }
+  });
+
+  app.get("/api/admin/maintenance/status", requireAdmin, async (_req, res) => {
+    const { isMaintenanceMode, getMaintenanceMessage } = await import("../launch-control");
+    res.json({ active: isMaintenanceMode(), message: getMaintenanceMessage() });
+  });
+
+  app.post("/api/admin/maintenance/toggle", requireAdmin, async (req, res) => {
+    const { toggleMaintenanceMode } = await import("../launch-control");
+    const { message } = req.body || {};
+    const active = toggleMaintenanceMode(message);
+    console.log(`[Admin] Maintenance mode ${active ? "enabled" : "disabled"} by admin`);
+    res.json({ active, message: active ? "Maintenance mode enabled" : "Maintenance mode disabled" });
+  });
+
+  app.post("/api/admin/actions/clear-prediction-cache", requireAdmin, async (_req, res) => {
+    try {
+      const { clearAllPredictionCaches } = await import("../precomputedPredictionsEngine");
+      const count = clearAllPredictionCaches();
+      res.json({ success: true, message: `Cleared ${count} prediction cache entries` });
+    } catch (err: any) {
+      res.status(500).json({ error: "Cache clear failed", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/actions/force-engine-run", requireAdmin, async (_req, res) => {
+    try {
+      const { forcePredictionCycleNow } = await import("../precomputedPredictionsEngine");
+      forcePredictionCycleNow().catch((e: any) => console.error("[Admin] Force engine run error:", e.message));
+      res.json({ success: true, message: "Engine cycle triggered — picks will refresh in ~30 seconds" });
+    } catch (err: any) {
+      res.status(500).json({ error: "Force run failed", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/actions/flush-stale-picks", requireAdmin, async (_req, res) => {
+    try {
+      const { storage } = await import("../storage");
+      const result = await storage.cleanupExpiredPickTracking?.() ?? { removed: 0 };
+      res.json({ success: true, message: `Flushed stale picks`, ...result });
+    } catch (err: any) {
+      res.status(500).json({ error: "Flush failed", detail: err.message });
+    }
+  });
+
 }

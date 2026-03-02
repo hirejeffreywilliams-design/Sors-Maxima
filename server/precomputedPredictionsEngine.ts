@@ -2367,6 +2367,18 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   };
 }
 
+export function clearAllPredictionCaches(): number {
+  const count = predictionCache.size;
+  predictionCache.clear();
+  console.log(`[PrecomputedEngine] Admin cleared all ${count} prediction cache entries`);
+  return count;
+}
+
+export async function forcePredictionCycleNow(): Promise<void> {
+  console.log("[PrecomputedEngine] Admin triggered immediate prediction cycle");
+  await runPredictionCycle();
+}
+
 export function getEngineStatus() {
   const cacheStatus: Record<string, { hasPicks: boolean; pickCount: number; dataSource: string; age: string; generatedAt: string }> = {};
   const entries = Array.from(predictionCache.entries());

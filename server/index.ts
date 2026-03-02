@@ -27,6 +27,7 @@ import {
   csrfTokenMiddleware,
   csrfValidationMiddleware,
 } from "./securityMiddleware";
+import { isMaintenanceMode, getMaintenanceMessage } from "./launch-control";
 
 // ─── Crash Guards ─────────────────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
@@ -99,6 +100,20 @@ app.use("/api", csrfValidationMiddleware);
 app.use("/api", apiRateLimitMiddleware);
 app.use("/api", inputSanitizationMiddleware);
 app.use("/api", sessionFingerprintMiddleware);
+
+// ─── Maintenance Mode Gate ────────────────────────────────────────────────────
+app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+  if (!isMaintenanceMode()) return next();
+  const isAdminRoute = req.path.startsWith("/admin");
+  const isSafeRoute = req.path.startsWith("/auth") || req.path === "/health" || req.path === "/maintenance/status";
+  if (isAdminRoute || isSafeRoute) return next();
+  return res.status(503).json({
+    error: "Service Temporarily Unavailable",
+    maintenance: true,
+    message: getMaintenanceMessage(),
+    retryAfter: 300,
+  });
+});
 
 // ─── Request Logger ───────────────────────────────────────────────────────────
 export function log(message: string, source = "express") {
