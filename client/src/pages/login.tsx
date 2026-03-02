@@ -193,7 +193,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center space-y-4">
-            <img src={sorsMaximaLogo} alt="Sors Maxima" className="mx-auto w-16 h-16 rounded-2xl" />
+            <a href="/" title="Back to Home" className="block w-fit mx-auto cursor-pointer hover:opacity-80 transition-opacity">
+              <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-16 h-16 rounded-2xl" />
+            </a>
             <div>
               <CardTitle className="text-2xl flex items-center justify-center gap-2">
                 <KeyRound className="w-5 h-5" />
@@ -360,7 +362,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-4">
-          <img src={sorsMaximaLogo} alt="Sors Maxima" className="mx-auto w-16 h-16 rounded-2xl" />
+          <a href="/" title="Back to Home" className="block w-fit mx-auto cursor-pointer hover:opacity-80 transition-opacity">
+            <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-16 h-16 rounded-2xl" />
+          </a>
           <div>
             <CardTitle className="text-2xl">Sors Maxima</CardTitle>
             <CardDescription>

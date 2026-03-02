@@ -866,25 +866,25 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </div>
       </ScrollArea>
 
-      <div className="border-t bg-background px-3 py-2 space-y-2">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground whitespace-nowrap">Stake $</span>
+      <div className="border-t bg-background px-3 py-2 space-y-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">Stake $</span>
           <Input
             type="number"
             min={1}
             max={100000}
             value={stake}
             onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
-            className="h-7 w-20 text-xs font-medium"
+            className="h-6 w-16 text-[10px] font-medium"
             data-testid="input-stake"
           />
-          <div className="flex gap-1 flex-1">
+          <div className="flex gap-0.5 flex-1">
             {[10, 25, 50, 100].map((amt) => (
               <Button
                 key={amt}
                 variant={stake === amt ? "default" : "outline"}
                 size="sm"
-                className="h-7 px-1.5 text-[10px] flex-1"
+                className="h-6 px-1 text-[9px] flex-1 min-w-0"
                 onClick={() => setStake(amt)}
                 data-testid={`button-stake-${amt}`}
               >
@@ -895,7 +895,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </div>
 
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Combined Odds</span>
+          <span className="text-muted-foreground">Odds</span>
           <span className="font-bold">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span>
         </div>
         <div className="flex items-center justify-between text-sm">
@@ -903,11 +903,11 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           <span className="font-bold text-green-600 dark:text-green-400">${toWinAmount}</span>
         </div>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Total Return (incl. stake)</span>
+          <span className="text-muted-foreground">Return (incl. stake)</span>
           <span className="font-medium text-muted-foreground">${totalReturn}</span>
         </div>
 
-        <MCSimulationPanel legs={legs} stake={stake} />
+        <MCSimulationPanel legs={legs} stake={stake} compact />
 
         <Separator />
 
@@ -920,26 +920,25 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             <Share2 className="h-3 w-3" />
             Share
           </Button>
+          {isAuthenticated && (
+            <Button
+              variant={tracked ? "outline" : "secondary"}
+              size="sm"
+              className="flex-1 h-7 text-[10px] gap-1"
+              onClick={() => !tracked && trackMutation.mutate()}
+              disabled={trackMutation.isPending || tracked}
+              data-testid="button-track-bet"
+            >
+              {tracked ? (
+                <><CheckCircle className="h-3 w-3 text-green-500" /> Tracked</>
+              ) : trackMutation.isPending ? (
+                <><Activity className="h-3 w-3 animate-pulse" /> ...</>
+              ) : (
+                <><Target className="h-3 w-3" /> Track</>
+              )}
+            </Button>
+          )}
         </div>
-
-        {isAuthenticated && (
-          <Button
-            variant={tracked ? "outline" : "secondary"}
-            size="sm"
-            className="w-full h-7 text-[10px] gap-1"
-            onClick={() => !tracked && trackMutation.mutate()}
-            disabled={trackMutation.isPending || tracked}
-            data-testid="button-track-bet"
-          >
-            {tracked ? (
-              <><CheckCircle className="h-3 w-3 text-green-500" /> Tracked — Result Auto-Recorded</>
-            ) : trackMutation.isPending ? (
-              <><Activity className="h-3 w-3 animate-pulse" /> Saving...</>
-            ) : (
-              <><Target className="h-3 w-3" /> Track My Bet</>
-            )}
-          </Button>
-        )}
 
         <button
           className="w-full flex items-center justify-between p-1.5 rounded-md hover:bg-muted/50 transition-colors text-xs text-muted-foreground"
@@ -955,17 +954,6 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         {showPlacement && (
           <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
         )}
-
-        <div className="flex gap-2">
-          <Button className="flex-1 gap-1.5" size="sm" variant="outline" asChild data-testid="button-open-builder">
-            <Link href="/builder">
-              <ChevronRight className="h-3.5 w-3.5" />
-              Open in Builder
-            </Link>
-          </Button>
-        </div>
-
-        <AffiliateDisclosure compact className="text-center block w-full" />
       </div>
     </>
   );
@@ -1001,7 +989,7 @@ export function ParlaySlipDesktopSidebar() {
             ? "bg-primary text-primary-foreground hover:bg-primary/90 border-white/10 py-5"
             : "bg-muted/80 text-muted-foreground hover:bg-muted border-border backdrop-blur-sm"
         }`}
-        style={{ right: open ? "300px" : "0px" }}
+        style={{ right: open ? "320px" : "0px" }}
         onClick={() => setOpen(o => !o)}
         data-testid="button-toggle-bet-slip"
         aria-label="Toggle bet slip"
@@ -1021,7 +1009,7 @@ export function ParlaySlipDesktopSidebar() {
 
       {/* Sliding panel — overlays content, does NOT push it */}
       <aside
-        className="hidden lg:flex fixed right-0 top-[3.5rem] bottom-0 w-[300px] border-l bg-background flex-col z-40 shadow-2xl transition-transform duration-300 ease-out"
+        className="hidden lg:flex fixed right-0 top-[3.5rem] bottom-0 w-[320px] border-l bg-background flex-col z-40 shadow-2xl transition-transform duration-300 ease-out"
         style={{ transform: open ? "translateX(0)" : "translateX(100%)" }}
         data-testid="desktop-bet-slip"
       >
