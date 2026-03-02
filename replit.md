@@ -73,6 +73,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Mobile Slip Bottom Nav Button**: Dedicated "Slip" button in the mobile bottom navigation with a Ticket icon and leg count badge.
 - **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces horizontal TabsList for settings.
 - **CLV-Gated Learning Engine**: Weight updates apply category multipliers based on CLV+ status and win/loss outcome.
+- **Stripe Payment Integration**: `server/stripeClient.ts` reads `STRIPE_PUBLISHABLE_KEY` and `STRIPE_SECRET_KEY` env vars directly (with Replit connector as fallback). Products and price IDs created in Stripe test mode for Sharp ($49/mo, $468/yr), Edge ($99/mo, $948/yr), Max ($249/mo, $2388/yr). Checkout flow: POST `/api/stripe/checkout` → Stripe-hosted checkout → webhook at `/api/stripe/webhook` updates subscription tier. Guest users clicking subscribe on `/pricing` are redirected to `/register?plan=<tierId>`. Webhook signature verified via `STRIPE_WEBHOOK_SECRET` (set this after deploying via Stripe Dashboard → Webhooks). Price IDs: Sharp monthly=`price_1T6Z8MCsa9MEIxma1AtmvcQa`, yearly=`price_1T6Z8MCsa9MEIxmajGN5GBnE`; Edge monthly=`price_1T6Z8NCsa9MEIxmaEjp1NamA`, yearly=`price_1T6Z8NCsa9MEIxma6NAdgBQB`; Max monthly=`price_1T6Z8OCsa9MEIxmapbFeapNC`, yearly=`price_1T6Z8OCsa9MEIxmamlNBUxM0`.
 
 ## External Dependencies
 - **Frontend Framework**: React

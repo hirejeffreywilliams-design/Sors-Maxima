@@ -36,8 +36,8 @@ const tiers: PricingTier[] = [
     description: 'Full engine access, daily ready-made tickets, and every tool recreational bettors never see. This is where serious betting begins.',
     monthlyPrice: 49,
     yearlyPrice: 468,
-    monthlyPriceId: 'price_1SskcQIp7f8yVoSO8uj04w8T',
-    yearlyPriceId: 'price_1SskcQIp7f8yVoSO1VDHyrWy',
+    monthlyPriceId: 'price_1T6Z8MCsa9MEIxma1AtmvcQa',
+    yearlyPriceId: 'price_1T6Z8MCsa9MEIxmajGN5GBnE',
     features: [
       "Today's Best Tickets — pre-built daily parlays",
       '46-Factor Prediction Engine across 6 US sports',
@@ -63,8 +63,8 @@ const tiers: PricingTier[] = [
     description: 'Real-time alerts, sharp money signals, advanced Kelly sizing, and the Life Changer Ticket — the full arsenal that separates winners from everyone else.',
     monthlyPrice: 99,
     yearlyPrice: 948,
-    monthlyPriceId: 'price_1SskcRIp7f8yVoSOEKOx5hde',
-    yearlyPriceId: 'price_1SskcRIp7f8yVoSOOBNZTk3V',
+    monthlyPriceId: 'price_1T6Z8NCsa9MEIxmaEjp1NamA',
+    yearlyPriceId: 'price_1T6Z8NCsa9MEIxma6NAdgBQB',
     features: [
       'Everything in Sharp, plus:',
       'Life Changer Ticket — daily cross-sport underdog parlay',
@@ -91,8 +91,8 @@ const tiers: PricingTier[] = [
     description: 'Zero restrictions. First-in-line on every pick. Monte Carlo simulations, custom model weights, and tools built for high-volume serious bettors.',
     monthlyPrice: 249,
     yearlyPrice: 2388,
-    monthlyPriceId: 'price_1SskcRIp7f8yVoSOWQe60fFw',
-    yearlyPriceId: 'price_1SskcSIp7f8yVoSOxK0pY4Ki',
+    monthlyPriceId: 'price_1T6Z8OCsa9MEIxmapbFeapNC',
+    yearlyPriceId: 'price_1T6Z8OCsa9MEIxmamlNBUxM0',
     features: [
       'Everything in Edge, plus:',
       'Whale picks released 30 min before all others',
@@ -164,7 +164,13 @@ export default function Pricing() {
       });
       return;
     }
-    
+
+    const isGuest = !subscription || (subscription.tier === 'none' && subscription.status === 'none');
+    if (isGuest) {
+      window.location.href = `/register?plan=${tier.id}`;
+      return;
+    }
+
     const priceId = isYearly ? tier.yearlyPriceId : tier.monthlyPriceId;
     checkoutMutation.mutate(priceId);
   };

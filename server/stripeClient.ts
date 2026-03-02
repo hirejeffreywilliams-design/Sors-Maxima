@@ -6,6 +6,15 @@ let connectionSettings: any;
 let stripeAvailable: boolean | null = null;
 
 async function getCredentials(): Promise<{ publishableKey: string; secretKey: string } | null> {
+  // Prefer env var keys (set directly via Replit secrets)
+  const envPublishable = process.env.STRIPE_PUBLISHABLE_KEY;
+  const envSecret = process.env.STRIPE_SECRET_KEY;
+  if (envPublishable && envSecret) {
+    stripeAvailable = true;
+    return { publishableKey: envPublishable, secretKey: envSecret };
+  }
+
+  // Fall back to Replit connector system
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? 'repl ' + process.env.REPL_IDENTITY
@@ -14,7 +23,7 @@ async function getCredentials(): Promise<{ publishableKey: string; secretKey: st
       : null;
 
   if (!xReplitToken || !hostname) {
-    console.log('[STRIPE] Stripe connector not available - running in demo mode');
+    console.log('[STRIPE] Stripe connector not available and no env keys found - running in demo mode');
     stripeAvailable = false;
     return null;
   }

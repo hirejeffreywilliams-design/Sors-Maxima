@@ -2,21 +2,21 @@ import { getUncachableStripeClient, getStripePublishableKey, isStripeAvailable }
 import { pool } from './db';
 
 const ALLOWED_PRICE_IDS = new Set([
-  'price_1SskcQIp7f8yVoSO8uj04w8T',
-  'price_1SskcQIp7f8yVoSO1VDHyrWy',
-  'price_1SskcRIp7f8yVoSOEKOx5hde',
-  'price_1SskcRIp7f8yVoSOOBNZTk3V',
-  'price_1SskcRIp7f8yVoSOWQe60fFw',
-  'price_1SskcSIp7f8yVoSOxK0pY4Ki',
+  'price_1T6Z8MCsa9MEIxma1AtmvcQa',
+  'price_1T6Z8MCsa9MEIxmajGN5GBnE',
+  'price_1T6Z8NCsa9MEIxmaEjp1NamA',
+  'price_1T6Z8NCsa9MEIxma6NAdgBQB',
+  'price_1T6Z8OCsa9MEIxmapbFeapNC',
+  'price_1T6Z8OCsa9MEIxmamlNBUxM0',
 ]);
 
 const PRICE_TO_TIER: Record<string, 'pro' | 'elite' | 'whale'> = {
-  'price_1SskcQIp7f8yVoSO8uj04w8T': 'pro',
-  'price_1SskcQIp7f8yVoSO1VDHyrWy': 'pro',
-  'price_1SskcRIp7f8yVoSOEKOx5hde': 'elite',
-  'price_1SskcRIp7f8yVoSOOBNZTk3V': 'elite',
-  'price_1SskcRIp7f8yVoSOWQe60fFw': 'whale',
-  'price_1SskcSIp7f8yVoSOxK0pY4Ki': 'whale',
+  'price_1T6Z8MCsa9MEIxma1AtmvcQa': 'pro',
+  'price_1T6Z8MCsa9MEIxmajGN5GBnE': 'pro',
+  'price_1T6Z8NCsa9MEIxmaEjp1NamA': 'elite',
+  'price_1T6Z8NCsa9MEIxma6NAdgBQB': 'elite',
+  'price_1T6Z8OCsa9MEIxmapbFeapNC': 'whale',
+  'price_1T6Z8OCsa9MEIxmamlNBUxM0': 'whale',
 };
 
 export interface UserSubscription {
