@@ -111,6 +111,8 @@ export interface PrecomputedPick {
     awayInjuryCount: number;
     homeStartersOut: number;
     awayStartersOut: number;
+    homePlayers?: { name: string; position: string; status: string }[];
+    awayPlayers?: { name: string; position: string; status: string }[];
   };
   sharpPropAlert?: {
     playerName: string;
@@ -631,6 +633,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     let homeInjuryCount = 0, awayInjuryCount = 0;
     let homeStartersOut = 0, awayStartersOut = 0;
+    const homeInjuredPlayers: { name: string; position: string; status: string }[] = [];
+    const awayInjuredPlayers: { name: string; position: string; status: string }[] = [];
     for (const inj of sportInjuries) {
       const teamName = (inj.teamName || inj.team || "").toLowerCase();
       const teamAbbr = (inj.teamAbbreviation || inj.abbreviation || "").toLowerCase();
@@ -639,9 +643,22 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const isHome = teamName.includes(homeLast) || teamAbbr === homeAbbr.toLowerCase() || teamName.includes(homeAbbr.toLowerCase());
       const isAway = teamName.includes(awayLast) || teamAbbr === awayAbbr.toLowerCase() || teamName.includes(awayAbbr.toLowerCase());
       const count = inj.injuries?.length || 0;
-      const starters = (inj.injuries || []).filter((i: any) => i.status === "Out" || i.status === "Doubtful").length;
-      if (isHome) { homeInjuryCount += count; homeStartersOut += starters; }
-      if (isAway) { awayInjuryCount += count; awayStartersOut += starters; }
+      const starterInjuries = (inj.injuries || []).filter((i: any) => i.status === "Out" || i.status === "Doubtful");
+      const starters = starterInjuries.length;
+      if (isHome) {
+        homeInjuryCount += count;
+        homeStartersOut += starters;
+        for (const si of starterInjuries) {
+          homeInjuredPlayers.push({ name: si.playerName || "Unknown", position: si.position || "", status: si.status || "Out" });
+        }
+      }
+      if (isAway) {
+        awayInjuryCount += count;
+        awayStartersOut += starters;
+        for (const si of starterInjuries) {
+          awayInjuredPlayers.push({ name: si.playerName || "Unknown", position: si.position || "", status: si.status || "Out" });
+        }
+      }
     }
 
     let sitFactors: SituationalFactors | null = null;
@@ -1279,6 +1296,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           awayInjuryCount,
           homeStartersOut,
           awayStartersOut,
+          homePlayers: homeInjuredPlayers.length > 0 ? homeInjuredPlayers : undefined,
+          awayPlayers: awayInjuredPlayers.length > 0 ? awayInjuredPlayers : undefined,
         } : undefined,
       });
     }
@@ -1427,6 +1446,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
               awayInjuryCount,
               homeStartersOut,
               awayStartersOut,
+              homePlayers: homeInjuredPlayers.length > 0 ? homeInjuredPlayers : undefined,
+              awayPlayers: awayInjuredPlayers.length > 0 ? awayInjuredPlayers : undefined,
             } : undefined,
             sharpPropAlert: matchingSharp ? {
               playerName: matchingSharp.playerName,
