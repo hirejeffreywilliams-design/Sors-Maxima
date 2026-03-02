@@ -37,6 +37,8 @@ interface ParlaySlipContextValue {
   totalAmericanOdds: number;
   toWin: number;
   legCount: number;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
 }
 
 const ParlaySlipContext = createContext<ParlaySlipContextValue | null>(null);
@@ -71,6 +73,7 @@ function safeDecimalOdds(leg: ParlaySlipLeg): number {
 
 export function ParlaySlipProvider({ children }: { children: ReactNode }) {
   const [legs, setLegs] = useState<ParlaySlipLeg[]>(loadFromStorage);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     saveToStorage(legs);
@@ -119,6 +122,8 @@ export function ParlaySlipProvider({ children }: { children: ReactNode }) {
       totalAmericanOdds,
       toWin,
       legCount: legs.length,
+      mobileOpen,
+      setMobileOpen,
     }}>
       {children}
     </ParlaySlipContext.Provider>

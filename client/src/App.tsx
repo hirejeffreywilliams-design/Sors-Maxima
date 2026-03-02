@@ -5,7 +5,7 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ParlaySlipProvider } from "@/hooks/use-parlay-slip";
+import { ParlaySlipProvider, useParlaySlip } from "@/hooks/use-parlay-slip";
 import { ParlaySlipDrawer } from "@/components/parlay-slip-drawer";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -600,6 +600,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
 
 function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [location] = useLocation();
+  const { legCount, setMobileOpen } = useParlaySlip();
 
   const coreItems = [
     { href: "/", icon: Zap, label: "Picks", testId: "bottom-nav-picks" },
@@ -610,27 +611,45 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
-      <div className="flex items-center justify-around gap-1 h-16">
+      <div className="flex items-center justify-around gap-0 h-16">
         {coreItems.map((item) => {
           const Icon = item.icon;
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <div className={`flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
+              <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
                 <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[9px] font-medium">{item.label}</span>
               </div>
             </Link>
           );
         })}
+
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-primary"
+          data-testid="bottom-nav-slip"
+          aria-label="Open bet slip"
+        >
+          <div className="relative">
+            <Ticket className="w-5 h-5" />
+            {legCount > 0 && (
+              <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold leading-none">
+                {legCount > 9 ? "9+" : legCount}
+              </span>
+            )}
+          </div>
+          <span className="text-[9px] font-bold">Slip</span>
+        </button>
+
         <button
           onClick={onOpenMenu}
-          className="flex flex-col items-center justify-center gap-1 px-3 py-2 touch-target text-muted-foreground"
+          className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-muted-foreground"
           data-testid="bottom-nav-more"
           aria-label="More navigation"
         >
           <MoreHorizontal className="w-5 h-5" />
-          <span className="text-[10px] font-medium">More</span>
+          <span className="text-[9px] font-medium">More</span>
         </button>
       </div>
     </nav>
@@ -786,38 +805,39 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <GeoComplianceBanner />
       </div>
       
-      <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
-        <ParlaySlipProvider>
-            <Router authState={authState} />
-          <ParlaySlipDrawer />
-        </ParlaySlipProvider>
-      </main>
-      
-      <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
-        <div className="max-w-screen-2xl mx-auto">
-          <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
-            <div className="text-center max-w-xl">
-              <p className="text-yellow-600 dark:text-yellow-500">
-                For entertainment & educational purposes only. Not gambling advice. 
-                No guarantees of profitability. Must be 21+. 
-                If you have a gambling problem, call 1-800-522-4700.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
-              <span>© 2026 Sors Maxima</span>
-              <Link href="/legal" className="hover:text-primary">Terms</Link>
-              <Link href="/legal" className="hover:text-primary">Privacy</Link>
-              <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
-              <Link href="/help" className="hover:text-primary">Help</Link>
-              <Link href="/changelog" className="hover:text-primary">What's New</Link>
-              <Link href="/roadmap" className="hover:text-primary">Roadmap</Link>
-              <AffiliateDisclosure compact />
+      <ParlaySlipProvider>
+        <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
+          <Router authState={authState} />
+        </main>
+
+        <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
+          <div className="max-w-screen-2xl mx-auto">
+            <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
+              <div className="text-center max-w-xl">
+                <p className="text-yellow-600 dark:text-yellow-500">
+                  For entertainment & educational purposes only. Not gambling advice. 
+                  No guarantees of profitability. Must be 21+. 
+                  If you have a gambling problem, call 1-800-522-4700.
+                </p>
+              </div>
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">
+                <span>© 2026 Sors Maxima</span>
+                <Link href="/legal" className="hover:text-primary">Terms</Link>
+                <Link href="/legal" className="hover:text-primary">Privacy</Link>
+                <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
+                <Link href="/help" className="hover:text-primary">Help</Link>
+                <Link href="/changelog" className="hover:text-primary">What's New</Link>
+                <Link href="/roadmap" className="hover:text-primary">Roadmap</Link>
+                <AffiliateDisclosure compact />
+              </div>
             </div>
           </div>
-        </div>
-      </footer>
-      
-      <BottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
+        </footer>
+
+        <ParlaySlipDrawer />
+        <BottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
+      </ParlaySlipProvider>
+
       <CommandPalette />
       <CookieConsentBanner />
       <FeedbackWidget />

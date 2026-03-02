@@ -61,7 +61,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **AI Pick Explainer Engine**: `server/aiPickExplainer.ts` — backend/admin-only. Generates pick explanations for admin QA. Not shown to end users.
 - **AI Routes — Backend/Admin Only**: `server/routes/ai.ts` — all routes (`/api/ai/pick-explanation`, `/api/ai/analyze-parlay`, `/api/ai/game-preview`, `/api/ai/status`) are restricted to admin access via `requireAdmin` middleware. OpenAI is used exclusively for system intelligence, admin assistant, and app guardian — NOT for user-facing features.
 - **Smart Leg Selector UX**: MatchupTicketCard has per-leg checkboxes, "Best 3"/"All"/"None" quick actions, live combined odds display, correlated leg warning, and "Add N Selected Legs" button.
-- **Bet Slip Auto-Open**: Desktop sidebar auto-opens when the first leg is added (useEffect watches legCount 0→1 transition).
+- **Bet Slip Auto-Open**: Desktop sidebar auto-opens when the first leg is added (useEffect watches legCount 0→1 transition). Mobile sheet also auto-opens when the first leg is added (same pattern in ParlaySlipMobileDrawer).
+- **Mobile Slip Bottom Nav Button**: The bottom navigation bar (mobile only) includes a dedicated "Slip" button (6th item, after Markets and before More) with a Ticket icon and a count badge showing the number of legs. Tapping it opens the bet slip sheet. The `ParlaySlipProvider` wraps `main`, `footer`, and `BottomNav` so all can access the context. `mobileOpen`/`setMobileOpen` are part of the ParlaySlipContext.
 - **Settings Mobile Overflow Fix**: On mobile, a Select dropdown replaces the horizontal TabsList for all 7 settings tabs.
 - **CLV-Gated Learning Engine**: Weight updates apply category multipliers (strong: 1.0, pure_signal: 0.4, noise: -0.2, true_miss: -0.8) based on CLV+ status and win/loss outcome.
 

@@ -12,7 +12,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetFooter,
 } from "@/components/ui/sheet";
 import {
@@ -1050,33 +1049,19 @@ export function ParlaySlipDesktopSidebar() {
 }
 
 export function ParlaySlipMobileDrawer() {
-  const { legs, legCount, totalOdds, totalAmericanOdds } = useParlaySlip();
-  const [open, setOpen] = useState(false);
-  const [stake] = useState(10);
+  const { legCount, mobileOpen, setMobileOpen } = useParlaySlip();
+  const prevLegCount = useRef(legCount);
 
-  const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
-  const potentialPayout = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
+  useEffect(() => {
+    if (prevLegCount.current === 0 && legCount === 1) {
+      setMobileOpen(true);
+    }
+    prevLegCount.current = legCount;
+  }, [legCount, setMobileOpen]);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button
-          className="lg:hidden fixed bottom-20 right-3 z-40 h-14 gap-2 rounded-full shadow-xl px-5 bg-primary hover:bg-primary/90"
-          data-testid="button-parlay-slip"
-        >
-          <Ticket className="h-5 w-5" />
-          {legCount > 0 ? (
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-sm">{legCount}</span>
-              <span className="text-xs opacity-80">|</span>
-              <span className="text-xs font-medium">{formattedTotalOdds}</span>
-            </div>
-          ) : (
-            <span className="font-semibold">Slip</span>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="bottom" className="h-[85vh] flex flex-col p-0 rounded-t-2xl">
+    <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+      <SheetContent side="bottom" className="h-[90vh] flex flex-col p-0 rounded-t-2xl">
         <SheetHeader className="px-4 pt-3 pb-2">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-2" />
           <SheetTitle className="flex items-center gap-2">
