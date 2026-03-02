@@ -281,12 +281,64 @@ function startEmailSchedulers(): void {
         // Digest is sent per-user via the weekly digest endpoint
         // Users who have connected recently will receive via the API route
       }
+
+      // Day 2 and Day 7 email sequences
+      await checkEmailSequences();
     } catch (err: any) {
       console.error("[EmailScheduler] Scheduler tick failed:", err.message);
     }
   }, CHECK_INTERVAL);
 
   log("[EmailScheduler] Email schedulers started (hourly check)", "startup");
+}
+
+async function checkEmailSequences(): Promise<void> {
+  const { db } = await import("./db");
+  const { users, subscriptions } = await import("@shared/schema");
+  const { eq, and, gt, lt } = await import("drizzle-orm");
+  const { sendDay2Email, sendDay7Email } = await import("./emailService");
+
+  const now = new Date();
+  const day2Start = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+  const day2End = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const day7Start = new Date(now.getTime() - 8 * 24 * 60 * 60 * 1000);
+  const day7End = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  // Day 2 sequence
+  const day2Users = await db.select().from(users)
+    .where(and(
+      eq(users.emailSequenceDay2Sent, false),
+      gt(users.createdAt, day2Start),
+      lt(users.createdAt, day2End)
+    ));
+
+  for (const user of day2Users) {
+    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
+    const tier = sub?.tier || "Sharp";
+    const sent = await sendDay2Email(user.email, user.username, tier);
+    if (sent) {
+      await db.update(users).set({ emailSequenceDay2Sent: true }).where(eq(users.id, user.id));
+      log(`[EmailSequence] Sent Day 2 email to ${user.username}`);
+    }
+  }
+
+  // Day 7 sequence
+  const day7Users = await db.select().from(users)
+    .where(and(
+      eq(users.emailSequenceDay7Sent, false),
+      gt(users.createdAt, day7Start),
+      lt(users.createdAt, day7End)
+    ));
+
+  for (const user of day7Users) {
+    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
+    const tier = sub?.tier || "Sharp";
+    const sent = await sendDay7Email(user.email, user.username, tier);
+    if (sent) {
+      await db.update(users).set({ emailSequenceDay7Sent: true }).where(eq(users.id, user.id));
+      log(`[EmailSequence] Sent Day 7 email to ${user.username}`);
+    }
+  }
 }
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────

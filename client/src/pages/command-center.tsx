@@ -22,6 +22,7 @@ import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { TierGate, useTier } from "@/components/tier-gate";
 import { IntelligencePipeline } from "@/components/intelligence-pipeline";
+import { OffseasonPanel } from "@/components/offseason-panel";
 
 interface TopPick {
   id: string;
@@ -1590,7 +1591,15 @@ export default function CommandCenter() {
 
         {canAccess("elite")
           ? <LifeChangerSection legs={legs} addLeg={addLeg} />
-          : <TierGate required="elite" label="Life Changer Ticket" description="A daily cross-sport underdog parlay built by the intelligence engine — high odds, real edge. Edge tier and above." />
+          : (
+            <TierGate 
+              required="elite" 
+              label="Life Changer Ticket" 
+              description="A daily cross-sport underdog parlay built by the intelligence engine — high odds, real edge. Edge tier and above."
+            >
+              <div />
+            </TierGate>
+          )
         }
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -1660,84 +1669,90 @@ export default function CommandCenter() {
           </div>
 
           <div className="mt-4 grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-            <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between mb-1">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-primary" />
-                  Top Edge Picks
-                </h3>
+            {activeSportTab === "NFL" && filteredUpcoming.length === 0 ? (
+              <div className="lg:col-span-3">
+                <OffseasonPanel />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {filteredPicks.length > 0 ? (
-                  filteredPicks.map(pick => (
-                    <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
-                  ))
-                ) : (
-                  <div className="col-span-full p-8 text-center border rounded-lg bg-muted/20">
-                    <p className="text-sm text-muted-foreground">No picks available for {activeSportTab} right now.</p>
+            ) : (
+              <>
+                <div className="lg:col-span-2 space-y-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-sm font-bold flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-primary" />
+                      Top Edge Picks
+                    </h3>
                   </div>
-                )}
-              </div>
-
-              {feed.liveGames.length > 0 && (activeSportTab === "all" || feed.liveGames.some(g => g.sport === activeSportTab)) && (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-bold flex items-center gap-2">
-                    <Radio className="w-4 h-4 text-red-500" />
-                    Live Analysis
-                  </h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {feed.liveGames
-                      .filter(g => activeSportTab === "all" || g.sport === activeSportTab)
-                      .map(game => (
-                        <LiveGameCard key={game.id} game={game} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {filteredPicks.length > 0 ? (
+                      filteredPicks.map(pick => (
+                        <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
                       ))
-                    }
+                    ) : (
+                      <div className="col-span-full p-8 text-center border rounded-lg bg-muted/20">
+                        <p className="text-sm text-muted-foreground">No picks available for {activeSportTab} right now.</p>
+                      </div>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
 
-            <div className="space-y-4">
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-primary" />
-                  Edge Alerts
-                </h3>
-                <div className="space-y-2.5">
-                  {filteredAlerts.length > 0 ? (
-                    filteredAlerts.map(alert => (
-                      <AlertCard key={alert.id} alert={alert} feed={feed} legs={legs} addLeg={addLeg} />
-                    ))
-                  ) : (
-                    <div className="p-6 text-center border rounded-lg bg-muted/20">
-                      <p className="text-xs text-muted-foreground">No critical alerts for {activeSportTab}.</p>
+                  {feed.liveGames.length > 0 && (activeSportTab === "all" || feed.liveGames.some(g => g.sport === activeSportTab)) && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-bold flex items-center gap-2">
+                        <Radio className="w-4 h-4 text-red-500" />
+                        Live Analysis
+                      </h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {feed.liveGames
+                          .filter(g => activeSportTab === "all" || g.sport === activeSportTab)
+                          .map(game => (
+                            <LiveGameCard key={game.id} game={game} />
+                          ))
+                        }
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <h3 className="text-sm font-bold flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  Upcoming Games
-                </h3>
-                <Card>
-                  <CardContent className="p-3">
-                    <div className="divide-y">
-                      {filteredUpcoming.length > 0 ? (
-                        filteredUpcoming.slice(0, 8).map(game => (
-                          <UpcomingGameRow key={game.id} game={game} />
+                <div className="space-y-4">
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-bold flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4 text-primary" />
+                      Edge Alerts
+                    </h3>
+                    <div className="space-y-2.5">
+                      {filteredAlerts.length > 0 ? (
+                        filteredAlerts.map(alert => (
+                          <AlertCard key={alert.id} alert={alert} feed={feed} legs={legs} addLeg={addLeg} />
                         ))
                       ) : (
-                        <p className="py-4 text-center text-xs text-muted-foreground">No upcoming games scheduled.</p>
+                        <div className="p-6 text-center border rounded-lg bg-muted/20">
+                          <p className="text-xs text-muted-foreground">No critical alerts for {activeSportTab}.</p>
+                        </div>
                       )}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+                  </div>
 
+                  <div className="space-y-3">
+                    <h3 className="text-sm font-bold flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      Upcoming Games
+                    </h3>
+                    <Card>
+                      <CardContent className="p-3">
+                        <div className="divide-y">
+                          {filteredUpcoming.length > 0 ? (
+                            filteredUpcoming.slice(0, 8).map(game => (
+                              <UpcomingGameRow key={game.id} game={game} />
+                            ))
+                          ) : (
+                            <p className="py-4 text-center text-xs text-muted-foreground">No upcoming games scheduled.</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </Tabs>
 

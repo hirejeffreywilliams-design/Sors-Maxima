@@ -1270,6 +1270,31 @@ export function generateSmartRecommendations(
 
 // ==================== DATABASE TABLES ====================
 
+export const applications = pgTable("applications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  email: varchar("email", { length: 255 }).notNull(),
+  username: varchar("username", { length: 255 }),
+  tier: varchar("tier", { length: 50 }).notNull(),
+  experience: text("experience").notNull(),
+  goals: text("goals").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertApplicationSchema = createInsertSchema(applications).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  adminNotes: true,
+}).extend({
+  username: z.string().optional(),
+});
+
+export type Application = typeof applications.$inferSelect;
+export type InsertApplication = z.infer<typeof insertApplicationSchema>;
+
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 50 }).unique().notNull(),
@@ -1279,6 +1304,8 @@ export const users = pgTable("users", {
   isBanned: boolean("is_banned").default(false).notNull(),
   banReason: text("ban_reason"),
   emailVerified: boolean("email_verified").default(false).notNull(),
+  emailSequenceDay2Sent: boolean("email_sequence_day2_sent").default(false).notNull(),
+  emailSequenceDay7Sent: boolean("email_sequence_day7_sent").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastLoginAt: timestamp("last_login_at"),
   loginAttempts: integer("login_attempts").default(0).notNull(),

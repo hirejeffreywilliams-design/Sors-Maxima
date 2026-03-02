@@ -205,8 +205,8 @@ export function SGPOptimizer() {
             <Layers className="w-5 h-5 text-primary" />
             <span className="font-semibold text-base">Same-Game Parlay Optimizer</span>
             <Badge variant="outline" className="gap-1 text-[10px]">
-              <Sparkles className="w-3 h-3" />
-              SGP Engine
+              <Layers className="w-3 h-3" />
+              Correlation Engine
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">

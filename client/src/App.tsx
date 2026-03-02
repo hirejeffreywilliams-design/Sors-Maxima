@@ -85,6 +85,8 @@ import { ErrorRecoveryInterceptor } from "@/components/error-recovery-intercepto
 import { SupportChat } from "@/components/support-chat";
 import { ErrorBoundary } from "@/components/error-boundary";
 
+const ApplyPage = lazy(() => import("@/pages/apply"));
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -95,6 +97,8 @@ function PageLoader() {
     </div>
   );
 }
+
+const AdminApplications = lazy(() => import("@/pages/admin-applications"));
 
 function AdminGuard({ component: Component, authState }: { component: React.ComponentType; authState: AuthState }) {
   const [location] = useLocation();
@@ -194,6 +198,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/guardian">{() => <AdminGuard component={AdminGuardian} authState={authState} />}</Route>
               <Route path="/admin/pricing-intelligence">{() => <AdminGuard component={AdminPricingIntelligence} authState={authState} />}</Route>
               <Route path="/admin/launch-control">{() => <AdminGuard component={AdminLaunchControl} authState={authState} />}</Route>
+              <Route path="/admin/applications">{() => <AdminGuard component={AdminApplications} authState={authState} />}</Route>
               <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
               <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>
               <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
@@ -247,6 +252,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/international" component={InternationalPage} />
         <Route path="/mma" component={MMAPage} />
         <Route path="/pricing" component={Pricing} />
+        <Route path="/apply" component={ApplyPage} />
         <Route path="/legal" component={LegalPage} />
         <Route path="/roadmap" component={Roadmap} />
         <Route path="/settings" component={Settings} />
@@ -883,7 +889,7 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email' && location !== '/apply',
   });
 
   useUTMCapture();
@@ -942,6 +948,14 @@ function AppContent() {
     return (
       <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
         <VerifyEmail />
+      </Suspense>
+    );
+  }
+
+  if (location === '/apply') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <ApplyPage />
       </Suspense>
     );
   }

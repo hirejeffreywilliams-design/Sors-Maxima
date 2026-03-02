@@ -354,6 +354,130 @@ function DeviceManagement() {
   );
 }
 
+function Membership() {
+  const { toast } = useToast();
+  const { data: subscription, isLoading } = useQuery<{ tier: string; status: string; nextRenewal?: string }>({
+    queryKey: ["/api/subscription"],
+  });
+
+  const portalMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/stripe/portal");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to open billing portal",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const tier = subscription?.tier || "none";
+  const status = subscription?.status || "none";
+
+  const getTierBadge = (tier: string) => {
+    switch (tier.toLowerCase()) {
+      case "max":
+        return <Badge className="bg-purple-500 hover:bg-purple-600">MAX</Badge>;
+      case "edge":
+        return <Badge className="bg-blue-500 hover:bg-blue-600">EDGE</Badge>;
+      case "sharp":
+        return <Badge className="bg-green-500 hover:bg-green-600">SHARP</Badge>;
+      default:
+        return <Badge variant="secondary">Free</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <DollarSign className="h-5 w-5" />
+            Membership Plan
+          </CardTitle>
+          <CardDescription>Manage your subscription and billing preferences.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium">Current Tier</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold capitalize">{tier}</span>
+                {getTierBadge(tier)}
+              </div>
+            </div>
+            <div className="text-right space-y-1">
+              <p className="text-sm font-medium">Status</p>
+              <Badge variant={status === "active" ? "default" : "secondary"} className="capitalize">
+                {status}
+              </Badge>
+            </div>
+          </div>
+
+          {subscription?.nextRenewal && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="h-4 w-4" />
+              Next renewal: {new Date(subscription.nextRenewal).toLocaleDateString()}
+            </div>
+          )}
+
+          <div className="pt-4 flex flex-wrap gap-3">
+            <Button
+              onClick={() => portalMutation.mutate()}
+              disabled={portalMutation.isPending}
+              data-testid="button-manage-billing"
+            >
+              {portalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Manage Billing
+            </Button>
+            
+            {tier.toLowerCase() === "sharp" && (
+              <>
+                <Button variant="outline" asChild data-testid="button-upgrade-edge">
+                  <a href="/pricing">Upgrade to Edge</a>
+                </Button>
+                <Button variant="outline" asChild data-testid="button-upgrade-max">
+                  <a href="/pricing">Upgrade to Max</a>
+                </Button>
+              </>
+            )}
+            
+            {tier.toLowerCase() === "edge" && (
+              <Button variant="outline" asChild data-testid="button-upgrade-max">
+                <a href="/pricing">Upgrade to Max</a>
+              </Button>
+            )}
+
+            {tier.toLowerCase() === "none" && (
+              <Button variant="outline" asChild data-testid="button-view-plans">
+                <a href="/pricing">View Plans</a>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export default function Settings() {
   useSEO({ title: "Settings", description: "Customize your application preferences" });
   const { toast } = useToast();
@@ -470,6 +594,7 @@ export default function Settings() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="security">Security</SelectItem>
+                <SelectItem value="membership">Membership</SelectItem>
                 <SelectItem value="notifications">Alerts</SelectItem>
                 <SelectItem value="responsible">Limits</SelectItem>
                 <SelectItem value="privacy">Privacy</SelectItem>
@@ -481,10 +606,14 @@ export default function Settings() {
           </div>
 
           <div className="hidden md:flex overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-7 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-8 h-auto">
               <TabsTrigger value="security" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-security">
                 <KeyRound className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">Security</span>
+              </TabsTrigger>
+              <TabsTrigger value="membership" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-membership">
+                <DollarSign className="h-4 w-4 shrink-0" />
+                <span className="hidden sm:inline">Membership</span>
               </TabsTrigger>
               <TabsTrigger value="notifications" className="text-xs sm:text-sm py-2 gap-1 px-2 sm:px-3" data-testid="tab-notifications">
                 <Bell className="h-4 w-4 shrink-0" />
@@ -664,6 +793,10 @@ export default function Settings() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="membership" className="mt-4">
+            <Membership />
           </TabsContent>
 
           <TabsContent value="notifications" className="space-y-4 mt-4">

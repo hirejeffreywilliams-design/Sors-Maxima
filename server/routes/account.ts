@@ -11,6 +11,10 @@ import { sql } from "drizzle-orm";
 
 const ticketOutcomes: Map<string, { ticketId: string; predictedProb: number; consensusProb: number; evPercent: number; actualOutcome: "win" | "loss" | "push" | "pending"; profitLoss: number; isFollowedByUser: boolean; settledAt?: string }> = new Map();
 
+import { applications, insertApplicationSchema } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { sendApplicationConfirmation, sendApplicationApproved, sendApplicationRejected } from "../emailService";
+
 /** Returns a numeric userId from session, or null if admin/non-numeric (prevents NaN DB queries) */
 function numericUserId(req: Request): number | null {
   const raw = req.session?.userId;
@@ -22,6 +26,65 @@ function numericUserId(req: Request): number | null {
 const utmEvents: Array<{ source: string; medium: string; campaign: string; content?: string; term?: string; timestamp: string; ip: string }> = [];
 
 export async function registerAccountRoutes(app: Express): Promise<void> {
+
+  app.post("/api/apply", async (req, res) => {
+    try {
+      const result = insertApplicationSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid application data", details: result.error.format() });
+      }
+
+      const [application] = await db.insert(applications).values({
+        ...result.data,
+        userId: numericUserId(req),
+        status: "pending",
+      }).returning();
+
+      await sendApplicationConfirmation(application.email, application.username, application.tier);
+
+      res.json(application);
+    } catch (err) {
+      console.error("Application error:", err);
+      res.status(500).json({ error: "Failed to submit application" });
+    }
+  });
+
+  app.get("/api/admin/applications", requireAdmin, async (req, res) => {
+    try {
+      const apps = await db.select().from(applications).orderBy(sql`${applications.createdAt} DESC`);
+      res.json(apps);
+    } catch (err) {
+      console.error("Failed to fetch applications:", err);
+      res.status(500).json({ error: "Failed to fetch applications" });
+    }
+  });
+
+  app.patch("/api/admin/applications/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status, adminNotes } = req.body;
+
+      if (!["approved", "rejected", "pending"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+
+      const [app] = await db.update(applications)
+        .set({ status, adminNotes })
+        .where(eq(applications.id, id))
+        .returning();
+
+      if (status === "approved") {
+        await sendApplicationApproved(app.email, app.username, app.tier);
+      } else if (status === "rejected") {
+        await sendApplicationRejected(app.email, app.username, app.tier, adminNotes);
+      }
+
+      res.json(app);
+    } catch (err) {
+      console.error("Failed to update application:", err);
+      res.status(500).json({ error: "Failed to update application" });
+    }
+  });
 
   app.get("/api/vegas/predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {

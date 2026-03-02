@@ -9,6 +9,82 @@ if (!resend) {
 const FROM_EMAIL = process.env.FROM_EMAIL || "Sors Maxima <onboarding@resend.dev>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "hirejeffreywilliams@gmail.com";
 
+export async function sendApplicationConfirmation(to: string, username: string, tier: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Application Received — Sors Maxima ${tier}`,
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <h1 style="color:white;">Application Received</h1>
+          <p style="color:#94a3b8;">Hi ${username},</p>
+          <p>We've received your application for the <strong style="color:#6366f1;">${tier}</strong> tier. Our team reviews every application to maintain the quality of our community.</p>
+          <p>You'll hear from us within 24-48 hours regarding your status.</p>
+          <p style="color:#475569;font-size:12px;margin-top:24px;">Thank you for your patience.</p>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending application confirmation email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send application confirmation email:", err);
+    return false;
+  }
+}
+
+export async function sendApplicationApproved(to: string, username: string, tier: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Application Approved — Welcome to Sors Maxima ${tier}`,
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <h1 style="color:white;">Welcome Aboard</h1>
+          <p style="color:#94a3b8;">Hi ${username},</p>
+          <p>Your application for the <strong style="color:#6366f1;">${tier}</strong> tier has been <strong style="color:#22c55e;">APPROVED</strong>.</p>
+          <p>You can now log in and complete your subscription to access your new edge.</p>
+          <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}/pricing" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;margin-top:16px;">Complete Subscription →</a>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending application approved email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send application approved email:", err);
+    return false;
+  }
+}
+
+export async function sendApplicationRejected(to: string, username: string, tier: string, notes?: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Update regarding your Sors Maxima application`,
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <h1 style="color:white;">Application Update</h1>
+          <p style="color:#94a3b8;">Hi ${username},</p>
+          <p>Thank you for your interest in Sors Maxima ${tier}. At this time, we are unable to approve your application for this tier.</p>
+          ${notes ? `<p style="color:#94a3b8; font-style: italic;">Note from our team: ${notes}</p>` : ''}
+          <p>You are still welcome to join our Sharp tier, which is open to all members.</p>
+          <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}/pricing" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;margin-top:16px;">View Sharp Tier →</a>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending application rejected email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send application rejected email:", err);
+    return false;
+  }
+}
+
 export async function sendVerificationEmail(to: string, username: string, code: string): Promise<boolean> {
   if (!resend) return false;
   try {
@@ -55,6 +131,17 @@ export async function sendWelcomeEmail(to: string, username: string, tier: strin
           <ul style="color:#cbd5e1;line-height:2;">
             ${tierFeatures.map(f => `<li>${f}</li>`).join('')}
           </ul>
+          
+          <div style="background:#1e293b;padding:24px;border-radius:8px;margin:24px 0;border-left:4px solid #6366f1;">
+            <h2 style="color:white;font-size:18px;margin-top:0;">🚀 Start Here: 4-Step Quick Guide</h2>
+            <ol style="color:#cbd5e1;line-height:1.6;margin-bottom:0;">
+              <li><strong>Sync Your Books:</strong> Connect your sportsbook accounts in Settings to track your performance automatically.</li>
+              <li><strong>Check the Command Center:</strong> This is where our 46-factor model's highest-confidence picks live.</li>
+              <li><strong>Explore the Props Engine:</strong> Use our specialized tools to find value in player markets.</li>
+              <li><strong>Set Your Alerts:</strong> Get notified the second a line moves in your favor.</li>
+            </ol>
+          </div>
+
           <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;margin-top:16px;">Go to Command Center →</a>
           <p style="color:#475569;font-size:12px;margin-top:24px;">Good luck out there.</p>
         </div>
@@ -229,6 +316,90 @@ export async function sendPickResultEmail(to: string, username: string, pick: {
     return true;
   } catch (err) {
     console.error("Failed to send pick result email:", err);
+    return false;
+  }
+}
+
+export async function sendDay2Email(to: string, username: string, tier: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Your picks are live — How to read the Sors Maxima model`,
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <h1 style="color:white;font-size:24px;">Your Picks are Live</h1>
+          <p style="color:#94a3b8;">Hi ${username},</p>
+          <p>You've had access to the platform for 24 hours. Here's how to interpret the model's output to maximize your edge:</p>
+          
+          <div style="margin:24px 0;">
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">Grade Explanation (A/B/C)</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">Our model assigns a letter grade based on the strength of the edge. <strong>A+</strong> represents a massive historical outlier, while <strong>C</strong> picks are marginal value.</p>
+            </div>
+            
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">Confidence %</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">This is the model's calculated probability of the outcome hitting, adjusted for current market volatility and lineup changes.</p>
+            </div>
+            
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">What EV Means</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">Expected Value (EV) measures how much you'd expect to win on average per bet. A +5% EV means the model thinks the odds are 5% better than what the book is offering.</p>
+            </div>
+          </div>
+
+          <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">Go to Command Center →</a>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending day 2 email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send day 2 email:", err);
+    return false;
+  }
+}
+
+export async function sendDay7Email(to: string, username: string, tier: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `One week in — Fine-tuning your Sors Maxima strategy`,
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <h1 style="color:white;font-size:24px;">Your First Week</h1>
+          <p style="color:#94a3b8;">Hi ${username},</p>
+          <p>You've been with us for a week. Now that you've seen the model in action, it's time to use our advanced features to fine-tune your approach:</p>
+          
+          <div style="margin:24px 0;">
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">Mastering CLV</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">Closing Line Value (CLV) is the ultimate metric for sharp bettors. If you're consistently beating the closing line, you're a long-term winner.</p>
+            </div>
+            
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">Strategy Coach</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">Use the Strategy Advisor to see where your specific strengths lie. It might reveal that you're an elite MLB prop bettor but struggle with NFL totals.</p>
+            </div>
+            
+            <div style="margin-bottom:16px;">
+              <strong style="color:#6366f1;display:block;">The Community</strong>
+              <p style="color:#cbd5e1;margin-top:4px;font-size:14px;">Check the community feed to see what other sharp members are playing and discuss model outliers in real-time.</p>
+            </div>
+          </div>
+
+          <a href="https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}/tools" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;">Explore Pro Tools →</a>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending day 7 email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send day 7 email:", err);
     return false;
   }
 }

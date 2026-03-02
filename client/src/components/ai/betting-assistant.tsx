@@ -7,10 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   Bot, Send, User, Sparkles, TrendingUp, Target,
-  Lightbulb, Zap, Atom, Info
+  Lightbulb, Zap, Atom, Info, AlertCircle, RefreshCw
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -41,6 +41,12 @@ export function BettingAssistant() {
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const { data: aiStatus, refetch: refetchStatus } = useQuery<{ available?: boolean; message?: string }>({
+    queryKey: ["/api/ai/status"],
+  });
+
+  const isUnavailable = aiStatus?.available === false;
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -50,6 +56,10 @@ export function BettingAssistant() {
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
       const res = await apiRequest("POST", "/api/live/assistant", { message });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || res.statusText);
+      }
       return res.json() as Promise<{ response: string }>;
     },
     onSuccess: (data) => {
@@ -67,6 +77,9 @@ export function BettingAssistant() {
       setMessages(prev => [...prev, assistantMessage]);
     },
     onError: (error: Error) => {
+      // Re-fetch status on error to see if we hit a 429/503
+      refetchStatus();
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
@@ -78,7 +91,7 @@ export function BettingAssistant() {
   });
 
   const sendMessage = async (content: string) => {
-    if (!content.trim()) return;
+    if (!content.trim() || isUnavailable) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -105,9 +118,12 @@ export function BettingAssistant() {
             Sors Betting Assistant
             <QuantumBadge />
           </CardTitle>
-          <Badge variant="outline" className="gap-1 bg-green-500/10 text-green-500 border-green-500/30">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            Online
+          <Badge 
+            variant="outline" 
+            className={`gap-1 ${isUnavailable ? 'bg-yellow-500/10 text-yellow-500 border-yellow-500/30' : 'bg-green-500/10 text-green-500 border-green-500/30'}`}
+          >
+            <div className={`w-2 h-2 rounded-full ${isUnavailable ? 'bg-yellow-500' : 'bg-green-500'}`} />
+            {isUnavailable ? 'Maintenance' : 'Online'}
           </Badge>
         </div>
         <div className="flex items-center gap-2 mt-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-500/10 p-2 rounded-md">
@@ -118,6 +134,28 @@ export function BettingAssistant() {
       <CardContent className="flex-1 flex flex-col overflow-hidden p-0">
         <ScrollArea className="flex-1 px-4" ref={scrollRef}>
           <div className="space-y-4 py-4">
+            {isUnavailable && (
+              <div className="mb-4">
+                <Card className="bg-yellow-500/5 border-yellow-500/20">
+                  <CardContent className="p-4 flex flex-col items-center text-center gap-3">
+                    <AlertCircle className="w-8 h-8 text-yellow-500" />
+                    <div className="space-y-1">
+                      <p className="font-semibold text-sm">AI analysis is temporarily at capacity.</p>
+                      <p className="text-xs text-muted-foreground">Your picks are still powered by the full 46-factor engine. AI insights resume automatically.</p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => refetchStatus()}
+                      className="gap-2"
+                    >
+                      <RefreshCw className="w-3 h-3" />
+                      Retry Connection
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -150,6 +188,7 @@ export function BettingAssistant() {
                           className="text-xs"
                           onClick={() => handleSuggestionClick(suggestion)}
                           data-testid={`button-suggestion-${idx}`}
+                          disabled={isUnavailable}
                         >
                           {suggestion}
                         </Button>
@@ -188,35 +227,55 @@ export function BettingAssistant() {
         <div className="p-4 border-t">
           <div className="flex gap-2">
             <Input
-              placeholder="Ask me anything about betting..."
+              placeholder={isUnavailable ? "Assistant temporarily unavailable" : "Ask me anything about betting..."}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && sendMessage(input)}
-              disabled={chatMutation.isPending}
+              disabled={chatMutation.isPending || isUnavailable}
               data-testid="input-chat-message"
             />
-            <Button onClick={() => sendMessage(input)} disabled={!input.trim() || chatMutation.isPending} data-testid="button-send-message">
+            <Button onClick={() => sendMessage(input)} disabled={!input.trim() || chatMutation.isPending || isUnavailable} data-testid="button-send-message">
               <Send className="w-4 h-4" />
             </Button>
           </div>
           <div className="flex gap-2 mt-2 flex-wrap">
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Build me a 3-leg parlay")}>
+            <Badge 
+              variant="secondary" 
+              className={`cursor-pointer hover-elevate ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`} 
+              onClick={() => sendMessage("Build me a 3-leg parlay")}
+            >
               <Sparkles className="w-3 h-3 mr-1" />
               Build Parlay
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("What are today's best +EV plays?")}>
+            <Badge 
+              variant="secondary" 
+              className={`cursor-pointer hover-elevate ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`} 
+              onClick={() => sendMessage("What are today's best +EV plays?")}
+            >
               <TrendingUp className="w-3 h-3 mr-1" />
               +EV Plays
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Show me live games right now")}>
+            <Badge 
+              variant="secondary" 
+              className={`cursor-pointer hover-elevate ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`} 
+              onClick={() => sendMessage("Show me live games right now")}
+            >
               <Zap className="w-3 h-3 mr-1" />
               Live Games
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("What injury news should I know about?")}>
+            <Badge 
+              variant="secondary" 
+              className={`cursor-pointer hover-elevate ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`} 
+              onClick={() => sendMessage("What injury news should I know about?")}
+            >
               <Lightbulb className="w-3 h-3 mr-1" />
               Injuries
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("How is the model performing?")}>
+            <Badge 
+              variant="secondary" 
+              className={`cursor-pointer hover-elevate ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`} 
+              onClick={() => sendMessage("How is the model performing?")}
+            >
               <Target className="w-3 h-3 mr-1" />
               Model Stats
             </Badge>

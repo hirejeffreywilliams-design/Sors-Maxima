@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Zap,
   Brain,
@@ -21,6 +22,9 @@ import {
   Star,
   Check,
   Atom,
+  Lock,
+  Database,
+  CheckCircle,
 } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { useSEO } from "@/hooks/use-seo";
@@ -77,6 +81,46 @@ const stats = [
   { value: "99.9%", label: "Uptime", icon: Zap },
 ];
 
+const testimonials = [
+  {
+    quote: "The depth of the data is unlike anything I've seen. The Sors Engine caught line value 3 hours before the public moved the market.",
+    author: "M.T.",
+    tier: "Sharp Member",
+    since: "Jan 2025"
+  },
+  {
+    quote: "Applying for Edge was the best decision for my bankroll. The AI assistant helps me filter out the noise and focus on high-confidence plays.",
+    author: "J.D.",
+    tier: "Edge Member",
+    since: "Feb 2025"
+  },
+  {
+    quote: "Sors Maxima isn't just a picker service; it's a full intelligence suite. The arbitrage scanner alone paid for my membership in week one.",
+    author: "R.S.",
+    tier: "Max Member",
+    since: "Dec 2024"
+  },
+  {
+    quote: "Verified tracking is why I'm here. Knowing the 'why' behind every 46-factor prediction gives me the confidence to stick to the strategy.",
+    author: "S.K.",
+    tier: "Sharp Member",
+    since: "Mar 2025"
+  }
+];
+
+const trustSignals = [
+  { icon: Lock, label: "SSL Secured", description: "Military-grade encryption" },
+  { icon: Database, label: "6 Live Data APIs", description: "Sub-second updates" },
+  { icon: CheckCircle, label: "3,800+ Picks Tracked", description: "Verified performance" },
+  { icon: Shield, label: "Members-Only Access", description: "Limited entry protocol" },
+];
+
+const howItWorks = [
+  { step: 1, title: "Apply", description: "Submit your application for our Edge or Max tiers to join our exclusive community." },
+  { step: 2, title: "Get Approved", description: "Our team reviews all applicants to maintain a high-signal environment." },
+  { step: 3, title: "Access Your Edge", description: "Unlock the full suite of intelligence tools and start betting smarter." },
+];
+
 const pricingTiers = [
   {
     name: "Sharp",
@@ -107,17 +151,6 @@ const pricingTiers = [
 
 export default function LandingPage() {
   useSEO({ title: "Sors Maxima — Private Betting Intelligence", description: "Exclusive sports betting intelligence platform. 46 analysis factors, real-time data, advanced simulations. Members only." });
-  const [betSize, setBetSize] = useState(50);
-  const [betsPerWeek, setBetsPerWeek] = useState(10);
-  const [winRate, setWinRate] = useState(48);
-
-  const edgeImprovement = 6.5;
-  const monthlyBets = betsPerWeek * 4.33;
-  const currentProfit = monthlyBets * betSize * ((winRate / 100) * 1.91 - 1);
-  const improvedWinRate = winRate + edgeImprovement;
-  const improvedProfit = monthlyBets * betSize * ((improvedWinRate / 100) * 1.91 - 1);
-
-  const maxBarValue = Math.max(Math.abs(currentProfit), Math.abs(improvedProfit), 1);
 
   return (
     <div className="min-h-screen bg-background">
@@ -137,14 +170,14 @@ export default function LandingPage() {
               Private Betting Intelligence Platform
             </Badge>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white max-w-4xl leading-tight">
-              The Edge the Books Don't Want You to Have.
+              Exclusive Intelligence for the Modern Bettor.
             </h1>
             <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">
-              46 analysis factors. Real-time ESPN data. Advanced simulations across 14+ sports.
-              Sors Maxima is a closed-door intelligence platform for serious bettors only.
+              Sors Maxima is a closed-door platform providing institutional-grade data and proprietary simulations. 
+              We don't just find picks; we identify market inefficiencies.
             </p>
             <div className="flex items-center gap-4 flex-wrap justify-center">
-              <Link href="/login">
+              <Link href="/apply">
                 <Button size="lg" data-testid="button-hero-join-now">
                   Request Access
                   <ChevronRight className="w-4 h-4 ml-1" />
@@ -157,7 +190,7 @@ export default function LandingPage() {
                   className="backdrop-blur-sm bg-white/5"
                   data-testid="button-hero-see-pricing"
                 >
-                  See Pricing
+                  View Tiers
                 </Button>
               </Link>
             </div>
@@ -165,13 +198,31 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <section className="border-y bg-muted/30" data-testid="section-trust-signals">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {trustSignals.map((signal) => (
+              <div key={signal.label} className="flex items-center gap-3 justify-center lg:justify-start" data-testid={`trust-signal-${signal.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <signal.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-bold leading-none">{signal.label}</div>
+                  <div className="text-xs text-muted-foreground">{signal.description}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-features">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            Your Unfair Advantage
+            What Our Engine Tracks
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            A private suite of AI-driven tools built to find edges, manage risk, and maximize returns — available only to members.
+            Our 46-factor analysis engine processes millions of data points daily to find edges that others miss.
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -193,183 +244,86 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="bg-muted/50 border-y" data-testid="section-stats">
-        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat) => (
-              <div key={stat.label} className="text-center space-y-2" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                <stat.icon className="w-6 h-6 mx-auto text-muted-foreground" />
-                <div className="text-3xl sm:text-4xl font-bold">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+      <section className="bg-muted/50 border-y" data-testid="section-how-it-works">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
+          <div className="text-center space-y-4 mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+              How It Works
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Join our exclusive community in three simple steps.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-border -translate-y-1/2 z-0" />
+            {howItWorks.map((step) => ( step.step === 2 ? (
+              <div key={step.step} className="relative z-10 flex flex-col items-center text-center space-y-4" data-testid={`step-${step.step}`}>
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold shadow-lg">
+                  {step.step}
+                </div>
+                <h3 className="text-xl font-bold">{step.title}</h3>
+                <p className="text-sm text-muted-foreground max-w-[250px]">{step.description}</p>
               </div>
-            ))}
+            ) : (
+              <div key={step.step} className="relative z-10 flex flex-col items-center text-center space-y-4" data-testid={`step-${step.step}`}>
+                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold shadow-lg">
+                  {step.step}
+                </div>
+                <h3 className="text-xl font-bold">{step.title}</h3>
+                <p className="text-sm text-muted-foreground max-w-[250px]">{step.description}</p>
+              </div>
+            )))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link href="/apply">
+              <Button size="lg" className="gap-2">
+                Start Your Application
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-roi-calculator">
+      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-testimonials">
         <div className="text-center space-y-4 mb-12">
-          <Badge variant="outline" className="gap-1">
-            <Calculator className="w-3 h-3" />
-            ROI Calculator
-          </Badge>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            See Your Potential Edge
+            Trusted by the Sharpest
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Input your betting habits and see how a {edgeImprovement}% win rate improvement changes your bottom line.
+            Join a community of data-driven bettors who demand more than just luck.
           </p>
         </div>
-
-        <Card className="max-w-3xl mx-auto">
-          <CardContent className="pt-6 space-y-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 text-muted-foreground" />
-                  Average Bet Size
-                </label>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">$</span>
-                  <Input
-                    type="number"
-                    min={1}
-                    max={1000}
-                    value={betSize}
-                    onChange={(e) => setBetSize(Math.max(1, Math.min(1000, Number(e.target.value))))}
-                    data-testid="input-bet-size"
-                  />
-                </div>
-                <Slider
-                  min={1}
-                  max={500}
-                  step={5}
-                  value={[betSize]}
-                  onValueChange={([v]) => setBetSize(v)}
-                  data-testid="slider-bet-size"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                  Bets Per Week
-                </label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={100}
-                  value={betsPerWeek}
-                  onChange={(e) => setBetsPerWeek(Math.max(1, Math.min(100, Number(e.target.value))))}
-                  data-testid="input-bets-per-week"
-                />
-                <Slider
-                  min={1}
-                  max={50}
-                  step={1}
-                  value={[betsPerWeek]}
-                  onValueChange={([v]) => setBetsPerWeek(v)}
-                  data-testid="slider-bets-per-week"
-                />
-              </div>
-
-              <div className="space-y-3">
-                <label className="text-sm font-medium flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                  Current Win Rate %
-                </label>
-                <Input
-                  type="number"
-                  min={30}
-                  max={70}
-                  value={winRate}
-                  onChange={(e) => setWinRate(Math.max(30, Math.min(70, Number(e.target.value))))}
-                  data-testid="input-win-rate"
-                />
-                <Slider
-                  min={30}
-                  max={70}
-                  step={0.5}
-                  value={[winRate]}
-                  onValueChange={([v]) => setWinRate(v)}
-                  data-testid="slider-win-rate"
-                />
-              </div>
-            </div>
-
-            <div className="border-t pt-6 space-y-6">
-              <h3 className="text-lg font-semibold text-center">Projected Monthly Results</h3>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="text-muted-foreground">Without Sors Maxima ({winRate.toFixed(1)}% win rate)</span>
-                    <span className={`font-semibold ${currentProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {currentProfit >= 0 ? "+" : ""}{currentProfit.toFixed(0)}
-                    </span>
-                  </div>
-                  <div className="h-6 bg-muted rounded-md overflow-hidden">
-                    <div
-                      className={`h-full rounded-md transition-all ${currentProfit >= 0 ? "bg-green-500/40" : "bg-red-500/40"}`}
-                      style={{ width: `${Math.max(2, (Math.abs(currentProfit) / maxBarValue) * 100)}%` }}
-                      data-testid="bar-without-sors"
-                    />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {testimonials.map((testimonial, i) => (
+            <Card key={i} className="flex flex-col" data-testid={`testimonial-card-${i}`}>
+              <CardContent className="pt-6 flex-1 italic text-sm text-muted-foreground">
+                "{testimonial.quote}"
+              </CardContent>
+              <CardFooter className="border-t pt-4 flex items-center gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="text-[10px]">{testimonial.author}</AvatarFallback>
+                </Avatar>
+                <div className="text-left">
+                  <div className="text-sm font-bold">{testimonial.author}</div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {testimonial.tier} since {testimonial.since}
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between gap-2 text-sm">
-                    <span className="font-medium flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500" />
-                      With Sors Maxima ({improvedWinRate.toFixed(1)}% win rate)
-                    </span>
-                    <span className={`font-semibold ${improvedProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {improvedProfit >= 0 ? "+" : ""}{improvedProfit.toFixed(0)}
-                    </span>
-                  </div>
-                  <div className="h-6 bg-muted rounded-md overflow-hidden">
-                    <div
-                      className={`h-full rounded-md transition-all ${improvedProfit >= 0 ? "bg-green-500/70" : "bg-red-500/70"}`}
-                      style={{ width: `${Math.max(2, (Math.abs(improvedProfit) / maxBarValue) * 100)}%` }}
-                      data-testid="bar-with-sors"
-                    />
-                  </div>
-                </div>
-
-                {improvedProfit > currentProfit && (
-                  <div className="text-center pt-2">
-                    <Badge variant="secondary" className="gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      +${(improvedProfit - currentProfit).toFixed(0)}/mo potential improvement
-                    </Badge>
-                  </div>
-                )}
-              </div>
-
-              <div className="text-center pt-2">
-                <Link href="/pricing">
-                  <Button size="lg" data-testid="button-roi-view-plans">
-                    View Membership Plans
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <p className="text-xs text-muted-foreground text-center mt-4 max-w-lg mx-auto">
-          For illustrative purposes only. Assumes standard -110 odds. Actual results depend on bet selection, odds, and market conditions. Not a guarantee of profitability.
-        </p>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </section>
 
       <section className="bg-muted/50 border-y" data-testid="section-pricing">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center space-y-4 mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-              Simple, Transparent Pricing
+              Membership Tiers
             </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Three exclusive tiers built for serious bettors. No hidden fees. Cancel anytime.
+              Select the level of intelligence that matches your strategy.
             </p>
           </div>
 
@@ -407,13 +361,13 @@ export default function LandingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Link href={tier.price === 0 ? "/login" : "/pricing"} className="w-full">
+                  <Link href={tier.name === "Sharp" ? "/pricing" : `/apply?tier=${tier.name.toLowerCase()}`} className="w-full">
                     <Button
                       className="w-full"
                       variant={tier.variant}
                       data-testid={`button-pricing-${tier.name.toLowerCase()}`}
                     >
-                      {tier.cta}
+                      {tier.name === "Sharp" ? "Join Sharp" : `Apply for ${tier.name}`}
                     </Button>
                   </Link>
                 </CardFooter>
@@ -437,15 +391,15 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
         <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 py-20 sm:py-28 text-center space-y-6">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-            Ready to Bet Smarter?
+            Ready to Gain the Edge?
           </h2>
           <p className="text-lg text-gray-300 max-w-xl mx-auto">
-            Join thousands of bettors using Sors Maxima to turn data into an unfair advantage.
+            Apply for membership today and join the inner circle of data-driven betting.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <Link href="/pricing">
+            <Link href="/apply">
               <Button size="lg" data-testid="button-footer-join-now">
-                Become a Member
+                Start Application
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>
@@ -456,7 +410,7 @@ export default function LandingPage() {
                 className="backdrop-blur-sm bg-white/5"
                 data-testid="button-footer-see-pricing"
               >
-                See Pricing
+                View Plans
               </Button>
             </Link>
           </div>

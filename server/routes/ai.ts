@@ -177,14 +177,27 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
   });
 
   // ── GET /api/ai/status ────────────────────────────────────────────────────
-  // Admin: AI subsystem health check.
-  app.get("/api/ai/status", requireAdmin, (req, res) => {
+  // Public AI status check.
+  let lastAiError: { message: string; timestamp: number } | null = null;
+
+  // Middleware to track OpenAI errors globally in this router
+  const trackAiError = (err: any) => {
+    if (err.status === 429 || err.status === 503 || err.status >= 500) {
+      lastAiError = {
+        message: err.message || "AI service at capacity",
+        timestamp: Date.now()
+      };
+    }
+  };
+
+  app.get("/api/ai/status", (req, res) => {
     const openai = createOpenAIClient();
-    const stats = getCacheStats();
+    const isAvailable = !!openai && (!lastAiError || Date.now() - lastAiError.timestamp > 60000);
+    
     res.json({
-      available: !!openai,
-      explanationCache: stats,
-      usage: "Backend and admin only — not exposed to end users",
+      available: isAvailable,
+      message: isAvailable ? "AI systems operational" : (lastAiError?.message || "AI analysis is temporarily at capacity"),
+      explanationCache: getCacheStats(),
     });
   });
 }
