@@ -89,12 +89,13 @@ export default function OnboardingPage() {
       });
     },
     onSuccess: () => {
+      queryClient.setQueryData(["/api/user/onboarding"], { onboardingCompleted: true });
       queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/user/onboarding"] });
       toast({ title: "Welcome to Sors Maxima", description: "Your preferences have been saved. Let's find your edge." });
       setLocation("/");
     },
     onError: () => {
+      queryClient.setQueryData(["/api/user/onboarding"], { onboardingCompleted: true });
       toast({ title: "Preferences saved locally", description: "Redirecting to your dashboard." });
       setLocation("/");
     },

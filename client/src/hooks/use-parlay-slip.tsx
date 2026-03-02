@@ -45,9 +45,13 @@ const ParlaySlipContext = createContext<ParlaySlipContextValue | null>(null);
 
 const STORAGE_KEY = "sors_parlay_slip";
 
-function loadFromStorage(): ParlaySlipLeg[] {
+function getStorageKey(username?: string): string {
+  return username ? `${STORAGE_KEY}_${username}` : STORAGE_KEY;
+}
+
+function loadFromStorage(username?: string): ParlaySlipLeg[] {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(getStorageKey(username));
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed)) return parsed;
@@ -56,9 +60,9 @@ function loadFromStorage(): ParlaySlipLeg[] {
   return [];
 }
 
-function saveToStorage(legs: ParlaySlipLeg[]) {
+function saveToStorage(legs: ParlaySlipLeg[], username?: string) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(legs));
+    localStorage.setItem(getStorageKey(username), JSON.stringify(legs));
   } catch {}
 }
 
@@ -71,13 +75,17 @@ function safeDecimalOdds(leg: ParlaySlipLeg): number {
   return 1.909;
 }
 
-export function ParlaySlipProvider({ children }: { children: ReactNode }) {
-  const [legs, setLegs] = useState<ParlaySlipLeg[]>(loadFromStorage);
+export function ParlaySlipProvider({ children, username }: { children: ReactNode; username?: string }) {
+  const [legs, setLegs] = useState<ParlaySlipLeg[]>(() => loadFromStorage(username));
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    saveToStorage(legs);
-  }, [legs]);
+    setLegs(loadFromStorage(username));
+  }, [username]);
+
+  useEffect(() => {
+    saveToStorage(legs, username);
+  }, [legs, username]);
 
   const addLeg = useCallback((leg: ParlaySlipLeg): boolean => {
     let added = false;

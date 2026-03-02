@@ -812,7 +812,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <GeoComplianceBanner />
       </div>
       
-      <ParlaySlipProvider>
+      <ParlaySlipProvider username={authState.username}>
         <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
           <Router authState={authState} />
         </main>
