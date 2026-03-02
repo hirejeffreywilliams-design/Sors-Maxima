@@ -1364,4 +1364,76 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       res.status(500).json({ error: "Failed to save picks" });
     }
   });
+
+  app.get("/api/user/strategy", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = numericUserId(req);
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+      const rows = await db.execute(sql`
+        SELECT strategy_id, strategy_name, constraints, notes, override_count, set_at, updated_at
+        FROM user_strategies WHERE user_id = ${userId}
+      `);
+      if (rows.rows.length === 0) return res.json(null);
+      const row = rows.rows[0] as any;
+      res.json({
+        strategyId: row.strategy_id,
+        strategyName: row.strategy_name,
+        constraints: row.constraints,
+        notes: row.notes,
+        overrideCount: row.override_count,
+        setAt: row.set_at,
+        updatedAt: row.updated_at,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch strategy" });
+    }
+  });
+
+  app.put("/api/user/strategy", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = numericUserId(req);
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+      const { strategyId, strategyName, constraints, notes } = req.body;
+      if (!strategyId || !strategyName) return res.status(400).json({ error: "strategyId and strategyName required" });
+      await db.execute(sql`
+        INSERT INTO user_strategies (user_id, strategy_id, strategy_name, constraints, notes, set_at, updated_at)
+        VALUES (${userId}, ${strategyId}, ${strategyName}, ${JSON.stringify(constraints || {})}, ${notes || null}, NOW(), NOW())
+        ON CONFLICT (user_id) DO UPDATE SET
+          strategy_id = EXCLUDED.strategy_id,
+          strategy_name = EXCLUDED.strategy_name,
+          constraints = EXCLUDED.constraints,
+          notes = EXCLUDED.notes,
+          override_count = 0,
+          updated_at = NOW()
+      `);
+      res.json({ success: true, strategyId, strategyName });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to save strategy" });
+    }
+  });
+
+  app.delete("/api/user/strategy", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = numericUserId(req);
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+      await db.execute(sql`DELETE FROM user_strategies WHERE user_id = ${userId}`);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to clear strategy" });
+    }
+  });
+
+  app.post("/api/user/strategy/override", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const userId = numericUserId(req);
+      if (!userId) return res.status(401).json({ error: "Not authenticated" });
+      await db.execute(sql`
+        UPDATE user_strategies SET override_count = override_count + 1, updated_at = NOW()
+        WHERE user_id = ${userId}
+      `);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to record override" });
+    }
+  });
 }

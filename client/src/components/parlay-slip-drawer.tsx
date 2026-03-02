@@ -2,6 +2,8 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useUserStrategy } from "@/hooks/use-user-strategy";
+import { checkPickAgainstStrategy } from "@/lib/strategy-definitions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -45,6 +47,7 @@ import {
   BarChart3,
   Shield,
   Zap,
+  AlertTriangle,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -677,6 +680,21 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
   const toWinAmount = useMemo(() => (toWin * stake).toFixed(2), [toWin, stake]);
   const totalReturn = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
+
+  const { activeStrategy, recordOverride } = useUserStrategy();
+  const strategyViolations = useMemo(() => {
+    if (!activeStrategy) return [];
+    return legs
+      .map((leg, idx) => {
+        const violation = checkPickAgainstStrategy(
+          activeStrategy,
+          { market: leg.market, americanOdds: leg.americanOdds ?? leg.odds, evPercent: leg.evPercent, confidence: leg.confidence, grade: leg.grade },
+          idx
+        );
+        return violation ? { leg, violation } : null;
+      })
+      .filter(Boolean) as { leg: ParlaySlipLeg; violation: { reason: string; severity: "warn" | "strong" } }[];
+  }, [activeStrategy, legs]);
   const formattedTotalOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
 
   const handleCopySlip = () => {
@@ -788,6 +806,27 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           </div>
         </ScrollArea>
 
+        {strategyViolations.length > 0 && (
+          <div className="mx-3 mb-1 p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 space-y-1.5" data-testid="banner-strategy-violations">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+              <AlertTriangle className="w-3.5 h-3.5" />
+              {strategyViolations.length} pick{strategyViolations.length > 1 ? "s" : ""} outside your {activeStrategy?.name} strategy
+            </div>
+            {strategyViolations.map(({ leg, violation }, i) => (
+              <p key={i} className="text-[10px] text-amber-700 dark:text-amber-300 leading-snug">
+                <span className="font-medium">{leg.team}</span>: {violation.reason}
+              </p>
+            ))}
+            <button
+              className="text-[10px] underline text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
+              onClick={() => recordOverride.mutate()}
+              data-testid="button-acknowledge-override"
+            >
+              I understand — continue anyway
+            </button>
+          </div>
+        )}
+
         <div className="border-t bg-background px-4 py-3 space-y-2.5 safe-area-bottom">
           <div className="flex gap-2">
             <Button className="flex-1 h-10 gap-2 font-bold" onClick={handleCopySlip} data-testid="button-copy-full-slip">
@@ -865,6 +904,27 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           ))}
         </div>
       </ScrollArea>
+
+      {strategyViolations.length > 0 && (
+        <div className="mx-2 mb-1 p-2 rounded-lg border border-amber-500/30 bg-amber-500/8 space-y-1" data-testid="banner-strategy-violations-desktop">
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+            <AlertTriangle className="w-3 h-3" />
+            {strategyViolations.length} off-strategy pick{strategyViolations.length > 1 ? "s" : ""}
+          </div>
+          {strategyViolations.map(({ leg, violation }, i) => (
+            <p key={i} className="text-[10px] text-amber-700 dark:text-amber-300 leading-snug">
+              <span className="font-medium">{leg.team}</span>: {violation.reason}
+            </p>
+          ))}
+          <button
+            className="text-[10px] underline text-amber-600 dark:text-amber-400"
+            onClick={() => recordOverride.mutate()}
+            data-testid="button-acknowledge-override-desktop"
+          >
+            Continue anyway
+          </button>
+        </div>
+      )}
 
       <div className="border-t bg-background px-3 py-2 space-y-1.5">
         <div className="flex items-center gap-1.5">

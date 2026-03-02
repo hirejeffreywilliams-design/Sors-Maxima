@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { ReferralProgram } from "@/components/referral-program";
 import { LanguageSelector } from "@/components/language-selector";
+import { StrategyCoach } from "@/components/strategy-coach";
 import {
   Dialog,
   DialogContent,
@@ -813,6 +814,7 @@ export default function Settings() {
           </TabsContent>
 
           <TabsContent value="responsible" className="space-y-4 mt-4">
+            <StrategyCoach />
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

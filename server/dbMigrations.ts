@@ -96,6 +96,24 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS user_strategies (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        strategy_id VARCHAR(50) NOT NULL,
+        strategy_name VARCHAR(100) NOT NULL,
+        constraints JSONB NOT NULL DEFAULT '{}',
+        notes TEXT,
+        override_count INTEGER NOT NULL DEFAULT 0,
+        set_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_user_strategies_user_id ON user_strategies(user_id)
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);
