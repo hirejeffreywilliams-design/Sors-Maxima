@@ -1199,7 +1199,7 @@ function generateLegFromESPNGame(
     totalLine: resolved.total,
     homeRecord: game.homeTeam.record,
     awayRecord: game.awayTeam.record,
-    venue: game.venue || undefined,
+    venue: (typeof game.venue === "string" ? game.venue : (game.venue as any)?.fullName || (game.venue as any)?.name || undefined),
   };
   const legFusion = analyzeLeg(sport, description, americanOdds, {
     hasRealOdds: oddsSource !== "model-estimated",

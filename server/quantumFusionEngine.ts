@@ -811,7 +811,8 @@ function getDataDrivenDirection(
   }
 
   if (source === "altitude_adjustment" && marketContext.venue) {
-    const venueLower = marketContext.venue.toLowerCase();
+    const venueRaw = typeof marketContext.venue === "string" ? marketContext.venue : (marketContext.venue as any)?.name || "";
+    const venueLower = venueRaw.toLowerCase();
     const highAltitudeMarkers = ["ball arena", "elitch", "denver", "salt lake", "delta center", "coors field", "empower field", "mile high", "mexico city", "estadio"];
     const isHighAltitude = highAltitudeMarkers.some(m => venueLower.includes(m));
     if (isHighAltitude) {
