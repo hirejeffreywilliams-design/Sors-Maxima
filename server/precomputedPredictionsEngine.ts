@@ -18,6 +18,8 @@ import { getGameSituationalFactors, type SituationalFactors } from "./situationa
 import { generateMarketSnapshot, type MarketSnapshot, type LineMovementData } from "./marketSnapshotEngine";
 import { isExclusivePick } from "./pickProtectionEngine";
 import { isBDLAvailable, getEnrichedTeamData, lookupTeamByName, type BDLEnrichedTeamData } from "./balldontlie-provider";
+import { getNHLTeamStats, findNHLTeam, type NHLTeamStats } from "./nhl-stats-provider";
+import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
@@ -526,6 +528,28 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     }
   }
 
+  // Load NHL Official Stats (free API, no key needed)
+  let nhlStats: NHLTeamStats[] = [];
+  if (sport === "NHL") {
+    try {
+      nhlStats = await getNHLTeamStats();
+      if (nhlStats.length > 0) {
+        console.log(`[PrecomputedEngine] NHL Stats API: loaded ${nhlStats.length} team stats`);
+      }
+    } catch {}
+  }
+
+  // Load MLB Official Stats (free API, no key needed)
+  let mlbStats: MLBTeamStats[] = [];
+  if (sport === "MLB") {
+    try {
+      mlbStats = await getMLBTeamStats();
+      if (mlbStats.length > 0) {
+        console.log(`[PrecomputedEngine] MLB Stats API: loaded ${mlbStats.length} team stats`);
+      }
+    } catch {}
+  }
+
   for (const game of upcomingGames.slice(0, 15)) {
     const homeName = game.homeTeam?.displayName || "Home";
     const awayName = game.awayTeam?.displayName || "Away";
@@ -544,6 +568,12 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
     const homeWinPct = parseWinPct(homeRecord);
     const awayWinPct = parseWinPct(awayRecord);
+
+    // Sport-specific stats lookups (loaded once per sport before the game loop)
+    const homeNHLStats = sport === "NHL" ? findNHLTeam(homeName) : undefined;
+    const awayNHLStats = sport === "NHL" ? findNHLTeam(awayName) : undefined;
+    const homeMLBStats = sport === "MLB" ? findMLBTeam(homeName) : undefined;
+    const awayMLBStats = sport === "MLB" ? findMLBTeam(awayName) : undefined;
 
     let homeInjuryCount = 0, awayInjuryCount = 0;
     let homeStartersOut = 0, awayStartersOut = 0;
@@ -1006,6 +1036,62 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
       const mappedFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
+
+      // Add sport-specific factors from official stats APIs
+      try {
+        if (sport === "NHL" && homeNHLStats && awayNHLStats) {
+          const ppDiff = homeNHLStats.powerPlayPct - awayNHLStats.powerPlayPct;
+          const gpgDiff = homeNHLStats.goalsForPerGame - awayNHLStats.goalsForPerGame;
+          const pkEdge = homeNHLStats.penaltyKillPct - awayNHLStats.penaltyKillPct;
+          if (Math.abs(ppDiff) > 0.005) {
+            mappedFactors.push({
+              name: "Power Play Differential",
+              impact: Math.min(12, Math.round(Math.abs(ppDiff * 100) * 0.5 * 10) / 10),
+              direction: ppDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(gpgDiff) > 0.15) {
+            mappedFactors.push({
+              name: "Goals Per Game Edge",
+              impact: Math.min(10, Math.round(Math.abs(gpgDiff) * 4 * 10) / 10),
+              direction: gpgDiff > 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(pkEdge) > 0.02) {
+            mappedFactors.push({
+              name: "Penalty Kill Edge",
+              impact: Math.min(8, Math.round(Math.abs(pkEdge * 100) * 0.3 * 10) / 10),
+              direction: pkEdge > 0 ? "positive" : "negative",
+            });
+          }
+        } else if (sport === "MLB" && homeMLBStats && awayMLBStats) {
+          const eraDiff = homeMLBStats.era - awayMLBStats.era;
+          const runsDiff = homeMLBStats.runsScored - awayMLBStats.runsScored;
+          if (Math.abs(eraDiff) > 0.2) {
+            mappedFactors.push({
+              name: "Starting Pitching Edge",
+              impact: Math.min(12, Math.round(Math.abs(eraDiff) * 2.5 * 10) / 10),
+              direction: eraDiff < 0 ? "positive" : "negative",
+            });
+          }
+          if (Math.abs(runsDiff) > 20) {
+            mappedFactors.push({
+              name: "Run Production Differential",
+              impact: Math.min(8, Math.round(Math.abs(runsDiff) * 0.04 * 10) / 10),
+              direction: runsDiff > 0 ? "positive" : "negative",
+            });
+          }
+          const whipDiff = homeMLBStats.whip - awayMLBStats.whip;
+          if (Math.abs(whipDiff) > 0.05) {
+            mappedFactors.push({
+              name: "Pitching Control Edge",
+              impact: Math.min(7, Math.round(Math.abs(whipDiff) * 5 * 10) / 10),
+              direction: whipDiff < 0 ? "positive" : "negative",
+            });
+          }
+        }
+      } catch {}
+
       const evRounded = Math.round(ev * 100) / 100;
       const rec = fusion.recommendation || "lean_bet";
       const winProb = fusion.winProbability || Math.round(confidence * 0.95);

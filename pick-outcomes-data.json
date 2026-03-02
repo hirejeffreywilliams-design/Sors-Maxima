@@ -639,54 +639,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-02T00:01:41.705Z",
       "savedAt": "2026-03-02T00:01:41.705Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-dd6715977729",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Penguins @ Bruins",
-      "homeTeam": "Bruins",
-      "awayTeam": "Penguins",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T13:44:04.947Z",
-      "savedAt": "2026-03-02T13:44:04.947Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-fb48929a2bb8",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Senators @ Oilers",
-      "homeTeam": "Oilers",
-      "awayTeam": "Senators",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T13:44:04.947Z",
-      "savedAt": "2026-03-02T13:44:04.947Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-4e78e801fd6f",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Maple Leafs @ Devils",
-      "homeTeam": "Devils",
-      "awayTeam": "Maple Leafs",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T13:44:04.947Z",
-      "savedAt": "2026-03-02T13:44:04.947Z"
     }
   ],
   "settled": [
@@ -76525,25 +76477,125 @@
       "homeScore": 5,
       "awayScore": 2,
       "settledAt": "2026-03-02T13:49:22.832Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820821-team_total-3e6b849554",
+      "gameId": "401820821",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Arizona Wildcats Under 78.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-03T02:00Z",
+      "savedAt": "2026-03-02T13:52:58.433Z",
+      "result": "lost",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-02T13:54:10.126Z"
+    },
+    {
+      "id": "precomp-NHL-401803318-moneyline-a4363ed3eb",
+      "gameId": "401803318",
+      "sport": "NHL",
+      "game": "Tampa Bay Lightning @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Tampa Bay Lightning",
+      "pick": "Minnesota Wild ML",
+      "betType": "moneyline",
+      "odds": 103,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 23.83,
+      "gameTime": "2026-03-04T02:30Z",
+      "savedAt": "2026-03-02T13:56:39.255Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-02T13:59:24.725Z"
+    },
+    {
+      "id": "precomp-NHL-401803318-total-0319bbe4ee",
+      "gameId": "401803318",
+      "sport": "NHL",
+      "game": "Tampa Bay Lightning @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Tampa Bay Lightning",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T02:30Z",
+      "savedAt": "2026-03-02T13:56:39.255Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-02T13:59:24.725Z"
+    },
+    {
+      "id": "precomp-NHL-401803318-team_total-10e79dc391",
+      "gameId": "401803318",
+      "sport": "NHL",
+      "game": "Tampa Bay Lightning @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Tampa Bay Lightning",
+      "pick": "Minnesota Wild Over 3",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T02:30Z",
+      "savedAt": "2026-03-02T13:56:39.255Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-02T13:59:24.725Z"
+    },
+    {
+      "id": "precomp-NHL-401803318-team_total-4db01913d9",
+      "gameId": "401803318",
+      "sport": "NHL",
+      "game": "Tampa Bay Lightning @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Tampa Bay Lightning",
+      "pick": "Tampa Bay Lightning Over 3",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T02:30Z",
+      "savedAt": "2026-03-02T13:56:39.255Z",
+      "result": "push",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-02T13:59:24.725Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3685,
+      "total": 3690,
       "won": 1839,
-      "lost": 1810,
-      "push": 36,
-      "rate": 49.9,
-      "pending": 43
+      "lost": 1814,
+      "push": 37,
+      "rate": 49.8,
+      "pending": 40
     },
     "bySport": {
       "NHL": {
-        "total": 674,
+        "total": 678,
         "won": 285,
-        "rate": 42.3
+        "rate": 42
       },
       "NCAAB": {
-        "total": 1320,
+        "total": 1321,
         "won": 725,
         "rate": 54.9
       },
@@ -76595,9 +76647,9 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 154,
+        "total": 158,
         "won": 79,
-        "rate": 51.3
+        "rate": 50
       },
       "A": {
         "total": 142,
@@ -76605,16 +76657,16 @@
         "rate": 55.6
       },
       "A+": {
-        "total": 700,
+        "total": 701,
         "won": 422,
-        "rate": 60.3
+        "rate": 60.2
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 661,
+        "total": 664,
         "won": 391,
-        "rate": 59.2
+        "rate": 58.9
       },
       "Spread": {
         "total": 1412,
@@ -76622,23 +76674,23 @@
         "rate": 39.6
       },
       "Total": {
-        "total": 1494,
+        "total": 1495,
         "won": 830,
-        "rate": 55.6
+        "rate": 55.5
       },
       "Moneyline": {
-        "total": 118,
+        "total": 119,
         "won": 59,
-        "rate": 50
+        "rate": 49.6
       }
     },
     "recentForm": {
       "won": 25,
-      "lost": 25,
-      "push": 0,
+      "lost": 24,
+      "push": 1,
       "rate": 50
     },
-    "lastUpdated": "2026-03-02T13:49:22.833Z"
+    "lastUpdated": "2026-03-02T14:04:03.107Z"
   },
   "version": 1
 }

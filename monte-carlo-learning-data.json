@@ -46,6 +46,6 @@
       "predictions": 0
     }
   ],
-  "totalSimulations": 1050000,
+  "totalSimulations": 300000,
   "engineVersion": 1
 }

@@ -487,3 +487,145 @@ export async function lookupTeamByName(teamName: string): Promise<BDLEnrichedTea
     nameLower.includes(t.teamName.split(" ").pop()!.toLowerCase())
   ) || null;
 }
+
+// ─── BallDontLie NFL + MLB (paid tier required) ───────────────────────────────
+// isBDLAvailable() checks NBA only. Use isBDLNFLAvailable()/isBDLMLBAvailable() for other sports.
+
+export interface BDLNFLTeamData {
+  teamName: string;
+  passingYards: number;
+  rushingYards: number;
+  passingTouchdowns: number;
+  rushingTouchdowns: number;
+  pointsScored: number;
+  pointsAllowed: number;
+  sacks: number;
+  interceptions: number;
+  turnovers: number;
+}
+
+export interface BDLMLBTeamData {
+  teamName: string;
+  battingAvg: number;
+  ops: number;
+  era: number;
+  whip: number;
+  homeRuns: number;
+  strikeoutsPerGame: number;
+}
+
+let nflAvailable: boolean | null = null;
+let mlbAvailable: boolean | null = null;
+
+const NFL_MLB_CACHE_TTL = 6 * 60 * 60 * 1000;
+let nflCache: { data: BDLNFLTeamData[]; ts: number } | null = null;
+let mlbBDLCache: { data: BDLMLBTeamData[]; ts: number } | null = null;
+
+async function fetchBDLSport<T>(sport: "nfl" | "mlb", path: string, params?: Record<string, string>): Promise<T | null> {
+  const apiKey = getApiKey();
+  if (!apiKey) return null;
+
+  const prefix = sport === "nfl" ? "/nfl/v1" : "/mlb/v1";
+  const url = new URL(`${prefix}${path}`, BASE_URL);
+  if (params) {
+    for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v);
+  }
+
+  const cacheKey = url.toString();
+  const cached = getCached<T>(cacheKey);
+  if (cached) return cached;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const res = await fetch(url.toString(), {
+      headers: { Authorization: apiKey },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (res.status === 401 || res.status === 403) return null;
+    if (!res.ok) {
+      logWarn(`[BDL-${sport.toUpperCase()}] API ${res.status}: ${path}`);
+      return null;
+    }
+    const data = await res.json() as T;
+    setCache(cacheKey, data);
+    return data;
+  } catch (err: any) {
+    if (err.name !== "AbortError") logError(err, { context: `fetchBDL-${sport}`, path });
+    return null;
+  }
+}
+
+export function isBDLNFLAvailable(): boolean {
+  return nflAvailable === true;
+}
+
+export function isBDLMLBAvailable(): boolean {
+  return mlbAvailable === true;
+}
+
+export async function getNFLTeamStatsBDL(): Promise<BDLNFLTeamData[]> {
+  if (nflCache && Date.now() - nflCache.ts < NFL_MLB_CACHE_TTL) return nflCache.data;
+
+  const res = await fetchBDLSport<{ data: any[] }>("nfl", "/teams", { per_page: "5" });
+  if (!res) {
+    if (nflAvailable === null) {
+      nflAvailable = false;
+      logWarn("[BDL] NFL stats unavailable on current plan — upgrade at balldontlie.io for NFL data");
+    }
+    return [];
+  }
+
+  nflAvailable = true;
+  const statsRes = await fetchBDLSport<{ data: any[] }>("nfl", "/season_stats", { season: "2024", type: "team" });
+  if (!statsRes?.data) return [];
+
+  const data: BDLNFLTeamData[] = statsRes.data.map((t: any) => ({
+    teamName: t.team?.full_name || t.team?.name || "",
+    passingYards: t.passing_yards || 0,
+    rushingYards: t.rushing_yards || 0,
+    passingTouchdowns: t.passing_tds || 0,
+    rushingTouchdowns: t.rushing_tds || 0,
+    pointsScored: t.points || 0,
+    pointsAllowed: t.points_allowed || 0,
+    sacks: t.sacks || 0,
+    interceptions: t.interceptions || 0,
+    turnovers: t.turnovers || 0,
+  }));
+
+  nflCache = { data, ts: Date.now() };
+  logInfo(`[BDL] NFL stats loaded ${data.length} teams`);
+  return data;
+}
+
+export async function getMLBTeamStatsBDL(): Promise<BDLMLBTeamData[]> {
+  if (mlbBDLCache && Date.now() - mlbBDLCache.ts < NFL_MLB_CACHE_TTL) return mlbBDLCache.data;
+
+  const res = await fetchBDLSport<{ data: any[] }>("mlb", "/teams", { per_page: "5" });
+  if (!res) {
+    if (mlbAvailable === null) {
+      mlbAvailable = false;
+      logWarn("[BDL] MLB stats unavailable on current plan — upgrade at balldontlie.io for MLB data");
+    }
+    return [];
+  }
+
+  mlbAvailable = true;
+  const statsRes = await fetchBDLSport<{ data: any[] }>("mlb", "/season_stats", { season: "2024", type: "team" });
+  if (!statsRes?.data) return [];
+
+  const data: BDLMLBTeamData[] = statsRes.data.map((t: any) => ({
+    teamName: t.team?.full_name || t.team?.name || "",
+    battingAvg: t.batting_average || 0,
+    ops: t.ops || 0,
+    era: t.era || 4.5,
+    whip: t.whip || 1.3,
+    homeRuns: t.home_runs || 0,
+    strikeoutsPerGame: t.strikeouts_per_game || 0,
+  }));
+
+  mlbBDLCache = { data, ts: Date.now() };
+  logInfo(`[BDL] MLB stats loaded ${data.length} teams`);
+  return data;
+}

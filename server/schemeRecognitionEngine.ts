@@ -4,6 +4,8 @@ import { getRosterFromCacheById, type ESPNTeam, type ESPNCoach } from "./espn-ro
 import { getOddsForSport, type SportEvent } from "./odds-provider";
 import { isBDLAvailable, getEnrichedTeamData, type BDLEnrichedTeamData } from "./balldontlie-provider";
 import { getPrecomputedCache } from "./precomputedPredictionsEngine";
+import { getNHLTeamStats, findNHLTeam, type NHLTeamStats } from "./nhl-stats-provider";
+import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
 
 export interface TeamSchemeData {
   teamName: string;
@@ -149,6 +151,21 @@ interface SchemeStats {
   streakType?: string;
   pointsAllowed?: number;
   rosterSize?: number;
+  // NHL-specific stats from api.nhle.com
+  goalsForPG?: number;
+  goalsAgainstPG?: number;
+  powerPlayPct?: number;
+  penaltyKillPct?: number;
+  shotsPG?: number;
+  shotsAgainstPG?: number;
+  faceoffWinPct?: number;
+  // MLB-specific stats from statsapi.mlb.com
+  era?: number;
+  whip?: number;
+  runsScored?: number;
+  runsAllowed?: number;
+  strikeoutsPer9?: number;
+  walksPer9?: number;
 }
 
 function getOffensiveScheme(sport: string, winPct: number, teamId: string, stats?: SchemeStats): TeamSchemeData["offensiveScheme"] {
@@ -218,30 +235,40 @@ function getOffensiveScheme(sport: string, winPct: number, teamId: string, stats
       name = "Survival Offense"; keyPlays = ["Checkdown Routes", "Screen Passes", "QB Keeper", "Field Goals"];
     }
   } else if (sport === "MLB") {
-    const avgPts = stats?.avgPts ?? 4.2;
-    if (winPct >= 0.58 && avgPts > 4.8) {
-      name = "Analytics Power Offense"; keyPlays = ["Launch Angle Hitting", "Patient At-Bats", "Power Focus", "Platoon Splits"];
-    } else if (winPct >= 0.55 && awayWinPct >= 0.5) {
-      name = "Contact & Balance"; keyPlays = ["Line Drives", "Situational Hitting", "Two-Strike Approach", "Hit and Run"];
-    } else if (winPct >= 0.5 && isHotStreak) {
+    const runsScored = stats?.runsScored;
+    const gamesPlayed = 162;
+    const runsPG = runsScored ? runsScored / gamesPlayed : (stats?.avgPts ?? 4.2);
+    // Use real MLB runs/game when available
+    if (runsPG >= 5.2) {
+      name = "High-Powered Lineup"; keyPlays = ["Launch Angle Hitting", "Patient At-Bats", "Power Focus", "Platoon Splits"];
+    } else if (runsPG >= 4.5 && awayWinPct >= 0.5) {
+      name = "Balanced Offense"; keyPlays = ["Line Drives", "Situational Hitting", "Two-Strike Approach", "Hit and Run"];
+    } else if (runsPG >= 4.0 && isHotStreak) {
       name = "Station-to-Station"; keyPlays = ["Extra-Base Hits", "Sacrifice Flies", "RBI Situations", "Power Corners"];
-    } else if (winPct >= 0.45) {
-      name = "Speed & Contact"; keyPlays = ["Stolen Bases", "Hit and Run", "Slap Hitting", "Bunt Game"];
+    } else if (runsPG >= 3.8) {
+      name = "Pitching-First Approach"; keyPlays = ["Small Ball", "Manufacturing Runs", "Speed Game", "Bunt Sets"];
     } else {
       name = "Small Ball"; keyPlays = ["Sacrifice Bunts", "Stolen Bases", "Hit and Run", "Squeeze Plays"];
     }
   } else if (sport === "NHL") {
-    const avgPts = stats?.avgPts ?? 2.8;
-    if (winPct >= 0.62 || (isHotStreak && winPct >= 0.55)) {
+    const gpg = stats?.goalsForPG ?? 2.8;
+    const shotsPG = stats?.shotsPG ?? 29;
+    const ppPct = stats?.powerPlayPct ?? 19;
+    // Use real NHL stats when available for more specific scheme names
+    if (gpg >= 3.5 && shotsPG >= 33) {
+      name = "High-Octane Offense"; keyPlays = ["Power Play Dominance", "Slot Attacks", "Net-Front Presence", "High Volume Shots"];
+    } else if (gpg >= 3.2 && shotsPG >= 30) {
       name = "Puck Possession"; keyPlays = ["Cycle Game", "Point Shots", "Net-Front Presence", "Extended Zone Time"];
-    } else if (winPct >= 0.52 && awayWinPct >= 0.48) {
+    } else if (gpg >= 3.0 && ppPct >= 22) {
+      name = "Power Play-Driven"; keyPlays = ["Overload Formations", "Cross-Ice Passes", "One-Timers", "PP Unit Depth"];
+    } else if (gpg >= 2.8 && awayWinPct >= 0.48) {
       name = "Speed Transition"; keyPlays = ["Stretch Passes", "Odd-Man Rushes", "Dump and Chase", "Forecheck Pressure"];
-    } else if (winPct >= 0.5 && teamVariant === 0) {
+    } else if (isHotStreak && winPct >= 0.52) {
       name = "Cycle & Crash"; keyPlays = ["Below-the-Goal Line", "Net Traffic", "Rebound Goals", "Grinding Forecheck"];
-    } else if (avgPts > 3.1) {
-      name = "High-Tempo Offense"; keyPlays = ["Rush Opportunities", "Power Play Units", "Quick Shots", "Slot Attacks"];
+    } else if (gpg < 2.5 || (shotsPG < 26 && winPct < 0.48)) {
+      name = "Trap Counter"; keyPlays = ["Defensive Counter", "Odd-Man Rushes", "Dump and Chase", "Shot-First Mentality"];
     } else {
-      name = "Defensive Counter"; keyPlays = ["Neutral Zone Trap", "Shot Blocking", "Counterattack", "Low-Event Hockey"];
+      name = "Balanced Attack"; keyPlays = ["Inside-Out Play", "Quick Transitions", "Power Play Setup", "Forecheck"];
     }
   } else if (sport === "NCAAB") {
     const pace = stats?.pace ?? 68;
@@ -323,19 +350,37 @@ function getDefensiveScheme(sport: string, winPct: number, teamId: string, stats
       name = "Prevent Zone"; formation = "Soft Zone + Bracket";
     }
   } else if (sport === "MLB") {
-    if (winPct >= 0.58 && (stats?.avgPts ?? 4.2) < 4.0) {
-      name = "Power Pitching Staff"; formation = "Strikeout-First Approach";
+    const era = stats?.era;
+    const whip = stats?.whip;
+    const k9 = stats?.strikeoutsPer9;
+    // Use real ERA/WHIP when available
+    if (era !== undefined && era < 3.5) {
+      name = "Ace-Led Pitching Staff"; formation = "Strikeout-First Approach";
+    } else if (era !== undefined && era < 4.0 && (k9 ?? 8) >= 9) {
+      name = "Power Pitching Staff"; formation = "High-K Rotation";
+    } else if (era !== undefined && era < 4.2) {
+      name = "Quality Rotation"; formation = "Pitch to Contact + Analytics Shift";
+    } else if (era !== undefined && era >= 4.8) {
+      name = "Bullpen-Heavy Approach"; formation = "Opener + Bulk Reliever";
     } else if (winPct >= 0.55 && awayWinPct >= 0.5) {
       name = "Ground Ball Focus"; formation = "Pitch to Contact + Shift";
-    } else if (winPct >= 0.5) {
-      name = "Analytics-First Pitching"; formation = "Opener + Bulk Reliever";
     } else if (winPct >= 0.45) {
       name = "Defensive Positioning"; formation = "Shift + Spray Charts";
     } else {
       name = "Fly Ball Defense"; formation = "Standard Positioning";
     }
   } else if (sport === "NHL") {
-    if (winPct >= 0.60 || (isHotStreak && winPct >= 0.52)) {
+    const gapg = stats?.goalsAgainstPG;
+    const pkPct = stats?.penaltyKillPct;
+    const shotsAgainst = stats?.shotsAgainstPG;
+    // Use real NHL defensive stats when available
+    if (gapg !== undefined && gapg < 2.5 && (pkPct ?? 80) >= 82) {
+      name = "Elite Defensive System"; formation = "1-2-2 Lockdown + PK Unit";
+    } else if (gapg !== undefined && gapg < 2.8) {
+      name = "Disciplined Structure"; formation = "Collapsing Zone";
+    } else if (gapg !== undefined && gapg >= 3.2) {
+      name = "High-Risk Style"; formation = "Aggressive Forecheck + Open Ice";
+    } else if (winPct >= 0.60 || (isHotStreak && winPct >= 0.52)) {
       name = "Aggressive Forecheck"; formation = "1-2-2 Forecheck";
     } else if (winPct >= 0.52 && teamVariant !== 2) {
       name = "Shot Suppression"; formation = "Collapsing Zone";
@@ -734,6 +779,24 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     } catch {}
   }
 
+  // Load NHL Official API stats (free, no key)
+  let nhlTeamStats: NHLTeamStats[] = [];
+  if (sport === "NHL") {
+    try {
+      nhlTeamStats = await getNHLTeamStats();
+      if (nhlTeamStats.length > 0) dataSources.add("NHL Stats API");
+    } catch {}
+  }
+
+  // Load MLB Official API stats (free, no key)
+  let mlbTeamStats: MLBTeamStats[] = [];
+  if (sport === "MLB") {
+    try {
+      mlbTeamStats = await getMLBTeamStats();
+      if (mlbTeamStats.length > 0) dataSources.add("MLB Stats API");
+    } catch {}
+  }
+
   // Load cached odds for the whole sport once — no per-game API calls
   let cachedEvents: SportEvent[] = [];
   try {
@@ -753,12 +816,23 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     );
   }
 
+  function findNHL(teamName: string): NHLTeamStats | undefined {
+    if (!nhlTeamStats.length) return undefined;
+    return findNHLTeam(teamName);
+  }
+
+  function findMLB(teamName: string): MLBTeamStats | undefined {
+    if (!mlbTeamStats.length) return undefined;
+    return findMLBTeam(teamName);
+  }
+
   function buildStats(
     teamData: { team: ESPNTeam; record: string; parsed: { wins: number; losses: number; pct: number } },
-    bdl?: BDLEnrichedTeamData
+    bdl?: BDLEnrichedTeamData,
+    nhl?: NHLTeamStats,
+    mlb?: MLBTeamStats
   ): SchemeStats {
     const total = teamData.parsed.wins + teamData.parsed.losses;
-    // Estimate home/away split: home teams win ~55% of games at home on average
     const homeGames = Math.round(total * 0.5);
     const homeWins = bdl?.homeWins ?? Math.round(teamData.parsed.pct * homeGames * 1.08);
     const homeLosses = bdl?.homeLosses ?? Math.max(0, homeGames - homeWins);
@@ -779,6 +853,21 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
       awayWinPct: awayTotal > 0 ? Math.min(0.90, awayWins / awayTotal) : Math.max(0.05, teamData.parsed.pct - 0.05),
       streak: bdl?.streak,
       streakType: bdl?.streakType,
+      // NHL Official API stats
+      goalsForPG: nhl?.goalsForPerGame,
+      goalsAgainstPG: nhl?.goalsAgainstPerGame,
+      powerPlayPct: nhl?.powerPlayPct !== undefined ? nhl.powerPlayPct * 100 : undefined,
+      penaltyKillPct: nhl?.penaltyKillPct !== undefined ? nhl.penaltyKillPct * 100 : undefined,
+      shotsPG: nhl?.shotsForPerGame,
+      shotsAgainstPG: nhl?.shotsAgainstPerGame,
+      faceoffWinPct: nhl?.faceoffWinPct !== undefined ? nhl.faceoffWinPct * 100 : undefined,
+      // MLB Official API stats
+      era: mlb?.era,
+      whip: mlb?.whip,
+      runsScored: mlb?.runsScored,
+      runsAllowed: mlb?.runsAllowed,
+      strikeoutsPer9: mlb?.strikeoutsPer9,
+      walksPer9: mlb?.walksPer9,
     };
   }
 
@@ -790,6 +879,10 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
 
     const homeBDL = findBDL(game.homeTeam.displayName);
     const awayBDL = findBDL(game.awayTeam.displayName);
+    const homeNHL = findNHL(game.homeTeam.displayName);
+    const awayNHL = findNHL(game.awayTeam.displayName);
+    const homeMLB = findMLB(game.homeTeam.displayName);
+    const awayMLB = findMLB(game.awayTeam.displayName);
 
     // Use cached odds — no new API calls
     const realOdds = matchOddsToGame(
@@ -801,8 +894,8 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
     const homeTeamData = { team: game.homeTeam, record: homeRecord, parsed: homeParsed };
     const awayTeamData = { team: game.awayTeam, record: awayRecord, parsed: awayParsed };
 
-    const homeStats = buildStats(homeTeamData, homeBDL);
-    const awayStats = buildStats(awayTeamData, awayBDL);
+    const homeStats = buildStats(homeTeamData, homeBDL, homeNHL, homeMLB);
+    const awayStats = buildStats(awayTeamData, awayBDL, awayNHL, awayMLB);
 
     for (const [teamData, bdl, stats] of [
       [homeTeamData, homeBDL, homeStats] as const,
@@ -835,7 +928,13 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
           underdog: Math.round(Math.max(30, Math.min(75, 35 + teamData.parsed.pct * 28 + (stats.streak && stats.streakType === "win" ? stats.streak * 1.5 : 0)))),
           favorite: Math.round(Math.max(38, Math.min(85, 45 + teamData.parsed.pct * 32))),
         },
-        dataSource: bdl ? "ESPN + BallDontLie" : "ESPN",
+        dataSource: bdl
+          ? "ESPN + BallDontLie"
+          : stats.goalsForPG !== undefined
+          ? "ESPN + NHL Stats API"
+          : stats.era !== undefined
+          ? "ESPN + MLB Stats API"
+          : "ESPN",
       });
 
       const roster = getRosterFromCacheById(sport, teamData.team.id);
