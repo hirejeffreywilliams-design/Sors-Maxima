@@ -13,7 +13,44 @@ import { LiveFactorAdjuster } from "@/components/live/live-factor-adjuster";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/use-seo";
 import { useSSE, type SSEEvent } from "@/hooks/use-sse";
+import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+
+interface LiveGame {
+  id: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  status: "live" | "halftime" | "final" | "pre";
+  period: string;
+  clock: string;
+  gameDate?: string;
+}
+
+function LiveGamesStrip({ games }: { games: LiveGame[] }) {
+  const live = games.filter(g => g.status === "live" || g.status === "halftime");
+  if (live.length === 0) return null;
+  return (
+    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-2 pb-1" style={{ minWidth: "max-content" }}>
+        {live.map(g => (
+          <div key={g.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-xs font-medium text-red-600 dark:text-red-400">{g.sport}</span>
+            <span className="text-xs">
+              {g.awayTeam.split(" ").pop()} <span className="font-bold">{g.awayScore}</span>
+              <span className="text-muted-foreground mx-1">@</span>
+              {g.homeTeam.split(" ").pop()} <span className="font-bold">{g.homeScore}</span>
+            </span>
+            {g.period && <span className="text-xs text-muted-foreground">Q{g.period}{g.clock ? ` ${g.clock}` : ""}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Live() {
   useSEO({ title: "Live Betting", description: "Real-time live betting tools and analysis" });
@@ -30,6 +67,10 @@ export default function Live() {
   }, []);
 
   const sse = useSSE({ enabled: true, onEvent: handleSSEEvent });
+  const { data: momentumGames } = useQuery<LiveGame[]>({
+    queryKey: ["/api/live/momentum"],
+    refetchInterval: 30000,
+  });
 
   return (
     <div className="min-h-full">
@@ -43,7 +84,7 @@ export default function Live() {
                 LIVE
               </Badge>
             </h1>
-            <p className="text-sm text-muted-foreground">Real-time game tracking, hedging tools, and AI assistance</p>
+            <p className="text-sm text-muted-foreground">Real-time game tracking, live factors, cashout analysis &amp; intelligence</p>
           </div>
           <div className="flex items-center gap-2" data-testid="sse-live-status">
             {sse.connected ? (
@@ -64,6 +105,10 @@ export default function Live() {
             )}
           </div>
         </header>
+
+        {momentumGames && momentumGames.some(g => g.status === "live" || g.status === "halftime") && (
+          <LiveGamesStrip games={momentumGames} />
+        )}
 
         <Tabs defaultValue="factors" className="space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -91,7 +136,7 @@ export default function Live() {
               </TabsTrigger>
               <TabsTrigger value="assistant" className="gap-1 px-2 sm:px-3" data-testid="tab-assistant">
                 <Bot className="w-4 h-4 shrink-0" />
-                <span className="hidden sm:inline">AI</span>
+                <span className="hidden sm:inline">Assistant</span>
               </TabsTrigger>
               <TabsTrigger value="clv" className="gap-1 px-2 sm:px-3" data-testid="tab-clv">
                 <LineChart className="w-4 h-4 shrink-0" />

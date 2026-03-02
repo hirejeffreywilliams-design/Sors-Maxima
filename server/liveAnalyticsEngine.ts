@@ -1,4 +1,5 @@
-import { getLiveGames, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
+import { getLiveGames, getAllSportsScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
+import { getRecentPicks } from "./pickOutcomeTracker";
 
 export interface MomentumGame {
   id: string;
@@ -17,6 +18,11 @@ export interface MomentumGame {
   totalLine?: number;
   homeRecord?: string;
   awayRecord?: string;
+  gameDate?: string;
+  broadcast?: string;
+  venue?: string;
+  moneylineHome?: number;
+  moneylineAway?: number;
 }
 
 export interface CLVEntry {
@@ -55,20 +61,56 @@ function mapStatus(state: "pre" | "in" | "post"): "live" | "halftime" | "final" 
 }
 
 export async function getMomentumGames(): Promise<MomentumGame[]> {
-  const liveGames = await getLiveGames();
-  if (!liveGames || liveGames.length === 0) return [];
+  const allGames = await getAllSportsScoreboard();
+  if (!allGames || allGames.length === 0) return [];
 
-  return liveGames.map((game: ESPNScoreboardGame) => {
+  const now = Date.now();
+  const cutoff48h = now + 48 * 60 * 60 * 1000;
+
+  const relevant = allGames.filter((g: ESPNScoreboardGame) => {
+    if (g.status.state === "in") return true;
+    if (g.status.state === "pre") {
+      const gameTime = g.date ? new Date(g.date).getTime() : 0;
+      return gameTime > 0 && gameTime < cutoff48h;
+    }
+    if (g.status.state === "post") {
+      const gameTime = g.date ? new Date(g.date).getTime() : 0;
+      return gameTime > now - 6 * 60 * 60 * 1000;
+    }
+    return false;
+  });
+
+  const sorted = relevant.sort((a: ESPNScoreboardGame, b: ESPNScoreboardGame) => {
+    const order = { in: 0, post: 1, pre: 2 };
+    const ao = order[a.status.state] ?? 3;
+    const bo = order[b.status.state] ?? 3;
+    if (ao !== bo) return ao - bo;
+    return new Date(a.date).getTime() - new Date(b.date).getTime();
+  });
+
+  return sorted.map((game: ESPNScoreboardGame) => {
     const homeScore = game.homeTeam.score || 0;
     const awayScore = game.awayTeam.score || 0;
     const scoreDiff = homeScore - awayScore;
 
     let momentum: "home" | "away" | "neutral" = "neutral";
     let momentumScore = 50;
-    if (scoreDiff > 10) { momentum = "home"; momentumScore = Math.min(85, 50 + scoreDiff * 2); }
-    else if (scoreDiff > 5) { momentum = "home"; momentumScore = Math.min(70, 50 + scoreDiff * 2); }
-    else if (scoreDiff < -10) { momentum = "away"; momentumScore = Math.max(15, 50 + scoreDiff * 2); }
-    else if (scoreDiff < -5) { momentum = "away"; momentumScore = Math.max(30, 50 + scoreDiff * 2); }
+    if (game.status.state === "in") {
+      if (scoreDiff > 10) { momentum = "home"; momentumScore = Math.min(85, 50 + scoreDiff * 2); }
+      else if (scoreDiff > 5) { momentum = "home"; momentumScore = Math.min(70, 50 + scoreDiff * 2); }
+      else if (scoreDiff < -10) { momentum = "away"; momentumScore = Math.max(15, 50 + scoreDiff * 2); }
+      else if (scoreDiff < -5) { momentum = "away"; momentumScore = Math.max(30, 50 + scoreDiff * 2); }
+
+      const hasSpread = game.odds?.spread;
+      if (hasSpread) {
+        const spreadNum = parseFloat(hasSpread);
+        if (!isNaN(spreadNum)) {
+          const margin = homeScore - awayScore;
+          const coveringBias = margin > -spreadNum ? 3 : -3;
+          momentumScore = Math.max(10, Math.min(90, momentumScore + coveringBias));
+        }
+      }
+    }
 
     return {
       id: game.id,
@@ -87,6 +129,9 @@ export async function getMomentumGames(): Promise<MomentumGame[]> {
       totalLine: game.odds?.overUnder,
       homeRecord: game.homeTeam.record,
       awayRecord: game.awayTeam.record,
+      gameDate: game.date || undefined,
+      broadcast: game.broadcast || undefined,
+      venue: game.venue?.name || undefined,
     };
   });
 }
@@ -100,10 +145,48 @@ export function trackCLV(gameId: string, market: string, odds: number): void {
   entry.timestamps.push({ odds, time: new Date().toISOString() });
 }
 
+const SPORT_CLOSING_BENCHMARKS: Record<string, { spread: number; ml: number; total: number }> = {
+  NBA: { spread: -110, ml: -110, total: -110 },
+  NFL: { spread: -110, ml: -115, total: -110 },
+  MLB: { spread: -110, ml: -120, total: -110 },
+  NHL: { spread: -110, ml: -115, total: -110 },
+  NCAAB: { spread: -110, ml: -110, total: -110 },
+  NCAAF: { spread: -110, ml: -115, total: -110 },
+};
+
 export function getCLVData(): CLVEntry[] {
   const entries: CLVEntry[] = [];
-  clvHistory.forEach((data, key) => {
-    if (data.timestamps.length === 0) return;
+
+  const recentSettled = getRecentPicks({ limit: 100, status: "settled" })
+    .filter(p => p.result && p.odds);
+
+  for (const pick of recentSettled) {
+    const bench = SPORT_CLOSING_BENCHMARKS[pick.sport?.toUpperCase() || "NBA"] || SPORT_CLOSING_BENCHMARKS.NBA;
+    const benchmarkOdds = pick.betType?.toLowerCase().includes("spread") ? bench.spread
+      : pick.betType?.toLowerCase().includes("total") ? bench.total
+      : bench.ml;
+
+    const pickOdds = pick.odds;
+    const clvPercent = benchmarkOdds !== 0
+      ? Math.round(((pickOdds - benchmarkOdds) / Math.abs(benchmarkOdds)) * 100 * 100) / 100
+      : 0;
+
+    entries.push({
+      id: pick.id,
+      game: pick.game || `${pick.awayTeam} @ ${pick.homeTeam}`,
+      market: pick.betType || "moneyline",
+      selection: pick.pick,
+      openingOdds: benchmarkOdds,
+      currentOdds: pickOdds,
+      clvPercent,
+      direction: clvPercent > 2 ? "positive" : clvPercent < -2 ? "negative" : "neutral",
+      sport: pick.sport || "",
+      timestamp: pick.settledAt || pick.savedAt,
+    });
+  }
+
+  for (const [key, data] of clvHistory.entries()) {
+    if (data.timestamps.length === 0) continue;
     const latest = data.timestamps[data.timestamps.length - 1];
     const clvPercent = data.opening !== 0 ? ((latest.odds - data.opening) / Math.abs(data.opening)) * 100 : 0;
     entries.push({
@@ -118,17 +201,23 @@ export function getCLVData(): CLVEntry[] {
       sport: "",
       timestamp: latest.time,
     });
-  });
+  }
+
   return entries;
 }
 
-export async function getPublicSharpSplits(): Promise<PublicSharpSplit[]> {
-  const liveGames = await getLiveGames();
-  if (!liveGames || liveGames.length === 0) return [];
+export async function getPublicSharpSplits(): Promise<(PublicSharpSplit & { isEstimated: boolean; gameDate?: string })[]> {
+  const allGames = await getAllSportsScoreboard();
+  if (!allGames || allGames.length === 0) return [];
 
-  return liveGames
+  return allGames
     .filter((g: ESPNScoreboardGame) => g.status.state === "pre" || g.status.state === "in")
-    .slice(0, 15)
+    .sort((a: ESPNScoreboardGame, b: ESPNScoreboardGame) => {
+      if (a.status.state === "in" && b.status.state !== "in") return -1;
+      if (b.status.state === "in" && a.status.state !== "in") return 1;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    })
+    .slice(0, 18)
     .map((game: ESPNScoreboardGame) => {
       const homeWinPct = parseWinPct(game.homeTeam.record);
       const awayWinPct = parseWinPct(game.awayTeam.record);
@@ -155,6 +244,9 @@ export async function getPublicSharpSplits(): Promise<PublicSharpSplit[]> {
         sport: game.sport,
         consensus: Math.abs(publicHome - sharpHome) < 5 ? "split" as const :
           sharpHome > publicHome ? "sharp" as const : "public" as const,
+        isEstimated: true,
+        gameDate: game.date || undefined,
+        isLive: game.status.state === "in",
       };
     });
 }

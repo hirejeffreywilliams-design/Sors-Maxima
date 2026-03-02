@@ -1796,41 +1796,141 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
   });
 
   // ==================== AI BETTING ASSISTANT (OpenAI) ====================
-  app.post("/api/ai/chat", async (req, res) => {
+  app.post("/api/ai/chat", requireTier("pro", "elite", "whale"), async (req, res) => {
+    return res.redirect(307, "/api/live/assistant");
+  });
+
+  app.post("/api/live/assistant", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const { message } = req.body;
       if (!message) return res.status(400).json({ error: "Message required" });
 
-      const { createOpenAIClient } = await import("../openaiClient");
-      const openai = createOpenAIClient();
+      const lc = message.toLowerCase();
 
-      const bets = userDataEngine.getBets();
-      const stats = userDataEngine.getBetStats();
+      const { getPickAccuracyStats, getRecentPicks } = await import("../pickOutcomeTracker");
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { getAllInjuries } = await import("../espn-injury-provider");
 
-      const systemPrompt = `You are Sors Maxima's betting intelligence assistant. You help users with sports betting analysis, strategy, and bankroll management.
+      const stats = getPickAccuracyStats();
+      const recentPicks = getRecentPicks({ limit: 10, status: "pending" });
+      const topPicks = getRecentPicks({ limit: 5, status: "pending" }).filter(p => ["A+", "A", "A-", "B+"].includes(p.grade));
+      let liveGames: any[] = [];
+      try { liveGames = await getAllSportsScoreboard(); } catch { liveGames = []; }
 
-User's betting stats:
-- Total bets tracked: ${stats.totalBets}
-- Win rate: ${stats.winRate.toFixed(1)}%
-- ROI: ${stats.roi.toFixed(1)}%
-- Total profit: $${stats.totalProfit.toFixed(2)}
-- Recent bets: ${bets.slice(-5).map(b => `${b.sport} ${b.result}`).join(', ')}
+      const liveNow = liveGames.filter(g => g.status?.state === "in");
+      const upcoming = liveGames.filter(g => g.status?.state === "pre").slice(0, 6);
 
-Be concise, data-driven, and honest. If you don't have enough data to make a recommendation, say so. Never guarantee outcomes. Always emphasize responsible gambling.`;
+      const winRate = stats.overall.total > 0 ? (stats.overall.won / (stats.overall.won + stats.overall.lost) * 100).toFixed(1) : "N/A";
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
-        max_completion_tokens: 500,
-      });
+      let response = "";
 
-      res.json({ response: completion.choices[0]?.message?.content || "I couldn't generate a response." });
+      const isParlay = /parlay|combo|multi|legs|ticket/.test(lc);
+      const isEV = /\+ev|value|ev play|edge|expected value/.test(lc);
+      const isInjury = /injur|hurt|out|questionable|doubtful|lineup|roster/.test(lc);
+      const isLive = /live|in.progress|right now|current score|score/.test(lc);
+      const isStrategy = /strategy|bankroll|kelly|unit|staking|risk|manage/.test(lc);
+      const isSport = /nba|nfl|mlb|nhl|ncaab|ncaaf|basketball|football|baseball|hockey|college/.test(lc);
+      const isModel = /model|factor|accuracy|win rate|performance|track record/.test(lc);
+
+      if (isParlay && topPicks.length > 0) {
+        const legs = topPicks.slice(0, 3);
+        const combined = legs.reduce((acc: number, p: any) => {
+          const d = p.odds > 0 ? (p.odds / 100) + 1 : (100 / Math.abs(p.odds)) + 1;
+          return acc * d;
+        }, 1);
+        const american = combined >= 2 ? Math.round((combined - 1) * 100) : Math.round(-100 / (combined - 1));
+        response = `Here's a top 3-leg parlay based on today's highest-graded picks:\n\n` +
+          legs.map((p: any, i: number) => `${i + 1}. ${p.pick} (${p.sport} | Grade: ${p.grade} | ${p.confidence}% conf.)`).join("\n") +
+          `\n\nCombined odds: ${american > 0 ? "+" : ""}${american}\n\n` +
+          `These are selected by the 46-Factor Model based on grade and edge. Always verify current odds before placing.`;
+      } else if (isParlay && topPicks.length === 0) {
+        response = `No high-grade picks are currently available for a parlay. Check back after the next prediction cycle (runs every 5 minutes). Visit the Daily Picks page for all available picks across 6 sports.`;
+      } else if (isEV) {
+        const evPicks = recentPicks.filter((p: any) => (p.ev || 0) > 3).slice(0, 4);
+        if (evPicks.length > 0) {
+          response = `Top +EV picks right now (EV above +3%):\n\n` +
+            evPicks.map((p: any) => `• ${p.pick} — EV: +${(p.ev || 0).toFixed(1)}% | ${p.sport} | ${p.grade}`).join("\n") +
+            `\n\nEV is calculated using the 46-Factor Model comparing our edge to market odds. Higher EV = stronger model edge.`;
+        } else {
+          response = `No picks with strong +EV signals are loaded right now. The 46-Factor Model identifies EV edges when our predicted probability exceeds the implied odds probability. Check the Daily Picks page for full breakdown by sport.`;
+        }
+      } else if (isInjury) {
+        let injuryText = "";
+        try {
+          const injuries = await getAllInjuries();
+          const allTeams = Object.values(injuries).flat() as any[];
+          const injured = allTeams.flatMap((t: any) => (t.players || []).filter((p: any) => p.status !== "Active")).slice(0, 8);
+          if (injured.length > 0) {
+            injuryText = `Current injury report (key players):\n\n` +
+              injured.map((p: any) => `• ${p.name} (${p.team || "Team"}) — ${p.status || "Questionable"}`).join("\n") +
+              `\n\nInjury data sourced live from ESPN. Always check sportsbook lines for updated injury adjustments before placing.`;
+          } else {
+            injuryText = `No major injuries flagged across tracked sports right now. ESPN injury data refreshes every 15 minutes. For game-specific injury impact, check the Injuries section on any pick card.`;
+          }
+        } catch {
+          injuryText = `Injury data is temporarily unavailable. Check ESPN or your sportsbook for the latest lineups. Injury status is factored into every pick in our 46-Factor Model.`;
+        }
+        response = injuryText;
+      } else if (isLive && liveNow.length > 0) {
+        response = `${liveNow.length} game${liveNow.length !== 1 ? "s" : ""} currently in progress:\n\n` +
+          liveNow.slice(0, 6).map((g: any) => {
+            const hs = g.homeTeam?.score || 0;
+            const as = g.awayTeam?.score || 0;
+            return `• ${g.awayTeam?.displayName} ${as} @ ${g.homeTeam?.displayName} ${hs} — ${g.status?.detail || "In Progress"}`;
+          }).join("\n") +
+          `\n\nSwitch to the Momentum tab for live factor analysis and spread coverage tracking on each game.`;
+      } else if (isLive) {
+        const upStr = upcoming.slice(0, 4).map((g: any) => `• ${g.awayTeam?.displayName} @ ${g.homeTeam?.displayName} — ${new Date(g.date || "").toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`).join("\n");
+        response = `No games are live right now. Upcoming today:\n\n${upStr || "No upcoming games found."}\n\nThe Momentum tab will auto-populate with live analysis once games start.`;
+      } else if (isStrategy) {
+        const bySport = Object.entries(stats.bySport || {})
+          .sort(([, a]: any, [, b]: any) => b.rate - a.rate)
+          .slice(0, 3);
+        response = `Bankroll strategy based on your model performance:\n\n` +
+          `• Overall win rate: ${winRate}%\n` +
+          `• Total settled picks: ${stats.overall.total}\n` +
+          (bySport.length > 0 ? `• Best sports by win rate: ${bySport.map(([s, d]: any) => `${s} (${d.rate.toFixed(0)}%)`).join(", ")}\n` : "") +
+          `\nKelly Criterion suggestion: With a ${winRate}% win rate at -110 odds, full Kelly suggests ~${Math.max(0, ((parseFloat(winRate) / 100 * 2.1) - 1) * 100 / 1.1).toFixed(1)}% of bankroll per bet. Most professionals use quarter-Kelly (÷4) to reduce variance.\n\n` +
+          `Flat-unit betting (1–3% of bankroll per bet) is the most consistent approach for managing risk across a large sample.`;
+      } else if (isModel) {
+        const bySport = Object.entries(stats.bySport || {}).slice(0, 4);
+        const byGrade = Object.entries(stats.byGrade || {}).filter(([g]) => ["A+", "A", "A-", "B+"].includes(g));
+        response = `46-Factor Model performance summary:\n\n` +
+          `• Settled picks: ${stats.overall.total} | Win rate: ${winRate}%\n` +
+          `• Pending: ${stats.overall.pending}\n` +
+          (bySport.length > 0 ? `• By sport: ${bySport.map(([s, d]: any) => `${s}: ${d.rate.toFixed(0)}%`).join(", ")}\n` : "") +
+          (byGrade.length > 0 ? `• High-grade picks (A/B+): ${byGrade.map(([g, d]: any) => `${g}: ${d.rate.toFixed(0)}% (${d.total} picks)`).join(", ")}\n` : "") +
+          `\nThe model combines 46 data factors including situational analysis, line movement, weather, injuries, pace stats, and historical patterns. Weights update automatically after each settled outcome.`;
+      } else if (isSport) {
+        const sport = lc.includes("nba") || lc.includes("basketball") ? "NBA"
+          : lc.includes("nfl") || lc.includes("football") ? "NFL"
+          : lc.includes("mlb") || lc.includes("baseball") ? "MLB"
+          : lc.includes("nhl") || lc.includes("hockey") ? "NHL"
+          : lc.includes("ncaab") || lc.includes("college basketball") ? "NCAAB" : "NBA";
+        const sportPicks = recentPicks.filter((p: any) => p.sport.toUpperCase() === sport).slice(0, 4);
+        const sportStats = stats.bySport?.[sport];
+        response = `${sport} intelligence summary:\n\n` +
+          (sportStats ? `• Model win rate in ${sport}: ${sportStats.rate.toFixed(1)}% (${sportStats.total} settled)\n` : "") +
+          (sportPicks.length > 0
+            ? `• Today's top ${sport} picks:\n${sportPicks.map((p: any) => `  – ${p.pick} | Grade: ${p.grade} | EV: +${(p.ev || 0).toFixed(1)}%`).join("\n")}`
+            : `• No ${sport} picks loaded yet — check the Daily Picks page after the next cycle.\n`) +
+          `\n\nFor full ${sport} analysis, use the matchup builder or visit the Daily Picks page and filter by sport.`;
+      } else {
+        const topToday = topPicks.slice(0, 3);
+        response = `Here's your Sors Maxima intelligence snapshot:\n\n` +
+          `📊 Model Status: ${stats.overall.total} settled picks | ${winRate}% win rate\n` +
+          `🔴 Live games: ${liveNow.length} | Upcoming: ${upcoming.length}\n` +
+          `📋 Pending picks: ${stats.overall.pending}\n\n` +
+          (topToday.length > 0
+            ? `Top picks right now:\n${topToday.map((p: any) => `• ${p.pick} (${p.sport}, ${p.grade})`).join("\n")}\n\n`
+            : "") +
+          `Try asking me:\n• "Build me a 3-leg parlay"\n• "What are today's +EV plays?"\n• "Show me live games"\n• "NBA strategy tips"\n• "How is the model performing?"`;
+      }
+
+      res.json({ response });
     } catch (e: any) {
-      console.error("AI chat error:", e.message);
-      res.json({ response: "AI assistant is currently unavailable. Please check your API configuration.", error: true });
+      console.error("[Live Assistant] Error:", e.message);
+      res.json({ response: "The intelligence assistant encountered an error. Please try again in a moment." });
     }
   });
 

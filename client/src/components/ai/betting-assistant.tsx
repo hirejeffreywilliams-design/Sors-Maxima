@@ -25,13 +25,13 @@ const initialMessages: Message[] = [
   {
     id: "1",
     role: "assistant",
-    content: "Hey! I'm your Sors Betting Assistant. I can help you build parlays, analyze matchups, find +EV opportunities, and answer any betting questions. What would you like to explore today?",
+    content: "Hey! I'm your Sors Intelligence Assistant — powered by real platform data, not guesses. I can pull today's top picks, live scores, injury reports, +EV plays, model stats, and bankroll strategy. What do you want to know?",
     timestamp: new Date(),
     suggestions: [
-      "Build me a 3-leg NBA parlay",
-      "What are today's best +EV plays?",
-      "Analyze the Chiefs vs Bills game",
-      "Show me underdog opportunities",
+      "Build me a 3-leg parlay",
+      "What are today's +EV plays?",
+      "Show me live games",
+      "How is the model performing?",
     ],
   },
 ];
@@ -49,7 +49,7 @@ export function BettingAssistant() {
 
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
-      const res = await apiRequest("POST", "/api/ai/chat", { message });
+      const res = await apiRequest("POST", "/api/live/assistant", { message });
       return res.json() as Promise<{ response: string }>;
     },
     onSuccess: (data) => {
@@ -200,21 +200,25 @@ export function BettingAssistant() {
             </Button>
           </div>
           <div className="flex gap-2 mt-2 flex-wrap">
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Build me a parlay")}>
+            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Build me a 3-leg parlay")}>
               <Sparkles className="w-3 h-3 mr-1" />
               Build Parlay
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Find +EV plays")}>
+            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("What are today's best +EV plays?")}>
               <TrendingUp className="w-3 h-3 mr-1" />
               +EV Plays
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Analyze matchups")}>
-              <Target className="w-3 h-3 mr-1" />
-              Matchups
+            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Show me live games right now")}>
+              <Zap className="w-3 h-3 mr-1" />
+              Live Games
             </Badge>
-            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("Betting tips")}>
+            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("What injury news should I know about?")}>
               <Lightbulb className="w-3 h-3 mr-1" />
-              Tips
+              Injuries
+            </Badge>
+            <Badge variant="secondary" className="cursor-pointer hover-elevate" onClick={() => sendMessage("How is the model performing?")}>
+              <Target className="w-3 h-3 mr-1" />
+              Model Stats
             </Badge>
           </div>
         </div>

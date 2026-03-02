@@ -84,7 +84,7 @@ export function CLVTracker() {
       <CardContent className="space-y-6">
         <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm">
           <Info className="w-4 h-4 shrink-0" />
-          <span>CLV is tracked from odds movements. Place bets and track odds to populate this view.</span>
+          <span>CLV derived from settled picks vs sport benchmark closing lines. Positive CLV = getting better than market odds.</span>
         </div>
 
         <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
