@@ -641,22 +641,6 @@
       "savedAt": "2026-03-02T00:01:41.705Z"
     },
     {
-      "id": "precomp-NBA-401810737-total-6818785fed",
-      "gameId": "401810737",
-      "sport": "NBA",
-      "game": "LA Clippers @ Golden State Warriors",
-      "homeTeam": "Golden State Warriors",
-      "awayTeam": "LA Clippers",
-      "pick": "Over 216",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A-",
-      "confidence": 61,
-      "ev": 16.45,
-      "gameTime": "2026-03-03T03:00Z",
-      "savedAt": "2026-03-02T16:37:32.152Z"
-    },
-    {
       "id": "precomp-vegas-NHL-dd6715977729",
       "gameId": "NHL",
       "sport": "NHL",
@@ -702,38 +686,6 @@
       "confidence": 64,
       "ev": 22.18,
       "gameTime": "2026-03-02T16:37:32.560Z",
-      "savedAt": "2026-03-02T16:37:32.560Z"
-    },
-    {
-      "id": "precomp-NHL-401803315-total-e1e3b0667a",
-      "gameId": "401803315",
-      "sport": "NHL",
-      "game": "Chicago Blackhawks @ Winnipeg Jets",
-      "homeTeam": "Winnipeg Jets",
-      "awayTeam": "Chicago Blackhawks",
-      "pick": "Over 5.5",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A-",
-      "confidence": 61,
-      "ev": 16.45,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-02T16:37:32.560Z"
-    },
-    {
-      "id": "precomp-NHL-401803315-team_total-297b0a1bcc",
-      "gameId": "401803315",
-      "sport": "NHL",
-      "game": "Chicago Blackhawks @ Winnipeg Jets",
-      "homeTeam": "Winnipeg Jets",
-      "awayTeam": "Chicago Blackhawks",
-      "pick": "Chicago Blackhawks Over 2",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "A-",
-      "confidence": 61,
-      "ev": 16.45,
-      "gameTime": "2026-03-04T01:00Z",
       "savedAt": "2026-03-02T16:37:32.560Z"
     }
   ],
@@ -77393,21 +77345,201 @@
       "homeScore": 5,
       "awayScore": 0,
       "settledAt": "2026-03-02T16:33:50.453Z"
+    },
+    {
+      "id": "precomp-NBA-401810737-total-6818785fed",
+      "gameId": "401810737",
+      "sport": "NBA",
+      "game": "LA Clippers @ Golden State Warriors",
+      "homeTeam": "Golden State Warriors",
+      "awayTeam": "LA Clippers",
+      "pick": "Over 216",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-03T03:00Z",
+      "savedAt": "2026-03-02T16:37:32.152Z",
+      "result": "won",
+      "homeScore": 137,
+      "awayScore": 117,
+      "settledAt": "2026-03-02T16:37:49.998Z"
+    },
+    {
+      "id": "precomp-NHL-401803315-total-e1e3b0667a",
+      "gameId": "401803315",
+      "sport": "NHL",
+      "game": "Chicago Blackhawks @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Chicago Blackhawks",
+      "pick": "Over 5.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:37:32.560Z",
+      "result": "lost",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:37:50.018Z"
+    },
+    {
+      "id": "precomp-NHL-401803315-team_total-297b0a1bcc",
+      "gameId": "401803315",
+      "sport": "NHL",
+      "game": "Chicago Blackhawks @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Chicago Blackhawks",
+      "pick": "Chicago Blackhawks Over 2",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:37:32.560Z",
+      "result": "won",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:37:50.018Z"
+    },
+    {
+      "id": "precomp-NBA-401810737-team_total-ebdf33d27f",
+      "gameId": "401810737",
+      "sport": "NBA",
+      "game": "LA Clippers @ Golden State Warriors",
+      "homeTeam": "Golden State Warriors",
+      "awayTeam": "LA Clippers",
+      "pick": "LA Clippers Over 108.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 16.45,
+      "gameTime": "2026-03-03T03:00Z",
+      "savedAt": "2026-03-02T16:42:32.269Z",
+      "result": "won",
+      "homeScore": 137,
+      "awayScore": 117,
+      "settledAt": "2026-03-02T16:42:49.934Z"
+    },
+    {
+      "id": "precomp-NHL-401803313-team_total-5d309ce1d3",
+      "gameId": "401803313",
+      "sport": "NHL",
+      "game": "Utah Mammoth @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Utah Mammoth",
+      "pick": "Washington Capitals Over 3.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-02T16:42:32.479Z",
+      "result": "lost",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:42:49.957Z"
+    },
+    {
+      "id": "precomp-NHL-401803315-team_total-69912191bc",
+      "gameId": "401803315",
+      "sport": "NHL",
+      "game": "Chicago Blackhawks @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Chicago Blackhawks",
+      "pick": "Winnipeg Jets Over 3.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:42:32.479Z",
+      "result": "lost",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:42:49.957Z"
+    },
+    {
+      "id": "precomp-NHL-401803316-spread-ee544b9438",
+      "gameId": "401803316",
+      "sport": "NHL",
+      "game": "Dallas Stars @ Calgary Flames",
+      "homeTeam": "Calgary Flames",
+      "awayTeam": "Dallas Stars",
+      "pick": "Calgary Flames +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 20.27,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-02T16:42:32.479Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T16:42:49.985Z"
+    },
+    {
+      "id": "precomp-NHL-401803317-moneyline-383df261fb",
+      "gameId": "401803317",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Edmonton Oilers",
+      "homeTeam": "Edmonton Oilers",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Edmonton Oilers ML",
+      "betType": "moneyline",
+      "odds": -145,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 4.76,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-02T16:42:32.479Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-02T16:42:50.012Z"
+    },
+    {
+      "id": "precomp-NBA-401810743-team_total-ec9addb5b1",
+      "gameId": "401810743",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "San Antonio Spurs Over 119",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 18.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-02T16:47:32.017Z",
+      "result": "lost",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-02T16:47:49.627Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3726,
-      "won": 1860,
-      "lost": 1829,
+      "total": 3735,
+      "won": 1865,
+      "lost": 1833,
       "push": 37,
       "rate": 49.9,
-      "pending": 46
+      "pending": 43
     },
     "bySport": {
       "NHL": {
-        "total": 714,
-        "won": 306,
+        "total": 720,
+        "won": 309,
         "rate": 42.9
       },
       "NCAAB": {
@@ -77416,8 +77548,8 @@
         "rate": 54.9
       },
       "NBA": {
-        "total": 1371,
-        "won": 703,
+        "total": 1374,
+        "won": 705,
         "rate": 51.3
       },
       "MLB": {
@@ -77463,14 +77595,14 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 185,
-        "won": 94,
-        "rate": 50.8
+        "total": 191,
+        "won": 98,
+        "rate": 51.3
       },
       "A": {
-        "total": 151,
-        "won": 85,
-        "rate": 56.3
+        "total": 154,
+        "won": 86,
+        "rate": 55.8
       },
       "A+": {
         "total": 701,
@@ -77480,33 +77612,33 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 682,
-        "won": 401,
-        "rate": 58.8
+        "total": 687,
+        "won": 403,
+        "rate": 58.7
       },
       "Spread": {
-        "total": 1423,
-        "won": 565,
+        "total": 1424,
+        "won": 566,
         "rate": 39.7
       },
       "Total": {
-        "total": 1502,
-        "won": 835,
+        "total": 1504,
+        "won": 836,
         "rate": 55.6
       },
       "Moneyline": {
-        "total": 119,
-        "won": 59,
-        "rate": 49.6
+        "total": 120,
+        "won": 60,
+        "rate": 50
       }
     },
     "recentForm": {
-      "won": 28,
-      "lost": 21,
+      "won": 26,
+      "lost": 23,
       "push": 1,
-      "rate": 56
+      "rate": 52
     },
-    "lastUpdated": "2026-03-02T16:33:50.455Z"
+    "lastUpdated": "2026-03-02T16:47:49.628Z"
   },
   "version": 1
 }
