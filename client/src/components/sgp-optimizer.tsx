@@ -200,13 +200,18 @@ export function SGPOptimizer() {
   return (
     <div className="space-y-4" data-testid="sgp-optimizer-container">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Layers className="w-5 h-5 text-primary" />
-          <span className="font-medium">Same Game Parlay Optimizer</span>
-          <Badge variant="outline" className="gap-1">
-            <Sparkles className="w-3 h-3" />
-            AI-Optimized
-          </Badge>
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Layers className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-base">Same-Game Parlay Optimizer</span>
+            <Badge variant="outline" className="gap-1 text-[10px]">
+              <Sparkles className="w-3 h-3" />
+              SGP Engine
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Finds correlated legs within a single game — when one outcome makes another more likely. Maximizes SGP expected value while avoiding conflicting selections.
+          </p>
         </div>
         <Select value={sport} onValueChange={setSport}>
           <SelectTrigger className="w-32" data-testid="select-sgp-sport">

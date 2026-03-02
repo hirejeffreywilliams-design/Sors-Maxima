@@ -20,6 +20,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
+import { TierGate, useTier } from "@/components/tier-gate";
+import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 
 interface TopPick {
   id: string;
@@ -1317,6 +1319,7 @@ export default function CommandCenter() {
   const [activeSportTab, setActiveSportTab] = useState("all");
   const [ticketDateFilter, setTicketDateFilter] = useState<"today" | "future" | "all">("all");
   const { legs, addLeg } = useParlaySlip();
+  const { canAccess } = useTier();
 
   const handleSSEEvent = useCallback((event: { type: string }) => {
     if (event.type === "intelligence-update") {
@@ -1503,6 +1506,8 @@ export default function CommandCenter() {
 
         <PickDisclaimer variant="banner" />
 
+        <IntelligencePipeline />
+
         <section data-testid="section-best-tickets">
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <div className="flex items-center gap-2">
@@ -1583,7 +1588,10 @@ export default function CommandCenter() {
           </section>
         )}
 
-        <LifeChangerSection legs={legs} addLeg={addLeg} />
+        {canAccess("elite")
+          ? <LifeChangerSection legs={legs} addLeg={addLeg} />
+          : <TierGate required="elite" label="Life Changer Ticket" description="A daily cross-sport underdog parlay built by the intelligence engine — high odds, real edge. Edge tier and above." />
+        }
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card data-testid="card-stat-best-grade">

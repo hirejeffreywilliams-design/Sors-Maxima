@@ -167,9 +167,14 @@ export function CorrelationEngine() {
   return (
     <div className="space-y-4" data-testid="correlation-engine-container">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
-          <Link2 className="w-5 h-5 text-primary" />
-          <span className="font-medium">Correlation Engine</span>
+        <div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link2 className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-base">Parlay Correlation Engine</span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Maps how individual legs relate to each other — flags negative correlations before you lock in, surfaces positive ones to stack with confidence.
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Select value={sport} onValueChange={setSport}>

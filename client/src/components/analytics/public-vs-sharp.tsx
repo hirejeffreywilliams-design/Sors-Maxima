@@ -82,11 +82,16 @@ export function PublicVsSharp() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
-            <Users className="w-5 h-5 text-blue-500" />
-            Public vs Sharp Money
-            <QuantumBadge />
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+              <Users className="w-5 h-5 text-blue-500" />
+              Public vs Sharp Money Flow
+              <QuantumBadge />
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Live betting percentage split — when sharp (professional) money disagrees with the public by 20%+, that's the market signal the engine looks for.
+            </p>
+          </div>
           <Select value={sport} onValueChange={setSport}>
             <SelectTrigger className="w-32" data-testid="select-pvs-sport">
               <SelectValue />

@@ -103,15 +103,15 @@ export function QuantumPlayerPrediction() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <User className="w-5 h-5 text-blue-500" />
-              <CardTitle className="text-lg">Player Predictions</CardTitle>
-              <Badge variant="secondary">All Players</Badge>
+              <CardTitle className="text-lg">Player Performance Projections</CardTitle>
+              <Badge variant="secondary" className="text-[10px]">Prop Engine</Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
             <Info className="w-4 h-4 shrink-0" />
-            <span>Select a sport and team to see stat projections for every player on the roster.</span>
+            <span>Select a sport and team to see ML-projected stat lines for every player. Projections power prop recommendations and correlated leg suggestions.</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">

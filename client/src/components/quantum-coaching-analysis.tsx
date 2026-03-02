@@ -71,15 +71,15 @@ export function QuantumCoachingAnalysis() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Brain className="w-5 h-5 text-purple-500" />
-              <CardTitle className="text-lg">Coaching Analysis</CardTitle>
-              <Badge variant="secondary">ESPN Data</Badge>
+              <CardTitle className="text-lg">Coaching Tendencies & Matchup Edge</CardTitle>
+              <Badge variant="secondary" className="text-[10px]">Analysis Layer</Badge>
             </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg text-sm text-blue-500">
             <Info className="w-4 h-4 shrink-0" />
-            <span>Select a sport and team to analyze coaching tendencies, strengths, and strategic patterns.</span>
+            <span>Select a sport and team to analyze coaching tendencies and late-game decision patterns. Results feed directly into the matchup win probability calculation.</span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">

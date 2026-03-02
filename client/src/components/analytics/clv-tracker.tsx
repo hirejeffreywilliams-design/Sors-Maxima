@@ -64,11 +64,16 @@ export function CLVTracker() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
-            <LineChart className="w-5 h-5 text-blue-500" />
-            Closing Line Value (CLV) Tracker
-            <QuantumBadge />
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+              <LineChart className="w-5 h-5 text-blue-500" />
+              Closing Line Value Audit
+              <QuantumBadge />
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Measures the quality of your line shopping — every pick logged at placement, compared to the closing number. Positive CLV over time = proven edge.
+            </p>
+          </div>
           <Select value={timeframe} onValueChange={setTimeframe}>
             <SelectTrigger className="w-32" data-testid="select-clv-timeframe">
               <SelectValue />

@@ -41,8 +41,10 @@ import {
   Database,
   Compass,
   GaugeCircle,
+  Lock,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+import { TierGate, useTier } from "@/components/tier-gate";
 
 const SPORT_ICONS: Record<string, any> = {
   "NBA": Dribbble,
@@ -806,6 +808,7 @@ function FactorDatabaseTab() {
 
 export default function SportFactorAnalysis() {
   useSEO({ title: "Sport Factor Analysis", description: "Deep analysis of sport-specific betting factors" });
+  const { canAccess } = useTier();
   return (
     <ScrollArea className="h-full">
       <div className="max-w-screen-2xl mx-auto p-4 lg:p-6 space-y-6">
@@ -843,6 +846,7 @@ export default function SportFactorAnalysis() {
               <Brain className="w-4 h-4" />
               <span className="hidden sm:inline">Fusion Deep Dive</span>
               <span className="sm:hidden">Fusion</span>
+              {!canAccess("elite") && <Lock className="w-3 h-3 opacity-50" />}
             </TabsTrigger>
             <TabsTrigger value="database" className="gap-2" data-testid="tab-database">
               <Database className="w-4 h-4" />
@@ -860,7 +864,10 @@ export default function SportFactorAnalysis() {
           </TabsContent>
 
           <TabsContent value="fusion">
-            <FusionDeepDiveTab />
+            {canAccess("elite")
+              ? <FusionDeepDiveTab />
+              : <TierGate required="elite" label="Fusion Deep Dive" description="Multi-factor fusion analysis that combines scheme recognition, situational data, and sharp-money signals into a single confidence-weighted score for any matchup." />
+            }
           </TabsContent>
 
           <TabsContent value="database">

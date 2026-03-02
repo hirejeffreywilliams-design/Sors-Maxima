@@ -57,15 +57,13 @@ export function QuantumTeamDynamics() {
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2 flex-wrap">
               <Users className="w-5 h-5 text-orange-500" />
-              <CardTitle className="text-lg">Team Dynamics</CardTitle>
-              <Badge variant="secondary">
-                Multi-Factor
-              </Badge>
+              <CardTitle className="text-lg">Team Health & Roster Dynamics</CardTitle>
+              <Badge variant="secondary" className="text-[10px]">46-Factor Input</Badge>
             </div>
           </div>
           <div className="flex items-center gap-2 mt-2 text-sm text-blue-600 dark:text-blue-400 bg-blue-500/10 p-2 rounded-md">
             <Info className="w-4 h-4 flex-shrink-0" />
-            <span>Live analysis from real-time data</span>
+            <span>Roster depth, back-to-back fatigue, and travel impact — these factors contribute to the 46-factor prediction model for every game.</span>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">

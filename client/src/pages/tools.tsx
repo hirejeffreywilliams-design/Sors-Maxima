@@ -1,8 +1,7 @@
 import { useState } from "react";
 import {
-  DollarSign, Brain, Link2, Users, Eye,
-  MapPin, BarChart3, Sparkles, Zap, Scale,
-  Percent, SlidersHorizontal, ClipboardCheck,
+  DollarSign, Brain, Link2,
+  BarChart3, Sparkles, Zap,
   FileOutput, UserCheck
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -54,6 +53,7 @@ import { ExportBetSlip } from "@/components/export-bet-slip";
 import { ROIUpliftCalculator } from "@/components/roi-uplift-calculator";
 import { Calculator } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+import { TierGate, useTier } from "@/components/tier-gate";
 
 const TOOL_GROUPS = [
   {
@@ -61,10 +61,10 @@ const TOOL_GROUPS = [
     name: "Analysis & Predictions",
     icon: Brain,
     subcategories: [
-      { id: "predictions", name: "AI Predictions" },
-      { id: "player-props", name: "Player Props" },
-      { id: "matchups", name: "Matchups" },
-      { id: "projections", name: "Projections" },
+      { id: "predictions", name: "AI Predictions", requiredTier: "elite" as const },
+      { id: "player-props", name: "Player Props", requiredTier: null },
+      { id: "matchups", name: "Matchups", requiredTier: "elite" as const },
+      { id: "projections", name: "Projections", requiredTier: null },
     ],
   },
   {
@@ -72,9 +72,9 @@ const TOOL_GROUPS = [
     name: "Market & Odds",
     icon: DollarSign,
     subcategories: [
-      { id: "odds", name: "Live Odds" },
-      { id: "sharp", name: "Sharp Action" },
-      { id: "arb", name: "Line Shopping" },
+      { id: "odds", name: "Live Odds", requiredTier: null },
+      { id: "sharp", name: "Sharp Action", requiredTier: "elite" as const },
+      { id: "arb", name: "Line Shopping", requiredTier: "elite" as const },
     ],
   },
   {
@@ -82,9 +82,9 @@ const TOOL_GROUPS = [
     name: "Correlations & Strategy",
     icon: Link2,
     subcategories: [
-      { id: "correlation", name: "Correlations" },
-      { id: "strategies", name: "Strategies" },
-      { id: "situational", name: "Situational" },
+      { id: "correlation", name: "Correlations", requiredTier: null },
+      { id: "strategies", name: "Strategies", requiredTier: null },
+      { id: "situational", name: "Situational", requiredTier: null },
     ],
   },
   {
@@ -92,8 +92,8 @@ const TOOL_GROUPS = [
     name: "Bankroll & Risk",
     icon: BarChart3,
     subcategories: [
-      { id: "bankroll", name: "Bankroll" },
-      { id: "simulators", name: "Simulators" },
+      { id: "bankroll", name: "Bankroll", requiredTier: null },
+      { id: "simulators", name: "Simulators", requiredTier: null },
     ],
   },
   {
@@ -101,9 +101,9 @@ const TOOL_GROUPS = [
     name: "More Tools",
     icon: Zap,
     subcategories: [
-      { id: "venue", name: "Game Context" },
-      { id: "grading", name: "Grading & Export" },
-      { id: "model", name: "Custom Model" },
+      { id: "venue", name: "Game Context", requiredTier: null },
+      { id: "grading", name: "Grading & Export", requiredTier: null },
+      { id: "model", name: "Custom Model", requiredTier: "whale" as const },
     ],
   },
 ];
@@ -112,6 +112,7 @@ export default function Tools() {
   useSEO({ title: "Tools", description: "Betting calculators and analysis tools" });
   const [activeGroup, setActiveGroup] = useState("analysis");
   const [activeSub, setActiveSub] = useState("predictions");
+  const { canAccess } = useTier();
 
   const currentGroup = TOOL_GROUPS.find(g => g.id === activeGroup) || TOOL_GROUPS[0];
   const ActiveIcon = currentGroup.icon;
@@ -123,6 +124,8 @@ export default function Tools() {
       setActiveSub(group.subcategories[0].id);
     }
   };
+
+  const currentSub = currentGroup.subcategories.find(s => s.id === activeSub);
 
   return (
     <div className="min-h-full">
@@ -156,8 +159,13 @@ export default function Tools() {
           <Tabs value={activeSub} onValueChange={setActiveSub}>
             <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
               {currentGroup.subcategories.map((sub) => (
-                <TabsTrigger key={sub.id} value={sub.id} className="text-xs sm:text-sm" data-testid={`tab-${sub.id}`}>
+                <TabsTrigger key={sub.id} value={sub.id} className="text-xs sm:text-sm gap-1.5" data-testid={`tab-${sub.id}`}>
                   {sub.name}
+                  {sub.requiredTier && !canAccess(sub.requiredTier) && (
+                    <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 opacity-60">
+                      {sub.requiredTier === "elite" ? "Edge+" : "Max"}
+                    </Badge>
+                  )}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -166,27 +174,34 @@ export default function Tools() {
 
         <div className="space-y-6">
           {activeGroup === "analysis" && activeSub === "predictions" && (
-            <div className="space-y-6">
-              <QuantumCoachingAnalysis />
-              <QuantumPlayerPrediction />
-              <QuantumTeamDynamics />
-            </div>
+            currentSub?.requiredTier && !canAccess(currentSub.requiredTier)
+              ? <TierGate required="elite" label="AI Predictions Engine" description="Advanced coaching patterns, player outcome modeling, and team dynamics analysis powered by the 46-Factor Intelligence Engine." />
+              : <div className="space-y-6">
+                  <QuantumCoachingAnalysis />
+                  <QuantumPlayerPrediction />
+                  <QuantumTeamDynamics />
+                </div>
           )}
+
           {activeGroup === "analysis" && activeSub === "player-props" && (
             <div className="space-y-6">
               <PlayerPropLab />
               <MLPropProjections />
             </div>
           )}
+
           {activeGroup === "analysis" && activeSub === "matchups" && (
-            <div className="space-y-6">
-              <PlayerMatchupCenter />
-              <div className="grid gap-6 lg:grid-cols-2">
-                <PropComboBuilder />
-                <MatchupAnalyzer />
-              </div>
-            </div>
+            currentSub?.requiredTier && !canAccess(currentSub.requiredTier)
+              ? <TierGate required="elite" label="Matchup Analyzer" description="Player matchup breakdowns, prop combination builder, and head-to-head analysis for every position and game context." />
+              : <div className="space-y-6">
+                  <PlayerMatchupCenter />
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <PropComboBuilder />
+                    <MatchupAnalyzer />
+                  </div>
+                </div>
           )}
+
           {activeGroup === "analysis" && activeSub === "projections" && (
             <div className="space-y-6">
               <AIPredictions />
@@ -197,48 +212,66 @@ export default function Tools() {
           {activeGroup === "market" && activeSub === "odds" && (
             <RealTimeOdds />
           )}
+
           {activeGroup === "market" && activeSub === "sharp" && (
-            <div className="space-y-6">
-              <SharpConsensus />
-              <CLVPredictor />
-              <div className="grid gap-6 lg:grid-cols-2">
-                <SharpMoneyTracker />
-                <SteamMoveDetector />
-              </div>
-            </div>
+            currentSub?.requiredTier && !canAccess(currentSub.requiredTier)
+              ? <TierGate required="elite" label="Sharp Action Tracker" description="Sharp money flow indicators, public-vs-sharp splits, line steam detection, and CLV signals across all major sportsbooks." />
+              : <div className="space-y-6">
+                  <SharpConsensus />
+                  <CLVPredictor />
+                  <div className="grid gap-6 lg:grid-cols-2">
+                    <SharpMoneyTracker />
+                    <SteamMoveDetector />
+                  </div>
+                </div>
           )}
+
           {activeGroup === "market" && activeSub === "arb" && (
-            <ArbitrageFinder />
+            currentSub?.requiredTier && !canAccess(currentSub.requiredTier)
+              ? <TierGate required="elite" label="Arbitrage & Line Shopping" description="Real-time arbitrage scanner, positive EV finder, and line shopping tools across 15+ sportsbooks." />
+              : <ArbitrageFinder />
           )}
 
           {activeGroup === "correlations" && activeSub === "correlation" && (
             <div className="space-y-6">
               <CorrelationEngine />
-              <SGPOptimizer />
+              {canAccess("elite")
+                ? <SGPOptimizer />
+                : <TierGate required="elite" label="SGP Correlation Engine" description="Same-game parlay correlation analysis — find positive correlations, avoid leg conflicts, and optimize SGP structure." />
+              }
               <ConditionalEngine />
               <LegDiversification />
             </div>
           )}
+
           {activeGroup === "correlations" && activeSub === "strategies" && (
             <div className="space-y-6">
               <ParlayStrategyBuilder />
               <KeyNumberAnalyzer />
             </div>
           )}
+
           {activeGroup === "correlations" && activeSub === "situational" && (
             <SituationalSpots />
           )}
 
           {activeGroup === "risk" && activeSub === "bankroll" && (
             <div className="space-y-6">
-              <CashoutMaximizer />
+              {canAccess("whale")
+                ? <CashoutMaximizer />
+                : <TierGate required="whale" label="Cashout Maximizer" description="Real-time cashout value analysis with optimal exit timing recommendations and EV-adjusted cashout decisions." />
+              }
               <BankrollSimulator />
               <div className="grid gap-6 lg:grid-cols-2">
-                <CorrelationHedgeCalculator />
+                {canAccess("whale")
+                  ? <CorrelationHedgeCalculator />
+                  : <TierGate required="whale" label="Hedge Calculator" description="Multi-leg hedge optimizer — lock in profit or minimize loss across correlated bets and live markets." />
+                }
                 <BookLimitOptimizer />
               </div>
             </div>
           )}
+
           {activeGroup === "risk" && activeSub === "simulators" && (
             <div className="space-y-6">
               <div className="grid gap-6 lg:grid-cols-2">
@@ -250,16 +283,31 @@ export default function Tools() {
                 <ROIUpliftCalculator />
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
-                <MarketTimingAlerts events={[]} />
+                {canAccess("elite")
+                  ? <MarketTimingAlerts events={[]} />
+                  : <TierGate required="elite" label="Market Timing Alerts" description="Bet-now vs. wait signals based on line movement patterns and sharp money timing." />
+                }
                 <PortfolioParlayOptimizer legs={[]} bankroll={1000} />
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
-                <ProgressiveHedgePlanner legs={[]} stake={25} potentialPayout={250} />
-                <PromoBoostStacker legs={[]} currentOdds={2.5} />
+                {canAccess("whale")
+                  ? <ProgressiveHedgePlanner legs={[]} stake={25} potentialPayout={250} />
+                  : <TierGate required="whale" label="Progressive Hedge Planner" description="Build staged hedging plans across a live parlay — lock in guaranteed profit as legs cash." />
+                }
+                {canAccess("elite")
+                  ? <PromoBoostStacker legs={[]} currentOdds={2.5} />
+                  : <TierGate required="elite" label="Promo Boost Stacker" description="Stack sportsbook promotions with your parlay legs to maximize expected value." />
+                }
               </div>
               <div className="grid gap-6 lg:grid-cols-2">
-                <SyntheticInsuranceBuilder legs={[]} stake={25} potentialPayout={250} expectedValue={5} />
-                <BookLimitPlanner desiredStake={100} />
+                {canAccess("whale")
+                  ? <SyntheticInsuranceBuilder legs={[]} stake={25} potentialPayout={250} expectedValue={5} />
+                  : <TierGate required="whale" label="Synthetic Insurance Builder" description="Create insurance positions using correlated bets to protect high-value parlays." />
+                }
+                {canAccess("elite")
+                  ? <BookLimitPlanner desiredStake={100} />
+                  : <TierGate required="elite" label="Book Limit Planner" description="Distribute stakes optimally across books to avoid limits while maximizing total action." />
+                }
               </div>
               <CorrelationGraph legs={[]} />
             </div>
@@ -272,14 +320,21 @@ export default function Tools() {
               <TravelRestAnalyzer />
             </div>
           )}
+
           {activeGroup === "extras" && activeSub === "grading" && (
             <div className="space-y-6">
               <BetGradingPostgame />
-              <ExportBetSlip />
+              {canAccess("whale")
+                ? <ExportBetSlip />
+                : <TierGate required="whale" label="Bet Slip Export" description="Export formatted bet slips directly to DraftKings, FanDuel, BetMGM, and more — one-click placement." />
+              }
             </div>
           )}
+
           {activeGroup === "extras" && activeSub === "model" && (
-            <CustomModelBuilder />
+            currentSub?.requiredTier && !canAccess(currentSub.requiredTier)
+              ? <TierGate required="whale" label="Custom 46-Factor Model Editor" description="Adjust the weight of every factor in the prediction engine. Build your own model with your own edge. Max tier only." />
+              : <CustomModelBuilder />
           )}
         </div>
       </div>

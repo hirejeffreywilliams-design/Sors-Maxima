@@ -77,16 +77,18 @@ export function LiveHedgeCalculator() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
-          <Shield className="w-5 h-5 text-blue-500" />
-          Live Hedge Calculator
-          <QuantumBadge />
-        </CardTitle>
+        <div>
+          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+            <Shield className="w-5 h-5 text-blue-500" />
+            Live Hedge & Profit Lock
+            <QuantumBadge />
+          </CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Computes optimal hedge stakes across your parlay legs as games go final — guarantees profit or minimizes loss. Connected to your saved bets.
+          </p>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          Calculate optimal hedge bets for your active wagers in real-time
-        </p>
 
         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
           <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />

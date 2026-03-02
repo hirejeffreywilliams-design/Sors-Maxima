@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders } from "lucide-react";
+import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders, Lock } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
@@ -15,6 +15,7 @@ import { useSEO } from "@/hooks/use-seo";
 import { useSSE, type SSEEvent } from "@/hooks/use-sse";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
+import { TierGate, useTier } from "@/components/tier-gate";
 
 interface LiveGame {
   id: string;
@@ -54,6 +55,7 @@ function LiveGamesStrip({ games }: { games: LiveGame[] }) {
 
 export default function Live() {
   useSEO({ title: "Live Betting", description: "Real-time live betting tools and analysis" });
+  const { canAccess } = useTier();
 
   const handleSSEEvent = useCallback((event: SSEEvent) => {
     if (event.type === "live-scores" || event.type === "intelligence-update") {
@@ -67,9 +69,13 @@ export default function Live() {
   }, []);
 
   const sse = useSSE({ enabled: true, onEvent: handleSSEEvent });
+
+  const isMax = canAccess("whale");
+
   const { data: momentumGames } = useQuery<LiveGame[]>({
     queryKey: ["/api/live/momentum"],
     refetchInterval: 30000,
+    enabled: isMax,
   });
 
   return (
@@ -106,7 +112,7 @@ export default function Live() {
           </div>
         </header>
 
-        {momentumGames && momentumGames.some(g => g.status === "live" || g.status === "halftime") && (
+        {isMax && momentumGames && momentumGames.some(g => g.status === "live" || g.status === "halftime") && (
           <LiveGamesStrip games={momentumGames} />
         )}
 
@@ -121,10 +127,12 @@ export default function Live() {
               <TabsTrigger value="momentum" className="gap-1 px-2 sm:px-3" data-testid="tab-momentum">
                 <Activity className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Momentum</span>
+                {!isMax && <Lock className="w-3 h-3 shrink-0 opacity-50 hidden sm:block" />}
               </TabsTrigger>
               <TabsTrigger value="cashout" className="gap-1 px-2 sm:px-3" data-testid="tab-cashout">
                 <DollarSign className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Cashout</span>
+                {!isMax && <Lock className="w-3 h-3 shrink-0 opacity-50 hidden sm:block" />}
               </TabsTrigger>
               <TabsTrigger value="schemes" className="gap-1 px-2 sm:px-3" data-testid="tab-schemes">
                 <Brain className="w-4 h-4 shrink-0" />
@@ -133,6 +141,7 @@ export default function Live() {
               <TabsTrigger value="hedge" className="gap-1 px-2 sm:px-3" data-testid="tab-hedge">
                 <Shield className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Hedge</span>
+                {!isMax && <Lock className="w-3 h-3 shrink-0 opacity-50 hidden sm:block" />}
               </TabsTrigger>
               <TabsTrigger value="assistant" className="gap-1 px-2 sm:px-3" data-testid="tab-assistant">
                 <Bot className="w-4 h-4 shrink-0" />
@@ -141,10 +150,12 @@ export default function Live() {
               <TabsTrigger value="clv" className="gap-1 px-2 sm:px-3" data-testid="tab-clv">
                 <LineChart className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Line Value</span>
+                {!isMax && <Lock className="w-3 h-3 shrink-0 opacity-50 hidden sm:block" />}
               </TabsTrigger>
               <TabsTrigger value="sharp" className="gap-1 px-2 sm:px-3" data-testid="tab-sharp">
                 <Users className="w-4 h-4 shrink-0" />
                 <span className="hidden sm:inline">Sharp</span>
+                {!isMax && <Lock className="w-3 h-3 shrink-0 opacity-50 hidden sm:block" />}
               </TabsTrigger>
               <TabsTrigger value="chat" className="gap-1 px-2 sm:px-3" data-testid="tab-chat">
                 <MessageSquare className="w-4 h-4 shrink-0" />
@@ -158,11 +169,17 @@ export default function Live() {
           </TabsContent>
 
           <TabsContent value="momentum" className="space-y-6">
-            <MomentumTracker />
+            {isMax
+              ? <MomentumTracker />
+              : <TierGate required="whale" label="Live Momentum Tracker" description="Real-time game momentum scoring with swing detection — know exactly when a line is about to move before it happens." />
+            }
           </TabsContent>
 
           <TabsContent value="cashout" className="space-y-6">
-            <CashoutAdvisor />
+            {isMax
+              ? <CashoutAdvisor />
+              : <TierGate required="whale" label="Live Cashout Advisor" description="EV-adjusted cashout recommendations updated every 30 seconds. Know precisely when to cash out vs. ride it out." />
+            }
           </TabsContent>
 
           <TabsContent value="schemes" className="space-y-6">
@@ -170,7 +187,10 @@ export default function Live() {
           </TabsContent>
 
           <TabsContent value="hedge" className="space-y-6">
-            <LiveHedgeCalculator />
+            {isMax
+              ? <LiveHedgeCalculator />
+              : <TierGate required="whale" label="Live Hedge Calculator" description="Real-time hedge sizing across your active parlay legs — lock in guaranteed profit as games go live." />
+            }
           </TabsContent>
 
           <TabsContent value="assistant" className="space-y-6">
@@ -178,11 +198,17 @@ export default function Live() {
           </TabsContent>
 
           <TabsContent value="clv" className="space-y-6">
-            <CLVTracker />
+            {isMax
+              ? <CLVTracker />
+              : <TierGate required="whale" label="CLV Deep Analysis" description="Track closing line value on every pick you've placed. The only stat serious bettors use to validate long-term edge." />
+            }
           </TabsContent>
 
           <TabsContent value="sharp" className="space-y-6">
-            <PublicVsSharp />
+            {isMax
+              ? <PublicVsSharp />
+              : <TierGate required="whale" label="Public vs. Sharp Money" description="Live public betting percentage vs. sharp money flow on every game. See where the informed money is going in real time." />
+            }
           </TabsContent>
 
           <TabsContent value="chat" className="space-y-6">

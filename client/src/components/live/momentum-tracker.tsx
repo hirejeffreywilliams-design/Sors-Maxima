@@ -306,12 +306,17 @@ export function MomentumTracker() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
-            <Activity className="w-5 h-5 text-green-500" />
-            Live Momentum Tracker
-            <QuantumBadge />
-          </CardTitle>
-          <Badge variant="outline" className="gap-1 text-xs">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
+              <Activity className="w-5 h-5 text-green-500" />
+              Live Game Momentum
+              <QuantumBadge />
+            </CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Real-time swing detection — signals when a game is shifting before the line moves. Feeds live cashout and hedge decisions.
+            </p>
+          </div>
+          <Badge variant="outline" className="gap-1 text-xs shrink-0">
             <Timer className="w-3 h-3" />
             Updated {lastUpdate.toLocaleTimeString()}
           </Badge>
@@ -321,7 +326,7 @@ export function MomentumTracker() {
         <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-md">
           <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
           <p className="text-xs text-blue-600 dark:text-blue-400">
-            Live scores &amp; odds from ESPN · {liveGames.length} live · {preGames.length} upcoming · {finalGames.length} completed
+            {liveGames.length} live · {preGames.length} upcoming · {finalGames.length} completed · Scores and odds updated in real time
           </p>
         </div>
 
