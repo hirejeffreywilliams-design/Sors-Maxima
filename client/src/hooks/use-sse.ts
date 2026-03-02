@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import { usePageVisibility } from "./use-page-visibility";
 
 export interface SSEEvent {
   type: string;
@@ -38,6 +39,8 @@ export function useSSE(options: UseSSEOptions = {}) {
     maxReconnectAttempts = 10,
   } = options;
 
+  const isPageVisible = usePageVisibility();
+
   const [state, setState] = useState<SSEState>({
     connected: false,
     clientId: null,
@@ -59,8 +62,10 @@ export function useSSE(options: UseSSEOptions = {}) {
   const lastEventIdRef = useRef<string | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const onEventRef = useRef(onEvent);
+  const isPageVisibleRef = useRef(isPageVisible);
 
   onEventRef.current = onEvent;
+  isPageVisibleRef.current = isPageVisible;
 
   const connect = useCallback(() => {
     if (!enabled || !mountedRef.current) return;
@@ -93,6 +98,12 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     };
 
+    const dispatchEvent = (sseEvent: SSEEvent) => {
+      if (isPageVisibleRef.current) {
+        onEventRef.current?.(sseEvent);
+      }
+    };
+
     es.addEventListener("intelligence-update", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {
@@ -110,7 +121,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           dataSourceHealth: data.dataSourceHealth || prev.dataSourceHealth,
           lastUpdate: data.timestamp,
         }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -121,7 +132,7 @@ export function useSSE(options: UseSSEOptions = {}) {
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "live-scores", data, timestamp: data.timestamp };
         setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -137,7 +148,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           edgeAlerts: data.alerts || prev.edgeAlerts,
           lastUpdate: data.timestamp,
         }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -153,7 +164,7 @@ export function useSSE(options: UseSSEOptions = {}) {
           pendingNotifications: [data.notification, ...prev.pendingNotifications].slice(0, 50),
           lastUpdate: data.timestamp,
         }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -164,7 +175,7 @@ export function useSSE(options: UseSSEOptions = {}) {
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "picks-settled", data, timestamp: Date.now() };
         setState(prev => ({ ...prev, lastEvent: sseEvent }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -175,7 +186,7 @@ export function useSSE(options: UseSSEOptions = {}) {
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "guardian-alert", data, timestamp: data.timestamp || new Date().toISOString() };
         setState(prev => ({ ...prev, lastEvent: sseEvent }));
-        onEventRef.current?.(sseEvent);
+        dispatchEvent(sseEvent);
       } catch {}
     });
 
@@ -192,7 +203,8 @@ export function useSSE(options: UseSSEOptions = {}) {
       const nextAttempts = reconnectAttemptsRef.current;
       setState(prev => ({ ...prev, connected: false, reconnectAttempts: nextAttempts }));
       if (nextAttempts <= maxReconnectAttempts) {
-        const delay = Math.min(reconnectDelay * Math.pow(1.5, nextAttempts - 1), 30000);
+        const backgroundMultiplier = isPageVisibleRef.current ? 1 : 5;
+        const delay = Math.min(reconnectDelay * Math.pow(1.5, nextAttempts - 1) * backgroundMultiplier, 60000);
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
@@ -230,5 +242,6 @@ export function useSSE(options: UseSSEOptions = {}) {
     ...state,
     disconnect,
     reconnect: connect,
+    isPageVisible,
   };
 }

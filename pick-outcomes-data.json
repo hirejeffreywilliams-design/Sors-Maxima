@@ -639,38 +639,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-02T00:01:41.705Z",
       "savedAt": "2026-03-02T00:01:41.705Z"
-    },
-    {
-      "id": "precomp-NHL-401803306-spread-6242a2b5cf",
-      "gameId": "401803306",
-      "sport": "NHL",
-      "game": "Detroit Red Wings @ Nashville Predators",
-      "homeTeam": "Nashville Predators",
-      "awayTeam": "Detroit Red Wings",
-      "pick": "Nashville Predators +2",
-      "betType": "spread",
-      "odds": -148,
-      "grade": "A",
-      "confidence": 66,
-      "ev": 10.59,
-      "gameTime": "2026-03-02T19:00Z",
-      "savedAt": "2026-03-02T19:33:55.662Z"
-    },
-    {
-      "id": "precomp-NHL-401803306-team_total-ecdb56035e",
-      "gameId": "401803306",
-      "sport": "NHL",
-      "game": "Detroit Red Wings @ Nashville Predators",
-      "homeTeam": "Nashville Predators",
-      "awayTeam": "Detroit Red Wings",
-      "pick": "Detroit Red Wings Under 4.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 64,
-      "ev": 22.18,
-      "gameTime": "2026-03-02T19:00Z",
-      "savedAt": "2026-03-02T19:33:55.662Z"
     }
   ],
   "settled": [
@@ -78369,22 +78337,102 @@
       "homeScore": 5,
       "awayScore": 2,
       "settledAt": "2026-03-02T19:28:30.572Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-6242a2b5cf",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Nashville Predators +2",
+      "betType": "spread",
+      "odds": -148,
+      "grade": "A",
+      "confidence": 66,
+      "ev": 10.59,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:33:55.662Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:35:08.119Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-team_total-ecdb56035e",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings Under 4.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 64,
+      "ev": 22.18,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:33:55.662Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:35:08.119Z"
+    },
+    {
+      "id": "precomp-NBA-401810734-total-8b8c320c4c",
+      "gameId": "401810734",
+      "sport": "NBA",
+      "game": "Houston Rockets @ Washington Wizards",
+      "homeTeam": "Washington Wizards",
+      "awayTeam": "Houston Rockets",
+      "pick": "Over 225.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 62,
+      "ev": 18.36,
+      "gameTime": "2026-03-03T00:00Z",
+      "savedAt": "2026-03-02T19:49:05.508Z",
+      "result": "lost",
+      "homeScore": 115,
+      "awayScore": 105,
+      "settledAt": "2026-03-02T19:50:16.342Z"
+    },
+    {
+      "id": "precomp-NHL-401803306-spread-2b40f93d62",
+      "gameId": "401803306",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Nashville Predators",
+      "homeTeam": "Nashville Predators",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Detroit Red Wings -0.5",
+      "betType": "spread",
+      "odds": 245,
+      "grade": "A",
+      "confidence": 63,
+      "ev": 117.35,
+      "gameTime": "2026-03-02T19:00Z",
+      "savedAt": "2026-03-02T19:49:05.978Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-02T19:50:16.363Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3778,
-      "won": 1896,
-      "lost": 1844,
+      "total": 3782,
+      "won": 1898,
+      "lost": 1846,
       "push": 38,
       "rate": 50.2,
-      "pending": 42
+      "pending": 40
     },
     "bySport": {
       "NHL": {
-        "total": 732,
-        "won": 314,
-        "rate": 42.9
+        "total": 735,
+        "won": 316,
+        "rate": 43
       },
       "NCAAB": {
         "total": 1333,
@@ -78392,9 +78440,9 @@
         "rate": 55.1
       },
       "NBA": {
-        "total": 1393,
+        "total": 1394,
         "won": 721,
-        "rate": 51.8
+        "rate": 51.7
       },
       "MLB": {
         "total": 320,
@@ -78439,14 +78487,14 @@
         "rate": 33.3
       },
       "A-": {
-        "total": 200,
+        "total": 201,
         "won": 101,
-        "rate": 50.5
+        "rate": 50.2
       },
       "A": {
-        "total": 163,
-        "won": 92,
-        "rate": 56.4
+        "total": 166,
+        "won": 94,
+        "rate": 56.6
       },
       "A+": {
         "total": 726,
@@ -78456,19 +78504,19 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 704,
-        "won": 417,
-        "rate": 59.2
+        "total": 705,
+        "won": 418,
+        "rate": 59.3
       },
       "Spread": {
-        "total": 1440,
-        "won": 577,
+        "total": 1442,
+        "won": 578,
         "rate": 40.1
       },
       "Total": {
-        "total": 1513,
+        "total": 1514,
         "won": 841,
-        "rate": 55.6
+        "rate": 55.5
       },
       "Moneyline": {
         "total": 121,
@@ -78482,7 +78530,7 @@
       "push": 1,
       "rate": 70
     },
-    "lastUpdated": "2026-03-02T19:34:03.103Z"
+    "lastUpdated": "2026-03-02T19:54:20.687Z"
   },
   "version": 1
 }

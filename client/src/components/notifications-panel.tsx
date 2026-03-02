@@ -156,8 +156,8 @@ export function NotificationsPanel() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[420px] p-0" data-testid="panel-notifications">
-        <div className="flex items-center justify-between gap-2 p-3 border-b">
+      <PopoverContent align="end" className="w-[340px] sm:w-[380px] p-0" data-testid="panel-notifications">
+        <div className="flex items-center justify-between gap-2 p-2.5 border-b">
           <div className="flex items-center gap-2">
             <h3 className="font-semibold text-sm">Notifications</h3>
             {sse.connected && (
@@ -166,37 +166,39 @@ export function NotificationsPanel() {
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5">
             {unreadCount > 0 && (
               <Button
                 variant="ghost"
                 size="sm"
+                className="h-7 px-2 text-xs"
                 onClick={handleMarkAllRead}
                 disabled={markReadMutation.isPending}
                 data-testid="button-mark-all-read"
               >
-                <CheckCheck className="w-4 h-4 mr-1" />
-                Mark all read
+                <CheckCheck className="w-3 h-3 mr-1" />
+                Read all
               </Button>
             )}
             <Button
               variant="ghost"
               size="icon"
+              className="h-7 w-7"
               onClick={() => setShowSettings(!showSettings)}
               data-testid="button-notification-settings"
             >
-              <Settings2 className="w-4 h-4" />
+              <Settings2 className="w-3.5 h-3.5" />
             </Button>
           </div>
         </div>
 
         {showSettings && (
-          <div className="p-3 border-b space-y-2" data-testid="panel-notification-settings">
-            <p className="text-xs text-muted-foreground font-medium mb-2">Alert Preferences</p>
+          <div className="px-2.5 py-2 border-b space-y-1.5" data-testid="panel-notification-settings">
+            <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Alert Preferences</p>
             {Object.entries(typeConfig).map(([key, config]) => (
               <div key={key} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <config.icon className={`w-3.5 h-3.5 ${config.color}`} />
+                <div className="flex items-center gap-1.5">
+                  <config.icon className={`w-3 h-3 ${config.color}`} />
                   <span className="text-xs">{config.label}</span>
                 </div>
                 <Switch
@@ -211,12 +213,12 @@ export function NotificationsPanel() {
           </div>
         )}
 
-        <ScrollArea className="max-h-[420px]">
+        <ScrollArea className="max-h-[360px]">
           {filteredNotifications.length === 0 ? (
-            <div className="p-8 text-center" data-testid="text-no-notifications">
-              <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground/40" />
+            <div className="p-6 text-center" data-testid="text-no-notifications">
+              <Bell className="w-7 h-7 mx-auto mb-2 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">No notifications yet</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Subscribe to games or watch parlays to get alerts</p>
+              <p className="text-[11px] text-muted-foreground/60 mt-1">Subscribe to games to get alerts here</p>
             </div>
           ) : (
             sortedTypes.map(type => {
@@ -228,8 +230,8 @@ export function NotificationsPanel() {
               const unreadInGroup = items.filter(n => !n.read).length;
               return (
                 <div key={type}>
-                  <div className="px-3 py-1.5 bg-muted/50 sticky top-0 z-10">
-                    <span className={`text-xs font-medium flex items-center gap-1.5 ${config.color}`}>
+                  <div className="px-2.5 py-1 bg-muted/50 sticky top-0 z-10">
+                    <span className={`text-[10px] font-semibold uppercase tracking-wide flex items-center gap-1.5 ${config.color}`}>
                       <Icon className="w-3 h-3" />
                       {config.label}
                       {unreadInGroup > 0 && (
@@ -245,27 +247,27 @@ export function NotificationsPanel() {
                     return (
                       <div
                         key={`${notification.type}-${notification.id}`}
-                        className={`px-3 py-2.5 border-b last:border-b-0 transition-colors ${
+                        className={`px-2.5 py-2 border-b last:border-b-0 transition-colors ${
                           notification.read ? "opacity-60" : "bg-muted/20"
                         } ${isClickable ? "cursor-pointer hover:bg-accent/40" : ""}`}
                         data-testid={`notification-item-${notification.id}`}
                         onClick={isClickable ? () => { if (!notification.read) markReadMutation.mutate([notification.id]); setOpen(false); setLocation(route); } : undefined}
                       >
                         <div className="flex items-start gap-2">
-                          <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${config.color}`} />
+                          <Icon className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${config.color}`} />
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-medium">{notification.title}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs font-medium leading-tight">{notification.title}</span>
                               {notification.sport && (
-                                <Badge variant="outline" className="text-[10px] h-4 px-1" data-testid={`badge-sport-${notification.id}`}>
+                                <Badge variant="outline" className="text-[9px] h-3.5 px-1 py-0" data-testid={`badge-sport-${notification.id}`}>
                                   {notification.sport}
                                 </Badge>
                               )}
                               {!notification.read && (
-                                <span className="w-2 h-2 rounded-full bg-primary shrink-0" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
                               )}
                             </div>
-                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                            <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-snug">
                               {notification.description}
                             </p>
                             <div className="flex items-center justify-between mt-1">
@@ -274,7 +276,7 @@ export function NotificationsPanel() {
                               </span>
                               {isClickable && (
                                 <span className="flex items-center gap-0.5 text-[10px] text-primary font-medium" data-testid={`link-notif-action-${notification.id}`}>
-                                  Bet Now <ArrowRight className="w-3 h-3" />
+                                  View <ArrowRight className="w-2.5 h-2.5" />
                                 </span>
                               )}
                             </div>
@@ -289,11 +291,13 @@ export function NotificationsPanel() {
           )}
         </ScrollArea>
 
-        <div className="p-2 border-t bg-muted/30">
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-            <span data-testid="text-notification-total">{filteredNotifications.length} notifications</span>
-            <span>{unreadCount} unread</span>
-          </div>
+        <div className="px-2.5 py-1.5 border-t bg-muted/20 flex items-center justify-between">
+          <span className="text-[10px] text-muted-foreground" data-testid="text-notification-total">
+            {filteredNotifications.length} total
+          </span>
+          {unreadCount > 0 && (
+            <span className="text-[10px] font-medium text-primary">{unreadCount} unread</span>
+          )}
         </div>
       </PopoverContent>
     </Popover>
