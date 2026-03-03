@@ -367,10 +367,20 @@ function buildLineMovementReason(
   }
 
   if (lm.sharpAction) {
-    if (lm.direction === "down") {
-      parts.push("Sharp action detected on the underdog side.");
-    } else if (lm.direction === "up") {
-      parts.push("Favorite getting more expensive — could be public or sharp money.");
+    if (lm.market === "spread") {
+      if (lm.direction === "down") {
+        parts.push("Sharp action detected — spread tightening in favor of the underdog.");
+      } else if (lm.direction === "up") {
+        parts.push("Sharp action detected — spread widening, bettors backing the favorite.");
+      }
+    } else if (lm.market === "total") {
+      if (lm.direction === "down") {
+        parts.push("Sharp money on the Under — total has been bet down.");
+      } else if (lm.direction === "up") {
+        parts.push("Sharp money on the Over — total has been bet up.");
+      }
+    } else {
+      parts.push("Sharp money detected — professional bettors may be on this game.");
     }
   }
 
@@ -407,9 +417,11 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
         });
       }
 
-      const maxEV = Math.max(Math.abs(game.edgeAnalysis?.homeEV || 0), Math.abs(game.edgeAnalysis?.awayEV || 0));
+      const homeEV = game.edgeAnalysis?.homeEV || 0;
+      const awayEV = game.edgeAnalysis?.awayEV || 0;
+      const maxEV = Math.max(homeEV, awayEV);
       if (maxEV > 0.08) {
-        const side = (game.edgeAnalysis?.homeEV || 0) > (game.edgeAnalysis?.awayEV || 0) ? game.homeTeam.name : game.awayTeam.name;
+        const side = homeEV >= awayEV ? game.homeTeam.name : game.awayTeam.name;
         const timing = determineMovementTiming(game);
         const timingAdvice = timing === "early_value"
           ? "Line still settling — value may increase or disappear."
@@ -442,7 +454,7 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
             sport: snapshot.sport,
             game: game.shortName,
             title: lm.velocity === "steam" ? "Steam Move Detected" : "Sharp Money Detected",
-            description: `${lm.market} moved ${lm.direction} (${lm.velocity}) on ${game.shortName}`,
+            description: `${lm.market === "spread" ? "Spread" : "Total"} shifted ${lm.opening} → ${lm.current} on ${game.shortName}`,
             reason: movementReason,
             timing,
             timestamp: now,

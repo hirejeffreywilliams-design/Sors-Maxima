@@ -431,10 +431,11 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
   const totals = bookmakers.map(b => b.total).filter((v): v is number => v !== undefined);
 
   if (spreads.length >= 2) {
-    const min = Math.min(...spreads);
-    const max = Math.max(...spreads);
     const avg = spreads.reduce((s, v) => s + v, 0) / spreads.length;
-    const openingGuess = espnOdds?.spread ? parseFloat(espnOdds.spread.replace(/[^-.\d]/g, "") || "0") : max;
+    const hasEspnLine = !!espnOdds?.spread;
+    const openingGuess = hasEspnLine
+      ? parseFloat(espnOdds!.spread!.replace(/[^-.\d]/g, "") || "0")
+      : avg; // use avg as baseline when no ESPN opening — avoids false "down" bias
     const movement = avg - openingGuess;
     const absMov = Math.abs(movement);
 
@@ -445,13 +446,14 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
       movement: Math.round(movement * 10) / 10,
       direction: movement > 0.25 ? "up" : movement < -0.25 ? "down" : "stable",
       velocity: absMov > 2 ? "steam" : absMov > 1 ? "fast" : absMov > 0.5 ? "moderate" : "slow",
-      sharpAction: absMov > 1.5,
+      sharpAction: hasEspnLine && absMov > 1.5, // only flag sharp action when we have a real opening
     });
   }
 
   if (totals.length >= 2) {
     const avg = totals.reduce((s, v) => s + v, 0) / totals.length;
-    const opening = espnOdds?.overUnder || Math.max(...totals);
+    const hasEspnTotal = !!espnOdds?.overUnder;
+    const opening = hasEspnTotal ? espnOdds!.overUnder! : avg;
     const movement = avg - opening;
     const absMov = Math.abs(movement);
 
@@ -462,7 +464,7 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
       movement: Math.round(movement * 10) / 10,
       direction: movement > 0.25 ? "up" : movement < -0.25 ? "down" : "stable",
       velocity: absMov > 3 ? "steam" : absMov > 1.5 ? "fast" : absMov > 0.5 ? "moderate" : "slow",
-      sharpAction: absMov > 2,
+      sharpAction: hasEspnTotal && absMov > 2, // only flag sharp action when we have a real opening
     });
   }
 
