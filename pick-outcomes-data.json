@@ -3981,27 +3981,87 @@
       "homeScore": 111,
       "awayScore": 77,
       "settledAt": "2026-03-03T17:25:15.822Z"
+    },
+    {
+      "id": "precomp-NBA-401810743-team_total-0cfd43caaa",
+      "gameId": "401810743",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "Philadelphia 76ers Over 112.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 67,
+      "ev": -10.27,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T17:29:58.246Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-03T17:30:16.503Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-spread-13777e4126",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "New Jersey Devils +1.5",
+      "betType": "spread",
+      "odds": -275,
+      "grade": "B-",
+      "confidence": 68,
+      "ev": -23.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T17:29:58.417Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T17:30:16.504Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-team_total-8c777baaf3",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "New Jersey Devils Over 2",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 16.45,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T17:29:58.417Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T17:30:16.504Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 187,
-      "won": 92,
+      "total": 190,
+      "won": 95,
       "lost": 94,
       "push": 1,
-      "rate": 49.2,
+      "rate": 50,
       "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 58,
-        "won": 27,
-        "rate": 46.6
+        "total": 59,
+        "won": 28,
+        "rate": 47.5
       },
       "NHL": {
-        "total": 60,
-        "won": 28,
-        "rate": 46.7
+        "total": 62,
+        "won": 30,
+        "rate": 48.4
       },
       "NCAAB": {
         "total": 69,
@@ -4021,9 +4081,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 69,
-        "won": 34,
-        "rate": 49.3
+        "total": 72,
+        "won": 37,
+        "rate": 51.4
       },
       "D+": {
         "total": 13,
@@ -4058,9 +4118,9 @@
         "rate": 50
       },
       "Spread": {
-        "total": 42,
-        "won": 21,
-        "rate": 50
+        "total": 43,
+        "won": 22,
+        "rate": 51.2
       },
       "Total": {
         "total": 34,
@@ -4068,18 +4128,18 @@
         "rate": 52.9
       },
       "Team Total": {
-        "total": 73,
-        "won": 34,
-        "rate": 46.6
+        "total": 75,
+        "won": 36,
+        "rate": 48
       }
     },
     "recentForm": {
-      "won": 22,
-      "lost": 27,
+      "won": 23,
+      "lost": 26,
       "push": 1,
-      "rate": 44
+      "rate": 46
     },
-    "lastUpdated": "2026-03-03T17:25:15.822Z"
+    "lastUpdated": "2026-03-03T17:30:16.505Z"
   },
   "version": 1
 }
