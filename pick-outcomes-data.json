@@ -735,54 +735,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827719-team_total-58674ef914",
-      "gameId": "401827719",
-      "sport": "NCAAB",
-      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
-      "homeTeam": "Texas Tech Red Raiders",
-      "awayTeam": "TCU Horned Frogs",
-      "pick": "TCU Horned Frogs Under 69.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "A+",
-      "confidence": 70,
-      "ev": 33.64,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T14:08:30.247Z"
-    },
-    {
-      "id": "precomp-NCAAB-401822967-spread-03ce04a9d9",
-      "gameId": "401822967",
-      "sport": "NCAAB",
-      "game": "Georgetown Hoyas @ St. John's Red Storm",
-      "homeTeam": "St. John's Red Storm",
-      "awayTeam": "Georgetown Hoyas",
-      "pick": "St. John's Red Storm -16.5",
-      "betType": "spread",
-      "odds": -115,
-      "grade": "A+",
-      "confidence": 70,
-      "ev": 30.87,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T14:08:30.247Z"
-    },
-    {
-      "id": "precomp-NCAAB-401822967-team_total-5dd9c3180a",
-      "gameId": "401822967",
-      "sport": "NCAAB",
-      "game": "Georgetown Hoyas @ St. John's Red Storm",
-      "homeTeam": "St. John's Red Storm",
-      "awayTeam": "Georgetown Hoyas",
-      "pick": "St. John's Red Storm Over 83",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "A+",
-      "confidence": 67,
-      "ev": 27.91,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T14:08:30.247Z"
     }
   ],
   "settled": [
@@ -61814,16 +61766,96 @@
       "homeScore": 89,
       "awayScore": 57,
       "settledAt": "2026-03-03T13:53:38.593Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827719-team_total-58674ef914",
+      "gameId": "401827719",
+      "sport": "NCAAB",
+      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "TCU Horned Frogs",
+      "pick": "TCU Horned Frogs Under 69.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:08:30.247Z",
+      "result": "lost",
+      "homeScore": 73,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T14:13:41.379Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-spread-03ce04a9d9",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "St. John's Red Storm -16.5",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 30.87,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:08:30.247Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 57,
+      "settledAt": "2026-03-03T14:13:41.393Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-team_total-5dd9c3180a",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "St. John's Red Storm Over 83",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:08:30.247Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 57,
+      "settledAt": "2026-03-03T14:13:41.393Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-team_total-c32c7a5566",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "Georgetown Hoyas Under 66",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:12:33.508Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 57,
+      "settledAt": "2026-03-03T14:13:41.393Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2998,
-      "won": 1665,
-      "lost": 1291,
+      "total": 3002,
+      "won": 1668,
+      "lost": 1292,
       "push": 42,
-      "rate": 55.5,
-      "pending": 49
+      "rate": 55.6,
+      "pending": 46
     },
     "bySport": {
       "NHL": {
@@ -61832,9 +61864,9 @@
         "rate": 55.3
       },
       "NCAAB": {
-        "total": 1008,
-        "won": 587,
-        "rate": 58.2
+        "total": 1012,
+        "won": 590,
+        "rate": 58.3
       },
       "NBA": {
         "total": 1225,
@@ -61894,21 +61926,21 @@
         "rate": 56.6
       },
       "A+": {
-        "total": 883,
-        "won": 528,
-        "rate": 59.8
+        "total": 887,
+        "won": 531,
+        "rate": 59.9
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 828,
-        "won": 485,
+        "total": 831,
+        "won": 487,
         "rate": 58.6
       },
       "Spread": {
-        "total": 449,
-        "won": 226,
-        "rate": 50.3
+        "total": 450,
+        "won": 227,
+        "rate": 50.4
       },
       "Total": {
         "total": 1586,
@@ -61922,12 +61954,12 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 19,
+      "won": 32,
+      "lost": 17,
       "push": 1,
-      "rate": 60
+      "rate": 64
     },
-    "lastUpdated": "2026-03-03T14:10:16.640Z"
+    "lastUpdated": "2026-03-03T14:15:35.846Z"
   },
   "version": 1
 }
