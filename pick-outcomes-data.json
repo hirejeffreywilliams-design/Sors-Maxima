@@ -239,54 +239,6 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
-    },
-    {
-      "id": "precomp-NHL-401803322-moneyline-10bba0e92e",
-      "gameId": "401803322",
-      "sport": "NHL",
-      "game": "Toronto Maple Leafs @ New Jersey Devils",
-      "homeTeam": "New Jersey Devils",
-      "awayTeam": "Toronto Maple Leafs",
-      "pick": "New Jersey Devils ML",
-      "betType": "moneyline",
-      "odds": -114,
-      "grade": "B-",
-      "confidence": 63,
-      "ev": 5.12,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T16:52:54.709Z"
-    },
-    {
-      "id": "precomp-NHL-401803322-team_total-de9068bb22",
-      "gameId": "401803322",
-      "sport": "NHL",
-      "game": "Toronto Maple Leafs @ New Jersey Devils",
-      "homeTeam": "New Jersey Devils",
-      "awayTeam": "Toronto Maple Leafs",
-      "pick": "New Jersey Devils Over 3.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 63,
-      "ev": 6.91,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T16:52:54.709Z"
-    },
-    {
-      "id": "precomp-NHL-401803321-team_total-fc9a553606",
-      "gameId": "401803321",
-      "sport": "NHL",
-      "game": "Vegas Golden Knights @ Detroit Red Wings",
-      "homeTeam": "Detroit Red Wings",
-      "awayTeam": "Vegas Golden Knights",
-      "pick": "Detroit Red Wings Under 4",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 62,
-      "ev": 10.73,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T16:52:54.709Z"
     }
   ],
   "settled": [
@@ -3729,27 +3681,147 @@
       "homeScore": 77,
       "awayScore": 51,
       "settledAt": "2026-03-03T16:50:42.025Z"
+    },
+    {
+      "id": "precomp-NHL-401803321-team_total-fc9a553606",
+      "gameId": "401803321",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Detroit Red Wings",
+      "homeTeam": "Detroit Red Wings",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Detroit Red Wings Under 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 10.73,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T16:52:54.709Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T16:54:01.587Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-moneyline-10bba0e92e",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils ML",
+      "betType": "moneyline",
+      "odds": -114,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 5.12,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T16:52:54.709Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T16:54:01.590Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-team_total-de9068bb22",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils Over 3.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 6.91,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T16:52:54.709Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T16:54:01.590Z"
+    },
+    {
+      "id": "precomp-NHL-401803321-moneyline-952fad5407",
+      "gameId": "401803321",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Detroit Red Wings",
+      "homeTeam": "Detroit Red Wings",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Detroit Red Wings ML",
+      "betType": "moneyline",
+      "odds": -129,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 1.19,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T16:57:42.880Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T16:58:00.421Z"
+    },
+    {
+      "id": "precomp-NHL-401803324-team_total-260d743131",
+      "gameId": "401803324",
+      "sport": "NHL",
+      "game": "New York Islanders @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "New York Islanders",
+      "pick": "Anaheim Ducks Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 62,
+      "ev": -4.55,
+      "gameTime": "2026-03-05T03:00Z",
+      "savedAt": "2026-03-03T16:57:42.880Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T16:58:00.423Z"
+    },
+    {
+      "id": "precomp-NBA-401810743-team_total-d76c525091",
+      "gameId": "401810743",
+      "sport": "NBA",
+      "game": "San Antonio Spurs @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "San Antonio Spurs",
+      "pick": "Philadelphia 76ers Over 113",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 67,
+      "ev": -10.27,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T17:01:21.806Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-03T17:03:46.769Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 172,
-      "won": 85,
-      "lost": 86,
+      "total": 178,
+      "won": 88,
+      "lost": 89,
       "push": 1,
       "rate": 49.4,
-      "pending": 18
+      "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 57,
-        "won": 26,
-        "rate": 45.6
+        "total": 58,
+        "won": 27,
+        "rate": 46.6
       },
       "NHL": {
-        "total": 52,
-        "won": 25,
-        "rate": 48.1
+        "total": 57,
+        "won": 27,
+        "rate": 47.4
       },
       "NCAAB": {
         "total": 63,
@@ -3769,9 +3841,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 62,
-        "won": 32,
-        "rate": 51.6
+        "total": 66,
+        "won": 33,
+        "rate": 50
       },
       "D+": {
         "total": 12,
@@ -3784,14 +3856,14 @@
         "rate": 50
       },
       "C+": {
-        "total": 22,
-        "won": 7,
-        "rate": 31.8
+        "total": 23,
+        "won": 8,
+        "rate": 34.8
       },
       "C": {
-        "total": 18,
-        "won": 9,
-        "rate": 50
+        "total": 19,
+        "won": 10,
+        "rate": 52.6
       },
       "A-": {
         "total": 13,
@@ -3801,9 +3873,9 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 36,
+        "total": 38,
         "won": 19,
-        "rate": 52.8
+        "rate": 50
       },
       "Spread": {
         "total": 40,
@@ -3816,18 +3888,18 @@
         "rate": 51.5
       },
       "Team Total": {
-        "total": 63,
-        "won": 30,
-        "rate": 47.6
+        "total": 67,
+        "won": 33,
+        "rate": 49.3
       }
     },
     "recentForm": {
-      "won": 27,
-      "lost": 22,
+      "won": 25,
+      "lost": 24,
       "push": 1,
-      "rate": 54
+      "rate": 50
     },
-    "lastUpdated": "2026-03-03T16:52:56.133Z"
+    "lastUpdated": "2026-03-03T17:03:46.769Z"
   },
   "version": 1
 }
