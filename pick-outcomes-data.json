@@ -271,6 +271,54 @@
       "ev": 33.64,
       "gameTime": "2026-03-04T02:00Z",
       "savedAt": "2026-03-03T17:58:37.701Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-total-b3bbd56bdc",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Under 166.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-189f174eed",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks Under 87",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-528d3b4542",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Texas Longhorns Under 79.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z"
     }
   ],
   "settled": [
@@ -4542,7 +4590,7 @@
       "lost": 108,
       "push": 1,
       "rate": 48.8,
-      "pending": 17
+      "pending": 20
     },
     "bySport": {
       "NBA": {
