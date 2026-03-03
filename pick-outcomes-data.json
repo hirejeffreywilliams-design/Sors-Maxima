@@ -239,102 +239,6 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808277-spread-584cda3eae",
-      "gameId": "401808277",
-      "sport": "NCAAB",
-      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
-      "homeTeam": "Georgia Bulldogs",
-      "awayTeam": "Alabama Crimson Tide",
-      "pick": "Georgia Bulldogs +1.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 70,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T23:30Z",
-      "savedAt": "2026-03-03T21:01:34.582Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808277-team_total-719d3ca6d6",
-      "gameId": "401808277",
-      "sport": "NCAAB",
-      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
-      "homeTeam": "Georgia Bulldogs",
-      "awayTeam": "Alabama Crimson Tide",
-      "pick": "Alabama Crimson Tide Under 91",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 70,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T23:30Z",
-      "savedAt": "2026-03-03T21:01:34.582Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827715-spread-6bc13d2fe2",
-      "gameId": "401827715",
-      "sport": "NCAAB",
-      "game": "Kansas Jayhawks @ Arizona State Sun Devils",
-      "homeTeam": "Arizona State Sun Devils",
-      "awayTeam": "Kansas Jayhawks",
-      "pick": "Kansas Jayhawks -5.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "D+",
-      "confidence": 70,
-      "ev": -21.73,
-      "gameTime": "2026-03-04T02:00Z",
-      "savedAt": "2026-03-03T21:03:13.682Z"
-    },
-    {
-      "id": "precomp-NBA-401810742-spread-1706976520",
-      "gameId": "401810742",
-      "sport": "NBA",
-      "game": "New York Knicks @ Toronto Raptors",
-      "homeTeam": "Toronto Raptors",
-      "awayTeam": "New York Knicks",
-      "pick": "Toronto Raptors +3",
-      "betType": "spread",
-      "odds": -108,
-      "grade": "C+",
-      "confidence": 67,
-      "ev": -5.63,
-      "gameTime": "2026-03-04T00:30Z",
-      "savedAt": "2026-03-03T21:04:20.849Z"
-    },
-    {
-      "id": "precomp-NHL-401803321-total-4ce96d9e48",
-      "gameId": "401803321",
-      "sport": "NHL",
-      "game": "Vegas Golden Knights @ Detroit Red Wings",
-      "homeTeam": "Detroit Red Wings",
-      "awayTeam": "Vegas Golden Knights",
-      "pick": "Over 6",
-      "betType": "total",
-      "odds": -115,
-      "grade": "B-",
-      "confidence": 62,
-      "ev": 6.57,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T21:05:08.511Z"
-    },
-    {
-      "id": "precomp-NHL-401803321-team_total-11edf4785c",
-      "gameId": "401803321",
-      "sport": "NHL",
-      "game": "Vegas Golden Knights @ Detroit Red Wings",
-      "homeTeam": "Detroit Red Wings",
-      "awayTeam": "Vegas Golden Knights",
-      "pick": "Vegas Golden Knights Over 2.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 62,
-      "ev": 8.82,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T21:05:08.511Z"
     }
   ],
   "settled": [
@@ -6177,32 +6081,152 @@
       "homeScore": 69,
       "awayScore": 71,
       "settledAt": "2026-03-03T21:00:10.868Z"
+    },
+    {
+      "id": "precomp-NHL-401803321-total-4ce96d9e48",
+      "gameId": "401803321",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Detroit Red Wings",
+      "homeTeam": "Detroit Red Wings",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 6.57,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:05:08.511Z",
+      "result": "push",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T21:06:15.662Z"
+    },
+    {
+      "id": "precomp-NHL-401803321-team_total-11edf4785c",
+      "gameId": "401803321",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Detroit Red Wings",
+      "homeTeam": "Detroit Red Wings",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Vegas Golden Knights Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 8.82,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:05:08.511Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T21:06:15.662Z"
+    },
+    {
+      "id": "precomp-NBA-401810742-spread-1706976520",
+      "gameId": "401810742",
+      "sport": "NBA",
+      "game": "New York Knicks @ Toronto Raptors",
+      "homeTeam": "Toronto Raptors",
+      "awayTeam": "New York Knicks",
+      "pick": "Toronto Raptors +3",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "C+",
+      "confidence": 67,
+      "ev": -5.63,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T21:04:20.849Z",
+      "result": "won",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-03T21:06:15.666Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827715-spread-6bc13d2fe2",
+      "gameId": "401827715",
+      "sport": "NCAAB",
+      "game": "Kansas Jayhawks @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Kansas Jayhawks",
+      "pick": "Kansas Jayhawks -5.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 70,
+      "ev": -21.73,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T21:03:13.682Z",
+      "result": "lost",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-03T21:06:15.678Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808277-spread-584cda3eae",
+      "gameId": "401808277",
+      "sport": "NCAAB",
+      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
+      "homeTeam": "Georgia Bulldogs",
+      "awayTeam": "Alabama Crimson Tide",
+      "pick": "Georgia Bulldogs +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-03T23:30Z",
+      "savedAt": "2026-03-03T21:01:34.582Z",
+      "result": "lost",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T21:06:15.688Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808277-team_total-719d3ca6d6",
+      "gameId": "401808277",
+      "sport": "NCAAB",
+      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
+      "homeTeam": "Georgia Bulldogs",
+      "awayTeam": "Alabama Crimson Tide",
+      "pick": "Alabama Crimson Tide Under 91",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-03T23:30Z",
+      "savedAt": "2026-03-03T21:01:34.582Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T21:06:15.688Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 292,
-      "won": 133,
-      "lost": 157,
-      "push": 2,
-      "rate": 45.5,
-      "pending": 21
+      "total": 298,
+      "won": 136,
+      "lost": 159,
+      "push": 3,
+      "rate": 45.6,
+      "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 101,
-        "won": 43,
-        "rate": 42.6
+        "total": 102,
+        "won": 44,
+        "rate": 43.1
       },
       "NHL": {
-        "total": 68,
-        "won": 32,
+        "total": 70,
+        "won": 33,
         "rate": 47.1
       },
       "NCAAB": {
-        "total": 123,
-        "won": 58,
-        "rate": 47.2
+        "total": 126,
+        "won": 59,
+        "rate": 46.8
       }
     },
     "byGrade": {
@@ -6217,14 +6241,14 @@
         "rate": 68
       },
       "B-": {
-        "total": 102,
-        "won": 50,
-        "rate": 49
+        "total": 106,
+        "won": 52,
+        "rate": 49.1
       },
       "D+": {
-        "total": 21,
+        "total": 22,
         "won": 14,
-        "rate": 66.7
+        "rate": 63.6
       },
       "C-": {
         "total": 21,
@@ -6232,9 +6256,9 @@
         "rate": 42.9
       },
       "C+": {
-        "total": 40,
-        "won": 13,
-        "rate": 32.5
+        "total": 41,
+        "won": 14,
+        "rate": 34.1
       },
       "C": {
         "total": 30,
@@ -6259,28 +6283,28 @@
         "rate": 50
       },
       "Spread": {
-        "total": 64,
-        "won": 31,
-        "rate": 48.4
+        "total": 67,
+        "won": 32,
+        "rate": 47.8
       },
       "Total": {
-        "total": 61,
+        "total": 62,
         "won": 24,
-        "rate": 39.3
+        "rate": 38.7
       },
       "Team Total": {
-        "total": 125,
-        "won": 57,
-        "rate": 45.6
+        "total": 127,
+        "won": 59,
+        "rate": 46.5
       }
     },
     "recentForm": {
       "won": 17,
-      "lost": 33,
-      "push": 0,
+      "lost": 32,
+      "push": 1,
       "rate": 34
     },
-    "lastUpdated": "2026-03-03T21:05:12.033Z"
+    "lastUpdated": "2026-03-03T21:06:15.689Z"
   },
   "version": 1
 }
