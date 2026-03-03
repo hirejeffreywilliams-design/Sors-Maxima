@@ -5,6 +5,7 @@
 // Insights are cached by pick ID and injected back into the prediction cache.
 
 import { logInfo, logWarn } from "./errorLogger";
+import { recordAiError, recordAiSuccess } from "./aiErrorTracker";
 import type { PrecomputedPick } from "./precomputedPredictionsEngine";
 
 let openai: any = null;
@@ -61,9 +62,11 @@ async function generateInsightForPick(pick: PrecomputedPick, client: any): Promi
       temperature: 0.5,
     });
     const text = resp.choices?.[0]?.message?.content?.trim();
+    if (text) recordAiSuccess();
     return text || null;
   } catch (err: any) {
     logWarn(`[InsightEngine] Failed for pick ${pick.id}: ${err.message}`);
+    recordAiError(err.message || String(err));
     return null;
   }
 }

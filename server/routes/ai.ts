@@ -177,26 +177,12 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
   });
 
   // ── GET /api/ai/status ────────────────────────────────────────────────────
-  // Public AI status check.
-  let lastAiError: { message: string; timestamp: number } | null = null;
-
-  // Middleware to track OpenAI errors globally in this router
-  const trackAiError = (err: any) => {
-    if (err.status === 429 || err.status === 503 || err.status >= 500) {
-      lastAiError = {
-        message: err.message || "AI service at capacity",
-        timestamp: Date.now()
-      };
-    }
-  };
-
-  app.get("/api/ai/status", (req, res) => {
-    const openai = createOpenAIClient();
-    const isAvailable = !!openai && (!lastAiError || Date.now() - lastAiError.timestamp > 60000);
-    
+  // Public AI status check — reads from global error tracker.
+  app.get("/api/ai/status", async (_req, res) => {
+    const { getAiAvailability } = await import("../aiErrorTracker");
+    const status = getAiAvailability();
     res.json({
-      available: isAvailable,
-      message: isAvailable ? "AI systems operational" : (lastAiError?.message || "AI analysis is temporarily at capacity"),
+      ...status,
       explanationCache: getCacheStats(),
     });
   });

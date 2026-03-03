@@ -34,6 +34,11 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
         return res.status(400).json({ error: "Invalid application data", details: result.error.format() });
       }
 
+      const VALID_TIERS = ["edge", "max"];
+      if (!VALID_TIERS.includes(result.data.tier)) {
+        return res.status(400).json({ error: "Invalid tier. Must be 'edge' or 'max'." });
+      }
+
       const [application] = await db.insert(applications).values({
         ...result.data,
         userId: numericUserId(req),
