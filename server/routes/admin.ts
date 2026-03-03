@@ -4204,4 +4204,50 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/model-integrity", requireAdmin, async (_req, res) => {
+    try {
+      const { getPickAccuracyStats, getRecentPicks } = await import("../pickOutcomeTracker");
+      const stats = getPickAccuracyStats();
+
+      const adjudicationRules = [
+        { event: "Postponed game", rule: "Pick remains pending until the game is played. If rescheduled beyond 7 days, it is removed from pending without settlement." },
+        { event: "Abandoned match (official innings/period reached)", rule: "Settled as won/lost based on the score at abandonment if the official threshold was reached." },
+        { event: "Abandoned match (official threshold not reached)", rule: "Voided — pick is removed from tracker without affecting win rate." },
+        { event: "Push / tie", rule: "Recorded as push. Does not count as a win or loss in ROI calculations. Confidence calibration excludes pushes." },
+        { event: "Game not found in ESPN final scores", rule: "Pick remains pending up to 72 hours, then removed from pending without settlement." },
+        { event: "Player prop result", rule: "Currently not auto-settled — player props require manual review and are excluded from automated accuracy stats." },
+        { event: "1st half / live bets", rule: "Not auto-settled via final-score data. Excluded from pending tracker by the cleanup routine." },
+        { event: "Post-match score correction by official league", rule: "If ESPN updates a final score after settlement, the pick is not retroactively re-settled. Admin can reset and re-run settlement to correct." },
+      ];
+
+      const dataProvenance = [
+        { source: "ESPN API", use: "Live game scores, schedules, team stats, final scores for settlement", official: true },
+        { source: "The Odds API", use: "Bookmaker odds from 10+ major sportsbooks used for EV calculation", official: true },
+        { source: "BallDontLie API", use: "NBA player stats, team stats for player-specific analysis", official: false },
+        { source: "NHL Stats API (NHL.com)", use: "Official NHL schedules and team statistics", official: true },
+        { source: "MLB Stats API", use: "Official MLB schedules, pitcher stats, park factors", official: true },
+        { source: "API-Football", use: "International soccer fixtures and odds for 16 major leagues", official: false },
+      ];
+
+      const antiLeakageStatement = [
+        "All predictions are generated before game start time using only pre-game information.",
+        "Odds data is fetched from The Odds API at prediction time — not post-game.",
+        "Rolling averages and form metrics use only games completed before the prediction date.",
+        "Settlement (scoring outcomes) is handled separately from prediction generation — the two pipelines do not share state.",
+        "Historical backtesting uses a temporal split: models are not trained on the same games they predict.",
+        "No future data (scores, in-game events) influences any pre-game pick generation.",
+      ];
+
+      res.json({
+        stats,
+        adjudicationRules,
+        dataProvenance,
+        antiLeakageStatement,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load model integrity data", detail: err.message });
+    }
+  });
+
 }

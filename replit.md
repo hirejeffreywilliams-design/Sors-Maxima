@@ -71,6 +71,9 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Email Sequence (Day 2 & Day 7)**: sendDay2Email and sendDay7Email in emailService.ts. Hourly scheduler in index.ts sends sequenced emails based on user.createdAt. DB columns email_sequence_day2_sent / email_sequence_day7_sent.
 - **Subscription Management UI**: Settings → Membership card shows current tier badge, billing status, upgrade buttons, and Manage Billing (→ Stripe Customer Portal).
 - **NFL Offseason Panel**: OffseasonPanel component at client/src/components/offseason-panel.tsx shown in command-center.tsx when NFL tab has no upcoming games.
+- **Admin Update Planner**: Tool at `/admin/update-planner` for tracking bugs, feature requests, and ideas. Stored in localStorage. Includes copy-to-AI-chat prompt generator.
+- **Model Integrity & Audit Report**: Admin page at `/admin/model-integrity` showing live ROI, Brier Score, Max Drawdown, Sharpe Ratio, calibration reliability curves, home/away bias detection, market-type ROI breakdown, adjudication rules, and anti-leakage guarantees. All metrics computed from real settled picks in `pickOutcomeTracker.ts`.
+- **Enhanced Pick Accuracy Stats**: `pickOutcomeTracker.ts` now computes ROI per market type, Brier Score (calibration metric), Max Drawdown, Sharpe Ratio, calibration buckets (confidence vs actual win rate), and home/away bias tracking from real settled pick data.
 
 ## External Dependencies
 - **Frontend Framework**: React

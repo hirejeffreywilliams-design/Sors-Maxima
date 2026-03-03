@@ -241,36 +241,20 @@
       "savedAt": "2026-03-03T16:35:31.103Z"
     },
     {
-      "id": "precomp-NBA-401810745-spread-751a43a7e9",
-      "gameId": "401810745",
+      "id": "precomp-NBA-401810738-total-e3df3e7eb0",
+      "gameId": "401810738",
       "sport": "NBA",
-      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
-      "homeTeam": "Minnesota Timberwolves",
-      "awayTeam": "Memphis Grizzlies",
-      "pick": "Minnesota Timberwolves -15",
-      "betType": "spread",
-      "odds": -112,
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 227",
+      "betType": "total",
+      "odds": -106,
       "grade": "B-",
       "confidence": 65,
-      "ev": 23.04,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-03T22:18:50.744Z"
-    },
-    {
-      "id": "precomp-NBA-401810745-team_total-6de523c60c",
-      "gameId": "401810745",
-      "sport": "NBA",
-      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
-      "homeTeam": "Minnesota Timberwolves",
-      "awayTeam": "Memphis Grizzlies",
-      "pick": "Memphis Grizzlies Over 111",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 65,
-      "ev": 24.09,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-03T22:18:50.744Z"
+      "ev": 16.6,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T22:37:08.702Z"
     }
   ],
   "settled": [
@@ -7353,22 +7337,162 @@
       "homeScore": 89,
       "awayScore": 82,
       "settledAt": "2026-03-03T22:15:37.237Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-spread-751a43a7e9",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Minnesota Timberwolves -15",
+      "betType": "spread",
+      "odds": -112,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 23.04,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T22:18:50.744Z",
+      "result": "lost",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T22:21:31.702Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-team_total-6de523c60c",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Memphis Grizzlies Over 111",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T22:18:50.744Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T22:21:31.702Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-spread-c1963c0a70",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Memphis Grizzlies +15",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "C",
+      "confidence": 70,
+      "ev": 25.19,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T22:25:11.429Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T22:25:29.392Z"
+    },
+    {
+      "id": "precomp-NBA-401810748-total-c98fa710fc",
+      "gameId": "401810748",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Over 222.5",
+      "betType": "total",
+      "odds": -114,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 10.75,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T22:33:48.824Z",
+      "result": "lost",
+      "homeScore": 114,
+      "awayScore": 89,
+      "settledAt": "2026-03-03T22:34:58.209Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-59a0d4a9c4",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 227.5",
+      "betType": "total",
+      "odds": -114,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 10.75,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T22:33:48.824Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T22:34:58.214Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-team_total-247f4db05d",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Dallas Mavericks Over 107",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 14.55,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T22:33:48.824Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T22:34:58.214Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808278-spread-d968c3585d",
+      "gameId": "401808278",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ South Carolina Gamecocks",
+      "homeTeam": "South Carolina Gamecocks",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "South Carolina Gamecocks +10.5",
+      "betType": "spread",
+      "odds": -105,
+      "grade": "D+",
+      "confidence": 70,
+      "ev": -31.67,
+      "gameTime": "2026-03-03T23:00Z",
+      "savedAt": "2026-03-03T22:33:49.510Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T22:34:58.226Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 354,
-      "won": 169,
-      "lost": 182,
+      "total": 361,
+      "won": 172,
+      "lost": 186,
       "push": 3,
-      "rate": 47.7,
-      "pending": 17
+      "rate": 47.6,
+      "pending": 16
     },
     "bySport": {
       "NBA": {
-        "total": 127,
-        "won": 57,
-        "rate": 44.9
+        "total": 133,
+        "won": 59,
+        "rate": 44.4
       },
       "NHL": {
         "total": 76,
@@ -7376,9 +7500,9 @@
         "rate": 48.7
       },
       "NCAAB": {
-        "total": 151,
-        "won": 75,
-        "rate": 49.7
+        "total": 152,
+        "won": 76,
+        "rate": 50
       }
     },
     "byGrade": {
@@ -7393,14 +7517,14 @@
         "rate": 71.9
       },
       "B-": {
-        "total": 121,
-        "won": 61,
-        "rate": 50.4
+        "total": 126,
+        "won": 62,
+        "rate": 49.2
       },
       "D+": {
-        "total": 30,
-        "won": 18,
-        "rate": 60
+        "total": 31,
+        "won": 19,
+        "rate": 61.3
       },
       "C-": {
         "total": 22,
@@ -7413,9 +7537,9 @@
         "rate": 38
       },
       "C": {
-        "total": 40,
-        "won": 18,
-        "rate": 45
+        "total": 41,
+        "won": 19,
+        "rate": 46.3
       },
       "A-": {
         "total": 31,
@@ -7432,31 +7556,89 @@
       "Moneyline": {
         "total": 54,
         "won": 30,
-        "rate": 55.6
+        "rate": 55.6,
+        "roi": 45.5
       },
       "Spread": {
-        "total": 91,
-        "won": 45,
-        "rate": 49.5
+        "total": 94,
+        "won": 47,
+        "rate": 50,
+        "roi": -5.1
       },
       "Total": {
-        "total": 66,
+        "total": 68,
         "won": 26,
-        "rate": 39.4
+        "rate": 38.2,
+        "roi": -26.2
       },
       "Team Total": {
-        "total": 143,
-        "won": 68,
-        "rate": 47.6
+        "total": 145,
+        "won": 69,
+        "rate": 47.6,
+        "roi": -7.9
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 21,
+      "won": 27,
+      "lost": 23,
       "push": 0,
-      "rate": 58
+      "rate": 54
     },
-    "lastUpdated": "2026-03-03T22:19:48.480Z"
+    "lastUpdated": "2026-03-03T22:37:12.441Z",
+    "roi": -2.5,
+    "brierScore": 0.2816,
+    "maxDrawdown": 39.5,
+    "sharpeRatio": -0.021,
+    "homeAwayBias": {
+      "homeWinRate": 50.9,
+      "awayWinRate": 56.3,
+      "homeTotal": 116,
+      "awayTotal": 32
+    },
+    "calibrationBuckets": [
+      {
+        "range": "50-55",
+        "predicted": 50,
+        "actual": 0,
+        "total": 0
+      },
+      {
+        "range": "55-60",
+        "predicted": 55,
+        "actual": 0,
+        "total": 0
+      },
+      {
+        "range": "60-65",
+        "predicted": 62.6,
+        "actual": 42.7,
+        "total": 96
+      },
+      {
+        "range": "65-70",
+        "predicted": 66.2,
+        "actual": 49,
+        "total": 145
+      },
+      {
+        "range": "70-75",
+        "predicted": 70,
+        "actual": 51.3,
+        "total": 117
+      },
+      {
+        "range": "75-80",
+        "predicted": 75,
+        "actual": 0,
+        "total": 0
+      },
+      {
+        "range": "80+",
+        "predicted": 80,
+        "actual": 0,
+        "total": 0
+      }
+    ]
   },
   "version": 1
 }

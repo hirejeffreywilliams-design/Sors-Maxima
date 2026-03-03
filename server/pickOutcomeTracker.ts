@@ -36,9 +36,15 @@ export interface PickAccuracyStats {
   overall: { total: number; won: number; lost: number; push: number; rate: number; pending: number };
   bySport: Record<string, { total: number; won: number; rate: number }>;
   byGrade: Record<string, { total: number; won: number; rate: number }>;
-  byMarket: Record<string, { total: number; won: number; rate: number }>;
+  byMarket: Record<string, { total: number; won: number; rate: number; roi: number }>;
   recentForm: { won: number; lost: number; push: number; rate: number };
   lastUpdated: string;
+  roi: number;
+  brierScore: number | null;
+  maxDrawdown: number;
+  sharpeRatio: number | null;
+  homeAwayBias: { homeWinRate: number; awayWinRate: number; homeTotal: number; awayTotal: number };
+  calibrationBuckets: Array<{ range: string; predicted: number; actual: number; total: number }>;
 }
 
 interface StoredData {
@@ -56,7 +62,29 @@ function defaultStats(): PickAccuracyStats {
     byMarket: {},
     recentForm: { won: 0, lost: 0, push: 0, rate: 0 },
     lastUpdated: new Date().toISOString(),
+    roi: 0,
+    brierScore: null,
+    maxDrawdown: 0,
+    sharpeRatio: null,
+    homeAwayBias: { homeWinRate: 0, awayWinRate: 0, homeTotal: 0, awayTotal: 0 },
+    calibrationBuckets: [],
   };
+}
+
+function computePickPayout(pick: TrackedPick): number {
+  if (pick.result === "push") return 0;
+  if (pick.result === "won") {
+    const o = pick.odds || -110;
+    return o > 0 ? o / 100 : 100 / Math.abs(o);
+  }
+  return -1;
+}
+
+function matchesHome(pickText: string, homeTeam: string): boolean {
+  const t = pickText.toLowerCase();
+  const h = homeTeam.toLowerCase();
+  const tokens = h.split(/\s+/);
+  return tokens.some(tok => tok.length > 2 && t.includes(tok));
 }
 
 function loadData(): StoredData {
@@ -91,6 +119,16 @@ function recomputeStats(data: StoredData): void {
   stats.overall.pending = data.pending.length;
   stats.overall.total = settled.length;
 
+  const marketPayouts: Record<string, number[]> = {};
+  const allPayouts: number[] = [];
+  let brierSum = 0;
+  let brierCount = 0;
+  let homeWon = 0, homeTotal = 0, awayWon = 0, awayTotal = 0;
+
+  const calibBuckets: Record<string, { won: number; total: number; predSum: number }> = {};
+  const bucketRanges = ["50-55", "55-60", "60-65", "65-70", "70-75", "75-80", "80+"];
+  for (const r of bucketRanges) calibBuckets[r] = { won: 0, total: 0, predSum: 0 };
+
   for (const pick of settled) {
     if (!pick.result) continue;
     const isWon = pick.result === "won";
@@ -111,9 +149,44 @@ function recomputeStats(data: StoredData): void {
     if (isWon) stats.byGrade[grade].won++;
 
     const market = normalizeMarket(pick.betType);
-    if (!stats.byMarket[market]) stats.byMarket[market] = { total: 0, won: 0, rate: 0 };
+    if (!stats.byMarket[market]) stats.byMarket[market] = { total: 0, won: 0, rate: 0, roi: 0 };
     stats.byMarket[market].total++;
     if (isWon) stats.byMarket[market].won++;
+    if (!isPush) {
+      if (!marketPayouts[market]) marketPayouts[market] = [];
+      marketPayouts[market].push(computePickPayout(pick));
+    }
+
+    if (!isPush) {
+      const payout = computePickPayout(pick);
+      allPayouts.push(payout);
+
+      const conf = typeof pick.confidence === "number" ? Math.max(0, Math.min(100, pick.confidence)) : 50;
+      const prob = conf / 100;
+      const outcome = isWon ? 1 : 0;
+      brierSum += Math.pow(prob - outcome, 2);
+      brierCount++;
+
+      const bucket = conf >= 80 ? "80+" :
+        conf >= 75 ? "75-80" : conf >= 70 ? "70-75" : conf >= 65 ? "65-70" :
+        conf >= 60 ? "60-65" : conf >= 55 ? "55-60" : "50-55";
+      calibBuckets[bucket].total++;
+      calibBuckets[bucket].predSum += prob;
+      if (isWon) calibBuckets[bucket].won++;
+
+      const pickText = (pick.pick || "").toLowerCase();
+      const betType = (pick.betType || "").toLowerCase();
+      if (!betType.includes("total") && !betType.includes("over_under") && !betType.includes("team_total")) {
+        const isHome = matchesHome(pickText, pick.homeTeam || "");
+        if (isHome) {
+          homeTotal++;
+          if (isWon) homeWon++;
+        } else {
+          awayTotal++;
+          if (isWon) awayWon++;
+        }
+      }
+    }
   }
 
   stats.overall.rate = stats.overall.total > 0
@@ -126,8 +199,10 @@ function recomputeStats(data: StoredData): void {
   for (const g of Object.values(stats.byGrade)) {
     g.rate = g.total > 0 ? Math.round((g.won / g.total) * 1000) / 10 : 0;
   }
-  for (const m of Object.values(stats.byMarket)) {
+  for (const [mkt, m] of Object.entries(stats.byMarket)) {
     m.rate = m.total > 0 ? Math.round((m.won / m.total) * 1000) / 10 : 0;
+    const pays = marketPayouts[mkt] || [];
+    m.roi = pays.length > 0 ? Math.round((pays.reduce((a, b) => a + b, 0) / pays.length) * 1000) / 10 : 0;
   }
 
   const recent = settled.slice(-50);
@@ -138,6 +213,48 @@ function recomputeStats(data: StoredData): void {
     won: rWon, lost: rLost, push: rPush,
     rate: recent.length > 0 ? Math.round((rWon / recent.length) * 1000) / 10 : 0,
   };
+
+  if (allPayouts.length > 0) {
+    const totalPayout = allPayouts.reduce((a, b) => a + b, 0);
+    stats.roi = Math.round((totalPayout / allPayouts.length) * 1000) / 10;
+
+    let bankroll = 100;
+    let peak = 100;
+    let maxDD = 0;
+    for (const p of allPayouts) {
+      bankroll += p;
+      if (bankroll > peak) peak = bankroll;
+      const dd = peak > 0 ? ((peak - bankroll) / peak) * 100 : 0;
+      if (dd > maxDD) maxDD = dd;
+    }
+    stats.maxDrawdown = Math.round(maxDD * 10) / 10;
+
+    const mean = totalPayout / allPayouts.length;
+    if (allPayouts.length > 1) {
+      const variance = allPayouts.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / (allPayouts.length - 1);
+      const std = Math.sqrt(variance);
+      stats.sharpeRatio = std > 0 ? Math.round((mean / std) * 1000) / 1000 : null;
+    }
+  }
+
+  stats.brierScore = brierCount > 0 ? Math.round((brierSum / brierCount) * 10000) / 10000 : null;
+
+  stats.homeAwayBias = {
+    homeWinRate: homeTotal > 0 ? Math.round((homeWon / homeTotal) * 1000) / 10 : 0,
+    awayWinRate: awayTotal > 0 ? Math.round((awayWon / awayTotal) * 1000) / 10 : 0,
+    homeTotal,
+    awayTotal,
+  };
+
+  stats.calibrationBuckets = bucketRanges.map(range => {
+    const b = calibBuckets[range];
+    return {
+      range,
+      predicted: b.total > 0 ? Math.round((b.predSum / b.total) * 1000) / 10 : parseFloat(range.split("-")[0]) || 80,
+      actual: b.total > 0 ? Math.round((b.won / b.total) * 1000) / 10 : 0,
+      total: b.total,
+    };
+  });
 
   stats.lastUpdated = new Date().toISOString();
   data.stats = stats;

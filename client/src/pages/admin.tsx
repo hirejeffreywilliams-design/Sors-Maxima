@@ -197,6 +197,7 @@ const navCategories: NavCategory[] = [
     title: "Intelligence",
     icon: Target,
     items: [
+      { href: "/admin/model-integrity", label: "Model Integrity", description: "ROI, Brier score, calibration & adjudication rules", icon: ShieldAlert, testId: "link-admin-model-integrity" },
       { href: "/admin/model-performance", label: "Model Performance", description: "Accuracy & calibration curves", icon: Target, testId: "link-admin-model-performance" },
       { href: "/admin/training", label: "Training Center", description: "Backtesting, stress tests & model tuning", icon: FlaskConical, testId: "link-admin-training" },
       { href: "/admin/data-provenance", label: "Data Lineage", description: "Sources, pipelines & contracts", icon: Database, testId: "link-admin-data-provenance" },
