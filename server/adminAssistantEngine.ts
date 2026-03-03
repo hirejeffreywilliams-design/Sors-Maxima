@@ -245,7 +245,7 @@ run_context:
 ${JSON.stringify(runContext, null, 2)}`;
 
   const completion = await openai.chat.completions.create({
-    model: "gpt-4o",
+    model: "gpt-5",
     messages: [
       { role: "system", content: buildSystemPrompt() },
       { role: "user", content: userPrompt },

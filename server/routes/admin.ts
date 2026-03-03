@@ -637,7 +637,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
       const openai = createOpenAIClient();
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
@@ -645,7 +645,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
           },
           { role: "user", content: fullPrompt }
         ],
-        max_tokens: 500,
+        max_completion_tokens: 8192,
       });
 
       const generatedContent = completion.choices[0]?.message?.content || "Content generation failed";
@@ -773,12 +773,12 @@ When analyzing issues, provide:
 Use technical but accessible language. Reference specific system components when relevant.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4.1",
+        model: "gpt-5",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: `Analyze this issue:\n\nCategory: ${category || 'general'}\n\nDescription: ${issueDescription}` }
         ],
-        max_tokens: 2000,
+        max_completion_tokens: 8192,
       });
 
       const analysis = response.choices[0]?.message?.content || "Unable to generate analysis";
@@ -871,12 +871,12 @@ Analyze and provide:
 Format your response clearly with sections and bullet points.`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4.1",
+        model: "gpt-5",
         messages: [
           { role: "system", content: "You are a system diagnostic AI specializing in advanced pattern recognition and sports betting platform optimization." },
           { role: "user", content: scanPrompt }
         ],
-        max_tokens: 2500,
+        max_completion_tokens: 8192,
       });
 
       const scanResults = response.choices[0]?.message?.content || "Scan completed with no issues detected";
@@ -1242,7 +1242,7 @@ Follow these rules:
 - Output in clean JSON format.`;
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-5",
         messages: [
           {
             role: "system",
