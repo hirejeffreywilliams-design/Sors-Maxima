@@ -4041,26 +4041,126 @@
       "homeScore": 5,
       "awayScore": 4,
       "settledAt": "2026-03-03T17:30:16.504Z"
+    },
+    {
+      "id": "precomp-NHL-401803323-spread-33a3af562e",
+      "gameId": "401803323",
+      "sport": "NHL",
+      "game": "Carolina Hurricanes @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Carolina Hurricanes",
+      "pick": "Vancouver Canucks +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 62,
+      "ev": -25.55,
+      "gameTime": "2026-03-05T03:00Z",
+      "savedAt": "2026-03-03T17:34:58.873Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 6,
+      "settledAt": "2026-03-03T17:35:15.989Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-total-4c68f0883c",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Over 217",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 64,
+      "ev": -8.36,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T17:34:58.672Z",
+      "result": "won",
+      "homeScore": 106,
+      "awayScore": 125,
+      "settledAt": "2026-03-03T17:35:15.991Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-team_total-acd65b9e6e",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Memphis Grizzlies Over 109",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 64,
+      "ev": -8.36,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T17:34:58.672Z",
+      "result": "lost",
+      "homeScore": 106,
+      "awayScore": 125,
+      "settledAt": "2026-03-03T17:35:15.991Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-team_total-b6744c8383",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Portland Trail Blazers Over 108.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 64,
+      "ev": -8.36,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T17:34:58.672Z",
+      "result": "won",
+      "homeScore": 106,
+      "awayScore": 125,
+      "settledAt": "2026-03-03T17:35:15.991Z"
+    },
+    {
+      "id": "precomp-NHL-401803324-moneyline-78bfbc7c2b",
+      "gameId": "401803324",
+      "sport": "NHL",
+      "game": "New York Islanders @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "New York Islanders",
+      "pick": "Anaheim Ducks ML",
+      "betType": "moneyline",
+      "odds": -106,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": -2.83,
+      "gameTime": "2026-03-05T03:00Z",
+      "savedAt": "2026-03-03T17:34:58.873Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T17:35:16.004Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 190,
-      "won": 95,
-      "lost": 94,
+      "total": 195,
+      "won": 98,
+      "lost": 96,
       "push": 1,
-      "rate": 50,
+      "rate": 50.3,
       "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 59,
-        "won": 28,
-        "rate": 47.5
-      },
-      "NHL": {
         "total": 62,
         "won": 30,
+        "rate": 48.4
+      },
+      "NHL": {
+        "total": 64,
+        "won": 31,
         "rate": 48.4
       },
       "NCAAB": {
@@ -4081,9 +4181,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 72,
-        "won": 37,
-        "rate": 51.4
+        "total": 73,
+        "won": 38,
+        "rate": 52.1
       },
       "D+": {
         "total": 13,
@@ -4096,14 +4196,14 @@
         "rate": 50
       },
       "C+": {
-        "total": 23,
+        "total": 24,
         "won": 8,
-        "rate": 34.8
+        "rate": 33.3
       },
       "C": {
-        "total": 19,
-        "won": 10,
-        "rate": 52.6
+        "total": 22,
+        "won": 12,
+        "rate": 54.5
       },
       "A-": {
         "total": 16,
@@ -4113,33 +4213,33 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 38,
-        "won": 19,
-        "rate": 50
+        "total": 39,
+        "won": 20,
+        "rate": 51.3
       },
       "Spread": {
-        "total": 43,
+        "total": 44,
         "won": 22,
-        "rate": 51.2
+        "rate": 50
       },
       "Total": {
-        "total": 34,
-        "won": 18,
-        "rate": 52.9
+        "total": 35,
+        "won": 19,
+        "rate": 54.3
       },
       "Team Total": {
-        "total": 75,
-        "won": 36,
-        "rate": 48
+        "total": 77,
+        "won": 37,
+        "rate": 48.1
       }
     },
     "recentForm": {
-      "won": 23,
-      "lost": 26,
+      "won": 24,
+      "lost": 25,
       "push": 1,
-      "rate": 46
+      "rate": 48
     },
-    "lastUpdated": "2026-03-03T17:30:16.505Z"
+    "lastUpdated": "2026-03-03T17:35:16.004Z"
   },
   "version": 1
 }
