@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
@@ -15,7 +16,7 @@ import { useSEO } from "@/hooks/use-seo";
 import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
-  Zap, Star, Target, Shield
+  Zap, Star, Target, Shield, Search, X, SlidersHorizontal,
 } from "lucide-react";
 
 interface MarketProp {
@@ -133,6 +134,55 @@ interface TopPropsResponse {
 
 const SPORT_TABS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF"];
 
+const MARKET_GROUPS: Record<string, { label: string; markets: string[] }[]> = {
+  NBA: [
+    { label: "All", markets: [] },
+    { label: "Points", markets: ["player_points"] },
+    { label: "Rebounds", markets: ["player_rebounds"] },
+    { label: "Assists", markets: ["player_assists"] },
+    { label: "Steals", markets: ["player_steals"] },
+    { label: "Blocks", markets: ["player_blocks"] },
+    { label: "3-Ptrs", markets: ["player_threes"] },
+    { label: "Combos", markets: ["player_points_rebounds_assists", "player_points_rebounds", "player_points_assists", "player_rebounds_assists"] },
+  ],
+  NFL: [
+    { label: "All", markets: [] },
+    { label: "Pass Yds", markets: ["player_pass_yds"] },
+    { label: "Pass TDs", markets: ["player_pass_tds"] },
+    { label: "Rush Yds", markets: ["player_rush_yds"] },
+    { label: "Rec Yds", markets: ["player_reception_yds"] },
+    { label: "Receptions", markets: ["player_receptions"] },
+    { label: "Anytime TD", markets: ["player_anytime_td"] },
+  ],
+  NHL: [
+    { label: "All", markets: [] },
+    { label: "Goals", markets: ["player_goals"] },
+    { label: "Assists", markets: ["player_assists"] },
+    { label: "Points", markets: ["player_points"] },
+    { label: "Shots", markets: ["player_shots_on_goal"] },
+  ],
+  MLB: [
+    { label: "All", markets: [] },
+    { label: "Hits", markets: ["batter_hits"] },
+    { label: "Total Bases", markets: ["batter_total_bases"] },
+    { label: "RBIs", markets: ["batter_rbis"] },
+    { label: "Home Runs", markets: ["batter_home_runs"] },
+    { label: "Ks", markets: ["pitcher_strikeouts"] },
+  ],
+  NCAAB: [
+    { label: "All", markets: [] },
+    { label: "Points", markets: ["player_points"] },
+    { label: "Rebounds", markets: ["player_rebounds"] },
+    { label: "Assists", markets: ["player_assists"] },
+  ],
+  NCAAF: [
+    { label: "All", markets: [] },
+    { label: "Pass Yds", markets: ["player_pass_yds"] },
+    { label: "Rush Yds", markets: ["player_rush_yds"] },
+    { label: "Rec Yds", markets: ["player_reception_yds"] },
+  ],
+};
+
 function formatOdds(odds: number): string {
   return odds > 0 ? `+${odds}` : `${odds}`;
 }
@@ -205,30 +255,77 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   const isUnder = prop.recommendation === "under";
   const hasEdge = prop.confidence >= 60 && prop.recommendation !== "push";
 
+  const hasAvg = prop.seasonAvg !== null && prop.seasonAvg !== undefined;
+  const avgVsLine = hasAvg ? (prop.seasonAvg! - prop.line) : 0;
+  const avgLeanOver = avgVsLine > 0.5;
+  const avgLeanUnder = avgVsLine < -0.5;
+  const bestBookSpread = prop.bestOver && prop.bestUnder
+    ? Math.abs(prop.bestOver.odds - prop.overOdds) + Math.abs(prop.bestUnder.odds - prop.underOdds)
+    : 0;
+  const hasBestBook = bestBookSpread > 5;
+
   return (
     <div className={`rounded-lg border p-3 space-y-2.5 ${hasEdge ? "border-primary/30 bg-primary/[0.02]" : ""}`} data-testid={`prop-${playerName}-${prop.market}`}>
       <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold truncate">{prop.marketLabel}</p>
-          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <p className="text-xs font-semibold">{prop.marketLabel}</p>
+            {hasEdge && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-primary/10 border-primary/30 text-primary">
+                {prop.confidence}% conf
+              </Badge>
+            )}
+            {hasAvg && avgLeanOver && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-emerald-500/10 border-emerald-500/30 text-emerald-500">
+                <ArrowUp className="w-2.5 h-2.5 mr-0.5" />avg over line
+              </Badge>
+            )}
+            {hasAvg && avgLeanUnder && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-red-500/10 border-red-500/30 text-red-500">
+                <ArrowDown className="w-2.5 h-2.5 mr-0.5" />avg under line
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-1 flex-wrap">
             <span className="text-[10px] text-muted-foreground">Line: <span className="font-mono font-medium text-foreground">{prop.line}</span></span>
-            {prop.seasonAvg !== null && (
-              <span className="text-[10px] text-muted-foreground">Avg: <span className="font-mono font-medium text-foreground">{prop.seasonAvg}</span></span>
+            {hasAvg && (
+              <span className="text-[10px] text-muted-foreground">
+                Avg: <span className={`font-mono font-medium ${avgLeanOver ? "text-emerald-500" : avgLeanUnder ? "text-red-500" : "text-foreground"}`}>{prop.seasonAvg}</span>
+              </span>
             )}
             {currentStat && (
               <span className="text-[10px] font-medium text-amber-500 flex items-center gap-0.5">
                 <Activity className="w-2.5 h-2.5" />
-                Tonight: <span className="font-mono font-bold">{currentStat.value}</span>
+                Live: <span className="font-mono font-bold">{currentStat.value}</span>
               </span>
             )}
           </div>
-        </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {hasEdge && (
-            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary whitespace-nowrap">
-              {prop.confidence}% conf
-            </Badge>
+          {hasAvg && (
+            <div className="mt-1.5">
+              <div className="relative h-1.5 rounded-full bg-muted overflow-hidden">
+                <div className="absolute inset-y-0 left-1/2 w-px bg-border z-10" />
+                {avgLeanOver && (
+                  <div
+                    className="absolute inset-y-0 left-1/2 bg-emerald-500/60 rounded-r-full"
+                    style={{ width: `${Math.min(50, (avgVsLine / (prop.line || 1)) * 200)}%` }}
+                  />
+                )}
+                {avgLeanUnder && (
+                  <div
+                    className="absolute inset-y-0 right-1/2 bg-red-500/60 rounded-l-full"
+                    style={{ width: `${Math.min(50, (Math.abs(avgVsLine) / (prop.line || 1)) * 200)}%` }}
+                  />
+                )}
+              </div>
+              <div className="flex justify-between text-[9px] text-muted-foreground/60 mt-0.5 px-0.5">
+                <span>Under</span>
+                <span>Line {prop.line}</span>
+                <span>Over</span>
+              </div>
+            </div>
           )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           {(overInSlip || underInSlip) && <Check className="w-4 h-4 text-primary" />}
         </div>
       </div>
@@ -885,6 +982,8 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
 export default function PlayerPropsPage() {
   useSEO({ title: "Player Props — Over/Under", description: "Real-time player prop over/under picks from The Odds API" });
   const [selectedSport, setSelectedSport] = useState("NBA");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [marketFilter, setMarketFilter] = useState("All");
   const { legs, addLeg } = useParlaySlip();
 
   const slipLegIds = new Set(legs.map(l => l.id));
@@ -900,6 +999,30 @@ export default function PlayerPropsPage() {
   });
 
   const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) : "";
+
+  const marketGroups = MARKET_GROUPS[selectedSport] || [{ label: "All", markets: [] }];
+
+  const filteredGames = useMemo(() => {
+    if (!data?.games) return [];
+    const activeGroup = marketGroups.find(g => g.label === marketFilter);
+    const activeMarkets = activeGroup?.markets || [];
+    return data.games
+      .map(game => ({
+        ...game,
+        players: game.players
+          .filter(p => !searchQuery.trim() || p.playerName.toLowerCase().includes(searchQuery.toLowerCase()))
+          .map(p => ({
+            ...p,
+            markets: activeMarkets.length > 0
+              ? p.markets.filter(m => activeMarkets.includes(m.market))
+              : p.markets,
+          }))
+          .filter(p => p.markets.length > 0),
+      }))
+      .filter(game => game.players.length > 0);
+  }, [data, searchQuery, marketFilter, selectedSport]);
+
+  const totalFilteredProps = filteredGames.reduce((sum, g) => sum + g.players.reduce((s, p) => s + p.markets.length, 0), 0);
 
   return (
     <div className="min-h-full">
@@ -921,7 +1044,7 @@ export default function PlayerPropsPage() {
                 variant={selectedSport === sport ? "default" : "outline"}
                 size="sm"
                 className="text-xs shrink-0 touch-target"
-                onClick={() => setSelectedSport(sport)}
+                onClick={() => { setSelectedSport(sport); setMarketFilter("All"); setSearchQuery(""); }}
                 data-testid={`button-sport-${sport}`}
               >
                 {sport}
@@ -929,10 +1052,63 @@ export default function PlayerPropsPage() {
             ))}
           </div>
 
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <Input
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search player..."
+                className="pl-8 pr-8 h-8 text-xs"
+                data-testid="input-player-search"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  data-testid="button-clear-search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            {(searchQuery || marketFilter !== "All") && (
+              <button
+                onClick={() => { setSearchQuery(""); setMarketFilter("All"); }}
+                className="text-[10px] text-muted-foreground hover:text-foreground flex items-center gap-1"
+                data-testid="button-clear-filters"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1" data-testid="market-filter-chips">
+            <SlidersHorizontal className="w-3 h-3 text-muted-foreground shrink-0" />
+            {marketGroups.map(group => (
+              <button
+                key={group.label}
+                onClick={() => setMarketFilter(group.label)}
+                className={`px-2.5 py-1 rounded-full text-[10px] font-medium transition-colors shrink-0 whitespace-nowrap ${
+                  marketFilter === group.label
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+                data-testid={`button-market-filter-${group.label}`}
+              >
+                {group.label}
+              </button>
+            ))}
+          </div>
+
           {data && (
             <div className="flex items-center gap-3 text-[10px] text-muted-foreground flex-wrap">
               <span className="flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> {data.totalGames} games &middot; {data.totalProps} props
+                <TrendingUp className="w-3 h-3" />
+                {searchQuery || marketFilter !== "All"
+                  ? <>{filteredGames.length} games &middot; {totalFilteredProps} props <span className="text-primary">(filtered)</span></>
+                  : <>{data.totalGames} games &middot; {data.totalProps} props</>
+                }
               </span>
               {data.dataSource && (
                 <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${
@@ -990,17 +1166,34 @@ export default function PlayerPropsPage() {
 
         {data && !isLoading && (
           <>
-            {data.games.length === 0 ? (
+            {filteredGames.length === 0 ? (
               <Card>
                 <CardContent className="p-8 text-center">
                   <Clock className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-base font-medium">No {selectedSport} games found</p>
-                  <p className="text-sm text-muted-foreground mt-1">Try a different sport or check back when games are scheduled.</p>
+                  {searchQuery || marketFilter !== "All" ? (
+                    <>
+                      <p className="text-base font-medium">No results found</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {searchQuery ? `No players matching "${searchQuery}"` : `No ${marketFilter} props available`} for {selectedSport}.
+                      </p>
+                      <button
+                        onClick={() => { setSearchQuery(""); setMarketFilter("All"); }}
+                        className="mt-3 text-sm text-primary hover:underline"
+                      >
+                        Clear filters
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-base font-medium">No {selectedSport} games found</p>
+                      <p className="text-sm text-muted-foreground mt-1">Try a different sport or check back when games are scheduled.</p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ) : (
               <div className="space-y-4">
-                {data.games.map((game) => (
+                {filteredGames.map((game) => (
                   <GameSection
                     key={game.gameId}
                     game={game}

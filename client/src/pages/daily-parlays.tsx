@@ -950,7 +950,7 @@ export default function DailyParlays() {
             </div>
             <div className="p-3 rounded-xl bg-background/60 backdrop-blur border border-border/40 text-center">
               <p className={`text-2xl font-bold ${topPickEv > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid="text-top-ev">
-                +{topPickEv.toFixed(1)}%
+                {displayEv(topPickEv)}
               </p>
               <p className="text-[10px] text-muted-foreground font-medium">Best Edge</p>
             </div>
@@ -1107,7 +1107,7 @@ export default function DailyParlays() {
                       <span className="text-amber-400 font-medium">{gradeBreakdown.c}C</span>
                     </span>
                     <span className="text-border">|</span>
-                    <span>Avg EV: <span className={avgEv > 0 ? "text-emerald-400" : "text-red-400"}>{avgEv > 0 ? "+" : ""}{avgEv.toFixed(1)}%</span></span>
+                    <span>Avg EV: <span className={avgEv > 0 ? "text-emerald-400" : "text-red-400"}>{avgEv > 0 ? displayEv(avgEv) : avgEv.toFixed(1) + "%"}</span></span>
                   </div>
                   <div className="flex items-center gap-3">
                     <span>Showing {visiblePicks.length} of {sortedPicks.length}</span>

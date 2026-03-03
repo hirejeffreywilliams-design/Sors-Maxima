@@ -239,6 +239,54 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-spread-cb6a883b07",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "St. John's Red Storm -15.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:58:06.326Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-team_total-519f64b678",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "St. John's Red Storm Over 82",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:58:06.326Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820785-total-d72d32791c",
+      "gameId": "401820785",
+      "sport": "NCAAB",
+      "game": "Wake Forest Demon Deacons @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "Wake Forest Demon Deacons",
+      "pick": "Under 148",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 29.82,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:59:15.655Z"
     }
   ],
   "settled": [
@@ -6981,31 +7029,191 @@
       "homeScore": 86,
       "awayScore": 83,
       "settledAt": "2026-03-03T21:48:16.638Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-spread-c8da43235d",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens -25.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T21:50:34.991Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T21:51:41.297Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-spread-8137f827aa",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils -0.5",
+      "betType": "spread",
+      "odds": 215,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 101.6,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:54:19.603Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T21:55:23.711Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-team_total-522acb1f75",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils Over 3",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 5,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:54:19.603Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T21:55:23.711Z"
+    },
+    {
+      "id": "precomp-NBA-401810741-spread-e373289a0e",
+      "gameId": "401810741",
+      "sport": "NBA",
+      "game": "Brooklyn Nets @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Brooklyn Nets",
+      "pick": "Miami Heat -12.5",
+      "betType": "spread",
+      "odds": -112,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": -1.57,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T21:54:19.166Z",
+      "result": "lost",
+      "homeScore": 102,
+      "awayScore": 106,
+      "settledAt": "2026-03-03T21:55:23.715Z"
+    },
+    {
+      "id": "precomp-NBA-401810741-team_total-0d95305679",
+      "gameId": "401810741",
+      "sport": "NBA",
+      "game": "Brooklyn Nets @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Brooklyn Nets",
+      "pick": "Miami Heat Over 119",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": -0.73,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T21:54:19.166Z",
+      "result": "lost",
+      "homeScore": 102,
+      "awayScore": 106,
+      "settledAt": "2026-03-03T21:55:23.715Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825553-team_total-0bf33a42d9",
+      "gameId": "401825553",
+      "sport": "NCAAB",
+      "game": "Oregon Ducks @ Illinois Fighting Illini",
+      "homeTeam": "Illinois Fighting Illini",
+      "awayTeam": "Oregon Ducks",
+      "pick": "Illinois Fighting Illini Over 82",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 69,
+      "ev": 35.55,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T21:54:19.805Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 84,
+      "settledAt": "2026-03-03T21:55:23.730Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-spread-d9c23f7c5c",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "St. John's Red Storm -16",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:56:22.208Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 57,
+      "settledAt": "2026-03-03T21:57:28.143Z"
+    },
+    {
+      "id": "precomp-NCAAB-401822967-team_total-14daf122bb",
+      "gameId": "401822967",
+      "sport": "NCAAB",
+      "game": "Georgetown Hoyas @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Georgetown Hoyas",
+      "pick": "Georgetown Hoyas Under 66.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:56:22.208Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 57,
+      "settledAt": "2026-03-03T21:57:28.143Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 337,
-      "won": 160,
-      "lost": 174,
+      "total": 345,
+      "won": 162,
+      "lost": 180,
       "push": 3,
-      "rate": 47.5,
-      "pending": 15
+      "rate": 47,
+      "pending": 18
     },
     "bySport": {
       "NBA": {
-        "total": 123,
+        "total": 125,
         "won": 56,
-        "rate": 45.5
+        "rate": 44.8
       },
       "NHL": {
-        "total": 74,
+        "total": 76,
         "won": 37,
-        "rate": 50
+        "rate": 48.7
       },
       "NCAAB": {
-        "total": 140,
-        "won": 67,
+        "total": 144,
+        "won": 69,
         "rate": 47.9
       }
     },
@@ -7016,14 +7224,14 @@
         "rate": 38.5
       },
       "B+": {
-        "total": 27,
-        "won": 18,
-        "rate": 66.7
+        "total": 29,
+        "won": 20,
+        "rate": 69
       },
       "B-": {
-        "total": 117,
+        "total": 119,
         "won": 59,
-        "rate": 50.4
+        "rate": 49.6
       },
       "D+": {
         "total": 30,
@@ -7036,9 +7244,9 @@
         "rate": 45.5
       },
       "C+": {
-        "total": 47,
+        "total": 49,
         "won": 19,
-        "rate": 40.4
+        "rate": 38.8
       },
       "C": {
         "total": 40,
@@ -7046,9 +7254,9 @@
         "rate": 45
       },
       "A-": {
-        "total": 26,
+        "total": 28,
         "won": 7,
-        "rate": 26.9
+        "rate": 25
       },
       "D": {
         "total": 2,
@@ -7063,9 +7271,9 @@
         "rate": 55.6
       },
       "Spread": {
-        "total": 83,
-        "won": 41,
-        "rate": 49.4
+        "total": 87,
+        "won": 42,
+        "rate": 48.3
       },
       "Total": {
         "total": 65,
@@ -7073,18 +7281,18 @@
         "rate": 38.5
       },
       "Team Total": {
-        "total": 135,
-        "won": 64,
-        "rate": 47.4
+        "total": 139,
+        "won": 65,
+        "rate": 46.8
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 20,
-      "push": 1,
-      "rate": 58
+      "won": 27,
+      "lost": 23,
+      "push": 0,
+      "rate": 54
     },
-    "lastUpdated": "2026-03-03T21:49:17.782Z"
+    "lastUpdated": "2026-03-03T21:59:16.895Z"
   },
   "version": 1
 }

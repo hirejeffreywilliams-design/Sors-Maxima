@@ -1333,10 +1333,15 @@ export interface RealPlayerProp {
 }
 
 const PLAYER_PROP_MARKETS: Record<string, string[]> = {
-  NBA: ["player_points", "player_rebounds", "player_assists", "player_threes", "player_points_rebounds_assists"],
+  NBA: [
+    "player_points", "player_rebounds", "player_assists",
+    "player_threes", "player_steals", "player_blocks",
+    "player_points_rebounds_assists", "player_points_rebounds",
+    "player_points_assists", "player_rebounds_assists",
+  ],
   NFL: ["player_pass_yds", "player_pass_tds", "player_rush_yds", "player_reception_yds", "player_receptions", "player_anytime_td"],
   MLB: ["batter_hits", "batter_total_bases", "batter_rbis", "batter_home_runs", "pitcher_strikeouts"],
-  NHL: ["player_points", "player_shots_on_goal", "player_anytime_goalscorer"],
+  NHL: ["player_points", "player_shots_on_goal", "player_goals", "player_assists"],
   NCAAB: ["player_points", "player_rebounds", "player_assists"],
   NCAAF: ["player_pass_yds", "player_rush_yds", "player_reception_yds", "player_anytime_td"],
 };
