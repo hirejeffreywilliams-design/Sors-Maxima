@@ -1,3 +1,13 @@
+import * as Sentry from "@sentry/node";
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || "development",
+    tracesSampleRate: 0.2,
+  });
+  console.log("[Sentry] Error monitoring active");
+}
+
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
@@ -34,10 +44,12 @@ import { isMaintenanceMode, getMaintenanceMessage } from "./launch-control";
 // ─── Crash Guards ─────────────────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
   console.error("[CRASH GUARD] Uncaught exception caught — app staying alive:", err.message);
+  if (process.env.SENTRY_DSN) Sentry.captureException(err);
 });
 
 process.on("unhandledRejection", (reason) => {
   console.error("[CRASH GUARD] Unhandled promise rejection caught:", String(reason));
+  if (process.env.SENTRY_DSN) Sentry.captureException(reason);
 });
 
 process.on("SIGHUP", () => { /* ignore — workflow runner disconnects terminal */ });
@@ -377,6 +389,8 @@ async function checkEmailSequences(): Promise<void> {
       },
       req.session?.userId
     );
+
+    if (status >= 500 && process.env.SENTRY_DSN) Sentry.captureException(err);
 
     res.status(status).json({ 
       message,

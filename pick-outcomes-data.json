@@ -255,6 +255,150 @@
       "ev": 29,
       "gameTime": "2026-03-04T02:00Z",
       "savedAt": "2026-03-03T20:13:19.409Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-total-e41158bddc",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Over 230.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 62,
+      "ev": -8.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T20:18:22.833Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-team_total-cb08bb1bd2",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Oklahoma City Thunder Over 120.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 62,
+      "ev": -8.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T20:18:22.833Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-moneyline-217df4f396",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Boston Celtics ML",
+      "betType": "moneyline",
+      "odds": -137,
+      "grade": "C",
+      "confidence": 62,
+      "ev": -10.04,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-03T20:18:22.833Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-spread-03ecad90eb",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Boston Celtics +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 62,
+      "ev": 1.18,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-03T20:18:22.833Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-spread-354aa7eb5b",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks -7",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:18:23.328Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-total-a4212bf80f",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Under 167.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:18:23.328Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-9ae4040b58",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks Under 87.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:18:23.328Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-2238bbae61",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Texas Longhorns Under 80.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:18:23.328Z"
+    },
+    {
+      "id": "precomp-NHL-401803316-moneyline-5c8b7f5ec1",
+      "gameId": "401803316",
+      "sport": "NHL",
+      "game": "Dallas Stars @ Calgary Flames",
+      "homeTeam": "Calgary Flames",
+      "awayTeam": "Dallas Stars",
+      "pick": "Calgary Flames ML",
+      "betType": "moneyline",
+      "odds": 116,
+      "grade": "C-",
+      "confidence": 61,
+      "ev": -4.96,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T20:18:56.481Z"
     }
   ],
   "settled": [
@@ -5466,7 +5610,7 @@
       "lost": 134,
       "push": 2,
       "rate": 47.7,
-      "pending": 16
+      "pending": 25
     },
     "bySport": {
       "NBA": {
@@ -5560,7 +5704,7 @@
       "push": 1,
       "rate": 40
     },
-    "lastUpdated": "2026-03-03T20:13:37.081Z"
+    "lastUpdated": "2026-03-03T20:18:58.277Z"
   },
   "version": 1
 }
