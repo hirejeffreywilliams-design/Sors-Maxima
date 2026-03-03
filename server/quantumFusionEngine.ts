@@ -994,7 +994,7 @@ function generateSignals(sport: Sport, odds: number, context: Record<string, unk
         }
       } else if (config.source === "predictive_model" && hasRealOdds) {
         confidence = Math.min(64, confidence + 4);
-        reasoning = `AI model validated against live market odds (source: ${oddsSource})`;
+        reasoning = `46-Factor Intelligence Engine validated against live market odds (source: ${oddsSource})`;
       }
     }
     

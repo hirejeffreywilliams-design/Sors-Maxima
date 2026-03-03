@@ -582,7 +582,7 @@ function buildReasoning(pick: any): string {
     .map((f: any) => f.name.toLowerCase());
   if (topFactors.length > 0) reasons.push(`driven by ${topFactors.join(" & ")}`);
 
-  return reasons.length > 0 ? reasons.join(", ") : "model-projected value";
+  return reasons.length > 0 ? reasons.join(", ") : "intelligence-projected value";
 }
 
 function buildDataSourceHealth(): DataSourceHealth[] {

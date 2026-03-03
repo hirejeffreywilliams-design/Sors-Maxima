@@ -106,7 +106,7 @@ export function PlayerPropLab() {
               <Info className="w-4 h-4 text-muted-foreground cursor-help" />
             </TooltipTrigger>
             <TooltipContent>
-              <p className="text-xs max-w-xs">Data source: ESPN roster data, model-estimated projections</p>
+              <p className="text-xs max-w-xs">Data source: live game data, 46-Factor projected analysis</p>
             </TooltipContent>
           </Tooltip>
         </div>

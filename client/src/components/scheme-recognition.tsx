@@ -286,7 +286,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
           <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
           <span>
             Scheme classifications are derived from live game records and advanced team stats.
-            Coach ATS stats are <strong>model-estimated</strong> from win% and recent form — not verified ATS records.
+            Coach ATS stats are <strong>intelligence-projected</strong> from win% and recent form — not verified ATS records.
           </span>
         </div>
       </CardHeader>

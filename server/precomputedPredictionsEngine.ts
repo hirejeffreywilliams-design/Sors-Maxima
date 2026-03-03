@@ -246,9 +246,9 @@ function buildPickReasoning(
     const team = pick.replace(" ML", "").trim();
     const impliedProb = ctx?.odds ? (ctx.odds < 0 ? Math.abs(ctx.odds) / (Math.abs(ctx.odds) + 100) * 100 : 100 / (ctx.odds + 100) * 100) : 0;
     if (impliedProb > 0 && Math.abs(winProbability - impliedProb) >= 3) {
-      parts.push(`Model estimates ${winProbability}% win probability vs ${Math.round(impliedProb)}% implied by odds = +${Math.round(winProbability - impliedProb)}% edge`);
+      parts.push(`46-Factor model projects ${winProbability}% win probability vs ${Math.round(impliedProb)}% implied by odds = +${Math.round(winProbability - impliedProb)}% edge`);
     } else {
-      parts.push(`${team} at ${winProbability}% model-projected win probability`);
+      parts.push(`${team} at ${winProbability}% intelligence-projected win probability`);
     }
   } else if (betType === "spread") {
     if (ev > 3) {

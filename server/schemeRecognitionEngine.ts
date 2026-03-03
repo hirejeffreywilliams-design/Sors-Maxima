@@ -1158,7 +1158,7 @@ export async function analyzeSchemes(sport: Sport): Promise<SchemeAnalysisRespon
       dataSources: Array.from(dataSources),
       oddsFromCache,
       picksLinked,
-      transparencyNote: "Scheme names derived from live ESPN records, BallDontLie stats (NBA), and team-specific signals. ATS coach stats are model-estimated from win% and form — not real ATS records.",
+      transparencyNote: "Scheme names derived from live ESPN records, BallDontLie stats (NBA), and team-specific signals. ATS coach stats are intelligence-projected from win% and form — not real ATS records.",
     },
   };
 }

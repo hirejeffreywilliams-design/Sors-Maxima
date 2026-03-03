@@ -178,7 +178,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         dataSources: {
           primary: "ESPN Live Data",
           analysis: "Statistical Model",
-          note: "Odds and game data sourced from ESPN. Analysis is model-estimated, not guaranteed.",
+          note: "Odds and game data sourced from ESPN. Analysis is 46-Factor intelligence-based, not guaranteed.",
         },
         disclaimer: "For entertainment purposes only. No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
@@ -237,7 +237,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         dataSources: {
           primary: "ESPN Live Data",
           analysis: "Statistical Model",
-          note: "Odds and game data sourced from ESPN. Analysis is model-estimated, not guaranteed.",
+          note: "Odds and game data sourced from ESPN. Analysis is 46-Factor intelligence-based, not guaranteed.",
         },
         disclaimer: "For entertainment purposes only. No guarantees \u2014 betting involves risk. Follow local laws and gamble responsibly. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).",
       });
