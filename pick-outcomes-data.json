@@ -241,52 +241,52 @@
       "savedAt": "2026-03-03T16:35:31.103Z"
     },
     {
-      "id": "precomp-NBA-401810744-spread-1dc1626729",
-      "gameId": "401810744",
+      "id": "precomp-NBA-401810747-team_total-759b2a9a89",
+      "gameId": "401810747",
       "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Chicago Bulls +10",
-      "betType": "spread",
-      "odds": -112,
-      "grade": "C-",
-      "confidence": 67,
-      "ev": -9.14,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-03T19:17:50.882Z"
-    },
-    {
-      "id": "precomp-NBA-401810744-team_total-907627aac2",
-      "gameId": "401810744",
-      "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Chicago Bulls Over 110",
+      "game": "Phoenix Suns @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Phoenix Suns",
+      "pick": "Sacramento Kings Over 107",
       "betType": "team_total",
       "odds": -110,
-      "grade": "C-",
+      "grade": "D+",
       "confidence": 67,
-      "ev": -8.36,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-03T19:17:50.882Z"
+      "ev": -23.64,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T19:27:41.614Z"
     },
     {
-      "id": "precomp-NBA-401810744-total-359c14bfc3",
-      "gameId": "401810744",
-      "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Chicago Bulls",
-      "homeTeam": "Chicago Bulls",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Over 230",
-      "betType": "total",
+      "id": "precomp-NCAAB-401827719-spread-e8961ec749",
+      "gameId": "401827719",
+      "sport": "NCAAB",
+      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "TCU Horned Frogs",
+      "pick": "Texas Tech Red Raiders -8",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 15.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:27:42.364Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827719-team_total-0a9fb62d41",
+      "gameId": "401827719",
+      "sport": "NCAAB",
+      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "TCU Horned Frogs",
+      "pick": "TCU Horned Frogs Under 70",
+      "betType": "team_total",
       "odds": -110,
-      "grade": "C-",
-      "confidence": 62,
-      "ev": -8.36,
-      "gameTime": "2026-03-04T01:00Z",
-      "savedAt": "2026-03-03T19:17:50.882Z"
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 18.36,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:27:42.364Z"
     }
   ],
   "settled": [
@@ -5109,22 +5109,82 @@
       "homeScore": 137,
       "awayScore": 117,
       "settledAt": "2026-03-03T19:06:22.032Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-spread-1dc1626729",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Chicago Bulls +10",
+      "betType": "spread",
+      "odds": -112,
+      "grade": "C-",
+      "confidence": 67,
+      "ev": -9.14,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T19:17:50.882Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-03T19:22:10.185Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-team_total-907627aac2",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Chicago Bulls Over 110",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 67,
+      "ev": -8.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T19:17:50.882Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-03T19:22:10.185Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-total-359c14bfc3",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Over 230",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 62,
+      "ev": -8.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T19:17:50.882Z",
+      "result": "lost",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-03T19:22:10.185Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 241,
-      "won": 115,
-      "lost": 124,
+      "total": 244,
+      "won": 117,
+      "lost": 125,
       "push": 2,
-      "rate": 47.7,
+      "rate": 48,
       "pending": 18
     },
     "bySport": {
       "NBA": {
-        "total": 87,
-        "won": 38,
-        "rate": 43.7
+        "total": 90,
+        "won": 40,
+        "rate": 44.4
       },
       "NHL": {
         "total": 65,
@@ -5159,9 +5219,9 @@
         "rate": 58.8
       },
       "C-": {
-        "total": 14,
-        "won": 7,
-        "rate": 50
+        "total": 17,
+        "won": 9,
+        "rate": 52.9
       },
       "C+": {
         "total": 36,
@@ -5191,19 +5251,19 @@
         "rate": 52.5
       },
       "Spread": {
-        "total": 53,
-        "won": 26,
-        "rate": 49.1
+        "total": 54,
+        "won": 27,
+        "rate": 50
       },
       "Total": {
-        "total": 49,
+        "total": 50,
         "won": 22,
-        "rate": 44.9
+        "rate": 44
       },
       "Team Total": {
-        "total": 99,
-        "won": 46,
-        "rate": 46.5
+        "total": 100,
+        "won": 47,
+        "rate": 47
       }
     },
     "recentForm": {
@@ -5212,7 +5272,7 @@
       "push": 1,
       "rate": 40
     },
-    "lastUpdated": "2026-03-03T19:17:53.233Z"
+    "lastUpdated": "2026-03-03T19:27:43.250Z"
   },
   "version": 1
 }
