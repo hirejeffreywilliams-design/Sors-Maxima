@@ -3921,15 +3921,35 @@
       "homeScore": 91,
       "awayScore": 76,
       "settledAt": "2026-03-03T17:14:35.642Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827715-team_total-10b9b4dec5",
+      "gameId": "401827715",
+      "sport": "NCAAB",
+      "game": "Kansas Jayhawks @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Kansas Jayhawks",
+      "pick": "Arizona State Sun Devils Under 73",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 66,
+      "ev": -21.73,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T17:15:08.317Z",
+      "result": "lost",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-03T17:16:14.521Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 184,
+      "total": 185,
       "won": 91,
-      "lost": 92,
+      "lost": 93,
       "push": 1,
-      "rate": 49.5,
+      "rate": 49.2,
       "pending": 15
     },
     "bySport": {
@@ -3944,9 +3964,9 @@
         "rate": 46.7
       },
       "NCAAB": {
-        "total": 66,
+        "total": 67,
         "won": 36,
-        "rate": 54.5
+        "rate": 53.7
       }
     },
     "byGrade": {
@@ -3966,9 +3986,9 @@
         "rate": 49.3
       },
       "D+": {
-        "total": 12,
+        "total": 13,
         "won": 6,
-        "rate": 50
+        "rate": 46.2
       },
       "C-": {
         "total": 12,
@@ -4008,18 +4028,18 @@
         "rate": 52.9
       },
       "Team Total": {
-        "total": 71,
+        "total": 72,
         "won": 34,
-        "rate": 47.9
+        "rate": 47.2
       }
     },
     "recentForm": {
-      "won": 24,
-      "lost": 25,
+      "won": 23,
+      "lost": 26,
       "push": 1,
-      "rate": 48
+      "rate": 46
     },
-    "lastUpdated": "2026-03-03T17:14:35.643Z"
+    "lastUpdated": "2026-03-03T17:16:14.521Z"
   },
   "version": 1
 }
