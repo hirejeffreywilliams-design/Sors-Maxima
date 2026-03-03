@@ -182,7 +182,7 @@ export function IntelligencePipeline() {
                 nodes={[
                   { name: "Ranked Picks", detail: "Confidence-sorted, grade-labeled", icon: <Target className="w-3 h-3" /> },
                   { name: "Smart Tickets", detail: "Auto-assembled daily parlays", icon: <CheckCircle2 className="w-3 h-3" /> },
-                  { name: "Life Changer", detail: "High-odds underdog combo (Edge+)", icon: <Sparkles className="w-3 h-3" /> },
+                  { name: "Daily Edge Parlay", detail: "High-value combo picks (Edge+)", icon: <Sparkles className="w-3 h-3" /> },
                   { name: "Matchup Tickets", detail: "Game-specific correlated leg bundles", icon: <Layers className="w-3 h-3" /> },
                   { name: "Tier Release", detail: "Max → Edge → Sharp, staggered timing", icon: <Clock className="w-3 h-3" /> },
                   { name: "Your Slip", detail: "One click to add any pick or ticket", icon: <CheckCircle2 className="w-3 h-3" /> },

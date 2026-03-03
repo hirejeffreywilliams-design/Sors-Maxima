@@ -51,7 +51,8 @@ const LEAGUE_MAP: Record<string, { id: number; season: number; name: string; esp
 };
 
 const fixturesCache = new Map<string, { data: SoccerFixture[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_TTL = 6 * 60 * 60 * 1000;
+const planRestrictedLeagues = new Set<number>();
 
 export function isApiFootballAvailable(): boolean {
   return !!API_FOOTBALL_KEY;
@@ -77,6 +78,10 @@ async function fetchApiFootballFixtures(leagueId: number, season: number): Promi
 
   console.log(`[API-Football] Fetching league ${leagueId} season ${season}: ${threeDaysAgo} to ${twoWeeksAhead}`);
 
+  if (planRestrictedLeagues.has(leagueId)) {
+    return [];
+  }
+
   try {
     const response = await fetch(url, {
       headers: { "x-apisports-key": API_FOOTBALL_KEY },
@@ -88,7 +93,13 @@ async function fetchApiFootballFixtures(leagueId: number, season: number): Promi
     }
     const json = await response.json();
     if (json.errors && Object.keys(json.errors).length > 0) {
-      console.error(`[API-Football] API errors for league ${leagueId}:`, JSON.stringify(json.errors));
+      const errStr = JSON.stringify(json.errors);
+      if (errStr.includes("Free plans do not have access")) {
+        planRestrictedLeagues.add(leagueId);
+        logWarn(`[API-Football] League ${leagueId} not available on free plan — ESPN fallback only`);
+        return [];
+      }
+      console.error(`[API-Football] API errors for league ${leagueId}:`, errStr);
       return [];
     }
     if (!json.response || !Array.isArray(json.response)) {

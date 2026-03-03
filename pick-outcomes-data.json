@@ -62246,31 +62246,191 @@
       "homeScore": 73,
       "awayScore": 82,
       "settledAt": "2026-03-03T15:24:27.482Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-total-ec6953f0cf",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Over 228",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 65,
+      "ev": 31.73,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T15:41:20.850Z",
+      "result": "won",
+      "homeScore": 118,
+      "awayScore": 123,
+      "settledAt": "2026-03-03T15:41:38.621Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-spread-c1afee5ef2",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks -8.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T15:41:38.640Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-total-6dcdbd3c46",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Under 171.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T15:41:38.640Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-708015e003",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks Under 90",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T15:41:38.640Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-84416b6cc2",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Texas Longhorns Under 81.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 26,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T15:41:38.640Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-team_total-928c06af82",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "North Carolina Tar Heels Over 73.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T15:41:38.669Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-total-168e90eeb1",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "Over 142.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 69,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T15:41:21.707Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T15:41:38.669Z"
+    },
+    {
+      "id": "precomp-NHL-401803317-team_total-585a407569",
+      "gameId": "401803317",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Edmonton Oilers",
+      "homeTeam": "Edmonton Oilers",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Ottawa Senators Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 61,
+      "ev": 1.18,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T15:47:25.644Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T15:49:31.775Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3022,
-      "won": 1677,
-      "lost": 1303,
+      "total": 3030,
+      "won": 1683,
+      "lost": 1305,
       "push": 42,
       "rate": 55.5,
       "pending": 46
     },
     "bySport": {
       "NHL": {
-        "total": 575,
-        "won": 317,
-        "rate": 55.1
+        "total": 576,
+        "won": 318,
+        "rate": 55.2
       },
       "NCAAB": {
-        "total": 1023,
-        "won": 595,
+        "total": 1029,
+        "won": 599,
         "rate": 58.2
       },
       "NBA": {
-        "total": 1230,
-        "won": 663,
+        "total": 1231,
+        "won": 664,
         "rate": 53.9
       },
       "MLB": {
@@ -62291,24 +62451,24 @@
         "rate": 50.4
       },
       "C+": {
-        "total": 1192,
-        "won": 663,
-        "rate": 55.6
+        "total": 1193,
+        "won": 664,
+        "rate": 55.7
       },
       "B-": {
-        "total": 59,
-        "won": 34,
-        "rate": 57.6
+        "total": 61,
+        "won": 36,
+        "rate": 59
       },
       "B+": {
-        "total": 6,
-        "won": 4,
-        "rate": 66.7
+        "total": 7,
+        "won": 5,
+        "rate": 71.4
       },
       "B": {
-        "total": 34,
-        "won": 15,
-        "rate": 44.1
+        "total": 38,
+        "won": 17,
+        "rate": 44.7
       },
       "D": {
         "total": 15,
@@ -62338,18 +62498,18 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 841,
-        "won": 491,
-        "rate": 58.4
+        "total": 845,
+        "won": 494,
+        "rate": 58.5
       },
       "Spread": {
-        "total": 458,
-        "won": 232,
-        "rate": 50.7
+        "total": 459,
+        "won": 233,
+        "rate": 50.8
       },
       "Total": {
-        "total": 1588,
-        "won": 884,
+        "total": 1591,
+        "won": 886,
         "rate": 55.7
       },
       "Moneyline": {
@@ -62364,7 +62524,7 @@
       "push": 1,
       "rate": 58
     },
-    "lastUpdated": "2026-03-03T15:31:33.840Z"
+    "lastUpdated": "2026-03-03T15:50:47.303Z"
   },
   "version": 1
 }

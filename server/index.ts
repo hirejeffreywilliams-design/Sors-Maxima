@@ -230,7 +230,7 @@ function startEnginesPhased(): void {
   safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
   safeStart("International Sports Engine", () => {
     generateInternationalFeed().catch(() => {});
-    setInterval(() => generateInternationalFeed().catch(() => {}), 15 * 60 * 1000);
+    setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);
   }, 145_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────

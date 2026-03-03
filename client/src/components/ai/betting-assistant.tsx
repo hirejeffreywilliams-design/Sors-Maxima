@@ -136,22 +136,29 @@ export function BettingAssistant() {
           <div className="space-y-4 py-4">
             {isUnavailable && (
               <div className="mb-4">
-                <Card className="bg-yellow-500/5 border-yellow-500/20">
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-3">
-                    <AlertCircle className="w-8 h-8 text-yellow-500" />
-                    <div className="space-y-1">
-                      <p className="font-semibold text-sm">AI analysis is temporarily at capacity.</p>
-                      <p className="text-xs text-muted-foreground">Your picks are still powered by the full 46-factor engine. AI insights resume automatically.</p>
+                <Card className="bg-slate-900/60 border-slate-700/50">
+                  <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                    <div className="p-3 rounded-full bg-slate-800/80 border border-slate-700/50">
+                      <AlertCircle className="w-6 h-6 text-slate-400" />
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => refetchStatus()}
-                      className="gap-2"
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                      Retry Connection
-                    </Button>
+                    <div className="space-y-1.5">
+                      <p className="font-semibold text-sm text-foreground">AI Assistant Temporarily Unavailable</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed max-w-[260px]">
+                        Your picks continue to run on the full 46-factor intelligence engine. AI chat resumes automatically when capacity is restored.
+                      </p>
+                    </div>
+                    <div className="w-full pt-1 border-t border-slate-800/60">
+                      <p className="text-[10px] text-muted-foreground/70 mb-2">All analysis engines remain active</p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => refetchStatus()}
+                        className="gap-2 text-xs h-7"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        Check Status
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

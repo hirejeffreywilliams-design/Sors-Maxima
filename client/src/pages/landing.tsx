@@ -103,7 +103,7 @@ const testimonials = [
 
 const trustSignals = [
   { icon: Lock, label: "SSL Secured", description: "Military-grade encryption" },
-  { icon: Database, label: "6 Live Data APIs", description: "Sub-second updates" },
+  { icon: Database, label: "5 Live Data Sources", description: "Sub-second updates" },
   { icon: CheckCircle, label: "3,800+ Picks Tracked", description: "Verified performance" },
   { icon: Shield, label: "Members-Only Access", description: "Limited entry protocol" },
 ];

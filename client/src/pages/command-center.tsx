@@ -1107,11 +1107,11 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base font-bold text-amber-300 leading-tight">Life Changer</h2>
-                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">Daily Ticket</Badge>
+                <h2 className="text-base font-bold text-amber-300 leading-tight">Daily Edge Parlay</h2>
+                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">Daily Parlay</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                Cross-sport underdog parlay — unorthodox picks across multiple sports
+                Cross-sport high-value parlay — unorthodox picks across multiple sports
               </p>
             </div>
           </div>
@@ -1607,8 +1607,8 @@ export default function CommandCenter() {
           : (
             <TierGate 
               required="elite" 
-              label="Life Changer Ticket" 
-              description="A daily cross-sport underdog parlay built by the intelligence engine — high odds, real edge. Edge tier and above."
+              label="Daily Edge Parlay" 
+              description="A daily cross-sport high-value parlay built by the intelligence engine — real edge, premium picks. Edge tier and above."
             >
               <div />
             </TierGate>
