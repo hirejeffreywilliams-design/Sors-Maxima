@@ -114,7 +114,9 @@ function deriveSharpPicks(games: MarketGame[]): SharpPickDerived[] {
         odds = game.consensus.awayMoneyline;
       }
 
-      const grade: SharpPickDerived["grade"] = confidence >= 80 ? "A" : confidence >= 65 ? "B" : "C";
+      // Align grade thresholds with platform-wide pick card grades.
+      // Sharp consensus confidence runs 50–95; map to same A/B/C tiers proportionally.
+      const grade: SharpPickDerived["grade"] = confidence >= 85 ? "A" : confidence >= 70 ? "B" : "C";
 
       picks.push({
         id: `${game.id}-${lm.market}`,

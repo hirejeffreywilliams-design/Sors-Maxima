@@ -556,19 +556,25 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
         }
       }
 
+      // Apply regression-to-mean (Bayesian shrinkage) on season win% before EV/edge calc.
+      // A 35-5 NCAAB team should not read as 87.5% — shrink toward 50% proportionally.
+      // Weight: 65% observed win%, 35% prior (50/50). Prevents extreme EV signals from small samples.
+      const homeWinPctAdj = homeWinPct * 0.65 + 0.5 * 0.35;
+      const awayWinPctAdj = awayWinPct * 0.65 + 0.5 * 0.35;
+
       let valueSide: "home" | "away" | "none" = "none";
       if (consensus.homeImpliedProb && consensus.awayImpliedProb) {
-        const homeEdge = (homeWinPct * 100) - consensus.homeImpliedProb;
-        const awayEdge = (awayWinPct * 100) - consensus.awayImpliedProb;
+        const homeEdge = (homeWinPctAdj * 100) - consensus.homeImpliedProb;
+        const awayEdge = (awayWinPctAdj * 100) - consensus.awayImpliedProb;
         if (homeEdge > 5) valueSide = "home";
         else if (awayEdge > 5) valueSide = "away";
       }
 
       const homeEV = consensus.homeMoneyline
-        ? Math.round(((homeWinPct * (consensus.homeMoneyline > 0 ? consensus.homeMoneyline / 100 : 100 / -consensus.homeMoneyline)) - (1 - homeWinPct)) * 100) / 100
+        ? Math.round(((homeWinPctAdj * (consensus.homeMoneyline > 0 ? consensus.homeMoneyline / 100 : 100 / -consensus.homeMoneyline)) - (1 - homeWinPctAdj)) * 100) / 100
         : 0;
       const awayEV = consensus.awayMoneyline
-        ? Math.round(((awayWinPct * (consensus.awayMoneyline > 0 ? consensus.awayMoneyline / 100 : 100 / -consensus.awayMoneyline)) - (1 - awayWinPct)) * 100) / 100
+        ? Math.round(((awayWinPctAdj * (consensus.awayMoneyline > 0 ? consensus.awayMoneyline / 100 : 100 / -consensus.awayMoneyline)) - (1 - awayWinPctAdj)) * 100) / 100
         : 0;
 
       return {

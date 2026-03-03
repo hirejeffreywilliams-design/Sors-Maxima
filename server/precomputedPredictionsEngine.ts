@@ -1109,7 +1109,12 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       }
 
       const impliedProb = bet.odds < 0 ? Math.abs(bet.odds) / (Math.abs(bet.odds) + 100) : 100 / (bet.odds + 100);
-      const trueProb = confidence / 100;
+      // Prefer QFE's calibrated win probability over raw confidence for EV — winProbability
+      // is Bayesian-adjusted and sigmoid-warped; confidence is just signal agreement (35-68 cap).
+      const fusionWinFrac = fusion.winProbability && fusion.winProbability > 0
+        ? Math.min(0.92, Math.max(0.08, fusion.winProbability / 100))
+        : null;
+      const trueProb = fusionWinFrac ?? confidence / 100;
       const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
       const mappedFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
@@ -1284,7 +1289,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         betType: bet.betType,
         odds: bet.odds,
         confidence,
-        grade: gradeFromConfidence(confidence),
+        grade: fusion.grade || gradeFromConfidence(confidence),
         edge: Math.round(ev * 10) / 10,
         ev: evRounded,
         factors: mappedFactors,
@@ -1300,7 +1305,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         timing: pickTiming.timing,
         timingAdvice: pickTiming.timingAdvice,
         releaseSchedule: buildReleaseSchedule(now),
-        isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: gradeFromConfidence(confidence) }),
+        isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: fusion.grade || gradeFromConfidence(confidence) }),
         monteCarloData: mcSim ? {
           simulations: mcSim.simulations || 10000,
           predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
@@ -1500,7 +1505,10 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds }, vpMarketCtx);
     const confidence = Math.min(68, Math.max(22, fusion.confidence));
     const impliedProb = (vp.odds || -110) < 0 ? Math.abs(vp.odds || -110) / (Math.abs(vp.odds || -110) + 100) : 100 / ((vp.odds || -110) + 100);
-    const trueProb = confidence / 100;
+    const vpFusionWinFrac = fusion.winProbability && fusion.winProbability > 0
+      ? Math.min(0.92, Math.max(0.08, fusion.winProbability / 100))
+      : null;
+    const trueProb = vpFusionWinFrac ?? confidence / 100;
     const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 
     const vpFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
@@ -1522,7 +1530,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       betType: vpBetType,
       odds: vp.odds || -110,
       confidence,
-      grade: gradeFromConfidence(confidence),
+      grade: fusion.grade || gradeFromConfidence(confidence),
       edge: Math.round(ev * 10) / 10,
       ev: vpEvRounded,
       factors: vpFactors,
@@ -1536,7 +1544,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       timing: vpTiming.timing,
       timingAdvice: vpTiming.timingAdvice,
       releaseSchedule: buildReleaseSchedule(now),
-      isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: gradeFromConfidence(confidence) }),
+      isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: fusion.grade || gradeFromConfidence(confidence) }),
     });
   }
 
