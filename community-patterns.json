@@ -2,9 +2,9 @@
   "totalPatterns": 22,
   "toxicPatterns": 15,
   "goldenPatterns": 6,
-  "totalSettledPicks": 599,
+  "totalSettledPicks": 625,
   "lastRunAt": "2026-03-03T21:20:05.505Z",
-  "nextRunAt": "2026-03-03T21:40:05.506Z",
+  "nextRunAt": "2026-03-03T21:43:50.625Z",
   "patterns": [
     {
       "id": "learned-all-moneyline-heavy_favorite",
