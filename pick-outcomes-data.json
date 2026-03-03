@@ -5681,15 +5681,155 @@
       "homeScore": 70,
       "awayScore": 84,
       "settledAt": "2026-03-03T20:21:15.707Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-spread-0444be2741",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens -25",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:28:37.889Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-total-d9d20199b1",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Under 155",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:28:37.889Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-707698197d",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Loyola Chicago Ramblers Under 65",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:28:37.889Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-b93db56501",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens Under 90",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 69,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:28:37.889Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-team_total-1768956537",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "SMU Mustangs Under 81",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 70,
+      "ev": -2.64,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T20:28:37.892Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-team_total-ede151b5bd",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "Miami Hurricanes Under 79.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 70,
+      "ev": -2.64,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:27:32.599Z",
+      "result": "lost",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T20:28:37.892Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-8f0012e9f4",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens Over 90",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:32:23.063Z",
+      "result": "won",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:32:39.898Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 272,
-      "won": 127,
-      "lost": 143,
+      "total": 279,
+      "won": 128,
+      "lost": 149,
       "push": 2,
-      "rate": 46.7,
+      "rate": 45.9,
       "pending": 15
     },
     "bySport": {
@@ -5704,9 +5844,9 @@
         "rate": 47
       },
       "NCAAB": {
-        "total": 110,
-        "won": 54,
-        "rate": 49.1
+        "total": 117,
+        "won": 55,
+        "rate": 47
       }
     },
     "byGrade": {
@@ -5716,9 +5856,9 @@
         "rate": 38.5
       },
       "B+": {
-        "total": 24,
-        "won": 16,
-        "rate": 66.7
+        "total": 25,
+        "won": 17,
+        "rate": 68
       },
       "B-": {
         "total": 97,
@@ -5741,14 +5881,14 @@
         "rate": 28.9
       },
       "C": {
-        "total": 27,
+        "total": 29,
         "won": 12,
-        "rate": 44.4
+        "rate": 41.4
       },
       "A-": {
-        "total": 19,
+        "total": 23,
         "won": 7,
-        "rate": 36.8
+        "rate": 30.4
       },
       "D": {
         "total": 1,
@@ -5763,28 +5903,28 @@
         "rate": 50
       },
       "Spread": {
-        "total": 59,
+        "total": 60,
         "won": 29,
-        "rate": 49.2
+        "rate": 48.3
       },
       "Total": {
-        "total": 58,
+        "total": 59,
         "won": 24,
-        "rate": 41.4
+        "rate": 40.7
       },
       "Team Total": {
-        "total": 113,
-        "won": 53,
-        "rate": 46.9
+        "total": 118,
+        "won": 54,
+        "rate": 45.8
       }
     },
     "recentForm": {
-      "won": 21,
-      "lost": 28,
+      "won": 20,
+      "lost": 29,
       "push": 1,
-      "rate": 42
+      "rate": 40
     },
-    "lastUpdated": "2026-03-03T20:21:15.707Z"
+    "lastUpdated": "2026-03-03T20:32:39.899Z"
   },
   "version": 1
 }
