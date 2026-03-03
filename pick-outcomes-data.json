@@ -735,150 +735,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-3b8dbc55e37b",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Jazz @ 76ers",
-      "homeTeam": "76ers",
-      "awayTeam": "Jazz",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-7b4398284151",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Pacers @ Clippers",
-      "homeTeam": "Clippers",
-      "awayTeam": "Pacers",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-6622f4486264",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Pistons @ Cavaliers",
-      "homeTeam": "Cavaliers",
-      "awayTeam": "Pistons",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-af599d5c45c7",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Thunder @ Knicks",
-      "homeTeam": "Knicks",
-      "awayTeam": "Thunder",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-106ec7ceeda4",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Trail Blazers @ Grizzlies",
-      "homeTeam": "Grizzlies",
-      "awayTeam": "Trail Blazers",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-6679f5dae0b5",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Hawks @ Bucks",
-      "homeTeam": "Bucks",
-      "awayTeam": "Hawks",
-      "pick": "",
-      "betType": "moneyline",
-      "odds": -110,
-      "grade": "B",
-      "confidence": 64,
-      "ev": 12.64,
-      "gameTime": "2026-03-03T14:40:17.692Z",
-      "savedAt": "2026-03-03T14:40:17.692Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-dd6715977729",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Penguins @ Bruins",
-      "homeTeam": "Bruins",
-      "awayTeam": "Penguins",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 64,
-      "ev": 8.82,
-      "gameTime": "2026-03-03T14:40:18.369Z",
-      "savedAt": "2026-03-03T14:40:18.369Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-fb48929a2bb8",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Senators @ Oilers",
-      "homeTeam": "Oilers",
-      "awayTeam": "Senators",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 64,
-      "ev": 8.82,
-      "gameTime": "2026-03-03T14:40:18.369Z",
-      "savedAt": "2026-03-03T14:40:18.369Z"
-    },
-    {
-      "id": "precomp-vegas-NHL-4e78e801fd6f",
-      "gameId": "NHL",
-      "sport": "NHL",
-      "game": "Maple Leafs @ Devils",
-      "homeTeam": "Devils",
-      "awayTeam": "Maple Leafs",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 64,
-      "ev": 8.82,
-      "gameTime": "2026-03-03T14:40:18.369Z",
-      "savedAt": "2026-03-03T14:40:18.369Z"
     }
   ],
   "settled": [
@@ -62119,7 +61975,7 @@
       "lost": 1294,
       "push": 42,
       "rate": 55.6,
-      "pending": 55
+      "pending": 46
     },
     "bySport": {
       "NHL": {
@@ -62228,7 +62084,7 @@
       "push": 1,
       "rate": 64
     },
-    "lastUpdated": "2026-03-03T14:40:35.774Z"
+    "lastUpdated": "2026-03-03T14:45:09.424Z"
   },
   "version": 1
 }

@@ -77761,13 +77761,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77778,8 +77778,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.952Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.843Z"
     },
     "precomp-NCAAB-401820784-moneyline-696cd79594": {
       "pickId": "precomp-NCAAB-401820784-moneyline-696cd79594",
@@ -77788,13 +77788,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 44.75,
+          "confidence": 45.53,
           "strength": 1,
           "weight": 1.05
         },
@@ -77806,7 +77806,7 @@
         }
       ],
       "ensembleConfidence": 55,
-      "createdAt": "2026-03-03T14:40:18.952Z"
+      "createdAt": "2026-03-03T14:45:06.844Z"
     },
     "precomp-NCAAB-401820784-spread-4300c3c032": {
       "pickId": "precomp-NCAAB-401820784-spread-4300c3c032",
@@ -77815,13 +77815,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77832,8 +77832,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.952Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.844Z"
     },
     "precomp-NCAAB-401820784-spread-05576b8f2d": {
       "pickId": "precomp-NCAAB-401820784-spread-05576b8f2d",
@@ -77842,13 +77842,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77859,8 +77859,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.953Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.845Z"
     },
     "precomp-NCAAB-401820784-total-577961a445": {
       "pickId": "precomp-NCAAB-401820784-total-577961a445",
@@ -77869,13 +77869,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77886,8 +77886,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.953Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.845Z"
     },
     "precomp-NCAAB-401820784-total-b161a0dd37": {
       "pickId": "precomp-NCAAB-401820784-total-b161a0dd37",
@@ -77896,13 +77896,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77913,8 +77913,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.953Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.846Z"
     },
     "precomp-NCAAB-401820784-first_half_spread-918b797862": {
       "pickId": "precomp-NCAAB-401820784-first_half_spread-918b797862",
@@ -77923,13 +77923,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77940,8 +77940,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.953Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.846Z"
     },
     "precomp-NCAAB-401820784-first_half_spread-5d93885d40": {
       "pickId": "precomp-NCAAB-401820784-first_half_spread-5d93885d40",
@@ -77950,13 +77950,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77967,8 +77967,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.953Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.847Z"
     },
     "precomp-NCAAB-401820784-first_half_total-862e0ce71e": {
       "pickId": "precomp-NCAAB-401820784-first_half_total-862e0ce71e",
@@ -77977,13 +77977,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -77994,8 +77994,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.954Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.847Z"
     },
     "precomp-NCAAB-401820784-first_half_total-53da1ac6e7": {
       "pickId": "precomp-NCAAB-401820784-first_half_total-53da1ac6e7",
@@ -78004,13 +78004,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -78021,8 +78021,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.954Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.848Z"
     },
     "precomp-NCAAB-401820784-team_total-024091232a": {
       "pickId": "precomp-NCAAB-401820784-team_total-024091232a",
@@ -78031,13 +78031,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -78048,8 +78048,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.954Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.848Z"
     },
     "precomp-NCAAB-401820784-team_total-dee07a6440": {
       "pickId": "precomp-NCAAB-401820784-team_total-dee07a6440",
@@ -78058,13 +78058,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -78075,8 +78075,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.954Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.848Z"
     },
     "precomp-NCAAB-401820784-team_total-d31eedbba2": {
       "pickId": "precomp-NCAAB-401820784-team_total-d31eedbba2",
@@ -78085,13 +78085,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -78102,8 +78102,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.955Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.849Z"
     },
     "precomp-NCAAB-401820784-team_total-c5293d37d6": {
       "pickId": "precomp-NCAAB-401820784-team_total-c5293d37d6",
@@ -78112,13 +78112,13 @@
       "votes": [
         {
           "sourceId": "qfe",
-          "confidence": 65,
+          "confidence": 64,
           "strength": 1,
           "weight": 1.1
         },
         {
           "sourceId": "monte_carlo",
-          "confidence": 51.99,
+          "confidence": 51.59,
           "strength": 1,
           "weight": 1.05
         },
@@ -78129,8 +78129,8 @@
           "weight": 0.34
         }
       ],
-      "ensembleConfidence": 59,
-      "createdAt": "2026-03-03T14:40:18.955Z"
+      "ensembleConfidence": 58,
+      "createdAt": "2026-03-03T14:45:06.849Z"
     },
     "precomp-NCAAB-401828461-moneyline-0095d5f83b": {
       "pickId": "precomp-NCAAB-401828461-moneyline-0095d5f83b",
@@ -78157,7 +78157,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.960Z"
+      "createdAt": "2026-03-03T14:45:06.858Z"
     },
     "precomp-NCAAB-401828461-moneyline-63fd8e8b39": {
       "pickId": "precomp-NCAAB-401828461-moneyline-63fd8e8b39",
@@ -78184,7 +78184,7 @@
         }
       ],
       "ensembleConfidence": 45,
-      "createdAt": "2026-03-03T14:40:18.961Z"
+      "createdAt": "2026-03-03T14:45:06.858Z"
     },
     "precomp-NCAAB-401828461-spread-ddd5155f8b": {
       "pickId": "precomp-NCAAB-401828461-spread-ddd5155f8b",
@@ -78211,7 +78211,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.961Z"
+      "createdAt": "2026-03-03T14:45:06.859Z"
     },
     "precomp-NCAAB-401828461-spread-802eb32033": {
       "pickId": "precomp-NCAAB-401828461-spread-802eb32033",
@@ -78238,7 +78238,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.961Z"
+      "createdAt": "2026-03-03T14:45:06.859Z"
     },
     "precomp-NCAAB-401828461-total-405f1d5f61": {
       "pickId": "precomp-NCAAB-401828461-total-405f1d5f61",
@@ -78265,7 +78265,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.962Z"
+      "createdAt": "2026-03-03T14:45:06.859Z"
     },
     "precomp-NCAAB-401828461-total-bfd7ee5972": {
       "pickId": "precomp-NCAAB-401828461-total-bfd7ee5972",
@@ -78292,7 +78292,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.962Z"
+      "createdAt": "2026-03-03T14:45:06.860Z"
     },
     "precomp-NCAAB-401828461-first_half_spread-802ddae181": {
       "pickId": "precomp-NCAAB-401828461-first_half_spread-802ddae181",
@@ -78319,7 +78319,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.962Z"
+      "createdAt": "2026-03-03T14:45:06.860Z"
     },
     "precomp-NCAAB-401828461-first_half_spread-6f3cab02cc": {
       "pickId": "precomp-NCAAB-401828461-first_half_spread-6f3cab02cc",
@@ -78346,7 +78346,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.962Z"
+      "createdAt": "2026-03-03T14:45:06.860Z"
     },
     "precomp-NCAAB-401828461-first_half_total-0ee1505e40": {
       "pickId": "precomp-NCAAB-401828461-first_half_total-0ee1505e40",
@@ -78373,7 +78373,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.963Z"
+      "createdAt": "2026-03-03T14:45:06.861Z"
     },
     "precomp-NCAAB-401828461-first_half_total-418e71de2b": {
       "pickId": "precomp-NCAAB-401828461-first_half_total-418e71de2b",
@@ -78400,7 +78400,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.963Z"
+      "createdAt": "2026-03-03T14:45:06.861Z"
     },
     "precomp-NCAAB-401828461-team_total-3d07a1e239": {
       "pickId": "precomp-NCAAB-401828461-team_total-3d07a1e239",
@@ -78427,7 +78427,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.963Z"
+      "createdAt": "2026-03-03T14:45:06.861Z"
     },
     "precomp-NCAAB-401828461-team_total-77366d210e": {
       "pickId": "precomp-NCAAB-401828461-team_total-77366d210e",
@@ -78454,7 +78454,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.963Z"
+      "createdAt": "2026-03-03T14:45:06.862Z"
     },
     "precomp-NCAAB-401828461-team_total-1d02ec4122": {
       "pickId": "precomp-NCAAB-401828461-team_total-1d02ec4122",
@@ -78481,7 +78481,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.964Z"
+      "createdAt": "2026-03-03T14:45:06.862Z"
     },
     "precomp-NCAAB-401828461-team_total-d9b3b11c75": {
       "pickId": "precomp-NCAAB-401828461-team_total-d9b3b11c75",
@@ -78508,7 +78508,7 @@
         }
       ],
       "ensembleConfidence": 69,
-      "createdAt": "2026-03-03T14:40:18.964Z"
+      "createdAt": "2026-03-03T14:45:06.862Z"
     },
     "precomp-NBA-401810747-total-3387f936c7": {
       "pickId": "precomp-NBA-401810747-total-3387f936c7",
@@ -93031,7 +93031,7 @@
       "precomp-NCAAB-401828461-team_total-095ff4548e"
     ]
   },
-  "totalEnsemblePredictions": 209875,
+  "totalEnsemblePredictions": 209903,
   "totalEnsembleSettled": 0,
   "ensembleWins": 0,
   "ensembleEMA": 0.52,
