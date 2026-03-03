@@ -305,19 +305,38 @@ export default function TrackRecordPage() {
           <CardContent>
             <div className="space-y-2">
               {data.byGrade.map((g) => (
-                <div key={g.grade} className="flex items-center justify-between text-xs" data-testid={`grade-accuracy-${g.grade}`}>
-                  <div className="flex items-center gap-2">
-                    <span className={`font-bold w-6 ${
-                      g.grade.startsWith("A") ? "text-green-400" :
-                      g.grade.startsWith("B") ? "text-blue-400" :
-                      "text-yellow-400"
-                    }`}>{g.grade}</span>
-                    <span className="text-muted-foreground">{g.total} picks</span>
+                <div key={g.grade} data-testid={`grade-accuracy-${g.grade}`}>
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className={`font-bold w-6 ${
+                        g.grade.startsWith("A") ? "text-green-400" :
+                        g.grade.startsWith("B") ? "text-blue-400" :
+                        "text-yellow-400"
+                      }`}>{g.grade}</span>
+                      <span className="text-muted-foreground">{g.total} picks</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground text-xs">{g.settled} settled</span>
+                      {g.settled < 25 ? (
+                        <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0">
+                          Small sample
+                        </Badge>
+                      ) : (
+                        <WinRateBadge rate={g.actualWinRate} />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground text-xs">{g.settled} settled</span>
-                    <WinRateBadge rate={g.actualWinRate} />
-                  </div>
+                  {g.settled >= 25 && (
+                    <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          (g.actualWinRate ?? 0) >= 55 ? "bg-green-500" :
+                          (g.actualWinRate ?? 0) >= 50 ? "bg-yellow-500" : "bg-red-500"
+                        }`}
+                        style={{ width: `${Math.min(100, g.actualWinRate ?? 0)}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
