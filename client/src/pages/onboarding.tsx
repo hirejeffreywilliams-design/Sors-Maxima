@@ -27,7 +27,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/use-seo";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 const sportOptions = [
   { id: "NBA", label: "NBA Basketball" },
@@ -67,6 +67,19 @@ const features = [
   { icon: Zap, title: "Real-Time Alerts", description: "Line movement alerts, sharp action notifications, and injury updates" },
 ];
 
+const sportsbookOptions = [
+  { id: "DraftKings", label: "DraftKings" },
+  { id: "FanDuel", label: "FanDuel" },
+  { id: "BetMGM", label: "BetMGM" },
+  { id: "Caesars", label: "Caesars Sportsbook" },
+  { id: "ESPN Bet", label: "ESPN Bet" },
+  { id: "BetRivers", label: "BetRivers" },
+  { id: "PointsBet", label: "PointsBet" },
+  { id: "Bet365", label: "Bet365" },
+  { id: "Pinnacle", label: "Pinnacle" },
+  { id: "Other", label: "Other / Multiple" },
+];
+
 export default function OnboardingPage() {
   useSEO({ title: "Get Started", description: "Set up your Sors Maxima experience" });
   const [step, setStep] = useState(1);
@@ -77,6 +90,7 @@ export default function OnboardingPage() {
   const [experience, setExperience] = useState("");
   const [selectedBetTypes, setSelectedBetTypes] = useState<string[]>([]);
   const [bankrollSize, setBankrollSize] = useState("");
+  const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
 
   const savePreferences = useMutation({
     mutationFn: async () => {
@@ -85,6 +99,7 @@ export default function OnboardingPage() {
         experience,
         betTypes: selectedBetTypes,
         bankrollSize,
+        sportsbooks: selectedSportsbooks,
         onboardingCompleted: true,
       });
     },
@@ -109,12 +124,17 @@ export default function OnboardingPage() {
     setSelectedBetTypes(prev => prev.includes(id) ? prev.filter(t => t !== id) : [...prev, id]);
   };
 
+  const toggleSportsbook = (id: string) => {
+    setSelectedSportsbooks(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+  };
+
   const canProceed = () => {
     switch (step) {
       case 1: return true;
       case 2: return selectedSports.length > 0 && experience !== "";
       case 3: return selectedBetTypes.length > 0;
       case 4: return true;
+      case 5: return true;
       default: return true;
     }
   };
@@ -281,6 +301,48 @@ export default function OnboardingPage() {
         )}
 
         {step === 4 && (
+          <Card className="border-primary/20" data-testid="onboarding-step-sportsbooks">
+            <CardHeader className="text-center pb-2">
+              <div className="mx-auto w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <BarChart3 className="w-8 h-8 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Which sportsbooks do you use?</CardTitle>
+              <CardDescription>
+                Optional — helps us tailor odds comparisons and EV alerts to books you actually have access to. We never ask for credentials.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-2">
+                {sportsbookOptions.map((book) => (
+                  <button
+                    key={book.id}
+                    onClick={() => toggleSportsbook(book.id)}
+                    className={`flex items-center gap-2 p-3 rounded-lg border text-sm font-medium transition-all text-left ${
+                      selectedSportsbooks.includes(book.id)
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50 text-foreground"
+                    }`}
+                    data-testid={`sportsbook-option-${book.id}`}
+                  >
+                    <div className={`w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 text-[10px] font-bold ${
+                      selectedSportsbooks.includes(book.id)
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-muted-foreground/30"
+                    }`}>
+                      {selectedSportsbooks.includes(book.id) && "✓"}
+                    </div>
+                    {book.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-muted-foreground text-center pt-1">
+                Select all that apply — this data is only used to personalize your experience and is never sold or shared.
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 5 && (
           <Card className="border-primary/20" data-testid="onboarding-step-ready">
             <CardHeader className="text-center pb-2">
               <div className="mx-auto w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4">

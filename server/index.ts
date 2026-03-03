@@ -301,8 +301,44 @@ function startEmailSchedulers(): void {
       if (dayOfWeek === 1 && hour === 9 && lastWeeklyDigestDate !== dateKey) {
         lastWeeklyDigestDate = dateKey;
         log("[EmailScheduler] Weekly digest run triggered (Monday 9am)", "scheduler");
-        // Digest is sent per-user via the weekly digest endpoint
-        // Users who have connected recently will receive via the API route
+        try {
+          const { db: emailDb } = await import("./db");
+          const { sql: emailSql } = await import("drizzle-orm");
+          const { sendWeeklyDigest } = await import("./emailService");
+          const activeUsers = await emailDb.execute(emailSql`
+            SELECT u.id, u.email, u.username
+            FROM users u
+            INNER JOIN subscriptions s ON s.user_id = u.id
+            WHERE s.status = 'active'
+              AND u.email IS NOT NULL
+              AND u.email_verified = true
+          `);
+          let digestSent = 0;
+          for (const user of activeUsers.rows as any[]) {
+            try {
+              const picksResult = await emailDb.execute(emailSql`
+                SELECT won FROM user_picks
+                WHERE username = ${user.username} AND settled = true
+                ORDER BY placed_at DESC LIMIT 30
+              `);
+              const picks = picksResult.rows as any[];
+              if (picks.length < 3) continue;
+              const wins = picks.filter(p => p.won === true).length;
+              const losses = picks.filter(p => p.won === false).length;
+              const winRate = wins + losses > 0 ? Math.round((wins / (wins + losses)) * 100) : 0;
+              await sendWeeklyDigest(user.email, user.username, {
+                wins,
+                losses,
+                winRate,
+                clvRate: 0,
+              });
+              digestSent++;
+            } catch (_) {}
+          }
+          log(`[EmailScheduler] Weekly digest sent to ${digestSent} users`, "scheduler");
+        } catch (err: any) {
+          console.error("[EmailScheduler] Weekly digest failed:", err.message);
+        }
       }
 
       // Day 2 and Day 7 email sequences

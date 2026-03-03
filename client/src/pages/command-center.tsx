@@ -23,6 +23,7 @@ import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { TierGate, useTier } from "@/components/tier-gate";
 import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 import { OffseasonPanel } from "@/components/offseason-panel";
+import { PickTrackNudge } from "@/components/pick-track-nudge";
 
 interface TopPick {
   id: string;
@@ -1346,6 +1347,12 @@ export default function CommandCenter() {
     staleTime: 60000,
   });
 
+  const { data: streakData } = useQuery<{ currentStreak: number; streakType: string; longestWin: number }>({
+    queryKey: ["/api/user/streak"],
+    staleTime: 120000,
+    enabled: authData?.authenticated === true,
+  });
+
   const { data: advancedFlagData } = useQuery<{ enabled: boolean }>({
     queryKey: ["/api/feature-flags/check/advanced_command_center"],
     staleTime: 60000,
@@ -1617,7 +1624,7 @@ export default function CommandCenter() {
           )
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card data-testid="card-stat-best-grade">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -1664,6 +1671,32 @@ export default function CommandCenter() {
                   <p className="text-xs text-muted-foreground">Live Games</p>
                   <p className="text-2xl font-bold tabular-nums" data-testid="text-live-count">{totalLive}</p>
                   <p className="text-[10px] text-muted-foreground">{totalLive > 0 ? "tracking now" : "none in progress"}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card data-testid="card-stat-streak" className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => window.location.href = "/personalized-insights"}>
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-md ${streakData?.streakType === "win" ? "bg-orange-500/10" : "bg-muted"}`}>
+                  <Flame className={`w-5 h-5 ${streakData?.streakType === "win" ? "text-orange-500" : "text-muted-foreground"}`} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Pick Streak</p>
+                  {streakData && streakData.currentStreak > 0 ? (
+                    <>
+                      <p className={`text-2xl font-bold tabular-nums ${streakData.streakType === "win" ? "text-orange-500" : "text-blue-400"}`} data-testid="text-pick-streak">
+                        {streakData.streakType === "win" ? "+" : ""}{streakData.currentStreak}W
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">best: {streakData.longestWin}W</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-bold tabular-nums text-muted-foreground" data-testid="text-pick-streak">–</p>
+                      <p className="text-[10px] text-muted-foreground">track picks to start</p>
+                    </>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -1778,6 +1811,7 @@ export default function CommandCenter() {
         </div>
 
       </div>
+      <PickTrackNudge />
     </div>
   );
 }

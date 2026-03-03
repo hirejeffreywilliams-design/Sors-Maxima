@@ -114,6 +114,10 @@ export async function runMigrations(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_user_strategies_user_id ON user_strategies(user_id)
     `);
 
+    await db.execute(sql`
+      ALTER TABLE user_betting_profile ADD COLUMN IF NOT EXISTS preferred_sportsbooks TEXT[] NOT NULL DEFAULT '{}'
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

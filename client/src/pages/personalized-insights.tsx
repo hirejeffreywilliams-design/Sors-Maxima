@@ -23,6 +23,7 @@ import {
   Activity,
   Star,
   ChevronRight,
+  Lock,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -166,6 +167,70 @@ export default function PersonalizedInsightsPage() {
   }
 
   if (!insights) return null;
+
+  const MIN_PICKS_FOR_DNA = 10;
+  if (insights.totalBets < MIN_PICKS_FOR_DNA) {
+    const tracked = insights.totalBets;
+    const remaining = MIN_PICKS_FOR_DNA - tracked;
+    return (
+      <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6" data-testid="page-personalized-insights-gate">
+        <div className="space-y-1">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3">
+            <Brain className="w-7 h-7 text-primary" />
+            Your Betting Intelligence
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Personalized analysis and recommendations based on your betting history
+          </p>
+        </div>
+        <Card className="border-primary/20" data-testid="card-dna-gate">
+          <CardContent className="pt-8 pb-8 flex flex-col items-center text-center gap-5">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Lock className="w-8 h-8 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-bold">Betting DNA Locked</h2>
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                Track {remaining} more pick{remaining !== 1 ? "s" : ""} to unlock your personalized Betting DNA — a full analysis of your style, strengths, weaknesses, and tailored recommendations.
+              </p>
+            </div>
+            <div className="w-full max-w-xs space-y-2">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>{tracked} picks tracked</span>
+                <span>{MIN_PICKS_FOR_DNA} needed</span>
+              </div>
+              <Progress value={(tracked / MIN_PICKS_FOR_DNA) * 100} className="h-2.5" />
+              <p className="text-[11px] text-muted-foreground">{remaining} more to go</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 w-full max-w-sm text-left mt-1">
+              {[
+                { icon: Target, label: "Risk Profile", desc: "Conservative · Moderate · Aggressive" },
+                { icon: Trophy, label: "Strengths", desc: "Your best sports & markets" },
+                { icon: BarChart3, label: "Performance Trends", desc: "Improving, declining, or stable" },
+                { icon: Zap, label: "Recommendations", desc: "Tailored picks to your style" },
+              ].map(({ icon: Icon, label, desc }) => (
+                <div key={label} className="flex gap-2 p-3 rounded-lg bg-muted/40 border border-border/50">
+                  <Icon className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-medium">{label}</p>
+                    <p className="text-[10px] text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <Button onClick={() => navigate("/")} className="gap-2" data-testid="button-gate-go-pick">
+              <Target className="w-4 h-4" />
+              Track picks on the dashboard
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </CardContent>
+        </Card>
+        <p className="text-center text-xs text-muted-foreground">
+          Add picks to your slip from any picks page — we settle them automatically when games end.
+        </p>
+      </div>
+    );
+  }
 
   const riskConfig = riskProfileConfig[insights.bettingDNA.riskProfile];
   const RiskIcon = riskConfig.icon;

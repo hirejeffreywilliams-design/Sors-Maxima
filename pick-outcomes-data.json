@@ -6201,15 +6201,35 @@
       "homeScore": 69,
       "awayScore": 71,
       "settledAt": "2026-03-03T21:06:15.688Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-team_total-e8c69fa794",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "Toronto Maple Leafs Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 5,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:09:59.988Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T21:12:03.389Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 298,
-      "won": 136,
+      "total": 299,
+      "won": 137,
       "lost": 159,
       "push": 3,
-      "rate": 45.6,
+      "rate": 45.8,
       "pending": 15
     },
     "bySport": {
@@ -6219,9 +6239,9 @@
         "rate": 43.1
       },
       "NHL": {
-        "total": 70,
-        "won": 33,
-        "rate": 47.1
+        "total": 71,
+        "won": 34,
+        "rate": 47.9
       },
       "NCAAB": {
         "total": 126,
@@ -6241,9 +6261,9 @@
         "rate": 68
       },
       "B-": {
-        "total": 106,
-        "won": 52,
-        "rate": 49.1
+        "total": 107,
+        "won": 53,
+        "rate": 49.5
       },
       "D+": {
         "total": 22,
@@ -6293,9 +6313,9 @@
         "rate": 38.7
       },
       "Team Total": {
-        "total": 127,
-        "won": 59,
-        "rate": 46.5
+        "total": 128,
+        "won": 60,
+        "rate": 46.9
       }
     },
     "recentForm": {
@@ -6304,7 +6324,7 @@
       "push": 1,
       "rate": 34
     },
-    "lastUpdated": "2026-03-03T21:06:15.689Z"
+    "lastUpdated": "2026-03-03T21:18:45.497Z"
   },
   "version": 1
 }

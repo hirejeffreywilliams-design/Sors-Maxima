@@ -1469,7 +1469,7 @@ Follow these rules:
     const userId = req.session?.userId;
     if (!userId) return res.status(401).json({ error: "Not authenticated" });
     try {
-      const { sports, experience, betTypes, bankrollSize, onboardingCompleted } = req.body;
+      const { sports, experience, betTypes, bankrollSize, sportsbooks, onboardingCompleted } = req.body;
       await db.execute(sql`
         INSERT INTO user_onboarding (user_id, sports, experience, bet_types, bankroll_size, onboarding_completed, completed_at)
         VALUES (${userId}, ${sql.raw(`ARRAY[${(sports || []).map((s: string) => `'${s.replace(/'/g, "''")}'`).join(",")}]::text[]`)}, ${experience || ""}, ${sql.raw(`ARRAY[${(betTypes || []).map((b: string) => `'${b.replace(/'/g, "''")}'`).join(",")}]::text[]`)}, ${bankrollSize || ""}, ${!!onboardingCompleted}, NOW())
@@ -1481,6 +1481,18 @@ Follow these rules:
           onboarding_completed = EXCLUDED.onboarding_completed,
           completed_at = NOW()
       `);
+      // Save sportsbook preferences to betting profile
+      if (sportsbooks && sportsbooks.length > 0) {
+        try {
+          await db.execute(sql`
+            INSERT INTO user_betting_profile (user_id, preferred_sportsbooks, updated_at)
+            VALUES (${userId}, ${sportsbooks}, NOW())
+            ON CONFLICT (user_id) DO UPDATE SET
+              preferred_sportsbooks = EXCLUDED.preferred_sportsbooks,
+              updated_at = NOW()
+          `);
+        } catch (_) {}
+      }
       res.json({ success: true });
     } catch (e: any) {
       console.error("[Onboarding] Save error:", e.message);
