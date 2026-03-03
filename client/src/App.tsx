@@ -879,11 +879,15 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
           <div className="max-w-screen-2xl mx-auto">
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
-              <div className="text-center max-w-xl">
-                <p className="text-yellow-600 dark:text-yellow-500">
-                  For entertainment & educational purposes only. Not gambling advice. 
-                  No guarantees of profitability. Must be 21+. 
-                  If you have a gambling problem, call 1-800-522-4700.
+              <div className="text-center max-w-2xl space-y-1">
+                <p className="text-yellow-600 dark:text-yellow-500 font-medium">
+                  For informational and entertainment purposes only. Statistical analysis — not gambling advice.
+                  No guarantee of winnings. Past model performance does not predict future results.
+                </p>
+                <p className="text-muted-foreground/70">
+                  Must be 21+ and located in a jurisdiction where sports betting is legal.
+                  Please comply with all applicable local, state, and federal laws before placing any wager.
+                  {" "}<span className="text-yellow-600 dark:text-yellow-500">Problem gambling? Call 1-800-522-4700 (NCPG) — free, confidential, 24/7.</span>
                 </p>
               </div>
               <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center">

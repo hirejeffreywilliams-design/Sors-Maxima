@@ -1339,6 +1339,19 @@ export default function CommandCenter() {
     onEvent: handleSSEEvent,
   });
 
+  const { data: authData } = useQuery<{ isAdmin?: boolean; authenticated?: boolean }>({
+    queryKey: ["/api/auth/check"],
+    staleTime: 60000,
+  });
+
+  const { data: advancedFlagData } = useQuery<{ enabled: boolean }>({
+    queryKey: ["/api/feature-flags/check/advanced_command_center"],
+    staleTime: 60000,
+  });
+
+  // Admin always sees advanced sections; flag unlocks them for all members
+  const showAdvanced = authData?.isAdmin === true || advancedFlagData?.enabled === true;
+
   const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
     queryKey: ["/api/intelligence/feed"],
     refetchInterval: 30000,
@@ -1509,7 +1522,7 @@ export default function CommandCenter() {
 
         <IntelligencePipeline />
 
-        <section data-testid="section-best-tickets">
+        {showAdvanced && <section data-testid="section-best-tickets">
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <div className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-primary" />
@@ -1569,9 +1582,9 @@ export default function CommandCenter() {
               </CardContent>
             </Card>
           )}
-        </section>
+        </section>}
 
-        {matchupData && matchupData.matchupTickets.length > 0 && (
+        {showAdvanced && matchupData && matchupData.matchupTickets.length > 0 && (
           <section data-testid="section-matchup-tickets">
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
               <div className="flex items-center gap-2">
@@ -1589,7 +1602,7 @@ export default function CommandCenter() {
           </section>
         )}
 
-        {canAccess("elite")
+        {showAdvanced && (canAccess("elite")
           ? <LifeChangerSection legs={legs} addLeg={addLeg} />
           : (
             <TierGate 
@@ -1600,7 +1613,7 @@ export default function CommandCenter() {
               <div />
             </TierGate>
           )
-        }
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card data-testid="card-stat-best-grade">

@@ -11,7 +11,7 @@ import {
   CheckCircle2, XCircle, AlertTriangle, RefreshCw, Rocket,
   ToggleLeft, ToggleRight, Zap, Trash2, Play, Shield,
   Database, Clock, TrendingUp, Activity, AlertCircle, ChevronRight,
-  Wifi, WifiOff, Radio, Key, KeyRound,
+  Wifi, WifiOff, Radio, Key, KeyRound, Layers, Settings2,
 } from "lucide-react";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -149,6 +149,25 @@ export default function AdminLaunchControl() {
       staleTime: 20_000,
       refetchInterval: 30_000,
     });
+
+  const { data: featureFlagsList } = useQuery<Array<{ id: string; name: string; enabled: boolean; description: string }>>({
+    queryKey: ["/api/admin/feature-flags"],
+    staleTime: 15_000,
+    refetchInterval: 30_000,
+  });
+
+  const advancedCCFlag = featureFlagsList?.find(f => f.id === "advanced_command_center");
+
+  const toggleAdvancedCC = useMutation({
+    mutationFn: (enabled: boolean) =>
+      apiRequest("PUT", "/api/admin/feature-flags/advanced_command_center", { enabled, rolloutPercentage: enabled ? 100 : 0 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/feature-flags"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feature-flags/check/advanced_command_center"] });
+      toast({ title: advancedCCFlag?.enabled ? "Advanced sections hidden from members" : "Advanced sections unlocked for all members" });
+    },
+    onError: () => toast({ title: "Toggle failed", variant: "destructive" }),
+  });
 
   const toggleMaintenance = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/maintenance/toggle", { message: maintenanceMsg || undefined }),
@@ -394,6 +413,53 @@ export default function AdminLaunchControl() {
                 {toggleMaintenance.isPending && <RefreshCw className="w-3 h-3 animate-spin" />}
                 {maintenanceStatus?.active ? "Disable Maintenance Mode" : "Enable Maintenance Mode"}
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Feature Controls — Command Center Visibility */}
+          <Card data-testid="section-feature-controls">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Settings2 className="w-4 h-4" />
+                Platform Controls
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-3 p-3 rounded-xl border border-border/40 bg-muted/20">
+                <div className="p-1.5 rounded-lg bg-primary/10 shrink-0">
+                  <Layers className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium">Advanced Command Center</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                    Best Tickets, Matchup Parlays, and Life Changer Ticket. Off = simplified member view. Admin always sees everything.
+                  </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge
+                      variant="outline"
+                      className={`text-[10px] h-5 ${advancedCCFlag?.enabled ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-muted/50 text-muted-foreground"}`}
+                    >
+                      {advancedCCFlag?.enabled ? "ON for all members" : "OFF — simplified view"}
+                    </Badge>
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className={`h-8 text-xs gap-1.5 shrink-0 ${advancedCCFlag?.enabled ? "border-amber-500/40 text-amber-400 hover:bg-amber-500/10" : "border-primary/40 text-primary hover:bg-primary/10"}`}
+                  onClick={() => toggleAdvancedCC.mutate(!advancedCCFlag?.enabled)}
+                  disabled={toggleAdvancedCC.isPending || advancedCCFlag === undefined}
+                  data-testid="button-toggle-advanced-cc"
+                >
+                  {toggleAdvancedCC.isPending
+                    ? <RefreshCw className="w-3 h-3 animate-spin" />
+                    : advancedCCFlag?.enabled
+                      ? <ToggleRight className="w-3.5 h-3.5" />
+                      : <ToggleLeft className="w-3.5 h-3.5" />
+                  }
+                  {advancedCCFlag?.enabled ? "Turn Off" : "Turn On"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

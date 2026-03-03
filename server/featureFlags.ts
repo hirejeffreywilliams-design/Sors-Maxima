@@ -122,6 +122,14 @@ class FeatureFlagService {
         rolloutPercentage: 100,
       },
       {
+        id: "advanced_command_center",
+        name: "Advanced Command Center",
+        description: "Enables Best Tickets, Matchup Parlays, and Life Changer Ticket sections for all members. Admin always sees these. Disable for a simplified member experience during launch phase.",
+        enabled: false,
+        rolloutPercentage: 0,
+        metadata: { adminAlwaysSees: true, launchPhaseControl: true },
+      },
+      {
         id: "live_cashout_advisor",
         name: "Live Cash-Out Advisor",
         description: "AI-powered real-time cash-out recommendations during live games",

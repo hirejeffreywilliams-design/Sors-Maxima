@@ -735,6 +735,54 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-spread-85c21ab425",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "North Carolina Tar Heels -4",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 8.43,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:58:48.719Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-team_total-6e044c78f2",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "Clemson Tigers Under 69",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 69,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:58:48.719Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808279-team_total-70d2cb0657",
+      "gameId": "401808279",
+      "sport": "NCAAB",
+      "game": "Vanderbilt Commodores @ Ole Miss Rebels",
+      "homeTeam": "Ole Miss Rebels",
+      "awayTeam": "Vanderbilt Commodores",
+      "pick": "Ole Miss Rebels Under 74",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 66,
+      "ev": -27.45,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T15:00:22.229Z"
     }
   ],
   "settled": [
@@ -61975,7 +62023,7 @@
       "lost": 1294,
       "push": 42,
       "rate": 55.6,
-      "pending": 46
+      "pending": 49
     },
     "bySport": {
       "NHL": {
@@ -62084,7 +62132,7 @@
       "push": 1,
       "rate": 64
     },
-    "lastUpdated": "2026-03-03T14:45:09.424Z"
+    "lastUpdated": "2026-03-03T15:01:40.742Z"
   },
   "version": 1
 }
