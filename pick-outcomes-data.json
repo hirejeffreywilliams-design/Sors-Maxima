@@ -735,102 +735,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-3b8dbc55e37b",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Jazz @ 76ers",
-      "homeTeam": "76ers",
-      "awayTeam": "Jazz",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-7b4398284151",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Pacers @ Clippers",
-      "homeTeam": "Clippers",
-      "awayTeam": "Pacers",
-      "pick": "",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-6622f4486264",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Pistons @ Cavaliers",
-      "homeTeam": "Cavaliers",
-      "awayTeam": "Pistons",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-af599d5c45c7",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Thunder @ Knicks",
-      "homeTeam": "Knicks",
-      "awayTeam": "Thunder",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-106ec7ceeda4",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Trail Blazers @ Grizzlies",
-      "homeTeam": "Grizzlies",
-      "awayTeam": "Trail Blazers",
-      "pick": "",
-      "betType": "total",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
-    },
-    {
-      "id": "precomp-vegas-NBA-6679f5dae0b5",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Hawks @ Bucks",
-      "homeTeam": "Bucks",
-      "awayTeam": "Hawks",
-      "pick": "",
-      "betType": "moneyline",
-      "odds": -110,
-      "grade": "A",
-      "confidence": 63,
-      "ev": 20.27,
-      "gameTime": "2026-03-03T13:06:02.949Z",
-      "savedAt": "2026-03-03T13:06:02.949Z"
     }
   ],
   "settled": [
@@ -61362,16 +61266,56 @@
       "homeScore": 108,
       "awayScore": 117,
       "settledAt": "2026-03-03T12:58:57.709Z"
+    },
+    {
+      "id": "precomp-NBA-401810739-team_total-11ed84cf89",
+      "gameId": "401810739",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Cleveland Cavaliers",
+      "homeTeam": "Cleveland Cavaliers",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Cleveland Cavaliers Over 112.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:11:03.543Z",
+      "result": "lost",
+      "homeScore": 102,
+      "awayScore": 106,
+      "settledAt": "2026-03-03T13:11:21.043Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825554-moneyline-0f05e4c6b8",
+      "gameId": "401825554",
+      "sport": "NCAAB",
+      "game": "Nebraska Cornhuskers @ UCLA Bruins",
+      "homeTeam": "UCLA Bruins",
+      "awayTeam": "Nebraska Cornhuskers",
+      "pick": "Nebraska Cornhuskers ML",
+      "betType": "moneyline",
+      "odds": -38,
+      "grade": "A",
+      "confidence": 66,
+      "ev": 139.68,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T13:16:15.111Z",
+      "result": "won",
+      "homeScore": 67,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T13:18:57.310Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2973,
-      "won": 1648,
-      "lost": 1284,
+      "total": 2975,
+      "won": 1649,
+      "lost": 1285,
       "push": 41,
       "rate": 55.4,
-      "pending": 52
+      "pending": 46
     },
     "bySport": {
       "NHL": {
@@ -61380,14 +61324,14 @@
         "rate": 55.3
       },
       "NCAAB": {
-        "total": 1004,
-        "won": 584,
+        "total": 1005,
+        "won": 585,
         "rate": 58.2
       },
       "NBA": {
-        "total": 1205,
+        "total": 1206,
         "won": 647,
-        "rate": 53.7
+        "rate": 53.6
       },
       "MLB": {
         "total": 194,
@@ -61437,19 +61381,19 @@
         "rate": 47.5
       },
       "A": {
-        "total": 238,
-        "won": 132,
-        "rate": 55.5
+        "total": 239,
+        "won": 133,
+        "rate": 55.6
       },
       "A+": {
-        "total": 876,
+        "total": 877,
         "won": 524,
-        "rate": 59.8
+        "rate": 59.7
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 815,
+        "total": 816,
         "won": 477,
         "rate": 58.5
       },
@@ -61464,18 +61408,18 @@
         "rate": 55.6
       },
       "Moneyline": {
-        "total": 134,
-        "won": 69,
-        "rate": 51.5
+        "total": 135,
+        "won": 70,
+        "rate": 51.9
       }
     },
     "recentForm": {
-      "won": 24,
-      "lost": 26,
+      "won": 25,
+      "lost": 25,
       "push": 0,
-      "rate": 48
+      "rate": 50
     },
-    "lastUpdated": "2026-03-03T13:01:16.751Z"
+    "lastUpdated": "2026-03-03T13:21:36.352Z"
   },
   "version": 1
 }
