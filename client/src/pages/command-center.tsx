@@ -1223,26 +1223,26 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
 
             {/* Leg list */}
             {expanded && (
-              <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3">
+              <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3 max-h-[340px] overflow-y-auto">
                 {ticket.legs.map((leg, i) => {
                   const legInSlip = legs.some(s => s.id === legId(leg));
                   return (
                     <div
                       key={i}
-                      className="rounded-lg border border-border/60 bg-background/50 px-3 py-2.5"
+                      className="rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 overflow-hidden"
                       data-testid={`row-lc-leg-${i}`}
                     >
-                      <div className="flex items-start gap-2.5">
+                      <div className="flex items-start gap-2">
                         <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-xs font-semibold">{leg.pick}</span>
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className="text-xs font-semibold leading-tight">{leg.pick}</span>
                             {leg.grade && (
-                              <Badge variant="outline" className={`text-[9px] px-1 py-0 border font-bold ${gradeColor(leg.grade)}`}>
+                              <Badge variant="outline" className={`text-[9px] px-1 py-0 border font-bold shrink-0 ${gradeColor(leg.grade)}`}>
                                 {leg.grade}
                               </Badge>
                             )}
-                            <Badge variant="outline" className={`text-[9px] px-1 py-0 border ${CATEGORY_COLORS[leg.selectionCategory]}`}>
+                            <Badge variant="outline" className={`text-[9px] px-1 py-0 border shrink-0 ${CATEGORY_COLORS[leg.selectionCategory]}`}>
                               {CATEGORY_LABEL[leg.selectionCategory]}
                             </Badge>
                           </div>
@@ -1258,20 +1258,20 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                           </div>
                           <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
                         </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0">
+                        <div className="flex flex-col items-end gap-1 shrink-0 w-[64px]">
                           <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
-                          <p className="text-[9px] text-muted-foreground">{leg.betType.replace(/_/g, " ")}</p>
+                          <p className="text-[9px] text-muted-foreground text-right leading-tight">{leg.betType.replace(/_/g, " ")}</p>
                           <button
                             onClick={() => { addLeg(buildLcLeg(leg) as any); }}
                             disabled={legInSlip}
                             data-testid={`button-lc-add-leg-${i}`}
-                            className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                            className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold transition-colors whitespace-nowrap ${
                               legInSlip
                                 ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 cursor-default"
                                 : "bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30"
                             }`}
                           >
-                            {legInSlip ? "✓ Added" : "+ Add"}
+                            {legInSlip ? "✓" : "+ Add"}
                           </button>
                         </div>
                       </div>

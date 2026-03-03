@@ -429,31 +429,59 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
 
         <div className={`grid gap-2 ${pick.winProbability ? "grid-cols-4" : "grid-cols-3"}`}>
           {pick.winProbability && (
-            <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center">
-              <p className="text-lg font-bold font-mono text-primary" data-testid={`text-pick-winprob-${pick.id}`}>
-                {pick.winProbability}%
-              </p>
-              <p className="text-[10px] text-muted-foreground font-medium">Win Prob</p>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-2 rounded-lg bg-primary/5 border border-primary/10 text-center cursor-default">
+                  <p className="text-lg font-bold font-mono text-primary" data-testid={`text-pick-winprob-${pick.id}`}>
+                    {pick.winProbability}%
+                  </p>
+                  <p className="text-[10px] text-muted-foreground font-medium">Win Prob</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                <p className="text-xs">Our model's estimated probability this pick wins. Higher = stronger signal.</p>
+              </TooltipContent>
+            </Tooltip>
           )}
-          <div className="p-2 rounded-lg bg-muted/30 text-center">
-            <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
-              {pick.confidence}%
-            </p>
-            <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
-          </div>
-          <div className="p-2 rounded-lg bg-muted/30 text-center">
-            <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-pick-ev-${pick.id}`}>
-              {displayEv(pick.ev)}
-            </p>
-            <p className="text-[10px] text-muted-foreground font-medium">Edge</p>
-          </div>
-          <div className="p-2 rounded-lg bg-muted/30 text-center">
-            <p className="text-lg font-bold font-mono" data-testid={`text-pick-odds-${pick.id}`}>
-              {formatOdds(pick.odds)}
-            </p>
-            <p className="text-[10px] text-muted-foreground font-medium">Odds</p>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-2 rounded-lg bg-muted/30 text-center cursor-default">
+                <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
+                  {pick.confidence}%
+                </p>
+                <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[200px] text-center">
+              <p className="text-xs">How confident our 46-factor model is in this pick. Gaps vs. the implied odds indicate edge.</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-2 rounded-lg bg-muted/30 text-center cursor-default">
+                <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-pick-ev-${pick.id}`}>
+                  {displayEv(pick.ev)}
+                </p>
+                <p className="text-[10px] text-muted-foreground font-medium">Edge</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[220px] text-center">
+              <p className="text-xs">Expected Value — how much value this bet has vs. the true probability. Positive means the odds are in your favor.</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-2 rounded-lg bg-muted/30 text-center cursor-default">
+                <p className="text-lg font-bold font-mono" data-testid={`text-pick-odds-${pick.id}`}>
+                  {formatOdds(pick.odds)}
+                </p>
+                <p className="text-[10px] text-muted-foreground font-medium">Odds</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[200px] text-center">
+              <p className="text-xs">American odds. Negative = favorite (e.g. -150 means bet $150 to win $100). Positive = underdog.</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {pick.insights && pick.insights.length > 0 && (
@@ -582,18 +610,39 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
         </div>
 
         <div className="grid grid-cols-4 gap-2 text-center text-xs">
-          <div className="p-1.5 rounded bg-muted/30">
-            <p className="font-bold text-emerald-400">{(parlay.winProbability * 100).toFixed(1)}%</p>
-            <p className="text-[9px] text-muted-foreground">Win Prob</p>
-          </div>
-          <div className="p-1.5 rounded bg-muted/30">
-            <p className="font-bold">{(parlay.expectedValue * 100).toFixed(1)}%</p>
-            <p className="text-[9px] text-muted-foreground">EV</p>
-          </div>
-          <div className="p-1.5 rounded bg-muted/30">
-            <p className="font-bold">${parlay.kellyStake.toFixed(0)}</p>
-            <p className="text-[9px] text-muted-foreground">Kelly</p>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-1.5 rounded bg-muted/30 cursor-default">
+                <p className="font-bold text-emerald-400">{(parlay.winProbability * 100).toFixed(1)}%</p>
+                <p className="text-[9px] text-muted-foreground">Win Prob</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[180px] text-center">
+              <p className="text-xs">Combined probability all legs in this parlay win.</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-1.5 rounded bg-muted/30 cursor-default">
+                <p className="font-bold">{(parlay.expectedValue * 100).toFixed(1)}%</p>
+                <p className="text-[9px] text-muted-foreground">EV</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[200px] text-center">
+              <p className="text-xs">Expected Value — positive means the parlay has long-run mathematical edge over the house.</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="p-1.5 rounded bg-muted/30 cursor-default">
+                <p className="font-bold">${parlay.kellyStake.toFixed(0)}</p>
+                <p className="text-[9px] text-muted-foreground">Kelly</p>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-[220px] text-center">
+              <p className="text-xs">Kelly Criterion — mathematically optimal bet size based on your edge and bankroll. Treats your money as a long-term investment.</p>
+            </TooltipContent>
+          </Tooltip>
           <div className="p-1.5 rounded bg-muted/30">
             <p className="font-bold text-emerald-400">${parlay.potentialReturn.toFixed(0)}</p>
             <p className="text-[9px] text-muted-foreground">Payout</p>
@@ -1060,7 +1109,44 @@ export default function DailyParlays() {
                     <span className="text-border">|</span>
                     <span>Avg EV: <span className={avgEv > 0 ? "text-emerald-400" : "text-red-400"}>{avgEv > 0 ? "+" : ""}{avgEv.toFixed(1)}%</span></span>
                   </div>
-                  <span>Showing {visiblePicks.length} of {sortedPicks.length}</span>
+                  <div className="flex items-center gap-3">
+                    <span>Showing {visiblePicks.length} of {sortedPicks.length}</span>
+                    {(() => {
+                      const topPicks = sortedPicks.filter(p => p.grade.startsWith("A") && !isInSlip(p.id)).slice(0, 4);
+                      if (topPicks.length === 0) return null;
+                      return (
+                        <button
+                          onClick={() => {
+                            let added = 0;
+                            topPicks.forEach(pick => {
+                              const decimalOdds = pick.odds > 0 ? (pick.odds / 100) + 1 : (-100 / pick.odds) + 1;
+                              const slipLeg: ParlaySlipLeg = {
+                                id: pick.id,
+                                team: pick.homeTeam,
+                                opponent: pick.awayTeam,
+                                market: (["moneyline", "spread", "total", "player_prop"].includes(pick.betType) ? pick.betType : "moneyline") as any,
+                                outcome: pick.pick || `${pick.homeTeam} vs ${pick.awayTeam}`,
+                                decimalOdds,
+                                americanOdds: pick.odds,
+                                addedFrom: "Daily Picks",
+                                addedAt: new Date().toISOString(),
+                                sport: pick.sport as any,
+                                confidence: pick.confidence,
+                                evPercent: pick.ev,
+                              };
+                              if (addLeg(slipLeg)) added++;
+                            });
+                            if (added > 0) toast({ title: `${added} A-grade pick${added > 1 ? "s" : ""} added to slip` });
+                          }}
+                          className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-medium hover:bg-emerald-500/20 transition-colors"
+                          data-testid="button-bulk-add-top-picks"
+                        >
+                          <Plus className="w-2.5 h-2.5" />
+                          Add top {topPicks.length} A picks
+                        </button>
+                      );
+                    })()}
+                  </div>
                 </div>
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

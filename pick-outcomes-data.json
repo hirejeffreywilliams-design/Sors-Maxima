@@ -239,38 +239,6 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
-    },
-    {
-      "id": "precomp-NCAAB-401820784-moneyline-06e97379cd",
-      "gameId": "401820784",
-      "sport": "NCAAB",
-      "game": "Miami Hurricanes @ SMU Mustangs",
-      "homeTeam": "SMU Mustangs",
-      "awayTeam": "Miami Hurricanes",
-      "pick": "SMU Mustangs ML",
-      "betType": "moneyline",
-      "odds": -131,
-      "grade": "C",
-      "confidence": 66,
-      "ev": -11.83,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T21:23:32.835Z"
-    },
-    {
-      "id": "precomp-NCAAB-401820784-spread-66ffaa8588",
-      "gameId": "401820784",
-      "sport": "NCAAB",
-      "game": "Miami Hurricanes @ SMU Mustangs",
-      "homeTeam": "SMU Mustangs",
-      "awayTeam": "Miami Hurricanes",
-      "pick": "SMU Mustangs -1.5",
-      "betType": "spread",
-      "odds": -105,
-      "grade": "C",
-      "confidence": 66,
-      "ev": 1.52,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T21:23:32.835Z"
     }
   ],
   "settled": [
@@ -6933,21 +6901,101 @@
       "homeScore": 5,
       "awayScore": 4,
       "settledAt": "2026-03-03T21:33:49.764Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-spread-25bf8d5d81",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Charlotte Hornets -13.5",
+      "betType": "spread",
+      "odds": -114,
+      "grade": "C",
+      "confidence": 65,
+      "ev": 10.75,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:43:32.356Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T21:43:50.284Z"
+    },
+    {
+      "id": "precomp-NBA-401810747-spread-9e59fbf70f",
+      "gameId": "401810747",
+      "sport": "NBA",
+      "game": "Phoenix Suns @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Phoenix Suns",
+      "pick": "Sacramento Kings +9.5",
+      "betType": "spread",
+      "odds": -114,
+      "grade": "B-",
+      "confidence": 67,
+      "ev": -24.91,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T21:43:32.356Z",
+      "result": "won",
+      "homeScore": 128,
+      "awayScore": 104,
+      "settledAt": "2026-03-03T21:43:50.288Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-moneyline-06e97379cd",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "SMU Mustangs ML",
+      "betType": "moneyline",
+      "odds": -131,
+      "grade": "C",
+      "confidence": 66,
+      "ev": -11.83,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:23:32.835Z",
+      "result": "won",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T21:48:16.638Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-spread-66ffaa8588",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "SMU Mustangs -1.5",
+      "betType": "spread",
+      "odds": -105,
+      "grade": "C",
+      "confidence": 66,
+      "ev": 1.52,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T21:23:32.835Z",
+      "result": "won",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T21:48:16.638Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 333,
-      "won": 157,
-      "lost": 173,
+      "total": 337,
+      "won": 160,
+      "lost": 174,
       "push": 3,
-      "rate": 47.1,
-      "pending": 17
+      "rate": 47.5,
+      "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 121,
-        "won": 55,
+        "total": 123,
+        "won": 56,
         "rate": 45.5
       },
       "NHL": {
@@ -6956,9 +7004,9 @@
         "rate": 50
       },
       "NCAAB": {
-        "total": 138,
-        "won": 65,
-        "rate": 47.1
+        "total": 140,
+        "won": 67,
+        "rate": 47.9
       }
     },
     "byGrade": {
@@ -6973,9 +7021,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 116,
-        "won": 58,
-        "rate": 50
+        "total": 117,
+        "won": 59,
+        "rate": 50.4
       },
       "D+": {
         "total": 30,
@@ -6993,9 +7041,9 @@
         "rate": 40.4
       },
       "C": {
-        "total": 37,
-        "won": 16,
-        "rate": 43.2
+        "total": 40,
+        "won": 18,
+        "rate": 45
       },
       "A-": {
         "total": 26,
@@ -7010,14 +7058,14 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 53,
-        "won": 29,
-        "rate": 54.7
+        "total": 54,
+        "won": 30,
+        "rate": 55.6
       },
       "Spread": {
-        "total": 80,
-        "won": 39,
-        "rate": 48.8
+        "total": 83,
+        "won": 41,
+        "rate": 49.4
       },
       "Total": {
         "total": 65,
@@ -7031,12 +7079,12 @@
       }
     },
     "recentForm": {
-      "won": 27,
-      "lost": 22,
+      "won": 29,
+      "lost": 20,
       "push": 1,
-      "rate": 54
+      "rate": 58
     },
-    "lastUpdated": "2026-03-03T21:33:49.772Z"
+    "lastUpdated": "2026-03-03T21:49:17.782Z"
   },
   "version": 1
 }
