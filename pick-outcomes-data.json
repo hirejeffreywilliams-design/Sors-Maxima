@@ -3941,13 +3941,53 @@
       "homeScore": 84,
       "awayScore": 61,
       "settledAt": "2026-03-03T17:16:14.521Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808274-team_total-d0dec650c2",
+      "gameId": "401808274",
+      "sport": "NCAAB",
+      "game": "Mississippi State Bulldogs @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "Mississippi State Bulldogs",
+      "pick": "Mississippi State Bulldogs Under 69.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T17:24:59.450Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T17:25:15.822Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808274-spread-cc5897410d",
+      "gameId": "401808274",
+      "sport": "NCAAB",
+      "game": "Mississippi State Bulldogs @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "Mississippi State Bulldogs",
+      "pick": "Florida Gators -22",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 67,
+      "ev": 33.64,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T17:24:59.450Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T17:25:15.822Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 185,
-      "won": 91,
-      "lost": 93,
+      "total": 187,
+      "won": 92,
+      "lost": 94,
       "push": 1,
       "rate": 49.2,
       "pending": 15
@@ -3964,16 +4004,16 @@
         "rate": 46.7
       },
       "NCAAB": {
-        "total": 67,
-        "won": 36,
-        "rate": 53.7
+        "total": 69,
+        "won": 37,
+        "rate": 53.6
       }
     },
     "byGrade": {
       "B": {
-        "total": 9,
-        "won": 4,
-        "rate": 44.4
+        "total": 11,
+        "won": 5,
+        "rate": 45.5
       },
       "B+": {
         "total": 24,
@@ -4018,9 +4058,9 @@
         "rate": 50
       },
       "Spread": {
-        "total": 41,
-        "won": 20,
-        "rate": 48.8
+        "total": 42,
+        "won": 21,
+        "rate": 50
       },
       "Total": {
         "total": 34,
@@ -4028,18 +4068,18 @@
         "rate": 52.9
       },
       "Team Total": {
-        "total": 72,
+        "total": 73,
         "won": 34,
-        "rate": 47.2
+        "rate": 46.6
       }
     },
     "recentForm": {
-      "won": 23,
-      "lost": 26,
+      "won": 22,
+      "lost": 27,
       "push": 1,
-      "rate": 46
+      "rate": 44
     },
-    "lastUpdated": "2026-03-03T17:16:14.521Z"
+    "lastUpdated": "2026-03-03T17:25:15.822Z"
   },
   "version": 1
 }
