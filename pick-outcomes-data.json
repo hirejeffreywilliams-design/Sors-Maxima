@@ -735,38 +735,6 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
-    },
-    {
-      "id": "precomp-NCAAB-401820785-spread-1348d39d90",
-      "gameId": "401820785",
-      "sport": "NCAAB",
-      "game": "Wake Forest Demon Deacons @ Virginia Cavaliers",
-      "homeTeam": "Virginia Cavaliers",
-      "awayTeam": "Wake Forest Demon Deacons",
-      "pick": "Virginia Cavaliers -15",
-      "betType": "spread",
-      "odds": -105,
-      "grade": "B+",
-      "confidence": 70,
-      "ev": 30.81,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T16:04:49.751Z"
-    },
-    {
-      "id": "precomp-NCAAB-401820785-team_total-2c3f756422",
-      "gameId": "401820785",
-      "sport": "NCAAB",
-      "game": "Wake Forest Demon Deacons @ Virginia Cavaliers",
-      "homeTeam": "Virginia Cavaliers",
-      "awayTeam": "Wake Forest Demon Deacons",
-      "pick": "Virginia Cavaliers Over 82",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 68,
-      "ev": 27.91,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T16:04:49.751Z"
     }
   ],
   "settled": [
@@ -62458,16 +62426,56 @@
       "homeScore": 120,
       "awayScore": 97,
       "settledAt": "2026-03-03T15:56:59.418Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820785-spread-1348d39d90",
+      "gameId": "401820785",
+      "sport": "NCAAB",
+      "game": "Wake Forest Demon Deacons @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "Wake Forest Demon Deacons",
+      "pick": "Virginia Cavaliers -15",
+      "betType": "spread",
+      "odds": -105,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 30.81,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T16:04:49.751Z",
+      "result": "won",
+      "homeScore": 77,
+      "awayScore": 51,
+      "settledAt": "2026-03-03T16:05:57.104Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820785-team_total-2c3f756422",
+      "gameId": "401820785",
+      "sport": "NCAAB",
+      "game": "Wake Forest Demon Deacons @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "Wake Forest Demon Deacons",
+      "pick": "Virginia Cavaliers Over 82",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T16:04:49.751Z",
+      "result": "lost",
+      "homeScore": 77,
+      "awayScore": 51,
+      "settledAt": "2026-03-03T16:05:57.104Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3031,
-      "won": 1683,
-      "lost": 1306,
+      "total": 3033,
+      "won": 1684,
+      "lost": 1307,
       "push": 42,
       "rate": 55.5,
-      "pending": 48
+      "pending": 46
     },
     "bySport": {
       "NHL": {
@@ -62476,8 +62484,8 @@
         "rate": 55.2
       },
       "NCAAB": {
-        "total": 1029,
-        "won": 599,
+        "total": 1031,
+        "won": 600,
         "rate": 58.2
       },
       "NBA": {
@@ -62513,9 +62521,9 @@
         "rate": 59
       },
       "B+": {
-        "total": 7,
-        "won": 5,
-        "rate": 71.4
+        "total": 9,
+        "won": 6,
+        "rate": 66.7
       },
       "B": {
         "total": 38,
@@ -62550,14 +62558,14 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 845,
+        "total": 846,
         "won": 494,
-        "rate": 58.5
+        "rate": 58.4
       },
       "Spread": {
-        "total": 459,
-        "won": 233,
-        "rate": 50.8
+        "total": 460,
+        "won": 234,
+        "rate": 50.9
       },
       "Total": {
         "total": 1592,
@@ -62576,7 +62584,7 @@
       "push": 1,
       "rate": 56
     },
-    "lastUpdated": "2026-03-03T16:04:52.877Z"
+    "lastUpdated": "2026-03-03T16:05:57.107Z"
   },
   "version": 1
 }
