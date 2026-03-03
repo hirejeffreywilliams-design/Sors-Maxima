@@ -43,7 +43,7 @@ export function useTier() {
     authenticated: boolean;
     tier?: string;
     isAdmin?: boolean;
-  }>({ queryKey: ["/api/auth/status"] });
+  }>({ queryKey: ["/api/auth/check"], staleTime: 1000 * 60 });
 
   const rawTier = authData?.tier || "free";
   const isAdmin = authData?.isAdmin || false;
