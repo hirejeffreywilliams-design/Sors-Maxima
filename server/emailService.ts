@@ -6,7 +6,7 @@ if (!resend) {
   console.warn("RESEND_API_KEY is missing. Email service will skip sending emails.");
 }
 
-const FROM_EMAIL = process.env.FROM_EMAIL || "Sors Maxima <onboarding@resend.dev>";
+const FROM_EMAIL = process.env.FROM_EMAIL || "Sors Maxima <noreply@sorsmaxima.com>";
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "hirejeffreywilliams@gmail.com";
 
 export async function sendApplicationConfirmation(to: string, username: string, tier: string): Promise<boolean> {

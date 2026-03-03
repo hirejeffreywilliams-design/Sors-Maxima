@@ -4493,27 +4493,67 @@
       "homeScore": 69,
       "awayScore": 71,
       "settledAt": "2026-03-03T18:08:54.911Z"
+    },
+    {
+      "id": "precomp-NHL-401803321-spread-bdc84e150c",
+      "gameId": "401803321",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Detroit Red Wings",
+      "homeTeam": "Detroit Red Wings",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Detroit Red Wings -1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 10.73,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:28:38.789Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T18:28:54.770Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-55549c46ac",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 229.5",
+      "betType": "total",
+      "odds": -108,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 15.56,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T18:28:38.585Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T18:28:54.773Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 211,
+      "total": 213,
       "won": 104,
-      "lost": 106,
+      "lost": 108,
       "push": 1,
-      "rate": 49.3,
+      "rate": 48.8,
       "pending": 17
     },
     "bySport": {
       "NBA": {
-        "total": 68,
+        "total": 69,
         "won": 30,
-        "rate": 44.1
+        "rate": 43.5
       },
       "NHL": {
-        "total": 64,
+        "total": 65,
         "won": 31,
-        "rate": 48.4
+        "rate": 47.7
       },
       "NCAAB": {
         "total": 79,
@@ -4533,9 +4573,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 78,
+        "total": 79,
         "won": 41,
-        "rate": 52.6
+        "rate": 51.9
       },
       "D+": {
         "total": 16,
@@ -4548,9 +4588,9 @@
         "rate": 50
       },
       "C+": {
-        "total": 27,
+        "total": 28,
         "won": 8,
-        "rate": 29.6
+        "rate": 28.6
       },
       "C": {
         "total": 22,
@@ -4570,14 +4610,14 @@
         "rate": 51.3
       },
       "Spread": {
-        "total": 48,
+        "total": 49,
         "won": 24,
-        "rate": 50
+        "rate": 49
       },
       "Total": {
-        "total": 40,
+        "total": 41,
         "won": 21,
-        "rate": 52.5
+        "rate": 51.2
       },
       "Team Total": {
         "total": 84,
@@ -4586,12 +4626,12 @@
       }
     },
     "recentForm": {
-      "won": 26,
-      "lost": 24,
+      "won": 24,
+      "lost": 26,
       "push": 0,
-      "rate": 52
+      "rate": 48
     },
-    "lastUpdated": "2026-03-03T18:08:54.912Z"
+    "lastUpdated": "2026-03-03T18:28:54.773Z"
   },
   "version": 1
 }
