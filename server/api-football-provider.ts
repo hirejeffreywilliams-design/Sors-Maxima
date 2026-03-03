@@ -1,5 +1,6 @@
 import { logInfo, logWarn, logError } from "./errorLogger";
 import { recordApiFootballCall } from "./api-usage-tracker";
+import { apiKeyManager } from "./apiKeyManager";
 
 export interface SoccerFixture {
   id: string;
@@ -28,6 +29,9 @@ export interface SoccerFixture {
 }
 
 const API_FOOTBALL_KEY = process.env.API_FOOTBALL_KEY;
+function getApiFootballKey(): string | undefined {
+  return apiKeyManager.getKey("apifootball") ?? API_FOOTBALL_KEY;
+}
 const API_FOOTBALL_BASE = "https://v3.football.api-sports.io";
 
 const LEAGUE_MAP: Record<string, { id: number; season: number; name: string; espnSlug: string }> = {
@@ -67,7 +71,8 @@ export function getAllSoccerLeagueIds(): string[] {
 }
 
 async function fetchApiFootballFixtures(leagueId: number, season: number): Promise<SoccerFixture[]> {
-  if (!API_FOOTBALL_KEY) {
+  const activeKey = getApiFootballKey();
+  if (!activeKey) {
     console.warn(`[API-Football] API_FOOTBALL_KEY not set — skipping league ${leagueId}, using ESPN fallback`);
     return [];
   }
@@ -84,9 +89,12 @@ async function fetchApiFootballFixtures(leagueId: number, season: number): Promi
 
   try {
     const response = await fetch(url, {
-      headers: { "x-apisports-key": API_FOOTBALL_KEY },
+      headers: { "x-apisports-key": activeKey },
     });
+    const remaining = parseInt(response.headers.get("x-ratelimit-requests-remaining") || "");
+    if (!isNaN(remaining)) apiKeyManager.reportUsage("apifootball", activeKey, remaining);
     if (!response.ok) {
+      apiKeyManager.reportError("apifootball", activeKey, response.status);
       const body = await response.text().catch(() => "");
       console.error(`[API-Football] HTTP ${response.status} for league ${leagueId}: ${body.slice(0, 200)}`);
       throw new Error(`API-Football error: ${response.status}`);

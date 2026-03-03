@@ -1,11 +1,12 @@
 import { logError, logInfo, logWarn } from "./errorLogger";
 import { recordBDLCall } from "./api-usage-tracker";
+import { apiKeyManager } from "./apiKeyManager";
 
 const BASE_URL = "https://api.balldontlie.io";
 const CACHE_TTL = 5 * 60 * 1000;
 
 function getApiKey(): string | null {
-  return process.env.BALLDONTLIE_API_KEY || null;
+  return apiKeyManager.getKey("balldontlie") ?? process.env.BALLDONTLIE_API_KEY ?? null;
 }
 
 interface CacheEntry<T> {
@@ -58,6 +59,7 @@ async function fetchBDL<T>(path: string, params?: Record<string, string>): Promi
     clearTimeout(timeout);
 
     if (!res.ok) {
+      apiKeyManager.reportError("balldontlie", apiKey, res.status);
       logWarn(`[BDL] API ${res.status}: ${path}`);
       return null;
     }

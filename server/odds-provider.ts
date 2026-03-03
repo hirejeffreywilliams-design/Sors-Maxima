@@ -6,10 +6,20 @@ import { americanToDecimal, propCategories } from "@shared/schema";
 import { getPlayersFromCache, getPlayersFromCacheById, getInjuredPlayersFromCache, getTeamRoster, getTeams, preloadAllRosters, isRosterPreloaded, type ESPNPlayer } from "./espn-roster-provider";
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { logInfo, logWarn, logError } from "./errorLogger";
+import { apiKeyManager } from "./apiKeyManager";
 
 const THE_ODDS_API_BASE = "https://api.the-odds-api.com/v4/sports";
 function getOddsApiKey(): string | undefined {
-  return process.env.THE_ODDS_API_KEY?.trim();
+  return apiKeyManager.getKey("odds") ?? process.env.THE_ODDS_API_KEY?.trim();
+}
+
+function reportOddsUsage(response: Response, key: string) {
+  const remaining = parseInt(response.headers.get("x-requests-remaining") || "");
+  if (!isNaN(remaining)) apiKeyManager.reportUsage("odds", key, remaining);
+}
+
+function reportOddsError(statusCode: number, key: string) {
+  apiKeyManager.reportError("odds", key, statusCode);
 }
 
 interface OddsApiBookmaker {
@@ -97,7 +107,9 @@ async function fetchPlayerPropsFromApi(sport: string, eventIds: { id: string; ho
     try {
       const url = `${THE_ODDS_API_BASE}/${sportKey}/events/${event.id}/odds?apiKey=${apiKey}&regions=us&markets=${marketsParam}&oddsFormat=american`;
       const response = await fetch(url);
+      reportOddsUsage(response, apiKey!);
       if (!response.ok) {
+        if (response.status !== 422) reportOddsError(response.status, apiKey!);
         if (response.status === 422) continue;
         logWarn(`[Props API] Failed for event ${event.id}: ${response.status}`);
         continue;
@@ -265,7 +277,9 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
 
   try {
     const response = await fetch(url);
+    reportOddsUsage(response, apiKey!);
     if (!response.ok) {
+      reportOddsError(response.status, apiKey!);
       const body = await response.text().catch(() => "");
       let reason = `HTTP ${response.status}`;
       try { const p = JSON.parse(body); if (p.message) reason = p.message; } catch {}
@@ -1382,7 +1396,11 @@ async function fetchEventIds(sport: string): Promise<{ id: string; home_team: st
   const url = `${THE_ODDS_API_BASE}/${sportKey}/events?apiKey=${apiKey}`;
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Events API error: ${response.status}`);
+    reportOddsUsage(response, apiKey!);
+    if (!response.ok) {
+      reportOddsError(response.status, apiKey!);
+      throw new Error(`Events API error: ${response.status}`);
+    }
     const data = await response.json();
     return data.map((e: any) => ({ id: e.id, home_team: e.home_team, away_team: e.away_team, commence_time: e.commence_time }));
   } catch (error) {
