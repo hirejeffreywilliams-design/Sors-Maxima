@@ -73,7 +73,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getHubStatus());
   });
 
-  app.get("/api/sse/stream", (req: Request, res: Response) => {
+  app.get("/api/sse/stream", requireAuth, (req: Request, res: Response) => {
     const channelsParam = (req.query.channels as string) || "all";
     const channels = channelsParam.split(",").map(c => c.trim()).filter(Boolean);
     const clientIp = getClientIp(req);

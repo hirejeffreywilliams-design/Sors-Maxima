@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
 import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier } from "./helpers";
+import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { stripeService } from "../stripeService";
 import { WebhookHandlers } from "../webhookHandlers";
 import * as featuresService from "../featuresService";
@@ -27,7 +28,7 @@ const utmEvents: Array<{ source: string; medium: string; campaign: string; conte
 
 export async function registerAccountRoutes(app: Express): Promise<void> {
 
-  app.post("/api/apply", async (req, res) => {
+  app.post("/api/apply", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
       const result = insertApplicationSchema.safeParse(req.body);
       if (!result.success) {

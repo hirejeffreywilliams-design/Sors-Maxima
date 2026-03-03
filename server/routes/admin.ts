@@ -3634,7 +3634,7 @@ Follow these rules:
 
   // ==================== CONTINUOUS LEARNING ORCHESTRATOR ====================
 
-  app.get("/api/admin/orchestrator/status", async (_req, res) => {
+  app.get("/api/admin/orchestrator/status", requireAdmin, async (_req, res) => {
     try {
       const { getOrchestratorStatus } = await import("../continuousLearningOrchestrator");
       res.json(getOrchestratorStatus());
@@ -3643,7 +3643,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/settle", async (_req, res) => {
+  app.post("/api/admin/orchestrator/settle", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualSettlement } = await import("../continuousLearningOrchestrator");
       const result = await triggerManualSettlement();
@@ -3684,7 +3684,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/retrain", async (_req, res) => {
+  app.post("/api/admin/orchestrator/retrain", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualRetraining } = await import("../continuousLearningOrchestrator");
       await triggerManualRetraining();
@@ -3694,7 +3694,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/sync-weights", async (_req, res) => {
+  app.post("/api/admin/orchestrator/sync-weights", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualWeightSync } = await import("../continuousLearningOrchestrator");
       await triggerManualWeightSync();
@@ -3704,7 +3704,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/calibrate", async (_req, res) => {
+  app.post("/api/admin/orchestrator/calibrate", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualCalibration } = await import("../continuousLearningOrchestrator");
       await triggerManualCalibration();
@@ -3714,7 +3714,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/check-freshness", async (_req, res) => {
+  app.post("/api/admin/orchestrator/check-freshness", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualFreshnessCheck } = await import("../continuousLearningOrchestrator");
       await triggerManualFreshnessCheck();
@@ -3724,7 +3724,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/start", async (_req, res) => {
+  app.post("/api/admin/orchestrator/start", requireAdmin, async (_req, res) => {
     try {
       const { startContinuousLearningOrchestrator } = await import("../continuousLearningOrchestrator");
       startContinuousLearningOrchestrator();
@@ -3734,7 +3734,7 @@ Follow these rules:
     }
   });
 
-  app.post("/api/admin/orchestrator/stop", async (_req, res) => {
+  app.post("/api/admin/orchestrator/stop", requireAdmin, async (_req, res) => {
     try {
       const { stopContinuousLearningOrchestrator } = await import("../continuousLearningOrchestrator");
       stopContinuousLearningOrchestrator();

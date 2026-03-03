@@ -82,6 +82,8 @@ export const requireSubscription = async (req: Request, res: Response, next: Nex
   try {
     const subscription = await stripeService.getUserSubscription(username);
     const tier = subscription?.subscriptionTier || 'free';
+    const status = subscription?.subscriptionStatus || 'none';
+
     if (tier === 'free') {
       return res.status(402).json({
         error: "Subscription required",
@@ -90,6 +92,26 @@ export const requireSubscription = async (req: Request, res: Response, next: Nex
         upgradePath: "/pricing",
       });
     }
+
+    if (status === 'past_due') {
+      return res.status(402).json({
+        error: "Payment required",
+        message: "Your payment is past due. Please update your payment method to continue.",
+        currentTier: tier,
+        subscriptionStatus: 'past_due',
+        upgradePath: "/settings",
+      });
+    }
+
+    if (status === 'cancelled' || status === 'expired') {
+      return res.status(402).json({
+        error: "Subscription inactive",
+        message: "Your subscription is no longer active. Resubscribe to regain access.",
+        currentTier: 'free',
+        upgradePath: "/pricing",
+      });
+    }
+
     next();
   } catch {
     next();

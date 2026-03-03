@@ -66,7 +66,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.post("/api/odds/refresh", (req, res) => {
+  app.post("/api/odds/refresh", requireAuth, (req, res) => {
     try {
       const sport = req.body.sport as string;
       
@@ -88,7 +88,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/market-snapshot", async (req, res) => {
+  app.get("/api/market-snapshot", requireAuth, async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";
       const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
