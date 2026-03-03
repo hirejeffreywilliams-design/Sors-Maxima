@@ -239,54 +239,6 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
-    },
-    {
-      "id": "precomp-NBA-401810747-team_total-759b2a9a89",
-      "gameId": "401810747",
-      "sport": "NBA",
-      "game": "Phoenix Suns @ Sacramento Kings",
-      "homeTeam": "Sacramento Kings",
-      "awayTeam": "Phoenix Suns",
-      "pick": "Sacramento Kings Over 107",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "D+",
-      "confidence": 67,
-      "ev": -23.64,
-      "gameTime": "2026-03-04T04:00Z",
-      "savedAt": "2026-03-03T19:27:41.614Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827719-spread-e8961ec749",
-      "gameId": "401827719",
-      "sport": "NCAAB",
-      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
-      "homeTeam": "Texas Tech Red Raiders",
-      "awayTeam": "TCU Horned Frogs",
-      "pick": "Texas Tech Red Raiders -8",
-      "betType": "spread",
-      "odds": -115,
-      "grade": "B-",
-      "confidence": 70,
-      "ev": 15.91,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T19:27:42.364Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827719-team_total-0a9fb62d41",
-      "gameId": "401827719",
-      "sport": "NCAAB",
-      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
-      "homeTeam": "Texas Tech Red Raiders",
-      "awayTeam": "TCU Horned Frogs",
-      "pick": "TCU Horned Frogs Under 70",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 70,
-      "ev": 18.36,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T19:27:42.364Z"
     }
   ],
   "settled": [
@@ -5169,22 +5121,262 @@
       "homeScore": 120,
       "awayScore": 97,
       "settledAt": "2026-03-03T19:22:10.185Z"
+    },
+    {
+      "id": "precomp-NBA-401810747-team_total-759b2a9a89",
+      "gameId": "401810747",
+      "sport": "NBA",
+      "game": "Phoenix Suns @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Phoenix Suns",
+      "pick": "Sacramento Kings Over 107",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 67,
+      "ev": -23.64,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T19:27:41.614Z",
+      "result": "won",
+      "homeScore": 128,
+      "awayScore": 104,
+      "settledAt": "2026-03-03T19:28:45.844Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827719-spread-e8961ec749",
+      "gameId": "401827719",
+      "sport": "NCAAB",
+      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "TCU Horned Frogs",
+      "pick": "Texas Tech Red Raiders -8",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 15.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:27:42.364Z",
+      "result": "lost",
+      "homeScore": 73,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T19:28:45.847Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827719-team_total-0a9fb62d41",
+      "gameId": "401827719",
+      "sport": "NCAAB",
+      "game": "TCU Horned Frogs @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "TCU Horned Frogs",
+      "pick": "TCU Horned Frogs Under 70",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 18.36,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:27:42.364Z",
+      "result": "lost",
+      "homeScore": 73,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T19:28:45.847Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827715-spread-f39ec39e60",
+      "gameId": "401827715",
+      "sport": "NCAAB",
+      "game": "Kansas Jayhawks @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Kansas Jayhawks",
+      "pick": "Arizona State Sun Devils +5.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 70,
+      "ev": -21.73,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "won",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-03T19:44:35.804Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827715-total-b1fd11963a",
+      "gameId": "401827715",
+      "sport": "NCAAB",
+      "game": "Kansas Jayhawks @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Kansas Jayhawks",
+      "pick": "Under 150.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 70,
+      "ev": -21.73,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "won",
+      "homeScore": 84,
+      "awayScore": 61,
+      "settledAt": "2026-03-03T19:44:35.804Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-total-b8e365e288",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "Over 141.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T19:44:35.806Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-team_total-87ff518662",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "North Carolina Tar Heels Over 72.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T19:44:35.806Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-team_total-6e044c78f2",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "Clemson Tigers Under 69",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 69,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "lost",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T19:44:35.806Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-total-a40fe5f662",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "Under 160.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 70,
+      "ev": 3.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "lost",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T19:44:35.819Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-team_total-ace2227ca8",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "SMU Mustangs Under 81.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 70,
+      "ev": 3.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "lost",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T19:44:35.819Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820784-team_total-f67f9d2c5e",
+      "gameId": "401820784",
+      "sport": "NCAAB",
+      "game": "Miami Hurricanes @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Miami Hurricanes",
+      "pick": "Miami Hurricanes Under 79",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 70,
+      "ev": 3.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T19:43:30.590Z",
+      "result": "lost",
+      "homeScore": 86,
+      "awayScore": 83,
+      "settledAt": "2026-03-03T19:44:35.819Z"
+    },
+    {
+      "id": "precomp-NBA-401810744-team_total-12a0851e56",
+      "gameId": "401810744",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Chicago Bulls",
+      "homeTeam": "Chicago Bulls",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Chicago Bulls Over 110.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 67,
+      "ev": -8.36,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T19:53:19.516Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 97,
+      "settledAt": "2026-03-03T19:53:37.240Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 244,
-      "won": 117,
-      "lost": 125,
+      "total": 256,
+      "won": 123,
+      "lost": 131,
       "push": 2,
       "rate": 48,
-      "pending": 18
+      "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 90,
-        "won": 40,
-        "rate": 44.4
+        "total": 92,
+        "won": 42,
+        "rate": 45.7
       },
       "NHL": {
         "total": 65,
@@ -5192,9 +5384,9 @@
         "rate": 47.7
       },
       "NCAAB": {
-        "total": 89,
-        "won": 46,
-        "rate": 51.7
+        "total": 99,
+        "won": 50,
+        "rate": 50.5
       }
     },
     "byGrade": {
@@ -5209,14 +5401,14 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 92,
-        "won": 47,
-        "rate": 51.1
+        "total": 97,
+        "won": 49,
+        "rate": 50.5
       },
       "D+": {
-        "total": 17,
-        "won": 10,
-        "rate": 58.8
+        "total": 20,
+        "won": 13,
+        "rate": 65
       },
       "C-": {
         "total": 17,
@@ -5224,14 +5416,14 @@
         "rate": 52.9
       },
       "C+": {
-        "total": 36,
-        "won": 10,
-        "rate": 27.8
+        "total": 37,
+        "won": 11,
+        "rate": 29.7
       },
       "C": {
-        "total": 22,
+        "total": 25,
         "won": 12,
-        "rate": 54.5
+        "rate": 48
       },
       "A-": {
         "total": 19,
@@ -5251,19 +5443,19 @@
         "rate": 52.5
       },
       "Spread": {
-        "total": 54,
-        "won": 27,
+        "total": 56,
+        "won": 28,
         "rate": 50
       },
       "Total": {
-        "total": 50,
-        "won": 22,
-        "rate": 44
+        "total": 53,
+        "won": 24,
+        "rate": 45.3
       },
       "Team Total": {
-        "total": 100,
-        "won": 47,
-        "rate": 47
+        "total": 107,
+        "won": 50,
+        "rate": 46.7
       }
     },
     "recentForm": {
@@ -5272,7 +5464,7 @@
       "push": 1,
       "rate": 40
     },
-    "lastUpdated": "2026-03-03T19:27:43.250Z"
+    "lastUpdated": "2026-03-03T19:53:37.240Z"
   },
   "version": 1
 }
