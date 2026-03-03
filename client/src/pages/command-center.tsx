@@ -372,7 +372,7 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <span>Signal: {ticket.combinedConfidence}%</span>
           <span className="text-muted-foreground/30">|</span>
-          <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 0 ? "+" : ""}{ticket.combinedEV}%</span>
+          <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 35 ? "35%+" : (ticket.combinedEV > 0 ? "+" : "") + ticket.combinedEV + "%"}</span>
           <span className="text-muted-foreground/30">|</span>
           <span>Win Prob: {ticket.winProbability}%</span>
         </div>
@@ -427,6 +427,8 @@ function sportColor(sport: string): string {
 function formatOdds(odds: number): string {
   return odds > 0 ? `+${odds}` : `${odds}`;
 }
+
+const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
 
 function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const legId = `cmd-${pick.id}`;
@@ -489,7 +491,7 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
               <span>Signal: {pick.confidence}%</span>
             )}
             <span className={pick.ev > 0 ? "text-green-500" : "text-red-500"}>
-              EV: {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
+              EV: {displayEv(pick.ev)}
             </span>
           </div>
           {pick.reasoning && (
@@ -1768,6 +1770,12 @@ export default function CommandCenter() {
             )}
           </div>
         </Tabs>
+
+        <div className="mt-8 pt-4 border-t border-border/40">
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            Picks are analytical recommendations only — not guaranteed outcomes. Must be 21+ and in a jurisdiction where sports betting is legal. Bet responsibly. View full disclaimer at <Link href="/legal" className="text-primary hover:underline">/legal</Link>
+          </p>
+        </div>
 
       </div>
     </div>

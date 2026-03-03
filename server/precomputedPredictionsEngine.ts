@@ -2309,10 +2309,12 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   const today = new Date().toISOString().slice(0, 10);
   const shuffled = dateSeededShuffle(upcoming, today);
 
-  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > 0);
-  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 3 && !["A+", "A"].includes(p.grade));
-  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 1);
-  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 42);
+  const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+
+  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > 0 && GOOD_GRADES.includes(p.grade));
+  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 3 && GOOD_GRADES.includes(p.grade));
+  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 1 && GOOD_GRADES.includes(p.grade));
+  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 42 && GOOD_GRADES.includes(p.grade));
 
   const selectedLegs: PrecomputedPick[] = [];
   const usedGames = new Set<string>();
@@ -2360,7 +2362,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   tryAdd(alternativePool, 2);
   tryAdd(sleeperPool, 2);
   if (selectedLegs.length < 6) {
-    const remaining = shuffled.filter(p => !selectedLegs.includes(p));
+    const remaining = shuffled.filter(p => !selectedLegs.includes(p) && GOOD_GRADES.includes(p.grade));
     tryAdd(remaining, 8 - selectedLegs.length);
   }
 
@@ -2398,7 +2400,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       return p.reasoning.length > 120 ? p.reasoning.slice(0, 117) + "..." : p.reasoning;
     }
     const cat = getCategory(p);
-    const evStr = p.ev > 0 ? ` (+${p.ev.toFixed(1)}% EV)` : "";
+    const evStr = p.ev > 35 ? " (+35%+ EV)" : (p.ev > 0 ? ` (+${p.ev.toFixed(1)}% EV)` : "");
     if (cat === "sleeper") return `Long-shot value at ${p.odds > 0 ? "+" : ""}${p.odds}${evStr} — ${p.sport} market underprices this line`;
     if (cat === "underdog") return `Underdog edge${evStr} — model projects ${p.confidence}% win probability vs implied ${Math.round(100 / (americanToDecimal(p.odds)))}%`;
     if (cat === "alternative") return `${p.betType.replace(/_/g, " ")} market${evStr} — sharp value on unorthodox line`;
@@ -2425,10 +2427,10 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       selectionReason: getReason(p),
       selectionCategory: getCategory(p),
       gameTime: p.gameTime,
-      ev: p.ev,
+      ev: Math.min(p.ev, 35),
       confidence: p.confidence,
       grade: p.grade,
-      edge: p.edge,
+      edge: Math.min(p.edge, 35),
       isUnderdog: p.odds >= 100,
       reasoning: p.reasoning || "",
     })),

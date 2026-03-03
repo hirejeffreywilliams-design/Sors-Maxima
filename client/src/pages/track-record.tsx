@@ -192,6 +192,22 @@ export default function TrackRecordPage() {
         </CardContent>
       </Card>
 
+      {(data.settledPicks < 300 || (data.overallWinRate !== null && data.overallWinRate < 52)) && (
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardContent className="p-4">
+            <div className="flex gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-amber-500">Model Calibrating</p>
+                <p className="text-xs text-muted-foreground">
+                  Model is still calibrating — {data.settledPicks} picks settled so far. Win rates become statistically reliable at 300+ picks. Results shown are real-time and unfiltered.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {!data.hasMinimumData && (
         <Card className="border-blue-500/30 bg-blue-500/5">
           <CardContent className="p-4">
@@ -245,9 +261,16 @@ export default function TrackRecordPage() {
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold" data-testid="stat-win-rate">
               {data.overallWinRate !== null ? (
-                <span className={data.overallWinRate >= 55 ? "text-green-500" : data.overallWinRate >= 50 ? "text-yellow-500" : "text-red-500"}>
-                  {data.overallWinRate.toFixed(1)}%
-                </span>
+                <div className="flex flex-col items-center">
+                  <span className={data.overallWinRate >= 55 ? "text-green-500" : data.overallWinRate >= 52.4 ? "text-yellow-500" : "text-red-500"}>
+                    {data.overallWinRate.toFixed(1)}%
+                  </span>
+                  {data.overallWinRate < 52.4 && (
+                    <span className="text-[10px] text-muted-foreground font-normal mt-1 italic">
+                      Break-even for -110 bets is 52.4%
+                    </span>
+                  )}
+                </div>
               ) : (
                 <span className="text-muted-foreground text-lg">Building</span>
               )}

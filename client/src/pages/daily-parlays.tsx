@@ -290,6 +290,8 @@ function formatGameTime(iso?: string): string {
   }
 }
 
+const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
+
 function isGameStarted(gameTime?: string): boolean {
   if (!gameTime) return false;
   try {
@@ -441,7 +443,7 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
           </div>
           <div className="p-2 rounded-lg bg-muted/30 text-center">
             <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-pick-ev-${pick.id}`}>
-              {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
+              {displayEv(pick.ev)}
             </p>
             <p className="text-[10px] text-muted-foreground font-medium">Edge</p>
           </div>
@@ -1185,7 +1187,13 @@ export default function DailyParlays() {
           </div>
         )}
 
-        <div className="text-center text-[11px] text-muted-foreground pt-2" data-testid="text-data-source">
+        <div className="mt-8 pt-6 border-t border-border/40">
+          <p className="text-xs text-muted-foreground text-center leading-relaxed">
+            Picks are analytical recommendations only — not guaranteed outcomes. Must be 21+ and in a jurisdiction where sports betting is legal. Bet responsibly. View full disclaimer at <Link href="/legal" className="text-primary hover:underline">/legal</Link>
+          </p>
+        </div>
+
+        <div className="text-center text-[11px] text-muted-foreground pt-4" data-testid="text-data-source">
           Powered by 46-Factor Model Analysis
           {lastUpdate && ` · Last analysis ${getTimeAgo(lastUpdate)}`}
           {engineStatus?.running && " · Auto-refreshing every 5 min"}

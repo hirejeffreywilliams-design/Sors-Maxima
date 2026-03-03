@@ -38,6 +38,13 @@ export function registerIntelligenceRoutes(app: Express): void {
   app.get("/api/intelligence/feed", requireSubscription, async (_req: Request, res: Response) => {
     try {
       const feed = await generateIntelligenceFeed();
+      // Cap EV values at 35
+      if (feed.topPicks) {
+        feed.topPicks = feed.topPicks.map((p: any) => ({
+          ...p,
+          ev: Math.min(p.ev, 35)
+        }));
+      }
       return res.json(feed);
     } catch (err) {
       console.error("Intelligence feed error:", err);
@@ -618,6 +625,16 @@ export function registerIntelligenceRoutes(app: Express): void {
       const ticket = buildLifeChangerTicket();
       if (!ticket) {
         return res.json({ ticket: null, message: "Not enough picks available yet — check back once today's games are loaded." });
+      }
+      // Cap EV values
+      if (ticket.combinedEV !== undefined) {
+        ticket.combinedEV = Math.min(ticket.combinedEV, 35);
+      }
+      if (ticket.legs) {
+        ticket.legs = ticket.legs.map((l: any) => ({
+          ...l,
+          ev: Math.min(l.ev, 35)
+        }));
       }
       res.json({ ticket });
     } catch (err: any) {

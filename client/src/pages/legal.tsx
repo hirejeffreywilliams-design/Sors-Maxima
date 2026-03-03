@@ -49,7 +49,7 @@ export default function LegalPage() {
             <CardContent>
               <ScrollArea className="h-[500px] pr-4">
                 <div className="space-y-4 text-sm">
-                  <p className="text-muted-foreground">Last Updated: January 2026</p>
+                  <p className="text-muted-foreground">Last Updated: March 2026</p>
                   
                   <section>
                     <h3 className="font-semibold mb-2">1. Acceptance of Terms</h3>
@@ -136,7 +136,7 @@ export default function LegalPage() {
             <CardContent>
               <ScrollArea className="h-[500px] pr-4">
                 <div className="space-y-4 text-sm">
-                  <p className="text-muted-foreground">Last Updated: January 2026</p>
+                  <p className="text-muted-foreground">Last Updated: March 2026</p>
 
                   <section>
                     <h3 className="font-semibold mb-2">1. Information We Collect</h3>
@@ -318,7 +318,7 @@ export default function LegalPage() {
             <CardContent>
               <ScrollArea className="h-[500px] pr-4">
                 <div className="space-y-4 text-sm" data-testid="affiliate-legal-content">
-                  <p className="text-muted-foreground">Last Updated: February 2026</p>
+                  <p className="text-muted-foreground">Last Updated: March 2026</p>
 
                   <section>
                     <h3 className="font-semibold mb-2">1. Affiliate Relationships</h3>

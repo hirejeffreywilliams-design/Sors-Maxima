@@ -92,6 +92,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useSEO } from "@/hooks/use-seo";
 
 interface SubscriptionStats {
@@ -2388,16 +2399,37 @@ function PickAccuracyPanel() {
               <Target className="h-5 w-5" />
               Pick Accuracy Tracker
             </CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => resetMutation.mutate()}
-              disabled={resetMutation.isPending}
-              data-testid="button-reset-tracker"
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Reset
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={resetMutation.isPending}
+                  data-testid="button-reset-tracker"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                  Reset
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset Pick Tracker</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all {overall?.total || 0} settled picks and reset the win rate to zero. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => resetMutation.mutate()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    data-testid="button-confirm-reset"
+                  >
+                    Yes, Reset Everything
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <CardDescription>
             Tracks precomputed engine picks and settles them against real game outcomes

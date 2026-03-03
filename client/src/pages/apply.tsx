@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -11,8 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useLocation, useSearch } from "wouter";
-import { CheckCircle2, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
+import { useLocation, useSearch, Link } from "wouter";
+import { CheckCircle2, ChevronRight, ChevronLeft, Loader2, Zap, LayoutGrid, ShieldCheck } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 
 const applicationFormSchema = z.object({
@@ -27,6 +27,13 @@ const applicationFormSchema = z.object({
 
 type ApplicationFormValues = z.infer<typeof applicationFormSchema>;
 
+type AuthResponse = {
+  authenticated: boolean;
+  username?: string;
+  tier?: string;
+  isAdmin?: boolean;
+};
+
 export default function ApplyPage() {
   useSEO({ title: "Apply for Access | Sors Maxima", description: "Apply for Edge or Max tier membership" });
   const [step, setStep] = useState(1);
@@ -35,6 +42,10 @@ export default function ApplyPage() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const initialTier = params.get("tier") === "max" ? "max" : "edge";
+
+  const { data: auth, isLoading: authLoading } = useQuery<AuthResponse>({
+    queryKey: ["/api/auth/check"],
+  });
 
   const form = useForm<ApplicationFormValues>({
     resolver: zodResolver(applicationFormSchema),
@@ -79,6 +90,74 @@ export default function ApplyPage() {
   const onSubmit = (values: ApplicationFormValues) => {
     mutation.mutate(values);
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Member check
+  if (auth?.authenticated && auth.tier && auth.tier !== "free") {
+    const tierMap: Record<string, string> = {
+      pro: "Sharp",
+      edge: "Edge",
+      whale: "Max",
+    };
+    const tierName = tierMap[auth.tier] || auth.tier;
+
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <div className="flex justify-center mb-4">
+              <div className="p-3 bg-primary/10 rounded-full">
+                <ShieldCheck className="h-10 w-10 text-primary" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl">You're Already a Member</CardTitle>
+            <CardDescription className="text-base mt-2">
+              You already have an active Sors Maxima <span className="font-bold text-foreground">{tierName}</span> membership.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-muted-foreground">
+            Visit your Settings to manage your plan or upgrade to a higher tier.
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3">
+            <Button className="w-full" onClick={() => setLocation("/")} data-testid="button-go-command-center">
+              <Zap className="mr-2 h-4 w-4" /> Go to Command Center
+            </Button>
+            <Button variant="outline" className="w-full" onClick={() => setLocation("/settings")} data-testid="button-go-settings">
+              <LayoutGrid className="mr-2 h-4 w-4" /> Manage Membership
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // Logged in but free tier (shouldn't happen but just in case)
+  if (auth?.authenticated && auth.tier === "free") {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <CardTitle className="text-2xl">Choose a Plan</CardTitle>
+            <CardDescription>
+              To access Sors Maxima picks, you need to select a membership plan.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter className="flex justify-center">
+            <Button onClick={() => setLocation("/pricing")} data-testid="button-view-pricing">
+              View Pricing & Plans
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   if (step === 3) {
     return (

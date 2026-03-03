@@ -73,7 +73,7 @@ export interface TrackRecord {
   };
 }
 
-const MINIMUM_PICKS_FOR_VALIDATION = 100;
+const MINIMUM_PICKS_FOR_VALIDATION = 300;
 
 function loadData(): { pending: any[]; settled: any[] } {
   try {
