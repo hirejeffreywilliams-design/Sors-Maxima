@@ -391,7 +391,16 @@ function determinePickTiming(
     };
   }
 
-  if (hoursUntilGame > 24 && hasSharp) {
+  // 72h+ out: never say "Bet Now" for sharp action — lines move again before game time.
+  // Only flag early monitoring so members can track without acting prematurely.
+  if (hoursUntilGame > 72 && hasSharp) {
+    return {
+      timing: "wait",
+      timingAdvice: "Monitor — sharp interest detected early. Check back 24–48h before game for final line direction before acting",
+    };
+  }
+
+  if (hoursUntilGame > 6 && hoursUntilGame <= 72 && hasSharp) {
     return {
       timing: "bet_now",
       timingAdvice: "Bet now — sharp money detected, line will move away from current value",

@@ -370,11 +370,11 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
         </div>
 
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span>Conf: {ticket.combinedConfidence}%</span>
+          <span>Signal: {ticket.combinedConfidence}%</span>
           <span className="text-muted-foreground/30">|</span>
           <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 0 ? "+" : ""}{ticket.combinedEV}%</span>
           <span className="text-muted-foreground/30">|</span>
-          <span>Win: {ticket.winProbability}%</span>
+          <span>Win Prob: {ticket.winProbability}%</span>
         </div>
 
         <Button
@@ -486,7 +486,7 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
             {pick.winProbability ? (
               <span className="text-primary font-medium">Win: {pick.winProbability}%</span>
             ) : (
-              <span>Conf: {pick.confidence}%</span>
+              <span>Signal: {pick.confidence}%</span>
             )}
             <span className={pick.ev > 0 ? "text-green-500" : "text-red-500"}>
               EV: {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
@@ -672,7 +672,7 @@ function AlertCard({ alert, feed, legs, addLeg }: { alert: EdgeAlert; feed: Inte
             )}
             {matchingPick && (
               <span className="text-[9px] text-muted-foreground">
-                {matchingPick.pick} · {matchingPick.confidence}% conf
+                {matchingPick.pick} · {matchingPick.confidence}% signal strength
               </span>
             )}
           </div>
@@ -1251,7 +1251,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                             {leg.ev > 0 && (
                               <span className="text-[10px] font-medium text-emerald-400">+{leg.ev.toFixed(1)}% EV</span>
                             )}
-                            <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% conf</span>
+                            <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% signal</span>
                           </div>
                           <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
                         </div>

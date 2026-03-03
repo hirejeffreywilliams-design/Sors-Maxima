@@ -45,7 +45,7 @@ export function registerAuthRoutes(app: Express): void {
       }
 
       const userIdStr = String(result.userId);
-      const code = generateAndStoreCode(userIdStr, email);
+      const code = await generateAndStoreCode(userIdStr, email);
       sendVerificationEmail(email, username, code).catch(err => {
         console.error("Failed to send verification email on registration:", err);
       });
@@ -83,7 +83,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(400).json({ error: "Verification code is required" });
       }
 
-      const isValid = validateCode(userId, code);
+      const isValid = await validateCode(userId, code);
       if (!isValid) {
         return res.status(400).json({ error: "Invalid or expired code" });
       }
@@ -121,7 +121,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(404).json({ error: "User not found" });
       }
 
-      const code = generateAndStoreCode(userId, user.email);
+      const code = await generateAndStoreCode(userId, user.email);
       await sendVerificationEmail(user.email, user.username, code);
       lastVerificationSent.set(userId, now);
 
@@ -238,7 +238,7 @@ export function registerAuthRoutes(app: Express): void {
       // Always return success (don't reveal if email exists)
       const user = await getUserByEmail(email.trim().toLowerCase());
       if (user && !user.isBanned) {
-        const token = generateResetToken(email.trim().toLowerCase());
+        const token = await generateResetToken(email.trim().toLowerCase());
         const host = (req.headers["x-forwarded-host"] as string) || req.headers.host || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:5000";
         const protocol = host.includes("localhost") ? "http" : "https";
         const resetLink = `${protocol}://${host}/reset-password?token=${token}`;
@@ -258,7 +258,7 @@ export function registerAuthRoutes(app: Express): void {
     if (!token || typeof token !== "string") {
       return res.status(400).json({ valid: false, error: "Token is required" });
     }
-    return res.json({ valid: isValidResetToken(token) });
+    return res.json({ valid: await isValidResetToken(token) });
   });
 
   // Step 2: Submit new password with token
@@ -278,7 +278,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(400).json({ error: "Password must include uppercase, lowercase, and a number" });
       }
 
-      const email = consumeResetToken(token);
+      const email = await consumeResetToken(token);
       if (!email) {
         return res.status(400).json({ error: "This reset link has expired or already been used. Please request a new one." });
       }

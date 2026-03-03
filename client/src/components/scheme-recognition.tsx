@@ -389,7 +389,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
                           {alert.impact.toUpperCase()}
                         </span>
                         <Badge variant="outline" className="text-xs">
-                          {alert.confidence}% conf
+                          {alert.confidence}% signal
                         </Badge>
                       </div>
                     </div>

@@ -1503,6 +1503,16 @@ export const taxRecords = pgTable("tax_records", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Token store for password reset and email verification (survives server restarts)
+export const tokenStore = pgTable("token_store", {
+  token: varchar("token", { length: 128 }).primaryKey(),
+  type: varchar("type", { length: 20 }).notNull(), // "reset" | "verify"
+  identifier: varchar("identifier", { length: 255 }).notNull(), // email for reset, userId for verify
+  code: varchar("code", { length: 10 }),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   subscriptions: many(subscriptions),

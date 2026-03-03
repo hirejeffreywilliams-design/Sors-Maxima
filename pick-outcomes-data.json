@@ -737,36 +737,20 @@
       "savedAt": "2026-03-03T12:50:52.224Z"
     },
     {
-      "id": "precomp-NBA-401810738-total-54e7018247",
-      "gameId": "401810738",
+      "id": "precomp-NBA-401810747-spread-570489ca35",
+      "gameId": "401810747",
       "sport": "NBA",
-      "game": "Dallas Mavericks @ Charlotte Hornets",
-      "homeTeam": "Charlotte Hornets",
-      "awayTeam": "Dallas Mavericks",
-      "pick": "Over 230.5",
-      "betType": "total",
-      "odds": -118,
-      "grade": "B-",
-      "confidence": 65,
-      "ev": 9,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T14:24:19.139Z"
-    },
-    {
-      "id": "precomp-NBA-401810741-team_total-0684beeb23",
-      "gameId": "401810741",
-      "sport": "NBA",
-      "game": "Brooklyn Nets @ Miami Heat",
-      "homeTeam": "Miami Heat",
-      "awayTeam": "Brooklyn Nets",
-      "pick": "Miami Heat Over 119.5",
-      "betType": "team_total",
+      "game": "Phoenix Suns @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Phoenix Suns",
+      "pick": "Sacramento Kings +10",
+      "betType": "spread",
       "odds": -110,
-      "grade": "C+",
-      "confidence": 65,
-      "ev": 5,
-      "gameTime": "2026-03-04T00:30Z",
-      "savedAt": "2026-03-03T14:25:51.692Z"
+      "grade": "D+",
+      "confidence": 67,
+      "ev": -23.64,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T14:33:12.998Z"
     }
   ],
   "settled": [
@@ -61878,16 +61862,56 @@
       "homeScore": 89,
       "awayScore": 57,
       "settledAt": "2026-03-03T14:13:41.393Z"
+    },
+    {
+      "id": "precomp-NBA-401810741-team_total-0684beeb23",
+      "gameId": "401810741",
+      "sport": "NBA",
+      "game": "Brooklyn Nets @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Brooklyn Nets",
+      "pick": "Miami Heat Over 119.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 5,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T14:25:51.692Z",
+      "result": "lost",
+      "homeScore": 102,
+      "awayScore": 106,
+      "settledAt": "2026-03-03T14:26:57.823Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-54e7018247",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 230.5",
+      "betType": "total",
+      "odds": -118,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 9,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:24:19.139Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T14:26:57.852Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 3002,
+      "total": 3004,
       "won": 1668,
-      "lost": 1292,
+      "lost": 1294,
       "push": 42,
-      "rate": 55.6,
-      "pending": 48
+      "rate": 55.5,
+      "pending": 47
     },
     "bySport": {
       "NHL": {
@@ -61901,9 +61925,9 @@
         "rate": 58.3
       },
       "NBA": {
-        "total": 1225,
+        "total": 1227,
         "won": 660,
-        "rate": 53.9
+        "rate": 53.8
       },
       "MLB": {
         "total": 194,
@@ -61923,14 +61947,14 @@
         "rate": 50
       },
       "C+": {
-        "total": 1191,
+        "total": 1192,
         "won": 663,
-        "rate": 55.7
+        "rate": 55.6
       },
       "B-": {
-        "total": 50,
+        "total": 51,
         "won": 32,
-        "rate": 64
+        "rate": 62.7
       },
       "B+": {
         "total": 6,
@@ -61965,9 +61989,9 @@
     },
     "byMarket": {
       "Team Total": {
-        "total": 831,
+        "total": 832,
         "won": 487,
-        "rate": 58.6
+        "rate": 58.5
       },
       "Spread": {
         "total": 450,
@@ -61975,7 +61999,7 @@
         "rate": 50.4
       },
       "Total": {
-        "total": 1586,
+        "total": 1587,
         "won": 884,
         "rate": 55.7
       },
@@ -61991,7 +62015,7 @@
       "push": 1,
       "rate": 64
     },
-    "lastUpdated": "2026-03-03T14:25:55.103Z"
+    "lastUpdated": "2026-03-03T14:34:32.765Z"
   },
   "version": 1
 }

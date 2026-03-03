@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { fromError } from "zod-validation-error";
 import { z } from "zod";
 import { sql } from "drizzle-orm";
-import { requireAdmin, getClientIp, formatUptime, abTestCreateSchema, campaignCreateSchema, segmentCreateSchema, promoCreateSchema } from "./helpers";
+import { requireAdmin, requireAuth, getClientIp, formatUptime, abTestCreateSchema, campaignCreateSchema, segmentCreateSchema, promoCreateSchema } from "./helpers";
 import { storage } from "../storage";
 import { db } from "../db";
 import { getAllUsers, banUser, unbanUser } from "../dbAuthService";
@@ -1297,7 +1297,7 @@ Follow these rules:
     res.json({ stats, totalTeams: stats.reduce((sum: any, s: any) => sum + s.teams, 0), totalPlayers: stats.reduce((sum: any, s: any) => sum + s.players, 0) });
   });
 
-  app.post("/api/admin/refresh-data", async (_req: any, res: any) => {
+  app.post("/api/admin/refresh-data", requireAdmin, async (_req: any, res: any) => {
     try {
       await refreshAllData();
       const stats = getRosterCacheStats();
@@ -1343,7 +1343,7 @@ Follow these rules:
   });
 
   // ── Account / GDPR Data Tools ──
-  app.get("/api/account/export", async (req, res) => {
+  app.get("/api/account/export", requireAuth, async (req, res) => {
     try {
       const username = req.session?.username || "unknown";
       const userId = req.session?.userId || "unknown";
@@ -1363,7 +1363,7 @@ Follow these rules:
     }
   });
 
-  app.delete("/api/account", async (req, res) => {
+  app.delete("/api/account", requireAuth, async (req, res) => {
     try {
       const userId = req.session?.userId || "unknown";
       const username = req.session?.username || "unknown";

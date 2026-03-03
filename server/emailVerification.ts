@@ -1,51 +1,101 @@
 import { db } from "./db";
-import { users } from "./dbSchema";
-import { eq } from "drizzle-orm";
+import { users, tokenStore } from "./dbSchema";
+import { eq, and, gt, lt } from "drizzle-orm";
 import crypto from "crypto";
 
-const verificationCodes = new Map<string, { code: string; expires: number; email: string }>();
+// ─── Password Reset Tokens (DB-persisted) ────────────────────────────────────
 
-// ─── Password Reset Tokens ───────────────────────────────────────────────────
-const resetTokens = new Map<string, { email: string; expires: number }>();
-
-export function generateResetToken(email: string): string {
+export async function generateResetToken(email: string): Promise<string> {
   const token = crypto.randomBytes(32).toString("hex");
-  const expires = Date.now() + 60 * 60 * 1000; // 1 hour
-  resetTokens.set(token, { email, expires });
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  // Clean up any existing reset tokens for this email first
+  await db.delete(tokenStore).where(
+    and(eq(tokenStore.type, "reset"), eq(tokenStore.identifier, email))
+  );
+
+  await db.insert(tokenStore).values({
+    token,
+    type: "reset",
+    identifier: email,
+    expiresAt,
+  });
+
   return token;
 }
 
-export function consumeResetToken(token: string): string | null {
-  const record = resetTokens.get(token);
+export async function consumeResetToken(token: string): Promise<string | null> {
+  const [record] = await db
+    .select()
+    .from(tokenStore)
+    .where(and(eq(tokenStore.token, token), eq(tokenStore.type, "reset")))
+    .limit(1);
+
   if (!record) return null;
-  if (Date.now() > record.expires) {
-    resetTokens.delete(token);
+
+  if (new Date() > record.expiresAt) {
+    await db.delete(tokenStore).where(eq(tokenStore.token, token));
     return null;
   }
-  resetTokens.delete(token);
-  return record.email;
+
+  await db.delete(tokenStore).where(eq(tokenStore.token, token));
+  return record.identifier;
 }
 
-export function isValidResetToken(token: string): boolean {
-  const record = resetTokens.get(token);
+export async function isValidResetToken(token: string): Promise<boolean> {
+  const [record] = await db
+    .select()
+    .from(tokenStore)
+    .where(and(eq(tokenStore.token, token), eq(tokenStore.type, "reset")))
+    .limit(1);
+
   if (!record) return false;
-  if (Date.now() > record.expires) { resetTokens.delete(token); return false; }
+
+  if (new Date() > record.expiresAt) {
+    await db.delete(tokenStore).where(eq(tokenStore.token, token));
+    return false;
+  }
+
   return true;
 }
 
-export function generateAndStoreCode(userId: string, email: string): string {
+// ─── Email Verification Codes (DB-persisted) ─────────────────────────────────
+
+export async function generateAndStoreCode(userId: string, email: string): Promise<string> {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
-  const expires = Date.now() + 15 * 60 * 1000;
-  verificationCodes.set(userId, { code, expires, email });
+  const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+  // Replace any existing code for this user
+  await db.delete(tokenStore).where(
+    and(eq(tokenStore.type, "verify"), eq(tokenStore.identifier, userId))
+  );
+
+  await db.insert(tokenStore).values({
+    token: crypto.randomBytes(16).toString("hex"),
+    type: "verify",
+    identifier: userId,
+    code,
+    expiresAt,
+  });
+
   return code;
 }
 
-export function validateCode(userId: string, inputCode: string): boolean {
-  const record = verificationCodes.get(userId);
-  if (!record) return false;
-  if (record.code !== inputCode) return false;
-  if (Date.now() > record.expires) return false;
-  verificationCodes.delete(userId);
+export async function validateCode(userId: string, inputCode: string): Promise<boolean> {
+  const [record] = await db
+    .select()
+    .from(tokenStore)
+    .where(and(eq(tokenStore.type, "verify"), eq(tokenStore.identifier, userId)))
+    .limit(1);
+
+  if (!record || record.code !== inputCode) return false;
+
+  if (new Date() > record.expiresAt) {
+    await db.delete(tokenStore).where(eq(tokenStore.token, record.token));
+    return false;
+  }
+
+  await db.delete(tokenStore).where(eq(tokenStore.token, record.token));
   return true;
 }
 
@@ -56,4 +106,13 @@ export async function markEmailVerified(userId: number): Promise<void> {
 export async function getEmailVerifiedStatus(userId: number): Promise<boolean> {
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
   return (user as any)?.emailVerified ?? false;
+}
+
+// Periodic cleanup of expired tokens (call once on startup)
+export async function cleanupExpiredTokens(): Promise<void> {
+  try {
+    await db.delete(tokenStore).where(lt(tokenStore.expiresAt, new Date()));
+  } catch {
+    // Non-critical — tokens expire on access anyway
+  }
 }

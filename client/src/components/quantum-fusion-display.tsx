@@ -433,7 +433,7 @@ export function TicketFusionDisplay({ ticketFusion }: TicketFusionDisplayProps) 
                     <span className="font-medium">{leg.fusion.winProbability}%</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Conf: </span>
+                    <span className="text-muted-foreground">Signal: </span>
                     <span className="font-medium">{leg.fusion.confidence}%</span>
                   </div>
                 </div>

@@ -16,6 +16,7 @@ export {
   betBackups,
   oddsSnapshots,
   taxRecords,
+  tokenStore,
   usersRelations,
   subscriptionsRelations,
   predictionsRelations,
