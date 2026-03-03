@@ -5,7 +5,7 @@
 // Insights are cached by pick ID and injected back into the prediction cache.
 
 import { logInfo, logWarn } from "./errorLogger";
-import { recordAiError, recordAiSuccess } from "./aiErrorTracker";
+import { recordAiError, recordAiSuccess, getAiAvailability } from "./aiErrorTracker";
 import type { PrecomputedPick } from "./precomputedPredictionsEngine";
 
 let openai: any = null;
@@ -75,6 +75,11 @@ export async function enrichPicksWithInsights(picks: PrecomputedPick[]): Promise
   if (generationRunning) return;
   if (!process.env.OPENAI_API_KEY) return;
 
+  const aiStatus = getAiAvailability();
+  if (!aiStatus.available) {
+    return; // Circuit breaker: skip silently when quota exhausted
+  }
+
   const client = await getOpenAI();
   if (!client) return;
 
@@ -94,6 +99,9 @@ export async function enrichPicksWithInsights(picks: PrecomputedPick[]): Promise
 
   let generated = 0;
   for (const pick of eligible) {
+    // Re-check circuit breaker before each call — bail out if quota hit mid-cycle
+    if (!getAiAvailability().available) break;
+
     const insight = await generateInsightForPick(pick, client);
     if (insight) {
       insightCache.set(pick.id, insight);
@@ -105,7 +113,7 @@ export async function enrichPicksWithInsights(picks: PrecomputedPick[]): Promise
   }
 
   generationRunning = false;
-  logInfo(`[InsightEngine] Generated ${generated} edge insights — cache size: ${insightCache.size}`);
+  if (generated > 0) logInfo(`[InsightEngine] Generated ${generated} edge insights — cache size: ${insightCache.size}`);
 }
 
 // Inject cached insights into picks (called when serving picks from cache)

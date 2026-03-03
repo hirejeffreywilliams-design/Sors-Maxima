@@ -65,6 +65,12 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Two-Way Contract Intelligence Engine**: Fetches NBA team rosters, identifies two-way contract players, calculates roster stability, and integrates "Two-Way Roster Risk" factor into NBA predictions.
 - **Secure Password Reset Flow**: Two-step email-token-based reset: user submits email → receives link to `/reset-password?token=xxx` → sets new password. Token expires in 1 hour, single-use (consumed on redemption). Never reveals whether email exists.
 - **Email Verification Banner**: Persistent amber banner shown to unverified authenticated users with inline "Resend code" and "Verify now" actions. Non-blocking (soft enforcement) — replaces previous hard redirect.
+- **By-Application Membership Gate**: /apply page with multi-step form for Edge/Max tier applications. Admin review panel at /admin/applications. sendApplicationConfirmation/Approved/Rejected emails via Resend.
+- **Landing Page**: Testimonials section, trust signals row, "How It Works" 3-step guide, proper tier CTAs (Sharp → /pricing, Edge/Max → /apply?tier=...). No ROI calculator.
+- **AI Circuit Breaker**: pick-insight-engine.ts checks getAiAvailability() before AND inside generation loop. aiErrorTracker.ts persists quota error state to /tmp/ai-error-state.json with 12-hour recovery window for 429 errors. Circuit breaker survives server restarts.
+- **Email Sequence (Day 2 & Day 7)**: sendDay2Email and sendDay7Email in emailService.ts. Hourly scheduler in index.ts sends sequenced emails based on user.createdAt. DB columns email_sequence_day2_sent / email_sequence_day7_sent.
+- **Subscription Management UI**: Settings → Membership card shows current tier badge, billing status, upgrade buttons, and Manage Billing (→ Stripe Customer Portal).
+- **NFL Offseason Panel**: OffseasonPanel component at client/src/components/offseason-panel.tsx shown in command-center.tsx when NFL tab has no upcoming games.
 
 ## External Dependencies
 - **Frontend Framework**: React

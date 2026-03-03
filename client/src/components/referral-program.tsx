@@ -31,10 +31,11 @@ export function ReferralProgram() {
     queryKey: ["/api/referral"],
   });
 
-  const referralCode = data?.code || "SORS-XXXXXX";
-  const referralLink = `https://sorsmaxima.com/ref/${referralCode}`;
+  const referralCode = data?.code || "";
+  const referralLink = referralCode ? `https://sorsmaxima.com/ref/${referralCode}` : "";
 
   const handleCopyCode = () => {
+    if (!referralCode) return;
     navigator.clipboard.writeText(referralCode);
     setCopied(true);
     toast({ title: "Referral code copied" });
@@ -42,6 +43,7 @@ export function ReferralProgram() {
   };
 
   const handleCopyLink = () => {
+    if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
     toast({ title: "Referral link copied" });
   };
@@ -72,6 +74,7 @@ export function ReferralProgram() {
             <div className="flex gap-2">
               <Input
                 value={referralCode}
+                placeholder="Generating your code..."
                 readOnly
                 className="font-mono"
                 data-testid="input-referral-code"
@@ -79,6 +82,7 @@ export function ReferralProgram() {
               <Button
                 variant="outline"
                 onClick={handleCopyCode}
+                disabled={!referralCode}
                 data-testid="button-copy-referral-code"
               >
                 {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -91,6 +95,7 @@ export function ReferralProgram() {
             <div className="flex gap-2">
               <Input
                 value={referralLink}
+                placeholder="Available once code is generated"
                 readOnly
                 className="text-sm"
                 data-testid="input-referral-link"
@@ -98,6 +103,7 @@ export function ReferralProgram() {
               <Button
                 variant="outline"
                 onClick={handleCopyLink}
+                disabled={!referralLink}
                 data-testid="button-copy-referral-link"
               >
                 <Share2 className="h-4 w-4" />

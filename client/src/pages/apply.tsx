@@ -57,7 +57,7 @@ export default function ApplyPage() {
         title: "Application Submitted",
         description: "We've received your application. Check your email for confirmation.",
       });
-      setLocation("/");
+      setTimeout(() => setLocation("/"), 2500);
     },
     onError: (error: Error) => {
       toast({
