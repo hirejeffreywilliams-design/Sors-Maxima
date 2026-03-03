@@ -4413,22 +4413,102 @@
       "homeScore": 69,
       "awayScore": 71,
       "settledAt": "2026-03-03T17:53:55.060Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-bb4efd845c",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 230",
+      "betType": "total",
+      "odds": -108,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 15.56,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T18:08:36.959Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T18:08:54.908Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-team_total-313cbc928c",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Charlotte Hornets Over 121.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 14.55,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T18:08:36.959Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T18:08:54.908Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-team_total-316664a2fc",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Dallas Mavericks Over 108.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 14.55,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T18:08:36.959Z",
+      "result": "lost",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T18:08:54.908Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808277-spread-c920f5a49f",
+      "gameId": "401808277",
+      "sport": "NCAAB",
+      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
+      "homeTeam": "Georgia Bulldogs",
+      "awayTeam": "Alabama Crimson Tide",
+      "pick": "Georgia Bulldogs +1",
+      "betType": "spread",
+      "odds": -112,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 11.68,
+      "gameTime": "2026-03-03T23:30Z",
+      "savedAt": "2026-03-03T18:08:37.285Z",
+      "result": "lost",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T18:08:54.911Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 207,
+      "total": 211,
       "won": 104,
-      "lost": 102,
+      "lost": 106,
       "push": 1,
-      "rate": 50.2,
+      "rate": 49.3,
       "pending": 17
     },
     "bySport": {
       "NBA": {
-        "total": 65,
+        "total": 68,
         "won": 30,
-        "rate": 46.2
+        "rate": 44.1
       },
       "NHL": {
         "total": 64,
@@ -4436,9 +4516,9 @@
         "rate": 48.4
       },
       "NCAAB": {
-        "total": 78,
+        "total": 79,
         "won": 43,
-        "rate": 55.1
+        "rate": 54.4
       }
     },
     "byGrade": {
@@ -4453,9 +4533,9 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 77,
+        "total": 78,
         "won": 41,
-        "rate": 53.2
+        "rate": 52.6
       },
       "D+": {
         "total": 16,
@@ -4468,9 +4548,9 @@
         "rate": 50
       },
       "C+": {
-        "total": 24,
+        "total": 27,
         "won": 8,
-        "rate": 33.3
+        "rate": 29.6
       },
       "C": {
         "total": 22,
@@ -4490,28 +4570,28 @@
         "rate": 51.3
       },
       "Spread": {
-        "total": 47,
+        "total": 48,
         "won": 24,
-        "rate": 51.1
+        "rate": 50
       },
       "Total": {
-        "total": 39,
+        "total": 40,
         "won": 21,
-        "rate": 53.8
+        "rate": 52.5
       },
       "Team Total": {
-        "total": 82,
+        "total": 84,
         "won": 39,
-        "rate": 47.6
+        "rate": 46.4
       }
     },
     "recentForm": {
-      "won": 27,
-      "lost": 22,
-      "push": 1,
-      "rate": 54
+      "won": 26,
+      "lost": 24,
+      "push": 0,
+      "rate": 52
     },
-    "lastUpdated": "2026-03-03T17:53:55.060Z"
+    "lastUpdated": "2026-03-03T18:08:54.912Z"
   },
   "version": 1
 }
