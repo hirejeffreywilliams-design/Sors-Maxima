@@ -1251,7 +1251,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                               <span className="text-[10px] text-muted-foreground/60">{new Date(leg.gameTime).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
                             )}
                             {leg.ev > 0 && (
-                              <span className="text-[10px] font-medium text-emerald-400">+{leg.ev.toFixed(1)}% EV</span>
+                              <span className="text-[10px] font-medium text-emerald-400">{leg.ev > 35 ? "35%+" : `+${leg.ev.toFixed(1)}%`} EV</span>
                             )}
                             <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% signal</span>
                           </div>
@@ -1644,7 +1644,7 @@ export default function CommandCenter() {
                 <div>
                   <p className="text-xs text-muted-foreground">Highest EV Ticket</p>
                   <p className="text-2xl font-bold tabular-nums text-emerald-500" data-testid="text-highest-ev">
-                    {ticketsData?.tickets[0]?.combinedEV ? `+${ticketsData.tickets[0].combinedEV}%` : feed.topPicks[0]?.ev ? `+${feed.topPicks[0].ev.toFixed(1)}%` : "–"}
+                    {ticketsData?.tickets[0]?.combinedEV ? (ticketsData.tickets[0].combinedEV > 35 ? "35%+" : `+${ticketsData.tickets[0].combinedEV}%`) : feed.topPicks[0]?.ev ? (feed.topPicks[0].ev > 35 ? "35%+" : `+${feed.topPicks[0].ev.toFixed(1)}%`) : "–"}
                   </p>
                   <p className="text-[10px] text-muted-foreground">
                     {ticketsData?.tickets[0]?.name || "analyzing markets"}

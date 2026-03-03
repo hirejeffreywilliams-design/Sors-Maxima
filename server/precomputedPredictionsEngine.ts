@@ -23,6 +23,7 @@ import { getTwoWayMatchupImpact } from "./two-way-contracts";
 import { getMLBTeamStats, findMLBTeam, type MLBTeamStats } from "./mlb-stats-provider";
 import { getInternationalLifeChangerPicks, type SoccerPick } from "./internationalSportsEngine";
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
+import { applyPatternAdjustment } from "./communityLossPatternEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } from "./pick-insight-engine";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
@@ -91,6 +92,9 @@ export interface PrecomputedPick {
   timingAdvice: string;
   releaseSchedule: PickReleaseSchedule;
   isExclusive: boolean;
+  communitySignal?: "bearish" | "bullish" | "neutral";
+  communityPatternWarning?: string;
+  communityPatternCue?: string;
   monteCarloData?: {
     simulations: number;
     predictedHomeScore: number;
@@ -1129,6 +1133,19 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       const mappedFactors = (fusion.signals || []).slice(0, 5).map(s => ({ name: s.source, impact: s.strength, direction: s.direction || "neutral" }));
       let gameTwoWayNote: string | undefined;
 
+      // ── Community Loss Pattern Engine ──────────────────────────────────────
+      // Checks this pick against historically toxic/golden patterns learned from
+      // settled picks and game outcomes. Adjusts confidence and adds warning factor.
+      const patternResult = applyPatternAdjustment({ sport, betType: bet.betType, odds: bet.odds, grade: fusion.grade });
+      if (patternResult.confidenceDelta !== 0) {
+        confidence = Math.min(70, Math.max(22, confidence + patternResult.confidenceDelta));
+        if (patternResult.communitySignal === "bearish") {
+          mappedFactors.push({ name: "community_pattern_risk", impact: Math.abs(patternResult.confidenceDelta), direction: "negative" });
+        } else if (patternResult.communitySignal === "bullish") {
+          mappedFactors.push({ name: "community_pattern_edge", impact: patternResult.confidenceDelta, direction: "positive" });
+        }
+      }
+
       // Add sport-specific factors from official stats APIs
       try {
         if (sport === "NHL" && homeNHLStats && awayNHLStats) {
@@ -1315,6 +1332,9 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         timingAdvice: pickTiming.timingAdvice,
         releaseSchedule: buildReleaseSchedule(now),
         isExclusive: isExclusivePick({ confidence, edge: Math.round(ev * 10) / 10, grade: fusion.grade || gradeFromConfidence(confidence) }),
+        communitySignal: patternResult.communitySignal !== "neutral" ? patternResult.communitySignal : undefined,
+        communityPatternWarning: patternResult.warningText,
+        communityPatternCue: patternResult.positiveCue,
         monteCarloData: mcSim ? {
           simulations: mcSim.simulations || 10000,
           predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,

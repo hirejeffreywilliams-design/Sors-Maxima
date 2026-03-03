@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { recordPickOutcome } from "./communityLossPatternEngine";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -376,6 +377,17 @@ export function settlePicksForGame(params: {
       data.settled.push(pick);
       settledIds.add(pick.id);
       settled++;
+
+      // Feed outcome back into community loss pattern engine
+      try {
+        recordPickOutcome({
+          sport: pick.sport,
+          betType: pick.betType || "moneyline",
+          odds: pick.odds ?? -110,
+          grade: pick.grade,
+          won: result === "won",
+        });
+      } catch (_) {}
     }
 
     data.pending = data.pending.filter(p => !settledIds.has(p.id));
