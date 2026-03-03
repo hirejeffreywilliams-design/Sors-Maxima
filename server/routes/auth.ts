@@ -1,11 +1,11 @@
 import type { Express } from "express";
-import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword, changePassword } from "../dbAuthService";
+import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword, changePassword, getUserByEmail, resetPasswordByEmail } from "../dbAuthService";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "../trustedDeviceService";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
 import { stripeService } from "../stripeService";
-import { generateAndStoreCode, validateCode, markEmailVerified, getEmailVerifiedStatus } from "../emailVerification";
-import { sendVerificationEmail } from "../emailService";
+import { generateAndStoreCode, validateCode, markEmailVerified, getEmailVerifiedStatus, generateResetToken, consumeResetToken, isValidResetToken } from "../emailVerification";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../emailService";
 
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
@@ -227,12 +227,47 @@ export function registerAuthRoutes(app: Express): void {
     }
   });
 
+  // Step 1: Request a reset link via email
+  app.post("/api/auth/forgot-password", sensitiveRouteRateLimitMiddleware, async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email || typeof email !== "string") {
+        return res.status(400).json({ error: "Email is required" });
+      }
+
+      // Always return success (don't reveal if email exists)
+      const user = await getUserByEmail(email.trim().toLowerCase());
+      if (user && !user.isBanned) {
+        const token = generateResetToken(email.trim().toLowerCase());
+        const host = (req.headers["x-forwarded-host"] as string) || req.headers.host || process.env.REPLIT_DOMAINS?.split(",")[0] || "localhost:5000";
+        const protocol = host.includes("localhost") ? "http" : "https";
+        const resetLink = `${protocol}://${host}/reset-password?token=${token}`;
+        await sendPasswordResetEmail(user.email, user.username, resetLink);
+      }
+
+      return res.json({ success: true, message: "If an account with that email exists, we've sent reset instructions." });
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      return res.status(500).json({ error: "Failed to process request" });
+    }
+  });
+
+  // Step 2: Validate a reset token (used by the frontend before showing the form)
+  app.get("/api/auth/reset-password/validate", async (req, res) => {
+    const { token } = req.query;
+    if (!token || typeof token !== "string") {
+      return res.status(400).json({ valid: false, error: "Token is required" });
+    }
+    return res.json({ valid: isValidResetToken(token) });
+  });
+
+  // Step 2: Submit new password with token
   app.post("/api/auth/reset-password", sensitiveRouteRateLimitMiddleware, async (req, res) => {
     try {
-      const { username, email, newPassword } = req.body;
+      const { token, newPassword } = req.body;
 
-      if (!username || !email || !newPassword) {
-        return res.status(400).json({ error: "Username, email, and new password are all required" });
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: "Reset token and new password are required" });
       }
 
       if (newPassword.length < 8) {
@@ -243,13 +278,18 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(400).json({ error: "Password must include uppercase, lowercase, and a number" });
       }
 
-      const result = await resetPassword(username, email, newPassword);
+      const email = consumeResetToken(token);
+      if (!email) {
+        return res.status(400).json({ error: "This reset link has expired or already been used. Please request a new one." });
+      }
+
+      const result = await resetPasswordByEmail(email, newPassword);
 
       if (!result.success) {
         return res.status(400).json({ error: result.error });
       }
 
-      return res.json({ success: true, message: "Password has been reset. You can now sign in with your new password." });
+      return res.json({ success: true, message: "Password updated. You can now sign in with your new password." });
     } catch (err) {
       console.error("Password reset error:", err);
       return res.status(500).json({ error: "Password reset failed" });

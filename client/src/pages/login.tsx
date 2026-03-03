@@ -30,11 +30,8 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
   const [regDateOfBirth, setRegDateOfBirth] = useState("");
   
-  // Reset form
-  const [resetUsername, setResetUsername] = useState("");
+  // Reset form (Step 1 — email only)
   const [resetEmail, setResetEmail] = useState("");
-  const [resetNewPassword, setResetNewPassword] = useState("");
-  const [resetConfirmPassword, setResetConfirmPassword] = useState("");
   const [resetSuccess, setResetSuccess] = useState(false);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -145,33 +142,18 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
     e.preventDefault();
     setError("");
 
-    if (resetNewPassword !== resetConfirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    const resetChecks = {
-      length: resetNewPassword.length >= 8,
-      uppercase: /[A-Z]/.test(resetNewPassword),
-      lowercase: /[a-z]/.test(resetNewPassword),
-      number: /[0-9]/.test(resetNewPassword),
-    };
-    if (!Object.values(resetChecks).every(Boolean)) {
-      setError("Password must be at least 8 characters with uppercase, lowercase, and a number");
+    if (!resetEmail.trim()) {
+      setError("Please enter your email address");
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
+      const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: resetUsername,
-          email: resetEmail,
-          newPassword: resetNewPassword,
-        }),
+        body: JSON.stringify({ email: resetEmail.trim() }),
       });
 
       const data = await response.json();
@@ -179,7 +161,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
       if (response.ok) {
         setResetSuccess(true);
       } else {
-        setError(data.error || "Password reset failed");
+        setError(data.error || "Failed to send reset email");
       }
     } catch (err) {
       setError("Connection error. Please try again.");
@@ -202,7 +184,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                 Reset Password
               </CardTitle>
               <CardDescription>
-                Enter your username and email to verify your identity, then choose a new password.
+                Enter your account email and we'll send you a secure reset link.
               </CardDescription>
             </div>
           </CardHeader>
@@ -220,9 +202,9 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                   <CheckCircle2 className="w-6 h-6 text-green-500" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-semibold text-lg">Password Reset Successful</p>
+                  <p className="font-semibold text-lg">Check Your Inbox</p>
                   <p className="text-sm text-muted-foreground">
-                    Your password has been updated. You can now sign in with your new password.
+                    If an account with that email exists, we've sent a secure reset link. Check your spam folder if you don't see it within a few minutes.
                   </p>
                 </div>
                 <Button
@@ -230,10 +212,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                   onClick={() => {
                     setShowResetForm(false);
                     setResetSuccess(false);
-                    setResetUsername("");
                     setResetEmail("");
-                    setResetNewPassword("");
-                    setResetConfirmPassword("");
                     setError("");
                   }}
                   data-testid="button-back-to-login"
@@ -244,93 +223,33 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
             ) : (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="reset-username">Username</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="reset-username"
-                      type="text"
-                      placeholder="Enter your username"
-                      value={resetUsername}
-                      onChange={(e) => setResetUsername(e.target.value)}
-                      className="pl-10"
-                      required
-                      data-testid="input-reset-username"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
+                  <Label htmlFor="reset-email">Account Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="reset-email"
                       type="email"
-                      placeholder="Enter your email"
+                      placeholder="Enter your account email"
                       value={resetEmail}
                       onChange={(e) => setResetEmail(e.target.value)}
                       className="pl-10"
                       required
+                      autoFocus
                       data-testid="input-reset-email"
                     />
                   </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reset-new-password">New Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="reset-new-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Choose a new password"
-                      value={resetNewPassword}
-                      onChange={(e) => setResetNewPassword(e.target.value)}
-                      className="pl-10 pr-10"
-                      required
-                      data-testid="input-reset-new-password"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
                   <p className="text-xs text-muted-foreground">
-                    Must be 8+ characters with uppercase, lowercase, and a number
+                    We'll send a secure link to this address. It expires in 1 hour.
                   </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="reset-confirm-password">Confirm New Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="reset-confirm-password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Confirm your new password"
-                      value={resetConfirmPassword}
-                      onChange={(e) => setResetConfirmPassword(e.target.value)}
-                      className="pl-10"
-                      required
-                      data-testid="input-reset-confirm-password"
-                    />
-                  </div>
-                  {resetConfirmPassword && resetNewPassword !== resetConfirmPassword && (
-                    <p className="text-xs text-destructive">Passwords do not match</p>
-                  )}
                 </div>
 
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={loading || resetNewPassword !== resetConfirmPassword}
+                  disabled={loading || !resetEmail.trim()}
                   data-testid="button-reset-password"
                 >
-                  {loading ? "Resetting..." : "Reset Password"}
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </Button>
 
                 <Button
@@ -340,10 +259,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                   onClick={() => {
                     setShowResetForm(false);
                     setError("");
-                    setResetUsername("");
                     setResetEmail("");
-                    setResetNewPassword("");
-                    setResetConfirmPassword("");
                   }}
                   data-testid="button-cancel-reset"
                 >

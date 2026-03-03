@@ -403,3 +403,33 @@ export async function sendDay7Email(to: string, username: string, tier: string):
     return false;
   }
 }
+
+export async function sendPasswordResetEmail(to: string, username: string, resetLink: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: "Reset Your Sors Maxima Password",
+      html: `
+        <div style="background-color:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:500px;margin:0 auto;">
+          <img src="https://app.sorsmaxima.com/logo.png" alt="Sors Maxima" style="width:48px;height:48px;border-radius:12px;margin-bottom:24px;" />
+          <h1 style="color:white;margin:0 0 8px 0;">Password Reset</h1>
+          <p style="color:#94a3b8;margin:0 0 24px 0;">Hi ${username},</p>
+          <p style="color:#cbd5e1;margin:0 0 24px 0;">We received a request to reset your Sors Maxima password. Click the button below to choose a new one. This link expires in <strong style="color:#f1f5f9;">1 hour</strong>.</p>
+          <a href="${resetLink}" style="display:inline-block;background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:600;margin-bottom:24px;">Reset My Password →</a>
+          <p style="color:#64748b;font-size:13px;margin:0 0 8px 0;">Or copy this link into your browser:</p>
+          <p style="color:#6366f1;font-size:12px;word-break:break-all;margin:0 0 24px 0;">${resetLink}</p>
+          <div style="border-top:1px solid #1e293b;padding-top:16px;">
+            <p style="color:#475569;font-size:12px;margin:0;">If you didn't request this, you can safely ignore this email. Your password will not change unless you click the link above.</p>
+          </div>
+        </div>
+      `,
+    });
+    if (error) { console.error("Error sending password reset email:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send password reset email:", err);
+    return false;
+  }
+}

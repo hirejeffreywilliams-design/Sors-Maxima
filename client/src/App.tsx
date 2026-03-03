@@ -73,7 +73,8 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword } from "lucide-react";
+const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -758,6 +759,55 @@ function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () 
   );
 }
 
+function EmailVerificationBanner({ authState }: { authState: AuthState }) {
+  const [, setLocation] = useLocation();
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  if (authState.isAdmin || authState.emailVerified !== false) return null;
+
+  const handleResend = async () => {
+    setSending(true);
+    try {
+      await fetch("/api/auth/resend-verification", { method: "POST" });
+      setSent(true);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-sm mt-2" data-testid="banner-email-verification">
+      <MailWarning className="w-4 h-4 text-amber-500 shrink-0" />
+      <p className="text-amber-700 dark:text-amber-400 flex-1">
+        <span className="font-medium">Please verify your email address</span>
+        {" "}— check your inbox for the verification code.
+      </p>
+      <div className="flex items-center gap-2 shrink-0">
+        {sent ? (
+          <span className="text-xs text-green-600 dark:text-green-400">Sent!</span>
+        ) : (
+          <button
+            onClick={handleResend}
+            disabled={sending}
+            className="text-xs underline text-amber-700 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-200 disabled:opacity-50"
+            data-testid="button-resend-verification"
+          >
+            {sending ? "Sending..." : "Resend code"}
+          </button>
+        )}
+        <button
+          onClick={() => setLocation("/verify-email")}
+          className="text-xs bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded font-medium transition-colors"
+          data-testid="button-verify-email"
+        >
+          Verify now
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -818,6 +868,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
 
       <div className="max-w-screen-2xl mx-auto px-4 lg:px-6 pt-2">
         <GeoComplianceBanner />
+        <EmailVerificationBanner authState={authState} />
       </div>
       
       <ParlaySlipProvider username={authState.username}>
@@ -891,7 +942,7 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email' && location !== '/apply',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email' && location !== '/apply' && location !== '/reset-password',
   });
 
   useUTMCapture();
@@ -946,6 +997,14 @@ function AppContent() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  if (location === '/reset-password') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <ResetPasswordPage />
+      </Suspense>
+    );
+  }
+
   if (location === '/verify-email') {
     return (
       <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
@@ -975,14 +1034,6 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <LandingPage />;
-  }
-
-  const emailVerified = authState.emailVerified ?? true;
-  if (!emailVerified && !authState.isAdmin && location !== '/verify-email') {
-    const exemptPaths = ['/legal', '/help', '/changelog', '/pricing'];
-    if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
-      return <Redirect to="/verify-email" />;
-    }
   }
 
   if (!authState.isAdmin) {

@@ -737,20 +737,100 @@
       "savedAt": "2026-03-03T12:50:52.224Z"
     },
     {
-      "id": "precomp-NBA-401810746-total-0d0f95fbfc",
+      "id": "precomp-NBA-401810746-total-da07c9a0fa",
       "gameId": "401810746",
       "sport": "NBA",
       "game": "New Orleans Pelicans @ Los Angeles Lakers",
       "homeTeam": "Los Angeles Lakers",
       "awayTeam": "New Orleans Pelicans",
-      "pick": "Over 241.5",
+      "pick": "Over 242",
       "betType": "total",
       "odds": -110,
       "grade": "A",
       "confidence": 65,
       "ev": 24.09,
       "gameTime": "2026-03-04T03:30Z",
-      "savedAt": "2026-03-03T13:32:51.258Z"
+      "savedAt": "2026-03-03T13:44:15.509Z"
+    },
+    {
+      "id": "precomp-NBA-401810746-team_total-e6a3aa4e83",
+      "gameId": "401810746",
+      "sport": "NBA",
+      "game": "New Orleans Pelicans @ Los Angeles Lakers",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "New Orleans Pelicans",
+      "pick": "Los Angeles Lakers Over 125.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T03:30Z",
+      "savedAt": "2026-03-03T13:44:15.509Z"
+    },
+    {
+      "id": "precomp-NBA-401810746-team_total-2bf52813df",
+      "gameId": "401810746",
+      "sport": "NBA",
+      "game": "New Orleans Pelicans @ Los Angeles Lakers",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "New Orleans Pelicans",
+      "pick": "New Orleans Pelicans Over 117",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T03:30Z",
+      "savedAt": "2026-03-03T13:44:15.509Z"
+    },
+    {
+      "id": "precomp-NBA-401810739-team_total-b098eb576d",
+      "gameId": "401810739",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Cleveland Cavaliers",
+      "homeTeam": "Cleveland Cavaliers",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Cleveland Cavaliers Over 113",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A+",
+      "confidence": 67,
+      "ev": 27.91,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:45:09.481Z"
+    },
+    {
+      "id": "precomp-NBA-401810746-total-3a7b85564c",
+      "gameId": "401810746",
+      "sport": "NBA",
+      "game": "New Orleans Pelicans @ Los Angeles Lakers",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "New Orleans Pelicans",
+      "pick": "Over 242.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T03:30Z",
+      "savedAt": "2026-03-03T13:45:09.481Z"
+    },
+    {
+      "id": "precomp-NHL-401803312-team_total-6906049b2b",
+      "gameId": "401803312",
+      "sport": "NHL",
+      "game": "Florida Panthers @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Florida Panthers",
+      "pick": "New Jersey Devils Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:46:01.009Z"
     }
   ],
   "settled": [
@@ -61422,16 +61502,136 @@
       "homeScore": 137,
       "awayScore": 117,
       "settledAt": "2026-03-03T13:30:33.775Z"
+    },
+    {
+      "id": "precomp-NBA-401810746-total-0d0f95fbfc",
+      "gameId": "401810746",
+      "sport": "NBA",
+      "game": "New Orleans Pelicans @ Los Angeles Lakers",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "New Orleans Pelicans",
+      "pick": "Over 241.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T03:30Z",
+      "savedAt": "2026-03-03T13:32:51.258Z",
+      "result": "won",
+      "homeScore": 137,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T13:34:28.923Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-total-9aea417815",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Over 229",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:38:31.820Z",
+      "result": "won",
+      "homeScore": 118,
+      "awayScore": 123,
+      "settledAt": "2026-03-03T13:39:40.791Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-team_total-d9e1ae4b5c",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Orlando Magic Over 122.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:38:31.820Z",
+      "result": "lost",
+      "homeScore": 118,
+      "awayScore": 123,
+      "settledAt": "2026-03-03T13:39:40.791Z"
+    },
+    {
+      "id": "precomp-NBA-401810740-team_total-ff75eb7520",
+      "gameId": "401810740",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Washington Wizards",
+      "pick": "Washington Wizards Over 107",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T13:38:31.820Z",
+      "result": "won",
+      "homeScore": 118,
+      "awayScore": 123,
+      "settledAt": "2026-03-03T13:39:40.791Z"
+    },
+    {
+      "id": "precomp-NBA-401810741-total-fa9897a695",
+      "gameId": "401810741",
+      "sport": "NBA",
+      "game": "Brooklyn Nets @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Brooklyn Nets",
+      "pick": "Over 226",
+      "betType": "total",
+      "odds": -108,
+      "grade": "A",
+      "confidence": 65,
+      "ev": 25.19,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T13:38:31.820Z",
+      "result": "lost",
+      "homeScore": 102,
+      "awayScore": 106,
+      "settledAt": "2026-03-03T13:39:40.804Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808279-total-f50ba58b8d",
+      "gameId": "401808279",
+      "sport": "NCAAB",
+      "game": "Vanderbilt Commodores @ Ole Miss Rebels",
+      "homeTeam": "Ole Miss Rebels",
+      "awayTeam": "Vanderbilt Commodores",
+      "pick": "Under 153.5",
+      "betType": "total",
+      "odds": -115,
+      "grade": "A+",
+      "confidence": 70,
+      "ev": 30.87,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T13:42:07.900Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T13:43:16.908Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2980,
-      "won": 1654,
-      "lost": 1285,
+      "total": 2986,
+      "won": 1657,
+      "lost": 1288,
       "push": 41,
       "rate": 55.5,
-      "pending": 47
+      "pending": 52
     },
     "bySport": {
       "NHL": {
@@ -61440,14 +61640,14 @@
         "rate": 55.3
       },
       "NCAAB": {
-        "total": 1005,
+        "total": 1006,
         "won": 585,
         "rate": 58.2
       },
       "NBA": {
-        "total": 1211,
-        "won": 652,
-        "rate": 53.8
+        "total": 1216,
+        "won": 655,
+        "rate": 53.9
       },
       "MLB": {
         "total": 194,
@@ -61497,20 +61697,20 @@
         "rate": 47.5
       },
       "A": {
-        "total": 242,
-        "won": 136,
-        "rate": 56.2
+        "total": 247,
+        "won": 139,
+        "rate": 56.3
       },
       "A+": {
-        "total": 879,
+        "total": 880,
         "won": 526,
         "rate": 59.8
       }
     },
     "byMarket": {
       "Team Total": {
-        "total": 819,
-        "won": 480,
+        "total": 821,
+        "won": 481,
         "rate": 58.6
       },
       "Spread": {
@@ -61519,8 +61719,8 @@
         "rate": 50.4
       },
       "Total": {
-        "total": 1578,
-        "won": 878,
+        "total": 1582,
+        "won": 880,
         "rate": 55.6
       },
       "Moneyline": {
@@ -61530,12 +61730,12 @@
       }
     },
     "recentForm": {
-      "won": 28,
-      "lost": 22,
+      "won": 27,
+      "lost": 23,
       "push": 0,
-      "rate": 56
+      "rate": 54
     },
-    "lastUpdated": "2026-03-03T13:33:25.993Z"
+    "lastUpdated": "2026-03-03T13:47:15.055Z"
   },
   "version": 1
 }

@@ -212,6 +212,45 @@ export async function getUserSubscription(userId: number): Promise<{
   }
 }
 
+export async function getUserByEmail(email: string): Promise<DbUser | null> {
+  try {
+    const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+    return user ? (user as unknown as DbUser) : null;
+  } catch (error: any) {
+    logError(error, { context: "getUserByEmail", email });
+    return null;
+  }
+}
+
+export async function resetPasswordByEmail(
+  email: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return { success: false, error: "No account found for that email address" };
+    }
+
+    if (user.isBanned) {
+      return { success: false, error: "This account has been suspended. Contact support for assistance." };
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+    await db.update(users).set({
+      passwordHash,
+      loginAttempts: 0,
+      lockedUntil: null,
+    }).where(eq(users.id, user.id));
+
+    logInfo(`Password reset via email token for user: ${user.username}`);
+    return { success: true };
+  } catch (error: any) {
+    logError(error, { context: "resetPasswordByEmail", email });
+    return { success: false, error: "Password reset failed. Please try again." };
+  }
+}
+
 export async function resetPassword(
   username: string,
   email: string,

@@ -63,6 +63,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Stripe Payment Integration**: Handles subscriptions and checkout flow for Sharp, Edge, and Max tiers.
 - **Strategy Accountability System**: Users can choose from 9 preset betting strategies with per-leg violation tracking.
 - **Two-Way Contract Intelligence Engine**: Fetches NBA team rosters, identifies two-way contract players, calculates roster stability, and integrates "Two-Way Roster Risk" factor into NBA predictions.
+- **Secure Password Reset Flow**: Two-step email-token-based reset: user submits email → receives link to `/reset-password?token=xxx` → sets new password. Token expires in 1 hour, single-use (consumed on redemption). Never reveals whether email exists.
+- **Email Verification Banner**: Persistent amber banner shown to unverified authenticated users with inline "Resend code" and "Verify now" actions. Non-blocking (soft enforcement) — replaces previous hard redirect.
 
 ## External Dependencies
 - **Frontend Framework**: React

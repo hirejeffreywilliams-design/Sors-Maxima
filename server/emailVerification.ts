@@ -1,8 +1,37 @@
 import { db } from "./db";
 import { users } from "./dbSchema";
 import { eq } from "drizzle-orm";
+import crypto from "crypto";
 
 const verificationCodes = new Map<string, { code: string; expires: number; email: string }>();
+
+// ─── Password Reset Tokens ───────────────────────────────────────────────────
+const resetTokens = new Map<string, { email: string; expires: number }>();
+
+export function generateResetToken(email: string): string {
+  const token = crypto.randomBytes(32).toString("hex");
+  const expires = Date.now() + 60 * 60 * 1000; // 1 hour
+  resetTokens.set(token, { email, expires });
+  return token;
+}
+
+export function consumeResetToken(token: string): string | null {
+  const record = resetTokens.get(token);
+  if (!record) return null;
+  if (Date.now() > record.expires) {
+    resetTokens.delete(token);
+    return null;
+  }
+  resetTokens.delete(token);
+  return record.email;
+}
+
+export function isValidResetToken(token: string): boolean {
+  const record = resetTokens.get(token);
+  if (!record) return false;
+  if (Date.now() > record.expires) { resetTokens.delete(token); return false; }
+  return true;
+}
 
 export function generateAndStoreCode(userId: string, email: string): string {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
