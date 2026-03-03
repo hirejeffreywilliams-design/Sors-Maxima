@@ -239,6 +239,38 @@
       "ev": 8.82,
       "gameTime": "2026-03-03T16:35:31.103Z",
       "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-spread-751a43a7e9",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Minnesota Timberwolves -15",
+      "betType": "spread",
+      "odds": -112,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 23.04,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T22:18:50.744Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-team_total-6de523c60c",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Memphis Grizzlies Over 111",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T22:18:50.744Z"
     }
   ],
   "settled": [
@@ -7281,22 +7313,62 @@
       "homeScore": 77,
       "awayScore": 51,
       "settledAt": "2026-03-03T22:05:53.078Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-spread-37bc21e627",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Boston Celtics -6",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 62,
+      "ev": 6.91,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-03T22:14:29.716Z",
+      "result": "lost",
+      "homeScore": 81,
+      "awayScore": 108,
+      "settledAt": "2026-03-03T22:15:37.233Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820779-spread-0dec37bae3",
+      "gameId": "401820779",
+      "sport": "NCAAB",
+      "game": "Clemson Tigers @ North Carolina Tar Heels",
+      "homeTeam": "North Carolina Tar Heels",
+      "awayTeam": "Clemson Tigers",
+      "pick": "North Carolina Tar Heels -3",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T22:14:30.409Z",
+      "result": "won",
+      "homeScore": 89,
+      "awayScore": 82,
+      "settledAt": "2026-03-03T22:15:37.237Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 352,
-      "won": 168,
-      "lost": 181,
+      "total": 354,
+      "won": 169,
+      "lost": 182,
       "push": 3,
       "rate": 47.7,
-      "pending": 15
+      "pending": 17
     },
     "bySport": {
       "NBA": {
-        "total": 126,
+        "total": 127,
         "won": 57,
-        "rate": 45.2
+        "rate": 44.9
       },
       "NHL": {
         "total": 76,
@@ -7304,9 +7376,9 @@
         "rate": 48.7
       },
       "NCAAB": {
-        "total": 150,
-        "won": 74,
-        "rate": 49.3
+        "total": 151,
+        "won": 75,
+        "rate": 49.7
       }
     },
     "byGrade": {
@@ -7321,9 +7393,9 @@
         "rate": 71.9
       },
       "B-": {
-        "total": 120,
-        "won": 60,
-        "rate": 50
+        "total": 121,
+        "won": 61,
+        "rate": 50.4
       },
       "D+": {
         "total": 30,
@@ -7336,9 +7408,9 @@
         "rate": 45.5
       },
       "C+": {
-        "total": 49,
+        "total": 50,
         "won": 19,
-        "rate": 38.8
+        "rate": 38
       },
       "C": {
         "total": 40,
@@ -7363,9 +7435,9 @@
         "rate": 55.6
       },
       "Spread": {
-        "total": 89,
-        "won": 44,
-        "rate": 49.4
+        "total": 91,
+        "won": 45,
+        "rate": 49.5
       },
       "Total": {
         "total": 66,
@@ -7384,7 +7456,7 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-03T22:10:05.075Z"
+    "lastUpdated": "2026-03-03T22:19:48.480Z"
   },
   "version": 1
 }

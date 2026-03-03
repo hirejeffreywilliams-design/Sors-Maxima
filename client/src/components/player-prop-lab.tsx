@@ -34,8 +34,18 @@ interface PlayerData {
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
 
-function StatBars({ values, label }: { values: number[]; label: string }) {
-  const max = Math.max(...values);
+function StatBars({ values, label }: { values: number[] | null | undefined; label: string }) {
+  if (!values || values.length === 0) {
+    return (
+      <div className="space-y-2">
+        <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        <div className="flex items-center justify-center h-20 rounded-md bg-muted/30">
+          <p className="text-xs text-muted-foreground">No data available</p>
+        </div>
+      </div>
+    );
+  }
+  const max = Math.max(...values, 0);
   return (
     <div className="space-y-2">
       <p className="text-xs text-muted-foreground font-medium">{label}</p>

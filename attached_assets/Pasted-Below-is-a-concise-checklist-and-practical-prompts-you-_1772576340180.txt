@@ -1,0 +1,88 @@
+Below is a concise checklist and practical prompts you can use to ensure your sports-bet analyzer is correct, fair, and learns properly.
+
+1) Data quality & provenance
+- Verify sources (official leagues, trusted APIs).  
+- Check completeness (missing rows, timestamps).  
+- Validate consistency (team names, event IDs, timezones).  
+- Sanity-check ranges (scores, odds).  
+- Log raw data and any cleaning steps for reproducibility.
+
+2) Labeling & ground truth
+- Define clear labels (win/lose/push, margin, cashout).  
+- Use deterministic rules for labeling (e.g., final score at official match end).  
+- Track label versioning and reasons for relabeling.
+
+3) Feature engineering
+- Avoid using future data (no lookahead/leakage).  
+- Create time-aware features (rolling averages, form over N games).  
+- Normalize features across seasons/teams when necessary.
+
+4) Model training & evaluation
+- Use a held-out test set separated by time (temporal split) not random.  
+- Employ cross-validation that respects time ordering.  
+- Evaluate multiple metrics: calibration (Brier), discrimination (AUC), accuracy, log loss, expected value (ROI), profit simulations.  
+- Backtest on historical odds to simulate real betting (transaction costs, limits).
+
+5) Avoiding leakage & overfitting
+- Ensure no data from after the event influences predictions.  
+- Limit feature count relative to sample size or use regularization.  
+- Test on entirely new seasons/leagues.
+
+6) Calibration & profitability
+- Check probability calibration (reliability curve, isotonic/Platt if needed).  
+- Translate probabilities to staking strategy and simulate bankroll over time.  
+- Compute edge = model_prob - implied_prob_from_odds; analyze distribution.
+
+7) Fairness, bias, robustness
+- Check performance across teams, leagues, markets, home/away, weather.  
+- Identify systematic biases (favored teams, day/night).  
+- Test robustness to missing or noisy inputs.
+
+8) Explainability & auditing
+- Produce per-ticket explanations (feature importances, SHAP values).  
+- Log decision rationale and confidence for each ticket.  
+- Keep an audit trail for manual review.
+
+9) Monitoring & live validation
+- Monitor drift (input distribution, performance metrics).  
+- Set alerts for performance degradation or suspicious profit patterns.  
+- Periodically retrain with new labeled outcomes.
+
+10) Human-in-the-loop & adjudication rules
+- Define how humans can override model recommendations and how overrides are recorded.  
+- Establish rules for ambiguous events (abandoned matches, post-match changes).
+
+Practical prompts to ask an AI reviewer (copy/paste and adapt)
+
+- "Review my data pipeline for leakage risks. I ingest [list sources], aggregate by [method], and create features [list]. Point out any steps that could introduce lookahead or leakage and propose fixes."
+- "Given these labels and labeling rules: [describe], verify they match official definitions and suggest edge cases I should handle (e.g., abandoned matches, postponements)."
+- "Evaluate model X (inputs: [features], architecture: [type], training split: [dates]) for overfitting and data leakage. Suggest better validation strategies and metrics to report."
+- "Assess my backtest methodology: I simulate bets using historical odds with fees/limits = [values]. Confirm whether the backtest is realistic and suggest improvements (e.g., limiting stakes, market impact)."
+- "Check calibration of predicted probabilities. Here are predictions vs outcomes (attach sample). Recommend calibration tests and fixes if needed."
+- "Audit fairness: compare model performance across groups [teams/leagues/home/away]. Identify significant disparities and propose mitigation."
+- "Generate a checklist for production monitoring and alert thresholds for drift, ROI drop, or unusually concentrated stakes."
+
+How to ask for ticket judgment checks
+- Provide: ticket details (event id, teams, market, model probability, implied probability from odds, stake), model features used, and final outcome.  
+- Ask the AI to:
+  - Recompute implied probability and edge.
+  - Re-evaluate ticket classification (good/bad/uncertain) based on threshold rules you define.
+  - Provide explanation (top contributing features, confidence).
+  - Flag tickets for manual review if edge is marginal, confidence low, or explanation inconsistent.
+
+Example short template to send to the AI for a ticket
+- Event: [league, teams, date/time]  
+- Market: [e.g., Match Winner]  
+- Odds: [bookie odds] => implied prob = [calc]  
+- Model prob: [p_model]  
+- Stake: [units]  
+- Features: [key features/values]  
+- Ask: "Recompute edge, classify this bet using thresholds (edge > X and p_confidence > Y), provide top 3 feature explanations, and say if this should be flagged for manual review."
+
+Key metrics to report regularly
+- ROI, total profit/loss, Sharpe ratio, max drawdown, strike rate, average edge, Brier score, AUC, calibration error, sample size per market.
+
+Wrap-up
+- Automate the checklist, keep auditable logs, use temporal validation, test calibration and profitability with realistic backtests, and require explainable rationale for ticket judgments with human review for edge cases.
+
+If you want, paste one example ticket or a summary of your pipeline and I’ll run a focused review checklist and sample prompts tailored to your system.
