@@ -154,6 +154,33 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ── Navigation Bar ── */}
+      <nav className="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-md" data-testid="nav-landing">
+        <div className="max-w-screen-xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-7 h-7 rounded-lg" />
+            <span className="font-semibold text-sm text-foreground tracking-tight">Sors Maxima</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Link href="/pricing">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-xs hidden sm:flex" data-testid="nav-link-pricing">
+                Pricing
+              </Button>
+            </Link>
+            <Link href="/track-record">
+              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground text-xs hidden sm:flex" data-testid="nav-link-track-record">
+                Track Record
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button variant="outline" size="sm" className="text-xs font-medium" data-testid="nav-button-member-login">
+                Member Login
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       <section className="relative overflow-hidden" data-testid="section-hero">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
@@ -414,6 +441,12 @@ export default function LandingPage() {
               </Button>
             </Link>
           </div>
+          <p className="text-sm text-gray-400" data-testid="text-footer-member-login">
+            Already a member?{" "}
+            <Link href="/login" className="text-primary underline underline-offset-2 hover:text-primary/80" data-testid="link-footer-login">
+              Log in here
+            </Link>
+          </p>
           <p className="text-xs text-gray-400 max-w-md mx-auto pt-4" data-testid="text-landing-disclaimer">
             For entertainment and educational purposes only. This is an analysis tool, not a sportsbook. Not gambling advice.
             No guarantees of accuracy or profitability. Must be 21+. We may earn referral fees from partner sportsbooks.
