@@ -80,10 +80,14 @@ export function BettingAssistant() {
       // Re-fetch status on error to see if we hit a 429/503
       refetchStatus();
       
+      const isRateLimit = error.message.includes("429") || error.message.includes("503") || error.message.toLowerCase().includes("capacity");
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: `Sorry, I encountered an error: ${error.message}. Please try again.`,
+        content: isRateLimit 
+          ? "AI analysis is temporarily at capacity. Your picks are still powered by the full 46-factor engine. AI insights resume automatically."
+          : `Sorry, I encountered an error: ${error.message}. Please try again.`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
@@ -136,27 +140,27 @@ export function BettingAssistant() {
           <div className="space-y-4 py-4">
             {isUnavailable && (
               <div className="mb-4">
-                <Card className="bg-slate-900/60 border-slate-700/50">
+                <Card className="bg-amber-500/10 border-amber-500/30">
                   <CardContent className="p-5 flex flex-col items-center text-center gap-3">
-                    <div className="p-3 rounded-full bg-slate-800/80 border border-slate-700/50">
-                      <AlertCircle className="w-6 h-6 text-slate-400" />
+                    <div className="p-3 rounded-full bg-amber-500/20 border border-amber-500/30">
+                      <AlertCircle className="w-6 h-6 text-amber-500" />
                     </div>
                     <div className="space-y-1.5">
-                      <p className="font-semibold text-sm text-foreground">AI Assistant Temporarily Unavailable</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed max-w-[260px]">
-                        Your picks continue to run on the full 46-factor intelligence engine. AI chat resumes automatically when capacity is restored.
+                      <p className="font-semibold text-sm text-amber-600 dark:text-amber-400">AI analysis is temporarily at capacity</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed max-w-[260px]">
+                        Your picks are still powered by the full 46-factor engine. AI insights resume automatically.
                       </p>
                     </div>
-                    <div className="w-full pt-1 border-t border-slate-800/60">
-                      <p className="text-[10px] text-muted-foreground/70 mb-2">All analysis engines remain active</p>
+                    <div className="w-full pt-1 border-t border-amber-500/20">
+                      <p className="text-[10px] text-amber-600/70 dark:text-amber-500/70 mb-2">All analysis engines remain active</p>
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => refetchStatus()}
-                        className="gap-2 text-xs h-7"
+                        className="gap-2 text-xs h-7 border-amber-500/50 hover:bg-amber-500/10 text-amber-600 dark:text-amber-400"
                       >
                         <RefreshCw className="w-3 h-3" />
-                        Check Status
+                        Retry
                       </Button>
                     </div>
                   </CardContent>

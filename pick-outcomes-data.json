@@ -145,20 +145,100 @@
       "savedAt": "2026-03-03T16:25:42.864Z"
     },
     {
-      "id": "precomp-NCAAB-401814597-team_total-86ee72ed38",
-      "gameId": "401814597",
-      "sport": "NCAAB",
-      "game": "Toledo Rockets @ Miami (OH) RedHawks",
-      "homeTeam": "Miami (OH) RedHawks",
-      "awayTeam": "Toledo Rockets",
-      "pick": "Miami (OH) RedHawks Under 85.5",
-      "betType": "team_total",
+      "id": "precomp-vegas-NHL-3124b69cbbed",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Canadiens @ Ducks",
+      "homeTeam": "Ducks",
+      "awayTeam": "Canadiens",
+      "pick": "",
+      "betType": "total",
       "odds": -110,
-      "grade": "B+",
-      "confidence": 68,
-      "ev": 29.82,
-      "gameTime": "2026-03-04T00:00Z",
-      "savedAt": "2026-03-03T16:30:42.736Z"
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-dd6715977729",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Penguins @ Bruins",
+      "homeTeam": "Bruins",
+      "awayTeam": "Penguins",
+      "pick": "",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-fb48929a2bb8",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Senators @ Oilers",
+      "homeTeam": "Oilers",
+      "awayTeam": "Senators",
+      "pick": "",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-18008b95e165",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Mammoth @ Capitals",
+      "homeTeam": "Capitals",
+      "awayTeam": "Mammoth",
+      "pick": "",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-fc92c6b53f87",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Golden Knights @ Sabres",
+      "homeTeam": "Sabres",
+      "awayTeam": "Golden Knights",
+      "pick": "",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-4e78e801fd6f",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Maple Leafs @ Devils",
+      "homeTeam": "Devils",
+      "awayTeam": "Maple Leafs",
+      "pick": "",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 64,
+      "ev": 8.82,
+      "gameTime": "2026-03-03T16:35:31.103Z",
+      "savedAt": "2026-03-03T16:35:31.103Z"
     }
   ],
   "settled": [
@@ -3281,44 +3361,304 @@
       "homeScore": 67,
       "awayScore": 69,
       "settledAt": "2026-03-03T16:26:50.738Z"
+    },
+    {
+      "id": "precomp-NCAAB-401814597-team_total-86ee72ed38",
+      "gameId": "401814597",
+      "sport": "NCAAB",
+      "game": "Toledo Rockets @ Miami (OH) RedHawks",
+      "homeTeam": "Miami (OH) RedHawks",
+      "awayTeam": "Toledo Rockets",
+      "pick": "Miami (OH) RedHawks Under 85.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 29.82,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T16:30:42.736Z",
+      "result": "won",
+      "homeScore": 67,
+      "awayScore": 69,
+      "settledAt": "2026-03-03T16:31:47.359Z"
+    },
+    {
+      "id": "precomp-NBA-401810750-moneyline-2e03b50093",
+      "gameId": "401810750",
+      "sport": "NBA",
+      "game": "Utah Jazz @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "Utah Jazz",
+      "pick": "Philadelphia 76ers ML",
+      "betType": "moneyline",
+      "odds": -186,
+      "grade": "C+",
+      "confidence": 64,
+      "ev": -24.66,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-03T16:35:30.756Z",
+      "result": "lost",
+      "homeScore": 125,
+      "awayScore": 128,
+      "settledAt": "2026-03-03T16:37:10.018Z"
+    },
+    {
+      "id": "precomp-NHL-401803319-total-2bd15d99cc",
+      "gameId": "401803319",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -103,
+      "grade": "C-",
+      "confidence": 61,
+      "ev": -13.28,
+      "gameTime": "2026-03-04T03:00Z",
+      "savedAt": "2026-03-03T16:36:01.837Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T16:37:10.020Z"
+    },
+    {
+      "id": "precomp-NHL-401803319-team_total-72065d14be",
+      "gameId": "401803319",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Colorado Avalanche Under 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 61,
+      "ev": -16,
+      "gameTime": "2026-03-04T03:00Z",
+      "savedAt": "2026-03-03T16:36:01.837Z",
+      "result": "push",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T16:37:10.020Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-spread-84be25b2d4",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Minnesota Timberwolves -14.5",
+      "betType": "spread",
+      "odds": -114,
+      "grade": "B",
+      "confidence": 65,
+      "ev": 23.89,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T16:36:01.383Z",
+      "result": "lost",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T16:37:10.030Z"
+    },
+    {
+      "id": "precomp-NBA-401810745-team_total-224ffce249",
+      "gameId": "401810745",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Memphis Grizzlies Over 111.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 65,
+      "ev": 26,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T16:36:01.383Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 117,
+      "settledAt": "2026-03-03T16:37:10.030Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-moneyline-5377ba3e31",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Portland Trail Blazers ML",
+      "betType": "moneyline",
+      "odds": -120,
+      "grade": "C",
+      "confidence": 63,
+      "ev": -12,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T16:35:30.756Z",
+      "result": "won",
+      "homeScore": 106,
+      "awayScore": 125,
+      "settledAt": "2026-03-03T16:37:10.035Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-spread-3bcd296d72",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Memphis Grizzlies -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 63,
+      "ev": -8.36,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T16:35:30.756Z",
+      "result": "lost",
+      "homeScore": 106,
+      "awayScore": 125,
+      "settledAt": "2026-03-03T16:37:10.035Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808278-moneyline-cc3d66364d",
+      "gameId": "401808278",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ South Carolina Gamecocks",
+      "homeTeam": "South Carolina Gamecocks",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "Tennessee Volunteers ML",
+      "betType": "moneyline",
+      "odds": -467,
+      "grade": "C-",
+      "confidence": 66,
+      "ev": -61.15,
+      "gameTime": "2026-03-03T23:00Z",
+      "savedAt": "2026-03-03T16:35:31.552Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T16:37:10.038Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808279-moneyline-80b28e0b0c",
+      "gameId": "401808279",
+      "sport": "NCAAB",
+      "game": "Vanderbilt Commodores @ Ole Miss Rebels",
+      "homeTeam": "Ole Miss Rebels",
+      "awayTeam": "Vanderbilt Commodores",
+      "pick": "Vanderbilt Commodores ML",
+      "betType": "moneyline",
+      "odds": -291,
+      "grade": "C-",
+      "confidence": 68,
+      "ev": -54.32,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T16:35:31.552Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T16:37:10.043Z"
+    },
+    {
+      "id": "precomp-NHL-401803320-total-26c94e0c51",
+      "gameId": "401803320",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ San Jose Sharks",
+      "homeTeam": "San Jose Sharks",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -109,
+      "grade": "C",
+      "confidence": 61,
+      "ev": -11.8,
+      "gameTime": "2026-03-04T03:00Z",
+      "savedAt": "2026-03-03T16:38:30.759Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 1,
+      "settledAt": "2026-03-03T16:39:40.178Z"
+    },
+    {
+      "id": "precomp-NHL-401803320-team_total-10e95c3d42",
+      "gameId": "401803320",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ San Jose Sharks",
+      "homeTeam": "San Jose Sharks",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Montreal Canadiens Under 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 61,
+      "ev": -12.18,
+      "gameTime": "2026-03-04T03:00Z",
+      "savedAt": "2026-03-03T16:38:30.759Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 1,
+      "settledAt": "2026-03-03T16:39:40.178Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-total-ba2910c723",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 68,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T16:38:30.976Z",
+      "result": "won",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T16:39:40.181Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 156,
-      "won": 76,
-      "lost": 80,
-      "push": 0,
-      "rate": 48.7,
-      "pending": 10
+      "total": 169,
+      "won": 84,
+      "lost": 84,
+      "push": 1,
+      "rate": 49.7,
+      "pending": 15
     },
     "bySport": {
       "NBA": {
-        "total": 51,
-        "won": 24,
-        "rate": 47.1
+        "total": 56,
+        "won": 26,
+        "rate": 46.4
       },
       "NHL": {
-        "total": 48,
-        "won": 22,
-        "rate": 45.8
+        "total": 52,
+        "won": 25,
+        "rate": 48.1
       },
       "NCAAB": {
-        "total": 57,
-        "won": 30,
-        "rate": 52.6
+        "total": 61,
+        "won": 33,
+        "rate": 54.1
       }
     },
     "byGrade": {
       "B": {
-        "total": 6,
-        "won": 3,
+        "total": 8,
+        "won": 4,
         "rate": 50
       },
       "B+": {
-        "total": 21,
-        "won": 14,
-        "rate": 66.7
+        "total": 22,
+        "won": 15,
+        "rate": 68.2
       },
       "B-": {
         "total": 62,
@@ -3331,55 +3671,55 @@
         "rate": 50
       },
       "C-": {
-        "total": 8,
-        "won": 4,
+        "total": 12,
+        "won": 6,
         "rate": 50
       },
       "C+": {
-        "total": 21,
+        "total": 22,
         "won": 7,
-        "rate": 33.3
+        "rate": 31.8
       },
       "C": {
-        "total": 14,
-        "won": 6,
-        "rate": 42.9
+        "total": 18,
+        "won": 9,
+        "rate": 50
       },
       "A-": {
-        "total": 12,
-        "won": 4,
-        "rate": 33.3
+        "total": 13,
+        "won": 5,
+        "rate": 38.5
       }
     },
     "byMarket": {
       "Moneyline": {
+        "total": 36,
+        "won": 19,
+        "rate": 52.8
+      },
+      "Spread": {
+        "total": 39,
+        "won": 18,
+        "rate": 46.2
+      },
+      "Total": {
         "total": 32,
         "won": 17,
         "rate": 53.1
       },
-      "Spread": {
-        "total": 37,
-        "won": 18,
-        "rate": 48.6
-      },
-      "Total": {
-        "total": 29,
-        "won": 14,
-        "rate": 48.3
-      },
       "Team Total": {
-        "total": 58,
-        "won": 27,
-        "rate": 46.6
+        "total": 62,
+        "won": 30,
+        "rate": 48.4
       }
     },
     "recentForm": {
-      "won": 24,
-      "lost": 26,
-      "push": 0,
-      "rate": 48
+      "won": 28,
+      "lost": 21,
+      "push": 1,
+      "rate": 56
     },
-    "lastUpdated": "2026-03-03T16:30:44.378Z"
+    "lastUpdated": "2026-03-03T16:41:30.238Z"
   },
   "version": 1
 }

@@ -322,12 +322,16 @@ async function checkEmailSequences(): Promise<void> {
     ));
 
   for (const user of day2Users) {
-    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
-    const tier = sub?.tier || "Sharp";
-    const sent = await sendDay2Email(user.email, user.username, tier);
-    if (sent) {
-      await db.update(users).set({ emailSequenceDay2Sent: true }).where(eq(users.id, user.id));
-      log(`[EmailSequence] Sent Day 2 email to ${user.username}`);
+    try {
+      const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
+      const tier = sub?.tier || "Sharp";
+      const sent = await sendDay2Email(user.email, user.username, tier);
+      if (sent) {
+        await db.update(users).set({ emailSequenceDay2Sent: true }).where(eq(users.id, user.id));
+        log(`[EmailSequence] Sent Day 2 email to ${user.username}`);
+      }
+    } catch (err: any) {
+      console.error(`[EmailSequence] Failed to process Day 2 email for ${user.username}:`, err.message);
     }
   }
 
@@ -340,12 +344,16 @@ async function checkEmailSequences(): Promise<void> {
     ));
 
   for (const user of day7Users) {
-    const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
-    const tier = sub?.tier || "Sharp";
-    const sent = await sendDay7Email(user.email, user.username, tier);
-    if (sent) {
-      await db.update(users).set({ emailSequenceDay7Sent: true }).where(eq(users.id, user.id));
-      log(`[EmailSequence] Sent Day 7 email to ${user.username}`);
+    try {
+      const [sub] = await db.select().from(subscriptions).where(eq(subscriptions.userId, user.id)).limit(1);
+      const tier = sub?.tier || "Sharp";
+      const sent = await sendDay7Email(user.email, user.username, tier);
+      if (sent) {
+        await db.update(users).set({ emailSequenceDay7Sent: true }).where(eq(users.id, user.id));
+        log(`[EmailSequence] Sent Day 7 email to ${user.username}`);
+      }
+    } catch (err: any) {
+      console.error(`[EmailSequence] Failed to process Day 7 email for ${user.username}:`, err.message);
     }
   }
 }

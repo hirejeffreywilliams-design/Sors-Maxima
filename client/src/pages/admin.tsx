@@ -218,6 +218,19 @@ const navCategories: NavCategory[] = [
   },
 ];
 
+interface Application {
+  id: number;
+  userId: number | null;
+  email: string;
+  username: string;
+  tier: string;
+  experience: string;
+  goals: string;
+  status: 'pending' | 'approved' | 'rejected';
+  adminNotes: string | null;
+  createdAt: string;
+}
+
 export default function AdminDashboard() {
   useSEO({ title: "Admin Dashboard", description: "Platform administration and management hub" });
   const [searchTerm, setSearchTerm] = useState("");
@@ -279,6 +292,21 @@ export default function AdminDashboard() {
     queryKey: ['/api/admin/bdl-stats'],
     refetchInterval: 120_000,
     staleTime: 60_000,
+  });
+
+  const { data: applications = [], isLoading: applicationsLoading } = useQuery<Application[]>({
+    queryKey: ['/api/admin/applications'],
+  });
+
+  const updateApplicationMutation = useMutation({
+    mutationFn: async ({ id, status, adminNotes }: { id: number; status: string; adminNotes?: string }) => {
+      const response = await apiRequest('PATCH', `/api/admin/applications/${id}`, { status, adminNotes });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/applications'] });
+      toast({ title: "Application updated successfully" });
+    },
   });
 
 
@@ -730,6 +758,9 @@ export default function AdminDashboard() {
                 <TabsTrigger value="ops" data-testid="tab-ops">
                   <Server className="h-3.5 w-3.5 mr-1" />Ops
                 </TabsTrigger>
+                <TabsTrigger value="applications" data-testid="tab-applications">
+                  <UsersRound className="h-3.5 w-3.5 mr-1" />Applications
+                </TabsTrigger>
                 <TabsTrigger value="users" data-testid="tab-users">
                   <Users className="h-3.5 w-3.5 mr-1" />Users
                 </TabsTrigger>
@@ -741,6 +772,97 @@ export default function AdminDashboard() {
                 </TabsTrigger>
               </TabsList>
             </ScrollArea>
+
+            <TabsContent value="applications" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Member Applications</h2>
+                <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/applications'] })} className="gap-2">
+                  <RefreshCw className={`h-4 w-4 ${applicationsLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+
+              <Card>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Tier</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {applicationsLoading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-full" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : applications.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
+                          No applications found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      applications.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell className="text-xs whitespace-nowrap">
+                            {new Date(app.createdAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="font-medium">{app.username}</TableCell>
+                          <TableCell className="text-muted-foreground">{app.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="uppercase">{app.tier}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge 
+                              variant={app.status === 'approved' ? 'default' : app.status === 'rejected' ? 'destructive' : 'secondary'}
+                              className="capitalize"
+                            >
+                              {app.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {app.status === 'pending' && (
+                              <div className="flex justify-end gap-2">
+                                <Button 
+                                  size="sm" 
+                                  variant="default" 
+                                  className="h-8"
+                                  onClick={() => updateApplicationMutation.mutate({ id: app.id, status: 'approved' })}
+                                >
+                                  Approve
+                                </Button>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="h-8"
+                                  onClick={() => {
+                                    const notes = prompt("Enter rejection reason (optional):");
+                                    updateApplicationMutation.mutate({ id: app.id, status: 'rejected', adminNotes: notes || undefined });
+                                  }}
+                                >
+                                  Reject
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </TabsContent>
 
             <TabsContent value="financials" className="space-y-4">
               {snapshotLoading ? (

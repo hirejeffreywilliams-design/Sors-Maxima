@@ -1,126 +1,137 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import { useLocation, useSearch } from "wouter";
-import { insertApplicationSchema, type InsertApplication } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLocation, useSearch } from "wouter";
+import { CheckCircle2, ChevronRight, ChevronLeft, Loader2 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
-import { Shield, Target, Zap, ChevronRight, CheckCircle } from "lucide-react";
+
+const applicationFormSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  username: z.string().min(2, "Name must be at least 2 characters"),
+  tier: z.enum(["edge", "max"], {
+    required_error: "Please select a tier",
+  }),
+  experience: z.string().min(1, "Please select your experience level"),
+  goals: z.string().min(10, "Please describe your goals in at least 10 characters"),
+});
+
+type ApplicationFormValues = z.infer<typeof applicationFormSchema>;
 
 export default function ApplyPage() {
-  useSEO({ title: "Apply for Membership | Sors Maxima", description: "Apply for Edge or Max membership at Sors Maxima." });
+  useSEO({ title: "Apply for Access | Sors Maxima", description: "Apply for Edge or Max tier membership" });
+  const [step, setStep] = useState(1);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const initialTier = params.get("tier") || "edge";
+  const initialTier = params.get("tier") === "max" ? "max" : "edge";
 
-  const form = useForm<InsertApplication>({
-    resolver: zodResolver(insertApplicationSchema),
+  const form = useForm<ApplicationFormValues>({
+    resolver: zodResolver(applicationFormSchema),
     defaultValues: {
       email: "",
       username: "",
-      tier: initialTier,
+      tier: initialTier as "edge" | "max",
       experience: "",
       goals: "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: InsertApplication) => {
-      const res = await apiRequest("POST", "/api/apply", data);
+    mutationFn: async (values: ApplicationFormValues) => {
+      const res = await apiRequest("POST", "/api/apply", values);
       return res.json();
     },
     onSuccess: () => {
-      toast({
-        title: "Application Submitted",
-        description: "We've received your application. Check your email for confirmation.",
-      });
-      setTimeout(() => setLocation("/"), 2500);
+      setStep(3);
     },
     onError: (error: Error) => {
       toast({
-        title: "Submission Failed",
+        title: "Application failed",
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Join the Inner Circle
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Sors Maxima Edge and Max tiers are restricted to maintain market impact.
-            Apply below for access to our most advanced intelligence.
-          </p>
-        </div>
+  const nextStep = async () => {
+    const fields = step === 1 ? ["email", "username", "tier"] : ["experience", "goals"];
+    const isValid = await form.trigger(fields as any);
+    if (isValid) {
+      setStep(step + 1);
+    }
+  };
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="bg-muted/50">
-            <CardHeader className="p-4 space-y-1">
-              <Shield className="w-5 h-5 text-primary" />
-              <CardTitle className="text-sm">Verified Edge</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-muted/50">
-            <CardHeader className="p-4 space-y-1">
-              <Target className="w-5 h-5 text-primary" />
-              <CardTitle className="text-sm">Market Protection</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-muted/50">
-            <CardHeader className="p-4 space-y-1">
-              <Zap className="w-5 h-5 text-primary" />
-              <CardTitle className="text-sm">Priority Data</CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+  const prevStep = () => {
+    setStep(step - 1);
+  };
 
-        <Card className="border-primary/20 shadow-xl shadow-primary/5">
+  const onSubmit = (values: ApplicationFormValues) => {
+    mutation.mutate(values);
+  };
+
+  if (step === 3) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+        <Card className="w-full max-w-md text-center">
           <CardHeader>
-            <CardTitle>Membership Application</CardTitle>
+            <div className="flex justify-center mb-4">
+              <CheckCircle2 className="h-12 w-12 text-green-500" />
+            </div>
+            <CardTitle className="text-2xl">Application Submitted</CardTitle>
             <CardDescription>
-              Tell us about your betting experience and goals.
+              Thank you for applying to Sors Maxima. Our team will review your application and get back to you within 24-48 hours.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <CardFooter className="flex justify-center">
+            <Button onClick={() => setLocation("/")} data-testid="button-return-home">
+              Return Home
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
+      <Card className="w-full max-w-xl">
+        <CardHeader>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Step {step} of 2</span>
+            <div className="flex gap-1">
+              <div className={`h-1 w-8 rounded-full ${step >= 1 ? "bg-primary" : "bg-muted"}`} />
+              <div className={`h-1 w-8 rounded-full ${step >= 2 ? "bg-primary" : "bg-muted"}`} />
+            </div>
+          </div>
+          <CardTitle className="text-2xl">Apply for Members-Only Access</CardTitle>
+          <CardDescription>
+            Join our elite community of sharp bettors. Applications are reviewed manually to maintain quality.
+          </CardDescription>
+        </CardHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <CardContent className="space-y-4">
+              {step === 1 && (
+                <>
                   <FormField
                     control={form.control}
                     name="username"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Username</FormLabel>
+                        <FormLabel>Full Name</FormLabel>
                         <FormControl>
-                          <Input placeholder="johndoe" {...field} data-testid="input-apply-username" />
+                          <Input placeholder="John Doe" {...field} data-testid="input-name" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -133,106 +144,107 @@ export default function ApplyPage() {
                       <FormItem>
                         <FormLabel>Email Address</FormLabel>
                         <FormControl>
-                          <Input type="email" placeholder="john@example.com" {...field} data-testid="input-apply-email" />
+                          <Input placeholder="john@example.com" {...field} data-testid="input-email" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
+                  <FormField
+                    control={form.control}
+                    name="tier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Desired Tier</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-tier">
+                              <SelectValue placeholder="Select a tier" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="edge">Edge Tier ($99/mo)</SelectItem>
+                            <SelectItem value="max">Max Tier ($249/mo)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
 
-                <FormField
-                  control={form.control}
-                  name="tier"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Target Tier</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+              {step === 2 && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="experience"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Experience Level</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger data-testid="select-experience">
+                              <SelectValue placeholder="Select your experience" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="beginner">Beginner (0-2 years)</SelectItem>
+                            <SelectItem value="intermediate">Intermediate (2-5 years)</SelectItem>
+                            <SelectItem value="advanced">Advanced (5-10 years)</SelectItem>
+                            <SelectItem value="professional">Professional (10+ years)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="goals"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Betting Goals & Strategy</FormLabel>
                         <FormControl>
-                          <SelectTrigger data-testid="select-apply-tier">
-                            <SelectValue placeholder="Select a tier" />
-                          </SelectTrigger>
+                          <Textarea
+                            placeholder="Tell us about your betting goals and what you hope to achieve with Sors Maxima..."
+                            className="min-h-[120px]"
+                            {...field}
+                            data-testid="textarea-goals"
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="edge">Sors Edge — $99/mo</SelectItem>
-                          <SelectItem value="max">Sors Max — $249/mo</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Sharp tier ($49/mo) is open access and does not require an application.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Betting Experience</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="How long have you been betting? What markets do you focus on?"
-                          className="min-h-[100px]"
-                          {...field}
-                          data-testid="textarea-apply-experience"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="goals"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>What are your goals with Sors Maxima?</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="What specific tools or data points are you looking for?"
-                          className="min-h-[100px]"
-                          {...field}
-                          data-testid="textarea-apply-goals"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={mutation.isPending}
-                  data-testid="button-apply-submit"
-                >
-                  {mutation.isPending ? "Submitting..." : "Submit Application"}
-                  {!mutation.isPending && <ChevronRight className="w-4 h-4 ml-2" />}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
+            </CardContent>
+            <CardFooter className="flex justify-between">
+              {step === 1 ? (
+                <Button type="button" variant="ghost" onClick={() => setLocation("/")} data-testid="button-cancel">
+                  Cancel
                 </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-
-        <div className="flex items-center justify-center gap-8 text-muted-foreground pt-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium">Encrypted</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium">Private Review</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium">Priority Processing</span>
-          </div>
-        </div>
-      </div>
+              ) : (
+                <Button type="button" variant="outline" onClick={prevStep} data-testid="button-prev">
+                  <ChevronLeft className="mr-2 h-4 w-4" /> Back
+                </Button>
+              )}
+              
+              {step === 1 ? (
+                <Button type="button" onClick={nextStep} data-testid="button-next">
+                  Next <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              ) : (
+                <Button type="submit" disabled={mutation.isPending} data-testid="button-submit">
+                  {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Submit Application
+                </Button>
+              )}
+            </CardFooter>
+          </form>
+        </Form>
+      </Card>
     </div>
   );
 }

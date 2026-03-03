@@ -394,16 +394,21 @@ function Membership() {
 
   const getTierBadge = (tier: string) => {
     switch (tier.toLowerCase()) {
+      case "whale":
       case "max":
-        return <Badge className="bg-purple-500 hover:bg-purple-600">MAX</Badge>;
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-600 dark:hover:bg-yellow-700 text-white">MAX</Badge>;
+      case "elite":
       case "edge":
-        return <Badge className="bg-blue-500 hover:bg-blue-600">EDGE</Badge>;
+        return <Badge className="bg-purple-500 hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-700 text-white">EDGE</Badge>;
+      case "pro":
       case "sharp":
-        return <Badge className="bg-green-500 hover:bg-green-600">SHARP</Badge>;
+        return <Badge className="bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white">SHARP</Badge>;
       default:
         return <Badge variant="secondary">Free</Badge>;
     }
   };
+
+  const currentTier = (tier || "none").toLowerCase();
 
   return (
     <div className="space-y-4">
@@ -420,8 +425,13 @@ function Membership() {
             <div className="space-y-1">
               <p className="text-sm font-medium">Current Tier</p>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold capitalize">{tier}</span>
-                {getTierBadge(tier)}
+                <span className="text-xl font-bold capitalize">
+                  {currentTier === "none" ? "Free" : 
+                   currentTier === "pro" || currentTier === "sharp" ? "Sharp" :
+                   currentTier === "elite" || currentTier === "edge" ? "Edge" :
+                   currentTier === "whale" || currentTier === "max" ? "Max" : currentTier}
+                </span>
+                {getTierBadge(currentTier)}
               </div>
             </div>
             <div className="text-right space-y-1">
@@ -439,38 +449,58 @@ function Membership() {
             </div>
           )}
 
-          <div className="pt-4 flex flex-wrap gap-3">
-            <Button
-              onClick={() => portalMutation.mutate()}
-              disabled={portalMutation.isPending}
-              data-testid="button-manage-billing"
-            >
-              {portalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Manage Billing
-            </Button>
-            
-            {tier.toLowerCase() === "sharp" && (
-              <>
-                <Button variant="outline" asChild data-testid="button-upgrade-edge">
-                  <a href="/pricing">Upgrade to Edge</a>
-                </Button>
-                <Button variant="outline" asChild data-testid="button-upgrade-max">
-                  <a href="/pricing">Upgrade to Max</a>
-                </Button>
-              </>
-            )}
-            
-            {tier.toLowerCase() === "edge" && (
-              <Button variant="outline" asChild data-testid="button-upgrade-max">
-                <a href="/pricing">Upgrade to Max</a>
+          <div className="pt-4 flex flex-col gap-4">
+            <div className="flex flex-wrap gap-3">
+              <Button
+                onClick={() => portalMutation.mutate()}
+                disabled={portalMutation.isPending}
+                data-testid="button-manage-billing"
+                variant="default"
+              >
+                {portalMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Manage Billing
               </Button>
-            )}
+            </div>
 
-            {tier.toLowerCase() === "none" && (
-              <Button variant="outline" asChild data-testid="button-view-plans">
-                <a href="/pricing">View Plans</a>
-              </Button>
-            )}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold">Available Upgrades</h4>
+              <div className="flex flex-wrap gap-3">
+                {(currentTier === "none" || currentTier === "free") && (
+                  <>
+                    <Button variant="outline" asChild data-testid="button-upgrade-sharp">
+                      <a href="/pricing">Get Sharp</a>
+                    </Button>
+                    <Button variant="outline" asChild data-testid="button-upgrade-edge">
+                      <a href="/pricing">Get Edge</a>
+                    </Button>
+                    <Button variant="outline" asChild data-testid="button-upgrade-max">
+                      <a href="/pricing">Get Max</a>
+                    </Button>
+                  </>
+                )}
+
+                {(currentTier === "pro" || currentTier === "sharp") && (
+                  <>
+                    <Button variant="outline" asChild data-testid="button-upgrade-edge">
+                      <a href="/pricing">Upgrade to Edge</a>
+                    </Button>
+                    <Button variant="outline" asChild data-testid="button-upgrade-max">
+                      <a href="/pricing">Upgrade to Max</a>
+                    </Button>
+                  </>
+                )}
+
+                {(currentTier === "elite" || currentTier === "edge") && (
+                  <Button variant="outline" asChild data-testid="button-upgrade-max">
+                    <a href="/pricing">Upgrade to Max</a>
+                  </Button>
+                )}
+
+                {(currentTier === "whale" || currentTier === "max") && (
+                  <p className="text-sm text-muted-foreground italic">You are on the top tier. Maximum edge achieved.</p>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { registerAdminRoutes } from "./routes/admin";
 import { registerBettingRoutes } from "./routes/betting";
 import { registerAccountRoutes } from "./routes/account";
 import { registerCommunityRoutes } from "./routes/community";
+import { registerApplyRoutes } from "./routes/apply";
 import { registerIntelligenceRoutes } from "./routes/intelligence";
 import { registerNotificationRoutes } from "./routes/notifications";
 import { registerAiRoutes } from "./routes/ai";
@@ -17,6 +18,7 @@ export async function registerRoutes(
   await registerAdminRoutes(app);
   await registerBettingRoutes(app);
   await registerAccountRoutes(app);
+  registerApplyRoutes(app);
   registerCommunityRoutes(app);
   registerIntelligenceRoutes(app);
   registerNotificationRoutes(app);

@@ -24,44 +24,44 @@ import { useSEO } from "@/hooks/use-seo";
 
 const features = [
   {
-    icon: Atom,
-    title: "Sors Prediction Engine",
-    description: "46 contributing factors across 7 categories with synergy detection and adaptive learning for every prediction.",
+    icon: Activity,
+    title: "Rest Advantage",
+    description: "Proprietary algorithms calculate the impact of travel, scheduling, and days between games for every matchup.",
     color: "text-purple-500",
     bg: "bg-purple-500/10",
   },
   {
-    icon: Brain,
-    title: "Advanced Simulations",
-    description: "Run millions of simulations per analysis to calculate true win probabilities and expected value on every bet.",
+    icon: Target,
+    title: "Line Movement",
+    description: "Track opening lines against current market rates to identify where the professional money is shifting.",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
   {
-    icon: Activity,
-    title: "Live ESPN Data",
-    description: "Real-time scores, rosters, injuries, and line movement from ESPN across 14+ sports and leagues.",
+    icon: Zap,
+    title: "Sharp Money",
+    description: "Detect discrepancies between public betting percentages and total handle to find the professional edge.",
     color: "text-green-500",
     bg: "bg-green-500/10",
   },
   {
-    icon: Wrench,
-    title: "Pro Tools Suite",
-    description: "Correlation engine, arbitrage finder, same-game parlay optimizer, custom model builder, and bet slip exports.",
+    icon: Brain,
+    title: "Injury Impact",
+    description: "Deep-layer analysis of depth chart changes beyond the starters, calculating true rotational value lost.",
     color: "text-orange-500",
     bg: "bg-orange-500/10",
   },
   {
-    icon: Users,
-    title: "Community & Tipsters",
-    description: "Follow top performers, copy bets, join competitions, and share picks with verified tipster communities.",
+    icon: Activity,
+    title: "Situational Spots",
+    description: "Automatic identification of look-ahead, let-down, and revenge scenarios based on historical performance.",
     color: "text-pink-500",
     bg: "bg-pink-500/10",
   },
   {
-    icon: Shield,
-    title: "Responsible Gaming",
-    description: "Built-in bankroll management, session limits, cool-off periods, loss alerts, and self-exclusion tools.",
+    icon: Star,
+    title: "Odds Value",
+    description: "Constant monitoring of 12+ sportsbooks to find the absolute best price for every suggested position.",
     color: "text-yellow-500",
     bg: "bg-yellow-500/10",
   },
@@ -239,7 +239,7 @@ export default function LandingPage() {
       <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-features">
         <div className="text-center space-y-4 mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
-            What Our Engine Tracks
+            What Our Engine Analyzes
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Our 46-factor analysis engine processes millions of data points daily to find edges that others miss.

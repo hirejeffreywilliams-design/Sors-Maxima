@@ -1,6 +1,29 @@
 // Re-export all database tables and types from shared/schema.ts
 // This maintains backwards compatibility with existing server imports
 
+import { pgTable, serial, integer, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { createInsertSchema } from "drizzle-zod";
+
+export const applications = pgTable("applications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  email: varchar("email", { length: 255 }).notNull(),
+  username: varchar("username", { length: 255 }).notNull(),
+  tier: varchar("tier", { length: 50 }).notNull(),
+  experience: varchar("experience", { length: 255 }).notNull(),
+  goals: text("goals").notNull(),
+  status: varchar("status", { length: 50 }).notNull().default("pending"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertApplicationSchema = createInsertSchema(applications).omit({ 
+  id: true, 
+  createdAt: true,
+  status: true,
+  adminNotes: true
+});
+
 export {
   users,
   subscriptions,

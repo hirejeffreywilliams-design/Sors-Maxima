@@ -220,7 +220,11 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
 
       const subscription = await stripeService.getUserSubscription(req.session.username);
       if (!subscription.stripeCustomerId) {
-        return res.status(400).json({ error: "No subscription found" });
+        // Redirect to pricing if no customer ID exists
+        const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+        const host = req.headers['x-forwarded-host'] || req.get('host');
+        const baseUrl = `${protocol}://${host}`;
+        return res.json({ url: `${baseUrl}/pricing` });
       }
 
       const protocol = req.headers['x-forwarded-proto'] || req.protocol;
