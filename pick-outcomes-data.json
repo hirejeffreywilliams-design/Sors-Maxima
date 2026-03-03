@@ -271,54 +271,6 @@
       "ev": 33.64,
       "gameTime": "2026-03-04T02:00Z",
       "savedAt": "2026-03-03T17:58:37.701Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808273-total-b3bbd56bdc",
-      "gameId": "401808273",
-      "sport": "NCAAB",
-      "game": "Texas Longhorns @ Arkansas Razorbacks",
-      "homeTeam": "Arkansas Razorbacks",
-      "awayTeam": "Texas Longhorns",
-      "pick": "Under 166.5",
-      "betType": "total",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 70,
-      "ev": 24.09,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T18:33:37.307Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808273-team_total-189f174eed",
-      "gameId": "401808273",
-      "sport": "NCAAB",
-      "game": "Texas Longhorns @ Arkansas Razorbacks",
-      "homeTeam": "Arkansas Razorbacks",
-      "awayTeam": "Texas Longhorns",
-      "pick": "Arkansas Razorbacks Under 87",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 70,
-      "ev": 24.09,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T18:33:37.307Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808273-team_total-528d3b4542",
-      "gameId": "401808273",
-      "sport": "NCAAB",
-      "game": "Texas Longhorns @ Arkansas Razorbacks",
-      "homeTeam": "Arkansas Razorbacks",
-      "awayTeam": "Texas Longhorns",
-      "pick": "Texas Longhorns Under 79.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 70,
-      "ev": 24.09,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-03T18:33:37.307Z"
     }
   ],
   "settled": [
@@ -4581,16 +4533,76 @@
       "homeScore": 87,
       "awayScore": 100,
       "settledAt": "2026-03-03T18:28:54.773Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-total-b3bbd56bdc",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Under 166.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T18:33:55.223Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-189f174eed",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Arkansas Razorbacks Under 87",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T18:33:55.223Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-528d3b4542",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Texas Longhorns Under 79.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T18:33:37.307Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T18:33:55.223Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 213,
-      "won": 104,
-      "lost": 108,
+      "total": 216,
+      "won": 105,
+      "lost": 110,
       "push": 1,
-      "rate": 48.8,
-      "pending": 20
+      "rate": 48.6,
+      "pending": 17
     },
     "bySport": {
       "NBA": {
@@ -4604,9 +4616,9 @@
         "rate": 47.7
       },
       "NCAAB": {
-        "total": 79,
-        "won": 43,
-        "rate": 54.4
+        "total": 82,
+        "won": 44,
+        "rate": 53.7
       }
     },
     "byGrade": {
@@ -4636,9 +4648,9 @@
         "rate": 50
       },
       "C+": {
-        "total": 28,
-        "won": 8,
-        "rate": 28.6
+        "total": 31,
+        "won": 9,
+        "rate": 29
       },
       "C": {
         "total": 22,
@@ -4663,14 +4675,14 @@
         "rate": 49
       },
       "Total": {
-        "total": 41,
+        "total": 42,
         "won": 21,
-        "rate": 51.2
+        "rate": 50
       },
       "Team Total": {
-        "total": 84,
-        "won": 39,
-        "rate": 46.4
+        "total": 86,
+        "won": 40,
+        "rate": 46.5
       }
     },
     "recentForm": {
@@ -4679,7 +4691,7 @@
       "push": 0,
       "rate": 48
     },
-    "lastUpdated": "2026-03-03T18:28:54.773Z"
+    "lastUpdated": "2026-03-03T18:33:55.224Z"
   },
   "version": 1
 }
