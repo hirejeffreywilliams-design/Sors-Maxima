@@ -90,7 +90,7 @@ function CommunityCard({ community, onJoin }: { community: Community; onJoin: ()
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex flex-wrap gap-1">
-          {community.tags.map((tag, i) => (
+          {(community.tags || []).map((tag, i) => (
             <Badge key={i} variant="secondary" className="text-xs">{tag}</Badge>
           ))}
         </div>
@@ -273,9 +273,9 @@ export function TipsterContent() {
   });
 
   const filteredCommunities = communities.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.description.toLowerCase().includes(search.toLowerCase()) ||
-    c.tags.some(t => t.toLowerCase().includes(search.toLowerCase()))
+    (c.name || "").toLowerCase().includes(search.toLowerCase()) ||
+    (c.description || "").toLowerCase().includes(search.toLowerCase()) ||
+    (c.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (

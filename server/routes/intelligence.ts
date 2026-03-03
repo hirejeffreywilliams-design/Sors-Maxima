@@ -38,12 +38,16 @@ export function registerIntelligenceRoutes(app: Express): void {
   app.get("/api/intelligence/feed", requireSubscription, async (_req: Request, res: Response) => {
     try {
       const feed = await generateIntelligenceFeed();
-      // Cap EV values at 35
+      const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+      // Cap EV values at 35 and filter to quality grades only
       if (feed.topPicks) {
-        feed.topPicks = feed.topPicks.map((p: any) => ({
-          ...p,
-          ev: Math.min(p.ev, 35)
-        }));
+        feed.topPicks = feed.topPicks
+          .filter((p: any) => GOOD_GRADES.includes(p.grade))
+          .map((p: any) => ({
+            ...p,
+            ev: Math.min(p.ev ?? 0, 35),
+            edge: Math.min(p.edge ?? 0, 35),
+          }));
       }
       return res.json(feed);
     } catch (err) {
@@ -108,7 +112,12 @@ export function registerIntelligenceRoutes(app: Express): void {
       const rawDate = (req.query.date as string) || "all";
       const dateFilter = (["today", "future", "all"].includes(rawDate) ? rawDate : "all") as "today" | "future" | "all";
 
-      const tickets = buildOptimalTickets({ sports, riskLevel, bankroll, maxLegs, dateFilter });
+      const rawTickets = buildOptimalTickets({ sports, riskLevel, bankroll, maxLegs, dateFilter });
+      const tickets = rawTickets.map((t: any) => ({
+        ...t,
+        ev: Math.min(t.ev ?? 0, 35),
+        legs: (t.legs || []).map((l: any) => ({ ...l, ev: Math.min(l.ev ?? 0, 35), edge: Math.min(l.edge ?? 0, 35) })),
+      }));
 
       return res.json({
         tickets,
@@ -141,7 +150,11 @@ export function registerIntelligenceRoutes(app: Express): void {
       const maxLegs = Math.max(3, Math.min(Number(req.query.maxLegs) || 20, 30));
       const bankroll = Math.max(10, Math.min(Number(req.query.bankroll) || 1000, 100000));
 
-      const matchupTickets = buildMatchupTickets({ sports, maxLegs, bankroll });
+      const rawMatchupTickets = buildMatchupTickets({ sports, maxLegs, bankroll });
+      const matchupTickets = rawMatchupTickets.map((t: any) => ({
+        ...t,
+        legs: (t.legs || []).map((l: any) => ({ ...l, ev: Math.min(l.ev ?? 0, 35), edge: Math.min(l.edge ?? 0, 35) })),
+      }));
 
       return res.json({
         matchupTickets,
