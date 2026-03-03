@@ -6773,32 +6773,192 @@
       "homeScore": 91,
       "awayScore": 77,
       "settledAt": "2026-03-03T21:23:50.625Z"
+    },
+    {
+      "id": "precomp-NBA-401810752-spread-cd088aba36",
+      "gameId": "401810752",
+      "sport": "NBA",
+      "game": "Atlanta Hawks @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Atlanta Hawks",
+      "pick": "Atlanta Hawks -1.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "C+",
+      "confidence": 69,
+      "ev": -5.63,
+      "gameTime": "2026-03-05T02:30Z",
+      "savedAt": "2026-03-03T21:28:32.260Z",
+      "result": "won",
+      "homeScore": 81,
+      "awayScore": 108,
+      "settledAt": "2026-03-03T21:28:49.989Z"
+    },
+    {
+      "id": "precomp-NHL-401803323-moneyline-1824cd2468",
+      "gameId": "401803323",
+      "sport": "NHL",
+      "game": "Carolina Hurricanes @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Carolina Hurricanes",
+      "pick": "Carolina Hurricanes ML",
+      "betType": "moneyline",
+      "odds": -267,
+      "grade": "C-",
+      "confidence": 63,
+      "ev": -50.52,
+      "gameTime": "2026-03-05T03:00Z",
+      "savedAt": "2026-03-03T21:28:32.595Z",
+      "result": "won",
+      "homeScore": 1,
+      "awayScore": 6,
+      "settledAt": "2026-03-03T21:28:49.991Z"
+    },
+    {
+      "id": "precomp-NBA-401810747-spread-1ad86a216d",
+      "gameId": "401810747",
+      "sport": "NBA",
+      "game": "Phoenix Suns @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Phoenix Suns",
+      "pick": "Phoenix Suns -9.5",
+      "betType": "spread",
+      "odds": -106,
+      "grade": "C",
+      "confidence": 68,
+      "ev": -22.26,
+      "gameTime": "2026-03-04T04:00Z",
+      "savedAt": "2026-03-03T21:28:32.260Z",
+      "result": "lost",
+      "homeScore": 128,
+      "awayScore": 104,
+      "settledAt": "2026-03-03T21:28:50.003Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808274-spread-450bda1931",
+      "gameId": "401808274",
+      "sport": "NCAAB",
+      "game": "Mississippi State Bulldogs @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "Mississippi State Bulldogs",
+      "pick": "Mississippi State Bulldogs +22.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 32.89,
+      "gameTime": "2026-03-04T01:00Z",
+      "savedAt": "2026-03-03T21:28:32.776Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-03T21:28:50.014Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808277-total-3642901756",
+      "gameId": "401808277",
+      "sport": "NCAAB",
+      "game": "Alabama Crimson Tide @ Georgia Bulldogs",
+      "homeTeam": "Georgia Bulldogs",
+      "awayTeam": "Alabama Crimson Tide",
+      "pick": "Under 180.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 70,
+      "ev": 12.64,
+      "gameTime": "2026-03-03T23:30Z",
+      "savedAt": "2026-03-03T21:28:32.776Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T21:28:50.025Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808278-total-5b9611af29",
+      "gameId": "401808278",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ South Carolina Gamecocks",
+      "homeTeam": "South Carolina Gamecocks",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "Over 141.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 62,
+      "ev": -33.18,
+      "gameTime": "2026-03-03T23:00Z",
+      "savedAt": "2026-03-03T21:28:32.776Z",
+      "result": "lost",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T21:28:50.025Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-spread-5e92ce8689",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Dallas Mavericks +13.5",
+      "betType": "spread",
+      "odds": -106,
+      "grade": "C",
+      "confidence": 70,
+      "ev": 14.66,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T21:33:31.951Z",
+      "result": "won",
+      "homeScore": 87,
+      "awayScore": 100,
+      "settledAt": "2026-03-03T21:33:49.760Z"
+    },
+    {
+      "id": "precomp-NHL-401803324-spread-874e3acd3e",
+      "gameId": "401803324",
+      "sport": "NHL",
+      "game": "New York Islanders @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "New York Islanders",
+      "pick": "Anaheim Ducks +1",
+      "betType": "spread",
+      "odds": -286,
+      "grade": "C+",
+      "confidence": 63,
+      "ev": -39.27,
+      "gameTime": "2026-03-05T03:00Z",
+      "savedAt": "2026-03-03T21:33:32.407Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T21:33:49.764Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 325,
-      "won": 152,
-      "lost": 170,
+      "total": 333,
+      "won": 157,
+      "lost": 173,
       "push": 3,
-      "rate": 46.8,
+      "rate": 47.1,
       "pending": 17
     },
     "bySport": {
       "NBA": {
-        "total": 118,
-        "won": 53,
-        "rate": 44.9
+        "total": 121,
+        "won": 55,
+        "rate": 45.5
       },
       "NHL": {
-        "total": 72,
-        "won": 35,
-        "rate": 48.6
+        "total": 74,
+        "won": 37,
+        "rate": 50
       },
       "NCAAB": {
-        "total": 135,
-        "won": 64,
-        "rate": 47.4
+        "total": 138,
+        "won": 65,
+        "rate": 47.1
       }
     },
     "byGrade": {
@@ -6813,8 +6973,8 @@
         "rate": 66.7
       },
       "B-": {
-        "total": 114,
-        "won": 57,
+        "total": 116,
+        "won": 58,
         "rate": 50
       },
       "D+": {
@@ -6823,19 +6983,19 @@
         "rate": 60
       },
       "C-": {
-        "total": 21,
-        "won": 9,
-        "rate": 42.9
+        "total": 22,
+        "won": 10,
+        "rate": 45.5
       },
       "C+": {
-        "total": 45,
-        "won": 17,
-        "rate": 37.8
+        "total": 47,
+        "won": 19,
+        "rate": 40.4
       },
       "C": {
-        "total": 34,
-        "won": 15,
-        "rate": 44.1
+        "total": 37,
+        "won": 16,
+        "rate": 43.2
       },
       "A-": {
         "total": 26,
@@ -6850,19 +7010,19 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 52,
-        "won": 28,
-        "rate": 53.8
+        "total": 53,
+        "won": 29,
+        "rate": 54.7
       },
       "Spread": {
-        "total": 75,
-        "won": 36,
-        "rate": 48
+        "total": 80,
+        "won": 39,
+        "rate": 48.8
       },
       "Total": {
-        "total": 63,
-        "won": 24,
-        "rate": 38.1
+        "total": 65,
+        "won": 25,
+        "rate": 38.5
       },
       "Team Total": {
         "total": 135,
@@ -6871,12 +7031,12 @@
       }
     },
     "recentForm": {
-      "won": 25,
-      "lost": 24,
+      "won": 27,
+      "lost": 22,
       "push": 1,
-      "rate": 50
+      "rate": 54
     },
-    "lastUpdated": "2026-03-03T21:23:50.626Z"
+    "lastUpdated": "2026-03-03T21:33:49.772Z"
   },
   "version": 1
 }
