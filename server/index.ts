@@ -1,5 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
@@ -16,6 +17,7 @@ import { startNotificationEngine } from "./notificationEngine";
 import { initBacktestOnStartup } from "./backtestEngine";
 import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
+import { pool } from "./db";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
 import {
@@ -79,7 +81,14 @@ app.use(
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+const PgSession = connectPgSimple(session);
 app.use(session({
+  store: new PgSession({
+    pool,
+    tableName: "session",
+    createTableIfMissing: true,
+    pruneSessionInterval: 60 * 15, // prune expired sessions every 15 min
+  }),
   secret: process.env.SESSION_SECRET || (() => {
     const generated = require('crypto').randomBytes(64).toString('hex');
     console.warn('[SECURITY] No SESSION_SECRET env var set — using auto-generated secret. Sessions will not persist across restarts.');
@@ -90,7 +99,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (was 24h)
     sameSite: "lax",
   },
 }));
