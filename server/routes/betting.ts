@@ -1831,8 +1831,49 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       const isStrategy = /strategy|bankroll|kelly|unit|staking|risk|manage/.test(lc);
       const isSport = /nba|nfl|mlb|nhl|ncaab|ncaaf|basketball|football|baseball|hockey|college/.test(lc);
       const isModel = /model|factor|accuracy|win rate|performance|track record/.test(lc);
+      const isSubscription = /subscription|billing|upgrade|downgrade|plan|tier|membership|manage.billing|stripe|payment|cancel|renew/.test(lc);
+      const isApply = /apply|sign.?up|join|register|get.access|application|how.do.i.get|how.to.join|get.started/.test(lc);
+      const isOffseason = /offseason|off.season|nfl.draft|free.agency|no.games|no.nfl/.test(lc);
+      const isHelp = /help|what.can.you|how.does|guide|explain|what.is|how.do|feature|navigation|where.is|how.to/.test(lc);
 
-      if (isParlay && topPicks.length > 0) {
+      if (isApply) {
+        response = `Sors Maxima is members-only — here's how access works:\n\n` +
+          `• Sharp ($49/mo): Apply directly at /pricing and subscribe immediately.\n` +
+          `• Edge ($99/mo): Submit an application at /apply?tier=edge — reviewed within 24–48 hours.\n` +
+          `• Max ($249/mo): Submit an application at /apply?tier=max — manually reviewed by our team.\n\n` +
+          `Once approved, you'll receive an email with full access instructions. If you're already a member and want to upgrade your tier, visit Settings → Membership.`;
+      } else if (isSubscription) {
+        response = `To manage your Sors Maxima membership:\n\n` +
+          `• View your current plan and tier: Settings → Membership\n` +
+          `• Upgrade to a higher tier: Settings → Membership → Upgrade buttons, or visit /pricing\n` +
+          `• Manage billing, cancel, or update payment info: Settings → Membership → Manage Billing (opens Stripe portal)\n\n` +
+          `Tier overview:\n` +
+          `• Sharp — $49/mo: Full picks access, 46-Factor Model, Daily Edge Parlay\n` +
+          `• Edge — $99/mo: Everything in Sharp + Betting Assistant, CLV Tracker, Strategy Coach\n` +
+          `• Max — $249/mo: Everything in Edge + priority access and advanced analytics\n\n` +
+          `For billing issues not resolved via the portal, contact support through the Settings page.`;
+      } else if (isOffseason) {
+        response = `NFL is currently in the offseason. Here's what's available:\n\n` +
+          `• NFL tab in the Command Center shows the Offseason Intelligence Panel with power rankings and key storylines.\n` +
+          `• Championship futures and early odds will appear as the 2026 season approaches (August 2026).\n` +
+          `• All other sports (NBA, NHL, MLB, NCAAB) have live picks running now.\n\n` +
+          `The 46-Factor Model will resume full NFL picks when the regular season schedule is released. You'll receive an alert notification when NFL picks go live.`;
+      } else if (isHelp) {
+        response = `Here's what the Sors Maxima intelligence platform covers:\n\n` +
+          `Picks & Analysis\n` +
+          `• Command Center (/): Today's best picks across all sports, Daily Edge Parlay, Smart tickets\n` +
+          `• Daily Picks: Full picks board filtered by sport, grade, or bet type\n` +
+          `• Player Props: Over/under prop lines with model recommendations\n\n` +
+          `Tools\n` +
+          `• Parlay Builder: Build and analyze custom parlays leg by leg\n` +
+          `• CLV Tracker: Track your closing line value over time\n` +
+          `• Strategy Coach: Choose from 9 betting strategies with per-leg guidance\n` +
+          `• Odds Center: Multi-book odds comparison, line movement, EV heatmap\n\n` +
+          `Account\n` +
+          `• Settings → Membership: Upgrade tier, manage billing via Stripe portal\n` +
+          `• Watchlist: Save teams and games you're tracking\n\n` +
+          `Try asking me: "Build me a parlay", "What are today's +EV picks?", "Show NBA picks", "How is the model performing?", "Injury report"`;
+      } else if (isParlay && topPicks.length > 0) {
         const legs = topPicks.slice(0, 3);
         const combined = legs.reduce((acc: number, p: any) => {
           const d = p.odds > 0 ? (p.odds / 100) + 1 : (100 / Math.abs(p.odds)) + 1;
@@ -1917,14 +1958,20 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           `\n\nFor full ${sport} analysis, use the matchup builder or visit the Daily Picks page and filter by sport.`;
       } else {
         const topToday = topPicks.slice(0, 3);
-        response = `Here's your Sors Maxima intelligence snapshot:\n\n` +
-          `📊 Model Status: ${stats.overall.total} settled picks | ${winRate}% win rate\n` +
-          `🔴 Live games: ${liveNow.length} | Upcoming: ${upcoming.length}\n` +
-          `📋 Pending picks: ${stats.overall.pending}\n\n` +
+        response = `Sors Maxima Intelligence — here's your current snapshot:\n\n` +
+          `Model: ${stats.overall.total} settled picks | ${winRate}% win rate | ${stats.overall.pending} pending\n` +
+          `Live games: ${liveNow.length} in progress | ${upcoming.length} upcoming today\n\n` +
           (topToday.length > 0
-            ? `Top picks right now:\n${topToday.map((p: any) => `• ${p.pick} (${p.sport}, ${p.grade})`).join("\n")}\n\n`
-            : "") +
-          `Try asking me:\n• "Build me a 3-leg parlay"\n• "What are today's +EV plays?"\n• "Show me live games"\n• "NBA strategy tips"\n• "How is the model performing?"`;
+            ? `Top picks right now:\n${topToday.map((p: any) => `• ${p.pick} (${p.sport}, Grade: ${p.grade}, ${p.confidence}% confidence)`).join("\n")}\n\n`
+            : "No high-grade picks loaded yet — check back after the next 5-minute cycle.\n\n") +
+          `What I can help you with:\n` +
+          `• "Build me a 3-leg parlay" — top picks combined into a ticket\n` +
+          `• "Today's +EV plays" — picks where the model finds value vs the market\n` +
+          `• "Injury report" — latest player status across all sports\n` +
+          `• "NBA picks" / "NHL strategy" — sport-specific intelligence\n` +
+          `• "How is the model performing?" — win rate and grade breakdowns\n` +
+          `• "How do I upgrade my plan?" — tier and billing information\n` +
+          `• "Help" — full feature guide`;
       }
 
       res.json({ response });
