@@ -3227,6 +3227,7 @@ Follow these rules:
       const { getHistoricalLearningStatus } = await import("../historicalLearningEngine");
       const { appGuardian } = await import("../appGuardianEngine");
       const { analyticsAgent } = await import("../analyticsAgentEngine");
+      const { getSSEStatus } = await import("../sseManager");
 
       const pipelineHealth = getPipelineHealth();
       const ticketMetrics = getTicketMetrics();
