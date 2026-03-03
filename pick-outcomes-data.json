@@ -735,6 +735,38 @@
       "ev": 20.27,
       "gameTime": "2026-03-03T12:50:52.224Z",
       "savedAt": "2026-03-03T12:50:52.224Z"
+    },
+    {
+      "id": "precomp-NBA-401810738-total-54e7018247",
+      "gameId": "401810738",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Charlotte Hornets",
+      "homeTeam": "Charlotte Hornets",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 230.5",
+      "betType": "total",
+      "odds": -118,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 9,
+      "gameTime": "2026-03-04T00:00Z",
+      "savedAt": "2026-03-03T14:24:19.139Z"
+    },
+    {
+      "id": "precomp-NBA-401810741-team_total-0684beeb23",
+      "gameId": "401810741",
+      "sport": "NBA",
+      "game": "Brooklyn Nets @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Brooklyn Nets",
+      "pick": "Miami Heat Over 119.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 5,
+      "gameTime": "2026-03-04T00:30Z",
+      "savedAt": "2026-03-03T14:25:51.692Z"
     }
   ],
   "settled": [
@@ -61855,7 +61887,7 @@
       "lost": 1292,
       "push": 42,
       "rate": 55.6,
-      "pending": 46
+      "pending": 48
     },
     "bySport": {
       "NHL": {
@@ -61959,7 +61991,7 @@
       "push": 1,
       "rate": 64
     },
-    "lastUpdated": "2026-03-03T14:21:56.073Z"
+    "lastUpdated": "2026-03-03T14:25:55.103Z"
   },
   "version": 1
 }
