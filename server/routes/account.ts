@@ -55,43 +55,6 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/admin/applications", requireAdmin, async (req, res) => {
-    try {
-      const apps = await db.select().from(applications).orderBy(sql`${applications.createdAt} DESC`);
-      res.json(apps);
-    } catch (err) {
-      console.error("Failed to fetch applications:", err);
-      res.status(500).json({ error: "Failed to fetch applications" });
-    }
-  });
-
-  app.patch("/api/admin/applications/:id", requireAdmin, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const { status, adminNotes } = req.body;
-
-      if (!["approved", "rejected", "pending"].includes(status)) {
-        return res.status(400).json({ error: "Invalid status" });
-      }
-
-      const [app] = await db.update(applications)
-        .set({ status, adminNotes })
-        .where(eq(applications.id, id))
-        .returning();
-
-      if (status === "approved") {
-        await sendApplicationApproved(app.email, app.username, app.tier);
-      } else if (status === "rejected") {
-        await sendApplicationRejected(app.email, app.username, app.tier, adminNotes);
-      }
-
-      res.json(app);
-    } catch (err) {
-      console.error("Failed to update application:", err);
-      res.status(500).json({ error: "Failed to update application" });
-    }
-  });
-
   app.get("/api/vegas/predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const sport = req.query.sport as string | undefined;

@@ -5821,15 +5821,135 @@
       "homeScore": 91,
       "awayScore": 76,
       "settledAt": "2026-03-03T20:32:39.898Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808278-spread-c7fba29d05",
+      "gameId": "401808278",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ South Carolina Gamecocks",
+      "homeTeam": "South Carolina Gamecocks",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "South Carolina Gamecocks +9.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "C+",
+      "confidence": 70,
+      "ev": -30.67,
+      "gameTime": "2026-03-03T23:00Z",
+      "savedAt": "2026-03-03T20:37:22.848Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 71,
+      "settledAt": "2026-03-03T20:37:39.871Z"
+    },
+    {
+      "id": "precomp-NHL-401803317-team_total-585a407569",
+      "gameId": "401803317",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Edmonton Oilers",
+      "homeTeam": "Edmonton Oilers",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Ottawa Senators Over 2.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 61,
+      "ev": 1.18,
+      "gameTime": "2026-03-04T02:00Z",
+      "savedAt": "2026-03-03T20:43:08.230Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 4,
+      "settledAt": "2026-03-03T20:45:40.958Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-spread-b4f0757f68",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens -26",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:41:48.146Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:45:40.961Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-85eb624c6f",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Loyola Chicago Ramblers Under 64.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:41:48.146Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:45:40.961Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-3f92e48de1",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens Under 90.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 69,
+      "ev": 31.73,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-03T20:41:48.146Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-03T20:45:40.961Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-spread-c8f200e3d9",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils -1",
+      "betType": "spread",
+      "odds": 215,
+      "grade": "B-",
+      "confidence": 61,
+      "ev": 104.75,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-03T20:46:23.884Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-03T20:47:30.506Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 279,
-      "won": 128,
-      "lost": 149,
+      "total": 285,
+      "won": 130,
+      "lost": 153,
       "push": 2,
-      "rate": 45.9,
+      "rate": 45.6,
       "pending": 15
     },
     "bySport": {
@@ -5839,14 +5959,14 @@
         "rate": 43.8
       },
       "NHL": {
-        "total": 66,
-        "won": 31,
-        "rate": 47
+        "total": 68,
+        "won": 32,
+        "rate": 47.1
       },
       "NCAAB": {
-        "total": 117,
-        "won": 55,
-        "rate": 47
+        "total": 121,
+        "won": 56,
+        "rate": 46.3
       }
     },
     "byGrade": {
@@ -5861,9 +5981,9 @@
         "rate": 68
       },
       "B-": {
-        "total": 97,
+        "total": 98,
         "won": 49,
-        "rate": 50.5
+        "rate": 50
       },
       "D+": {
         "total": 20,
@@ -5876,9 +5996,9 @@
         "rate": 45
       },
       "C+": {
-        "total": 38,
-        "won": 11,
-        "rate": 28.9
+        "total": 40,
+        "won": 13,
+        "rate": 32.5
       },
       "C": {
         "total": 29,
@@ -5886,9 +6006,9 @@
         "rate": 41.4
       },
       "A-": {
-        "total": 23,
+        "total": 26,
         "won": 7,
-        "rate": 30.4
+        "rate": 26.9
       },
       "D": {
         "total": 1,
@@ -5903,9 +6023,9 @@
         "rate": 50
       },
       "Spread": {
-        "total": 60,
-        "won": 29,
-        "rate": 48.3
+        "total": 63,
+        "won": 30,
+        "rate": 47.6
       },
       "Total": {
         "total": 59,
@@ -5913,18 +6033,18 @@
         "rate": 40.7
       },
       "Team Total": {
-        "total": 118,
-        "won": 54,
-        "rate": 45.8
+        "total": 121,
+        "won": 55,
+        "rate": 45.5
       }
     },
     "recentForm": {
-      "won": 20,
-      "lost": 29,
+      "won": 18,
+      "lost": 31,
       "push": 1,
-      "rate": 40
+      "rate": 36
     },
-    "lastUpdated": "2026-03-03T20:32:39.899Z"
+    "lastUpdated": "2026-03-03T20:51:47.629Z"
   },
   "version": 1
 }

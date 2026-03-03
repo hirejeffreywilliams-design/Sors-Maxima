@@ -254,6 +254,9 @@ export default function AdminDashboard() {
   const [errorLevelFilter, setErrorLevelFilter] = useState<string>("all");
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const [alertsExpanded, setAlertsExpanded] = useState(true);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectingApp, setRejectingApp] = useState<Application | null>(null);
+  const [rejectNotes, setRejectNotes] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: snapshot, isLoading: snapshotLoading } = useQuery<any>({
@@ -320,6 +323,34 @@ export default function AdminDashboard() {
     },
   });
 
+  const { data: settlementStatus } = useQuery<any>({
+    queryKey: ['/api/admin/settlement/status'],
+    refetchInterval: 30000,
+  });
+
+  const runSettlementMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/settlement/run', {});
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/settlement/status'] });
+      toast({ title: `Settlement complete — ${data.settled ?? 0} picks settled` });
+    },
+    onError: () => toast({ title: "Settlement run failed", variant: "destructive" }),
+  });
+
+  const backfillSettlementMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/settlement/backfill', { days: 14 });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/settlement/status'] });
+      toast({ title: `Backfill complete — ${data.settled ?? 0} historical picks settled` });
+    },
+    onError: () => toast({ title: "Backfill failed", variant: "destructive" }),
+  });
 
   const visibleAlerts = useMemo(() => {
     if (!snapshot?.alerts) return [];
@@ -857,9 +888,11 @@ export default function AdminDashboard() {
                                   size="sm" 
                                   variant="outline" 
                                   className="h-8"
+                                  data-testid={`button-reject-${app.id}`}
                                   onClick={() => {
-                                    const notes = prompt("Enter rejection reason (optional):");
-                                    updateApplicationMutation.mutate({ id: app.id, status: 'rejected', adminNotes: notes || undefined });
+                                    setRejectingApp(app);
+                                    setRejectNotes("");
+                                    setRejectDialogOpen(true);
                                   }}
                                 >
                                   Reject
@@ -1683,6 +1716,66 @@ export default function AdminDashboard() {
                     </Card>
                   )}
 
+                  <Card data-testid="card-settlement-controls">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <Database className="h-4 w-4" />Pick Settlement Engine
+                      </CardTitle>
+                      <CardDescription>Manually trigger settlement or backfill historical picks</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {settlementStatus && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-2">
+                          <div className="p-3 border rounded-md text-center">
+                            <p className="text-xs text-muted-foreground">Total Picks</p>
+                            <p className="text-xl font-bold mt-1">{settlementStatus.totalPicks ?? 0}</p>
+                          </div>
+                          <div className="p-3 border rounded-md text-center">
+                            <p className="text-xs text-muted-foreground">Settled</p>
+                            <p className="text-xl font-bold mt-1 text-emerald-500">{settlementStatus.settledPicks ?? 0}</p>
+                          </div>
+                          <div className="p-3 border rounded-md text-center">
+                            <p className="text-xs text-muted-foreground">Pending</p>
+                            <p className="text-xl font-bold mt-1 text-amber-500">{settlementStatus.pendingPicks ?? 0}</p>
+                          </div>
+                          <div className="p-3 border rounded-md text-center">
+                            <p className="text-xs text-muted-foreground">Last Run</p>
+                            <p className="text-xs font-medium mt-1.5">
+                              {settlementStatus.lastRun ? new Date(settlementStatus.lastRun).toLocaleTimeString() : "Never"}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          data-testid="button-run-settlement"
+                          onClick={() => runSettlementMutation.mutate()}
+                          disabled={runSettlementMutation.isPending}
+                          className="gap-2"
+                        >
+                          <Play className="h-4 w-4" />
+                          {runSettlementMutation.isPending ? "Running..." : "Run Settlement Now"}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          data-testid="button-backfill-settlement"
+                          onClick={() => backfillSettlementMutation.mutate()}
+                          disabled={backfillSettlementMutation.isPending}
+                          className="gap-2"
+                        >
+                          <RefreshCw className="h-4 w-4" />
+                          {backfillSettlementMutation.isPending ? "Backfilling..." : "Backfill 14 Days"}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Settlement runs automatically every 30 minutes. Use "Run Now" to force an immediate check, or "Backfill" to process 14 days of historical game results.
+                      </p>
+                    </CardContent>
+                  </Card>
+
                   {!snapshot?.infrastructure && (
                     <div className="text-center py-12 text-muted-foreground">No infrastructure data available</div>
                   )}
@@ -1979,6 +2072,50 @@ export default function AdminDashboard() {
               className="w-full sm:w-auto"
             >
               {banMutation.isPending ? "Banning..." : "Ban User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Reject Application</DialogTitle>
+            <DialogDescription>
+              Reject {rejectingApp?.username}&apos;s application for {rejectingApp?.tier} membership. They will receive an email with your reason.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Rejection reason (optional)</label>
+              <Textarea
+                placeholder="Enter the reason for rejection — this will be included in the email sent to the applicant..."
+                value={rejectNotes}
+                onChange={(e) => setRejectNotes(e.target.value)}
+                className="mt-2"
+                data-testid="input-reject-reason"
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} className="w-full sm:w-auto">
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (rejectingApp) {
+                  updateApplicationMutation.mutate({ id: rejectingApp.id, status: 'rejected', adminNotes: rejectNotes || undefined });
+                  setRejectDialogOpen(false);
+                  setRejectingApp(null);
+                  setRejectNotes("");
+                }
+              }}
+              disabled={updateApplicationMutation.isPending}
+              data-testid="button-confirm-reject"
+              className="w-full sm:w-auto"
+            >
+              {updateApplicationMutation.isPending ? "Rejecting..." : "Reject Application"}
             </Button>
           </DialogFooter>
         </DialogContent>
