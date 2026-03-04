@@ -162,6 +162,13 @@ function processEvents(events: any[]): MMAFight[] {
   return fights.sort((a, b) => b.confidence - a.confidence);
 }
 
+export function getCachedMMAFights(): MMAFight[] {
+  if (mmaCache && Date.now() < mmaCache.expiresAt) {
+    return mmaCache.data.fights;
+  }
+  return [];
+}
+
 export async function generateMMAFeed(): Promise<MMAFeed> {
   if (mmaCache && Date.now() < mmaCache.expiresAt) return mmaCache.data;
 

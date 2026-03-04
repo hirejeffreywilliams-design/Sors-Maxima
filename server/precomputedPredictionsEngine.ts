@@ -25,6 +25,7 @@ import { getInternationalLifeChangerPicks, type SoccerPick } from "./internation
 import { getSharpPropAlerts, type PropMovement } from "./notificationEngine";
 import { applyPatternAdjustment } from "./communityLossPatternEngine";
 import { savePrecomputedPicks } from "./pickOutcomeTracker";
+import { getCachedMMAFights, type MMAFight } from "./mma-engine";
 import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } from "./pick-insight-engine";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
@@ -2315,6 +2316,36 @@ function dateSeededShuffle<T>(arr: T[], seed: string): T[] {
   return copy;
 }
 
+function mmaFightToPrecomputed(f: MMAFight): PrecomputedPick {
+  const now = new Date().toISOString();
+  return {
+    id: f.id,
+    sport: "MMA",
+    game: `${f.fighter1} vs ${f.fighter2}`,
+    homeTeam: f.fighter2,
+    awayTeam: f.fighter1,
+    pick: f.pick,
+    betType: "moneyline",
+    odds: f.pickOdds,
+    confidence: f.confidence,
+    grade: f.grade,
+    edge: f.edge,
+    ev: f.ev,
+    factors: [],
+    generatedAt: now,
+    dataSource: "live" as const,
+    gameTime: f.gameTime,
+    reasoning: f.reasoning,
+    recommendation: f.pick,
+    winProbability: f.trueWinProbability,
+    insights: [f.reasoning],
+    timing: "bet_now" as const,
+    timingAdvice: "Place before fight starts",
+    releaseSchedule: { whaleRelease: now, eliteRelease: now, proRelease: now, freeRelease: now },
+    isExclusive: false,
+  };
+}
+
 function soccerPickToPrecomputed(sp: SoccerPick): PrecomputedPick {
   const now = new Date().toISOString();
   return {
@@ -2367,6 +2398,12 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     .filter(sp => !sp.isLive)
     .map(soccerPickToPrecomputed);
   allPicks.push(...soccerConverted);
+
+  // Inject MMA/UFC picks from The Odds API cache
+  const mmaConverted = getCachedMMAFights()
+    .filter(f => f.gameTime && new Date(f.gameTime).getTime() > Date.now())
+    .map(mmaFightToPrecomputed);
+  allPicks.push(...mmaConverted);
 
   // ── Filter 1: Remove games that have already started ──────────────────────
   // Allow a 5-minute grace window for very recently started games
@@ -2630,13 +2667,20 @@ export function getAlternativePicks(params: {
   const allPicks: PrecomputedPick[] = [];
   for (const [, entry] of predictionCache.entries()) {
     if (params.sport !== "any" && entry.snapshot.picks[0]?.sport !== params.sport) {
-      // Try to match by sport on individual picks (snapshot may be multi-sport)
       const matching = entry.snapshot.picks.filter(p => p.sport === params.sport);
       allPicks.push(...matching);
     } else {
       allPicks.push(...entry.snapshot.picks);
     }
   }
+  // Also include soccer and MMA picks in alternatives pool
+  const soccerAlts = getInternationalLifeChangerPicks()
+    .filter(p => params.sport === "any" || p.sport === params.sport)
+    .map(soccerPickToPrecomputed);
+  const mmaAlts = getCachedMMAFights()
+    .filter(f => params.sport === "any" || params.sport === "MMA")
+    .map(mmaFightToPrecomputed);
+  allPicks.push(...soccerAlts, ...mmaAlts);
 
   const upcoming = allPicks.filter(p =>
     p.gameTime && new Date(p.gameTime).getTime() > now - GRACE_MS

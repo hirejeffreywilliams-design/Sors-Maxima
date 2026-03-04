@@ -1002,9 +1002,12 @@ interface LifeChangerTicket {
 
 const SPORT_EMOJI: Record<string, string> = {
   NBA: "🏀", NHL: "🏒", NCAAB: "🏀", NFL: "🏈", MLB: "⚾", NCAAF: "🏈",
+  MMA: "🥊", UFC: "🥊",
   Soccer_EPL: "⚽", Soccer_LALIGA: "⚽", Soccer_BUNDESLIGA: "⚽",
   Soccer_SERIEA: "⚽", Soccer_LIGUE1: "⚽", Soccer_MLS: "⚽",
-  Soccer_UCL: "⚽", Soccer_INTL: "⚽",
+  Soccer_UCL: "⚽", Soccer_INTL: "⚽", Soccer_CHAMPIONSHIP: "⚽",
+  Soccer_LIGAMX: "⚽", Soccer_EREDIVISIE: "⚽", Soccer_PORTUGAL: "⚽",
+  Soccer_TURKEY: "⚽", Soccer_BRASIL: "⚽", Soccer_EUROPA: "⚽",
 };
 
 interface AlternativePick {
