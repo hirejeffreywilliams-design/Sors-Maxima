@@ -184,6 +184,7 @@ const navCategories: NavCategory[] = [
       { href: "/admin/update-planner", label: "Update Planner", description: "Track bugs, features & ideas — copy to AI chat", icon: ListTodo, testId: "link-admin-update-planner" },
       { href: "/admin/owner-playbook", label: "Owner's Playbook", description: "Launch plan, daily ops, growth & legal guide", icon: BookOpen, testId: "link-admin-owner-playbook" },
       { href: "/admin/launch-control", label: "Launch Control", description: "Pre-launch checklist & maintenance mode", icon: Rocket, testId: "link-admin-launch-control" },
+      { href: "/admin/autonomous", label: "Autonomous Monitor", description: "AI watches everything 24/7 — alerts, reports, metrics", icon: Brain, testId: "link-admin-autonomous" },
       { href: "/admin/assistant", label: "AI Assistant", description: "AI-powered ops briefings & tasks", icon: Bot, testId: "link-admin-assistant" },
       { href: "/admin/guardian", label: "App Guardian", description: "Health monitoring, auto-heal & alerts", icon: Shield, testId: "link-admin-guardian" },
       { href: "/admin/applications", label: "Applications", description: "Review and approve member applications", icon: UsersRound, testId: "link-admin-applications" },

@@ -4356,4 +4356,66 @@ Follow these rules:
     }
   });
 
+  // === Autonomous Admin Intelligence ===
+
+  app.get("/api/admin/autonomous/status", requireAdmin, async (_req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      res.json(autonomousAdminIntelligence.getStatus());
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to get autonomous status", detail: err.message });
+    }
+  });
+
+  app.get("/api/admin/autonomous/alerts", requireAdmin, async (req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const includeResolved = req.query.includeResolved === "true";
+      const limit = parseInt(req.query.limit as string) || 50;
+      res.json(autonomousAdminIntelligence.getAlerts({ includeResolved, limit }));
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to get alerts", detail: err.message });
+    }
+  });
+
+  app.get("/api/admin/autonomous/reports", requireAdmin, async (req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const limit = parseInt(req.query.limit as string) || 10;
+      res.json(autonomousAdminIntelligence.getReports(limit));
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to get reports", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/autonomous/trigger-check", requireAdmin, async (_req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const result = await autonomousAdminIntelligence.triggerQuickCheck();
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to run quick check", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/autonomous/trigger-deep", requireAdmin, async (_req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const report = await autonomousAdminIntelligence.triggerDeepAnalysis();
+      res.json(report);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to run deep analysis", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/autonomous/alerts/:id/resolve", requireAdmin, async (req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const resolved = autonomousAdminIntelligence.resolveAlert(req.params.id);
+      res.json({ resolved });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to resolve alert", detail: err.message });
+    }
+  });
+
 }
