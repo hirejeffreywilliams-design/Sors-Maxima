@@ -30,6 +30,7 @@ import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } fro
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
 import { getTeamFormData } from "./teamHistoricalFormEngine";
+import { getTrackRecord } from "./calibrationEngine";
 import type { Sport } from "@shared/schema";
 
 const DIVISION_GROUPS: Record<string, string[][]> = {
@@ -316,6 +317,47 @@ const __filename_pe = fileURLToPath(import.meta.url);
 const __dirname_pe = path.dirname(__filename_pe);
 const CACHE_PERSIST_FILE = path.join(__dirname_pe, "..", "precomputed-picks-cache.json");
 const CACHE_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours — stale beyond this
+
+// ── Dynamic Confidence Ceiling ─────────────────────────────────────────────────
+// The model earns the right to express higher confidence as its track record
+// grows. Starts conservative, expands based on settled pick win rate and volume.
+// This creates genuine "learns from winning" growth rather than artificial caps.
+let _ceilingValue = 72;
+let _ceilingTs = 0;
+function getConfidenceCeiling(): number {
+  if (Date.now() - _ceilingTs < 5 * 60_000) return _ceilingValue;
+  try {
+    const track = getTrackRecord();
+    const settled = track.settledPicks ?? 0;
+    const wr = track.overallWinRate ?? 0;
+    const recent20 = track.recentTrend?.last20WinRate ?? 0;
+    const trend = track.recentTrend?.trend ?? "stable";
+
+    let ceiling: number;
+    if (settled < 50) {
+      ceiling = 72;  // Unproven — stay cautious
+    } else if (settled < 200 || wr < 0.52) {
+      ceiling = 76;  // Early learner — slight opening
+    } else if (settled < 600 || wr < 0.55) {
+      ceiling = 82;  // Proven performer — confident
+    } else if (settled < 1500 || wr < 0.58) {
+      ceiling = 87;  // Strong track record — high conviction
+    } else {
+      ceiling = 93;  // Elite, well-proven model — maximum expression
+    }
+
+    // Recent-trend bonus: if last 20 picks are significantly outperforming, allow +3
+    if (trend === "improving" && recent20 > wr + 0.05 && ceiling < 93) ceiling = Math.min(93, ceiling + 3);
+    // Recent-trend penalty: cold streak → pull back 3 points
+    if (trend === "declining" && recent20 < wr - 0.05) ceiling = Math.max(70, ceiling - 3);
+
+    _ceilingValue = ceiling;
+    _ceilingTs = Date.now();
+    return ceiling;
+  } catch {
+    return _ceilingValue;
+  }
+}
 
 function loadPersistedCache(): void {
   try {
@@ -1080,7 +1122,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         confidence = Math.round(
           confidence * (1 - ensembleWeight) + ensemble.ensembleConfidence * ensembleWeight
         );
-        confidence = Math.min(70, Math.max(22, confidence));
+        confidence = Math.min(getConfidenceCeiling(), Math.max(22, confidence));
 
         // Record for feedback learning (fire-and-forget), including gameId
         // for the secondary index so settlement can find it by game+betType
@@ -1141,7 +1183,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
         const rawBoost = Math.round(mcConfBoost * varAdj * stackedWeight);
         const finalMCBoost = rawBoost + biasCorrection;
-        confidence = Math.min(70, Math.max(22, confidence + finalMCBoost));
+        confidence = Math.min(getConfidenceCeiling(), Math.max(22, confidence + finalMCBoost));
 
         // Record this prediction for future learning
         const isFavPickForRecord = bet.betType === "moneyline" && bet.pick.includes(favName);
@@ -1170,7 +1212,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       // confidence to break the 70 ceiling. When no market signals at all (stable
       // line, no sharp data), apply a small penalty to separate signal from noise.
       if (derivedSharpMoney) {
-        confidence = Math.min(75, confidence + 3);
+        confidence = Math.min(getConfidenceCeiling() + 5, confidence + 3);
       } else if (!derivedLineMovement || derivedLineMovement.magnitude < 0.5) {
         confidence = Math.max(22, confidence - 3);
       }
@@ -1192,7 +1234,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       // settled picks and game outcomes. Adjusts confidence and adds warning factor.
       const patternResult = applyPatternAdjustment({ sport, betType: bet.betType, odds: bet.odds, grade: fusion.grade });
       if (patternResult.confidenceDelta !== 0) {
-        confidence = Math.min(70, Math.max(22, confidence + patternResult.confidenceDelta));
+        confidence = Math.min(getConfidenceCeiling(), Math.max(22, confidence + patternResult.confidenceDelta));
         if (patternResult.communitySignal === "bearish") {
           mappedFactors.push({ name: "community_pattern_risk", impact: Math.abs(patternResult.confidenceDelta), direction: "negative" });
         } else if (patternResult.communitySignal === "bullish") {
@@ -1586,7 +1628,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       awayMoneyline: vp.awayMoneyline || undefined,
     };
     const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds }, vpMarketCtx);
-    const confidence = Math.min(68, Math.max(22, fusion.confidence));
+    const confidence = Math.min(getConfidenceCeiling(), Math.max(22, fusion.confidence));
     const impliedProb = (vp.odds || -110) < 0 ? Math.abs(vp.odds || -110) / (Math.abs(vp.odds || -110) + 100) : 100 / ((vp.odds || -110) + 100);
     const vpFusionWinFrac = fusion.winProbability && fusion.winProbability > 0
       ? Math.min(0.92, Math.max(0.08, fusion.winProbability / 100))
@@ -1732,7 +1774,22 @@ export function startPrecomputedEngine(): void {
     featureFlags.syncSeasonFlags();
   }).catch(() => {});
 
-  setTimeout(() => runPredictionCycle(), 5000);
+  // Smart startup: if disk cache is fresh, serve from it and defer the first
+  // API refresh cycle — this prevents wasting external API calls on every restart
+  const cacheEntries = Array.from(predictionCache.values());
+  const newestCacheTs = cacheEntries.reduce((max, e) => Math.max(max, e.timestamp), 0);
+  const cacheAgeMs = newestCacheTs > 0 ? Date.now() - newestCacheTs : Infinity;
+  const STARTUP_GRACE_MS = 10 * 60 * 1000; // 10 min — if cache is this fresh, skip immediate refresh
+
+  if (newestCacheTs > 0 && cacheAgeMs < STARTUP_GRACE_MS) {
+    const deferMs = Math.max(30_000, STARTUP_GRACE_MS - cacheAgeMs);
+    console.log(`[PrecomputedEngine] Disk cache is ${Math.round(cacheAgeMs / 60_000)}m old — deferring first API refresh by ${Math.round(deferMs / 60_000)}m (API budget preserved)`);
+    setTimeout(() => runPredictionCycle(), deferMs);
+  } else {
+    const reason = newestCacheTs === 0 ? "no cache found" : `cache is ${Math.round(cacheAgeMs / 60_000)}m old`;
+    console.log(`[PrecomputedEngine] ${reason} — running first prediction cycle in 5s`);
+    setTimeout(() => runPredictionCycle(), 5_000);
+  }
 
   intervalHandle = setInterval(() => runPredictionCycle(), REFRESH_INTERVAL);
 }
@@ -2592,10 +2649,10 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       selectionReason: getReason(p),
       selectionCategory: getCategory(p),
       gameTime: p.gameTime,
-      ev: Math.min(p.ev, 35),
+      ev: Math.min(p.ev, 55),
       confidence: p.confidence,
       grade: p.grade,
-      edge: Math.min(p.edge, 35),
+      edge: Math.min(p.edge, 55),
       isUnderdog: p.odds >= 100,
       reasoning: p.reasoning || "",
     })),
