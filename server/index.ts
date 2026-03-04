@@ -33,6 +33,7 @@ import { runMigrations } from "./dbMigrations";
 import { pool } from "./db";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
+import { initTeamFormEngine, scheduleFormCacheRefresh } from "./teamHistoricalFormEngine";
 import {
   securityHeadersMiddleware,
   ipBlockMiddleware,
@@ -224,6 +225,15 @@ function startEnginesPhased(): void {
   // Core ESPN + odds data pipeline. Everything else depends on this.
   // Runs its first cycle immediately, then every 60s.
   safeStart("Intelligence Hub", startIntelligenceHub, 10_000);
+
+  // ── Phase 3.5 (12s): Team Historical Form Engine ─────────────────────────
+  // Pulls 60 days of ESPN historical scores to compute real team form metrics.
+  // Loads from disk cache (instant) or builds fresh (runs in background).
+  // Feeds real last-10 records and home/road splits into prediction engine.
+  safeStart("Team Historical Form Engine", async () => {
+    await initTeamFormEngine();
+    scheduleFormCacheRefresh();
+  }, 12_000);
 
   // ── Phase 4 (14s): Precomputed Predictions ───────────────────────────────
   // Builds AI picks from hub data. Disk cache serves instant picks while this

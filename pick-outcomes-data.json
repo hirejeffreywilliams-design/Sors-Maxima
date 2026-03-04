@@ -431,70 +431,6 @@
       "ev": 6.91,
       "gameTime": "2026-03-04T14:32:56.845Z",
       "savedAt": "2026-03-04T14:32:56.845Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827726-team_total-94fce1fa6a",
-      "gameId": "401827726",
-      "sport": "NCAAB",
-      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
-      "homeTeam": "Iowa State Cyclones",
-      "awayTeam": "Arizona State Sun Devils",
-      "pick": "Iowa State Cyclones Over 71",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 70,
-      "ev": 33.64,
-      "gameTime": "2026-03-07T19:00Z",
-      "savedAt": "2026-03-04T15:13:35.808Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827726-team_total-5eed820871",
-      "gameId": "401827726",
-      "sport": "NCAAB",
-      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
-      "homeTeam": "Iowa State Cyclones",
-      "awayTeam": "Arizona State Sun Devils",
-      "pick": "Arizona State Sun Devils Under 72.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 70,
-      "ev": 33.64,
-      "gameTime": "2026-03-07T19:00Z",
-      "savedAt": "2026-03-04T15:13:35.808Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827726-total-4eb2213b3c",
-      "gameId": "401827726",
-      "sport": "NCAAB",
-      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
-      "homeTeam": "Iowa State Cyclones",
-      "awayTeam": "Arizona State Sun Devils",
-      "pick": "Over 143.5",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 68,
-      "ev": 33.64,
-      "gameTime": "2026-03-07T19:00Z",
-      "savedAt": "2026-03-04T15:13:35.808Z"
-    },
-    {
-      "id": "precomp-NCAAB-401827726-total-c259ee222e",
-      "gameId": "401827726",
-      "sport": "NCAAB",
-      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
-      "homeTeam": "Iowa State Cyclones",
-      "awayTeam": "Arizona State Sun Devils",
-      "pick": "Over 144.5",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 68,
-      "ev": 33.64,
-      "gameTime": "2026-03-07T19:00Z",
-      "savedAt": "2026-03-04T15:14:29.006Z"
     }
   ],
   "settled": [
@@ -11177,16 +11113,156 @@
       "homeScore": 2,
       "awayScore": 1,
       "settledAt": "2026-03-04T15:12:21.716Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827726-team_total-94fce1fa6a",
+      "gameId": "401827726",
+      "sport": "NCAAB",
+      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
+      "homeTeam": "Iowa State Cyclones",
+      "awayTeam": "Arizona State Sun Devils",
+      "pick": "Iowa State Cyclones Over 71",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-07T19:00Z",
+      "savedAt": "2026-03-04T15:13:35.808Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 60,
+      "settledAt": "2026-03-04T15:17:06.337Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827726-team_total-5eed820871",
+      "gameId": "401827726",
+      "sport": "NCAAB",
+      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
+      "homeTeam": "Iowa State Cyclones",
+      "awayTeam": "Arizona State Sun Devils",
+      "pick": "Arizona State Sun Devils Under 72.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 33.64,
+      "gameTime": "2026-03-07T19:00Z",
+      "savedAt": "2026-03-04T15:13:35.808Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 60,
+      "settledAt": "2026-03-04T15:17:06.337Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827726-total-4eb2213b3c",
+      "gameId": "401827726",
+      "sport": "NCAAB",
+      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
+      "homeTeam": "Iowa State Cyclones",
+      "awayTeam": "Arizona State Sun Devils",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 33.64,
+      "gameTime": "2026-03-07T19:00Z",
+      "savedAt": "2026-03-04T15:13:35.808Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 60,
+      "settledAt": "2026-03-04T15:17:06.337Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827726-total-c259ee222e",
+      "gameId": "401827726",
+      "sport": "NCAAB",
+      "game": "Arizona State Sun Devils @ Iowa State Cyclones",
+      "homeTeam": "Iowa State Cyclones",
+      "awayTeam": "Arizona State Sun Devils",
+      "pick": "Over 144.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 33.64,
+      "gameTime": "2026-03-07T19:00Z",
+      "savedAt": "2026-03-04T15:14:29.006Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 60,
+      "settledAt": "2026-03-04T15:17:06.337Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-team_total-35dca5db83",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "New Jersey Devils Under 4",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 6.91,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-04T15:26:40.633Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 1,
+      "settledAt": "2026-03-04T15:27:48.024Z"
+    },
+    {
+      "id": "precomp-NHL-401803322-total-e4ee745ce0",
+      "gameId": "401803322",
+      "sport": "NHL",
+      "game": "Toronto Maple Leafs @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Toronto Maple Leafs",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -129,
+      "grade": "B-",
+      "confidence": 60,
+      "ev": -2.36,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-04T15:26:40.633Z",
+      "result": "push",
+      "homeScore": 5,
+      "awayScore": 1,
+      "settledAt": "2026-03-04T15:27:48.024Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-total-0e4ff02c73",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Under 165",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 22.18,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-04T15:30:15.396Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-04T15:31:20.853Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 534,
-      "won": 246,
-      "lost": 283,
-      "push": 5,
-      "rate": 46.1,
-      "pending": 31
+      "total": 541,
+      "won": 247,
+      "lost": 288,
+      "push": 6,
+      "rate": 45.7,
+      "pending": 27
     },
     "bySport": {
       "NBA": {
@@ -11195,31 +11271,31 @@
         "rate": 40.7
       },
       "NHL": {
-        "total": 119,
+        "total": 121,
         "won": 60,
-        "rate": 50.4
+        "rate": 49.6
       },
       "NCAAB": {
-        "total": 216,
-        "won": 105,
-        "rate": 48.6
+        "total": 221,
+        "won": 106,
+        "rate": 48
       }
     },
     "byGrade": {
       "B": {
-        "total": 38,
+        "total": 39,
         "won": 14,
-        "rate": 36.8
+        "rate": 35.9
       },
       "B+": {
-        "total": 59,
-        "won": 40,
-        "rate": 67.8
+        "total": 63,
+        "won": 41,
+        "rate": 65.1
       },
       "B-": {
-        "total": 165,
+        "total": 167,
         "won": 79,
-        "rate": 47.9
+        "rate": 47.3
       },
       "D+": {
         "total": 31,
@@ -11271,29 +11347,29 @@
         "roi": -9.7
       },
       "Total": {
-        "total": 106,
+        "total": 110,
         "won": 40,
-        "rate": 37.7,
-        "roi": -26.1
+        "rate": 36.4,
+        "roi": -28.2
       },
       "Team Total": {
-        "total": 217,
-        "won": 101,
-        "rate": 46.5,
-        "roi": -10.3
+        "total": 220,
+        "won": 102,
+        "rate": 46.4,
+        "roi": -10.7
       }
     },
     "recentForm": {
-      "won": 19,
-      "lost": 31,
-      "push": 0,
-      "rate": 38
+      "won": 17,
+      "lost": 32,
+      "push": 1,
+      "rate": 34
     },
-    "lastUpdated": "2026-03-04T15:14:32.824Z",
-    "roi": -7,
-    "brierScore": 0.287,
-    "maxDrawdown": 41.9,
-    "sharpeRatio": -0.062,
+    "lastUpdated": "2026-03-04T15:31:20.856Z",
+    "roi": -7.7,
+    "brierScore": 0.2883,
+    "maxDrawdown": 44.9,
+    "sharpeRatio": -0.069,
     "homeAwayBias": {
       "homeWinRate": 50.9,
       "awayWinRate": 45.5,
@@ -11322,14 +11398,14 @@
       {
         "range": "65-70",
         "predicted": 66.2,
-        "actual": 46,
-        "total": 226
+        "actual": 45.4,
+        "total": 229
       },
       {
         "range": "70-75",
         "predicted": 70,
-        "actual": 48.7,
-        "total": 156
+        "actual": 48.4,
+        "total": 159
       },
       {
         "range": "75-80",

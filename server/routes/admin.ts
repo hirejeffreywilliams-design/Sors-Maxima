@@ -4161,6 +4161,16 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/team-form-status", requireAdmin, async (_req, res) => {
+    try {
+      const { getFormCacheStatus } = await import("../teamHistoricalFormEngine");
+      const status = getFormCacheStatus();
+      res.json({ ...status, timestamp: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Form cache status failed", detail: err.message });
+    }
+  });
+
   app.get("/api/admin/bdl-stats", requireAdmin, async (_req, res) => {
     try {
       const {

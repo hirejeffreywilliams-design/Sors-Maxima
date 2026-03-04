@@ -28,6 +28,7 @@ import { savePrecomputedPicks } from "./pickOutcomeTracker";
 import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } from "./pick-insight-engine";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
+import { getTeamFormData } from "./teamHistoricalFormEngine";
 import type { Sport } from "@shared/schema";
 
 const DIVISION_GROUPS: Record<string, string[][]> = {
@@ -757,9 +758,54 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     let awayStreakData = deriveStreak(awayWinPct, awayGames);
     let homeScoringData = deriveScoring(homeWinPct);
     let awayScoringData = deriveScoring(awayWinPct);
-    let homeHomeRec = { wins: Math.round(homeRec.wins * 0.55), losses: Math.round(homeRec.losses * 0.45) };
-    let awayAwayRec = { wins: Math.round(awayRec.wins * 0.45), losses: Math.round(awayRec.losses * 0.55) };
 
+    // Use ESPN home/road split records when available (real data, not estimated)
+    const parseRecordStr = (r: string | undefined): { wins: number; losses: number } => {
+      if (!r) return { wins: 0, losses: 0 };
+      const parts = r.split("-");
+      return { wins: parseInt(parts[0]) || 0, losses: parseInt(parts[1]) || 0 };
+    };
+    const espnHomeHomeRec = parseRecordStr(game.homeTeam?.homeRecord);
+    const espnAwayRoadRec = parseRecordStr(game.awayTeam?.roadRecord);
+    const hasEspnHomeRec = espnHomeHomeRec.wins + espnHomeHomeRec.losses >= 3;
+    const hasEspnAwayRec = espnAwayRoadRec.wins + espnAwayRoadRec.losses >= 3;
+
+    let homeHomeRec = hasEspnHomeRec
+      ? espnHomeHomeRec
+      : { wins: Math.round(homeRec.wins * 0.55), losses: Math.round(homeRec.losses * 0.45) };
+    let awayAwayRec = hasEspnAwayRec
+      ? espnAwayRoadRec
+      : { wins: Math.round(awayRec.wins * 0.45), losses: Math.round(awayRec.losses * 0.55) };
+
+    // Historical Form Engine — real last-60-day team performance (all sports)
+    const homeFormData = getTeamFormData(sport, homeName);
+    const awayFormData = getTeamFormData(sport, awayName);
+
+    if (homeFormData && homeFormData.gamesAnalyzed >= 5) {
+      const { last10, homeRecord: hHomeRec, recentStreak } = homeFormData;
+      const last10Total = last10.wins + last10.losses;
+      if (last10Total >= 5) {
+        homeLastNWinPct = last10.wins / last10Total;
+        homeStreakData = { type: recentStreak.type, length: recentStreak.length };
+      }
+      if (hHomeRec.wins + hHomeRec.losses >= 3 && !hasEspnHomeRec) {
+        homeHomeRec = { wins: hHomeRec.wins, losses: hHomeRec.losses };
+      }
+    }
+
+    if (awayFormData && awayFormData.gamesAnalyzed >= 5) {
+      const { last10, awayRecord: aAwayRec, recentStreak } = awayFormData;
+      const last10Total = last10.wins + last10.losses;
+      if (last10Total >= 5) {
+        awayLastNWinPct = last10.wins / last10Total;
+        awayStreakData = { type: recentStreak.type, length: recentStreak.length };
+      }
+      if (aAwayRec.wins + aAwayRec.losses >= 3 && !hasEspnAwayRec) {
+        awayAwayRec = { wins: aAwayRec.wins, losses: aAwayRec.losses };
+      }
+    }
+
+    // BDL overrides for NBA — highest quality source for that sport
     if (homeBDL) {
       homeStreakData = { type: homeBDL.streakType === "win" ? "W" : "L", length: homeBDL.streak };
       homeScoringData = { avgFor: homeBDL.avgPts, avgAgainst: homeBDL.avgPts > 0 ? Math.round((homeBDL.avgPts / ((homeBDL.offRating || 110) / (homeBDL.defRating || 110))) * 10) / 10 : deriveScoring(homeWinPct).avgAgainst };

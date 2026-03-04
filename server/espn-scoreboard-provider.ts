@@ -26,6 +26,8 @@ export interface ESPNScoreboardGame {
     logo?: string;
     color?: string;
     record?: string;
+    homeRecord?: string;
+    roadRecord?: string;
     score: number;
   };
   awayTeam: {
@@ -36,6 +38,8 @@ export interface ESPNScoreboardGame {
     logo?: string;
     color?: string;
     record?: string;
+    homeRecord?: string;
+    roadRecord?: string;
     score: number;
   };
   status: {
@@ -95,6 +99,8 @@ function parseCompetitor(comp: any): ESPNScoreboardGame["homeTeam"] {
   const team = comp.team || {};
   const records = comp.records || [];
   const overallRecord = records.find((r: any) => r.type === "total");
+  const homeRecord = records.find((r: any) => r.type === "home");
+  const roadRecord = records.find((r: any) => r.type === "road" || r.type === "away");
 
   return {
     id: team.id || "",
@@ -104,6 +110,8 @@ function parseCompetitor(comp: any): ESPNScoreboardGame["homeTeam"] {
     logo: team.logo || team.logos?.[0]?.href,
     color: team.color ? `#${team.color}` : undefined,
     record: overallRecord?.summary || "",
+    homeRecord: homeRecord?.summary || undefined,
+    roadRecord: roadRecord?.summary || undefined,
     score: parseInt(comp.score || "0", 10) || 0,
   };
 }
