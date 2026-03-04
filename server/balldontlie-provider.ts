@@ -50,6 +50,10 @@ async function fetchBDL<T>(path: string, params?: Record<string, string>): Promi
   const cached = getCached<T>(cacheKey);
   if (cached) return cached;
 
+  if (apiBudgetOptimizer.isSuspended("balldontlie")) {
+    return null;
+  }
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10000);

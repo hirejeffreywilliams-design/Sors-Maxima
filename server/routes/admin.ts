@@ -4245,6 +4245,51 @@ Follow these rules:
     }
   });
 
+  app.post("/api/admin/api-budget/:service/suspend", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { service } = req.params;
+      const { reason } = req.body;
+      apiBudgetOptimizer.suspendService(service as any, reason || "Manually suspended by admin");
+      res.json({ success: true, service, suspended: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to suspend service", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/api-budget/:service/resume", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { service } = req.params;
+      apiBudgetOptimizer.resumeService(service as any);
+      res.json({ success: true, service, suspended: false });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to resume service", detail: err.message });
+    }
+  });
+
+  app.patch("/api/admin/api-budget/:service/auto-suspend", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { service } = req.params;
+      const { enabled } = req.body;
+      apiBudgetOptimizer.setAutoSuspend(service as any, !!enabled);
+      res.json({ success: true, service, autoSuspend: !!enabled });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to update auto-suspend", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/api-budget/alerts/:id/dismiss", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      apiBudgetOptimizer.dismissAlert(req.params.id);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to dismiss alert", detail: err.message });
+    }
+  });
+
   app.get("/api/admin/model-integrity", requireAdmin, async (_req, res) => {
     try {
       const { getPickAccuracyStats, getRecentPicks } = await import("../pickOutcomeTracker");

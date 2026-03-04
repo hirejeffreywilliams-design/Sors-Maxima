@@ -88,6 +88,11 @@ async function fetchApiFootballFixtures(leagueId: number, season: number): Promi
     return [];
   }
 
+  if (apiBudgetOptimizer.isSuspended("apifootball")) {
+    console.log("[API-Football] Skipping — service suspended by Budget Optimizer");
+    return [];
+  }
+
   try {
     const response = await fetch(url, {
       headers: { "x-apisports-key": activeKey },

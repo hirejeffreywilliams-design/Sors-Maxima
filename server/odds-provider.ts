@@ -267,6 +267,10 @@ function mapSportToOddsApiKey(sport: string): string | null {
 async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
   const apiKey = getOddsApiKey();
   if (!apiKey) return [];
+  if (apiBudgetOptimizer.isSuspended("odds")) {
+    logInfo("[OddsAPI] Skipping fetch — service suspended");
+    return [];
+  }
 
   const sportKey = mapSportToOddsApiKey(sport);
   if (!sportKey) return [];
