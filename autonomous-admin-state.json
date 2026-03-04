@@ -1,0 +1,69 @@
+{
+  "alerts": [
+    {
+      "id": "alert_1772642074365_bw4l4",
+      "timestamp": "2026-03-04T16:34:34.365Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "memory",
+      "title": "Memory Critical — Heap at 90%+",
+      "detail": "Heap: 60MB / 62MB (97%). OOM risk.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772642074365_gq3b7",
+      "timestamp": "2026-03-04T16:34:34.365Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772642074365_igbax",
+      "timestamp": "2026-03-04T16:34:34.365Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "model_performance",
+      "title": "Win Rate Critical — Below 48%",
+      "detail": "Win rate 46.1% over 583 picks. Break-even is 52.4%. Immediate review needed.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772639102554_64jsn",
+      "timestamp": "2026-03-04T15:45:02.554Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "memory",
+      "title": "Memory Critical — Heap at 90%+",
+      "detail": "Heap: 64MB / 66MB (97%). OOM risk.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772639102554_bemi0",
+      "timestamp": "2026-03-04T15:45:02.554Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772639102554_44xoc",
+      "timestamp": "2026-03-04T15:45:02.554Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "model_performance",
+      "title": "Win Rate Critical — Below 48%",
+      "detail": "Win rate 45.9% over 548 picks. Break-even is 52.4%. Immediate review needed.",
+      "checkType": "quick"
+    }
+  ],
+  "reports": [],
+  "lastQuickCheck": "2026-03-04T16:34:34.365Z",
+  "lastDeepCheck": null,
+  "totalQuickChecks": 2,
+  "totalDeepChecks": 0
+}
