@@ -5,7 +5,7 @@ import { generateInternationalFeed, getLeagueEmoji } from "../internationalSport
 import { generateMMAFeed, generateNCAABFutures } from "../mma-engine";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
 import { registerSSEClient, getSSEStatus } from "../sseManager";
-import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
+import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, getAlternativePicks, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
 import { stripeService } from "../stripeService";
@@ -657,6 +657,38 @@ export function registerIntelligenceRoutes(app: Express): void {
       res.json(record);
     } catch (err: any) {
       res.status(500).json({ error: "Failed to refresh track record" });
+    }
+  });
+
+  // ── Leg Swap Alternatives ───────────────────────────────────────────────────
+  app.get("/api/picks/alternatives", requireAuth, (req: Request, res: Response) => {
+    try {
+      const sport = String(req.query.sport || "any");
+      const betType = String(req.query.betType || "any");
+      const excludeGame = String(req.query.excludeGame || "");
+      const minOdds = Number(req.query.minOdds ?? -500);
+      const maxOdds = Number(req.query.maxOdds ?? 600);
+      const picks = getAlternativePicks({ sport, betType, excludeGame, minOdds, maxOdds });
+      const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+      const results = picks.map(p => ({
+        sport: p.sport,
+        game: p.game,
+        pick: p.pick,
+        betType: p.betType,
+        americanOdds: p.odds,
+        decimalOdds: +(1 + Math.abs(p.odds) / (p.odds > 0 ? 100 : Math.abs(p.odds))).toFixed(3),
+        ev: Math.min(p.ev, 35),
+        confidence: p.confidence,
+        grade: p.grade,
+        edge: Math.min(p.edge, 35),
+        gameTime: p.gameTime,
+        reasoning: p.reasoning?.slice(0, 120) || "",
+        isUnderdog: p.odds >= 100,
+      }));
+      res.json({ alternatives: results });
+    } catch (err: any) {
+      console.error("[picks/alternatives] Error:", err.message);
+      res.status(500).json({ error: "Failed to fetch alternatives" });
     }
   });
 

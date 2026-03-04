@@ -2275,7 +2275,7 @@ export interface LifeChangerLeg {
   americanOdds: number;
   decimalOdds: number;
   selectionReason: string;
-  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper";
+  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper" | "steam_move" | "trap_game";
   gameTime?: string;
   ev: number;
   confidence: number;
@@ -2384,10 +2384,26 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
 
   const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
 
-  const underdogPool = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > 0 && GOOD_GRADES.includes(p.grade));
-  const contrarianPool = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 3 && GOOD_GRADES.includes(p.grade));
-  const alternativePool = shuffled.filter(p => ["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType) && p.ev > 1 && GOOD_GRADES.includes(p.grade));
-  const sleeperPool = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 42 && GOOD_GRADES.includes(p.grade));
+  // Detect steam moves: picks where line_movement factor has high impact (sharp money signal)
+  const hasSteamFactor = (p: PrecomputedPick) =>
+    p.factors.some(f => f.name === "line_movement" && f.impact >= 55) ||
+    p.reasoning.toLowerCase().includes("steam") ||
+    (p.reasoning.toLowerCase().includes("line movement") && p.reasoning.toLowerCase().includes("sharp"));
+
+  // Detect trap games: public-facing favorite in a scheduling spot that favors the underdog
+  const isTrapGame = (p: PrecomputedPick) =>
+    p.factors.some(f => f.name === "schedule_spot" && f.impact >= 50) ||
+    (p.reasoning.toLowerCase().includes("look-ahead") || p.reasoning.toLowerCase().includes("back-to-back") || p.reasoning.toLowerCase().includes("trap"));
+
+  const underdogPool    = shuffled.filter(p => p.odds >= 110 && p.odds <= 450 && p.ev > 0 && GOOD_GRADES.includes(p.grade) && !hasSteamFactor(p));
+  const contrarianPool  = shuffled.filter(p => p.odds < 0 && p.odds > -180 && p.ev > 3 && GOOD_GRADES.includes(p.grade) && !hasSteamFactor(p));
+  // Alternative pool: ALL non-moneyline markets (spreads + totals) — includes both overs AND unders
+  const alternativePool = shuffled.filter(p => p.betType !== "moneyline" && p.betType !== "h2h" && p.ev > 1 && GOOD_GRADES.includes(p.grade));
+  const sleeperPool     = shuffled.filter(p => p.odds >= 200 && p.odds <= 600 && p.confidence >= 42 && GOOD_GRADES.includes(p.grade));
+  // Steam move pool: sharp line movement picks — high-signal, high-confidence contrarian value
+  const steamMovePool   = shuffled.filter(p => hasSteamFactor(p) && p.ev > 2 && GOOD_GRADES.includes(p.grade));
+  // Trap game pool: scheduling spot / back-to-back / look-ahead picks
+  const trapGamePool    = shuffled.filter(p => isTrapGame(p) && p.ev > 1 && GOOD_GRADES.includes(p.grade) && !hasSteamFactor(p));
 
   const selectedLegs: PrecomputedPick[] = [];
   const usedGames = new Set<string>();
@@ -2430,16 +2446,48 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     }
   }
 
-  tryAdd(underdogPool, 4);
-  tryAdd(contrarianPool, 3);
-  tryAdd(alternativePool, 2);
-  tryAdd(sleeperPool, 2);
+  // Build the ticket: steam moves + trap games are the "unorthodox" premium legs
+  tryAdd(steamMovePool, 2);   // Up to 2 sharp steam-money plays
+  tryAdd(trapGamePool, 2);    // Up to 2 scheduling-spot trap games
+  tryAdd(underdogPool, 3);    // 3 underdog value plays
+  tryAdd(alternativePool, 2); // 2 alt-market picks (spreads, totals, overs AND unders)
+  tryAdd(contrarianPool, 2);  // 2 contrarian fades
+  tryAdd(sleeperPool, 1);     // 1 long-shot sleeper
   if (selectedLegs.length < 6) {
     const remaining = shuffled.filter(p => !selectedLegs.includes(p) && GOOD_GRADES.includes(p.grade));
     tryAdd(remaining, 8 - selectedLegs.length);
   }
 
   if (selectedLegs.length < 4) return null;
+
+  // ── Sport diversity enforcement ───────────────────────────────────────────
+  // Require at least 3 different sports to keep the ticket truly multi-sport.
+  // If we have fewer, swap excess single-sport picks for picks from new sports.
+  const sportsInTicket = () => new Set(selectedLegs.map(p => p.sport)).size;
+  if (sportsInTicket() < 3) {
+    const usedSports = new Set(selectedLegs.map(p => p.sport));
+    const diversityPool = shuffled.filter(p =>
+      !usedSports.has(p.sport) &&
+      !usedGames.has(p.game) &&
+      GOOD_GRADES.includes(p.grade) &&
+      p.gameTime && new Date(p.gameTime).getTime() > now - 5 * 60 * 1000
+    );
+    for (const pick of diversityPool) {
+      if (sportsInTicket() >= 3) break;
+      // Replace the last pick from an over-represented sport (sport with 2 picks)
+      const overRepSport = [...sportCounts.entries()].find(([, c]) => c >= 2)?.[0];
+      if (!overRepSport) break;
+      const replaceIdx = selectedLegs.findLastIndex(p => p.sport === overRepSport);
+      if (replaceIdx < 0) break;
+      const removed = selectedLegs.splice(replaceIdx, 1)[0];
+      sportCounts.set(removed.sport, (sportCounts.get(removed.sport) || 1) - 1);
+      usedGames.delete(removed.game);
+      selectedLegs.push(pick);
+      usedGames.add(pick.game);
+      sportCounts.set(pick.sport, (sportCounts.get(pick.sport) || 0) + 1);
+      usedSports.add(pick.sport);
+    }
+  }
 
   const totalDecimalOdds = selectedLegs.reduce((acc, p) => acc * americanToDecimal(p.odds), 1);
   const rawAmerican = decimalToAmerican(totalDecimalOdds);
@@ -2460,23 +2508,30 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   });
 
   function getCategory(p: PrecomputedPick): LifeChangerLeg["selectionCategory"] {
+    if (hasSteamFactor(p)) return "steam_move";
+    if (isTrapGame(p)) return "trap_game";
     if (p.odds >= 200) return "sleeper";
     if (p.odds >= 110) return "underdog";
-    if (["total", "first_half_total", "team_total", "first_half_spread"].includes(p.betType)) return "alternative";
+    if (p.betType !== "moneyline" && p.betType !== "h2h") return "alternative";
     return "contrarian";
   }
 
   // Use real pick reasoning — fall back to contextual template only if empty
   function getReason(p: PrecomputedPick): string {
     if (p.reasoning && p.reasoning.trim().length > 20) {
-      // Truncate long reasoning to 120 chars for display
       return p.reasoning.length > 120 ? p.reasoning.slice(0, 117) + "..." : p.reasoning;
     }
     const cat = getCategory(p);
     const evStr = p.ev > 35 ? " (+35%+ EV)" : (p.ev > 0 ? ` (+${p.ev.toFixed(1)}% EV)` : "");
+    const impliedPct = Math.round(100 / americanToDecimal(p.odds));
+    if (cat === "steam_move") return `Sharp steam money detected${evStr} — line moving against public; model aligns with sharps on ${p.sport}`;
+    if (cat === "trap_game") return `Scheduling spot trap${evStr} — public overvalues ${p.game.split(" @ ").pop() || "favorite"}; sharps targeting hidden value`;
     if (cat === "sleeper") return `Long-shot value at ${p.odds > 0 ? "+" : ""}${p.odds}${evStr} — ${p.sport} market underprices this line`;
-    if (cat === "underdog") return `Underdog edge${evStr} — model projects ${p.confidence}% win probability vs implied ${Math.round(100 / (americanToDecimal(p.odds)))}%`;
-    if (cat === "alternative") return `${p.betType.replace(/_/g, " ")} market${evStr} — sharp value on unorthodox line`;
+    if (cat === "underdog") return `Underdog edge${evStr} — model projects ${p.confidence}% win probability vs implied ${impliedPct}%`;
+    if (cat === "alternative") {
+      const side = p.pick.toLowerCase().includes("over") ? "over" : p.pick.toLowerCase().includes("under") ? "under" : p.betType.replace(/_/g, " ");
+      return `${side.charAt(0).toUpperCase() + side.slice(1)} market${evStr} — sharp value on ${p.betType.replace(/_/g, " ")} line in ${p.sport}`;
+    }
     return `Contrarian play${evStr} — fading the public on ${p.game.split(" @ ")[0] || p.sport}`;
   }
 
@@ -2512,7 +2567,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     legCount: selectedLegs.length,
     sports: uniqueSports,
     potentialPayouts,
-    selectionLogic: `${selectedLegs.length}-leg cross-sport parlay: underdogs + contrarian plays + alternative markets across ${uniqueSports.join(", ")}`,
+    selectionLogic: `${selectedLegs.length}-leg unorthodox multi-sport parlay across ${uniqueSports.length} sports (${uniqueSports.join(", ")}): steam moves, trap games, underdogs, and alt-market overs/unders hand-selected by the 46-Factor Model.`,
     generatedAt: new Date().toISOString(),
     earliestGame,
     disclaimer: "High-risk parlay for entertainment purposes. Bet responsibly. Past results do not predict future outcomes.",
@@ -2554,4 +2609,46 @@ export function getEngineStatus() {
     refreshIntervalMs: REFRESH_INTERVAL,
     cacheStatus,
   };
+}
+
+/**
+ * Returns alternative picks for leg-swap UX on the Life Changer ticket.
+ * Filters to the same sport (or all sports if sport is "any"), same rough odds band,
+ * excludes the game currently in the ticket, and returns top 5 by confidence.
+ */
+export function getAlternativePicks(params: {
+  sport: string;
+  betType: string;
+  excludeGame: string;
+  minOdds: number;
+  maxOdds: number;
+}): PrecomputedPick[] {
+  const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+  const now = Date.now();
+  const GRACE_MS = 5 * 60 * 1000;
+
+  const allPicks: PrecomputedPick[] = [];
+  for (const [, entry] of predictionCache.entries()) {
+    if (params.sport !== "any" && entry.snapshot.picks[0]?.sport !== params.sport) {
+      // Try to match by sport on individual picks (snapshot may be multi-sport)
+      const matching = entry.snapshot.picks.filter(p => p.sport === params.sport);
+      allPicks.push(...matching);
+    } else {
+      allPicks.push(...entry.snapshot.picks);
+    }
+  }
+
+  const upcoming = allPicks.filter(p =>
+    p.gameTime && new Date(p.gameTime).getTime() > now - GRACE_MS
+  );
+
+  return upcoming
+    .filter(p => {
+      if (p.game === params.excludeGame) return false;
+      if (!GOOD_GRADES.includes(p.grade)) return false;
+      if (p.odds < params.minOdds || p.odds > params.maxOdds) return false;
+      return true;
+    })
+    .sort((a, b) => b.confidence - a.confidence || b.ev - a.ev)
+    .slice(0, 5);
 }

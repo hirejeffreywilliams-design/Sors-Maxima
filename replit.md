@@ -61,6 +61,8 @@ The application uses a modern web architecture with a React-based frontend and a
 - **AI Pick Edge Insight Engine**: Async, non-blocking enrichment layer generating 1-2 sentence sharp edge insights for top picks using GPT-4o-mini.
 - **AI Routes — Backend/Admin Only**: All AI routes restricted to admin access.
 - **Smart Leg Selector UX**: `MatchupTicketCard` includes per-leg checkboxes, quick actions, and correlated leg warnings.
+- **Leg Swap UX on Daily Edge Parlay**: Each leg in the Life Changer section has a "Swap" popover that fetches up to 5 high-grade alternatives from the cache via `GET /api/picks/alternatives`. Users can apply a swap (live payout updates, "swapped" badge), see "X swapped" pill count on the expand button, and restore the original leg. Swaps are session-only and reset on ticket refresh.
+- **Enhanced Life Changer Ticket**: Expanded `selectionCategory` to include `steam_move` (sharp line-movement picks) and `trap_game` (scheduling-spot fades). Pool selection now prioritizes steam moves and trap games first, then underdogs, alt-market overs+unders, contrarian plays, and sleepers. Enforces minimum 3 different sports via a post-selection diversity swap loop.
 - **Bet Slip Auto-Open**: Desktop sidebar and mobile sheet auto-open when the first leg is added.
 - **Stripe Payment Integration**: Handles subscriptions and checkout flow for Sharp, Edge, and Max tiers.
 - **Strategy Accountability System**: Users can choose from 9 preset betting strategies with per-leg violation tracking.

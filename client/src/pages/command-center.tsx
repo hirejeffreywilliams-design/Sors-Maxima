@@ -976,7 +976,7 @@ interface LifeChangerLeg {
   americanOdds: number;
   decimalOdds: number;
   selectionReason: string;
-  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper";
+  selectionCategory: "underdog" | "contrarian" | "alternative" | "sleeper" | "steam_move" | "trap_game";
   gameTime?: string;
   ev: number;
   confidence: number;
@@ -1007,18 +1007,38 @@ const SPORT_EMOJI: Record<string, string> = {
   Soccer_UCL: "⚽", Soccer_INTL: "⚽",
 };
 
+interface AlternativePick {
+  sport: string;
+  game: string;
+  pick: string;
+  betType: string;
+  americanOdds: number;
+  decimalOdds: number;
+  ev: number;
+  confidence: number;
+  grade: string;
+  edge: number;
+  gameTime?: string;
+  reasoning: string;
+  isUnderdog: boolean;
+}
+
 const CATEGORY_COLORS: Record<string, string> = {
-  underdog: "text-amber-500 bg-amber-500/10 border-amber-500/30",
-  sleeper: "text-purple-500 bg-purple-500/10 border-purple-500/30",
+  underdog:   "text-amber-500 bg-amber-500/10 border-amber-500/30",
+  sleeper:    "text-purple-500 bg-purple-500/10 border-purple-500/30",
   contrarian: "text-blue-500 bg-blue-500/10 border-blue-500/30",
-  alternative: "text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
+  alternative:"text-emerald-500 bg-emerald-500/10 border-emerald-500/30",
+  steam_move: "text-cyan-400 bg-cyan-400/10 border-cyan-400/30",
+  trap_game:  "text-rose-400 bg-rose-400/10 border-rose-400/30",
 };
 
 const CATEGORY_LABEL: Record<string, string> = {
-  underdog: "Underdog",
-  sleeper: "Sleeper",
+  underdog:   "Underdog",
+  sleeper:    "Sleeper",
   contrarian: "Contrarian",
-  alternative: "Alt Market",
+  alternative:"Alt Market",
+  steam_move: "Steam Move",
+  trap_game:  "Trap Game",
 };
 
 function formatOddsLC(american: number): string {
@@ -1048,12 +1068,41 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
   const [expanded, setExpanded] = useState(false);
   const [addedAll, setAddedAll] = useState(false);
   const [stake, setStake] = useState(10);
+  const [swapOverrides, setSwapOverrides] = useState<Map<number, LifeChangerLeg>>(new Map());
+  const [swapOpenIdx, setSwapOpenIdx] = useState<number | null>(null);
 
-  // Reset addedAll when ticket refreshes
-  useEffect(() => { setAddedAll(false); }, [dataUpdatedAt]);
+  // Reset state when ticket refreshes
+  useEffect(() => {
+    setAddedAll(false);
+    setSwapOverrides(new Map());
+    setSwapOpenIdx(null);
+  }, [dataUpdatedAt]);
 
-  const payout = useMemo(() => ticket ? stake * ticket.totalDecimalOdds : 0, [stake, ticket]);
+  // Effective legs = ticket legs with any user-applied swaps overlaid
+  const effectiveLegs = useMemo<LifeChangerLeg[]>(() => {
+    if (!ticket) return [];
+    return ticket.legs.map((leg, i) => swapOverrides.get(i) ?? leg);
+  }, [ticket, swapOverrides]);
+
+  // Recompute parlay odds when swaps change
+  const effectiveDecimalOdds = useMemo(
+    () => effectiveLegs.reduce((acc, l) => acc * l.decimalOdds, 1),
+    [effectiveLegs]
+  );
+
+  const payout = useMemo(() => effectiveDecimalOdds > 0 ? stake * effectiveDecimalOdds : 0, [stake, effectiveDecimalOdds]);
   const payoutFormatted = useMemo(() => formatLCPayout(payout), [payout]);
+
+  // Alternatives query — only runs when a swap popover is open
+  const activeLeg = swapOpenIdx !== null ? effectiveLegs[swapOpenIdx] : null;
+  const altQueryKey = activeLeg
+    ? `/api/picks/alternatives?sport=${encodeURIComponent(activeLeg.sport)}&excludeGame=${encodeURIComponent(activeLeg.game)}`
+    : null;
+  const { data: altsData, isLoading: altsLoading } = useQuery<{ alternatives: AlternativePick[] }>({
+    queryKey: [altQueryKey],
+    enabled: !!altQueryKey,
+    staleTime: 60000,
+  });
 
   // Stable leg ID based on sport + game name + bet type
   function legId(leg: LifeChangerLeg) {
@@ -1086,17 +1135,43 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
     };
   }
 
+  function handleSwapUse(idx: number, alt: AlternativePick) {
+    const asLeg: LifeChangerLeg = {
+      sport: alt.sport,
+      game: alt.game,
+      pick: alt.pick,
+      betType: alt.betType,
+      americanOdds: alt.americanOdds,
+      decimalOdds: alt.decimalOdds,
+      selectionReason: alt.reasoning || "Alternative selected by model",
+      selectionCategory: alt.isUnderdog ? "underdog" : "alternative",
+      gameTime: alt.gameTime,
+      ev: alt.ev,
+      confidence: alt.confidence,
+      grade: alt.grade,
+      edge: alt.edge,
+      isUnderdog: alt.isUnderdog,
+      reasoning: alt.reasoning,
+    };
+    setSwapOverrides(prev => {
+      const next = new Map(prev);
+      next.set(idx, asLeg);
+      return next;
+    });
+    setSwapOpenIdx(null);
+  }
+
   function handleAddAll() {
-    if (!ticket) return;
+    if (!effectiveLegs.length) return;
     let added = 0;
-    ticket.legs.forEach(leg => {
+    effectiveLegs.forEach(leg => {
       const ok = addLeg(buildLcLeg(leg) as any);
       if (ok) added++;
     });
     if (added > 0) setAddedAll(true);
   }
 
-  const allInSlip = ticket ? ticket.legs.every(l => legs.some(s => s.id === legId(l))) : false;
+  const allInSlip = effectiveLegs.length > 0 && effectiveLegs.every(l => legs.some(s => s.id === legId(l)));
 
   return (
     <section data-testid="section-life-changer" className="relative">
@@ -1121,9 +1196,15 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
           {ticket && (
             <div className="text-right shrink-0">
               <p className="text-2xl font-black text-amber-300 leading-none tabular-nums" data-testid="text-life-changer-odds">
-                {ticket.americanOdds}
+                {effectiveDecimalOdds > 1
+                  ? (effectiveDecimalOdds >= 2
+                    ? `+${Math.round((effectiveDecimalOdds - 1) * 100)}`
+                    : `-${Math.round(100 / (effectiveDecimalOdds - 1))}`)
+                  : ticket.americanOdds}
               </p>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{ticket.legCount} legs · {ticket.sports.join(", ")}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                {effectiveLegs.length} legs · {[...new Set(effectiveLegs.map(l => l.sport))].join(", ")}
+              </p>
             </div>
           )}
         </div>
@@ -1192,9 +1273,9 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
               {/* Payout display */}
               <div className="rounded-lg bg-amber-500/10 border border-amber-500/25 p-3 flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] text-amber-300/70 uppercase tracking-wide">If all {ticket.legCount} legs hit</p>
+                  <p className="text-[10px] text-amber-300/70 uppercase tracking-wide">If all {effectiveLegs.length} legs hit</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">
-                    {formatLCStake(stake)} × {ticket.totalDecimalOdds.toFixed(1)}x odds
+                    {formatLCStake(stake)} × {effectiveDecimalOdds.toFixed(1)}x odds
                   </p>
                 </div>
                 <div className="text-right">
@@ -1215,7 +1296,12 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
               >
                 <span className="flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5" />
-                  {expanded ? "Hide" : "View"} all {ticket.legCount} legs
+                  {expanded ? "Hide" : "View"} all {effectiveLegs.length} legs
+                  {swapOverrides.size > 0 && (
+                    <span className="text-[9px] bg-cyan-400/20 text-cyan-300 border border-cyan-400/30 rounded px-1">
+                      {swapOverrides.size} swapped
+                    </span>
+                  )}
                 </span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? "rotate-180" : ""}`} />
               </button>
@@ -1223,13 +1309,16 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
 
             {/* Leg list */}
             {expanded && (
-              <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3 max-h-[340px] overflow-y-auto">
-                {ticket.legs.map((leg, i) => {
+              <div className="px-4 pb-3 space-y-2 border-t border-amber-500/10 pt-3 max-h-[420px] overflow-y-auto">
+                {effectiveLegs.map((leg, i) => {
                   const legInSlip = legs.some(s => s.id === legId(leg));
+                  const isSwapped = swapOverrides.has(i);
+                  const isSwapOpen = swapOpenIdx === i;
+                  const alternatives = altsData?.alternatives ?? [];
                   return (
                     <div
                       key={i}
-                      className="rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 overflow-hidden"
+                      className={`rounded-lg border bg-background/50 px-3 py-2.5 overflow-hidden transition-colors ${isSwapped ? "border-cyan-400/40 bg-cyan-950/20" : "border-border/60"}`}
                       data-testid={`row-lc-leg-${i}`}
                     >
                       <div className="flex items-start gap-2">
@@ -1237,13 +1326,16 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                         <div className="flex-1 min-w-0 overflow-hidden">
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="text-xs font-semibold leading-tight">{leg.pick}</span>
+                            {isSwapped && (
+                              <span className="text-[9px] text-cyan-300 bg-cyan-400/10 border border-cyan-400/30 rounded px-1">swapped</span>
+                            )}
                             {leg.grade && (
                               <Badge variant="outline" className={`text-[9px] px-1 py-0 border font-bold shrink-0 ${gradeColor(leg.grade)}`}>
                                 {leg.grade}
                               </Badge>
                             )}
-                            <Badge variant="outline" className={`text-[9px] px-1 py-0 border shrink-0 ${CATEGORY_COLORS[leg.selectionCategory]}`}>
-                              {CATEGORY_LABEL[leg.selectionCategory]}
+                            <Badge variant="outline" className={`text-[9px] px-1 py-0 border shrink-0 ${CATEGORY_COLORS[leg.selectionCategory] ?? ""}`}>
+                              {CATEGORY_LABEL[leg.selectionCategory] ?? leg.selectionCategory}
                             </Badge>
                           </div>
                           <p className="text-[10px] text-muted-foreground truncate mt-0.5">{leg.game}</p>
@@ -1258,7 +1350,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                           </div>
                           <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
                         </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0 w-[64px]">
+                        <div className="flex flex-col items-end gap-1 shrink-0 w-[68px]">
                           <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
                           <p className="text-[9px] text-muted-foreground text-right leading-tight">{leg.betType.replace(/_/g, " ")}</p>
                           <button
@@ -1273,6 +1365,82 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                           >
                             {legInSlip ? "✓" : "+ Add"}
                           </button>
+                          {/* Swap trigger */}
+                          <Popover open={isSwapOpen} onOpenChange={open => setSwapOpenIdx(open ? i : null)}>
+                            <PopoverTrigger asChild>
+                              <button
+                                data-testid={`button-lc-swap-${i}`}
+                                className="mt-0.5 px-2 py-0.5 rounded text-[10px] font-semibold transition-colors whitespace-nowrap bg-muted/40 text-muted-foreground border border-border/40 hover:bg-muted/70 flex items-center gap-0.5"
+                              >
+                                <RefreshCw className="w-2.5 h-2.5" /> Swap
+                              </button>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              side="left"
+                              align="start"
+                              className="w-72 p-0 shadow-xl border-border/60"
+                            >
+                              <div className="px-3 py-2 border-b border-border/40 flex items-center justify-between">
+                                <p className="text-xs font-semibold">Swap Leg {i + 1}</p>
+                                <p className="text-[10px] text-muted-foreground">{leg.sport} alternatives</p>
+                              </div>
+                              {altsLoading && swapOpenIdx === i && (
+                                <div className="px-3 py-4 space-y-2">
+                                  <div className="h-10 rounded-md bg-muted/40 animate-pulse" />
+                                  <div className="h-10 rounded-md bg-muted/40 animate-pulse" />
+                                  <div className="h-10 rounded-md bg-muted/40 animate-pulse" />
+                                </div>
+                              )}
+                              {!altsLoading && alternatives.length === 0 && swapOpenIdx === i && (
+                                <div className="px-3 py-4 text-center text-xs text-muted-foreground">
+                                  No alternatives available right now.<br />Check back once more games are loaded.
+                                </div>
+                              )}
+                              {!altsLoading && alternatives.length > 0 && swapOpenIdx === i && (
+                                <div className="divide-y divide-border/30 max-h-[280px] overflow-y-auto">
+                                  {alternatives.map((alt, ai) => (
+                                    <div key={ai} className="px-3 py-2 hover:bg-muted/30 transition-colors flex items-start gap-2">
+                                      <span className="text-sm shrink-0 mt-0.5">{SPORT_EMOJI[alt.sport] || "🎯"}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-1 flex-wrap">
+                                          <span className="text-[11px] font-semibold leading-tight truncate">{alt.pick}</span>
+                                          <Badge variant="outline" className={`text-[9px] px-1 py-0 border font-bold shrink-0 ${gradeColor(alt.grade)}`}>
+                                            {alt.grade}
+                                          </Badge>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground truncate">{alt.game}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                          <span className="text-[10px] font-bold text-amber-400">{formatOddsLC(alt.americanOdds)}</span>
+                                          {alt.ev > 0 && <span className="text-[10px] text-emerald-400">{alt.ev > 35 ? "35%+" : `+${alt.ev.toFixed(1)}%`} EV</span>}
+                                          <span className="text-[10px] text-muted-foreground/60">{alt.confidence}%</span>
+                                        </div>
+                                      </div>
+                                      <button
+                                        data-testid={`button-lc-swap-use-${i}-${ai}`}
+                                        onClick={() => handleSwapUse(i, alt)}
+                                        className="shrink-0 mt-0.5 px-2 py-1 rounded text-[10px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 hover:bg-cyan-500/30 transition-colors whitespace-nowrap"
+                                      >
+                                        Use
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {isSwapped && (
+                                <div className="px-3 py-1.5 border-t border-border/30">
+                                  <button
+                                    className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                                    onClick={() => {
+                                      setSwapOverrides(prev => { const next = new Map(prev); next.delete(i); return next; });
+                                      setSwapOpenIdx(null);
+                                    }}
+                                  >
+                                    ↩ Restore original leg
+                                  </button>
+                                </div>
+                              )}
+                            </PopoverContent>
+                          </Popover>
                         </div>
                       </div>
                     </div>
