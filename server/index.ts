@@ -9,6 +9,7 @@ if (process.env.SENTRY_DSN) {
 }
 
 import express, { type Request, Response, NextFunction } from "express";
+import compression from "compression";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import cookieParser from "cookie-parser";
@@ -78,6 +79,16 @@ declare module "express-session" {
     role?: 'user' | 'admin';
   }
 }
+
+// ─── Compression ──────────────────────────────────────────────────────────────
+app.use(compression({
+  level: 6,
+  threshold: 1024,
+  filter: (req, res) => {
+    if (req.headers["x-no-compression"]) return false;
+    return compression.filter(req, res);
+  },
+}));
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
 app.use(securityHeadersMiddleware);
@@ -246,6 +257,30 @@ function startEnginesPhased(): void {
     generateInternationalFeed().catch(() => {});
     setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);
   }, 145_000);
+
+  // ── Phase 10 (50s): Cache Warmup ─────────────────────────────────────────
+  // Pre-warm the response cache for the most-hit endpoints so the first user
+  // after a deploy gets instant data instead of waiting for live generation.
+  safeStart("Response Cache Warmup", async () => {
+    try {
+      const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
+      const { buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket } = await import("./precomputedPredictionsEngine");
+      const { getPickAccuracyStats } = await import("./pickOutcomeTracker");
+      const { getTrackRecord } = await import("./calibrationEngine");
+      const { invalidateCache } = await import("./responseCache");
+      // Pre-generate data so it's in in-process caches; route-level responseCache
+      // will populate on first actual HTTP request with the already-warm data.
+      await generateIntelligenceFeed().catch(() => {});
+      buildOptimalTickets({ sports: ["NBA", "NHL", "NCAAB"], riskLevel: "moderate", bankroll: 1000, maxLegs: 4, dateFilter: "all" });
+      buildMatchupTickets({ sports: ["NBA", "NHL", "NCAAB"], maxLegs: 20, bankroll: 1000 });
+      buildLifeChangerTicket();
+      getPickAccuracyStats();
+      getTrackRecord();
+      console.log("[CacheWarmup] Critical caches pre-warmed — first page load will be instant");
+    } catch (err: any) {
+      console.warn("[CacheWarmup] Warmup partial:", err.message);
+    }
+  }, 50_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.

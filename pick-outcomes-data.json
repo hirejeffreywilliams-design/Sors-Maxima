@@ -433,84 +433,148 @@
       "savedAt": "2026-03-04T14:32:56.845Z"
     },
     {
-      "id": "precomp-NBA-401810751-team_total-9d2b17470d",
-      "gameId": "401810751",
-      "sport": "NBA",
-      "game": "Portland Trail Blazers @ Memphis Grizzlies",
-      "homeTeam": "Memphis Grizzlies",
-      "awayTeam": "Portland Trail Blazers",
-      "pick": "Memphis Grizzlies Over 113.5",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "C",
-      "confidence": 67,
-      "ev": -6.45,
-      "gameTime": "2026-03-05T01:00Z",
-      "savedAt": "2026-03-04T14:51:33.289Z"
-    },
-    {
-      "id": "precomp-NBA-401810753-spread-56eb341b48",
-      "gameId": "401810753",
-      "sport": "NBA",
-      "game": "Indiana Pacers @ LA Clippers",
-      "homeTeam": "LA Clippers",
-      "awayTeam": "Indiana Pacers",
-      "pick": "LA Clippers -12.5",
-      "betType": "spread",
-      "odds": -108,
-      "grade": "B-",
-      "confidence": 65,
-      "ev": 25.19,
-      "gameTime": "2026-03-05T03:30Z",
-      "savedAt": "2026-03-04T14:51:33.289Z"
-    },
-    {
-      "id": "precomp-NBA-401810753-team_total-01ee16026a",
-      "gameId": "401810753",
-      "sport": "NBA",
-      "game": "Indiana Pacers @ LA Clippers",
-      "homeTeam": "LA Clippers",
-      "awayTeam": "Indiana Pacers",
-      "pick": "LA Clippers Over 120",
-      "betType": "team_total",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 65,
-      "ev": 24.09,
-      "gameTime": "2026-03-05T03:30Z",
-      "savedAt": "2026-03-04T14:51:33.289Z"
-    },
-    {
-      "id": "precomp-NCAAB-401808273-team_total-d118247558",
-      "gameId": "401808273",
+      "id": "precomp-NCAAB-401825561-team_total-7de4684a07",
+      "gameId": "401825561",
       "sport": "NCAAB",
-      "game": "Texas Longhorns @ Arkansas Razorbacks",
-      "homeTeam": "Arkansas Razorbacks",
-      "awayTeam": "Texas Longhorns",
-      "pick": "Texas Longhorns Under 78.5",
+      "game": "Rutgers Scarlet Knights @ Michigan State Spartans",
+      "homeTeam": "Michigan State Spartans",
+      "awayTeam": "Rutgers Scarlet Knights",
+      "pick": "Michigan State Spartans Over 70.5",
       "betType": "team_total",
       "odds": -110,
-      "grade": "B",
+      "grade": "A-",
       "confidence": 70,
-      "ev": 22.18,
-      "gameTime": "2026-03-05T00:00Z",
-      "savedAt": "2026-03-04T14:51:33.935Z"
+      "ev": 41.27,
+      "gameTime": "2026-03-06T01:00Z",
+      "savedAt": "2026-03-04T14:55:36.542Z"
     },
     {
-      "id": "precomp-NCAAB-401827727-total-4bee3497d8",
-      "gameId": "401827727",
+      "id": "precomp-NCAAB-401825561-team_total-315545834f",
+      "gameId": "401825561",
       "sport": "NCAAB",
-      "game": "Kansas State Wildcats @ Kansas Jayhawks",
-      "homeTeam": "Kansas Jayhawks",
-      "awayTeam": "Kansas State Wildcats",
+      "game": "Rutgers Scarlet Knights @ Michigan State Spartans",
+      "homeTeam": "Michigan State Spartans",
+      "awayTeam": "Rutgers Scarlet Knights",
+      "pick": "Rutgers Scarlet Knights Under 73",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 70,
+      "ev": 41.27,
+      "gameTime": "2026-03-06T01:00Z",
+      "savedAt": "2026-03-04T14:55:36.542Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825561-total-55c515c4d9",
+      "gameId": "401825561",
+      "sport": "NCAAB",
+      "game": "Rutgers Scarlet Knights @ Michigan State Spartans",
+      "homeTeam": "Michigan State Spartans",
+      "awayTeam": "Rutgers Scarlet Knights",
       "pick": "Over 143.5",
       "betType": "total",
       "odds": -110,
       "grade": "A-",
       "confidence": 68,
-      "ev": 33.64,
-      "gameTime": "2026-03-07T19:00Z",
-      "savedAt": "2026-03-04T14:51:33.935Z"
+      "ev": 41.27,
+      "gameTime": "2026-03-06T01:00Z",
+      "savedAt": "2026-03-04T14:55:36.542Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825561-total-f79c3b48ff",
+      "gameId": "401825561",
+      "sport": "NCAAB",
+      "game": "Rutgers Scarlet Knights @ Michigan State Spartans",
+      "homeTeam": "Michigan State Spartans",
+      "awayTeam": "Rutgers Scarlet Knights",
+      "pick": "Over 144.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 68,
+      "ev": 41.27,
+      "gameTime": "2026-03-06T01:00Z",
+      "savedAt": "2026-03-04T14:56:35.516Z"
+    },
+    {
+      "id": "precomp-NCAAB-401820794-total-147189e86e",
+      "gameId": "401820794",
+      "sport": "NCAAB",
+      "game": "Virginia Tech Hokies @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "Virginia Tech Hokies",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 68,
+      "ev": 26,
+      "gameTime": "2026-03-07T17:00Z",
+      "savedAt": "2026-03-04T14:58:04.791Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808285-team_total-4598ef8431",
+      "gameId": "401808285",
+      "sport": "NCAAB",
+      "game": "Arkansas Razorbacks @ Missouri Tigers",
+      "homeTeam": "Missouri Tigers",
+      "awayTeam": "Arkansas Razorbacks",
+      "pick": "Missouri Tigers Over 72",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 68,
+      "ev": 10.73,
+      "gameTime": "2026-03-07T17:00Z",
+      "savedAt": "2026-03-04T14:58:04.791Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808285-team_total-87a3d710d0",
+      "gameId": "401808285",
+      "sport": "NCAAB",
+      "game": "Arkansas Razorbacks @ Missouri Tigers",
+      "homeTeam": "Missouri Tigers",
+      "awayTeam": "Arkansas Razorbacks",
+      "pick": "Arkansas Razorbacks Under 71.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 67,
+      "ev": 10.73,
+      "gameTime": "2026-03-07T17:00Z",
+      "savedAt": "2026-03-04T14:58:04.791Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808285-total-86bbad0654",
+      "gameId": "401808285",
+      "sport": "NCAAB",
+      "game": "Arkansas Razorbacks @ Missouri Tigers",
+      "homeTeam": "Missouri Tigers",
+      "awayTeam": "Arkansas Razorbacks",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 10.73,
+      "gameTime": "2026-03-07T17:00Z",
+      "savedAt": "2026-03-04T14:58:04.791Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825556-spread-fcf7015f77",
+      "gameId": "401825556",
+      "sport": "NCAAB",
+      "game": "Purdue Boilermakers @ Northwestern Wildcats",
+      "homeTeam": "Northwestern Wildcats",
+      "awayTeam": "Purdue Boilermakers",
+      "pick": "Purdue Boilermakers -11",
+      "betType": "spread",
+      "odds": -105,
+      "grade": "D",
+      "confidence": 70,
+      "ev": -33.62,
+      "gameTime": "2026-03-05T01:30Z",
+      "savedAt": "2026-03-04T15:00:14.760Z"
     }
   ],
   "settled": [
@@ -10793,22 +10857,122 @@
       "homeScore": 91,
       "awayScore": 76,
       "settledAt": "2026-03-04T14:48:10.611Z"
+    },
+    {
+      "id": "precomp-NBA-401810751-team_total-9d2b17470d",
+      "gameId": "401810751",
+      "sport": "NBA",
+      "game": "Portland Trail Blazers @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Portland Trail Blazers",
+      "pick": "Memphis Grizzlies Over 113.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 67,
+      "ev": -6.45,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-04T14:51:33.289Z",
+      "result": "won",
+      "homeScore": 117,
+      "awayScore": 110,
+      "settledAt": "2026-03-04T14:54:46.193Z"
+    },
+    {
+      "id": "precomp-NCAAB-401827727-total-4bee3497d8",
+      "gameId": "401827727",
+      "sport": "NCAAB",
+      "game": "Kansas State Wildcats @ Kansas Jayhawks",
+      "homeTeam": "Kansas Jayhawks",
+      "awayTeam": "Kansas State Wildcats",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 68,
+      "ev": 33.64,
+      "gameTime": "2026-03-07T19:00Z",
+      "savedAt": "2026-03-04T14:51:33.935Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 60,
+      "settledAt": "2026-03-04T14:54:46.198Z"
+    },
+    {
+      "id": "precomp-NBA-401810753-spread-56eb341b48",
+      "gameId": "401810753",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ LA Clippers",
+      "homeTeam": "LA Clippers",
+      "awayTeam": "Indiana Pacers",
+      "pick": "LA Clippers -12.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 25.19,
+      "gameTime": "2026-03-05T03:30Z",
+      "savedAt": "2026-03-04T14:51:33.289Z",
+      "result": "lost",
+      "homeScore": 101,
+      "awayScore": 114,
+      "settledAt": "2026-03-04T14:54:46.211Z"
+    },
+    {
+      "id": "precomp-NBA-401810753-team_total-01ee16026a",
+      "gameId": "401810753",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ LA Clippers",
+      "homeTeam": "LA Clippers",
+      "awayTeam": "Indiana Pacers",
+      "pick": "LA Clippers Over 120",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 24.09,
+      "gameTime": "2026-03-05T03:30Z",
+      "savedAt": "2026-03-04T14:51:33.289Z",
+      "result": "lost",
+      "homeScore": 101,
+      "awayScore": 114,
+      "settledAt": "2026-03-04T14:54:46.211Z"
+    },
+    {
+      "id": "precomp-NCAAB-401808273-team_total-d118247558",
+      "gameId": "401808273",
+      "sport": "NCAAB",
+      "game": "Texas Longhorns @ Arkansas Razorbacks",
+      "homeTeam": "Arkansas Razorbacks",
+      "awayTeam": "Texas Longhorns",
+      "pick": "Texas Longhorns Under 78.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 70,
+      "ev": 22.18,
+      "gameTime": "2026-03-05T00:00Z",
+      "savedAt": "2026-03-04T14:51:33.935Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 77,
+      "settledAt": "2026-03-04T14:54:46.223Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 514,
-      "won": 239,
-      "lost": 270,
+      "total": 519,
+      "won": 241,
+      "lost": 273,
       "push": 5,
-      "rate": 46.5,
-      "pending": 32
+      "rate": 46.4,
+      "pending": 36
     },
     "bySport": {
       "NBA": {
-        "total": 196,
-        "won": 80,
-        "rate": 40.8
+        "total": 199,
+        "won": 81,
+        "rate": 40.7
       },
       "NHL": {
         "total": 117,
@@ -10816,16 +10980,16 @@
         "rate": 50.4
       },
       "NCAAB": {
-        "total": 201,
-        "won": 100,
+        "total": 203,
+        "won": 101,
         "rate": 49.8
       }
     },
     "byGrade": {
       "B": {
-        "total": 37,
-        "won": 13,
-        "rate": 35.1
+        "total": 38,
+        "won": 14,
+        "rate": 36.8
       },
       "B+": {
         "total": 55,
@@ -10833,9 +10997,9 @@
         "rate": 69.1
       },
       "B-": {
-        "total": 163,
+        "total": 165,
         "won": 79,
-        "rate": 48.5
+        "rate": 47.9
       },
       "D+": {
         "total": 31,
@@ -10853,14 +11017,14 @@
         "rate": 40.7
       },
       "C": {
-        "total": 71,
-        "won": 34,
-        "rate": 47.9
+        "total": 72,
+        "won": 35,
+        "rate": 48.6
       },
       "A-": {
-        "total": 42,
+        "total": 43,
         "won": 10,
-        "rate": 23.8
+        "rate": 23.3
       },
       "D": {
         "total": 7,
@@ -10881,39 +11045,39 @@
         "roi": 33.7
       },
       "Spread": {
-        "total": 132,
+        "total": 133,
         "won": 63,
-        "rate": 47.7,
-        "roi": -8.4
+        "rate": 47.4,
+        "roi": -9.1
       },
       "Total": {
-        "total": 99,
+        "total": 100,
         "won": 38,
-        "rate": 38.4,
-        "roi": -24.7
+        "rate": 38,
+        "roi": -25.4
       },
       "Team Total": {
-        "total": 208,
-        "won": 97,
-        "rate": 46.6,
-        "roi": -10.1
+        "total": 211,
+        "won": 99,
+        "rate": 46.9,
+        "roi": -9.6
       }
     },
     "recentForm": {
-      "won": 18,
-      "lost": 32,
+      "won": 19,
+      "lost": 31,
       "push": 0,
-      "rate": 36
+      "rate": 38
     },
-    "lastUpdated": "2026-03-04T14:53:40.938Z",
-    "roi": -5.9,
-    "brierScore": 0.285,
+    "lastUpdated": "2026-03-04T15:00:18.541Z",
+    "roi": -6.1,
+    "brierScore": 0.2851,
     "maxDrawdown": 39.5,
-    "sharpeRatio": -0.053,
+    "sharpeRatio": -0.055,
     "homeAwayBias": {
-      "homeWinRate": 51.2,
+      "homeWinRate": 50.9,
       "awayWinRate": 46.5,
-      "homeTotal": 164,
+      "homeTotal": 165,
       "awayTotal": 43
     },
     "calibrationBuckets": [
@@ -10938,14 +11102,14 @@
       {
         "range": "65-70",
         "predicted": 66.1,
-        "actual": 46,
-        "total": 215
+        "actual": 45.7,
+        "total": 219
       },
       {
         "range": "70-75",
         "predicted": 70,
-        "actual": 50.3,
-        "total": 149
+        "actual": 50.7,
+        "total": 150
       },
       {
         "range": "75-80",

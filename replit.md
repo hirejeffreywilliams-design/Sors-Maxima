@@ -76,6 +76,13 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Model Integrity & Audit Report**: Admin page at `/admin/model-integrity` showing live ROI, Brier Score, Max Drawdown, Sharpe Ratio, calibration reliability curves, home/away bias detection, market-type ROI breakdown, adjudication rules, and anti-leakage guarantees. All metrics computed from real settled picks in `pickOutcomeTracker.ts`.
 - **Enhanced Pick Accuracy Stats**: `pickOutcomeTracker.ts` now computes ROI per market type, Brier Score (calibration metric), Max Drawdown, Sharpe Ratio, calibration buckets (confidence vs actual win rate), and home/away bias tracking from real settled pick data.
 
+## Performance Architecture
+- **HTTP Compression**: gzip enabled via `compression` middleware (level 6, threshold 1KB). All API responses and pages are compressed. Intelligence feed JSON reduced ~70% on the wire.
+- **Static Asset Caching**: Content-hashed JS/CSS assets served with `Cache-Control: public, max-age=31536000, immutable`. Browser caches files for 1 year. HTML served with `no-cache` so deploys are instant.
+- **Response Cache**: `server/responseCache.ts` — lightweight in-memory cache for hot API endpoints. ETag + `If-None-Match` support for 304 responses. Cache TTLs: intelligence feed (60s), optimal-tickets (60s), matchup-tickets (60s), life-changer-ticket (60s), model-health (60s), track-record (120s). Cache stats + clear at `/api/admin/cache-stats`.
+- **Payload Trimming**: Intelligence feed limited to top 40 picks (was 80+), 5 factors per pick (was 15), 15 edge alerts, 12 live games. Reduces JSON payload by ~50%.
+- **Startup Warmup**: At 50s post-startup, all critical in-process caches are pre-warmed (intelligence hub, precomputed picks, life-changer ticket, track record). First user after a deploy gets instant data.
+
 ## External Dependencies
 - **Frontend Framework**: React
 - **Styling**: TailwindCSS, shadcn/ui

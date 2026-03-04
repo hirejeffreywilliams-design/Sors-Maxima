@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from "express";
+import { responseCacheMiddleware } from "../responseCache";
 import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../unifiedIntelligenceHub";
 import { generateInternationalFeed, getLeagueEmoji } from "../internationalSportsEngine";
 import { generateMMAFeed, generateNCAABFutures } from "../mma-engine";
@@ -34,20 +35,46 @@ import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireTier, requireSubscription } from "./helpers";
 import { getTwoWayMatchupImpact } from "../two-way-contracts";
 
+const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+
+function trimPick(p: any, maxFactors = 5) {
+  return {
+    id: p.id,
+    sport: p.sport,
+    game: p.game,
+    pick: p.pick,
+    betType: p.betType,
+    odds: p.odds,
+    confidence: p.confidence,
+    grade: p.grade,
+    edge: Math.min(p.edge ?? 0, 35),
+    ev: Math.min(p.ev ?? 0, 35),
+    gameTime: p.gameTime,
+    isUnderdog: p.isUnderdog,
+    reasoning: p.reasoning,
+    insight: p.insight,
+    factors: Array.isArray(p.factors) ? p.factors.slice(0, maxFactors) : [],
+  };
+}
+
 export function registerIntelligenceRoutes(app: Express): void {
-  app.get("/api/intelligence/feed", requireSubscription, async (_req: Request, res: Response) => {
+  app.get("/api/intelligence/feed", requireSubscription, responseCacheMiddleware(60_000), async (_req: Request, res: Response) => {
     try {
       const feed = await generateIntelligenceFeed();
-      const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
-      // Cap EV values at 35 and filter to quality grades only
       if (feed.topPicks) {
         feed.topPicks = feed.topPicks
           .filter((p: any) => GOOD_GRADES.includes(p.grade))
-          .map((p: any) => ({
-            ...p,
-            ev: Math.min(p.ev ?? 0, 35),
-            edge: Math.min(p.edge ?? 0, 35),
-          }));
+          .slice(0, 40)
+          .map((p: any) => trimPick(p));
+      }
+      if (feed.edgeAlerts) {
+        feed.edgeAlerts = (feed.edgeAlerts as any[]).slice(0, 15);
+      }
+      if (feed.liveGames) {
+        feed.liveGames = (feed.liveGames as any[]).slice(0, 12);
+      }
+      if (feed.upcomingGames) {
+        feed.upcomingGames = (feed.upcomingGames as any[]).slice(0, 20);
       }
       return res.json(feed);
     } catch (err) {
@@ -99,7 +126,7 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
 
-  app.get("/api/optimal-tickets", requireSubscription, async (req: Request, res: Response) => {
+  app.get("/api/optimal-tickets", requireSubscription, responseCacheMiddleware(60_000), async (req: Request, res: Response) => {
     try {
       const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
       const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
@@ -141,7 +168,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/matchup-tickets", requireSubscription, async (req: Request, res: Response) => {
+  app.get("/api/matchup-tickets", requireSubscription, responseCacheMiddleware(60_000), async (req: Request, res: Response) => {
     try {
       const sportsParam = (req.query.sports as string) || "NBA,NFL,MLB,NHL,NCAAB,NCAAF";
       const sports = sportsParam.split(",").map(s => s.trim().toUpperCase()).filter(s =>
@@ -378,7 +405,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     return res.json(getPlatformEngineStatus());
   });
 
-  app.get("/api/model-health", (_req: Request, res: Response) => {
+  app.get("/api/model-health", responseCacheMiddleware(60_000), (_req: Request, res: Response) => {
     try {
       const stats = getPickAccuracyStats();
       const settledCount = stats.overall.total;
@@ -605,7 +632,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/track-record", async (_req: Request, res: Response) => {
+  app.get("/api/track-record", responseCacheMiddleware(120_000), async (_req: Request, res: Response) => {
     try {
       const { getTrackRecord } = await import("../calibrationEngine");
       const { getRecentPicks } = await import("../pickOutcomeTracker");
@@ -633,7 +660,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/life-changer-ticket", (req: Request, res: Response) => {
+  app.get("/api/life-changer-ticket", responseCacheMiddleware(60_000), (req: Request, res: Response) => {
     try {
       const ticket = buildLifeChangerTicket();
       if (!ticket) {

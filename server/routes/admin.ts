@@ -4204,6 +4204,26 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/cache-stats", requireAdmin, async (_req, res) => {
+    try {
+      const { getCacheStats } = await import("../responseCache");
+      res.json(getCacheStats());
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to get cache stats", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/cache/clear", requireAdmin, async (req, res) => {
+    try {
+      const { invalidateCache } = await import("../responseCache");
+      const { pattern } = req.body;
+      invalidateCache(pattern);
+      res.json({ success: true, cleared: pattern || "all" });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to clear cache", detail: err.message });
+    }
+  });
+
   app.get("/api/admin/api-budget", requireAdmin, async (_req, res) => {
     try {
       const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
