@@ -1,48 +1,18 @@
 {
   "alerts": [
     {
-      "id": "alert_1772646069275_q0ep5",
-      "timestamp": "2026-03-04T17:41:09.275Z",
-      "resolved": false,
-      "severity": "critical",
-      "category": "memory",
-      "title": "Memory Critical — Heap at 90%+",
-      "detail": "Heap: 65MB / 70MB (93%). OOM risk.",
-      "checkType": "quick"
-    },
-    {
-      "id": "alert_1772646069275_mjd5z",
-      "timestamp": "2026-03-04T17:41:09.275Z",
-      "resolved": false,
-      "severity": "critical",
-      "category": "api_budget",
-      "title": "Odds API Critical — Under 10K Requests",
-      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
-    },
-    {
-      "id": "alert_1772646069275_zil6b",
-      "timestamp": "2026-03-04T17:41:09.275Z",
-      "resolved": false,
-      "severity": "critical",
-      "category": "model_performance",
-      "title": "Win Rate Critical — Below 48%",
-      "detail": "Win rate 46.7% over 634 picks. Break-even is 52.4%. Immediate review needed.",
-      "checkType": "quick"
-    },
-    {
-      "id": "alert_1772645134240_2mvs3",
-      "timestamp": "2026-03-04T17:25:34.240Z",
+      "id": "alert_1772647522763_3hte9",
+      "timestamp": "2026-03-04T18:05:22.763Z",
       "resolved": false,
       "severity": "warning",
       "category": "memory",
       "title": "Memory High — Heap at 75%+",
-      "detail": "Heap: 64MB / 73MB (88%).",
+      "detail": "Heap: 63MB / 71MB (89%).",
       "checkType": "quick"
     },
     {
-      "id": "alert_1772645134240_6ohh0",
-      "timestamp": "2026-03-04T17:25:34.240Z",
+      "id": "alert_1772647522763_b357w",
+      "timestamp": "2026-03-04T18:05:22.763Z",
       "resolved": false,
       "severity": "critical",
       "category": "api_budget",
@@ -51,14 +21,80 @@
       "checkType": "quick"
     },
     {
-      "id": "alert_1772645134240_r4bv2",
-      "timestamp": "2026-03-04T17:25:34.240Z",
+      "id": "alert_1772647522763_wmr9w",
+      "timestamp": "2026-03-04T18:05:22.763Z",
       "resolved": false,
       "severity": "critical",
       "category": "model_performance",
       "title": "Win Rate Critical — Below 48%",
-      "detail": "Win rate 46.6% over 601 picks. Break-even is 52.4%. Immediate review needed.",
+      "detail": "Win rate 47.2% over 641 picks. Break-even is 52.4%. Immediate review needed.",
       "checkType": "quick"
+    },
+    {
+      "id": "alert_1772646069275_q0ep5",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": true,
+      "severity": "critical",
+      "category": "memory",
+      "title": "Memory Critical — Heap at 90%+",
+      "detail": "Heap: 65MB / 70MB (93%). OOM risk.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:06.614Z"
+    },
+    {
+      "id": "alert_1772646069275_mjd5z",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": true,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:19.371Z"
+    },
+    {
+      "id": "alert_1772646069275_zil6b",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": true,
+      "severity": "critical",
+      "category": "model_performance",
+      "title": "Win Rate Critical — Below 48%",
+      "detail": "Win rate 46.7% over 634 picks. Break-even is 52.4%. Immediate review needed.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:27.580Z"
+    },
+    {
+      "id": "alert_1772645134240_2mvs3",
+      "timestamp": "2026-03-04T17:25:34.240Z",
+      "resolved": true,
+      "severity": "warning",
+      "category": "memory",
+      "title": "Memory High — Heap at 75%+",
+      "detail": "Heap: 64MB / 73MB (88%).",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:32.150Z"
+    },
+    {
+      "id": "alert_1772645134240_6ohh0",
+      "timestamp": "2026-03-04T17:25:34.240Z",
+      "resolved": true,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:35.218Z"
+    },
+    {
+      "id": "alert_1772645134240_r4bv2",
+      "timestamp": "2026-03-04T17:25:34.240Z",
+      "resolved": true,
+      "severity": "critical",
+      "category": "model_performance",
+      "title": "Win Rate Critical — Below 48%",
+      "detail": "Win rate 46.6% over 601 picks. Break-even is 52.4%. Immediate review needed.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:36.662Z"
     },
     {
       "id": "alert_1772642074365_bw4l4",
@@ -74,57 +110,138 @@
     {
       "id": "alert_1772642074365_gq3b7",
       "timestamp": "2026-03-04T16:34:34.365Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "api_budget",
       "title": "Odds API Critical — Under 10K Requests",
       "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:38.064Z"
     },
     {
       "id": "alert_1772642074365_igbax",
       "timestamp": "2026-03-04T16:34:34.365Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "model_performance",
       "title": "Win Rate Critical — Below 48%",
       "detail": "Win rate 46.1% over 583 picks. Break-even is 52.4%. Immediate review needed.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:39.355Z"
     },
     {
       "id": "alert_1772639102554_64jsn",
       "timestamp": "2026-03-04T15:45:02.554Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "memory",
       "title": "Memory Critical — Heap at 90%+",
       "detail": "Heap: 64MB / 66MB (97%). OOM risk.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:40.380Z"
     },
     {
       "id": "alert_1772639102554_bemi0",
       "timestamp": "2026-03-04T15:45:02.554Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "api_budget",
       "title": "Odds API Critical — Under 10K Requests",
       "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:41.424Z"
     },
     {
       "id": "alert_1772639102554_44xoc",
       "timestamp": "2026-03-04T15:45:02.554Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "model_performance",
       "title": "Win Rate Critical — Below 48%",
       "detail": "Win rate 45.9% over 548 picks. Break-even is 52.4%. Immediate review needed.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-04T18:02:42.492Z"
     }
   ],
-  "reports": [],
-  "lastQuickCheck": "2026-03-04T17:41:09.275Z",
-  "lastDeepCheck": null,
-  "totalQuickChecks": 4,
-  "totalDeepChecks": 0
+  "reports": [
+    {
+      "id": "report_1772648062762_lyu2w",
+      "timestamp": "2026-03-04T18:14:22.762Z",
+      "durationMs": 11259,
+      "summary": [
+        "Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.",
+        "Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.",
+        "Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Review Betting Model",
+          "description": "Conduct an immediate review of the betting model and strategies to improve win rate above 48%.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 4
+        },
+        {
+          "title": "Increase API Call Budget or Optimize Usage",
+          "description": "Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 2
+        },
+        {
+          "title": "Memory Management Review",
+          "description": "Investigate high memory usage and implement optimizations to reduce heap memory consumption.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 3
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Win Rate Critical",
+          "description": "Win rate below 48%, indicating potential model failure and necessitating immediate action.",
+          "severity": "critical"
+        },
+        {
+          "title": "Odds API Critical Usage",
+          "description": "Less than 10,000 requests left; urgent action needed to prevent loss of live data access.",
+          "severity": "critical"
+        },
+        {
+          "title": "High Memory Usage",
+          "description": "Heap memory usage is above 75%, indicating potential performance issues.",
+          "severity": "warning"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Conduct a review of the betting model performance and strategies.",
+          "Assess and address the low request count for the Odds API.",
+          "Check memory usage metrics and explore options for optimization."
+        ],
+        "this_week": [
+          "Implement changes to improve the model's win rate.",
+          "Develop an action plan for optimizing API call budget.",
+          "Monitor memory usage trends and apply necessary fixes."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 47.2,
+        "settledPicks": 641,
+        "oddsApiRemaining": 500,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 90,
+        "cacheHitRate": 0,
+        "heapUsedMb": 63,
+        "heapTotalMb": 71,
+        "hubLastCycleMs": 9,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
+    }
+  ],
+  "lastQuickCheck": "2026-03-04T18:05:22.763Z",
+  "lastDeepCheck": "2026-03-04T18:14:22.762Z",
+  "totalQuickChecks": 5,
+  "totalDeepChecks": 1
 }
