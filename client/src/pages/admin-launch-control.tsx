@@ -11,8 +11,9 @@ import {
   CheckCircle2, XCircle, AlertTriangle, RefreshCw, Rocket,
   ToggleLeft, ToggleRight, Zap, Trash2, Play, Shield,
   Database, Clock, TrendingUp, Activity, AlertCircle, ChevronRight,
-  Wifi, WifiOff, Radio, Key, KeyRound, Layers, Settings2,
+  Wifi, WifiOff, Radio, Key, KeyRound, Layers, Settings2, Network,
 } from "lucide-react";
+import { Link } from "wouter";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface CheckResult {
@@ -548,6 +549,17 @@ export default function AdminLaunchControl() {
                   {pipelineHealth.summary.offline > 0 && <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />{pipelineHealth.summary.offline} offline</span>}
                 </div>
               )}
+              <Link href="/admin/pipeline">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 gap-1.5 text-xs"
+                  data-testid="button-open-pipeline-map"
+                >
+                  <Network className="w-3.5 h-3.5" />
+                  Connection Map
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 size="sm"

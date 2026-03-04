@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { apiRequest } from "@/lib/queryClient";
 import {
-  Activity, AlertTriangle, ArrowRight, BarChart3, Brain, CheckCircle2, ChevronDown, ChevronRight,
+  Activity, AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Brain, CheckCircle2, ChevronDown, ChevronRight,
   Clock, Database, Eye, Filter, FlaskConical, Gauge, GitBranch, Layers, LineChart,
   Lock, Network, Play, RefreshCw, Search, Shield, Sparkles, Target, TrendingUp, XCircle, Zap,
   Cpu, Globe, Wifi, WifiOff, Bot, Workflow, Stethoscope, CircleDot
@@ -576,8 +577,14 @@ export default function PipelineIntelligence() {
     <div className="min-h-full p-4 sm:p-6 space-y-6" data-testid="pipeline-intelligence-page">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
+          <Link href="/admin/launch-control">
+            <button className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-2 transition-colors" data-testid="link-back-to-admin">
+              <ArrowLeft className="w-3 h-3" />
+              Launch Control
+            </button>
+          </Link>
           <h1 className="text-2xl font-bold tracking-tight" data-testid="heading-pipeline">
-            Prediction Pipeline
+            Intelligence Pipeline
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
             Advanced 12-module prediction engine with continuous learning
