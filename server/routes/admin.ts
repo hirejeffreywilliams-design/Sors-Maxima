@@ -4163,9 +4163,35 @@ Follow these rules:
 
   app.get("/api/admin/team-form-status", requireAdmin, async (_req, res) => {
     try {
-      const { getFormCacheStatus } = await import("../teamHistoricalFormEngine");
+      const { getFormCacheStatus, getTeamFormData } = await import("../teamHistoricalFormEngine");
       const status = getFormCacheStatus();
-      res.json({ ...status, timestamp: new Date().toISOString() });
+
+      // Build top/bottom teams list for display
+      const sports = ["NBA", "NHL", "MLB", "NCAAB"] as const;
+      const allTeams: any[] = [];
+      for (const sport of sports) {
+        const count = status.teamCounts[sport] || 0;
+        if (count === 0) continue;
+        // Sample known teams for each sport to get form data
+        const sampleNames: Partial<Record<string, string[]>> = {
+          NBA: ["Boston Celtics","Oklahoma City Thunder","Cleveland Cavaliers","Denver Nuggets","Minnesota Timberwolves","Brooklyn Nets","Charlotte Hornets","Washington Wizards","San Antonio Spurs","Philadelphia 76ers"],
+          NHL: ["Dallas Stars","Washington Capitals","Winnipeg Jets","New York Rangers","Carolina Hurricanes","Chicago Blackhawks","San Jose Sharks","Columbus Blue Jackets","Anaheim Ducks"],
+          MLB: ["Los Angeles Dodgers","New York Yankees","Atlanta Braves","Houston Astros","Colorado Rockies","Oakland Athletics","Chicago White Sox"],
+          NCAAB: ["Duke Blue Devils","Auburn Tigers","Houston Cougars","Florida Gators","Connecticut Huskies","Colorado Buffaloes","Mississippi State Bulldogs"],
+        };
+        for (const name of (sampleNames[sport] || [])) {
+          const form = getTeamFormData(sport as any, name);
+          if (form) {
+            allTeams.push({ ...form, sport });
+          }
+        }
+      }
+
+      const sorted = allTeams.sort((a, b) => b.formScore - a.formScore);
+      const hotTeams = sorted.slice(0, 6);
+      const coldTeams = sorted.slice(-6).reverse();
+
+      res.json({ ...status, hotTeams, coldTeams, timestamp: new Date().toISOString() });
     } catch (err: any) {
       res.status(500).json({ error: "Form cache status failed", detail: err.message });
     }

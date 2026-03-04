@@ -431,6 +431,38 @@
       "ev": 6.91,
       "gameTime": "2026-03-04T14:32:56.845Z",
       "savedAt": "2026-03-04T14:32:56.845Z"
+    },
+    {
+      "id": "precomp-NBA-401810753-total-e6137b389b",
+      "gameId": "401810753",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ LA Clippers",
+      "homeTeam": "LA Clippers",
+      "awayTeam": "Indiana Pacers",
+      "pick": "Over 227.5",
+      "betType": "total",
+      "odds": -114,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 20.14,
+      "gameTime": "2026-03-05T03:30Z",
+      "savedAt": "2026-03-04T15:40:26.847Z"
+    },
+    {
+      "id": "precomp-NBA-401810753-team_total-c248d0b425",
+      "gameId": "401810753",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ LA Clippers",
+      "homeTeam": "LA Clippers",
+      "awayTeam": "Indiana Pacers",
+      "pick": "Indiana Pacers Over 108",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 65,
+      "ev": 22.18,
+      "gameTime": "2026-03-05T03:30Z",
+      "savedAt": "2026-03-04T15:40:26.847Z"
     }
   ],
   "settled": [
@@ -11253,22 +11285,122 @@
       "homeScore": 111,
       "awayScore": 77,
       "settledAt": "2026-03-04T15:31:20.853Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-spread-98c450326b",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Saint Louis Billikens -23",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 25.26,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-04T15:35:14.073Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-04T15:37:49.423Z"
+    },
+    {
+      "id": "precomp-NCAAB-401828461-team_total-360c686530",
+      "gameId": "401828461",
+      "sport": "NCAAB",
+      "game": "Loyola Chicago Ramblers @ Saint Louis Billikens",
+      "homeTeam": "Saint Louis Billikens",
+      "awayTeam": "Loyola Chicago Ramblers",
+      "pick": "Loyola Chicago Ramblers Under 66.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 70,
+      "ev": 27.91,
+      "gameTime": "2026-03-05T01:00Z",
+      "savedAt": "2026-03-04T15:35:14.073Z",
+      "result": "lost",
+      "homeScore": 91,
+      "awayScore": 76,
+      "settledAt": "2026-03-04T15:37:49.423Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-total-e3a73bab3e",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Over 213",
+      "betType": "total",
+      "odds": -114,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 3.25,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-04T15:38:19.278Z",
+      "result": "lost",
+      "homeScore": 117,
+      "awayScore": 90,
+      "settledAt": "2026-03-04T15:39:26.143Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-team_total-1f6b3894bf",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Boston Celtics Over 110",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 5,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-04T15:38:19.278Z",
+      "result": "won",
+      "homeScore": 117,
+      "awayScore": 90,
+      "settledAt": "2026-03-04T15:39:26.143Z"
+    },
+    {
+      "id": "precomp-NBA-401810749-team_total-c5972ab6ac",
+      "gameId": "401810749",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Boston Celtics",
+      "homeTeam": "Boston Celtics",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Charlotte Hornets Over 103.5",
+      "betType": "team_total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 5,
+      "gameTime": "2026-03-05T00:30Z",
+      "savedAt": "2026-03-04T15:38:19.278Z",
+      "result": "lost",
+      "homeScore": 117,
+      "awayScore": 90,
+      "settledAt": "2026-03-04T15:39:26.143Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 541,
-      "won": 247,
-      "lost": 288,
+      "total": 546,
+      "won": 248,
+      "lost": 292,
       "push": 6,
-      "rate": 45.7,
-      "pending": 27
+      "rate": 45.4,
+      "pending": 29
     },
     "bySport": {
       "NBA": {
-        "total": 199,
-        "won": 81,
-        "rate": 40.7
+        "total": 202,
+        "won": 82,
+        "rate": 40.6
       },
       "NHL": {
         "total": 121,
@@ -11276,9 +11408,9 @@
         "rate": 49.6
       },
       "NCAAB": {
-        "total": 221,
+        "total": 223,
         "won": 106,
-        "rate": 48
+        "rate": 47.5
       }
     },
     "byGrade": {
@@ -11288,9 +11420,9 @@
         "rate": 35.9
       },
       "B+": {
-        "total": 63,
+        "total": 65,
         "won": 41,
-        "rate": 65.1
+        "rate": 63.1
       },
       "B-": {
         "total": 167,
@@ -11308,9 +11440,9 @@
         "rate": 43.5
       },
       "C+": {
-        "total": 84,
-        "won": 35,
-        "rate": 41.7
+        "total": 87,
+        "won": 36,
+        "rate": 41.4
       },
       "C": {
         "total": 74,
@@ -11341,39 +11473,39 @@
         "roi": 33.7
       },
       "Spread": {
-        "total": 136,
+        "total": 137,
         "won": 64,
-        "rate": 47.1,
-        "roi": -9.7
+        "rate": 46.7,
+        "roi": -10.3
       },
       "Total": {
-        "total": 110,
+        "total": 111,
         "won": 40,
-        "rate": 36.4,
-        "roi": -28.2
+        "rate": 36,
+        "roi": -28.8
       },
       "Team Total": {
-        "total": 220,
-        "won": 102,
-        "rate": 46.4,
-        "roi": -10.7
+        "total": 223,
+        "won": 103,
+        "rate": 46.2,
+        "roi": -11
       }
     },
     "recentForm": {
-      "won": 17,
-      "lost": 32,
+      "won": 16,
+      "lost": 33,
       "push": 1,
-      "rate": 34
+      "rate": 32
     },
-    "lastUpdated": "2026-03-04T15:31:20.856Z",
-    "roi": -7.7,
-    "brierScore": 0.2883,
-    "maxDrawdown": 44.9,
-    "sharpeRatio": -0.069,
+    "lastUpdated": "2026-03-04T15:40:30.554Z",
+    "roi": -8.2,
+    "brierScore": 0.2892,
+    "maxDrawdown": 47.8,
+    "sharpeRatio": -0.073,
     "homeAwayBias": {
-      "homeWinRate": 50.9,
+      "homeWinRate": 50.6,
       "awayWinRate": 45.5,
-      "homeTotal": 167,
+      "homeTotal": 168,
       "awayTotal": 44
     },
     "calibrationBuckets": [
@@ -11397,15 +11529,15 @@
       },
       {
         "range": "65-70",
-        "predicted": 66.2,
-        "actual": 45.4,
-        "total": 229
+        "predicted": 66.1,
+        "actual": 45.3,
+        "total": 232
       },
       {
         "range": "70-75",
         "predicted": 70,
-        "actual": 48.4,
-        "total": 159
+        "actual": 47.8,
+        "total": 161
       },
       {
         "range": "75-80",

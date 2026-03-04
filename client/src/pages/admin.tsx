@@ -314,6 +314,12 @@ export default function AdminDashboard() {
     staleTime: 60_000,
   });
 
+  const { data: teamFormStatus, isLoading: teamFormLoading } = useQuery<any>({
+    queryKey: ['/api/admin/team-form-status'],
+    refetchInterval: 300_000,
+    staleTime: 60_000,
+  });
+
   const { data: applications = [], isLoading: applicationsLoading } = useQuery<Application[]>({
     queryKey: ['/api/admin/applications'],
   });
@@ -1595,6 +1601,104 @@ export default function AdminDashboard() {
                     </>
                   ) : (
                     <p className="text-xs text-muted-foreground text-center py-4">BDL stats not available — check API key configuration</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Team Historical Form Engine Panel */}
+              <Card data-testid="card-team-form-engine">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-emerald-400" />
+                    Historical Form Engine
+                    <Badge
+                      variant={teamFormStatus?.loaded ? "default" : "secondary"}
+                      className={teamFormStatus?.loaded ? "bg-emerald-600 text-white ml-auto text-[10px]" : "ml-auto text-[10px]"}
+                      data-testid="badge-form-engine-status"
+                    >
+                      {teamFormStatus?.loaded ? "Active" : "Loading"}
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription className="text-[11px]">
+                    Real 60-day ESPN game history powering home/road splits, last-10 form, and streak data for all picks
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {teamFormLoading ? (
+                    <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}</div>
+                  ) : teamFormStatus?.loaded ? (
+                    <>
+                      {/* Sport coverage summary */}
+                      <div className="grid grid-cols-4 gap-2 text-center">
+                        {["NBA","NHL","MLB","NCAAB"].map(sport => (
+                          <div key={sport} className="rounded-lg p-2 border bg-emerald-500/10 border-emerald-500/20" data-testid={`form-sport-${sport}`}>
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground">{sport}</p>
+                            <p className="text-sm font-semibold text-emerald-400 mt-0.5">
+                              {teamFormStatus.teamCounts?.[sport] || 0} teams
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
+                        <span>Cache age: <span className="text-foreground font-mono">{teamFormStatus.ageMins ?? "?"} min ago</span></span>
+                        <span>Refreshes every 22h automatically</span>
+                      </div>
+
+                      {/* Hot teams */}
+                      {teamFormStatus.hotTeams?.length > 0 && (
+                        <div>
+                          <p className="text-[11px] font-semibold text-emerald-400 mb-1.5 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" /> Hottest Teams (Last 60 Days)
+                          </p>
+                          <div className="space-y-1">
+                            {teamFormStatus.hotTeams.map((t: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between gap-2 text-xs" data-testid={`hot-team-${i}`}>
+                                <span className="text-muted-foreground w-14 shrink-0 font-mono">{t.sport}</span>
+                                <span className="flex-1 truncate">{t.teamName}</span>
+                                <span className="text-muted-foreground font-mono shrink-0">L10: {t.last10?.wins}-{t.last10?.losses}</span>
+                                <span className={`font-mono shrink-0 ${t.last10AvgMargin >= 0 ? "text-emerald-400" : "text-red-400"}`}>
+                                  {t.last10AvgMargin >= 0 ? "+" : ""}{t.last10AvgMargin}
+                                </span>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0 text-emerald-400 border-emerald-500/30 shrink-0">
+                                  +{t.formScore}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Cold teams */}
+                      {teamFormStatus.coldTeams?.length > 0 && (
+                        <div>
+                          <p className="text-[11px] font-semibold text-red-400 mb-1.5 flex items-center gap-1">
+                            <TrendingDown className="w-3 h-3" /> Coldest Teams (Last 60 Days)
+                          </p>
+                          <div className="space-y-1">
+                            {teamFormStatus.coldTeams.map((t: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between gap-2 text-xs" data-testid={`cold-team-${i}`}>
+                                <span className="text-muted-foreground w-14 shrink-0 font-mono">{t.sport}</span>
+                                <span className="flex-1 truncate">{t.teamName}</span>
+                                <span className="text-muted-foreground font-mono shrink-0">L10: {t.last10?.wins}-{t.last10?.losses}</span>
+                                <span className="text-red-400 font-mono shrink-0">{t.last10AvgMargin}</span>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0 text-red-400 border-red-500/30 shrink-0">
+                                  {t.formScore}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-2 border-t border-border/40 text-[10px] text-muted-foreground">
+                        This data replaces estimated home/road records with real ESPN historical data, improving accuracy of the home court advantage, recent momentum, and confidence index factors in every pick.
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground text-center py-4">
+                      Form engine loading — check back after server startup completes (typically 15–30 seconds)
+                    </p>
                   )}
                 </CardContent>
               </Card>
