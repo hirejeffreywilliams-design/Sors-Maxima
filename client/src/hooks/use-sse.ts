@@ -202,12 +202,16 @@ export function useSSE(options: UseSSEOptions = {}) {
       reconnectAttemptsRef.current += 1;
       const nextAttempts = reconnectAttemptsRef.current;
       setState(prev => ({ ...prev, connected: false, reconnectAttempts: nextAttempts }));
-      if (nextAttempts <= maxReconnectAttempts) {
-        const backgroundMultiplier = isPageVisibleRef.current ? 1 : 5;
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      const backgroundMultiplier = isPageVisibleRef.current ? 1 : 5;
+      if (nextAttempts > maxReconnectAttempts) {
+        reconnectAttemptsRef.current = 0;
+        const delay = 30000 * backgroundMultiplier;
+        reconnectTimeoutRef.current = setTimeout(connect, delay);
+      } else {
         const delay = Math.min(reconnectDelay * Math.pow(1.5, nextAttempts - 1) * backgroundMultiplier, 60000);
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
-        }
         reconnectTimeoutRef.current = setTimeout(connect, delay);
       }
     };

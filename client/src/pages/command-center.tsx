@@ -1664,9 +1664,9 @@ export default function CommandCenter() {
                         Live
                       </Badge>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-red-500/10 border-red-500/30 text-red-500">
+                      <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-amber-500/10 border-amber-500/30 text-amber-500">
                         <WifiOff className="w-2.5 h-2.5" />
-                        Offline
+                        Syncing
                       </Badge>
                     )}
                   </div>
