@@ -10,7 +10,8 @@ import { apiRequest } from "@/lib/queryClient";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, CheckCircle2, ChevronDown, ChevronRight,
   Clock, Database, Eye, Filter, FlaskConical, Gauge, GitBranch, Layers, LineChart,
-  Lock, Play, RefreshCw, Search, Shield, Sparkles, Target, TrendingUp, XCircle, Zap
+  Lock, Network, Play, RefreshCw, Search, Shield, Sparkles, Target, TrendingUp, XCircle, Zap,
+  Cpu, Globe, Wifi, WifiOff, Bot, Workflow, Stethoscope, CircleDot
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -84,6 +85,428 @@ const STATUS_BG: Record<string, string> = {
   skipped: "bg-yellow-500/10 border-yellow-500/20",
 };
 
+// ─── Pipeline Connection Map ───────────────────────────────────────────────────
+
+interface VisualNode {
+  x: number; y: number; w: number; h: number; row: number;
+  label: string; sublabel: string; layer: string;
+}
+
+interface VisualStatus {
+  nodes: Record<string, { status: string; label: string; detail: string }>;
+  summary: { totalNodes: number; liveNodes: number; degradedNodes: number; offlineNodes: number; unknownNodes: number };
+  lastUpdated: string;
+}
+
+interface DiagnosisResult {
+  status: string;
+  priority: string;
+  headline: string;
+  analysis: string;
+  recommendations: string[];
+}
+
+const MAP_NODES: Record<string, VisualNode> = {
+  "espn":           { x: 20,   y: 24,  w: 128, h: 50, row: 0, label: "ESPN Live",           sublabel: "Scores · Rosters",    layer: "Data Sources" },
+  "odds-api":       { x: 190,  y: 24,  w: 128, h: 50, row: 0, label: "The Odds API",         sublabel: "Multi-book Odds",     layer: "Data Sources" },
+  "bdl":            { x: 360,  y: 24,  w: 128, h: 50, row: 0, label: "BallDontLie",          sublabel: "NBA/NFL/MLB Stats",   layer: "Data Sources" },
+  "nhl-stats":      { x: 530,  y: 24,  w: 128, h: 50, row: 0, label: "NHL Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
+  "mlb-stats":      { x: 700,  y: 24,  w: 128, h: 50, row: 0, label: "MLB Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
+  "api-football":   { x: 872,  y: 24,  w: 148, h: 50, row: 0, label: "API-Football",         sublabel: "16 Soccer Leagues",   layer: "Data Sources" },
+  "openai":         { x: 1072, y: 24,  w: 128, h: 50, row: 0, label: "OpenAI",               sublabel: "AI Insights",         layer: "Data Sources" },
+
+  "precomputed":    { x: 20,   y: 188, w: 155, h: 50, row: 1, label: "Predictions Engine",   sublabel: "46-Factor Model",     layer: "Core Engines" },
+  "intel-hub":      { x: 222,  y: 188, w: 148, h: 50, row: 1, label: "Intelligence Hub",     sublabel: "60-sec Cycle",        layer: "Core Engines" },
+  "team-form":      { x: 418,  y: 188, w: 148, h: 50, row: 1, label: "Team Form Engine",     sublabel: "60d Historical",      layer: "Core Engines" },
+  "situational":    { x: 614,  y: 188, w: 160, h: 50, row: 1, label: "Situational Analysis", sublabel: "Rest · B2B · Travel", layer: "Core Engines" },
+  "two-way":        { x: 822,  y: 188, w: 172, h: 50, row: 1, label: "Two-Way Intelligence", sublabel: "Roster Stability",    layer: "Core Engines" },
+  "vegas-engine":   { x: 1042, y: 188, w: 158, h: 50, row: 1, label: "Vegas Engine",         sublabel: "Power Ratings",       layer: "Core Engines" },
+
+  "mma-engine":     { x: 20,   y: 352, w: 132, h: 50, row: 2, label: "MMA Engine",           sublabel: "UFC/MMA Odds & EV",   layer: "Specialized" },
+  "intl-sports":    { x: 200,  y: 352, w: 152, h: 50, row: 2, label: "Intl Sports Engine",   sublabel: "Soccer Fixtures",     layer: "Specialized" },
+  "pick-insight":   { x: 402,  y: 352, w: 160, h: 50, row: 2, label: "Pick Insight Engine",  sublabel: "AI Sharp Insights",   layer: "Specialized" },
+  "correlation":    { x: 614,  y: 352, w: 162, h: 50, row: 2, label: "Correlation Engine",   sublabel: "Slip Analysis 0–100", layer: "Specialized" },
+  "usml":           { x: 828,  y: 352, w: 128, h: 50, row: 2, label: "USML Meta-Learner",    sublabel: "6-Source Ensemble",   layer: "Specialized" },
+  "life-changer":   { x: 1008, y: 352, w: 192, h: 50, row: 2, label: "Life Changer Generator",sublabel: "5-Sport Pool",       layer: "Specialized" },
+
+  "command-center": { x: 20,   y: 516, w: 168, h: 50, row: 3, label: "Command Center",       sublabel: "Today's Picks",       layer: "User Features" },
+  "bet-slip":       { x: 238,  y: 516, w: 128, h: 50, row: 3, label: "Bet Slip",             sublabel: "Multi-Slip · Parlay", layer: "User Features" },
+  "ticket-vars":    { x: 420,  y: 516, w: 160, h: 50, row: 3, label: "Ticket Variations",    sublabel: "5 Strategy Blueprints",layer: "User Features" },
+  "daily-picks":    { x: 634,  y: 516, w: 142, h: 50, row: 3, label: "Daily Picks",          sublabel: "All Sports Feed",     layer: "User Features" },
+  "odds-center":    { x: 834,  y: 516, w: 152, h: 50, row: 3, label: "Odds Center",          sublabel: "EV · Lines · Comparison",layer:"User Features"},
+  "player-props":   { x: 1042, y: 516, w: 158, h: 50, row: 3, label: "Player Props",         sublabel: "Over/Under Lines",    layer: "User Features" },
+};
+
+const MAP_CONNECTIONS: [string, string][] = [
+  ["espn",         "precomputed"],
+  ["espn",         "intel-hub"],
+  ["espn",         "team-form"],
+  ["espn",         "situational"],
+  ["odds-api",     "intel-hub"],
+  ["odds-api",     "mma-engine"],
+  ["bdl",          "precomputed"],
+  ["bdl",          "two-way"],
+  ["bdl",          "vegas-engine"],
+  ["nhl-stats",    "precomputed"],
+  ["mlb-stats",    "precomputed"],
+  ["api-football", "intl-sports"],
+  ["openai",       "pick-insight"],
+  ["precomputed",  "pick-insight"],
+  ["precomputed",  "usml"],
+  ["precomputed",  "life-changer"],
+  ["intel-hub",    "correlation"],
+  ["intel-hub",    "daily-picks"],
+  ["team-form",    "pick-insight"],
+  ["situational",  "pick-insight"],
+  ["two-way",      "pick-insight"],
+  ["vegas-engine", "pick-insight"],
+  ["mma-engine",   "life-changer"],
+  ["intl-sports",  "life-changer"],
+  ["pick-insight", "command-center"],
+  ["pick-insight", "daily-picks"],
+  ["pick-insight", "ticket-vars"],
+  ["correlation",  "bet-slip"],
+  ["usml",         "daily-picks"],
+  ["life-changer", "command-center"],
+  ["odds-api",     "odds-center"],
+  ["odds-api",     "player-props"],
+];
+
+function getConnectionPath(fromId: string, toId: string): string {
+  const from = MAP_NODES[fromId];
+  const to = MAP_NODES[toId];
+  if (!from || !to) return "";
+  const fx = from.x + from.w / 2;
+  const fy = from.y + from.h;
+  const tx = to.x + to.w / 2;
+  const ty = to.y;
+  const rowDiff = Math.abs(to.row - from.row);
+  const cp = Math.max(55, rowDiff * 55);
+  if (to.row <= from.row) {
+    const midY = (from.y + to.y + to.h) / 2;
+    return `M ${fx} ${fy} Q ${fx + 80} ${midY} ${tx} ${ty}`;
+  }
+  return `M ${fx} ${fy} C ${fx} ${fy + cp} ${tx} ${ty - cp} ${tx} ${ty}`;
+}
+
+const STATUS_NODE_STYLES: Record<string, { ring: string; dot: string; bg: string; text: string }> = {
+  live:     { ring: "border-emerald-500/60", dot: "bg-emerald-500", bg: "bg-emerald-500/8",  text: "text-emerald-400" },
+  cached:   { ring: "border-yellow-500/50",  dot: "bg-yellow-500",  bg: "bg-yellow-500/8",   text: "text-yellow-400" },
+  degraded: { ring: "border-orange-500/50",  dot: "bg-orange-500",  bg: "bg-orange-500/8",   text: "text-orange-400" },
+  offline:  { ring: "border-red-500/60",     dot: "bg-red-500",     bg: "bg-red-500/8",      text: "text-red-400" },
+  unknown:  { ring: "border-border",         dot: "bg-muted-foreground", bg: "",              text: "text-muted-foreground" },
+};
+
+const STATUS_EDGE_COLOR: Record<string, string> = {
+  live: "#10b981",
+  cached: "#eab308",
+  degraded: "#f97316",
+  offline: "#ef4444",
+  unknown: "#6b7280",
+};
+
+const LAYER_COLORS: Record<string, string> = {
+  "Data Sources": "text-blue-400",
+  "Core Engines": "text-violet-400",
+  "Specialized":  "text-amber-400",
+  "User Features": "text-emerald-400",
+};
+
+function PipelineConnectionMap() {
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
+  const [diagnosisLoading, setDiagnosisLoading] = useState(false);
+
+  const { data: visualData, isLoading, dataUpdatedAt } = useQuery<VisualStatus>({
+    queryKey: ["/api/admin/pipeline/visual-status"],
+    refetchInterval: 6000,
+  });
+
+  const diagnose = useMutation({
+    mutationFn: async () => {
+      setDiagnosisLoading(true);
+      try {
+        const res = await apiRequest("POST", "/api/admin/pipeline/diagnose", {
+          nodes: visualData?.nodes ?? {},
+          summary: visualData?.summary ?? {},
+        });
+        return res.json();
+      } finally {
+        setDiagnosisLoading(false);
+      }
+    },
+    onSuccess: (data) => setDiagnosis(data),
+  });
+
+  const nodes = visualData?.nodes ?? {};
+  const summary = visualData?.summary;
+
+  const getNodeStatus = (id: string): string => nodes[id]?.status ?? "unknown";
+  const getNodeStyle = (id: string) => STATUS_NODE_STYLES[getNodeStatus(id)] ?? STATUS_NODE_STYLES.unknown;
+
+  const CANVAS_W = 1220;
+  const CANVAS_H = 610;
+
+  const priorityColors: Record<string, string> = {
+    none: "emerald", low: "blue", medium: "yellow", high: "orange", critical: "red",
+  };
+  const pc = priorityColors[diagnosis?.priority ?? "none"] ?? "blue";
+
+  return (
+    <div className="space-y-4" data-testid="pipeline-connection-map">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Network className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-semibold">Live Intelligence Pipeline Map</h2>
+            {summary && (
+              <Badge variant="outline" className="text-[10px] h-4 px-1.5">
+                {summary.liveNodes}/{summary.totalNodes} live
+              </Badge>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Real-time view of all 26 nodes — data sources, engines, and user features. Updates every 6 seconds.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {dataUpdatedAt > 0 && (
+            <span className="text-[10px] text-muted-foreground">
+              Updated {new Date(dataUpdatedAt).toLocaleTimeString()}
+            </span>
+          )}
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1.5 text-xs"
+            onClick={() => diagnose.mutate()}
+            disabled={diagnosisLoading || !visualData}
+            data-testid="button-ai-diagnose"
+          >
+            {diagnosisLoading
+              ? <><RefreshCw className="h-3.5 w-3.5 animate-spin" /> Analyzing…</>
+              : <><Stethoscope className="h-3.5 w-3.5" /> AI Diagnose</>}
+          </Button>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
+        {(["live","cached","degraded","offline","unknown"] as const).map(s => (
+          <span key={s} className="flex items-center gap-1.5">
+            <span className={`w-2 h-2 rounded-full ${STATUS_NODE_STYLES[s].dot}`} />
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </span>
+        ))}
+        <span className="ml-auto text-[10px] flex items-center gap-3">
+          {Object.entries(LAYER_COLORS).map(([layer, cls]) => (
+            <span key={layer} className={`font-medium ${cls}`}>{layer}</span>
+          ))}
+        </span>
+      </div>
+
+      {/* SVG Diagram */}
+      <div className="relative border rounded-lg bg-card/40 overflow-x-auto">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10 rounded-lg">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <RefreshCw className="h-4 w-4 animate-spin" />
+              Loading pipeline data…
+            </div>
+          </div>
+        )}
+        <div style={{ minWidth: CANVAS_W + 40 }}>
+          <svg
+            viewBox={`0 0 ${CANVAS_W} ${CANVAS_H}`}
+            width={CANVAS_W}
+            height={CANVAS_H}
+            className="block"
+            style={{ maxWidth: "100%" }}
+          >
+            {/* Layer labels */}
+            {[
+              { y: 10, label: "EXTERNAL DATA SOURCES", color: "#60a5fa" },
+              { y: 174, label: "CORE PROCESSING ENGINES", color: "#a78bfa" },
+              { y: 338, label: "SPECIALIZED INTELLIGENCE ENGINES", color: "#fbbf24" },
+              { y: 502, label: "USER-FACING FEATURES", color: "#34d399" },
+            ].map(({ y, label, color }) => (
+              <text key={label} x={CANVAS_W / 2} y={y} textAnchor="middle" fill={color}
+                fontSize="9" fontWeight="600" letterSpacing="1.5" opacity="0.7"
+                style={{ userSelect: "none" }}>
+                {label}
+              </text>
+            ))}
+
+            {/* Connection edges */}
+            {MAP_CONNECTIONS.map(([from, to]) => {
+              const d = getConnectionPath(from, to);
+              const status = getNodeStatus(from);
+              const color = STATUS_EDGE_COLOR[status] ?? STATUS_EDGE_COLOR.unknown;
+              const isHoveredSource = hoveredNode === from || hoveredNode === to;
+              return (
+                <path
+                  key={`${from}-${to}`}
+                  d={d}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={isHoveredSource ? 2 : 1}
+                  strokeOpacity={isHoveredSource ? 0.9 : 0.3}
+                  strokeDasharray={status === "offline" ? "4 3" : status === "unknown" ? "2 3" : "none"}
+                  style={{ transition: "stroke-opacity 0.2s, stroke-width 0.2s" }}
+                />
+              );
+            })}
+
+            {/* Nodes */}
+            {Object.entries(MAP_NODES).map(([id, node]) => {
+              const status = getNodeStatus(id);
+              const style = getNodeStyle(id);
+              const nodeData = nodes[id];
+              const isHovered = hoveredNode === id;
+              const isConnected = hoveredNode
+                ? MAP_CONNECTIONS.some(([f, t]) => (f === hoveredNode && t === id) || (t === hoveredNode && f === id))
+                : false;
+              const dimmed = hoveredNode && !isHovered && !isConnected;
+
+              return (
+                <g
+                  key={id}
+                  transform={`translate(${node.x}, ${node.y})`}
+                  style={{ cursor: "pointer", opacity: dimmed ? 0.35 : 1, transition: "opacity 0.15s" }}
+                  onMouseEnter={() => setHoveredNode(id)}
+                  onMouseLeave={() => setHoveredNode(null)}
+                  data-testid={`node-${id}`}
+                >
+                  <rect
+                    x={0} y={0} width={node.w} height={node.h} rx={6}
+                    fill={isHovered || isConnected ? "hsl(var(--card))" : "hsl(var(--card))"}
+                    fillOpacity={isHovered ? 1 : 0.85}
+                    stroke={isHovered ? (STATUS_EDGE_COLOR[status] ?? "#6b7280") : (status === "live" ? "#10b98130" : status === "offline" ? "#ef444440" : "#6b728030")}
+                    strokeWidth={isHovered ? 1.5 : 1}
+                  />
+                  {/* Status dot */}
+                  <circle
+                    cx={node.w - 8} cy={8} r={3.5}
+                    fill={STATUS_EDGE_COLOR[status] ?? "#6b7280"}
+                    opacity={0.9}
+                  >
+                    {status === "live" && (
+                      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite" />
+                    )}
+                  </circle>
+                  {/* Label */}
+                  <text x={8} y={20} fill="hsl(var(--foreground))" fontSize="9.5" fontWeight="600"
+                    style={{ userSelect: "none" }}>
+                    {node.label}
+                  </text>
+                  {/* Sublabel */}
+                  <text x={8} y={34} fill="hsl(var(--muted-foreground))" fontSize="8"
+                    style={{ userSelect: "none" }}>
+                    {nodeData?.detail?.slice(0, 30) ?? node.sublabel}
+                  </text>
+                  {/* Status text */}
+                  <text x={8} y={46} fill={STATUS_EDGE_COLOR[status] ?? "#6b7280"} fontSize="7.5" fontWeight="500"
+                    style={{ userSelect: "none" }}>
+                    {status.toUpperCase()}
+                  </text>
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+      </div>
+
+      {/* Hovered node detail tooltip */}
+      {hoveredNode && nodes[hoveredNode] && (
+        <div className="rounded-lg border bg-card/80 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-1 duration-150">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className={`w-2 h-2 rounded-full ${STATUS_NODE_STYLES[nodes[hoveredNode].status]?.dot ?? "bg-muted-foreground"}`} />
+                <span className="font-semibold">{nodes[hoveredNode].label}</span>
+                <Badge variant="outline" className="text-[10px] h-4 px-1.5 capitalize">
+                  {nodes[hoveredNode].status}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">{nodes[hoveredNode].detail}</p>
+            </div>
+            <div className="text-[10px] text-muted-foreground shrink-0">
+              <div>Inputs: {MAP_CONNECTIONS.filter(([, t]) => t === hoveredNode).map(([f]) => MAP_NODES[f]?.label ?? f).join(", ") || "—"}</div>
+              <div>Outputs: {MAP_CONNECTIONS.filter(([f]) => f === hoveredNode).map(([, t]) => MAP_NODES[t]?.label ?? t).join(", ") || "—"}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Diagnosis Result */}
+      {diagnosis && (
+        <Card className={`border-${pc}-500/30 bg-${pc}-500/5 animate-in fade-in slide-in-from-bottom-2 duration-200`}
+          data-testid="diagnosis-result">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Bot className={`h-4 w-4 text-${pc}-400`} />
+                <CardTitle className="text-sm">AI Pipeline Diagnosis</CardTitle>
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] h-4 px-1.5 border-${pc}-500/40 text-${pc}-400`}
+                >
+                  {(diagnosis.priority ?? "none").toUpperCase()}
+                </Badge>
+              </div>
+              <button
+                onClick={() => setDiagnosis(null)}
+                className="text-muted-foreground hover:text-foreground text-xs"
+              >
+                ✕
+              </button>
+            </div>
+            <CardDescription className="text-xs font-medium text-foreground/80 mt-1">
+              {diagnosis.headline}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-3">
+            <p className="text-xs text-muted-foreground leading-relaxed">{diagnosis.analysis}</p>
+            {diagnosis.recommendations?.length > 0 && (
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-semibold text-foreground/70 uppercase tracking-wide">Recommendations</p>
+                <ol className="space-y-1">
+                  {diagnosis.recommendations.map((rec, i) => (
+                    <li key={i} className="flex items-start gap-2 text-xs">
+                      <span className={`shrink-0 w-4 h-4 rounded-full bg-${pc}-500/20 text-${pc}-400 flex items-center justify-center text-[9px] font-bold mt-px`}>
+                        {i + 1}
+                      </span>
+                      <span className="text-muted-foreground leading-relaxed">{rec}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Node status grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {summary && [
+          { label: "Live",     val: summary.liveNodes,     color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" },
+          { label: "Cached",   val: summary.degradedNodes, color: "text-yellow-400 bg-yellow-500/10 border-yellow-500/20" },
+          { label: "Offline",  val: summary.offlineNodes,  color: "text-red-400 bg-red-500/10 border-red-500/20" },
+          { label: "Unknown",  val: summary.unknownNodes,  color: "text-muted-foreground bg-muted/30 border-border" },
+        ].map(({ label, val, color }) => (
+          <div key={label} className={`rounded-lg border px-3 py-2 text-center ${color}`}>
+            <div className="text-lg font-bold">{val}</div>
+            <div className="text-[10px] uppercase tracking-wide font-medium">{label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+
 export default function PipelineIntelligence() {
   useSEO({ title: "Pipeline Intelligence", description: "Data pipeline monitoring and intelligence" });
   const queryClient = useQueryClient();
@@ -142,6 +565,7 @@ export default function PipelineIntelligence() {
 
   const tabs = [
     { id: "overview", label: "Overview", icon: Activity },
+    { id: "connection-map", label: "Connection Map", icon: Network },
     { id: "pipeline", label: "Pipeline", icon: GitBranch },
     { id: "metrics", label: "Metrics", icon: BarChart3 },
     { id: "alerts", label: "Alerts", icon: AlertTriangle, count: activeAlerts.length },
@@ -206,6 +630,10 @@ export default function PipelineIntelligence() {
           );
         })}
       </div>
+
+      {activeTab === "connection-map" && (
+        <PipelineConnectionMap />
+      )}
 
       {activeTab === "overview" && healthLoading && (
         <div className="space-y-6">

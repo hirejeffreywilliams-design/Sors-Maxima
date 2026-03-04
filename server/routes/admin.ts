@@ -4454,4 +4454,152 @@ Follow these rules:
     }
   });
 
+  // ── Pipeline Visual Status ─────────────────────────────────────────────────────
+  app.get("/api/admin/pipeline/visual-status", requireAdmin, async (_req, res) => {
+    try {
+      const { getDataPipelineHealth } = await import("../data-pipeline-health");
+      const { getFormCacheStatus } = await import("../teamHistoricalFormEngine");
+      const { getInsightCacheSize } = await import("../pick-insight-engine");
+      const { isBDLAvailable } = await import("../balldontlie-provider");
+      const fs = await import("fs");
+
+      const dataSources = getDataPipelineHealth();
+      const pipelineHealth = getPipelineHealth();
+      const formStatus = getFormCacheStatus();
+      const insightCacheSize = getInsightCacheSize();
+
+      let aiStatus: "live" | "degraded" | "offline" = "live";
+      try {
+        const raw = fs.readFileSync("ai-error-state.json", "utf-8");
+        const aiState = JSON.parse(raw);
+        if (aiState?.quota_exceeded) aiStatus = "offline";
+        else if (aiState?.error_count > 0) aiStatus = "degraded";
+      } catch {}
+
+      const sourceMap: Record<string, string> = {};
+      for (const src of (dataSources.sources || [])) {
+        sourceMap[src.id] = src.status;
+      }
+
+      const picksCount: number = (() => {
+        try {
+          const hits = pipelineHealth.metrics?.picksGenerated ?? 0;
+          return typeof hits === "number" ? hits : 0;
+        } catch { return 0; }
+      })();
+
+      const espn = sourceMap["espn"] || "live";
+      const oddsApi = sourceMap["odds-api"] || "unknown";
+      const bdl = isBDLAvailable() ? "live" : (sourceMap["bdl"] || "unknown");
+      const nhl = sourceMap["nhl-stats"] || "unknown";
+      const mlb = sourceMap["mlb-stats"] || "unknown";
+      const apifootball = sourceMap["api-football"] || "unknown";
+
+      const precomputedStatus = pipelineHealth.totalRuns > 0 ? "live" : (picksCount > 0 ? "cached" : "unknown");
+      const formSt: string = formStatus.totalTeams > 0 ? "live" : "unknown";
+
+      const nodes: Record<string, { status: string; label: string; detail: string }> = {
+        "espn":           { status: espn,              label: "ESPN Live",          detail: `${sourceMap["espn"] === "live" ? "Active" : "Startup"} — scores, rosters, injuries` },
+        "odds-api":       { status: oddsApi,           label: "The Odds API",       detail: "Multi-book odds, lines, MMA" },
+        "bdl":            { status: bdl,               label: "BallDontLie",        detail: "NBA/NFL/MLB advanced stats" },
+        "nhl-stats":      { status: nhl,               label: "NHL Stats API",      detail: "NHL team & player stats" },
+        "mlb-stats":      { status: mlb,               label: "MLB Stats API",      detail: "MLB team & player stats" },
+        "api-football":   { status: apifootball,       label: "API-Football",       detail: "16 international soccer leagues" },
+        "openai":         { status: aiStatus,          label: "OpenAI",             detail: "AI insights, diagnosis, variations" },
+        "precomputed":    { status: precomputedStatus, label: "Predictions Engine", detail: `${pipelineHealth.totalRuns} runs · 46-Factor Model` },
+        "intel-hub":      { status: espn === "live" || oddsApi === "live" ? "live" : "degraded", label: "Intelligence Hub", detail: "60-sec aggregation cycle" },
+        "team-form":      { status: formSt,            label: "Team Form Engine",   detail: `${formStatus.totalTeams} teams · 60d history` },
+        "situational":    { status: espn,              label: "Situational Analysis",detail: "Rest days, B2B, travel factors" },
+        "two-way":        { status: bdl,               label: "Two-Way Intelligence",detail: "NBA roster stability, contract risk" },
+        "vegas-engine":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Vegas Engine", detail: "Power ratings, line movement" },
+        "mma-engine":     { status: oddsApi,           label: "MMA Engine",         detail: "UFC/MMA odds, EV, grades" },
+        "intl-sports":    { status: apifootball,       label: "Intl Sports Engine", detail: "Soccer fixtures + odds, 16 leagues" },
+        "pick-insight":   { status: insightCacheSize > 0 ? "live" : (aiStatus === "live" ? "cached" : "offline"), label: "Pick Insight Engine", detail: `${insightCacheSize} AI insights cached` },
+        "correlation":    { status: "live",            label: "Correlation Engine",  detail: "Real-time slip analysis, 0–100 score" },
+        "usml":           { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "USML Meta-Learner", detail: "6-source ensemble reweighting" },
+        "life-changer":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Life Changer Generator", detail: "5+ sport diversity, steam/trap pools" },
+        "command-center": { status: "live",            label: "Command Center",      detail: "Today's picks, daily ticket, SSE" },
+        "bet-slip":       { status: "live",            label: "Bet Slip",            detail: "Multi-slip, correlation panel, payouts" },
+        "ticket-vars":    { status: aiStatus === "live" ? "live" : "degraded", label: "Ticket Variations", detail: "5 AI-generated strategic blueprints" },
+        "daily-picks":    { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Daily Picks",   detail: "All-sport filtered picks feed" },
+        "odds-center":    { status: oddsApi,           label: "Odds Center",         detail: "EV heatmap, line movement, comparison" },
+        "player-props":   { status: oddsApi,           label: "Player Props",        detail: "Real-time over/under prop lines" },
+      };
+
+      const statuses = Object.values(nodes).map(n => n.status);
+      const summary = {
+        totalNodes: statuses.length,
+        liveNodes:     statuses.filter(s => s === "live").length,
+        degradedNodes: statuses.filter(s => s === "degraded" || s === "cached").length,
+        offlineNodes:  statuses.filter(s => s === "offline").length,
+        unknownNodes:  statuses.filter(s => s === "unknown").length,
+      };
+
+      res.json({ nodes, summary, lastUpdated: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Visual status failed", detail: err.message });
+    }
+  });
+
+  // ── Pipeline AI Diagnosis ──────────────────────────────────────────────────────
+  app.post("/api/admin/pipeline/diagnose", requireAdmin, async (req, res) => {
+    try {
+      const { nodes, summary } = req.body as {
+        nodes: Record<string, { status: string; label: string; detail: string }>;
+        summary: { totalNodes: number; liveNodes: number; degradedNodes: number; offlineNodes: number; unknownNodes: number };
+      };
+
+      const issues = Object.entries(nodes)
+        .filter(([, n]) => n.status !== "live")
+        .map(([id, n]) => `• ${n.label} [${id}]: ${n.status} — ${n.detail}`);
+
+      if (issues.length === 0) {
+        return res.json({
+          status: "healthy",
+          priority: "none",
+          headline: "All 26 pipeline nodes are fully operational.",
+          analysis: "Every data source, processing engine, and user feature is live. No action required.",
+          recommendations: [],
+        });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const prompt = `You are a senior systems engineer for Sors Maxima, an elite sports betting intelligence platform.
+
+Current pipeline health:
+- ${summary.liveNodes}/${summary.totalNodes} nodes live | ${summary.degradedNodes} degraded/cached | ${summary.offlineNodes} offline | ${summary.unknownNodes} unknown
+
+Issues detected:
+${issues.join("\n")}
+
+Platform architecture layers:
+1. External Data Sources: ESPN (free), The Odds API, BallDontLie, NHL Stats, MLB Stats, API-Football, OpenAI
+2. Processing Engines: Predictions Engine (46-Factor), Intelligence Hub, Team Form Engine, Situational Analysis, Two-Way Intelligence, Vegas Engine
+3. Specialized Engines: MMA Engine, International Sports Engine, Pick Insight Engine, Correlation Engine, USML Meta-Learner, Life Changer Generator
+4. User Features: Command Center, Bet Slip, Ticket Variations, Daily Picks, Odds Center, Player Props
+
+Analyze the issues and respond with VALID JSON only (no markdown):
+{
+  "headline": "<one sentence overall status>",
+  "analysis": "<2-3 sentences explaining impact on users and what features are affected>",
+  "recommendations": ["<specific actionable fix 1>", "<specific actionable fix 2>", ...up to 5],
+  "priority": "low|medium|high|critical"
+}`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        max_completion_tokens: 700,
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+      res.json({ status: "analyzed", ...result });
+    } catch (err: any) {
+      res.status(500).json({ error: "Diagnosis failed", detail: err.message });
+    }
+  });
+
 }
