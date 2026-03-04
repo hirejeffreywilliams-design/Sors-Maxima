@@ -33,6 +33,7 @@ import {
   Bell,
   Megaphone,
   Search,
+  Network,
 } from "lucide-react";
 
 interface CommandItem {
@@ -67,6 +68,7 @@ const commandItems: CommandItem[] = [
   { label: "Export Bet Slip", href: "/tools", icon: FileText, group: "Tools", keywords: ["export", "draftkings", "fanduel", "betmgm"] },
 
   { label: "Admin Dashboard", href: "/admin", icon: Shield, group: "Admin", keywords: ["admin", "users", "fraud"] },
+  { label: "Intelligence Pipeline", href: "/admin/pipeline", icon: Network, group: "Admin", keywords: ["pipeline", "nodes", "engines", "connection", "map", "diagnose"] },
   { label: "AI Diagnostics", href: "/admin/diagnostics", icon: Brain, group: "Admin", keywords: ["diagnostics", "system", "ai"] },
   { label: "Marketing Tools", href: "/admin/marketing", icon: Megaphone, group: "Admin", keywords: ["marketing", "content", "growth"] },
   { label: "Security Center", href: "/admin/security", icon: Shield, group: "Admin", keywords: ["security", "errors", "ip", "blocking"] },
