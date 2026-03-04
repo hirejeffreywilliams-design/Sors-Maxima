@@ -150,10 +150,9 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
       
       let customerId = subscription.stripeCustomerId;
       if (!customerId) {
-        const customer = await stripeService.createCustomer(
-          `${username}@sorsmaxima.com`,
-          username
-        );
+        const userRows = await db.execute(sql`SELECT email FROM users WHERE username = ${username} LIMIT 1`);
+        const userEmail = (userRows.rows?.[0] as any)?.email || `${username}@placeholder.sorsmaxima.com`;
+        const customer = await stripeService.createCustomer(userEmail, username);
         customerId = customer.id;
       }
 

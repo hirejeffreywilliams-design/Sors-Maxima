@@ -197,18 +197,6 @@ export class StripeService {
     if (result.rows.length > 0) {
       const sub = rowToSubscription(result.rows[0]);
 
-      if (sub.subscriptionStatus === 'trialing') {
-        await pool.query(`
-          UPDATE user_subscriptions
-          SET subscription_tier = 'free', subscription_status = 'active', is_trial_user = false, trial_converted = false, updated_at = NOW()
-          WHERE username = $1
-        `, [username]);
-        sub.subscriptionTier = 'free';
-        sub.subscriptionStatus = 'active';
-        sub.isTrialUser = false;
-        sub.trialConverted = false;
-        console.log(`[SUBSCRIPTION] Legacy trial cleared for ${username}, set to free tier — subscription required`);
-      }
       return sub;
     }
 
@@ -273,8 +261,10 @@ export class StripeService {
         const customerId = subscription.customer;
         const tier = this.getPriceIdTier(subscription.items.data[0]?.price?.id);
         const status = subscription.status === 'active' ? 'active' :
+                       subscription.status === 'trialing' ? 'trialing' :
                        subscription.status === 'canceled' ? 'cancelled' :
-                       subscription.status === 'past_due' ? 'past_due' : 'none';
+                       subscription.status === 'past_due' ? 'past_due' :
+                       subscription.status === 'unpaid' ? 'past_due' : 'none';
 
         await pool.query(`
           UPDATE user_subscriptions
@@ -306,6 +296,26 @@ export class StripeService {
           WHERE stripe_customer_id = $1
         `, [customerId]);
         console.log(`[STRIPE] Payment failed for customer ${customerId}, set status to past_due`);
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object;
+        const customerId = invoice.customer;
+        if (invoice.billing_reason === 'subscription_cycle' || invoice.billing_reason === 'subscription_update') {
+          await pool.query(`
+            UPDATE user_subscriptions
+            SET subscription_status = 'active', updated_at = NOW()
+            WHERE stripe_customer_id = $1 AND subscription_status = 'past_due'
+          `, [customerId]);
+          console.log(`[STRIPE] Payment succeeded for customer ${customerId}, recovered from past_due`);
+        }
+        break;
+      }
+
+      case 'customer.subscription.trial_will_end': {
+        const subscription = event.data.object;
+        console.log(`[STRIPE] Trial ending soon for subscription ${subscription.id}`);
         break;
       }
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Check, Crown, Gem, Star, Trophy, Shield, Bot, Bell, Users, Wallet, Target, AlertTriangle, Sparkles, Lock, Flame, TrendingUp, BarChart2, Globe, Zap, Brain, ChevronRight, Swords } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -126,6 +126,27 @@ export default function Pricing() {
   const [isYearly, setIsYearly] = useState(false);
   const [showCompetitors, setShowCompetitors] = useState(false);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      queryClient.invalidateQueries({ queryKey: ['/api/subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/check'] });
+      toast({
+        title: "Payment Successful",
+        description: "Your subscription is now active. Welcome to Sors Maxima.",
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('cancelled') === 'true') {
+      toast({
+        title: "Checkout Cancelled",
+        description: "No charge was made. You can subscribe anytime.",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const { data: subscription } = useQuery<{ tier: string; status: string; customerId: string | null }>({
     queryKey: ['/api/subscription'],
