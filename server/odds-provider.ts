@@ -7,6 +7,7 @@ import { getPlayersFromCache, getPlayersFromCacheById, getInjuredPlayersFromCach
 import { getMultiDayScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { logInfo, logWarn, logError } from "./errorLogger";
 import { apiKeyManager } from "./apiKeyManager";
+import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
 
 const THE_ODDS_API_BASE = "https://api.the-odds-api.com/v4/sports";
 function getOddsApiKey(): string | undefined {
@@ -15,7 +16,12 @@ function getOddsApiKey(): string | undefined {
 
 function reportOddsUsage(response: Response, key: string) {
   const remaining = parseInt(response.headers.get("x-requests-remaining") || "");
-  if (!isNaN(remaining)) apiKeyManager.reportUsage("odds", key, remaining);
+  if (!isNaN(remaining)) {
+    apiKeyManager.reportUsage("odds", key, remaining);
+    apiBudgetOptimizer.reportRemaining("odds", remaining);
+  } else {
+    apiBudgetOptimizer.trackCall("odds", 1);
+  }
 }
 
 function reportOddsError(statusCode: number, key: string) {

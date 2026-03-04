@@ -62,6 +62,7 @@ import {
   Sparkles,
   BookOpen,
   ListTodo,
+  Gauge,
   type LucideIcon
 } from "lucide-react";
 import { Link } from "wouter";
@@ -179,6 +180,7 @@ const navCategories: NavCategory[] = [
     title: "Operations",
     icon: Settings,
     items: [
+      { href: "/admin/api-budget", label: "API Budget Optimizer", description: "Monthly quota tracking, burn rate & interval tuning", icon: Gauge, testId: "link-admin-api-budget" },
       { href: "/admin/update-planner", label: "Update Planner", description: "Track bugs, features & ideas — copy to AI chat", icon: ListTodo, testId: "link-admin-update-planner" },
       { href: "/admin/owner-playbook", label: "Owner's Playbook", description: "Launch plan, daily ops, growth & legal guide", icon: BookOpen, testId: "link-admin-owner-playbook" },
       { href: "/admin/launch-control", label: "Launch Control", description: "Pre-launch checklist & maintenance mode", icon: Rocket, testId: "link-admin-launch-control" },

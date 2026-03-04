@@ -1,6 +1,7 @@
 import { logInfo, logWarn, logError } from "./errorLogger";
 import { recordApiFootballCall } from "./api-usage-tracker";
 import { apiKeyManager } from "./apiKeyManager";
+import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
 
 export interface SoccerFixture {
   id: string;
@@ -92,7 +93,12 @@ async function fetchApiFootballFixtures(leagueId: number, season: number): Promi
       headers: { "x-apisports-key": activeKey },
     });
     const remaining = parseInt(response.headers.get("x-ratelimit-requests-remaining") || "");
-    if (!isNaN(remaining)) apiKeyManager.reportUsage("apifootball", activeKey, remaining);
+    if (!isNaN(remaining)) {
+      apiKeyManager.reportUsage("apifootball", activeKey, remaining);
+      apiBudgetOptimizer.reportRemaining("apifootball", remaining);
+    } else {
+      apiBudgetOptimizer.trackCall("apifootball", 1);
+    }
     if (!response.ok) {
       apiKeyManager.reportError("apifootball", activeKey, response.status);
       const body = await response.text().catch(() => "");

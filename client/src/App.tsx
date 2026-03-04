@@ -60,6 +60,7 @@ const AdminLaunchControl = lazy(() => import("@/pages/admin-launch-control"));
 const AdminOwnerPlaybook = lazy(() => import("@/pages/admin-owner-playbook"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
+const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
 const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
 const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
 const PersonalizedInsights = lazy(() => import("@/pages/personalized-insights"));
@@ -205,6 +206,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/owner-playbook">{() => <AdminGuard component={AdminOwnerPlaybook} authState={authState} />}</Route>
               <Route path="/admin/update-planner">{() => <AdminGuard component={AdminUpdatePlanner} authState={authState} />}</Route>
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
+              <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
               <Route path="/admin/applications">{() => <AdminGuard component={AdminApplications} authState={authState} />}</Route>
               <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
               <Route path="/admin/pipeline">{() => <AdminGuard component={PipelineIntelligence} authState={authState} />}</Route>

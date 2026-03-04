@@ -1,6 +1,7 @@
 import { logError, logInfo, logWarn } from "./errorLogger";
 import { recordBDLCall } from "./api-usage-tracker";
 import { apiKeyManager } from "./apiKeyManager";
+import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
 
 const BASE_URL = "https://api.balldontlie.io";
 const CACHE_TTL = 5 * 60 * 1000;
@@ -64,6 +65,7 @@ async function fetchBDL<T>(path: string, params?: Record<string, string>): Promi
       return null;
     }
 
+    apiBudgetOptimizer.trackCall("balldontlie", 1);
     const data = await res.json() as T;
     setCache(cacheKey, data);
     return data;

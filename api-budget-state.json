@@ -1,0 +1,67 @@
+{
+  "configs": {},
+  "states": {
+    "odds": {
+      "currentUsage": 0,
+      "manualRemaining": null,
+      "lastReported": null,
+      "monthReset": "2026-03-01T00:00:00.000Z",
+      "callLog": []
+    },
+    "apifootball": {
+      "currentUsage": 0,
+      "manualRemaining": null,
+      "lastReported": null,
+      "monthReset": "2026-03-01T00:00:00.000Z",
+      "callLog": []
+    },
+    "balldontlie": {
+      "currentUsage": 6,
+      "manualRemaining": null,
+      "lastReported": null,
+      "monthReset": "2026-03-01T00:00:00.000Z",
+      "callLog": [
+        {
+          "ts": 1772635182130,
+          "count": 1
+        },
+        {
+          "ts": 1772635182149,
+          "count": 1
+        },
+        {
+          "ts": 1772635182318,
+          "count": 1
+        },
+        {
+          "ts": 1772635336085,
+          "count": 1
+        },
+        {
+          "ts": 1772635336107,
+          "count": 1
+        },
+        {
+          "ts": 1772635336222,
+          "count": 1
+        }
+      ]
+    },
+    "openai": {
+      "currentUsage": 0,
+      "manualRemaining": null,
+      "lastReported": null,
+      "monthReset": "2026-03-01T00:00:00.000Z",
+      "callLog": []
+    },
+    "espn": {
+      "currentUsage": 0,
+      "manualRemaining": null,
+      "lastReported": null,
+      "monthReset": "2026-03-01T00:00:00.000Z",
+      "callLog": []
+    }
+  },
+  "activeUsers": 0,
+  "lastSaved": "2026-03-04T14:42:16.222Z"
+}

@@ -4204,6 +4204,47 @@ Follow these rules:
     }
   });
 
+  app.get("/api/admin/api-budget", requireAdmin, async (_req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { apiKeyManager } = await import("../apiKeyManager");
+      const dashboard = apiBudgetOptimizer.getDashboard();
+      const keyStatus = apiKeyManager.getAllStatus();
+      const allSubs = await stripeService.getAllSubscriptions();
+      const paidUsers = allSubs.filter((s: any) => s.subscriptionTier && s.subscriptionTier !== "free").length;
+      apiBudgetOptimizer.updateActiveUsers(paidUsers);
+      res.json({ ...dashboard, keyStatus, paidUsers });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load API budget data", detail: err.message });
+    }
+  });
+
+  app.patch("/api/admin/api-budget/:service/budget", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { service } = req.params;
+      const { budget } = req.body;
+      if (!budget || isNaN(parseInt(budget))) {
+        return res.status(400).json({ error: "budget must be a number" });
+      }
+      apiBudgetOptimizer.updateMonthlyBudget(service as any, parseInt(budget));
+      res.json({ success: true, service, budget: parseInt(budget) });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to update budget", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/api-budget/:service/reset-usage", requireAdmin, async (req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { service } = req.params;
+      apiBudgetOptimizer.trackCall(service as any, 0);
+      res.json({ success: true, message: `Usage log cleared for ${service}` });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to reset usage", detail: err.message });
+    }
+  });
+
   app.get("/api/admin/model-integrity", requireAdmin, async (_req, res) => {
     try {
       const { getPickAccuracyStats, getRecentPicks } = await import("../pickOutcomeTracker");
