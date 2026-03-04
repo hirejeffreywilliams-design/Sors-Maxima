@@ -43,6 +43,7 @@ const AdminDataProvenance = lazy(() => import("@/pages/admin-data-provenance"));
 const AdminRiskRegister = lazy(() => import("@/pages/admin-risk-register"));
 const AdminFinancialProjections = lazy(() => import("@/pages/admin-financial-projections"));
 const Roadmap = lazy(() => import("@/pages/roadmap"));
+const TicketVariations = lazy(() => import("@/pages/ticket-variations"));
 const AdminUserHealth = lazy(() => import("@/pages/admin-user-health"));
 const AdminSupportDashboard = lazy(() => import("@/pages/admin-support"));
 const AdminFraudDashboard = lazy(() => import("@/pages/admin-fraud"));
@@ -284,6 +285,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/track-record" component={TrackRecordPage} />
+        <Route path="/ticket-variations" component={TicketVariations} />
         <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
@@ -879,7 +881,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <EmailVerificationBanner authState={authState} />
       </div>
       
-      <ParlaySlipProvider username={authState.username}>
+      <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authData?.tier ?? "")}>
         <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
           <Router authState={authState} />
         </main>

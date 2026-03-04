@@ -48,6 +48,9 @@ import {
   Shield,
   Zap,
   AlertTriangle,
+  Plus,
+  Shuffle,
+  FlaskConical,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -641,8 +644,198 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
   );
 }
 
+interface CorrelationData {
+  score: number;
+  grade: string;
+  label: string;
+  color: "green" | "yellow" | "red";
+  warnings: string[];
+  suggestions: string[];
+  averageGrade: string;
+  averageEV: number;
+  averageConfidence: number;
+}
+
+function CorrelationPanel({ legs }: { legs: ParlaySlipLeg[] }) {
+  const [data, setData] = useState<CorrelationData | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const lastKeyRef = useRef("");
+
+  const legKey = legs.map(l => l.id).sort().join(",");
+
+  useEffect(() => {
+    if (legs.length < 2 || legKey === lastKeyRef.current) return;
+    lastKeyRef.current = legKey;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const resp = await fetch("/api/tickets/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ legs }),
+        });
+        if (resp.ok) setData(await resp.json());
+      } catch {}
+      setLoading(false);
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [legKey, legs]);
+
+  if (legs.length < 2) return null;
+
+  const colorClass = data?.color === "green"
+    ? "border-green-500/30 bg-green-500/8 text-green-700 dark:text-green-400"
+    : data?.color === "yellow"
+    ? "border-yellow-500/30 bg-yellow-500/8 text-yellow-700 dark:text-yellow-400"
+    : "border-red-500/30 bg-red-500/8 text-red-700 dark:text-red-400";
+
+  const dot = data?.color === "green" ? "🟢" : data?.color === "yellow" ? "🟡" : "🔴";
+
+  return (
+    <div className={`mx-2 my-1.5 rounded-lg border text-[10px] ${colorClass}`} data-testid="correlation-panel">
+      <button
+        className="w-full flex items-center justify-between px-2.5 py-1.5 gap-1.5"
+        onClick={() => setExpanded(e => !e)}
+      >
+        <span className="flex items-center gap-1.5 font-medium">
+          <Shield className="h-3 w-3" />
+          Correlation Check
+          {loading && <Activity className="h-2.5 w-2.5 animate-pulse" />}
+        </span>
+        {data && (
+          <span className="flex items-center gap-1.5">
+            <span className="font-bold">{dot} {data.score}/100 — {data.label}</span>
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </span>
+        )}
+        {!data && !loading && <span className="text-muted-foreground">Analyzing...</span>}
+      </button>
+      {expanded && data && (
+        <div className="px-2.5 pb-2 space-y-1.5 border-t border-current/20">
+          <div className="flex items-center gap-3 pt-1.5 text-muted-foreground">
+            <span>Avg Grade: <span className="font-bold text-foreground">{data.averageGrade}</span></span>
+            <span>Avg EV: <span className="font-bold text-foreground">{data.averageEV > 0 ? "+" : ""}{data.averageEV}%</span></span>
+            <span>Conf: <span className="font-bold text-foreground">{data.averageConfidence}%</span></span>
+          </div>
+          {data.warnings.length > 0 && (
+            <div className="space-y-1">
+              <p className="font-semibold text-[9px] uppercase tracking-wide opacity-70">Warnings</p>
+              {data.warnings.map((w, i) => (
+                <p key={i} className="text-[10px] leading-snug flex items-start gap-1">
+                  <AlertTriangle className="h-2.5 w-2.5 shrink-0 mt-0.5" />
+                  {w}
+                </p>
+              ))}
+            </div>
+          )}
+          {data.suggestions.length > 0 && (
+            <div className="space-y-1">
+              <p className="font-semibold text-[9px] uppercase tracking-wide opacity-70">Suggestions</p>
+              {data.suggestions.map((s, i) => (
+                <p key={i} className="text-[10px] leading-snug flex items-start gap-1">
+                  <Zap className="h-2.5 w-2.5 shrink-0 mt-0.5" />
+                  {s}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SlipTabBar() {
+  const { slips, activeSlipId, createSlip, deleteSlip, switchSlip, renameSlip, canUseMultiSlip } = useParlaySlip();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const editRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingId && editRef.current) editRef.current.focus();
+  }, [editingId]);
+
+  const startEdit = (slip: { id: string; name: string }, e: { stopPropagation: () => void }) => {
+    e.stopPropagation();
+    setEditingId(slip.id);
+    setEditValue(slip.name);
+  };
+
+  const commitEdit = () => {
+    if (editingId && editValue.trim()) renameSlip(editingId, editValue.trim());
+    setEditingId(null);
+  };
+
+  if (!canUseMultiSlip) return null;
+
+  return (
+    <div className="flex items-center gap-0.5 px-2 py-1.5 border-b bg-muted/20 overflow-x-auto scrollbar-none" data-testid="slip-tab-bar">
+      {slips.map((slip) => {
+        const isActive = slip.id === activeSlipId;
+        return (
+          <div key={slip.id} className="flex items-center shrink-0">
+            <button
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium transition-all ${
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+              onClick={() => switchSlip(slip.id)}
+              onDoubleClick={(e) => startEdit(slip, e)}
+              data-testid={`tab-slip-${slip.id}`}
+            >
+              {editingId === slip.id ? (
+                <input
+                  ref={editRef}
+                  className="bg-transparent outline-none w-20 text-[10px]"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  onBlur={commitEdit}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") commitEdit();
+                    if (e.key === "Escape") setEditingId(null);
+                  }}
+                  onClick={e => e.stopPropagation()}
+                />
+              ) : (
+                <span className="max-w-[72px] truncate">{slip.name}</span>
+              )}
+              {slip.legs.length > 0 && (
+                <span className={`text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center ${isActive ? "bg-white/20" : "bg-muted-foreground/20"}`}>
+                  {slip.legs.length}
+                </span>
+              )}
+            </button>
+            {!isActive && slips.length > 1 && (
+              <button
+                className="text-muted-foreground/50 hover:text-destructive h-4 w-4 flex items-center justify-center rounded ml-0.5"
+                onClick={(e) => { e.stopPropagation(); deleteSlip(slip.id); }}
+                data-testid={`delete-slip-${slip.id}`}
+                title="Delete slip"
+              >
+                <X className="h-2.5 w-2.5" />
+              </button>
+            )}
+          </div>
+        );
+      })}
+      {slips.length < 5 && (
+        <button
+          className="flex items-center gap-0.5 px-1.5 py-1 rounded-md text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0"
+          onClick={() => createSlip()}
+          data-testid="button-create-slip"
+          title="New slip"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
-  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin } = useParlaySlip();
+  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip } = useParlaySlip();
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
   const [showPlacement, setShowPlacement] = useState(false);
@@ -744,6 +937,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   if (isMobile) {
     return (
       <>
+        <SlipTabBar />
         <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -806,6 +1000,8 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             </div>
           </div>
         </ScrollArea>
+
+        <CorrelationPanel legs={legs} />
 
         {strategyViolations.length > 0 && (
           <div className="mx-3 mb-1 p-2.5 rounded-lg border border-amber-500/30 bg-amber-500/8 space-y-1.5" data-testid="banner-strategy-violations">
@@ -873,6 +1069,16 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
           )}
 
+          {canUseMultiSlip && (
+            <Link href="/ticket-variations">
+              <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md border border-dashed border-primary/40 text-[10px] text-primary hover:bg-primary/5 transition-colors" data-testid="link-variation-engine">
+                <FlaskConical className="h-3 w-3" />
+                Ticket Variation Engine
+                <Shuffle className="h-3 w-3" />
+              </button>
+            </Link>
+          )}
+
           <AffiliateDisclosure compact className="text-center block w-full" />
         </div>
       </>
@@ -881,6 +1087,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
   return (
     <>
+      <SlipTabBar />
       <div className="px-3 py-2 bg-muted/30 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="text-xs font-bold">
@@ -905,6 +1112,8 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           ))}
         </div>
       </ScrollArea>
+
+      <CorrelationPanel legs={legs} />
 
       {strategyViolations.length > 0 && (
         <div className="mx-2 mb-1 p-2 rounded-lg border border-amber-500/30 bg-amber-500/8 space-y-1" data-testid="banner-strategy-violations-desktop">
@@ -1014,6 +1223,16 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </button>
         {showPlacement && (
           <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+        )}
+
+        {canUseMultiSlip && (
+          <Link href="/ticket-variations">
+            <button className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-md border border-dashed border-primary/40 text-[10px] text-primary hover:bg-primary/5 transition-colors" data-testid="link-variation-engine-desktop">
+              <FlaskConical className="h-2.5 w-2.5" />
+              Variation Engine
+              <Shuffle className="h-2.5 w-2.5" />
+            </button>
+          </Link>
         )}
       </div>
     </>
