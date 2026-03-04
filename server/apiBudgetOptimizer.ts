@@ -73,7 +73,7 @@ export interface OptimizationResult {
 const DEFAULT_CONFIGS: Record<ServiceKey, ServiceConfig> = {
   odds: {
     name: "The Odds API",
-    monthlyBudget: 500,
+    monthlyBudget: 100000,
     description: "Bookmaker odds across 10+ sportsbooks",
     unit: "requests",
     resetDay: 1,

@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getHeapStatistics } from "v8";
 import { logInfo, logWarn, logError } from "./errorLogger";
 import { getAiAvailability, recordAiError, recordAiSuccess } from "./aiErrorTracker";
 import { createOpenAIClient, isOpenAIAvailable } from "./openaiClient";
@@ -313,14 +314,17 @@ class AutonomousAdminIntelligence {
       this.autoResolve("system_health", "System Health Degraded");
     }
 
-    // Memory
-    const heapPercent = m.heapTotalMb > 0 ? Math.round((m.heapUsedMb / m.heapTotalMb) * 100) : 0;
+    // Memory — compare against the actual V8 heap size limit (set by --max-old-space-size),
+    // NOT heapTotal. heapTotal is just V8's current allocation chunk and will be at 90%+
+    // routinely as the GC manages it. The real OOM risk is heapUsed vs the hard limit.
+    const heapLimitMb = Math.round(getHeapStatistics().heap_size_limit / 1024 / 1024);
+    const heapPercent = heapLimitMb > 0 ? Math.round((m.heapUsedMb / heapLimitMb) * 100) : 0;
     if (heapPercent > 90) {
       addIf(true, {
         severity: "critical",
         category: "memory",
         title: "Memory Critical — Heap at 90%+",
-        detail: `Heap: ${m.heapUsedMb}MB / ${m.heapTotalMb}MB (${heapPercent}%). OOM risk.`,
+        detail: `Heap: ${m.heapUsedMb}MB / ${heapLimitMb}MB limit (${heapPercent}%). OOM risk.`,
         checkType: "quick",
       });
     } else if (heapPercent > 75) {
@@ -329,7 +333,7 @@ class AutonomousAdminIntelligence {
         severity: "warning",
         category: "memory",
         title: "Memory High — Heap at 75%+",
-        detail: `Heap: ${m.heapUsedMb}MB / ${m.heapTotalMb}MB (${heapPercent}%).`,
+        detail: `Heap: ${m.heapUsedMb}MB / ${heapLimitMb}MB limit (${heapPercent}%).`,
         checkType: "quick",
       });
     } else {
