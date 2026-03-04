@@ -1,6 +1,36 @@
 {
   "alerts": [
     {
+      "id": "alert_1772646069275_q0ep5",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "memory",
+      "title": "Memory Critical — Heap at 90%+",
+      "detail": "Heap: 65MB / 70MB (93%). OOM risk.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772646069275_mjd5z",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 500 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772646069275_zil6b",
+      "timestamp": "2026-03-04T17:41:09.275Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "model_performance",
+      "title": "Win Rate Critical — Below 48%",
+      "detail": "Win rate 46.7% over 634 picks. Break-even is 52.4%. Immediate review needed.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1772645134240_2mvs3",
       "timestamp": "2026-03-04T17:25:34.240Z",
       "resolved": false,
@@ -93,8 +123,8 @@
     }
   ],
   "reports": [],
-  "lastQuickCheck": "2026-03-04T17:25:34.240Z",
+  "lastQuickCheck": "2026-03-04T17:41:09.275Z",
   "lastDeepCheck": null,
-  "totalQuickChecks": 3,
+  "totalQuickChecks": 4,
   "totalDeepChecks": 0
 }
