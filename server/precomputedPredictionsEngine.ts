@@ -925,6 +925,8 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       : Math.round(100 + (0.5 - homeWinPct) * 400);
 
     const marketGame = marketData?.games.find(mg => mg.id === game.id);
+    // Only generate picks for games with real bookmaker data — estimated lines produce unreliable picks
+    if (!marketGame) continue;
     const gameLineMovements: LineMovementData[] = marketGame?.lineMovement || [];
 
     const underdogName = favoriteIsHome ? awayName : homeName;
@@ -956,6 +958,9 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const actualH1Spread = marketGame?.bookmakers?.[0]?.h1Spread ?? h1Spread;
     const actualH1Total = marketGame?.bookmakers?.[0]?.h1Total ?? h1Total;
 
+    // Focus on the three most predictable and liquid markets only.
+    // First-half and team total markets have much higher variance and are removed
+    // to improve overall pick quality and win rate calibration.
     const betOptions = [
       { pick: `${favName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualHomeML : actualAwayML, desc: `${favName} Moneyline` },
       { pick: `${underdogName} ML`, betType: "moneyline", odds: favoriteIsHome ? actualAwayML : actualHomeML, desc: `${underdogName} Moneyline` },
@@ -963,14 +968,6 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       { pick: `${awayName} ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}`, betType: "spread", odds: actualSpreadAwayOdds, desc: `${awayName} Spread ${actualSpread > 0 ? "-" : "+"}${Math.abs(actualSpread)}` },
       { pick: `Over ${actualTotal}`, betType: "total", odds: actualOverOdds, desc: `Over ${actualTotal}` },
       { pick: `Under ${actualTotal}`, betType: "total", odds: actualUnderOdds, desc: `Under ${actualTotal}` },
-      { pick: `1H ${homeName} ${actualH1Spread > 0 ? "+" : ""}${actualH1Spread}`, betType: "first_half_spread", odds: h1SpreadOdds, desc: `1H ${homeName} Spread ${actualH1Spread}` },
-      { pick: `1H ${awayName} ${actualH1Spread > 0 ? "-" : "+"}${Math.abs(actualH1Spread)}`, betType: "first_half_spread", odds: h1SpreadAwayOdds, desc: `1H ${awayName} Spread ${actualH1Spread}` },
-      { pick: `1H Over ${actualH1Total}`, betType: "first_half_total", odds: h1OverOdds, desc: `1H Over ${actualH1Total}` },
-      { pick: `1H Under ${actualH1Total}`, betType: "first_half_total", odds: h1UnderOdds, desc: `1H Under ${actualH1Total}` },
-      { pick: `${homeName} Over ${homeTeamTotal}`, betType: "team_total", odds: -110, desc: `${homeName} Team Total Over ${homeTeamTotal}` },
-      { pick: `${homeName} Under ${homeTeamTotal}`, betType: "team_total", odds: -110, desc: `${homeName} Team Total Under ${homeTeamTotal}` },
-      { pick: `${awayName} Over ${awayTeamTotal}`, betType: "team_total", odds: -110, desc: `${awayName} Team Total Over ${awayTeamTotal}` },
-      { pick: `${awayName} Under ${awayTeamTotal}`, betType: "team_total", odds: -110, desc: `${awayName} Team Total Under ${awayTeamTotal}` },
     ];
 
     for (const bet of betOptions) {
@@ -1165,6 +1162,16 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
             pickConfidence: confidence,
           });
         } catch {}
+      }
+
+      // ── Sharp money signal adjustment ────────────────────────────────────────
+      // When real sharp action is detected (steam move or sharp action flag), allow
+      // confidence to break the 70 ceiling. When no market signals at all (stable
+      // line, no sharp data), apply a small penalty to separate signal from noise.
+      if (derivedSharpMoney) {
+        confidence = Math.min(75, confidence + 3);
+      } else if (!derivedLineMovement || derivedLineMovement.magnitude < 0.5) {
+        confidence = Math.max(22, confidence - 3);
       }
 
       const impliedProb = bet.odds < 0 ? Math.abs(bet.odds) / (Math.abs(bet.odds) + 100) : 100 / (bet.odds + 100);
@@ -1947,7 +1954,7 @@ export function buildOptimalTickets(options: {
   const eligible = allPicks
     .filter(p => {
       const gs = gradeToScore(p.grade);
-      if (!(gs >= 5 && p.ev > 0 && p.confidence >= 50 && p.recommendation !== "fade" && p.recommendation !== "avoid")) return false;
+      if (!(gs >= 5 && p.ev > 2 && p.confidence >= 50 && p.recommendation !== "fade" && p.recommendation !== "avoid")) return false;
 
       if (dateFilter !== "all" && p.gameTime) {
         const gameDate = new Date(p.gameTime);
