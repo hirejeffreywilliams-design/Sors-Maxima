@@ -28,6 +28,12 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Precomputed Predictions Engine**: Runs every 5 minutes for in-season sports, combining 46-Factor Model analysis with Vegas engine predictions, focusing on high-quality picks.
 - **Situational Analysis Engine**: Calculates rest days, back-to-back detection, schedule spot classification, and travel factors from live ESPN schedule data.
 - **CLV Tracker**: Stores user picks with odds at placement and tracks Closing Line Value (CLV+).
+- **Intelligence Acceleration System**: Five interconnected engines that dramatically speed up prediction-to-learning cycles:
+  - **Early Settlement Engine** (`server/earlySettlementEngine.ts`): Polls ESPN live scoreboards every 90s. Settles picks before official game end when outcome is mathematically certain (e.g., 18+ pt lead with <2 min left in NBA). Also checks NBA player props via BDL live boxscore. Broadcasts SSE `early-settlement` events. Admin trigger at `POST /api/admin/intelligence-acceleration/trigger-early-settlement`.
+  - **BallDontLie Live Boxscore**: Added `getLiveBoxscore(gameId)` to `balldontlie-provider.ts` — fetches current player stats for ongoing NBA games (55s cache). Used by Early Settlement Engine to settle player props (OVER) in real time.
+  - **Micro-Learning Cycles**: Orchestrator now runs `runMCLearningCycle()` + `runUSMLLearningCycle()` immediately after each settlement batch (when `mcRecorded > 0`). Shortens model weight feedback loop from 24 hours to minutes.
+  - **CLV Auto-Capture** (`server/sharpSignalDetector.ts`): When The Odds API detects a game going live (commence_time ≤ now), the engine captures the current spread/total/ML from the highest-priority bookmaker and writes it to `user_picks.closing_odds`. CLV is computed as `odds_at_pick - closing_line`.
+  - **Sharp Signal Detector** (`server/sharpSignalDetector.ts`): Monitors line movement every 60s across NBA/NFL/NHL/MLB/NCAAB. Triggers sharp signal alert when spread moves ≥1.5 pts, total moves ≥2 pts, or ML moves ≥30 cents. Broadcasts SSE `sharp-signal` events and flags matching user picks with `sharp_signal=true`. Admin status at `GET /api/admin/intelligence-acceleration/status`.
 - **Personalized Betting Insights**: Analyzes user betting history to generate "Betting DNA" and recommendations.
 - **Unified Tools & Analytics Page**: Consolidates all betting analysis tools.
 - **Consolidated Odds Center**: Combines Odds Comparison, EV Heatmap, Line Movement, and Power Rankings.

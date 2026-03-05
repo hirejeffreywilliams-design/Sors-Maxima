@@ -4626,4 +4626,37 @@ Analyze the issues and respond with VALID JSON only (no markdown):
     }
   });
 
+  app.get("/api/admin/intelligence-acceleration/status", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { getEarlySettlementStatus } = await import("../earlySettlementEngine");
+      const { getSharpSignalStatus } = await import("../sharpSignalDetector");
+      res.json({
+        earlySettlement: getEarlySettlementStatus(),
+        sharpSignal: getSharpSignalStatus(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/intelligence-acceleration/trigger-early-settlement", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { triggerEarlySettlementNow } = await import("../earlySettlementEngine");
+      const result = await triggerEarlySettlementNow();
+      res.json({ status: "triggered", ...result });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/intelligence-acceleration/trigger-sharp-detection", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { triggerSharpDetectionNow } = await import("../sharpSignalDetector");
+      const result = await triggerSharpDetectionNow();
+      res.json({ status: "triggered", ...result });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

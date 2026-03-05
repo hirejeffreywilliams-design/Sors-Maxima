@@ -325,6 +325,18 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
 
     if (settled > 0 || mcRecorded > 0) {
       logInfo(`[Orchestrator] Auto-settled ${settled}/${checked} predictions, MC outcomes recorded: ${mcRecorded}`);
+      // ── Micro-Learning Cycle: propagate outcomes immediately ──────────────
+      // Instead of waiting 24 hours, run lightweight weight recalibration
+      // as soon as games settle — shortens feedback loop from 24h to minutes.
+      try {
+        if (mcRecorded > 0) {
+          runMCLearningCycle();
+          runUSMLLearningCycle();
+          logInfo(`[Orchestrator] Micro-learning cycle triggered after ${mcRecorded} new outcomes`);
+        }
+      } catch (mlErr: any) {
+        logWarn(`[Orchestrator] Micro-learning cycle failed: ${mlErr.message}`);
+      }
     }
 
     let picksSettled = 0;

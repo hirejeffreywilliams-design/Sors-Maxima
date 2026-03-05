@@ -398,6 +398,35 @@ export async function getTodaysGames(): Promise<BDLGame[]> {
   return result?.data || [];
 }
 
+export interface BDLLiveStat {
+  player?: { id: number; first_name: string; last_name: string; team_id?: number };
+  team?: { id: number; abbreviation: string };
+  pts: number;
+  reb: number;
+  ast: number;
+  stl: number;
+  blk: number;
+  fg3m: number;
+  turnover: number;
+  min: string;
+}
+
+const liveBoxscoreCache = new Map<number, { data: BDLLiveStat[]; ts: number }>();
+const LIVE_CACHE_TTL = 55_000;
+
+export async function getLiveBoxscore(gameId: number): Promise<BDLLiveStat[]> {
+  const cached = liveBoxscoreCache.get(gameId);
+  if (cached && Date.now() - cached.ts < LIVE_CACHE_TTL) return cached.data;
+
+  const result = await fetchBDL<{ data: BDLLiveStat[] }>(`/nba/v1/stats`, {
+    game_ids: String(gameId),
+    per_page: "50",
+  });
+  const data = result?.data || [];
+  if (data.length > 0) liveBoxscoreCache.set(gameId, { data, ts: Date.now() });
+  return data;
+}
+
 export async function getGamesForDate(date: string): Promise<BDLGame[]> {
   const result = await fetchBDL<{ data: BDLGame[] }>(`/nba/v1/games`, {
     "dates[]": date,

@@ -31,6 +31,8 @@ import { initBacktestOnStartup } from "./backtestEngine";
 import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
 import { startQualityWatchdog } from "./qualityWatchdog";
+import { startEarlySettlementEngine } from "./earlySettlementEngine";
+import { startSharpSignalDetector } from "./sharpSignalDetector";
 import { pool } from "./db";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
@@ -254,6 +256,16 @@ function startEnginesPhased(): void {
   // Reduced from 70s → 50s: hub + precomputed are running well by this point.
   // First warmup cycle fires 15s after start = 65s total. 10× more sims overnight.
   safeStart("Monte Carlo Engine", startMonteCarloEngine, 50_000);
+
+  // ── Phase 5.5 (35s): Early Settlement Engine ─────────────────────────────
+  // Detects mathematically-decided game outcomes before ESPN marks them "post".
+  // Polls live ESPN scoreboards every 90s and settles picks when outcome is certain.
+  safeStart("Early Settlement Engine", startEarlySettlementEngine, 35_000);
+
+  // ── Phase 5.7 (40s): Sharp Signal Detector ───────────────────────────────
+  // Monitors The Odds API line movement every 60s. Triggers CLV capture when
+  // games go live, and broadcasts sharp money alerts for ≥1.5pt line moves.
+  safeStart("Sharp Signal Detector", startSharpSignalDetector, 40_000);
 
   // ── Phase 8 (70s): Notification Engine ───────────────────────────────────
   // Monitors live games and prop lines for user-subscribed alerts.
