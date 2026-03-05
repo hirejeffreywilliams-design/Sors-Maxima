@@ -232,17 +232,19 @@ function GameCard({ game, slipLegs }: { game: LiveFactorAdjustment; slipLegs: { 
         onClick={() => setExpanded(v => !v)}
         data-testid={`toggle-factor-${game.gameId}`}
       >
-        <div className="flex items-center gap-3 min-w-0">
-          <Badge variant="outline" className="text-[10px] shrink-0">{game.sport}</Badge>
-          <div className="flex items-center gap-2 font-semibold text-sm">
-            <span>{game.awayTeam.split(" ").pop()}</span>
-            <span className="text-muted-foreground text-lg font-bold">{game.awayScore} – {game.homeScore}</span>
-            <span>{game.homeTeam.split(" ").pop()}</span>
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <div className="flex items-center gap-2 font-semibold text-sm min-w-0">
+            <span className="truncate max-w-[70px] sm:max-w-none">{game.awayTeam.split(" ").pop()}</span>
+            <span className="text-muted-foreground font-bold shrink-0">{game.awayScore} – {game.homeScore}</span>
+            <span className="truncate max-w-[70px] sm:max-w-none">{game.homeTeam.split(" ").pop()}</span>
           </div>
-          <Badge variant="outline" className="gap-1 bg-red-500/10 border-red-500/30 text-red-500 text-[10px] shrink-0">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            {game.period ? `Q${game.period}` : "LIVE"} {game.clock && `${game.clock}`}
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">{game.sport}</Badge>
+            <Badge variant="outline" className="gap-1 bg-red-500/10 border-red-500/30 text-red-500 text-[10px] px-1.5 py-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+              <span>{game.period ? `Q${game.period}` : "LIVE"}{game.clock ? ` ${game.clock}` : ""}</span>
+            </Badge>
+          </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded border ${rec.bgColor} ${rec.color}`}>
