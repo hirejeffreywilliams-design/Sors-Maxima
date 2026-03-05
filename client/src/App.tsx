@@ -643,9 +643,9 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
           const isActive = location === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
+              <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
                 <Icon className="w-5 h-5" />
-                <span className="text-[9px] font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium">{item.label}</span>
               </div>
             </Link>
           );
@@ -653,29 +653,29 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
         <button
           onClick={() => setMobileOpen(true)}
-          className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-primary"
+          className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target text-primary"
           data-testid="bottom-nav-slip"
           aria-label="Open bet slip"
         >
           <div className="relative">
             <Ticket className="w-5 h-5" />
             {legCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-bold leading-none">
+              <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none">
                 {legCount > 9 ? "9+" : legCount}
               </span>
             )}
           </div>
-          <span className="text-[9px] font-bold">Slip</span>
+          <span className="text-[10px] font-bold">Slip</span>
         </button>
 
         <button
           onClick={onOpenMenu}
-          className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-muted-foreground"
+          className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target text-muted-foreground"
           data-testid="bottom-nav-more"
           aria-label="More navigation"
         >
           <MoreHorizontal className="w-5 h-5" />
-          <span className="text-[9px] font-medium">More</span>
+          <span className="text-[10px] font-medium">More</span>
         </button>
       </div>
     </nav>
@@ -834,7 +834,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3 lg:gap-4">

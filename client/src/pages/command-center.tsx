@@ -1654,7 +1654,7 @@ export default function CommandCenter() {
                 <ModelHealthChip />
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-1.5 cursor-help">
@@ -1676,21 +1676,23 @@ export default function CommandCenter() {
                   {sse.lastUpdate && <p className="text-[10px] text-muted-foreground">Last update: {new Date(sse.lastUpdate).toLocaleTimeString()}</p>}
                 </TooltipContent>
               </Tooltip>
-              <DataSourceBar sources={feed.dataSourceHealth} />
+              <div className="hidden sm:block">
+                <DataSourceBar sources={feed.dataSourceHealth} />
+              </div>
               {(() => {
                 const oddsApi = feed.dataSourceHealth.find(s => s.name.toLowerCase().includes("odds api") || s.name.toLowerCase().includes("odds-api") || s.name.toLowerCase().includes("the odds"));
                 const isMultiBook = oddsApi && oddsApi.status === "live";
                 return (
                   <Badge
                     variant="outline"
-                    className={`text-[10px] px-1.5 py-0 ${isMultiBook ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-orange-500/10 border-orange-500/30 text-orange-500"}`}
+                    className={`hidden sm:inline-flex text-[10px] px-1.5 py-0 ${isMultiBook ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-orange-500/10 border-orange-500/30 text-orange-500"}`}
                     data-testid="indicator-odds-source"
                   >
                     {isMultiBook ? "Multi-Book" : "ESPN Only"}
                   </Badge>
                 );
               })()}
-              <div className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <div className="hidden sm:flex text-[10px] text-muted-foreground items-center gap-1">
                 <RefreshCw className="w-3 h-3" />
                 {lastUpdate}
               </div>

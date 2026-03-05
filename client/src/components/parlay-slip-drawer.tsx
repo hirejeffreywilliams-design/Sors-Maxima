@@ -1154,7 +1154,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
                 key={amt}
                 variant={stake === amt ? "default" : "outline"}
                 size="sm"
-                className="h-6 px-1 text-[9px] flex-1 min-w-0"
+                className="h-6 px-1 text-[10px] flex-1 min-w-0"
                 onClick={() => setStake(amt)}
                 data-testid={`button-stake-${amt}`}
               >

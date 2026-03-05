@@ -343,7 +343,7 @@ export default function Pricing() {
           <p className="text-sm text-muted-foreground text-center mb-8 max-w-xl mx-auto">
             This isn't a tip sheet or a tout service. It's a private intelligence platform built for bettors who treat this like a business.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {[
               { icon: <Brain className="w-7 h-7 text-blue-500" />, color: "bg-blue-500/10", title: "46-Factor AI Engine", desc: "Every pick analyzed across 46 real-data factors — not gut feeling. Results in seconds." },
               { icon: <TrendingUp className="w-7 h-7 text-green-500" />, color: "bg-green-500/10", title: "+EV Detection", desc: "Scans every market for positive expected value so you only bet when the math is with you." },
