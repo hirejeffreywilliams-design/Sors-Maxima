@@ -344,8 +344,8 @@ async function loadRealGames(): Promise<Array<{ home: string; away: string; spor
       const upcoming = espnGames.filter(g => g.status.state === "pre" || g.status.state === "in");
       for (const g of upcoming) {
         allGames.push({
-          home: g.homeTeam.shortDisplayName || g.homeTeam.displayName,
-          away: g.awayTeam.shortDisplayName || g.awayTeam.displayName,
+          home: g.homeTeam.displayName || g.homeTeam.shortDisplayName,
+          away: g.awayTeam.displayName || g.awayTeam.shortDisplayName,
           sport: s,
         });
       }

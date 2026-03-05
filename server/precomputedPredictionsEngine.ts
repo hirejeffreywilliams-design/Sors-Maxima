@@ -1640,7 +1640,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
     const vpEvRounded = Math.round(ev * 100) / 100;
     const vpRec = fusion.recommendation || "lean_bet";
     const vpWinProb = fusion.winProbability || Math.round(confidence * 0.95);
-    const vpPick = vp.pick || vp.description || "";
+    const vpPick = vp.prediction || vp.pick || vp.description || "";
     const vpBetType = vp.betType || "moneyline";
 
     const vpTiming = determinePickTiming(vp.gameTime, [], vpEvRounded);
