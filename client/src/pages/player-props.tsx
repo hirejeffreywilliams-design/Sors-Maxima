@@ -17,6 +17,7 @@ import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
   Zap, Star, Target, Shield, Search, X, SlidersHorizontal,
+  Minus, Plus, RotateCcw,
 } from "lucide-react";
 
 interface MarketProp {
@@ -232,6 +233,53 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   isReadOnly?: boolean;
 }) {
   const [showBooks, setShowBooks] = useState(false);
+  const [customLine, setCustomLine] = useState<number | null>(null);
+
+  const step = 0.5;
+  const effectiveLine = customLine ?? prop.line;
+  const adjustment = effectiveLine - prop.line;
+  const isAdjusted = customLine !== null && adjustment !== 0;
+
+  const sensitivityPct = Math.abs(adjustment) / Math.max(prop.line, 1);
+  const confDelta = Math.round(sensitivityPct * 130);
+
+  let adjustedConf = prop.confidence;
+  let adjustedRec = prop.recommendation;
+
+  if (isAdjusted) {
+    if (adjustment > 0) {
+      if (prop.recommendation === "over") adjustedConf = Math.max(22, prop.confidence - confDelta);
+      else if (prop.recommendation === "under") adjustedConf = Math.min(94, prop.confidence + confDelta);
+      if (prop.seasonAvg !== null && effectiveLine > prop.seasonAvg + 1.5) adjustedRec = "under";
+    } else {
+      if (prop.recommendation === "over") adjustedConf = Math.min(94, prop.confidence + confDelta);
+      else if (prop.recommendation === "under") adjustedConf = Math.max(22, prop.confidence - confDelta);
+      if (prop.seasonAvg !== null && effectiveLine < prop.seasonAvg - 1.5) adjustedRec = "over";
+    }
+  }
+
+  const adjustedEdge = isAdjusted
+    ? Math.max(-20, Math.min(40, prop.edge + (adjustment < 0 ? confDelta * 0.35 : -confDelta * 0.35)))
+    : prop.edge;
+
+  const getGrade = (conf: number): string => {
+    if (conf >= 85) return "A+";
+    if (conf >= 75) return "A";
+    if (conf >= 65) return "B";
+    if (conf >= 55) return "C";
+    if (conf >= 45) return "D";
+    return "F";
+  };
+
+  const adjustedGrade = getGrade(adjustedConf);
+  const gradeColorClass =
+    adjustedGrade === "A+" || adjustedGrade === "A"
+      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+      : adjustedGrade === "B"
+      ? "bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400"
+      : adjustedGrade === "C"
+      ? "bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400"
+      : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400";
 
   const handleAdd = (side: "over" | "under") => {
     const odds = side === "over" ? prop.overOdds : prop.underOdds;
@@ -239,26 +287,28 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
     addLeg({
       id: `prop-${playerName}-${prop.market}-${side}`.replace(/\s+/g, "-").toLowerCase(),
       team: playerName,
-      opponent: `${prop.marketLabel} ${prop.line}`,
+      opponent: `${prop.marketLabel} ${effectiveLine}`,
       market: "player_prop" as any,
-      outcome: `${playerName} ${side === "over" ? "Over" : "Under"} ${prop.line} ${prop.marketLabel}`,
+      outcome: `${playerName} ${side === "over" ? "Over" : "Under"} ${effectiveLine} ${prop.marketLabel}${isAdjusted ? " (custom)" : ""}`,
       decimalOdds: decOdds,
       americanOdds: odds,
       addedFrom: "Player Props Analyzer",
       addedAt: new Date().toISOString(),
       sport,
-      confidence: prop.confidence,
-      evPercent: prop.edge,
-      reasoning: prop.reasoning,
+      confidence: adjustedConf,
+      evPercent: adjustedEdge,
+      reasoning: isAdjusted
+        ? `[Custom Line ${effectiveLine}] ${prop.reasoning}`
+        : prop.reasoning,
     });
   };
 
-  const isOver = prop.recommendation === "over";
-  const isUnder = prop.recommendation === "under";
-  const hasEdge = prop.confidence >= 60 && prop.recommendation !== "push";
+  const isOver = adjustedRec === "over";
+  const isUnder = adjustedRec === "under";
+  const hasEdge = adjustedConf >= 60 && adjustedRec !== "push";
 
   const hasAvg = prop.seasonAvg !== null && prop.seasonAvg !== undefined;
-  const avgVsLine = hasAvg ? (prop.seasonAvg! - prop.line) : 0;
+  const avgVsLine = hasAvg ? (prop.seasonAvg! - effectiveLine) : 0;
   const avgLeanOver = avgVsLine > 0.5;
   const avgLeanUnder = avgVsLine < -0.5;
   const bestBookSpread = prop.bestOver && prop.bestUnder
@@ -267,14 +317,22 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   const hasBestBook = bestBookSpread > 5;
 
   return (
-    <div className={`rounded-lg border p-3 space-y-2.5 ${hasEdge ? "border-primary/30 bg-primary/[0.02]" : ""}`} data-testid={`prop-${playerName}-${prop.market}`}>
+    <div className={`rounded-lg border p-3 space-y-2.5 ${isAdjusted ? "border-amber-500/30 bg-amber-500/[0.02]" : hasEdge ? "border-primary/30 bg-primary/[0.02]" : ""}`} data-testid={`prop-${playerName}-${prop.market}`}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
             <p className="text-xs font-semibold">{prop.marketLabel}</p>
+            <Badge variant="outline" className={`text-[9px] px-1.5 py-0 font-bold ${gradeColorClass}`} data-testid={`badge-grade-${playerName}-${prop.market}`}>
+              {adjustedGrade}
+            </Badge>
+            {isAdjusted && (
+              <Badge variant="outline" className="text-[9px] px-1 py-0 bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400">
+                <SlidersHorizontal className="w-2.5 h-2.5 mr-0.5" />Custom
+              </Badge>
+            )}
             {hasEdge && (
               <Badge variant="outline" className="text-[9px] px-1 py-0 bg-primary/10 border-primary/30 text-primary">
-                {prop.confidence}% conf
+                {adjustedConf}% conf
               </Badge>
             )}
             {hasAvg && avgLeanOver && (
@@ -288,8 +346,41 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2 mt-1 flex-wrap">
-            <span className="text-[10px] text-muted-foreground">Line: <span className="font-mono font-medium text-foreground">{prop.line}</span></span>
+
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <div className="flex items-center gap-1" data-testid={`line-adjuster-${playerName}-${prop.market}`}>
+              <span className="text-[10px] text-muted-foreground font-medium">Line:</span>
+              <button
+                onClick={() => setCustomLine(Math.max(0.5, effectiveLine - step))}
+                className="w-5 h-5 rounded flex items-center justify-center bg-muted/60 hover:bg-muted border border-border/60 hover:border-border transition-colors"
+                aria-label="Decrease line"
+                data-testid={`button-line-down-${playerName}-${prop.market}`}
+              >
+                <Minus className="w-2.5 h-2.5" />
+              </button>
+              <span className={`text-sm font-mono font-bold px-1 min-w-[3.5rem] text-center ${isAdjusted ? "text-amber-600 dark:text-amber-400" : "text-foreground"}`}>
+                {effectiveLine % 1 === 0 ? effectiveLine.toFixed(1) : effectiveLine}
+              </span>
+              <button
+                onClick={() => setCustomLine(effectiveLine + step)}
+                className="w-5 h-5 rounded flex items-center justify-center bg-muted/60 hover:bg-muted border border-border/60 hover:border-border transition-colors"
+                aria-label="Increase line"
+                data-testid={`button-line-up-${playerName}-${prop.market}`}
+              >
+                <Plus className="w-2.5 h-2.5" />
+              </button>
+              {isAdjusted && (
+                <button
+                  onClick={() => setCustomLine(null)}
+                  className="flex items-center gap-0.5 text-[9px] text-muted-foreground hover:text-foreground transition-colors ml-0.5"
+                  aria-label="Reset to original line"
+                  data-testid={`button-line-reset-${playerName}-${prop.market}`}
+                >
+                  <RotateCcw className="w-2.5 h-2.5" />
+                  <span>{prop.line}</span>
+                </button>
+              )}
+            </div>
             {hasAvg && (
               <span className="text-[10px] text-muted-foreground">
                 Avg: <span className={`font-mono font-medium ${avgLeanOver ? "text-emerald-500" : avgLeanUnder ? "text-red-500" : "text-foreground"}`}>{prop.seasonAvg}</span>
@@ -302,6 +393,17 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
               </span>
             )}
           </div>
+
+          {isAdjusted && (
+            <div className="mt-1.5 flex items-center gap-1.5 text-[10px]">
+              <span className="text-muted-foreground">Original:</span>
+              <span className="font-mono font-medium text-muted-foreground line-through">{prop.line}</span>
+              <span className={`font-medium ${adjustment > 0 ? "text-red-500" : "text-emerald-500"}`}>
+                {adjustment > 0 ? `+${adjustment}` : adjustment} ({adjustedRec === "over" ? "leans OVER" : adjustedRec === "under" ? "leans UNDER" : "push"})
+              </span>
+            </div>
+          )}
+
           {hasAvg && (
             <div className="mt-1.5">
               <div className="relative h-1.5 rounded-full bg-muted overflow-hidden">
@@ -309,19 +411,19 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
                 {avgLeanOver && (
                   <div
                     className="absolute inset-y-0 left-1/2 bg-emerald-500/60 rounded-r-full"
-                    style={{ width: `${Math.min(50, (avgVsLine / (prop.line || 1)) * 200)}%` }}
+                    style={{ width: `${Math.min(50, (avgVsLine / (effectiveLine || 1)) * 200)}%` }}
                   />
                 )}
                 {avgLeanUnder && (
                   <div
                     className="absolute inset-y-0 right-1/2 bg-red-500/60 rounded-l-full"
-                    style={{ width: `${Math.min(50, (Math.abs(avgVsLine) / (prop.line || 1)) * 200)}%` }}
+                    style={{ width: `${Math.min(50, (Math.abs(avgVsLine) / (effectiveLine || 1)) * 200)}%` }}
                   />
                 )}
               </div>
               <div className="flex justify-between text-[9px] text-muted-foreground/60 mt-0.5 px-0.5">
                 <span>Under</span>
-                <span>Line {prop.line}</span>
+                <span>Line {effectiveLine}</span>
                 <span>Over</span>
               </div>
             </div>
@@ -364,7 +466,7 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
           <button
             onClick={() => handleAdd("over")}
             disabled={overInSlip}
-            aria-label={`${playerName} Over ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
+            aria-label={`${playerName} Over ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
             className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
               isOver
                 ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20"
@@ -380,7 +482,9 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
               {formatOdds(prop.overOdds)}
             </span>
             {isOver && (
-              <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">Recommended</span>
+              <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {isAdjusted ? `Grade ${adjustedGrade} · ${adjustedConf}%` : "Recommended"}
+              </span>
             )}
             {overInSlip && (
               <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
@@ -390,7 +494,7 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
           <button
             onClick={() => handleAdd("under")}
             disabled={underInSlip}
-            aria-label={`${playerName} Under ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
+            aria-label={`${playerName} Under ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
             className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
               isUnder
                 ? "border-red-500 bg-red-500/10 ring-1 ring-red-500/20"
@@ -406,7 +510,9 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
               {formatOdds(prop.underOdds)}
             </span>
             {isUnder && (
-              <span className="text-[10px] font-medium text-red-600 dark:text-red-400 mt-0.5">Recommended</span>
+              <span className="text-[10px] font-medium text-red-600 dark:text-red-400 mt-0.5">
+                {isAdjusted ? `Grade ${adjustedGrade} · ${adjustedConf}%` : "Recommended"}
+              </span>
             )}
             {underInSlip && (
               <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
