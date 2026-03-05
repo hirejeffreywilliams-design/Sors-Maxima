@@ -2192,7 +2192,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
         const gameIsLive = game.status?.state === "in";
 
-        if (matchedProps.length === 0 && !gameIsLive) {
+        if (matchedProps.length === 0) {
           const homeToken = homeName.split(" ").pop() || "";
           const awayToken = awayName.split(" ").pop() || "";
           const directCache = getCachedPropsForGame(`${homeTeamName}|${awayTeamName}`);
@@ -2214,6 +2214,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             }
           }
         }
+
+        const isPreGameReference = gameIsLive && propsFromCache && matchedProps.length > 0;
 
         if (matchedProps.length === 0 && sport === "NBA") {
           try {
@@ -2662,8 +2664,9 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           },
           players: allPlayersArr,
           totalProps: allPlayersArr.reduce((sum, p) => sum + p.markets.length, 0),
+          isPreGameReference,
           dataSource: matchedProps.length > 0
-            ? (propsFromCache ? "The Odds API (pre-game cached)" : (matchedProps[0]?.dataSource || "The Odds API (live)"))
+            ? (isPreGameReference ? "The Odds API (pre-game reference)" : propsFromCache ? "The Odds API (pre-game cached)" : (matchedProps[0]?.dataSource || "The Odds API (live)"))
             : "ESPN roster",
         });
       }

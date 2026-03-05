@@ -68,6 +68,7 @@ interface GameData {
   players: GamePlayer[];
   totalProps: number;
   dataSource: string;
+  isPreGameReference?: boolean;
 }
 
 interface PropsResponse {
@@ -220,7 +221,7 @@ function matchStatToMarket(category: string, market: string): boolean {
   return false;
 }
 
-function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, currentStat }: {
+function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, currentStat, isReadOnly }: {
   prop: MarketProp;
   playerName: string;
   sport: string;
@@ -228,6 +229,7 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   overInSlip: boolean;
   underInSlip: boolean;
   currentStat?: { value: string; category: string } | null;
+  isReadOnly?: boolean;
 }) {
   const [showBooks, setShowBooks] = useState(false);
 
@@ -330,59 +332,88 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-2" role="group" aria-label={`${prop.marketLabel} over under selection`}>
-        <button
-          onClick={() => handleAdd("over")}
-          disabled={overInSlip}
-          aria-label={`${playerName} Over ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
-          className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
-            isOver
-              ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20"
-              : "border-border hover:border-emerald-500/40 hover:bg-emerald-500/5"
-          } ${overInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
-          data-testid={`button-over-${playerName}-${prop.market}`}
-        >
-          <div className="flex items-center gap-1">
-            <ArrowUp className={`w-4 h-4 ${isOver ? "text-emerald-500" : "text-muted-foreground"}`} />
-            <span className={`text-sm font-bold ${isOver ? "text-emerald-500" : "text-foreground"}`}>OVER</span>
+      {isReadOnly ? (
+        <div className="grid grid-cols-2 gap-2" data-testid={`ref-lines-${playerName}-${prop.market}`}>
+          <div className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 border-border/40 bg-muted/20 opacity-75 ${isOver ? "border-emerald-500/30 bg-emerald-500/5" : ""}`}>
+            <div className="flex items-center gap-1">
+              <ArrowUp className={`w-4 h-4 ${isOver ? "text-emerald-500/70" : "text-muted-foreground/60"}`} />
+              <span className={`text-sm font-bold ${isOver ? "text-emerald-500/70" : "text-muted-foreground/60"}`}>OVER</span>
+            </div>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${isOver ? "text-emerald-500/70" : "text-muted-foreground/60"}`}>
+              {formatOdds(prop.overOdds)}
+            </span>
+            {isOver && (
+              <span className="text-[9px] font-medium text-emerald-600/60 dark:text-emerald-400/60 mt-0.5">Pre-game pick</span>
+            )}
           </div>
-          <span className={`text-lg font-mono font-bold mt-0.5 ${isOver ? "text-emerald-500" : "text-foreground"}`}>
-            {formatOdds(prop.overOdds)}
-          </span>
-          {isOver && (
-            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">Recommended</span>
-          )}
-          {overInSlip && (
-            <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
-          )}
-        </button>
+          <div className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 border-border/40 bg-muted/20 opacity-75 ${isUnder ? "border-red-500/30 bg-red-500/5" : ""}`}>
+            <div className="flex items-center gap-1">
+              <ArrowDown className={`w-4 h-4 ${isUnder ? "text-red-500/70" : "text-muted-foreground/60"}`} />
+              <span className={`text-sm font-bold ${isUnder ? "text-red-500/70" : "text-muted-foreground/60"}`}>UNDER</span>
+            </div>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${isUnder ? "text-red-500/70" : "text-muted-foreground/60"}`}>
+              {formatOdds(prop.underOdds)}
+            </span>
+            {isUnder && (
+              <span className="text-[9px] font-medium text-red-600/60 dark:text-red-400/60 mt-0.5">Pre-game pick</span>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2" role="group" aria-label={`${prop.marketLabel} over under selection`}>
+          <button
+            onClick={() => handleAdd("over")}
+            disabled={overInSlip}
+            aria-label={`${playerName} Over ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
+              isOver
+                ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+                : "border-border hover:border-emerald-500/40 hover:bg-emerald-500/5"
+            } ${overInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
+            data-testid={`button-over-${playerName}-${prop.market}`}
+          >
+            <div className="flex items-center gap-1">
+              <ArrowUp className={`w-4 h-4 ${isOver ? "text-emerald-500" : "text-muted-foreground"}`} />
+              <span className={`text-sm font-bold ${isOver ? "text-emerald-500" : "text-foreground"}`}>OVER</span>
+            </div>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${isOver ? "text-emerald-500" : "text-foreground"}`}>
+              {formatOdds(prop.overOdds)}
+            </span>
+            {isOver && (
+              <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">Recommended</span>
+            )}
+            {overInSlip && (
+              <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
+            )}
+          </button>
 
-        <button
-          onClick={() => handleAdd("under")}
-          disabled={underInSlip}
-          aria-label={`${playerName} Under ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
-          className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
-            isUnder
-              ? "border-red-500 bg-red-500/10 ring-1 ring-red-500/20"
-              : "border-border hover:border-red-500/40 hover:bg-red-500/5"
-          } ${underInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
-          data-testid={`button-under-${playerName}-${prop.market}`}
-        >
-          <div className="flex items-center gap-1">
-            <ArrowDown className={`w-4 h-4 ${isUnder ? "text-red-500" : "text-muted-foreground"}`} />
-            <span className={`text-sm font-bold ${isUnder ? "text-red-500" : "text-foreground"}`}>UNDER</span>
-          </div>
-          <span className={`text-lg font-mono font-bold mt-0.5 ${isUnder ? "text-red-500" : "text-foreground"}`}>
-            {formatOdds(prop.underOdds)}
-          </span>
-          {isUnder && (
-            <span className="text-[10px] font-medium text-red-600 dark:text-red-400 mt-0.5">Recommended</span>
-          )}
-          {underInSlip && (
-            <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
-          )}
-        </button>
-      </div>
+          <button
+            onClick={() => handleAdd("under")}
+            disabled={underInSlip}
+            aria-label={`${playerName} Under ${prop.line} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
+              isUnder
+                ? "border-red-500 bg-red-500/10 ring-1 ring-red-500/20"
+                : "border-border hover:border-red-500/40 hover:bg-red-500/5"
+            } ${underInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
+            data-testid={`button-under-${playerName}-${prop.market}`}
+          >
+            <div className="flex items-center gap-1">
+              <ArrowDown className={`w-4 h-4 ${isUnder ? "text-red-500" : "text-muted-foreground"}`} />
+              <span className={`text-sm font-bold ${isUnder ? "text-red-500" : "text-foreground"}`}>UNDER</span>
+            </div>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${isUnder ? "text-red-500" : "text-foreground"}`}>
+              {formatOdds(prop.underOdds)}
+            </span>
+            {isUnder && (
+              <span className="text-[10px] font-medium text-red-600 dark:text-red-400 mt-0.5">Recommended</span>
+            )}
+            {underInSlip && (
+              <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
+            )}
+          </button>
+        </div>
+      )}
 
       {prop.reasoning && (
         <p className="text-[11px] text-muted-foreground leading-relaxed" data-testid={`text-reasoning-${playerName}-${prop.market}`}>
@@ -470,12 +501,13 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   );
 }
 
-function PlayerSection({ player, sport, addLeg, slipLegIds, isLive }: {
+function PlayerSection({ player, sport, addLeg, slipLegIds, isLive, isReadOnly }: {
   player: GamePlayer;
   sport: string;
   addLeg: (leg: any) => boolean;
   slipLegIds: Set<string>;
   isLive?: boolean;
+  isReadOnly?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -556,6 +588,7 @@ function PlayerSection({ player, sport, addLeg, slipLegIds, isLive }: {
                 overInSlip={slipLegIds.has(overId)}
                 underInSlip={slipLegIds.has(underId)}
                 currentStat={matchedStat}
+                isReadOnly={isReadOnly}
               />
             );
           })}
@@ -667,6 +700,17 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
             </div>
           ) : (
             <>
+              {isLive && game.isPreGameReference && (
+                <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/25" data-testid="banner-pregame-reference">
+                  <Clock className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">Pre-Game Reference Lines</p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
+                      These were the final odds before tip-off. Prop markets are now suspended — sportsbooks pull lines once the game goes live. Use these as a reference to compare against your pre-game picks.
+                    </p>
+                  </div>
+                </div>
+              )}
               {[
                 { label: game.awayTeam.abbreviation, logo: game.awayTeam.logo, name: game.awayTeam.name },
                 { label: game.homeTeam.abbreviation, logo: game.homeTeam.logo, name: game.homeTeam.name },
@@ -694,6 +738,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           addLeg={addLeg}
                           slipLegIds={slipLegIds}
                           isLive={isLive}
+                          isReadOnly={isLive && game.isPreGameReference}
                         />
                       ))}
                     </div>
@@ -725,6 +770,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           addLeg={addLeg}
                           slipLegIds={slipLegIds}
                           isLive={isLive}
+                          isReadOnly={isLive && game.isPreGameReference}
                         />
                       ))}
                     </div>
