@@ -7593,27 +7593,127 @@
       "homeScore": 80,
       "awayScore": 75,
       "settledAt": "2026-03-05T01:56:57.983Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-1723cdc39ee9",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Dallas Mavericks @ Toronto Raptors",
+      "homeTeam": "Toronto Raptors",
+      "awayTeam": "Dallas Mavericks",
+      "pick": "Over 220",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-05T02:25:38.343Z",
+      "savedAt": "2026-03-05T02:25:38.343Z",
+      "result": "lost",
+      "homeScore": 117,
+      "awayScore": 90,
+      "settledAt": "2026-03-05T02:25:52.154Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-3b711ab9ec3f",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Chicago Bulls @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Chicago Bulls",
+      "pick": "Chicago Bulls +7",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-05T02:25:38.343Z",
+      "savedAt": "2026-03-05T02:25:38.343Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 116,
+      "settledAt": "2026-03-05T02:25:52.160Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-73a4915fbf31",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Golden State Warriors @ Oklahoma City Thunder",
+      "homeTeam": "Oklahoma City Thunder",
+      "awayTeam": "Golden State Warriors",
+      "pick": "Golden State Warriors +6.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-05T02:25:38.343Z",
+      "savedAt": "2026-03-05T02:25:38.343Z",
+      "result": "won",
+      "homeScore": 108,
+      "awayScore": 116,
+      "settledAt": "2026-03-05T02:25:52.160Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-5fef22db0486",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ Los Angeles Lakers",
+      "homeTeam": "Los Angeles Lakers",
+      "awayTeam": "Indiana Pacers",
+      "pick": "Indiana Pacers +8",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-05T02:25:38.343Z",
+      "savedAt": "2026-03-05T02:25:38.343Z",
+      "result": "lost",
+      "homeScore": 110,
+      "awayScore": 101,
+      "settledAt": "2026-03-05T02:25:52.174Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-19798528394d",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Vancouver Canucks @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Vancouver Canucks",
+      "pick": "Vancouver Canucks +5.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 60,
+      "ev": 6.91,
+      "gameTime": "2026-03-05T02:25:38.722Z",
+      "savedAt": "2026-03-05T02:25:38.722Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-05T02:25:52.189Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 342,
-      "won": 177,
-      "lost": 158,
+      "total": 347,
+      "won": 180,
+      "lost": 160,
       "push": 7,
-      "rate": 51.8,
+      "rate": 51.9,
       "pending": 47
     },
     "bySport": {
       "NBA": {
-        "total": 107,
-        "won": 49,
-        "rate": 45.8
+        "total": 111,
+        "won": 51,
+        "rate": 45.9
       },
       "NHL": {
-        "total": 116,
-        "won": 57,
-        "rate": 49.1
+        "total": 117,
+        "won": 58,
+        "rate": 49.6
       },
       "NCAAB": {
         "total": 119,
@@ -7633,14 +7733,14 @@
         "rate": 52.9
       },
       "B-": {
-        "total": 87,
-        "won": 43,
-        "rate": 49.4
+        "total": 91,
+        "won": 45,
+        "rate": 49.5
       },
       "C+": {
-        "total": 64,
-        "won": 37,
-        "rate": 57.8
+        "total": 65,
+        "won": 38,
+        "rate": 58.5
       },
       "D+": {
         "total": 19,
@@ -7681,16 +7781,16 @@
         "roi": 28
       },
       "Spread": {
-        "total": 92,
-        "won": 48,
-        "rate": 52.2,
-        "roi": 4.3
+        "total": 96,
+        "won": 51,
+        "rate": 53.1,
+        "roi": 5.9
       },
       "Total": {
-        "total": 87,
+        "total": 88,
         "won": 41,
-        "rate": 47.1,
-        "roi": -6.2
+        "rate": 46.6,
+        "roi": -7.3
       },
       "Team Total": {
         "total": 71,
@@ -7700,21 +7800,21 @@
       }
     },
     "recentForm": {
-      "won": 26,
-      "lost": 22,
+      "won": 27,
+      "lost": 21,
       "push": 2,
-      "rate": 52
+      "rate": 54
     },
-    "lastUpdated": "2026-03-05T02:20:48.125Z",
-    "roi": 8.4,
-    "brierScore": 0.2634,
+    "lastUpdated": "2026-03-05T02:34:20.551Z",
+    "roi": 8.5,
+    "brierScore": 0.2631,
     "maxDrawdown": 10.6,
-    "sharpeRatio": 0.07,
+    "sharpeRatio": 0.071,
     "homeAwayBias": {
       "homeWinRate": 57.3,
-      "awayWinRate": 40,
+      "awayWinRate": 43.2,
       "homeTotal": 143,
-      "awayTotal": 40
+      "awayTotal": 44
     },
     "calibrationBuckets": [
       {
@@ -7732,8 +7832,8 @@
       {
         "range": "60-65",
         "predicted": 62.2,
-        "actual": 50.4,
-        "total": 133
+        "actual": 50.7,
+        "total": 138
       },
       {
         "range": "65-70",
