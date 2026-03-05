@@ -368,8 +368,82 @@ function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; st
   );
 }
 
+interface BetQualityIssue {
+  headline: string;
+  detail: string;
+  severity: "mild" | "moderate" | "strong";
+}
+
+function getBetQualityIssue(leg: ParlaySlipLeg): BetQualityIssue | null {
+  const { grade, confidence, evPercent, americanOdds } = leg;
+
+  if (grade === "F") {
+    return {
+      headline: "Our model really doesn't like this one.",
+      detail: `An F grade means the data strongly favors the other side. You can still bet it — just know you're going against the numbers.`,
+      severity: "strong",
+    };
+  }
+
+  if (grade === "D" || grade === "D+") {
+    return {
+      headline: "This pick has a rough report card.",
+      detail: `A D grade means the model sees significant edge working against you here. Worth double-checking before locking it in.`,
+      severity: "moderate",
+    };
+  }
+
+  if (americanOdds >= 700) {
+    const impliedPct = Math.round(100 / (americanOdds / 100 + 1));
+    const breakEvenEvery = Math.round(100 / impliedPct);
+    return {
+      headline: "That's a long shot — and we mean that literally.",
+      detail: `At +${americanOdds}, this has roughly a ${impliedPct}% chance according to the market. It needs to hit about once every ${breakEvenEvery} times just to break even. Fun to root for, but the math is steep.`,
+      severity: "moderate",
+    };
+  }
+
+  if (evPercent !== undefined && evPercent < -18) {
+    const lossPerHundred = Math.abs(evPercent).toFixed(0);
+    return {
+      headline: "The house has a big edge on this one.",
+      detail: `At ${evPercent.toFixed(0)}% EV, you'd expect to lose about $${lossPerHundred} for every $100 bet here over time. That's a steep price to pay. Are you sure this is the right number?`,
+      severity: "strong",
+    };
+  }
+
+  if (evPercent !== undefined && evPercent < -10) {
+    return {
+      headline: "Negative expected value — just a heads up.",
+      detail: `This bet comes in at ${evPercent.toFixed(1)}% EV. You're paying a premium over true odds. Still beatable with the right edge, but worth knowing.`,
+      severity: "mild",
+    };
+  }
+
+  if (americanOdds <= -450) {
+    const profitPer100 = Math.round(10000 / Math.abs(americanOdds));
+    return {
+      headline: "Heavy chalk, light reward.",
+      detail: `At ${americanOdds}, you're risking $100 to win only $${profitPer100}. The team probably wins — but you need them to win a lot of times just to make the juice worthwhile.`,
+      severity: "mild",
+    };
+  }
+
+  if (confidence !== undefined && confidence < 28) {
+    return {
+      headline: "Low confidence flag.",
+      detail: `The model gives this only a ${Math.round(confidence)}% win probability. That's below a coin flip, and the coin is leaning the wrong way.`,
+      severity: "moderate",
+    };
+  }
+
+  return null;
+}
+
 function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean }) {
   const Icon = marketIcons[leg.market] || TrendingUp;
+  const [alertDismissed, setAlertDismissed] = useState(false);
+  const qualityIssue = getBetQualityIssue(leg);
 
   return (
     <div className="flex items-start gap-2 py-2 px-1 group" data-testid={`slip-leg-${leg.id}`}>
@@ -422,6 +496,33 @@ function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () 
           <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1" data-testid={`slip-reasoning-${leg.id}`}>
             {leg.reasoning}
           </p>
+        )}
+        {!compact && qualityIssue && !alertDismissed && (
+          <div
+            className={`mt-1.5 rounded-md px-2 py-1.5 text-[10px] border flex items-start gap-1.5 ${
+              qualityIssue.severity === "strong"
+                ? "bg-red-500/8 border-red-400/30 text-red-700 dark:text-red-400"
+                : qualityIssue.severity === "moderate"
+                ? "bg-amber-500/10 border-amber-400/30 text-amber-700 dark:text-amber-400"
+                : "bg-yellow-500/8 border-yellow-400/25 text-yellow-700 dark:text-yellow-500"
+            }`}
+            data-testid={`bet-quality-alert-${leg.id}`}
+          >
+            <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="font-semibold">{qualityIssue.headline}</span>
+              {" "}
+              <span className="opacity-85">{qualityIssue.detail}</span>
+            </div>
+            <button
+              className="shrink-0 opacity-50 hover:opacity-100 transition-opacity ml-0.5"
+              onClick={() => setAlertDismissed(true)}
+              title="Dismiss"
+              data-testid={`dismiss-quality-alert-${leg.id}`}
+            >
+              <X className="h-3 w-3" />
+            </button>
+          </div>
         )}
       </div>
       <Button
