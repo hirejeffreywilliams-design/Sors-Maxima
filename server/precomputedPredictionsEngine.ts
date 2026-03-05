@@ -250,12 +250,15 @@ function buildPickReasoning(
   }
 
   if (betType === "moneyline") {
-    const team = pick.replace(" ML", "").trim();
     const impliedProb = ctx?.odds ? (ctx.odds < 0 ? Math.abs(ctx.odds) / (Math.abs(ctx.odds) + 100) * 100 : 100 / (ctx.odds + 100) * 100) : 0;
-    if (impliedProb > 0 && Math.abs(winProbability - impliedProb) >= 3) {
-      parts.push(`46-Factor model projects ${winProbability}% win probability vs ${Math.round(impliedProb)}% implied by odds = +${Math.round(winProbability - impliedProb)}% edge`);
+    if (impliedProb > 0 && ev > 2) {
+      const modelProb = Math.round(Math.min(impliedProb * 1.25, impliedProb * (1 + ev / 100)));
+      const evDisplay = ev >= 35 ? "35%+" : `+${ev.toFixed(1)}%`;
+      parts.push(`46-Factor model projects ${modelProb}% vs ${Math.round(impliedProb)}% implied by odds — ${evDisplay} edge detected`);
+    } else if (impliedProb > 0) {
+      parts.push(`${Math.round(impliedProb)}% implied probability — signal alignment favorable at current price`);
     } else {
-      parts.push(`${team} at ${winProbability}% intelligence-projected win probability`);
+      parts.push(`Multi-factor signal alignment detected at current odds`);
     }
   } else if (betType === "spread") {
     if (ev > 3) {

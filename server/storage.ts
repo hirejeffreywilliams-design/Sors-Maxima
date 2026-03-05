@@ -76,7 +76,7 @@ function estimateLegProbability(leg: ParlayLeg): number {
       const desc = leg.outcome || `${leg.team || "Team"} ${leg.market || "moneyline"}`;
       const fusion = analyzeLeg(sport, desc, americanOdds, { hasRealOdds: true });
       const fusionProb = fusion.winProbability / 100;
-      const blended = calibrated * 0.6 + fusionProb * 0.4;
+      const blended = calibrated * 0.8 + fusionProb * 0.2;
       return Math.max(0.0001, Math.min(0.9999, blended));
     } catch {
       return calibrated;

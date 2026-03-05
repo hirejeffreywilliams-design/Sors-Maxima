@@ -624,7 +624,9 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="p-1.5 rounded bg-muted/30 cursor-default">
-                <p className="font-bold">{(parlay.expectedValue * 100).toFixed(1)}%</p>
+                <p className="font-bold">
+                  {parlay.expectedValue * 100 > 30 ? "30%+" : `${(parlay.expectedValue * 100).toFixed(1)}%`}
+                </p>
                 <p className="text-[9px] text-muted-foreground">EV</p>
               </div>
             </TooltipTrigger>

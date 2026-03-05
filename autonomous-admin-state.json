@@ -146,6 +146,77 @@
   ],
   "reports": [
     {
+      "id": "report_1772678872547_se299",
+      "timestamp": "2026-03-05T02:47:52.547Z",
+      "durationMs": 7425,
+      "summary": [
+        "Pipeline health is critical; win rate is below expected thresholds at 51.9%.",
+        "Model degradation alert: win rate is 46.6% for Total bets, triggering a critical risk alert.",
+        "Cash on hand is stable at $100,000, monthly burn is manageable at $45,000.",
+        "API usage is healthy, with plenty of remaining budget."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate Pipeline Health",
+          "description": "Deep dive into the reasons behind the critical pipeline health and win rate drop.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 4
+        },
+        {
+          "title": "Model Adjustments",
+          "description": "Review the predictive model, focusing on Total market bets and adjust for performance improvement.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 6
+        },
+        {
+          "title": "Communication Plan",
+          "description": "Prepare communication for members regarding the current performance and upcoming improvements without exposing vendor details.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 2
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Model Degradation Detected",
+          "description": "Total market win rate below 48%, indicating critical model performance issues that need immediate attention.",
+          "severity": "critical"
+        },
+        {
+          "title": "Pipeline Health Critical",
+          "description": "Overall pipeline health rated as critical; requires urgent investigation and remediation.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Review and investigate causes for critical pipeline health.",
+          "Assess model predictions across different markets specifically focusing on Total bets.",
+          "Begin drafting communication for members regarding current performance."
+        ],
+        "this_week": [
+          "Implement any required adjustments to the predictive model.",
+          "Monitor win rates closely across all markets.",
+          "Plan a review meeting to discuss model strategies with any key team members involved."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 347,
+        "oddsApiRemaining": 85605,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 0,
+        "heapUsedMb": 68,
+        "heapTotalMb": 71,
+        "hubLastCycleMs": 6,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Pipeline health is critical; win rate is below expected thresholds at 51.9%.\",\n    \"Model degradation alert: win rate is 46.6% for Total bets, triggering a critical risk alert.\",\n    \"Cash on hand is stable at $100,000, monthly burn is manageable at $45,000.\",\n    \"API usage is healthy, with plenty of remaining budget.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Pipeline Health\",\n      \"description\": \"Deep dive into the reasons behind the critical pipeline health and win rate drop.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Model Adjustments\",\n      \"description\": \"Review the predictive model, focusing on Total market bets and adjust for performance improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 6\n    },\n    {\n      \"title\": \"Communication Plan\",\n      \"description\": \"Prepare communication for members regarding the current performance and upcoming improvements without exposing vendor details.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Model Degradation Detected\",\n      \"description\": \"Total market win rate below 48%, indicating critical model performance issues that need immediate attention.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Pipeline Health Critical\",\n      \"description\": \"Overall pipeline health rated as critical; requires urgent investigation and remediation.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and investigate causes for critical pipeline health.\",\n      \"Assess model predictions across different markets specifically focusing on Total bets.\",\n      \"Begin drafting communication for members regarding current performance.\"\n    ],\n    \"this_week\": [\n      \"Implement any required adjustments to the predictive model.\",\n      \"Monitor win rates closely across all markets.\",\n      \"Plan a review meeting to discuss model strategies with any key team members involved.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1772661638688_c20hy",
       "timestamp": "2026-03-04T22:00:38.688Z",
       "durationMs": 7334,
@@ -349,8 +420,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-05T02:25:20.125Z",
-  "lastDeepCheck": "2026-03-04T22:00:38.688Z",
-  "totalQuickChecks": 15,
-  "totalDeepChecks": 3
+  "lastQuickCheck": "2026-03-05T02:38:52.548Z",
+  "lastDeepCheck": "2026-03-05T02:47:52.547Z",
+  "totalQuickChecks": 16,
+  "totalDeepChecks": 4
 }
