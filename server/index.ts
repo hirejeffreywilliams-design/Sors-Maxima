@@ -30,6 +30,7 @@ import { startNotificationEngine } from "./notificationEngine";
 import { initBacktestOnStartup } from "./backtestEngine";
 import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
+import { startQualityWatchdog } from "./qualityWatchdog";
 import { pool } from "./db";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
@@ -265,6 +266,7 @@ function startEnginesPhased(): void {
   safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
   safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 120_000);
   safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
+  safeStart("Quality Watchdog", startQualityWatchdog, 140_000);
   safeStart("International Sports Engine", () => {
     generateInternationalFeed().catch(() => {});
     setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);

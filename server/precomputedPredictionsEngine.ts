@@ -262,7 +262,8 @@ function buildPickReasoning(
     }
   } else if (betType === "spread") {
     if (ev > 3) {
-      parts.push(`Spread offers strong value with +${ev.toFixed(1)}% expected edge`);
+      const evStr = ev >= 35 ? "35%+" : `+${ev.toFixed(1)}%`;
+      parts.push(`Spread shows model edge — ${evStr} EV detected at current line`);
     } else {
       parts.push(`Spread line is favorable based on projected scoring`);
     }

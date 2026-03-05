@@ -22,6 +22,7 @@ import { featureFlags } from "../featureFlags";
 import { auditTrail } from "../auditTrail";
 import { idempotencyStore } from "../idempotency";
 import { analyticsEventService } from "../analyticsEventService";
+import { getLatestQualityReport, runAndStoreQualityCheck } from "../qualityWatchdog";
 import { getTeams, getTeamRoster, getRosterCacheStats, refreshAllData, getPlayersFromCacheById } from "../espn-roster-provider";
 import { sportsDataService } from "../sportsDataService";
 import { getDeviceStats } from "../trustedDeviceService";
@@ -454,6 +455,29 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
   // Admin: Error code categories
   app.get("/api/admin/error-categories", requireAdmin, (_req, res) => {
     res.json(getCategories());
+  });
+
+  // Admin: Quality Watchdog report
+  app.get("/api/admin/quality-report", requireAdmin, (_req, res) => {
+    try {
+      const report = getLatestQualityReport();
+      if (!report) {
+        const fresh = runAndStoreQualityCheck();
+        return res.json(fresh);
+      }
+      res.json(report);
+    } catch (err) {
+      res.status(500).json({ error: "Quality check failed" });
+    }
+  });
+
+  app.post("/api/admin/quality-report/refresh", requireAdmin, (_req, res) => {
+    try {
+      const report = runAndStoreQualityCheck();
+      res.json(report);
+    } catch (err) {
+      res.status(500).json({ error: "Quality check failed" });
+    }
   });
 
   // Admin: System health checks

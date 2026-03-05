@@ -33,6 +33,7 @@ import {
   Target,
   Database,
   ShieldAlert,
+  ShieldCheck,
   UsersRound,
   TrendingUp,
   TrendingDown,
@@ -396,6 +397,7 @@ export default function AdminDashboard() {
   };
 
   const quickLinks = [
+    { href: "/admin/quality-watchdog", label: "Quality Watchdog", desc: "Pick accuracy, EV integrity, reasoning", icon: ShieldCheck },
     { href: "/admin/pipeline", label: "Intelligence Pipeline", desc: "Live node map, AI diagnosis", icon: Network },
     { href: "/admin/autonomous", label: "Autonomous Monitor", desc: "24/7 AI health watch", icon: Brain },
     { href: "/admin/model-integrity", label: "Model Integrity", desc: "ROI, Brier score, calibration", icon: ShieldAlert },
