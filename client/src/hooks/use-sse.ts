@@ -28,6 +28,8 @@ interface SSEState {
   lastUpdate: string | null;
   reconnectAttempts: number;
   pendingNotifications: any[];
+  sharpSignals: any[];
+  earlySettlements: any[];
 }
 
 export function useSSE(options: UseSSEOptions = {}) {
@@ -54,6 +56,8 @@ export function useSSE(options: UseSSEOptions = {}) {
     lastUpdate: null,
     reconnectAttempts: 0,
     pendingNotifications: [],
+    sharpSignals: [],
+    earlySettlements: [],
   });
 
   const eventSourceRef = useRef<EventSource | null>(null);
@@ -186,6 +190,38 @@ export function useSSE(options: UseSSEOptions = {}) {
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "guardian-alert", data, timestamp: data.timestamp || new Date().toISOString() };
         setState(prev => ({ ...prev, lastEvent: sseEvent }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
+    es.addEventListener("sharp-signal", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "sharp-signal", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({
+          ...prev,
+          lastEvent: sseEvent,
+          sharpSignals: [data, ...prev.sharpSignals].slice(0, 20),
+          lastUpdate: data.timestamp || new Date().toISOString(),
+        }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
+    es.addEventListener("early-settlement", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "early-settlement", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({
+          ...prev,
+          lastEvent: sseEvent,
+          earlySettlements: [data, ...prev.earlySettlements].slice(0, 20),
+          lastUpdate: data.timestamp || new Date().toISOString(),
+        }));
         dispatchEvent(sseEvent);
       } catch {}
     });

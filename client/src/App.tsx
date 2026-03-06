@@ -92,8 +92,24 @@ import { useUTMCapture } from "@/lib/utm-tracker";
 import { ErrorRecoveryInterceptor } from "@/components/error-recovery-interceptor";
 import { SupportChat } from "@/components/support-chat";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { SSEProvider, useSSEContext } from "@/context/sse-provider";
 
 const ApplyPage = lazy(() => import("@/pages/apply"));
+
+function SSEStatusDot() {
+  const sse = useSSEContext();
+  return (
+    <div
+      className="hidden sm:flex items-center gap-1 px-1.5"
+      title={sse.connected ? "Live updates active" : "Reconnecting..."}
+      data-testid="sse-status-dot"
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${sse.connected ? "bg-green-500 animate-pulse" : "bg-yellow-500"}`}
+      />
+    </div>
+  );
+}
 
 function PageLoader() {
   return (
@@ -836,6 +852,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   };
 
   return (
+    <SSEProvider enabled={true}>
     <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
@@ -845,6 +862,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           </div>
           
           <div className="flex items-center gap-1.5">
+            <SSEStatusDot />
             <div className="hidden sm:block">
               <SearchButton />
             </div>
@@ -926,6 +944,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <ErrorRecoveryInterceptor />
       <SupportChat />
     </div>
+    </SSEProvider>
   );
 }
 

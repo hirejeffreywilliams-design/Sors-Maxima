@@ -82,6 +82,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useSEO } from "@/hooks/use-seo";
+import { AdminAIResolve } from "@/components/admin-ai-resolve";
 
 interface SubscriptionStats {
   total: number;
@@ -552,14 +553,25 @@ export default function AdminDashboard() {
                           Remediation: {alert.remediation}
                         </p>
                       </div>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => setDismissedAlerts(prev => { const next = new Set(Array.from(prev)); next.add(alert.id); return next; })}
-                        data-testid={`button-dismiss-alert-${alert.id}`}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <AdminAIResolve
+                          category="System Alert"
+                          issue={alert.message}
+                          severity={alert.severity}
+                          metrics={{ metric: alert.metric, value: alert.value, threshold: alert.threshold, remediation: alert.remediation }}
+                          label="Resolve"
+                          compact
+                          variant="outline"
+                        />
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => setDismissedAlerts(prev => { const next = new Set(Array.from(prev)); next.add(alert.id); return next; })}
+                          data-testid={`button-dismiss-alert-${alert.id}`}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -649,6 +661,25 @@ export default function AdminDashboard() {
             {/* ── Overview ── */}
             <TabsContent value="overview" className="space-y-4">
 
+              {/* Quick AI Health Check */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <p className="text-xs text-muted-foreground">Full platform status — use AI to diagnose any issue instantly</p>
+                <AdminAIResolve
+                  category="Platform Health"
+                  issue="General platform health check — identify any issues, bottlenecks, or improvements needed"
+                  metrics={{
+                    systems: (snapshot as any)?.systems?.length,
+                    healthySystems: (snapshot as any)?.systems?.filter((s: any) => s.status === 'running' || s.status === 'healthy').length,
+                    openIncidents: (snapshot as any)?.executive?.openIncidents,
+                    pipelineStatus: (snapshot as any)?.executive?.pipelineStatus,
+                    errorsLast24h: errorStats?.last24Hours,
+                    pendingSettlement: settlementStatus?.pendingCount,
+                  }}
+                  label="Run AI Health Check"
+                  variant="default"
+                />
+              </div>
+
               {/* Systems status */}
               {!snapshotLoading && (snapshot as any)?.systems?.length > 0 && (
                 <Card>
@@ -669,13 +700,25 @@ export default function AdminDashboard() {
                         return (
                           <div key={i} className="flex items-center justify-between gap-2 p-2 rounded border text-sm" data-testid={`card-system-${i}`}>
                             <span className="truncate text-xs">{sys.name}</span>
-                            <Badge
-                              variant={isUp ? 'default' : isDegraded ? 'secondary' : 'destructive'}
-                              className={`shrink-0 text-[10px] ${isUp ? 'bg-green-600 text-white' : ''}`}
-                              data-testid={`badge-system-status-${i}`}
-                            >
-                              {sys.status}
-                            </Badge>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <Badge
+                                variant={isUp ? 'default' : isDegraded ? 'secondary' : 'destructive'}
+                                className={`text-[10px] ${isUp ? 'bg-green-600 text-white' : ''}`}
+                                data-testid={`badge-system-status-${i}`}
+                              >
+                                {sys.status}
+                              </Badge>
+                              {!isUp && (
+                                <AdminAIResolve
+                                  category="System Health"
+                                  issue={`${sys.name} is ${sys.status}`}
+                                  severity={isDegraded ? "medium" : "high"}
+                                  metrics={{ system: sys.name, status: sys.status, details: sys.details }}
+                                  label="Fix"
+                                  compact
+                                />
+                              )}
+                            </div>
                           </div>
                         );
                       })}
@@ -713,6 +756,16 @@ export default function AdminDashboard() {
                   >
                     {backfillSettlementMutation.isPending ? "Backfilling..." : "Backfill 14 Days"}
                   </Button>
+                  {(settlementStatus?.pendingCount ?? 0) > 0 && (
+                    <AdminAIResolve
+                      category="Settlement"
+                      issue={`${settlementStatus?.pendingCount} picks are pending settlement`}
+                      severity={(settlementStatus?.pendingCount ?? 0) > 20 ? "high" : "medium"}
+                      metrics={{ pendingCount: settlementStatus?.pendingCount, lastRun: settlementStatus?.lastRun }}
+                      label="AI Diagnose"
+                      compact
+                    />
+                  )}
                 </CardContent>
               </Card>
 
@@ -819,16 +872,32 @@ export default function AdminDashboard() {
                         </div>
                       ))}
                     </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-3 w-full text-xs"
-                      onClick={() => clearErrorsMutation.mutate()}
-                      disabled={clearErrorsMutation.isPending}
-                      data-testid="button-clear-errors"
-                    >
-                      Clear All Errors
-                    </Button>
+                    <div className="mt-3 flex gap-2">
+                      <AdminAIResolve
+                        category="Error Logs"
+                        issue={`${errorStats?.last24Hours} errors in the last 24 hours`}
+                        severity={errorStats?.errors > 5 ? "high" : "medium"}
+                        metrics={{
+                          total: errorStats?.total,
+                          errors: errorStats?.errors,
+                          warnings: errorStats?.warnings,
+                          last24h: errorStats?.last24Hours,
+                          topError: errorLogs[0]?.message,
+                        }}
+                        label="AI Diagnose"
+                        variant="outline"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 text-xs"
+                        onClick={() => clearErrorsMutation.mutate()}
+                        disabled={clearErrorsMutation.isPending}
+                        data-testid="button-clear-errors"
+                      >
+                        Clear All Errors
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               )}

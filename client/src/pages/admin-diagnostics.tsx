@@ -31,6 +31,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+import { AdminAIResolve } from "@/components/admin-ai-resolve";
 
 interface HealthStatus {
   overall: 'healthy' | 'warning' | 'critical';
@@ -250,18 +251,35 @@ export default function AdminDiagnostics() {
         </TabsList>
 
         <TabsContent value="health" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
             <h2 className="text-lg font-semibold">System Health Monitor</h2>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => refetchHealth()}
-              disabled={healthLoading}
-              data-testid="button-refresh-health"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 ${healthLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              {healthStatus && healthStatus.overall !== 'healthy' && (
+                <AdminAIResolve
+                  category="System Diagnostics"
+                  issue={`System overall status is ${healthStatus.overall}`}
+                  severity={healthStatus.overall === 'critical' ? 'critical' : 'high'}
+                  metrics={{
+                    overall: healthStatus.overall,
+                    uptime: healthStatus.uptime,
+                    heapUsed: healthStatus.memoryUsage?.heapUsed,
+                    heapTotal: healthStatus.memoryUsage?.heapTotal,
+                    components: Object.entries(healthStatus.components || {}).map(([k, v]: [string, any]) => `${k}: ${v.status}`).join(', '),
+                  }}
+                  label="AI Resolve"
+                />
+              )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetchHealth()}
+                disabled={healthLoading}
+                data-testid="button-refresh-health"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${healthLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
           </div>
 
           {healthLoading ? (

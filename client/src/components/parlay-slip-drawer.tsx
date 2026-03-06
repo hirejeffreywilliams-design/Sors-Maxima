@@ -791,7 +791,11 @@ function CorrelationPanel({ legs }: { legs: ParlaySlipLeg[] }) {
     ? "border-yellow-500/30 bg-yellow-500/8 text-yellow-700 dark:text-yellow-400"
     : "border-red-500/30 bg-red-500/8 text-red-700 dark:text-red-400";
 
-  const dot = data?.color === "green" ? "🟢" : data?.color === "yellow" ? "🟡" : "🔴";
+  const dotColor = data?.color === "green"
+    ? "bg-green-500"
+    : data?.color === "yellow"
+    ? "bg-yellow-500"
+    : "bg-red-500";
 
   return (
     <div className={`mx-2 my-1.5 rounded-lg border text-[10px] ${colorClass}`} data-testid="correlation-panel">
@@ -806,7 +810,10 @@ function CorrelationPanel({ legs }: { legs: ParlaySlipLeg[] }) {
         </span>
         {data && (
           <span className="flex items-center gap-1.5">
-            <span className="font-bold">{dot} {data.score}/100 — {data.label}</span>
+            <span className="flex items-center gap-1 font-bold">
+              <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+              {data.score}/100 — {data.label}
+            </span>
             {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </span>
         )}

@@ -1,8 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useSSE } from "@/hooks/use-sse";
+import { useSSEContext } from "@/context/sse-provider";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,9 +87,11 @@ export default function AdminGuardian() {
   const { toast } = useToast();
   const [tab, setTab] = useState("overview");
 
-  const handleGuardianSSE = useCallback((event: any) => {
-    if (event.type === "guardian-alert") {
-      const a = event.data;
+  const sse = useSSEContext();
+
+  useEffect(() => {
+    if (sse.lastEvent?.type === "guardian-alert") {
+      const a = sse.lastEvent.data;
       const severityColor = a.severity === "critical" ? "destructive" : "default";
       toast({
         title: `Guardian Alert: ${a.title}`,
@@ -98,9 +100,7 @@ export default function AdminGuardian() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/guardian/status"] });
     }
-  }, [toast]);
-
-  useSSE({ enabled: true, onEvent: handleGuardianSSE });
+  }, [sse.lastEvent, toast]);
 
   const { data: status, isLoading } = useQuery<any>({
     queryKey: ["/api/admin/guardian/status"],

@@ -116,9 +116,8 @@ function safeDecimalOdds(leg: ParlaySlipLeg): number {
   return 1.909;
 }
 
-let slipIdCounter = 2;
 function nextSlipId(): string {
-  return `slip-${slipIdCounter++}`;
+  return `slip-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
 export function ParlaySlipProvider({

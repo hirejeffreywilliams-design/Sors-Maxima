@@ -89,12 +89,8 @@ function gradeColor(grade: string): string {
   return "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30";
 }
 
-function SportEmoji({ sport }: { sport: string }) {
-  const map: Record<string, string> = {
-    NBA: "🏀", NHL: "🏒", NFL: "🏈", MLB: "⚾",
-    NCAAB: "🏀", NCAAF: "🏈", Soccer: "⚽", MMA: "🥊",
-  };
-  return <>{map[sport] ?? "🎯"}</>;
+function SportTag({ sport }: { sport: string }) {
+  return <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{sport}</span>;
 }
 
 function VariationCard({ variation, index }: { variation: Variation; index: number }) {
@@ -165,7 +161,7 @@ function VariationCard({ variation, index }: { variation: Variation; index: numb
         <div className="flex flex-wrap gap-1.5 mt-2">
           {variation.sports.map(sport => (
             <span key={sport} className="inline-flex items-center gap-1 text-[10px] bg-muted/60 px-1.5 py-0.5 rounded-full">
-              <SportEmoji sport={sport} /> {sport}
+              <SportTag sport={sport} />
             </span>
           ))}
           <span className="text-[10px] text-muted-foreground">
@@ -199,7 +195,7 @@ function VariationCard({ variation, index }: { variation: Variation; index: numb
                   <div className="flex gap-2 mt-0.5 text-[9px] text-muted-foreground">
                     <span className="text-green-600 dark:text-green-400">+{leg.ev.toFixed(1)}% EV</span>
                     <span>{leg.confidence}% conf</span>
-                    <span><SportEmoji sport={leg.sport} /> {leg.sport}</span>
+                    <span><SportTag sport={leg.sport} /></span>
                   </div>
                 </div>
               </div>
@@ -250,7 +246,7 @@ function SourceTicketPanel({ legs }: { legs: ParlaySlipLeg[] }) {
             <span className="text-muted-foreground w-4">{i + 1}.</span>
             <span className="font-medium flex-1 truncate">{leg.outcome || leg.game}</span>
             {leg.grade && <Badge variant="outline" className={`text-[9px] h-4 px-1 ${gradeColor(leg.grade)}`}>{leg.grade}</Badge>}
-            {leg.sport && <span className="text-muted-foreground"><SportEmoji sport={leg.sport} /></span>}
+            {leg.sport && <span className="text-muted-foreground"><SportTag sport={leg.sport} /></span>}
           </div>
         ))}
       </div>

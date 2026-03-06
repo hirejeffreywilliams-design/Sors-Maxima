@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders, Lock } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
@@ -12,7 +12,7 @@ import { LiveChat } from "@/components/live/live-chat";
 import { LiveFactorAdjuster } from "@/components/live/live-factor-adjuster";
 import { Badge } from "@/components/ui/badge";
 import { useSEO } from "@/hooks/use-seo";
-import { useSSE, type SSEEvent } from "@/hooks/use-sse";
+import { useSSEContext } from "@/context/sse-provider";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { TierGate, useTier } from "@/components/tier-gate";
@@ -57,18 +57,19 @@ export default function Live() {
   useSEO({ title: "Live Betting", description: "Real-time live betting tools and analysis" });
   const { canAccess } = useTier();
 
-  const handleSSEEvent = useCallback((event: SSEEvent) => {
-    if (event.type === "live-scores" || event.type === "intelligence-update") {
+  const sse = useSSEContext();
+
+  useEffect(() => {
+    if (!sse.lastEvent) return;
+    if (sse.lastEvent.type === "live-scores" || sse.lastEvent.type === "intelligence-update") {
       queryClient.invalidateQueries({ queryKey: ["/api/live/momentum"] });
       queryClient.invalidateQueries({ queryKey: ["/api/market-snapshot"] });
       queryClient.invalidateQueries({ queryKey: ["/api/live/factor-adjustments"] });
     }
-    if (event.type === "edge-alerts") {
+    if (sse.lastEvent.type === "edge-alerts") {
       queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
     }
-  }, []);
-
-  const sse = useSSE({ enabled: true, onEvent: handleSSEEvent });
+  }, [sse.lastEvent]);
 
   const isMax = canAccess("whale");
 

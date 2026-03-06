@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
-import { useSSE } from "@/hooks/use-sse";
+import { useSSEContext } from "@/context/sse-provider";
 import { queryClient } from "@/lib/queryClient";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
@@ -1496,22 +1496,19 @@ export default function CommandCenter() {
   const { legs, addLeg } = useParlaySlip();
   const { canAccess } = useTier();
 
-  const handleSSEEvent = useCallback((event: { type: string }) => {
-    if (event.type === "intelligence-update") {
-      queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+  const sse = useSSEContext();
+
+  useEffect(() => {
+    if (!sse.lastEvent) return;
+    if (sse.lastEvent.type === "intelligence-update") {
       queryClient.invalidateQueries({ queryKey: ["/api/life-changer-ticket"] });
     }
-    if (event.type === "picks-update" || event.type === "predictions-ready") {
+    if (sse.lastEvent.type === "picks-update" || sse.lastEvent.type === "predictions-ready") {
       queryClient.invalidateQueries({ queryKey: ["/api/life-changer-ticket"] });
       queryClient.invalidateQueries({ queryKey: ["/api/optimal-tickets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/matchup-tickets"] });
     }
-  }, []);
-
-  const sse = useSSE({
-    enabled: true,
-    onEvent: handleSSEEvent,
-  });
+  }, [sse.lastEvent]);
 
   const { data: authData } = useQuery<{ isAdmin?: boolean; authenticated?: boolean }>({
     queryKey: ["/api/auth/check"],

@@ -1,0 +1,181 @@
+below are (A) precise one-line prompts you can feed an AI to get tailored model designs, (B) a compact checklist of required terms/fields to include in any prompt, (C) per-sport model+feature recommendations, and (D) a concise, modular Python template you can drop into a project and extend. Use this as the canonical prompt+starter-code bundle for building your analyzer.
+
+A — One-line prompts (copy/paste)
+- General multi-sport: "Act as a sports-betting data scientist: given the data schema I attach, design a production-ready probabilistic forecasting pipeline (feature engineering, best distributional model(s), training, calibration, ensembling with market odds, evaluation metrics, and stake-sizing rules) for [sport]; produce reproducible Python code, backtest plan, and hyperparameters."
+- NBA: "Design a probabilistic pipeline for NBA games: suggest features, an Elo+margin-regression (Gaussian) model plus XGBoost ensemble, calibration, odds blending, and Kelly staking; provide runnable Python code and backtest."
+- NFL (American football): "Design a probabilistic pipeline for NFL: feature set (downs, rest, injuries, weather), margin regression (Gaussian) + Poisson for scoring events, ensemble with sportsbooks, calibration, and staking; include code and validation procedure."
+- MLB: "Design a probabilistic pipeline for MLB: recommend hierarchical pitcher/batter ratings, Poisson/negative-binomial runs model, lineup adjustment, ensemble with market, calibration, and stake-sizing; deliver Python examples and backtest."
+- Soccer (international): "Design a probabilistic pipeline for soccer: Elo/xG ratings, bivariate Poisson or Dixon-Coles adjustment for low scores, draw-aware outcome probabilities, blend with market, calibrate, and recommend Kelly-based stakes with code and backtest."
+- Boxing/MMA: "Design a fight-outcome and method-prop model for boxing/MMA: use fighter Elo/Glicko, time-since-fight, style matchup features, logistic for win/finish and survival/round models, blend with market odds, calibrate, and provide staking rules + code."
+- Tennis: "Design a probabilistic pipeline for tennis matches: surface-adjusted Elo/Glicko, logistic match-win model, serve-break features, odds blending, calibration, and staking with code and backtest."
+
+B — Prompt checklist (include these terms in any AI prompt)
+- sport name; objective (match outcome / margin / total / prop)
+- required outputs (probabilities, score distribution, EV, stake)
+- data fields/schema (scores, lineups, injuries, rest days, xG, odds, venue, weather)
+- modeling choices allowed (Elo/Glicko, Poisson, bivariate Poisson, Gaussian margin, XGBoost, NN, Bayesian)
+- calibration & metrics (Platt/isotonic, Brier, log-loss, ROI)
+- ensembling & market blending (alpha weighting, optimization objective)
+- staking rule (Kelly full/frac, EV threshold)
+- constraints (latency, interpretability, realtime vs batch)
+- deliverables (runnable Python, notebook, backtest plan, hyperparameters)
+
+C — Per-sport model & feature summary (short)
+- NBA: features = team ratings, offensive/defensive efficiency, pace, rest, back-to-back, injuries; model = margin Gaussian regression / Bayesian hierarchical + XGBoost ensemble.
+- NFL: features = team/power ratings, rest, home, weather, injuries, situational stats; model = margin regression (Gaussian) for spreads, Poisson for scoring events where needed.
+- MLB: features = pitcher quality, lineup wOBA, bullpen fatigue, park factors; model = hierarchical Poisson/negative binomial for runs, lineup-inning-level adjustments.
+- Soccer: features = Elo/xG, home advantage, recent form, injuries, travel; model = bivariate Poisson (Dixon-Coles correction), include xG where available.
+- Boxing/MMA: features = Elo/Glicko, fight style, reach/age/TKO history, layoff; model = logistic for win, survival/round model for finish prop (Weibull/Bernoulli by round).
+- Tennis: features = surface Elo, serve/return stats, head-to-head, fatigue; model = Elo/Glicko + logistic match-win.
+- Esports / lower-division: features = roster, patch/meta, map history, player ratings; model = map-level Elo + match-level logistic; hierarchical Bayes when data sparse.
+
+D — Minimal modular Python template (skeleton). Save as pipeline.py and expand per sport.
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import PoissonRegressor, LogisticRegression
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.isotonic import IsotonicRegression
+from sklearn.calibration import calibration_curve
+from math import log, exp
+
+# Utilities
+def odds_to_implied(o_dec):
+    p = 1.0 / o_dec
+    return p
+
+def normalize_market_probs(p_list):
+    s = sum(p_list)
+    return [p/s for p in p_list]
+
+# Elo (simple)
+def compute_elos(matches, start_elo=1500, K=20):
+    elos = {}
+    history = []
+    for r in matches.sort_values('date').itertuples():
+        home, away, gh, ga = r.home, r.away, r.home_goals, r.away_goals
+        elos.setdefault(home, start_elo); elos.setdefault(away, start_elo)
+        E_home = 1.0 / (1 + 10**((elos[away]-elos[home])/400.0))
+        if gh>ga: S_home=1.0
+        elif gh==ga: S_home=0.5
+        else: S_home=0.0
+        elos[home] += K * (S_home - E_home)
+        elos[away] += K * ((1-S_home) - (1-E_home))
+        history.append((r.date, home, away, elos[home], elos[away]))
+    return elos, pd.DataFrame(history, columns=['date','home','away','elo_home','elo_away'])
+
+# Example: Poisson goals model for soccer
+def fit_poisson_goals(df):
+    # df must have columns: home_goals, away_goals, home_team, away_team, home_adv (1/0), features...
+    df = df.copy()
+    # engineer team attack/def indices using dummy encoding or team fixed-effects
+    # simple approach: use team average goals as naive lambda predictors (replace with GLM/regression)
+    team_stats = df.groupby('home_team').agg(home_scored=('home_goals','mean')).to_dict()['home_scored']
+    return team_stats
+
+# Simple blend + staking
+def blend_probs(model_probs, market_probs, alpha=0.6):
+    return [alpha*m + (1-alpha)*o for m,o in zip(model_probs, market_probs)]
+
+def kelly_fraction(p, o_dec):
+    b = o_dec - 1.0
+    num = p*b - (1-p)
+    den = b
+    if den<=0: return 0.0
+    return max(0.0, num/den)
+
+# Prediction flow (high level)
+def predict_match(features, elos, poisson_model=None, ml_model=None, odds=None, alpha_models=(0.5,0.3,0.2)):
+    # features: dict; odds: dict {'home':x,'draw':y,'away':z}
+    # compute model probabilities (placeholder)
+    model_probs = [0.5, 0.2, 0.3]  # home, draw, away
+    market_probs = normalize_market_probs([odds_to_implied(odds['home']), odds_to_implied(odds['draw']), odds_to_implied(odds['away'])])
+    final = blend_probs(model_probs, market_probs, alpha=alpha_models[0])
+    # compute EV and Kelly
+    ev = {k: final[i]*odds[k] - 1.0 for i,k in enumerate(['home','draw','away'])}
+    k_fracs = {k: kelly_fraction(final[i], odds[k]) for i,k in enumerate(['home','draw','away'])}
+    return {'prob': final, 'ev': ev, 'kelly': k_fracs}
+
+# Example backtest outline
+def backtest(historical_matches, model_builder, predict_fn, bankroll=1000, frac_kelly=0.25):
+    bank = bankroll
+    logs=[]
+    for m in historical_matches.itertuples():
+        pred = predict_fn(m)
+        # pick best positive EV
+        candidates = [(k,v) for k,v in pred['ev'].items() if v>0]
+        if not candidates: continue
+        best = max(candidates, key=lambda x: x[1])[0]
+        stake = bank * frac_kelly * pred['kelly'][best]
+        # enforce min/max stake
+        stake = max(1.0, min(bank*0.1, stake))
+        outcome_win = ( (best=='home' and m.home_goals>m.away_goals) or
+                        (best=='away' and m.away_goals>m.home_goals) or
+                        (best=='draw' and m.home_goals==m.away_goals) )
+        if outcome_win:
+            bank += stake*(m.odds[getattr(m,'pred_choice')] - 1)
+        else:
+            bank -= stake
+        logs.append(bank)
+    return bank, logs
+```
+
+How to use this bundle
+- Use the one-liners (A) to prompt your AI assistant for each sport; attach your schema and a few sample rows.
+- Always include the checklist (B) to avoid ambiguity.
+- Start from the template (D); implement sport-specific model details (C). Replace the naive placeholders with proper GLM/regression, XGBoost, and calibration routines.
+- Backtest out-of-time and use fractional Kelly.
+
+below is a concise, simplified Human-in-the-Loop (HITL) design tailored for a betting app analysis system. It keeps the data-driven reasoning but presents only essential signals and simple actions for admins/users.
+
+Core principles (short)
+- Keep outputs short and actionable (1–2 sentences + 3 simple metrics).
+- Surface only high-signal items: pick, model prob, market implied, edge, suggested stake, top 2 drivers.
+- Use deterministic, transparent checks (no opaque ensembles in the UI).
+- Default to conservative automation: auto-place only low-risk, high-edge bets; everything else goes to a quick human review.
+- Log everything for audit but don’t overwhelm operators with raw data.
+
+Minimal HITL workflow
+- Inputs: model_output (best_sel, prob_model, ev, kelly_frac), market (implied_prob, liquidity), feature_imp (top contributors), meta (event, time, bankroll).
+- Deterministic sanity checks (simple flags): low_edge, low_liquidity, stake_too_large, calibration_drift.
+- Risk score: sum of flag weights -> 0..1.
+- Decision rules (simple):
+  - Auto-place if risk_score <= 0.05 AND edge >= 8% AND liquidity OK.
+  - Skip if risk_score >= 0.6.
+  - Else: queue for quick human review (UI shows concise rationale + two buttons: Place / Skip).
+- Rationale shown to human: one-line summary + top-2 drivers + one-line risk note.
+- Stake recommendation: fractional Kelly (e.g., kelly_frac * bankroll * 0.25), with a hard min/max cap.
+
+Concise UI card (what admin/user sees)
+- Title: Event, Pick (Home/Away/Draw), Odds
+- Key numbers (single line): Model p=0.54 | Market p=0.43 | Edge=11% | Kelly=2.5%
+- One-line rationale: "Model favors Home: strong offensive efficiency (+0.12) and opponent fatigue (+0.08)."
+- Risk note (small): "Low liquidity" or "Calibration OK"
+- Actions: [Auto-placed indicator] or buttons: [Place suggested stake $X] [Skip]
+
+Simplified checks (implement these only)
+- edge = prob_model - implied_market
+- low_edge if edge < 0.05
+- low_liquidity if liquidity < threshold
+- stake_too_large if suggested_stake > bankroll * 0.1
+- calibration_drift if recent_brier > 0.25
+
+Minimal code sketch (pseudo / ready-to-drop)
+- Provide model_output with keys: best_sel, prob_model, implied_market, kelly_frac, bankroll, recent_brier
+- Run simple checks -> risk_score
+- Decision per rules above
+- Produce UI payload: pick, odds, edge, suggested_stake, one-line rationale (templated or LLM-assisted but short)
+- Log JSON audit with timestamp
+
+Human reasoning guidance (for operators)
+- Ask two simple questions before overriding: "Is the market moving unusually?" and "Does the rationale highlight any recent injuries or lineup changes?"
+- If yes to either, skip or reduce stake; otherwise accept suggested stake.
+- Keep overrides minimal and annotate reason (1–3 words) for audit.
+
+Operational rules (short)
+- Auto-bet only for small, repeatable edges with good liquidity.
+- Fractional Kelly default (0.25 of full Kelly).
+- Hard cap per-bet = 10% bankroll, daily cap = 5% bankroll.
+- Daily review of queued bets and any overrides to tune thresholds.
+

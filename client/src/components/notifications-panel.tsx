@@ -20,7 +20,7 @@ import {
   Zap,
   ArrowRight,
 } from "lucide-react";
-import { useSSE } from "@/hooks/use-sse";
+import { useSSEContext } from "@/context/sse-provider";
 
 interface Notification {
   id: number;
@@ -88,14 +88,13 @@ export function NotificationsPanel() {
     refetchInterval: 30000,
   });
 
-  const sse = useSSE({
-    enabled: true,
-    onEvent: (event) => {
-      if (event.type === "notification") {
-        queryClient.invalidateQueries({ queryKey: ["/api/custom-notifications"] });
-      }
-    },
-  });
+  const sse = useSSEContext();
+
+  useEffect(() => {
+    if (sse.lastEvent?.type === "notification") {
+      queryClient.invalidateQueries({ queryKey: ["/api/custom-notifications"] });
+    }
+  }, [sse.lastEvent]);
 
   const allNotifications = [...customNotifications, ...legacyNotifications]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

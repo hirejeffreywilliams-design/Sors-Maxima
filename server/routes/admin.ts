@@ -4659,4 +4659,142 @@ Analyze the issues and respond with VALID JSON only (no markdown):
     }
   });
 
+  app.post("/api/admin/ai-resolve", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { category, issue, metrics, context, severity } = req.body as {
+        category: string;
+        issue: string;
+        metrics?: Record<string, unknown>;
+        context?: string;
+        severity?: string;
+      };
+
+      if (!issue || !category) {
+        return res.status(400).json({ error: "category and issue are required" });
+      }
+
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
+      if (!openai) return res.status(503).json({ error: "AI service unavailable" });
+
+      const metricsStr = metrics ? `\nCurrent metrics:\n${JSON.stringify(metrics, null, 2)}` : "";
+      const contextStr = context ? `\nAdditional context: ${context}` : "";
+      const severityStr = severity ? `Severity: ${severity}` : "";
+
+      const prompt = `You are an expert DevOps engineer and data platform administrator for Sors Maxima, a sports betting intelligence SaaS platform. Analyze this operational issue and provide a structured resolution plan.
+
+Category: ${category}
+${severityStr}
+Issue: ${issue}${metricsStr}${contextStr}
+
+Respond with a JSON object containing:
+{
+  "priority": "critical" | "high" | "medium" | "low",
+  "rootCause": "brief root cause in 1-2 sentences",
+  "explanation": "detailed explanation of the problem and its impact on users",
+  "steps": [
+    { "order": 1, "action": "action description", "detail": "how to execute it", "automated": true | false, "actionKey": "optional_action_key_if_automated" }
+  ],
+  "automatedActions": [
+    { "key": "action_key", "label": "Button label", "description": "What this button will do", "dangerous": false }
+  ],
+  "followUp": "what to monitor after applying the fix",
+  "estimatedResolutionTime": "e.g. 2-5 minutes"
+}
+
+Available automated action keys (only include if relevant):
+- "run_settlement": Runs pick settlement against ESPN scores
+- "clear_error_logs": Clears all error logs from the system
+- "force_recompute": Forces precomputed predictions to regenerate
+- "refresh_cache": Clears and refreshes all data caches
+- "run_quality_check": Triggers a quality watchdog scan
+- "recalibrate_weights": Recalibrates prediction factor weights
+- "run_historical_learning": Runs historical learning cycle
+- "trigger_early_settlement": Triggers early settlement engine
+- "refresh_rosters": Force-refreshes all team roster data
+- "restart_intelligence_hub": Restarts the unified intelligence hub cycle
+
+Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_completion_tokens: 1000,
+        response_format: { type: "json_object" },
+      });
+
+      const content = response.choices[0]?.message?.content;
+      if (!content) return res.status(500).json({ error: "No AI response" });
+
+      const parsed = JSON.parse(content);
+      res.json({ ...parsed, generatedAt: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/execute-action", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { actionKey } = req.body as { actionKey: string };
+
+      switch (actionKey) {
+        case "run_settlement": {
+          const { triggerSettlement } = await import("../settlementEngine");
+          const settled = await triggerSettlement(3);
+          return res.json({ success: true, message: `Settlement complete — ${settled} picks settled` });
+        }
+        case "clear_error_logs": {
+          errorLogger.clear();
+          return res.json({ success: true, message: "Error logs cleared" });
+        }
+        case "force_recompute": {
+          const { forcePredictionCycleNow } = await import("../precomputedPredictionsEngine");
+          await forcePredictionCycleNow();
+          return res.json({ success: true, message: "Precomputed predictions regenerating in background" });
+        }
+        case "refresh_cache": {
+          const { clearScoreboardCache } = await import("../espn-scoreboard-provider");
+          const { clearAllPredictionCaches } = await import("../precomputedPredictionsEngine");
+          clearScoreboardCache();
+          clearAllPredictionCaches();
+          return res.json({ success: true, message: "All caches cleared — data will refresh on next request" });
+        }
+        case "run_quality_check": {
+          const { runAndStoreQualityCheck: runQC } = await import("../qualityWatchdog");
+          const report = await runQC();
+          return res.json({ success: true, message: "Quality check complete", report });
+        }
+        case "recalibrate_weights": {
+          const { recalibrateWeights: recalibrate } = await import("../learningEngine");
+          recalibrate();
+          return res.json({ success: true, message: "Factor weights recalibrated based on recent outcomes" });
+        }
+        case "run_historical_learning": {
+          const { runHistoricalLearning: runHistorical } = await import("../historicalLearningEngine");
+          await runHistorical();
+          return res.json({ success: true, message: "Historical learning cycle complete" });
+        }
+        case "trigger_early_settlement": {
+          const { triggerEarlySettlementNow } = await import("../earlySettlementEngine");
+          const result = await triggerEarlySettlementNow();
+          return res.json({ success: true, message: "Early settlement triggered", result });
+        }
+        case "refresh_rosters": {
+          const { refreshAllData } = await import("../espn-roster-provider");
+          await refreshAllData();
+          return res.json({ success: true, message: "All team rosters refreshed" });
+        }
+        case "restart_intelligence_hub": {
+          const { startIntelligenceHub } = await import("../unifiedIntelligenceHub");
+          await startIntelligenceHub();
+          return res.json({ success: true, message: "Intelligence hub cycle restarted" });
+        }
+        default:
+          return res.status(400).json({ error: `Unknown action: ${actionKey}` });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

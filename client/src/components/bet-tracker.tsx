@@ -1,6 +1,6 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useSSE } from "@/hooks/use-sse";
+import { useSSEContext } from "@/context/sse-provider";
 import { 
   TrendingUp, TrendingDown, DollarSign, Target, 
   Calendar, PieChart, BarChart3, Clock, CheckCircle2, 
@@ -76,12 +76,14 @@ export function BetTracker() {
 
   const { toast } = useToast();
 
-  const handleSSEEvent = useCallback((event: any) => {
-    if (event.type === "picks-settled") {
+  const sse = useSSEContext();
+
+  useEffect(() => {
+    if (sse.lastEvent?.type === "picks-settled") {
       queryClient.invalidateQueries({ queryKey: ["/api/user/bets"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/bet-stats"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/picks/clv-summary"] });
-      const d = event.data;
+      const d = sse.lastEvent.data;
       if (d?.won !== null && d?.won !== undefined) {
         toast({
           title: d.won ? `✓ Pick Won — ${d.sport}` : `✗ Pick Lost — ${d.sport}`,
@@ -90,9 +92,7 @@ export function BetTracker() {
         });
       }
     }
-  }, [toast]);
-
-  useSSE({ onEvent: handleSSEEvent });
+  }, [sse.lastEvent, toast]);
 
   const addBetMutation = useMutation({
     mutationFn: async (bet: Partial<BetRecord>) => {
