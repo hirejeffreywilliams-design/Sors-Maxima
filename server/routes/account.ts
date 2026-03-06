@@ -12,9 +12,6 @@ import { sql } from "drizzle-orm";
 
 const ticketOutcomes: Map<string, { ticketId: string; predictedProb: number; consensusProb: number; evPercent: number; actualOutcome: "win" | "loss" | "push" | "pending"; profitLoss: number; isFollowedByUser: boolean; settledAt?: string }> = new Map();
 
-import { applications, insertApplicationSchema } from "@shared/schema";
-import { eq } from "drizzle-orm";
-import { sendApplicationConfirmation, sendApplicationApproved, sendApplicationRejected } from "../emailService";
 
 /** Returns a numeric userId from session, or null if admin/non-numeric (prevents NaN DB queries) */
 function numericUserId(req: Request): number | null {
@@ -27,33 +24,6 @@ function numericUserId(req: Request): number | null {
 const utmEvents: Array<{ source: string; medium: string; campaign: string; content?: string; term?: string; timestamp: string; ip: string }> = [];
 
 export async function registerAccountRoutes(app: Express): Promise<void> {
-
-  app.post("/api/apply", sensitiveRouteRateLimitMiddleware, async (req, res) => {
-    try {
-      const result = insertApplicationSchema.safeParse(req.body);
-      if (!result.success) {
-        return res.status(400).json({ error: "Invalid application data", details: result.error.format() });
-      }
-
-      const VALID_TIERS = ["edge", "max"];
-      if (!VALID_TIERS.includes(result.data.tier)) {
-        return res.status(400).json({ error: "Invalid tier. Must be 'edge' or 'max'." });
-      }
-
-      const [application] = await db.insert(applications).values({
-        ...result.data,
-        userId: numericUserId(req),
-        status: "pending",
-      }).returning();
-
-      await sendApplicationConfirmation(application.email, application.username, application.tier);
-
-      res.json(application);
-    } catch (err) {
-      console.error("Application error:", err);
-      res.status(500).json({ error: "Failed to submit application" });
-    }
-  });
 
   app.get("/api/vegas/predictions", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {

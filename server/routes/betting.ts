@@ -1068,7 +1068,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                 weatherImpact = Math.min(100, Math.round(windSpeed * 2 + precip * 0.5));
               }
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
         }
 
         const sportInjuries = injuryData[betSport] || [];
@@ -1262,7 +1262,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                 weatherImpact = Math.min(100, Math.round((weather.windSpeed || 0) * 2 + (weather.precipitationProbability || 0) * 0.5));
               }
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
         }
 
         const sportInjuries = injuryData[betSport] || [];
@@ -1423,7 +1423,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               if (weather && ["NFL", "MLB", "NCAAF"].includes(sport)) {
                 weatherScore = Math.min(100, Math.round((weather.windSpeed || 0) * 2 + (weather.precipitationProbability || 0) * 0.5));
               }
-            } catch {}
+            } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
           }
 
           try {
@@ -1433,8 +1433,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
             ).length;
             injuryScore = Math.min(100, criticalCount * 10);
-          } catch {}
-        } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
+        } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
       }
 
       const factors = [
@@ -2478,7 +2478,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                 confidence = Math.min(92, confidence + 3);
               }
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
 
           try {
             const mcData = getPreSimulated(game.id);
@@ -2508,7 +2508,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                 }
               }
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
 
           try {
             const sitFactors = getGameSituationalFactors(sport as any, game, games);
@@ -2540,7 +2540,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
                 reasoning += ` Sit: ${sitFactors.spotDescription}.`;
               }
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
 
           try {
             const vegasPreds = await generateVegasPredictions(sport as any);
@@ -2549,7 +2549,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
               vegasEdge = gamePred.ev;
               engineSources.push("Vegas Engine");
             }
-          } catch {}
+          } catch (err: any) { console.warn("[betting] Non-critical error:", err?.message || err); }
 
           const edge = seasonAvg ? Math.round((seasonAvg - prop.line) / prop.line * 100 * 10) / 10 : 0;
 

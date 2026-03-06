@@ -123,7 +123,15 @@ export function BetTracker() {
   const handleAddBet = () => {
     const stake = parseFloat(newBet.stake);
     const decimalOdds = parseFloat(newBet.odds);
-    if (!stake || !decimalOdds || !newBet.team) return;
+    if (!newBet.team) return;
+    if (!stake || stake <= 0) {
+      toast({ title: "Invalid stake", description: "Stake must be a positive number.", variant: "destructive" });
+      return;
+    }
+    if (!decimalOdds || decimalOdds < 1.01) {
+      toast({ title: "Invalid odds", description: "Decimal odds must be 1.01 or higher (e.g. 1.91 for -110).", variant: "destructive" });
+      return;
+    }
 
     addBetMutation.mutate({
       sport: newBet.sport,

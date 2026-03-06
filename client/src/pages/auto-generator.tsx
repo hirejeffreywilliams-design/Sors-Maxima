@@ -190,20 +190,12 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
     lines.push("Powered by Sors Maxima \u2022 sorsmaxima.com");
 
     const text = lines.join("\n");
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text);
-    } else {
-      const ta = document.createElement("textarea");
-      ta.value = text;
-      ta.style.position = "fixed";
-      ta.style.left = "-9999px";
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-    }
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      toast({ title: "Copy failed", description: "Please copy manually from the ticket view.", variant: "destructive" });
+    });
   };
 
   const handleSaveToHistory = async () => {

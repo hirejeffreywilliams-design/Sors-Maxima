@@ -48,7 +48,7 @@ const tiers: PricingTier[] = [
       'Player props analyzer — ML-powered projections',
       'Closing Line Value (CLV) tracker',
       'ROI dashboard & performance analytics',
-      '2,900+ validated historical picks (track record)',
+      'Full track record — every settled pick with win rate, CLV, and calibration data',
       'Community leaderboards & social feed',
     ],
     icon: <Star className="w-6 h-6" />,
@@ -226,7 +226,7 @@ export default function Pricing() {
             </Badge>
             <Badge variant="outline" className="gap-1.5 bg-green-500/10 border-green-500/30 text-green-400 px-3 py-1">
               <BarChart2 className="w-3 h-3" />
-              2,900+ Validated Picks
+              Full Verified Track Record
             </Badge>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight" data-testid="text-pricing-headline">
@@ -350,7 +350,7 @@ export default function Pricing() {
               { icon: <Globe className="w-7 h-7 text-purple-500" />, color: "bg-purple-500/10", title: "International Markets", desc: "8 soccer leagues, draws, and underdog value — markets most US platforms ignore entirely." },
               { icon: <Wallet className="w-7 h-7 text-amber-500" />, color: "bg-amber-500/10", title: "Bankroll Protection", desc: "Kelly sizing, correlation guards, and risk warnings keep your bets smart and bankroll intact." },
               { icon: <Zap className="w-7 h-7 text-cyan-500" />, color: "bg-cyan-500/10", title: "Live Intelligence", desc: "Server-sent events push real-time updates for scores, odds shifts, and sharp money alerts." },
-              { icon: <BarChart2 className="w-7 h-7 text-rose-500" />, color: "bg-rose-500/10", title: "Transparent Track Record", desc: "2,900+ settled picks with full win rate, CLV stats, and calibration tiers — nothing hidden." },
+              { icon: <BarChart2 className="w-7 h-7 text-rose-500" />, color: "bg-rose-500/10", title: "Transparent Track Record", desc: "Every settled pick logged with full win rate, CLV stats, and calibration tiers — nothing hidden." },
               { icon: <Bot className="w-7 h-7 text-violet-500" />, color: "bg-violet-500/10", title: "Self-Learning Model", desc: "CLV-gated learning engine continuously retrains weights from settled picks — it gets smarter." },
               { icon: <Flame className="w-7 h-7 text-orange-500" />, color: "bg-orange-500/10", title: "Life Changer Ticket", desc: "Daily cross-sport underdog parlay built for explosive combined odds — not available anywhere else." },
             ].map((item, i) => (
@@ -450,7 +450,7 @@ export default function Pricing() {
             </CardHeader>
             <CardContent className="space-y-3">
               <p className="text-sm text-muted-foreground">
-                Every prediction runs through a 46-factor model trained on 2,900+ settled picks with real-time data — not gut feeling. Cancel anytime, no contracts, no hassle.
+                Every prediction runs through a 46-factor model with real-time data and continuous learning from every settled pick — not gut feeling. Cancel anytime, no contracts, no hassle.
               </p>
               <div className="flex gap-4 pt-2">
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">

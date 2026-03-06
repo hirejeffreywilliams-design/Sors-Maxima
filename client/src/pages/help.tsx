@@ -105,7 +105,7 @@ const FEATURES: Feature[] = [
       "Click 'Copy Slip' to copy a formatted text summary — great for sharing",
     ],
     tips: [
-      "The Monte Carlo panel shows win probability from 1,500 simulations using real team data",
+      "The Monte Carlo panel shows win probability from 10,000+ simulations using real team data",
       "Remove any leg by clicking the X next to it — odds recalculate instantly",
       "Copy Slip text is formatted for Discord/group chats — teammates see exactly what you're betting",
     ],
@@ -443,7 +443,7 @@ const FAQ_ITEMS = [
   {
     category: "Features",
     q: "What is Monte Carlo simulation?",
-    a: "Monte Carlo runs 1,500+ simulated game outcomes using real team statistics and scoring patterns. It gives you a probability distribution of results — not just a point estimate. The combined win probability shown in your Bet Slip comes from this simulation.",
+    a: "Monte Carlo runs 10,000+ simulated game outcomes per matchup using real team statistics and scoring patterns — escalating to 100,000 simulations in overnight deep runs. It gives you a probability distribution of results — not just a point estimate. The combined win probability shown in your Bet Slip comes from this simulation.",
   },
   {
     category: "Features",

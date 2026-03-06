@@ -253,6 +253,18 @@ const FUSION_WEIGHTS: FusionWeight[] = [
   // MOTIVATION & STABILITY (2 factors)
   { factor: "contract_motivation", weight: 0.02, confidence: 69, historicalAccuracy: 0.55, recentTrend: "improving", learningRate: 0.03 },
   { factor: "roster_stability", weight: 0.02, confidence: 72, historicalAccuracy: 0.57, recentTrend: "stable", learningRate: 0.02 },
+
+  // MARKET INTELLIGENCE (4 factors) — betting market signal data
+  { factor: "public_bet_percentage", weight: 0.04, confidence: 70, historicalAccuracy: 0.56, recentTrend: "improving", learningRate: 0.04 },
+  { factor: "line_velocity", weight: 0.05, confidence: 75, historicalAccuracy: 0.61, recentTrend: "improving", learningRate: 0.05 },
+  { factor: "market_liquidity", weight: 0.03, confidence: 65, historicalAccuracy: 0.54, recentTrend: "stable", learningRate: 0.03 },
+  { factor: "referee_tendency", weight: 0.02, confidence: 58, historicalAccuracy: 0.52, recentTrend: "stable", learningRate: 0.02 },
+
+  // EXTENDED CONTEXT (4 factors) — situational depth signals
+  { factor: "h2h_dominance", weight: 0.03, confidence: 72, historicalAccuracy: 0.57, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "travel_distance_burden", weight: 0.02, confidence: 68, historicalAccuracy: 0.54, recentTrend: "improving", learningRate: 0.03 },
+  { factor: "venue_atmosphere", weight: 0.02, confidence: 62, historicalAccuracy: 0.52, recentTrend: "stable", learningRate: 0.02 },
+  { factor: "rolling_5game_form", weight: 0.04, confidence: 74, historicalAccuracy: 0.60, recentTrend: "improving", learningRate: 0.04 },
 ];
 
 const totalWeight = FUSION_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);
@@ -343,7 +355,7 @@ function calculateQuantumState(signals: FusionSignal[]): QuantumState {
   const coherence = Math.abs(bullishStrength - bearishStrength) / Math.max(totalStrength, 1) * 100;
   
   const avgConfidence = signals.reduce((sum, s) => sum + s.confidence, 0) / Math.max(signals.length, 1);
-  const entanglement = avgConfidence * 0.8 + (signals.length / 38) * 20;
+  const entanglement = avgConfidence * 0.8 + (signals.length / 46) * 20;
   
   const superposition = 100 - coherence * 0.7;
   
