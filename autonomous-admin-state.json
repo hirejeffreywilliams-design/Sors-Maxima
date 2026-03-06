@@ -146,6 +146,364 @@
   ],
   "reports": [
     {
+      "id": "report_1772800939761_442ej",
+      "timestamp": "2026-03-06T12:42:19.761Z",
+      "durationMs": 7442,
+      "summary": [
+        "Win rate is at 53.8%, exceeding the break-even threshold.",
+        "Current API usage is 20,164 requests, well within safe limits.",
+        "Total settled picks is at 400, suggesting stable activity.",
+        "No alerts or flags are currently active."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Monitor API Utilization",
+          "description": "Ensure that the API request counts stay within optimal limits to prevent throttling issues.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 1
+        },
+        {
+          "title": "Analyze Team Total Market",
+          "description": "Investigate the low win rate of 46.2% for the Team Total market to identify potential improvements or adjustments.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 3
+        },
+        {
+          "title": "User Engagement Strategy",
+          "description": "Develop tactics to further engage active users and reduce churn rate, currently at 4.2%.",
+          "priority": "P2",
+          "due_by": "this_month",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [],
+      "ops_checklist": {
+        "today": [
+          "Check the performance of various betting markets for anomalies.",
+          "Review user feedback and satisfaction levels.",
+          "Validate the health of all connected services."
+        ],
+        "this_week": [
+          "Conduct a deeper analysis of the overall win rate and its implications.",
+          "Ensure regulatory compliance across all markets.",
+          "Identify trends in user activity and adjust marketing efforts accordingly."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 53.8,
+        "settledPicks": 400,
+        "oddsApiRemaining": 79971,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 0,
+        "heapUsedMb": 66,
+        "heapTotalMb": 69,
+        "hubLastCycleMs": 7,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate is at 53.8%, exceeding the break-even threshold.\",\n    \"Current API usage is 20,164 requests, well within safe limits.\",\n    \"Total settled picks is at 400, suggesting stable activity.\",\n    \"No alerts or flags are currently active.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor API Utilization\",\n      \"description\": \"Ensure that the API request counts stay within optimal limits to prevent throttling issues.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Analyze Team Total Market\",\n      \"description\": \"Investigate the low win rate of 46.2% for the Team Total market to identify potential improvements or adjustments.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Develop tactics to further engage active users and reduce churn rate, currently at 4.2%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Check the performance of various betting markets for anomalies.\",\n      \"Review user feedback and satisfaction levels.\",\n      \"Validate the health of all connected services.\"\n    ],\n    \"this_week\": [\n      \"Conduct a deeper analysis of the overall win rate and its implications.\",\n      \"Ensure regulatory compliance across all markets.\",\n      \"Identify trends in user activity and adjust marketing efforts accordingly.\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1772768287610_ki3ns",
+      "timestamp": "2026-03-06T03:38:07.611Z",
+      "durationMs": 7772,
+      "summary": [
+        "Win rate is currently at 53.8%, above break-even threshold.",
+        "Total settled picks are 400, accurate performance indicates potential model degradation in 'Total' market with 46.2% win rate.",
+        "API usage is healthy, with no warnings or critical alerts.",
+        "Monthly financials indicate a stable cash flow, with a burn of $45,000."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Evaluate Model Performance",
+          "description": "Conduct a thorough review of model accuracy in the 'Total' market to identify and address issues.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 10
+        },
+        {
+          "title": "Monitor API Usage",
+          "description": "Regularly check API usage to ensure it remains within healthy thresholds and adjust as needed.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 2
+        },
+        {
+          "title": "User Engagement Analysis",
+          "description": "Review user activity and churn rate to identify areas for improving user retention and engagement.",
+          "priority": "P2",
+          "due_by": "this_month",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Model Degradation Risk",
+          "description": "A potential degradation in model accuracy in the 'Total' market (<48% win rate over >200 picks) needs investigation.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Check API usage for any unexpected fluctuations",
+          "Review model performance metrics",
+          "Communicate findings of any major issues to the team"
+        ],
+        "this_week": [
+          "Complete evaluation of model performance in the 'Total' market",
+          "Draft a plan for user engagement initiatives",
+          "Prepare a status report on financial health"
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 53.8,
+        "settledPicks": 400,
+        "oddsApiRemaining": 81390,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 0,
+        "heapUsedMb": 60,
+        "heapTotalMb": 65,
+        "hubLastCycleMs": 10,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate is currently at 53.8%, above break-even threshold.\",\n    \"Total settled picks are 400, accurate performance indicates potential model degradation in 'Total' market with 46.2% win rate.\",\n    \"API usage is healthy, with no warnings or critical alerts.\",\n    \"Monthly financials indicate a stable cash flow, with a burn of $45,000.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Evaluate Model Performance\",\n      \"description\": \"Conduct a thorough review of model accuracy in the 'Total' market to identify and address issues.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 10\n    },\n    {\n      \"title\": \"Monitor API Usage\",\n      \"description\": \"Regularly check API usage to ensure it remains within healthy thresholds and adjust as needed.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"User Engagement Analysis\",\n      \"description\": \"Review user activity and churn rate to identify areas for improving user retention and engagement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Model Degradation Risk\",\n      \"description\": \"A potential degradation in model accuracy in the 'Total' market (<48% win rate over >200 picks) needs investigation.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Check API usage for any unexpected fluctuations\",\n      \"Review model performance metrics\",\n      \"Communicate findings of any major issues to the team\"\n    ],\n    \"this_week\": [\n      \"Complete evaluation of model performance in the 'Total' market\",\n      \"Draft a plan for user engagement initiatives\",\n      \"Prepare a status report on financial health\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1772762473353_uy0dm",
+      "timestamp": "2026-03-06T02:01:13.353Z",
+      "durationMs": 6349,
+      "summary": [
+        "Current win rate is 54.1%, above the break-even threshold of 52.4%.",
+        "Total settled picks stand at 397, indicating active engagement.",
+        "API usage is on track with healthy budgets across services, but there is an anomaly with apifootball having a negative usage value.",
+        "Pick accuracy is showing a decline in 'Total' market with a win rate of 46.2%."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate apifootball API Usage",
+          "description": "Analyze the unexpected negative usage of apifootball and resolve the discrepancy.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 2
+        },
+        {
+          "title": "Review Total Market Performance",
+          "description": "Conduct a thorough review of selections in the Total market due to the win rate dropping below 48%.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 3
+        }
+      ],
+      "risk_alerts": [],
+      "ops_checklist": {
+        "today": [
+          "Initiate investigation into apifootball API budget discrepancy.",
+          "Contact service provider to clarify usage metrics for apifootball.",
+          "Prepare a report summarizing current win rates across different markets."
+        ],
+        "this_week": [
+          "Implement adjustments in predictions for the Total market based on review findings.",
+          "Monitor win rates and API usage trends regularly throughout the week.",
+          "Evaluate long-term strategies to maintain or improve win rates across all markets."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 54.1,
+        "settledPicks": 397,
+        "oddsApiRemaining": 81924,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 6,
+        "heapUsedMb": 70,
+        "heapTotalMb": 74,
+        "hubLastCycleMs": 8,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Current win rate is 54.1%, above the break-even threshold of 52.4%.\",\n    \"Total settled picks stand at 397, indicating active engagement.\",\n    \"API usage is on track with healthy budgets across services, but there is an anomaly with apifootball having a negative usage value.\",\n    \"Pick accuracy is showing a decline in 'Total' market with a win rate of 46.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate apifootball API Usage\",\n      \"description\": \"Analyze the unexpected negative usage of apifootball and resolve the discrepancy.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Review Total Market Performance\",\n      \"description\": \"Conduct a thorough review of selections in the Total market due to the win rate dropping below 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Initiate investigation into apifootball API budget discrepancy.\",\n      \"Contact service provider to clarify usage metrics for apifootball.\",\n      \"Prepare a report summarizing current win rates across different markets.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments in predictions for the Total market based on review findings.\",\n      \"Monitor win rates and API usage trends regularly throughout the week.\",\n      \"Evaluate long-term strategies to maintain or improve win rates across all markets.\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1772741337631_qyb6g",
+      "timestamp": "2026-03-05T20:08:57.631Z",
+      "durationMs": 6922,
+      "summary": [
+        "Win rate is at 52.9%, exceeding the break-even threshold of 52.4%.",
+        "Total pick accuracy is satisfactory, but the 'Total' market has a low win rate of 46.6%.",
+        "API usage is well within healthy limits, with significant remaining budget.",
+        "The model is not experiencing degradation, as win rate is above the critical threshold."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate Total Market Picks",
+          "description": "Analyze the factors contributing to the low win rate of 46.6% in the Total market to improve performance.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 4
+        },
+        {
+          "title": "Enhance User Engagement",
+          "description": "Increase user engagement strategies to reduce churn rate from 4.2%, aiming for enhanced retention.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 3
+        },
+        {
+          "title": "Monitor API Call Efficiency",
+          "description": "Continue to monitor API calls and ensure optimal performance, evaluating the current recommendation of 1-minute intervals.",
+          "priority": "P3",
+          "due_by": "this_month",
+          "effort_hours": 2
+        }
+      ],
+      "risk_alerts": [],
+      "ops_checklist": {
+        "today": [
+          "Prepare report on Total market performance for review.",
+          "Assess current user retention strategies and brainstorm improvements.",
+          "Check resource allocations for efficient API usage."
+        ],
+        "this_week": [
+          "Complete investigation into low win rate in Total market.",
+          "Draft a new engagement plan targeting user retention.",
+          "Review API performance metrics and adjust usage accordingly."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 347,
+        "oddsApiRemaining": 82335,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 6,
+        "heapUsedMb": 63,
+        "heapTotalMb": 70,
+        "hubLastCycleMs": 11,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate is at 52.9%, exceeding the break-even threshold of 52.4%.\",\n    \"Total pick accuracy is satisfactory, but the 'Total' market has a low win rate of 46.6%.\",\n    \"API usage is well within healthy limits, with significant remaining budget.\",\n    \"The model is not experiencing degradation, as win rate is above the critical threshold.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Total Market Picks\",\n      \"description\": \"Analyze the factors contributing to the low win rate of 46.6% in the Total market to improve performance.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Enhance User Engagement\",\n      \"description\": \"Increase user engagement strategies to reduce churn rate from 4.2%, aiming for enhanced retention.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Monitor API Call Efficiency\",\n      \"description\": \"Continue to monitor API calls and ensure optimal performance, evaluating the current recommendation of 1-minute intervals.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Prepare report on Total market performance for review.\",\n      \"Assess current user retention strategies and brainstorm improvements.\",\n      \"Check resource allocations for efficient API usage.\"\n    ],\n    \"this_week\": [\n      \"Complete investigation into low win rate in Total market.\",\n      \"Draft a new engagement plan targeting user retention.\",\n      \"Review API performance metrics and adjust usage accordingly.\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1772714777993_5wzi6",
+      "timestamp": "2026-03-05T12:46:17.994Z",
+      "durationMs": 6705,
+      "summary": [
+        "Overall win rate is at 52.9%, above break-even threshold of 52.4%.",
+        "No alerts or compliance flags; systems appear healthy.",
+        "API usage for odds service is moderate with 17,164 used out of 100,000 budget; no immediate action needed.",
+        "Balldontlie API showing significant budget variance; daily usage is much lower than expected, but it is still healthy."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Evaluate Total Market Strategies",
+          "description": "Assess Total market performance, considering the 46.6% win rate is below target. Determine if bet types should be modified or removed.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 5
+        },
+        {
+          "title": "Monitor API Budget Variances",
+          "description": "Review and adjust API usage strategies since balldontlie shows significant projected under-utilization of its budget.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 3
+        },
+        {
+          "title": "User Engagement Analysis",
+          "description": "Analyze user engagement metrics, particularly churn rate and new users, to develop retention strategies.",
+          "priority": "P2",
+          "due_by": "this_month",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [],
+      "ops_checklist": {
+        "today": [
+          "Review pick performance for Total market bets.",
+          "Confirm API usage against expected usage metrics.",
+          "Check system performance metrics and maintain AI circuit stability."
+        ],
+        "this_week": [
+          "Investigate any significant changes in user churn rate.",
+          "Evaluate promotional strategies to boost engagement.",
+          "Prepare a report on total market performance improvements."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 347,
+        "oddsApiRemaining": 82971,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 90,
+        "cacheHitRate": 0,
+        "heapUsedMb": 63,
+        "heapTotalMb": 72,
+        "hubLastCycleMs": 6,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Overall win rate is at 52.9%, above break-even threshold of 52.4%.\",\n    \"No alerts or compliance flags; systems appear healthy.\",\n    \"API usage for odds service is moderate with 17,164 used out of 100,000 budget; no immediate action needed.\",\n    \"Balldontlie API showing significant budget variance; daily usage is much lower than expected, but it is still healthy.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Evaluate Total Market Strategies\",\n      \"description\": \"Assess Total market performance, considering the 46.6% win rate is below target. Determine if bet types should be modified or removed.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Monitor API Budget Variances\",\n      \"description\": \"Review and adjust API usage strategies since balldontlie shows significant projected under-utilization of its budget.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"User Engagement Analysis\",\n      \"description\": \"Analyze user engagement metrics, particularly churn rate and new users, to develop retention strategies.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review pick performance for Total market bets.\",\n      \"Confirm API usage against expected usage metrics.\",\n      \"Check system performance metrics and maintain AI circuit stability.\"\n    ],\n    \"this_week\": [\n      \"Investigate any significant changes in user churn rate.\",\n      \"Evaluate promotional strategies to boost engagement.\",\n      \"Prepare a report on total market performance improvements.\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1772710102509_pq26i",
+      "timestamp": "2026-03-05T11:28:22.509Z",
+      "durationMs": 8318,
+      "summary": [
+        "Win rate currently at 52.9%, above break-even threshold but showing overall average of 51.9%.",
+        "API usage is healthy, but adjust usage to avoid budget variance in the future, particularly with the apifootball service.",
+        "No critical alerts or compliance issues reported."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Monitor API Usage",
+          "description": "Regularly review APIfotball usage to avoid exceeding the budget as it's currently showing negative variance.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 2
+        },
+        {
+          "title": "Evaluate Pick Accuracy",
+          "description": "Investigate low win rate in the Total market which stands at 46.6%. Potential model adjustments may be necessary.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 4
+        },
+        {
+          "title": "User Engagement Strategy",
+          "description": "Develop strategies to augment monthly active users in response to churn rate of 4.2%.",
+          "priority": "P2",
+          "due_by": "this_month",
+          "effort_hours": 6
+        }
+      ],
+      "risk_alerts": [],
+      "ops_checklist": {
+        "today": [
+          "Review all API budgets and adjust usage accordingly.",
+          "Analyze recent pick performance across all markets.",
+          "Communicate with marketing for user retention strategies."
+        ],
+        "this_week": [
+          "Draft a report on pick accuracy metrics for quarterly evaluation.",
+          "Set up meetings to discuss potential model updates.",
+          "Implement user feedback mechanisms to address churn."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 347,
+        "oddsApiRemaining": 83296,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 7,
+        "heapUsedMb": 66,
+        "heapTotalMb": 70,
+        "hubLastCycleMs": 8,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate currently at 52.9%, above break-even threshold but showing overall average of 51.9%.\",\n    \"API usage is healthy, but adjust usage to avoid budget variance in the future, particularly with the apifootball service.\",\n    \"No critical alerts or compliance issues reported.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor API Usage\",\n      \"description\": \"Regularly review APIfotball usage to avoid exceeding the budget as it's currently showing negative variance.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Evaluate Pick Accuracy\",\n      \"description\": \"Investigate low win rate in the Total market which stands at 46.6%. Potential model adjustments may be necessary.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Develop strategies to augment monthly active users in response to churn rate of 4.2%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 6\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review all API budgets and adjust usage accordingly.\",\n      \"Analyze recent pick performance across all markets.\",\n      \"Communicate with marketing for user retention strategies.\"\n    ],\n    \"this_week\": [\n      \"Draft a report on pick accuracy metrics for quarterly evaluation.\",\n      \"Set up meetings to discuss potential model updates.\",\n      \"Implement user feedback mechanisms to address churn.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1772678872547_se299",
       "timestamp": "2026-03-05T02:47:52.547Z",
       "durationMs": 7425,
@@ -420,8 +778,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-05T04:27:42.444Z",
-  "lastDeepCheck": "2026-03-05T02:47:52.547Z",
-  "totalQuickChecks": 20,
-  "totalDeepChecks": 4
+  "lastQuickCheck": "2026-03-06T13:00:19.763Z",
+  "lastDeepCheck": "2026-03-06T12:42:19.761Z",
+  "totalQuickChecks": 33,
+  "totalDeepChecks": 10
 }
