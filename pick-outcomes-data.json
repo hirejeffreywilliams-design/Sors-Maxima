@@ -8753,15 +8753,35 @@
       "homeScore": 7,
       "awayScore": 5,
       "settledAt": "2026-03-06T01:52:45.824Z"
+    },
+    {
+      "id": "precomp-NHL-401803348-total-9826a88d64",
+      "gameId": "401803348",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ Los Angeles Kings",
+      "homeTeam": "Los Angeles Kings",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 51,
+      "ev": -33.18,
+      "gameTime": "2026-03-08T00:00Z",
+      "savedAt": "2026-03-06T15:18:20.202Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 3,
+      "settledAt": "2026-03-06T15:21:12.184Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 400,
-      "won": 211,
+      "total": 401,
+      "won": 212,
       "lost": 181,
       "push": 8,
-      "rate": 52.8,
+      "rate": 52.9,
       "pending": 47
     },
     "bySport": {
@@ -8771,9 +8791,9 @@
         "rate": 48.5
       },
       "NHL": {
-        "total": 139,
-        "won": 69,
-        "rate": 49.6
+        "total": 140,
+        "won": 70,
+        "rate": 50
       },
       "NCAAB": {
         "total": 125,
@@ -8803,9 +8823,9 @@
         "rate": 56.5
       },
       "D+": {
-        "total": 23,
-        "won": 10,
-        "rate": 43.5
+        "total": 24,
+        "won": 11,
+        "rate": 45.8
       },
       "C-": {
         "total": 29,
@@ -8847,10 +8867,10 @@
         "roi": 8.8
       },
       "Total": {
-        "total": 106,
-        "won": 49,
-        "rate": 46.2,
-        "roi": -8.7
+        "total": 107,
+        "won": 50,
+        "rate": 46.7,
+        "roi": -7.7
       },
       "Team Total": {
         "total": 71,
@@ -8860,16 +8880,16 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 19,
+      "won": 31,
+      "lost": 18,
       "push": 1,
-      "rate": 60
+      "rate": 62
     },
-    "lastUpdated": "2026-03-06T15:07:53.517Z",
-    "roi": 8.7,
+    "lastUpdated": "2026-03-06T15:31:51.467Z",
+    "roi": 8.9,
     "brierScore": 0.2585,
     "maxDrawdown": 10.6,
-    "sharpeRatio": 0.075,
+    "sharpeRatio": 0.077,
     "homeAwayBias": {
       "homeWinRate": 60,
       "awayWinRate": 43.1,
@@ -8879,9 +8899,9 @@
     "calibrationBuckets": [
       {
         "range": "50-55",
-        "predicted": 52.3,
-        "actual": 66.7,
-        "total": 12
+        "predicted": 52.2,
+        "actual": 69.2,
+        "total": 13
       },
       {
         "range": "55-60",

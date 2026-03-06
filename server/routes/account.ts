@@ -205,6 +205,51 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
+  // ===== Bankroll Settings (amount + kelly fraction) =====
+  app.get("/api/settings/bankroll", requireAuth, async (req, res) => {
+    const uid = numericUserId(req);
+    if (!uid) return res.json({ bankroll: 1000, kellyFraction: 0.25, dailyCapPct: 5 });
+    try {
+      const row = await db.execute(sql`
+        SELECT bankroll, kelly_fraction, daily_cap_pct
+        FROM user_betting_profile WHERE user_id = ${uid}
+      `);
+      const r = (row.rows as any[])[0];
+      return res.json({
+        bankroll: r ? Number(r.bankroll ?? 1000) : 1000,
+        kellyFraction: r ? Number(r.kelly_fraction ?? 0.25) : 0.25,
+        dailyCapPct: r ? Number(r.daily_cap_pct ?? 5) : 5,
+      });
+    } catch {
+      return res.json({ bankroll: 1000, kellyFraction: 0.25, dailyCapPct: 5 });
+    }
+  });
+
+  app.patch("/api/settings/bankroll", requireAuth, async (req, res) => {
+    const uid = numericUserId(req);
+    if (!uid) {
+      return res.json({ success: true, note: "Bankroll not persisted for this account type" });
+    }
+    const { bankroll, kellyFraction, dailyCapPct } = req.body;
+    if (bankroll !== undefined && (typeof bankroll !== "number" || bankroll <= 0)) {
+      return res.status(400).json({ error: "bankroll must be a positive number" });
+    }
+    try {
+      await db.execute(sql`
+        INSERT INTO user_betting_profile (user_id, bankroll, kelly_fraction, daily_cap_pct)
+        VALUES (${uid}, ${bankroll ?? 1000}, ${kellyFraction ?? 0.25}, ${dailyCapPct ?? 5})
+        ON CONFLICT (user_id) DO UPDATE SET
+          bankroll = COALESCE(${bankroll}, user_betting_profile.bankroll),
+          kelly_fraction = COALESCE(${kellyFraction}, user_betting_profile.kelly_fraction),
+          daily_cap_pct = COALESCE(${dailyCapPct}, user_betting_profile.daily_cap_pct)
+      `);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[BankrollSettings] Update failed:", err);
+      return res.status(500).json({ error: "Failed to update bankroll settings" });
+    }
+  });
+
   // ===== Bankroll Alerts =====
   app.get("/api/bankroll/alerts", async (req, res) => {
     if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });

@@ -169,6 +169,55 @@ function CapacityBar({ capacity }: { capacity: CapacityInfo }) {
   );
 }
 
+function PickSignalRow({ pick }: { pick: PrecomputedPick }) {
+  if (!pick.winProbability) return null;
+
+  function americanToDecimal(odds: number): number {
+    if (odds >= 100) return (odds / 100) + 1;
+    return 1 - (100 / odds);
+  }
+
+  const modelPct = Math.round(pick.winProbability * 1000) / 10;
+  const decOdds = americanToDecimal(pick.odds || -110);
+  const marketPct = Math.round((1 / decOdds) * 1000) / 10;
+  const edgePct = pick.edge !== undefined ? pick.edge : modelPct - marketPct;
+  const edgePositive = edgePct >= 5;
+  const edgeNeutral = edgePct >= 0 && edgePct < 5;
+
+  return (
+    <div className="space-y-1.5" data-testid={`pick-model-edge-row-${pick.id}`}>
+      <div className="flex items-center justify-between text-[10px] px-0.5">
+        <span className="text-muted-foreground">
+          Model <span className="font-mono font-semibold text-foreground">{modelPct}%</span>
+        </span>
+        <span className="text-muted-foreground">
+          Market <span className="font-mono font-semibold text-foreground">{marketPct}%</span>
+        </span>
+        <span className={edgePositive ? "text-green-500 font-semibold" : edgeNeutral ? "text-yellow-500 font-semibold" : "text-red-500 font-semibold"}>
+          Edge {edgePct >= 0 ? "+" : ""}{edgePct.toFixed(1)}%
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-1" data-testid={`pick-risk-flags-${pick.id}`}>
+        {(pick.ev ?? 0) >= 8 && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/20 font-medium">
+            High Value
+          </span>
+        )}
+        {(pick.ev ?? 0) >= 0 && (pick.ev ?? 0) < 3 && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-medium">
+            Low Edge
+          </span>
+        )}
+        {pick.winProbability !== undefined && pick.winProbability >= 0.60 && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20 font-medium">
+            Strong Model
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick; rank: number; userTier: string; activeSport: string }) {
   const [expanded, setExpanded] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
@@ -339,6 +388,10 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
             <p className="text-[10px] text-muted-foreground">Odds</p>
           </div>
         </div>
+
+        {pick.winProbability !== undefined && (
+          <PickSignalRow pick={pick} />
+        )}
 
         {pick.capacity && pick.capacity.capacityLimit !== -1 && (
           <CapacityBar capacity={pick.capacity} />

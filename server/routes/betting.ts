@@ -3539,4 +3539,123 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       return res.status(500).json({ error: "Failed to generate round robin" });
     }
   });
+
+  // ===== HITL Smart Pick Review Queue =====
+  app.get("/api/picks/review-queue", requireAuth, async (req, res) => {
+    try {
+      const { getPrecomputedCache } = await import("../precomputedPredictionsEngine");
+      const { getAllSports } = await import("../sportSeasons");
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+
+      const rawUid = req.session?.userId;
+      const uid = rawUid && rawUid !== 'admin' ? parseInt(rawUid, 10) : null;
+      const bankrollParam = parseFloat(req.query.bankroll as string);
+
+      let userBankroll = isNaN(bankrollParam) ? 1000 : bankrollParam;
+      let userKellyFraction = 0.25;
+      if (uid && !isNaN(uid)) {
+        try {
+          const row = await db.execute(sql`SELECT bankroll, kelly_fraction FROM user_betting_profile WHERE user_id = ${uid}`);
+          const r = (row.rows as any[])[0];
+          if (r) {
+            userBankroll = Number(r.bankroll ?? userBankroll);
+            userKellyFraction = Number(r.kelly_fraction ?? 0.25);
+          }
+        } catch { /* use defaults */ }
+      }
+
+      const allPicks: any[] = [];
+      for (const sport of getAllSports()) {
+        const snapshot = getPrecomputedCache(sport);
+        if (snapshot?.picks) allPicks.push(...snapshot.picks.slice(0, 8));
+      }
+
+      let calibrationDrift = false;
+      try {
+        const brierRow = await db.execute(sql`
+          SELECT AVG(POWER(COALESCE(confidence, 60) / 100.0 - CASE WHEN result = 'win' THEN 1.0 ELSE 0.0 END, 2)) as brier
+          FROM user_picks
+          WHERE settled = TRUE AND result IN ('win', 'loss')
+          ORDER BY created_at DESC LIMIT 50
+        `);
+        const b = (brierRow.rows as any[])[0]?.brier;
+        if (b !== null && b !== undefined) calibrationDrift = Number(b) > 0.25;
+      } catch { /* ignore */ }
+
+      function americanToDecimal(odds: number): number {
+        if (odds >= 100) return (odds / 100) + 1;
+        return 1 - (100 / odds);
+      }
+
+      const queuePicks = allPicks.slice(0, 25).map((pick: any) => {
+        const decOdds = americanToDecimal(pick.odds || -110);
+        const modelProb = pick.winProbability ?? 0.5;
+        const marketProb = 1 / decOdds;
+        const edgePct = pick.edge ?? (modelProb - marketProb) * 100;
+
+        const rawKelly = Math.max(0, (modelProb * (decOdds - 1) - (1 - modelProb)) / (decOdds - 1));
+        const fractionalKelly = rawKelly * userKellyFraction;
+        const suggestedStake = Math.min(
+          Math.max(1, fractionalKelly * userBankroll),
+          userBankroll * 0.10
+        );
+
+        const flags: string[] = [];
+        if (edgePct < 5) flags.push("low_edge");
+        if (fractionalKelly * userBankroll > userBankroll * 0.10) flags.push("stake_cap");
+        if (calibrationDrift) flags.push("calibration_drift");
+        if ((pick.ev ?? 0) < 0) flags.push("negative_ev");
+
+        const riskScore = (flags.includes("low_edge") ? 0.3 : 0) +
+          (flags.includes("stake_cap") ? 0.25 : 0) +
+          (flags.includes("calibration_drift") ? 0.25 : 0) +
+          (flags.includes("negative_ev") ? 0.3 : 0);
+
+        const topFactors = (pick.factors || []).slice(0, 2).map((f: any) => f.name).join(" and ");
+        const rationale = topFactors
+          ? `Model driven by ${topFactors}`
+          : `${pick.grade || "B"}-grade pick with ${edgePct > 0 ? "+" : ""}${edgePct.toFixed(1)}% edge`;
+
+        let status: "auto_approved" | "review" | "skip";
+        if (riskScore >= 0.6) status = "skip";
+        else if (riskScore <= 0.2 && edgePct >= 5) status = "auto_approved";
+        else status = "review";
+
+        return {
+          id: pick.id,
+          sport: pick.sport,
+          game: pick.game,
+          pick: pick.pick,
+          betType: pick.betType,
+          odds: pick.odds,
+          grade: pick.grade,
+          ev: pick.ev,
+          confidence: pick.confidence,
+          modelProb: Math.round(modelProb * 1000) / 10,
+          marketProb: Math.round(marketProb * 1000) / 10,
+          edgePct: Math.round(edgePct * 10) / 10,
+          kellyPct: Math.round(fractionalKelly * 1000) / 10,
+          suggestedStake: Math.round(suggestedStake * 100) / 100,
+          riskScore: Math.round(riskScore * 100) / 100,
+          flags,
+          rationale,
+          status,
+          factors: pick.factors || [],
+        };
+      });
+
+      return res.json({
+        picks: queuePicks,
+        bankroll: userBankroll,
+        kellyFraction: userKellyFraction,
+        calibrationDrift,
+        perBetCap: Math.round(userBankroll * 0.10 * 100) / 100,
+        dailyCap: Math.round(userBankroll * 0.05 * 100) / 100,
+      });
+    } catch (err) {
+      console.error("[ReviewQueue] Error:", err);
+      return res.status(500).json({ error: "Failed to build review queue" });
+    }
+  });
 }

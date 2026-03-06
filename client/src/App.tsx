@@ -44,6 +44,7 @@ const AdminRiskRegister = lazy(() => import("@/pages/admin-risk-register"));
 const AdminFinancialProjections = lazy(() => import("@/pages/admin-financial-projections"));
 const Roadmap = lazy(() => import("@/pages/roadmap"));
 const TicketVariations = lazy(() => import("@/pages/ticket-variations"));
+const PickReview = lazy(() => import("@/pages/pick-review"));
 const AdminUserHealth = lazy(() => import("@/pages/admin-user-health"));
 const AdminSupportDashboard = lazy(() => import("@/pages/admin-support"));
 const AdminFraudDashboard = lazy(() => import("@/pages/admin-fraud"));
@@ -80,7 +81,7 @@ const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -304,6 +305,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/track-record" component={TrackRecordPage} />
         <Route path="/ticket-variations" component={TicketVariations} />
+        <Route path="/pick-review" component={PickReview} />
         <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
@@ -450,6 +452,7 @@ const navItems: NavItem[] = [
 
 const BUILD_SUBITEMS = [
   { href: "/generate", icon: Brain, label: "Smart Generator", desc: "AI builds the optimal parlay for you" },
+  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", desc: "Risk-scored picks with Kelly stake guidance" },
   { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", desc: "Manually drag & drop your own ticket" },
   { href: "/strategy", icon: Compass, label: "Strategy Advisor", desc: "Expert guidance for your betting style" },
 ];
@@ -513,6 +516,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
 
         {navSection("Build", [
           { href: "/generate", icon: Brain, label: "Smart Generator", testId: "mobile-nav-generate" },
+          { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "mobile-nav-pick-review" },
           { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
           { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "mobile-nav-strategy" },
         ])}
