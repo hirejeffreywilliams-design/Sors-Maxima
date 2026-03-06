@@ -2,9 +2,9 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 22421,
-      "manualRemaining": 77579,
-      "lastReported": "2026-03-06T15:48:21.280Z",
+      "currentUsage": 22538,
+      "manualRemaining": 77462,
+      "lastReported": "2026-03-06T15:55:41.237Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
@@ -26,7 +26,7 @@
       "lastSeasonCheck": "2026-03-06T15:48:10.782Z"
     },
     "balldontlie": {
-      "currentUsage": 611,
+      "currentUsage": 612,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -846,6 +846,10 @@
         {
           "ts": 1772812135650,
           "count": 1
+        },
+        {
+          "ts": 1772812487447,
+          "count": 1
         }
       ],
       "suspended": false,
@@ -880,6 +884,6 @@
     }
   },
   "activeUsers": 1,
-  "lastSaved": "2026-03-06T15:50:39.693Z",
+  "lastSaved": "2026-03-06T15:55:41.237Z",
   "alerts": []
 }
