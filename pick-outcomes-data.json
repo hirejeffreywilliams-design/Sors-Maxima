@@ -897,22 +897,6 @@
       "savedAt": "2026-03-07T21:40:11.180Z"
     },
     {
-      "id": "precomp-vegas-NBA-b573327b2dee",
-      "gameId": "NBA",
-      "sport": "NBA",
-      "game": "Philadelphia 76ers @ Cleveland Cavaliers",
-      "homeTeam": "Cleveland Cavaliers",
-      "awayTeam": "Philadelphia 76ers",
-      "pick": "Philadelphia 76ers +3.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B-",
-      "confidence": 63,
-      "ev": 12.64,
-      "gameTime": "2026-03-07T23:11:47.992Z",
-      "savedAt": "2026-03-07T23:11:47.992Z"
-    },
-    {
       "id": "precomp-NCAAB-401851716-spread-7e4d4e1589",
       "gameId": "401851716",
       "sport": "NCAAB",
@@ -10798,22 +10782,42 @@
       "homeScore": 6,
       "awayScore": 5,
       "settledAt": "2026-03-07T23:02:21.982Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-b573327b2dee",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Philadelphia 76ers @ Cleveland Cavaliers",
+      "homeTeam": "Cleveland Cavaliers",
+      "awayTeam": "Philadelphia 76ers",
+      "pick": "Philadelphia 76ers +3.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-07T23:11:47.992Z",
+      "savedAt": "2026-03-07T23:11:47.992Z",
+      "result": "lost",
+      "homeScore": 106,
+      "awayScore": 102,
+      "settledAt": "2026-03-07T23:14:08.788Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 476,
+      "total": 477,
       "won": 241,
-      "lost": 223,
+      "lost": 224,
       "push": 12,
-      "rate": 50.6,
-      "pending": 59
+      "rate": 50.5,
+      "pending": 58
     },
     "bySport": {
       "NBA": {
-        "total": 161,
+        "total": 162,
         "won": 78,
-        "rate": 48.4
+        "rate": 48.1
       },
       "NHL": {
         "total": 169,
@@ -10838,9 +10842,9 @@
         "rate": 65.5
       },
       "B-": {
-        "total": 114,
+        "total": 115,
         "won": 59,
-        "rate": 51.8
+        "rate": 51.3
       },
       "C+": {
         "total": 107,
@@ -10886,10 +10890,10 @@
         "roi": 14.1
       },
       "Spread": {
-        "total": 137,
+        "total": 138,
         "won": 70,
-        "rate": 51.1,
-        "roi": 1.8
+        "rate": 50.7,
+        "roi": 1
       },
       "Total": {
         "total": 133,
@@ -10910,16 +10914,16 @@
       "push": 1,
       "rate": 38
     },
-    "lastUpdated": "2026-03-07T23:13:05.577Z",
-    "roi": 3.7,
-    "brierScore": 0.2616,
-    "maxDrawdown": 15.3,
-    "sharpeRatio": 0.032,
+    "lastUpdated": "2026-03-07T23:15:08.943Z",
+    "roi": 3.4,
+    "brierScore": 0.2619,
+    "maxDrawdown": 15.4,
+    "sharpeRatio": 0.03,
     "homeAwayBias": {
       "homeWinRate": 55.5,
-      "awayWinRate": 41.7,
+      "awayWinRate": 41,
       "homeTotal": 209,
-      "awayTotal": 60
+      "awayTotal": 61
     },
     "calibrationBuckets": [
       {
@@ -10937,8 +10941,8 @@
       {
         "range": "60-65",
         "predicted": 62.1,
-        "actual": 52.2,
-        "total": 186
+        "actual": 51.9,
+        "total": 187
       },
       {
         "range": "65-70",
