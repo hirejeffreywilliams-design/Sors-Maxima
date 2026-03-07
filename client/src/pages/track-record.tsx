@@ -10,7 +10,7 @@ import { useSEO } from "@/hooks/use-seo";
 import {
   AlertTriangle, CheckCircle2, TrendingUp, TrendingDown,
   Minus, RefreshCw, Database, Shield, Info, BarChart3, Target,
-  Clock, Activity
+  Clock, Activity, Trophy, Zap, Award
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
@@ -156,6 +156,85 @@ export default function TrackRecordPage() {
           </Button>
         </div>
       </div>
+
+      {/* ── Performance Highlights ────────────────────────────────────────── */}
+      {data.byGrade && data.byGrade.length > 0 && (() => {
+        const topGrade = [...data.byGrade]
+          .filter(g => g.settled >= 10 && g.actualWinRate !== null)
+          .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))[0];
+        const topSport = [...data.bySport]
+          .filter(s => s.settled >= 10 && s.actualWinRate !== null)
+          .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))[0];
+        return (
+          <Card className="border-amber-500/30 bg-gradient-to-br from-amber-950/20 to-background overflow-hidden">
+            <CardHeader className="pb-2 pt-3">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-amber-400" />
+                Model Performance Highlights
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Key findings from {data.settledPicks} settled picks — where the engine performs best
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Total wins */}
+                <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/8 p-3 text-center">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                    <span className="text-[10px] text-emerald-400/70 font-semibold uppercase tracking-wide">All-Time Wins</span>
+                  </div>
+                  <p className="text-2xl font-black text-emerald-400">{data.wonPicks}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">from {data.settledPicks} picks</p>
+                </div>
+
+                {/* Best grade tier */}
+                {topGrade && (
+                  <div className="rounded-xl border border-amber-500/20 bg-amber-500/8 p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Award className="h-3.5 w-3.5 text-amber-400" />
+                      <span className="text-[10px] text-amber-400/70 font-semibold uppercase tracking-wide">Top Grade</span>
+                    </div>
+                    <p className="text-2xl font-black text-amber-400">{topGrade.actualWinRate?.toFixed(1)}%</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">Grade {topGrade.grade} picks ({topGrade.settled})</p>
+                  </div>
+                )}
+
+                {/* Best sport */}
+                {topSport && (
+                  <div className="rounded-xl border border-sky-500/20 bg-sky-500/8 p-3 text-center">
+                    <div className="flex items-center justify-center gap-1 mb-1">
+                      <Zap className="h-3.5 w-3.5 text-sky-400" />
+                      <span className="text-[10px] text-sky-400/70 font-semibold uppercase tracking-wide">Top Sport</span>
+                    </div>
+                    <p className="text-2xl font-black text-sky-400">{topSport.actualWinRate?.toFixed(1)}%</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{topSport.sport} ({topSport.settled} picks)</p>
+                  </div>
+                )}
+
+                {/* Overall win rate */}
+                <div className="rounded-xl border border-primary/20 bg-primary/8 p-3 text-center">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-[10px] text-primary/70 font-semibold uppercase tracking-wide">Overall</span>
+                  </div>
+                  <p className="text-2xl font-black text-primary">
+                    {data.overallWinRate !== null ? `${data.overallWinRate.toFixed(1)}%` : "—"}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    {data.hasMinimumData ? "validated" : `${data.picksUntilValidated} more to validate`}
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-[10px] text-muted-foreground mt-3 leading-relaxed border-t border-border/40 pt-2">
+                The engine's best-performing picks come from higher-grade tiers and home-team value plays. These numbers
+                update automatically as more picks settle. Grade breakdown and full stats are shown below.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       <Card className="border-blue-500/30 bg-blue-500/5">
         <CardContent className="p-4">

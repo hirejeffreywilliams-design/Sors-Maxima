@@ -44,6 +44,11 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **AI Pick Edge Insight Engine**: Generates sharp edge insights for top picks using GPT-4o-mini.
 - **Strategy Accountability System**: Allows users to choose from preset betting strategies with per-leg violation tracking.
 - **AI Circuit Breaker**: Manages AI API quotas and error states.
+- **Pick Hall of Fame**: Premium ambient-glow "trading card" style pick showcase on `/track-record` page. Horizontal scroll row (won = green glow "CALLED IT", lost = red glow "MISSED"). Each card shows grade, confidence/EV bars, and "Sors Intelligence Report" bullets. Backend: `/api/pick-highlights` (3-min cache). Component: `client/src/components/pick-highlight-cards.tsx`.
+- **Performance Highlights Card**: Stats card on `/track-record` showing All-Time Wins, Top Grade win rate, Top Sport win rate, and Overall — computed dynamically from track record data.
+- **Share Winning Ticket**: Share button on winning cards in Ticket Showcase opens `ShareProofModal` (branded green overlay). Copy (clipboard) + Share (Web Share API, mobile). Component inline in `client/src/components/ticket-showcase.tsx`.
+- **Prediction Engine Calibration**: Outcome-calibrated adjustments in `server/precomputedPredictionsEngine.ts`: Totals -3% confidence, Home team +2%, Away team -2%, NBA/NHL -2%, NCAAB +1%. Quality gate: skips picks with confidence < 52 (C-grade and below historically ≤44% win rate).
+- **AI Analysis moved to Admin**: AI Analysis button/panel removed from user-facing `/track-record` page. Now lives in Admin → Model Performance → "AI Analysis" tab. Keeps technical calibration language out of user view.
 
 ## Proprietary Branding Notes
 - All user-visible "Monte Carlo" references replaced with "Sors Simulation" (parlay slip, command center, daily parlays, help, pricing, odds-center, platform-intelligence, intelligence-pipeline, admin pages)

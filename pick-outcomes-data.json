@@ -895,6 +895,54 @@
       "ev": 20.27,
       "gameTime": "2026-03-10T04:00Z",
       "savedAt": "2026-03-07T21:40:11.180Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-b573327b2dee",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Philadelphia 76ers @ Cleveland Cavaliers",
+      "homeTeam": "Cleveland Cavaliers",
+      "awayTeam": "Philadelphia 76ers",
+      "pick": "Philadelphia 76ers +3.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-07T23:11:47.992Z",
+      "savedAt": "2026-03-07T23:11:47.992Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851716-spread-7e4d4e1589",
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "game": "TBD @ Prairie View A&M Panthers",
+      "homeTeam": "Prairie View A&M Panthers",
+      "awayTeam": "TBD",
+      "pick": "Prairie View A&M Panthers -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 73,
+      "ev": 20.27,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-07T23:11:48.540Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851716-total-88aa5e5e86",
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "game": "TBD @ Prairie View A&M Panthers",
+      "homeTeam": "Prairie View A&M Panthers",
+      "awayTeam": "TBD",
+      "pick": "Over 144.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 60,
+      "ev": 20.27,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-07T23:11:48.540Z"
     }
   ],
   "settled": [
@@ -10670,16 +10718,96 @@
       "homeScore": 120,
       "awayScore": 128,
       "settledAt": "2026-03-07T22:51:59.674Z"
+    },
+    {
+      "id": "precomp-NHL-401803357-moneyline-550bdcabec",
+      "gameId": "401803357",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Anaheim Ducks ML",
+      "betType": "moneyline",
+      "odds": -170,
+      "grade": "C",
+      "confidence": 68,
+      "ev": -22.18,
+      "gameTime": "2026-03-09T01:00Z",
+      "savedAt": "2026-03-07T23:01:43.274Z",
+      "result": "won",
+      "homeScore": 6,
+      "awayScore": 5,
+      "settledAt": "2026-03-07T23:02:21.982Z"
+    },
+    {
+      "id": "precomp-NHL-401803357-spread-7a78eb1ef8",
+      "gameId": "401803357",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Anaheim Ducks -1.5",
+      "betType": "spread",
+      "odds": 130,
+      "grade": "C+",
+      "confidence": 66,
+      "ev": 26.5,
+      "gameTime": "2026-03-09T01:00Z",
+      "savedAt": "2026-03-07T23:01:43.274Z",
+      "result": "lost",
+      "homeScore": 6,
+      "awayScore": 5,
+      "settledAt": "2026-03-07T23:02:21.982Z"
+    },
+    {
+      "id": "precomp-NHL-401803357-total-d47c47ad9d",
+      "gameId": "401803357",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Anaheim Ducks",
+      "homeTeam": "Anaheim Ducks",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 66,
+      "ev": 1.18,
+      "gameTime": "2026-03-09T01:00Z",
+      "savedAt": "2026-03-07T23:01:43.274Z",
+      "result": "lost",
+      "homeScore": 6,
+      "awayScore": 5,
+      "settledAt": "2026-03-07T23:02:21.982Z"
+    },
+    {
+      "id": "precomp-vegas-NHL-d5d97d978f07",
+      "gameId": "NHL",
+      "sport": "NHL",
+      "game": "Anaheim Ducks @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Anaheim Ducks",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 60,
+      "ev": 6.91,
+      "gameTime": "2026-03-07T23:01:43.274Z",
+      "savedAt": "2026-03-07T23:01:43.274Z",
+      "result": "won",
+      "homeScore": 6,
+      "awayScore": 5,
+      "settledAt": "2026-03-07T23:02:21.982Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 472,
-      "won": 239,
-      "lost": 221,
+      "total": 476,
+      "won": 241,
+      "lost": 223,
       "push": 12,
       "rate": 50.6,
-      "pending": 56
+      "pending": 59
     },
     "bySport": {
       "NBA": {
@@ -10688,8 +10816,8 @@
         "rate": 48.4
       },
       "NHL": {
-        "total": 165,
-        "won": 77,
+        "total": 169,
+        "won": 79,
         "rate": 46.7
       },
       "NCAAB": {
@@ -10715,9 +10843,9 @@
         "rate": 51.8
       },
       "C+": {
-        "total": 104,
-        "won": 55,
-        "rate": 52.9
+        "total": 107,
+        "won": 56,
+        "rate": 52.3
       },
       "D+": {
         "total": 29,
@@ -10730,9 +10858,9 @@
         "rate": 53.1
       },
       "C": {
-        "total": 95,
-        "won": 42,
-        "rate": 44.2
+        "total": 96,
+        "won": 43,
+        "rate": 44.8
       },
       "A-": {
         "total": 18,
@@ -10752,20 +10880,20 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 134,
-        "won": 70,
-        "rate": 52.2,
-        "roi": 13.8
+        "total": 135,
+        "won": 71,
+        "rate": 52.6,
+        "roi": 14.1
       },
       "Spread": {
-        "total": 136,
+        "total": 137,
         "won": 70,
-        "rate": 51.5,
-        "roi": 2.6
+        "rate": 51.1,
+        "roi": 1.8
       },
       "Total": {
-        "total": 131,
-        "won": 61,
+        "total": 133,
+        "won": 62,
         "rate": 46.6,
         "roi": -6.4
       },
@@ -10777,20 +10905,20 @@
       }
     },
     "recentForm": {
-      "won": 18,
+      "won": 19,
       "lost": 30,
-      "push": 2,
-      "rate": 36
+      "push": 1,
+      "rate": 38
     },
-    "lastUpdated": "2026-03-07T22:55:09.435Z",
-    "roi": 3.8,
-    "brierScore": 0.2614,
-    "maxDrawdown": 15,
-    "sharpeRatio": 0.034,
+    "lastUpdated": "2026-03-07T23:13:05.577Z",
+    "roi": 3.7,
+    "brierScore": 0.2616,
+    "maxDrawdown": 15.3,
+    "sharpeRatio": 0.032,
     "homeAwayBias": {
-      "homeWinRate": 55.6,
+      "homeWinRate": 55.5,
       "awayWinRate": 41.7,
-      "homeTotal": 207,
+      "homeTotal": 209,
       "awayTotal": 60
     },
     "calibrationBuckets": [
@@ -10809,14 +10937,14 @@
       {
         "range": "60-65",
         "predicted": 62.1,
-        "actual": 51.9,
-        "total": 185
+        "actual": 52.2,
+        "total": 186
       },
       {
         "range": "65-70",
-        "predicted": 66.2,
-        "actual": 52.2,
-        "total": 115
+        "predicted": 66.3,
+        "actual": 51.7,
+        "total": 118
       },
       {
         "range": "70-75",

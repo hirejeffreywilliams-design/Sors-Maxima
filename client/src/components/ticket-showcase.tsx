@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft, Check, X, Trophy, TrendingDown, Sparkles, CircleDollarSign,
-  Calendar, ChevronRight, Star
+  Calendar, ChevronRight, Star, Share2, Copy, CheckCheck
 } from "lucide-react";
 
 interface ShowcaseLeg {
@@ -58,6 +58,147 @@ function gradeColor(g: string) {
   return "text-muted-foreground";
 }
 
+function ShareProofModal({ ticket, onClose }: { ticket: ShowcaseTicket; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  const formatText = () => {
+    const header = `⚡ SORS MAXIMA — WINNING TICKET\n${"─".repeat(32)}`;
+    const odds = `Combined Odds: ${ticket.combinedOdds > 0 ? "+" : ""}${ticket.combinedOdds}`;
+    const payout = `Payout: $${ticket.payout} (+$${ticket.profit} profit)`;
+    const date = `Date: ${formatDate(ticket.date)}`;
+    const legs = ticket.legs.map((l, i) =>
+      `${i + 1}. ${sportEmoji(l.sport)} ${l.pick} (${l.odds > 0 ? "+" : ""}${l.odds}) — ${l.result === "won" ? "✓ WON" : "✗ LOST"}`
+    ).join("\n");
+    const footer = `\nPowered by Sors 46-Factor Engine\nsorsmaxima.com`;
+    return [header, odds, payout, date, "", legs, footer].join("\n");
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(formatText());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = formatText();
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await (navigator as any).share({
+          title: "Sors Maxima — Winning Ticket",
+          text: formatText(),
+        });
+        return;
+      } catch {}
+    }
+    handleCopy();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+      data-testid="share-proof-modal"
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "linear-gradient(135deg, #0a1628 0%, #0d1f0e 50%, #0a1628 100%)",
+          boxShadow: "0 0 80px rgba(34,197,94,0.4), 0 0 200px rgba(34,197,94,0.15), 0 20px 60px rgba(0,0,0,0.7)",
+          border: "2px solid rgba(34,197,94,0.5)",
+        }}
+      >
+        {/* Top strip */}
+        <div className="h-1.5 bg-gradient-to-r from-emerald-600 via-emerald-400 to-emerald-600" />
+
+        {/* Branding header */}
+        <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-emerald-500/20">
+          <div>
+            <p className="text-[10px] font-black tracking-[0.25em] text-emerald-400/80 uppercase">Sors Maxima</p>
+            <p className="text-lg font-black text-emerald-400">WINNING TICKET</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] text-emerald-400/60">{formatDate(ticket.date)}</p>
+            <p className="text-2xl font-black text-emerald-400 tabular-nums">
+              {ticket.combinedOdds > 0 ? "+" : ""}{ticket.combinedOdds}
+            </p>
+          </div>
+        </div>
+
+        {/* Legs */}
+        <div className="px-5 py-3 space-y-2">
+          {ticket.legs.map((leg, i) => (
+            <div key={i} className="flex items-start gap-2.5">
+              <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
+                leg.result === "won" ? "bg-emerald-500/25" : "bg-red-500/20"
+              }`}>
+                {leg.result === "won"
+                  ? <Check className="w-2.5 h-2.5 text-emerald-400" />
+                  : <X className="w-2.5 h-2.5 text-red-400" />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-white leading-snug">{leg.pick}</p>
+                <p className="text-[10px] text-emerald-400/60">{sportEmoji(leg.sport)} {leg.sport} · {leg.odds > 0 ? "+" : ""}{leg.odds}</p>
+              </div>
+              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
+                leg.result === "won" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
+              }`}>{leg.grade}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Payout */}
+        <div className="mx-5 mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-[10px] text-emerald-400/60">$100 stake</p>
+            <p className="text-xs font-semibold text-white">Payout</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-black text-emerald-400 tabular-nums">${ticket.payout}</p>
+            <p className="text-[10px] text-emerald-400/60">+${ticket.profit} profit</p>
+          </div>
+        </div>
+
+        {/* Footer branding */}
+        <div className="px-5 pb-4 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3 text-emerald-400/60" />
+            <p className="text-[9px] text-emerald-400/50 font-semibold tracking-wider">46-FACTOR ENGINE · SORSMAXIMA.COM</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-semibold text-white hover:bg-white/10 transition-colors"
+              data-testid="button-share-copy"
+            >
+              {copied ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500/30 transition-colors"
+              data-testid="button-share-send"
+            >
+              <Share2 className="w-3 h-3" />
+              Share
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function TicketShowcase({ onClose }: TicketShowcaseProps) {
   const { data, isLoading } = useQuery<{ tickets: ShowcaseTicket[]; stats: { winning: number; losing: number } }>({
     queryKey: ["/api/showcase-tickets"],
@@ -70,6 +211,7 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
   const [animatingOut, setAnimatingOut] = useState<"left" | "right" | null>(null);
   const [seen, setSeen] = useState<Set<number>>(new Set());
   const [liked, setLiked] = useState<Set<number>>(new Set());
+  const [sharingTicket, setSharingTicket] = useState<ShowcaseTicket | null>(null);
   const startXRef = useRef(0);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -371,38 +513,59 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
           {/* Swipe hint */}
           <p className="text-center text-[10px] text-muted-foreground pb-3">
             Swipe right to save · Swipe left to skip
+            {isWin && <span className="ml-2 text-emerald-400/60">· Tap Share to post your proof</span>}
           </p>
         </div>
       </div>
 
       {/* Action buttons */}
-      <div className="px-8 pb-6 shrink-0 flex items-center justify-center gap-6">
+      <div className="px-8 pb-6 shrink-0 flex items-center justify-center gap-4">
         <button
           onClick={() => triggerAction("left")}
-          className="w-14 h-14 rounded-full border-2 border-muted-foreground/30 bg-background flex items-center justify-center shadow-lg hover:border-red-500/60 hover:bg-red-500/5 transition-colors"
+          className="w-12 h-12 rounded-full border-2 border-muted-foreground/30 bg-background flex items-center justify-center shadow-lg hover:border-red-500/60 hover:bg-red-500/5 transition-colors"
           data-testid="button-showcase-skip"
         >
-          <X className="w-6 h-6 text-muted-foreground" />
+          <X className="w-5 h-5 text-muted-foreground" />
         </button>
+
+        {/* Share button — visible for winning tickets */}
+        {isWin && (
+          <button
+            onClick={() => setSharingTicket(ticket)}
+            className="w-12 h-12 rounded-full border-2 border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center shadow-lg hover:bg-emerald-500/20 transition-colors"
+            data-testid="button-showcase-share"
+          >
+            <Share2 className="w-5 h-5 text-emerald-400" />
+          </button>
+        )}
+
         <button
           onClick={() => triggerAction("right")}
-          className={`w-16 h-16 rounded-full border-2 flex items-center justify-center shadow-xl transition-colors ${
+          className={`w-14 h-14 rounded-full border-2 flex items-center justify-center shadow-xl transition-colors ${
             isWin
               ? "border-emerald-500/60 bg-emerald-500/10 hover:bg-emerald-500/20"
               : "border-amber-500/60 bg-amber-500/10 hover:bg-amber-500/20"
           }`}
           data-testid="button-showcase-save"
         >
-          <Star className={`w-7 h-7 ${isWin ? "text-emerald-400" : "text-amber-400"}`} />
+          <Star className={`w-6 h-6 ${isWin ? "text-emerald-400" : "text-amber-400"}`} />
         </button>
+
+        {!isWin && <div className="w-12 h-12" />}
+
         <button
           onClick={() => triggerAction("left")}
-          className="w-14 h-14 rounded-full border-2 border-muted-foreground/30 bg-background flex items-center justify-center shadow-lg hover:border-muted-foreground/60 transition-colors"
+          className="w-12 h-12 rounded-full border-2 border-muted-foreground/30 bg-background flex items-center justify-center shadow-lg hover:border-muted-foreground/60 transition-colors"
           data-testid="button-showcase-next"
         >
-          <ChevronRight className="w-6 h-6 text-muted-foreground" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
+
+      {/* Share proof modal */}
+      {sharingTicket && (
+        <ShareProofModal ticket={sharingTicket} onClose={() => setSharingTicket(null)} />
+      )}
     </div>
   );
 }

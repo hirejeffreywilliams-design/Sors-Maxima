@@ -1392,6 +1392,34 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         }
       } catch {}
 
+      // ── Outcome-calibrated sport/market adjustments ──────────────────────────
+      // Based on 472 settled picks of historical outcome data:
+      //   • Totals market: -6.4% ROI — consistently underperforms
+      //   • Home picks:    55.6% win rate vs away 41.7%
+      //   • NBA/NHL:       48.4% / 46.7% — below break-even, trim overconfidence
+      //   • NCAAB:         57.5% — slight bonus
+      const isHomeTeamPick = !!(homeName && bet.pick.startsWith(homeName));
+      const isAwayTeamPick = !!(awayName && bet.pick.startsWith(awayName));
+
+      if (bet.betType === "total") {
+        // Totals historically lose money — dampen confidence
+        confidence = Math.max(22, confidence - 3);
+      } else if ((bet.betType === "moneyline" || bet.betType === "spread") && isHomeTeamPick) {
+        // Home-team picks over-perform — small boost
+        confidence = Math.min(getConfidenceCeiling(), confidence + 2);
+      } else if ((bet.betType === "moneyline" || bet.betType === "spread") && isAwayTeamPick) {
+        // Away-team picks under-perform — small penalty
+        confidence = Math.max(22, confidence - 2);
+      }
+
+      if (sport === "NBA") confidence = Math.max(22, confidence - 2);   // 48.4% hist.
+      if (sport === "NHL") confidence = Math.max(22, confidence - 2);   // 46.7% hist.
+      if (sport === "NCAAB") confidence = Math.min(getConfidenceCeiling(), confidence + 1); // 57.5% hist.
+
+      // Quality gate: skip picks that fall below C+ performance threshold.
+      // C-grade and below historically win at ≤44% — below break-even at -110.
+      if (confidence < 52) continue;
+
       const evRounded = Math.round(ev * 100) / 100;
       const rec = fusion.recommendation || "lean_bet";
       const winProb = fusion.winProbability || Math.round(confidence * 0.95);
