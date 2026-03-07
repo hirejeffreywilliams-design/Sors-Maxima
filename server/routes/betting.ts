@@ -1017,15 +1017,17 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         });
       }
 
-      // ── Upcoming games (next 24h) with odds ───────────────────────
+      // ── Upcoming games (next 36h) with odds ───────────────────────
       const upcomingGames = allGames
         .filter(g => g.status?.state === "pre")
         .filter(g => {
           const gameTime = new Date(g.date || "");
           const diffMs = gameTime.getTime() - now.getTime();
-          return diffMs > 0 && diffMs < 86400000;
+          return diffMs > 0 && diffMs < 129600000; // 36 hours
         })
-        .slice(0, 12);
+        .slice(0, 15);
+
+      const todayET = now.toLocaleDateString("en-US", { timeZone: "America/New_York" });
 
       for (const g of upcomingGames) {
         const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
@@ -1033,19 +1035,69 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         const sport = (g as any).sport || "NBA";
         const tag = sportEmoji[sport] || sport;
         const gameTime = new Date(g.date || "");
-        const timeStr = gameTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York", hour12: true }) + " ET";
-        const oddsInfo = g.odds?.spread ? `  Spread: ${g.odds.spread}` : "";
+        const gameDateET = gameTime.toLocaleDateString("en-US", { timeZone: "America/New_York" });
+        const timeOnly = gameTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York", hour12: true });
+        const isToday = gameDateET === todayET;
+        const diffH = Math.round((gameTime.getTime() - now.getTime()) / 3600000);
+        let whenLabel = isToday ? "Tonight" : gameTime.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/New_York" });
+        if (isToday && diffH <= 2) whenLabel = `In ${diffH}h`;
+        const timeStr = `${whenLabel} ${timeOnly} ET`;
+        const spreadInfo = g.odds?.spread ? `  ${g.odds.spread}` : "";
         const ouInfo = g.odds?.overUnder ? `  O/U ${g.odds.overUnder}` : "";
-        const broadcast = g.broadcast ? `  ${g.broadcast}` : "";
+        const broadcast = g.broadcast ? `  ·  ${g.broadcast}` : "";
+        const badge = isToday ? "TODAY" : "UPCOMING";
+        const badgeColor = isToday ? "orange" : "blue";
         items.push({
           id: `upcoming-${g.id}`,
           type: "upcoming",
-          badge: "UPCOMING",
-          badgeColor: "blue",
-          text: `${tag}  ${away} @ ${home}  ${timeStr}${oddsInfo}${ouInfo}${broadcast}`,
+          badge,
+          badgeColor,
+          text: `${tag}  ${away} @ ${home}  ${timeStr}${spreadInfo}${ouInfo}${broadcast}`,
           sport,
-          priority: 2,
+          priority: isToday ? 2 : 3,
         });
+      }
+
+      // ── Injury reports (NBA · NHL · NFL) ──────────────────────────
+      const injuryEndpoints: Array<{ sport: string; url: string }> = [
+        { sport: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries" },
+        { sport: "NHL", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/injuries" },
+        { sport: "NFL", url: "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries" },
+      ];
+
+      for (const { sport: injSport, url } of injuryEndpoints) {
+        try {
+          const injRes = await fetch(url, { signal: AbortSignal.timeout(4000) });
+          if (!injRes.ok) continue;
+          const injData = await injRes.json() as {
+            injuries?: Array<{ displayName: string; injuries: Array<{ status: string; shortComment: string; date?: string }> }>
+          };
+          let added = 0;
+          for (const team of (injData.injuries || [])) {
+            if (added >= 4) break;
+            for (const inj of (team.injuries || [])) {
+              if (added >= 4) break;
+              const rawStatus = (inj.status || "").toUpperCase();
+              if (!["OUT", "QUESTIONABLE", "DOUBTFUL"].includes(rawStatus)) continue;
+              const comment = inj.shortComment || "";
+              if (!comment || comment.length < 10) continue;
+              // Trim long comments
+              const text = comment.length > 95 ? comment.slice(0, 92) + "…" : comment;
+              const badge = rawStatus === "OUT" ? "OUT" : rawStatus === "QUESTIONABLE" ? "QUES" : "DOUBT";
+              const badgeColor = rawStatus === "OUT" ? "orange" : "yellow";
+              items.push({
+                id: `injury-${injSport}-${team.displayName}-${added}`,
+                type: "injury",
+                badge,
+                badgeColor,
+                text: `${injSport}  ${text}`,
+                sport: injSport,
+                priority: 2,
+              });
+              added++;
+            }
+          }
+        } catch (err: any) { console.warn(`[ticker] ${injSport} injuries:`, err?.message); }
       }
 
       // ── Top precomputed picks (A-grade) ───────────────────────────

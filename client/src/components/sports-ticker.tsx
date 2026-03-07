@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 interface TickerItem {
   id: string;
-  type: "live" | "final" | "upcoming" | "pick" | "model" | "sharp" | string;
+  type: "live" | "final" | "upcoming" | "pick" | "model" | "sharp" | "injury" | string;
   badge: string;
   badgeColor: "red" | "gray" | "blue" | "green" | "purple" | "orange" | "yellow" | string;
   text: string;
@@ -76,6 +76,10 @@ export function SportsTicker() {
 
   const items = (!isLoading && data?.items?.length) ? data.items : FALLBACK_ITEMS;
   const liveCount = items.filter(i => i.type === "live").length;
+  const injuryCount = items.filter(i => i.type === "injury").length;
+
+  // Scale scroll speed with item count (~2.5s per item, min 45s, max 150s)
+  const scrollDuration = Math.min(150, Math.max(45, items.length * 2.5));
 
   if (!isVisible) return null;
 
@@ -100,6 +104,12 @@ export function SportsTicker() {
               {liveCount}
             </span>
           )}
+          {injuryCount > 0 && (
+            <div className="hidden sm:flex items-center gap-1 border-l border-border/30 pl-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
+              <span className="text-[9px] font-bold text-orange-400">{injuryCount}</span>
+            </div>
+          )}
         </div>
 
         {/* Scrolling content */}
@@ -112,7 +122,7 @@ export function SportsTicker() {
           <div
             className="flex items-center"
             style={{
-              animation: isPaused ? "none" : "ticker-scroll 60s linear infinite",
+              animation: isPaused ? "none" : `ticker-scroll ${scrollDuration}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
             }}
           >
