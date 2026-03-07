@@ -947,6 +947,160 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  // ==================== SPORTS TICKER ====================
+  app.get("/api/ticker", async (_req, res) => {
+    try {
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { getPrecomputedCache } = await import("../precomputedPredictionsEngine");
+
+      const allGames = await getAllSportsScoreboard();
+      const items: Array<{
+        id: string; type: string; badge: string; badgeColor: string; text: string; sport: string; priority: number;
+      }> = [];
+
+      const sportEmoji: Record<string, string> = {
+        NBA: "NBA", NFL: "NFL", NHL: "NHL", MLB: "MLB", NCAAB: "CBB", NCAAF: "CFB",
+        MMA: "MMA", Soccer: "SOC", EPL: "EPL", UEFA: "UCL",
+      };
+
+      const now = new Date();
+
+      // ── Live game scores ──────────────────────────────────────────
+      const liveGames = allGames.filter(g => g.status?.state === "in");
+      for (const g of liveGames.slice(0, 10)) {
+        const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
+        const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
+        const awayScore = g.awayTeam.score || 0;
+        const homeScore = g.homeTeam.score || 0;
+        const scoreLine = `${away} ${awayScore}  ${home} ${homeScore}`;
+        const detail = g.status?.shortDetail || "";
+        const sport = (g as any).sport || "NBA";
+        const tag = sportEmoji[sport] || sport;
+
+        // Score differential run messaging
+        const diff = Math.abs(homeScore - awayScore);
+        let runMsg = "";
+        if (diff >= 10 && diff <= 25) {
+          const leadTeam = homeScore > awayScore ? home : away;
+          runMsg = `  ${leadTeam} leads by ${diff}`;
+        }
+
+        items.push({
+          id: `live-${g.id}`,
+          type: "live",
+          badge: "LIVE",
+          badgeColor: "red",
+          text: `${tag}  ${scoreLine}  ${detail}${runMsg}`,
+          sport,
+          priority: 1,
+        });
+      }
+
+      // ── Final scores (last 3 hours) ───────────────────────────────
+      const finalGames = allGames.filter(g => g.status?.state === "post");
+      for (const g of finalGames.slice(0, 8)) {
+        const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
+        const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
+        const awayScore = g.awayTeam.score || 0;
+        const homeScore = g.homeTeam.score || 0;
+        const winner = homeScore > awayScore ? home : away;
+        const sport = (g as any).sport || "NBA";
+        const tag = sportEmoji[sport] || sport;
+        items.push({
+          id: `final-${g.id}`,
+          type: "final",
+          badge: "FINAL",
+          badgeColor: "gray",
+          text: `${tag}  ${away} ${awayScore}  ${home} ${homeScore}  —  ${winner} WIN`,
+          sport,
+          priority: 3,
+        });
+      }
+
+      // ── Upcoming games (next 24h) with odds ───────────────────────
+      const upcomingGames = allGames
+        .filter(g => g.status?.state === "pre")
+        .filter(g => {
+          const gameTime = new Date(g.date || "");
+          const diffMs = gameTime.getTime() - now.getTime();
+          return diffMs > 0 && diffMs < 86400000;
+        })
+        .slice(0, 12);
+
+      for (const g of upcomingGames) {
+        const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
+        const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
+        const sport = (g as any).sport || "NBA";
+        const tag = sportEmoji[sport] || sport;
+        const gameTime = new Date(g.date || "");
+        const timeStr = gameTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York", hour12: true }) + " ET";
+        const oddsInfo = g.odds?.spread ? `  Spread: ${g.odds.spread}` : "";
+        const ouInfo = g.odds?.overUnder ? `  O/U ${g.odds.overUnder}` : "";
+        const broadcast = g.broadcast ? `  ${g.broadcast}` : "";
+        items.push({
+          id: `upcoming-${g.id}`,
+          type: "upcoming",
+          badge: "UPCOMING",
+          badgeColor: "blue",
+          text: `${tag}  ${away} @ ${home}  ${timeStr}${oddsInfo}${ouInfo}${broadcast}`,
+          sport,
+          priority: 2,
+        });
+      }
+
+      // ── Top precomputed picks (A-grade) ───────────────────────────
+      const pickSports = ["NBA", "NHL", "NCAAB"];
+      for (const sport of pickSports) {
+        try {
+          const cache = getPrecomputedCache(sport);
+          if (!cache?.picks) continue;
+          const topPicks = cache.picks
+            .filter((p: any) => p.grade?.startsWith("A") && (p.ev || 0) > 5)
+            .slice(0, 2);
+          for (const pick of topPicks) {
+            const teams = pick.game?.replace(" @ ", " vs ") || pick.homeTeam || "";
+            items.push({
+              id: `pick-${sport}-${pick.id}`,
+              type: "pick",
+              badge: pick.grade,
+              badgeColor: "green",
+              text: `${sport}  ${teams}  —  ${pick.pick || pick.outcome}  |  ${pick.confidence}% conf  |  +${(pick.ev || 0).toFixed(1)}% EV`,
+              sport,
+              priority: 2,
+            });
+          }
+        } catch (err: any) { console.warn("[ticker] picks:", err?.message); }
+      }
+
+      // ── Model confidence spotlight ─────────────────────────────────
+      try {
+        const modelRes = await fetch(`http://localhost:${process.env.PORT || 5000}/api/model-health`);
+        if (modelRes.ok) {
+          const model = await modelRes.json();
+          if (model?.winRate) {
+            items.push({
+              id: "model-health",
+              type: "model",
+              badge: "MODEL",
+              badgeColor: "purple",
+              text: `46-Factor Engine  |  ${model.winRate}% win rate  |  ${model.settledCount?.toLocaleString()} settled picks  |  Calibration score ${model.calibrationScore}%`,
+              sport: "ALL",
+              priority: 4,
+            });
+          }
+        }
+      } catch (err: any) { console.warn("[ticker] model-health:", err?.message); }
+
+      // ── Sort by priority then shuffle within groups ────────────────
+      items.sort((a, b) => a.priority - b.priority);
+
+      res.json({ items, generatedAt: now.toISOString(), gameCount: allGames.length });
+    } catch (e: any) {
+      console.error("[ticker] Error:", e.message);
+      res.status(500).json({ error: e.message, items: [] });
+    }
+  });
+
   // ==================== LIVE GAMES & ANALYTICS ====================
   app.get("/api/live-games", async (_req, res) => {
     try {

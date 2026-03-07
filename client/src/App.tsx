@@ -84,6 +84,7 @@ const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
+import { SportsTicker } from "@/components/sports-ticker";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { NotificationsPanel } from "@/components/notifications-panel";
 import { CookieConsentBanner } from "@/components/cookie-consent";
@@ -897,6 +898,10 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           </div>
         </div>
       </header>
+
+      <div className="sticky top-14 z-40 w-full">
+        <SportsTicker />
+      </div>
 
       <ContextualNavBar />
 
