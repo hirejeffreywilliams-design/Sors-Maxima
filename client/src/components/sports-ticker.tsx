@@ -33,6 +33,12 @@ const FALLBACK_ITEMS: TickerItem[] = [
   { id: "f3", type: "pick",     badge: "PICK",     badgeColor: "green", text: "Sors Maxima  |  Real-time picks, scores, and sharp money alerts", sport: "ALL", priority: 3 },
 ];
 
+type TickerSpeed = "slow" | "normal" | "fast";
+const SPEED_LABELS: Record<TickerSpeed, string> = { slow: "1×", normal: "2×", fast: "4×" };
+const SPEED_NEXT: Record<TickerSpeed, TickerSpeed> = { slow: "normal", normal: "fast", fast: "slow" };
+const SPEED_DIVISORS: Record<TickerSpeed, number> = { slow: 0.6, normal: 1, fast: 2.5 };
+const SPEED_STORAGE_KEY = "sors_ticker_speed";
+
 function TickerBadge({ badge, color }: { badge: string; color: string }) {
   const cls = BADGE_STYLES[color] || "bg-zinc-700 text-white";
   return (
@@ -44,9 +50,7 @@ function TickerBadge({ badge, color }: { badge: string; color: string }) {
 
 function TickerContent({ items }: { items: TickerItem[] }) {
   if (items.length === 0) return null;
-
   const doubled = [...items, ...items];
-
   return (
     <div className="flex items-center gap-0 whitespace-nowrap">
       {doubled.map((item, i) => (
@@ -66,6 +70,10 @@ export function SportsTicker() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [speed, setSpeed] = useState<TickerSpeed>(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem(SPEED_STORAGE_KEY) : null;
+    return (saved as TickerSpeed) || "normal";
+  });
 
   const { data, isLoading } = useQuery<TickerResponse>({
     queryKey: ["/api/ticker"],
@@ -74,12 +82,21 @@ export function SportsTicker() {
     retry: 1,
   });
 
+  const cycleSpeed = () => {
+    setSpeed(prev => {
+      const next = SPEED_NEXT[prev];
+      localStorage.setItem(SPEED_STORAGE_KEY, next);
+      return next;
+    });
+  };
+
   const items = (!isLoading && data?.items?.length) ? data.items : FALLBACK_ITEMS;
   const liveCount = items.filter(i => i.type === "live").length;
   const injuryCount = items.filter(i => i.type === "injury").length;
 
-  // Scale scroll speed with item count (~2.5s per item, min 45s, max 150s)
-  const scrollDuration = Math.min(150, Math.max(45, items.length * 2.5));
+  // Base scroll duration scaled by item count, then adjusted by speed
+  const baseDuration = Math.min(150, Math.max(45, items.length * 2.5));
+  const scrollDuration = baseDuration / SPEED_DIVISORS[speed];
 
   if (!isVisible) return null;
 
@@ -93,20 +110,17 @@ export function SportsTicker() {
 
         {/* Left label — brand + live counts */}
         <div className="shrink-0 flex items-center gap-0 border-r border-border/30 bg-zinc-950 h-full z-10">
-          {/* Brand name */}
           <div className="flex items-center gap-1.5 px-3 h-full border-r border-border/20">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
             <span className="text-[9px] font-black tracking-[0.18em] text-zinc-200 uppercase hidden sm:block whitespace-nowrap">
               SORS INTEL
             </span>
           </div>
-          {/* Live game count */}
           {liveCount > 0 && (
             <div className="hidden sm:flex items-center gap-1 px-2.5 h-full border-r border-border/20">
               <span className="text-[8px] font-bold text-red-400 tracking-wide">{liveCount} LIVE</span>
             </div>
           )}
-          {/* Injury count */}
           {injuryCount > 0 && (
             <div className="hidden sm:flex items-center gap-1 px-2.5 h-full border-r border-border/20">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
@@ -133,15 +147,27 @@ export function SportsTicker() {
           </div>
         </div>
 
-        {/* Right dismiss */}
-        <button
-          onClick={() => setIsVisible(false)}
-          className="shrink-0 flex items-center justify-center w-7 h-full border-l border-border/30 text-zinc-500 hover:text-zinc-300 transition-colors bg-zinc-950 z-10"
-          data-testid="button-close-ticker"
-          title="Hide ticker"
-        >
-          <span className="text-[10px] font-bold">✕</span>
-        </button>
+        {/* Right controls */}
+        <div className="shrink-0 flex items-center border-l border-border/30 bg-zinc-950 h-full z-10">
+          {/* Speed toggle */}
+          <button
+            onClick={cycleSpeed}
+            className="flex items-center justify-center px-2 h-full text-zinc-500 hover:text-zinc-200 transition-colors border-r border-border/20"
+            data-testid="button-ticker-speed"
+            title={`Ticker speed: ${speed}. Click to change.`}
+          >
+            <span className="text-[9px] font-bold tracking-wide">{SPEED_LABELS[speed]}</span>
+          </button>
+          {/* Dismiss */}
+          <button
+            onClick={() => setIsVisible(false)}
+            className="flex items-center justify-center w-7 h-full text-zinc-500 hover:text-zinc-300 transition-colors"
+            data-testid="button-close-ticker"
+            title="Hide ticker"
+          >
+            <span className="text-[10px] font-bold">✕</span>
+          </button>
+        </div>
       </div>
     </div>
   );

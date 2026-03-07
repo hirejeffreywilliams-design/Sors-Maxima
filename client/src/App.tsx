@@ -81,7 +81,8 @@ const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders } from "lucide-react";
+import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { SportsTicker } from "@/components/sports-ticker";
@@ -558,6 +559,23 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
             {authState.isAdmin && <Badge variant="secondary" className="text-xs py-0">Admin</Badge>}
           </div>
         )}
+        <Sheet>
+          <SheetTrigger asChild>
+            <button
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm hover:bg-muted text-muted-foreground"
+              data-testid="mobile-nav-customize-shortcuts"
+            >
+              <Sliders className="w-4 h-4" />
+              <span>Customize Shortcuts</span>
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Customize Bottom Navigation</SheetTitle>
+            </SheetHeader>
+            <NavCustomizerSheet onClose={() => {}} />
+          </SheetContent>
+        </Sheet>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <Button variant="outline" size="sm" onClick={() => { onLogout(); onClose(); }} className="flex-1 gap-2 text-destructive border-destructive/30 hover:bg-destructive/10" data-testid="mobile-button-logout">
@@ -648,61 +666,125 @@ function DesktopNav({ authState }: { authState: AuthState }) {
   );
 }
 
+const NAV_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Zap, Calendar, Brain, TrendingUp, Activity, ClipboardList, Star, LayoutGrid,
+  Sword, Calculator, Users, Eye, BarChart2, Wallet, LineChart, User,
+};
+
+function NavCustomizerSheet({ onClose }: { onClose: () => void }) {
+  const { selectedIds, toggleItem, resetToDefault } = useBottomNavPrefs();
+  return (
+    <div className="p-4 space-y-4">
+      <div>
+        <p className="text-sm font-semibold mb-1">Customize Bottom Shortcuts</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Choose up to 4 shortcuts for quick access. The Slip and More buttons are always shown.
+        </p>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        {ALL_NAV_ITEMS.map(item => {
+          const Icon = NAV_ICON_MAP[item.iconName] || Zap;
+          const isSelected = selectedIds.includes(item.id);
+          return (
+            <button
+              key={item.id}
+              onClick={() => toggleItem(item.id)}
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                isSelected
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-muted/30 text-muted-foreground hover:border-primary/40 hover:bg-muted/50"
+              }`}
+              data-testid={`nav-customizer-${item.id}`}
+              aria-pressed={isSelected}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[10px] font-medium leading-none text-center">{item.label}</span>
+              {isSelected && (
+                <span className="text-[8px] font-bold text-primary/70 tracking-wider">
+                  #{selectedIds.indexOf(item.id) + 1}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          onClick={resetToDefault}
+          className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+          data-testid="button-nav-reset-default"
+        >
+          Reset to defaults
+        </button>
+        <div className="flex-1" />
+        <span className="text-xs text-muted-foreground">{selectedIds.length}/4 selected</span>
+      </div>
+    </div>
+  );
+}
+
 function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [location] = useLocation();
   const { legCount, setMobileOpen } = useParlaySlip();
-
-  const coreItems = [
-    { href: "/", icon: Zap, label: "Picks", testId: "bottom-nav-picks" },
-    { href: "/daily", icon: Calendar, label: "Daily", testId: "bottom-nav-daily" },
-    { href: "/generate", icon: Brain, label: "Build", testId: "bottom-nav-build" },
-    { href: "/odds-center", icon: TrendingUp, label: "Markets", testId: "bottom-nav-markets" },
-  ];
+  const { selectedItems } = useBottomNavPrefs();
+  const [showCustomizer, setShowCustomizer] = useState(false);
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
-      <div className="flex items-center justify-around gap-0 h-16">
-        {coreItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location === item.href;
-          return (
-            <Link key={item.href} href={item.href}>
-              <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={item.testId}>
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{item.label}</span>
-              </div>
-            </Link>
-          );
-        })}
+    <>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
+        <div className="flex items-center justify-around gap-0 h-16">
+          {selectedItems.map((item) => {
+            const Icon = NAV_ICON_MAP[item.iconName] || Zap;
+            const isActive = location === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={`bottom-nav-${item.id}`}>
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-medium">{item.label}</span>
+                </div>
+              </Link>
+            );
+          })}
 
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target text-primary"
-          data-testid="bottom-nav-slip"
-          aria-label="Open bet slip"
-        >
-          <div className="relative">
-            <Ticket className="w-5 h-5" />
-            {legCount > 0 && (
-              <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none">
-                {legCount > 9 ? "9+" : legCount}
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] font-bold">Slip</span>
-        </button>
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-primary"
+            data-testid="bottom-nav-slip"
+            aria-label="Open bet slip"
+          >
+            <div className="relative">
+              <Ticket className="w-5 h-5" />
+              {legCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none">
+                  {legCount > 9 ? "9+" : legCount}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-bold">Slip</span>
+          </button>
 
-        <button
-          onClick={onOpenMenu}
-          className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[56px] touch-target text-muted-foreground"
-          data-testid="bottom-nav-more"
-          aria-label="More navigation"
-        >
-          <MoreHorizontal className="w-5 h-5" />
-          <span className="text-[10px] font-medium">More</span>
-        </button>
-      </div>
-    </nav>
+          <button
+            onClick={onOpenMenu}
+            className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-muted-foreground"
+            data-testid="bottom-nav-more"
+            aria-label="More navigation"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[10px] font-medium">More</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Customizer Sheet */}
+      <Sheet open={showCustomizer} onOpenChange={setShowCustomizer}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Customize Bottom Navigation</SheetTitle>
+          </SheetHeader>
+          <NavCustomizerSheet onClose={() => setShowCustomizer(false)} />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }
 

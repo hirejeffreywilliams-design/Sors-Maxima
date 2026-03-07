@@ -831,6 +831,70 @@
       "ev": 26,
       "gameTime": "2026-03-10T04:00Z",
       "savedAt": "2026-03-07T21:19:45.755Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851202-spread-d317067459",
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "game": "TBD @ UMBC Retrievers",
+      "homeTeam": "UMBC Retrievers",
+      "awayTeam": "TBD",
+      "pick": "UMBC Retrievers +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 79,
+      "ev": 35.55,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:30:06.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851202-moneyline-17a70b6fa7",
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "game": "TBD @ UMBC Retrievers",
+      "homeTeam": "UMBC Retrievers",
+      "awayTeam": "TBD",
+      "pick": "UMBC Retrievers ML",
+      "betType": "moneyline",
+      "odds": -147,
+      "grade": "B+",
+      "confidence": 73,
+      "ev": 15.94,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:30:06.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851202-total-8ca2794ecb",
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "game": "TBD @ UMBC Retrievers",
+      "homeTeam": "UMBC Retrievers",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 65,
+      "ev": 35.55,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:30:06.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-total-327f17870b",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ Vermont Catamounts",
+      "homeTeam": "Vermont Catamounts",
+      "awayTeam": "TBD",
+      "pick": "Over 143.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 65,
+      "ev": 20.27,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:40:11.180Z"
     }
   ],
   "settled": [
@@ -10535,7 +10599,7 @@
       "lost": 219,
       "push": 12,
       "rate": 50.6,
-      "pending": 52
+      "pending": 56
     },
     "bySport": {
       "NBA": {
@@ -10638,7 +10702,7 @@
       "push": 3,
       "rate": 32
     },
-    "lastUpdated": "2026-03-07T21:27:58.003Z",
+    "lastUpdated": "2026-03-07T21:40:44.453Z",
     "roi": 3.9,
     "brierScore": 0.2615,
     "maxDrawdown": 14.5,

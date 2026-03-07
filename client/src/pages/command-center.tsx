@@ -15,7 +15,7 @@ import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
-  Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle
+  Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle, Smartphone
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
@@ -24,6 +24,7 @@ import { TierGate, useTier } from "@/components/tier-gate";
 import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 import { OffseasonPanel } from "@/components/offseason-panel";
 import { PickTrackNudge } from "@/components/pick-track-nudge";
+import { SwipePickCards } from "@/components/swipe-pick-cards";
 
 interface TopPick {
   id: string;
@@ -1493,6 +1494,7 @@ export default function CommandCenter() {
   useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
   const [activeSportTab, setActiveSportTab] = useState("all");
   const [ticketDateFilter, setTicketDateFilter] = useState<"today" | "future" | "all">("all");
+  const [swipeMode, setSwipeMode] = useState(false);
   const { legs, addLeg } = useParlaySlip();
   const { canAccess } = useTier();
 
@@ -1693,6 +1695,16 @@ export default function CommandCenter() {
                 <RefreshCw className="w-3 h-3" />
                 {lastUpdate}
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs sm:hidden"
+                onClick={() => setSwipeMode(true)}
+                data-testid="button-swipe-mode"
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                Swipe
+              </Button>
             </div>
           </div>
         </header>
@@ -1793,85 +1805,6 @@ export default function CommandCenter() {
             </TierGate>
           )
         )}
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Card data-testid="card-stat-best-grade">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-primary/10">
-                  <Trophy className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Best Grade Today</p>
-                  <p className={`text-2xl font-bold tabular-nums ${gradeColor(ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–")}`} data-testid="text-best-grade">
-                    {ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">{totalPicks} picks across {activeSports.length} sports</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-stat-highest-ev">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-emerald-500/10">
-                  <TrendingUp className="w-5 h-5 text-emerald-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Highest EV Ticket</p>
-                  <p className="text-2xl font-bold tabular-nums text-emerald-500" data-testid="text-highest-ev">
-                    {ticketsData?.tickets[0]?.combinedEV ? (ticketsData.tickets[0].combinedEV > 35 ? "35%+" : `+${ticketsData.tickets[0].combinedEV}%`) : feed.topPicks[0]?.ev ? (feed.topPicks[0].ev > 35 ? "35%+" : `+${feed.topPicks[0].ev.toFixed(1)}%`) : "–"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {ticketsData?.tickets[0]?.name || "analyzing markets"}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-stat-live">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-red-500/10">
-                  <Activity className="w-5 h-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Live Games</p>
-                  <p className="text-2xl font-bold tabular-nums" data-testid="text-live-count">{totalLive}</p>
-                  <p className="text-[10px] text-muted-foreground">{totalLive > 0 ? "tracking now" : "none in progress"}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card data-testid="card-stat-streak" className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => window.location.href = "/personalized-insights"}>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-md ${streakData?.streakType === "win" ? "bg-orange-500/10" : "bg-muted"}`}>
-                  <Flame className={`w-5 h-5 ${streakData?.streakType === "win" ? "text-orange-500" : "text-muted-foreground"}`} />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Pick Streak</p>
-                  {streakData && streakData.currentStreak > 0 ? (
-                    <>
-                      <p className={`text-2xl font-bold tabular-nums ${streakData.streakType === "win" ? "text-orange-500" : "text-blue-400"}`} data-testid="text-pick-streak">
-                        {streakData.streakType === "win" ? "+" : ""}{streakData.currentStreak}W
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">best: {streakData.longestWin}W</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-2xl font-bold tabular-nums text-muted-foreground" data-testid="text-pick-streak">–</p>
-                      <p className="text-[10px] text-muted-foreground">track picks to start</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
 
         <Tabs value={activeSportTab} onValueChange={setActiveSportTab}>
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
@@ -1974,13 +1907,129 @@ export default function CommandCenter() {
           </div>
         </Tabs>
 
-        <div className="mt-8 pt-4 border-t border-border/40">
+        {/* ── Performance Summary (moved below picks) ── */}
+        <div data-testid="section-performance-summary">
+          <div className="flex items-center gap-2 mb-3">
+            <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Your Performance</h3>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Card data-testid="card-stat-best-grade">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-primary/10">
+                    <Trophy className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Best Grade Today</p>
+                    <p className={`text-2xl font-bold tabular-nums ${gradeColor(ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–")}`} data-testid="text-best-grade">
+                      {ticketsData?.tickets[0]?.combinedGrade || feed.topPicks[0]?.grade || "–"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{totalPicks} picks across {activeSports.length} sports</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-stat-highest-ev">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-emerald-500/10">
+                    <TrendingUp className="w-5 h-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Highest EV Ticket</p>
+                    <p className="text-2xl font-bold tabular-nums text-emerald-500" data-testid="text-highest-ev">
+                      {ticketsData?.tickets[0]?.combinedEV ? (ticketsData.tickets[0].combinedEV > 35 ? "35%+" : `+${ticketsData.tickets[0].combinedEV}%`) : feed.topPicks[0]?.ev ? (feed.topPicks[0].ev > 35 ? "35%+" : `+${feed.topPicks[0].ev.toFixed(1)}%`) : "–"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {ticketsData?.tickets[0]?.name || "analyzing markets"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-stat-live">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-md bg-red-500/10">
+                    <Activity className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Live Games</p>
+                    <p className="text-2xl font-bold tabular-nums" data-testid="text-live-count">{totalLive}</p>
+                    <p className="text-[10px] text-muted-foreground">{totalLive > 0 ? "tracking now" : "none in progress"}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-stat-streak" className="cursor-pointer hover:border-primary/40 transition-colors" onClick={() => window.location.href = "/personalized-insights"}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-md ${streakData?.streakType === "win" ? "bg-orange-500/10" : "bg-muted"}`}>
+                    <Flame className={`w-5 h-5 ${streakData?.streakType === "win" ? "text-orange-500" : "text-muted-foreground"}`} />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Pick Streak</p>
+                    {streakData && streakData.currentStreak > 0 ? (
+                      <>
+                        <p className={`text-2xl font-bold tabular-nums ${streakData.streakType === "win" ? "text-orange-500" : "text-blue-400"}`} data-testid="text-pick-streak">
+                          {streakData.streakType === "win" ? "+" : ""}{streakData.currentStreak}W
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">best: {streakData.longestWin}W</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-2xl font-bold tabular-nums text-muted-foreground" data-testid="text-pick-streak">–</p>
+                        <p className="text-[10px] text-muted-foreground">track picks to start</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-border/40">
           <p className="text-xs text-muted-foreground text-center leading-relaxed">
             Picks are analytical recommendations only — not guaranteed outcomes. Must be 21+ and in a jurisdiction where sports betting is legal. Bet responsibly. View full disclaimer at <Link href="/legal" className="text-primary hover:underline">/legal</Link>
           </p>
         </div>
 
       </div>
+
+      {/* Swipe Mode overlay */}
+      {swipeMode && feed.topPicks.length > 0 && (
+        <SwipePickCards
+          picks={feed.topPicks}
+          onAdd={(pick) => {
+            const legId = `swipe-${pick.id}`;
+            const decOdds = pick.odds < 0 ? 1 + (100 / Math.abs(pick.odds)) : 1 + (pick.odds / 100);
+            const validMarket = ["moneyline","spread","total","player_prop"].includes(pick.betType) ? pick.betType : "moneyline";
+            addLeg({
+              id: legId,
+              team: pick.homeTeam,
+              opponent: pick.awayTeam,
+              market: validMarket as any,
+              outcome: pick.pick,
+              decimalOdds: decOdds,
+              americanOdds: pick.odds,
+              addedFrom: "Swipe Mode",
+              addedAt: new Date().toISOString(),
+              sport: pick.sport,
+              confidence: pick.confidence,
+              grade: pick.grade,
+              edge: pick.edge,
+              ev: pick.ev,
+            });
+          }}
+          onClose={() => setSwipeMode(false)}
+        />
+      )}
+
       <PickTrackNudge />
     </div>
   );

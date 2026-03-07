@@ -1159,12 +1159,29 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         });
       }
 
-      // ── Injury reports (NBA · NHL · NFL) ──────────────────────────
-      const injuryEndpoints: Array<{ sport: string; url: string }> = [
+      // ── Derive in-season sports from actual game data ─────────────
+      const sportsWithGames = new Set<string>(
+        allGames
+          .filter(g => {
+            if (g.status?.state === "in") return true;
+            if (g.status?.state === "pre") {
+              const t = new Date(g.date || "").getTime() - now.getTime();
+              return t > 0 && t < 259200000; // 72 hours
+            }
+            return false;
+          })
+          .map(g => ((g as any).sport || "").toUpperCase())
+          .filter(Boolean)
+      );
+
+      // ── Injury reports — only for in-season sports ─────────────────
+      const ALL_INJURY_ENDPOINTS: Array<{ sport: string; url: string }> = [
         { sport: "NBA", url: "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/injuries" },
         { sport: "NHL", url: "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/injuries" },
         { sport: "NFL", url: "https://site.api.espn.com/apis/site/v2/sports/football/nfl/injuries" },
+        { sport: "MLB", url: "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/injuries" },
       ];
+      const injuryEndpoints = ALL_INJURY_ENDPOINTS.filter(e => sportsWithGames.has(e.sport));
 
       for (const { sport: injSport, url } of injuryEndpoints) {
         try {

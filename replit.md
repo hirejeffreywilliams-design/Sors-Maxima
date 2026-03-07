@@ -28,6 +28,10 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **User Engagement & Personalization**: Features Personalized Betting Insights, a Unified Tools & Analytics Page, and a Consolidated Odds Center (Odds Comparison, EV Heatmap, Line Movement, Power Rankings).
 - **Real-time Updates & Notifications**: Utilizes Server-Sent Events (SSE) for live updates and a Custom Notification Engine for game subscriptions and parlay watches.
 - **Tier-Based Feature Gating**: Protects API routes and features based on user subscription tiers (Sharp, Edge, Max).
+- **Sports Ticker with Speed Control**: Ticker shows only in-season sports (filtered by actual game presence). Speed cycles Slow (1×) / Normal (2×) / Fast (4×), stored in localStorage `sors_ticker_speed`.
+- **Swipe Mode (Mobile Picks)**: Tinder-style swipe-right-to-add, swipe-left-to-skip card interface for picks on mobile. `SwipePickCards` component in `client/src/components/swipe-pick-cards.tsx`. Uses pointer events (works touch + mouse). Activated by "Swipe" button in command center header (hidden on sm+ screens).
+- **Customizable Bottom Nav**: Users choose up to 4 shortcut icons for the bottom mobile nav. Stored in localStorage `sors_bottom_nav_items`. Default: Picks/Daily/Build/Markets. Configure via "Customize Shortcuts" in the More side menu. Hook: `client/src/hooks/use-bottom-nav-prefs.ts`. NavCustomizerSheet in App.tsx.
+- **Command Center Layout**: Stats/performance cards ("Your Performance" section) moved below the sport picks tabs so picks appear first.
 - **Persistent Data Storage**: Uses PostgreSQL for storing user watchlists, preferences, subscriptions, ticket history, and betting profiles.
 - **Autonomous Intelligence & Admin Tools**: Includes a Platform Intelligence Engine for continuous learning, an App Guardian Engine for health monitoring, an AI-Powered Admin Assistant for reports, and an Autonomous Admin Intelligence Engine for monitoring and task prioritization.
 - **Specialized Pick Engines**: Dedicated engines for MMA/UFC Picks, March Madness Championship Futures, and Player Props Analyzer.
