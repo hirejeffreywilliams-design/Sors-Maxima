@@ -49,6 +49,8 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Share Winning Ticket**: Share button on winning cards in Ticket Showcase opens `ShareProofModal` (branded green overlay). Copy (clipboard) + Share (Web Share API, mobile). Component inline in `client/src/components/ticket-showcase.tsx`.
 - **Prediction Engine Calibration**: Outcome-calibrated adjustments in `server/precomputedPredictionsEngine.ts`: Totals -3% confidence, Home team +2%, Away team -2%, NBA/NHL -2%, NCAAB +1%. Quality gate: skips picks with confidence < 52 (C-grade and below historically ≤44% win rate).
 - **AI Analysis moved to Admin**: AI Analysis button/panel removed from user-facing `/track-record` page. Now lives in Admin → Model Performance → "AI Analysis" tab. Keeps technical calibration language out of user view.
+- **Profile Page Performance Aura**: Profile hero section shows a full ambient glow background that shifts color based on user's actual betting performance: green (win rate ≥55% or ROI ≥5%), yellow (45–55%), red (<45%), indigo (no data yet). Includes animated SVG performance ring, tier badge, bettor archetype, streak, record, ROI, and bankroll at a glance.
+- **Cookie Consent Auto-Accept**: Authenticated users are automatically granted cookie consent on login/signup (implied by T&C agreement). Banner only shows to logged-out visitors. Cookie preferences are visible and manageable in Profile → Account → Data & Privacy.
 
 ## Proprietary Branding Notes
 - All user-visible "Monte Carlo" references replaced with "Sors Simulation" (parlay slip, command center, daily parlays, help, pricing, odds-center, platform-intelligence, intelligence-pipeline, admin pages)

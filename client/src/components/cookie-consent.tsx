@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Shield, X } from "lucide-react";
@@ -6,25 +7,46 @@ import { Link } from "wouter";
 
 const COOKIE_CONSENT_KEY = "sors-maxima-cookie-consent";
 
+export function grantCookieConsent() {
+  try {
+    localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ accepted: true, timestamp: Date.now() }));
+  } catch {}
+}
+
+export function getCookieConsent(): { accepted: boolean } | null {
+  try {
+    const raw = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 export function CookieConsentBanner() {
   const [visible, setVisible] = useState(false);
 
+  const { data: authData } = useQuery<{ authenticated: boolean }>({
+    queryKey: ["/api/auth/check"],
+  });
+
   useEffect(() => {
-    try {
-      const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
-      if (!consent) {
-        const timer = setTimeout(() => setVisible(true), 1500);
-        return () => clearTimeout(timer);
-      }
-    } catch {
-      // localStorage unavailable
+    const consent = getCookieConsent();
+    if (consent) return;
+
+    if (authData?.authenticated) {
+      grantCookieConsent();
+      return;
     }
-  }, []);
+
+    if (authData?.authenticated === false) {
+      const timer = setTimeout(() => setVisible(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [authData]);
 
   const handleAccept = () => {
-    try {
-      localStorage.setItem(COOKIE_CONSENT_KEY, JSON.stringify({ accepted: true, timestamp: Date.now() }));
-    } catch {}
+    grantCookieConsent();
     setVisible(false);
   };
 
@@ -46,7 +68,7 @@ export function CookieConsentBanner() {
             <div>
               <p className="text-sm font-medium">We value your privacy</p>
               <p className="text-xs text-muted-foreground mt-1">
-                We use cookies and similar technologies to improve your experience, analyze traffic, and personalize content. 
+                We use cookies and similar technologies to improve your experience, analyze traffic, and personalize content.
                 By accepting, you consent to our use of cookies as described in our{" "}
                 <Link href="/legal" className="text-primary underline">Privacy Policy</Link>.
               </p>

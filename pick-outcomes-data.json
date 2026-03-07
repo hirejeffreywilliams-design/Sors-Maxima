@@ -927,6 +927,22 @@
       "ev": 20.27,
       "gameTime": "2026-03-10T18:00Z",
       "savedAt": "2026-03-07T23:11:48.540Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851716-moneyline-c5dbdf0af2",
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "game": "TBD @ Prairie View A&M Panthers",
+      "homeTeam": "Prairie View A&M Panthers",
+      "awayTeam": "TBD",
+      "pick": "Prairie View A&M Panthers ML",
+      "betType": "moneyline",
+      "odds": 111,
+      "grade": "B-",
+      "confidence": 54,
+      "ev": 35.04,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-07T23:21:46.719Z"
     }
   ],
   "settled": [
@@ -10811,7 +10827,7 @@
       "lost": 224,
       "push": 12,
       "rate": 50.5,
-      "pending": 58
+      "pending": 59
     },
     "bySport": {
       "NBA": {
@@ -10914,7 +10930,7 @@
       "push": 1,
       "rate": 38
     },
-    "lastUpdated": "2026-03-07T23:15:08.943Z",
+    "lastUpdated": "2026-03-07T23:24:27.008Z",
     "roi": 3.4,
     "brierScore": 0.2619,
     "maxDrawdown": 15.4,

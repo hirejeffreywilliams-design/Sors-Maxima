@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,8 +52,21 @@ import {
   ChevronDown,
   ChevronUp,
   Minus,
+  Flame,
+  Wallet,
+  Activity,
+  Award,
+  Sparkles,
+  DollarSign,
+  Calendar,
+  BookOpen,
+  Lock,
+  ExternalLink,
+  Crown,
 } from "lucide-react";
 import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
+import { Link } from "wouter";
+import { getCookieConsent, grantCookieConsent } from "@/components/cookie-consent";
 
 type RiskTolerance = "conservative" | "moderate" | "aggressive";
 type BankrollStrategy = "flat" | "percentage" | "kelly";
@@ -193,6 +206,298 @@ function formatOdds(american: number) {
 function formatDate(iso: string) {
   const d = new Date(iso);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+type AuraConfig = {
+  label: string;
+  sublabel: string;
+  glowColor: string;
+  gradientStyle: string;
+  ringColor: string;
+  textColor: string;
+  bgPulse: string;
+  borderColor: string;
+  statsBg: string;
+};
+
+function getPerformanceAura(winRate: number, roi: number, hasData: boolean): AuraConfig {
+  if (!hasData) {
+    return {
+      label: "Getting Started",
+      sublabel: "Start tracking tickets to unlock your performance aura",
+      glowColor: "rgba(99,102,241,0.18)",
+      gradientStyle: "radial-gradient(ellipse 120% 50% at 50% -5%, rgba(99,102,241,0.22) 0%, rgba(139,92,246,0.12) 40%, transparent 70%)",
+      ringColor: "#6366f1",
+      textColor: "text-indigo-400",
+      bgPulse: "bg-indigo-500/10",
+      borderColor: "border-indigo-500/20",
+      statsBg: "bg-indigo-500/5",
+    };
+  }
+  if (winRate >= 55 || roi >= 5) {
+    return {
+      label: "Sharp Edge",
+      sublabel: "You're beating the market — keep it up",
+      glowColor: "rgba(34,197,94,0.2)",
+      gradientStyle: "radial-gradient(ellipse 120% 50% at 50% -5%, rgba(34,197,94,0.28) 0%, rgba(16,185,129,0.15) 40%, transparent 70%)",
+      ringColor: "#22c55e",
+      textColor: "text-green-400",
+      bgPulse: "bg-green-500/10",
+      borderColor: "border-green-500/25",
+      statsBg: "bg-green-500/5",
+    };
+  }
+  if (winRate >= 45) {
+    return {
+      label: "Building Edge",
+      sublabel: "Solid foundation — stay disciplined and grow",
+      glowColor: "rgba(234,179,8,0.18)",
+      gradientStyle: "radial-gradient(ellipse 120% 50% at 50% -5%, rgba(234,179,8,0.25) 0%, rgba(245,158,11,0.14) 40%, transparent 70%)",
+      ringColor: "#eab308",
+      textColor: "text-yellow-400",
+      bgPulse: "bg-yellow-500/10",
+      borderColor: "border-yellow-500/25",
+      statsBg: "bg-yellow-500/5",
+    };
+  }
+  return {
+    label: "Needs Adjustment",
+    sublabel: "Review your strategy and lean on the Sors engine",
+    glowColor: "rgba(239,68,68,0.18)",
+    gradientStyle: "radial-gradient(ellipse 120% 50% at 50% -5%, rgba(239,68,68,0.25) 0%, rgba(220,38,38,0.14) 40%, transparent 70%)",
+    ringColor: "#ef4444",
+    textColor: "text-red-400",
+    bgPulse: "bg-red-500/10",
+    borderColor: "border-red-500/25",
+    statsBg: "bg-red-500/5",
+  };
+}
+
+const TIER_DISPLAY: Record<string, { label: string; icon: JSX.Element; badge: string; crown: boolean }> = {
+  free: {
+    label: "Free",
+    icon: <User className="w-3.5 h-3.5" />,
+    badge: "bg-gray-500/15 text-gray-400 border-gray-500/25",
+    crown: false,
+  },
+  pro: {
+    label: "Sharp",
+    icon: <Zap className="w-3.5 h-3.5" />,
+    badge: "bg-blue-500/15 text-blue-400 border-blue-500/25",
+    crown: false,
+  },
+  elite: {
+    label: "Edge",
+    icon: <Flame className="w-3.5 h-3.5" />,
+    badge: "bg-purple-500/15 text-purple-400 border-purple-500/25",
+    crown: false,
+  },
+  whale: {
+    label: "Max",
+    icon: <Crown className="w-3.5 h-3.5" />,
+    badge: "bg-amber-500/15 text-amber-400 border-amber-500/25",
+    crown: true,
+  },
+};
+
+function PerformanceRing({ winRate, ringColor, hasData }: { winRate: number; ringColor: string; hasData: boolean }) {
+  const size = 88;
+  const strokeWidth = 6;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = hasData ? Math.min(100, Math.max(0, winRate)) : 0;
+  const offset = circumference - (pct / 100) * circumference;
+
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }} data-testid="performance-ring">
+      <svg width={size} height={size} className="absolute inset-0 -rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          className="text-muted/20"
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke={ringColor}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 1s ease-in-out", filter: `drop-shadow(0 0 6px ${ringColor}80)` }}
+        />
+      </svg>
+      <div className="relative z-10 text-center">
+        <p className="text-lg font-bold leading-none" style={{ color: ringColor }} data-testid="text-winrate-ring">
+          {hasData ? `${winRate.toFixed(0)}%` : "—"}
+        </p>
+        <p className="text-[9px] text-muted-foreground uppercase tracking-wide mt-0.5">Win Rate</p>
+      </div>
+    </div>
+  );
+}
+
+function ProfileHero() {
+  const { data: authData } = useQuery<{ authenticated: boolean; username?: string; isAdmin?: boolean; tier?: string }>({
+    queryKey: ["/api/auth/check"],
+  });
+  const { data: tickets = [] } = useQuery<SavedTicket[]>({ queryKey: TICKET_HISTORY_KEY });
+  const { data: streak } = useQuery<any>({ queryKey: ["/api/user/streak"] });
+  const { data: bankroll } = useQuery<any>({ queryKey: ["/api/settings/bankroll"] });
+  const { data: bettingProfile } = useQuery<any>({ queryKey: ["/api/user/betting-profile"] });
+  const { data: subscription } = useQuery<any>({ queryKey: ["/api/subscription"] });
+
+  const settled = tickets.filter((t) => t.status !== "pending");
+  const wins = settled.filter((t) => t.status === "won").length;
+  const losses = settled.filter((t) => t.status === "lost").length;
+  const winRate = settled.length > 0 ? (wins / (wins + losses)) * 100 : 0;
+  const totalStaked = settled.reduce((s, t) => s + t.recommended_stake, 0);
+  const totalPL = settled.reduce((s, t) => s + (t.actual_pl ?? 0), 0);
+  const roi = totalStaked > 0 ? (totalPL / totalStaked) * 100 : 0;
+  const hasData = settled.length >= 3;
+
+  const aura = getPerformanceAura(winRate, roi, hasData);
+  const tierKey = (subscription?.tier || authData?.tier || "free").toLowerCase();
+  const tierConfig = TIER_DISPLAY[tierKey] || TIER_DISPLAY.free;
+
+  const profile: BettingProfileData = bettingProfile ?? defaultProfile;
+  const archetypeInfo = getProfileType(profile);
+
+  const initials = (authData?.username || "?")
+    .split(/[\s_-]/)
+    .map((w: string) => w[0] || "")
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  const currentStreak = streak?.currentStreak ?? 0;
+  const streakType = streak?.streakType ?? "none";
+
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl border"
+      style={{ borderColor: aura.ringColor + "30" }}
+      data-testid="profile-hero"
+    >
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: aura.gradientStyle }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none opacity-40"
+        style={{
+          background: `radial-gradient(ellipse 60% 60% at 50% 100%, ${aura.glowColor}, transparent)`,
+        }}
+      />
+
+      <div className="relative z-10 p-6 sm:p-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+          <div className="relative shrink-0">
+            <div
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold bg-background/60 backdrop-blur-sm border-2"
+              style={{ borderColor: aura.ringColor + "50", boxShadow: `0 0 24px ${aura.glowColor}, 0 0 48px ${aura.glowColor}` }}
+              data-testid="avatar-initials"
+            >
+              {initials}
+            </div>
+            <div
+              className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-background"
+              style={{ backgroundColor: aura.ringColor }}
+            >
+              {archetypeInfo.icon && (
+                <span className="text-[10px] text-white">{archetypeInfo.icon}</span>
+              )}
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-0 text-center sm:text-left space-y-2">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 flex-wrap">
+              <h2 className="text-2xl sm:text-3xl font-bold truncate" data-testid="text-hero-username">
+                {authData?.username || "Member"}
+              </h2>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={`text-xs flex items-center gap-1 px-2 py-0.5 ${tierConfig.badge}`}
+                  data-testid="badge-tier"
+                >
+                  {tierConfig.icon}
+                  {tierConfig.label}
+                </Badge>
+                {authData?.isAdmin && (
+                  <Badge variant="outline" className="text-xs bg-rose-500/10 text-rose-400 border-rose-500/25">
+                    Admin
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center sm:justify-start gap-1.5">
+              <Sparkles className={`w-3.5 h-3.5 ${aura.textColor}`} />
+              <span className={`text-sm font-medium ${aura.textColor}`} data-testid="text-archetype">
+                {archetypeInfo.name}
+              </span>
+              <span className="text-muted-foreground text-xs">·</span>
+              <span className={`text-xs ${aura.textColor} opacity-80`}>{aura.label}</span>
+            </div>
+
+            <p className="text-xs text-muted-foreground italic">{aura.sublabel}</p>
+          </div>
+
+          <div className="shrink-0">
+            <PerformanceRing winRate={winRate} ringColor={aura.ringColor} hasData={hasData} />
+          </div>
+        </div>
+
+        <div className={`mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3`}>
+          <div className={`rounded-xl p-3 text-center ${aura.statsBg} border ${aura.borderColor}`} data-testid="stat-hero-tickets">
+            <p className="text-lg font-bold">{tickets.length}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Tickets</p>
+          </div>
+          <div className={`rounded-xl p-3 text-center ${aura.statsBg} border ${aura.borderColor}`} data-testid="stat-hero-record">
+            <p className="text-lg font-bold">{wins}W–{losses}L</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Record</p>
+          </div>
+          <div className={`rounded-xl p-3 text-center ${aura.statsBg} border ${aura.borderColor}`} data-testid="stat-hero-roi">
+            <p className={`text-lg font-bold ${!hasData ? "" : roi >= 0 ? "text-green-400" : "text-red-400"}`}>
+              {hasData ? `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%` : "—"}
+            </p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">ROI</p>
+          </div>
+          <div className={`rounded-xl p-3 text-center ${aura.statsBg} border ${aura.borderColor}`} data-testid="stat-hero-streak">
+            <div className="flex items-center justify-center gap-1">
+              {streakType === "win" && <Flame className="w-4 h-4 text-orange-400" />}
+              {streakType === "loss" && <TrendingDown className="w-4 h-4 text-red-400" />}
+              <p className={`text-lg font-bold ${streakType === "win" ? "text-orange-400" : streakType === "loss" ? "text-red-400" : ""}`}>
+                {currentStreak > 0 ? `${currentStreak}` : "—"}
+              </p>
+            </div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+              {streakType === "win" ? "Win Streak" : streakType === "loss" ? "Loss Streak" : "Streak"}
+            </p>
+          </div>
+        </div>
+
+        {bankroll?.bankroll > 0 && (
+          <div className={`mt-3 rounded-xl p-3 flex items-center justify-between ${aura.statsBg} border ${aura.borderColor}`} data-testid="stat-hero-bankroll">
+            <div className="flex items-center gap-2">
+              <Wallet className={`w-4 h-4 ${aura.textColor}`} />
+              <span className="text-sm text-muted-foreground">Active Bankroll</span>
+            </div>
+            <span className="font-bold text-sm" data-testid="text-bankroll-amount">
+              ${bankroll.bankroll.toLocaleString()}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function StatusBadge({ status }: { status: SavedTicket["status"] }) {
@@ -494,6 +799,7 @@ function ProfileTab() {
   const [passwordCurrent, setPasswordCurrent] = useState("");
   const [passwordNew, setPasswordNew] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [cookieConsent, setCookieConsent] = useState(() => getCookieConsent());
 
   const { data: authData } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -509,6 +815,10 @@ function ProfileTab() {
 
   const { data: tierInfo } = useQuery<any>({
     queryKey: ["/api/credits"],
+  });
+
+  const { data: achievements = [] } = useQuery<any[]>({
+    queryKey: ["/api/user/achievements"],
   });
 
   const exportMutation = useMutation({
@@ -575,17 +885,14 @@ function ProfileTab() {
     changePasswordMutation.mutate({ currentPassword: passwordCurrent, newPassword: passwordNew });
   };
 
-  const tierName = subscription?.tier || tierInfo?.tier || "Free";
-  const tierColors: Record<string, string> = {
-    free: "bg-gray-500/10 text-gray-600 dark:text-gray-400",
-    pro: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-    elite: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-    whale: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  };
+  const tierKey = (subscription?.tier || "free").toLowerCase();
+  const tierConfig = TIER_DISPLAY[tierKey] || TIER_DISPLAY.free;
+
+  const unlockedAchievements = Array.isArray(achievements) ? achievements.filter((a: any) => a.unlocked) : [];
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card data-testid="card-account-info">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
@@ -601,27 +908,71 @@ function ProfileTab() {
             <div className="space-y-1">
               <Label className="text-xs text-muted-foreground">Role</Label>
               <div className="flex items-center gap-2">
-                <p className="font-medium">{authData?.isAdmin ? "Administrator" : "User"}</p>
+                <p className="font-medium">{authData?.isAdmin ? "Administrator" : "Member"}</p>
                 {authData?.isAdmin && <Badge variant="secondary" className="text-xs">Admin</Badge>}
               </div>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Subscription</Label>
-              <Badge className={tierColors[tierName.toLowerCase()] || tierColors.free}>
-                {tierName}
+              <Label className="text-xs text-muted-foreground">Membership Tier</Label>
+              <Badge variant="outline" className={`flex items-center gap-1 w-fit ${tierConfig.badge}`} data-testid="badge-subscription-tier">
+                {tierConfig.icon}
+                {tierConfig.label}
               </Badge>
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Membership</Label>
-              <p className="font-medium text-sm" data-testid="text-profile-access">
-                {tierInfo?.access || "Unrestricted member access"}
-              </p>
+              <Label className="text-xs text-muted-foreground">Quick Links</Label>
+              <div className="flex flex-wrap gap-2">
+                <Link href="/pricing">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 h-7" data-testid="link-upgrade-plan">
+                    <Crown className="w-3 h-3" />
+                    Plans
+                  </Button>
+                </Link>
+                <Link href="/bankroll">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 h-7" data-testid="link-bankroll">
+                    <Wallet className="w-3 h-3" />
+                    Bankroll
+                  </Button>
+                </Link>
+                <Link href="/sorsbooks">
+                  <Button variant="outline" size="sm" className="text-xs gap-1 h-7" data-testid="link-sorsbooks">
+                    <BookOpen className="w-3 h-3" />
+                    My Books
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      {unlockedAchievements.length > 0 && (
+        <Card data-testid="card-achievements">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Award className="w-4 h-4 text-amber-400" />
+              Achievements
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {unlockedAchievements.slice(0, 8).map((a: any) => (
+                <Badge
+                  key={a.id}
+                  variant="outline"
+                  className="bg-amber-500/10 text-amber-400 border-amber-500/25 text-xs"
+                  data-testid={`badge-achievement-${a.id}`}
+                >
+                  {a.icon && <span className="mr-1">{a.icon}</span>}
+                  {a.name || a.title}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card data-testid="card-change-password">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Key className="w-5 h-5" />
@@ -674,7 +1025,7 @@ function ProfileTab() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-testid="card-sessions">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Monitor className="w-5 h-5" />
@@ -728,7 +1079,7 @@ function ProfileTab() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card data-testid="card-privacy">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
@@ -737,6 +1088,37 @@ function ProfileTab() {
           <CardDescription>Export your data or manage your account</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="flex items-start gap-4 p-4 rounded-lg border bg-muted/20">
+            <Lock className="w-5 h-5 text-muted-foreground shrink-0 mt-0.5" />
+            <div className="flex-1 space-y-2">
+              <p className="text-sm font-medium">Cookie Preferences</p>
+              <p className="text-xs text-muted-foreground">
+                By using Sors Maxima, you agree to our use of cookies for session management and experience personalization.{" "}
+                <Link href="/legal" className="text-primary underline">View Privacy Policy</Link>
+              </p>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={cookieConsent?.accepted ? "bg-green-500/10 text-green-400 border-green-500/25 text-xs" : "bg-muted text-muted-foreground text-xs"}
+                  data-testid="badge-cookie-status"
+                >
+                  {cookieConsent?.accepted ? <><Check className="w-3 h-3 mr-1" />Accepted</> : "Not set"}
+                </Badge>
+                {!cookieConsent?.accepted && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-6"
+                    onClick={() => { grantCookieConsent(); setCookieConsent({ accepted: true }); }}
+                    data-testid="button-accept-cookies"
+                  >
+                    Accept All Cookies
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-start gap-4 p-4 rounded-lg border">
             <Download className="w-5 h-5 text-primary shrink-0 mt-0.5" />
             <div className="flex-1 space-y-2">
@@ -786,33 +1168,31 @@ function ProfileTab() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Delete Account Permanently
+              Delete Account
             </DialogTitle>
             <DialogDescription>
-              This will permanently delete your account and all associated data including betting history,
-              settings, community posts, and referral data. This action cannot be undone.
+              This will permanently delete your account, all betting history, and associated data.
+              This action cannot be undone. Type <strong>DELETE</strong> to confirm.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <p className="text-sm">Type <strong>DELETE</strong> to confirm:</p>
-            <Input
-              value={deleteConfirmText}
-              onChange={(e) => setDeleteConfirmText(e.target.value)}
-              placeholder="Type DELETE to confirm"
-              data-testid="input-delete-confirm"
-            />
-          </div>
+          <Input
+            placeholder="Type DELETE to confirm"
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.target.value)}
+            data-testid="input-delete-confirm"
+          />
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDeleteDialogOpen(false); setDeleteConfirmText(""); }}>
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} data-testid="button-delete-cancel">
               Cancel
             </Button>
             <Button
               variant="destructive"
               onClick={handleDeleteAccount}
               disabled={deleteConfirmText !== "DELETE" || deleteMutation.isPending}
-              data-testid="button-confirm-delete"
+              data-testid="button-delete-confirm"
             >
-              {deleteMutation.isPending ? "Deleting..." : "Delete My Account"}
+              {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Delete Permanently
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -823,60 +1203,49 @@ function ProfileTab() {
 
 function BettingDNATab() {
   const { toast } = useToast();
-
   const { data: savedProfile, isLoading } = useQuery<BettingProfileData>({
-    queryKey: ['/api/user/betting-profile'],
+    queryKey: ["/api/user/betting-profile"],
   });
 
-  const [profile, setProfile] = useState<BettingProfileData | null>(null);
-  const [favoriteTeams, setFavoriteTeams] = useState<string[] | null>(null);
-  const [favoriteLeagues, setFavoriteLeagues] = useState<string[] | null>(null);
+  const [localProfile, setLocalProfile] = useState<BettingProfileData>(defaultProfile);
 
-  const currentProfile = profile ?? savedProfile ?? defaultProfile;
-  const currentTeams = favoriteTeams ?? savedProfile?.favoriteTeams ?? [];
-  const currentLeagues = favoriteLeagues ?? savedProfile?.favoriteLeagues ?? [];
+  const currentProfile = savedProfile ?? localProfile;
+  const [currentTeams, setCurrentTeams] = useState<string[]>(currentProfile.favoriteTeams);
+  const [currentLeagues, setCurrentLeagues] = useState<string[]>(currentProfile.favoriteLeagues);
 
   const saveMutation = useMutation({
-    mutationFn: async (data: BettingProfileData) => {
-      const res = await apiRequest("POST", "/api/user/betting-profile", data);
-      return res.json();
-    },
+    mutationFn: (data: BettingProfileData) => apiRequest("POST", "/api/user/betting-profile", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/betting-profile'] });
-      toast({ title: "Profile saved!", description: "Your betting preferences have been updated." });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/betting-profile"] });
+      toast({ title: "Profile Saved", description: "Your betting DNA has been updated." });
     },
     onError: () => {
-      toast({ title: "Error", description: "Failed to save profile. Please try again.", variant: "destructive" });
+      toast({ title: "Save Failed", description: "Could not save your profile. Please try again.", variant: "destructive" });
     },
   });
 
-  const toggleBetType = (bt: string) => {
-    const prev = profile ?? savedProfile ?? defaultProfile;
-    setProfile({
-      ...prev,
-      preferredBetTypes: prev.preferredBetTypes.includes(bt)
-        ? prev.preferredBetTypes.filter(t => t !== bt)
-        : [...prev.preferredBetTypes, bt],
-    });
+  const profile = savedProfile ?? localProfile;
+  const archetypeInfo = getProfileType(profile);
+
+  const updateProfile = (updates: Partial<BettingProfileData>) => {
+    setLocalProfile((prev) => ({ ...prev, ...updates }));
   };
 
-  const toggleTeam = (team: string) => {
-    const prev = favoriteTeams ?? savedProfile?.favoriteTeams ?? [];
-    setFavoriteTeams(
-      prev.includes(team) ? prev.filter(t => t !== team) : [...prev, team]
+  const toggleTeam = (key: string) => {
+    setCurrentTeams((prev) =>
+      prev.includes(key) ? prev.filter((t) => t !== key) : [...prev, key]
     );
   };
 
-  const toggleLeague = (league: string) => {
-    const prev = favoriteLeagues ?? savedProfile?.favoriteLeagues ?? [];
-    setFavoriteLeagues(
-      prev.includes(league) ? prev.filter(l => l !== league) : [...prev, league]
+  const toggleLeague = (id: string) => {
+    setCurrentLeagues((prev) =>
+      prev.includes(id) ? prev.filter((l) => l !== id) : [...prev, id]
     );
   };
 
   const saveProfile = () => {
     saveMutation.mutate({
-      ...currentProfile,
+      ...profile,
       favoriteTeams: currentTeams,
       favoriteLeagues: currentLeagues,
     });
@@ -884,124 +1253,124 @@ function BettingDNATab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6" data-testid="betting-profile-loading">
-        <Card><CardContent className="p-5 space-y-4">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </CardContent></Card>
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}><CardContent className="p-5"><Skeleton className="h-32 w-full" /></CardContent></Card>
+        ))}
       </div>
     );
   }
 
-  const profileType = getProfileType(currentProfile);
-
   return (
-    <div className="space-y-6" data-testid="betting-profile-page">
-      <Card data-testid="card-betting-quiz">
-        <CardContent className="p-5 space-y-6">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Betting Style Quiz
-          </h2>
-
-          <div className="space-y-5">
-            <div className="space-y-2">
-              <p className="text-sm font-medium" data-testid="text-q1">Q1: What is your risk tolerance?</p>
-              <div className="flex flex-wrap gap-2">
-                {(["conservative", "moderate", "aggressive"] as RiskTolerance[]).map(option => (
-                  <Button
-                    key={option}
-                    variant={currentProfile.riskTolerance === option ? "default" : "outline"}
-                    size="sm"
-                    className={`capitalize toggle-elevate ${currentProfile.riskTolerance === option ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), riskTolerance: option }))}
-                    data-testid={`button-risk-${option}`}
-                  >
-                    {option}
-                  </Button>
-                ))}
-              </div>
+    <div className="space-y-6">
+      <Card data-testid="card-archetype">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/15">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary">
+              {archetypeInfo.icon}
             </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium" data-testid="text-q2">Q2: Preferred bet types (select all that apply)</p>
-              <div className="flex flex-wrap gap-2">
-                {betTypeOptions.map(bt => (
-                  <Button
-                    key={bt}
-                    variant={currentProfile.preferredBetTypes.includes(bt) ? "default" : "outline"}
-                    size="sm"
-                    className={`toggle-elevate ${currentProfile.preferredBetTypes.includes(bt) ? "toggle-elevated" : ""}`}
-                    onClick={() => toggleBetType(bt)}
-                    data-testid={`button-bettype-${bt.toLowerCase().replace(/\s+/g, "-")}`}
-                  >
-                    {bt}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium" data-testid="text-q3">Q3: Bankroll strategy</p>
-              <div className="flex flex-wrap gap-2">
-                {([
-                  { value: "flat" as BankrollStrategy, label: "Flat betting" },
-                  { value: "percentage" as BankrollStrategy, label: "Percentage" },
-                  { value: "kelly" as BankrollStrategy, label: "Kelly Criterion" },
-                ]).map(option => (
-                  <Button
-                    key={option.value}
-                    variant={currentProfile.bankrollStrategy === option.value ? "default" : "outline"}
-                    size="sm"
-                    className={`toggle-elevate ${currentProfile.bankrollStrategy === option.value ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), bankrollStrategy: option.value }))}
-                    data-testid={`button-bankroll-${option.value}`}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium" data-testid="text-q4">Q4: Bet frequency</p>
-              <div className="flex flex-wrap gap-2">
-                {([
-                  { value: "1-2" as BetFrequency, label: "1-2 per day" },
-                  { value: "3-5" as BetFrequency, label: "3-5 per day" },
-                  { value: "5+" as BetFrequency, label: "5+ per day" },
-                ]).map(option => (
-                  <Button
-                    key={option.value}
-                    variant={currentProfile.betFrequency === option.value ? "default" : "outline"}
-                    size="sm"
-                    className={`toggle-elevate ${currentProfile.betFrequency === option.value ? "toggle-elevated" : ""}`}
-                    onClick={() => setProfile(prev => ({ ...(prev ?? savedProfile ?? defaultProfile), betFrequency: option.value }))}
-                    data-testid={`button-frequency-${option.value}`}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">Your Bettor Archetype</p>
+              <p className="text-lg font-bold" data-testid="text-archetype-name">{archetypeInfo.name}</p>
             </div>
           </div>
 
-          <div className="p-4 bg-muted/50 rounded-lg space-y-3" data-testid="profile-result">
-            <div className="flex items-center gap-2">
-              {profileType.icon}
-              <span className="text-lg font-bold" data-testid="text-profile-type">{profileType.name}</span>
-            </div>
-            <ul className="space-y-1.5">
-              {profileType.tips.map((tip, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2" data-testid={`text-tip-${i}`}>
-                  <Star className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
-                  {tip}
-                </li>
+          <ul className="mt-4 space-y-2">
+            {archetypeInfo.tips.map((tip, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground" data-testid={`text-archetype-tip-${i}`}>
+                <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="card-betting-preferences">
+        <CardContent className="p-5 space-y-5">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Betting Preferences
+          </h2>
+
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Risk Tolerance</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["conservative", "moderate", "aggressive"] as RiskTolerance[]).map((r) => (
+                <Button
+                  key={r}
+                  variant={profile.riskTolerance === r ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => updateProfile({ riskTolerance: r })}
+                  className="capitalize toggle-elevate"
+                  data-testid={`button-risk-${r}`}
+                >
+                  {r}
+                </Button>
               ))}
-            </ul>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Preferred Bet Types</Label>
+            <div className="flex flex-wrap gap-2">
+              {betTypeOptions.map((bt) => {
+                const selected = profile.preferredBetTypes.includes(bt);
+                return (
+                  <Badge
+                    key={bt}
+                    variant={selected ? "default" : "outline"}
+                    className={`cursor-pointer gap-1 toggle-elevate ${selected ? "toggle-elevated" : ""}`}
+                    onClick={() => {
+                      const updated = selected
+                        ? profile.preferredBetTypes.filter((t) => t !== bt)
+                        : [...profile.preferredBetTypes, bt];
+                      updateProfile({ preferredBetTypes: updated });
+                    }}
+                    data-testid={`badge-bettype-${bt.replace(/\s+/g, "-").toLowerCase()}`}
+                  >
+                    {selected && <Check className="w-3 h-3" />}
+                    {bt}
+                  </Badge>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Bankroll Strategy</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["flat", "percentage", "kelly"] as BankrollStrategy[]).map((s) => (
+                <Button
+                  key={s}
+                  variant={profile.bankrollStrategy === s ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => updateProfile({ bankrollStrategy: s })}
+                  className="capitalize toggle-elevate"
+                  data-testid={`button-strategy-${s}`}
+                >
+                  {s === "kelly" ? "Kelly" : s}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Daily Bet Frequency</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["1-2", "3-5", "5+"] as BetFrequency[]).map((f) => (
+                <Button
+                  key={f}
+                  variant={profile.betFrequency === f ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => updateProfile({ betFrequency: f })}
+                  className="toggle-elevate"
+                  data-testid={`button-frequency-${f}`}
+                >
+                  {f} bets
+                </Button>
+              ))}
+            </div>
           </div>
 
           <Button onClick={saveProfile} className="w-full gap-2" disabled={saveMutation.isPending} data-testid="button-save-profile">
@@ -1223,25 +1592,17 @@ export default function ProfilePage() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <User className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight" data-testid="text-page-title">My Account</h1>
-          </div>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Manage your account, betting style, and track your performance
-          </p>
-        </header>
+        <ProfileHero />
 
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md" data-testid="profile-tabs">
             <TabsTrigger value="profile" className="gap-1 text-xs sm:text-sm" data-testid="tab-profile">
               <User className="w-4 h-4 shrink-0" />
-              Profile
+              Account
             </TabsTrigger>
             <TabsTrigger value="betting-dna" className="gap-1 text-xs sm:text-sm" data-testid="tab-betting-dna">
               <Target className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Betting</span> DNA
+              Betting DNA
             </TabsTrigger>
             <TabsTrigger value="bet-history" className="gap-1 text-xs sm:text-sm" data-testid="tab-bet-history">
               <History className="w-4 h-4 shrink-0" />
