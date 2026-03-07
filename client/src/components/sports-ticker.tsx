@@ -91,23 +91,26 @@ export function SportsTicker() {
     >
       <div className="absolute inset-0 flex items-center overflow-hidden">
 
-        {/* Left label */}
-        <div className="shrink-0 flex items-center gap-2 px-3 border-r border-border/30 bg-zinc-950 h-full z-10">
-          <div className="flex items-center gap-1.5">
+        {/* Left label — brand + live counts */}
+        <div className="shrink-0 flex items-center gap-0 border-r border-border/30 bg-zinc-950 h-full z-10">
+          {/* Brand name */}
+          <div className="flex items-center gap-1.5 px-3 h-full border-r border-border/20">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-            <span className="text-[9px] font-black tracking-[0.15em] text-zinc-400 uppercase hidden sm:block">
-              Live
+            <span className="text-[9px] font-black tracking-[0.18em] text-zinc-200 uppercase hidden sm:block whitespace-nowrap">
+              SORS INTEL
             </span>
           </div>
+          {/* Live game count */}
           {liveCount > 0 && (
-            <span className="text-[9px] font-bold text-red-500 hidden sm:block">
-              {liveCount}
-            </span>
+            <div className="hidden sm:flex items-center gap-1 px-2.5 h-full border-r border-border/20">
+              <span className="text-[8px] font-bold text-red-400 tracking-wide">{liveCount} LIVE</span>
+            </div>
           )}
+          {/* Injury count */}
           {injuryCount > 0 && (
-            <div className="hidden sm:flex items-center gap-1 border-l border-border/30 pl-2">
+            <div className="hidden sm:flex items-center gap-1 px-2.5 h-full border-r border-border/20">
               <span className="w-1.5 h-1.5 rounded-full bg-orange-500 shrink-0" />
-              <span className="text-[9px] font-bold text-orange-400">{injuryCount}</span>
+              <span className="text-[8px] font-bold text-orange-400 tracking-wide">{injuryCount} INJ</span>
             </div>
           )}
         </div>

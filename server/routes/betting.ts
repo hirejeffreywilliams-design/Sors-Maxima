@@ -958,7 +958,106 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         id: string; type: string; badge: string; badgeColor: string; text: string; sport: string; priority: number;
       }> = [];
 
-      const sportEmoji: Record<string, string> = {
+      // ── Team abbreviation lookup tables ───────────────────────────
+      const NBA_ABBR: Record<string, string> = {
+        "Atlanta Hawks": "ATL", "Boston Celtics": "BOS", "Brooklyn Nets": "BKN",
+        "Charlotte Hornets": "CHA", "Chicago Bulls": "CHI", "Cleveland Cavaliers": "CLE",
+        "Dallas Mavericks": "DAL", "Denver Nuggets": "DEN", "Detroit Pistons": "DET",
+        "Golden State Warriors": "GSW", "Houston Rockets": "HOU", "Indiana Pacers": "IND",
+        "Los Angeles Clippers": "LAC", "Los Angeles Lakers": "LAL", "Memphis Grizzlies": "MEM",
+        "Miami Heat": "MIA", "Milwaukee Bucks": "MIL", "Minnesota Timberwolves": "MIN",
+        "New Orleans Pelicans": "NOP", "New York Knicks": "NYK", "Oklahoma City Thunder": "OKC",
+        "Orlando Magic": "ORL", "Philadelphia 76ers": "PHI", "Phoenix Suns": "PHX",
+        "Portland Trail Blazers": "POR", "Sacramento Kings": "SAC", "San Antonio Spurs": "SAS",
+        "Toronto Raptors": "TOR", "Utah Jazz": "UTA", "Washington Wizards": "WAS",
+      };
+      const NHL_ABBR: Record<string, string> = {
+        "Anaheim Ducks": "ANA", "Boston Bruins": "BOS", "Buffalo Sabres": "BUF",
+        "Calgary Flames": "CGY", "Carolina Hurricanes": "CAR", "Chicago Blackhawks": "CHI",
+        "Colorado Avalanche": "COL", "Columbus Blue Jackets": "CBJ", "Dallas Stars": "DAL",
+        "Detroit Red Wings": "DET", "Edmonton Oilers": "EDM", "Florida Panthers": "FLA",
+        "Los Angeles Kings": "LAK", "Minnesota Wild": "MIN", "Montréal Canadiens": "MTL",
+        "Montreal Canadiens": "MTL", "Nashville Predators": "NSH", "New Jersey Devils": "NJD",
+        "New York Islanders": "NYI", "New York Rangers": "NYR", "Ottawa Senators": "OTT",
+        "Philadelphia Flyers": "PHI", "Pittsburgh Penguins": "PIT", "San Jose Sharks": "SJS",
+        "Seattle Kraken": "SEA", "St. Louis Blues": "STL", "Tampa Bay Lightning": "TBL",
+        "Toronto Maple Leafs": "TOR", "Utah Hockey Club": "UTA", "Utah Mammoth": "UTA", "Vancouver Canucks": "VAN",
+        "Vegas Golden Knights": "VGK", "Washington Capitals": "WSH", "Winnipeg Jets": "WPG",
+      };
+      const NFL_ABBR: Record<string, string> = {
+        "Arizona Cardinals": "ARI", "Atlanta Falcons": "ATL", "Baltimore Ravens": "BAL",
+        "Buffalo Bills": "BUF", "Carolina Panthers": "CAR", "Chicago Bears": "CHI",
+        "Cincinnati Bengals": "CIN", "Cleveland Browns": "CLE", "Dallas Cowboys": "DAL",
+        "Denver Broncos": "DEN", "Detroit Lions": "DET", "Green Bay Packers": "GB",
+        "Houston Texans": "HOU", "Indianapolis Colts": "IND", "Jacksonville Jaguars": "JAX",
+        "Kansas City Chiefs": "KC", "Las Vegas Raiders": "LV", "Los Angeles Chargers": "LAC",
+        "Los Angeles Rams": "LAR", "Miami Dolphins": "MIA", "Minnesota Vikings": "MIN",
+        "New England Patriots": "NE", "New Orleans Saints": "NO", "New York Giants": "NYG",
+        "New York Jets": "NYJ", "Philadelphia Eagles": "PHI", "Pittsburgh Steelers": "PIT",
+        "San Francisco 49ers": "SF", "Seattle Seahawks": "SEA", "Tampa Bay Buccaneers": "TB",
+        "Tennessee Titans": "TEN", "Washington Commanders": "WSH",
+      };
+      const ALL_TEAM_ABBR = { ...NBA_ABBR, ...NHL_ABBR, ...NFL_ABBR };
+
+      // ── Helper: format injury text ─────────────────────────────────
+      function formatInjury(teamDisplayName: string, shortComment: string, rawStatus: string): string {
+        const teamAbbr = ALL_TEAM_ABBR[teamDisplayName] ||
+          teamDisplayName.split(" ").pop()?.toUpperCase().slice(0, 3) || "???";
+
+        const playerMatch = shortComment.match(/^([A-Z][a-zA-Z'.\-]+(?:\s+[A-Z][a-zA-Z'.\-]+){0,2})/);
+        const playerName = playerMatch ? playerMatch[1].trim() : shortComment.split(" ").slice(0, 2).join(" ");
+
+        // Extract injury type from parentheses (e.g. "(knee)", "(right ankle)")
+        const injMatch = shortComment.match(/\(([^)]{2,30})\)/);
+        const injType = injMatch ? injMatch[1].charAt(0).toUpperCase() + injMatch[1].slice(1) : "";
+
+        const statusLabel = rawStatus === "OUT" ? "OUT" : rawStatus === "QUESTIONABLE" ? "QUES" : "DTD";
+
+        if (injType) return `${playerName} (${teamAbbr})  ${statusLabel} — ${injType}`;
+
+        // Strip journalist attribution, keep first sentence
+        const cleaned = shortComment
+          .replace(/,\s*[A-Z][a-z]+\s+[A-Z][a-z]+\s+of\s+[\w\s.]+$/i, "")
+          .replace(/\s+of\s+ESPN[\w\s.]*reports?\.?/i, "")
+          .replace(/\s+per\s+[\w\s,]+\.?$/i, "")
+          .split(".")[0].trim();
+
+        // Look for specific injury keywords
+        const injPatterns: RegExp[] = [
+          /(?:fractured?|broken)\s+(?:\w+\s+){0,2}\w+/i,
+          /(?:knee|shoulder|ankle|wrist|hip|back|hamstring|quad|elbow|foot|toe|finger|thumb|hand|calf|groin|rib|neck|spine|disc|leg|arm|collarbone)\s+(?:surgery|procedure)/i,
+          /sprained?\s+(?:\w+\s+){0,1}\w+/i,
+          /torn?\s+\w+/i,
+          /concussion/i,
+          /illness/i,
+          /under\s+the\s+weather/i,
+          /\w+(?:\s+\w+)?\s+(?:surgery|procedure)/i,
+        ];
+        for (const p of injPatterns) {
+          const m = cleaned.match(p);
+          if (m) {
+            const desc = m[0].slice(0, 38).trim();
+            return `${playerName} (${teamAbbr})  ${statusLabel} — ${desc.charAt(0).toUpperCase() + desc.slice(1)}`;
+          }
+        }
+
+        // General fallback: strip player name and leading verb, take first ~45 chars
+        const after = cleaned.slice(playerName.length)
+          .replace(/^\s+(?:will|has|is|won't|was|wasn't)\s+/i, "").trim().slice(0, 45);
+        return `${playerName} (${teamAbbr})  ${statusLabel}${after ? " — " + after.charAt(0).toUpperCase() + after.slice(1) : ""}`;
+      }
+
+      // ── Helper: team full name → abbreviation ──────────────────────
+      function getTeamAbbr(fullName: string): string {
+        if (ALL_TEAM_ABBR[fullName]) return ALL_TEAM_ABBR[fullName];
+        for (const [key, abbr] of Object.entries(ALL_TEAM_ABBR)) {
+          if (fullName.includes(key) || key.includes(fullName)) return abbr;
+        }
+        const words = fullName.trim().split(" ");
+        return words[words.length - 1].slice(0, 4).toUpperCase();
+      }
+
+      const sportTag: Record<string, string> = {
         NBA: "NBA", NFL: "NFL", NHL: "NHL", MLB: "MLB", NCAAB: "CBB", NCAAF: "CFB",
         MMA: "MMA", Soccer: "SOC", EPL: "EPL", UEFA: "UCL",
       };
@@ -970,19 +1069,18 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       for (const g of liveGames.slice(0, 10)) {
         const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
         const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
-        const awayScore = g.awayTeam.score || 0;
-        const homeScore = g.homeTeam.score || 0;
-        const scoreLine = `${away} ${awayScore}  ${home} ${homeScore}`;
-        const detail = g.status?.shortDetail || "";
+        const awayScore = g.awayTeam.score ?? 0;
+        const homeScore = g.homeTeam.score ?? 0;
         const sport = (g as any).sport || "NBA";
-        const tag = sportEmoji[sport] || sport;
+        const tag = sportTag[sport] || sport;
 
-        // Score differential run messaging
+        // Clean up period/clock display
+        const detail = g.status?.shortDetail || "";
         const diff = Math.abs(homeScore - awayScore);
-        let runMsg = "";
-        if (diff >= 10 && diff <= 25) {
-          const leadTeam = homeScore > awayScore ? home : away;
-          runMsg = `  ${leadTeam} leads by ${diff}`;
+        let contextMsg = "";
+        if (diff >= 10 && diff <= 30) {
+          const leader = homeScore > awayScore ? home : away;
+          contextMsg = `  ·  ${leader} +${diff}`;
         }
 
         items.push({
@@ -990,28 +1088,31 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           type: "live",
           badge: "LIVE",
           badgeColor: "red",
-          text: `${tag}  ${scoreLine}  ${detail}${runMsg}`,
+          text: `${tag}  ${away} ${awayScore}  –  ${homeScore} ${home}  ${detail}${contextMsg}`,
           sport,
           priority: 1,
         });
       }
 
-      // ── Final scores (last 3 hours) ───────────────────────────────
+      // ── Final scores ──────────────────────────────────────────────
       const finalGames = allGames.filter(g => g.status?.state === "post");
       for (const g of finalGames.slice(0, 8)) {
         const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
         const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
-        const awayScore = g.awayTeam.score || 0;
-        const homeScore = g.homeTeam.score || 0;
-        const winner = homeScore > awayScore ? home : away;
+        const awayScore = g.awayTeam.score ?? 0;
+        const homeScore = g.homeTeam.score ?? 0;
         const sport = (g as any).sport || "NBA";
-        const tag = sportEmoji[sport] || sport;
+        const tag = sportTag[sport] || sport;
+        const winner = homeScore > awayScore ? home : away;
+        const loser = homeScore > awayScore ? away : home;
+        const winScore = Math.max(homeScore, awayScore);
+        const loseScore = Math.min(homeScore, awayScore);
         items.push({
           id: `final-${g.id}`,
           type: "final",
           badge: "FINAL",
           badgeColor: "gray",
-          text: `${tag}  ${away} ${awayScore}  ${home} ${homeScore}  —  ${winner} WIN`,
+          text: `${tag}  ${winner} def. ${loser}  ${winScore}–${loseScore}`,
           sport,
           priority: 3,
         });
@@ -1033,7 +1134,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         const away = g.awayTeam.abbreviation || g.awayTeam.shortDisplayName;
         const home = g.homeTeam.abbreviation || g.homeTeam.shortDisplayName;
         const sport = (g as any).sport || "NBA";
-        const tag = sportEmoji[sport] || sport;
+        const tag = sportTag[sport] || sport;
         const gameTime = new Date(g.date || "");
         const gameDateET = gameTime.toLocaleDateString("en-US", { timeZone: "America/New_York" });
         const timeOnly = gameTime.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: "America/New_York", hour12: true });
@@ -1074,23 +1175,24 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           };
           let added = 0;
           for (const team of (injData.injuries || [])) {
-            if (added >= 4) break;
+            if (added >= 5) break;
             for (const inj of (team.injuries || [])) {
-              if (added >= 4) break;
+              if (added >= 5) break;
               const rawStatus = (inj.status || "").toUpperCase();
               if (!["OUT", "QUESTIONABLE", "DOUBTFUL"].includes(rawStatus)) continue;
               const comment = inj.shortComment || "";
               if (!comment || comment.length < 10) continue;
-              // Trim long comments
-              const text = comment.length > 95 ? comment.slice(0, 92) + "…" : comment;
-              const badge = rawStatus === "OUT" ? "OUT" : rawStatus === "QUESTIONABLE" ? "QUES" : "DOUBT";
+              // Skip bare status words (e.g. "questionable", "out") with no player name
+              if (!/^[A-Z]/.test(comment)) continue;
+              const formatted = formatInjury(team.displayName, comment, rawStatus);
+              const badge = rawStatus === "OUT" ? "OUT" : rawStatus === "QUESTIONABLE" ? "QUES" : "DTD";
               const badgeColor = rawStatus === "OUT" ? "orange" : "yellow";
               items.push({
                 id: `injury-${injSport}-${team.displayName}-${added}`,
                 type: "injury",
                 badge,
                 badgeColor,
-                text: `${injSport}  ${text}`,
+                text: `${injSport}  ${formatted}`,
                 sport: injSport,
                 priority: 2,
               });
@@ -1110,13 +1212,20 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             .filter((p: any) => p.grade?.startsWith("A") && (p.ev || 0) > 5)
             .slice(0, 2);
           for (const pick of topPicks) {
-            const teams = pick.game?.replace(" @ ", " vs ") || pick.homeTeam || "";
+            // Use abbreviations for team names in the game matchup
+            const gameParts = (pick.game || "").split(" @ ");
+            const awayAbbr = gameParts[0] ? getTeamAbbr(gameParts[0].trim()) : "";
+            const homeAbbr = gameParts[1] ? getTeamAbbr(gameParts[1].trim()) : "";
+            const matchup = awayAbbr && homeAbbr ? `${awayAbbr} @ ${homeAbbr}` : (pick.game || "").slice(0, 30);
+            const pickLabel = (pick.pick || pick.outcome || "").slice(0, 50);
+            const conf = pick.confidence ? `${pick.confidence}% conf` : "";
+            const ev = pick.ev ? `+${Number(pick.ev).toFixed(1)}% EV` : "";
             items.push({
               id: `pick-${sport}-${pick.id}`,
               type: "pick",
-              badge: pick.grade,
+              badge: pick.grade || "A",
               badgeColor: "green",
-              text: `${sport}  ${teams}  —  ${pick.pick || pick.outcome}  |  ${pick.confidence}% conf  |  +${(pick.ev || 0).toFixed(1)}% EV`,
+              text: `${sport}  ${matchup}  ·  ${pickLabel}  |  ${[conf, ev].filter(Boolean).join("  |  ")}`,
               sport,
               priority: 2,
             });
@@ -1130,12 +1239,13 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         if (modelRes.ok) {
           const model = await modelRes.json();
           if (model?.winRate) {
+            const statusLabel = model.status === "calibrated" ? "Calibrated" : model.status === "warming_up" ? "Warming Up" : "Active";
             items.push({
               id: "model-health",
               type: "model",
               badge: "MODEL",
               badgeColor: "purple",
-              text: `46-Factor Engine  |  ${model.winRate}% win rate  |  ${model.settledCount?.toLocaleString()} settled picks  |  Calibration score ${model.calibrationScore}%`,
+              text: `46-Factor Intelligence Engine  ·  ${statusLabel}  |  ${model.winRate}% Win Rate  |  ${(model.settledCount || 0).toLocaleString()} Picks Settled  |  ${model.factorCount || 46} Factors Active`,
               sport: "ALL",
               priority: 4,
             });
