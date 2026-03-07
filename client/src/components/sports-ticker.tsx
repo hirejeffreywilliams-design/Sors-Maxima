@@ -52,10 +52,10 @@ function TickerContent({ items }: { items: TickerItem[] }) {
       {doubled.map((item, i) => (
         <span key={`${item.id}-${i}`} className="inline-flex items-center gap-2 px-5">
           <TickerBadge badge={item.badge} color={item.badgeColor} />
-          <span className="text-[11px] font-medium text-foreground/85 tracking-wide">
+          <span className="text-[11px] font-medium text-zinc-200 tracking-wide">
             {item.text}
           </span>
-          <span className="text-border/60 text-[10px] px-1 select-none">◆</span>
+          <span className="text-zinc-600 text-[10px] px-1 select-none">◆</span>
         </span>
       ))}
     </div>
