@@ -203,8 +203,11 @@ export function computeCalibration(): TrackRecord {
       : null,
   })).sort((a, b) => b.total - a.total);
 
+  // Sort by game date (not settlement date) so "recent" means chronologically recent games,
+  // not the arbitrary order in which a settlement batch was processed
   const recentSettled = [...settled].sort(
-    (a, b) => new Date(b.settledAt || b.savedAt).getTime() - new Date(a.settledAt || a.savedAt).getTime()
+    (a, b) => new Date(b.gameTime || b.settledAt || b.savedAt).getTime() -
+              new Date(a.gameTime || a.settledAt || a.savedAt).getTime()
   );
   const last20 = recentSettled.slice(0, 20);
   const last50 = recentSettled.slice(0, 50);

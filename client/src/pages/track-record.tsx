@@ -10,7 +10,7 @@ import { useSEO } from "@/hooks/use-seo";
 import {
   AlertTriangle, CheckCircle2, XCircle, TrendingUp, TrendingDown,
   Minus, RefreshCw, Database, Shield, Info, BarChart3, Target,
-  Clock, Activity, Layers
+  Clock, Activity, Layers, Sparkles, FlaskConical
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
@@ -80,18 +80,20 @@ export default function TrackRecordPage() {
   });
 
   const [filter, setFilter] = useState<"all" | "live" | "backtest">("all");
+  const [aiAnalysis, setAiAnalysis] = useState<{ analysis: string; generatedAt: string } | null>(null);
 
   const refreshMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/track-record/refresh"),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/track-record"] }),
   });
 
+  const aiMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/track-record/ai-analysis").then(r => r.json()),
+    onSuccess: (result: any) => setAiAnalysis(result),
+  });
+
   const filteredData = useMemo(() => {
     if (!data) return null;
-    if (filter === "all") return data;
-    
-    // In a real app we'd filter the picks, but here we'll just mock the shift in stats
-    // for UI demonstration if specific backtest/live stats aren't fully broken down yet
     return data;
   }, [data, filter]);
 
@@ -236,13 +238,13 @@ export default function TrackRecordPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <Card>
           <CardContent className="p-4 text-center">
-            <p className="text-2xl font-bold" data-testid="stat-total-tracked">{data.totalPicks.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">Picks Tracked</p>
-            {(data.backtestPickCount || data.livePickCount) && (
-              <p className="text-[10px] text-muted-foreground mt-1">
-                {data.livePickCount || 0} live | {data.backtestPickCount || 0} backtest
-              </p>
-            )}
+            <p className="text-2xl font-bold" data-testid="stat-total-tracked">{data.settledPicks.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Settled Picks</p>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              <span className="text-blue-400">{data.livePickCount ?? 0} live</span>
+              {" · "}
+              <span className="text-amber-400">{data.backtestPickCount ?? 0} backtest</span>
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -396,25 +398,115 @@ export default function TrackRecordPage() {
               <TrendingUp className="h-4 w-4" />
               Recent Performance Trend
             </CardTitle>
+            <CardDescription className="text-xs">
+              Sorted by game date — most recent games first
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2 mb-3">
               {trendIcon}
-              <span className="text-sm font-medium capitalize">{data.recentTrend.trend}</span>
+              <span className="text-sm font-medium capitalize">
+                {data.recentTrend.trend === "insufficient" ? "Building data" : data.recentTrend.trend}
+              </span>
             </div>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Last 20 picks (win rate)</span>
-                <WinRateBadge rate={data.recentTrend.last20WinRate} />
+                <span className="text-muted-foreground">Last 20 games (win rate)</span>
+                {data.recentTrend.last20WinRate !== null
+                  ? <WinRateBadge rate={data.recentTrend.last20WinRate} />
+                  : <span className="text-muted-foreground text-xs">Not enough data</span>}
               </div>
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Last 50 picks (win rate)</span>
-                <WinRateBadge rate={data.recentTrend.last50WinRate} />
+                <span className="text-muted-foreground">Last 50 games (win rate)</span>
+                {data.recentTrend.last50WinRate !== null
+                  ? <WinRateBadge rate={data.recentTrend.last50WinRate} />
+                  : <span className="text-muted-foreground text-xs">Not enough data</span>}
               </div>
+              {data.recentTrend.trend === "declining" && (
+                <p className="text-[10px] text-amber-400/80 mt-1 leading-relaxed">
+                  Recent games are underperforming the overall average. Normal variance over small samples — meaningful at 100+ recent games.
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* ── AI Analysis Panel ──────────────────────────────────────────── */}
+      <Card className="border-violet-500/30 bg-gradient-to-br from-violet-950/20 to-background">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-violet-400" />
+                AI Analysis
+              </CardTitle>
+              <CardDescription className="text-xs mt-0.5">
+                Instant plain-English breakdown of what these numbers mean
+              </CardDescription>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => aiMutation.mutate()}
+              disabled={aiMutation.isPending}
+              className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 shrink-0"
+              data-testid="button-generate-ai-analysis"
+            >
+              {aiMutation.isPending ? (
+                <>
+                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                  Analyzing…
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {aiAnalysis ? "Refresh Analysis" : "Generate Analysis"}
+                </>
+              )}
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {aiMutation.isError && (
+            <div className="flex items-center gap-2 text-sm text-red-400">
+              <XCircle className="h-4 w-4 shrink-0" />
+              Analysis failed — try again in a moment.
+            </div>
+          )}
+          {!aiAnalysis && !aiMutation.isPending && !aiMutation.isError && (
+            <div className="flex flex-col items-center py-6 text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-violet-500/10 flex items-center justify-center">
+                <FlaskConical className="h-6 w-6 text-violet-400" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Click "Generate Analysis" for an AI-powered read on the model's performance,
+                  calibration gaps, and what the numbers suggest about pick selection.
+                </p>
+              </div>
+            </div>
+          )}
+          {aiMutation.isPending && (
+            <div className="space-y-2 py-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/5" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          )}
+          {aiAnalysis && !aiMutation.isPending && (
+            <div className="space-y-2">
+              <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line" data-testid="text-ai-analysis">
+                {aiAnalysis.analysis}
+              </div>
+              <p className="text-[10px] text-muted-foreground pt-2 border-t border-border">
+                Generated {new Date(aiAnalysis.generatedAt).toLocaleString()} · Based on {data.settledPicks} settled picks
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2">

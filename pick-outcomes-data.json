@@ -772,7 +772,8 @@
       "result": "won",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-03T21:23:50.358Z"
+      "settledAt": "2026-03-03T21:23:50.358Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810740-spread-d38f61b3de",
@@ -792,7 +793,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-03T17:53:55.020Z"
+      "settledAt": "2026-03-03T17:53:55.020Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810740-total-b04271aaea",
@@ -812,7 +814,8 @@
       "result": "won",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-03T16:26:50.656Z"
+      "settledAt": "2026-03-03T16:26:50.656Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810740-team_total-a20f2c04c4",
@@ -832,7 +835,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-03T17:53:55.020Z"
+      "settledAt": "2026-03-03T17:53:55.020Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810750-spread-eaeb56469a",
@@ -852,7 +856,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-04T14:34:05.947Z"
+      "settledAt": "2026-03-04T14:34:05.947Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810750-total-a12f4386f5",
@@ -872,7 +877,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-04T14:38:46.597Z"
+      "settledAt": "2026-03-04T14:38:46.597Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810750-team_total-7e9a7bc0d3",
@@ -892,7 +898,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-04T14:38:46.597Z"
+      "settledAt": "2026-03-04T14:38:46.597Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810750-moneyline-2e03b50093",
@@ -912,7 +919,8 @@
       "result": "lost",
       "homeScore": 125,
       "awayScore": 128,
-      "settledAt": "2026-03-03T16:37:10.018Z"
+      "settledAt": "2026-03-03T16:37:10.018Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803314-team_total-c2a19247c2",
@@ -932,7 +940,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.669Z"
+      "settledAt": "2026-03-03T16:26:50.669Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803314-moneyline-e2f312af83",
@@ -952,7 +961,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.669Z"
+      "settledAt": "2026-03-03T16:26:50.669Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803314-spread-09d90d58a2",
@@ -972,7 +982,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.669Z"
+      "settledAt": "2026-03-03T16:26:50.669Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803314-total-d15e82a335",
@@ -992,7 +1003,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.669Z"
+      "settledAt": "2026-03-03T16:26:50.669Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803321-total-4ce96d9e48",
@@ -1012,7 +1024,8 @@
       "result": "push",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T21:06:15.662Z"
+      "settledAt": "2026-03-03T21:06:15.662Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803321-team_total-11edf4785c",
@@ -1032,7 +1045,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T21:06:15.662Z"
+      "settledAt": "2026-03-03T21:06:15.662Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803322-total-e4ee745ce0",
@@ -1052,7 +1066,8 @@
       "result": "push",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T15:27:48.024Z"
+      "settledAt": "2026-03-04T15:27:48.024Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803322-team_total-35dca5db83",
@@ -1072,7 +1087,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T15:27:48.024Z"
+      "settledAt": "2026-03-04T15:27:48.024Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803316-spread-ee544b9438",
@@ -1092,7 +1108,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-03T16:26:50.680Z"
+      "settledAt": "2026-03-03T16:26:50.680Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803316-team_total-3054ba5cad",
@@ -1112,7 +1129,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-03T16:26:50.680Z"
+      "settledAt": "2026-03-03T16:26:50.680Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803319-spread-6c405e66ef",
@@ -1132,7 +1150,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.681Z"
+      "settledAt": "2026-03-03T16:26:50.681Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803319-team_total-72065d14be",
@@ -1152,7 +1171,8 @@
       "result": "push",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:37:10.020Z"
+      "settledAt": "2026-03-03T16:37:10.020Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803319-moneyline-25af1ba7ff",
@@ -1172,7 +1192,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.681Z"
+      "settledAt": "2026-03-03T16:26:50.681Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810742-moneyline-2999780af4",
@@ -1192,7 +1213,8 @@
       "result": "lost",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T21:23:50.395Z"
+      "settledAt": "2026-03-03T21:23:50.395Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810742-spread-abbd266fdc",
@@ -1212,7 +1234,8 @@
       "result": "lost",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T22:42:17.030Z"
+      "settledAt": "2026-03-03T22:42:17.030Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810742-team_total-633bf42ffd",
@@ -1232,7 +1255,8 @@
       "result": "won",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T19:06:21.997Z"
+      "settledAt": "2026-03-03T19:06:21.997Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810743-moneyline-391d866bb4",
@@ -1252,7 +1276,8 @@
       "result": "won",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T16:26:50.683Z"
+      "settledAt": "2026-03-03T16:26:50.683Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810743-spread-9ff4f9c903",
@@ -1272,7 +1297,8 @@
       "result": "lost",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T22:52:16.782Z"
+      "settledAt": "2026-03-03T22:52:16.782Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810743-team_total-50033ce3dc",
@@ -1292,7 +1318,8 @@
       "result": "won",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T20:55:13.463Z"
+      "settledAt": "2026-03-03T20:55:13.463Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810748-moneyline-fcc3bcc14e",
@@ -1312,7 +1339,8 @@
       "result": "won",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T18:50:17.518Z"
+      "settledAt": "2026-03-03T18:50:17.518Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810748-spread-7eb74242b7",
@@ -1332,7 +1360,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-04T14:34:05.943Z"
+      "settledAt": "2026-03-04T14:34:05.943Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810748-total-c98fa710fc",
@@ -1352,7 +1381,8 @@
       "result": "lost",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T22:34:58.209Z"
+      "settledAt": "2026-03-03T22:34:58.209Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810748-team_total-4971f68653",
@@ -1372,7 +1402,8 @@
       "result": "lost",
       "homeScore": 114,
       "awayScore": 89,
-      "settledAt": "2026-03-03T22:52:16.782Z"
+      "settledAt": "2026-03-03T22:52:16.782Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810739-moneyline-faaebee10a",
@@ -1392,7 +1423,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 106,
-      "settledAt": "2026-03-03T21:23:50.406Z"
+      "settledAt": "2026-03-03T21:23:50.406Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810739-spread-d43dc60dbe",
@@ -1412,7 +1444,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 106,
-      "settledAt": "2026-03-03T21:23:50.406Z"
+      "settledAt": "2026-03-03T21:23:50.406Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810739-team_total-b098eb576d",
@@ -1432,7 +1465,8 @@
       "result": "lost",
       "homeScore": 102,
       "awayScore": 106,
-      "settledAt": "2026-03-03T16:26:50.684Z"
+      "settledAt": "2026-03-03T16:26:50.684Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810756-spread-b9c85433a3",
@@ -1452,7 +1486,8 @@
       "result": "won",
       "homeScore": 124,
       "awayScore": 98,
-      "settledAt": "2026-03-04T14:34:05.927Z"
+      "settledAt": "2026-03-04T14:34:05.927Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810756-total-e7be5901f3",
@@ -1472,7 +1507,8 @@
       "result": "won",
       "homeScore": 124,
       "awayScore": 98,
-      "settledAt": "2026-03-04T14:34:05.927Z"
+      "settledAt": "2026-03-04T14:34:05.927Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810756-team_total-f29d1d865f",
@@ -1492,7 +1528,8 @@
       "result": "won",
       "homeScore": 124,
       "awayScore": 98,
-      "settledAt": "2026-03-04T14:34:05.927Z"
+      "settledAt": "2026-03-04T14:34:05.927Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810744-moneyline-c08655d13c",
@@ -1512,7 +1549,8 @@
       "result": "won",
       "homeScore": 120,
       "awayScore": 97,
-      "settledAt": "2026-03-03T16:26:50.686Z"
+      "settledAt": "2026-03-03T16:26:50.686Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810744-spread-1dc1626729",
@@ -1532,7 +1570,8 @@
       "result": "won",
       "homeScore": 120,
       "awayScore": 97,
-      "settledAt": "2026-03-03T19:22:10.185Z"
+      "settledAt": "2026-03-03T19:22:10.185Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810744-team_total-cb08bb1bd2",
@@ -1552,7 +1591,8 @@
       "result": "lost",
       "homeScore": 120,
       "awayScore": 97,
-      "settledAt": "2026-03-03T20:21:15.692Z"
+      "settledAt": "2026-03-03T20:21:15.692Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810744-total-f307efc32d",
@@ -1572,7 +1612,8 @@
       "result": "lost",
       "homeScore": 120,
       "awayScore": 97,
-      "settledAt": "2026-03-03T21:00:10.864Z"
+      "settledAt": "2026-03-03T21:00:10.864Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810745-moneyline-f98c016cb8",
@@ -1592,7 +1633,8 @@
       "result": "won",
       "homeScore": 108,
       "awayScore": 117,
-      "settledAt": "2026-03-03T21:23:50.417Z"
+      "settledAt": "2026-03-03T21:23:50.417Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810745-spread-5863c132de",
@@ -1612,7 +1654,8 @@
       "result": "won",
       "homeScore": 108,
       "awayScore": 117,
-      "settledAt": "2026-03-03T22:52:16.797Z"
+      "settledAt": "2026-03-03T22:52:16.797Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810745-total-5886b87b7d",
@@ -1632,7 +1675,8 @@
       "result": "lost",
       "homeScore": 108,
       "awayScore": 117,
-      "settledAt": "2026-03-03T16:50:42.023Z"
+      "settledAt": "2026-03-03T16:50:42.023Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810745-team_total-d15348739c",
@@ -1652,7 +1696,8 @@
       "result": "lost",
       "homeScore": 108,
       "awayScore": 117,
-      "settledAt": "2026-03-03T22:52:16.797Z"
+      "settledAt": "2026-03-03T22:52:16.797Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810738-moneyline-45be86b4a6",
@@ -1672,7 +1717,8 @@
       "result": "won",
       "homeScore": 87,
       "awayScore": 100,
-      "settledAt": "2026-03-03T21:23:50.420Z"
+      "settledAt": "2026-03-03T21:23:50.420Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810738-spread-25bf8d5d81",
@@ -1692,7 +1738,8 @@
       "result": "lost",
       "homeScore": 87,
       "awayScore": 100,
-      "settledAt": "2026-03-03T21:43:50.284Z"
+      "settledAt": "2026-03-03T21:43:50.284Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810738-total-e3df3e7eb0",
@@ -1712,7 +1759,8 @@
       "result": "lost",
       "homeScore": 87,
       "awayScore": 100,
-      "settledAt": "2026-03-03T22:38:18.237Z"
+      "settledAt": "2026-03-03T22:38:18.237Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810738-team_total-4f31c4d33f",
@@ -1732,7 +1780,8 @@
       "result": "lost",
       "homeScore": 87,
       "awayScore": 100,
-      "settledAt": "2026-03-03T22:47:17.387Z"
+      "settledAt": "2026-03-03T22:47:17.387Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810746-moneyline-dbbf1ef7ae",
@@ -1752,7 +1801,8 @@
       "result": "lost",
       "homeScore": 137,
       "awayScore": 117,
-      "settledAt": "2026-03-03T21:23:50.430Z"
+      "settledAt": "2026-03-03T21:23:50.430Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810746-spread-d874ef000d",
@@ -1772,7 +1822,8 @@
       "result": "lost",
       "homeScore": 137,
       "awayScore": 117,
-      "settledAt": "2026-03-03T21:23:50.430Z"
+      "settledAt": "2026-03-03T21:23:50.430Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810746-total-3a7b85564c",
@@ -1792,7 +1843,8 @@
       "result": "won",
       "homeScore": 137,
       "awayScore": 117,
-      "settledAt": "2026-03-03T19:06:22.032Z"
+      "settledAt": "2026-03-03T19:06:22.032Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810746-team_total-e6a3aa4e83",
@@ -1812,7 +1864,8 @@
       "result": "won",
       "homeScore": 137,
       "awayScore": 117,
-      "settledAt": "2026-03-03T19:06:22.032Z"
+      "settledAt": "2026-03-03T19:06:22.032Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810747-spread-9e59fbf70f",
@@ -1832,7 +1885,8 @@
       "result": "won",
       "homeScore": 128,
       "awayScore": 104,
-      "settledAt": "2026-03-03T21:43:50.288Z"
+      "settledAt": "2026-03-03T21:43:50.288Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810747-team_total-759b2a9a89",
@@ -1852,7 +1906,8 @@
       "result": "won",
       "homeScore": 128,
       "awayScore": 104,
-      "settledAt": "2026-03-03T19:28:45.844Z"
+      "settledAt": "2026-03-03T19:28:45.844Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810747-moneyline-5cd3043a61",
@@ -1872,7 +1927,8 @@
       "result": "won",
       "homeScore": 128,
       "awayScore": 104,
-      "settledAt": "2026-03-03T16:26:50.692Z"
+      "settledAt": "2026-03-03T16:26:50.692Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803310-team_total-9b3daab4fa",
@@ -1892,7 +1948,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T17:07:47.130Z"
+      "settledAt": "2026-03-03T17:07:47.130Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803311-team_total-15dfa9de59",
@@ -1912,7 +1969,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803310-moneyline-0ba22b723b",
@@ -1932,7 +1990,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803311-moneyline-3c46afd406",
@@ -1952,7 +2011,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803310-spread-6df9001e5f",
@@ -1972,7 +2032,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803311-spread-92a4019887",
@@ -1992,7 +2053,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803310-total-019831cc49",
@@ -2012,7 +2074,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803311-total-bcb8ebb755",
@@ -2032,7 +2095,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 0,
-      "settledAt": "2026-03-03T16:26:50.694Z"
+      "settledAt": "2026-03-03T16:26:50.694Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803313-team_total-404580b9cd",
@@ -2052,7 +2116,8 @@
       "result": "won",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803315-moneyline-dae285cb95",
@@ -2072,7 +2137,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803315-team_total-69912191bc",
@@ -2092,7 +2158,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803313-moneyline-b19dc1d558",
@@ -2112,7 +2179,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803313-spread-37bd6e69cd",
@@ -2132,7 +2200,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803315-spread-d39a89229d",
@@ -2152,7 +2221,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803315-total-e1e3b0667a",
@@ -2172,7 +2242,8 @@
       "result": "lost",
       "homeScore": 0,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.696Z"
+      "settledAt": "2026-03-03T16:26:50.696Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803320-spread-36ace7678f",
@@ -2192,7 +2263,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-03T16:26:50.697Z"
+      "settledAt": "2026-03-03T16:26:50.697Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803320-team_total-10e95c3d42",
@@ -2212,7 +2284,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-03T16:39:40.178Z"
+      "settledAt": "2026-03-03T16:39:40.178Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803320-moneyline-9cdaaf9984",
@@ -2232,7 +2305,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-03T16:26:50.697Z"
+      "settledAt": "2026-03-03T16:26:50.697Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803318-spread-1916277a4e",
@@ -2252,7 +2326,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 3,
-      "settledAt": "2026-03-03T16:26:50.699Z"
+      "settledAt": "2026-03-03T16:26:50.699Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803318-team_total-45faf61194",
@@ -2272,7 +2347,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 3,
-      "settledAt": "2026-03-03T16:26:50.699Z"
+      "settledAt": "2026-03-03T16:26:50.699Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803318-moneyline-a4363ed3eb",
@@ -2292,7 +2368,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 3,
-      "settledAt": "2026-03-03T16:26:50.699Z"
+      "settledAt": "2026-03-03T16:26:50.699Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803318-total-0319bbe4ee",
@@ -2312,7 +2389,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 3,
-      "settledAt": "2026-03-03T16:26:50.699Z"
+      "settledAt": "2026-03-03T16:26:50.699Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803312-spread-13777e4126",
@@ -2332,7 +2410,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T17:30:16.504Z"
+      "settledAt": "2026-03-03T17:30:16.504Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803312-team_total-8c777baaf3",
@@ -2352,7 +2431,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T17:30:16.504Z"
+      "settledAt": "2026-03-03T17:30:16.504Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803312-moneyline-58607267fd",
@@ -2372,7 +2452,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.701Z"
+      "settledAt": "2026-03-03T16:26:50.701Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803324-spread-69df48acab",
@@ -2392,7 +2473,8 @@
       "result": "won",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-04T17:41:41.115Z"
+      "settledAt": "2026-03-04T17:41:41.115Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803312-total-94b73d62f1",
@@ -2412,7 +2494,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.701Z"
+      "settledAt": "2026-03-03T16:26:50.701Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803317-team_total-585a407569",
@@ -2432,7 +2515,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T20:45:40.958Z"
+      "settledAt": "2026-03-03T20:45:40.958Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803317-moneyline-383df261fb",
@@ -2452,7 +2536,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.702Z"
+      "settledAt": "2026-03-03T16:26:50.702Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803317-spread-055aff4c95",
@@ -2472,7 +2557,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.702Z"
+      "settledAt": "2026-03-03T16:26:50.702Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803317-total-66a51102d6",
@@ -2492,7 +2578,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:26:50.702Z"
+      "settledAt": "2026-03-03T16:26:50.702Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820785-moneyline-329afe6928",
@@ -2512,7 +2599,8 @@
       "result": "won",
       "homeScore": 77,
       "awayScore": 51,
-      "settledAt": "2026-03-03T16:26:50.704Z"
+      "settledAt": "2026-03-03T16:26:50.704Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820785-spread-a0e48b57bd",
@@ -2532,7 +2620,8 @@
       "result": "won",
       "homeScore": 77,
       "awayScore": 51,
-      "settledAt": "2026-03-03T22:01:24.981Z"
+      "settledAt": "2026-03-03T22:01:24.981Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820785-total-d72d32791c",
@@ -2552,7 +2641,8 @@
       "result": "won",
       "homeScore": 77,
       "awayScore": 51,
-      "settledAt": "2026-03-03T22:01:24.981Z"
+      "settledAt": "2026-03-03T22:01:24.981Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820785-team_total-b2845f0742",
@@ -2572,7 +2662,8 @@
       "result": "won",
       "homeScore": 77,
       "awayScore": 51,
-      "settledAt": "2026-03-03T22:05:53.078Z"
+      "settledAt": "2026-03-03T22:05:53.078Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827715-spread-6bc13d2fe2",
@@ -2592,7 +2683,8 @@
       "result": "lost",
       "homeScore": 84,
       "awayScore": 61,
-      "settledAt": "2026-03-03T21:06:15.678Z"
+      "settledAt": "2026-03-03T21:06:15.678Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827715-total-b1fd11963a",
@@ -2612,7 +2704,8 @@
       "result": "won",
       "homeScore": 84,
       "awayScore": 61,
-      "settledAt": "2026-03-03T19:44:35.804Z"
+      "settledAt": "2026-03-03T19:44:35.804Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827715-team_total-c43ae86e48",
@@ -2632,7 +2725,8 @@
       "result": "lost",
       "homeScore": 84,
       "awayScore": 61,
-      "settledAt": "2026-03-03T21:23:50.515Z"
+      "settledAt": "2026-03-03T21:23:50.515Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827719-moneyline-4de0f1d349",
@@ -2652,7 +2746,8 @@
       "result": "lost",
       "homeScore": 73,
       "awayScore": 82,
-      "settledAt": "2026-03-03T16:26:50.716Z"
+      "settledAt": "2026-03-03T16:26:50.716Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827719-spread-e8961ec749",
@@ -2672,7 +2767,8 @@
       "result": "lost",
       "homeScore": 73,
       "awayScore": 82,
-      "settledAt": "2026-03-03T19:28:45.847Z"
+      "settledAt": "2026-03-03T19:28:45.847Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827719-total-3bc3e8e3dd",
@@ -2692,7 +2788,8 @@
       "result": "lost",
       "homeScore": 73,
       "awayScore": 82,
-      "settledAt": "2026-03-03T16:26:50.716Z"
+      "settledAt": "2026-03-03T16:26:50.716Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827719-team_total-d264c6ea62",
@@ -2712,7 +2809,8 @@
       "result": "won",
       "homeScore": 73,
       "awayScore": 82,
-      "settledAt": "2026-03-03T20:57:41.541Z"
+      "settledAt": "2026-03-03T20:57:41.541Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808274-moneyline-81fea2135a",
@@ -2732,7 +2830,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T16:26:50.718Z"
+      "settledAt": "2026-03-03T16:26:50.718Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808274-total-b1525cacca",
@@ -2752,7 +2851,8 @@
       "result": "lost",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T17:53:55.049Z"
+      "settledAt": "2026-03-03T17:53:55.049Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808274-team_total-f59dd8e77b",
@@ -2772,7 +2872,8 @@
       "result": "lost",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T17:53:55.049Z"
+      "settledAt": "2026-03-03T17:53:55.049Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808273-moneyline-e091ecc58e",
@@ -2792,7 +2893,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T16:26:50.718Z"
+      "settledAt": "2026-03-03T16:26:50.718Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808273-spread-354aa7eb5b",
@@ -2812,7 +2914,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T20:21:15.704Z"
+      "settledAt": "2026-03-03T20:21:15.704Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808273-total-0e4ff02c73",
@@ -2832,7 +2935,8 @@
       "result": "lost",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T15:31:20.853Z"
+      "settledAt": "2026-03-04T15:31:20.853Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808273-team_total-d118247558",
@@ -2852,7 +2956,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T14:54:46.223Z"
+      "settledAt": "2026-03-04T14:54:46.223Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808274-spread-450bda1931",
@@ -2872,7 +2977,8 @@
       "result": "lost",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-03T21:28:50.014Z"
+      "settledAt": "2026-03-03T21:28:50.014Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822967-moneyline-46cc81b6f6",
@@ -2892,7 +2998,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 57,
-      "settledAt": "2026-03-03T16:26:50.720Z"
+      "settledAt": "2026-03-03T16:26:50.720Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822967-spread-cb6a883b07",
@@ -2912,7 +3019,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 57,
-      "settledAt": "2026-03-03T22:01:24.994Z"
+      "settledAt": "2026-03-03T22:01:24.994Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822967-total-a241bea9ce",
@@ -2932,7 +3040,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 57,
-      "settledAt": "2026-03-03T16:26:50.720Z"
+      "settledAt": "2026-03-03T16:26:50.720Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822967-team_total-519f64b678",
@@ -2952,7 +3061,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 57,
-      "settledAt": "2026-03-03T22:01:24.994Z"
+      "settledAt": "2026-03-03T22:01:24.994Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808278-spread-d968c3585d",
@@ -2972,7 +3082,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T22:34:58.226Z"
+      "settledAt": "2026-03-03T22:34:58.226Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808277-spread-584cda3eae",
@@ -2992,7 +3103,8 @@
       "result": "lost",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T21:06:15.688Z"
+      "settledAt": "2026-03-03T21:06:15.688Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808277-total-80f2b181ee",
@@ -3012,7 +3124,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T22:52:16.816Z"
+      "settledAt": "2026-03-03T22:52:16.816Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808277-team_total-2999087121",
@@ -3032,7 +3145,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T22:52:16.816Z"
+      "settledAt": "2026-03-03T22:52:16.816Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808277-moneyline-d86e410baf",
@@ -3052,7 +3166,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T21:23:50.557Z"
+      "settledAt": "2026-03-03T21:23:50.557Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820779-moneyline-31b1829066",
@@ -3072,7 +3187,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 82,
-      "settledAt": "2026-03-03T16:26:50.723Z"
+      "settledAt": "2026-03-03T16:26:50.723Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820779-spread-0dec37bae3",
@@ -3092,7 +3208,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 82,
-      "settledAt": "2026-03-03T22:15:37.237Z"
+      "settledAt": "2026-03-03T22:15:37.237Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820779-total-b8e365e288",
@@ -3112,7 +3229,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 82,
-      "settledAt": "2026-03-03T19:44:35.806Z"
+      "settledAt": "2026-03-03T19:44:35.806Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820779-team_total-87ff518662",
@@ -3132,7 +3250,8 @@
       "result": "won",
       "homeScore": 89,
       "awayScore": 82,
-      "settledAt": "2026-03-03T19:44:35.806Z"
+      "settledAt": "2026-03-03T19:44:35.806Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401828461-moneyline-0095d5f83b",
@@ -3152,7 +3271,8 @@
       "result": "won",
       "homeScore": 91,
       "awayScore": 76,
-      "settledAt": "2026-03-03T16:26:50.725Z"
+      "settledAt": "2026-03-03T16:26:50.725Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401828461-spread-98c450326b",
@@ -3172,7 +3292,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 76,
-      "settledAt": "2026-03-04T15:37:49.423Z"
+      "settledAt": "2026-03-04T15:37:49.423Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401828461-team_total-04f07bddd6",
@@ -3192,7 +3313,8 @@
       "result": "won",
       "homeScore": 91,
       "awayScore": 76,
-      "settledAt": "2026-03-04T17:22:04.091Z"
+      "settledAt": "2026-03-04T17:22:04.091Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401828461-total-f340775925",
@@ -3212,7 +3334,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 76,
-      "settledAt": "2026-03-04T14:34:06.909Z"
+      "settledAt": "2026-03-04T14:34:06.909Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808279-spread-718f8aef00",
@@ -3232,7 +3355,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 77,
-      "settledAt": "2026-03-03T16:26:50.735Z"
+      "settledAt": "2026-03-03T16:26:50.735Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808279-total-1c368355f7",
@@ -3252,7 +3376,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 77,
-      "settledAt": "2026-03-03T16:26:50.735Z"
+      "settledAt": "2026-03-03T16:26:50.735Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808279-team_total-fc40cc6876",
@@ -3272,7 +3397,8 @@
       "result": "won",
       "homeScore": 91,
       "awayScore": 77,
-      "settledAt": "2026-03-03T21:23:50.625Z"
+      "settledAt": "2026-03-03T21:23:50.625Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825553-moneyline-9d39f8d5b7",
@@ -3292,7 +3418,8 @@
       "result": "lost",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-03T16:26:50.736Z"
+      "settledAt": "2026-03-03T16:26:50.736Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825553-spread-7a196fe207",
@@ -3312,7 +3439,8 @@
       "result": "lost",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-03T18:39:18.857Z"
+      "settledAt": "2026-03-03T18:39:18.857Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825553-total-a401f0e6a2",
@@ -3332,7 +3460,8 @@
       "result": "lost",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-03T20:21:15.707Z"
+      "settledAt": "2026-03-03T20:21:15.707Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825553-team_total-0bf33a42d9",
@@ -3352,7 +3481,8 @@
       "result": "lost",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-03T21:55:23.730Z"
+      "settledAt": "2026-03-03T21:55:23.730Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814597-moneyline-ae52ed2684",
@@ -3372,7 +3502,8 @@
       "result": "lost",
       "homeScore": 67,
       "awayScore": 69,
-      "settledAt": "2026-03-03T16:26:50.738Z"
+      "settledAt": "2026-03-03T16:26:50.738Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814597-spread-4c1a9c65e8",
@@ -3392,7 +3523,8 @@
       "result": "lost",
       "homeScore": 67,
       "awayScore": 69,
-      "settledAt": "2026-03-03T16:26:50.738Z"
+      "settledAt": "2026-03-03T16:26:50.738Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814597-total-b43035425d",
@@ -3412,7 +3544,8 @@
       "result": "won",
       "homeScore": 67,
       "awayScore": 69,
-      "settledAt": "2026-03-03T16:26:50.738Z"
+      "settledAt": "2026-03-03T16:26:50.738Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814597-team_total-86ee72ed38",
@@ -3432,7 +3565,8 @@
       "result": "won",
       "homeScore": 67,
       "awayScore": 69,
-      "settledAt": "2026-03-03T16:31:47.359Z"
+      "settledAt": "2026-03-03T16:31:47.359Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803319-total-2bd15d99cc",
@@ -3452,7 +3586,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:37:10.020Z"
+      "settledAt": "2026-03-03T16:37:10.020Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810751-moneyline-5c18ee60c2",
@@ -3472,7 +3607,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 110,
-      "settledAt": "2026-03-04T14:34:05.956Z"
+      "settledAt": "2026-03-04T14:34:05.956Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810751-spread-dc9e655a8f",
@@ -3492,7 +3628,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 110,
-      "settledAt": "2026-03-04T17:22:04.020Z"
+      "settledAt": "2026-03-04T17:22:04.020Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808278-moneyline-cc3d66364d",
@@ -3512,7 +3649,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T16:37:10.038Z"
+      "settledAt": "2026-03-03T16:37:10.038Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808279-moneyline-80b28e0b0c",
@@ -3532,7 +3670,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 77,
-      "settledAt": "2026-03-03T16:37:10.043Z"
+      "settledAt": "2026-03-03T16:37:10.043Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803320-total-26c94e0c51",
@@ -3552,7 +3691,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-03T16:39:40.178Z"
+      "settledAt": "2026-03-03T16:39:40.178Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803322-moneyline-10bba0e92e",
@@ -3572,7 +3712,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 3,
-      "settledAt": "2026-03-03T16:54:01.590Z"
+      "settledAt": "2026-03-03T16:54:01.590Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803321-moneyline-952fad5407",
@@ -3592,7 +3733,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T16:58:00.421Z"
+      "settledAt": "2026-03-03T16:58:00.421Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803324-team_total-d15099cb64",
@@ -3612,7 +3754,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-04T14:34:06.152Z"
+      "settledAt": "2026-03-04T14:34:06.152Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803323-spread-d0f91fd555",
@@ -3632,7 +3775,8 @@
       "result": "won",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-03T21:23:50.383Z"
+      "settledAt": "2026-03-03T21:23:50.383Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810751-total-ba0b5fee6d",
@@ -3652,7 +3796,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 110,
-      "settledAt": "2026-03-04T17:35:50.649Z"
+      "settledAt": "2026-03-04T17:35:50.649Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810751-team_total-26f7161ff2",
@@ -3672,7 +3817,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 110,
-      "settledAt": "2026-03-04T17:26:06.248Z"
+      "settledAt": "2026-03-04T17:26:06.248Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803324-moneyline-78bfbc7c2b",
@@ -3692,7 +3838,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-03T17:35:16.004Z"
+      "settledAt": "2026-03-03T17:35:16.004Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803321-spread-bdc84e150c",
@@ -3712,7 +3859,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-03T18:28:54.770Z"
+      "settledAt": "2026-03-03T18:28:54.770Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820784-total-0a6e16502c",
@@ -3732,7 +3880,8 @@
       "result": "lost",
       "homeScore": 86,
       "awayScore": 83,
-      "settledAt": "2026-03-04T17:35:51.068Z"
+      "settledAt": "2026-03-04T17:35:51.068Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820784-team_total-1768956537",
@@ -3752,7 +3901,8 @@
       "result": "lost",
       "homeScore": 86,
       "awayScore": 83,
-      "settledAt": "2026-03-03T20:28:37.892Z"
+      "settledAt": "2026-03-03T20:28:37.892Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810749-moneyline-779b8b7051",
@@ -3772,7 +3922,8 @@
       "result": "won",
       "homeScore": 81,
       "awayScore": 108,
-      "settledAt": "2026-03-03T22:52:16.778Z"
+      "settledAt": "2026-03-03T22:52:16.778Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810749-spread-ea0e4d0293",
@@ -3792,7 +3943,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T18:10:55.293Z"
+      "settledAt": "2026-03-04T18:10:55.293Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803316-moneyline-5c8b7f5ec1",
@@ -3812,7 +3964,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-03T20:21:15.681Z"
+      "settledAt": "2026-03-03T20:21:15.681Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803322-spread-727506a604",
@@ -3832,7 +3985,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810752-moneyline-397b1bea8e",
@@ -3852,7 +4006,8 @@
       "result": "lost",
       "homeScore": 81,
       "awayScore": 108,
-      "settledAt": "2026-03-04T15:45:35.309Z"
+      "settledAt": "2026-03-04T15:45:35.309Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810749-team_total-1f6b3894bf",
@@ -3872,7 +4027,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T15:39:26.143Z"
+      "settledAt": "2026-03-04T15:39:26.143Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825554-moneyline-6ae92578ba",
@@ -3892,7 +4048,8 @@
       "result": "lost",
       "homeScore": 67,
       "awayScore": 82,
-      "settledAt": "2026-03-03T21:23:50.532Z"
+      "settledAt": "2026-03-03T21:23:50.532Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825554-team_total-e06c32dc9f",
@@ -3912,7 +4069,8 @@
       "result": "won",
       "homeScore": 67,
       "awayScore": 82,
-      "settledAt": "2026-03-03T21:23:50.532Z"
+      "settledAt": "2026-03-03T21:23:50.532Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825554-total-d8e0a8a937",
@@ -3932,7 +4090,8 @@
       "result": "lost",
       "homeScore": 67,
       "awayScore": 82,
-      "settledAt": "2026-03-03T21:23:50.532Z"
+      "settledAt": "2026-03-03T21:23:50.532Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808278-team_total-bc3580203d",
@@ -3952,7 +4111,8 @@
       "result": "won",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T22:42:17.048Z"
+      "settledAt": "2026-03-03T22:42:17.048Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810752-spread-4cc3616e13",
@@ -3972,7 +4132,8 @@
       "result": "lost",
       "homeScore": 81,
       "awayScore": 108,
-      "settledAt": "2026-03-04T14:38:46.612Z"
+      "settledAt": "2026-03-04T14:38:46.612Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803323-moneyline-87cd7defbc",
@@ -3992,7 +4153,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T15:45:35.484Z"
+      "settledAt": "2026-03-04T15:45:35.484Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808278-total-5b9611af29",
@@ -4012,7 +4174,8 @@
       "result": "lost",
       "homeScore": 69,
       "awayScore": 71,
-      "settledAt": "2026-03-03T21:28:50.025Z"
+      "settledAt": "2026-03-03T21:28:50.025Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820784-moneyline-06e97379cd",
@@ -4032,7 +4195,8 @@
       "result": "won",
       "homeScore": 86,
       "awayScore": 83,
-      "settledAt": "2026-03-03T21:48:16.638Z"
+      "settledAt": "2026-03-03T21:48:16.638Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820784-spread-66ffaa8588",
@@ -4052,7 +4216,8 @@
       "result": "won",
       "homeScore": 86,
       "awayScore": 83,
-      "settledAt": "2026-03-03T21:48:16.638Z"
+      "settledAt": "2026-03-03T21:48:16.638Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810754-spread-d4ddd46443",
@@ -4072,7 +4237,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T14:34:05.922Z"
+      "settledAt": "2026-03-04T14:34:05.922Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810754-total-84676cb168",
@@ -4092,7 +4258,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T14:34:05.922Z"
+      "settledAt": "2026-03-04T14:34:05.922Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810754-team_total-63a76e60cc",
@@ -4112,7 +4279,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T14:34:05.922Z"
+      "settledAt": "2026-03-04T14:34:05.922Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810749-total-a6b10eb469",
@@ -4132,7 +4300,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T18:15:55.288Z"
+      "settledAt": "2026-03-04T18:15:55.288Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810754-moneyline-50def6738b",
@@ -4152,7 +4321,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-04T14:34:05.922Z"
+      "settledAt": "2026-03-04T14:34:05.922Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810758-moneyline-f8cf44a560",
@@ -4172,7 +4342,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-04T14:34:05.943Z"
+      "settledAt": "2026-03-04T14:34:05.943Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810758-spread-1cec8bee1e",
@@ -4192,7 +4363,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-04T14:34:05.943Z"
+      "settledAt": "2026-03-04T14:34:05.943Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810758-total-9bb51214ad",
@@ -4212,7 +4384,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-04T14:34:05.943Z"
+      "settledAt": "2026-03-04T14:34:05.943Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810758-team_total-abf91bf24c",
@@ -4232,7 +4405,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-04T14:34:05.943Z"
+      "settledAt": "2026-03-04T14:34:05.943Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810760-moneyline-25545c1c14",
@@ -4252,7 +4426,8 @@
       "result": "lost",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-04T14:34:05.952Z"
+      "settledAt": "2026-03-04T14:34:05.952Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810760-spread-ed3ea9d4b3",
@@ -4272,7 +4447,8 @@
       "result": "lost",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-04T14:34:05.952Z"
+      "settledAt": "2026-03-04T14:34:05.952Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810760-total-4787dab382",
@@ -4292,7 +4468,8 @@
       "result": "won",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-04T14:34:05.952Z"
+      "settledAt": "2026-03-04T14:34:05.952Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810760-team_total-7c88037846",
@@ -4312,7 +4489,8 @@
       "result": "lost",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-04T14:34:05.952Z"
+      "settledAt": "2026-03-04T14:34:05.952Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803328-spread-119766dd0e",
@@ -4332,7 +4510,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T16:40:06.128Z"
+      "settledAt": "2026-03-04T16:40:06.128Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803328-total-c16139769a",
@@ -4352,7 +4531,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T17:35:50.690Z"
+      "settledAt": "2026-03-04T17:35:50.690Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803328-team_total-356e8e9825",
@@ -4372,7 +4552,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T17:26:06.253Z"
+      "settledAt": "2026-03-04T17:26:06.253Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803329-spread-9bd5d77819",
@@ -4392,7 +4573,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T16:40:06.133Z"
+      "settledAt": "2026-03-04T16:40:06.133Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803334-spread-b8ce0416cd",
@@ -4412,7 +4594,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803329-team_total-ec3bf1c298",
@@ -4432,7 +4615,8 @@
       "result": "lost",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T16:40:06.133Z"
+      "settledAt": "2026-03-04T16:40:06.133Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803334-team_total-a6e4131953",
@@ -4452,7 +4636,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803329-moneyline-542030a33b",
@@ -4472,7 +4657,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803329-total-c1ca834147",
@@ -4492,7 +4678,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T17:22:04.040Z"
+      "settledAt": "2026-03-04T17:22:04.040Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803334-moneyline-1f59ff1902",
@@ -4512,7 +4699,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803334-total-d5a4dccacd",
@@ -4532,7 +4720,8 @@
       "result": "push",
       "homeScore": 5,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.135Z"
+      "settledAt": "2026-03-04T14:34:06.135Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803335-moneyline-7223326dea",
@@ -4552,7 +4741,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T14:34:06.141Z"
+      "settledAt": "2026-03-04T14:34:06.141Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803335-spread-1edc5a16d8",
@@ -4572,7 +4762,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T14:34:06.141Z"
+      "settledAt": "2026-03-04T14:34:06.141Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803335-total-ab769641be",
@@ -4592,7 +4783,8 @@
       "result": "won",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T14:34:06.141Z"
+      "settledAt": "2026-03-04T14:34:06.141Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803335-team_total-16d90f491b",
@@ -4612,7 +4804,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T14:34:06.141Z"
+      "settledAt": "2026-03-04T14:34:06.141Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803324-total-55726484ba",
@@ -4632,7 +4825,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-04T18:05:54.823Z"
+      "settledAt": "2026-03-04T18:05:54.823Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820794-moneyline-e8aeac230f",
@@ -4652,7 +4846,8 @@
       "result": "won",
       "homeScore": 75,
       "awayScore": 70,
-      "settledAt": "2026-03-04T14:34:06.163Z"
+      "settledAt": "2026-03-04T14:34:06.163Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820794-spread-0712e6cc1f",
@@ -4672,7 +4867,8 @@
       "result": "won",
       "homeScore": 75,
       "awayScore": 70,
-      "settledAt": "2026-03-04T14:34:06.163Z"
+      "settledAt": "2026-03-04T14:34:06.163Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820794-team_total-9d664bf55d",
@@ -4692,7 +4888,8 @@
       "result": "won",
       "homeScore": 75,
       "awayScore": 70,
-      "settledAt": "2026-03-04T15:50:34.799Z"
+      "settledAt": "2026-03-04T15:50:34.799Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401820794-total-147189e86e",
@@ -4712,7 +4909,8 @@
       "result": "won",
       "homeScore": 75,
       "awayScore": 70,
-      "settledAt": "2026-03-04T15:02:30.584Z"
+      "settledAt": "2026-03-04T15:02:30.584Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827726-moneyline-eb2d218aba",
@@ -4892,7 +5090,8 @@
       "result": "lost",
       "homeScore": 74,
       "awayScore": 72,
-      "settledAt": "2026-03-04T14:34:06.177Z"
+      "settledAt": "2026-03-04T14:34:06.177Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814601-spread-92fc336870",
@@ -4912,7 +5111,8 @@
       "result": "lost",
       "homeScore": 74,
       "awayScore": 72,
-      "settledAt": "2026-03-04T14:34:06.177Z"
+      "settledAt": "2026-03-04T14:34:06.177Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814601-total-abac3e4ace",
@@ -4932,7 +5132,8 @@
       "result": "won",
       "homeScore": 74,
       "awayScore": 72,
-      "settledAt": "2026-03-04T14:34:06.177Z"
+      "settledAt": "2026-03-04T14:34:06.177Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810757-moneyline-394d20ca42",
@@ -4952,7 +5153,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-04T14:34:06.199Z"
+      "settledAt": "2026-03-04T14:34:06.199Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810757-spread-5becc0a7c8",
@@ -4972,7 +5174,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-04T14:34:06.199Z"
+      "settledAt": "2026-03-04T14:34:06.199Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810757-total-368aa1c20c",
@@ -4992,7 +5195,8 @@
       "result": "won",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-04T14:34:06.199Z"
+      "settledAt": "2026-03-04T14:34:06.199Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810757-team_total-2f24a431ad",
@@ -5012,7 +5216,8 @@
       "result": "won",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-04T14:34:06.199Z"
+      "settledAt": "2026-03-04T14:34:06.199Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810752-total-2d7372752e",
@@ -5032,7 +5237,8 @@
       "result": "won",
       "homeScore": 81,
       "awayScore": 108,
-      "settledAt": "2026-03-04T17:41:41.214Z"
+      "settledAt": "2026-03-04T17:41:41.214Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810752-team_total-f6f3f9af1e",
@@ -5052,7 +5258,8 @@
       "result": "lost",
       "homeScore": 81,
       "awayScore": 108,
-      "settledAt": "2026-03-04T14:43:28.413Z"
+      "settledAt": "2026-03-04T14:43:28.413Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810753-moneyline-2cc33a4fd9",
@@ -5072,7 +5279,8 @@
       "result": "won",
       "homeScore": 101,
       "awayScore": 114,
-      "settledAt": "2026-03-04T15:45:35.473Z"
+      "settledAt": "2026-03-04T15:45:35.473Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810753-spread-56eb341b48",
@@ -5092,7 +5300,8 @@
       "result": "lost",
       "homeScore": 101,
       "awayScore": 114,
-      "settledAt": "2026-03-04T14:54:46.211Z"
+      "settledAt": "2026-03-04T14:54:46.211Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810753-total-d867defe5b",
@@ -5112,7 +5321,8 @@
       "result": "won",
       "homeScore": 101,
       "awayScore": 114,
-      "settledAt": "2026-03-04T17:41:41.230Z"
+      "settledAt": "2026-03-04T17:41:41.230Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810753-team_total-c248d0b425",
@@ -5132,7 +5342,8 @@
       "result": "won",
       "homeScore": 101,
       "awayScore": 114,
-      "settledAt": "2026-03-04T15:41:33.353Z"
+      "settledAt": "2026-03-04T15:41:33.353Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803326-spread-0ef39afeea",
@@ -5152,7 +5363,8 @@
       "result": "lost",
       "homeScore": 4,
       "awayScore": 5,
-      "settledAt": "2026-03-04T17:22:04.083Z"
+      "settledAt": "2026-03-04T17:22:04.083Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803326-total-f2600091b2",
@@ -5172,7 +5384,8 @@
       "result": "won",
       "homeScore": 4,
       "awayScore": 5,
-      "settledAt": "2026-03-04T17:22:04.083Z"
+      "settledAt": "2026-03-04T17:22:04.083Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803326-team_total-1723592557",
@@ -5192,7 +5405,8 @@
       "result": "lost",
       "homeScore": 4,
       "awayScore": 5,
-      "settledAt": "2026-03-04T14:38:46.617Z"
+      "settledAt": "2026-03-04T14:38:46.617Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803326-moneyline-36047c3cbf",
@@ -5212,7 +5426,8 @@
       "result": "lost",
       "homeScore": 4,
       "awayScore": 5,
-      "settledAt": "2026-03-04T14:34:06.342Z"
+      "settledAt": "2026-03-04T14:34:06.342Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803323-team_total-4973358301",
@@ -5232,7 +5447,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T15:50:34.812Z"
+      "settledAt": "2026-03-04T15:50:34.812Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803325-moneyline-6f63ea6179",
@@ -5252,7 +5468,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.463Z"
+      "settledAt": "2026-03-04T14:34:06.463Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803325-team_total-59f313f649",
@@ -5272,7 +5489,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T16:31:07.354Z"
+      "settledAt": "2026-03-04T16:31:07.354Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803325-spread-318df6116c",
@@ -5292,7 +5510,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T14:34:06.463Z"
+      "settledAt": "2026-03-04T14:34:06.463Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803325-total-e4f75c86f1",
@@ -5312,7 +5531,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T18:05:54.829Z"
+      "settledAt": "2026-03-04T18:05:54.829Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825556-spread-4247f25b72",
@@ -5332,7 +5552,8 @@
       "result": "won",
       "homeScore": 82,
       "awayScore": 74,
-      "settledAt": "2026-03-04T16:40:06.173Z"
+      "settledAt": "2026-03-04T16:40:06.173Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825556-moneyline-0525df98f5",
@@ -5352,7 +5573,8 @@
       "result": "lost",
       "homeScore": 82,
       "awayScore": 74,
-      "settledAt": "2026-03-04T14:34:06.585Z"
+      "settledAt": "2026-03-04T14:34:06.585Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825561-moneyline-1844560520",
@@ -5372,7 +5594,8 @@
       "result": "lost",
       "homeScore": 64,
       "awayScore": 77,
-      "settledAt": "2026-03-04T14:34:06.797Z"
+      "settledAt": "2026-03-04T14:34:06.797Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825561-spread-0b8b1597c0",
@@ -5392,7 +5615,8 @@
       "result": "lost",
       "homeScore": 64,
       "awayScore": 77,
-      "settledAt": "2026-03-04T14:34:06.797Z"
+      "settledAt": "2026-03-04T14:34:06.797Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825561-team_total-7de4684a07",
@@ -5412,7 +5636,8 @@
       "result": "lost",
       "homeScore": 64,
       "awayScore": 77,
-      "settledAt": "2026-03-04T15:02:30.604Z"
+      "settledAt": "2026-03-04T15:02:30.604Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825561-total-55c515c4d9",
@@ -5432,7 +5657,8 @@
       "result": "lost",
       "homeScore": 64,
       "awayScore": 77,
-      "settledAt": "2026-03-04T15:02:30.604Z"
+      "settledAt": "2026-03-04T15:02:30.604Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827721-moneyline-7fe5d6178a",
@@ -5452,7 +5678,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T14:34:06.802Z"
+      "settledAt": "2026-03-04T14:34:06.802Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827721-spread-99357e87f1",
@@ -5472,7 +5699,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T14:34:06.802Z"
+      "settledAt": "2026-03-04T14:34:06.802Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827721-total-e2220f61dd",
@@ -5492,7 +5720,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T14:34:06.802Z"
+      "settledAt": "2026-03-04T14:34:06.802Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827721-team_total-2a8d9337db",
@@ -5512,7 +5741,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T14:34:06.802Z"
+      "settledAt": "2026-03-04T14:34:06.802Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822973-moneyline-5a11608400",
@@ -5532,7 +5762,8 @@
       "result": "lost",
       "homeScore": 71,
       "awayScore": 67,
-      "settledAt": "2026-03-04T14:34:06.894Z"
+      "settledAt": "2026-03-04T14:34:06.894Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822973-spread-05f2aa028f",
@@ -5552,7 +5783,8 @@
       "result": "lost",
       "homeScore": 71,
       "awayScore": 67,
-      "settledAt": "2026-03-04T14:34:06.894Z"
+      "settledAt": "2026-03-04T14:34:06.894Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822973-team_total-a0fd686400",
@@ -5572,7 +5804,8 @@
       "result": "won",
       "homeScore": 71,
       "awayScore": 67,
-      "settledAt": "2026-03-04T14:34:06.894Z"
+      "settledAt": "2026-03-04T14:34:06.894Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808285-spread-0cdf803c96",
@@ -5592,7 +5825,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T14:34:06.905Z"
+      "settledAt": "2026-03-04T14:34:06.905Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808285-moneyline-2f5a5dc87a",
@@ -5612,7 +5846,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T14:34:06.905Z"
+      "settledAt": "2026-03-04T14:34:06.905Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808285-team_total-4598ef8431",
@@ -5632,7 +5867,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T15:02:30.621Z"
+      "settledAt": "2026-03-04T15:02:30.621Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808285-total-86bbad0654",
@@ -5652,7 +5888,8 @@
       "result": "won",
       "homeScore": 111,
       "awayScore": 77,
-      "settledAt": "2026-03-04T15:02:30.621Z"
+      "settledAt": "2026-03-04T15:02:30.621Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803330-spread-e50c1378e4",
@@ -5672,7 +5909,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T17:35:50.690Z"
+      "settledAt": "2026-03-04T17:35:50.690Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803330-team_total-b336767462",
@@ -5692,7 +5930,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T17:26:06.253Z"
+      "settledAt": "2026-03-04T17:26:06.253Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803330-total-79ba6b2186",
@@ -5712,7 +5951,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T15:12:21.716Z"
+      "settledAt": "2026-03-04T15:12:21.716Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810755-moneyline-7fd3a2231f",
@@ -5732,7 +5972,8 @@
       "result": "lost",
       "homeScore": 126,
       "awayScore": 109,
-      "settledAt": "2026-03-04T15:45:35.143Z"
+      "settledAt": "2026-03-04T15:45:35.143Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810756-moneyline-11815b930f",
@@ -5752,7 +5993,8 @@
       "result": "won",
       "homeScore": 124,
       "awayScore": 98,
-      "settledAt": "2026-03-04T17:35:50.635Z"
+      "settledAt": "2026-03-04T17:35:50.635Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810762-moneyline-220c1ff522",
@@ -5772,7 +6014,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T15:45:35.176Z"
+      "settledAt": "2026-03-04T15:45:35.176Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810761-moneyline-2fd323691f",
@@ -5792,7 +6035,8 @@
       "result": "won",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T15:45:35.176Z"
+      "settledAt": "2026-03-04T15:45:35.176Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810761-spread-d390a4e702",
@@ -5812,7 +6056,8 @@
       "result": "won",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T15:45:35.176Z"
+      "settledAt": "2026-03-04T15:45:35.176Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810761-team_total-5a9a9641c8",
@@ -5832,7 +6077,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T15:45:35.176Z"
+      "settledAt": "2026-03-04T15:45:35.176Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803330-moneyline-ea7e4b6c55",
@@ -5852,7 +6098,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T15:45:35.198Z"
+      "settledAt": "2026-03-04T15:45:35.198Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803328-moneyline-00f40b1642",
@@ -5872,7 +6119,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-04T15:45:35.198Z"
+      "settledAt": "2026-03-04T15:45:35.198Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803327-spread-e558be28f8",
@@ -5892,7 +6140,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 3,
-      "settledAt": "2026-03-04T17:22:04.055Z"
+      "settledAt": "2026-03-04T17:22:04.055Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803327-moneyline-ef3f37a082",
@@ -5912,7 +6161,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 3,
-      "settledAt": "2026-03-04T15:45:35.209Z"
+      "settledAt": "2026-03-04T15:45:35.209Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803331-spread-a31b1d9bcd",
@@ -5932,7 +6182,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-04T17:26:06.287Z"
+      "settledAt": "2026-03-04T17:26:06.287Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803331-moneyline-b5d2db1476",
@@ -5952,7 +6203,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-04T15:45:35.221Z"
+      "settledAt": "2026-03-04T15:45:35.221Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803332-spread-32110c67b5",
@@ -5972,7 +6224,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T16:40:06.158Z"
+      "settledAt": "2026-03-04T16:40:06.158Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803332-moneyline-8a411cb59f",
@@ -5992,7 +6245,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T15:45:35.286Z"
+      "settledAt": "2026-03-04T15:45:35.286Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401814601-team_total-ff451bfcf7",
@@ -6012,7 +6266,8 @@
       "result": "won",
       "homeScore": 74,
       "awayScore": 72,
-      "settledAt": "2026-03-04T15:45:35.298Z"
+      "settledAt": "2026-03-04T15:45:35.298Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803333-spread-9d342dffd5",
@@ -6032,7 +6287,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-04T17:35:50.774Z"
+      "settledAt": "2026-03-04T17:35:50.774Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803333-moneyline-1d186b78c8",
@@ -6052,7 +6308,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-04T17:26:06.311Z"
+      "settledAt": "2026-03-04T17:26:06.311Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825556-team_total-51c04be986",
@@ -6072,7 +6329,8 @@
       "result": "won",
       "homeScore": 82,
       "awayScore": 74,
-      "settledAt": "2026-03-04T16:40:06.173Z"
+      "settledAt": "2026-03-04T16:40:06.173Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810762-spread-a3e68e9098",
@@ -6092,7 +6350,8 @@
       "result": "won",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T15:50:34.778Z"
+      "settledAt": "2026-03-04T15:50:34.778Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827728-moneyline-fd8dd6a80f",
@@ -6112,7 +6371,8 @@
       "result": "lost",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T16:31:07.361Z"
+      "settledAt": "2026-03-04T16:31:07.361Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825560-moneyline-639fe2c271",
@@ -6132,7 +6392,8 @@
       "result": "won",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-04T16:31:07.377Z"
+      "settledAt": "2026-03-04T16:31:07.377Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825560-spread-1cdbb808be",
@@ -6152,7 +6413,8 @@
       "result": "won",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-04T16:31:07.377Z"
+      "settledAt": "2026-03-04T16:31:07.377Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825560-team_total-ff814c2b6b",
@@ -6172,7 +6434,8 @@
       "result": "won",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-04T16:31:07.377Z"
+      "settledAt": "2026-03-04T16:31:07.377Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822972-moneyline-6375a8bdf4",
@@ -6192,7 +6455,8 @@
       "result": "won",
       "homeScore": 72,
       "awayScore": 69,
-      "settledAt": "2026-03-04T17:35:50.749Z"
+      "settledAt": "2026-03-04T17:35:50.749Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822972-spread-14c27bad09",
@@ -6212,7 +6476,8 @@
       "result": "won",
       "homeScore": 72,
       "awayScore": 69,
-      "settledAt": "2026-03-04T16:35:06.892Z"
+      "settledAt": "2026-03-04T16:35:06.892Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803327-team_total-f9d7726e11",
@@ -6232,7 +6497,8 @@
       "result": "push",
       "homeScore": 2,
       "awayScore": 3,
-      "settledAt": "2026-03-04T17:26:06.274Z"
+      "settledAt": "2026-03-04T17:26:06.274Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803331-team_total-881b13bf98",
@@ -6252,7 +6518,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-04T17:26:06.287Z"
+      "settledAt": "2026-03-04T17:26:06.287Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803332-team_total-c3850e87c3",
@@ -6272,7 +6539,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T17:26:06.298Z"
+      "settledAt": "2026-03-04T17:26:06.298Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810759-moneyline-2267d41f10",
@@ -6292,7 +6560,8 @@
       "result": "lost",
       "homeScore": 113,
       "awayScore": 109,
-      "settledAt": "2026-03-04T17:35:50.613Z"
+      "settledAt": "2026-03-04T17:35:50.613Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810759-spread-166541befc",
@@ -6312,7 +6581,8 @@
       "result": "won",
       "homeScore": 113,
       "awayScore": 109,
-      "settledAt": "2026-03-04T17:35:50.613Z"
+      "settledAt": "2026-03-04T17:35:50.613Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810759-total-63f0eec28f",
@@ -6332,7 +6602,8 @@
       "result": "lost",
       "homeScore": 113,
       "awayScore": 109,
-      "settledAt": "2026-03-04T17:35:50.613Z"
+      "settledAt": "2026-03-04T17:35:50.613Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810755-spread-6672f5e0cc",
@@ -6352,7 +6623,8 @@
       "result": "won",
       "homeScore": 126,
       "awayScore": 109,
-      "settledAt": "2026-03-04T17:35:50.620Z"
+      "settledAt": "2026-03-04T17:35:50.620Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810755-total-5f3e92a681",
@@ -6372,7 +6644,8 @@
       "result": "won",
       "homeScore": 126,
       "awayScore": 109,
-      "settledAt": "2026-03-04T17:35:50.620Z"
+      "settledAt": "2026-03-04T17:35:50.620Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810761-total-d036da1d79",
@@ -6392,7 +6665,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T17:35:50.676Z"
+      "settledAt": "2026-03-04T17:35:50.676Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810762-total-a3fba54266",
@@ -6412,7 +6686,8 @@
       "result": "won",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-04T17:35:50.676Z"
+      "settledAt": "2026-03-04T17:35:50.676Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803327-total-cb7ef4d8c6",
@@ -6432,7 +6707,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 3,
-      "settledAt": "2026-03-04T17:35:50.702Z"
+      "settledAt": "2026-03-04T17:35:50.702Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803331-total-8ed5481f70",
@@ -6452,7 +6728,8 @@
       "result": "lost",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-04T17:35:50.718Z"
+      "settledAt": "2026-03-04T17:35:50.718Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803332-total-c6a6786108",
@@ -6472,7 +6749,8 @@
       "result": "won",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T17:35:50.735Z"
+      "settledAt": "2026-03-04T17:35:50.735Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822972-total-29667953a6",
@@ -6492,7 +6770,8 @@
       "result": "lost",
       "homeScore": 72,
       "awayScore": 69,
-      "settledAt": "2026-03-04T17:35:50.749Z"
+      "settledAt": "2026-03-04T17:35:50.749Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803323-total-8d42b9ddf5",
@@ -6512,7 +6791,8 @@
       "result": "won",
       "homeScore": 1,
       "awayScore": 6,
-      "settledAt": "2026-03-04T17:35:50.762Z"
+      "settledAt": "2026-03-04T17:35:50.762Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803333-total-669d9f0bf8",
@@ -6532,7 +6812,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 4,
-      "settledAt": "2026-03-04T17:35:50.774Z"
+      "settledAt": "2026-03-04T17:35:50.774Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825556-total-a02ceaafcc",
@@ -6552,7 +6833,8 @@
       "result": "lost",
       "homeScore": 82,
       "awayScore": 74,
-      "settledAt": "2026-03-04T17:35:50.966Z"
+      "settledAt": "2026-03-04T17:35:50.966Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827728-spread-0ad35eeb44",
@@ -6572,7 +6854,8 @@
       "result": "lost",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T17:35:50.978Z"
+      "settledAt": "2026-03-04T17:35:50.978Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401827728-total-cc3a4efa9c",
@@ -6592,7 +6875,8 @@
       "result": "won",
       "homeScore": 102,
       "awayScore": 62,
-      "settledAt": "2026-03-04T17:54:55.981Z"
+      "settledAt": "2026-03-04T17:54:55.981Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401822973-total-cb8c120f49",
@@ -6612,7 +6896,8 @@
       "result": "lost",
       "homeScore": 71,
       "awayScore": 67,
-      "settledAt": "2026-03-04T17:47:27.467Z"
+      "settledAt": "2026-03-04T17:47:27.467Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825560-total-3cd4752fdc",
@@ -6632,7 +6917,8 @@
       "result": "won",
       "homeScore": 70,
       "awayScore": 84,
-      "settledAt": "2026-03-04T18:19:58.397Z"
+      "settledAt": "2026-03-04T18:19:58.397Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810763-total-5cd245d96d",
@@ -6652,7 +6938,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810764-total-add0cd82a2",
@@ -6672,7 +6959,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810763-spread-77d3f14500",
@@ -6692,7 +6980,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810763-moneyline-d2aca259b9",
@@ -6712,7 +7001,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810764-moneyline-5565411f2b",
@@ -6732,7 +7022,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810764-spread-db6df49dff",
@@ -6752,7 +7043,8 @@
       "result": "won",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T00:00:37.382Z"
+      "settledAt": "2026-03-05T00:00:37.382Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810766-total-8234726e80",
@@ -6772,7 +7064,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-05T00:00:37.424Z"
+      "settledAt": "2026-03-05T00:00:37.424Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810766-moneyline-21b00dd760",
@@ -6792,7 +7085,8 @@
       "result": "won",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-05T00:00:37.424Z"
+      "settledAt": "2026-03-05T00:00:37.424Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810766-spread-5eef6b2e90",
@@ -6812,7 +7106,8 @@
       "result": "lost",
       "homeScore": 95,
       "awayScore": 111,
-      "settledAt": "2026-03-05T00:00:37.424Z"
+      "settledAt": "2026-03-05T00:00:37.424Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810768-moneyline-cc85012f4d",
@@ -6832,7 +7127,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-05T00:00:37.436Z"
+      "settledAt": "2026-03-05T00:00:37.436Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810768-total-aa1cd5b9a9",
@@ -6852,7 +7148,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-05T00:00:37.436Z"
+      "settledAt": "2026-03-05T00:00:37.436Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810768-spread-d079f7763f",
@@ -6872,7 +7169,8 @@
       "result": "lost",
       "homeScore": 91,
       "awayScore": 131,
-      "settledAt": "2026-03-05T00:00:37.436Z"
+      "settledAt": "2026-03-05T00:00:37.436Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810767-total-8d919cf1da",
@@ -6892,7 +7190,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-05T00:00:37.452Z"
+      "settledAt": "2026-03-05T00:00:37.452Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810767-spread-d7cf3e90bf",
@@ -6912,7 +7211,8 @@
       "result": "won",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-05T00:00:37.452Z"
+      "settledAt": "2026-03-05T00:00:37.452Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810767-moneyline-d14cfb5d9f",
@@ -6932,7 +7232,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-05T00:00:37.452Z"
+      "settledAt": "2026-03-05T00:00:37.452Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803339-moneyline-f5047cacfc",
@@ -6952,7 +7253,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T00:00:37.464Z"
+      "settledAt": "2026-03-05T00:00:37.464Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803339-spread-4e0997231b",
@@ -6972,7 +7274,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T00:00:37.464Z"
+      "settledAt": "2026-03-05T00:00:37.464Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803336-spread-c66798e312",
@@ -6992,7 +7295,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T00:00:37.478Z"
+      "settledAt": "2026-03-05T00:00:37.478Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803336-moneyline-46b3ef8522",
@@ -7012,7 +7316,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T00:00:37.478Z"
+      "settledAt": "2026-03-05T00:00:37.478Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803336-total-0c25d47993",
@@ -7032,7 +7337,8 @@
       "result": "lost",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T00:00:37.478Z"
+      "settledAt": "2026-03-05T00:00:37.478Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803337-moneyline-75515593bb",
@@ -7052,7 +7358,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-05T00:00:37.495Z"
+      "settledAt": "2026-03-05T00:00:37.495Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803337-spread-2172a34062",
@@ -7072,7 +7379,8 @@
       "result": "push",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-05T00:00:37.495Z"
+      "settledAt": "2026-03-05T00:00:37.495Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803337-total-c842aed273",
@@ -7092,7 +7400,8 @@
       "result": "won",
       "homeScore": 5,
       "awayScore": 4,
-      "settledAt": "2026-03-05T00:00:37.495Z"
+      "settledAt": "2026-03-05T00:00:37.495Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803338-spread-08e72b2606",
@@ -7112,7 +7421,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.508Z"
+      "settledAt": "2026-03-05T00:00:37.508Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803338-moneyline-47dcec3558",
@@ -7132,7 +7442,8 @@
       "result": "lost",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.508Z"
+      "settledAt": "2026-03-05T00:00:37.508Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803338-total-d103b53984",
@@ -7152,7 +7463,8 @@
       "result": "push",
       "homeScore": 1,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.508Z"
+      "settledAt": "2026-03-05T00:00:37.508Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803340-spread-69d43663ac",
@@ -7172,7 +7484,8 @@
       "result": "won",
       "homeScore": 7,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.622Z"
+      "settledAt": "2026-03-05T00:00:37.622Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803340-moneyline-45be5164da",
@@ -7192,7 +7505,8 @@
       "result": "won",
       "homeScore": 7,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.622Z"
+      "settledAt": "2026-03-05T00:00:37.622Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803340-total-4867e2c3c9",
@@ -7212,7 +7526,8 @@
       "result": "won",
       "homeScore": 7,
       "awayScore": 5,
-      "settledAt": "2026-03-05T00:00:37.622Z"
+      "settledAt": "2026-03-05T00:00:37.622Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401808281-moneyline-6057697cfc",
@@ -7352,7 +7667,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-05T00:00:37.654Z"
+      "settledAt": "2026-03-05T00:00:37.654Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810765-total-529e5baeac",
@@ -7372,7 +7688,8 @@
       "result": "won",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-05T00:00:37.654Z"
+      "settledAt": "2026-03-05T00:00:37.654Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810765-spread-bc8cf03cc8",
@@ -7392,7 +7709,8 @@
       "result": "lost",
       "homeScore": 118,
       "awayScore": 123,
-      "settledAt": "2026-03-05T00:00:37.654Z"
+      "settledAt": "2026-03-05T00:00:37.654Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803339-total-8ae25d7263",
@@ -7412,7 +7730,8 @@
       "result": "lost",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T01:56:57.950Z"
+      "settledAt": "2026-03-05T01:56:57.950Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NCAAB-401825565-spread-25d3a61e97",
@@ -7612,7 +7931,8 @@
       "result": "lost",
       "homeScore": 117,
       "awayScore": 90,
-      "settledAt": "2026-03-05T02:25:52.154Z"
+      "settledAt": "2026-03-05T02:25:52.154Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-vegas-NBA-3b711ab9ec3f",
@@ -7632,7 +7952,8 @@
       "result": "won",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-05T02:25:52.160Z"
+      "settledAt": "2026-03-05T02:25:52.160Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-vegas-NBA-73a4915fbf31",
@@ -7652,7 +7973,8 @@
       "result": "won",
       "homeScore": 108,
       "awayScore": 116,
-      "settledAt": "2026-03-05T02:25:52.160Z"
+      "settledAt": "2026-03-05T02:25:52.160Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-vegas-NBA-5fef22db0486",
@@ -7672,7 +7994,8 @@
       "result": "lost",
       "homeScore": 110,
       "awayScore": 101,
-      "settledAt": "2026-03-05T02:25:52.174Z"
+      "settledAt": "2026-03-05T02:25:52.174Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-vegas-NHL-19798528394d",
@@ -7692,7 +8015,8 @@
       "result": "won",
       "homeScore": 3,
       "awayScore": 2,
-      "settledAt": "2026-03-05T02:25:52.189Z"
+      "settledAt": "2026-03-05T02:25:52.189Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810775-moneyline-62de3f97d7",
@@ -8052,7 +8376,8 @@
       "result": "won",
       "homeScore": 130,
       "awayScore": 107,
-      "settledAt": "2026-03-06T01:48:46.160Z"
+      "settledAt": "2026-03-06T01:48:46.160Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810769-total-93e93a2081",
@@ -8072,7 +8397,8 @@
       "result": "won",
       "homeScore": 130,
       "awayScore": 107,
-      "settledAt": "2026-03-06T01:48:46.160Z"
+      "settledAt": "2026-03-06T01:48:46.160Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803342-spread-66ff3fcc54",
@@ -8192,7 +8518,8 @@
       "result": "won",
       "homeScore": 4,
       "awayScore": 6,
-      "settledAt": "2026-03-06T01:48:46.178Z"
+      "settledAt": "2026-03-06T01:48:46.178Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803347-moneyline-c11b71164e",
@@ -8372,7 +8699,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-06T01:48:46.218Z"
+      "settledAt": "2026-03-06T01:48:46.218Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803344-moneyline-e76825a1b5",
@@ -8432,7 +8760,8 @@
       "result": "won",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-06T01:48:46.218Z"
+      "settledAt": "2026-03-06T01:48:46.218Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803341-total-05cefb73d4",
@@ -8452,7 +8781,8 @@
       "result": "lost",
       "homeScore": 2,
       "awayScore": 1,
-      "settledAt": "2026-03-06T01:48:46.218Z"
+      "settledAt": "2026-03-06T01:48:46.218Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803343-spread-aed1c268ac",
@@ -9112,7 +9442,8 @@
       "result": "won",
       "homeScore": 123,
       "awayScore": 133,
-      "settledAt": "2026-03-07T01:04:30.830Z"
+      "settledAt": "2026-03-07T01:04:30.830Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803354-spread-4dc070be98",
@@ -9252,7 +9583,8 @@
       "result": "won",
       "homeScore": 4,
       "awayScore": 1,
-      "settledAt": "2026-03-07T01:04:30.846Z"
+      "settledAt": "2026-03-07T01:04:30.846Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NHL-401803351-spread-c2d5938c31",
@@ -9452,7 +9784,8 @@
       "result": "won",
       "homeScore": 114,
       "awayScore": 122,
-      "settledAt": "2026-03-07T01:04:30.874Z"
+      "settledAt": "2026-03-07T01:04:30.874Z",
+      "isBacktest": true
     },
     {
       "id": "precomp-NBA-401810784-spread-66a8d9272a",
@@ -10165,7 +10498,7 @@
       "push": 3,
       "rate": 32
     },
-    "lastUpdated": "2026-03-07T20:39:57.345Z",
+    "lastUpdated": "2026-03-07T20:50:59.337Z",
     "roi": 3.8,
     "brierScore": 0.2621,
     "maxDrawdown": 14.5,

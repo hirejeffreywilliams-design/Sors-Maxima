@@ -660,6 +660,58 @@ export function registerIntelligenceRoutes(app: Express): void {
     }
   });
 
+  // ── AI Track Record Analysis ────────────────────────────────────────────────
+  app.post("/api/track-record/ai-analysis", requireAuth, async (_req: Request, res: Response) => {
+    try {
+      const { getTrackRecord } = await import("../calibrationEngine");
+      const { createOpenAIClient } = await import("../openaiClient");
+
+      const record = getTrackRecord();
+
+      const summary = {
+        overallWinRate: record.overallWinRate,
+        settledPicks: record.settledPicks,
+        wonPicks: record.wonPicks,
+        lostPicks: record.lostPicks,
+        pushPicks: record.pushPicks,
+        calibrationScore: record.calibrationScore,
+        recentTrend: record.recentTrend,
+        byGrade: record.byGrade.map(g => ({ grade: g.grade, settled: g.settled, winRate: g.actualWinRate })),
+        bySport: record.bySport.map(s => ({ sport: s.sport, settled: s.settled, winRate: s.actualWinRate })),
+        byBetType: record.byBetType.map(b => ({ betType: b.betType, settled: b.settled, winRate: b.actualWinRate })),
+        calibrationTiers: record.calibrationTiers
+          .filter(t => t.settled >= 10)
+          .map(t => ({ label: t.label, modelAvgConf: t.modelAvgConfidence, actualWinRate: t.actualWinRate, gap: t.calibrationGap })),
+      };
+
+      const openai = createOpenAIClient();
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        max_completion_tokens: 600,
+        messages: [
+          {
+            role: "system",
+            content: `You are a professional sports betting analyst reviewing the track record of an AI-powered pick engine. 
+Analyze the data honestly and concisely. Be direct — highlight what's working, what needs improvement, and what the numbers actually mean.
+Respond in plain English, no markdown, no headers. Use short paragraphs. Focus on actionable insights.
+Never mention specific vendor names, APIs, or internal engine names. Refer to the system as "the model" or "the engine".
+The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically win 54–57% long-term.`,
+          },
+          {
+            role: "user",
+            content: `Analyze this pick engine track record and give me an honest assessment:\n\n${JSON.stringify(summary, null, 2)}`,
+          },
+        ],
+      });
+
+      const analysis = completion.choices[0]?.message?.content || "Analysis unavailable.";
+      res.json({ analysis, generatedAt: new Date().toISOString() });
+    } catch (err: any) {
+      console.error("[track-record/ai-analysis] Error:", err.message);
+      res.status(500).json({ error: "Failed to generate AI analysis." });
+    }
+  });
+
   // ── Leg Swap Alternatives ───────────────────────────────────────────────────
   app.get("/api/picks/alternatives", requireAuth, (req: Request, res: Response) => {
     try {

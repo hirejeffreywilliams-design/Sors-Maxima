@@ -506,6 +506,17 @@ export function settlePicksForGame(params: {
       pick.homeScore = params.homeScore;
       pick.awayScore = params.awayScore;
       pick.settledAt = now;
+
+      // Auto-detect backtest: if game was already finished before this settlement ran
+      // (game start time is more than 3 hours before now), treat as a backtested pick
+      if (!pick.isBacktest && pick.gameTime) {
+        const gameMs = new Date(pick.gameTime).getTime();
+        const nowMs = Date.now();
+        if (nowMs - gameMs > 3 * 60 * 60 * 1000) {
+          pick.isBacktest = true;
+        }
+      }
+
       data.settled.push(pick);
       settledIds.add(pick.id);
       settled++;
