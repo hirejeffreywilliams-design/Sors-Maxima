@@ -266,7 +266,7 @@ function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; st
     return (
       <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-primary/5 border border-primary/10 text-xs" data-testid="mc-simulating">
         <Activity className="h-3 w-3 animate-pulse text-primary" />
-        <span className="text-muted-foreground">Running Monte Carlo simulation...</span>
+        <span className="text-muted-foreground">Running Sors simulation...</span>
       </div>
     );
   }
@@ -282,7 +282,7 @@ function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; st
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 font-medium">
             <Activity className="h-2.5 w-2.5" />
-            MC: {simulation.winProbability.toFixed(1)}% win
+            Sors Sim: {simulation.winProbability.toFixed(1)}% win
           </span>
           <span className={`font-bold ${riskColor(risk.rating)}`}>{ratingLabel} Risk</span>
         </div>
@@ -305,7 +305,7 @@ function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; st
       >
         <span className="flex items-center gap-1.5 font-medium">
           <Activity className="h-3 w-3 text-primary" />
-          Monte Carlo: {simulation.winProbability.toFixed(1)}% Win
+          Sors Simulation: {simulation.winProbability.toFixed(1)}% Win
           {isSimulating && <span className="text-muted-foreground animate-pulse">(updating...)</span>}
         </span>
         <div className="flex items-center gap-1.5">
@@ -360,7 +360,7 @@ function MCSimulationPanel({ legs, stake, compact }: { legs: ParlaySlipLeg[]; st
           )}
 
           <div className="text-[9px] text-muted-foreground/70 pt-0.5">
-            {simulation.method === "analytic" ? "Analytic" : `${(simulation.simulations / 1000).toFixed(0)}K sims`} | {simulation.method}
+            {simulation.method === "analytic" ? "Sors Analytic" : `${(simulation.simulations / 1000).toFixed(0)}K runs`} | Sors Engine
           </div>
         </div>
       )}
@@ -485,7 +485,7 @@ function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () 
           <div className="mt-1 px-1.5 py-1 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
             <div className="flex items-center gap-1 text-muted-foreground">
               <Sparkles className="h-2.5 w-2.5" />
-              <span className="font-medium">MC: {(leg.monteCarloData.simulations / 1000).toFixed(0)}K sims</span>
+              <span className="font-medium">SM: {(leg.monteCarloData.simulations / 1000).toFixed(0)}K runs</span>
             </div>
             <div className="flex items-center gap-2">
               <span>Projected: {leg.monteCarloData.predictedAwayScore}-{leg.monteCarloData.predictedHomeScore}</span>
@@ -946,6 +946,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip } = useParlaySlip();
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
+  const [stakeInitialized, setStakeInitialized] = useState(false);
   const [showPlacement, setShowPlacement] = useState(false);
   const [tracked, setTracked] = useState(false);
 
@@ -954,6 +955,26 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     staleTime: 30000,
   });
   const isAuthenticated = authData?.authenticated ?? false;
+
+  const { data: bankrollData } = useQuery<{ bankroll: number; kellyFraction: number; dailyCapPct: number }>({
+    queryKey: ["/api/settings/bankroll"],
+    enabled: isAuthenticated,
+    staleTime: 60000,
+  });
+
+  useEffect(() => {
+    if (bankrollData && !stakeInitialized) {
+      const br = bankrollData.bankroll;
+      const frac = bankrollData.kellyFraction ?? 0.25;
+      const suggested = Math.max(1, Math.round(br * frac * 0.05));
+      setStake(Math.min(suggested, Math.round(br * 0.05)));
+      setStakeInitialized(true);
+    }
+  }, [bankrollData, stakeInitialized]);
+
+  const bankrollPct = bankrollData && bankrollData.bankroll > 0
+    ? ((stake / bankrollData.bankroll) * 100).toFixed(1)
+    : null;
 
   const trackMutation = useMutation({
     mutationFn: async () => {
@@ -982,6 +1003,24 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
   const toWinAmount = useMemo(() => (toWin * stake).toFixed(2), [toWin, stake]);
   const totalReturn = useMemo(() => (totalOdds * stake).toFixed(2), [totalOdds, stake]);
+
+  const stakePresets: Array<{ label: string; value: number; testId: string }> = useMemo(() => {
+    if (bankrollData && bankrollData.bankroll > 0) {
+      const br = bankrollData.bankroll;
+      return [
+        { label: "1%", value: Math.max(1, Math.round(br * 0.01)), testId: "button-stake-1pct" },
+        { label: "2%", value: Math.max(1, Math.round(br * 0.02)), testId: "button-stake-2pct" },
+        { label: "5%", value: Math.max(1, Math.round(br * 0.05)), testId: "button-stake-5pct" },
+        { label: "10%", value: Math.max(1, Math.round(br * 0.10)), testId: "button-stake-10pct" },
+      ];
+    }
+    return [
+      { label: "$10", value: 10, testId: "button-stake-10" },
+      { label: "$25", value: 25, testId: "button-stake-25" },
+      { label: "$50", value: 50, testId: "button-stake-50" },
+      { label: "$100", value: 100, testId: "button-stake-100" },
+    ];
+  }, [bankrollData]);
 
   const { activeStrategy, recordOverride } = useUserStrategy();
   const strategyViolations = useMemo(() => {
@@ -1059,7 +1098,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
               Clear
             </Button>
           </div>
-          <div className="flex items-center justify-between">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Stake $</span>
               <Input
@@ -1072,20 +1111,34 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
                 data-testid="input-stake"
               />
               <div className="flex gap-1">
-                {[10, 25, 50, 100].map((amt) => (
+                {stakePresets.map(({ label, value, testId }) => (
                   <Button
-                    key={amt}
-                    variant={stake === amt ? "default" : "outline"}
+                    key={testId}
+                    variant={stake === value ? "default" : "outline"}
                     size="sm"
                     className="h-8 px-2 text-xs"
-                    onClick={() => setStake(amt)}
-                    data-testid={`button-stake-${amt}`}
+                    onClick={() => setStake(value)}
+                    data-testid={testId}
                   >
-                    ${amt}
+                    {label}
                   </Button>
                 ))}
               </div>
             </div>
+            {bankrollPct !== null ? (
+              <div className="flex items-center gap-1.5 text-[10px]" data-testid="bankroll-stake-context">
+                <span className={`font-medium ${parseFloat(bankrollPct) > 10 ? "text-amber-500" : parseFloat(bankrollPct) > 5 ? "text-yellow-500" : "text-emerald-500"}`}>
+                  {bankrollPct}% of your ${bankrollData!.bankroll.toLocaleString()} bankroll
+                </span>
+                {parseFloat(bankrollPct) > 10 && (
+                  <span className="text-amber-500">— consider reducing stake</span>
+                )}
+              </div>
+            ) : isAuthenticated ? (
+              <div className="text-[10px] text-muted-foreground" data-testid="bankroll-no-setting">
+                <a href="/settings" className="underline text-primary/70">Set your bankroll</a> to get personalized stake recommendations
+              </div>
+            ) : null}
           </div>
           <div className="flex items-center justify-between mt-2">
             <span className="text-xs text-muted-foreground">Odds: <span className="font-bold text-foreground">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span></span>

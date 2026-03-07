@@ -88,7 +88,7 @@ const tiers: PricingTier[] = [
     id: 'whale',
     name: 'Max',
     tagline: 'Invite Only',
-    description: 'Zero restrictions. First-in-line on every pick. Monte Carlo simulations, custom model weights, and tools built for high-volume serious bettors.',
+    description: 'Zero restrictions. First-in-line on every pick. Sors Simulation engine, custom model weights, and tools built for high-volume serious bettors.',
     monthlyPrice: 249,
     yearlyPrice: 2388,
     monthlyPriceId: 'price_1T6Z8OCsa9MEIxmapbFeapNC',
@@ -96,7 +96,7 @@ const tiers: PricingTier[] = [
     features: [
       'Everything in Edge, plus:',
       'Whale picks released 30 min before all others',
-      'Monte Carlo engine — up to 100K sims per matchup',
+      'Sors Simulation engine — up to 100K runs per matchup',
       'Custom 46-factor model weight editor',
       'Hedge calculator & multi-leg optimizer',
       'Pattern recognition engine (pre-game & live)',

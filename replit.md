@@ -44,6 +44,16 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Strategy Accountability System**: Allows users to choose from preset betting strategies with per-leg violation tracking.
 - **AI Circuit Breaker**: Manages AI API quotas and error states.
 
+## Proprietary Branding Notes
+- All user-visible "Monte Carlo" references replaced with "Sors Simulation" (parlay slip, command center, daily parlays, help, pricing, odds-center, platform-intelligence, intelligence-pipeline, admin pages)
+- All user-visible "Quantum" references replaced with "Sors Edge" / "Sors Intelligence" / "Sors 46-Factor Engine" (quantum-analysis-badge.tsx labels — component names kept internal)
+- "Quantum Top Picks" → "Sors Top Picks" (precomputed-picks.tsx)
+- `quantum-analysis-badge.tsx` exports kept (QuantumBadge, QuantumAnalysisIndicator) but UI labels rebranded. `generateQuantumScore` renamed to `generateSorsScore` internally.
+- Ticker user picks endpoint: `/api/ticker/my-picks` — requires auth, returns personalized ticker items from user's tracked picks (live game cross-reference, win/loss updates)
+- Ticker sport filter: stored in `localStorage sors_ticker_sports`. Button: data-testid="button-ticker-filter". Popover with per-sport toggles + "Show All".
+- Bankroll-aware stake: `SlipContent` in `parlay-slip-drawer.tsx` fetches `/api/settings/bankroll`, computes suggested stake (kellyFraction × 5% of bankroll), pre-fills stake on first load. Preset buttons show 1%/2%/5%/10% of bankroll if set, else $10/$25/$50/$100. Shows "X% of your $Y bankroll" context label.
+- SmartAlerts enhanced: 11 alert types, quick-add recommended alerts (7 presets), custom create form with type selector, sport selector, team, title, message. Located at /community → Alerts tab.
+
 ## Technical Notes & Critical Fixes
 - **AuthState tier propagation**: `AuthState` interface includes `tier` field. `AppContent` sets `authState.tier` from `authData.tier` in its `useEffect`. Use `authState.tier` inside `AuthenticatedApp` — never reference `authData` (scoped to `AppContent` only).
 - **Sports Ticker**: `client/src/components/sports-ticker.tsx` — sticky bar `top-14 z-40` below header, only visible in `AuthenticatedApp` (paid subscribers). Backend at `/api/ticker` (public, no auth). 45s refetch interval.

@@ -1280,6 +1280,121 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  // ==================== PERSONALIZED TICKER (AUTH) ====================
+  app.get("/api/ticker/my-picks", async (req, res) => {
+    try {
+      const session = req.session as any;
+      const username = session?.username;
+      if (!username) return res.json({ items: [] });
+
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const [picksResult, games] = await Promise.all([
+        db.execute(sql`
+          SELECT id, sport, game_id, pick, bet_type, odds_at_pick, settled, won, placed_at, legs
+          FROM user_picks
+          WHERE username = ${username}
+            AND (settled = false OR placed_at > NOW() - INTERVAL '3 days')
+          ORDER BY placed_at DESC LIMIT 20
+        `),
+        getAllSportsScoreboard().catch(() => [] as any[]),
+      ]);
+
+      const picks = picksResult.rows as any[];
+      if (picks.length === 0) return res.json({ items: [] });
+
+      const liveByGame: Record<string, any> = {};
+      for (const g of games) {
+        if (g.id) liveByGame[g.id] = g;
+        if (g.gameId) liveByGame[g.gameId] = g;
+      }
+
+      const items: Array<{ id: string; type: string; badge: string; badgeColor: string; text: string; sport: string; priority: number }> = [];
+
+      const unsettled = picks.filter(p => !p.settled);
+      const recentWins = picks.filter(p => p.settled && p.won).slice(0, 3);
+      const recentLosses = picks.filter(p => p.settled && p.won === false).slice(0, 2);
+
+      for (const pick of unsettled.slice(0, 6)) {
+        const game = liveByGame[pick.game_id];
+        const isLive = game?.status?.state === "in";
+        const isFinal = game?.status?.state === "post";
+        const sportLabel = (pick.sport || "Pick").toUpperCase();
+
+        let text = "";
+        let badge = "YOUR PICK";
+        let badgeColor = "purple";
+
+        if (isLive && game) {
+          const home = game.teams?.home?.abbreviation || game.teams?.home?.name || "HOME";
+          const away = game.teams?.away?.abbreviation || game.teams?.away?.name || "AWAY";
+          const hs = game.score?.home ?? "–";
+          const as_ = game.score?.away ?? "–";
+          const period = game.status?.period ? `Q${game.status.period}` : "LIVE";
+          text = `Your ${pick.pick} — ${sportLabel}  ${away} ${as_}–${hs} ${home}  (${period})`;
+          badge = "LIVE";
+          badgeColor = "red";
+        } else if (isFinal && game) {
+          const home = game.teams?.home?.abbreviation || "HOME";
+          const away = game.teams?.away?.abbreviation || "AWAY";
+          const hs = game.score?.home ?? "–";
+          const as_ = game.score?.away ?? "–";
+          text = `Your ${pick.pick} — ${sportLabel}  Final: ${away} ${as_}–${hs} ${home}`;
+          badge = "FINAL";
+          badgeColor = "gray";
+        } else {
+          const pickOdds = pick.odds_at_pick ? (pick.odds_at_pick > 0 ? `+${pick.odds_at_pick}` : `${pick.odds_at_pick}`) : "";
+          text = `Your ${pick.pick} ${pickOdds} — ${sportLabel}  Tracking...`;
+          badgeColor = "blue";
+        }
+
+        if (text) {
+          items.push({ id: `mypick-${pick.id}`, type: "my_pick", badge, badgeColor, text, sport: pick.sport || "ALL", priority: 10 });
+        }
+      }
+
+      for (const win of recentWins) {
+        items.push({
+          id: `mywin-${win.id}`,
+          type: "my_win",
+          badge: "WON ✓",
+          badgeColor: "green",
+          text: `Your ${win.pick} — ${(win.sport || "Pick").toUpperCase()}  Pick Won! Great call.`,
+          sport: win.sport || "ALL",
+          priority: 9,
+        });
+      }
+      for (const loss of recentLosses) {
+        items.push({
+          id: `myloss-${loss.id}`,
+          type: "my_loss",
+          badge: "SETTLED",
+          badgeColor: "gray",
+          text: `Your ${loss.pick} — ${(loss.sport || "Pick").toUpperCase()}  Pick settled.`,
+          sport: loss.sport || "ALL",
+          priority: 7,
+        });
+      }
+
+      const parlayPicks = unsettled.filter(p => p.legs && Array.isArray(JSON.parse(p.legs || "[]")) && JSON.parse(p.legs || "[]").length > 1);
+      if (parlayPicks.length > 0) {
+        items.push({
+          id: "myparlay-summary",
+          type: "my_parlay",
+          badge: "PARLAY",
+          badgeColor: "purple",
+          text: `You have ${parlayPicks.length} active parlay${parlayPicks.length > 1 ? "s" : ""} tracking  —  visit Your Picks for full details`,
+          sport: "ALL",
+          priority: 8,
+        });
+      }
+
+      res.json({ items });
+    } catch (e: any) {
+      console.error("[ticker/my-picks]", e.message);
+      res.json({ items: [] });
+    }
+  });
+
   // ==================== LIVE GAMES & ANALYTICS ====================
   app.get("/api/live-games", async (_req, res) => {
     try {

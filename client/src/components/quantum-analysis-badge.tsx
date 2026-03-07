@@ -25,7 +25,7 @@ function seededValue(seed: number, min: number, max: number): number {
   return Math.floor(normalized * (max - min + 1)) + min;
 }
 
-export function generateQuantumScore(seed?: string): AnalysisScore {
+export function generateSorsScore(seed?: string): AnalysisScore {
   const s = seed ? hashSeed(seed) : hashSeed(new Date().toDateString());
   return {
     modelConfidence: seededValue(s, 70, 99),
@@ -49,25 +49,25 @@ export function QuantumBadge({ score }: { score?: number }) {
       <TooltipTrigger asChild>
         <Badge variant="outline" className={`gap-1 cursor-help ${getColor(value)}`}>
           <Sparkles className="w-3 h-3" />
-          Score: {value}%
+          Sors Edge: {value}%
         </Badge>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Analysis Confidence: {value}%</p>
-        <p className="text-xs text-muted-foreground">How confident our model is in this prediction</p>
+        <p>Sors Edge Score: {value}%</p>
+        <p className="text-xs text-muted-foreground">Sors 46-Factor precision score for this pick</p>
       </TooltipContent>
     </Tooltip>
   );
 }
 
 export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolean }) {
-  const score = generateQuantumScore();
+  const score = generateSorsScore();
 
   if (compact) {
     return (
       <div className="flex items-center gap-2 p-2 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 rounded-lg border border-purple-500/20">
         <Brain className="w-4 h-4 text-purple-400" />
-        <span className="text-xs font-medium text-purple-400">Analysis Engine Active</span>
+        <span className="text-xs font-medium text-purple-400">Sors Intelligence Active</span>
         <Badge variant="outline" className="bg-purple-500/20 text-purple-400 border-purple-500/50 text-xs">
           {score.modelConfidence}% Confidence
         </Badge>
@@ -81,7 +81,7 @@ export function QuantumAnalysisIndicator({ compact = false }: { compact?: boolea
         <div className="p-1.5 bg-purple-500/20 rounded">
           <Brain className="w-4 h-4 text-purple-400" />
         </div>
-        <span className="font-medium text-sm">Prediction Analysis Engine</span>
+        <span className="font-medium text-sm">Sors 46-Factor Engine</span>
         <Badge variant="outline" className="bg-gradient-to-r from-purple-500/20 to-cyan-500/20 text-purple-400 border-purple-500/30">
           <Sparkles className="w-3 h-3 mr-1" />
           Active

@@ -1695,7 +1695,7 @@ function PowerRankingsTab({ games, isLoading }: { games: MarketGame[]; isLoading
             <BarChart3 className="w-5 h-5 text-primary" />
             <CardTitle className="text-base">Bankroll Simulator</CardTitle>
           </div>
-          <Badge variant="outline" className="text-xs">Monte Carlo</Badge>
+          <Badge variant="outline" className="text-xs">Sors Simulation</Badge>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

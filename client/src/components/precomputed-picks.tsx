@@ -656,7 +656,7 @@ export function PrecomputedPicks() {
               </div>
               <div>
                 <CardTitle className="text-lg flex items-center gap-2" data-testid="text-top-picks-title">
-                  Quantum Top Picks
+                  Sors Top Picks
                   {engineStatus?.running && (
                     <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400 gap-0.5">
                       <Activity className="w-2.5 h-2.5 animate-pulse" />

@@ -171,7 +171,7 @@ const FACTOR_LABELS: Record<string, string> = {
   scheme_mismatch: "Favorable Matchup", coaching_tendency: "Coaching Edge",
   sharp_money_flow: "Sharp Money", public_fade: "Contrarian Value",
   line_movement: "Line Movement", momentum_score: "Team Momentum",
-  monte_carlo: "Simulation Model", player_efficiency: "Player Performance",
+  monte_carlo: "Sors Simulation", player_efficiency: "Player Performance",
   injury_adjustment: "Injury Impact", weather_impact: "Weather Factor",
   home_field: "Home Court/Field", rest_advantage: "Rest Advantage",
   pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
@@ -1232,7 +1232,7 @@ export default function DailyParlays() {
                     </div>
                     <div className="text-center">
                       <p className="font-medium">Analyzing {activeSport} Games...</p>
-                      <p className="text-sm text-muted-foreground mt-1">Running Monte Carlo simulations and correlation analysis</p>
+                      <p className="text-sm text-muted-foreground mt-1">Running Sors simulations and correlation analysis</p>
                     </div>
                     <Progress value={66} className="w-64" />
                   </div>

@@ -165,7 +165,7 @@ export function IntelligencePipeline() {
                 nodes={[
                   { name: "Prediction Engine", detail: "46 weighted factors → win probability", icon: <Brain className="w-3 h-3" /> },
                   { name: "Scheme Recognition", detail: "Offensive/defensive tendencies vs. matchup", icon: <Layers className="w-3 h-3" /> },
-                  { name: "Monte Carlo Sims", detail: "10,000–100K simulations per matchup", icon: <Sparkles className="w-3 h-3" /> },
+                  { name: "Sors Simulation Engine", detail: "10,000–100K path simulations per matchup", icon: <Sparkles className="w-3 h-3" /> },
                   { name: "Kelly Criterion", detail: "Optimal stake sizing per pick", icon: <Shield className="w-3 h-3" /> },
                   { name: "CLV Analysis", detail: "Closing line value vs. current number", icon: <TrendingUp className="w-3 h-3" /> },
                   { name: "Ensemble Blend", detail: "6 expert models weighted by sport", icon: <Zap className="w-3 h-3" /> },

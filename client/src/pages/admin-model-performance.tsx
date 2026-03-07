@@ -394,7 +394,7 @@ export default function AdminModelPerformance() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">MC Stacked Learning Engine</CardTitle>
-                <CardDescription>Variance-adjusted Monte Carlo trust weight, sport calibration, and prediction learning loop</CardDescription>
+                <CardDescription>Variance-adjusted Sors Simulation trust weight, sport calibration, and prediction learning loop</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -516,7 +516,7 @@ export default function AdminModelPerformance() {
                   <div>
                     <CardTitle className="text-base">Unified Stacking Meta-Learner (USML)</CardTitle>
                     <CardDescription>
-                      Ensemble engine that dynamically reweights QFE, Monte Carlo, Vegas, Situational, Market, and Learning signals
+                      Ensemble engine that dynamically reweights Sors Core, Simulation, Vegas, Situational, Market, and Learning signals
                       based on historical accuracy. Weights self-adjust after every settled outcome.
                     </CardDescription>
                   </div>

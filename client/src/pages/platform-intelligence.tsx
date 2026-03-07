@@ -195,7 +195,7 @@ export default function PlatformIntelligencePage() {
               <TrendingUp className="w-3 h-3 mr-1" /> Data Growth
             </TabsTrigger>
             <TabsTrigger value="montecarlo" data-testid="tab-montecarlo">
-              <Dices className="w-3 h-3 mr-1" /> Monte Carlo
+              <Dices className="w-3 h-3 mr-1" /> Sors Simulation
             </TabsTrigger>
           </TabsList>
 

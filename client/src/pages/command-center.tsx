@@ -51,12 +51,12 @@ const FACTOR_LABELS: Record<string, string> = {
   scheme_mismatch: "Favorable Matchup", coaching_tendency: "Coaching Edge",
   sharp_money_flow: "Sharp Money", public_fade: "Contrarian Value",
   line_movement: "Line Movement", momentum_score: "Team Momentum",
-  monte_carlo: "Simulation Model", player_efficiency: "Player Performance",
+  monte_carlo: "Sors Simulation", player_efficiency: "Player Performance",
   injury_adjustment: "Injury Impact", weather_impact: "Weather Factor",
   home_field: "Home Court/Field", rest_advantage: "Rest Advantage",
   pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
   point_differential: "Point Differential", strength_schedule: "Schedule Strength",
-  historical_h2h: "Head-to-Head", predictive_model: "Predictive Model",
+  historical_h2h: "Head-to-Head", predictive_model: "Sors Intelligence",
 };
 
 function humanFactor(name: string): string {

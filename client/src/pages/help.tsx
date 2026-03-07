@@ -43,7 +43,7 @@ const FEATURES: Feature[] = [
     category: "start",
     path: "/",
     pathLabel: "Home / Picks (Zap icon in nav)",
-    why: "Our engines analyze 46 data-backed factors — rest days, sharp money flow, line movement, weather, Monte Carlo simulations — and pre-build complete parlay tickets before you even open the app. You get the analysis output, not the raw data.",
+    why: "Our engines analyze 46 data-backed factors — rest days, sharp money flow, line movement, weather, Sors simulations — and pre-build complete parlay tickets before you even open the app. You get the analysis output, not the raw data.",
     when: "Check first thing every morning. Tickets refresh every 5 minutes as new games and odds data arrive. Best to act early before the public moves lines.",
     where: "The home page — the first screen you land on after logging in. 'Today's Best Tickets' is the top section. Below it are Game Matchup Parlays covering all legs of specific games.",
     how: [
@@ -55,7 +55,7 @@ const FEATURES: Feature[] = [
     ],
     tips: [
       "Tickets graded A or B+ are the system's highest-confidence plays — these converge across the most engines",
-      "Check the engine convergence row (Quantum, Monte Carlo, Situational, Injury, Vegas, Market) — more green = stronger signal",
+      "Check the engine convergence row (Sors Sim, Situational, Injury, Vegas, Market) — more green = stronger signal",
       "Game Matchup Parlays are great for high-value heavy days like NBA playoff nights",
     ],
     tags: ["tickets", "parlay", "ai", "picks", "daily", "home", "command center"],
@@ -79,8 +79,8 @@ const FEATURES: Feature[] = [
       "Mix picks from multiple sports to build your custom parlay",
     ],
     tips: [
-      "Each pick card shows grade, confidence %, EV%, key factors, Monte Carlo results, and game context",
-      "Look for picks where both the '46-Factor Model' and 'Monte Carlo' factors agree — high convergence",
+      "Each pick card shows grade, confidence %, EV%, key factors, Sors Simulation results, and game context",
+      "Look for picks where both the '46-Factor Model' and 'Sors Simulation' factors agree — high convergence",
       "Picks labeled 'Bet Now' have timing-sensitive value — lines may move quickly",
     ],
     tags: ["picks", "daily", "sport", "filter", "individual", "browse"],
@@ -99,13 +99,13 @@ const FEATURES: Feature[] = [
     how: [
       "Add picks using '+' or 'Add to Slip' buttons from any page",
       "Watch combined odds and projected payout update in real time as you add legs",
-      "Enter your stake — use quick-select buttons ($10 / $25 / $50 / $100) or type any amount",
+      "Enter your stake — use quick-select buttons (% of your bankroll or dollar amounts) or type any amount",
       "Click 'Track My Bet' (requires login) to record your slip for automatic settlement tracking",
       "Click 'Open Sportsbook' to get deep links for placing the bet at your preferred book",
       "Click 'Copy Slip' to copy a formatted text summary — great for sharing",
     ],
     tips: [
-      "The Monte Carlo panel shows win probability from 10,000+ simulations using real team data",
+      "The Sors Simulation panel shows win probability from 10,000+ simulations using real team data",
       "Remove any leg by clicking the X next to it — odds recalculate instantly",
       "Copy Slip text is formatted for Discord/group chats — teammates see exactly what you're betting",
     ],
@@ -442,8 +442,8 @@ const FAQ_ITEMS = [
   },
   {
     category: "Features",
-    q: "What is Monte Carlo simulation?",
-    a: "Monte Carlo runs 10,000+ simulated game outcomes per matchup using real team statistics and scoring patterns — escalating to 100,000 simulations in overnight deep runs. It gives you a probability distribution of results — not just a point estimate. The combined win probability shown in your Bet Slip comes from this simulation.",
+    q: "What is the Sors Simulation engine?",
+    a: "The Sors Simulation engine runs 10,000+ simulated game outcomes per matchup using real team statistics and scoring patterns — escalating to 100,000 simulations in overnight deep runs. It gives you a probability distribution of results — not just a point estimate. The combined win probability shown in your Bet Slip comes from this simulation.",
   },
   {
     category: "Features",
