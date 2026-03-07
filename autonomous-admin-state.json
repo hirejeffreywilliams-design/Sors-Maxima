@@ -146,6 +146,70 @@
   ],
   "reports": [
     {
+      "id": "report_1772907503705_cvj9r",
+      "timestamp": "2026-03-07T18:18:23.705Z",
+      "durationMs": 7790,
+      "summary": [
+        "Overall win rate is slightly above break-even at 52.9%, but Total market is at 46.7% which may indicate potential model degradation.",
+        "API usage is healthy, but OpenAI budget usage is significantly below expected, requiring attention.",
+        "Churn rate is moderate at 4.2%, indicating some user retention issues that may need addressing."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Evaluate Model for Total Bets",
+          "description": "Investigate low performance in Total market (46.7% win rate) and consider adjustments to improve predictions.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 5
+        },
+        {
+          "title": "User Retention Strategy Review",
+          "description": "Assess the churn rate of 4.2% and develop strategies to enhance user retention and engagement.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 4
+        },
+        {
+          "title": "Review OpenAI Budget Usage",
+          "description": "Examine why OpenAI usage is significantly under budget and ensure that necessary AI insights are being generated.",
+          "priority": "P2",
+          "due_by": "today",
+          "effort_hours": 2
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Potential Model Degradation in Total Market",
+          "description": "The win rate for Total bets is below 48%, indicating potential degradation of predictive model performance.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Investigate OpenAI budget usage issues.",
+          "Monitor user engagement metrics over the next few days."
+        ],
+        "this_week": [
+          "Conduct a thorough analysis of the Total market performance.",
+          "Develop a plan for improving user retention metrics.",
+          "Review and optimize betting strategies based on current performance data."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 449,
+        "oddsApiRemaining": 73913,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 20,
+        "heapUsedMb": 68,
+        "heapTotalMb": 71,
+        "hubLastCycleMs": 16,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Overall win rate is slightly above break-even at 52.9%, but Total market is at 46.7% which may indicate potential model degradation.\",\n    \"API usage is healthy, but OpenAI budget usage is significantly below expected, requiring attention.\",\n    \"Churn rate is moderate at 4.2%, indicating some user retention issues that may need addressing.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Evaluate Model for Total Bets\",\n      \"description\": \"Investigate low performance in Total market (46.7% win rate) and consider adjustments to improve predictions.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"User Retention Strategy Review\",\n      \"description\": \"Assess the churn rate of 4.2% and develop strategies to enhance user retention and engagement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review OpenAI Budget Usage\",\n      \"description\": \"Examine why OpenAI usage is significantly under budget and ensure that necessary AI insights are being generated.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Potential Model Degradation in Total Market\",\n      \"description\": \"The win rate for Total bets is below 48%, indicating potential degradation of predictive model performance.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate OpenAI budget usage issues.\",\n      \"Monitor user engagement metrics over the next few days.\"\n    ],\n    \"this_week\": [\n      \"Conduct a thorough analysis of the Total market performance.\",\n      \"Develop a plan for improving user retention metrics.\",\n      \"Review and optimize betting strategies based on current performance data.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1772885701034_6nej4",
       "timestamp": "2026-03-07T12:15:01.034Z",
       "durationMs": 10962,
@@ -1022,8 +1086,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-07T12:53:38.054Z",
-  "lastDeepCheck": "2026-03-07T12:15:01.034Z",
-  "totalQuickChecks": 43,
-  "totalDeepChecks": 14
+  "lastQuickCheck": "2026-03-07T18:40:06.942Z",
+  "lastDeepCheck": "2026-03-07T18:18:23.705Z",
+  "totalQuickChecks": 47,
+  "totalDeepChecks": 15
 }
