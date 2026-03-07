@@ -14,7 +14,7 @@ import { queryClient } from "@/lib/queryClient";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
-  Shield, Sparkles, Star, Target, TrendingUp, Zap, AlertCircle, Wifi, WifiOff,
+  Shield, Sparkles, Star, Target, TrendingUp, TrendingDown, Zap, AlertCircle, Wifi, WifiOff,
   Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle, Smartphone
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +25,7 @@ import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 import { OffseasonPanel } from "@/components/offseason-panel";
 import { PickTrackNudge } from "@/components/pick-track-nudge";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
+import { TicketShowcase } from "@/components/ticket-showcase";
 
 interface TopPick {
   id: string;
@@ -1495,6 +1496,7 @@ export default function CommandCenter() {
   const [activeSportTab, setActiveSportTab] = useState("all");
   const [ticketDateFilter, setTicketDateFilter] = useState<"today" | "future" | "all">("all");
   const [swipeMode, setSwipeMode] = useState(false);
+  const [showShowcase, setShowShowcase] = useState(false);
   const { legs, addLeg } = useParlaySlip();
   const { canAccess } = useTier();
 
@@ -1907,6 +1909,43 @@ export default function CommandCenter() {
           </div>
         </Tabs>
 
+        {/* ── Ticket Showcase Banner ── */}
+        <div
+          className="relative overflow-hidden rounded-2xl border border-emerald-500/25 bg-gradient-to-r from-emerald-950/60 via-background to-red-950/40 cursor-pointer group"
+          onClick={() => setShowShowcase(true)}
+          data-testid="section-ticket-showcase-entry"
+        >
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-500 to-emerald-700 rounded-l-2xl" />
+            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-red-500 to-red-700 rounded-r-2xl" />
+          </div>
+          <div className="px-5 py-4 flex items-center gap-4">
+            <div className="relative shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center"
+                style={{ boxShadow: "0 0 20px rgba(34,197,94,0.3)" }}>
+                <Trophy className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-red-500/15 border border-red-500/30 flex items-center justify-center"
+                style={{ boxShadow: "0 0 10px rgba(239,68,68,0.3)" }}>
+                <TrendingDown className="w-2.5 h-2.5 text-red-400" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <p className="text-sm font-bold">Ticket Showcase</p>
+                <Badge className="text-[9px] bg-emerald-500/20 text-emerald-400 border-emerald-500/30 px-1.5">REAL RESULTS</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug">
+                Swipe through actual winning & losing tickets. See what the Sors engine called — and what it paid.
+              </p>
+            </div>
+            <div className="shrink-0 flex items-center gap-1 text-muted-foreground group-hover:text-foreground transition-colors">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
         {/* ── Performance Summary (moved below picks) ── */}
         <div data-testid="section-performance-summary">
           <div className="flex items-center gap-2 mb-3">
@@ -2028,6 +2067,11 @@ export default function CommandCenter() {
           }}
           onClose={() => setSwipeMode(false)}
         />
+      )}
+
+      {/* Ticket Showcase overlay */}
+      {showShowcase && (
+        <TicketShowcase onClose={() => setShowShowcase(false)} />
       )}
 
       <PickTrackNudge />
