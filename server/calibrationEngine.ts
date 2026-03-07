@@ -24,6 +24,9 @@ export interface GradeAccuracy {
   won: number;
   lost: number;
   actualWinRate: number | null;
+  avgOdds: number | null;
+  breakEvenRate: number | null;
+  roi: number | null;
 }
 
 export interface SportAccuracy {
@@ -139,6 +142,35 @@ export function computeCalibration(): TrackRecord {
       const w = gradeSettled.filter((p) => p.result === "won").length;
       const l = gradeSettled.filter((p) => p.result === "lost").length;
       const wl = w + l;
+
+      // Calculate average odds from settled picks
+      const oddsValues = gradeSettled
+        .filter((p) => typeof p.odds === "number" && p.odds !== 0)
+        .map((p) => p.odds as number);
+      const avgOdds = oddsValues.length > 0
+        ? Math.round(oddsValues.reduce((a, b) => a + b, 0) / oddsValues.length)
+        : null;
+
+      // Break-even rate: what win% you need at these odds to profit
+      const breakEvenRate = avgOdds !== null
+        ? avgOdds > 0
+          ? Math.round((100 / (avgOdds + 100)) * 1000) / 10
+          : Math.round((Math.abs(avgOdds) / (Math.abs(avgOdds) + 100)) * 1000) / 10
+        : null;
+
+      // ROI: average profit per $100 bet
+      let roiSum = 0;
+      let roiCount = 0;
+      for (const p of gradeSettled) {
+        if (p.result === "push" || typeof p.odds !== "number") continue;
+        const payout = p.result === "won"
+          ? (p.odds > 0 ? p.odds / 100 : 100 / Math.abs(p.odds))
+          : -1;
+        roiSum += payout;
+        roiCount++;
+      }
+      const roi = roiCount > 0 ? Math.round((roiSum / roiCount) * 1000) / 10 : null;
+
       return {
         grade,
         total: gradeAll.length,
@@ -146,6 +178,9 @@ export function computeCalibration(): TrackRecord {
         won: w,
         lost: l,
         actualWinRate: wl > 0 ? Math.round((w / wl) * 1000) / 10 : null,
+        avgOdds,
+        breakEvenRate,
+        roi,
       };
     })
     .filter((g) => g.total > 0);

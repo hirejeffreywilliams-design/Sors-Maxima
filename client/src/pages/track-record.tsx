@@ -45,7 +45,7 @@ interface TrackRecord {
   picksUntilValidated: number;
   calibrationScore: number | null;
   calibrationTiers: CalibrationTier[];
-  byGrade: { grade: string; total: number; settled: number; won: number; lost: number; actualWinRate: number | null }[];
+  byGrade: { grade: string; total: number; settled: number; won: number; lost: number; actualWinRate: number | null; avgOdds: number | null; breakEvenRate: number | null; roi: number | null }[];
   bySport: { sport: string; total: number; settled: number; won: number; lost: number; actualWinRate: number | null }[];
   byBetType: { betType: string; total: number; settled: number; won: number; lost: number; actualWinRate: number | null }[];
   recentTrend: { last20WinRate: number | null; last50WinRate: number | null; trend: string };
@@ -321,50 +321,61 @@ export default function TrackRecordPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Win Rate by Grade
+              Performance by Grade
             </CardTitle>
             <CardDescription className="text-xs">
-              Are higher grades actually winning more?
+              Win rate + ROI per $100 bet — positive ROI means profitable at actual odds
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {data.byGrade.map((g) => (
-                <div key={g.grade} data-testid={`grade-accuracy-${g.grade}`}>
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <span className={`font-bold w-6 ${
-                        g.grade.startsWith("A") ? "text-green-400" :
-                        g.grade.startsWith("B") ? "text-blue-400" :
-                        "text-yellow-400"
-                      }`}>{g.grade}</span>
-                      <span className="text-muted-foreground">{g.total} picks</span>
+            <div className="space-y-3">
+              {data.byGrade.map((g) => {
+                const roi = g.roi ?? 0;
+                const roiPositive = roi >= 0;
+                const roiBarWidth = Math.min(100, Math.abs(roi));
+                return (
+                  <div key={g.grade} data-testid={`grade-accuracy-${g.grade}`}>
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold w-6 ${
+                          g.grade.startsWith("A") ? "text-green-400" :
+                          g.grade.startsWith("B") ? "text-blue-400" :
+                          "text-yellow-400"
+                        }`}>{g.grade}</span>
+                        <span className="text-muted-foreground">{g.settled} settled</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {g.settled < 15 ? (
+                          <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0">
+                            Small sample
+                          </Badge>
+                        ) : (
+                          <>
+                            <span className="text-muted-foreground font-mono">
+                              {g.actualWinRate !== null ? `${g.actualWinRate.toFixed(1)}% WR` : "—"}
+                            </span>
+                            <span className={`text-xs font-semibold font-mono ${roiPositive ? "text-green-400" : "text-red-400"}`}>
+                              {roiPositive ? "+" : ""}{roi.toFixed(1)}% ROI
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground text-xs">{g.settled} settled</span>
-                      {g.settled < 25 ? (
-                        <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0">
-                          Small sample
-                        </Badge>
-                      ) : (
-                        <WinRateBadge rate={g.actualWinRate} />
-                      )}
-                    </div>
+                    {g.settled >= 15 && g.roi !== null && (
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${roiPositive ? "bg-green-500" : "bg-red-500/70"}`}
+                          style={{ width: `${Math.max(2, roiBarWidth)}%` }}
+                        />
+                      </div>
+                    )}
                   </div>
-                  {g.settled >= 25 && (
-                    <div className="mt-1 h-1 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          (g.actualWinRate ?? 0) >= 55 ? "bg-green-500" :
-                          (g.actualWinRate ?? 0) >= 50 ? "bg-yellow-500" : "bg-red-500"
-                        }`}
-                        style={{ width: `${Math.min(100, g.actualWinRate ?? 0)}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-3 pt-2 border-t border-border leading-relaxed">
+              ROI = average profit per $100 bet at actual odds. Grade A doesn't mean higher win rate — it means higher quality edge score. A +150 underdog winning 45% of the time is more valuable than a -300 favorite winning 65%.
+            </p>
           </CardContent>
         </Card>
       </div>

@@ -751,6 +751,86 @@
       "ev": 6.91,
       "gameTime": "2026-03-05T01:55:50.770Z",
       "savedAt": "2026-03-05T01:55:50.770Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-spread-d72fc3d30e",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ TBD",
+      "homeTeam": "TBD",
+      "awayTeam": "TBD",
+      "pick": "TBD 0",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 76,
+      "ev": 8.82,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:14:54.396Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-moneyline-09c07aec72",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ TBD",
+      "homeTeam": "TBD",
+      "awayTeam": "TBD",
+      "pick": "TBD ML",
+      "betType": "moneyline",
+      "odds": -100,
+      "grade": "C+",
+      "confidence": 65,
+      "ev": 16,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:14:54.396Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-total-6f3c2bcf45",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ TBD",
+      "homeTeam": "TBD",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 61,
+      "ev": 8.82,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:14:54.396Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-spread-77bb24e4e2",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ Vermont Catamounts",
+      "homeTeam": "Vermont Catamounts",
+      "awayTeam": "TBD",
+      "pick": "Vermont Catamounts 0",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 79,
+      "ev": 20.27,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:19:45.755Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-moneyline-c72197a9c2",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "TBD @ Vermont Catamounts",
+      "homeTeam": "Vermont Catamounts",
+      "awayTeam": "TBD",
+      "pick": "Vermont Catamounts ML",
+      "betType": "moneyline",
+      "odds": -100,
+      "grade": "B-",
+      "confidence": 60,
+      "ev": 26,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T21:19:45.755Z"
     }
   ],
   "settled": [
@@ -10386,16 +10466,76 @@
       "homeScore": 106,
       "awayScore": 102,
       "settledAt": "2026-03-07T20:35:32.845Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851760-spread-6068e18fc1",
+      "gameId": "401851760",
+      "sport": "NCAAB",
+      "game": "TBD @ Saint Mary's Gaels",
+      "homeTeam": "Saint Mary's Gaels",
+      "awayTeam": "TBD",
+      "pick": "Saint Mary's Gaels +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 79,
+      "ev": 33.64,
+      "gameTime": "2026-03-10T03:30Z",
+      "savedAt": "2026-03-07T21:14:54.396Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T21:16:01.289Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851760-moneyline-3dbf1f322b",
+      "gameId": "401851760",
+      "sport": "NCAAB",
+      "game": "TBD @ Saint Mary's Gaels",
+      "homeTeam": "Saint Mary's Gaels",
+      "awayTeam": "TBD",
+      "pick": "Saint Mary's Gaels ML",
+      "betType": "moneyline",
+      "odds": -174,
+      "grade": "A-",
+      "confidence": 75,
+      "ev": 7.08,
+      "gameTime": "2026-03-10T03:30Z",
+      "savedAt": "2026-03-07T21:14:54.396Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T21:16:01.289Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851760-total-c4dd56f018",
+      "gameId": "401851760",
+      "sport": "NCAAB",
+      "game": "TBD @ Saint Mary's Gaels",
+      "homeTeam": "Saint Mary's Gaels",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 65,
+      "ev": 33.64,
+      "gameTime": "2026-03-10T03:30Z",
+      "savedAt": "2026-03-07T21:14:54.396Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T21:16:01.289Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 465,
-      "won": 235,
-      "lost": 218,
+      "total": 468,
+      "won": 237,
+      "lost": 219,
       "push": 12,
-      "rate": 50.5,
-      "pending": 47
+      "rate": 50.6,
+      "pending": 52
     },
     "bySport": {
       "NBA": {
@@ -10409,9 +10549,9 @@
         "rate": 46.7
       },
       "NCAAB": {
-        "total": 143,
-        "won": 82,
-        "rate": 57.3
+        "total": 146,
+        "won": 84,
+        "rate": 57.5
       }
     },
     "byGrade": {
@@ -10451,9 +10591,9 @@
         "rate": 44.6
       },
       "A-": {
-        "total": 15,
-        "won": 5,
-        "rate": 33.3
+        "total": 18,
+        "won": 7,
+        "rate": 38.9
       },
       "D": {
         "total": 10,
@@ -10468,22 +10608,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 132,
-        "won": 69,
-        "rate": 52.3,
-        "roi": 14.3
+        "total": 133,
+        "won": 70,
+        "rate": 52.6,
+        "roi": 14.6
       },
       "Spread": {
-        "total": 134,
-        "won": 69,
-        "rate": 51.5,
-        "roi": 2.7
+        "total": 135,
+        "won": 70,
+        "rate": 51.9,
+        "roi": 3.3
       },
       "Total": {
-        "total": 128,
+        "total": 129,
         "won": 59,
-        "rate": 46.1,
-        "roi": -7.3
+        "rate": 45.7,
+        "roi": -8
       },
       "Team Total": {
         "total": 71,
@@ -10498,15 +10638,15 @@
       "push": 3,
       "rate": 32
     },
-    "lastUpdated": "2026-03-07T20:50:59.337Z",
-    "roi": 3.8,
-    "brierScore": 0.2621,
+    "lastUpdated": "2026-03-07T21:27:58.003Z",
+    "roi": 3.9,
+    "brierScore": 0.2615,
     "maxDrawdown": 14.5,
-    "sharpeRatio": 0.033,
+    "sharpeRatio": 0.034,
     "homeAwayBias": {
-      "homeWinRate": 55.7,
+      "homeWinRate": 56.1,
       "awayWinRate": 41.7,
-      "homeTotal": 203,
+      "homeTotal": 205,
       "awayTotal": 60
     },
     "calibrationBuckets": [
@@ -10530,9 +10670,9 @@
       },
       {
         "range": "65-70",
-        "predicted": 66.3,
-        "actual": 52.6,
-        "total": 114
+        "predicted": 66.2,
+        "actual": 52.2,
+        "total": 115
       },
       {
         "range": "70-75",
@@ -10542,9 +10682,9 @@
       },
       {
         "range": "75-80",
-        "predicted": 77.4,
-        "actual": 75,
-        "total": 8
+        "predicted": 77.3,
+        "actual": 80,
+        "total": 10
       },
       {
         "range": "80+",
