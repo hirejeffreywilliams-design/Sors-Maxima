@@ -81,7 +81,8 @@ const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders } from "lucide-react";
+const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -275,6 +276,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/" component={CommandCenter} />
         <Route path="/generate" component={AutoGenerator} />
         <Route path="/strategy" component={StrategyAdvisor} />
+        <Route path="/sorsbooks" component={SorsBooksPage} />
         <Route path="/builder" component={Dashboard} />
         <Route path="/daily" component={DailyParlays} />
         <Route path="/tools" component={Tools} />
@@ -367,7 +369,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/dashboard":            { label: "Dashboard",            parent: "/" },
 };
 
-const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools"]);
+const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools", "/sorsbooks"]);
 
 // Static parent labels (can't reference navItems since it's defined below)
 const PARENT_LABELS: Record<string, string> = {
@@ -445,10 +447,11 @@ function ContextualNavBar() {
 
 const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Command Center — all engines live" },
-  { href: "/daily", icon: Calendar, label: "Daily", testId: "nav-daily", tooltip: "Today's top picks" },
-  { href: "/generate", icon: Brain, label: "Build", testId: "nav-generate", tooltip: "Build parlays from real data" },
+  { href: "/daily", icon: Calendar, label: "Daily", testId: "nav-daily", tooltip: "Today's optimized parlay picks" },
+  { href: "/generate", icon: Ticket, label: "Tickets", testId: "nav-generate", tooltip: "Smart Ticket Generator & Parlay Builder" },
   { href: "/odds-center", icon: TrendingUp, label: "Markets", testId: "nav-odds-center", tooltip: "Odds, EV & line movement" },
-  { href: "/tools", icon: Calculator, label: "Tools", testId: "nav-pro-tools", tooltip: "Analytics & calculators" },
+  { href: "/sorsbooks", icon: Landmark, label: "Books", testId: "nav-sorsbooks", tooltip: "Sors Books — sportsbook intelligence hub" },
+  { href: "/tools", icon: BarChart2, label: "Analysis", testId: "nav-pro-tools", tooltip: "Analytics, calculators & factor tools" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Leaderboards, social feed & tipsters" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center", adminOnly: true },
 ];
@@ -517,8 +520,8 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
           { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "mobile-nav-daily" },
         ])}
 
-        {navSection("Build", [
-          { href: "/generate", icon: Brain, label: "Smart Generator", testId: "mobile-nav-generate" },
+        {navSection("Tickets", [
+          { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "mobile-nav-generate" },
           { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "mobile-nav-pick-review" },
           { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
           { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "mobile-nav-strategy" },
@@ -526,6 +529,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
 
         {navSection("Markets", [
           { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "mobile-nav-odds" },
+          { href: "/sorsbooks", icon: Landmark, label: "Sors Books", testId: "mobile-nav-books" },
           { href: "/player-props", icon: Star, label: "Player Props", testId: "mobile-nav-props" },
           { href: "/mma", icon: Sword, label: "MMA / UFC", testId: "mobile-nav-mma" },
           { href: "/international", icon: Globe, label: "International", testId: "mobile-nav-international" },
@@ -533,7 +537,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         ])}
 
         {navSection("Discover", [
-          { href: "/tools", icon: Calculator, label: "Tools & Analytics", testId: "mobile-nav-tools" },
+          { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
           { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
@@ -650,9 +654,10 @@ function DesktopNav({ authState }: { authState: AuthState }) {
     <nav className="hidden lg:flex items-center gap-0.5">
       <NavBtn href="/" icon={Zap} label="Picks" testId="nav-command-center" tooltip="Command Center — all engines live" />
       <NavBtn href="/daily" icon={Calendar} label="Daily" testId="nav-daily" tooltip="Today's top picks" />
-      <NavDropdown label="Build" icon={Brain} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
+      <NavDropdown label="Tickets" icon={Ticket} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
       <NavDropdown label="Markets" icon={TrendingUp} testId="nav-markets-dropdown" subitems={MARKETS_SUBITEMS} isActive={isMarketsActive} />
-      <NavBtn href="/tools" icon={Calculator} label="Tools" testId="nav-pro-tools" tooltip="Analytics & calculators" />
+      <NavBtn href="/sorsbooks" icon={Landmark} label="Books" testId="nav-sorsbooks" tooltip="Sors Books — sportsbook intelligence hub" />
+      <NavBtn href="/tools" icon={BarChart2} label="Analysis" testId="nav-pro-tools" tooltip="Analytics, calculators & factor tools" />
       <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
       {authState.isAdmin && (
         <Link href="/admin">
@@ -669,6 +674,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
 const NAV_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Zap, Calendar, Brain, TrendingUp, Activity, ClipboardList, Star, LayoutGrid,
   Sword, Calculator, Users, Eye, BarChart2, Wallet, LineChart, User,
+  Ticket, Landmark,
 };
 
 function NavCustomizerSheet({ onClose }: { onClose: () => void }) {

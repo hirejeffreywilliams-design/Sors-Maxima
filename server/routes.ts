@@ -10,6 +10,7 @@ import { registerIntelligenceRoutes } from "./routes/intelligence";
 import { registerNotificationRoutes } from "./routes/notifications";
 import { registerAiRoutes } from "./routes/ai";
 import { registerTicketRoutes } from "./routes/tickets";
+import { registerSorsbooksRoutes } from "./routes/sorsbooks";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -25,6 +26,7 @@ export async function registerRoutes(
   registerNotificationRoutes(app);
   registerAiRoutes(app);
   registerTicketRoutes(app);
+  registerSorsbooksRoutes(app);
 
   return httpServer;
 }
