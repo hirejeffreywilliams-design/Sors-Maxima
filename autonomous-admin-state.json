@@ -146,6 +146,71 @@
   ],
   "reports": [
     {
+      "id": "report_1772885701034_6nej4",
+      "timestamp": "2026-03-07T12:15:01.034Z",
+      "durationMs": 10962,
+      "summary": [
+        "Current win rate is 52.9%, above the break-even threshold of 52.4%.",
+        "API usage is healthy; odds API used 25,073 requests of 100,000 budget with a recommendation to throttle.",
+        "Overall pick accuracy at 51.4% remains under watch, particularly the Total market at 46.7%."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Monitor Pick Performance",
+          "description": "Increase scrutiny on the Total market due to low accuracy (46.7%). Assess strategies for improvement.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 5
+        },
+        {
+          "title": "Optimize API Usage",
+          "description": "Implement throttling for odds API to ensure budget remains intact as current usage trends toward high variance.",
+          "priority": "P2",
+          "due_by": "today",
+          "effort_hours": 2
+        },
+        {
+          "title": "User Engagement Strategy",
+          "description": "Evaluate churn rate at 4.2%. Develop initiatives to maintain and increase user engagement.",
+          "priority": "P3",
+          "due_by": "this_week",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Total Market Performance",
+          "description": "Total market has a win rate of 46.7%, indicating potential model degradation. Needs immediate attention.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Implement throttling for the odds API usage.",
+          "Begin a detailed performance review of the Total market picks.",
+          "Check budget allocations against projected month-end usage."
+        ],
+        "this_week": [
+          "Develop a user engagement strategy to reduce churn rate.",
+          "Analyze the current win rate trends for potential adjustments.",
+          "Review liability across all markets for risk management."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 449,
+        "oddsApiRemaining": 75071,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 90,
+        "cacheHitRate": 24,
+        "heapUsedMb": 74,
+        "heapTotalMb": 90,
+        "hubLastCycleMs": 11,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Current win rate is 52.9%, above the break-even threshold of 52.4%.\",\n    \"API usage is healthy; odds API used 25,073 requests of 100,000 budget with a recommendation to throttle.\",\n    \"Overall pick accuracy at 51.4% remains under watch, particularly the Total market at 46.7%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor Pick Performance\",\n      \"description\": \"Increase scrutiny on the Total market due to low accuracy (46.7%). Assess strategies for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Optimize API Usage\",\n      \"description\": \"Implement throttling for odds API to ensure budget remains intact as current usage trends toward high variance.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Evaluate churn rate at 4.2%. Develop initiatives to maintain and increase user engagement.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Total Market Performance\",\n      \"description\": \"Total market has a win rate of 46.7%, indicating potential model degradation. Needs immediate attention.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling for the odds API usage.\",\n      \"Begin a detailed performance review of the Total market picks.\",\n      \"Check budget allocations against projected month-end usage.\"\n    ],\n    \"this_week\": [\n      \"Develop a user engagement strategy to reduce churn rate.\",\n      \"Analyze the current win rate trends for potential adjustments.\",\n      \"Review liability across all markets for risk management.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1772883278513_yg2ax",
       "timestamp": "2026-03-07T11:34:38.513Z",
       "durationMs": 7447,
@@ -957,8 +1022,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-07T12:06:01.036Z",
-  "lastDeepCheck": "2026-03-07T11:34:38.513Z",
-  "totalQuickChecks": 42,
-  "totalDeepChecks": 13
+  "lastQuickCheck": "2026-03-07T12:53:38.054Z",
+  "lastDeepCheck": "2026-03-07T12:15:01.034Z",
+  "totalQuickChecks": 43,
+  "totalDeepChecks": 14
 }

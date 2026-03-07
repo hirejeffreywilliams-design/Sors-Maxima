@@ -648,7 +648,7 @@ export async function getNFLTeamStatsBDL(): Promise<BDLNFLTeamData[]> {
   for (let i = 0; i < allTeams.length; i += BATCH_SIZE) {
     const batch = allTeams.slice(i, i + BATCH_SIZE);
     const url = new URL("/nfl/v1/team_season_stats", BASE_URL);
-    url.searchParams.set("season", "2024");
+    url.searchParams.set("season", "2025");
     for (const t of batch) url.searchParams.append("team_ids[]", String(t.id));
     const batchRes = await fetchBDLRaw("nfl", "/team_season_stats", url);
     if (batchRes?.data) allStats.push(...batchRes.data);
@@ -705,7 +705,7 @@ export async function getMLBTeamStatsBDL(): Promise<BDLMLBTeamData[]> {
   let page = 0;
   while (cursor !== null && page < 12) {
     const url = new URL("/mlb/v1/season_stats", BASE_URL);
-    url.searchParams.set("season", "2024");
+    url.searchParams.set("season", "2025");
     url.searchParams.set("postseason", "false");
     url.searchParams.set("per_page", "100");
     if (cursor > 0) url.searchParams.set("cursor", String(cursor));
@@ -787,4 +787,13 @@ export async function getMLBTeamStatsBDL(): Promise<BDLMLBTeamData[]> {
   const totalBatters = data.reduce((s, t) => s + t.batterCount, 0);
   logInfo(`[BDL] MLB team stats aggregated for ${data.length} teams (${totalPitchers} pitchers, ${totalBatters} batters)`);
   return data;
+}
+
+// ── Background warmup — call at server startup to pre-set all availability flags ──
+export function warmupBDLSports(): void {
+  // NBA enriched data (sets isBDLAvailable cache implicitly via getEnrichedTeamData)
+  getEnrichedTeamData().catch(() => {});
+  // NFL and MLB — warm up availability flags so admin panel shows correct status
+  getNFLTeamStatsBDL().catch(() => {});
+  getMLBTeamStatsBDL().catch(() => {});
 }

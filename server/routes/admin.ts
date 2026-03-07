@@ -4224,20 +4224,20 @@ Follow these rules:
   app.get("/api/admin/bdl-stats", requireAdmin, async (_req, res) => {
     try {
       const {
-        isBDLAvailable, isBDLNFLAvailable, isBDLMLBAvailable,
         getEnrichedTeamData, getNFLTeamStatsBDL, getMLBTeamStatsBDL,
       } = await import("../balldontlie-provider");
       const { getInsightCacheSize } = await import("../pick-insight-engine");
 
-      const nbaAvail = isBDLAvailable();
-      const nflAvail = isBDLNFLAvailable();
-      const mlbAvail = isBDLMLBAvailable();
-
+      // Always fetch all sports — availability determined from results, not pre-flags
       const [nbaTeams, nflTeams, mlbTeams] = await Promise.all([
-        nbaAvail ? getEnrichedTeamData("all").catch(() => []) : Promise.resolve([]),
-        nflAvail ? getNFLTeamStatsBDL().catch(() => []) : Promise.resolve([]),
-        mlbAvail ? getMLBTeamStatsBDL().catch(() => []) : Promise.resolve([]),
+        getEnrichedTeamData().catch(() => []),
+        getNFLTeamStatsBDL().catch(() => []),
+        getMLBTeamStatsBDL().catch(() => []),
       ]);
+
+      const nbaAvail = (nbaTeams as any[]).length > 0;
+      const nflAvail = (nflTeams as any[]).length > 0;
+      const mlbAvail = (mlbTeams as any[]).length > 0;
 
       const topNFL = nflTeams.slice(0, 5).map((t: any) => ({
         name: t.teamName, abbreviation: t.abbreviation,

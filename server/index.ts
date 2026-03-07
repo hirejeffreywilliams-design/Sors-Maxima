@@ -238,6 +238,13 @@ function startEnginesPhased(): void {
     scheduleFormCacheRefresh();
   }, 12_000);
 
+  // ── Phase 3.6 (13s): BDL Sports Warmup ───────────────────────────────────
+  // Proactively fetch NFL/MLB team stats so availability flags are set and
+  // the admin panel shows accurate status instead of "Offline".
+  safeStart("BDL Warmup", () => {
+    import("./balldontlie-provider").then(({ warmupBDLSports }) => warmupBDLSports()).catch(() => {});
+  }, 13_000);
+
   // ── Phase 4 (14s): Precomputed Predictions ───────────────────────────────
   // Builds AI picks from hub data. Disk cache serves instant picks while this
   // warms up — hub will have started its first cycle by 10s so 14s is safe.
