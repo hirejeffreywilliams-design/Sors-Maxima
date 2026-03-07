@@ -1679,6 +1679,44 @@ Follow these rules:
     }
   });
 
+  // === Autonomous Learning Status ===
+  app.get("/api/admin/autonomous-learning", requireAdmin, async (_req, res) => {
+    try {
+      const { getAutonomousLearningStatus } = await import("../autonomousLearningEngine");
+      const { getMCStackedStats } = await import("../mcStackedLearner");
+      const { getUSMLStats } = await import("../unifiedStackingMetaLearner");
+
+      const learningStatus = getAutonomousLearningStatus();
+      const mcStats = getMCStackedStats();
+      const usmlStats = getUSMLStats();
+
+      res.json({
+        bootstrap: {
+          complete: learningStatus.bootstrapComplete,
+          picksProcessed: learningStatus.bootstrapPicksProcessed,
+          ranAt: learningStatus.bootstrapRunAt,
+        },
+        cycles: {
+          total: learningStatus.totalLearningCycles,
+          lastRanAt: learningStatus.lastCycleAt,
+          lastSettledCount: learningStatus.lastCycleSettledCount,
+          mcStackedCycles: learningStatus.mcStackedCycles,
+          usmlCycles: learningStatus.usmlCycles,
+        },
+        mcEngine: {
+          records: learningStatus.mcEngineRecords,
+        },
+        mcStacked: mcStats,
+        usml: usmlStats,
+        sportAccuracy: learningStatus.sportAccuracy,
+        userFeedbackProcessed: learningStatus.userFeedbackProcessed,
+        recentErrors: learningStatus.errors.slice(0, 5),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   // === Age Verification ===
   app.post("/api/auth/verify-age", (req, res) => {
     const { dateOfBirth } = req.body;
@@ -4165,6 +4203,16 @@ Follow these rules:
     }
   });
 
+  app.post("/api/admin/actions/run-autonomous-learning", requireAdmin, async (_req, res) => {
+    try {
+      const { triggerImmediateCycle } = await import("../autonomousLearningEngine");
+      triggerImmediateCycle();
+      res.json({ success: true, message: "Autonomous learning cycle triggered — MC engine and stacking meta-learner updating in background" });
+    } catch (err: any) {
+      res.status(500).json({ error: "Cycle trigger failed", detail: err.message });
+    }
+  });
+
   app.post("/api/admin/actions/flush-stale-picks", requireAdmin, async (_req, res) => {
     try {
       const { storage } = await import("../storage");
@@ -4773,6 +4821,11 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
           const { runHistoricalLearning: runHistorical } = await import("../historicalLearningEngine");
           await runHistorical();
           return res.json({ success: true, message: "Historical learning cycle complete" });
+        }
+        case "run_autonomous_learning": {
+          const { triggerImmediateCycle } = await import("../autonomousLearningEngine");
+          triggerImmediateCycle();
+          return res.json({ success: true, message: "Autonomous learning cycle triggered — bootstrapping MC engine + USML from historical data" });
         }
         case "trigger_early_settlement": {
           const { triggerEarlySettlementNow } = await import("../earlySettlementEngine");

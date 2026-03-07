@@ -2,6 +2,18 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { recordPickOutcome } from "./communityLossPatternEngine";
+// Lazy-import to avoid circular deps — resolved at runtime
+let _onPickSettled: ((p: { id: string; gameId: string; sport: string; betType: string; confidence: number; result: "won" | "lost"; odds?: number }) => void) | null = null;
+function getOnPickSettled() {
+  if (!_onPickSettled) {
+    try {
+      // Dynamic require avoids circular dependency at module load time
+      const mod = require("./autonomousLearningEngine");
+      _onPickSettled = mod.onPickSettled;
+    } catch {}
+  }
+  return _onPickSettled;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -530,6 +542,22 @@ export function settlePicksForGame(params: {
           grade: pick.grade,
           won: result === "won",
         });
+      } catch (_) {}
+
+      // Feed outcome into autonomous learning engine (MC + USML calibration)
+      try {
+        const learningHook = getOnPickSettled();
+        if (learningHook && (result === "won" || result === "lost")) {
+          learningHook({
+            id: pick.id,
+            gameId: pick.gameId || pick.id,
+            sport: pick.sport,
+            betType: pick.betType || "moneyline",
+            confidence: pick.confidence || 55,
+            result,
+            odds: pick.odds ?? -110,
+          });
+        }
       } catch (_) {}
     }
 

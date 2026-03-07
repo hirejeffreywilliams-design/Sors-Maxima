@@ -14,7 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, Target, TrendingUp, Activity, BarChart3, Shield,
   CheckCircle, AlertTriangle, XCircle, Cpu, GitBranch, Eye,
-  Crosshair, DollarSign, Layers, RefreshCw, Sparkles, FlaskConical
+  Crosshair, DollarSign, Layers, RefreshCw, Sparkles, FlaskConical,
+  BookOpen, Zap, Database
 } from "lucide-react";
 import { Link } from "wouter";
 import { useSEO } from "@/hooks/use-seo";
@@ -25,9 +26,17 @@ export default function AdminModelPerformance() {
   const { data, isLoading } = useQuery<any>({ queryKey: ["/api/admin/model-performance"] });
   const { data: mcStats } = useQuery<any>({ queryKey: ["/api/admin/mc-learning/stats"], refetchInterval: 60000 });
   const { data: usmlStats, refetch: refetchUSML } = useQuery<any>({ queryKey: ["/api/admin/usml/stats"], refetchInterval: 30000 });
+  const { data: autoLearnData, refetch: refetchAutoLearn, isLoading: autoLearnLoading } = useQuery<any>({
+    queryKey: ["/api/admin/autonomous-learning"],
+    refetchInterval: 60000,
+  });
   const usmlCycleMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/usml/cycle"),
     onSuccess: () => { setTimeout(() => refetchUSML(), 1000); },
+  });
+  const triggerLearnMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/actions/run-autonomous-learning").then(r => r.json()),
+    onSuccess: () => { setTimeout(() => refetchAutoLearn(), 3000); },
   });
 
   const [aiAnalysis, setAiAnalysis] = useState<{ analysis: string; generatedAt: string } | null>(null);
@@ -152,6 +161,9 @@ export default function AdminModelPerformance() {
             </TabsTrigger>
             <TabsTrigger value="ai-analysis" data-testid="tab-ai-analysis">
               <Sparkles className="w-3 h-3 mr-1" /> AI Analysis
+            </TabsTrigger>
+            <TabsTrigger value="auto-learning" data-testid="tab-auto-learning">
+              <BookOpen className="w-3 h-3 mr-1" /> Auto-Learn
             </TabsTrigger>
           </TabsList>
 
@@ -723,6 +735,161 @@ export default function AdminModelPerformance() {
               </CardContent>
             </Card>
           </TabsContent>
+          <TabsContent value="auto-learning" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <CardTitle className="text-base">Autonomous Learning Engine</CardTitle>
+                    <CardDescription>
+                      Bootstraps the Sors Simulation Engine and Stacking Meta-Learner from historical pick outcomes.
+                      Every settled pick automatically feeds real-time Bayesian updates and sport calibration.
+                    </CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => triggerLearnMutation.mutate({ action: "run_autonomous_learning" } as any)}
+                    disabled={triggerLearnMutation.isPending}
+                    data-testid="button-trigger-learning"
+                  >
+                    <Zap className={`w-3 h-3 mr-1 ${triggerLearnMutation.isPending ? "animate-pulse" : ""}`} />
+                    Trigger Cycle
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {autoLearnLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          <Database className="w-3 h-3" /> Bootstrap Status
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {autoLearnData?.bootstrap?.complete
+                            ? <CheckCircle className="w-4 h-4 text-green-500" />
+                            : <AlertTriangle className="w-4 h-4 text-yellow-500" />}
+                          <span className="text-sm font-medium" data-testid="text-bootstrap-status">
+                            {autoLearnData?.bootstrap?.complete ? "Complete" : "Pending"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-muted-foreground" data-testid="text-bootstrap-count">
+                          {autoLearnData?.bootstrap?.picksProcessed ?? 0} picks fed
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">Total Cycles</div>
+                        <div className="text-2xl font-bold" data-testid="text-total-cycles">
+                          {autoLearnData?.cycles?.total ?? 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          MC: {autoLearnData?.cycles?.mcStackedCycles ?? 0} / USML: {autoLearnData?.cycles?.usmlCycles ?? 0}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">MC Engine Records</div>
+                        <div className="text-2xl font-bold" data-testid="text-mc-records">
+                          {autoLearnData?.mcEngine?.records ?? 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">predictions logged</div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs text-muted-foreground">User Feedback</div>
+                        <div className="text-2xl font-bold" data-testid="text-user-feedback">
+                          {autoLearnData?.userFeedbackProcessed ?? 0}
+                        </div>
+                        <div className="text-xs text-muted-foreground">ticket outcomes</div>
+                      </div>
+                    </div>
+
+                    {autoLearnData?.bootstrap?.ranAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Last bootstrap: {new Date(autoLearnData.bootstrap.ranAt).toLocaleString()}
+                        {autoLearnData?.cycles?.lastRanAt && ` · Last cycle: ${new Date(autoLearnData.cycles.lastRanAt).toLocaleString()}`}
+                      </p>
+                    )}
+
+                    <Separator />
+
+                    <div>
+                      <p className="text-sm font-medium mb-3">Sport Calibration (from {autoLearnData?.bootstrap?.picksProcessed ?? 0} historical picks)</p>
+                      {Object.keys(autoLearnData?.sportAccuracy ?? {}).length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No sport data yet — trigger a learning cycle to bootstrap.</p>
+                      ) : (
+                        <div className="space-y-2">
+                          {Object.entries(autoLearnData?.sportAccuracy ?? {})
+                            .sort(([, a]: any, [, b]: any) => b.total - a.total)
+                            .map(([sport, d]: [string, any]) => {
+                              const winRate = d.total > 0 ? Math.round((d.wins / d.total) * 100) : 0;
+                              const color = winRate >= 55 ? "text-green-500" : winRate >= 50 ? "text-yellow-500" : "text-red-500";
+                              return (
+                                <div key={sport} className="flex items-center gap-3" data-testid={`row-sport-${sport}`}>
+                                  <span className="text-sm font-medium w-16 shrink-0">{sport}</span>
+                                  <div className="flex-1">
+                                    <Progress value={winRate} className="h-2" />
+                                  </div>
+                                  <span className={`text-sm font-bold tabular-nums w-14 text-right ${color}`}>
+                                    {winRate}%
+                                  </span>
+                                  <span className="text-xs text-muted-foreground w-20 text-right">
+                                    {d.wins}W / {d.total}T
+                                  </span>
+                                </div>
+                              );
+                            })}
+                        </div>
+                      )}
+                    </div>
+
+                    {autoLearnData?.mcStacked && (
+                      <>
+                        <Separator />
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">Stacked Weight</div>
+                            <div className="text-2xl font-bold font-mono" data-testid="text-stacked-weight">
+                              {autoLearnData.mcStacked.mcStackedWeight?.toFixed(3) ?? "—"}×
+                            </div>
+                            <div className="text-xs text-muted-foreground">target = 1.0 baseline</div>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">Stacked Cycles</div>
+                            <div className="text-2xl font-bold" data-testid="text-stacked-cycles">
+                              {autoLearnData.mcStacked.learningCycles ?? 0}
+                            </div>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="text-xs text-muted-foreground">Total Settled</div>
+                            <div className="text-2xl font-bold">{autoLearnData.mcStacked.totalSettled ?? 0}</div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {(autoLearnData?.recentErrors ?? []).length > 0 && (
+                      <>
+                        <Separator />
+                        <div>
+                          <p className="text-sm font-medium text-red-500 mb-2">Recent Errors</p>
+                          {autoLearnData.recentErrors.map((err: string, i: number) => (
+                            <p key={i} className="text-xs text-muted-foreground font-mono">{err}</p>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
         </Tabs>
       </div>
     </ScrollArea>

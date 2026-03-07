@@ -31,6 +31,7 @@ import { initBacktestOnStartup } from "./backtestEngine";
 import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
 import { startQualityWatchdog } from "./qualityWatchdog";
+import { startAutonomousLearningEngine } from "./autonomousLearningEngine";
 import { startEarlySettlementEngine } from "./earlySettlementEngine";
 import { startSharpSignalDetector } from "./sharpSignalDetector";
 import { pool } from "./db";
@@ -284,6 +285,7 @@ function startEnginesPhased(): void {
   safeStart("Community Pattern Engine", initCommunityPatternEngine, 108_000);
   safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
   safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 120_000);
+  safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 135_000);
   safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
   safeStart("Quality Watchdog", startQualityWatchdog, 140_000);
   safeStart("International Sports Engine", () => {

@@ -943,6 +943,22 @@
       "ev": 35.04,
       "gameTime": "2026-03-10T18:00Z",
       "savedAt": "2026-03-07T23:21:46.719Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851204-spread-20c8fd03de",
+      "gameId": "401851204",
+      "sport": "NCAAB",
+      "game": "NJIT Highlanders @ Vermont Catamounts",
+      "homeTeam": "Vermont Catamounts",
+      "awayTeam": "NJIT Highlanders",
+      "pick": "Vermont Catamounts +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 82,
+      "ev": 33.64,
+      "gameTime": "2026-03-10T04:00Z",
+      "savedAt": "2026-03-07T23:39:31.521Z"
     }
   ],
   "settled": [
@@ -10827,7 +10843,7 @@
       "lost": 224,
       "push": 12,
       "rate": 50.5,
-      "pending": 59
+      "pending": 60
     },
     "bySport": {
       "NBA": {
@@ -10930,7 +10946,7 @@
       "push": 1,
       "rate": 38
     },
-    "lastUpdated": "2026-03-07T23:24:27.008Z",
+    "lastUpdated": "2026-03-07T23:55:02.853Z",
     "roi": 3.4,
     "brierScore": 0.2619,
     "maxDrawdown": 15.4,
