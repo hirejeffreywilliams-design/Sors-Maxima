@@ -751,6 +751,54 @@
       "ev": 6.91,
       "gameTime": "2026-03-05T01:55:50.770Z",
       "savedAt": "2026-03-05T01:55:50.770Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-spread-1091a4950f",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Illinois Fighting Illini +2.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 65,
+      "ev": -37,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-total-ff151f91a4",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 49,
+      "ev": -37,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-moneyline-2afc8447e8",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Illinois Fighting Illini ML",
+      "betType": "moneyline",
+      "odds": -209,
+      "grade": "D",
+      "confidence": 47,
+      "ev": -52.69,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z"
     }
   ],
   "settled": [
@@ -9742,7 +9790,7 @@
       "lost": 206,
       "push": 12,
       "rate": 51.4,
-      "pending": 47
+      "pending": 50
     },
     "bySport": {
       "NBA": {
