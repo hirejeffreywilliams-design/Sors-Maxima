@@ -126,6 +126,22 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`ALTER TABLE user_betting_profile ADD COLUMN IF NOT EXISTS kelly_fraction NUMERIC DEFAULT 0.25`);
     await db.execute(sql`ALTER TABLE user_betting_profile ADD COLUMN IF NOT EXISTS daily_cap_pct NUMERIC DEFAULT 5`);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS user_onboarding (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL UNIQUE,
+        sports TEXT[] NOT NULL DEFAULT '{}',
+        experience TEXT NOT NULL DEFAULT '',
+        bet_types TEXT[] NOT NULL DEFAULT '{}',
+        bankroll_size TEXT NOT NULL DEFAULT '',
+        sportsbooks TEXT[] NOT NULL DEFAULT '{}',
+        onboarding_completed BOOLEAN NOT NULL DEFAULT FALSE,
+        completed_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

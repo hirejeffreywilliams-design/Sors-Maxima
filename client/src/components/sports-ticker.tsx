@@ -30,7 +30,7 @@ const BADGE_STYLES: Record<string, string> = {
 const FALLBACK_ITEMS: TickerItem[] = [
   { id: "f1", type: "model",    badge: "MODEL",    badgeColor: "purple", text: "46-Factor Intelligence Engine  |  Loading live sports data...", sport: "ALL", priority: 4 },
   { id: "f2", type: "upcoming", badge: "UPCOMING", badgeColor: "blue",   text: "NBA  •  NHL  •  NCAAB  •  NFL  •  MLB  —  Today's schedule loading...", sport: "ALL", priority: 2 },
-  { id: "f3", type: "pick",     badge: "PICK",     badge_color: "green", text: "Sors Maxima  |  Real-time picks, scores, and sharp money alerts", sport: "ALL", priority: 3 } as any,
+  { id: "f3", type: "pick",     badge: "PICK",     badgeColor: "green", text: "Sors Maxima  |  Real-time picks, scores, and sharp money alerts", sport: "ALL", priority: 3 },
 ];
 
 function TickerBadge({ badge, color }: { badge: string; color: string }) {

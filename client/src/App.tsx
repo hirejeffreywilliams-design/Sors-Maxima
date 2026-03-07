@@ -328,6 +328,7 @@ interface AuthState {
   isAdmin?: boolean;
   username?: string;
   emailVerified?: boolean;
+  tier?: string;
 }
 
 interface NavItem {
@@ -910,7 +911,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <EmailVerificationBanner authState={authState} />
       </div>
       
-      <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authData?.tier ?? "")}>
+      <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authState.tier ?? "")}>
         <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
           <Router authState={authState} />
         </main>
@@ -998,7 +999,8 @@ function AppContent() {
         setAuthState({
           isAdmin: authData.isAdmin,
           username: authData.username,
-          emailVerified: authData.emailVerified
+          emailVerified: authData.emailVerified,
+          tier: authData.tier,
         });
       }
     }

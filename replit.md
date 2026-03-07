@@ -40,6 +40,15 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Strategy Accountability System**: Allows users to choose from preset betting strategies with per-leg violation tracking.
 - **AI Circuit Breaker**: Manages AI API quotas and error states.
 
+## Technical Notes & Critical Fixes
+- **AuthState tier propagation**: `AuthState` interface includes `tier` field. `AppContent` sets `authState.tier` from `authData.tier` in its `useEffect`. Use `authState.tier` inside `AuthenticatedApp` — never reference `authData` (scoped to `AppContent` only).
+- **Sports Ticker**: `client/src/components/sports-ticker.tsx` — sticky bar `top-14 z-40` below header, only visible in `AuthenticatedApp` (paid subscribers). Backend at `/api/ticker` (public, no auth). 45s refetch interval.
+- **SSE System**: Backend `server/sseManager.ts` — lazy-start broadcaster (30s interval), 200 client limit (in-memory). For horizontal scaling, Redis Pub/Sub would be needed. Frontend: `use-sse.ts` + `sse-provider.tsx`. Integrated via `<SSEProvider>` wrapping `AuthenticatedApp`.
+- **user_onboarding table**: Created in `server/dbMigrations.ts`. Stores per-user onboarding state. `OnboardingGuard` in `App.tsx` redirects to `/onboarding` if `onboarding_completed = false` and path is not in `skipPaths`.
+- **Frontend build**: After ANY frontend change, run `npx vite build` from project root. Built output goes to `dist/public/`.
+- **Tier mapping**: DB `pro` = Sharp ($49), `elite` = Edge ($99), `whale` = Max ($249), `free` = unsubscribed.
+- **Admin userId**: Session stores `userId = 'admin'` (string). Check `rawUid !== 'admin'` before `parseInt` in routes needing numeric user IDs.
+
 ## External Dependencies
 - **Frontend Framework**: React
 - **Styling**: TailwindCSS, shadcn/ui
