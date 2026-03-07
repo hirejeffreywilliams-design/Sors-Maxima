@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy } from "lucide-react";
+import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy, Info } from "lucide-react";
 import { BetSharing } from "@/components/social/bet-sharing";
 import { Leaderboard } from "@/components/social/leaderboard";
 import { FollowBettors } from "@/components/social/follow-bettors";
@@ -26,6 +26,15 @@ export default function Community() {
           </h1>
           <p className="text-sm text-muted-foreground">Connect with bettors, follow tipsters, and share wins</p>
         </header>
+
+        <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-lg border border-blue-500/20 bg-blue-500/5 text-sm">
+          <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+          <span className="text-muted-foreground">
+            <span className="text-blue-400 font-medium">Early Access — </span>
+            Community leaderboards and social feeds currently display sample activity while the member network grows. Your real pick performance is tracked on the{" "}
+            <a href="/track-record" className="text-blue-400 hover:underline">Track Record</a> page.
+          </span>
+        </div>
 
         <Tabs defaultValue="feed" className="space-y-6">
           <TabsList className="grid w-full grid-cols-3 max-w-md">

@@ -313,14 +313,14 @@ export default function InternationalPage() {
           )}
         </div>
 
-        {/* ── Life Changer notice ─────────────────────────────────────── */}
+        {/* ── Daily Edge Parlay notice ─────────────────────────────────── */}
         <div className="flex items-start gap-3 px-4 py-3 rounded-lg border border-amber-500/30 bg-amber-500/5">
           <Zap className="h-4 w-4 text-amber-400 flex-shrink-0 mt-0.5" />
           <div className="text-sm">
-            <span className="font-semibold text-amber-300">Life Changer boost active.</span>
+            <span className="font-semibold text-amber-300">Daily Edge Parlay boost active.</span>
             <span className="text-muted-foreground ml-1.5">
-              Soccer draws (+200 to +350) and underdog moneylines are now automatically included in daily Life Changer tickets — 
-              these markets are the most underpriced by US sportsbooks.
+              Soccer draws (+200 to +350) and underdog moneylines are automatically included in the daily Edge Parlay — 
+              these markets are among the most underpriced by US sportsbooks.
             </span>
           </div>
         </div>

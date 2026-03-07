@@ -60,14 +60,14 @@ const tiers: PricingTier[] = [
     id: 'elite',
     name: 'Edge',
     tagline: 'By Application',
-    description: 'Real-time alerts, sharp money signals, advanced Kelly sizing, and the Life Changer Ticket — the full arsenal that separates winners from everyone else.',
+    description: 'Real-time alerts, sharp money signals, advanced Kelly sizing, and the Daily Edge Parlay — the full arsenal that separates winners from everyone else.',
     monthlyPrice: 99,
     yearlyPrice: 948,
     monthlyPriceId: 'price_1T6Z8NCsa9MEIxmaEjp1NamA',
     yearlyPriceId: 'price_1T6Z8NCsa9MEIxma6NAdgBQB',
     features: [
       'Everything in Sharp, plus:',
-      'Life Changer Ticket — daily cross-sport underdog parlay',
+      'Daily Edge Parlay — cross-sport high-value underdog parlay',
       'Real-time line movement push alerts',
       'Live odds comparison across 6 sportsbooks',
       'Arbitrage scanner + positive EV alerts',
@@ -352,7 +352,7 @@ export default function Pricing() {
               { icon: <Zap className="w-7 h-7 text-cyan-500" />, color: "bg-cyan-500/10", title: "Live Intelligence", desc: "Server-sent events push real-time updates for scores, odds shifts, and sharp money alerts." },
               { icon: <BarChart2 className="w-7 h-7 text-rose-500" />, color: "bg-rose-500/10", title: "Transparent Track Record", desc: "Every settled pick logged with full win rate, CLV stats, and calibration tiers — nothing hidden." },
               { icon: <Bot className="w-7 h-7 text-violet-500" />, color: "bg-violet-500/10", title: "Self-Learning Model", desc: "CLV-gated learning engine continuously retrains weights from settled picks — it gets smarter." },
-              { icon: <Flame className="w-7 h-7 text-orange-500" />, color: "bg-orange-500/10", title: "Life Changer Ticket", desc: "Daily cross-sport underdog parlay built for explosive combined odds — not available anywhere else." },
+              { icon: <Flame className="w-7 h-7 text-orange-500" />, color: "bg-orange-500/10", title: "Daily Edge Parlay", desc: "Daily cross-sport high-value underdog parlay built by the intelligence engine — Edge tier and above." },
             ].map((item, i) => (
               <div key={i} className="text-center space-y-2.5">
                 <div className={`w-14 h-14 mx-auto rounded-full ${item.color} flex items-center justify-center`}>

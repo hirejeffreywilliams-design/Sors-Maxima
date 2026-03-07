@@ -751,54 +751,6 @@
       "ev": 6.91,
       "gameTime": "2026-03-05T01:55:50.770Z",
       "savedAt": "2026-03-05T01:55:50.770Z"
-    },
-    {
-      "id": "precomp-NCAAB-401825567-spread-1091a4950f",
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "game": "Illinois Fighting Illini @ Maryland Terrapins",
-      "homeTeam": "Maryland Terrapins",
-      "awayTeam": "Illinois Fighting Illini",
-      "pick": "Illinois Fighting Illini +2.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "D",
-      "confidence": 65,
-      "ev": -37,
-      "gameTime": "2026-03-08T19:00Z",
-      "savedAt": "2026-03-07T19:06:32.128Z"
-    },
-    {
-      "id": "precomp-NCAAB-401825567-total-ff151f91a4",
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "game": "Illinois Fighting Illini @ Maryland Terrapins",
-      "homeTeam": "Maryland Terrapins",
-      "awayTeam": "Illinois Fighting Illini",
-      "pick": "Over 144",
-      "betType": "total",
-      "odds": -110,
-      "grade": "D",
-      "confidence": 49,
-      "ev": -37,
-      "gameTime": "2026-03-08T19:00Z",
-      "savedAt": "2026-03-07T19:06:32.128Z"
-    },
-    {
-      "id": "precomp-NCAAB-401825567-moneyline-2afc8447e8",
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "game": "Illinois Fighting Illini @ Maryland Terrapins",
-      "homeTeam": "Maryland Terrapins",
-      "awayTeam": "Illinois Fighting Illini",
-      "pick": "Illinois Fighting Illini ML",
-      "betType": "moneyline",
-      "odds": -209,
-      "grade": "D",
-      "confidence": 47,
-      "ev": -52.69,
-      "gameTime": "2026-03-08T19:00Z",
-      "savedAt": "2026-03-07T19:06:32.128Z"
     }
   ],
   "settled": [
@@ -9781,32 +9733,352 @@
       "homeScore": 73,
       "awayScore": 57,
       "settledAt": "2026-03-07T01:04:30.986Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-spread-1091a4950f",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Illinois Fighting Illini +2.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 65,
+      "ev": -37,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z",
+      "result": "lost",
+      "homeScore": 80,
+      "awayScore": 54,
+      "settledAt": "2026-03-07T19:12:17.551Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-total-ff151f91a4",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 49,
+      "ev": -37,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z",
+      "result": "lost",
+      "homeScore": 80,
+      "awayScore": 54,
+      "settledAt": "2026-03-07T19:12:17.551Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825567-moneyline-2afc8447e8",
+      "gameId": "401825567",
+      "sport": "NCAAB",
+      "game": "Illinois Fighting Illini @ Maryland Terrapins",
+      "homeTeam": "Maryland Terrapins",
+      "awayTeam": "Illinois Fighting Illini",
+      "pick": "Illinois Fighting Illini ML",
+      "betType": "moneyline",
+      "odds": -209,
+      "grade": "D",
+      "confidence": 47,
+      "ev": -52.69,
+      "gameTime": "2026-03-08T19:00Z",
+      "savedAt": "2026-03-07T19:06:32.128Z",
+      "result": "lost",
+      "homeScore": 80,
+      "awayScore": 54,
+      "settledAt": "2026-03-07T19:12:17.551Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825568-total-c58e6e0ab4",
+      "gameId": "401825568",
+      "sport": "NCAAB",
+      "game": "Michigan State Spartans @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Michigan State Spartans",
+      "pick": "Under 148.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 68,
+      "ev": 24.09,
+      "gameTime": "2026-03-08T20:30Z",
+      "savedAt": "2026-03-07T19:16:28.069Z",
+      "result": "won",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:21:26.607Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825568-spread-c1a67258ac",
+      "gameId": "401825568",
+      "sport": "NCAAB",
+      "game": "Michigan State Spartans @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Michigan State Spartans",
+      "pick": "Michigan Wolverines -10.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 63,
+      "ev": 24.09,
+      "gameTime": "2026-03-08T20:30Z",
+      "savedAt": "2026-03-07T19:16:28.069Z",
+      "result": "lost",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:21:26.607Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825568-moneyline-8c6b79b148",
+      "gameId": "401825568",
+      "sport": "NCAAB",
+      "game": "Michigan State Spartans @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Michigan State Spartans",
+      "pick": "Michigan Wolverines ML",
+      "betType": "moneyline",
+      "odds": -480,
+      "grade": "C+",
+      "confidence": 53,
+      "ev": -29.92,
+      "gameTime": "2026-03-08T20:30Z",
+      "savedAt": "2026-03-07T19:16:28.069Z",
+      "result": "lost",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:21:26.607Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825569-spread-c19d286381",
+      "gameId": "401825569",
+      "sport": "NCAAB",
+      "game": "Iowa Hawkeyes @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "Iowa Hawkeyes",
+      "pick": "Nebraska Cornhuskers -5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 79,
+      "ev": 24.09,
+      "gameTime": "2026-03-08T21:00Z",
+      "savedAt": "2026-03-07T19:41:23.208Z",
+      "result": "lost",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:41:26.363Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825569-total-866ef0d7cb",
+      "gameId": "401825569",
+      "sport": "NCAAB",
+      "game": "Iowa Hawkeyes @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "Iowa Hawkeyes",
+      "pick": "Over 132.5",
+      "betType": "total",
+      "odds": -115,
+      "grade": "C+",
+      "confidence": 79,
+      "ev": 21.52,
+      "gameTime": "2026-03-08T21:00Z",
+      "savedAt": "2026-03-07T19:41:23.208Z",
+      "result": "won",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:41:26.363Z"
+    },
+    {
+      "id": "precomp-NCAAB-401825569-moneyline-d033848277",
+      "gameId": "401825569",
+      "sport": "NCAAB",
+      "game": "Iowa Hawkeyes @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "Iowa Hawkeyes",
+      "pick": "Nebraska Cornhuskers ML",
+      "betType": "moneyline",
+      "odds": -220,
+      "grade": "C+",
+      "confidence": 56,
+      "ev": -11.27,
+      "gameTime": "2026-03-08T21:00Z",
+      "savedAt": "2026-03-07T19:41:23.208Z",
+      "result": "lost",
+      "homeScore": 68,
+      "awayScore": 71,
+      "settledAt": "2026-03-07T19:41:26.363Z"
+    },
+    {
+      "id": "precomp-NHL-401803356-moneyline-5fb4453332",
+      "gameId": "401803356",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "New Jersey Devils ML",
+      "betType": "moneyline",
+      "odds": -117,
+      "grade": "C",
+      "confidence": 61,
+      "ev": -12.83,
+      "gameTime": "2026-03-08T23:00Z",
+      "savedAt": "2026-03-07T20:18:25.867Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-07T20:19:32.923Z"
+    },
+    {
+      "id": "precomp-NHL-401803356-spread-7f8fcae1ed",
+      "gameId": "401803356",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "New Jersey Devils -1",
+      "betType": "spread",
+      "odds": 210,
+      "grade": "C",
+      "confidence": 59,
+      "ev": 70.5,
+      "gameTime": "2026-03-08T23:00Z",
+      "savedAt": "2026-03-07T20:18:25.867Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-07T20:19:32.923Z"
+    },
+    {
+      "id": "precomp-NHL-401803356-total-4e0f774cf3",
+      "gameId": "401803356",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Over 5.5",
+      "betType": "total",
+      "odds": -125,
+      "grade": "C",
+      "confidence": 59,
+      "ev": -15.4,
+      "gameTime": "2026-03-08T23:00Z",
+      "savedAt": "2026-03-07T20:18:25.867Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-07T20:19:32.923Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851759-spread-6fc8d88f6d",
+      "gameId": "401851759",
+      "sport": "NCAAB",
+      "game": "TBD @ Gonzaga Bulldogs",
+      "homeTeam": "Gonzaga Bulldogs",
+      "awayTeam": "TBD",
+      "pick": "Gonzaga Bulldogs +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 79,
+      "ev": 37.45,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-07T20:18:26.001Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T20:19:32.930Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851759-moneyline-eff46e5be8",
+      "gameId": "401851759",
+      "sport": "NCAAB",
+      "game": "TBD @ Gonzaga Bulldogs",
+      "homeTeam": "Gonzaga Bulldogs",
+      "awayTeam": "TBD",
+      "pick": "Gonzaga Bulldogs ML",
+      "betType": "moneyline",
+      "odds": -181,
+      "grade": "A-",
+      "confidence": 75,
+      "ev": 7.12,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-07T20:18:26.001Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T20:19:32.930Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851759-total-c1b743f227",
+      "gameId": "401851759",
+      "sport": "NCAAB",
+      "game": "TBD @ Gonzaga Bulldogs",
+      "homeTeam": "Gonzaga Bulldogs",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 65,
+      "ev": 37.45,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-07T20:18:26.001Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-07T20:19:32.930Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-a26fdac05d57",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Philadelphia 76ers @ Cleveland Cavaliers",
+      "homeTeam": "Cleveland Cavaliers",
+      "awayTeam": "Philadelphia 76ers",
+      "pick": "Over 220",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-07T20:33:43.730Z",
+      "savedAt": "2026-03-07T20:33:43.730Z",
+      "result": "lost",
+      "homeScore": 106,
+      "awayScore": 102,
+      "settledAt": "2026-03-07T20:35:32.845Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 449,
-      "won": 231,
-      "lost": 206,
+      "total": 465,
+      "won": 235,
+      "lost": 218,
       "push": 12,
-      "rate": 51.4,
-      "pending": 50
+      "rate": 50.5,
+      "pending": 47
     },
     "bySport": {
       "NBA": {
-        "total": 156,
+        "total": 157,
         "won": 76,
-        "rate": 48.7
+        "rate": 48.4
       },
       "NHL": {
-        "total": 162,
+        "total": 165,
         "won": 77,
-        "rate": 47.5
+        "rate": 46.7
       },
       "NCAAB": {
-        "total": 131,
-        "won": 78,
-        "rate": 59.5
+        "total": 143,
+        "won": 82,
+        "rate": 57.3
       }
     },
     "byGrade": {
@@ -9821,14 +10093,14 @@
         "rate": 65.5
       },
       "B-": {
-        "total": 112,
+        "total": 113,
         "won": 58,
-        "rate": 51.8
+        "rate": 51.3
       },
       "C+": {
-        "total": 98,
-        "won": 53,
-        "rate": 54.1
+        "total": 104,
+        "won": 55,
+        "rate": 52.9
       },
       "D+": {
         "total": 29,
@@ -9841,19 +10113,19 @@
         "rate": 53.1
       },
       "C": {
-        "total": 89,
+        "total": 92,
         "won": 41,
-        "rate": 46.1
+        "rate": 44.6
       },
       "A-": {
-        "total": 12,
-        "won": 3,
-        "rate": 25
+        "total": 15,
+        "won": 5,
+        "rate": 33.3
       },
       "D": {
-        "total": 7,
+        "total": 10,
         "won": 3,
-        "rate": 42.9
+        "rate": 30
       },
       "F": {
         "total": 5,
@@ -9863,22 +10135,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 127,
-        "won": 68,
-        "rate": 53.5,
-        "roi": 17.6
+        "total": 132,
+        "won": 69,
+        "rate": 52.3,
+        "roi": 14.3
       },
       "Spread": {
-        "total": 129,
-        "won": 68,
-        "rate": 52.7,
-        "roi": 5.2
+        "total": 134,
+        "won": 69,
+        "rate": 51.5,
+        "roi": 2.7
       },
       "Total": {
-        "total": 122,
-        "won": 57,
-        "rate": 46.7,
-        "roi": -5.7
+        "total": 128,
+        "won": 59,
+        "rate": 46.1,
+        "roi": -7.3
       },
       "Team Total": {
         "total": 71,
@@ -9888,46 +10160,46 @@
       }
     },
     "recentForm": {
-      "won": 20,
-      "lost": 26,
-      "push": 4,
-      "rate": 40
+      "won": 16,
+      "lost": 31,
+      "push": 3,
+      "rate": 32
     },
-    "lastUpdated": "2026-03-07T19:01:40.874Z",
-    "roi": 5.9,
-    "brierScore": 0.2611,
-    "maxDrawdown": 10.6,
-    "sharpeRatio": 0.052,
+    "lastUpdated": "2026-03-07T20:35:32.847Z",
+    "roi": 3.8,
+    "brierScore": 0.2621,
+    "maxDrawdown": 14.5,
+    "sharpeRatio": 0.033,
     "homeAwayBias": {
-      "homeWinRate": 56.9,
-      "awayWinRate": 43.1,
-      "homeTotal": 195,
-      "awayTotal": 58
+      "homeWinRate": 55.7,
+      "awayWinRate": 41.7,
+      "homeTotal": 203,
+      "awayTotal": 60
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
-        "predicted": 52.2,
-        "actual": 69.2,
-        "total": 13
+        "predicted": 51.7,
+        "actual": 56.3,
+        "total": 16
       },
       {
         "range": "55-60",
         "predicted": 57.9,
-        "actual": 43.4,
-        "total": 53
+        "actual": 41.1,
+        "total": 56
       },
       {
         "range": "60-65",
         "predicted": 62.1,
-        "actual": 52.5,
-        "total": 181
+        "actual": 51.6,
+        "total": 184
       },
       {
         "range": "65-70",
         "predicted": 66.3,
-        "actual": 53.2,
-        "total": 111
+        "actual": 52.6,
+        "total": 114
       },
       {
         "range": "70-75",
@@ -9937,9 +10209,9 @@
       },
       {
         "range": "75-80",
-        "predicted": 76.8,
+        "predicted": 77.4,
         "actual": 75,
-        "total": 4
+        "total": 8
       },
       {
         "range": "80+",

@@ -124,7 +124,7 @@ class FeatureFlagService {
       {
         id: "advanced_command_center",
         name: "Advanced Command Center",
-        description: "Enables Best Tickets, Matchup Parlays, and Life Changer Ticket sections for all members. Admin always sees these. Disable for a simplified member experience during launch phase.",
+        description: "Enables Best Tickets, Matchup Parlays, and Daily Edge Parlay sections for all members. Admin always sees these. Disable for a simplified member experience during launch phase.",
         enabled: false,
         rolloutPercentage: 0,
         metadata: { adminAlwaysSees: true, launchPhaseControl: true },

@@ -128,7 +128,7 @@ const MAP_NODES: Record<string, VisualNode> = {
   "pick-insight":   { x: 402,  y: 352, w: 160, h: 50, row: 2, label: "Pick Insight Engine",  sublabel: "AI Sharp Insights",   layer: "Specialized" },
   "correlation":    { x: 614,  y: 352, w: 162, h: 50, row: 2, label: "Correlation Engine",   sublabel: "Slip Analysis 0–100", layer: "Specialized" },
   "usml":           { x: 828,  y: 352, w: 128, h: 50, row: 2, label: "USML Meta-Learner",    sublabel: "6-Source Ensemble",   layer: "Specialized" },
-  "life-changer":   { x: 1008, y: 352, w: 192, h: 50, row: 2, label: "Life Changer Generator",sublabel: "5-Sport Pool",       layer: "Specialized" },
+  "life-changer":   { x: 1008, y: 352, w: 192, h: 50, row: 2, label: "Daily Edge Parlay",     sublabel: "5-Sport Pool",       layer: "Specialized" },
 
   "command-center": { x: 20,   y: 516, w: 168, h: 50, row: 3, label: "Command Center",       sublabel: "Today's Picks",       layer: "User Features" },
   "bet-slip":       { x: 238,  y: 516, w: 128, h: 50, row: 3, label: "Bet Slip",             sublabel: "Multi-Slip · Parlay", layer: "User Features" },

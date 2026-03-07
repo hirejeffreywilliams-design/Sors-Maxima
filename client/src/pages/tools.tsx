@@ -292,7 +292,7 @@ export default function Tools() {
               <div className="grid gap-6 lg:grid-cols-2">
                 {canAccess("whale")
                   ? <ProgressiveHedgePlanner legs={[]} stake={25} potentialPayout={250} />
-                  : <TierGate required="whale" label="Progressive Hedge Planner" description="Build staged hedging plans across a live parlay — lock in guaranteed profit as legs cash." />
+                  : <TierGate required="whale" label="Progressive Hedge Planner" description="Build staged hedging plans across a live parlay — protect your returns by hedging as each leg cashes." />
                 }
                 {canAccess("elite")
                   ? <PromoBoostStacker legs={[]} currentOdds={2.5} />

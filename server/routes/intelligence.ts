@@ -711,7 +711,7 @@ export function registerIntelligenceRoutes(app: Express): void {
       res.json({ ticket });
     } catch (err: any) {
       console.error("[life-changer] Error:", err.message);
-      res.status(500).json({ error: "Failed to generate Life Changer ticket" });
+      res.status(500).json({ error: "Failed to generate Daily Edge Parlay ticket" });
     }
   });
 

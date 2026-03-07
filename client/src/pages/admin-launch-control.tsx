@@ -433,7 +433,7 @@ export default function AdminLaunchControl() {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium">Advanced Command Center</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed">
-                    Best Tickets, Matchup Parlays, and Life Changer Ticket. Off = simplified member view. Admin always sees everything.
+                    Best Tickets, Matchup Parlays, and Daily Edge Parlay. Off = simplified member view. Admin always sees everything.
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     <Badge

@@ -1526,8 +1526,8 @@ export default function CommandCenter() {
     staleTime: 60000,
   });
 
-  // Admin always sees advanced sections; flag unlocks them for all members
-  const showAdvanced = authData?.isAdmin === true || advancedFlagData?.enabled === true;
+  // All paying subscribers see advanced sections; admin flag provides early access during rollout
+  const showAdvanced = authData?.isAdmin === true || advancedFlagData?.enabled === true || canAccess("pro");
 
   const { data: feed, isLoading, dataUpdatedAt } = useQuery<IntelligenceFeed>({
     queryKey: ["/api/intelligence/feed"],

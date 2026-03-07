@@ -1,6 +1,26 @@
 {
   "alerts": [
     {
+      "id": "alert_1772914982123_ontts",
+      "timestamp": "2026-03-07T20:23:02.123Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "model_performance",
+      "title": "Win Rate Below Break-Even",
+      "detail": "Win rate 52% over 464 picks. Break-even for -110 bets is 52.4%.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1772912564938_w6tc6",
+      "timestamp": "2026-03-07T19:42:44.938Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "model_performance",
+      "title": "Win Rate Below Break-Even",
+      "detail": "Win rate 52.2% over 458 picks. Break-even for -110 bets is 52.4%.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1772647522763_wmr9w",
       "timestamp": "2026-03-04T18:05:22.763Z",
       "resolved": true,
@@ -145,6 +165,71 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1772911484937_fjqyc",
+      "timestamp": "2026-03-07T19:24:44.937Z",
+      "durationMs": 9426,
+      "summary": [
+        "Current win rate is at 52.5%, meeting the break-even threshold.",
+        "The platform shows a significant underperformance in Total picks, with an accuracy rate of only 46.8%.",
+        "API usage is healthy, however, low activity indicates no actual handle or win recorded this period."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate Total Pick Performance",
+          "description": "Analyze the Total picks to identify the cause of low accuracy and implement a strategy for improvement.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 5
+        },
+        {
+          "title": "Enhance Marketing Engagement",
+          "description": "Develop a targeted campaign to increase user activity and betting handle, aiming to capitalize on active user base.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 4
+        },
+        {
+          "title": "Review API Reporting Metrics",
+          "description": "Ensure API budget and performance reports are clear to avoid any potential issues with daily limits in the future.",
+          "priority": "P2",
+          "due_by": "this_month",
+          "effort_hours": 3
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Low Handle and Gross Win",
+          "description": "Current handle is 0, indicating potential engagement issues. Need to investigate user activity and betting patterns.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Review user engagement strategies to boost betting activity.",
+          "Perform a detailed audit of Total pick performance.",
+          "Prepare a report on API usage and implement necessary adjustments."
+        ],
+        "this_week": [
+          "Launch marketing initiatives targeting increased user engagement.",
+          "Analyze data from Total picks for insights on improvement.",
+          "Schedule a team meeting to discuss user retention strategies."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.5,
+        "settledPicks": 452,
+        "oddsApiRemaining": 72735,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 90,
+        "cacheHitRate": 20,
+        "heapUsedMb": 107,
+        "heapTotalMb": 127,
+        "hubLastCycleMs": 63,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Current win rate is at 52.5%, meeting the break-even threshold.\",\n    \"The platform shows a significant underperformance in Total picks, with an accuracy rate of only 46.8%.\",\n    \"API usage is healthy, however, low activity indicates no actual handle or win recorded this period.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Total Pick Performance\",\n      \"description\": \"Analyze the Total picks to identify the cause of low accuracy and implement a strategy for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Enhance Marketing Engagement\",\n      \"description\": \"Develop a targeted campaign to increase user activity and betting handle, aiming to capitalize on active user base.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review API Reporting Metrics\",\n      \"description\": \"Ensure API budget and performance reports are clear to avoid any potential issues with daily limits in the future.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Low Handle and Gross Win\",\n      \"description\": \"Current handle is 0, indicating potential engagement issues. Need to investigate user activity and betting patterns.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review user engagement strategies to boost betting activity.\",\n      \"Perform a detailed audit of Total pick performance.\",\n      \"Prepare a report on API usage and implement necessary adjustments.\"\n    ],\n    \"this_week\": [\n      \"Launch marketing initiatives targeting increased user engagement.\",\n      \"Analyze data from Total picks for insights on improvement.\",\n      \"Schedule a team meeting to discuss user retention strategies.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1772909649904_aoczd",
       "timestamp": "2026-03-07T18:54:09.904Z",
@@ -1155,8 +1240,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-07T19:06:12.871Z",
-  "lastDeepCheck": "2026-03-07T18:54:09.904Z",
-  "totalQuickChecks": 49,
-  "totalDeepChecks": 16
+  "lastQuickCheck": "2026-03-07T20:23:02.123Z",
+  "lastDeepCheck": "2026-03-07T19:24:44.937Z",
+  "totalQuickChecks": 52,
+  "totalDeepChecks": 17
 }

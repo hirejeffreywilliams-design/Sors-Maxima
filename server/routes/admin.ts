@@ -4541,7 +4541,7 @@ Follow these rules:
         "pick-insight":   { status: insightCacheSize > 0 ? "live" : (aiStatus === "live" ? "cached" : "offline"), label: "Pick Insight Engine", detail: `${insightCacheSize} AI insights cached` },
         "correlation":    { status: "live",            label: "Correlation Engine",  detail: "Real-time slip analysis, 0–100 score" },
         "usml":           { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "USML Meta-Learner", detail: "6-source ensemble reweighting" },
-        "life-changer":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Life Changer Generator", detail: "5+ sport diversity, steam/trap pools" },
+        "life-changer":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Daily Edge Parlay Engine", detail: "5+ sport diversity, steam/trap pools" },
         "command-center": { status: "live",            label: "Command Center",      detail: "Today's picks, daily ticket, SSE" },
         "bet-slip":       { status: "live",            label: "Bet Slip",            detail: "Multi-slip, correlation panel, payouts" },
         "ticket-vars":    { status: aiStatus === "live" ? "live" : "degraded", label: "Ticket Variations", detail: "5 AI-generated strategic blueprints" },
@@ -4601,7 +4601,7 @@ ${issues.join("\n")}
 Platform architecture layers:
 1. External Data Sources: ESPN (free), The Odds API, BallDontLie, NHL Stats, MLB Stats, API-Football, OpenAI
 2. Processing Engines: Predictions Engine (46-Factor), Intelligence Hub, Team Form Engine, Situational Analysis, Two-Way Intelligence, Vegas Engine
-3. Specialized Engines: MMA Engine, International Sports Engine, Pick Insight Engine, Correlation Engine, USML Meta-Learner, Life Changer Generator
+3. Specialized Engines: MMA Engine, International Sports Engine, Pick Insight Engine, Correlation Engine, USML Meta-Learner, Daily Edge Parlay Engine
 4. User Features: Command Center, Bet Slip, Ticket Variations, Daily Picks, Odds Center, Player Props
 
 Analyze the issues and respond with VALID JSON only (no markdown):
