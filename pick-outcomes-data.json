@@ -10590,21 +10590,101 @@
       "homeScore": 70,
       "awayScore": 59,
       "settledAt": "2026-03-07T21:16:01.289Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-5e4e9e0447e5",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Washington Wizards",
+      "pick": "Over 220",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 63,
+      "ev": 12.64,
+      "gameTime": "2026-03-07T22:51:37.657Z",
+      "savedAt": "2026-03-07T22:51:37.657Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 128,
+      "settledAt": "2026-03-07T22:51:59.674Z"
+    },
+    {
+      "id": "precomp-NBA-401810783-moneyline-a7de465153",
+      "gameId": "401810783",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Phoenix Suns",
+      "homeTeam": "Phoenix Suns",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Phoenix Suns ML",
+      "betType": "moneyline",
+      "odds": 135,
+      "grade": "C",
+      "confidence": 58,
+      "ev": 22.2,
+      "gameTime": "2026-03-09T02:00Z",
+      "savedAt": "2026-03-07T22:51:37.657Z",
+      "result": "lost",
+      "homeScore": 120,
+      "awayScore": 128,
+      "settledAt": "2026-03-07T22:51:59.674Z"
+    },
+    {
+      "id": "precomp-NBA-401810783-spread-971eb3bd6f",
+      "gameId": "401810783",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Phoenix Suns",
+      "homeTeam": "Phoenix Suns",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Phoenix Suns +3.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 58,
+      "ev": -6.45,
+      "gameTime": "2026-03-09T02:00Z",
+      "savedAt": "2026-03-07T22:51:37.657Z",
+      "result": "lost",
+      "homeScore": 120,
+      "awayScore": 128,
+      "settledAt": "2026-03-07T22:51:59.674Z"
+    },
+    {
+      "id": "precomp-NBA-401810783-total-63fa6821d9",
+      "gameId": "401810783",
+      "sport": "NBA",
+      "game": "Charlotte Hornets @ Phoenix Suns",
+      "homeTeam": "Phoenix Suns",
+      "awayTeam": "Charlotte Hornets",
+      "pick": "Over 219",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 58,
+      "ev": -6.45,
+      "gameTime": "2026-03-09T02:00Z",
+      "savedAt": "2026-03-07T22:51:37.657Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 128,
+      "settledAt": "2026-03-07T22:51:59.674Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 468,
-      "won": 237,
-      "lost": 219,
+      "total": 472,
+      "won": 239,
+      "lost": 221,
       "push": 12,
       "rate": 50.6,
       "pending": 56
     },
     "bySport": {
       "NBA": {
-        "total": 157,
-        "won": 76,
+        "total": 161,
+        "won": 78,
         "rate": 48.4
       },
       "NHL": {
@@ -10630,9 +10710,9 @@
         "rate": 65.5
       },
       "B-": {
-        "total": 113,
-        "won": 58,
-        "rate": 51.3
+        "total": 114,
+        "won": 59,
+        "rate": 51.8
       },
       "C+": {
         "total": 104,
@@ -10650,9 +10730,9 @@
         "rate": 53.1
       },
       "C": {
-        "total": 92,
-        "won": 41,
-        "rate": 44.6
+        "total": 95,
+        "won": 42,
+        "rate": 44.2
       },
       "A-": {
         "total": 18,
@@ -10672,22 +10752,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 133,
+        "total": 134,
         "won": 70,
-        "rate": 52.6,
-        "roi": 14.6
+        "rate": 52.2,
+        "roi": 13.8
       },
       "Spread": {
-        "total": 135,
+        "total": 136,
         "won": 70,
-        "rate": 51.9,
-        "roi": 3.3
+        "rate": 51.5,
+        "roi": 2.6
       },
       "Total": {
-        "total": 129,
-        "won": 59,
-        "rate": 45.7,
-        "roi": -8
+        "total": 131,
+        "won": 61,
+        "rate": 46.6,
+        "roi": -6.4
       },
       "Team Total": {
         "total": 71,
@@ -10697,20 +10777,20 @@
       }
     },
     "recentForm": {
-      "won": 16,
-      "lost": 31,
-      "push": 3,
-      "rate": 32
+      "won": 18,
+      "lost": 30,
+      "push": 2,
+      "rate": 36
     },
-    "lastUpdated": "2026-03-07T22:31:44.169Z",
-    "roi": 3.9,
-    "brierScore": 0.2615,
-    "maxDrawdown": 14.5,
+    "lastUpdated": "2026-03-07T22:55:09.435Z",
+    "roi": 3.8,
+    "brierScore": 0.2614,
+    "maxDrawdown": 15,
     "sharpeRatio": 0.034,
     "homeAwayBias": {
-      "homeWinRate": 56.1,
+      "homeWinRate": 55.6,
       "awayWinRate": 41.7,
-      "homeTotal": 205,
+      "homeTotal": 207,
       "awayTotal": 60
     },
     "calibrationBuckets": [
@@ -10723,14 +10803,14 @@
       {
         "range": "55-60",
         "predicted": 57.9,
-        "actual": 41.1,
-        "total": 56
+        "actual": 40.7,
+        "total": 59
       },
       {
         "range": "60-65",
         "predicted": 62.1,
-        "actual": 51.6,
-        "total": 184
+        "actual": 51.9,
+        "total": 185
       },
       {
         "range": "65-70",

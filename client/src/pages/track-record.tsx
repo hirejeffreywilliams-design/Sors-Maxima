@@ -8,12 +8,13 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
 import {
-  AlertTriangle, CheckCircle2, XCircle, TrendingUp, TrendingDown,
+  AlertTriangle, CheckCircle2, TrendingUp, TrendingDown,
   Minus, RefreshCw, Database, Shield, Info, BarChart3, Target,
-  Clock, Activity, Layers, Sparkles, FlaskConical
+  Clock, Activity
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
+import { PickHighlightCards } from "@/components/pick-highlight-cards";
 
 interface CalibrationTier {
   label: string;
@@ -80,16 +81,10 @@ export default function TrackRecordPage() {
   });
 
   const [filter, setFilter] = useState<"all" | "live" | "backtest">("all");
-  const [aiAnalysis, setAiAnalysis] = useState<{ analysis: string; generatedAt: string } | null>(null);
 
   const refreshMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/track-record/refresh"),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/track-record"] }),
-  });
-
-  const aiMutation = useMutation({
-    mutationFn: () => apiRequest("POST", "/api/track-record/ai-analysis").then(r => r.json()),
-    onSuccess: (result: any) => setAiAnalysis(result),
   });
 
   const filteredData = useMemo(() => {
@@ -443,81 +438,8 @@ export default function TrackRecordPage() {
         </Card>
       </div>
 
-      {/* ── AI Analysis Panel ──────────────────────────────────────────── */}
-      <Card className="border-violet-500/30 bg-gradient-to-br from-violet-950/20 to-background">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-violet-400" />
-                AI Analysis
-              </CardTitle>
-              <CardDescription className="text-xs mt-0.5">
-                Instant plain-English breakdown of what these numbers mean
-              </CardDescription>
-            </div>
-            <Button
-              size="sm"
-              onClick={() => aiMutation.mutate()}
-              disabled={aiMutation.isPending}
-              className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 shrink-0"
-              data-testid="button-generate-ai-analysis"
-            >
-              {aiMutation.isPending ? (
-                <>
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                  Analyzing…
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {aiAnalysis ? "Refresh Analysis" : "Generate Analysis"}
-                </>
-              )}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {aiMutation.isError && (
-            <div className="flex items-center gap-2 text-sm text-red-400">
-              <XCircle className="h-4 w-4 shrink-0" />
-              Analysis failed — try again in a moment.
-            </div>
-          )}
-          {!aiAnalysis && !aiMutation.isPending && !aiMutation.isError && (
-            <div className="flex flex-col items-center py-6 text-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-violet-500/10 flex items-center justify-center">
-                <FlaskConical className="h-6 w-6 text-violet-400" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Click "Generate Analysis" for an AI-powered read on the model's performance,
-                  calibration gaps, and what the numbers suggest about pick selection.
-                </p>
-              </div>
-            </div>
-          )}
-          {aiMutation.isPending && (
-            <div className="space-y-2 py-2">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-5/6" />
-              <Skeleton className="h-4 w-4/5" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          )}
-          {aiAnalysis && !aiMutation.isPending && (
-            <div className="space-y-2">
-              <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line" data-testid="text-ai-analysis">
-                {aiAnalysis.analysis}
-              </div>
-              <p className="text-[10px] text-muted-foreground pt-2 border-t border-border">
-                Generated {new Date(aiAnalysis.generatedAt).toLocaleString()} · Based on {data.settledPicks} settled picks
-              </p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* ── Pick Hall of Fame ────────────────────────────────────────────── */}
+      <PickHighlightCards />
 
       <Card>
         <CardHeader className="pb-2">

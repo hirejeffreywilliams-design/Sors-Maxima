@@ -10,10 +10,11 @@ import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, Target, TrendingUp, Activity, BarChart3, Shield,
   CheckCircle, AlertTriangle, XCircle, Cpu, GitBranch, Eye,
-  Crosshair, DollarSign, Layers, RefreshCw
+  Crosshair, DollarSign, Layers, RefreshCw, Sparkles, FlaskConical
 } from "lucide-react";
 import { Link } from "wouter";
 import { useSEO } from "@/hooks/use-seo";
@@ -27,6 +28,12 @@ export default function AdminModelPerformance() {
   const usmlCycleMutation = useMutation({
     mutationFn: () => apiRequest("POST", "/api/admin/usml/cycle"),
     onSuccess: () => { setTimeout(() => refetchUSML(), 1000); },
+  });
+
+  const [aiAnalysis, setAiAnalysis] = useState<{ analysis: string; generatedAt: string } | null>(null);
+  const aiMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/track-record/ai-analysis").then(r => r.json()),
+    onSuccess: (result: any) => setAiAnalysis(result),
   });
 
   if (isLoading) {
@@ -142,6 +149,9 @@ export default function AdminModelPerformance() {
             </TabsTrigger>
             <TabsTrigger value="ensemble" data-testid="tab-ensemble">
               <Cpu className="w-3 h-3 mr-1" /> Ensemble
+            </TabsTrigger>
+            <TabsTrigger value="ai-analysis" data-testid="tab-ai-analysis">
+              <Sparkles className="w-3 h-3 mr-1" /> AI Analysis
             </TabsTrigger>
           </TabsList>
 
@@ -630,6 +640,86 @@ export default function AdminModelPerformance() {
                   <span>Learning Cycles: <span className="text-foreground font-medium">{usmlStats?.learningCycles ?? 0}</span></span>
                   <span>Last Cycle: <span className="text-foreground font-medium font-mono">{usmlStats?.lastCycleAt ? new Date(usmlStats.lastCycleAt).toLocaleTimeString() : "—"}</span></span>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ── AI Analysis Tab ──────────────────────────────────────────── */}
+          <TabsContent value="ai-analysis" className="space-y-4 mt-4">
+            <Card className="border-violet-500/30 bg-gradient-to-br from-violet-950/20 to-background">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-violet-400" />
+                      Model Performance AI Analysis
+                    </CardTitle>
+                    <CardDescription className="text-xs mt-0.5">
+                      AI-powered breakdown of calibration gaps, grade distribution, and pick selection patterns
+                    </CardDescription>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => aiMutation.mutate()}
+                    disabled={aiMutation.isPending}
+                    className="bg-violet-600 hover:bg-violet-700 text-white gap-1.5 shrink-0"
+                    data-testid="button-generate-ai-analysis"
+                  >
+                    {aiMutation.isPending ? (
+                      <>
+                        <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                        Analyzing…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5" />
+                        {aiAnalysis ? "Refresh Analysis" : "Generate Analysis"}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {aiMutation.isError && (
+                  <div className="flex items-center gap-2 text-sm text-red-400">
+                    <XCircle className="h-4 w-4 shrink-0" />
+                    Analysis failed — try again in a moment.
+                  </div>
+                )}
+                {!aiAnalysis && !aiMutation.isPending && !aiMutation.isError && (
+                  <div className="flex flex-col items-center py-8 text-center gap-3">
+                    <div className="w-14 h-14 rounded-full bg-violet-500/10 flex items-center justify-center">
+                      <FlaskConical className="h-7 w-7 text-violet-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium">Admin-only performance analysis</p>
+                      <p className="text-xs text-muted-foreground max-w-sm">
+                        Generates a detailed plain-English breakdown of model calibration, grade-tier accuracy,
+                        over/underconfidence patterns, and actionable improvement signals.
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {aiMutation.isPending && (
+                  <div className="space-y-2 py-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </div>
+                )}
+                {aiAnalysis && !aiMutation.isPending && (
+                  <div className="space-y-3">
+                    <div className="text-sm leading-relaxed text-foreground/90 whitespace-pre-line" data-testid="text-ai-analysis">
+                      {aiAnalysis.analysis}
+                    </div>
+                    <p className="text-[10px] text-muted-foreground pt-2 border-t border-border">
+                      Generated {new Date(aiAnalysis.generatedAt).toLocaleString()} · Admin view only
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
