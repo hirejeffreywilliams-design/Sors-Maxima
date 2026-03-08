@@ -27,6 +27,11 @@ function generateUniqueId(): string {
   return crypto.randomUUID();
 }
 
+function generateLegId(team: string, opponent: string, market: string, outcome: string, line?: number | null): string {
+  const raw = `${team.toLowerCase()}|${opponent.toLowerCase()}|${market}|${outcome.toLowerCase()}|${line ?? ""}`;
+  return crypto.createHash("sha256").update(raw).digest("hex").slice(0, 16);
+}
+
 export type MarketType = "moneyline" | "spread" | "total" | "prop" 
   | "first_half_spread" | "first_half_total" | "first_quarter_spread" | "first_quarter_total"
   | "team_total" | "alt_spread" | "alt_total"
@@ -547,7 +552,7 @@ function generateSoccerLeg(league: string, marketType: string): TicketLeg {
   };
 
   return {
-    id: generateUniqueId(),
+    id: generateLegId(homeTeam.name, awayTeam.name, market, outcome, line),
     team: homeTeam.name,
     opponent: awayTeam.name,
     market,
@@ -1255,7 +1260,7 @@ function generateLegFromESPNGame(
   const gameSource: "ESPN Live" | "scheduled" = game.status.state === "in" ? "ESPN Live" : "scheduled";
 
   return {
-    id: generateUniqueId(),
+    id: generateLegId(`${selectedTeam.city} ${selectedTeam.name}`, `${opponent.city} ${opponent.name}`, market, outcome, line),
     team: `${selectedTeam.city} ${selectedTeam.name}`,
     opponent: `${opponent.city} ${opponent.name}`,
     market,
@@ -1384,7 +1389,7 @@ function generateLegFromSoccerFixture(
   const confidenceLevel: "high" | "medium" | "low" = winProbability > 0.55 ? "high" : winProbability > 0.4 ? "medium" : "low";
 
   return {
-    id: generateUniqueId(),
+    id: generateLegId(selectedTeam, opponent, market, outcome, line),
     team: selectedTeam,
     opponent,
     market,
@@ -1651,7 +1656,7 @@ function buildLegFromTeams(sport: Sport, selectedTeam: { name: string; city: str
   }
   
   return {
-    id: generateUniqueId(),
+    id: generateLegId(`${selectedTeam.city} ${selectedTeam.name}`, `${opponent.city} ${opponent.name}`, market, outcome, line),
     team: `${selectedTeam.city} ${selectedTeam.name}`,
     opponent: `${opponent.city} ${opponent.name}`,
     market,

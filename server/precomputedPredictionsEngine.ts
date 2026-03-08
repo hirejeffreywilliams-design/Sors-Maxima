@@ -2028,7 +2028,7 @@ function decimalToAmerican(decimal: number): number {
 function pickToLeg(pick: PrecomputedPick): OptimalTicketLeg {
   const dec = americanToDecimal(pick.odds);
   return {
-    id: crypto.randomUUID(),
+    id: crypto.createHash("sha256").update(`leg:${pick.id}`).digest("hex").slice(0, 16),
     pickId: pick.id,
     team: pick.homeTeam,
     opponent: pick.awayTeam,

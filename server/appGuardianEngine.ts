@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import v8 from "v8";
 import { errorLogger, logError, logWarn, logInfo } from "./errorLogger";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
@@ -228,20 +229,25 @@ class AppGuardianEngine {
 
     try {
       const mem = process.memoryUsage();
-      const heapPercent = (mem.heapUsed / mem.heapTotal) * 100;
+      // Use v8 heap_size_limit (set by --max-old-space-size) as the denominator
+      // so percentage reflects real headroom, not V8's dynamic current allocation.
+      const heapLimit = v8.getHeapStatistics().heap_size_limit;
+      const heapPercent = (mem.heapUsed / heapLimit) * 100;
+      const heapUsedMB = (mem.heapUsed / 1024 / 1024).toFixed(0);
+      const heapLimitMB = (heapLimit / 1024 / 1024).toFixed(0);
 
       if (heapPercent > 90) {
         const alert = this.addAlert("critical", "memory", "Critical Memory Pressure",
-          `Heap usage at ${heapPercent.toFixed(1)}% (${(mem.heapUsed / 1024 / 1024).toFixed(0)}MB / ${(mem.heapTotal / 1024 / 1024).toFixed(0)}MB)`,
+          `Heap usage at ${heapPercent.toFixed(1)}% (${heapUsedMB}MB / ${heapLimitMB}MB limit)`,
           "health_check");
         this.createIncident("critical", "Memory Exhaustion Risk",
-          "Application memory usage exceeds 90%", ["Server"], [alert.id]);
+          "Application memory usage exceeds 90% of heap limit", ["Server"], [alert.id]);
         if (global.gc) {
           try { global.gc(); } catch (_) {}
         }
       } else if (heapPercent > 75) {
         this.addAlert("high", "memory", "High Memory Usage",
-          `Heap usage at ${heapPercent.toFixed(1)}%`, "health_check");
+          `Heap usage at ${heapPercent.toFixed(1)}% (${heapUsedMB}MB / ${heapLimitMB}MB limit)`, "health_check");
       } else {
         this.resolveAlertsByCategory("memory", true, "Memory usage returned to normal");
       }
@@ -547,8 +553,8 @@ class AppGuardianEngine {
         healthScore,
         uptime: Math.round(process.uptime()),
         memHeapUsedMB: Math.round(mem.heapUsed / 1024 / 1024),
-        memHeapTotalMB: Math.round(mem.heapTotal / 1024 / 1024),
-        memHeapPercent: Math.round((mem.heapUsed / mem.heapTotal) * 100),
+        memHeapLimitMB: Math.round(v8.getHeapStatistics().heap_size_limit / 1024 / 1024),
+        memHeapPercent: Math.round((mem.heapUsed / v8.getHeapStatistics().heap_size_limit) * 100),
         checksPerformed: this.checksPerformed,
         autoHealActions: this.autoHealActions,
         activeAlerts: activeAlerts.map(a => ({ severity: a.severity, category: a.category, title: a.title, message: a.message })),
@@ -635,7 +641,7 @@ Prioritize the most impactful issues for the platform's paying users. Be direct 
     score -= degradedCount * 5;
 
     const mem = process.memoryUsage();
-    const heapPct = (mem.heapUsed / mem.heapTotal) * 100;
+    const heapPct = (mem.heapUsed / v8.getHeapStatistics().heap_size_limit) * 100;
     if (heapPct > 90) score -= 20;
     else if (heapPct > 75) score -= 10;
 
@@ -682,8 +688,8 @@ Prioritize the most impactful issues for the platform's paying users. Be direct 
       vitals: {
         memoryUsage: {
           used: Math.round(mem.heapUsed / 1024 / 1024),
-          total: Math.round(mem.heapTotal / 1024 / 1024),
-          percent: Math.round((mem.heapUsed / mem.heapTotal) * 100),
+          total: Math.round(v8.getHeapStatistics().heap_size_limit / 1024 / 1024),
+          percent: Math.round((mem.heapUsed / v8.getHeapStatistics().heap_size_limit) * 100),
         },
         uptime: uptimeSec,
         uptimeFormatted: `${hours}h ${mins}m`,

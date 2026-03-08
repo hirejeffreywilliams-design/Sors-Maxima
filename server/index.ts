@@ -305,20 +305,24 @@ function startEnginesPhased(): void {
   safeStart("Notification Engine", startNotificationEngine, 70_000);
 
   // ── Phase 9 (Background): Learning + Backtest ────────────────────────────
-  // Pure background work — run last to avoid competing with user-facing engines.
+  // These engines do purely background work (model calibration, pattern mining,
+  // backtest analysis). They are intentionally deferred to 5-12 minutes after
+  // boot so they don't compete with user-facing engines during the critical
+  // first-load window. Memory pressure on a 512 MB heap was hitting 91% because
+  // these were all loading within the first 2.5 minutes.
   safeStart("Continuous Learning Engine", startContinuousLearning, 100_000);
   safeStart("Learning Orchestrator", startContinuousLearningOrchestrator, 105_000);
-  safeStart("Community Pattern Engine", initCommunityPatternEngine, 108_000);
-  safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
-  safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 120_000);
-  safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 135_000);
-  safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
-  safeStart("Quality Watchdog", startQualityWatchdog, 140_000);
+  safeStart("Community Pattern Engine", initCommunityPatternEngine, 360_000);   // 6 min
+  safeStart("Analytics Agent", startAnalyticsAgent, 420_000);                   // 7 min
+  safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 480_000); // 8 min
+  safeStart("Historical Backtest", initBacktestOnStartup, 540_000);             // 9 min
+  safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 600_000); // 10 min
+  safeStart("Quality Watchdog", startQualityWatchdog, 660_000);                 // 11 min
   safeStart("App Intelligence Engine", () => {
     import("./appIntelligenceEngine").then(({ startAppIntelligenceEngine }) => {
       startAppIntelligenceEngine();
     }).catch(() => {});
-  }, 150_000);
+  }, 720_000);                                                                    // 12 min
   safeStart("International Sports Engine", () => {
     generateInternationalFeed().catch(() => {});
     setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);

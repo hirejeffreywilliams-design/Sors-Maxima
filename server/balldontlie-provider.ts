@@ -419,7 +419,7 @@ export async function getLiveBoxscore(gameId: number): Promise<BDLLiveStat[]> {
   if (cached && Date.now() - cached.ts < LIVE_CACHE_TTL) return cached.data;
 
   const result = await fetchBDL<{ data: BDLLiveStat[] }>(`/nba/v1/stats`, {
-    game_ids: String(gameId),
+    "game_ids[]": String(gameId),
     per_page: "50",
   });
   const data = result?.data || [];
