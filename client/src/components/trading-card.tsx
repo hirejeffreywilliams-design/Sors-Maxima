@@ -265,9 +265,21 @@ export function TradingCard({
   const isSettled = !!card.settledResult;
   const isWin = card.settledResult === "won";
 
+  const calcReturn = (stake: number) => {
+    if (!card.odds || Math.abs(card.odds) >= 2000) return null;
+    const decimal = card.odds > 0
+      ? 1 + card.odds / 100
+      : 1 + 100 / Math.abs(card.odds);
+    const payout = stake * decimal;
+    if (payout >= 1000) return `$${(payout / 1000).toFixed(1)}K`;
+    return `$${payout.toFixed(0)}`;
+  };
   const potentialReturn = card.odds > 0
     ? (100 + card.odds).toFixed(0)
     : (100 + (10000 / Math.abs(card.odds))).toFixed(0);
+  const ret1   = calcReturn(1);
+  const ret10  = calcReturn(10);
+  const ret100 = calcReturn(100);
 
   return (
     <div
@@ -627,17 +639,41 @@ export function TradingCard({
                   style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.38)" }}
                 >{(card.betType ?? "").replace(/_/g, " ")}</span>
               </div>
-              {card.odds && Math.abs(card.odds) < 2000 && (
+              {ret1 && ret10 && ret100 && (
                 <div
-                  className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full border"
+                  className="mt-2 rounded-lg px-2.5 py-1.5 border"
                   style={{
-                    background: "rgba(34,197,94,0.08)",
-                    borderColor: "rgba(34,197,94,0.25)",
+                    background: isWin
+                      ? "rgba(251,191,36,0.12)"
+                      : "rgba(255,255,255,0.04)",
+                    borderColor: isWin
+                      ? "rgba(251,191,36,0.45)"
+                      : "rgba(255,255,255,0.10)",
                   }}
                 >
-                  <span className="text-[8px] font-bold text-white/30">$100 bet</span>
-                  <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)" }}>→</span>
-                  <span className="text-[9px] font-black text-emerald-400">${potentialReturn} return</span>
+                  <div
+                    className="text-[7px] font-black uppercase tracking-widest mb-1"
+                    style={{ color: isWin ? "rgba(251,191,36,0.75)" : "rgba(255,255,255,0.30)" }}
+                  >
+                    {isWin ? "★ If You Bet" : "If You Bet"}
+                  </div>
+                  <div className="flex items-center justify-between gap-1">
+                    {[{ label: "$1", val: ret1 }, { label: "$10", val: ret10 }, { label: "$100", val: ret100 }].map(({ label, val }) => (
+                      <div key={label} className="flex flex-col items-center gap-0.5 flex-1">
+                        <span
+                          className="text-[8px] font-black"
+                          style={{ color: isWin ? "rgba(251,191,36,0.55)" : "rgba(255,255,255,0.25)" }}
+                        >{label}</span>
+                        <span
+                          className="text-[10px] font-black tabular-nums"
+                          style={{
+                            color: isWin ? "#FBBF24" : "rgba(52,211,153,0.85)",
+                            textShadow: isWin ? "0 0 10px rgba(251,191,36,0.55)" : "none",
+                          }}
+                        >{val}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -677,6 +713,44 @@ export function TradingCard({
               </div>
             </div>
           </div>
+
+          {/* === WIN PAYOUT BANNER (won cards only) === */}
+          {isWin && ret1 && ret10 && ret100 && (
+            <div
+              className="relative z-10 mx-3 mb-2 rounded-xl shrink-0"
+              style={{
+                background: "linear-gradient(135deg, rgba(251,191,36,0.22) 0%, rgba(234,179,8,0.10) 100%)",
+                border: "2px solid rgba(251,191,36,0.60)",
+                boxShadow: "0 0 24px rgba(251,191,36,0.30), inset 0 1px 0 rgba(251,191,36,0.18)",
+                padding: "8px 10px 10px",
+              }}
+            >
+              <div
+                className="text-[7px] font-black uppercase tracking-widest text-center mb-2"
+                style={{ color: "rgba(251,191,36,0.70)" }}
+              >
+                ★ If You Had Listened — You Would Have Won ★
+              </div>
+              <div className="flex items-end justify-around gap-1">
+                {[{ label: "$1 bet", val: ret1, size: "text-[16px]" }, { label: "$10 bet", val: ret10, size: "text-[20px]" }, { label: "$100 bet", val: ret100, size: "text-[26px]" }].map(({ label, val, size }) => (
+                  <div key={label} className="flex flex-col items-center gap-0.5 flex-1">
+                    <span
+                      className="text-[7px] font-black uppercase tracking-wider"
+                      style={{ color: "rgba(251,191,36,0.50)" }}
+                    >{label}</span>
+                    <span
+                      className={`${size} font-black tabular-nums leading-none`}
+                      style={{
+                        color: "#FCD34D",
+                        textShadow: "0 0 16px rgba(251,191,36,0.80), 0 2px 4px rgba(0,0,0,0.60)",
+                        fontFamily: "Georgia, 'Times New Roman', serif",
+                      }}
+                    >{val}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* === Footer === */}
           <div

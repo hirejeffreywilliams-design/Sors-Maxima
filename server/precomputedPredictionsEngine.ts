@@ -2579,7 +2579,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     return gameMs > now - GRACE_MS;
   });
 
-  if (upcoming.length < 6) return null;
+  if (upcoming.length < 8) return null;
 
   const today = new Date().toISOString().slice(0, 10);
   const shuffled = dateSeededShuffle(upcoming, today);
@@ -2612,7 +2612,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   const sportCounts = new Map<string, number>();
   // Track betType per sport to avoid correlated legs (e.g. two NHL overs)
   const sportBetTypes = new Map<string, Set<string>>();
-  const MAX_PER_SPORT = 2;
+  const MAX_PER_SPORT = 3;
 
   function isCorrelated(pick: PrecomputedPick): boolean {
     const sportKey = pick.sport;
@@ -2649,18 +2649,19 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
   }
 
   // Build the ticket: steam moves + trap games are the "unorthodox" premium legs
-  tryAdd(steamMovePool, 2);   // Up to 2 sharp steam-money plays
-  tryAdd(trapGamePool, 2);    // Up to 2 scheduling-spot trap games
-  tryAdd(underdogPool, 3);    // 3 underdog value plays
-  tryAdd(alternativePool, 2); // 2 alt-market picks (spreads, totals, overs AND unders)
-  tryAdd(contrarianPool, 2);  // 2 contrarian fades
-  tryAdd(sleeperPool, 1);     // 1 long-shot sleeper
-  if (selectedLegs.length < 6) {
+  // Target 10-13 legs to make this truly life-changing
+  tryAdd(steamMovePool, 3);   // Up to 3 sharp steam-money plays
+  tryAdd(trapGamePool, 3);    // Up to 3 scheduling-spot trap games
+  tryAdd(underdogPool, 4);    // 4 underdog value plays
+  tryAdd(alternativePool, 3); // 3 alt-market picks (spreads, totals, overs AND unders)
+  tryAdd(contrarianPool, 3);  // 3 contrarian fades
+  tryAdd(sleeperPool, 2);     // 2 long-shot sleepers
+  if (selectedLegs.length < 10) {
     const remaining = shuffled.filter(p => !selectedLegs.includes(p) && GOOD_GRADES.includes(p.grade));
-    tryAdd(remaining, 8 - selectedLegs.length);
+    tryAdd(remaining, 15 - selectedLegs.length);
   }
 
-  if (selectedLegs.length < 4) return null;
+  if (selectedLegs.length < 6) return null;
 
   // ── Sport diversity enforcement ───────────────────────────────────────────
   // Require at least 3 different sports to keep the ticket truly multi-sport.
@@ -2769,7 +2770,7 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     legCount: selectedLegs.length,
     sports: uniqueSports,
     potentialPayouts,
-    selectionLogic: `${selectedLegs.length}-leg unorthodox multi-sport parlay across ${uniqueSports.length} sports (${uniqueSports.join(", ")}): steam moves, trap games, underdogs, and alt-market overs/unders hand-selected by the 46-Factor Model.`,
+    selectionLogic: `${selectedLegs.length}-leg life-changing multi-sport parlay across ${uniqueSports.length} sports (${uniqueSports.join(", ")}): steam moves, trap games, underdogs, sleepers, and alt-market picks — all hand-selected by the 46-Factor Model for maximum payout potential.`,
     generatedAt: new Date().toISOString(),
     earliestGame,
     disclaimer: "High-risk parlay for entertainment purposes. Bet responsibly. Past results do not predict future outcomes.",

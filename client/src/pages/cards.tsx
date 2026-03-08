@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { CardStackDeck } from "@/components/card-stack-deck";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award } from "lucide-react";
+import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
@@ -80,6 +80,7 @@ export default function CardsPage() {
   const queryClient = useQueryClient();
   const [openedPackCards, setOpenedPackCards] = useState<UserCardCollection[] | null>(null);
   const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
+  const [rarityGuideOpen, setRarityGuideOpen] = useState(false);
 
   const { data: authData } = useQuery<{ isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -182,6 +183,133 @@ export default function CardsPage() {
         subtitle="Collect, trade, and showcase your best-performing picks"
         variant="gold"
       />
+
+      {/* === Rarity Guide === */}
+      <div
+        className="rounded-xl border overflow-hidden"
+        style={{ borderColor: "rgba(251,191,36,0.22)", background: "rgba(10,10,10,0.85)" }}
+        data-testid="rarity-guide"
+      >
+        <button
+          className="w-full flex items-center justify-between px-5 py-3.5 gap-3"
+          onClick={() => setRarityGuideOpen(v => !v)}
+          data-testid="button-rarity-guide-toggle"
+          style={{ background: "transparent", cursor: "pointer" }}
+        >
+          <div className="flex items-center gap-2.5">
+            <HelpCircle className="w-4 h-4" style={{ color: "rgba(251,191,36,0.70)" }} />
+            <span className="text-sm font-black uppercase tracking-widest" style={{ color: "rgba(251,191,36,0.85)" }}>
+              Card Color & Grade Guide
+            </span>
+            <span className="text-xs font-medium text-white/35">— What do the colors mean?</span>
+          </div>
+          {rarityGuideOpen
+            ? <ChevronUp className="w-4 h-4 text-white/40 shrink-0" />
+            : <ChevronDown className="w-4 h-4 text-white/40 shrink-0" />
+          }
+        </button>
+
+        {rarityGuideOpen && (
+          <div
+            className="px-5 pb-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3 border-t"
+            style={{ borderColor: "rgba(255,255,255,0.06)" }}
+          >
+            {[
+              {
+                grade: "S+",
+                label: "Life Changer™",
+                desc: "Auto-minted when the Daily Life Changer Ticket wins. The rarest card in existence.",
+                color: "#D946EF",
+                glow: "rgba(217,70,239,0.55)",
+                bg: "rgba(217,70,239,0.12)",
+                border: "rgba(217,70,239,0.50)",
+              },
+              {
+                grade: "A+",
+                label: "Legendary",
+                desc: "Top 1% picks with exceptional edge and EV. Maximum conviction plays.",
+                color: "#FBBF24",
+                glow: "rgba(251,191,36,0.50)",
+                bg: "rgba(251,191,36,0.10)",
+                border: "rgba(251,191,36,0.45)",
+              },
+              {
+                grade: "A",
+                label: "Rare",
+                desc: "Top 5% of picks. High EV, strong confidence, and multi-factor alignment.",
+                color: "#34D399",
+                glow: "rgba(52,211,153,0.45)",
+                bg: "rgba(52,211,153,0.09)",
+                border: "rgba(52,211,153,0.38)",
+              },
+              {
+                grade: "B+",
+                label: "Uncommon",
+                desc: "Top 15% picks. Solid value plays with clear model edge and positive EV.",
+                color: "#2DD4BF",
+                glow: "rgba(45,212,191,0.40)",
+                bg: "rgba(45,212,191,0.08)",
+                border: "rgba(45,212,191,0.32)",
+              },
+              {
+                grade: "B",
+                label: "Standard+",
+                desc: "Top 25% picks. Good value — above-average picks with proven model signals.",
+                color: "#60A5FA",
+                glow: "rgba(96,165,250,0.38)",
+                bg: "rgba(96,165,250,0.07)",
+                border: "rgba(96,165,250,0.28)",
+              },
+              {
+                grade: "C+",
+                label: "Standard",
+                desc: "Average-tier picks with mild edge. Suitable for lower-risk parlay legs.",
+                color: "#FACC15",
+                glow: "rgba(250,204,21,0.32)",
+                bg: "rgba(250,204,21,0.06)",
+                border: "rgba(250,204,21,0.25)",
+              },
+              {
+                grade: "C",
+                label: "Common",
+                desc: "Baseline model output. Lower edge picks — use with caution in parlays.",
+                color: "#94A3B8",
+                glow: "rgba(148,163,184,0.25)",
+                bg: "rgba(148,163,184,0.05)",
+                border: "rgba(148,163,184,0.20)",
+              },
+            ].map(({ grade, label, desc, color, glow, bg, border }) => (
+              <div
+                key={grade}
+                className="rounded-lg p-3 flex flex-col gap-2"
+                style={{ background: bg, border: `1px solid ${border}` }}
+                data-testid={`rarity-tier-${grade.replace("+", "plus")}`}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                    style={{
+                      background: bg,
+                      border: `2px solid ${border}`,
+                      boxShadow: `0 0 12px ${glow}`,
+                    }}
+                  >
+                    <span
+                      className="text-sm font-black"
+                      style={{ color, textShadow: `0 0 8px ${glow}` }}
+                    >{grade}</span>
+                  </div>
+                  <span
+                    className="text-[11px] font-black uppercase tracking-wider"
+                    style={{ color }}
+                  >{label}</span>
+                </div>
+                <p className="text-[10px] text-white/45 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <TierGate
         required="elite"
