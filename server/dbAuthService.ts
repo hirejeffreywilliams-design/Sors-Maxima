@@ -369,3 +369,38 @@ export async function updateSubscription(
     return false;
   }
 }
+
+// ─── Admin User Bootstrap ─────────────────────────────────────────────────────
+// Ensures the admin has a real DB row so their numeric user ID can be stored
+// in the session — preventing NaN errors on profile endpoints.
+export async function getOrCreateAdminUser(adminUsername: string): Promise<number | null> {
+  try {
+    const [existing] = await db.select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, adminUsername))
+      .limit(1);
+    if (existing) return existing.id;
+
+    const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString("hex"), SALT_ROUNDS);
+    const [newAdmin] = await db.insert(users).values({
+      username: adminUsername,
+      email: `${adminUsername}@sors.internal`,
+      passwordHash,
+      isAdmin: true,
+      isBanned: false,
+      loginAttempts: 0,
+    }).returning({ id: users.id });
+
+    await db.insert(subscriptions).values({
+      userId: newAdmin.id,
+      tier: "whale",
+      status: "active",
+    }).onConflictDoNothing();
+
+    logInfo(`Admin DB record created for ${adminUsername} → id ${newAdmin.id}`);
+    return newAdmin.id;
+  } catch (err: any) {
+    logError(err, { context: "getOrCreateAdminUser", adminUsername });
+    return null;
+  }
+}

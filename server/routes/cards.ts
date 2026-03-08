@@ -6,10 +6,17 @@ import crypto from "crypto";
 
 const router = Router();
 
+// Safe userId extraction — returns null if session is missing or userId is non-numeric
+function sessionUserId(req: any): number | null {
+  if (!req.session?.isAuthenticated || !req.session?.userId) return null;
+  const n = Number(req.session.userId);
+  return isNaN(n) ? null : n;
+}
+
 // GET /api/cards/collection — user's owned cards
 router.get("/collection", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   
   try {
     const userCards = await db
@@ -47,8 +54,8 @@ router.get("/marketplace", async (req, res) => {
 
 // GET /api/cards/packs/available — check daily pack availability
 router.get("/packs/available", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
 
   try {
     const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
@@ -119,8 +126,8 @@ router.get("/packs/available", async (req, res) => {
 
 // POST /api/cards/packs/open — open a pack (3 cards, tier-gated)
 router.post("/packs/open", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   
   try {
     const availableCards = await db
@@ -180,8 +187,8 @@ router.post("/packs/open", async (req, res) => {
 
 // POST /api/cards/trades — create trade offer
 router.post("/trades", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   const { toUserId, offeredCollectionIds, requestedCardId, message } = req.body;
   
   try {
@@ -207,8 +214,8 @@ router.post("/trades", async (req, res) => {
 
 // PUT /api/cards/trades/:id — accept/decline/cancel trade
 router.put("/trades/:id", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   const { id } = req.params;
   const { status } = req.body; 
   
@@ -269,8 +276,8 @@ router.put("/trades/:id", async (req, res) => {
 
 // GET /api/cards/trades — user's trade inbox/outbox
 router.get("/trades", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   
   try {
     const allTrades = await db
@@ -393,8 +400,8 @@ router.get("/community/feed", async (req, res) => {
 
 // POST /api/cards/showcase/toggle — toggle public showcase for a collection item
 router.post("/showcase/toggle", async (req, res) => {
-  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
-  const userId = Number(req.session.userId);
+  const userId = sessionUserId(req);
+  if (!userId) return res.sendStatus(401);
   const { collectionId } = req.body;
 
   if (!collectionId) return res.status(400).json({ message: "collectionId required" });

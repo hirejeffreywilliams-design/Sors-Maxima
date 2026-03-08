@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword, changePassword, getUserByEmail, resetPasswordByEmail } from "../dbAuthService";
+import { registerUser, loginUser, getUserById, resetPassword, adminResetPassword, changePassword, getUserByEmail, resetPasswordByEmail, getOrCreateAdminUser } from "../dbAuthService";
 import { createTrustedDevice, validateDeviceToken, getUserDevices, revokeDevice, revokeAllDevices, refreshDeviceToken, getDeviceStats } from "../trustedDeviceService";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { getClientIp, requireAdmin } from "./helpers";
@@ -167,9 +167,12 @@ export function registerAuthRoutes(app: Express): void {
       const isAdminLogin = ADMIN_USERNAME && ADMIN_PASSWORD && username === ADMIN_USERNAME && password === ADMIN_PASSWORD;
 
       if (isAdminLogin) {
+        // Look up (or create) the admin's DB row so all profile endpoints
+        // get a real numeric userId — preventing NaN errors.
+        const adminNumericId = await getOrCreateAdminUser(ADMIN_USERNAME!).catch(() => null);
         req.session.isAuthenticated = true;
         req.session.username = ADMIN_USERNAME;
-        req.session.userId = 'admin';
+        req.session.userId = adminNumericId ? String(adminNumericId) : 'admin';
         req.session.isAdmin = true;
         req.session.role = 'admin';
 
@@ -417,9 +420,10 @@ export function registerAuthRoutes(app: Express): void {
       if (validation.valid && validation.userId && !validation.requiresReauth) {
         if (validation.userId === 'admin') {
           const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+          const adminNumericId = await getOrCreateAdminUser(ADMIN_USERNAME).catch(() => null);
           req.session.isAuthenticated = true;
           req.session.username = ADMIN_USERNAME;
-          req.session.userId = 'admin';
+          req.session.userId = adminNumericId ? String(adminNumericId) : 'admin';
           req.session.isAdmin = true;
           req.session.role = 'admin';
           return res.json({ authenticated: true, username: ADMIN_USERNAME, isAdmin: true, role: 'admin', tier: 'whale', emailVerified: true });

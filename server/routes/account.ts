@@ -1225,7 +1225,8 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   `);
 
   app.get("/api/user/betting-profile", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId!);
+    const userId = numericUserId(req);
+    if (!userId) return res.json({ riskTolerance: "moderate", preferredBetTypes: [], bankrollStrategy: "flat", betFrequency: "1-2", favoriteTeams: [], favoriteLeagues: [] });
     try {
       const result = await db.execute(sql`SELECT * FROM user_betting_profile WHERE user_id = ${userId}`);
       if (result.rows.length === 0) {
@@ -1254,7 +1255,8 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
   });
 
   app.post("/api/user/betting-profile", requireAuth, async (req, res) => {
-    const userId = parseInt(req.session!.userId!);
+    const userId = numericUserId(req);
+    if (!userId) return res.status(401).json({ error: "Not authenticated" });
     const { riskTolerance, preferredBetTypes, bankrollStrategy, betFrequency, favoriteTeams, favoriteLeagues } = req.body;
     try {
       const result = await db.execute(sql`
