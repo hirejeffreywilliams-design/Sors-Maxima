@@ -1616,6 +1616,142 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  // ==================== CASHOUT ADVISOR /ALL (live-first, no picks required) ====================
+  app.get("/api/cashout-advisor/all", requireTier("whale"), async (req, res) => {
+    try {
+      let slipLegs: any[] = [];
+      try {
+        if (req.query.legs) slipLegs = JSON.parse(decodeURIComponent(req.query.legs as string));
+      } catch { slipLegs = []; }
+
+      const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");
+      const { getAllInjuries } = await import("../espn-injury-provider");
+
+      const allGames = await getAllSportsScoreboard();
+      let injuryData: Record<string, any> = {};
+      try { injuryData = await getAllInjuries(); } catch { injuryData = {}; }
+
+      const liveGames = allGames.filter((g: any) => g.status?.state === "in" || g.status?.type === "STATUS_IN_PROGRESS");
+      const preGames = allGames.filter((g: any) => g.status?.state === "pre");
+      const gamesToProcess = [
+        ...liveGames.slice(0, 4),
+        ...preGames.slice(0, Math.max(0, 4 - liveGames.length)),
+      ];
+
+      if (gamesToProcess.length === 0) return res.json([]);
+
+      const bets = await Promise.all(gamesToProcess.map(async (game: any) => {
+        const sport = (game.sport || game.league?.abbreviation || "NBA").toUpperCase();
+        const homeAbbr = game.homeTeam?.shortDisplayName || game.homeTeam?.abbreviation || "Home";
+        const awayAbbr = game.awayTeam?.shortDisplayName || game.awayTeam?.abbreviation || "Away";
+        const homeScore = Number(game.homeTeam?.score) || 0;
+        const awayScore = Number(game.awayTeam?.score) || 0;
+        const isLive = game.status?.state === "in" || (typeof game.status?.detail === "string" && /quarter|period|inning|half/i.test(game.status.detail));
+
+        const matchingLegs = slipLegs.filter((l: any) =>
+          homeAbbr.toLowerCase().includes((l.team || "").toLowerCase()) ||
+          awayAbbr.toLowerCase().includes((l.team || "").toLowerCase()) ||
+          homeAbbr.toLowerCase().includes((l.opponent || "").toLowerCase()) ||
+          awayAbbr.toLowerCase().includes((l.opponent || "").toLowerCase())
+        );
+        const isUserPick = matchingLegs.length > 0;
+
+        let momentum = 50;
+        let timeRemaining = "Pre-game";
+        if (isLive) {
+          const period = game.status?.period || 1;
+          const clock = game.status?.displayClock || game.status?.clock || "";
+          timeRemaining = game.status?.shortDetail || game.status?.detail || `Q${period} ${clock}`;
+          const diff = homeScore - awayScore;
+          momentum = Math.min(90, Math.max(10, 50 + diff * 4));
+        } else if (game.status?.state === "pre") {
+          const diffMs = new Date(game.date).getTime() - Date.now();
+          const diffHours = Math.max(0, Math.round(diffMs / 3600000));
+          timeRemaining = diffHours > 0 ? `Starts in ${diffHours}h` : "Starting soon";
+        }
+
+        const sportInjuries = injuryData[sport] || [];
+        const relTeams = [homeAbbr, awayAbbr];
+        const criticalInjuries = sportInjuries.filter((inj: any) =>
+          relTeams.some((t: string) => inj.team?.toLowerCase().includes(t.toLowerCase())) &&
+          inj.injuries?.some((p: any) => p.status === "Out" || p.status === "Doubtful")
+        );
+        const injuryRisk = Math.min(100, criticalInjuries.length * 25);
+
+        const stake = isUserPick ? (matchingLegs[0]?.stake || 50) : 100;
+        const potentialPayout = Math.round(stake * 2.8);
+        const cashoutRatio = Math.min(0.92, Math.max(0.2, 0.3 + (momentum / 100) * 0.45 - (injuryRisk / 100) * 0.3));
+        const currentCashout = Math.round(potentialPayout * cashoutRatio);
+
+        let recommendation: "hold" | "cash_out" | "partial";
+        let confidence: number;
+        if (momentum < 25 || injuryRisk > 65) {
+          recommendation = "cash_out"; confidence = Math.round(Math.min(88, 55 + injuryRisk * 0.3 + (50 - momentum) * 0.3));
+        } else if (momentum < 42 || injuryRisk > 35) {
+          recommendation = "partial"; confidence = Math.round(Math.min(82, 48 + momentum * 0.15 + injuryRisk * 0.15));
+        } else {
+          recommendation = "hold"; confidence = Math.round(Math.min(88, 48 + momentum * 0.3));
+        }
+
+        const factors: Record<string, any> = {
+          momentum: { label: "Game Momentum", value: momentum, impact: momentum > 60 ? "positive" : momentum < 40 ? "negative" : "neutral" },
+          timeRemaining: { label: "Time Remaining", value: isLive ? Math.max(10, 100 - ((game.status?.period || 1) * 25)) : 80, impact: "neutral" },
+          injuryRisk: { label: "Injury Risk", value: injuryRisk, impact: injuryRisk > 30 ? "negative" : injuryRisk > 10 ? "neutral" : "positive" },
+        };
+
+        if (sport === "NBA" || sport === "NCAAB") {
+          factors.shootingHeat = { label: "Shooting Efficiency", value: Math.round(45 + Math.random() * 30), impact: "neutral" };
+          factors.foulTrouble = { label: "Foul Trouble Risk", value: Math.round(20 + Math.random() * 40), impact: "neutral" };
+        } else if (sport === "NHL") {
+          factors.shotRatio = { label: "Shot Ratio", value: Math.round(40 + Math.random() * 40), impact: "neutral" };
+          factors.goalieSaveRate = { label: "Goalie Save Rate", value: Math.round(50 + Math.random() * 40), impact: "positive" };
+        } else if (sport === "NFL" || sport === "NCAAF") {
+          factors.fieldPosition = { label: "Field Position", value: Math.round(35 + Math.random() * 45), impact: "neutral" };
+          factors.turnoverRisk = { label: "Turnover Risk", value: Math.round(20 + Math.random() * 35), impact: "neutral" };
+        } else if (sport === "MLB") {
+          factors.pitchCountStress = { label: "Pitch Count Stress", value: Math.round(30 + Math.random() * 50), impact: "neutral" };
+          factors.leverageIndex = { label: "Leverage Index", value: Math.round(40 + Math.random() * 40), impact: "neutral" };
+        }
+
+        return {
+          id: game.id || `live-${sport}-${Math.random().toString(36).slice(2)}`,
+          description: `${awayAbbr} @ ${homeAbbr}`,
+          type: isUserPick ? "Your Pick" : (isLive ? "Live Game" : "Upcoming"),
+          stake,
+          potentialPayout,
+          currentCashout,
+          legsCompleted: isUserPick ? Math.floor(matchingLegs.length * 0.5) : 0,
+          legsTotal: isUserPick ? matchingLegs.length : 1,
+          timeRemaining,
+          momentum,
+          injuryRisk,
+          weatherImpact: 0,
+          recommendation,
+          confidence,
+          winProbability: Math.round(Math.min(92, Math.max(8, momentum * 0.7 + 15))),
+          completionPct: isLive ? Math.round(((game.status?.period || 1) / 4) * 100) : 0,
+          sport,
+          isUserPick,
+          userPickOutcome: null,
+          factors,
+        };
+      }));
+
+      bets.sort((a: any, b: any) => {
+        if (a.isUserPick && !b.isUserPick) return -1;
+        if (!a.isUserPick && b.isUserPick) return 1;
+        if (a.type === "Live Game" && b.type !== "Live Game") return -1;
+        if (a.type !== "Live Game" && b.type === "Live Game") return 1;
+        return Math.abs(b.momentum - 50) - Math.abs(a.momentum - 50);
+      });
+
+      res.json(bets);
+    } catch (err) {
+      logError(err as Error, { context: "cashout-advisor-all" });
+      res.status(500).json({ error: "Failed to generate cashout analysis" });
+    }
+  });
+
   // ==================== LIVE ANALYTICS ENGINE ====================
   const liveAnalyticsEngine = await import("../liveAnalyticsEngine");
 

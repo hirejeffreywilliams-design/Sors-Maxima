@@ -346,15 +346,16 @@ export function CashoutAdvisor() {
 
   if (bets.length === 0) {
     return (
-      <Card>
-        <CardContent className="p-8 text-center">
-          <DollarSign className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-1">No Live Games Right Now</h3>
-          <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-            Cashout analysis runs on in-progress games. Add picks to your slip — they'll automatically be tracked when those games go live.
-          </p>
-        </CardContent>
-      </Card>
+      <div
+        className="rounded-2xl px-6 py-10 border text-center"
+        style={{ background: "rgba(255,255,255,0.025)", borderColor: "rgba(255,255,255,0.07)" }}
+      >
+        <DollarSign className="w-8 h-8 mx-auto mb-3" style={{ color: "rgba(255,255,255,0.20)" }} />
+        <p className="text-[13px] font-black text-white/60">Scanning live games...</p>
+        <p className="text-[10px] text-white/30 mt-1.5 max-w-xs mx-auto">
+          Analysis loads with the next SSE update. Add picks to your slip to see personalized cashout recommendations on your active bets.
+        </p>
+      </div>
     );
   }
 
