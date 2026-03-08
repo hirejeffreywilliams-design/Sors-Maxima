@@ -1,4 +1,4 @@
-import { Lock, ArrowRight } from "lucide-react";
+import { Lock, ArrowRight, Check, Star, Gem, Crown, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,16 +26,85 @@ const TIER_PRICE: Record<RequiredTier, string> = {
   whale: "$249/mo",
 };
 
-const TIER_COLOR: Record<RequiredTier, string> = {
-  pro: "bg-blue-500/10 border-blue-500/30 text-blue-400",
-  elite: "bg-purple-500/10 border-purple-500/30 text-purple-400",
-  whale: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+const TIER_ICON: Record<RequiredTier, any> = {
+  pro: Star,
+  elite: Gem,
+  whale: Crown,
 };
 
-const TIER_BADGE: Record<RequiredTier, string> = {
-  pro: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-  elite: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-  whale: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+const TIER_COLORS = {
+  pro: {
+    badge: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+    border: "border-blue-500/30",
+    bg: "bg-blue-500/5",
+    glow: "shadow-blue-500/10",
+    icon: "text-blue-400",
+    iconBg: "bg-blue-500/10",
+    benefitsBg: "bg-blue-500/8 border-blue-500/20",
+    accent: "text-blue-400",
+    button: "bg-blue-600 hover:bg-blue-700 text-white",
+  },
+  elite: {
+    badge: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+    border: "border-purple-500/30",
+    bg: "bg-purple-500/5",
+    glow: "shadow-purple-500/10",
+    icon: "text-purple-400",
+    iconBg: "bg-purple-500/10",
+    benefitsBg: "bg-purple-500/8 border-purple-500/20",
+    accent: "text-purple-400",
+    button: "bg-purple-600 hover:bg-purple-700 text-white",
+  },
+  whale: {
+    badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+    border: "border-amber-500/30",
+    bg: "bg-amber-500/5",
+    glow: "shadow-amber-500/10",
+    icon: "text-amber-400",
+    iconBg: "bg-amber-500/10",
+    benefitsBg: "bg-amber-500/8 border-amber-500/20",
+    accent: "text-amber-400",
+    button: "bg-amber-600 hover:bg-amber-700 text-white",
+  },
+};
+
+const TIER_BENEFITS: Record<RequiredTier, { headline: string; tagline: string; features: string[] }> = {
+  pro: {
+    headline: "Everything serious bettors need",
+    tagline: "Full engine access from day one",
+    features: [
+      "Today's Best Tickets — pre-built daily parlays",
+      "46-Factor Prediction Engine across 6 US sports",
+      "A–F grade and +EV score on every pick",
+      "Visual drag-and-drop parlay builder",
+      "Player props analyzer with ML projections",
+      "Full verified track record on every settled pick",
+    ],
+  },
+  elite: {
+    headline: "The complete intelligence suite",
+    tagline: "For bettors who demand every edge",
+    features: [
+      "AI Predictions Engine — advanced outcome modeling",
+      "Matchup Analyzer + prop combo builder",
+      "Sharp Action Tracker — follow professional money",
+      "Arbitrage & line shopping across 15+ sportsbooks",
+      "Ticket Variation Engine — 5 strategic blueprints",
+      "SGP Correlation Intelligence — avoid negative legs",
+    ],
+  },
+  whale: {
+    headline: "Zero limits. Maximum depth.",
+    tagline: "The full platform — completely unrestricted",
+    features: [
+      "Life Changer Ticket — our biggest weekly parlay",
+      "Custom Model Builder — train on your own history",
+      "Cashout Maximizer with EV-adjusted timing",
+      "Progressive Hedge Planner for live parlays",
+      "Multi-Slip Manager — 5 independent bet slips",
+      "Priority support & early access to new tools",
+    ],
+  },
 };
 
 export function useTier() {
@@ -63,9 +132,10 @@ interface TierGateProps {
   label: string;
   description?: string;
   children: React.ReactNode;
+  compact?: boolean;
 }
 
-export function TierGate({ required, label, description, children }: TierGateProps) {
+export function TierGate({ required, label, description, children, compact = false }: TierGateProps) {
   const { canAccess } = useTier();
 
   if (canAccess(required)) {
@@ -74,44 +144,109 @@ export function TierGate({ required, label, description, children }: TierGatePro
 
   const tierName = TIER_DISPLAY[required];
   const tierPrice = TIER_PRICE[required];
+  const colors = TIER_COLORS[required];
+  const benefits = TIER_BENEFITS[required];
+  const TierIcon = TIER_ICON[required];
+
+  if (compact) {
+    return (
+      <Card
+        className={`border ${colors.border} ${colors.bg}`}
+        data-testid={`tier-gate-${label.toLowerCase().replace(/\s+/g, "-")}`}
+      >
+        <CardContent className="p-4 flex items-center gap-4">
+          <div className={`p-2.5 rounded-xl ${colors.iconBg} shrink-0`}>
+            <Lock className={`w-4 h-4 ${colors.icon}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <Badge variant="outline" className={`text-[10px] font-semibold ${colors.badge}`}>
+                {tierName}
+              </Badge>
+              <span className="font-semibold text-sm truncate">{label}</span>
+            </div>
+            {description && <p className="text-xs text-muted-foreground truncate">{description}</p>}
+          </div>
+          <Link href="/pricing" className="shrink-0">
+            <Button size="sm" className={colors.button}>
+              Upgrade <ArrowRight className="w-3 h-3 ml-1" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card
-      className={`border ${TIER_COLOR[required]} bg-card/50`}
+      className={`border ${colors.border} ${colors.bg} shadow-lg ${colors.glow}`}
       data-testid={`tier-gate-${label.toLowerCase().replace(/\s+/g, "-")}`}
     >
-      <CardContent className="p-8 flex flex-col items-center text-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-          <Lock className="w-6 h-6 text-muted-foreground" />
-        </div>
+      <CardContent className="p-6 sm:p-8">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
+          {/* Left: lock message + CTA */}
+          <div className="flex-1 space-y-5">
+            <div className="flex items-start gap-4">
+              <div className={`p-3 rounded-2xl ${colors.iconBg} shrink-0`}>
+                <Lock className={`w-6 h-6 ${colors.icon}`} />
+              </div>
+              <div>
+                <Badge variant="outline" className={`text-xs font-semibold mb-2 ${colors.badge}`}>
+                  <TierIcon className="w-3 h-3 mr-1.5" />
+                  {tierName} Plan — {tierPrice}
+                </Badge>
+                <h3 className="text-xl font-bold leading-tight">{label}</h3>
+                {description && (
+                  <p className="text-sm text-muted-foreground mt-1 leading-snug">{description}</p>
+                )}
+              </div>
+            </div>
 
-        <div className="space-y-1">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Badge
-              variant="outline"
-              className={`text-xs font-semibold ${TIER_BADGE[required]}`}
-            >
-              {tierName} Feature
-            </Badge>
+            <p className={`text-sm font-medium ${colors.accent}`}>
+              Upgrade to {tierName} to unlock this feature — and everything else in the plan.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link href="/pricing">
+                <Button className={`gap-2 ${colors.button}`} data-testid={`button-upgrade-${required}`}>
+                  <Sparkles className="w-4 h-4" />
+                  Upgrade to {tierName}
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/pricing">
+                <Button variant="outline" size="default" className={`text-xs border-current/20 ${colors.accent}`}>
+                  Compare all plans
+                </Button>
+              </Link>
+            </div>
+
+            <p className="text-[11px] text-muted-foreground">
+              {tierPrice} · 30-day money-back guarantee · Cancel anytime
+            </p>
           </div>
-          <h3 className="text-lg font-semibold">{label}</h3>
-          {description && (
-            <p className="text-sm text-muted-foreground max-w-xs">{description}</p>
-          )}
-        </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs">
-          <Link href="/pricing" className="flex-1">
-            <Button className="w-full gap-2" size="sm">
-              Upgrade to {tierName}
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Button>
-          </Link>
-          <Link href="/pricing" className="flex-1">
-            <Button variant="outline" className="w-full text-xs" size="sm">
-              {tierPrice} — See All Features
-            </Button>
-          </Link>
+          {/* Right: tier benefits list */}
+          <div className={`w-full lg:w-72 shrink-0 rounded-xl border ${colors.benefitsBg} p-4`}>
+            <div className="flex items-center gap-2 mb-3">
+              <TierIcon className={`w-4 h-4 ${colors.icon}`} />
+              <span className={`text-xs font-bold uppercase tracking-wide ${colors.accent}`}>
+                What {tierName} unlocks
+              </span>
+            </div>
+            <p className="text-xs font-semibold text-foreground mb-3">{benefits.headline}</p>
+            <div className="space-y-2.5">
+              {benefits.features.map((feature, i) => (
+                <div key={i} className="flex items-start gap-2.5">
+                  <Check className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${colors.icon}`} />
+                  <span className="text-xs text-muted-foreground leading-snug">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <div className={`mt-4 pt-3 border-t border-current/10`}>
+              <p className={`text-[11px] italic ${colors.accent} opacity-80`}>{benefits.tagline}</p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

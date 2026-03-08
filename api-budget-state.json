@@ -2,99 +2,35 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 33611,
-      "manualRemaining": 66389,
-      "lastReported": "2026-03-08T01:26:22.904Z",
+      "currentUsage": 34109,
+      "manualRemaining": 65891,
+      "lastReported": "2026-03-08T01:51:40.225Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T01:26:22.179Z"
+      "lastSeasonCheck": "2026-03-08T01:51:39.258Z"
     },
     "apifootball": {
       "currentUsage": 0,
-      "manualRemaining": 74792,
-      "lastReported": "2026-03-08T01:20:11.036Z",
+      "manualRemaining": 74728,
+      "lastReported": "2026-03-08T01:50:11.973Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T01:26:22.179Z"
+      "lastSeasonCheck": "2026-03-08T01:51:39.258Z"
     },
     "balldontlie": {
-      "currentUsage": 1407,
+      "currentUsage": 1451,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [
-        {
-          "ts": 1772846979678,
-          "count": 1
-        },
-        {
-          "ts": 1772847076468,
-          "count": 1
-        },
-        {
-          "ts": 1772847147021,
-          "count": 1
-        },
-        {
-          "ts": 1772847266712,
-          "count": 1
-        },
-        {
-          "ts": 1772847269885,
-          "count": 1
-        },
-        {
-          "ts": 1772847269913,
-          "count": 1
-        },
-        {
-          "ts": 1772847269917,
-          "count": 1
-        },
-        {
-          "ts": 1772847348106,
-          "count": 1
-        },
-        {
-          "ts": 1772847621796,
-          "count": 1
-        },
-        {
-          "ts": 1772847621826,
-          "count": 1
-        },
-        {
-          "ts": 1772847621883,
-          "count": 1
-        },
-        {
-          "ts": 1772847703249,
-          "count": 1
-        },
-        {
-          "ts": 1772848063180,
-          "count": 1
-        },
-        {
-          "ts": 1772848222122,
-          "count": 1
-        },
-        {
-          "ts": 1772848222147,
-          "count": 1
-        },
-        {
-          "ts": 1772848222534,
-          "count": 1
-        },
         {
           "ts": 1772848423090,
           "count": 1
@@ -3030,13 +2966,189 @@
         {
           "ts": 1772933195744,
           "count": 1
+        },
+        {
+          "ts": 1772933223801,
+          "count": 1
+        },
+        {
+          "ts": 1772933578804,
+          "count": 1
+        },
+        {
+          "ts": 1772933674626,
+          "count": 1
+        },
+        {
+          "ts": 1772933674645,
+          "count": 1
+        },
+        {
+          "ts": 1772933674682,
+          "count": 1
+        },
+        {
+          "ts": 1772933702832,
+          "count": 1
+        },
+        {
+          "ts": 1772933888431,
+          "count": 1
+        },
+        {
+          "ts": 1772933888480,
+          "count": 1
+        },
+        {
+          "ts": 1772933888545,
+          "count": 1
+        },
+        {
+          "ts": 1772933916596,
+          "count": 1
+        },
+        {
+          "ts": 1772934000022,
+          "count": 1
+        },
+        {
+          "ts": 1772934000024,
+          "count": 1
+        },
+        {
+          "ts": 1772934000046,
+          "count": 1
+        },
+        {
+          "ts": 1772934028255,
+          "count": 1
+        },
+        {
+          "ts": 1772934145055,
+          "count": 1
+        },
+        {
+          "ts": 1772934145057,
+          "count": 1
+        },
+        {
+          "ts": 1772934145105,
+          "count": 1
+        },
+        {
+          "ts": 1772934183141,
+          "count": 1
+        },
+        {
+          "ts": 1772934183143,
+          "count": 1
+        },
+        {
+          "ts": 1772934183202,
+          "count": 1
+        },
+        {
+          "ts": 1772934211328,
+          "count": 1
+        },
+        {
+          "ts": 1772934373013,
+          "count": 1
+        },
+        {
+          "ts": 1772934373052,
+          "count": 1
+        },
+        {
+          "ts": 1772934373098,
+          "count": 1
+        },
+        {
+          "ts": 1772934405589,
+          "count": 1
+        },
+        {
+          "ts": 1772934405659,
+          "count": 1
+        },
+        {
+          "ts": 1772934405802,
+          "count": 1
+        },
+        {
+          "ts": 1772934444935,
+          "count": 1
+        },
+        {
+          "ts": 1772934445047,
+          "count": 1
+        },
+        {
+          "ts": 1772934445054,
+          "count": 1
+        },
+        {
+          "ts": 1772934476631,
+          "count": 1
+        },
+        {
+          "ts": 1772934476672,
+          "count": 1
+        },
+        {
+          "ts": 1772934476807,
+          "count": 1
+        },
+        {
+          "ts": 1772934504857,
+          "count": 1
+        },
+        {
+          "ts": 1772934628647,
+          "count": 1
+        },
+        {
+          "ts": 1772934628650,
+          "count": 1
+        },
+        {
+          "ts": 1772934628678,
+          "count": 1
+        },
+        {
+          "ts": 1772934656012,
+          "count": 1
+        },
+        {
+          "ts": 1772934656064,
+          "count": 1
+        },
+        {
+          "ts": 1772934656087,
+          "count": 1
+        },
+        {
+          "ts": 1772934684166,
+          "count": 1
+        },
+        {
+          "ts": 1772934712746,
+          "count": 1
+        },
+        {
+          "ts": 1772934712756,
+          "count": 1
+        },
+        {
+          "ts": 1772934712816,
+          "count": 1
         }
       ],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T01:26:22.179Z"
+      "lastSeasonCheck": "2026-03-08T01:51:39.258Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -3048,7 +3160,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T01:26:22.179Z"
+      "lastSeasonCheck": "2026-03-08T01:51:39.258Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -3060,10 +3172,10 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T01:26:22.179Z"
+      "lastSeasonCheck": "2026-03-08T01:51:39.258Z"
     }
   },
   "activeUsers": 3,
-  "lastSaved": "2026-03-08T01:26:35.744Z",
+  "lastSaved": "2026-03-08T01:51:52.816Z",
   "alerts": []
 }

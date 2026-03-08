@@ -32,6 +32,16 @@ interface PipelineService {
   quota?: number;
 }
 
+interface ProcessingEngine {
+  id: string;
+  name: string;
+  description: string;
+  status: "healthy" | "degraded" | "down";
+  metric: string;
+  lastRunAt: string | null;
+  detail: string | null;
+}
+
 interface QuickSolutionResult {
   healthScore: number;
   summary: string;
@@ -69,6 +79,52 @@ const SERVICE_ICONS: Record<string, any> = {
   "api-football": Globe,
   stripe: Shield,
 };
+
+const ENGINE_ICONS_MAP: Record<string, any> = {
+  hub: Wifi,
+  "precomputed-engine": FlaskConical,
+  "vegas-engine": TrendingUp,
+  "sors-simulation": Brain,
+  "learning-engine": Activity,
+  "autonomous-learning": Cpu,
+  "sse-broadcaster": Zap,
+  "platform-intelligence": Globe,
+};
+
+function EngineCard({ engine }: { engine: ProcessingEngine }) {
+  const Icon = ENGINE_ICONS_MAP[engine.id] || Server;
+  const borderColor = engine.status === "healthy" ? "border-green-500/20" : engine.status === "degraded" ? "border-yellow-500/30" : "border-red-500/40";
+  const bg = engine.status === "down" ? "bg-red-500/5" : engine.status === "degraded" ? "bg-yellow-500/3" : "";
+  const iconColor = engine.status === "healthy" ? "text-green-500" : engine.status === "degraded" ? "text-yellow-500" : "text-red-500";
+  const iconBg = engine.status === "healthy" ? "bg-green-500/10" : engine.status === "degraded" ? "bg-yellow-500/10" : "bg-red-500/10";
+  return (
+    <div className={`p-3 rounded-lg border ${borderColor} ${bg}`} data-testid={`engine-card-${engine.id}`}>
+      <div className="flex items-start gap-3">
+        <div className={`p-1.5 rounded-md ${iconBg} shrink-0 mt-0.5`}>
+          <Icon className={`h-4 w-4 ${iconColor}`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="font-medium text-sm">{engine.name}</span>
+            <StatusDot status={engine.status} />
+            {engine.status === "down" && <Badge variant="outline" className="text-[9px] border-red-500/30 text-red-400 px-1 py-0">DOWN</Badge>}
+            {engine.status === "degraded" && <Badge variant="outline" className="text-[9px] border-yellow-500/30 text-yellow-400 px-1 py-0">DEGRADED</Badge>}
+          </div>
+          <p className="text-[11px] text-muted-foreground leading-snug mb-1.5">{engine.description}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[11px] font-mono text-foreground/60 bg-muted/50 px-1.5 py-0.5 rounded">{engine.metric}</span>
+            {engine.lastRunAt && (
+              <span className="text-[10px] text-muted-foreground">last: {timeAgo(engine.lastRunAt)}</span>
+            )}
+          </div>
+          {engine.detail && (
+            <p className="text-[10px] text-yellow-400 mt-1">{engine.detail}</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function PipelineServiceCard({ svc }: { svc: PipelineService }) {
   const Icon = SERVICE_ICONS[svc.id] || Server;
@@ -231,9 +287,12 @@ export default function AdminGuardian() {
 
   const { data: pipelineData, isLoading: pipelineLoading, refetch: refetchPipeline } = useQuery<{
     services: PipelineService[];
+    engines: ProcessingEngine[];
     overallStatus: string;
     healthy: number;
     total: number;
+    enginesHealthy: number;
+    enginesTotal: number;
     checkedAt: string;
   }>({
     queryKey: ["/api/admin/pipeline-services"],
@@ -629,23 +688,66 @@ export default function AdminGuardian() {
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 {pipelineLoading && !pipelineData ? (
                   <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="text-sm">Checking all services...</span>
-                  </div>
-                ) : pipelineData?.services?.length ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2" data-testid="pipeline-services-grid">
-                    {pipelineData.services.map((svc) => (
-                      <PipelineServiceCard key={svc.id} svc={svc} />
-                    ))}
+                    <span className="text-sm">Checking all services and engines...</span>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Network className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>Click refresh to check pipeline services</p>
-                  </div>
+                  <>
+                    {/* External Data Sources */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                          <Globe className="h-3 w-3" /> External Data Sources
+                          {pipelineData && (
+                            <Badge variant="outline" className="text-[10px] ml-1">
+                              {pipelineData.healthy}/{pipelineData.total} healthy
+                            </Badge>
+                          )}
+                        </h4>
+                      </div>
+                      {pipelineData?.services?.length ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2" data-testid="pipeline-services-grid">
+                          {pipelineData.services.map((svc) => (
+                            <PipelineServiceCard key={svc.id} svc={svc} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-muted-foreground">
+                          <Network className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Click refresh to check services</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Internal Processing Engines */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
+                          <Cpu className="h-3 w-3" /> Processing Engines
+                          {pipelineData && (
+                            <Badge variant="outline" className="text-[10px] ml-1">
+                              {pipelineData.enginesHealthy}/{pipelineData.enginesTotal} healthy
+                            </Badge>
+                          )}
+                        </h4>
+                      </div>
+                      {pipelineData?.engines?.length ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2" data-testid="pipeline-engines-grid">
+                          {pipelineData.engines.map((engine) => (
+                            <EngineCard key={engine.id} engine={engine} />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-muted-foreground">
+                          <Brain className="h-6 w-6 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">Engine data unavailable — click refresh</p>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
 
                 {/* System snapshot from last Quick Solution */}

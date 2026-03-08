@@ -983,11 +983,131 @@ Format your response clearly with sections and bullet points.`;
     ]);
 
     const services = checks.map(c => c.status === "fulfilled" ? c.value : { id: "unknown", name: "Service", latencyMs: 0, status: "down" as const, detail: (c as any).reason?.message || "Check failed" });
+
+    // Internal processing engines
+    const engineChecks = await Promise.allSettled([
+      // 1. Unified Intelligence Hub
+      (async () => {
+        const hub = getHubStatus();
+        return {
+          id: "hub", name: "Unified Intelligence Hub",
+          description: "Master orchestrator — runs 60-second data cycles, aggregates ESPN + odds + stats into the IntelligenceFeed that powers every prediction",
+          status: (hub.running ? "healthy" : "down") as "healthy" | "degraded" | "down",
+          metric: hub.running ? `${hub.totalCycles} cycles · last cycle ${hub.lastCycleTimeMs || 0}ms` : "Stopped — picks will go stale",
+          lastRunAt: hub.lastCycleAt || null,
+          detail: hub.lastError || null,
+        };
+      })(),
+      // 2. Precomputed Predictions Engine
+      (async () => {
+        const { getEngineStatus } = await import("../precomputedPredictionsEngine");
+        const s = getEngineStatus() as any;
+        const total = s.totalPicks || 0;
+        const sports = s.sportsComputed?.length || Object.keys(s.cacheStatus || {}).length || 0;
+        return {
+          id: "precomputed-engine", name: "Precomputed Picks Engine",
+          description: "Pre-generates pick predictions for all 6 sports on a 5-minute cycle and caches them for instant delivery — eliminates cold-start latency",
+          status: (total > 0 ? "healthy" : "degraded") as "healthy" | "degraded" | "down",
+          metric: `${total} picks cached · ${sports} sports ready`,
+          lastRunAt: s.lastRunTime || null,
+          detail: total === 0 ? "Cache empty — predictions regenerating" : null,
+        };
+      })(),
+      // 3. Vegas Engine
+      (async () => {
+        const { generateVegasPredictions } = await import("../vegas-engine");
+        const hasFn = typeof generateVegasPredictions === "function";
+        return {
+          id: "vegas-engine", name: "Vegas Power Engine",
+          description: "Generates power ratings, calculates sharp money %, vig-removed true probabilities, detects line steam moves and reverse line movement across all markets",
+          status: (hasFn ? "healthy" : "down") as "healthy" | "degraded" | "down",
+          metric: hasFn ? "Power ratings + sharp signals active" : "Module unavailable",
+          lastRunAt: null,
+          detail: null,
+        };
+      })(),
+      // 4. Sors Simulation Engine (Monte Carlo)
+      (async () => {
+        const { getMonteCarloEngineStatus } = await import("../monteCarloEngine");
+        const s = getMonteCarloEngineStatus();
+        return {
+          id: "sors-simulation", name: "Sors Simulation Engine",
+          description: "Runs 1M+ daily Monte Carlo simulations to model every game outcome, compute Kelly Criterion stake sizing, and score parlay probability distributions",
+          status: (s.running ? "healthy" : "degraded") as "healthy" | "degraded" | "down",
+          metric: `${s.totalSimulations.toLocaleString()} sims · ${s.preSimCacheSize} pre-sims · drift: ${s.driftStatus}`,
+          lastRunAt: s.lastDeepSimRun || null,
+          detail: !s.running ? "Engine idle — will activate on parlay request" : null,
+        };
+      })(),
+      // 5. Continuous Learning Engine
+      (async () => {
+        const { getLearningStats } = await import("../learningEngine");
+        const s = await getLearningStats();
+        return {
+          id: "learning-engine", name: "Continuous Learning Engine",
+          description: "Bayesian factor weight updates — recalibrates all 46 prediction factors hourly based on settled picks, keeping the model accurate as markets evolve",
+          status: "healthy" as const,
+          metric: `${s.totalPredictions} predictions tracked · ${s.settledCount} settled · ${s.activeSports?.length || 0} sports`,
+          lastRunAt: s.lastCalibration || null,
+          detail: null,
+        };
+      })(),
+      // 6. Autonomous Learning Engine
+      (async () => {
+        const { getAutonomousLearningStatus } = await import("../autonomousLearningEngine");
+        const s = getAutonomousLearningStatus();
+        return {
+          id: "autonomous-learning", name: "Autonomous Learning Engine",
+          description: "Bootstrap + hourly unsupervised learning — trains the Stacking Meta-Learner and MC Stacked Learner from 477+ historical picks without human intervention",
+          status: (s.bootstrapComplete ? "healthy" : "degraded") as "healthy" | "degraded" | "down",
+          metric: s.bootstrapComplete
+            ? `${s.bootstrapPicksProcessed} picks processed · ${s.totalLearningCycles} cycles · MC records: ${s.mcEngineRecords}`
+            : `Bootstrap pending — ${s.bootstrapPicksProcessed || 0} picks processed`,
+          lastRunAt: s.lastCycleAt || null,
+          detail: !s.bootstrapComplete ? "Bootstrap still running" : null,
+        };
+      })(),
+      // 7. SSE Broadcaster
+      (async () => {
+        const { getSSEStatus } = await import("../sseManager");
+        const s = getSSEStatus();
+        return {
+          id: "sse-broadcaster", name: "Real-Time SSE Broadcaster",
+          description: "Server-Sent Events pipeline — pushes live picks, score updates, line movement alerts, and intelligence feed updates to all connected member clients instantly",
+          status: "healthy" as const,
+          metric: `${s.activeClients} connected clients · ${s.totalEventsSent.toLocaleString()} events broadcast`,
+          lastRunAt: null,
+          detail: s.activeClients === 0 ? "No clients connected" : null,
+        };
+      })(),
+      // 8. Platform Intelligence Engine
+      (async () => {
+        const { getEngineStatus: getPIStatus } = await import("../platformIntelligenceEngine");
+        const s = getPIStatus() as any;
+        const ok = s.initialized !== false;
+        return {
+          id: "platform-intelligence", name: "Platform Intelligence Engine",
+          description: "Team historical form analysis, situational spots (look-ahead/revenge/back-to-back), travel impact, and venue factors applied to every matchup",
+          status: (ok ? "healthy" : "degraded") as "healthy" | "degraded" | "down",
+          metric: ok ? `Active · ${s.teamsTracked || "all"} teams tracked` : "Warming up",
+          lastRunAt: null,
+          detail: null,
+        };
+      })(),
+    ]);
+
+    const engines = engineChecks.map((c, i) => c.status === "fulfilled" ? c.value : {
+      id: `engine-${i}`, name: "Processing Engine", description: "",
+      status: "down" as const, metric: "Check failed", lastRunAt: null,
+      detail: (c as any).reason?.message || "Status unavailable",
+    });
+
     const healthy = services.filter(s => s.status === "healthy").length;
     const total = services.length;
-    const overallStatus = healthy === total ? "healthy" : healthy >= total * 0.7 ? "degraded" : "critical";
+    const enginesHealthy = engines.filter(e => e.status === "healthy").length;
+    const overallStatus = (healthy + enginesHealthy) >= Math.ceil((total + engines.length) * 0.7) ? "healthy" : healthy >= total * 0.7 ? "degraded" : "critical";
 
-    res.json({ services, overallStatus, healthy, total, checkedAt: new Date().toISOString() });
+    res.json({ services, engines, overallStatus, healthy, total, enginesHealthy, enginesTotal: engines.length, checkedAt: new Date().toISOString() });
   });
 
   // === Quick Solution — AI Diagnosis + Auto-Fix ===

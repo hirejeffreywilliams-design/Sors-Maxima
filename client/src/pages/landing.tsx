@@ -114,6 +114,59 @@ const howItWorks = [
   { step: 3, title: "Access Your Edge", description: "Unlock the full suite of intelligence tools and start betting smarter." },
 ];
 
+const intelligenceSteps = [
+  {
+    number: "01",
+    icon: Database,
+    title: "Live Data Harvest",
+    subtitle: "Every 60 seconds",
+    description: "Six simultaneous data feeds — live scores, injury reports, line movements, roster updates, and weather — ingested and cross-validated before anything is analyzed.",
+    color: "text-blue-400",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+  },
+  {
+    number: "02",
+    icon: Brain,
+    title: "46-Factor Analysis",
+    subtitle: "Proprietary model",
+    description: "Every matchup is scored across 46 weighted intelligence factors: rest advantage, travel impact, sharp money %, line steam, injury depth, venue history, and 39 more.",
+    color: "text-violet-400",
+    bg: "bg-violet-500/10",
+    border: "border-violet-500/20",
+  },
+  {
+    number: "03",
+    icon: Zap,
+    title: "Sors Simulation Engine",
+    subtitle: "1M+ daily simulations",
+    description: "Our proprietary simulation engine models every possible game outcome across millions of scenarios to compute true win probability and optimal Kelly stake sizing.",
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    border: "border-emerald-500/20",
+  },
+  {
+    number: "04",
+    icon: Target,
+    title: "Grade & Edge Assignment",
+    subtitle: "A+ to F quality control",
+    description: "Each pick receives an A+ to F grade based on confidence, EV calculation, and model agreement. Only A and B-grade picks with confirmed positive expected value reach members.",
+    color: "text-amber-400",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+  },
+  {
+    number: "05",
+    icon: Activity,
+    title: "Real-Time Delivery",
+    subtitle: "Instant push to members",
+    description: "Approved picks push instantly to your dashboard via our live intelligence feed. Lines are continuously monitored for steam moves and late-breaking injury news.",
+    color: "text-rose-400",
+    bg: "bg-rose-500/10",
+    border: "border-rose-500/20",
+  },
+];
+
 const pricingTiers = [
   {
     name: "Sharp",
@@ -261,6 +314,67 @@ export default function LandingPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      </section>
+
+      {/* The Intelligence Behind Every Pick */}
+      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 py-16 sm:py-24" data-testid="section-intelligence-pipeline">
+        <div className="text-center space-y-4 mb-12">
+          <Badge variant="outline" className="gap-1.5 text-xs bg-emerald-500/10 border-emerald-500/30 text-emerald-400">
+            <Zap className="w-3 h-3" /> Fully Automated Intelligence
+          </Badge>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            The Intelligence Behind Every Pick
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Every pick on Sors Maxima passes through a 5-stage automated pipeline before it ever reaches a member. 
+            Nothing reaches you unless it clears every gate.
+          </p>
+        </div>
+
+        <div className="relative">
+          <div className="hidden lg:block absolute left-[calc(50%-1px)] top-8 bottom-8 w-0.5 bg-gradient-to-b from-border/0 via-border to-border/0" />
+          <div className="space-y-6 lg:space-y-0">
+            {intelligenceSteps.map((step, i) => (
+              <div
+                key={step.number}
+                className={`relative lg:grid lg:grid-cols-2 lg:gap-12 lg:items-center lg:mb-16 ${i % 2 !== 0 ? "lg:rtl" : ""}`}
+                data-testid={`intelligence-step-${step.number}`}
+              >
+                <div className={`${i % 2 !== 0 ? "lg:ltr lg:text-right" : ""} mb-4 lg:mb-0`}>
+                  <div className={`inline-flex items-center gap-3 mb-3 ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""}`}>
+                    <div className={`w-10 h-10 rounded-xl ${step.bg} border ${step.border} flex items-center justify-center shrink-0`}>
+                      <step.icon className={`w-5 h-5 ${step.color}`} />
+                    </div>
+                    <div>
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${step.color} opacity-70`}>Step {step.number}</span>
+                      <span className="text-[10px] text-muted-foreground mx-2">·</span>
+                      <span className="text-[10px] text-muted-foreground">{step.subtitle}</span>
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-sm">{step.description}</p>
+                </div>
+                <div className={`hidden lg:flex items-center ${i % 2 !== 0 ? "lg:justify-end" : "lg:justify-start"}`}>
+                  <div className={`w-20 h-20 rounded-2xl ${step.bg} border ${step.border} flex items-center justify-center shadow-lg`}>
+                    <span className={`text-4xl font-black ${step.color} opacity-30`}>{step.number}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10 text-center">
+          <p className="text-sm text-muted-foreground mb-4">
+            Every factor. Every simulation. Every grade. Running automatically so the edge is always fresh.
+          </p>
+          <Link href="/apply">
+            <Button size="lg" className="gap-2" data-testid="button-intel-cta">
+              Access the Intelligence
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 
