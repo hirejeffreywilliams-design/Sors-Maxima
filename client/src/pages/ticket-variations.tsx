@@ -368,9 +368,9 @@ function VariationsContent() {
 export default function TicketVariations() {
   return (
     <TierGate
-      required="elite"
+      required="whale"
       label="Ticket Variation Engine"
-      description="Generate 5 strategic ticket alternatives with correlation analysis. Available for Edge and Max members."
+      description="Generate 5 strategic ticket alternatives — Safe Locks, EV Hunter, Contrarian, Correlation Builder, and Max Upside blueprints. Max tier only."
     >
       <VariationsContent />
     </TierGate>

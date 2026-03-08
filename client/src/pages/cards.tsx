@@ -8,6 +8,7 @@ import { TradingCard } from "@/components/trading-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
+import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PackRipReveal } from "@/components/pack-rip-reveal";
@@ -166,6 +167,12 @@ export default function CardsPage() {
         subtitle="Collect, trade, and showcase your best-performing picks"
         variant="gold"
       />
+
+      <TierGate
+        required="elite"
+        label="Sors Intelligence Cards"
+        description="Open packs, collect cryptographically verified pick cards, showcase your wins on the community feed, and build your Discord-proof win portfolio — Edge tier and above."
+      >
 
       {/* Pack Drops */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -390,6 +397,8 @@ export default function CardsPage() {
           </TabsContent>
         )}
       </Tabs>
+
+      </TierGate>
     </div>
   );
 }

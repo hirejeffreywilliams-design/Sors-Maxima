@@ -2217,13 +2217,13 @@ export default function CommandCenter() {
           </section>
         )}
 
-        {showAdvanced && (canAccess("elite")
+        {showAdvanced && (canAccess("whale")
           ? <LifeChangerSection legs={legs} addLeg={addLeg} />
           : (
             <TierGate 
-              required="elite" 
-              label="Daily Edge Parlay" 
-              description="A daily cross-sport high-value parlay built by the intelligence engine — real edge, premium picks. Edge tier and above."
+              required="whale" 
+              label="Life Changer™ Ticket" 
+              description="Our highest-upside daily parlay — cross-sport, unorthodox picks, monster payouts. The ticket our Max members wait for every morning. Max tier only."
             >
               <div />
             </TierGate>

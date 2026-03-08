@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PageHero } from "@/components/page-hero";
+import { TierGate } from "@/components/tier-gate";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   CheckCircle2, AlertCircle, XCircle, TrendingUp, Wallet,
-  ChevronDown, ChevronUp, Loader2, RefreshCw, ShieldAlert, Info
+  ChevronDown, ChevronUp, Loader2, RefreshCw, ShieldAlert, Info, Brain
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
@@ -299,6 +300,12 @@ export default function PickReviewPage() {
           }
         />
 
+        <TierGate
+          required="whale"
+          label="Smart Pick Review Queue"
+          description="Every pick scored by model edge, sharp money risk flags, and fractional Kelly stake guidance. The analyst layer that separates the top 1% of bettors — Max tier only."
+        >
+
         <Card className="border">
           <CardContent className="p-3 sm:p-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -446,6 +453,8 @@ export default function PickReviewPage() {
           Hard cap: 10% bankroll per bet. Daily limit: 5% bankroll.
           Past performance does not guarantee future results.
         </div>
+
+        </TierGate>
       </div>
     </div>
   );

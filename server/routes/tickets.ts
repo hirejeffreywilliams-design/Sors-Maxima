@@ -197,7 +197,7 @@ export function registerTicketRoutes(app: Express) {
     }
   });
 
-  app.post("/api/tickets/variations", requireAuth, requireTier("elite", "whale"), (req, res) => {
+  app.post("/api/tickets/variations", requireAuth, requireTier("whale"), (req, res) => {
     try {
       const { seedLegs = [] } = req.body;
       const variations = generateVariations(seedLegs);

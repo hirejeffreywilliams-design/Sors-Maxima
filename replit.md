@@ -29,7 +29,7 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Real-time Data and Analytics**: Includes a Team Historical Form Engine, Precomputed Predictions Engine, Situational Analysis Engine, and CLV Tracker.
 - **User Engagement & Personalization**: Features Personalized Betting Insights, a Unified Tools & Analytics Page, and a Consolidated Odds Center.
 - **Real-time Updates & Notifications**: Utilizes Server-Sent Events (SSE) for live updates and a Custom Notification Engine.
-- **Tier-Based Feature Gating**: Protects API routes and features based on user subscription tiers (Sharp, Edge, Max).
+- **Tier-Based Feature Gating**: Protects API routes and features based on user subscription tiers. Sharp ($49): core picks, parlay builder, track record. Edge ($99): Intelligence Cards, Strategy Advisor, MMA/UFC, Sors Books Hub. Max ($249): Life Changer™ Ticket, Smart Pick Review Queue, Ticket Variation Engine, Card Verification & Discord proof links, Live Cashout/CLV/Hedge tools, Custom Model Builder.
 - **Sports Ticker**: Displays only in-season sports with adjustable speed settings.
 - **Mobile UX Enhancements**: Includes Swipe Mode for picks and customizable bottom navigation.
 - **Sors Books Intelligence Hub**: Full sportsbook management where users register books, track balances, view P&L, and compare live odds.

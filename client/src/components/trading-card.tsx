@@ -5,6 +5,7 @@ import { getGradeGlow } from "@/lib/grade-utils";
 import { cn } from "@/lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useTier } from "@/components/tier-gate";
 
 interface TradingCardProps {
   card: {
@@ -168,6 +169,7 @@ export function TradingCard({
   isPublicShowcase,
 }: TradingCardProps) {
   const { toast } = useToast();
+  const { canAccess } = useTier();
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
@@ -693,62 +695,68 @@ export function TradingCard({
                 )}
               </button>
 
-              <div className="flex items-center gap-2 justify-center">
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const url = `${window.location.origin}/c/${collectionId}`;
-                    await navigator.clipboard.writeText(url);
-                    setCopiedProof("link");
-                    toast({ title: "Proof link copied!", description: "Share it to prove this win is real." });
-                    setTimeout(() => setCopiedProof(null), 2500);
-                  }}
-                  data-testid={`button-copy-proof-${collectionId}`}
-                  className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10"
-                  style={{ color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.45)" }}
-                >
-                  {copiedProof === "link" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
-                  {copiedProof === "link" ? "Copied!" : "Proof Link"}
-                </button>
+              {canAccess("whale") ? (
+                <div className="flex items-center gap-2 justify-center">
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const url = `${window.location.origin}/c/${collectionId}`;
+                      await navigator.clipboard.writeText(url);
+                      setCopiedProof("link");
+                      toast({ title: "Proof link copied!", description: "Share it to prove this win is real." });
+                      setTimeout(() => setCopiedProof(null), 2500);
+                    }}
+                    data-testid={`button-copy-proof-${collectionId}`}
+                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10"
+                    style={{ color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.45)" }}
+                  >
+                    {copiedProof === "link" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
+                    {copiedProof === "link" ? "Copied!" : "Proof Link"}
+                  </button>
 
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    const url = `${window.location.origin}/c/${collectionId}`;
-                    const isWin = card.settledResult === "won";
-                    const isPending = !card.settledResult || card.settledResult === "pending";
-                    const resultLabel = isWin ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "❌ MISSED";
-                    const gradeEmoji = card.grade?.startsWith("A") ? "🏆" : card.grade?.startsWith("B") ? "⚡" : "📊";
-                    const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
-                    const msg = [
-                      `${gradeEmoji} **SORS MAXIMA™ VERIFIED PICK**`,
-                      `━━━━━━━━━━━━━━━━━━━━`,
-                      `🎯 **${card.pick}**`,
-                      `🏅 Grade: **${card.grade}** | Sport: ${card.sport}`,
-                      card.game ? `🏟️ ${card.game}` : null,
-                      `💰 Odds: ${oddsStr}`,
-                      `📊 Result: ${resultLabel}`,
-                      `━━━━━━━━━━━━━━━━━━━━`,
-                      `🔗 Verify: ${url}`,
-                      `*Cannot be fabricated — Sors 46-Factor Engine™*`,
-                    ].filter(Boolean).join("\n");
-                    await navigator.clipboard.writeText(msg);
-                    setCopiedProof("discord");
-                    toast({ title: "Discord message copied!", description: "Paste it into your server." });
-                    setTimeout(() => setCopiedProof(null), 2500);
-                  }}
-                  data-testid={`button-copy-discord-${collectionId}`}
-                  className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 border"
-                  style={{
-                    background: copiedProof === "discord" ? "rgba(34,197,94,0.15)" : "rgba(var(--primary-rgb, 34 197 94) / 0.10)",
-                    borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.40)" : "rgba(var(--primary-rgb, 34 197 94) / 0.25)",
-                    color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))",
-                  }}
-                >
-                  {copiedProof === "discord" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <MessageSquare className="w-2.5 h-2.5" />}
-                  {copiedProof === "discord" ? "Copied!" : "Discord"}
-                </button>
-              </div>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      const url = `${window.location.origin}/c/${collectionId}`;
+                      const isWin = card.settledResult === "won";
+                      const isPending = !card.settledResult || card.settledResult === "pending";
+                      const resultLabel = isWin ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "❌ MISSED";
+                      const gradeEmoji = card.grade?.startsWith("A") ? "🏆" : card.grade?.startsWith("B") ? "⚡" : "📊";
+                      const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
+                      const msg = [
+                        `${gradeEmoji} **SORS MAXIMA™ VERIFIED PICK**`,
+                        `━━━━━━━━━━━━━━━━━━━━`,
+                        `🎯 **${card.pick}**`,
+                        `🏅 Grade: **${card.grade}** | Sport: ${card.sport}`,
+                        card.game ? `🏟️ ${card.game}` : null,
+                        `💰 Odds: ${oddsStr}`,
+                        `📊 Result: ${resultLabel}`,
+                        `━━━━━━━━━━━━━━━━━━━━`,
+                        `🔗 Verify: ${url}`,
+                        `*Cannot be fabricated — Sors 46-Factor Engine™*`,
+                      ].filter(Boolean).join("\n");
+                      await navigator.clipboard.writeText(msg);
+                      setCopiedProof("discord");
+                      toast({ title: "Discord message copied!", description: "Paste it into your server." });
+                      setTimeout(() => setCopiedProof(null), 2500);
+                    }}
+                    data-testid={`button-copy-discord-${collectionId}`}
+                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 border"
+                    style={{
+                      background: copiedProof === "discord" ? "rgba(34,197,94,0.15)" : "rgba(var(--primary-rgb, 34 197 94) / 0.10)",
+                      borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.40)" : "rgba(var(--primary-rgb, 34 197 94) / 0.25)",
+                      color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))",
+                    }}
+                  >
+                    {copiedProof === "discord" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <MessageSquare className="w-2.5 h-2.5" />}
+                    {copiedProof === "discord" ? "Copied!" : "Discord"}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-1.5 px-2 py-1">
+                  <span className="text-[9px] text-amber-400/60 font-bold uppercase tracking-wider">👑 Max — Discord Proof</span>
+                </div>
+              )}
             </div>
           )}
           
