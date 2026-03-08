@@ -3682,6 +3682,7 @@ Follow these rules:
       const openTickets = getAllTickets({ status: "open" });
       const latestReport = getLatestReport();
 
+      const { getEngineStatus: getPrecomputedEngineStatus } = await import("../precomputedPredictionsEngine");
       const hubStatus = getHubStatus();
       const sseStatus = getSSEStatus();
       const precomputedStatus = getPrecomputedEngineStatus();

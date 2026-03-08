@@ -1070,10 +1070,12 @@ function evaluatePerformance(): EvaluationMetrics {
   const driftValues = Object.values(baselineDistributions).map(b => Math.abs(b.mean - 0.6));
   const conceptDrift = driftValues.length > 0 ? driftValues.reduce((a, b) => a + b, 0) / driftValues.length : 0;
 
-  const retrainingTriggered =
+  const hasEnoughFeedback = feedbackStore.length >= 20;
+  const retrainingTriggered = hasEnoughFeedback && (
     stats.winRate < (0.5 - currentConfig.retrainingWinRateDelta) ||
     calibrationError > currentConfig.retrainingCalibrationErrorMax ||
-    conceptDrift > currentConfig.retrainingDriftThreshold;
+    conceptDrift > currentConfig.retrainingDriftThreshold
+  );
 
   let retrainingReason: string | undefined;
   if (retrainingTriggered) {
@@ -1126,6 +1128,9 @@ function checkAlerts(metrics: EvaluationMetrics): PipelineAlert[] {
   for (const rule of ALERT_RULES) {
     const value = metricValues[rule.metric];
     if (value === undefined) continue;
+
+    // Skip win_rate alerts when there aren't enough settled picks to have a meaningful sample
+    if (rule.metric === "win_rate" && feedbackStore.length < 20) continue;
 
     let triggered = false;
     switch (rule.operator) {
@@ -1470,7 +1475,8 @@ export async function runPipeline(request: PipelineRequest): Promise<PipelineRun
     stage10.inputCount = feedbackStore.length;
     stage10.outputCount = 1;
     stage10.checksRun = 5;
-    stage10.checksPassed = [!metrics.retrainingTriggered, metrics.winRate > 0.4, metrics.calibration > 0.9, metrics.conceptDrift < 0.15, metrics.modelLatency < 2000].filter(Boolean).length;
+    const winRateOk = feedbackStore.length < 20 || metrics.winRate > 0.4;
+    stage10.checksPassed = [!metrics.retrainingTriggered, winRateOk, metrics.calibration > 0.9, metrics.conceptDrift < 0.15, metrics.modelLatency < 2000].filter(Boolean).length;
     stage10.endTime = new Date().toISOString();
     stage10.durationMs = new Date(stage10.endTime).getTime() - new Date(stage10.startTime).getTime();
     stage10.status = "success";

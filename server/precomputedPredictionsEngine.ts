@@ -1829,27 +1829,30 @@ async function runPredictionCycle(): Promise<void> {
   lastRunTime = Date.now();
   console.log(`[PrecomputedEngine] Prediction cycle #${totalRuns} complete`);
 
-  // Wire into prediction pipeline engine so pipeline health tracking reflects real activity
+  // Wire into prediction pipeline engine — run one concurrent pipeline per active sport
   import("./predictionPipelineEngine").then(({ runPipeline }) => {
-    const allPicks: any[] = [];
-    for (const sport of sports) {
+    const sportRuns = sports.map(sport => {
       const entry = predictionCache.get(sport as any);
-      if (entry?.snapshot?.picks?.length) {
-        allPicks.push(...entry.snapshot.picks.slice(0, 5).map((p: any) => ({
-          homeTeam: p.homeTeam || "Home",
-          awayTeam: p.awayTeam || "Away",
-          odds: p.americanOdds || -110,
-          market: p.betType || "Moneyline",
-          gameTime: p.gameTime || new Date().toISOString(),
-        })));
-      }
-    }
-    runPipeline({
-      sport: sports[0] || "NBA",
-      maxCandidates: Math.min(allPicks.length || 10, 20),
-      riskLevel: "medium",
-      eventData: allPicks.length > 0 ? allPicks : undefined,
-    }).catch(() => {});
+      const picks = entry?.snapshot?.picks?.length
+        ? entry.snapshot.picks.slice(0, 5).map((p: any) => ({
+            homeTeam: p.homeTeam || "Home",
+            awayTeam: p.awayTeam || "Away",
+            odds: p.americanOdds || -110,
+            market: p.betType || "Moneyline",
+            gameTime: p.gameTime || new Date().toISOString(),
+          }))
+        : undefined;
+      return runPipeline({
+        sport: sport as any,
+        maxCandidates: Math.min((picks?.length || 0) + 5, 20),
+        riskLevel: "medium",
+        eventData: picks,
+      });
+    });
+    Promise.allSettled(sportRuns).then(results => {
+      const succeeded = results.filter(r => r.status === "fulfilled").length;
+      console.log(`[PrecomputedEngine] Pipeline runs complete: ${succeeded}/${results.length} sports succeeded`);
+    });
   }).catch(() => {});
 
   import("./sseManager").then(({ broadcastEvent }) => {

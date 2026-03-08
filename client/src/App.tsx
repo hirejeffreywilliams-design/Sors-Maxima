@@ -287,7 +287,7 @@ function Router({ authState }: { authState: AuthState }) {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
-        <Route path="/command-center">{() => { const [, setLocation] = useLocation(); setLocation("/"); return null; }}</Route>
+        <Route path="/command-center"><Redirect to="/" /></Route>
         <Route path="/generate" component={AutoGenerator} />
         <Route path="/strategy" component={StrategyAdvisor} />
         <Route path="/sorsbooks" component={SorsBooksPage} />
