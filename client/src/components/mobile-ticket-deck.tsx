@@ -116,37 +116,34 @@ export function MobileTicketDeck<T>({
         </span>
       </div>
 
-      {/* Card stack */}
+      {/* Card stack — height grows with content */}
       <div
-        className="relative w-full"
-        style={{ height: "clamp(420px, 62svh, 540px)" }}
+        className="relative w-full pb-4"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {/* Card 3 (back of stack) */}
+        {/* Card 3 (back of stack) — decorative, matches main card size */}
         {peekCard2 && (
           <div
-            className="absolute inset-x-0 top-0 rounded-2xl border bg-card/30"
+            className="absolute inset-0 rounded-2xl border bg-card/30 pointer-events-none"
             style={{
-              height: "100%",
               transform: "translateY(14px) scaleX(0.90)",
-              transformOrigin: "bottom center",
+              transformOrigin: "top center",
               zIndex: 0,
               opacity: 0.18,
               ...gradeAmbientGlow(getGrade(peekCard2)),
             }}
           />
         )}
-        {/* Card 2 (middle of stack) */}
+        {/* Card 2 (middle of stack) — decorative, matches main card size */}
         {peekCard1 && (
           <div
-            className="absolute inset-x-0 top-0 rounded-2xl border bg-card/50"
+            className="absolute inset-0 rounded-2xl border bg-card/50 pointer-events-none"
             style={{
-              height: "100%",
               transform: "translateY(7px) scaleX(0.95)",
-              transformOrigin: "bottom center",
+              transformOrigin: "top center",
               zIndex: 1,
               opacity: 0.45,
               ...gradeAmbientGlow(getGrade(peekCard1)),
@@ -154,9 +151,9 @@ export function MobileTicketDeck<T>({
           />
         )}
 
-        {/* Main card */}
+        {/* Main card — in normal flow so height is defined by content */}
         <div
-          className="absolute inset-0 z-10 overflow-hidden rounded-2xl"
+          className="relative z-10 rounded-2xl"
           style={{
             transform: isDragging ? `translateX(${dragX}px) rotate(${dragX / 20}deg)` : "translateX(0) rotate(0deg)",
             transition: isDragging ? "none" : "transform 0.3s cubic-bezier(0.2,0,0.3,1)",
@@ -188,12 +185,13 @@ export function MobileTicketDeck<T>({
               <span className="text-indigo-400 font-black text-lg tracking-widest">← PREV</span>
             </div>
           </div>
+
           {renderCard(currentItem, currentIndex)}
         </div>
 
         {/* Swipe hint */}
         {showHint && (
-          <div className="absolute inset-x-0 -bottom-7 flex justify-center z-20 pointer-events-none">
+          <div className="absolute inset-x-0 -bottom-3 flex justify-center z-20 pointer-events-none">
             <div className="flex items-center gap-2 text-[10px] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full border border-primary/20 animate-bounce">
               <Fingerprint className="w-3 h-3" />
               Swipe or use arrows
