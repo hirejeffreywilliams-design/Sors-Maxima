@@ -17,6 +17,7 @@ import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
+import { OddsAttribution } from "@/components/ui/odds-attribution";
 
 interface CapacityInfo {
   tailCount: number;
@@ -80,6 +81,10 @@ interface PrecomputedPick {
     awayPlayers?: { name: string; position: string; status: string }[];
   };
   aiInsight?: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 interface PredictionSnapshot {
@@ -402,6 +407,13 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
             <p className="text-[10px] text-muted-foreground">Odds</p>
           </div>
         </div>
+
+        <OddsAttribution
+          oddsSourceBook={pick.oddsSourceBook}
+          oddsBookCount={pick.oddsBookCount}
+          oddsApiSource={pick.oddsApiSource}
+          allBookOdds={pick.allBookOdds}
+        />
 
         {pick.winProbability !== undefined && (
           <PickSignalRow pick={pick} />

@@ -48,6 +48,7 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Mobile UX Enhancements**: Includes Swipe Mode for picks and a Mobile Card Stack Deck for ticket/pick grids.
 - **React.lazy Code Splitting**: All pages in `client/src/App.tsx` use `React.lazy` with `Suspense` for faster initial load times.
 - **Onboarding Flow**: Guided first-time experience with step-by-step walkthrough at `/onboarding`.
+- **Odds Source Attribution**: Every precomputed pick card shows which sportsbook offers the best odds for that specific bet. The `OddsAttribution` component (`client/src/components/ui/odds-attribution.tsx`) renders compact book badges (DK, FD, MGM, CZR, etc.) with expandable "where to place this bet" breakdown. Source is "The Odds API" when live book data is available, or "ESPN-derived" as fallback. Backend `/api/odds-source` endpoint accepts sport/homeTeam/awayTeam/betType/pickSide params and returns full book breakdown. `precomputedPredictionsEngine.ts` enriches picks with `oddsSourceBook`, `oddsBookCount`, `oddsApiSource`, and `allBookOdds` fields.
 
 ## Critical Dev Rules
 - **NEVER run `npm run db:push`** — it drops 8 tables. Use raw SQL `ADD COLUMN IF NOT EXISTS` only.

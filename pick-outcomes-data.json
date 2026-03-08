@@ -11898,22 +11898,82 @@
       "homeScore": 6,
       "awayScore": 3,
       "settledAt": "2026-03-08T17:19:50.483Z"
+    },
+    {
+      "id": "precomp-NBA-401810791-moneyline-753ff34863",
+      "gameId": "401810791",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Philadelphia 76ers ML",
+      "betType": "moneyline",
+      "odds": -145,
+      "grade": "C+",
+      "confidence": 60,
+      "ev": -22.28,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T19:39:36.633Z",
+      "result": "won",
+      "homeScore": 125,
+      "awayScore": 116,
+      "settledAt": "2026-03-08T19:40:20.311Z"
+    },
+    {
+      "id": "precomp-NBA-401810791-spread-f43ed46d36",
+      "gameId": "401810791",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Philadelphia 76ers +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 60,
+      "ev": -10.27,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T19:39:36.633Z",
+      "result": "won",
+      "homeScore": 125,
+      "awayScore": 116,
+      "settledAt": "2026-03-08T19:40:20.311Z"
+    },
+    {
+      "id": "precomp-NBA-401810791-total-76135b3a57",
+      "gameId": "401810791",
+      "sport": "NBA",
+      "game": "Memphis Grizzlies @ Philadelphia 76ers",
+      "homeTeam": "Philadelphia 76ers",
+      "awayTeam": "Memphis Grizzlies",
+      "pick": "Over 218",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 55,
+      "ev": -10.27,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T19:39:36.633Z",
+      "result": "won",
+      "homeScore": 125,
+      "awayScore": 116,
+      "settledAt": "2026-03-08T19:40:20.311Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 523,
-      "won": 269,
+      "total": 526,
+      "won": 272,
       "lost": 242,
       "push": 12,
-      "rate": 51.4,
+      "rate": 51.7,
       "pending": 69
     },
     "bySport": {
       "NBA": {
-        "total": 175,
-        "won": 85,
-        "rate": 48.6
+        "total": 178,
+        "won": 88,
+        "rate": 49.4
       },
       "NHL": {
         "total": 193,
@@ -11943,9 +12003,9 @@
         "rate": 51.9
       },
       "C+": {
-        "total": 113,
-        "won": 60,
-        "rate": 53.1
+        "total": 116,
+        "won": 63,
+        "rate": 54.3
       },
       "D+": {
         "total": 30,
@@ -11980,22 +12040,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 152,
-        "won": 81,
-        "rate": 53.3,
-        "roi": 13.8
+        "total": 153,
+        "won": 82,
+        "rate": 53.6,
+        "roi": 14.2
       },
       "Spread": {
-        "total": 154,
-        "won": 79,
-        "rate": 51.3,
-        "roi": 1.4
+        "total": 155,
+        "won": 80,
+        "rate": 51.6,
+        "roi": 2
       },
       "Total": {
-        "total": 146,
-        "won": 71,
-        "rate": 48.6,
-        "roi": -2.8
+        "total": 147,
+        "won": 72,
+        "rate": 49,
+        "roi": -2.1
       },
       "Team Total": {
         "total": 71,
@@ -12005,20 +12065,20 @@
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 21,
+      "won": 31,
+      "lost": 19,
       "push": 0,
-      "rate": 58
+      "rate": 62
     },
-    "lastUpdated": "2026-03-08T19:36:50.617Z",
-    "roi": 4.5,
-    "brierScore": 0.2618,
+    "lastUpdated": "2026-03-08T19:46:09.475Z",
+    "roi": 4.9,
+    "brierScore": 0.2613,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.04,
+    "sharpeRatio": 0.044,
     "homeAwayBias": {
-      "homeWinRate": 55.2,
+      "homeWinRate": 55.6,
       "awayWinRate": 43.8,
-      "homeTotal": 239,
+      "homeTotal": 241,
       "awayTotal": 64
     },
     "calibrationBuckets": [
@@ -12030,15 +12090,15 @@
       },
       {
         "range": "55-60",
-        "predicted": 57.8,
-        "actual": 42.5,
-        "total": 73
+        "predicted": 57.7,
+        "actual": 43.2,
+        "total": 74
       },
       {
         "range": "60-65",
         "predicted": 62,
-        "actual": 53,
-        "total": 200
+        "actual": 53.5,
+        "total": 202
       },
       {
         "range": "65-70",

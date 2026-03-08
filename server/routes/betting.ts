@@ -109,6 +109,84 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.get("/api/odds-source", requireAuth, async (req, res) => {
+    try {
+      const sport = (req.query.sport as string)?.toUpperCase() || "NBA";
+      const homeTeam = (req.query.homeTeam as string) || "";
+      const awayTeam = (req.query.awayTeam as string) || "";
+      const betType = (req.query.betType as string) || "moneyline";
+      const pickSide = (req.query.pickSide as string) || "home";
+
+      const validSports = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+      if (!validSports.includes(sport)) {
+        return res.status(400).json({ error: "Invalid sport" });
+      }
+
+      const { generateMarketSnapshot } = await import("../marketSnapshotEngine");
+      const snapshot = await generateMarketSnapshot(sport as any);
+
+      const homeLower = homeTeam.toLowerCase();
+      const awayLower = awayTeam.toLowerCase();
+      const game = snapshot.games.find(g => {
+        const hn = (g.homeTeam?.abbreviation || g.homeTeam?.name || "").toLowerCase();
+        const an = (g.awayTeam?.abbreviation || g.awayTeam?.name || "").toLowerCase();
+        const homeToken = homeLower.split(" ").pop() || homeLower;
+        const awayToken = awayLower.split(" ").pop() || awayLower;
+        return (hn.includes(homeToken) || homeToken.includes(hn)) &&
+               (an.includes(awayToken) || awayToken.includes(an));
+      });
+
+      if (!game || !game.bookmakers || game.bookmakers.length === 0) {
+        return res.json({
+          found: false,
+          sport,
+          homeTeam,
+          awayTeam,
+          betType,
+          dataSource: "ESPN-derived (no live book data for this game)",
+          books: [],
+          bestBook: null,
+          bookCount: 0,
+        });
+      }
+
+      const isHome = pickSide === "home";
+      const books: { book: string; odds: number }[] = game.bookmakers
+        .map((bk: any) => {
+          let odds: number | undefined;
+          if (betType === "moneyline") odds = isHome ? bk.homeMoneyline : bk.awayMoneyline;
+          else if (betType === "spread") odds = isHome ? bk.spreadHome : bk.spreadAway;
+          else if (betType === "total") odds = pickSide === "over" ? bk.overPrice : bk.underPrice;
+          return odds !== undefined ? { book: bk.book, odds } : null;
+        })
+        .filter(Boolean)
+        .sort((a: any, b: any) => b.odds - a.odds) as { book: string; odds: number }[];
+
+      let bestBook: { book: string; odds: number } | null = null;
+      if (betType === "moneyline") bestBook = isHome ? game.bestLines.bestHomeML || null : game.bestLines.bestAwayML || null;
+      else if (betType === "spread") bestBook = isHome ? game.bestLines.bestSpreadHome || null : game.bestLines.bestSpreadAway || null;
+      else if (betType === "total") bestBook = pickSide === "over" ? game.bestLines.bestOver || null : game.bestLines.bestUnder || null;
+
+      return res.json({
+        found: true,
+        sport,
+        homeTeam: game.homeTeam?.abbreviation || homeTeam,
+        awayTeam: game.awayTeam?.abbreviation || awayTeam,
+        betType,
+        dataSource: "The Odds API",
+        books,
+        bestBook,
+        bookCount: books.length,
+        consensusOdds: betType === "moneyline"
+          ? (isHome ? game.consensus.homeMoneyline : game.consensus.awayMoneyline)
+          : betType === "spread" ? game.consensus.spread
+          : game.consensus.total,
+      });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to fetch odds source data" });
+    }
+  });
+
   app.get("/api/scheme-analysis", requireTier("pro", "elite", "whale"), async (req, res) => {
     try {
       const sport = (req.query.sport as string) || "NBA";

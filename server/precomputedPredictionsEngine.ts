@@ -1490,6 +1490,44 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
           homePlayers: homeInjuredPlayers.length > 0 ? homeInjuredPlayers : undefined,
           awayPlayers: awayInjuredPlayers.length > 0 ? awayInjuredPlayers : undefined,
         } : undefined,
+        oddsSourceBook: (() => {
+          if (!marketGame?.bestLines) return undefined;
+          const bl = marketGame.bestLines;
+          const pickLower = bet.pick.toLowerCase();
+          const homeLower = homeName.toLowerCase();
+          if (bet.betType === "moneyline") {
+            return pickLower.includes(homeLower) ? bl.bestHomeML?.book : bl.bestAwayML?.book;
+          }
+          if (bet.betType === "spread") {
+            return pickLower.includes(homeLower) ? bl.bestSpreadHome?.book : bl.bestSpreadAway?.book;
+          }
+          if (bet.betType === "total") {
+            return pickLower.startsWith("over") ? bl.bestOver?.book : bl.bestUnder?.book;
+          }
+          return bl.bestHomeML?.book;
+        })(),
+        oddsBookCount: marketGame?.bookmakers?.length || 0,
+        oddsApiSource: (marketGame?.bookmakers?.length || 0) > 0 ? "the-odds-api" : "espn-derived",
+        allBookOdds: (() => {
+          if (!marketGame?.bookmakers || marketGame.bookmakers.length === 0) return undefined;
+          const pickLower = bet.pick.toLowerCase();
+          const homeLower = homeName.toLowerCase();
+          return marketGame.bookmakers
+            .map((bk: any) => {
+              let odds: number | undefined;
+              if (bet.betType === "moneyline") {
+                odds = pickLower.includes(homeLower) ? bk.homeMoneyline : bk.awayMoneyline;
+              } else if (bet.betType === "spread") {
+                odds = pickLower.includes(homeLower) ? bk.spreadHome : bk.spreadAway;
+              } else if (bet.betType === "total") {
+                odds = pickLower.startsWith("over") ? bk.overPrice : bk.underPrice;
+              }
+              return odds !== undefined ? { book: bk.book, odds } : null;
+            })
+            .filter(Boolean)
+            .sort((a: any, b: any) => b.odds - a.odds)
+            .slice(0, 5);
+        })(),
       });
     }
 
