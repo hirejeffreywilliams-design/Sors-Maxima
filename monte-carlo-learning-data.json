@@ -4669,6 +4669,6 @@
       "predictions": 500
     }
   ],
-  "totalSimulations": 50000,
+  "totalSimulations": 0,
   "engineVersion": 1
 }
