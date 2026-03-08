@@ -93,9 +93,21 @@ interface VisualNode {
   label: string; sublabel: string; layer: string;
 }
 
+interface DataQualityAlert {
+  id: string;
+  severity: "critical" | "warning" | "info";
+  node: string;
+  label: string;
+  issue: string;
+  impact: string;
+  resolution: string;
+  status: "open" | "resolved";
+}
+
 interface VisualStatus {
   nodes: Record<string, { status: string; label: string; detail: string; metrics?: { a: string; b: string; c?: string } }>;
   summary: { totalNodes: number; liveNodes: number; degradedNodes: number; offlineNodes: number; unknownNodes: number };
+  dataQualityAlerts?: DataQualityAlert[];
   lastUpdated: string;
 }
 
@@ -288,7 +300,7 @@ function PipelineConnectionMap() {
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            26 nodes with live sub-compartment metrics — data sources, engines, user features. Updates every 6 seconds.
+            28 nodes with live sub-compartment metrics — data sources, engines, user features. Updates every 6 seconds.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -611,6 +623,74 @@ function PipelineConnectionMap() {
           </div>
         ))}
       </div>
+
+      {/* ─── Data Quality & Broken Endpoint Alerts ─────────────────────── */}
+      {visualData?.dataQualityAlerts && visualData.dataQualityAlerts.length > 0 && (
+        <Card className="border-orange-500/30 bg-orange-500/5">
+          <CardHeader className="pb-3 pt-4 px-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-400" />
+                <CardTitle className="text-sm font-semibold">Data Quality & Broken Endpoint Alerts</CardTitle>
+                <Badge variant="outline" className="text-[10px] h-5 px-1.5 border-orange-500/40 text-orange-400">
+                  {visualData.dataQualityAlerts.length} issue{visualData.dataQualityAlerts.length !== 1 ? "s" : ""} detected
+                </Badge>
+              </div>
+              <span className="text-[10px] text-muted-foreground">Fix these before launch</span>
+            </div>
+            <CardDescription className="text-xs">
+              Proactive scan of all pipeline endpoints, API keys, data flows, and null field detection. Address all critical issues before going live.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-4 pb-4 space-y-2">
+            {visualData.dataQualityAlerts.map((alert) => {
+              const severityConfig = {
+                critical: { bg: "bg-red-500/8 border-red-500/25",    badge: "border-red-500/40 text-red-400 bg-red-500/10",    icon: "text-red-400",    dot: "bg-red-500" },
+                warning:  { bg: "bg-yellow-500/8 border-yellow-500/25", badge: "border-yellow-500/40 text-yellow-400 bg-yellow-500/10", icon: "text-yellow-400", dot: "bg-yellow-500" },
+                info:     { bg: "bg-blue-500/8 border-blue-500/25",   badge: "border-blue-500/40 text-blue-400 bg-blue-500/10",   icon: "text-blue-400",   dot: "bg-blue-500/70" },
+              }[alert.severity];
+
+              return (
+                <div key={alert.id} className={`rounded-lg border p-3 space-y-2 ${severityConfig.bg}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`w-2 h-2 rounded-full shrink-0 mt-0.5 ${severityConfig.dot}`} />
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-semibold text-foreground">{alert.label}</span>
+                          <Badge variant="outline" className={`text-[9px] h-4 px-1.5 ${severityConfig.badge}`}>
+                            {alert.severity.toUpperCase()}
+                          </Badge>
+                          <span className="text-[10px] text-muted-foreground font-mono">→ node:{alert.node}</span>
+                        </div>
+                        <p className="text-xs text-foreground/80 mt-0.5 leading-snug">{alert.issue}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pl-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">User Impact</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{alert.impact}</p>
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-semibold text-emerald-500/80 uppercase tracking-wide">Resolution</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{alert.resolution}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* All clear */}
+      {visualData?.dataQualityAlerts && visualData.dataQualityAlerts.length === 0 && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-emerald-500/25 bg-emerald-500/5 text-emerald-400 text-xs">
+          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          <span className="font-medium">All data quality checks passed — no broken endpoints detected</span>
+        </div>
+      )}
     </div>
   );
 }

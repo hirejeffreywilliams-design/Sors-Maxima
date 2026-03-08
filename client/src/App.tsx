@@ -557,6 +557,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         {navSection("Discover", [
           { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
+          { href: "/cards", icon: Trophy, label: "Sors Cards", testId: "mobile-nav-cards" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
           { href: "/research", icon: BookOpen, label: "Research Notes", testId: "mobile-nav-research" },
           { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
@@ -880,6 +881,7 @@ function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () 
         <DropdownMenuSeparator />
         <Link href="/profile"><DropdownMenuItem className="gap-2 cursor-pointer"><User className="w-4 h-4" />My Profile</DropdownMenuItem></Link>
         <Link href="/track-record"><DropdownMenuItem className="gap-2 cursor-pointer"><BarChart2 className="w-4 h-4" />Track Record</DropdownMenuItem></Link>
+        <Link href="/cards"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-cards"><Trophy className="w-4 h-4 text-amber-400" />Sors Cards</DropdownMenuItem></Link>
         <Link href="/watchlist"><DropdownMenuItem className="gap-2 cursor-pointer"><Eye className="w-4 h-4" />Watchlist</DropdownMenuItem></Link>
         <Link href="/research"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-research"><BookOpen className="w-4 h-4" />Research Notes</DropdownMenuItem></Link>
         <Link href="/bankroll"><DropdownMenuItem className="gap-2 cursor-pointer"><Wallet className="w-4 h-4" />Bankroll</DropdownMenuItem></Link>

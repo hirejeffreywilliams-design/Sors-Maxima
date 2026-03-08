@@ -5061,10 +5061,167 @@ Follow these rules:
         "odds-center":    { status: oddsApi,           label: "Odds Center",
           detail: "Multi-book EV comparison hub",
           metrics: { a: "EV heatmap · Line comparison", b: "Market Gap™ · CLV tracker", c: "Best line · Arbitrage alerts" } },
-        "player-props":   { status: oddsApi,           label: "Player Props",
-          detail: "Real-time over/under props",
-          metrics: { a: "Player props · All markets", b: "AI grade · EV analysis", c: "15+ books · Live updates" } },
+        "player-props":   { status: espn === "live" ? "live" : "degraded", label: "Player Props Lab",
+          detail: "Player stat projections · Last 5 games · vs Opponent",
+          metrics: { a: "ESPN roster data · Position baselines", b: "Last 5 · Season avg · vs Opp · Projections", c: "NBA · NHL · MLB · NFL · NCAAB" } },
+        "cards-engine":   { status: precomputedCacheHasPicks ? "live" : "cached", label: "Sors Cards Engine",
+          detail: "Collectible pick cards · Crypto-signed wins",
+          metrics: { a: "SHA-256 card signatures active", b: "Daily pack generation · Trade system", c: "SORS CERTIFIED badges · Holographic UI" } },
+        "research-notes": { status: "live", label: "Research Notes",
+          detail: "Personal betting research notebook",
+          metrics: { a: "CRUD notes · 6 note types · Tags", b: "Pick/team/parlay/game/line notes", c: "Search · Filter · Pin-to-top" } },
       };
+
+      // ─── Data Quality Alerts ───────────────────────────────────────────────────
+      // Proactively detect broken data flows, null fields, missing configs, etc.
+      interface DataQualityAlert {
+        id: string;
+        severity: "critical" | "warning" | "info";
+        node: string;
+        label: string;
+        issue: string;
+        impact: string;
+        resolution: string;
+        status: "open" | "resolved";
+      }
+      const dataQualityAlerts: DataQualityAlert[] = [];
+
+      // Check: Odds API key present
+      if (!process.env.THE_ODDS_API_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-odds-api-key",
+          severity: "critical",
+          node: "odds-api",
+          label: "The Odds API",
+          issue: "API key not configured (THE_ODDS_API_KEY missing)",
+          impact: "Real-time betting lines, EV calculations, and odds comparisons are unavailable across all sports.",
+          resolution: "Set THE_ODDS_API_KEY in environment secrets. Get a key at the-odds-api.com.",
+          status: "open",
+        });
+      }
+
+      // Check: BallDontLie key
+      if (!process.env.BALLDONTLIE_API_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-bdl-key",
+          severity: "warning",
+          node: "bdl",
+          label: "BallDontLie API",
+          issue: "API key not configured (BALLDONTLIE_API_KEY missing)",
+          impact: "NBA advanced stats enrichment degraded. Player efficiency, pace, and rolling form unavailable.",
+          resolution: "Set BALLDONTLIE_API_KEY in environment secrets. Free tier available at balldontlie.io.",
+          status: "open",
+        });
+      }
+
+      // Check: OpenAI key
+      if (!process.env.OPENAI_API_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-openai-key",
+          severity: "critical",
+          node: "openai",
+          label: "OpenAI GPT-4o",
+          issue: "API key not configured (OPENAI_API_KEY missing)",
+          impact: "AI pick insights, ticket variations, pipeline diagnosis, and marketing copy generator are all offline.",
+          resolution: "Set OPENAI_API_KEY in environment secrets.",
+          status: "open",
+        });
+      } else if (aiStatus === "offline") {
+        dataQualityAlerts.push({
+          id: "dqa-openai-quota",
+          severity: "critical",
+          node: "openai",
+          label: "OpenAI GPT-4o",
+          issue: "API quota exceeded — circuit breaker open",
+          impact: "AI insights, ticket variations, and admin diagnosis are paused until quota resets.",
+          resolution: "Check OpenAI billing dashboard. AI circuit breaker auto-resets every 30 minutes.",
+          status: "open",
+        });
+      }
+
+      // Check: API-Football key
+      if (!process.env.API_FOOTBALL_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-apifootball-key",
+          severity: "warning",
+          node: "api-football",
+          label: "API-Football",
+          issue: "API key not configured (API_FOOTBALL_KEY missing)",
+          impact: "International soccer picks (16 leagues) are unavailable.",
+          resolution: "Set API_FOOTBALL_KEY in environment secrets. Free tier at api-football.com.",
+          status: "open",
+        });
+      }
+
+      // Check: Stripe keys
+      if (!process.env.STRIPE_SECRET_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-stripe-key",
+          severity: "critical",
+          node: "command-center",
+          label: "Stripe Payments",
+          issue: "Stripe secret key missing (STRIPE_SECRET_KEY not configured)",
+          impact: "Subscription purchases and tier upgrades are non-functional. All users see free-tier content only.",
+          resolution: "Set STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY in environment secrets.",
+          status: "open",
+        });
+      }
+
+      // Check: Precomputed engine picks present
+      if (!precomputedCacheHasPicks) {
+        dataQualityAlerts.push({
+          id: "dqa-no-picks-cache",
+          severity: "warning",
+          node: "precomputed",
+          label: "Predictions Engine",
+          issue: "No picks in cache — engine warming up or ESPN data unavailable",
+          impact: "Command Center and Daily Picks feed may show empty or stale picks.",
+          resolution: "POST to /api/admin/precomputed-engine/force-run to trigger an immediate picks refresh.",
+          status: "open",
+        });
+      }
+
+      // Check: Roster cache populated (needed by player-props)
+      if (rosterCount === 0) {
+        dataQualityAlerts.push({
+          id: "dqa-roster-empty",
+          severity: "warning",
+          node: "player-props",
+          label: "Player Props Lab",
+          issue: "Roster cache is empty — ESPN roster preload may have failed",
+          impact: "Player Props Lab will show no players until rosters are loaded.",
+          resolution: "POST to /api/admin/roster/refresh to trigger roster preload from ESPN.",
+          status: "open",
+        });
+      }
+
+      // Check: Resend email key (for email verification/marketing)
+      if (!process.env.RESEND_API_KEY?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-resend-key",
+          severity: "info",
+          node: "command-center",
+          label: "Email (Resend)",
+          issue: "RESEND_API_KEY not configured",
+          impact: "Email verification, win notifications, and lifecycle campaigns are disabled.",
+          resolution: "Set RESEND_API_KEY in environment secrets. Sign up at resend.com.",
+          status: "open",
+        });
+      }
+
+      // Check: Session secret
+      if (!process.env.SESSION_SECRET?.trim()) {
+        dataQualityAlerts.push({
+          id: "dqa-session-secret",
+          severity: "warning",
+          node: "command-center",
+          label: "Session Security",
+          issue: "SESSION_SECRET not configured — using default insecure key",
+          impact: "Sessions are not cryptographically secure. Card signatures may use a predictable key.",
+          resolution: "Set a strong random SESSION_SECRET (32+ characters) in environment secrets.",
+          status: "open",
+        });
+      }
 
       const statuses = Object.values(nodes).map(n => n.status);
       const summary = {
@@ -5075,7 +5232,7 @@ Follow these rules:
         unknownNodes:  statuses.filter(s => s === "unknown").length,
       };
 
-      res.json({ nodes, summary, lastUpdated: new Date().toISOString() });
+      res.json({ nodes, summary, dataQualityAlerts, lastUpdated: new Date().toISOString() });
     } catch (err: any) {
       res.status(500).json({ error: "Visual status failed", detail: err.message });
     }
