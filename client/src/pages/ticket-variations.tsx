@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
@@ -279,16 +280,11 @@ function VariationsContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <FlaskConical className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Ticket Variation Engine</h1>
-        </div>
-        <p className="text-muted-foreground text-sm">
-          Generates 5 strategically distinct ticket blueprints using the same 46-Factor Model data — each optimized for a different risk/reward profile.
-          The engine avoids repeating correlated legs so every variation explores a genuinely different edge.
-        </p>
-      </div>
+      <PageHero
+        icon={<FlaskConical className="h-6 w-6" />}
+        title="Ticket Variation Engine"
+        subtitle="5 strategically distinct blueprints using the same 46-Factor data — each optimized for a different risk/reward profile"
+      />
 
       <Separator />
 

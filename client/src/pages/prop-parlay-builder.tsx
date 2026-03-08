@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -384,19 +385,12 @@ export default function PropParlayBuilder() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary/10 rounded-lg">
-            <Brain className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold" data-testid="page-title">Prop Parlay Builder</h1>
-            <p className="text-sm text-muted-foreground">
-              Advanced multi-leg parlay analysis combining player props, moneylines, spreads, and totals with real-time data
-            </p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        icon={<Brain className="w-6 h-6" />}
+        title="Prop Parlay Builder"
+        subtitle="Advanced multi-leg parlay analysis combining player props, moneylines, spreads, and totals"
+        data-testid="page-title"
+      />
 
       <Card data-testid="builder-config">
         <CardHeader>

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye } from "lucide-react";
+import { PageHero } from "@/components/page-hero";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -159,15 +160,16 @@ export default function CardsPage() {
 
   return (
     <div className="container max-w-screen-2xl mx-auto py-6 px-4 space-y-8" data-testid="cards-page">
-      {/* Header & Pack Drops */}
+      <PageHero
+        icon={<Trophy className="w-6 h-6" />}
+        title="Sors Intelligence Cards"
+        subtitle="Collect, trade, and showcase your best-performing picks"
+        variant="gold"
+      />
+
+      {/* Pack Drops */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight flex items-center gap-3">
-            <Trophy className="w-8 h-8 text-primary" />
-            Sors Intelligence Cards
-          </h1>
-          <p className="text-muted-foreground font-medium">Collect, trade, and showcase your best-performing picks.</p>
-        </div>
+        <div />
 
         <Card className="bg-primary/5 border-primary/20 shrink-0">
           <CardContent className="pt-6 flex items-center gap-6">

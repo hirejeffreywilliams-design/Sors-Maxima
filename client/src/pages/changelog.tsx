@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHero } from "@/components/page-hero";
 import { Badge } from "@/components/ui/badge";
 import {
   Megaphone,
@@ -142,15 +143,11 @@ export default function ChangelogPage() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-md mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">What's New</h1>
-          </div>
-          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-            Track all updates, improvements, and new features in Sors Maxima
-          </p>
-        </header>
+        <PageHero
+          icon={<Megaphone className="w-6 h-6" />}
+          title="What's New"
+          subtitle="Track all updates, improvements, and new features in Sors Maxima"
+        />
 
         <div className="space-y-6">
           {changelog.map((entry, idx) => (

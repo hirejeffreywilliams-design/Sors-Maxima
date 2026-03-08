@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -380,15 +381,11 @@ export default function RostersPage() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-8 space-y-6">
-        <header className="space-y-1">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Users className="w-6 h-6" />
-            Team Rosters
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Live rosters, coaching staff, and injury statuses updated in real time
-          </p>
-        </header>
+        <PageHero
+          icon={<Users className="w-6 h-6" />}
+          title="Team Rosters"
+          subtitle="Live rosters, coaching staff, and injury statuses updated in real time"
+        />
 
         {selectedTeamId ? (
           <RosterView

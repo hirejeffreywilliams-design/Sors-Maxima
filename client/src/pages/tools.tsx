@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import {
   DollarSign, Brain, Link2,
   BarChart3, Sparkles, Zap,
@@ -130,30 +131,31 @@ export default function Tools() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-          <div>
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight">Tools & Analytics</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">Advanced betting analytics and research</p>
-          </div>
-          <Select value={activeGroup} onValueChange={handleGroupChange}>
-            <SelectTrigger className="w-full sm:w-56 h-9 sm:h-10" data-testid="select-category">
-              <div className="flex items-center gap-2">
-                <ActiveIcon className="w-4 h-4 shrink-0" />
-                <SelectValue />
-              </div>
-            </SelectTrigger>
-            <SelectContent>
-              {TOOL_GROUPS.map((group) => (
-                <SelectItem key={group.id} value={group.id}>
-                  <div className="flex items-center gap-2">
-                    <group.icon className="w-4 h-4" />
-                    {group.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </header>
+        <PageHero
+          icon={<BarChart3 className="w-6 h-6" />}
+          title="Tools & Analytics"
+          subtitle="Advanced betting analytics and research"
+          actions={
+            <Select value={activeGroup} onValueChange={handleGroupChange}>
+              <SelectTrigger className="w-full sm:w-56 h-9 sm:h-10" data-testid="select-category">
+                <div className="flex items-center gap-2">
+                  <ActiveIcon className="w-4 h-4 shrink-0" />
+                  <SelectValue />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {TOOL_GROUPS.map((group) => (
+                  <SelectItem key={group.id} value={group.id}>
+                    <div className="flex items-center gap-2">
+                      <group.icon className="w-4 h-4" />
+                      {group.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          }
+        />
 
         {currentGroup.subcategories.length > 1 && (
           <Tabs value={activeSub} onValueChange={setActiveSub}>

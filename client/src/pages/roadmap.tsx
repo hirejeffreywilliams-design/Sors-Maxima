@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { PageHero } from "@/components/page-hero";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -49,12 +50,12 @@ export default function Roadmap() {
   return (
     <ScrollArea className="h-full">
       <div className="p-4 md:p-6 space-y-8 max-w-4xl mx-auto">
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold" data-testid="text-page-title">Product Roadmap</h1>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            Our vision for building the most intelligent sports betting analysis platform. Transparent progress on what we're building and where we're headed.
-          </p>
-        </div>
+        <PageHero
+          icon={<Compass className="w-6 h-6" />}
+          title="Product Roadmap"
+          subtitle="Our vision for building the most intelligent sports betting analysis platform"
+          data-testid="text-page-title"
+        />
 
         {horizons.map(({ key, icon, color }) => {
           const horizon = data?.[key];

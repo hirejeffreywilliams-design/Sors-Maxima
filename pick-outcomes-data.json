@@ -1103,22 +1103,6 @@
       "ev": 27.91,
       "gameTime": "2026-03-10T22:30Z",
       "savedAt": "2026-03-08T10:38:49.788Z"
-    },
-    {
-      "id": "precomp-NHL-401803362-spread-b74421c073",
-      "gameId": "401803362",
-      "sport": "NHL",
-      "game": "Ottawa Senators @ Vancouver Canucks",
-      "homeTeam": "Vancouver Canucks",
-      "awayTeam": "Ottawa Senators",
-      "pick": "Vancouver Canucks -0.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "F",
-      "confidence": 52,
-      "ev": -44.64,
-      "gameTime": "2026-03-10T01:00Z",
-      "savedAt": "2026-03-08T12:05:03.042Z"
     }
   ],
   "settled": [
@@ -11874,16 +11858,36 @@
       "homeScore": 4,
       "awayScore": 5,
       "settledAt": "2026-03-08T10:44:29.985Z"
+    },
+    {
+      "id": "precomp-NHL-401803362-spread-b74421c073",
+      "gameId": "401803362",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Vancouver Canucks -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "F",
+      "confidence": 52,
+      "ev": -44.64,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-08T12:05:03.042Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-08T12:09:40.934Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 521,
-      "won": 267,
+      "total": 522,
+      "won": 268,
       "lost": 242,
       "push": 12,
-      "rate": 51.2,
-      "pending": 70
+      "rate": 51.3,
+      "pending": 69
     },
     "bySport": {
       "NBA": {
@@ -11892,9 +11896,9 @@
         "rate": 48.6
       },
       "NHL": {
-        "total": 191,
-        "won": 94,
-        "rate": 49.2
+        "total": 192,
+        "won": 95,
+        "rate": 49.5
       },
       "NCAAB": {
         "total": 155,
@@ -11949,9 +11953,9 @@
         "rate": 30
       },
       "F": {
-        "total": 6,
-        "won": 2,
-        "rate": 33.3
+        "total": 7,
+        "won": 3,
+        "rate": 42.9
       }
     },
     "byMarket": {
@@ -11962,10 +11966,10 @@
         "roi": 13.8
       },
       "Spread": {
-        "total": 153,
-        "won": 78,
-        "rate": 51,
-        "roi": 0.8
+        "total": 154,
+        "won": 79,
+        "rate": 51.3,
+        "roi": 1.4
       },
       "Total": {
         "total": 145,
@@ -11986,23 +11990,23 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-08T12:08:36.341Z",
-    "roi": 4.1,
-    "brierScore": 0.2619,
+    "lastUpdated": "2026-03-08T12:17:39.654Z",
+    "roi": 4.3,
+    "brierScore": 0.2618,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.037,
+    "sharpeRatio": 0.039,
     "homeAwayBias": {
-      "homeWinRate": 55,
+      "homeWinRate": 55.2,
       "awayWinRate": 43.8,
-      "homeTotal": 238,
+      "homeTotal": 239,
       "awayTotal": 64
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.1,
-        "actual": 60.9,
-        "total": 23
+        "actual": 62.5,
+        "total": 24
       },
       {
         "range": "55-60",

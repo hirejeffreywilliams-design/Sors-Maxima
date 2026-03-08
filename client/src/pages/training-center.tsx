@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   backtestingEngine, 
@@ -247,26 +248,22 @@ export default function TrainingCenter() {
 
   return (
     <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <GraduationCap className="w-7 h-7" />
-            Algorithm Training Center
-          </h1>
-          <p className="text-muted-foreground">
-            Advanced training, testing, and optimization for launch readiness
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <p className="text-sm text-muted-foreground">Launch Countdown</p>
-            <p className="text-2xl font-bold">{daysToLaunch} days</p>
+      <PageHero
+        icon={<GraduationCap className="w-6 h-6" />}
+        title="Algorithm Training Center"
+        subtitle="Advanced training, testing, and optimization for launch readiness"
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <p className="text-sm text-muted-foreground">Launch Countdown</p>
+              <p className="text-2xl font-bold">{daysToLaunch} days</p>
+            </div>
+            <div className="p-3 rounded-lg bg-primary/10">
+              <Rocket className="w-6 h-6 text-primary" />
+            </div>
           </div>
-          <div className="p-3 rounded-lg bg-primary/10">
-            <Rocket className="w-6 h-6 text-primary" />
-          </div>
-        </div>
-      </div>
+        }
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-6 max-w-3xl">

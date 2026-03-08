@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -289,18 +290,12 @@ export default function InternationalPage() {
     <div className="min-h-screen bg-background">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Globe className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-bold tracking-tight" data-testid="heading-international">International Sports</h1>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Soccer picks from 7 global leagues — draws and underdogs the US market ignores
-            </p>
-          </div>
-          {feed && (
+        <PageHero
+          icon={<Globe className="w-6 h-6" />}
+          title="International Sports"
+          subtitle="Soccer picks from 7 global leagues — draws and underdogs the US market ignores"
+          data-testid="heading-international"
+          actions={feed ? (
             <div className="flex items-center gap-3 flex-shrink-0">
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Last updated</p>
@@ -310,8 +305,8 @@ export default function InternationalPage() {
                 Refresh
               </Button>
             </div>
-          )}
-        </div>
+          ) : undefined}
+        />
 
         {/* ── Daily Edge Parlay notice ─────────────────────────────────── */}
         <div className="flex items-start gap-3 px-4 py-3 rounded-lg border border-amber-500/30 bg-amber-500/5">

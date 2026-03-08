@@ -1,5 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Target, Flame, Gamepad2, Atom, Swords } from "lucide-react";
+import { PageHero } from "@/components/page-hero";
 import { Achievements } from "@/components/gamification/achievements";
 import { DailyChallenges } from "@/components/gamification/daily-challenges";
 import { StreakTracker } from "@/components/gamification/streak-tracker";
@@ -13,18 +14,13 @@ export default function Rewards() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 px-2 sm:px-0">
-          <div>
-            <h1 className="text-xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
-              Rewards & Practice
-              <Badge variant="outline" className="gap-1 bg-yellow-500/10 border-yellow-500/30 text-yellow-500 h-5 text-[10px]">
-                <Trophy className="w-2.5 h-2.5" />
-                Rewards & Challenges
-              </Badge>
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground">Earn achievements and practice risk-free</p>
-          </div>
-        </header>
+        <PageHero
+          icon={<Flame className="w-6 h-6" />}
+          title="Rewards & Practice"
+          badge="Challenges"
+          subtitle="Earn achievements and practice risk-free"
+          variant="gold"
+        />
 
         <Tabs defaultValue="challenges" className="space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">

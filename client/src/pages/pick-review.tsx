@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -286,20 +287,17 @@ export default function PickReviewPage() {
     <div className="min-h-full" data-testid="pick-review-page">
       <div className="max-w-screen-lg mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-5">
 
-        <header>
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Smart Pick Review</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                Picks scored by edge, risk, and model confidence — with fractional Kelly stake guidance
-              </p>
-            </div>
+        <PageHero
+          icon={<Brain className="w-6 h-6" />}
+          title="Smart Pick Review"
+          subtitle="Picks scored by edge, risk, and model confidence — with fractional Kelly stake guidance"
+          actions={
             <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5 shrink-0">
               <RefreshCw className="w-3.5 h-3.5" />
               Refresh
             </Button>
-          </div>
-        </header>
+          }
+        />
 
         <Card className="border">
           <CardContent className="p-3 sm:p-4">
