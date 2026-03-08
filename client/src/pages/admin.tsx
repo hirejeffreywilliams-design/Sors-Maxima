@@ -415,6 +415,7 @@ export default function AdminDashboard() {
   };
 
   const quickLinks = [
+    { href: "/admin/monetization",       label: "Revenue Intelligence",   desc: "All revenue streams, affiliate programs & execution roadmap", icon: DollarSign },
     { href: "/admin/marketing",          label: "Marketing",              desc: "Promo ads, campaigns & AI ad gen",      icon: Megaphone },
     { href: "/admin/growth",             label: "Growth Analytics",       desc: "Revenue, LTV/CAC & acquisition",        icon: TrendingUp },
     { href: "/admin/pipeline",           label: "Intelligence Pipeline",  desc: "Live node map, AI diagnosis",           icon: Network },
@@ -483,6 +484,7 @@ export default function AdminDashboard() {
     {
       label: "Strategy & Business",
       tools: [
+        { href: "/admin/monetization",     label: "Revenue Intelligence", icon: DollarSign },
         { href: "/admin/launch-control",   label: "Launch Control",  icon: Rocket },
         { href: "/admin/owner-playbook",   label: "Owner's Playbook",icon: BookOpen },
         { href: "/admin/update-planner",   label: "Update Planner",  icon: ListTodo },
