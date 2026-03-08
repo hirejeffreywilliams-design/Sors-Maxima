@@ -1384,6 +1384,88 @@ async function buildEnrichedInput(
     }
   }
 
+  // === 4. Team Form: recent streak adjusts win% confidence ===
+  // getTeamFormData returns { formScore, recentStreak, last10 } etc.
+  // formScore is -100 to +100 (positive = good form)
+  try {
+    const { getTeamFormData } = await import("./teamHistoricalFormEngine");
+    const homeFD = getTeamFormData(sport, homeName);
+    const awayFD = getTeamFormData(sport, awayName);
+    if (homeFD) {
+      // formScore: -100 to +100. We map to a win% adjustment: ±5% max
+      const homeFormAdj = (homeFD.formScore / 100) * 5;
+      input.homeWinPct = Math.min(85, Math.max(15, input.homeWinPct + homeFormAdj));
+      // Back-to-back: treat like a minor injury penalty (NBA/NHL only)
+      if (homeFD.recentStreak && (sport === "NBA" || sport === "NHL")) {
+        // A 5+ game losing streak acts as a slight injury equivalent
+        if (homeFD.recentStreak.type === "L" && homeFD.recentStreak.length >= 3) {
+          const existing = input.injuryImpact || { home: 0, away: 0 };
+          input.injuryImpact = { home: existing.home + 1.5, away: existing.away };
+        }
+      }
+    }
+    if (awayFD) {
+      const awayFormAdj = (awayFD.formScore / 100) * 5;
+      input.awayWinPct = Math.min(85, Math.max(15, input.awayWinPct + awayFormAdj));
+      if (awayFD.recentStreak && (sport === "NBA" || sport === "NHL")) {
+        if (awayFD.recentStreak.type === "L" && awayFD.recentStreak.length >= 3) {
+          const existing = input.injuryImpact || { home: 0, away: 0 };
+          input.injuryImpact = { home: existing.home, away: existing.away + 1.5 };
+        }
+      }
+    }
+  } catch {}
+
+  // === 5. Sharp Signal: recent line movement affects spread confidence ===
+  // If there's a sharp signal for this game, it indicates professional money
+  // has moved the line — this increases our confidence in the spread direction.
+  try {
+    const { getRecentSharpSignals } = await import("./sharpSignalDetector");
+    const signals = getRecentSharpSignals(50);
+    const gameSignal = signals.find(s =>
+      (s.homeTeam.toLowerCase().includes(homeName.toLowerCase().split(" ").pop() || "") ||
+       s.awayTeam.toLowerCase().includes(homeName.toLowerCase().split(" ").pop() || "")) &&
+      Date.now() - new Date(s.detectedAt).getTime() < 4 * 60 * 60 * 1000 // last 4h only
+    );
+    if (gameSignal) {
+      // Sharp money moved the spread: adjust the home win% slightly in the direction
+      const sharpAdj = gameSignal.market === "spread" ?
+        (gameSignal.direction === "up" ? 2.5 : -2.5) : 1.0;
+      input.homeWinPct = Math.min(85, Math.max(15, input.homeWinPct + sharpAdj));
+    }
+  } catch {}
+
+  // === 6. Situational Factors: rest days, B2B, spot type ===
+  try {
+    const { getGameSituationalFactors } = await import("./situationalEngine");
+    const { liveSportsData } = await import("./live-sports-data");
+    const allLiveGames = liveSportsData.getLiveGames ? liveSportsData.getLiveGames() : [];
+    const factors = getGameSituationalFactors(
+      sport as any,
+      game,
+      allLiveGames as any
+    );
+    if (factors) {
+      // Back-to-back penalty: equivalent to 1 extra injury point
+      if (factors.homeB2B) {
+        const existing = input.injuryImpact || { home: 0, away: 0 };
+        input.injuryImpact = { home: existing.home + 2.0, away: existing.away };
+      }
+      if (factors.awayB2B) {
+        const existing = input.injuryImpact || { home: 0, away: 0 };
+        input.injuryImpact = { home: existing.home, away: existing.away + 2.0 };
+      }
+      // Letdown spot (just beat a big rival, now facing lesser opponent)
+      if (factors.spotType === "letdown") {
+        input.homeWinPct = Math.min(85, Math.max(15, input.homeWinPct - 3));
+      }
+      // Revenge spot (team coming off a loss to this exact opponent)
+      if (factors.spotType === "revenge") {
+        input.awayWinPct = Math.min(85, Math.max(15, input.awayWinPct + 2));
+      }
+    }
+  } catch {}
+
   return input;
 }
 
@@ -1407,7 +1489,7 @@ async function buildTeamRecordsMap(): Promise<Map<string, { avgPointsFor: number
 async function runPreSimulationCycle(): Promise<void> {
   try {
     const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
-    const feed = generateIntelligenceFeed();
+    const feed = await generateIntelligenceFeed();
     if (!feed) return;
 
     const allGames = [...(feed.liveGames || []), ...(feed.upcomingGames || [])];
@@ -1441,6 +1523,13 @@ async function runPreSimulationCycle(): Promise<void> {
       try {
         const input = await buildEnrichedInput(game, bdlTeams, teamRecords);
         simulateMatchup(input, MATCHUP_SIMS); // 10,000 sims — fast, responsive during user sessions
+        
+        // After simulateMatchup call, if it's a live game, shorten TTL to 2 min
+        const cached = preSimCache.get(input.gameId);
+        if (cached && game.status?.state === "in") {
+          preSimCache.set(input.gameId, { ...cached, ttl: 2 * 60 * 1000 }); // 2 min for live games
+        }
+        
         simulated++;
       } catch {}
     }
@@ -1467,7 +1556,7 @@ export async function runDeepSimulationCycle(): Promise<void> {
 
   try {
     const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
-    const feed = generateIntelligenceFeed();
+    const feed = await generateIntelligenceFeed();
     if (!feed) {
       console.log("[MonteCarlo] Deep sim: no feed available yet, will retry in 5 min");
       setTimeout(() => runDeepSimulationCycle(), 300000);
@@ -1576,6 +1665,29 @@ function scheduleMidnightDeepSim(): void {
   }, ms);
 }
 
+function msUntil7AMET(): number {
+  const nowET = new Date(new Date().toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const target = new Date(nowET);
+  target.setHours(7, 0, 0, 0);
+  if (nowET >= target) target.setDate(target.getDate() + 1);
+  return target.getTime() - nowET.getTime();
+}
+
+function scheduleMorningPreSim(): void {
+  const ms = msUntil7AMET();
+  const minsAway = Math.round(ms / 60000);
+  console.log(`[MonteCarlo] Morning pre-simulation scheduled at 7 AM ET (in ${minsAway}m)`);
+  setTimeout(async () => {
+    console.log("[MonteCarlo] === 7 AM MORNING PRE-SIMULATION STARTED ===");
+    await runDeepSimulationCycle();
+    // Reschedule every 24h
+    setInterval(async () => {
+      console.log("[MonteCarlo] === 7 AM MORNING PRE-SIMULATION (scheduled) ===");
+      await runDeepSimulationCycle();
+    }, 24 * 60 * 60 * 1000);
+  }, ms);
+}
+
 export function startMonteCarloEngine(): void {
   if (engineRunning) return;
 
@@ -1594,6 +1706,9 @@ export function startMonteCarloEngine(): void {
 
   // Schedule comprehensive midnight deep simulation
   scheduleMidnightDeepSim();
+  
+  // Schedule morning pre-simulation at 7 AM ET
+  scheduleMorningPreSim();
 }
 
 export function stopMonteCarloEngine(): void {

@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { cacheApiResponse, CACHE_KEYS, getCachedResponse } from "@/hooks/use-offline-cache";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -38,7 +39,16 @@ export const getQueryFn: <T>(options: {
     }
 
     await throwIfResNotOk(res);
-    return await res.json();
+    const data = await res.json();
+
+    // Cache specific keys for offline use
+    const url = queryKey[0] as string;
+    const isCacheable = Object.values(CACHE_KEYS).some(key => url.startsWith(key));
+    if (isCacheable) {
+      cacheApiResponse(url, data);
+    }
+
+    return data;
   };
 
 export const queryClient = new QueryClient({
@@ -47,8 +57,14 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-      retry: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes (data stays "fresh" for 5 min)
+      gcTime: 60 * 60 * 1000,   // 1 hour (keep in memory for 1h)
+      retry: (failureCount, error) => {
+        // Don't retry on auth errors, retry up to 2x on network errors
+        if (!navigator.onLine) return false;
+        return failureCount < 2;
+      },
+      networkMode: "offlineFirst", // Use cached data when offline
     },
     mutations: {
       retry: false,

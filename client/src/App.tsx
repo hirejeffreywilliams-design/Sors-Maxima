@@ -99,6 +99,8 @@ import { ErrorRecoveryInterceptor } from "@/components/error-recovery-intercepto
 import { SupportChat } from "@/components/support-chat";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SSEProvider, useSSEContext } from "@/context/sse-provider";
+import { useOfflineStatus } from "@/hooks/use-offline-cache";
+import { OfflineBanner } from "@/components/offline-banner";
 
 const ApplyPage = lazy(() => import("@/pages/apply"));
 
@@ -994,6 +996,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       </header>
 
       <div className="sticky top-14 z-40 w-full">
+        <OfflineBanner />
         <SportsTicker />
       </div>
 

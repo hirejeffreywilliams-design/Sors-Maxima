@@ -225,19 +225,24 @@ function startEnginesPhased(): void {
   // This is the base data layer everything else reads from.
   safeStart("Live Sports Data", () => liveSportsData.startSimulation(), 5_000);
 
-  // ── Phase 3 (10s): Intelligence Hub ──────────────────────────────────────
-  // Core ESPN + odds data pipeline. Everything else depends on this.
-  // Runs its first cycle immediately, then every 60s.
-  safeStart("Intelligence Hub", startIntelligenceHub, 10_000);
+  // ── Phase 2.1 (8s): Monte Carlo Engine ────────────────────────────────────
+  // Advanced simulation engine. Pre-simulates matchups for fast user responses.
+  // Moved from 50s → 8s: loads disk cache immediately, fires first warmup at 23s total.
+  safeStart("Monte Carlo Engine", startMonteCarloEngine, 8_000);
 
-  // ── Phase 3.5 (12s): Team Historical Form Engine ─────────────────────────
+  // ── Phase 2.2 (9s): Team Historical Form Engine ─────────────────────────
   // Pulls 60 days of ESPN historical scores to compute real team form metrics.
   // Loads from disk cache (instant) or builds fresh (runs in background).
   // Feeds real last-10 records and home/road splits into prediction engine.
   safeStart("Team Historical Form Engine", async () => {
     await initTeamFormEngine();
     scheduleFormCacheRefresh();
-  }, 12_000);
+  }, 9_000);
+
+  // ── Phase 3 (10s): Intelligence Hub ──────────────────────────────────────
+  // Core ESPN + odds data pipeline. Everything else depends on this.
+  // Runs its first cycle immediately, then every 60s.
+  safeStart("Intelligence Hub", startIntelligenceHub, 10_000);
 
   // ── Phase 3.6 (13s): BDL Sports Warmup ───────────────────────────────────
   // Proactively fetch NFL/MLB team stats so availability flags are set and
@@ -258,12 +263,6 @@ function startEnginesPhased(): void {
   // ── Phase 6 (42s): Platform Intelligence ─────────────────────────────────
   // Accumulates game outcomes and prediction accuracy for continuous learning.
   safeStart("Platform Intelligence Engine", startPlatformIntelligenceEngine, 42_000);
-
-  // ── Phase 7 (50s): Monte Carlo Engine ────────────────────────────────────
-  // Advanced simulation engine. Pre-simulates matchups for fast user responses.
-  // Reduced from 70s → 50s: hub + precomputed are running well by this point.
-  // First warmup cycle fires 15s after start = 65s total. 10× more sims overnight.
-  safeStart("Monte Carlo Engine", startMonteCarloEngine, 50_000);
 
   // ── Phase 5.5 (35s): Early Settlement Engine ─────────────────────────────
   // Detects mathematically-decided game outcomes before ESPN marks them "post".
@@ -293,7 +292,7 @@ function startEnginesPhased(): void {
     setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);
   }, 145_000);
 
-  // ── Phase 10 (50s): Cache Warmup ─────────────────────────────────────────
+  // ── Phase 10 (25s): Cache Warmup ─────────────────────────────────────────
   // Pre-warm the response cache for the most-hit endpoints so the first user
   // after a deploy gets instant data instead of waiting for live generation.
   safeStart("Response Cache Warmup", async () => {
@@ -315,7 +314,7 @@ function startEnginesPhased(): void {
     } catch (err: any) {
       console.warn("[CacheWarmup] Warmup partial:", err.message);
     }
-  }, 50_000);
+  }, 25_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.
