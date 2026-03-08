@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -462,32 +463,27 @@ export default function SorsBooks() {
 
   return (
     <div className="max-w-screen-lg mx-auto px-4 py-6 space-y-6" data-testid="page-sorsbooks">
-      {/* Page header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Landmark className="w-5 h-5 text-primary" />
-            <h1 className="text-xl font-bold">Sors Books</h1>
-            <Badge className="text-[9px] bg-primary/10 text-primary border-primary/30">Intelligence Hub</Badge>
+      <PageHero
+        icon={<Landmark className="w-6 h-6" />}
+        title="Sors Books"
+        badge="Intelligence Hub"
+        subtitle="Track your sportsbook accounts, compare live lines, and maximize every bet"
+        actions={
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refetchStats()}
+              className="gap-1.5 text-muted-foreground"
+              data-testid="button-refresh-stats"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Refresh
+            </Button>
+            {catalogData && <AddBookDialog catalog={catalogData} />}
           </div>
-          <p className="text-sm text-muted-foreground">
-            Track your sportsbook accounts, compare live lines, and maximize every bet.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetchStats()}
-            className="gap-1.5 text-muted-foreground"
-            data-testid="button-refresh-stats"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            Refresh
-          </Button>
-          {catalogData && <AddBookDialog catalog={catalogData} />}
-        </div>
-      </div>
+        }
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3">

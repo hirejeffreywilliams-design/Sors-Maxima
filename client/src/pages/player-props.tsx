@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1180,14 +1181,11 @@ export default function PlayerPropsPage() {
     <div className="min-h-full">
       <div className="max-w-screen-lg mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-4">
         <header className="space-y-3">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight" data-testid="heading-player-props">
-              Player Props
-            </h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-              Over/Under picks &middot; Tap a side to add to your slip
-            </p>
-          </div>
+          <PageHero
+            icon={<Target className="w-6 h-6" />}
+            title="Player Props"
+            subtitle="Over/Under picks — tap a side to add to your slip"
+          />
 
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1" data-testid="sport-tabs">
             {SPORT_TABS.map((sport) => (

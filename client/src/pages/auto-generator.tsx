@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PageHero } from "@/components/page-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -602,20 +603,12 @@ export default function AutoGenerator() {
       />
       
       <div className="max-w-screen-md mx-auto px-4 sm:px-6 py-6 space-y-5">
-        <header className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2">
-            <Sparkles className="w-6 h-6 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-bold">
-              Smart Ticket Generator
-            </h1>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Pick your sports, tap Generate, and get optimized betting tickets backed by real data.
-          </p>
-          <div className="flex items-center justify-center gap-2 pt-1">
-            <TutorialButton onClick={() => setShowTutorial(true)} />
-          </div>
-        </header>
+        <PageHero
+          icon={<Sparkles className="w-6 h-6" />}
+          title="Smart Ticket Generator"
+          subtitle="Pick your sports, tap Generate, and get optimized tickets backed by real data"
+          actions={<TutorialButton onClick={() => setShowTutorial(true)} />}
+        />
 
         <Card>
           <CardContent className="p-4 sm:p-5 space-y-5">

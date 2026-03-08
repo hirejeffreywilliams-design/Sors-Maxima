@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { PageHero } from "@/components/page-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -467,17 +468,11 @@ export default function StrategyAdvisorPage() {
 
   return (
     <div className="space-y-6 pb-24" data-testid="strategy-advisor-page">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Compass className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">Strategy Advisor</h1>
-            <p className="text-sm text-muted-foreground">Choose a strategy, build your ticket, and we'll tell you exactly how good it is</p>
-          </div>
-        </div>
-      </div>
+      <PageHero
+        icon={<Compass className="w-6 h-6" />}
+        title="Strategy Advisor"
+        subtitle="Choose a strategy, build your ticket, and we'll tell you exactly how good it is"
+      />
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">

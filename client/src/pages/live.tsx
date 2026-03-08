@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { PageHero } from "@/components/page-hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders, Lock } from "lucide-react";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
@@ -82,36 +83,32 @@ export default function Live() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-              Live Center
-              <Badge variant="outline" className="gap-1 bg-red-500/10 border-red-500/30 text-red-500">
-                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                LIVE
-              </Badge>
-            </h1>
-            <p className="text-sm text-muted-foreground">Real-time game tracking, live factors, cashout analysis &amp; intelligence</p>
-          </div>
-          <div className="flex items-center gap-2" data-testid="sse-live-status">
-            {sse.connected ? (
-              <Badge variant="outline" className="gap-1 text-xs bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400">
-                <Wifi className="w-3 h-3" />
-                SSE Connected
-              </Badge>
-            ) : (
-              <Badge variant="outline" className="gap-1 text-xs bg-yellow-500/10 border-yellow-500/30 text-yellow-600 dark:text-yellow-400">
-                <WifiOff className="w-3 h-3" />
-                Reconnecting...
-              </Badge>
-            )}
-            {sse.lastUpdate && (
-              <span className="text-xs text-muted-foreground" data-testid="text-live-last-update">
-                Updated {new Date(sse.lastUpdate).toLocaleTimeString()}
-              </span>
-            )}
-          </div>
-        </header>
+        <PageHero
+          icon={<Activity className="w-6 h-6" />}
+          title="Live Center"
+          badge="LIVE"
+          subtitle="Real-time game tracking, live factors, cashout analysis & intelligence"
+          actions={
+            <div className="flex items-center gap-2" data-testid="sse-live-status">
+              {sse.connected ? (
+                <Badge variant="outline" className="gap-1 text-xs bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400">
+                  <Wifi className="w-3 h-3" />
+                  SSE Connected
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="gap-1 text-xs bg-yellow-500/10 border-yellow-500/30 text-yellow-600 dark:text-yellow-400">
+                  <WifiOff className="w-3 h-3" />
+                  Reconnecting...
+                </Badge>
+              )}
+              {sse.lastUpdate && (
+                <span className="text-xs text-muted-foreground" data-testid="text-live-last-update">
+                  Updated {new Date(sse.lastUpdate).toLocaleTimeString()}
+                </span>
+              )}
+            </div>
+          }
+        />
 
         {isMax && momentumGames && momentumGames.some(g => g.status === "live" || g.status === "halftime") && (
           <LiveGamesStrip games={momentumGames} />

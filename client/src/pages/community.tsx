@@ -1,4 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHero } from "@/components/page-hero";
 import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy, Info } from "lucide-react";
 import { BetSharing } from "@/components/social/bet-sharing";
 import { Leaderboard } from "@/components/social/leaderboard";
@@ -16,16 +17,13 @@ export default function Community() {
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <header>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2 flex-wrap">
-            Community
-            <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-400">
-              <Users className="w-3 h-3" />
-              Connect
-            </Badge>
-          </h1>
-          <p className="text-sm text-muted-foreground">Connect with bettors, follow tipsters, and share wins</p>
-        </header>
+        <PageHero
+          icon={<Users className="w-6 h-6" />}
+          title="Community"
+          badge="Connect"
+          subtitle="Connect with bettors, follow tipsters, and share wins"
+          variant="violet"
+        />
 
         <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-lg border border-blue-500/20 bg-blue-500/5 text-sm">
           <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
