@@ -11878,15 +11878,35 @@
       "homeScore": 3,
       "awayScore": 2,
       "settledAt": "2026-03-08T12:09:40.934Z"
+    },
+    {
+      "id": "precomp-NHL-401803359-total-a2e354f4c4",
+      "gameId": "401803359",
+      "sport": "NHL",
+      "game": "New York Rangers @ Philadelphia Flyers",
+      "homeTeam": "Philadelphia Flyers",
+      "awayTeam": "New York Rangers",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 52,
+      "ev": -6.45,
+      "gameTime": "2026-03-09T23:00Z",
+      "savedAt": "2026-03-08T17:15:46.004Z",
+      "result": "won",
+      "homeScore": 6,
+      "awayScore": 3,
+      "settledAt": "2026-03-08T17:19:50.483Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 522,
-      "won": 268,
+      "total": 523,
+      "won": 269,
       "lost": 242,
       "push": 12,
-      "rate": 51.3,
+      "rate": 51.4,
       "pending": 69
     },
     "bySport": {
@@ -11896,9 +11916,9 @@
         "rate": 48.6
       },
       "NHL": {
-        "total": 192,
-        "won": 95,
-        "rate": 49.5
+        "total": 193,
+        "won": 96,
+        "rate": 49.7
       },
       "NCAAB": {
         "total": 155,
@@ -11938,9 +11958,9 @@
         "rate": 54.3
       },
       "C": {
-        "total": 102,
-        "won": 45,
-        "rate": 44.1
+        "total": 103,
+        "won": 46,
+        "rate": 44.7
       },
       "A-": {
         "total": 20,
@@ -11972,10 +11992,10 @@
         "roi": 1.4
       },
       "Total": {
-        "total": 145,
-        "won": 70,
-        "rate": 48.3,
-        "roi": -3.5
+        "total": 146,
+        "won": 71,
+        "rate": 48.6,
+        "roi": -2.8
       },
       "Team Total": {
         "total": 71,
@@ -11990,11 +12010,11 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-08T17:14:37.143Z",
-    "roi": 4.3,
+    "lastUpdated": "2026-03-08T17:31:56.445Z",
+    "roi": 4.5,
     "brierScore": 0.2618,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.039,
+    "sharpeRatio": 0.04,
     "homeAwayBias": {
       "homeWinRate": 55.2,
       "awayWinRate": 43.8,
@@ -12005,8 +12025,8 @@
       {
         "range": "50-55",
         "predicted": 52.1,
-        "actual": 62.5,
-        "total": 24
+        "actual": 64,
+        "total": 25
       },
       {
         "range": "55-60",

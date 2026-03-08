@@ -350,6 +350,70 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_cal_card_id ON card_audit_log(card_id)`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_cal_created_at ON card_audit_log(created_at)`);
 
+    // ── Life-Changing Ticket Log ────────────────────────────────────────────────
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS life_changer_log (
+        id SERIAL PRIMARY KEY,
+        date DATE NOT NULL UNIQUE,
+        ticket_id TEXT NOT NULL,
+        legs JSONB NOT NULL DEFAULT '[]',
+        total_legs INTEGER NOT NULL DEFAULT 0,
+        outcome TEXT NOT NULL DEFAULT 'pending',
+        won_legs INTEGER NOT NULL DEFAULT 0,
+        settled_at TIMESTAMPTZ,
+        minted_card_id TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lcl_date ON life_changer_log(date)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lcl_outcome ON life_changer_log(outcome)`);
+
+    // ── Platform Rules (Guidelines) ─────────────────────────────────────────────
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS platform_rules (
+        id SERIAL PRIMARY KEY,
+        category TEXT NOT NULL,
+        title TEXT NOT NULL,
+        body TEXT NOT NULL,
+        rule_order INTEGER NOT NULL DEFAULT 0,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pr_category ON platform_rules(category)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pr_is_active ON platform_rules(is_active)`);
+
+    // Seed default platform rules if table is empty
+    const existingRules = await db.execute(sql`SELECT COUNT(*) as cnt FROM platform_rules`);
+    const ruleCount = Number((existingRules.rows[0] as any)?.cnt ?? 0);
+    if (ruleCount === 0) {
+      const defaultRules = [
+        { category: "Community Conduct", title: "Zero Tolerance for Harassment", body: "Bullying, threats, targeted harassment, or hate speech of any kind will result in immediate and permanent account termination. Treat every member with respect.", rule_order: 1 },
+        { category: "Community Conduct", title: "No Tip Selling or Solicitation", body: "Soliciting payments, gifts, or other compensation from members in exchange for picks, advice, or predictions is strictly prohibited within the platform.", rule_order: 2 },
+        { category: "Community Conduct", title: "Respect Member Privacy", body: "Sharing, distributing, or discussing another member's personal information, betting data, or account details without their explicit consent is a serious violation.", rule_order: 3 },
+        { category: "Card & Collectibles Policy", title: "Verified Cards Only", body: "Only display cryptographically signed Sors Intelligence Cards as proof of winning picks. Cards without a valid SORS CERTIFIED signature are not recognized as authentic.", rule_order: 1 },
+        { category: "Card & Collectibles Policy", title: "No Card Tampering or Forgery", body: "Attempting to alter, duplicate, or forge card data, signatures, or credentials is grounds for immediate permanent ban and possible legal action.", rule_order: 2 },
+        { category: "Card & Collectibles Policy", title: "Fair Trading Standards", body: "All card trades must be voluntary and free from coercion, deception, or misrepresentation. Fraudulent trade practices will result in account suspension.", rule_order: 3 },
+        { category: "Responsible Gambling & Legal", title: "18+ Requirement", body: "You must be at least 18 years of age (21+ in applicable jurisdictions) to access Sors Maxima's intelligence tools. It is your responsibility to comply with local laws and regulations regarding sports betting.", rule_order: 1 },
+        { category: "Responsible Gambling & Legal", title: "Not Financial Advice", body: "All analytical picks, predictions, and intelligence data provided by Sors Maxima are for educational and research purposes only. They do not constitute financial advice, guaranteed outcomes, or investment recommendations.", rule_order: 2 },
+        { category: "Responsible Gambling & Legal", title: "Set Your Limits", body: "We strongly encourage all members to set daily, weekly, and monthly loss limits. Never wager money you cannot afford to lose. If gambling is affecting your quality of life, seek help at ncpgambling.org or 1-800-GAMBLER.", rule_order: 3 },
+        { category: "Account Policy", title: "One Account Per Person", body: "Each individual is permitted one active account. Creating multiple accounts to circumvent bans, tier restrictions, or referral systems is prohibited.", rule_order: 1 },
+        { category: "Account Policy", title: "Keep Credentials Secure", body: "Never share your login credentials, API access, or member-tier content with others. Credential sharing is detected automatically and will result in account suspension.", rule_order: 2 },
+        { category: "Account Policy", title: "Subscription Compliance", body: "Member-only content, picks, Intelligence Cards, and analysis tools are licensed to you individually. Redistribution, resale, or public sharing of subscription content is strictly prohibited.", rule_order: 3 },
+        { category: "Betting Intelligence Standards", title: "Accuracy Is Never Guaranteed", body: "No prediction system, model, or algorithm — regardless of sophistication — can guarantee winning outcomes. Past performance of the Sors 46-Factor Model does not guarantee future results.", rule_order: 1 },
+        { category: "Betting Intelligence Standards", title: "Use Responsible Bankroll Management", body: "Always apply Kelly Criterion principles and use the bankroll tools provided. Chasing losses by exceeding your daily cap is a path to financial harm.", rule_order: 2 },
+        { category: "Betting Intelligence Standards", title: "Data Is for Research Only", body: "All odds data, line movement insights, and predictive outputs are provided for analytical research. Always verify information with your licensed sportsbook before placing any wager.", rule_order: 3 },
+      ];
+      for (const rule of defaultRules) {
+        await db.execute(sql`
+          INSERT INTO platform_rules (category, title, body, rule_order, is_active)
+          VALUES (${rule.category}, ${rule.title}, ${rule.body}, ${rule.rule_order}, TRUE)
+        `);
+      }
+      console.log("[Migrations] Seeded 15 default platform rules");
+    }
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

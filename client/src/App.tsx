@@ -64,6 +64,8 @@ const AdminOwnerPlaybook = lazy(() => import("@/pages/admin-owner-playbook"));
 const AdminMonetization = lazy(() => import("@/pages/admin-monetization"));
 const AdminCommunityIntegrity = lazy(() => import("@/pages/admin-community-integrity"));
 const AdminCardsVault = lazy(() => import("@/pages/admin-cards"));
+const AdminGuidelines = lazy(() => import("@/pages/admin-guidelines"));
+const GuidelinesPage = lazy(() => import("@/pages/guidelines"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
@@ -90,7 +92,7 @@ const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -241,6 +243,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/monetization">{() => <AdminGuard component={AdminMonetization} authState={authState} />}</Route>
               <Route path="/admin/community-integrity">{() => <AdminGuard component={AdminCommunityIntegrity} authState={authState} />}</Route>
               <Route path="/admin/cards">{() => <AdminGuard component={AdminCardsVault} authState={authState} />}</Route>
+              <Route path="/admin/guidelines">{() => <AdminGuard component={AdminGuidelines} authState={authState} />}</Route>
               <Route path="/admin/update-planner">{() => <AdminGuard component={AdminUpdatePlanner} authState={authState} />}</Route>
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
@@ -305,6 +308,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/pricing" component={Pricing} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/legal" component={LegalPage} />
+        <Route path="/guidelines" component={GuidelinesPage} />
         <Route path="/roadmap" component={Roadmap} />
         <Route path="/settings" component={Settings} />
         <Route path="/tipster-communities">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
@@ -535,6 +539,12 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
                 <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin/cards' ? 'bg-amber-500/15 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`} data-testid="mobile-nav-admin-cards">
                   <Trophy className="w-4 h-4" />
                   <span>Cards Vault</span>
+                </div>
+              </Link>
+              <Link href="/admin/guidelines" onClick={onClose}>
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin/guidelines' ? 'bg-amber-500/15 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`} data-testid="mobile-nav-admin-guidelines">
+                  <Scale className="w-4 h-4" />
+                  <span>Guidelines & LCT</span>
                 </div>
               </Link>
             </nav>
@@ -1056,6 +1066,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
                 <Link href="/legal" className="hover:text-primary">Terms</Link>
                 <Link href="/legal" className="hover:text-primary">Privacy</Link>
                 <Link href="/legal" className="hover:text-primary">Disclaimer</Link>
+                <Link href="/guidelines" className="hover:text-primary" data-testid="footer-link-guidelines">Guidelines</Link>
                 <Link href="/help" className="hover:text-primary">Help</Link>
                 <Link href="/changelog" className="hover:text-primary">What's New</Link>
                 <Link href="/roadmap" className="hover:text-primary">Roadmap</Link>

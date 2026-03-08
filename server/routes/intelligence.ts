@@ -35,6 +35,11 @@ import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireAdmin, requireTier, requireSubscription } from "./helpers";
 import { getTwoWayMatchupImpact } from "../two-way-contracts";
+import { db } from "../db";
+import { sql as drizzleSql } from "drizzle-orm";
+import { users, tradingCards, userCardCollections, cardAuditLog } from "../dbSchema";
+import { eq } from "drizzle-orm";
+import crypto from "crypto";
 
 const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
 
@@ -1315,7 +1320,7 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
     }
   });
 
-  app.get("/api/life-changer-ticket", responseCacheMiddleware(60_000), (req: Request, res: Response) => {
+  app.get("/api/life-changer-ticket", responseCacheMiddleware(60_000), async (req: Request, res: Response) => {
     try {
       const ticket = buildLifeChangerTicket();
       if (!ticket) {
@@ -1331,10 +1336,188 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
           ev: Math.min(l.ev, 35)
         }));
       }
+      // Auto-log today's LCT if not already stored
+      try {
+        const today = new Date().toISOString().split("T")[0];
+        await db.execute(drizzleSql`
+          INSERT INTO life_changer_log (date, ticket_id, legs, total_legs, outcome, created_at)
+          VALUES (${today}::DATE, ${ticket.id}, ${JSON.stringify(ticket.legs)}::JSONB, ${ticket.legs.length}, 'pending', NOW())
+          ON CONFLICT (date) DO NOTHING
+        `);
+      } catch (logErr: any) {
+        // Non-fatal — log continues even if logging fails
+        console.warn("[LCT Log] Failed to log:", logErr.message);
+      }
       res.json({ ticket });
     } catch (err: any) {
       console.error("[life-changer] Error:", err.message);
       res.status(500).json({ error: "Failed to generate Daily Edge Parlay ticket" });
+    }
+  });
+
+  // GET /api/lct-track-record — public LCT performance history
+  app.get("/api/lct-track-record", async (_req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(drizzleSql`
+        SELECT id, date, ticket_id, legs, total_legs, outcome, won_legs, settled_at, minted_card_id, created_at
+        FROM life_changer_log
+        ORDER BY date DESC
+        LIMIT 90
+      `);
+
+      const history = (rows.rows as any[]).map(r => ({
+        id: r.id,
+        date: r.date,
+        ticketId: r.ticket_id,
+        legs: r.legs,
+        totalLegs: r.total_legs,
+        outcome: r.outcome,
+        wonLegs: r.won_legs,
+        settledAt: r.settled_at,
+        mintedCardId: r.minted_card_id,
+        createdAt: r.created_at,
+      }));
+
+      const settled = history.filter(h => h.outcome !== "pending");
+      const wins = history.filter(h => h.outcome === "won").length;
+      const losses = history.filter(h => h.outcome === "lost").length;
+      const pending = history.filter(h => h.outcome === "pending").length;
+      const winRate = settled.length > 0 ? Math.round((wins / settled.length) * 100) : 0;
+
+      // Calculate current streak
+      let streak = 0;
+      let streakType: "win" | "loss" | "none" = "none";
+      for (const h of settled) {
+        if (streak === 0) {
+          streakType = h.outcome === "won" ? "win" : "loss";
+          streak = 1;
+        } else if ((h.outcome === "won" && streakType === "win") || (h.outcome === "lost" && streakType === "loss")) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+
+      res.json({
+        history,
+        stats: { total: history.length, wins, losses, pending, winRate, streak, streakType },
+      });
+    } catch (err: any) {
+      console.error("[LCT Track Record] Error:", err.message);
+      res.status(500).json({ error: "Failed to fetch LCT track record" });
+    }
+  });
+
+  // POST /api/admin/lct/:id/settle — admin settles an LCT outcome
+  app.post("/api/admin/lct/:id/settle", async (req: Request, res: Response) => {
+    if (!req.session?.isAdmin) return res.sendStatus(403);
+    const { id } = req.params;
+    const { outcome, wonLegs } = req.body;
+    if (!["won", "lost"].includes(outcome)) {
+      return res.status(400).json({ error: "outcome must be 'won' or 'lost'" });
+    }
+
+    try {
+      // Fetch the LCT log entry
+      const rows = await db.execute(drizzleSql`SELECT * FROM life_changer_log WHERE id = ${parseInt(id)}`);
+      if (rows.rows.length === 0) return res.status(404).json({ error: "LCT entry not found" });
+      const lct = rows.rows[0] as any;
+
+      // Update outcome
+      await db.execute(drizzleSql`
+        UPDATE life_changer_log
+        SET outcome = ${outcome}, won_legs = ${wonLegs ?? (outcome === "won" ? lct.total_legs : 0)}, settled_at = NOW()
+        WHERE id = ${parseInt(id)}
+      `);
+
+      let mintedCard = null;
+
+      // Auto-mint legendary system card if won
+      if (outcome === "won" && !lct.minted_card_id) {
+        try {
+          const adminUser = await db.select().from(users).where(eq(users.username, process.env.ADMIN_USERNAME || "jeffreywilliams")).limit(1);
+          const adminId = adminUser[0]?.id;
+          if (!adminId) throw new Error("Admin user not found");
+
+          const cardId = `lct-win-${lct.date}-${crypto.randomBytes(4).toString("hex")}`;
+          const lctLegs: any[] = lct.legs ?? [];
+          const legsText = lctLegs.slice(0, 3).map((l: any) => `${l.sport}: ${l.pick} (${l.americanOdds > 0 ? "+" : ""}${l.americanOdds})`).join(" • ");
+
+          const [newCard] = await db.insert(tradingCards).values({
+            id: cardId,
+            sport: "PARLAY",
+            pick: `LIFE CHANGER™ HIT — ${new Date(lct.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+            grade: "S+",
+            betType: "parlay",
+            odds: 0,
+            confidence: 99,
+            ev: 35,
+            game: legsText || "Multi-Sport Life Changer Parlay",
+            gameTime: new Date(lct.settled_at || Date.now()),
+            maxCopies: 1,
+            copiesIssued: 1,
+            cardType: "system",
+            createdAt: new Date(),
+          }).returning();
+
+          const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+          const sig = crypto.createHash("sha256").update(`${adminId}:${cardId}:1:${sigKey}`).digest("hex");
+
+          const [collEntry] = await db.insert(userCardCollections).values({
+            userId: adminId,
+            cardId,
+            instanceNumber: 1,
+            acquiredVia: "system_lct_win",
+            acquiredAt: new Date(),
+            isShowcase: true,
+            cardSignature: sig,
+            isPublicShowcase: true,
+            isFeatured: true,
+          }).returning();
+
+          // Log the auto-mint
+          await db.insert(cardAuditLog).values({
+            actionType: "lct_auto_mint",
+            cardId,
+            collectionId: collEntry.id,
+            targetUserId: adminId,
+            adminId,
+            reason: `Auto-minted: LCT WIN on ${lct.date} — all ${lct.total_legs} legs hit`,
+            metadata: { date: lct.date, legs: lctLegs, totalLegs: lct.total_legs },
+          });
+
+          // Store the minted card ID in the LCT log
+          await db.execute(drizzleSql`
+            UPDATE life_changer_log SET minted_card_id = ${cardId} WHERE id = ${parseInt(id)}
+          `);
+
+          mintedCard = newCard;
+          console.log(`[LCT] Auto-minted LIFE CHANGER™ HIT card ${cardId} for date ${lct.date}`);
+        } catch (mintErr: any) {
+          console.error("[LCT] Auto-mint failed:", mintErr.message);
+        }
+      }
+
+      res.json({ success: true, outcome, mintedCard });
+    } catch (err: any) {
+      console.error("[LCT Settle] Error:", err.message);
+      res.status(500).json({ error: "Failed to settle LCT" });
+    }
+  });
+
+  // GET /api/admin/lct — admin view of all LCT log entries
+  app.get("/api/admin/lct", async (req: Request, res: Response) => {
+    if (!req.session?.isAdmin) return res.sendStatus(403);
+    try {
+      const rows = await db.execute(drizzleSql`
+        SELECT id, date, ticket_id, legs, total_legs, outcome, won_legs, settled_at, minted_card_id, created_at
+        FROM life_changer_log
+        ORDER BY date DESC
+        LIMIT 180
+      `);
+      res.json({ entries: rows.rows });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch LCT log" });
     }
   });
 

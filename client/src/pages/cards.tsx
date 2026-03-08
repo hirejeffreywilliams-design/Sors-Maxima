@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe } from "lucide-react";
+import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
@@ -110,6 +110,17 @@ export default function CardsPage() {
     stats: { winning: number; losing: number };
   }>({
     queryKey: ["/api/showcase-tickets"],
+  });
+
+  const { data: lctData, isLoading: isLctLoading } = useQuery<{
+    history: Array<{
+      id: number; date: string; ticketId: string; legs: any[];
+      totalLegs: number; outcome: string; wonLegs: number;
+      settledAt: string | null; mintedCardId: string | null; createdAt: string;
+    }>;
+    stats: { total: number; wins: number; losses: number; pending: number; winRate: number; streak: number; streakType: string };
+  }>({
+    queryKey: ["/api/lct-track-record"],
   });
 
   const openPackMutation = useMutation({
@@ -305,6 +316,139 @@ export default function CardsPage() {
               ))}
             </div>
           )}
+
+          {/* ─── LIFE CHANGER™ TRACKER ──────────────────────────────── */}
+          <div className="mt-10 space-y-4">
+            {/* LCT Section Header */}
+            <div
+              className="relative rounded-2xl overflow-hidden p-5 flex items-center gap-4 border"
+              style={{
+                background: "linear-gradient(135deg, rgba(16,185,129,0.10) 0%, rgba(251,191,36,0.06) 50%, rgba(16,24,40,0.98) 100%)",
+                borderColor: "rgba(16,185,129,0.25)",
+              }}
+            >
+              <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                style={{ background: "rgba(16,185,129,0.12)", border: "2px solid rgba(16,185,129,0.35)" }}>
+                <Ticket className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="text-base font-black text-emerald-400">LIFE CHANGER™ Track Record</h3>
+                  <Badge className="text-[10px] border bg-emerald-500/10 text-emerald-400 border-emerald-400/30 font-black">SEPARATE TRACKER</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Daily Life Changer™ tickets tracked independently. When one hits — a legendary card is auto-minted and featured in the showcase.
+                </p>
+              </div>
+              {lctData && (
+                <div className="hidden md:flex items-center gap-5 shrink-0">
+                  <div className="text-center">
+                    <p className="text-xl font-black text-emerald-400">{lctData.stats.wins}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Hits</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-black text-red-400">{lctData.stats.losses}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Misses</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xl font-black text-amber-400">{lctData.stats.winRate}%</p>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold">Hit Rate</p>
+                  </div>
+                  {lctData.stats.streak > 0 && (
+                    <div className="text-center">
+                      <p className={`text-xl font-black ${lctData.stats.streakType === "win" ? "text-emerald-400" : "text-red-400"}`}>
+                        {lctData.stats.streakType === "win" ? "🔥" : ""}{lctData.stats.streak}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold">Streak</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* LCT History */}
+            {isLctLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="w-full h-14 rounded-xl" />)}
+              </div>
+            ) : !lctData || lctData.history.length === 0 ? (
+              <Card className="border-dashed border-2 bg-emerald-400/5 border-emerald-400/20">
+                <CardContent className="py-10 text-center space-y-2">
+                  <Ticket className="w-8 h-8 mx-auto text-emerald-400 opacity-30" />
+                  <div>
+                    <h4 className="font-bold text-sm">No Life Changer™ tickets tracked yet</h4>
+                    <p className="text-xs text-muted-foreground mt-1">Today's ticket will be logged the first time you view it. Check back tomorrow for results.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-2" data-testid="lct-history-list">
+                {lctData.history.slice(0, 30).map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors"
+                    style={{
+                      borderColor: entry.outcome === "won"
+                        ? "rgba(16,185,129,0.3)"
+                        : entry.outcome === "lost"
+                          ? "rgba(239,68,68,0.3)"
+                          : "rgba(255,255,255,0.08)",
+                      background: entry.outcome === "won"
+                        ? "rgba(16,185,129,0.05)"
+                        : entry.outcome === "lost"
+                          ? "rgba(239,68,68,0.04)"
+                          : "rgba(255,255,255,0.02)",
+                    }}
+                    data-testid={`lct-entry-${entry.id}`}
+                  >
+                    <div className="shrink-0">
+                      {entry.outcome === "won" ? (
+                        <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        </div>
+                      ) : entry.outcome === "lost" ? (
+                        <div className="w-8 h-8 rounded-full bg-red-500/15 flex items-center justify-center">
+                          <XCircle className="w-4 h-4 text-red-400" />
+                        </div>
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center">
+                          <Clock className="w-4 h-4 text-amber-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold">{new Date(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
+                        <Badge
+                          className={`text-[10px] font-black ${
+                            entry.outcome === "won"
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-400/30"
+                              : entry.outcome === "lost"
+                                ? "bg-red-500/10 text-red-400 border-red-400/30"
+                                : "bg-amber-500/10 text-amber-400 border-amber-400/30"
+                          } border`}
+                        >
+                          {entry.outcome === "won" ? "🏆 HIT" : entry.outcome === "lost" ? "MISS" : "PENDING"}
+                        </Badge>
+                        {entry.mintedCardId && (
+                          <Badge className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-400/30">
+                            <Award className="w-2.5 h-2.5 mr-1" />Card Minted
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.totalLegs}-leg parlay
+                        {entry.outcome !== "pending" && entry.wonLegs > 0 && ` · ${entry.wonLegs}/${entry.totalLegs} legs won`}
+                      </p>
+                    </div>
+                    {entry.outcome === "pending" && (
+                      <Badge className="shrink-0 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-400/20">Awaiting Results</Badge>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
 
         {/* ─── MY COLLECTION ───────────────────────────────────────── */}
