@@ -5364,4 +5364,71 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  // ── Community Integrity Engine ─────────────────────────────────────────────
+
+  app.get("/api/admin/integrity/alerts", requireAdmin, async (_req, res) => {
+    try {
+      const { getIntegrityAlerts } = await import("../communityIntegrityEngine");
+      const alerts = await getIntegrityAlerts({ limit: 200 });
+      res.json(alerts);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/integrity/verification-stats", requireAdmin, async (_req, res) => {
+    try {
+      const { getVerificationStats } = await import("../communityIntegrityEngine");
+      const stats = await getVerificationStats();
+      res.json(stats);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/integrity/discord-bindings", requireAdmin, async (_req, res) => {
+    try {
+      const { getDiscordBindings } = await import("../communityIntegrityEngine");
+      const bindings = await getDiscordBindings();
+      res.json(bindings);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/integrity/tier-bypass-stats", requireAdmin, async (_req, res) => {
+    try {
+      const { getTierBypassStats } = await import("../communityIntegrityEngine");
+      const stats = await getTierBypassStats();
+      res.json(stats);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/integrity/resolve-alert", requireAdmin, async (req, res) => {
+    try {
+      const { alertId, notes, actionTaken } = req.body;
+      if (!alertId) return res.status(400).json({ error: "alertId required" });
+      const reviewedBy = (req.session as any)?.username || "admin";
+      const { resolveAlert } = await import("../communityIntegrityEngine");
+      await resolveAlert(alertId, reviewedBy, notes || "", actionTaken);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/integrity/suspend-discord", requireAdmin, async (req, res) => {
+    try {
+      const { userId, reason } = req.body;
+      if (!userId) return res.status(400).json({ error: "userId required" });
+      const { suspendDiscordBinding } = await import("../communityIntegrityEngine");
+      await suspendDiscordBinding(userId, reason || "Suspended by admin");
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

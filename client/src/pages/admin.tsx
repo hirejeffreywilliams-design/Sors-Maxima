@@ -425,6 +425,7 @@ export default function AdminDashboard() {
     { href: "/admin/assistant",          label: "AI Assistant",           desc: "Chat with admin AI assistant",          icon: Bot },
     { href: "/admin/security",           label: "Security Center",        desc: "Threats, IP blocks, sessions",          icon: Lock },
     { href: "/admin/model-integrity",    label: "Model Integrity",        desc: "ROI, Brier score, calibration",         icon: ShieldAlert },
+    { href: "/admin/community-integrity", label: "Community Integrity",   desc: "Card fraud, Discord abuse, tier bypass",  icon: ShieldAlert },
     { href: "/admin/user-health",        label: "User Health",            desc: "Churn risk, engagement & LTV",          icon: Activity },
     { href: "/admin/api-budget",         label: "API Budget",             desc: "Quota usage & burn rate",               icon: Gauge },
     { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
@@ -470,6 +471,7 @@ export default function AdminDashboard() {
       label: "Platform & Finance",
       tools: [
         { href: "/admin/security",               label: "Security Center",        icon: Lock },
+        { href: "/admin/community-integrity",    label: "Community Integrity",    icon: ShieldAlert },
         { href: "/admin/feature-flags",          label: "Feature Flags",          icon: Flag },
         { href: "/admin/api-budget",             label: "API Budget",             icon: Gauge },
         { href: "/admin/financial-projections",  label: "Financial Projections",  icon: DollarSign },

@@ -2,31 +2,31 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 41507,
-      "manualRemaining": 58493,
-      "lastReported": "2026-03-08T13:28:11.882Z",
+      "currentUsage": 41711,
+      "manualRemaining": 58289,
+      "lastReported": "2026-03-08T13:39:13.691Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T13:28:01.353Z"
+      "lastSeasonCheck": "2026-03-08T13:39:12.318Z"
     },
     "apifootball": {
       "currentUsage": 0,
-      "manualRemaining": 73948,
-      "lastReported": "2026-03-08T13:26:39.471Z",
+      "manualRemaining": 73932,
+      "lastReported": "2026-03-08T13:34:47.249Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T13:28:01.353Z"
+      "lastSeasonCheck": "2026-03-08T13:39:12.318Z"
     },
     "balldontlie": {
-      "currentUsage": 2170,
+      "currentUsage": 2195,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -5642,13 +5642,113 @@
         {
           "ts": 1772976494941,
           "count": 1
+        },
+        {
+          "ts": 1772976523065,
+          "count": 1
+        },
+        {
+          "ts": 1772976615510,
+          "count": 1
+        },
+        {
+          "ts": 1772976615522,
+          "count": 1
+        },
+        {
+          "ts": 1772976615532,
+          "count": 1
+        },
+        {
+          "ts": 1772976643793,
+          "count": 1
+        },
+        {
+          "ts": 1772976752901,
+          "count": 1
+        },
+        {
+          "ts": 1772976753281,
+          "count": 1
+        },
+        {
+          "ts": 1772976753288,
+          "count": 1
+        },
+        {
+          "ts": 1772976779510,
+          "count": 1
+        },
+        {
+          "ts": 1772976942631,
+          "count": 1
+        },
+        {
+          "ts": 1772976942664,
+          "count": 1
+        },
+        {
+          "ts": 1772976942673,
+          "count": 1
+        },
+        {
+          "ts": 1772976970843,
+          "count": 1
+        },
+        {
+          "ts": 1772977000228,
+          "count": 1
+        },
+        {
+          "ts": 1772977000232,
+          "count": 1
+        },
+        {
+          "ts": 1772977000244,
+          "count": 1
+        },
+        {
+          "ts": 1772977028430,
+          "count": 1
+        },
+        {
+          "ts": 1772977068020,
+          "count": 1
+        },
+        {
+          "ts": 1772977068023,
+          "count": 1
+        },
+        {
+          "ts": 1772977068047,
+          "count": 1
+        },
+        {
+          "ts": 1772977096393,
+          "count": 1
+        },
+        {
+          "ts": 1772977166124,
+          "count": 1
+        },
+        {
+          "ts": 1772977166133,
+          "count": 1
+        },
+        {
+          "ts": 1772977166147,
+          "count": 1
+        },
+        {
+          "ts": 1772977194282,
+          "count": 1
         }
       ],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T13:28:01.353Z"
+      "lastSeasonCheck": "2026-03-08T13:39:12.318Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -5660,7 +5760,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T13:28:01.353Z"
+      "lastSeasonCheck": "2026-03-08T13:39:12.318Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -5672,10 +5772,10 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-08T13:28:01.353Z"
+      "lastSeasonCheck": "2026-03-08T13:39:12.318Z"
     }
   },
   "activeUsers": 3,
-  "lastSaved": "2026-03-08T13:28:14.941Z",
+  "lastSaved": "2026-03-08T13:39:54.282Z",
   "alerts": []
 }

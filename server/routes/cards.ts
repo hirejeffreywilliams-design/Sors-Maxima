@@ -308,16 +308,32 @@ router.get("/hall-of-fame", async (req, res) => {
 // GET /api/cards/verify/:collectionId — verify card authenticity
 router.get("/verify/:collectionId", async (req, res) => {
   const { collectionId } = req.params;
+  const verifierIp = (req.headers["x-forwarded-for"] as string || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+  const verifierUA = req.headers["user-agent"] || null;
+  const collId = parseInt(collectionId);
+
   try {
     const [entry] = await db
       .select({ collection: userCardCollections, card: tradingCards, user: users })
       .from(userCardCollections)
       .innerJoin(tradingCards, eq(userCardCollections.cardId, tradingCards.id))
       .innerJoin(users, eq(userCardCollections.userId, users.id))
-      .where(eq(userCardCollections.id, parseInt(collectionId)))
+      .where(eq(userCardCollections.id, collId))
       .limit(1);
 
-    if (!entry) return res.status(404).json({ authentic: false, message: "Card not found" });
+    if (!entry) {
+      // Log failed lookup — could be someone sharing a fake/non-existent card
+      const { logCardVerification } = await import("../communityIntegrityEngine");
+      await logCardVerification({
+        collectionId: collId,
+        cardId: "unknown",
+        issuedToUserId: null,
+        verifierIp,
+        verifierUserAgent: verifierUA,
+        result: "not_found",
+      });
+      return res.status(404).json({ authentic: false, message: "Card not found" });
+    }
 
     const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
     const expectedSig = crypto
@@ -326,6 +342,18 @@ router.get("/verify/:collectionId", async (req, res) => {
       .digest("hex");
 
     const authentic = entry.collection.cardSignature === expectedSig;
+
+    // Log every verification attempt with outcome
+    const { logCardVerification } = await import("../communityIntegrityEngine");
+    await logCardVerification({
+      collectionId: collId,
+      cardId: entry.collection.cardId,
+      issuedToUserId: entry.collection.userId,
+      verifierIp,
+      verifierUserAgent: verifierUA,
+      result: authentic ? "authentic" : "tampered",
+    });
+
     res.json({
       authentic,
       verificationCode: entry.collection.cardSignature?.slice(-12).toUpperCase() || "LEGACY",

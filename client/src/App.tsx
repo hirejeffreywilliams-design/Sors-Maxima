@@ -62,6 +62,7 @@ const AdminPricingIntelligence = lazy(() => import("@/pages/admin-pricing-intell
 const AdminLaunchControl = lazy(() => import("@/pages/admin-launch-control"));
 const AdminOwnerPlaybook = lazy(() => import("@/pages/admin-owner-playbook"));
 const AdminMonetization = lazy(() => import("@/pages/admin-monetization"));
+const AdminCommunityIntegrity = lazy(() => import("@/pages/admin-community-integrity"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
@@ -236,6 +237,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/launch-control">{() => <AdminGuard component={AdminLaunchControl} authState={authState} />}</Route>
               <Route path="/admin/owner-playbook">{() => <AdminGuard component={AdminOwnerPlaybook} authState={authState} />}</Route>
               <Route path="/admin/monetization">{() => <AdminGuard component={AdminMonetization} authState={authState} />}</Route>
+              <Route path="/admin/community-integrity">{() => <AdminGuard component={AdminCommunityIntegrity} authState={authState} />}</Route>
               <Route path="/admin/update-planner">{() => <AdminGuard component={AdminUpdatePlanner} authState={authState} />}</Route>
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>

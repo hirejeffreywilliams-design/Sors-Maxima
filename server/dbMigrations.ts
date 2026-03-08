@@ -187,6 +187,114 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    // ── Community Integrity Tables ──────────────────────────────────────────
+    await db.execute(sql`
+      ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS card_signature TEXT
+    `);
+    await db.execute(sql`
+      ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS is_public_showcase BOOLEAN NOT NULL DEFAULT FALSE
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS card_verification_log (
+        id SERIAL PRIMARY KEY,
+        collection_id INTEGER NOT NULL,
+        card_id VARCHAR(50) NOT NULL,
+        issued_to_user_id INTEGER,
+        verifier_ip TEXT NOT NULL,
+        verifier_user_agent TEXT,
+        result TEXT NOT NULL CHECK (result IN ('authentic', 'not_found', 'tampered', 'error')),
+        verified_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cvl_collection_id ON card_verification_log(collection_id)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cvl_verifier_ip ON card_verification_log(verifier_ip)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cvl_verified_at ON card_verification_log(verified_at)
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS discord_operator_bindings (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        discord_user_id TEXT,
+        discord_username TEXT,
+        discord_server_id TEXT,
+        discord_server_name TEXT,
+        discord_member_count INTEGER,
+        webhook_url TEXT,
+        webhook_secret TEXT,
+        verified BOOLEAN NOT NULL DEFAULT FALSE,
+        verified_at TIMESTAMP,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'suspended', 'revoked')),
+        suspension_reason TEXT,
+        posts_sent INTEGER NOT NULL DEFAULT 0,
+        last_post_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_dob_user_id ON discord_operator_bindings(user_id)
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS community_fraud_alerts (
+        id SERIAL PRIMARY KEY,
+        alert_type TEXT NOT NULL,
+        severity TEXT NOT NULL CHECK (severity IN ('low', 'medium', 'high', 'critical')),
+        user_id INTEGER,
+        username TEXT,
+        collection_id INTEGER,
+        details JSONB NOT NULL DEFAULT '{}',
+        ip_address TEXT,
+        auto_actioned BOOLEAN NOT NULL DEFAULT FALSE,
+        action_taken TEXT,
+        reviewed BOOLEAN NOT NULL DEFAULT FALSE,
+        reviewed_by TEXT,
+        review_notes TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cfa_alert_type ON community_fraud_alerts(alert_type)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cfa_severity ON community_fraud_alerts(severity)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_cfa_reviewed ON community_fraud_alerts(reviewed)
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS tier_bypass_log (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        username TEXT,
+        user_tier TEXT NOT NULL DEFAULT 'none',
+        required_tier TEXT NOT NULL,
+        route TEXT NOT NULL,
+        ip_address TEXT,
+        user_agent TEXT,
+        attempted_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_tbl_user_id ON tier_bypass_log(user_id)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_tbl_attempted_at ON tier_bypass_log(attempted_at)
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);
