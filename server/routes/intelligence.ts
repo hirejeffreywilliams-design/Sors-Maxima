@@ -919,11 +919,24 @@ export function registerIntelligenceRoutes(app: Express): void {
 
   async function buildShowcasePayload() {
     const { getRecentPicks } = await import("../pickOutcomeTracker");
-    const settled = getRecentPicks({ status: "settled", limit: 5000 });
+    const allSettled = getRecentPicks({ status: "settled", limit: 5000 });
+
+    // Only include picks from games that have genuinely been played.
+    // Filter out picks whose gameTime is more than 2 hours in the future —
+    // these are pending games that got prematurely settled (gameTime drift / UTC offset).
+    const now = new Date();
+    const cutoff = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours buffer
+    const settled = allSettled.filter(p => {
+      if (!p.gameTime) return true; // no gameTime stored — keep it
+      const gt = new Date(p.gameTime);
+      return gt <= cutoff; // only keep games that are in the past or very near future
+    });
 
     const byDate: Record<string, typeof settled> = {};
     for (const p of settled) {
-      const d = (p.gameTime || p.savedAt || "").slice(0, 10);
+      // Group by settledAt date (when the result was confirmed), NOT gameTime.
+      // gameTime can be in UTC midnight which shifts the display date by a day.
+      const d = (p.settledAt || p.savedAt || p.gameTime || "").slice(0, 10);
       if (!d) continue;
       if (!byDate[d]) byDate[d] = [];
       byDate[d].push(p);
