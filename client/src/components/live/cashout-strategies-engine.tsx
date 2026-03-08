@@ -247,6 +247,377 @@ function LadderStepRow({ step, stake, totalLegs }: { step: LadderStep; stake: nu
   );
 }
 
+// ─── Structure Feedback ────────────────────────────────────────────────────────
+
+function StructureFeedback({ legs }: { legs: SweatLeg[] }) {
+  const anchors = legs.filter(l => l.role === "anchor");
+  const pressures = legs.filter(l => l.role === "pressure");
+  const firstPressureIdx = legs.findIndex(l => l.role === "pressure");
+  const lastAnchorIdx = legs.map(l => l.role).lastIndexOf("anchor");
+  const outOfOrder = firstPressureIdx !== -1 && lastAnchorIdx > firstPressureIdx;
+  const weakAnchors = anchors.filter(a => a.americanOdds > -110 || a.americanOdds > 0);
+  const extremePressure = pressures.filter(p => p.americanOdds > 350);
+
+  type Feedback = { type: "warn" | "tip" | "ok"; msg: string; detail?: string };
+
+  const feedback: Feedback[] = [];
+
+  if (legs.length === 0) return null;
+
+  if (outOfOrder) {
+    feedback.push({
+      type: "warn",
+      msg: "Anchors must come before pressure legs",
+      detail: "Reorder your legs so both heavy favorites appear first — this is what triggers the cashout spike.",
+    });
+  }
+  if (weakAnchors.length > 0) {
+    feedback.push({
+      type: "tip",
+      msg: `Anchor leg${weakAnchors.length > 1 ? "s" : ""} may be too risky`,
+      detail: `Anchors should be heavy favorites (-130 to -200). Weaker favorites reduce cashout pressure.`,
+    });
+  }
+  if (extremePressure.length > 0) {
+    feedback.push({
+      type: "tip",
+      msg: "Pressure leg odds are very high",
+      detail: `Odds above +350 can reduce cashout offers — books price these as near-impossible and hold back more.`,
+    });
+  }
+  if (anchors.length < 2 && legs.length >= 2) {
+    feedback.push({
+      type: "tip",
+      msg: "Two anchor legs work best",
+      detail: `One anchor leaves the book less nervous. Two anchors winning back-to-back creates peak cashout pressure.`,
+    });
+  }
+  if (pressures.length === 0 && anchors.length >= 2) {
+    feedback.push({
+      type: "tip",
+      msg: "Add a pressure leg to complete the structure",
+      detail: `Add 1–2 underdogs at the end (+120 to +250). This is what the book is worried about — and why they'll pay you to leave.`,
+    });
+  }
+  if (feedback.length === 0 && anchors.length >= 2 && pressures.length >= 1 && !outOfOrder) {
+    feedback.push({ type: "ok", msg: "Good structure — anchors first, pressure at the end." });
+  }
+
+  if (feedback.length === 0) return null;
+
+  return (
+    <div className="space-y-1.5">
+      {feedback.map((f, i) => {
+        const colors = {
+          warn: { bg: "rgba(239,68,68,0.07)", border: "rgba(239,68,68,0.22)", icon: "text-red-400", text: "text-red-300" },
+          tip:  { bg: "rgba(251,191,36,0.06)", border: "rgba(251,191,36,0.20)", icon: "text-yellow-400", text: "text-yellow-200/80" },
+          ok:   { bg: "rgba(52,211,153,0.06)", border: "rgba(52,211,153,0.20)", icon: "text-emerald-400", text: "text-emerald-200/80" },
+        }[f.type];
+        const Icon = f.type === "warn" ? AlertCircle : f.type === "ok" ? CheckCircle2 : Info;
+        return (
+          <div key={i} className="flex items-start gap-2.5 rounded-xl px-3 py-2.5 border" style={{ background: colors.bg, borderColor: colors.border }}>
+            <Icon className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${colors.icon}`} />
+            <div>
+              <p className={`text-[10px] font-bold ${colors.text}`}>{f.msg}</p>
+              {f.detail && <p className="text-[9px] text-white/40 mt-0.5 leading-snug">{f.detail}</p>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Lock & Roll Calculator ─────────────────────────────────────────────────────
+
+function LockRollCalculator() {
+  const [stake, setStake] = useState(100);
+  const [legs, setLegs] = useState(4);
+  const [totalOdds, setTotalOdds] = useState<string>("+650");
+
+  const decimalOdds = useMemo(() => {
+    const parsed = parseInt(totalOdds);
+    if (isNaN(parsed)) return 7.5;
+    return parsed > 0 ? 1 + parsed / 100 : 1 + 100 / Math.abs(parsed);
+  }, [totalOdds]);
+
+  const fullPayout = stake * decimalOdds;
+  const legValue = fullPayout / legs;
+
+  const stages = useMemo(() => {
+    let bankrolled = 0;
+    let remaining = stake;
+    return Array.from({ length: legs }, (_, i) => {
+      const parlayProgress = (i + 1) / legs;
+      const currentParlayValue = stake * Math.pow(decimalOdds, (i + 1) / legs);
+      const cashPct = i === 0 ? 0.30 : i === 1 ? 0.25 : i === legs - 1 ? 1 : 0;
+      const cashAmount = i < legs - 1 ? currentParlayValue * cashPct : currentParlayValue;
+      bankrolled += cashAmount;
+      remaining = Math.max(0, stake - bankrolled);
+      const netPosition = bankrolled - stake;
+      const atRisk = stake - Math.min(bankrolled, stake);
+      return {
+        leg: i + 1,
+        isLast: i === legs - 1,
+        cashPct: cashPct * 100,
+        cashAmount: Math.round(cashAmount),
+        bankrolled: Math.round(bankrolled),
+        atRisk: Math.round(atRisk),
+        netPosition: Math.round(netPosition),
+        parlayProgress: Math.round(parlayProgress * 100),
+        action: i === 0 ? "Take 30% partial cashout" : i === 1 ? "Take 25% more — risk now minimized" : i === legs - 1 ? "Let it ride — minimal exposure" : "Optional partial cashout",
+        status: netPosition > 0 ? "ahead" : atRisk === 0 ? "safe" : "exposed",
+      };
+    });
+  }, [stake, legs, decimalOdds]);
+
+  const noLossPoint = stages.find(s => s.atRisk === 0);
+
+  return (
+    <div className="space-y-4">
+      {/* Inputs */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Stake</label>
+          <div className="flex gap-1 flex-wrap">
+            {[25, 50, 100, 250].map(v => (
+              <button
+                key={v}
+                onClick={() => setStake(v)}
+                className="px-2 py-1 rounded-lg text-[9px] font-black border transition-all"
+                style={{ background: stake === v ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.04)", borderColor: stake === v ? "rgba(52,211,153,0.40)" : "rgba(255,255,255,0.08)", color: stake === v ? "#34d399" : "rgba(255,255,255,0.45)" }}
+                data-testid={`lockroll-stake-${v}`}
+              >${v}</button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Legs</label>
+          <div className="flex gap-1">
+            {[3, 4, 5, 6].map(v => (
+              <button
+                key={v}
+                onClick={() => setLegs(v)}
+                className="px-2.5 py-1 rounded-lg text-[9px] font-black border transition-all"
+                style={{ background: legs === v ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.04)", borderColor: legs === v ? "rgba(52,211,153,0.40)" : "rgba(255,255,255,0.08)", color: legs === v ? "#34d399" : "rgba(255,255,255,0.45)" }}
+                data-testid={`lockroll-legs-${v}`}
+              >{v}</button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Total Odds</label>
+          <Input
+            value={totalOdds}
+            onChange={e => setTotalOdds(e.target.value)}
+            placeholder="+650"
+            className="h-8 text-[11px] font-mono bg-white/5 border-white/10"
+            data-testid="lockroll-odds-input"
+          />
+        </div>
+      </div>
+
+      {/* No-loss point callout */}
+      {noLossPoint && (
+        <div className="flex items-start gap-2.5 rounded-xl px-3 py-2.5 border" style={{ background: "rgba(52,211,153,0.06)", borderColor: "rgba(52,211,153,0.22)" }}>
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-[10px] font-bold text-emerald-300">Minimum exposure point: after Leg {noLossPoint.leg}</p>
+            <p className="text-[9px] text-white/45 mt-0.5">After taking partial cashouts on legs 1 and 2, the remaining legs ride with your stake largely recovered. You've banked ${noLossPoint.bankrolled} of your ${stake} stake.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Stage breakdown */}
+      <div className="space-y-1.5">
+        <p className="text-[9px] font-black uppercase tracking-widest text-white/35">Stage-by-Stage Plan</p>
+        {stages.map(s => (
+          <div
+            key={s.leg}
+            className="rounded-xl px-3 py-2.5 border"
+            style={{
+              background: s.isLast ? "rgba(251,191,36,0.06)" : s.status === "ahead" ? "rgba(52,211,153,0.05)" : s.status === "safe" ? "rgba(52,211,153,0.04)" : "rgba(255,255,255,0.025)",
+              borderColor: s.isLast ? "rgba(251,191,36,0.20)" : s.status === "ahead" ? "rgba(52,211,153,0.18)" : s.status === "safe" ? "rgba(52,211,153,0.12)" : "rgba(255,255,255,0.06)",
+            }}
+            data-testid={`lockroll-stage-${s.leg}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shrink-0"
+                  style={{ background: s.isLast ? "rgba(251,191,36,0.20)" : "rgba(52,211,153,0.20)", color: s.isLast ? "#fbbf24" : "#34d399" }}
+                >
+                  {s.leg}
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold text-white/75">Leg {s.leg} wins</p>
+                  <p className="text-[9px] text-white/40">{s.action}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                {s.cashPct > 0 ? (
+                  <p className="text-[11px] font-black text-emerald-400">${s.cashAmount}</p>
+                ) : (
+                  <p className="text-[11px] font-black text-amber-400">${s.cashAmount}</p>
+                )}
+                <p className="text-[8px] text-white/30">{s.isLast ? "full remaining" : `${s.cashPct.toFixed(0)}% cashout`}</p>
+              </div>
+            </div>
+            <div className="flex gap-4 mt-1.5 text-[8px] text-white/30">
+              <span>Banked: <span className="text-white/55">${s.bankrolled}</span></span>
+              <span>Still at risk: <span className={s.atRisk === 0 ? "text-emerald-400" : "text-white/55"}>${s.atRisk}</span></span>
+              <span>Net: <span className={s.netPosition >= 0 ? "text-emerald-400" : "text-white/55"}>{s.netPosition >= 0 ? "+" : ""}${s.netPosition}</span></span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─── Steam Exit Calculator ──────────────────────────────────────────────────────
+
+function SteamExitCalculator() {
+  const [stake, setStake] = useState(50);
+  const [originalOdds, setOriginalOdds] = useState<string>("-110");
+  const [currentOdds, setCurrentOdds] = useState<string>("-118");
+  const [parlayOdds, setParlayOdds] = useState<string>("+420");
+
+  const origDecimal = useMemo(() => {
+    const p = parseInt(originalOdds);
+    if (isNaN(p)) return 1.91;
+    return p > 0 ? 1 + p / 100 : 1 + 100 / Math.abs(p);
+  }, [originalOdds]);
+
+  const currDecimal = useMemo(() => {
+    const p = parseInt(currentOdds);
+    if (isNaN(p)) return 1.85;
+    return p > 0 ? 1 + p / 100 : 1 + 100 / Math.abs(p);
+  }, [currentOdds]);
+
+  const parlayDecimal = useMemo(() => {
+    const p = parseInt(parlayOdds);
+    if (isNaN(p)) return 5.2;
+    return p > 0 ? 1 + p / 100 : 1 + 100 / Math.abs(p);
+  }, [parlayOdds]);
+
+  const origImplied = origDecimal > 1 ? 1 / origDecimal : 0;
+  const currImplied = currDecimal > 1 ? 1 / currDecimal : 0;
+  const clvGain = ((origImplied - currImplied) / origImplied) * 100;
+  const origInt = parseInt(originalOdds) || -110;
+  const currInt = parseInt(currentOdds) || -110;
+  const lineMove = currInt - origInt;
+  const thresholdMet = Math.abs(lineMove) >= 5;
+  const direction = lineMove > 0 ? "away from you" : "toward you";
+  const favorable = lineMove < 0;
+  const parlayPayout = stake * parlayDecimal;
+  const estimatedCashout = parlayPayout * (1 - currImplied) * 0.87;
+  const clvPremium = favorable ? estimatedCashout - stake : 0;
+
+  return (
+    <div className="space-y-4">
+      {/* Input grid */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Stake</label>
+          <div className="flex gap-1 flex-wrap">
+            {[25, 50, 100, 200].map(v => (
+              <button
+                key={v}
+                onClick={() => setStake(v)}
+                className="px-2 py-1 rounded-lg text-[9px] font-black border transition-all"
+                style={{ background: stake === v ? "rgba(167,139,250,0.15)" : "rgba(255,255,255,0.04)", borderColor: stake === v ? "rgba(167,139,250,0.40)" : "rgba(255,255,255,0.08)", color: stake === v ? "#a78bfa" : "rgba(255,255,255,0.45)" }}
+                data-testid={`steam-stake-${v}`}
+              >${v}</button>
+            ))}
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Parlay Total Odds</label>
+          <Input
+            value={parlayOdds}
+            onChange={e => setParlayOdds(e.target.value)}
+            placeholder="+420"
+            className="h-8 text-[11px] font-mono bg-white/5 border-white/10"
+            data-testid="steam-parlay-odds"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Original Leg Odds (when you bet)</label>
+          <Input
+            value={originalOdds}
+            onChange={e => setOriginalOdds(e.target.value)}
+            placeholder="-110"
+            className="h-8 text-[11px] font-mono bg-white/5 border-white/10"
+            data-testid="steam-original-odds"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-[9px] font-black uppercase tracking-wider text-white/40">Current Line (live market)</label>
+          <Input
+            value={currentOdds}
+            onChange={e => setCurrentOdds(e.target.value)}
+            placeholder="-118"
+            className="h-8 text-[11px] font-mono bg-white/5 border-white/10"
+            data-testid="steam-current-odds"
+          />
+          <p className="text-[8px] text-white/30">Enter the line as it stands RIGHT NOW</p>
+        </div>
+      </div>
+
+      {/* Movement analysis */}
+      <div
+        className="rounded-xl px-4 py-3 border"
+        style={{
+          background: favorable && thresholdMet ? "rgba(167,139,250,0.08)" : favorable ? "rgba(52,211,153,0.05)" : "rgba(239,68,68,0.05)",
+          borderColor: favorable && thresholdMet ? "rgba(167,139,250,0.28)" : favorable ? "rgba(52,211,153,0.18)" : "rgba(239,68,68,0.18)",
+        }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          {favorable && thresholdMet ? (
+            <><Zap className="w-4 h-4 text-violet-400" /><span className="text-[11px] font-black text-violet-300">Exit Window Open — Take the Cashout</span></>
+          ) : favorable ? (
+            <><TrendingUp className="w-4 h-4 text-emerald-400" /><span className="text-[11px] font-black text-emerald-300">Line Moving Your Way — Wait for +5 Points</span></>
+          ) : (
+            <><AlertCircle className="w-4 h-4 text-red-400" /><span className="text-[11px] font-black text-red-300">Line Moving Against You</span></>
+          )}
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-center">
+          {[
+            { label: "Line Move", value: `${lineMove > 0 ? "+" : ""}${lineMove} pts`, sub: direction, color: favorable ? "#34d399" : "#f87171" },
+            { label: "CLV Edge", value: `${clvGain >= 0 ? "+" : ""}${clvGain.toFixed(1)}%`, sub: "closing line value", color: favorable ? "#a78bfa" : "#94a3b8" },
+            { label: "Est. Cashout Premium", value: favorable && clvPremium > 0 ? `+$${clvPremium.toFixed(0)}` : "—", sub: "above stake", color: "#fbbf24" },
+          ].map(({ label, value, sub, color }) => (
+            <div key={label} className="rounded-lg px-2 py-2 border border-white/06" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <p className="text-[8px] text-white/30 uppercase tracking-wide">{label}</p>
+              <p className="text-[14px] font-black tabular-nums mt-0.5" style={{ color }}>{value}</p>
+              <p className="text-[7px] text-white/25 mt-0.5">{sub}</p>
+            </div>
+          ))}
+        </div>
+        {favorable && thresholdMet && (
+          <p className="text-[9px] text-violet-200/60 mt-2.5 leading-relaxed">
+            The line has moved {Math.abs(lineMove)} points in your favor. Your position is now worth more to the sportsbook than when you placed it. Cash out now to lock in your closing line value advantage — you don't need the ticket to win.
+          </p>
+        )}
+        {favorable && !thresholdMet && (
+          <p className="text-[9px] text-emerald-200/50 mt-2.5 leading-relaxed">
+            Good movement, but the threshold isn't met yet. Steam Exit™ works best when lines move 5+ points in your favor. The current {Math.abs(lineMove)}-point move gives you some edge, but holding for more movement will increase the cashout premium further.
+          </p>
+        )}
+        {!favorable && (
+          <p className="text-[9px] text-red-200/50 mt-2.5 leading-relaxed">
+            The line has moved against your position. This reduces your cashout value — consider whether to hold or accept a cashout below your original stake to minimize losses.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Sweat Builder ─────────────────────────────────────────────────────────────
 
 function SweatBuilder() {
@@ -334,6 +705,9 @@ function SweatBuilder() {
             "Needs work. Front-load heavy favorites and add at least one volatile underdog at the end."}
         </p>
       </div>
+
+      {/* Structure feedback — only shows when there's something actionable */}
+      <StructureFeedback legs={legs} />
 
       {/* Stake input */}
       <div className="flex items-center gap-3">
@@ -626,7 +1000,7 @@ export function CashoutStrategiesEngine() {
         <TabsList className="grid w-full grid-cols-2 max-w-xs">
           <TabsTrigger value="builder" className="gap-1.5 text-[11px]" data-testid="tab-builder">
             <BarChart2 className="w-3.5 h-3.5" />
-            Build & Simulate
+            {activeStrategy === "sweat" ? "Build & Simulate" : activeStrategy === "lock" ? "Cashout Planner" : "Exit Calculator"}
           </TabsTrigger>
           <TabsTrigger value="guide" className="gap-1.5 text-[11px]" data-testid="tab-guide">
             <Info className="w-3.5 h-3.5" />
@@ -635,7 +1009,9 @@ export function CashoutStrategiesEngine() {
         </TabsList>
 
         <TabsContent value="builder">
-          <SweatBuilder />
+          {activeStrategy === "sweat" && <SweatBuilder />}
+          {activeStrategy === "lock" && <LockRollCalculator />}
+          {activeStrategy === "steam" && <SteamExitCalculator />}
         </TabsContent>
 
         <TabsContent value="guide">
