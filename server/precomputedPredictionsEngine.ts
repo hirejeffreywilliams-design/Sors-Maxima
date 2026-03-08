@@ -2,7 +2,9 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
+import { tradingCards } from "./dbSchema";
+import { db } from "./db";
+import { eq, and, desc, or, gt } from "drizzle-orm";
 import { generateVegasPredictions } from "./vegas-engine";
 import {
   getSportPropCategories,
@@ -1734,6 +1736,44 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
   // Inject any already-generated AI insights into the new picks batch
   injectCachedInsights(finalPicks);
+
+  // Mint cards for high confidence picks (Grade A- or higher)
+  setImmediate(async () => {
+    for (const pick of finalPicks) {
+      if (pick.grade.startsWith("A")) {
+        try {
+          // Check if card already exists for this pick
+          const [existingCard] = await db
+            .select()
+            .from(tradingCards)
+            .where(eq(tradingCards.pickId, pick.id))
+            .limit(1);
+
+          if (!existingCard) {
+            await db.insert(tradingCards).values({
+              id: crypto.randomUUID(),
+              pickId: pick.id,
+              sport: pick.sport,
+              pick: pick.pick,
+              grade: pick.grade,
+              betType: pick.betType,
+              odds: pick.odds,
+              confidence: pick.confidence,
+              ev: pick.ev,
+              game: pick.game,
+              gameTime: new Date(pick.gameTime || Date.now()),
+              maxCopies: pick.grade === "A+" ? 10 : pick.grade === "A" ? 25 : 50,
+              copiesIssued: 0,
+              settledResult: "pending",
+              createdAt: new Date(),
+            });
+          }
+        } catch (err) {
+          console.error(`[PrecomputedEngine] Failed to mint card for pick ${pick.id}:`, err);
+        }
+      }
+    }
+  });
 
   predictionCache.set(sport, { snapshot, timestamp: Date.now(), sport });
 

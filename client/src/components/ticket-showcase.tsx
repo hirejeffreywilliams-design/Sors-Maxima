@@ -6,6 +6,7 @@ import {
   ChevronLeft, Check, X, Trophy, TrendingDown, Sparkles, CircleDollarSign,
   Calendar, ChevronRight, Star, Share2, Copy, CheckCheck
 } from "lucide-react";
+import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 
 interface ShowcaseLeg {
   sport: string;
@@ -385,13 +386,14 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
             isWin
               ? "border-emerald-500/40 bg-card"
               : "border-red-500/40 bg-card"
-          }`}
+          } ${getGradeShimmerClass(ticket.legs[0]?.grade)}`}
           style={{
             ...cardStyle,
+            ...gradeAmbientGlow(ticket.legs[0]?.grade),
             zIndex: 1,
             boxShadow: isWin
-              ? `0 0 50px rgba(34,197,94,0.35), 0 0 100px rgba(34,197,94,0.15), 0 8px 32px rgba(0,0,0,0.4)`
-              : `0 0 50px rgba(239,68,68,0.35), 0 0 100px rgba(239,68,68,0.15), 0 8px 32px rgba(0,0,0,0.4)`,
+              ? `${gradeAmbientGlow(ticket.legs[0]?.grade).boxShadow}, 0 0 50px rgba(34,197,94,0.35), 0 0 100px rgba(34,197,94,0.15), 0 8px 32px rgba(0,0,0,0.4)`
+              : `${gradeAmbientGlow(ticket.legs[0]?.grade).boxShadow}, 0 0 50px rgba(239,68,68,0.35), 0 0 100px rgba(239,68,68,0.15), 0 8px 32px rgba(0,0,0,0.4)`,
           }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}

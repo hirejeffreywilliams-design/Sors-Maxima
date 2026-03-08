@@ -16,6 +16,7 @@ import {
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 
 interface CapacityInfo {
   tailCount: number;
@@ -280,7 +281,8 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
           : rank <= 3
           ? "border-primary/20 bg-gradient-to-br from-primary/3 to-transparent"
           : "border-border hover:border-primary/20"
-      } ${isDiminished ? "opacity-75" : ""}`}
+      } ${isDiminished ? "opacity-75" : ""} ${getGradeShimmerClass(pick.grade)}`}
+      style={gradeAmbientGlow(pick.grade)}
       data-testid={`card-pick-${pick.id}`}
     >
       {isDiminished && (

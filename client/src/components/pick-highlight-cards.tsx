@@ -6,6 +6,7 @@ import {
   ChevronLeft, ChevronRight, Brain, TrendingUp
 } from "lucide-react";
 import { useRef, useState } from "react";
+import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 
 interface HighlightPick {
   id: string;
@@ -70,11 +71,12 @@ function PickCard({ pick }: { pick: HighlightPick }) {
     <div
       className={`shrink-0 w-[300px] sm:w-[340px] rounded-2xl border-2 overflow-hidden select-none ${
         isWin ? "border-emerald-500/50" : "border-red-500/40"
-      } bg-gradient-to-br from-card to-background`}
+      } bg-gradient-to-br from-card to-background ${getGradeShimmerClass(pick.grade)}`}
       style={{
+        ...gradeAmbientGlow(pick.grade),
         boxShadow: isWin
-          ? "0 0 45px rgba(34,197,94,0.35), 0 0 90px rgba(34,197,94,0.12), 0 4px 24px rgba(0,0,0,0.5)"
-          : "0 0 35px rgba(239,68,68,0.28), 0 0 70px rgba(239,68,68,0.08), 0 4px 24px rgba(0,0,0,0.5)",
+          ? `${gradeAmbientGlow(pick.grade).boxShadow}, 0 0 45px rgba(34,197,94,0.35), 0 0 90px rgba(34,197,94,0.12), 0 4px 24px rgba(0,0,0,0.5)`
+          : `${gradeAmbientGlow(pick.grade).boxShadow}, 0 0 35px rgba(239,68,68,0.28), 0 0 70px rgba(239,68,68,0.08), 0 4px 24px rgba(0,0,0,0.5)`,
       }}
       data-testid={`pick-card-${pick.id}`}
     >

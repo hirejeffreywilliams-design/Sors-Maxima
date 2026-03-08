@@ -11,6 +11,7 @@ import { registerNotificationRoutes } from "./routes/notifications";
 import { registerAiRoutes } from "./routes/ai";
 import { registerTicketRoutes } from "./routes/tickets";
 import { registerSorsbooksRoutes } from "./routes/sorsbooks";
+import cardsRouter from "./routes/cards";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -27,6 +28,8 @@ export async function registerRoutes(
   registerAiRoutes(app);
   registerTicketRoutes(app);
   registerSorsbooksRoutes(app);
+  
+  app.use("/api/cards", cardsRouter);
 
   return httpServer;
 }

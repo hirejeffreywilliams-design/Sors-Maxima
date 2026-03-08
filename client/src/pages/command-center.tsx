@@ -26,6 +26,7 @@ import { OffseasonPanel } from "@/components/offseason-panel";
 import { PickTrackNudge } from "@/components/pick-track-nudge";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { TicketShowcase } from "@/components/ticket-showcase";
+import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 
 interface TopPick {
   id: string;
@@ -309,7 +310,11 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
   };
 
   return (
-    <Card className="group border hover:border-primary/40 transition-all duration-200 overflow-hidden" data-testid={`card-ticket-${ticket.id}`}>
+    <Card
+      className={`group border hover:border-primary/40 transition-all duration-200 overflow-hidden ${getGradeShimmerClass(ticket.combinedGrade)}`}
+      style={gradeAmbientGlow(ticket.combinedGrade)}
+      data-testid={`card-ticket-${ticket.id}`}
+    >
       <div className={`h-1 w-full ${ticket.combinedGrade.startsWith("A") ? "bg-green-500" : ticket.combinedGrade.startsWith("B") ? "bg-blue-500" : "bg-yellow-500"}`} />
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
@@ -469,7 +474,8 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
 
   return (
     <div
-      className="group relative p-3 sm:p-4 rounded-lg bg-card border hover:border-primary/30 transition-all duration-200"
+      className={`group relative p-3 sm:p-4 rounded-lg bg-card border hover:border-primary/30 transition-all duration-200 ${getGradeShimmerClass(pick.grade)}`}
+      style={gradeAmbientGlow(pick.grade)}
       data-testid={`card-pick-${pick.id}`}
     >
       <div className="flex items-start justify-between gap-3">

@@ -4660,6 +4660,13 @@
       "brierScore": 0,
       "driftScore": 0,
       "predictions": 0
+    },
+    {
+      "date": "2026-03-08",
+      "accuracy": 51.6,
+      "brierScore": 0.2635,
+      "driftScore": 0.1361,
+      "predictions": 500
     }
   ],
   "totalSimulations": 0,

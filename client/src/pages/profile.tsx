@@ -63,10 +63,12 @@ import {
   Lock,
   ExternalLink,
   Crown,
+  ChevronRight,
 } from "lucide-react";
 import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
 import { Link } from "wouter";
 import { getCookieConsent, grantCookieConsent } from "@/components/cookie-consent";
+import { TradingCard } from "@/components/trading-card";
 
 type RiskTolerance = "conservative" | "moderate" | "aggressive";
 type BankrollStrategy = "flat" | "percentage" | "kelly";
@@ -1588,11 +1590,42 @@ function BetHistoryTab() {
 
 export default function ProfilePage() {
   useSEO({ title: "Profile", description: "Manage your account, betting profile, and bet history" });
+  const { data: cards } = useQuery<any[]>({ 
+    queryKey: ["/api/cards/collection"],
+    select: (data) => data.filter((item: any) => item.collection.isShowcase)
+  });
 
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <ProfileHero />
+
+        {cards && cards.length > 0 && (
+          <section className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xl font-black tracking-tight flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                Card Showcase
+              </h3>
+              <Link href="/cards">
+                <Button variant="ghost" size="sm" className="text-xs gap-1">
+                  View All <ChevronRight className="w-3 h-3" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {cards.slice(0, 6).map((item) => (
+                <div key={item.collection.id} className="scale-75 origin-top -mb-24 sm:-mb-20">
+                  <TradingCard 
+                    card={item.card} 
+                    instanceNumber={item.collection.instanceNumber}
+                    className="w-full"
+                  />
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         <Tabs defaultValue="profile" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md" data-testid="profile-tabs">

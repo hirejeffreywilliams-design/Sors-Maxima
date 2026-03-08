@@ -17,6 +17,7 @@ export const ALL_NAV_ITEMS: NavItemDef[] = [
   { id: "props",     href: "/player-props",    label: "Props",     iconName: "Star" },
   { id: "community", href: "/community",       label: "Community", iconName: "Users" },
   { id: "watchlist", href: "/watchlist",       label: "Watchlist", iconName: "Eye" },
+  { id: "cards",     href: "/cards",           label: "Cards",     iconName: "Trophy" },
   { id: "record",    href: "/track-record",    label: "Record",    iconName: "BarChart2" },
   { id: "bankroll",  href: "/bankroll",        label: "Bankroll",  iconName: "Wallet" },
   { id: "profile",   href: "/profile",         label: "Profile",   iconName: "User" },

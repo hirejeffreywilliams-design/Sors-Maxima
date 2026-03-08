@@ -311,6 +311,16 @@
   }
 }
 
+@keyframes shimmer-border {
+  0% { border-color: rgba(245, 158, 11, 0.3); }
+  50% { border-color: rgba(245, 158, 11, 0.8); }
+  100% { border-color: rgba(245, 158, 11, 0.3); }
+}
+
+.animate-shimmer-border {
+  animation: shimmer-border 2s infinite ease-in-out;
+}
+
 /* ── Sports Ticker Scroll Animation ─────────────────────── */
 @keyframes ticker-scroll {
   0%   { transform: translateX(0); }

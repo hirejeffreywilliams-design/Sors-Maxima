@@ -75,6 +75,7 @@ const OddsCenter = lazy(() => import("@/pages/odds-center"));
 const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
+const CardsPage = lazy(() => import("@/pages/cards"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
@@ -318,6 +319,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
         <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
+        <Route path="/cards" component={CardsPage} />
         <Route path="/verify-email" component={VerifyEmail} />
         <Route component={NotFound} />
       </Switch>
@@ -366,6 +368,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },
   "/strategy":             { label: "Strategy Advisor",     parent: "/" },
   "/onboarding":           { label: "Onboarding",           parent: "/" },
+  "/cards":                { label: "Sors Cards",           parent: "/" },
   "/dashboard":            { label: "Dashboard",            parent: "/" },
 };
 

@@ -142,6 +142,51 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS trading_cards (
+        id VARCHAR(50) PRIMARY KEY,
+        pick_id TEXT,
+        sport TEXT NOT NULL,
+        pick TEXT NOT NULL,
+        grade TEXT NOT NULL,
+        bet_type TEXT NOT NULL,
+        odds NUMERIC NOT NULL,
+        confidence NUMERIC NOT NULL,
+        ev NUMERIC NOT NULL,
+        game TEXT NOT NULL,
+        game_time TIMESTAMP NOT NULL,
+        max_copies INTEGER NOT NULL,
+        copies_issued INTEGER NOT NULL DEFAULT 0,
+        settled_result TEXT DEFAULT 'pending',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS user_card_collections (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        card_id VARCHAR(50) NOT NULL REFERENCES trading_cards(id) ON DELETE CASCADE,
+        instance_number INTEGER NOT NULL,
+        acquired_via TEXT NOT NULL,
+        acquired_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        is_showcase BOOLEAN NOT NULL DEFAULT FALSE
+      )
+    `);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS card_trades (
+        id SERIAL PRIMARY KEY,
+        from_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        to_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        offered_collection_ids JSONB NOT NULL DEFAULT '[]',
+        requested_card_id VARCHAR(50) REFERENCES trading_cards(id) ON DELETE SET NULL,
+        message TEXT,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);
