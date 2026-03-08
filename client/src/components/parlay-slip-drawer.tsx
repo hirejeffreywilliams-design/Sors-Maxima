@@ -441,46 +441,65 @@ function getBetQualityIssue(leg: ParlaySlipLeg): BetQualityIssue | null {
   return null;
 }
 
+const SPORT_EMOJI: Record<string, string> = {
+  NBA: "🏀", NFL: "🏈", MLB: "⚾", NHL: "🏒", NCAAB: "🏀", NCAAF: "🏈", MMA: "🥊", SOCCER: "⚽",
+};
+
+function legGradeBorder(grade?: string): string {
+  if (!grade) return "border-l-border";
+  if (grade.startsWith("A")) return "border-l-green-500";
+  if (grade.startsWith("B")) return "border-l-blue-500";
+  if (grade.startsWith("C")) return "border-l-yellow-500";
+  return "border-l-red-500";
+}
+
 function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean }) {
   const Icon = marketIcons[leg.market] || TrendingUp;
   const [alertDismissed, setAlertDismissed] = useState(false);
   const qualityIssue = getBetQualityIssue(leg);
+  const formattedOdds = formatOdds(leg.americanOdds, leg.decimalOdds);
+  const isPositiveOdds = (leg.americanOdds ?? 0) > 0;
 
   return (
-    <div className="flex items-start gap-2 py-2 px-1 group" data-testid={`slip-leg-${leg.id}`}>
-      <div className="mt-0.5 p-1 rounded-md bg-primary/10">
-        <Icon className="h-3 w-3 text-primary" />
-      </div>
+    <div className={`flex items-start gap-2 py-2 px-1 pl-2.5 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent`} data-testid={`slip-leg-${leg.id}`}>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="font-medium text-xs truncate">{leg.team}</span>
-          {leg.opponent && (
-            <span className="text-[10px] text-muted-foreground truncate">vs {leg.opponent}</span>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-[10px] text-muted-foreground capitalize">{leg.market.replace("_", " ")}</span>
-          <span className="text-[10px] font-medium">{leg.outcome}</span>
-        </div>
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          <Badge variant="outline" className="text-[10px] h-4 px-1">
-            {formatOdds(leg.americanOdds, leg.decimalOdds)}
-          </Badge>
-          {leg.grade && (
-            <Badge variant="outline" className={`text-[10px] h-4 px-1 font-bold ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
-              {leg.grade}
-            </Badge>
-          )}
-          {leg.confidence && (
-            <Badge variant="secondary" className="text-[10px] h-4 px-1">
-              {Math.round(leg.confidence)}%
-            </Badge>
-          )}
-          {leg.evPercent !== undefined && leg.evPercent > 0 && (
-            <Badge className="text-[10px] h-4 px-1 bg-green-500/20 text-green-600 border-green-500/30">
-              +{leg.evPercent.toFixed(1)}% EV
-            </Badge>
-          )}
+        <div className="flex items-start justify-between gap-1">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {leg.sport && (
+                <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground uppercase tracking-wide shrink-0">
+                  {SPORT_EMOJI[leg.sport] ?? ""} {leg.sport}
+                </span>
+              )}
+              {leg.grade && (
+                <Badge variant="outline" className={`text-[9px] h-4 px-1 font-bold shrink-0 ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
+                  {leg.grade}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-1 mt-0.5">
+              <Icon className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
+              <span className="text-[10px] text-muted-foreground capitalize">{(leg.market || "").replace(/_/g, " ")}</span>
+            </div>
+            <p className="text-xs font-semibold mt-0.5 leading-tight truncate" data-testid={`slip-outcome-${leg.id}`}>{leg.outcome}</p>
+            <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
+              <span className="truncate">{leg.team}{leg.opponent ? ` vs ${leg.opponent}` : ""}</span>
+            </div>
+            {leg.gameTime && (
+              <p className="text-[9px] text-muted-foreground/60 mt-0.5">{formatGameDate(leg.gameTime)}</p>
+            )}
+          </div>
+          <div className="flex flex-col items-end gap-0.5 shrink-0">
+            <span className={`text-sm font-bold font-mono tabular-nums ${isPositiveOdds ? "text-emerald-500" : "text-foreground"}`}>
+              {formattedOdds}
+            </span>
+            {leg.evPercent !== undefined && leg.evPercent > 0 && (
+              <span className="text-[9px] font-bold text-emerald-500/80">+{leg.evPercent.toFixed(1)}% EV</span>
+            )}
+            {leg.confidence && (
+              <span className="text-[9px] text-muted-foreground">{Math.round(leg.confidence)}% conf</span>
+            )}
+          </div>
         </div>
         {!compact && leg.monteCarloData && (
           <div className="mt-1 px-1.5 py-1 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
@@ -1092,17 +1111,35 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
   if (legCount === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-3">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
-          <Sparkles className="h-6 w-6 text-muted-foreground" />
+      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-4 py-6">
+        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+          <Ticket className="h-7 w-7 text-primary/60" />
         </div>
-        <div>
-          <p className="font-medium text-sm">Your slip is empty</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Add picks from any page to start building your parlay
+        <div className="space-y-1">
+          <p className="font-bold text-sm">No picks yet</p>
+          <p className="text-xs text-muted-foreground leading-relaxed max-w-[220px]">
+            Add picks from Daily Picks, Odds Center, or Live Center to start building your parlay.
           </p>
         </div>
-        <Button variant="outline" size="sm" asChild>
+        <div className="flex flex-col gap-1.5 w-full max-w-[220px]">
+          <Button variant="default" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
+            <Link href="/daily">
+              <Sparkles className="h-3.5 w-3.5" />
+              Browse Today's Picks
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
+            <Link href="/odds-center">
+              <BarChart3 className="h-3.5 w-3.5" />
+              Compare Odds
+            </Link>
+          </Button>
+        </div>
+        <div className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
+          <Zap className="h-2.5 w-2.5" />
+          First pick auto-opens this slip
+        </div>
+        <Button variant="outline" size="sm" asChild className="hidden">
           <Link href="/">
             <Sparkles className="h-3.5 w-3.5 mr-1" />
             Browse Picks
@@ -1301,21 +1338,46 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     <>
       {showHoloCard && <SlipShareCard {...holoPayloadDesktop} onClose={() => setShowHoloCard(false)} />}
       <SlipTabBar />
-      <div className="px-3 py-2 bg-muted/30 border-b flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-xs font-bold">
-            {legCount} leg{legCount !== 1 ? "s" : ""}
-          </Badge>
-          <span className="text-xs font-bold">{formattedTotalOdds}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="text-right">
-            <span className="text-xs text-green-600 dark:text-green-400 font-bold">Win ${toWinAmount}</span>
+      <div className="px-3 pt-2.5 pb-2 bg-gradient-to-br from-primary/8 via-primary/5 to-transparent border-b space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center justify-center bg-primary text-primary-foreground rounded-full h-6 w-6 text-[10px] font-black shrink-0">
+              {legCount}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground leading-none">Combined Odds</p>
+              <p className="text-base font-black tabular-nums leading-tight">{formattedTotalOdds}</p>
+            </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={clearSlip} className="text-[10px] text-destructive hover:text-destructive h-6 px-1.5" data-testid="button-clear-slip">
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          <div className="flex items-start gap-2 shrink-0">
+            <div className="text-right">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider leading-none">To Win</p>
+              <p className="text-lg font-black text-emerald-500 tabular-nums leading-tight" data-testid="desktop-to-win">${toWinAmount}</p>
+            </div>
+            <Button variant="ghost" size="icon" onClick={clearSlip} className="h-6 w-6 text-muted-foreground/40 hover:text-destructive mt-0.5 shrink-0" data-testid="button-clear-slip" title="Clear slip">
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
         </div>
+        {legs.length > 1 && (
+          <div className="flex items-center gap-0.5">
+            {legs.map((leg, i) => {
+              const bg = leg.grade?.startsWith("A") ? "bg-green-500" : leg.grade?.startsWith("B") ? "bg-blue-500" : leg.grade?.startsWith("C") ? "bg-yellow-500" : "bg-muted-foreground/40";
+              return (
+                <div key={leg.id} className="flex items-center gap-0.5 flex-1">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className={`h-1.5 w-full rounded-full ${bg}`} />
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="text-[10px]">Leg {i + 1}: {leg.outcome} ({leg.grade ?? "?"})</TooltipContent>
+                  </Tooltip>
+                  {i < legs.length - 1 && <div className="w-1 h-px bg-muted-foreground/20 shrink-0" />}
+                </div>
+              );
+            })}
+            <span className="text-[8px] text-muted-foreground/50 ml-1.5 shrink-0 tabular-nums">{totalOdds.toFixed(2)}x</span>
+          </div>
+        )}
       </div>
 
       <ScrollArea className="flex-1">
@@ -1350,45 +1412,57 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </div>
       )}
 
-      <div className="border-t bg-background px-3 py-2 space-y-1.5">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">Stake $</span>
-          <Input
-            type="number"
-            min={1}
-            max={100000}
-            value={stake}
-            onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
-            className="h-6 w-16 text-[10px] font-medium"
-            data-testid="input-stake"
-          />
-          <div className="flex gap-0.5 flex-1">
-            {[10, 25, 50, 100].map((amt) => (
-              <Button
-                key={amt}
-                variant={stake === amt ? "default" : "outline"}
-                size="sm"
-                className="h-6 px-1 text-[10px] flex-1 min-w-0"
-                onClick={() => setStake(amt)}
-                data-testid={`button-stake-${amt}`}
-              >
-                ${amt}
-              </Button>
-            ))}
+      <div className="border-t bg-background px-3 py-2.5 space-y-2">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-muted-foreground whitespace-nowrap font-medium">Stake</span>
+            <div className="flex items-center flex-1 gap-1">
+              <span className="text-[10px] text-muted-foreground">$</span>
+              <Input
+                type="number"
+                min={1}
+                max={100000}
+                value={stake}
+                onChange={(e) => setStake(Math.max(1, Number(e.target.value) || 1))}
+                className="h-6 w-14 text-[10px] font-bold px-1.5"
+                data-testid="input-stake"
+              />
+            </div>
+            <div className="flex gap-0.5">
+              {stakePresets.map(({ label, value, testId }) => (
+                <Button
+                  key={testId}
+                  variant={stake === value ? "default" : "outline"}
+                  size="sm"
+                  className="h-6 px-1.5 text-[9px] font-medium"
+                  onClick={() => setStake(value)}
+                  data-testid={testId}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
           </div>
+          {bankrollPct !== null && (
+            <p className={`text-[9px] font-medium ${parseFloat(bankrollPct) > 10 ? "text-amber-500" : parseFloat(bankrollPct) > 5 ? "text-yellow-500" : "text-emerald-500"}`} data-testid="bankroll-pct-desktop">
+              {bankrollPct}% of ${bankrollData!.bankroll.toLocaleString()} bankroll{parseFloat(bankrollPct) > 10 ? " — consider reducing" : ""}
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Odds</span>
-          <span className="font-bold">{formattedTotalOdds} ({totalOdds.toFixed(2)}x)</span>
-        </div>
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground font-medium">To Win</span>
-          <span className="font-bold text-green-600 dark:text-green-400">${toWinAmount}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Return (incl. stake)</span>
-          <span className="font-medium text-muted-foreground">${totalReturn}</span>
+        <div className="rounded-lg bg-muted/40 border px-2.5 py-2 space-y-1">
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground">Odds</span>
+            <span className="font-mono font-bold">{formattedTotalOdds} <span className="text-muted-foreground font-normal">({totalOdds.toFixed(2)}x)</span></span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground font-medium">To Win</span>
+            <span className="text-xl font-black text-emerald-500 tabular-nums leading-none">${toWinAmount}</span>
+          </div>
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground">Total Return</span>
+            <span className="font-medium text-muted-foreground">${totalReturn}</span>
+          </div>
         </div>
 
         <MCSimulationPanel legs={legs} stake={stake} compact />

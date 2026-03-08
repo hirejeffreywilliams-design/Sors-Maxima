@@ -256,6 +256,146 @@
   ],
   "reports": [
     {
+      "id": "report_1773005304060_ghn78",
+      "timestamp": "2026-03-08T21:28:24.061Z",
+      "durationMs": 8211,
+      "summary": [
+        "Win rate at 52.9% is above break-even but declining, with potential risks observed in Total category at 49.7%.",
+        "Calibration error alert exists, exceeding the threshold; needs immediate investigation.",
+        "The API service for balldontlie is critical; current usage is below expected limits but projected to exceed budget; immediate action required."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate Calibration Error",
+          "description": "Assess and rectify the calibration_error of 0.1440 that is above the acceptable threshold of 0.08.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 2
+        },
+        {
+          "title": "Throttling for balldontlie API",
+          "description": "Implement throttling measures for balldontlie service to ensure budget compliance and reduce call frequency.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Enhance Total Market Win Rate",
+          "description": "Analyze picks in the Total market for improvement opportunities, as the current win rate is at 49.7%.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 3
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Calibration Error Exceeding Threshold",
+          "description": "Calibration error of 0.1440 exceeds the permissible limit of 0.08, indicating a potential model issue that may affect predictive accuracy.",
+          "severity": "critical"
+        },
+        {
+          "title": "Critical balldontlie API Status",
+          "description": "The balldontlie API is at critical status due to a projected budget exceedance; immediate mitigation is necessary.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Investigate calibration error and potential causes.",
+          "Implement throttling strategies for the balldontlie API.",
+          "Review Total market performance and identify key issues."
+        ],
+        "this_week": [
+          "Initiate a comprehensive analysis of market win rates, focusing on improving totals.",
+          "Monitor API usage across all services to avoid further critical alerts.",
+          "Report findings from calibration error assessment to ensure model reliability."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.9,
+        "settledPicks": 530,
+        "oddsApiRemaining": 50956,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 90,
+        "cacheHitRate": 33,
+        "heapUsedMb": 69,
+        "heapTotalMb": 83,
+        "hubLastCycleMs": 6,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate at 52.9% is above break-even but declining, with potential risks observed in Total category at 49.7%.\",\n    \"Calibration error alert exists, exceeding the threshold; needs immediate investigation.\",\n    \"The API service for balldontlie is critical; current usage is below expected limits but projected to exceed budget; immediate action required.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Calibration Error\",\n      \"description\": \"Assess and rectify the calibration_error of 0.1440 that is above the acceptable threshold of 0.08.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Throttling for balldontlie API\",\n      \"description\": \"Implement throttling measures for balldontlie service to ensure budget compliance and reduce call frequency.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Enhance Total Market Win Rate\",\n      \"description\": \"Analyze picks in the Total market for improvement opportunities, as the current win rate is at 49.7%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Calibration Error Exceeding Threshold\",\n      \"description\": \"Calibration error of 0.1440 exceeds the permissible limit of 0.08, indicating a potential model issue that may affect predictive accuracy.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Critical balldontlie API Status\",\n      \"description\": \"The balldontlie API is at critical status due to a projected budget exceedance; immediate mitigation is necessary.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate calibration error and potential causes.\",\n      \"Implement throttling strategies for the balldontlie API.\",\n      \"Review Total market performance and identify key issues.\"\n    ],\n    \"this_week\": [\n      \"Initiate a comprehensive analysis of market win rates, focusing on improving totals.\",\n      \"Monitor API usage across all services to avoid further critical alerts.\",\n      \"Report findings from calibration error assessment to ensure model reliability.\"\n    ]\n  }\n}"
+    },
+    {
+      "id": "report_1773003584524_nipb6",
+      "timestamp": "2026-03-08T20:59:44.524Z",
+      "durationMs": 7208,
+      "summary": [
+        "Win rate is at 53%, above break-even threshold.",
+        "Critical alert: Balldontlie API status is critical; current usage indicates potential budget overage.",
+        "Pipeline alert indicates calibration error exceeds acceptable range.",
+        "Active user count is stable; slight increase in new users."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Adjust Balldontlie API Polling",
+          "description": "Reduce polling for Balldontlie API to 1 minute intervals to prevent budget overage.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Investigate Calibration Error",
+          "description": "Analyze the cause of the calibration error exceeding the threshold and implement corrective actions.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 2
+        },
+        {
+          "title": "Monitor User Engagement",
+          "description": "Review user engagement metrics to ensure steady user growth and retention, especially following new user increase.",
+          "priority": "P3",
+          "due_by": "this_week",
+          "effort_hours": 2
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Balldontlie API Budget Risk",
+          "description": "Critical risk of exceeding budget for Balldontlie API due to high current usage.",
+          "severity": "critical"
+        },
+        {
+          "title": "Calibration Error",
+          "description": "Calibration error exceeds the acceptable threshold; potential impact on model accuracy and performance.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Adjust Balldontlie API polling settings.",
+          "Communicate with technical team about the calibration error."
+        ],
+        "this_week": [
+          "Investigate and resolve the calibration issue.",
+          "Assess user engagement strategies based on recent growth.",
+          "Review API budget usage across all services."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 53,
+        "settledPicks": 527,
+        "oddsApiRemaining": 51205,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 80,
+        "cacheHitRate": 33,
+        "heapUsedMb": 67,
+        "heapTotalMb": 73,
+        "hubLastCycleMs": 8,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate is at 53%, above break-even threshold.\",\n    \"Critical alert: Balldontlie API status is critical; current usage indicates potential budget overage.\",\n    \"Pipeline alert indicates calibration error exceeds acceptable range.\",\n    \"Active user count is stable; slight increase in new users.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Balldontlie API Polling\",\n      \"description\": \"Reduce polling for Balldontlie API to 1 minute intervals to prevent budget overage.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Investigate Calibration Error\",\n      \"description\": \"Analyze the cause of the calibration error exceeding the threshold and implement corrective actions.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Monitor User Engagement\",\n      \"description\": \"Review user engagement metrics to ensure steady user growth and retention, especially following new user increase.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Balldontlie API Budget Risk\",\n      \"description\": \"Critical risk of exceeding budget for Balldontlie API due to high current usage.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Calibration Error\",\n      \"description\": \"Calibration error exceeds the acceptable threshold; potential impact on model accuracy and performance.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust Balldontlie API polling settings.\",\n      \"Communicate with technical team about the calibration error.\"\n    ],\n    \"this_week\": [\n      \"Investigate and resolve the calibration issue.\",\n      \"Assess user engagement strategies based on recent growth.\",\n      \"Review API budget usage across all services.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1772911484937_fjqyc",
       "timestamp": "2026-03-07T19:24:44.937Z",
       "durationMs": 9426,
@@ -1330,8 +1470,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-08T19:29:09.293Z",
-  "lastDeepCheck": "2026-03-07T19:24:44.937Z",
-  "totalQuickChecks": 91,
-  "totalDeepChecks": 17
+  "lastQuickCheck": "2026-03-08T22:16:57.606Z",
+  "lastDeepCheck": "2026-03-08T21:28:24.061Z",
+  "totalQuickChecks": 96,
+  "totalDeepChecks": 19
 }

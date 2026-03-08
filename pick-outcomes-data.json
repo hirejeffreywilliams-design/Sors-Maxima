@@ -1103,6 +1103,54 @@
       "ev": 27.91,
       "gameTime": "2026-03-10T22:30Z",
       "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851521-spread-b8db9cf33b",
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "game": "Mercyhurst Lakers @ Long Island University Sharks",
+      "homeTeam": "Long Island University Sharks",
+      "awayTeam": "Mercyhurst Lakers",
+      "pick": "Long Island University Sharks +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 79,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T21:29:39.013Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851521-moneyline-0c42a3168a",
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "game": "Mercyhurst Lakers @ Long Island University Sharks",
+      "homeTeam": "Long Island University Sharks",
+      "awayTeam": "Mercyhurst Lakers",
+      "pick": "Long Island University Sharks ML",
+      "betType": "moneyline",
+      "odds": -135,
+      "grade": "B+",
+      "confidence": 63,
+      "ev": 18.37,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T21:29:39.013Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851521-total-5b3faf51df",
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "game": "Mercyhurst Lakers @ Long Island University Sharks",
+      "homeTeam": "Long Island University Sharks",
+      "awayTeam": "Mercyhurst Lakers",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 61,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T21:29:39.013Z"
     }
   ],
   "settled": [
@@ -11958,26 +12006,206 @@
       "homeScore": 125,
       "awayScore": 116,
       "settledAt": "2026-03-08T19:40:20.311Z"
+    },
+    {
+      "id": "precomp-NHL-401803362-total-876a3defdc",
+      "gameId": "401803362",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -118,
+      "grade": "F",
+      "confidence": 56,
+      "ev": -40.88,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-08T20:46:09.464Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-08T20:47:16.294Z"
+    },
+    {
+      "id": "precomp-NHL-401803361-total-f396f7c6ea",
+      "gameId": "401803361",
+      "sport": "NHL",
+      "game": "Utah Mammoth @ Chicago Blackhawks",
+      "homeTeam": "Chicago Blackhawks",
+      "awayTeam": "Utah Mammoth",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -124,
+      "grade": "C",
+      "confidence": 52,
+      "ev": -33.16,
+      "gameTime": "2026-03-10T00:30Z",
+      "savedAt": "2026-03-08T20:55:59.071Z",
+      "result": "won",
+      "homeScore": 4,
+      "awayScore": 5,
+      "settledAt": "2026-03-08T20:56:16.737Z"
+    },
+    {
+      "id": "precomp-NHL-401803366-spread-6f603c9b4f",
+      "gameId": "401803366",
+      "sport": "NHL",
+      "game": "Columbus Blue Jackets @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Columbus Blue Jackets",
+      "pick": "Tampa Bay Lightning +0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 60,
+      "ev": -16,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T21:00:59.750Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 5,
+      "settledAt": "2026-03-08T21:01:17.450Z"
+    },
+    {
+      "id": "precomp-NHL-401803366-moneyline-ba5604dea3",
+      "gameId": "401803366",
+      "sport": "NHL",
+      "game": "Columbus Blue Jackets @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Columbus Blue Jackets",
+      "pick": "Tampa Bay Lightning ML",
+      "betType": "moneyline",
+      "odds": -113,
+      "grade": "C",
+      "confidence": 59,
+      "ev": -17.06,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T21:00:59.750Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 5,
+      "settledAt": "2026-03-08T21:01:17.450Z"
+    },
+    {
+      "id": "precomp-NBA-401810792-moneyline-c4a4b940a4",
+      "gameId": "401810792",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Brooklyn Nets ML",
+      "betType": "moneyline",
+      "odds": 286,
+      "grade": "D+",
+      "confidence": 62,
+      "ev": 77.56,
+      "gameTime": "2026-03-10T23:30Z",
+      "savedAt": "2026-03-08T22:17:12.426Z",
+      "result": "lost",
+      "homeScore": 105,
+      "awayScore": 107,
+      "settledAt": "2026-03-08T22:17:29.882Z"
+    },
+    {
+      "id": "precomp-NBA-401810792-spread-8ee2e9b671",
+      "gameId": "401810792",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Brooklyn Nets -3.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 56,
+      "ev": -27.45,
+      "gameTime": "2026-03-10T23:30Z",
+      "savedAt": "2026-03-08T22:17:12.426Z",
+      "result": "lost",
+      "homeScore": 105,
+      "awayScore": 107,
+      "settledAt": "2026-03-08T22:17:29.882Z"
+    },
+    {
+      "id": "precomp-NBA-401810792-total-021dff3801",
+      "gameId": "401810792",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Brooklyn Nets",
+      "homeTeam": "Brooklyn Nets",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Over 220",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 55,
+      "ev": -27.45,
+      "gameTime": "2026-03-10T23:30Z",
+      "savedAt": "2026-03-08T22:17:12.426Z",
+      "result": "lost",
+      "homeScore": 105,
+      "awayScore": 107,
+      "settledAt": "2026-03-08T22:17:29.882Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-55e7851407cc",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Washington Wizards @ Miami Heat",
+      "homeTeam": "Miami Heat",
+      "awayTeam": "Washington Wizards",
+      "pick": "Washington Wizards +7",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 64,
+      "ev": 12.64,
+      "gameTime": "2026-03-08T22:22:11.955Z",
+      "savedAt": "2026-03-08T22:22:11.955Z",
+      "result": "won",
+      "homeScore": 120,
+      "awayScore": 128,
+      "settledAt": "2026-03-08T22:22:30.389Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-a55170324f59",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ Sacramento Kings",
+      "homeTeam": "Sacramento Kings",
+      "awayTeam": "Indiana Pacers",
+      "pick": "Over 220",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 64,
+      "ev": 12.64,
+      "gameTime": "2026-03-08T22:22:11.955Z",
+      "savedAt": "2026-03-08T22:22:11.955Z",
+      "result": "won",
+      "homeScore": 128,
+      "awayScore": 117,
+      "settledAt": "2026-03-08T22:22:30.394Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 526,
-      "won": 272,
-      "lost": 242,
+      "total": 535,
+      "won": 276,
+      "lost": 247,
       "push": 12,
-      "rate": 51.7,
-      "pending": 69
+      "rate": 51.6,
+      "pending": 72
     },
     "bySport": {
       "NBA": {
-        "total": 178,
-        "won": 88,
-        "rate": 49.4
+        "total": 183,
+        "won": 90,
+        "rate": 49.2
       },
       "NHL": {
-        "total": 193,
-        "won": 96,
+        "total": 197,
+        "won": 98,
         "rate": 49.7
       },
       "NCAAB": {
@@ -11993,9 +12221,9 @@
         "rate": 64.9
       },
       "B": {
-        "total": 39,
-        "won": 27,
-        "rate": 69.2
+        "total": 41,
+        "won": 29,
+        "rate": 70.7
       },
       "B-": {
         "total": 129,
@@ -12008,9 +12236,9 @@
         "rate": 54.3
       },
       "D+": {
-        "total": 30,
+        "total": 33,
         "won": 13,
-        "rate": 43.3
+        "rate": 39.4
       },
       "C-": {
         "total": 35,
@@ -12018,9 +12246,9 @@
         "rate": 54.3
       },
       "C": {
-        "total": 103,
-        "won": 46,
-        "rate": 44.7
+        "total": 106,
+        "won": 47,
+        "rate": 44.3
       },
       "A-": {
         "total": 20,
@@ -12033,29 +12261,29 @@
         "rate": 30
       },
       "F": {
-        "total": 7,
-        "won": 3,
-        "rate": 42.9
+        "total": 8,
+        "won": 4,
+        "rate": 50
       }
     },
     "byMarket": {
       "Moneyline": {
-        "total": 153,
+        "total": 155,
         "won": 82,
-        "rate": 53.6,
-        "roi": 14.2
+        "rate": 52.9,
+        "roi": 12.7
       },
       "Spread": {
-        "total": 155,
-        "won": 80,
-        "rate": 51.6,
-        "roi": 2
+        "total": 158,
+        "won": 81,
+        "rate": 51.3,
+        "roi": 1.2
       },
       "Total": {
-        "total": 147,
-        "won": 72,
-        "rate": 49,
-        "roi": -2.1
+        "total": 151,
+        "won": 75,
+        "rate": 49.7,
+        "roi": -1
       },
       "Team Total": {
         "total": 71,
@@ -12065,40 +12293,40 @@
       }
     },
     "recentForm": {
-      "won": 31,
-      "lost": 19,
+      "won": 29,
+      "lost": 21,
       "push": 0,
-      "rate": 62
+      "rate": 58
     },
-    "lastUpdated": "2026-03-08T19:46:09.475Z",
-    "roi": 4.9,
+    "lastUpdated": "2026-03-08T22:30:37.217Z",
+    "roi": 4.5,
     "brierScore": 0.2613,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.044,
+    "sharpeRatio": 0.041,
     "homeAwayBias": {
-      "homeWinRate": 55.6,
-      "awayWinRate": 43.8,
-      "homeTotal": 241,
-      "awayTotal": 64
+      "homeWinRate": 54.7,
+      "awayWinRate": 44.6,
+      "homeTotal": 245,
+      "awayTotal": 65
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.1,
-        "actual": 64,
-        "total": 25
+        "actual": 65.4,
+        "total": 26
       },
       {
         "range": "55-60",
         "predicted": 57.7,
-        "actual": 43.2,
-        "total": 74
+        "actual": 42.3,
+        "total": 78
       },
       {
         "range": "60-65",
         "predicted": 62,
-        "actual": 53.5,
-        "total": 202
+        "actual": 53.4,
+        "total": 206
       },
       {
         "range": "65-70",

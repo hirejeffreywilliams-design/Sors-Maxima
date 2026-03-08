@@ -6,6 +6,7 @@ import type { PrecomputedPick } from "../precomputedPredictionsEngine";
 
 const ALL_SPORTS = ["NBA", "NHL", "NCAAB", "NFL", "MLB", "NCAAF"] as const;
 const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
+const ALL_GRADES = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C"];
 
 function americanOddsStr(decimalOdds: number): string {
   const am = decimalOdds >= 2
@@ -106,6 +107,9 @@ function generateVariations(seedLegs: any[]) {
     !seedGameIds.has(p.game.toLowerCase().trim());
 
   const freshPool = allPicks.filter(excludeSeedGames);
+  const widePool = dedupeById(
+    [...freshPool, ...allPicks].filter(p => ALL_GRADES.includes(p.grade))
+  );
 
   // Strategy 1: Safe Locks — highest-grade, low-risk odds
   const safePicks = [...freshPool]
@@ -121,7 +125,7 @@ function generateVariations(seedLegs: any[]) {
   const evPicks = [...freshPool]
     .sort((a, b) => b.ev - a.ev);
 
-  // Strategy 4: Sharp Money — use steam_move/selectionCategory or line movement picks
+  // Strategy 4: Sharp Money — steam_move/contrarian/line-movement spread picks
   const sharpPicks = [...freshPool]
     .filter(p => {
       const sc = (p as any).selectionCategory;
@@ -142,12 +146,58 @@ function generateVariations(seedLegs: any[]) {
   }
   flexPicks.sort((a, b) => b.ev - a.ev);
 
+  // Strategy 6: Underdog Surge™ — positive odds +110 to +320, real upside value
+  const underdogPicks = [...widePool]
+    .filter(p => p.odds >= 110 && p.odds <= 320 && p.ev > 0)
+    .sort((a, b) => (b.ev * 1.5 + b.confidence * 0.5) - (a.ev * 1.5 + a.confidence * 0.5));
+
+  // Strategy 7: Correlated Stack™ — max picks from fewest games (same-game feel)
+  const gamePickMap = new Map<string, PrecomputedPick[]>();
+  for (const p of freshPool) {
+    const key = p.game.toLowerCase().trim();
+    if (!gamePickMap.has(key)) gamePickMap.set(key, []);
+    gamePickMap.get(key)!.push(p);
+  }
+  const sortedGames = [...gamePickMap.entries()]
+    .sort((a, b) => b[1].length - a[1].length);
+  const correlatedPicks: PrecomputedPick[] = [];
+  for (const [, picks] of sortedGames) {
+    if (correlatedPicks.length >= 6) break;
+    const best = picks.sort((a, b) => b.confidence - a.confidence).slice(0, 2);
+    best.forEach(p => { correlatedPicks.push(p); });
+  }
+
+  // Strategy 8: Player Prop Blitz™ — player props only, highest confidence
+  const propPicks = [...widePool]
+    .filter(p => p.betType?.includes("player") || p.betType?.includes("prop"))
+    .sort((a, b) => (b.confidence + b.ev * 0.5) - (a.confidence + a.ev * 0.5));
+
+  // Strategy 9: Momentum Fade™ — pure contrarian plays, fading overvalued public picks
+  const momentumFadePicks = [...widePool]
+    .filter(p => {
+      const sc = (p as any).selectionCategory;
+      const isContrarian = sc === "contrarian" || sc === "public_fade";
+      const hasPublicBias = (p as any).publicMoneyPct !== undefined
+        ? (p as any).publicMoneyPct > 60
+        : false;
+      return isContrarian || hasPublicBias || p.betType === "spread";
+    })
+    .sort((a, b) => b.ev - a.ev);
+
+  // Strategy 10: Alt-Market Edge™ — non-moneyline bets (spreads, totals, alt lines)
+  const altMarketPicks = [...widePool]
+    .filter(p => p.betType !== "moneyline" && GOOD_GRADES.includes(p.grade))
+    .sort((a, b) => (b.ev + b.confidence * 0.4) - (a.ev + a.confidence * 0.4));
+
+  const fallback = (picks: PrecomputedPick[], min: number) =>
+    picks.length >= min ? picks : balancedPicks;
+
   const variations = [
     buildVariation(
       "Safe Locks",
       "High-confidence A-grade picks with tight odds. Lower ceiling, much higher hit rate.",
       "safe",
-      safePicks.length >= 3 ? safePicks : balancedPicks,
+      fallback(safePicks, 3),
       5
     ),
     buildVariation(
@@ -166,9 +216,9 @@ function generateVariations(seedLegs: any[]) {
     ),
     buildVariation(
       "Sharp Money",
-      "Contrarian and spread picks that track line movement. Fades public money where the model sees value.",
+      "Fades public money and tracks steam line movement. Contrarian plays where sharp bettors are acting.",
       "sharp",
-      sharpPicks.length >= 3 ? sharpPicks : balancedPicks.filter(p => p.betType === "spread"),
+      fallback(sharpPicks, 3),
       5
     ),
     buildVariation(
@@ -177,6 +227,41 @@ function generateVariations(seedLegs: any[]) {
       "multi_sport",
       flexPicks,
       6
+    ),
+    buildVariation(
+      "Underdog Surge™",
+      "Positive-odds plays (+110 to +320) with genuine model edge. High EV underdogs the public is sleeping on.",
+      "underdog_surge",
+      fallback(underdogPicks, 3),
+      5
+    ),
+    buildVariation(
+      "Correlated Stack™",
+      "Multiple picks from the same games. Mirrors same-game parlay structure — when one leg hits, others are primed.",
+      "correlated_stack",
+      fallback(correlatedPicks, 3),
+      6
+    ),
+    buildVariation(
+      "Player Prop Blitz™",
+      "High-confidence individual player performance bets. The most predictable leg type in the 46-Factor model.",
+      "prop_blitz",
+      fallback(propPicks, 3),
+      5
+    ),
+    buildVariation(
+      "Momentum Fade™",
+      "Contrarian plays against overhyped teams. Fades public darlings where the model sees hidden weakness.",
+      "momentum_fade",
+      fallback(momentumFadePicks, 3),
+      5
+    ),
+    buildVariation(
+      "Alt-Market Edge™",
+      "Spreads, totals, and alternate lines where the model finds the most inefficiency vs. public pricing.",
+      "alt_market",
+      fallback(altMarketPicks, 3),
+      5
     ),
   ].filter(Boolean);
 

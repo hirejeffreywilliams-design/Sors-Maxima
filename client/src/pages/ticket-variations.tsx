@@ -22,6 +22,11 @@ import {
   CheckCircle,
   RotateCcw,
   Info,
+  Flame,
+  Layers,
+  User,
+  ArrowDownLeft,
+  BarChart2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -57,7 +62,7 @@ interface Variation {
   id: string;
   name: string;
   description: string;
-  strategy: "safe" | "balanced" | "high_ev" | "sharp" | "multi_sport";
+  strategy: "safe" | "balanced" | "high_ev" | "sharp" | "multi_sport" | "underdog_surge" | "correlated_stack" | "prop_blitz" | "momentum_fade" | "alt_market";
   legs: VariationLeg[];
   totalDecimalOdds: number;
   americanOdds: string;
@@ -73,6 +78,11 @@ const STRATEGY_ICONS: Record<string, typeof Shield> = {
   high_ev: TrendingUp,
   sharp: Zap,
   multi_sport: Globe,
+  underdog_surge: Flame,
+  correlated_stack: Layers,
+  prop_blitz: User,
+  momentum_fade: ArrowDownLeft,
+  alt_market: BarChart2,
 };
 
 const STRATEGY_COLORS: Record<string, string> = {
@@ -81,6 +91,11 @@ const STRATEGY_COLORS: Record<string, string> = {
   high_ev: "text-purple-600 dark:text-purple-400 bg-purple-500/10 border-purple-500/20",
   sharp: "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20",
   multi_sport: "text-cyan-600 dark:text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+  underdog_surge: "text-orange-600 dark:text-orange-400 bg-orange-500/10 border-orange-500/20",
+  correlated_stack: "text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20",
+  prop_blitz: "text-pink-600 dark:text-pink-400 bg-pink-500/10 border-pink-500/20",
+  momentum_fade: "text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20",
+  alt_market: "text-teal-600 dark:text-teal-400 bg-teal-500/10 border-teal-500/20",
 };
 
 function gradeColor(grade: string): string {
@@ -283,7 +298,7 @@ function VariationsContent() {
       <PageHero
         icon={<FlaskConical className="h-6 w-6" />}
         title="Ticket Variation Engine"
-        subtitle="5 strategically distinct blueprints using the same 46-Factor data — each optimized for a different risk/reward profile"
+        subtitle="10 strategically distinct blueprints from the same 46-Factor dataset — each optimized for a different risk/reward profile"
       />
 
       <Separator />
@@ -339,6 +354,11 @@ function VariationsContent() {
             { name: "EV Hunter", icon: TrendingUp, color: STRATEGY_COLORS.high_ev, desc: "Pure mathematical edge maximization" },
             { name: "Sharp Money", icon: Zap, color: STRATEGY_COLORS.sharp, desc: "Fades public money, tracks line movement" },
             { name: "Multi-Sport Flex", icon: Globe, color: STRATEGY_COLORS.multi_sport, desc: "One strong pick from each sport, max diversification" },
+            { name: "Underdog Surge™", icon: Flame, color: STRATEGY_COLORS.underdog_surge, desc: "+110 to +320 underdogs with genuine model edge" },
+            { name: "Correlated Stack™", icon: Layers, color: STRATEGY_COLORS.correlated_stack, desc: "Multiple picks per game — same-game parlay structure" },
+            { name: "Player Prop Blitz™", icon: User, color: STRATEGY_COLORS.prop_blitz, desc: "High-confidence individual player performance bets" },
+            { name: "Momentum Fade™", icon: ArrowDownLeft, color: STRATEGY_COLORS.momentum_fade, desc: "Contrarian fades against overvalued public teams" },
+            { name: "Alt-Market Edge™", icon: BarChart2, color: STRATEGY_COLORS.alt_market, desc: "Spreads, totals, and alt lines — max market inefficiency" },
           ].map(({ name, icon: Icon, color, desc }) => (
             <Card key={name} className="opacity-50 border-dashed" data-testid={`placeholder-${name}`}>
               <CardHeader className="pb-2">
@@ -353,7 +373,7 @@ function VariationsContent() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="h-16 rounded-md bg-muted/40 flex items-center justify-center text-[10px] text-muted-foreground">
+                <div className="h-12 rounded-md bg-muted/40 flex items-center justify-center text-[10px] text-muted-foreground">
                   Click Generate Variations above
                 </div>
               </CardContent>
@@ -370,7 +390,7 @@ export default function TicketVariations() {
     <TierGate
       required="whale"
       label="Ticket Variation Engine"
-      description="Generate 5 strategic ticket alternatives — Safe Locks, EV Hunter, Contrarian, Correlation Builder, and Max Upside blueprints. Max tier only."
+      description="Generate 10 strategic ticket blueprints — Safe Locks, EV Hunter, Sharp Money, Underdog Surge, Correlated Stack, Player Prop Blitz, Momentum Fade, Alt-Market Edge, and more. Max tier only."
     >
       <VariationsContent />
     </TierGate>
