@@ -226,6 +226,39 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     });
 
+    es.addEventListener("picks-update", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "picks-update", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp || new Date().toISOString() }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
+    es.addEventListener("predictions-ready", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "predictions-ready", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp || new Date().toISOString() }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
+    es.addEventListener("odds-update", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "odds-update", data, timestamp: data.timestamp || new Date().toISOString() };
+        setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp || new Date().toISOString() }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
     es.addEventListener("heartbeat", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;

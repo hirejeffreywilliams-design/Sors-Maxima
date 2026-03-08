@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Check, Crown, Gem, Star, Trophy, Shield, Bot, Bell, Users, Wallet, Target, AlertTriangle, Sparkles, Lock, Flame, TrendingUp, BarChart2, Globe, Zap, Brain, ChevronRight, Swords } from "lucide-react";
+import { Check, Crown, Gem, Star, Trophy, Shield, Bot, Bell, Users, Wallet, Target, AlertTriangle, Sparkles, Lock, Flame, TrendingUp, BarChart2, Globe, Zap, Brain, ChevronRight, Swords, MessageSquare, Building2, ArrowUpRight, Webhook, BarChart, Link2, HeartHandshake } from "lucide-react";
 
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -338,6 +338,166 @@ export default function Pricing() {
           ))}
         </div>
 
+        {/* Enterprise / Community Section */}
+        <div className="space-y-6" data-testid="section-enterprise">
+          <div className="text-center space-y-2">
+            <Badge variant="outline" className="gap-1.5 bg-indigo-500/10 border-indigo-500/30 text-indigo-400 px-3 py-1">
+              <Building2 className="w-3 h-3" />
+              Communities & Enterprise
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Running a Discord Server or Community?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto text-sm">
+              The Discord picks market is flooded with fake screenshots and fabricated wins. Sors gives community operators a cryptographic proof system — every pick you share carries a verification link that proves it's real. Your members can check it themselves.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Community Operator Card */}
+            <div
+              className="relative rounded-2xl border-2 border-indigo-500/40 overflow-hidden"
+              style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(139,92,246,0.06) 50%, transparent 100%)" }}
+              data-testid="card-enterprise-community"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle, #6366f1 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+              <div className="relative p-6 sm:p-8 space-y-6">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center">
+                        <MessageSquare className="w-5 h-5 text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Community Operator</p>
+                        <h3 className="text-xl font-black leading-tight">Discord Community Plan</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">For Discord server owners, tipster channels, and paid picks communities.</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="flex items-baseline gap-1 justify-end">
+                      <span className="text-4xl font-extrabold tracking-tight">$499</span>
+                      <span className="text-muted-foreground text-sm">/mo</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">or $4,788/yr (save 20%)</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { icon: <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Everything in Max, plus:" },
+                    { icon: <Webhook className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Discord webhook — auto-post verified picks to your server" },
+                    { icon: <Link2 className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Branded verification portal for your community picks" },
+                    { icon: <BarChart className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Community analytics — track your server's win rate" },
+                    { icon: <Users className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "3 moderator/guest seats included" },
+                    { icon: <HeartHandshake className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Referral commission — earn 20% on referred subscriptions" },
+                    { icon: <Shield className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "\"Powered by Sors Intelligence™\" credibility badge" },
+                    { icon: <Zap className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />, text: "Priority 2-hour response support" },
+                  ].map((item, i) => (
+                    <div key={i} className={`flex items-start gap-2 text-sm ${i === 0 ? "font-semibold text-foreground sm:col-span-2" : "text-muted-foreground"}`}>
+                      {item.icon}
+                      <span>{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 space-y-2">
+                  <a href="/apply?plan=community" data-testid="button-apply-community">
+                    <Button className="w-full h-11 font-semibold bg-indigo-600 hover:bg-indigo-700 text-white gap-2">
+                      <MessageSquare className="w-4 h-4" />
+                      Book a Demo
+                      <ArrowUpRight className="w-4 h-4" />
+                    </Button>
+                  </a>
+                  <p className="text-[11px] text-muted-foreground text-center">Setup call included · Cancel anytime · No contracts</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Enterprise Card */}
+            <div
+              className="relative rounded-2xl border-2 border-amber-500/30 overflow-hidden"
+              style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.07) 0%, rgba(234,179,8,0.04) 50%, transparent 100%)" }}
+              data-testid="card-enterprise-custom"
+            >
+              <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle, #f59e0b 0%, transparent 70%)", transform: "translate(30%, -30%)" }} />
+              <div className="relative p-6 sm:p-8 space-y-6">
+                <div className="flex items-start justify-between gap-4 flex-wrap">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center">
+                        <Building2 className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-amber-400">Enterprise</p>
+                        <h3 className="text-xl font-black leading-tight">Custom Deal</h3>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">For large communities (500+ members), media brands, sportsbook affiliates, and white-label deals.</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="flex items-baseline gap-1 justify-end">
+                      <span className="text-3xl font-extrabold tracking-tight text-amber-400">Custom</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">starts ~$1,200/mo</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { icon: <Check className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Everything in Community, plus:" },
+                    { icon: <Webhook className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Custom Discord bot with your server branding" },
+                    { icon: <Building2 className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "White-label verification portal (your domain)" },
+                    { icon: <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "API access for custom integrations" },
+                    { icon: <Users className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Up to 25 moderator/guest seats" },
+                    { icon: <HeartHandshake className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Revenue share or co-branding arrangements" },
+                    { icon: <Target className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Dedicated account manager with SLA" },
+                    { icon: <BarChart className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />, text: "Custom reports & automated community analytics" },
+                  ].map((item, i) => (
+                    <div key={i} className={`flex items-start gap-2 text-sm ${i === 0 ? "font-semibold text-foreground sm:col-span-2" : "text-muted-foreground"}`}>
+                      {item.icon}
+                      <span>{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="pt-2 space-y-2">
+                  <a href="/apply?plan=enterprise" data-testid="button-apply-enterprise">
+                    <Button className="w-full h-11 font-semibold bg-amber-600 hover:bg-amber-700 text-white gap-2">
+                      <Building2 className="w-4 h-4" />
+                      Contact Sales
+                      <ArrowUpRight className="w-4 h-4" />
+                    </Button>
+                  </a>
+                  <p className="text-[11px] text-muted-foreground text-center">Response within 24 hours · Volume pricing available</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Community value prop bar */}
+          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 px-6 py-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-8">
+              <div className="flex items-center gap-2 shrink-0">
+                <Shield className="w-5 h-5 text-indigo-400" />
+                <span className="text-sm font-bold text-indigo-300">Why community operators choose Sors</span>
+              </div>
+              <div className="flex flex-wrap gap-x-6 gap-y-2">
+                {[
+                  "Cryptographic pick verification — no more \"trust me bro\"",
+                  "Automated Discord posting of verified wins",
+                  "Your community sees a real track record, not claims",
+                  "Earn commissions from members you bring in",
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Check className="w-3 h-3 text-indigo-400 shrink-0" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Why Sors Maxima */}
         <div className="bg-card rounded-xl p-8 border">
           <h2 className="text-2xl font-bold mb-2 text-center">Why Sors Maxima?</h2>
@@ -405,9 +565,9 @@ export default function Pricing() {
                     ))}
                     <tr className="bg-primary/5 border-t-2 border-primary/20">
                       <td className="px-6 py-3 font-bold text-primary">Sors Maxima</td>
-                      <td className="px-4 py-3 font-semibold">$49–249/mo</td>
-                      <td className="px-4 py-3 font-medium">Full intelligence platform</td>
-                      <td className="px-4 py-3 text-xs text-green-600 dark:text-green-400 font-medium">All-in-one: AI picks + builder + odds + live + international + CLV + self-learning model</td>
+                      <td className="px-4 py-3 font-semibold">$49–499/mo</td>
+                      <td className="px-4 py-3 font-medium">Full intelligence + community platform</td>
+                      <td className="px-4 py-3 text-xs text-green-600 dark:text-green-400 font-medium">All-in-one: AI picks + builder + odds + live + international + CLV + Intelligence Cards + cryptographic Discord proof — only platform with community operator tools</td>
                     </tr>
                   </tbody>
                 </table>

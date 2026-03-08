@@ -62,7 +62,8 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Sors Lexicon™**: Full proprietary terminology framework replacing industry-standard betting terms throughout the UI.
 - **Admin IP Registry & Business Intelligence**: Admin page with platform vitals, IP registry, Sors Lexicon table, mission & vision, and business plan.
 - **Marketing Command Center**: Admin page for marketing with pre-built tier-specific ad copy and an AI Tier Ad Generator.
-- **SSE Live Updates Complete**: Server-Sent Events infrastructure fully wired for various live updates.
+- **SSE Live Updates Complete**: Full SSE pipeline — server broadcaster (`sseManager.ts`) fires intelligence-update, live-scores, edge-alerts, picks-update, predictions-ready, odds-update, sharp-signal, early-settlement, picks-settled, notification, and guardian-alert events. Client hook (`use-sse.ts`) listens to all event types. SSEProvider auto-invalidates TanStack Query cache and shows toast on sharp signals and settlements. SSEStatusDot in header shows live green pulse. Live page shows "SSE Connected" badge.
+- **Enterprise & Community Pricing**: Pricing page now includes a "Communities & Enterprise" section below the individual tier cards. Community Operator plan at $499/mo (for Discord server owners; includes webhook auto-posting, branded verification portal, community analytics, 3 mod seats, referral commission). Enterprise Custom (~$1,200+/mo) for large communities, media brands, white-label. Both CTAs link to /apply. Competitor comparison table updated to show $49–499/mo range.
 - **Mobile Card Stack Deck**: On mobile, converts ticket/pick grids into a swipeable playing-card stack.
 - **Single-Color Grade Glow Fix**: Ticket cards show a single cohesive glow color based on combined grade.
 - **Global Visual Redesign (Glass/Gradient System)**: Complete redesign across the application using glassmorphism, gradient backgrounds, and specific color palettes.
