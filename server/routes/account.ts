@@ -548,6 +548,93 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     }
   });
 
+  // Strategy Streak & Accountability
+  app.get("/api/user/strategy/streak", requireAuth, async (req, res) => {
+    const uid = numericUserId(req);
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    try {
+      // Get current active strategy
+      const strategyRow = await db.execute(sql`
+        SELECT strategy_id, strategy_name, set_at 
+        FROM user_strategies 
+        WHERE user_id = ${uid} 
+        LIMIT 1
+      `);
+      const activeStrategy = (strategyRow.rows as any[])[0];
+
+      if (!activeStrategy) {
+        return res.json(null);
+      }
+
+      // Get the username for this user to query user_picks (which stores by username)
+      const userRow = await db.execute(sql`SELECT username FROM users WHERE id = ${uid} LIMIT 1`);
+      const username = (userRow.rows as any[])[0]?.username;
+      if (!username) return res.json(null);
+
+      // Query user_picks for the current user, filtered by placed_at >= set_at
+      const picksRow = await db.execute(sql`
+        SELECT won, settled, stake, placed_at
+        FROM user_picks
+        WHERE username = ${username} AND settled = true AND placed_at >= ${activeStrategy.set_at}
+        ORDER BY placed_at DESC
+      `);
+      const picks = picksRow.rows as any[];
+
+      let wins = 0;
+      let losses = 0;
+      let pushes = 0;
+      let totalPL = 0;
+      let streak = 0;
+      let streakType: "win" | "loss" | "none" = "none";
+
+      if (picks.length > 0) {
+        picks.forEach(p => {
+          const stake = Number(p.stake || 100);
+          if (p.won === true) { wins++; totalPL += stake; }
+          else if (p.won === false) { losses++; totalPL -= stake; }
+          else if (p.won === null) { pushes++; }
+        });
+
+        // Calculate current streak using resolved picks
+        const resolved = picks.filter(p => p.won !== null);
+        if (resolved.length > 0) {
+          streakType = resolved[0].won === true ? "win" : "loss";
+          for (const p of resolved) {
+            if ((p.won === true && streakType === "win") || (p.won === false && streakType === "loss")) {
+              streak++;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+
+      const totalBets = picks.length;
+      const resolvedBets = wins + losses;
+      const winRate = resolvedBets > 0 ? (wins / resolvedBets) * 100 : 0;
+      const totalStaked = picks.reduce((s, p) => s + Number(p.stake || 100), 0);
+      const roi = totalStaked > 0 ? (totalPL / totalStaked) * 100 : 0;
+
+      return res.json({
+        strategyId: activeStrategy.strategy_id,
+        strategyName: activeStrategy.strategy_name,
+        setAt: activeStrategy.set_at,
+        totalBets,
+        wins,
+        losses,
+        pushes,
+        winRate: Math.round(winRate * 10) / 10,
+        roi: Math.round(roi * 10) / 10,
+        streak,
+        streakType
+      });
+    } catch (err) {
+      console.error("Failed to get strategy streak:", err);
+      res.status(500).json({ error: "Failed to get strategy streak" });
+    }
+  });
+
   // Bet Backup & Recovery
   app.get("/api/backups", async (req, res) => {
     if (!req.session?.isAuthenticated) return res.status(401).json({ error: "Not authenticated" });

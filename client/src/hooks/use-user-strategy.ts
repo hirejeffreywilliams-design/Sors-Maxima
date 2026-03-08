@@ -20,6 +20,7 @@ export function useUserStrategy() {
   });
 
   const activeStrategy: BettingStrategy | null = data?.strategyId ? (getStrategy(data.strategyId) ?? null) : null;
+  const isActiveMode = () => !!data?.constraints?.activeMode;
 
   const setStrategy = useMutation({
     mutationFn: (s: { strategyId: string; strategyName: string; constraints?: Record<string, any>; notes?: string }) =>
@@ -46,6 +47,7 @@ export function useUserStrategy() {
   return {
     userStrategy: data ?? null,
     activeStrategy,
+    isActiveMode,
     isLoading,
     setStrategy,
     clearStrategy,

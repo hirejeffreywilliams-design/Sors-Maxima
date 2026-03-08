@@ -1,9 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useUserStrategy } from "@/hooks/use-user-strategy";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -12,10 +15,20 @@ import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSSEContext } from "@/context/sse-provider";
 import { queryClient } from "@/lib/queryClient";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
   ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, TrendingDown, Zap, AlertCircle, Wifi, WifiOff,
-  Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle, Smartphone
+  Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle, Smartphone,
+  Loader2
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
@@ -63,6 +76,72 @@ const FACTOR_LABELS: Record<string, string> = {
 
 function humanFactor(name: string): string {
   return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function CompactPickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+  const legId = `cmd-strat-${pick.id}`;
+  const inSlip = legs.some(l => l.id === legId);
+
+  const handleAdd = () => {
+    if (inSlip) return;
+    const decimalOdds = pick.odds < 0
+      ? 1 + (100 / Math.abs(pick.odds))
+      : 1 + (pick.odds / 100);
+
+    addLeg({
+      id: legId,
+      team: pick.homeTeam,
+      opponent: pick.awayTeam,
+      market: (pick.betType || "moneyline") as any,
+      outcome: pick.pick,
+      decimalOdds,
+      americanOdds: pick.odds,
+      addedFrom: "Strategy Mode",
+      addedAt: new Date().toISOString(),
+      sport: pick.sport,
+      confidence: pick.confidence,
+      evPercent: pick.ev,
+      grade: pick.grade,
+      gameTime: pick.gameTime,
+    });
+  };
+
+  return (
+    <Card className="min-w-[200px] w-[200px] shrink-0 border-primary/20 bg-card/50 hover:border-primary/40 transition-colors" data-testid={`card-strategy-pick-${pick.id}`}>
+      <CardContent className="p-3 space-y-2">
+        <div className="flex items-center justify-between gap-1">
+          <Badge variant="outline" className={`text-[9px] px-1 h-3.5 ${sportColor(pick.sport)}`}>{pick.sport}</Badge>
+          <Badge variant="outline" className={`text-[9px] font-bold h-3.5 px-1 ${gradeBg(pick.grade)}`}>{pick.grade}</Badge>
+        </div>
+        <div className="space-y-0.5">
+          <p className="text-[11px] font-semibold truncate leading-tight">{pick.pick}</p>
+          <p className="text-[9px] text-muted-foreground truncate">{pick.game}</p>
+        </div>
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="font-mono font-bold text-foreground">{formatOdds(pick.odds)}</span>
+          <span className={pick.ev > 0 ? "text-green-500 font-medium" : "text-red-500"}>EV: {displayEv(pick.ev)}</span>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+            <span>Confidence</span>
+            <span>{pick.confidence}%</span>
+          </div>
+          <Progress value={pick.confidence} className="h-1" />
+        </div>
+        <Button 
+          variant={inSlip ? "secondary" : "default"} 
+          size="sm" 
+          className="w-full h-7 text-[10px]" 
+          onClick={handleAdd}
+          disabled={inSlip}
+          data-testid={`button-add-strategy-pick-${pick.id}`}
+        >
+          {inSlip ? <Check className="w-3 h-3 mr-1" /> : <Plus className="w-3 h-3 mr-1" />}
+          {inSlip ? "Added" : "Add to Slip"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
 }
 
 const REC_STYLES: Record<string, { label: string; color: string }> = {
@@ -1528,6 +1607,83 @@ export default function CommandCenter() {
   const [showShowcase, setShowShowcase] = useState(false);
   const { legs, addLeg } = useParlaySlip();
   const { canAccess } = useTier();
+  const { activeStrategy, isActiveMode } = useUserStrategy();
+  const activeMode = isActiveMode();
+  const { toast } = useToast();
+  const [parlayModalOpen, setParlayModalOpen] = useState(false);
+
+  const { data: stratPicks, isLoading: isStratLoading } = useQuery<{ picks: TopPick[] }>({
+    queryKey: ["/api/strategy/auto-picks", activeStrategy?.id],
+    enabled: !!activeStrategy && activeMode,
+    refetchInterval: 60000,
+  });
+
+  const { data: autoParlayPicks, isLoading: isLoadingAutoParlay } = useQuery<{ picks: TopPick[] }>({
+    queryKey: ["/api/strategy/auto-picks", activeStrategy?.id, 4],
+    enabled: !!activeStrategy && activeMode && parlayModalOpen,
+  });
+
+  const handleBuildParlay = () => {
+    setParlayModalOpen(true);
+  };
+
+  const handleAddAllToSlip = () => {
+    if (!autoParlayPicks?.picks) return;
+    
+    let addedCount = 0;
+    autoParlayPicks.picks.forEach(pick => {
+      const legId = `cmd-strat-${pick.id}`;
+      if (!legs.some(l => l.id === legId)) {
+        const decimalOdds = pick.odds < 0
+          ? 1 + (100 / Math.abs(pick.odds))
+          : 1 + (pick.odds / 100);
+
+        addLeg({
+          id: legId,
+          team: pick.homeTeam,
+          opponent: pick.awayTeam,
+          market: (pick.betType || "moneyline") as any,
+          outcome: pick.pick,
+          decimalOdds,
+          americanOdds: pick.odds,
+          addedFrom: "Strategy Mode",
+          addedAt: new Date().toISOString(),
+          sport: pick.sport,
+          confidence: pick.confidence,
+          evPercent: pick.ev,
+          grade: pick.grade,
+          gameTime: pick.gameTime,
+        });
+        addedCount++;
+      }
+    });
+
+    if (addedCount > 0) {
+      toast({
+        title: `${addedCount}-leg ${activeStrategy?.name} parlay added!`,
+        description: "Review your legs in the parlay slip.",
+      });
+    }
+    setParlayModalOpen(false);
+  };
+
+  const parlayOdds = useMemo(() => {
+    if (!autoParlayPicks?.picks) return 1;
+    return autoParlayPicks.picks.reduce((acc, pick) => {
+      const decimal = pick.odds < 0
+        ? 1 + (100 / Math.abs(pick.odds))
+        : 1 + (pick.odds / 100);
+      return acc * decimal;
+    }, 1);
+  }, [autoParlayPicks]);
+
+  const americanParlayOdds = useMemo(() => {
+    if (parlayOdds >= 2.0) {
+      return Math.round((parlayOdds - 1) * 100);
+    } else {
+      return Math.round(-100 / (parlayOdds - 1));
+    }
+  }, [parlayOdds]);
 
   const sse = useSSEContext();
 
@@ -1739,6 +1895,123 @@ export default function CommandCenter() {
             </div>
           </div>
         </header>
+
+        {activeStrategy && activeMode && (
+          <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-3" data-testid="banner-strategy-mode">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-2xl">
+                  {activeStrategy.icon}
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold flex items-center gap-2">
+                    Your {activeStrategy.name} Picks Today
+                    <Badge variant="default" className="text-[10px] h-4 px-1.5 bg-primary text-primary-foreground animate-pulse">Strategy Mode</Badge>
+                  </h2>
+                  <p className="text-[11px] text-muted-foreground">Filtered for your active {activeStrategy.name} rules</p>
+                </div>
+              </div>
+              <Button 
+                size="sm" 
+                className="gap-2 h-8 text-xs" 
+                onClick={handleBuildParlay}
+                data-testid="button-build-strategy-parlay"
+              >
+                <Dice5 className="w-3.5 h-3.5" />
+                Build My Parlay
+              </Button>
+            </div>
+
+            <ScrollArea className="w-full whitespace-nowrap">
+              <div className="flex gap-3 pb-3">
+                {isStratLoading ? (
+                  Array.from({ length: 4 }).map((_, i) => (
+                    <Skeleton key={i} className="h-[140px] w-[200px] rounded-lg shrink-0" />
+                  ))
+                ) : stratPicks?.picks && stratPicks.picks.length > 0 ? (
+                  stratPicks.picks.slice(0, 6).map((pick) => (
+                    <CompactPickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
+                  ))
+                ) : (
+                  <div className="w-full flex items-center justify-center p-8 bg-muted/20 rounded-lg border border-dashed">
+                    <p className="text-xs text-muted-foreground">No picks found for your strategy right now — check back soon</p>
+                  </div>
+                )}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+        )}
+
+        <Dialog open={parlayModalOpen} onOpenChange={setParlayModalOpen}>
+          <DialogContent className="max-w-md" data-testid="modal-auto-parlay">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                Sors built a parlay for you
+              </DialogTitle>
+              <DialogDescription>
+                Based on your active <strong>{activeStrategy?.name}</strong> strategy.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              {isLoadingAutoParlay ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-4">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Analyzing elite edges...</p>
+                </div>
+              ) : autoParlayPicks?.picks && autoParlayPicks.picks.length > 0 ? (
+                <>
+                  <div className="space-y-2">
+                    {autoParlayPicks.picks.map((pick, i) => (
+                      <div key={pick.id} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+                        <span className="text-xs font-bold text-muted-foreground w-4">L{i+1}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold truncate">{pick.pick}</p>
+                          <p className="text-[10px] text-muted-foreground truncate">{pick.game}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs font-mono font-bold">{formatOdds(pick.odds)}</p>
+                          <Badge variant="outline" className={`text-[9px] h-3.5 px-1 ${gradeBg(pick.grade)}`}>{pick.grade}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-primary/70">Combined Odds</p>
+                      <p className="text-2xl font-mono font-black text-primary">{americanParlayOdds > 0 ? "+" : ""}{americanParlayOdds}</p>
+                    </div>
+                    <div className="text-right space-y-0.5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Potential Payout</p>
+                      <p className="text-sm font-medium text-foreground">{(parlayOdds).toFixed(2)}x Return</p>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="py-12 text-center space-y-2">
+                  <AlertTriangle className="h-8 w-8 text-amber-500 mx-auto" />
+                  <p className="text-sm font-medium">No suitable legs found right now.</p>
+                  <p className="text-xs text-muted-foreground">Try again in a few minutes or adjust your strategy.</p>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setParlayModalOpen(false)}>Cancel</Button>
+              <Button 
+                className="flex-1" 
+                disabled={!autoParlayPicks?.picks || autoParlayPicks.picks.length === 0}
+                onClick={handleAddAllToSlip}
+                data-testid="button-add-auto-parlay"
+              >
+                Add All to Slip
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {showAdvanced && <section data-testid="section-best-tickets">
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">

@@ -3,7 +3,7 @@ import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useUserStrategy } from "@/hooks/use-user-strategy";
-import { checkPickAgainstStrategy } from "@/lib/strategy-definitions";
+import { checkPickAgainstStrategy, type BettingStrategy } from "@/lib/strategy-definitions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -1180,6 +1180,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         </div>
 
         <ScrollArea className="flex-1">
+          {activeStrategy && <ConflictBanner legs={legs} strategy={activeStrategy} />}
           <div className="px-3 py-1">
             <div className="divide-y">
               {legs.map((leg) => (
@@ -1307,6 +1308,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
       </div>
 
       <ScrollArea className="flex-1">
+        {activeStrategy && <ConflictBanner legs={legs} strategy={activeStrategy} />}
         <div className="divide-y px-2">
           {legs.map((leg) => (
             <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} compact={compact} />
@@ -1551,6 +1553,85 @@ export function ParlaySlipMobileDrawer() {
         <SlipContent isMobile />
       </SheetContent>
     </Sheet>
+  );
+}
+
+function ConflictBanner({ legs, strategy }: { legs: ParlaySlipLeg[]; strategy: BettingStrategy }) {
+  const [expanded, setExpanded] = useState(false);
+  const violations = useMemo(() => {
+    return legs
+      .map((leg) => ({
+        leg,
+        violation: checkPickAgainstStrategy(strategy, leg, legs.length),
+      }))
+      .filter((v) => v.violation !== null);
+  }, [legs, strategy]);
+
+  if (violations.length === 0) return null;
+
+  return (
+    <div className="mx-4 mt-4 mb-2 rounded-lg border border-orange-200 bg-orange-50 dark:border-orange-900/50 dark:bg-orange-950/20 overflow-hidden" data-testid="strategy-conflict-banner">
+      <div className="flex items-center justify-between p-3">
+        <div className="flex items-center gap-2 text-orange-800 dark:text-orange-300">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span className="text-sm font-semibold">
+            {violations.length} pick{violations.length !== 1 ? "s" : ""} conflict with your {strategy.name} strategy
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-orange-800 hover:bg-orange-100 dark:text-orange-300 dark:hover:bg-orange-900/30"
+          onClick={() => setExpanded(!expanded)}
+          data-testid="button-toggle-conflicts"
+        >
+          {expanded ? "Hide Details" : "Show Details"}
+          {expanded ? <ChevronUp className="ml-1 h-3 w-3" /> : <ChevronDown className="ml-1 h-3 w-3" />}
+        </Button>
+      </div>
+
+      {expanded && (
+        <div className="px-3 pb-3 space-y-3 border-t border-orange-200/50 dark:border-orange-900/30 pt-3">
+          {violations.map(({ leg, violation }) => (
+            <div key={leg.id} className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="mt-1 h-1.5 w-1.5 rounded-full bg-orange-500 shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-orange-900 dark:text-orange-200">
+                    {leg.team}: {violation?.reason}
+                  </p>
+                  <AlternativeSuggestion strategyId={strategy.id} sport={leg.sport} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AlternativeSuggestion({ strategyId, sport }: { strategyId: string; sport?: string }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["/api/strategy/auto-picks", strategyId, sport, 1],
+    queryFn: async () => {
+      const url = `/api/strategy/auto-picks?strategyId=${strategyId}&limit=1${sport ? `&sport=${sport}` : ""}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Failed to fetch alternative");
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+
+  if (isLoading) return <div className="h-4 w-32 bg-orange-200/50 dark:bg-orange-900/30 animate-pulse rounded" />;
+  if (!data?.picks?.[0]) return null;
+
+  const pick = data.picks[0];
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] text-orange-700 dark:text-orange-400 font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-1 rounded w-fit">
+      <Sparkles className="h-3 w-3" />
+      Best alternative: {pick.team} {pick.outcome} ({pick.americanOdds > 0 ? "+" : ""}{pick.americanOdds})
+    </div>
   );
 }
 
