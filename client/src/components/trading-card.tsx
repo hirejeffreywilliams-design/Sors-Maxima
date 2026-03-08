@@ -410,7 +410,7 @@ export function TradingCard({
           <div
             className="shrink-0"
             style={{
-              height: "4px",
+              height: "5px",
               background: isAPlus
                 ? "linear-gradient(90deg,#ff0080,#ff8000,#ffff00,#00ff80,#00c8ff,#8000ff,#ff0080)"
                 : `linear-gradient(90deg, ${foil.accent}, rgba(255,255,255,0.5), ${foil.accent})`,
@@ -419,185 +419,114 @@ export function TradingCard({
             }}
           />
 
-          {/* === Header: Sport + Grade === */}
-          <div className="relative z-10 px-4 py-2.5 flex items-center justify-between border-b border-white/8 shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl drop-shadow-md">{sportIcon}</span>
-              <div>
-                <div className="text-[9px] font-black tracking-widest uppercase text-white/40">
-                  {rarity.label}
-                </div>
-                <div className="text-xs font-black tracking-wider uppercase text-white/80">
-                  {card.sport}
-                </div>
+          {/* ── POKÉMON-STYLE HEADER: Pick Name + Odds ── */}
+          <div className="relative z-10 px-3 pt-2.5 pb-2 flex items-start justify-between shrink-0">
+            {/* Left: sport icon + rarity label + pick name */}
+            <div className="flex-1 min-w-0 pr-2">
+              <div className="flex items-center gap-1.5 mb-1">
+                <span className="text-lg leading-none drop-shadow-md">{sportIcon}</span>
+                <span
+                  className="text-[8px] font-black uppercase tracking-widest"
+                  style={{ color: foil.accent }}
+                >{rarity.label}</span>
                 {card.cardType === "system" && (
-                  <div className="flex items-center gap-0.5 mt-0.5">
-                    <Settings2 className="w-2.5 h-2.5" style={{ color: "rgba(251,191,36,0.75)" }} />
-                    <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(251,191,36,0.75)" }}>SYSTEM</span>
-                  </div>
+                  <span style={{ fontSize: 7, fontWeight: 900, color: "rgba(251,191,36,0.80)", letterSpacing: "0.12em" }}>✦ SYSTEM</span>
                 )}
                 {card.cardType === "admin_seeded" && (
-                  <div className="flex items-center gap-0.5 mt-0.5">
-                    <Star className="w-2.5 h-2.5" style={{ color: "rgba(148,163,184,0.55)" }} />
-                    <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(148,163,184,0.55)" }}>DEMO</span>
-                  </div>
+                  <span style={{ fontSize: 7, fontWeight: 900, color: "rgba(148,163,184,0.65)", letterSpacing: "0.12em" }}>◈ DEMO</span>
                 )}
               </div>
+              <h2
+                className="font-black leading-tight text-white"
+                style={{ fontSize: "15px", lineHeight: 1.25, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+              >{card.pick}</h2>
             </div>
-            <div className="flex flex-col items-center gap-0.5">
+            {/* Right: Odds (like Pokémon HP) + Grade badge */}
+            <div className="shrink-0 flex flex-col items-end gap-1.5 pt-0.5">
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-[8px] font-black uppercase text-white/30">ODDS</span>
+                <span
+                  className="text-[20px] font-black leading-none tabular-nums"
+                  style={{ color: foil.accent, textShadow: `0 0 16px ${foil.accent}70`, fontFamily: "Georgia, serif" }}
+                >
+                  {card.odds > 0 ? `+${card.odds}` : card.odds}
+                </span>
+              </div>
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                className="w-9 h-9 rounded-full flex items-center justify-center"
                 style={{
-                  border: isAPlus
-                    ? "2px solid rgba(251,191,36,0.80)"
-                    : safeGrade.startsWith("A")
-                    ? "2px solid rgba(52,211,153,0.70)"
-                    : safeGrade === "B+"
-                    ? "2px solid rgba(45,212,191,0.60)"
-                    : safeGrade.startsWith("B")
-                    ? "2px solid rgba(96,165,250,0.50)"
-                    : "2px solid rgba(255,255,255,0.15)",
-                  background: isAPlus
-                    ? "rgba(251,191,36,0.09)"
-                    : safeGrade.startsWith("A")
-                    ? "rgba(52,211,153,0.07)"
-                    : "rgba(255,255,255,0.04)",
-                  boxShadow: isAPlus
-                    ? "0 0 18px rgba(251,191,36,0.40), inset 0 0 8px rgba(251,191,36,0.10)"
-                    : safeGrade.startsWith("A")
-                    ? "0 0 14px rgba(52,211,153,0.30)"
-                    : safeGrade === "B+"
-                    ? "0 0 10px rgba(45,212,191,0.22)"
-                    : "none",
+                  border: `2px solid ${foil.accent}70`,
+                  background: `${foil.accent}10`,
+                  boxShadow: `0 0 12px ${foil.accent}40`,
                 }}
               >
-                <span className={`font-black text-lg leading-none ${
-                  isAPlus ? "text-amber-400" :
-                  safeGrade.startsWith("A") ? "text-emerald-400" :
-                  safeGrade === "B+" ? "text-teal-400" :
-                  safeGrade.startsWith("B") ? "text-blue-400" :
-                  "text-slate-400"
-                }`}>{safeGrade}</span>
+                <span className="font-black text-sm leading-none" style={{ color: foil.accent }}>{safeGrade}</span>
               </div>
-              <div style={{ fontSize: "7px", fontWeight: 900, letterSpacing: "0.12em", color: foil.accent, opacity: 0.55 }}>GRADE</div>
             </div>
           </div>
 
-          {/* === Art Area — Matchup Showcase === */}
+          {/* ── INSET ART BOX (Pokémon-style illustrated frame) ── */}
           {(() => {
             const teams = parseTeams(card.game);
             return (
-              <div
-                className="relative z-10 px-4 py-4 shrink-0 overflow-hidden"
-                style={{
-                  background: `linear-gradient(to bottom, ${foil.accent}14 0%, ${foil.accent}06 60%, transparent 100%)`,
-                  minHeight: "110px",
-                }}
-              >
-                {/* Decorative watermark emoji */}
+              <div className="relative z-10 px-3 shrink-0">
                 <div
-                  className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none select-none text-[72px] leading-none"
-                  style={{ opacity: 0.06, filter: isAPlus ? `drop-shadow(0 0 8px ${foil.accent})` : undefined }}
-                  aria-hidden="true"
+                  className="relative rounded-xl overflow-hidden"
+                  style={{
+                    border: `2px solid ${foil.accent}35`,
+                    boxShadow: `inset 0 0 24px ${foil.accent}12, 0 0 0 1px rgba(255,255,255,0.05)`,
+                    background: `linear-gradient(135deg, ${foil.accent}18 0%, rgba(0,0,0,0.45) 70%, ${foil.accent}08 100%)`,
+                    minHeight: "88px",
+                    padding: "10px 12px 10px",
+                  }}
                 >
-                  {sportIcon}
-                </div>
+                  {/* Background sport emoji watermark — very subtle */}
+                  <div
+                    className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none select-none leading-none"
+                    style={{ fontSize: "52px", opacity: 0.07 }}
+                    aria-hidden="true"
+                  >{sportIcon}</div>
 
-                {teams.away ? (
-                  /* Two-team matchup layout */
-                  <div className="relative z-10 space-y-2.5">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[8px] font-bold uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}70` }}>Home</p>
-                        <p className="font-black text-[13px] leading-snug text-white/90 truncate">{teams.home}</p>
+                  {teams.away ? (
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}80` }}>Home</p>
+                          <p className="font-black text-[12px] leading-snug text-white/95 truncate">{teams.home}</p>
+                        </div>
+                        <div className="shrink-0 flex flex-col items-center gap-0.5 px-1">
+                          <div
+                            className="w-6 h-6 rounded-full flex items-center justify-center"
+                            style={{ background: `${foil.accent}20`, border: `1px solid ${foil.accent}50` }}
+                          >
+                            <span className="text-[7px] font-black" style={{ color: foil.accent }}>VS</span>
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0 text-right">
+                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}80` }}>Away</p>
+                          <p className="font-black text-[12px] leading-snug text-white/95 truncate">{teams.away}</p>
+                        </div>
                       </div>
-                      <div className="shrink-0 flex flex-col items-center gap-0.5">
-                        <span className="text-[9px] font-black tracking-widest text-white/25">VS</span>
-                        <div className="w-5 h-px" style={{ background: `${foil.accent}50` }} />
+                      {/* Divider line */}
+                      <div className="h-px mb-1.5" style={{ background: `linear-gradient(90deg, transparent, ${foil.accent}40, transparent)` }} />
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[7px] font-black uppercase text-white/25 shrink-0 w-12">Power</span>
+                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})`, boxShadow: `0 0 5px ${foil.accent}50` }} />
+                        </div>
+                        <span className="text-[9px] font-black tabular-nums shrink-0" style={{ color: foil.accent }}>{card.confidence}</span>
                       </div>
-                      <div className="flex-1 min-w-0 text-right">
-                        <p className="text-[8px] font-bold uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}70` }}>Away</p>
-                        <p className="font-black text-[13px] leading-snug text-white/90 truncate">{teams.away}</p>
+                    </div>
+                  ) : (
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-2 py-1">
+                      <div className="text-4xl drop-shadow-lg" style={{ filter: isAPlus ? `drop-shadow(0 0 10px ${foil.accent})` : undefined }}>{sportIcon}</div>
+                      <div className="flex items-center gap-1.5 w-full">
+                        <span className="text-[7px] font-black uppercase text-white/25 shrink-0">Power</span>
+                        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                          <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})` }} />
+                        </div>
+                        <span className="text-[9px] font-black tabular-nums shrink-0" style={{ color: foil.accent }}>{card.confidence}</span>
                       </div>
-                    </div>
-
-                    {/* Power bar */}
-                    <div className="flex items-center gap-2">
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-white/25 shrink-0">Power</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-                        <div
-                          className="h-full rounded-full"
-                          style={{
-                            width: `${card.confidence}%`,
-                            background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})`,
-                            boxShadow: `0 0 5px ${foil.accent}60`,
-                          }}
-                        />
-                      </div>
-                      <span
-                        className="text-[10px] font-black shrink-0 tabular-nums"
-                        style={{ color: foil.accent }}
-                      >{card.confidence}</span>
-                    </div>
-                  </div>
-                ) : (
-                  /* Single-name / no-opponent fallback */
-                  <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
-                    <div
-                      className="text-5xl drop-shadow-lg"
-                      style={{
-                        filter: isAPlus ? `drop-shadow(0 0 12px ${foil.accent})` : undefined,
-                        animation: isAPlus ? "pulse 2s ease-in-out infinite" : undefined,
-                      }}
-                    >
-                      {sportIcon}
-                    </div>
-                    <div className="flex items-center gap-2 w-full">
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-white/25 shrink-0">Power</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-                        <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})` }} />
-                      </div>
-                      <span className="text-[10px] font-black shrink-0" style={{ color: foil.accent }}>{card.confidence}</span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="relative z-10 mt-2 flex items-center gap-2 flex-wrap">
-                  {eventLabel && (
-                    <div
-                      className="inline-block text-[8px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border"
-                      style={{
-                        background: `${foil.accent}15`,
-                        borderColor: `${foil.accent}40`,
-                        color: foil.accent,
-                        textShadow: `0 0 8px ${foil.accent}55`,
-                      }}
-                    >
-                      {eventLabel}
-                    </div>
-                  )}
-                  {card.ev >= 15 && (
-                    <div
-                      className="inline-flex items-center gap-1 text-[7px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border"
-                      style={{
-                        background: "rgba(251,191,36,0.10)",
-                        borderColor: "rgba(251,191,36,0.35)",
-                        color: "rgba(251,191,36,0.85)",
-                      }}
-                    >
-                      🔥 HIGH EDGE
-                    </div>
-                  )}
-                  {isAPlus && !eventLabel && (
-                    <div
-                      className="inline-flex items-center gap-1 text-[7px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border"
-                      style={{
-                        background: "rgba(251,191,36,0.08)",
-                        borderColor: "rgba(251,191,36,0.30)",
-                        color: "rgba(251,191,36,0.75)",
-                      }}
-                    >
-                      ◆ LEGENDARY
                     </div>
                   )}
                 </div>
@@ -605,197 +534,129 @@ export function TradingCard({
             );
           })()}
 
-          {/* === Pick Info === */}
-          <div className="relative z-10 flex-1 flex flex-col px-4 py-3 gap-2 min-h-0">
-            {/* Brand "S" monogram watermark */}
-            <div
-              className="absolute inset-0 flex items-center justify-end pr-3 pointer-events-none select-none"
-              aria-hidden="true"
-            >
+          {/* ── TYPE + EVENT TAG ROW ── */}
+          <div className="relative z-10 px-3 pt-2 flex items-center gap-1.5 flex-wrap shrink-0">
+            <span
+              className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
+              style={{ background: `${foil.accent}15`, borderColor: `${foil.accent}45`, color: foil.accent }}
+            >{card.sport}</span>
+            <span
+              className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.50)" }}
+            >{(card.betType ?? "").replace(/_/g, " ")}</span>
+            {eventLabel && (
               <span
-                style={{
-                  fontSize: "88px",
-                  fontWeight: 900,
-                  fontFamily: "Georgia, 'Times New Roman', serif",
-                  color: "white",
-                  opacity: 0.032,
-                  lineHeight: 1,
-                  userSelect: "none",
-                }}
-              >S</span>
-            </div>
-            <div>
-              <p className="text-[8px] text-white/30 uppercase tracking-widest font-bold truncate">{card.game}</p>
-              <h3 className="text-[15px] font-black leading-tight text-white/95 mt-0.5">{card.pick}</h3>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                <span
-                  className="text-sm font-mono font-black tabular-nums"
-                  style={{ color: foil.accent, textShadow: `0 0 10px ${foil.accent}60` }}
-                >
-                  {card.odds > 0 ? `+${card.odds}` : card.odds}
-                </span>
-                <span
-                  className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
-                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.38)" }}
-                >{(card.betType ?? "").replace(/_/g, " ")}</span>
-              </div>
-              {ret1 && ret10 && ret100 && (
-                <div
-                  className="mt-2 rounded-lg px-2.5 py-1.5 border"
-                  style={{
-                    background: isWin
-                      ? "rgba(251,191,36,0.12)"
-                      : "rgba(255,255,255,0.04)",
-                    borderColor: isWin
-                      ? "rgba(251,191,36,0.45)"
-                      : "rgba(255,255,255,0.10)",
-                  }}
-                >
-                  <div
-                    className="text-[7px] font-black uppercase tracking-widest mb-1"
-                    style={{ color: isWin ? "rgba(251,191,36,0.75)" : "rgba(255,255,255,0.30)" }}
-                  >
-                    {isWin ? "★ If You Bet" : "If You Bet"}
-                  </div>
-                  <div className="flex items-center justify-between gap-1">
-                    {[{ label: "$1", val: ret1 }, { label: "$10", val: ret10 }, { label: "$100", val: ret100 }].map(({ label, val }) => (
-                      <div key={label} className="flex flex-col items-center gap-0.5 flex-1">
-                        <span
-                          className="text-[8px] font-black"
-                          style={{ color: isWin ? "rgba(251,191,36,0.55)" : "rgba(255,255,255,0.25)" }}
-                        >{label}</span>
-                        <span
-                          className="text-[10px] font-black tabular-nums"
-                          style={{
-                            color: isWin ? "#FBBF24" : "rgba(52,211,153,0.85)",
-                            textShadow: isWin ? "0 0 10px rgba(251,191,36,0.55)" : "none",
-                          }}
-                        >{val}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+                className="text-[7px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                style={{ background: `${foil.accent}10`, borderColor: `${foil.accent}35`, color: `${foil.accent}CC`, textShadow: `0 0 6px ${foil.accent}55` }}
+              >{eventLabel}</span>
+            )}
+            {card.ev >= 15 && (
+              <span className="text-[7px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.12)", color: "rgba(251,191,36,0.90)" }}>🔥 HIGH EDGE</span>
+            )}
+            {isAPlus && (
+              <span className="text-[7px] font-black px-2 py-0.5 rounded-full" style={{ background: "rgba(251,191,36,0.10)", color: "rgba(251,191,36,0.80)" }}>◆ LEGENDARY</span>
+            )}
+          </div>
 
-            {/* Stats bars */}
-            <div className="space-y-2.5 mt-auto">
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-white/40 uppercase font-bold tracking-wider">Conviction</span>
-                  <span className="text-[10px] font-black text-white/90">{card.confidence}%</span>
-                </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${card.confidence}%`,
-                      background: `linear-gradient(90deg, ${foil.accent}80, ${foil.accent})`,
-                      boxShadow: `0 0 7px ${foil.accent}65`,
-                    }}
-                  />
-                </div>
+          {/* ── ABILITY BOX (Pokémon-style move description) ── */}
+          <div
+            className="relative z-10 mx-3 mt-2 rounded-lg px-2.5 py-2 shrink-0"
+            style={{ background: "rgba(255,255,255,0.045)", border: "1px solid rgba(255,255,255,0.09)" }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <Brain className="w-2.5 h-2.5 shrink-0" style={{ color: foil.accent }} />
+              <span className="text-[7px] font-black uppercase tracking-widest" style={{ color: foil.accent }}>46-Factor Analysis</span>
+              <span className="ml-auto text-[9px] font-black tabular-nums text-emerald-400">EV +{card.ev}%</span>
+            </div>
+            <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.60)" }}>
+              {(card.betType ?? "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())} pick — {card.confidence}% conviction. Model targets positive expected value on this line.
+            </p>
+          </div>
+
+          {/* ── STAT BARS (Pokémon-style weakness/resistance) ── */}
+          <div className="relative z-10 px-3 pt-2 space-y-1.5 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[7px] font-black uppercase text-white/30 shrink-0" style={{ width: "52px" }}>Conviction</span>
+              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}80, ${foil.accent})`, boxShadow: `0 0 6px ${foil.accent}60` }} />
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-white/40 uppercase font-bold tracking-wider">Sors EV™</span>
-                  <span className="text-[10px] font-black text-emerald-400">+{card.ev}%</span>
-                </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
-                  <div
-                    className="h-full rounded-full bg-emerald-500"
-                    style={{
-                      width: `${Math.min(card.ev * 5, 100)}%`,
-                      boxShadow: "0 0 8px rgba(52,211,153,0.55)",
-                    }}
-                  />
-                </div>
+              <span className="text-[9px] font-black tabular-nums shrink-0" style={{ color: foil.accent, minWidth: "28px", textAlign: "right" }}>{card.confidence}%</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[7px] font-black uppercase text-white/30 shrink-0" style={{ width: "52px" }}>Sors EV™</span>
+              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(card.ev * 5, 100)}%`, boxShadow: "0 0 6px rgba(52,211,153,0.55)" }} />
               </div>
+              <span className="text-[9px] font-black tabular-nums text-emerald-400 shrink-0" style={{ minWidth: "28px", textAlign: "right" }}>+{card.ev}%</span>
             </div>
           </div>
 
-          {/* === WIN PAYOUT BANNER (won cards only) === */}
-          {isWin && ret1 && ret10 && ret100 && (
+          {/* ── PAYOUT ROW ── */}
+          {ret1 && ret10 && ret100 && (
             <div
-              className="relative z-10 mx-3 mb-2 rounded-xl shrink-0"
+              className="relative z-10 mx-3 mt-2 rounded-lg px-2.5 py-2 shrink-0"
               style={{
-                background: "linear-gradient(135deg, rgba(251,191,36,0.22) 0%, rgba(234,179,8,0.10) 100%)",
-                border: "2px solid rgba(251,191,36,0.60)",
-                boxShadow: "0 0 24px rgba(251,191,36,0.30), inset 0 1px 0 rgba(251,191,36,0.18)",
-                padding: "8px 10px 10px",
+                background: isWin ? "rgba(251,191,36,0.10)" : "rgba(255,255,255,0.035)",
+                border: `1px solid ${isWin ? "rgba(251,191,36,0.40)" : "rgba(255,255,255,0.08)"}`,
               }}
             >
-              <div
-                className="text-[7px] font-black uppercase tracking-widest text-center mb-2"
-                style={{ color: "rgba(251,191,36,0.70)" }}
-              >
-                ★ If You Had Listened — You Would Have Won ★
+              <div className="text-[7px] font-black uppercase tracking-widest mb-1.5" style={{ color: isWin ? "rgba(251,191,36,0.70)" : "rgba(255,255,255,0.28)" }}>
+                {isWin ? "★ If You Bet" : "If You Bet"}
               </div>
-              <div className="flex items-end justify-around gap-1">
-                {[{ label: "$1 bet", val: ret1, size: "text-[16px]" }, { label: "$10 bet", val: ret10, size: "text-[20px]" }, { label: "$100 bet", val: ret100, size: "text-[26px]" }].map(({ label, val, size }) => (
-                  <div key={label} className="flex flex-col items-center gap-0.5 flex-1">
-                    <span
-                      className="text-[7px] font-black uppercase tracking-wider"
-                      style={{ color: "rgba(251,191,36,0.50)" }}
-                    >{label}</span>
-                    <span
-                      className={`${size} font-black tabular-nums leading-none`}
-                      style={{
-                        color: "#FCD34D",
-                        textShadow: "0 0 16px rgba(251,191,36,0.80), 0 2px 4px rgba(0,0,0,0.60)",
-                        fontFamily: "Georgia, 'Times New Roman', serif",
-                      }}
-                    >{val}</span>
+              <div className="flex items-center justify-around">
+                {[{ stake: "$1", val: ret1 }, { stake: "$10", val: ret10 }, { stake: "$100", val: ret100 }].map(({ stake, val }) => (
+                  <div key={stake} className="flex flex-col items-center gap-0.5">
+                    <span className="text-[7px] font-black uppercase" style={{ color: isWin ? "rgba(251,191,36,0.50)" : "rgba(255,255,255,0.22)" }}>{stake}</span>
+                    <span className="text-[11px] font-black tabular-nums" style={{ color: isWin ? "#FBBF24" : "rgba(52,211,153,0.85)", textShadow: isWin ? "0 0 10px rgba(251,191,36,0.55)" : "none" }}>{val}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* === Footer === */}
+          {/* ── FOOTER (Pokémon-style card bottom) ── */}
           <div
-            className="relative z-10 px-4 py-2 border-t flex items-center justify-between shrink-0"
-            style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.3)" }}
+            className="relative z-10 mt-auto px-3 py-2 border-t flex items-center justify-between shrink-0"
+            style={{ borderColor: `${foil.accent}20`, background: "rgba(0,0,0,0.40)" }}
           >
-            <div className="flex items-center gap-1.5">
-              <Brain className="w-3 h-3 text-white/30" />
-              <span className="text-[8px] font-black uppercase tracking-widest text-white/30">46-Factor</span>
-            </div>
-            {isFlippable && !isSettled && (
-              <span className="text-[7px] font-black uppercase tracking-widest text-white/18 flex items-center gap-0.5">
-                ↺ flip
-              </span>
-            )}
-            {isSettled ? (
-              isWin ? (
-                <div className="flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-[9px] font-black uppercase text-emerald-400">Called It ✓</span>
-                </div>
+            {/* Left: instance number or 46-Factor */}
+            <div className="flex items-center gap-1">
+              {instanceNumber && card.maxCopies ? (
+                <span className="text-[7px] font-mono" style={{ color: `${foil.accent}55` }}>
+                  {String(instanceNumber).padStart(3, "0")}/{card.maxCopies}
+                </span>
               ) : (
-                <div className="flex items-center gap-1">
-                  <XCircle className="w-3.5 h-3.5 text-white/30" />
-                  <span className="text-[9px] font-black uppercase text-white/35">No Hit</span>
-                </div>
-              )
-            ) : (
-              <div className="flex items-center gap-1.5 animate-pulse">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                <span className="text-[9px] font-bold uppercase tracking-wider text-primary/80">Pending</span>
-              </div>
-            )}
-          </div>
-
-          {instanceNumber && card.maxCopies && (
-            <div
-              className="relative z-10 px-4 pb-2 flex items-center justify-between shrink-0"
-            >
-              <span className="text-[8px] font-mono text-white/20">
-                #{String(instanceNumber).padStart(3, "0")} / {card.maxCopies}
-              </span>
-              <span className="text-[8px] text-white/15 font-medium">SORS MAXIMA™</span>
+                <span className="text-[7px] font-black uppercase tracking-widest text-white/20">46-Factor™</span>
+              )}
             </div>
-          )}
+
+            {/* Center: flip hint */}
+            {isFlippable && !isSettled && (
+              <span className="text-[7px] font-black uppercase tracking-widest text-white/18">↺ flip</span>
+            )}
+
+            {/* Right: result / status */}
+            <div>
+              {isSettled ? (
+                isWin ? (
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                    <span className="text-[8px] font-black uppercase text-emerald-400">Called It ✓</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <XCircle className="w-3 h-3 text-white/28" />
+                    <span className="text-[8px] font-black uppercase text-white/30">No Hit</span>
+                  </div>
+                )
+              ) : (
+                <div className="flex items-center gap-1 animate-pulse">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: foil.accent }} />
+                  <span className="text-[8px] font-bold uppercase tracking-wider" style={{ color: `${foil.accent}AA` }}>Pending</span>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* === FROZEN OVERLAY === */}
           {card.isFrozen && (
