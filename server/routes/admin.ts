@@ -924,6 +924,249 @@ Format your response clearly with sections and bullet points.`;
     }
   });
 
+  // === Intelligence Pipeline Services Health ===
+  app.get("/api/admin/pipeline-services", requireAdmin, async (_req, res) => {
+    const checks = await Promise.allSettled([
+      // 1. Database
+      (async () => {
+        const t = Date.now();
+        await db.execute(sql`SELECT 1`);
+        return { id: "database", name: "PostgreSQL Database", latencyMs: Date.now() - t, status: "healthy" as const, detail: "Connected" };
+      })(),
+      // 2. ESPN / Intelligence Hub
+      (async () => {
+        const hub = getHubStatus();
+        return {
+          id: "espn", name: "ESPN Data Feed", latencyMs: hub.lastCycleTimeMs || 0,
+          status: (hub.running ? "healthy" : "degraded") as "healthy" | "degraded" | "down",
+          detail: hub.running ? `Hub running · ${hub.totalCycles} cycles · last ${hub.lastCycleAt ? new Date(hub.lastCycleAt).toLocaleTimeString() : "never"}` : "Hub stopped"
+        };
+      })(),
+      // 3. BallDontLie
+      (async () => {
+        const { isBDLAvailable } = await import("../balldontlie-provider");
+        const ok = isBDLAvailable();
+        return { id: "balldontlie", name: "BallDontLie API (NBA)", latencyMs: 0, status: (ok ? "healthy" : "degraded") as "healthy" | "degraded" | "down", detail: ok ? "NBA stats enrichment active" : "Key missing — reduced NBA data" };
+      })(),
+      // 4. The Odds API
+      (async () => {
+        const s = sportsDataService.getApiStatus();
+        const remaining = s.requestsRemaining ?? -1;
+        const st: "healthy" | "degraded" | "down" = remaining < 0 ? "unknown" as any : remaining > 100 ? "healthy" : remaining > 0 ? "degraded" : "down";
+        return { id: "odds-api", name: "The Odds API", latencyMs: 0, status: st, detail: remaining >= 0 ? `${remaining} requests remaining today` : (s.available ? "Available" : "Unavailable"), quota: remaining };
+      })(),
+      // 5. OpenAI
+      (async () => {
+        const key = process.env.OPENAI_API_KEY;
+        const { getCircuitBreakerState } = await import("../aiCircuitBreaker").catch(() => ({ getCircuitBreakerState: () => ({ open: false }) }));
+        const circuit = getCircuitBreakerState?.() || { open: false };
+        const ok = !!key && !(circuit as any).open;
+        return { id: "openai", name: "OpenAI (AI Insights)", latencyMs: 0, status: (ok ? "healthy" : !key ? "down" : "degraded") as "healthy" | "degraded" | "down", detail: !key ? "API key missing" : (circuit as any).open ? "Circuit breaker open — quota exceeded" : "GPT-4o active" };
+      })(),
+      // 6. Precomputed Predictions Engine
+      (async () => {
+        const { getEngineStatus } = await import("../precomputedPredictionsEngine");
+        const s = getEngineStatus();
+        const hasData = (s as any).totalPicks > 0 || (s as any).sportsComputed?.length > 0;
+        return { id: "precomputed", name: "Precomputed Picks Engine", latencyMs: (s as any).lastCycleMs || 0, status: (hasData ? "healthy" : "degraded") as "healthy" | "degraded" | "down", detail: hasData ? `${(s as any).totalPicks || 0} picks cached · ${(s as any).sportsComputed?.length || 0} sports` : "No picks in cache — regenerating" };
+      })(),
+      // 7. API-Football
+      (async () => {
+        const key = process.env.API_FOOTBALL_KEY;
+        return { id: "api-football", name: "API-Football (Soccer)", latencyMs: 0, status: (key ? "healthy" : "degraded") as "healthy" | "degraded" | "down", detail: key ? "16 soccer leagues available" : "API key missing — soccer data unavailable" };
+      })(),
+      // 8. Stripe
+      (async () => {
+        const key = process.env.STRIPE_SECRET_KEY;
+        return { id: "stripe", name: "Stripe (Payments)", latencyMs: 0, status: (key ? "healthy" : "down") as "healthy" | "degraded" | "down", detail: key ? "Payment processing active" : "Stripe key missing" };
+      })(),
+    ]);
+
+    const services = checks.map(c => c.status === "fulfilled" ? c.value : { id: "unknown", name: "Service", latencyMs: 0, status: "down" as const, detail: (c as any).reason?.message || "Check failed" });
+    const healthy = services.filter(s => s.status === "healthy").length;
+    const total = services.length;
+    const overallStatus = healthy === total ? "healthy" : healthy >= total * 0.7 ? "degraded" : "critical";
+
+    res.json({ services, overallStatus, healthy, total, checkedAt: new Date().toISOString() });
+  });
+
+  // === Quick Solution — AI Diagnosis + Auto-Fix ===
+  app.post("/api/admin/quick-solution", requireAdmin, async (req, res) => {
+    const { applyFixes = true } = req.body;
+    try {
+      const { createOpenAIClient } = await import("../openaiClient");
+      const openai = createOpenAIClient();
+
+      // Gather full pipeline context
+      const [hub, errorLogs, learningStats] = await Promise.all([
+        Promise.resolve(getHubStatus()),
+        Promise.resolve(errorLogger.getLogs({ limit: 30 })),
+        getAllFactorWeights().catch(() => ({})),
+      ]);
+      const oddsStatus = sportsDataService.getApiStatus();
+      const { getEngineStatus: getPredictionStatus } = await import("../precomputedPredictionsEngine");
+      const predStatus = getPredictionStatus() as any;
+      const { isBDLAvailable } = await import("../balldontlie-provider");
+      const bdlOk = isBDLAvailable();
+      const { getCircuitBreakerState } = await import("../aiCircuitBreaker").catch(() => ({ getCircuitBreakerState: () => ({}) }));
+      const aiCircuit = (getCircuitBreakerState?.() || {}) as any;
+      const mem = process.memoryUsage();
+      const heapPct = Math.round((mem.heapUsed / mem.heapTotal) * 100);
+      const recentCritical = (errorLogs as any[]).filter((e: any) => e.severity === "critical" || e.level === "critical");
+      const recentErrors = (errorLogs as any[]).slice(0, 10);
+
+      const systemPrompt = `You are the Sors Maxima Intelligence Pipeline Expert — the most authoritative AI on this platform's architecture. You have complete, deep knowledge of every component.
+
+COMPLETE INTELLIGENCE PIPELINE ARCHITECTURE:
+
+DATA COLLECTION LAYER:
+- ESPN Scoreboard Provider (server/espn-scoreboard-provider.ts): Fetches live/upcoming games for NBA/NFL/MLB/NHL/NCAAB/NCAAF using ESPN's public API (no key needed). Feeds the hub cycle every 60s.
+- BallDontLie API (BALLDONTLIE_API_KEY): NBA team stats, W/L records, offensive/defensive ratings. Used in precomputed predictions + Vegas Engine for NBA enrichment.
+- API-Football (API_FOOTBALL_KEY): 16 major soccer leagues data.
+- NHL Stats API (public): NHL game data.
+- MLB Stats API (public): MLB game data.
+- The Odds API (THE_ODDS_API_KEY): Multi-bookmaker odds for all sports. ~500 requests/day quota. Falls back to ESPN-derived odds when quota exhausted.
+- OpenAI GPT-4o (OPENAI_API_KEY): Powers AI Pick Edge Insight Engine (per-pick sharp insights), Admin AI Assistant, Quick Solution. Protected by aiCircuitBreaker.ts.
+
+PROCESSING LAYER:
+- unifiedIntelligenceHub.ts: MASTER ORCHESTRATOR. Runs 60-second cycles. Aggregates ESPN + BDL + Odds API data into IntelligenceFeed. Drives the entire prediction pipeline. If it stops, picks go stale.
+- precomputedPredictionsEngine.ts: Pre-generates sport predictions for all 6 sports. Cached for instant delivery. Regenerates every 6+ hours or on force-trigger.
+- vegasEngine.ts: Power ratings, sharp money %, vig-removed probabilities, line movement, steam moves, reverse line movement. Has its own game data + BDL enrichment.
+- strategyAdvisorEngine.ts: Strategy templates, ticket analysis, leg improvement suggestions.
+- monteCarloEngine.ts: "Sors Simulation Engine" — Monte Carlo simulations + Kelly Criterion for parlay probability.
+- learningEngine.ts: Continuous model learning. Bayesian factor weight updates from settled picks.
+- autonomousLearningEngine.ts: Bootstrap + hourly learning from 477+ historical picks.
+- pickOutcomeTracker.ts: Settles picks against ESPN final scores, captures CLV, feeds learning engine.
+- platformIntelligenceEngine.ts: Team form, historical records, situational analysis.
+
+DELIVERY LAYER:
+- SSE broadcaster: Server-Sent Events push to all connected clients (picks, scores, alerts, intel updates).
+- API routes: /api/picks, /api/predictions, /api/vegas/predictions, /api/strategy/auto-picks
+
+COMMON FAILURE MODES & AUTO-FIXES:
+1. "Hub stopped / no cycles" → CRITICAL → FIX: reset_intelligence_hub
+2. "Precomputed cache empty / no picks" → CRITICAL → FIX: force_regen
+3. "Memory heap > 85%" → HIGH → FIX: clear_picks_cache
+4. "AI circuit breaker open" → MEDIUM → FIX: reset_ai_circuit (only if quota not exceeded)
+5. "Many critical errors" → HIGH → FIX: clear_error_logs (after analyzing patterns)
+6. "Odds API quota = 0" → LOW → NOT fixable automatically — monitor only
+7. "BallDontLie unavailable" → LOW → NBA data reduced but platform still works
+8. "Rosters stale > 24h" → LOW → FIX: rebuild_rosters
+
+AVAILABLE AUTO-FIX ACTIONS:
+- clear_picks_cache: Clears stale precomputed predictions cache (triggers fresh generation)
+- force_regen: Forces immediate precomputed prediction regeneration for all sports
+- reset_intelligence_hub: Restarts the 60-second intelligence cycle
+- clear_error_logs: Clears accumulated error log backlog
+- rebuild_rosters: Refreshes ESPN roster cache for all sports
+
+You must respond with ONLY valid JSON in this exact structure (no markdown, no explanation outside JSON):
+{
+  "healthScore": <0-100>,
+  "summary": "<one-sentence overall status>",
+  "issues": [
+    {
+      "id": "<unique-id>",
+      "severity": "critical|high|medium|low|info",
+      "service": "<service name>",
+      "title": "<concise issue title>",
+      "detail": "<what's wrong and why it matters>",
+      "autoFixable": <true|false>,
+      "fixAction": "<action_key or null>",
+      "recommendation": "<what to do>"
+    }
+  ],
+  "suggestedFixes": ["<fix_action_1>", "<fix_action_2>"],
+  "nextActions": ["<action 1>", "<action 2>"],
+  "pipelineStatus": "healthy|degraded|critical"
+}`;
+
+      const userPrompt = `Perform a complete Quick Solution diagnostic on the current platform state.
+
+LIVE SYSTEM DATA:
+Intelligence Hub: running=${hub.running}, cycles=${hub.totalCycles}, lastCycleAt=${hub.lastCycleAt}, lastCycleMs=${hub.lastCycleTimeMs}ms, lastError=${hub.lastError || "none"}
+Odds API: available=${oddsStatus.available}, remaining=${oddsStatus.requestsRemaining ?? "unknown"}
+BallDontLie: available=${bdlOk}
+OpenAI Circuit Breaker: open=${aiCircuit.open || false}, failures=${aiCircuit.failures || 0}
+Precomputed Engine: totalPicks=${predStatus.totalPicks || 0}, sportsComputed=${JSON.stringify(predStatus.sportsComputed || [])}
+Memory: heapUsed=${Math.round(mem.heapUsed / 1048576)}MB / heapTotal=${Math.round(mem.heapTotal / 1048576)}MB (${heapPct}%)
+Critical Errors (last 30): ${recentCritical.length} critical | ${recentErrors.length} total
+Recent Error Sample: ${JSON.stringify(recentErrors.map((e: any) => ({ msg: e.message || e.msg, sev: e.severity || e.level, ts: e.timestamp })).slice(0, 5))}
+API Keys Present: ESPN=yes(public), BDL=${bdlOk ? "yes" : "no"}, Odds=${oddsStatus.available ? "yes" : "limited"}, OpenAI=${!!process.env.OPENAI_API_KEY ? "yes" : "no"}, Stripe=${!!process.env.STRIPE_SECRET_KEY ? "yes" : "no"}, APIFootball=${!!process.env.API_FOOTBALL_KEY ? "yes" : "no"}
+
+Identify ALL real issues. Only suggest autoFixable=true if the fix action would actually help. Be specific.`;
+
+      const aiResponse = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_completion_tokens: 2048,
+      });
+
+      let diagnosis: any;
+      try {
+        const raw = aiResponse.choices[0]?.message?.content || "{}";
+        const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        diagnosis = JSON.parse(cleaned);
+      } catch {
+        diagnosis = { healthScore: 50, summary: "Diagnostic completed", issues: [], suggestedFixes: [], nextActions: ["Review system logs manually"], pipelineStatus: "unknown" };
+      }
+
+      // Apply auto-fixes if requested
+      const appliedFixes: string[] = [];
+      const fixErrors: string[] = [];
+
+      if (applyFixes && diagnosis.suggestedFixes?.length > 0) {
+        for (const fix of diagnosis.suggestedFixes) {
+          try {
+            if (fix === "clear_picks_cache") {
+              const { clearAllPredictionCaches } = await import("../precomputedPredictionsEngine");
+              clearAllPredictionCaches();
+              appliedFixes.push("clear_picks_cache");
+            } else if (fix === "force_regen") {
+              const { forcePredictionCycleNow } = await import("../precomputedPredictionsEngine");
+              forcePredictionCycleNow();
+              appliedFixes.push("force_regen");
+            } else if (fix === "reset_intelligence_hub") {
+              const { startIntelligenceHub } = await import("../unifiedIntelligenceHub");
+              startIntelligenceHub();
+              appliedFixes.push("reset_intelligence_hub");
+            } else if (fix === "clear_error_logs") {
+              errorLogger.clearLogs?.();
+              appliedFixes.push("clear_error_logs");
+            } else if (fix === "rebuild_rosters") {
+              refreshAllData().catch(() => {});
+              appliedFixes.push("rebuild_rosters");
+            } else if (fix === "reset_ai_circuit") {
+              const { resetCircuitBreaker } = await import("../aiCircuitBreaker").catch(() => ({ resetCircuitBreaker: null }));
+              if (resetCircuitBreaker) { resetCircuitBreaker(); appliedFixes.push("reset_ai_circuit"); }
+            }
+          } catch (fixErr: any) {
+            fixErrors.push(`${fix}: ${fixErr?.message || "failed"}`);
+          }
+        }
+      }
+
+      res.json({
+        ...diagnosis,
+        appliedFixes,
+        fixErrors,
+        ranAt: new Date().toISOString(),
+        systemSnapshot: {
+          hubRunning: hub.running,
+          oddsRemaining: oddsStatus.requestsRemaining,
+          heapPct,
+          criticalErrors: recentCritical.length,
+          totalPicksCached: predStatus.totalPicks || 0,
+        },
+      });
+    } catch (err: any) {
+      console.error("Quick-solution error:", err);
+      res.status(500).json({ error: "Quick solution failed", message: err?.message });
+    }
+  });
 
   // === Audit Trail Routes ===
   app.get("/api/audit/entries", requireAdmin, (req, res) => {

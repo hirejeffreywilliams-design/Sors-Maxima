@@ -18,9 +18,81 @@ import {
   ArrowLeft, Shield, Activity, AlertTriangle, CheckCircle, XCircle,
   Server, Database, Cpu, MemoryStick, Clock, RefreshCw, Play, Square,
   Loader2, Heart, Zap, Eye, Brain, Wrench, Bell, TrendingUp,
-  CircleDot, Wifi, WifiOff, ArrowUpRight,
+  CircleDot, Wifi, WifiOff, ArrowUpRight, Wand2, Sparkles, Bot,
+  ChevronDown, ChevronUp, Globe, Network, CheckCircle2, FlaskConical,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+
+interface PipelineService {
+  id: string;
+  name: string;
+  status: "healthy" | "degraded" | "down";
+  latencyMs: number;
+  detail: string;
+  quota?: number;
+}
+
+interface QuickSolutionResult {
+  healthScore: number;
+  summary: string;
+  issues: Array<{
+    id: string;
+    severity: "critical" | "high" | "medium" | "low" | "info";
+    service: string;
+    title: string;
+    detail: string;
+    autoFixable: boolean;
+    fixAction: string | null;
+    recommendation: string;
+  }>;
+  appliedFixes: string[];
+  fixErrors: string[];
+  nextActions: string[];
+  pipelineStatus: string;
+  systemSnapshot: {
+    hubRunning: boolean;
+    oddsRemaining: number;
+    heapPct: number;
+    criticalErrors: number;
+    totalPicksCached: number;
+  };
+  ranAt: string;
+}
+
+const SERVICE_ICONS: Record<string, any> = {
+  database: Database,
+  espn: Globe,
+  balldontlie: Network,
+  "odds-api": TrendingUp,
+  openai: Bot,
+  precomputed: FlaskConical,
+  "api-football": Globe,
+  stripe: Shield,
+};
+
+function PipelineServiceCard({ svc }: { svc: PipelineService }) {
+  const Icon = SERVICE_ICONS[svc.id] || Server;
+  const borderColor = svc.status === "healthy" ? "border-green-500/30" : svc.status === "degraded" ? "border-yellow-500/40" : "border-red-500/50";
+  const statusColor = svc.status === "healthy" ? "text-green-500" : svc.status === "degraded" ? "text-yellow-500" : "text-red-500";
+  const bg = svc.status === "healthy" ? "" : svc.status === "degraded" ? "bg-yellow-500/3" : "bg-red-500/5";
+  return (
+    <div className={`flex items-center gap-3 p-3 rounded-lg border ${borderColor} ${bg}`} data-testid={`pipeline-service-${svc.id}`}>
+      <div className={`p-1.5 rounded-md ${svc.status === "healthy" ? "bg-green-500/10" : svc.status === "degraded" ? "bg-yellow-500/10" : "bg-red-500/10"}`}>
+        <Icon className={`h-4 w-4 ${statusColor}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium truncate">{svc.name}</span>
+          <StatusDot status={svc.status} />
+        </div>
+        <p className="text-[11px] text-muted-foreground truncate">{svc.detail}</p>
+      </div>
+      {svc.latencyMs > 0 && (
+        <span className="text-[10px] font-mono text-muted-foreground shrink-0">{svc.latencyMs}ms</span>
+      )}
+    </div>
+  );
+}
 
 function SeverityBadge({ severity }: { severity: string }) {
   const map: Record<string, string> = {
@@ -86,6 +158,8 @@ export default function AdminGuardian() {
   useSEO({ title: "App Guardian", description: "Continuous monitoring, auto-healing, and AI diagnostics" });
   const { toast } = useToast();
   const [tab, setTab] = useState("overview");
+  const [qsResult, setQsResult] = useState<QuickSolutionResult | null>(null);
+  const [qsExpanded, setQsExpanded] = useState(true);
 
   const sse = useSSEContext();
 
@@ -153,6 +227,32 @@ export default function AdminGuardian() {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/guardian/status"] });
       toast({ title: "Guardian restarted" });
     },
+  });
+
+  const { data: pipelineData, isLoading: pipelineLoading, refetch: refetchPipeline } = useQuery<{
+    services: PipelineService[];
+    overallStatus: string;
+    healthy: number;
+    total: number;
+    checkedAt: string;
+  }>({
+    queryKey: ["/api/admin/pipeline-services"],
+    refetchInterval: 30000,
+  });
+
+  const quickSolutionMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/quick-solution").then(r => r.json()),
+    onSuccess: (data: QuickSolutionResult) => {
+      setQsResult(data);
+      setQsExpanded(true);
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pipeline-services"] });
+      const fixCount = data.appliedFixes?.length || 0;
+      toast({
+        title: fixCount > 0 ? `Quick Solution: ${fixCount} fix${fixCount > 1 ? "es" : ""} applied` : "Quick Solution complete",
+        description: data.summary,
+      });
+    },
+    onError: () => toast({ title: "Quick Solution failed", variant: "destructive" }),
   });
 
   if (isLoading) {
@@ -272,10 +372,163 @@ export default function AdminGuardian() {
           </Card>
         </div>
 
+        {/* Quick Solution Panel */}
+        <Card className="border-violet-500/30 bg-violet-500/5" data-testid="card-quick-solution">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-violet-500/10 shrink-0">
+                  <Wand2 className="h-5 w-5 text-violet-400" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-sm">Quick Solution</h3>
+                    <Badge variant="outline" className="text-[10px] border-violet-500/30 text-violet-400">AI-Powered</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Deep-scans all pipeline services, diagnoses issues, and applies available auto-fixes in one click
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {qsResult && (
+                  <Button size="sm" variant="ghost" onClick={() => setQsExpanded(v => !v)} data-testid="button-qs-toggle">
+                    {qsExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </Button>
+                )}
+                <Button
+                  size="sm"
+                  className="bg-violet-600 hover:bg-violet-700 text-white"
+                  onClick={() => quickSolutionMutation.mutate()}
+                  disabled={quickSolutionMutation.isPending}
+                  data-testid="button-quick-solution"
+                >
+                  {quickSolutionMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin mr-1.5" />
+                      Scanning...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1.5" />
+                      Run Quick Solution
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Loading state */}
+            {quickSolutionMutation.isPending && (
+              <div className="mt-4 space-y-2" data-testid="qs-scanning">
+                {["Connecting to all pipeline services...", "Analyzing error patterns...", "Running AI diagnosis...", "Evaluating auto-fix options..."].map((step, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin text-violet-400 shrink-0" />
+                    {step}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Results */}
+            {qsResult && qsExpanded && !quickSolutionMutation.isPending && (
+              <div className="mt-4 space-y-4" data-testid="qs-results">
+                <Separator className="opacity-30" />
+                <div className="flex items-center gap-4 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <HealthGauge score={qsResult.healthScore} size="sm" />
+                    <span className="text-xs text-muted-foreground">Pipeline Health</span>
+                  </div>
+                  <Badge variant="outline" className={
+                    qsResult.pipelineStatus === "healthy" ? "border-green-500/30 text-green-500" :
+                    qsResult.pipelineStatus === "degraded" ? "border-yellow-500/30 text-yellow-500" :
+                    "border-red-500/30 text-red-500"
+                  } data-testid="qs-pipeline-status">
+                    {qsResult.pipelineStatus}
+                  </Badge>
+                  <p className="text-sm text-muted-foreground flex-1">{qsResult.summary}</p>
+                </div>
+
+                {/* Applied fixes */}
+                {qsResult.appliedFixes?.length > 0 && (
+                  <div className="p-3 rounded-lg bg-green-500/8 border border-green-500/20">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      <span className="text-xs font-semibold text-green-400">{qsResult.appliedFixes.length} Auto-Fix{qsResult.appliedFixes.length > 1 ? "es" : ""} Applied</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {qsResult.appliedFixes.map((fix, i) => (
+                        <Badge key={i} variant="outline" className="text-[10px] border-green-500/30 text-green-400 font-mono" data-testid={`qs-fix-${i}`}>
+                          {fix.replace(/_/g, " ")}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Issues */}
+                {qsResult.issues?.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Detected Issues</h4>
+                    {qsResult.issues.map((issue) => (
+                      <div key={issue.id}
+                        className={`p-3 rounded-lg border text-sm ${
+                          issue.severity === "critical" ? "border-red-500/40 bg-red-500/5" :
+                          issue.severity === "high" ? "border-orange-500/40 bg-orange-500/5" :
+                          issue.severity === "medium" ? "border-yellow-500/30 bg-yellow-500/5" :
+                          "border-border"
+                        }`}
+                        data-testid={`qs-issue-${issue.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <SeverityBadge severity={issue.severity} />
+                              <Badge variant="outline" className="text-[10px]">{issue.service}</Badge>
+                              <span className="font-medium text-sm">{issue.title}</span>
+                              {issue.autoFixable && (
+                                <Badge variant="outline" className="text-[10px] border-violet-500/30 text-violet-400">
+                                  <Wand2 className="h-2 w-2 mr-1" /> Auto-fixed
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{issue.detail}</p>
+                            <p className="text-xs text-foreground/70 mt-0.5 italic">{issue.recommendation}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Next Actions */}
+                {qsResult.nextActions?.length > 0 && (
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Recommended Next Steps</h4>
+                    {qsResult.nextActions.map((action, i) => (
+                      <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground" data-testid={`qs-action-${i}`}>
+                        <ArrowUpRight className="h-3 w-3 mt-0.5 text-violet-400 shrink-0" />
+                        {action}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="text-[10px] text-muted-foreground text-right">
+                  Ran {timeAgo(qsResult.ranAt)} · hub:{qsResult.systemSnapshot?.hubRunning ? "running" : "stopped"} · {qsResult.systemSnapshot?.totalPicksCached} picks cached · heap:{qsResult.systemSnapshot?.heapPct}%
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList data-testid="tabs-guardian">
             <TabsTrigger value="overview" data-testid="tab-overview">
               <Server className="h-3 w-3 mr-1" /> Services ({services.length})
+            </TabsTrigger>
+            <TabsTrigger value="pipeline" data-testid="tab-pipeline">
+              <Network className="h-3 w-3 mr-1" /> Pipeline
             </TabsTrigger>
             <TabsTrigger value="alerts" data-testid="tab-alerts">
               <Bell className="h-3 w-3 mr-1" /> Alerts ({alerts.length})
@@ -341,6 +594,79 @@ export default function AdminGuardian() {
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="pipeline" className="mt-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Network className="h-4 w-4 text-violet-400" /> Intelligence Pipeline Services
+                    </CardTitle>
+                    <CardDescription>
+                      {pipelineData ? (
+                        <>
+                          {pipelineData.healthy}/{pipelineData.total} services healthy
+                          {" · "}
+                          <span className={
+                            pipelineData.overallStatus === "healthy" ? "text-green-500" :
+                            pipelineData.overallStatus === "degraded" ? "text-yellow-500" : "text-red-500"
+                          }>
+                            {pipelineData.overallStatus}
+                          </span>
+                          {pipelineData.checkedAt && <span className="text-muted-foreground ml-1">· checked {timeAgo(pipelineData.checkedAt)}</span>}
+                        </>
+                      ) : "Live status of all external data integrations and internal engines"}
+                    </CardDescription>
+                  </div>
+                  <Button size="sm" variant="outline" onClick={() => refetchPipeline()} data-testid="button-refresh-pipeline">
+                    {pipelineLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {pipelineLoading && !pipelineData ? (
+                  <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Checking all services...</span>
+                  </div>
+                ) : pipelineData?.services?.length ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2" data-testid="pipeline-services-grid">
+                    {pipelineData.services.map((svc) => (
+                      <PipelineServiceCard key={svc.id} svc={svc} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Network className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p>Click refresh to check pipeline services</p>
+                  </div>
+                )}
+
+                {/* System snapshot from last Quick Solution */}
+                {qsResult?.systemSnapshot && (
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Last Quick Solution Snapshot</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                      {[
+                        { label: "Hub", value: qsResult.systemSnapshot.hubRunning ? "Running" : "Stopped", ok: qsResult.systemSnapshot.hubRunning },
+                        { label: "Odds Quota", value: qsResult.systemSnapshot.oddsRemaining >= 0 ? `${qsResult.systemSnapshot.oddsRemaining} left` : "unknown", ok: qsResult.systemSnapshot.oddsRemaining > 100 },
+                        { label: "Heap", value: `${qsResult.systemSnapshot.heapPct}%`, ok: qsResult.systemSnapshot.heapPct < 80 },
+                        { label: "Critical Errors", value: String(qsResult.systemSnapshot.criticalErrors), ok: qsResult.systemSnapshot.criticalErrors === 0 },
+                        { label: "Picks Cached", value: String(qsResult.systemSnapshot.totalPicksCached), ok: qsResult.systemSnapshot.totalPicksCached > 0 },
+                      ].map((metric) => (
+                        <div key={metric.label} className={`p-2 rounded-lg border text-center ${metric.ok ? "border-green-500/20 bg-green-500/5" : "border-yellow-500/20 bg-yellow-500/5"}`}>
+                          <div className={`text-sm font-bold ${metric.ok ? "text-green-400" : "text-yellow-400"}`}>{metric.value}</div>
+                          <div className="text-[10px] text-muted-foreground">{metric.label}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground mt-2">Snapshot from {timeAgo(qsResult.ranAt)}</div>
                   </div>
                 )}
               </CardContent>
