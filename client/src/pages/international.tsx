@@ -354,7 +354,7 @@ export default function InternationalPage() {
         {feed && !isLoading && (
           <>
             {/* Stats bar */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <Card className="border-border/40 bg-card/60">
                 <CardContent className="p-3 text-center">
                   <p className="text-2xl font-bold text-primary">{feed.totalGames}</p>

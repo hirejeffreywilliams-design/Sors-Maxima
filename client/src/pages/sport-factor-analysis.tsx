@@ -714,7 +714,7 @@ function FactorDatabaseTab() {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card>
           <CardContent className="p-4 text-center">
             <div className="text-2xl font-bold" data-testid="text-total-factors">{allFactors.length}</div>

@@ -374,7 +374,7 @@ export default function PersonalizedInsightsPage() {
 
             <div className="pt-2 border-t border-border space-y-3">
               <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Activity Streak</div>
-              <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
                 <div>
                   <div className="text-xl font-bold text-primary">{insights.streakInfo.currentStreak}</div>
                   <div className="text-xs text-muted-foreground">Current</div>

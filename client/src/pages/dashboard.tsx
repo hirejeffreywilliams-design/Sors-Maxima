@@ -119,7 +119,7 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
           <div className="bg-muted/50 rounded-lg p-2">
             <p className="text-xs text-muted-foreground">Confidence</p>
             <p className="text-sm font-bold">{pick.confidence}%</p>
@@ -443,7 +443,7 @@ function SGPContent() {
       </Card>
 
       {data?.meta && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{data.meta.gamesAnalyzed}</p><p className="text-xs text-muted-foreground">Games Analyzed</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{data.meta.totalSGPs}</p><p className="text-xs text-muted-foreground">SGPs Generated</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-green-500">{sgps.filter((s: any) => s.confidence >= 65).length}</p><p className="text-xs text-muted-foreground">High Confidence</p></CardContent></Card>
@@ -661,7 +661,7 @@ function TeaserContent() {
       </Card>
 
       {data?.meta && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{data.meta.gamesAvailable}</p><p className="text-xs text-muted-foreground">Games Available</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold">{teasers.length}</p><p className="text-xs text-muted-foreground">Teasers Generated</p></CardContent></Card>
           <Card><CardContent className="p-3 text-center"><p className="text-2xl font-bold text-green-500">{data.meta.teaserPointOptions?.join(" / ")}</p><p className="text-xs text-muted-foreground">Point Options</p></CardContent></Card>

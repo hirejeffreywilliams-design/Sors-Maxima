@@ -164,7 +164,7 @@ function FightCard({ fight, onAdd }: { fight: MMAFight; onAdd: (f: MMAFight) => 
         </div>
 
         {/* Stats row */}
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
           <div className="p-2 rounded-lg bg-muted/30">
             <p className={`text-sm font-bold ${confColor(fight.confidence)}`}>{fight.confidence}%</p>
             <p className="text-[9px] text-muted-foreground">Confidence</p>
@@ -343,7 +343,7 @@ export default function MMAPage() {
                   <Skeleton className="w-8 h-8 rounded-full" />
                   <Skeleton className="flex-1 h-16 rounded-xl" />
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                   {[1,2,3,4].map(j => <Skeleton key={j} className="h-10 rounded-lg" />)}
                 </div>
               </div>

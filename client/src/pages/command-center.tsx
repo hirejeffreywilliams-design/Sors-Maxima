@@ -1084,7 +1084,7 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
         </div>
 
         {/* ── Stats Row ── */}
-        <div className="grid grid-cols-4 border-t border-b border-muted/25">
+        <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-b border-muted/25">
           {[
             { label: "Odds", value: formatOdds(combinedAmerican) },
             { label: "Stake", value: `$${ticket.recommendedStake}` },

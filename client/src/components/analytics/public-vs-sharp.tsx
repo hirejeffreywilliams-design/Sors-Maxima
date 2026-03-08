@@ -116,7 +116,7 @@ export function PublicVsSharp() {
           </p>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
             <p className="text-2xl font-bold text-green-500">{sharpPlays}</p>
             <p className="text-xs text-muted-foreground">Sors Signal™ Leans</p>

@@ -262,7 +262,7 @@ function BookCard({ account, onUpdate, onDelete }: {
 
         {/* Stats row */}
         {account.totalBets > 0 && (
-          <div className="mt-3 grid grid-cols-4 gap-2">
+          <div className="mt-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
             <div className="text-center">
               <p className={`text-sm font-bold tabular-nums ${pnlPositive ? "text-emerald-400" : "text-red-400"}`}>
                 {formatMoney(account.netProfit)}
@@ -486,7 +486,7 @@ export default function SorsBooks() {
       />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <Card data-testid="card-total-balance">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-1">

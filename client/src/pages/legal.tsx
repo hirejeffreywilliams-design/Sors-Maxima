@@ -20,20 +20,20 @@ export default function LegalPage() {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-4 mb-6">
-          <TabsTrigger value="terms" className="gap-2" data-testid="tab-terms">
-            <FileText className="w-4 h-4" />
+          <TabsTrigger value="terms" className="gap-1.5 text-xs sm:text-sm" data-testid="tab-terms">
+            <FileText className="w-3.5 h-3.5 shrink-0 hidden sm:block" />
             Terms
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="gap-2" data-testid="tab-privacy">
-            <Shield className="w-4 h-4" />
+          <TabsTrigger value="privacy" className="gap-1.5 text-xs sm:text-sm" data-testid="tab-privacy">
+            <Shield className="w-3.5 h-3.5 shrink-0 hidden sm:block" />
             Privacy
           </TabsTrigger>
-          <TabsTrigger value="disclaimer" className="gap-2" data-testid="tab-disclaimer">
-            <AlertTriangle className="w-4 h-4" />
+          <TabsTrigger value="disclaimer" className="gap-1.5 text-xs sm:text-sm" data-testid="tab-disclaimer">
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 hidden sm:block" />
             Disclaimer
           </TabsTrigger>
-          <TabsTrigger value="affiliate" className="gap-2" data-testid="tab-affiliate">
-            <ExternalLink className="w-4 h-4" />
+          <TabsTrigger value="affiliate" className="gap-1.5 text-xs sm:text-sm" data-testid="tab-affiliate">
+            <ExternalLink className="w-3.5 h-3.5 shrink-0 hidden sm:block" />
             Affiliates
           </TabsTrigger>
         </TabsList>

@@ -427,7 +427,7 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
         )}
 
 
-        <div className={`grid gap-2 ${pick.winProbability ? "grid-cols-4" : "grid-cols-3"}`}>
+        <div className={`grid gap-2 ${pick.winProbability ? "grid-cols-2 md:grid-cols-4" : "grid-cols-3"}`}>
           {pick.winProbability && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -609,7 +609,7 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
           </div>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 text-center text-xs">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="p-1.5 rounded bg-muted/30 cursor-default">

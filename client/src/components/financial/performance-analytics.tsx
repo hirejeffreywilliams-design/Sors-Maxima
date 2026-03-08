@@ -202,7 +202,7 @@ export function PerformanceAnalytics() {
             <CardTitle className="text-base">Grade Accuracy</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
               <div className="p-2 bg-muted rounded-lg">
                 <p className="text-xs text-muted-foreground">A-Grade</p>
                 <p className="text-lg font-bold text-green-500">

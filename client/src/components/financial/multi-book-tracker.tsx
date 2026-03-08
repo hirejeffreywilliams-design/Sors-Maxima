@@ -105,7 +105,7 @@ export function MultiBookTracker() {
         </div>
 
         <div className="p-4 rounded-lg bg-gradient-to-br from-green-500/10 to-blue-500/10 border border-green-500/20">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Total Balance</p>
               <p className="text-2xl font-bold">${totalBalance.toLocaleString()}</p>

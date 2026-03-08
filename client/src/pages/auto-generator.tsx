@@ -245,7 +245,7 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="text-center p-2.5 bg-muted/50 rounded-lg">
             <p className="text-[10px] sm:text-xs text-muted-foreground mb-0.5">Win Chance</p>
             <p className="text-base sm:text-lg font-bold text-green-500" data-testid={`text-win-prob-${ticket.id}`}>

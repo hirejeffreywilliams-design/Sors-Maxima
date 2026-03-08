@@ -181,7 +181,7 @@ function CashoutCard({ bet }: { bet: CashoutBet }) {
       </CardHeader>
 
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-4 gap-2 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
           <div>
             <p className="text-[10px] text-muted-foreground">Stake</p>
             <p className="font-semibold text-sm" data-testid={`text-stake-${bet.id}`}>${bet.stake}</p>
