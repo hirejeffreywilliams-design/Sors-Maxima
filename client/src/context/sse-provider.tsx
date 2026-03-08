@@ -14,7 +14,7 @@ export function useSSEContext(): SSEContextValue {
       console.warn("[SSEContext] useSSEContext() called outside SSEProvider — SSE features disabled for this component.");
     }
     return {
-      connected: false, clientId: null, lastEvent: null, liveGames: [], topPicks: [],
+      connected: false, clientId: null, lastEvent: null, liveGames: [], upcomingGames: [], allGames: [], topPicks: [],
       edgeAlerts: [], opportunityScore: 0, sportSummaries: [], dataSourceHealth: [],
       lastUpdate: null, reconnectAttempts: 0, pendingNotifications: [],
       sharpSignals: [], earlySettlements: [], isPageVisible: true,

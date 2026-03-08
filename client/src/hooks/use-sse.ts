@@ -20,6 +20,8 @@ interface SSEState {
   clientId: string | null;
   lastEvent: SSEEvent | null;
   liveGames: any[];
+  upcomingGames: any[];
+  allGames: any[];
   topPicks: any[];
   edgeAlerts: any[];
   opportunityScore: number;
@@ -48,6 +50,8 @@ export function useSSE(options: UseSSEOptions = {}) {
     clientId: null,
     lastEvent: null,
     liveGames: [],
+    upcomingGames: [],
+    allGames: [],
     topPicks: [],
     edgeAlerts: [],
     opportunityScore: 0,
@@ -114,17 +118,24 @@ export function useSSE(options: UseSSEOptions = {}) {
         if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
         const sseEvent: SSEEvent = { type: "intelligence-update", data, timestamp: data.timestamp };
-        setState(prev => ({
-          ...prev,
-          lastEvent: sseEvent,
-          liveGames: data.liveGames || prev.liveGames,
-          topPicks: data.topPicks || prev.topPicks,
-          edgeAlerts: data.edgeAlerts || prev.edgeAlerts,
-          opportunityScore: data.opportunityScore ?? prev.opportunityScore,
-          sportSummaries: data.sportSummaries || prev.sportSummaries,
-          dataSourceHealth: data.dataSourceHealth || prev.dataSourceHealth,
-          lastUpdate: data.timestamp,
-        }));
+        setState(prev => {
+          const liveGames = data.liveGames || prev.liveGames;
+          const upcomingGames = data.upcomingGames || prev.upcomingGames;
+          const allGames = data.allGames || (liveGames.length > 0 || upcomingGames.length > 0 ? [...liveGames, ...upcomingGames] : prev.allGames);
+          return {
+            ...prev,
+            lastEvent: sseEvent,
+            liveGames,
+            upcomingGames,
+            allGames,
+            topPicks: data.topPicks || prev.topPicks,
+            edgeAlerts: data.edgeAlerts || prev.edgeAlerts,
+            opportunityScore: data.opportunityScore ?? prev.opportunityScore,
+            sportSummaries: data.sportSummaries || prev.sportSummaries,
+            dataSourceHealth: data.dataSourceHealth || prev.dataSourceHealth,
+            lastUpdate: data.timestamp,
+          };
+        });
         dispatchEvent(sseEvent);
       } catch {}
     });

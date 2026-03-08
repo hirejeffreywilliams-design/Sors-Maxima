@@ -153,19 +153,25 @@ async function pushIntelligenceUpdate(): Promise<void> {
 
     lastFeedHash = currentHash;
 
+    const mapGame = (g: any) => ({
+      id: g.id,
+      sport: g.sport,
+      shortName: g.shortName,
+      date: g.date,
+      homeTeam: { name: g.homeTeam.name, abbreviation: g.homeTeam.abbreviation, score: g.homeTeam.score },
+      awayTeam: { name: g.awayTeam.name, abbreviation: g.awayTeam.abbreviation, score: g.awayTeam.score },
+      status: g.status,
+      momentum: g.momentum,
+      odds: g.odds,
+    });
+
     const liveUpdate = {
       type: "intelligence-update",
       timestamp: new Date().toISOString(),
       opportunityScore: feed.opportunityScore,
-      liveGames: feed.liveGames.map(g => ({
-        id: g.id,
-        sport: g.sport,
-        shortName: g.shortName,
-        homeTeam: { name: g.homeTeam.name, abbreviation: g.homeTeam.abbreviation, score: g.homeTeam.score },
-        awayTeam: { name: g.awayTeam.name, abbreviation: g.awayTeam.abbreviation, score: g.awayTeam.score },
-        status: g.status,
-        momentum: g.momentum,
-      })),
+      liveGames: feed.liveGames.map(mapGame),
+      upcomingGames: feed.upcomingGames.slice(0, 20).map(mapGame),
+      allGames: [...feed.liveGames.map(mapGame), ...feed.upcomingGames.slice(0, 20).map(mapGame)],
       topPicksCount: feed.topPicks.length,
       topPicks: feed.topPicks.slice(0, 5).map(p => ({
         id: p.id,
