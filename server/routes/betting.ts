@@ -68,6 +68,20 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.post("/api/odds/live-legs", requireAuth, async (req, res) => {
+    try {
+      const { legs } = req.body as { legs: Array<{ id: string; sport?: string; team?: string; opponent?: string; market?: string; outcome?: string }> };
+      if (!Array.isArray(legs) || legs.length === 0) {
+        return res.json({ legs: [] });
+      }
+      const { getCachedOddsForLegs } = await import("../marketSnapshotEngine");
+      const results = getCachedOddsForLegs(legs);
+      return res.json({ legs: results, timestamp: new Date().toISOString() });
+    } catch (err) {
+      return res.status(500).json({ error: "Failed to fetch live leg odds" });
+    }
+  });
+
   app.post("/api/odds/refresh", requireAuth, (req, res) => {
     try {
       const sport = req.body.sport as string;

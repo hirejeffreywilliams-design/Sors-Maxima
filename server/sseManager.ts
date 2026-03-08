@@ -20,6 +20,7 @@ const ipConnectionCount = new Map<string, number>();
 let eventCounter = 0;
 let broadcastInterval: NodeJS.Timeout | null = null;
 let lastFeedHash = "";
+let lastOddsHash = "";
 const eventBuffer: { id: number; eventType: string; data: any; channel: string; timestamp: number }[] = [];
 
 function generateClientId(): string {
@@ -218,6 +219,28 @@ async function pushIntelligenceUpdate(): Promise<void> {
         alerts: feed.edgeAlerts.slice(0, 5),
       }, "alerts");
     }
+
+    // Check if odds have changed since last broadcast — if so push odds-update event
+    try {
+      const { getCachedOddsForLegs } = await import("./marketSnapshotEngine");
+      const allGames = [...feed.liveGames, ...feed.upcomingGames.slice(0, 30)];
+      const oddsSnapshot = allGames.map((g: any) => ({
+        id: g.id,
+        homeOdds: g.odds?.homeML,
+        awayOdds: g.odds?.awayML,
+        spread: g.odds?.spread,
+        total: g.odds?.total,
+      }));
+      const oddsHash = JSON.stringify(oddsSnapshot);
+      if (oddsHash !== lastOddsHash && lastOddsHash !== "") {
+        broadcastEvent("odds-update", {
+          type: "odds-update",
+          timestamp: new Date().toISOString(),
+          changedGames: allGames.length,
+        });
+      }
+      lastOddsHash = oddsHash;
+    } catch { /* odds hash check is best-effort */ }
 
   } catch (err) {
     logError("[SSE] Failed to push intelligence update", { error: String(err) });

@@ -651,3 +651,93 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
   snapshotCache.set(cacheKey, { data: result, timestamp: Date.now() });
   return result;
 }
+
+function teamMatches(gameName: string, query: string): boolean {
+  if (!query || !gameName) return false;
+  const g = gameName.toLowerCase().trim();
+  const q = query.toLowerCase().trim();
+  return g === q || g.includes(q) || q.includes(g);
+}
+
+function americanToDecimal(american: number): number {
+  if (american > 0) return american / 100 + 1;
+  return 100 / Math.abs(american) + 1;
+}
+
+export interface LiveLegOdds {
+  legId: string;
+  americanOdds: number | null;
+  decimalOdds: number | null;
+  book: string | null;
+  found: boolean;
+  sport?: string;
+}
+
+export function getCachedOddsForLegs(legs: Array<{
+  id: string;
+  sport?: string;
+  team?: string;
+  opponent?: string;
+  market?: string;
+  outcome?: string;
+}>): LiveLegOdds[] {
+  return legs.map(leg => {
+    const base: LiveLegOdds = { legId: leg.id, americanOdds: null, decimalOdds: null, book: null, found: false };
+    const sport = (leg.sport || "").toUpperCase();
+    if (!sport) return base;
+
+    const cacheKey = `snapshot-${sport}`;
+    const cached = snapshotCache.get(cacheKey);
+    if (!cached) return base;
+
+    const team = (leg.team || "").trim();
+    const opponent = (leg.opponent || "").trim();
+    const market = (leg.market || "moneyline").toLowerCase();
+    const outcome = (leg.outcome || "").toLowerCase();
+
+    // Find the game in the snapshot that contains our team
+    const game = cached.data.games.find(g => {
+      const hn = g.homeTeam.name;
+      const an = g.awayTeam.name;
+      const ha = g.homeTeam.abbreviation;
+      const aa = g.awayTeam.abbreviation;
+      return teamMatches(hn, team) || teamMatches(an, team) ||
+             teamMatches(hn, opponent) || teamMatches(an, opponent) ||
+             teamMatches(ha, team) || teamMatches(aa, team);
+    });
+
+    if (!game) return base;
+
+    const bl = game.bestLines;
+    let americanOdds: number | null = null;
+    let book: string | null = null;
+
+    const isHome = teamMatches(game.homeTeam.name, team) || teamMatches(game.homeTeam.abbreviation, team);
+
+    if (market.includes("moneyline") || market === "ml") {
+      const best = isHome ? bl.bestHomeML : bl.bestAwayML;
+      if (best) { americanOdds = best.odds; book = best.book; }
+    } else if (market.includes("spread")) {
+      const best = isHome ? bl.bestSpreadHome : bl.bestSpreadAway;
+      if (best) { americanOdds = best.odds; book = best.book; }
+    } else if (market.includes("total") || market.includes("over") || market.includes("under")) {
+      const isOver = outcome.includes("over");
+      const best = isOver ? bl.bestOver : bl.bestUnder;
+      if (best) { americanOdds = best.odds; book = best.book; }
+    } else if (market.includes("h2h")) {
+      const best = isHome ? bl.bestHomeML : bl.bestAwayML;
+      if (best) { americanOdds = best.odds; book = best.book; }
+    }
+
+    if (americanOdds === null) return base;
+
+    return {
+      legId: leg.id,
+      americanOdds,
+      decimalOdds: Math.round(americanToDecimal(americanOdds) * 1000) / 1000,
+      book,
+      found: true,
+      sport,
+    };
+  });
+}

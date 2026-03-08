@@ -64,6 +64,7 @@ export function SSEProvider({ enabled, children }: SSEProviderProps) {
       case "odds-update":
         queryClient.invalidateQueries({ queryKey: ["/api/odds"] });
         queryClient.invalidateQueries({ queryKey: ["/api/odds/live"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/odds/live-legs"] });
         break;
 
       case "sharp-signal": {

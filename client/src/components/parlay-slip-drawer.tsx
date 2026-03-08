@@ -51,11 +51,58 @@ import {
   Plus,
   Shuffle,
   FlaskConical,
+  ArrowUp,
+  ArrowDown,
+  Radio,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { SlipShareCard } from "@/components/slip-share-card";
+
+interface LiveLegOdds {
+  legId: string;
+  americanOdds: number | null;
+  decimalOdds: number | null;
+  book: string | null;
+  found: boolean;
+}
+
+function useSlipLiveOdds(legs: ParlaySlipLeg[]): Map<string, LiveLegOdds> {
+  const legKey = legs.map(l => l.id).join(",");
+  const { data } = useQuery<{ legs: LiveLegOdds[]; timestamp: string }>({
+    queryKey: ["/api/odds/live-legs", legKey],
+    queryFn: async () => {
+      const res = await fetch("/api/odds/live-legs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          legs: legs.map(l => ({
+            id: l.id,
+            sport: l.sport,
+            team: l.team,
+            opponent: l.opponent,
+            market: l.market,
+            outcome: l.outcome,
+          })),
+        }),
+      });
+      if (!res.ok) return { legs: [], timestamp: "" };
+      return res.json();
+    },
+    enabled: legs.length > 0,
+    staleTime: 25000,
+    refetchInterval: 30000,
+  });
+
+  return useMemo(() => {
+    const map = new Map<string, LiveLegOdds>();
+    if (data?.legs) {
+      for (const entry of data.legs) map.set(entry.legId, entry);
+    }
+    return map;
+  }, [data]);
+}
 
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard && window.isSecureContext) {
@@ -453,15 +500,37 @@ function legGradeBorder(grade?: string): string {
   return "border-l-red-500";
 }
 
-function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean }) {
+function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onRemove: () => void; compact?: boolean; liveOdds?: LiveLegOdds }) {
   const Icon = marketIcons[leg.market] || TrendingUp;
   const [alertDismissed, setAlertDismissed] = useState(false);
+  const [flashing, setFlashing] = useState(false);
+  const prevLiveOdds = useRef<number | null>(null);
   const qualityIssue = getBetQualityIssue(leg);
   const formattedOdds = formatOdds(leg.americanOdds, leg.decimalOdds);
   const isPositiveOdds = (leg.americanOdds ?? 0) > 0;
 
+  const liveAmerican = liveOdds?.found ? liveOdds.americanOdds : null;
+  const originalAmerican = leg.americanOdds ?? null;
+  const oddsChanged = liveAmerican !== null && originalAmerican !== null && liveAmerican !== originalAmerican;
+  const oddsImproved = oddsChanged && liveAmerican! > originalAmerican!;
+  const formattedLiveOdds = liveAmerican !== null
+    ? (liveAmerican > 0 ? `+${liveAmerican}` : `${liveAmerican}`)
+    : null;
+
+  useEffect(() => {
+    if (liveAmerican !== null && prevLiveOdds.current !== null && prevLiveOdds.current !== liveAmerican) {
+      setFlashing(true);
+      const t = setTimeout(() => setFlashing(false), 1200);
+      return () => clearTimeout(t);
+    }
+    prevLiveOdds.current = liveAmerican;
+  }, [liveAmerican]);
+
   return (
-    <div className={`flex items-start gap-2 py-2 px-1 pl-2.5 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent`} data-testid={`slip-leg-${leg.id}`}>
+    <div
+      className={`flex items-start gap-2 py-2 px-1 pl-2.5 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent transition-colors duration-300 ${flashing ? (oddsImproved ? "bg-emerald-500/10" : "bg-red-500/10") : ""}`}
+      data-testid={`slip-leg-${leg.id}`}
+    >
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-1">
           <div className="flex-1 min-w-0">
@@ -475,6 +544,12 @@ function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () 
                 <Badge variant="outline" className={`text-[9px] h-4 px-1 font-bold shrink-0 ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
                   {leg.grade}
                 </Badge>
+              )}
+              {liveOdds?.found && (
+                <span className="text-[8px] font-bold text-sky-500 flex items-center gap-0.5 shrink-0" data-testid={`live-odds-badge-${leg.id}`}>
+                  <Radio className="h-2 w-2 animate-pulse" />
+                  LIVE
+                </span>
               )}
             </div>
             <div className="flex items-center gap-1 mt-0.5">
@@ -490,9 +565,29 @@ function LegItem({ leg, onRemove, compact }: { leg: ParlaySlipLeg; onRemove: () 
             )}
           </div>
           <div className="flex flex-col items-end gap-0.5 shrink-0">
-            <span className={`text-sm font-bold font-mono tabular-nums ${isPositiveOdds ? "text-emerald-500" : "text-foreground"}`}>
-              {formattedOdds}
-            </span>
+            {oddsChanged ? (
+              <>
+                <span className="text-[10px] font-mono tabular-nums text-muted-foreground/50 line-through">
+                  {formattedOdds}
+                </span>
+                <span className={`text-sm font-bold font-mono tabular-nums flex items-center gap-0.5 ${oddsImproved ? "text-emerald-500" : "text-red-500"}`} data-testid={`live-odds-value-${leg.id}`}>
+                  {oddsImproved ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                  {formattedLiveOdds}
+                </span>
+                {liveOdds?.book && (
+                  <span className="text-[8px] text-sky-500/80 font-medium">{liveOdds.book}</span>
+                )}
+              </>
+            ) : (
+              <>
+                <span className={`text-sm font-bold font-mono tabular-nums ${liveOdds?.found ? "text-sky-400" : isPositiveOdds ? "text-emerald-500" : "text-foreground"}`}>
+                  {formattedLiveOdds ?? formattedOdds}
+                </span>
+                {liveOdds?.book && liveOdds.found && (
+                  <span className="text-[8px] text-sky-500/60 font-medium">{liveOdds.book}</span>
+                )}
+              </>
+            )}
             {leg.evPercent !== undefined && leg.evPercent > 0 && (
               <span className="text-[9px] font-bold text-emerald-500/80">+{leg.evPercent.toFixed(1)}% EV</span>
             )}
@@ -982,6 +1077,8 @@ function SlipTabBar() {
 
 function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
   const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip } = useParlaySlip();
+  const liveOddsMap = useSlipLiveOdds(legs);
+  const liveLegsCount = useMemo(() => [...liveOddsMap.values()].filter(o => o.found).length, [liveOddsMap]);
   const { toast } = useToast();
   const [stake, setStake] = useState(10);
   const [stakeInitialized, setStakeInitialized] = useState(false);
@@ -1167,6 +1264,12 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
                 {legCount} leg{legCount !== 1 ? "s" : ""}
               </Badge>
               <span className="text-sm font-bold">{formattedTotalOdds}</span>
+              {liveLegsCount > 0 && (
+                <span className="flex items-center gap-0.5 text-[9px] font-bold text-sky-500" data-testid="live-odds-mobile-status">
+                  <Radio className="h-2.5 w-2.5 animate-pulse" />
+                  {liveLegsCount} LIVE
+                </span>
+              )}
             </div>
             <Button variant="ghost" size="sm" onClick={clearSlip} className="text-xs text-destructive hover:text-destructive h-7 px-2" data-testid="button-clear-slip">
               <Trash2 className="h-3.5 w-3.5 mr-1" />
@@ -1232,7 +1335,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           <div className="px-3 py-1">
             <div className="divide-y">
               {legs.map((leg) => (
-                <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} />
+                <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} liveOdds={liveOddsMap.get(leg.id)} />
               ))}
             </div>
           </div>
@@ -1345,7 +1448,15 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
               {legCount}
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-muted-foreground leading-none">Combined Odds</p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-[10px] text-muted-foreground leading-none">Combined Odds</p>
+                {liveLegsCount > 0 && (
+                  <span className="flex items-center gap-0.5 text-[8px] font-bold text-sky-500 leading-none" data-testid="live-odds-status">
+                    <Radio className="h-2 w-2 animate-pulse" />
+                    {liveLegsCount}/{legCount} LIVE
+                  </span>
+                )}
+              </div>
               <p className="text-base font-black tabular-nums leading-tight">{formattedTotalOdds}</p>
             </div>
           </div>
@@ -1384,7 +1495,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
         {activeStrategy && <ConflictBanner legs={legs} strategy={activeStrategy} />}
         <div className="divide-y px-2">
           {legs.map((leg) => (
-            <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} compact={compact} />
+            <LegItem key={leg.id} leg={leg} onRemove={() => removeLeg(leg.id)} compact={compact} liveOdds={liveOddsMap.get(leg.id)} />
           ))}
         </div>
       </ScrollArea>
