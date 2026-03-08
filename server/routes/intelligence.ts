@@ -914,52 +914,181 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
   // ── Ticket Showcase ─────────────────────────────────────────────────────────
-  // Daily-stable cache: same tickets all day, refreshes at midnight
+  // Intelligent showcase: midnight auto-refresh, season-aware, significance-scored,
+  // stale-filtered. Only shows real settled results.
   let showcaseDailyCache: { date: string; payload: any } | null = null;
+
+  // Schedule automatic midnight cache clear — rebuilds on first request of new day
+  function scheduleShowcaseMidnightRefresh() {
+    const now = new Date();
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 2, 0, 0);
+    const ms = tomorrow.getTime() - now.getTime();
+    setTimeout(() => {
+      showcaseDailyCache = null;
+      console.log("[Showcase] Midnight cache cleared — will rebuild on next request");
+      scheduleShowcaseMidnightRefresh();
+    }, ms);
+  }
+  scheduleShowcaseMidnightRefresh();
+
+  function showcaseIsInSeason(sport: string): boolean {
+    const m = new Date().getMonth() + 1;
+    switch (sport.toUpperCase()) {
+      case "NBA":   return m >= 10 || m <= 6;
+      case "NHL":   return m >= 10 || m <= 6;
+      case "NFL":   return m >= 8  && m <= 2;
+      case "MLB":   return m >= 3  && m <= 10;
+      case "NCAAB": return m >= 11 || m <= 4;
+      case "NCAAF": return m >= 8  && m <= 1;
+      default:      return true;
+    }
+  }
+
+  function showcaseSeasonLabel(sport: string, dateStr: string): string {
+    const d = new Date(dateStr + "T12:00:00");
+    const m = d.getMonth() + 1;
+    const y = d.getFullYear();
+    const s = sport.toUpperCase();
+    if (s === "NCAAB") {
+      if (m === 3 || m === 4) return `March Madness ${y}`;
+      const yr = m >= 11 ? `${y}–${y + 1}` : `${y - 1}–${y}`;
+      return `College Hoops ${yr}`;
+    }
+    if (s === "NBA") {
+      const yr = m >= 10 ? `${y}–${String(y + 1).slice(2)}` : `${y - 1}–${String(y).slice(2)}`;
+      if (m >= 4 && m <= 6) return `NBA Playoffs ${y}`;
+      return `NBA ${yr}`;
+    }
+    if (s === "NHL") {
+      const yr = m >= 10 ? `${y}–${String(y + 1).slice(2)}` : `${y - 1}–${String(y).slice(2)}`;
+      if (m >= 4 && m <= 6) return `Stanley Cup Playoffs ${y}`;
+      return `NHL ${yr}`;
+    }
+    if (s === "NFL") {
+      if (m === 1 || m === 2) return `NFL Playoffs ${y}`;
+      return `NFL ${m >= 9 ? y : y - 1}`;
+    }
+    if (s === "MLB") {
+      if (m === 10) return `World Series ${y}`;
+      if (m === 9) return `MLB Pennant Race ${y}`;
+      return `MLB ${y}`;
+    }
+    return `${s} ${y}`;
+  }
+
+  function showcaseComputeGrade(legs: { grade: string }[]): string {
+    const ord: Record<string, number> = {
+      "A+": 10, "A": 9, "A-": 8, "B+": 7, "B": 6, "B-": 5,
+      "C+": 4, "C": 3, "C-": 2, "D": 1, "F": 0,
+    };
+    const rev: Record<number, string> = {
+      10: "A+", 9: "A", 8: "A-", 7: "B+", 6: "B", 5: "B-",
+      4: "C+", 3: "C", 2: "C-", 1: "D", 0: "F",
+    };
+    if (!legs.length) return "C";
+    const avg = Math.round(legs.reduce((s, l) => s + (ord[l.grade] ?? 3), 0) / legs.length);
+    return rev[Math.max(0, Math.min(10, avg))] ?? "C";
+  }
+
+  function showcaseScoreTicket(ticket: any): number {
+    const oddsToDecimal = (o: number) => o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o);
+    const gs: Record<string, number> = {
+      "A+": 10, "A": 9, "A-": 8, "B+": 7, "B": 6, "B-": 5,
+      "C+": 4, "C": 3, "C-": 2, "D": 1, "F": 0,
+    };
+    let score = 0;
+    const isWin = ticket.result === "won";
+    if (isWin) score += 200;
+    const avgGrade = ticket.legs.reduce((s: number, l: any) => s + (gs[l.grade] || 3), 0) / ticket.legs.length;
+    score += Math.round(avgGrade * 8);
+    const dec = oddsToDecimal(ticket.combinedOdds);
+    if (dec >= 8) score += 120;
+    else if (dec >= 6) score += 90;
+    else if (dec >= 4) score += 60;
+    else if (dec >= 3) score += 35;
+    else if (dec >= 2) score += 15;
+    if (ticket.legs.length >= 4) score += 30;
+    else if (ticket.legs.length >= 3) score += 15;
+    const sports = new Set(ticket.legs.map((l: any) => l.sport));
+    if (sports.size >= 3) score += 40;
+    else if (sports.size >= 2) score += 20;
+    if (isWin && ticket.profit >= 500) score += 80;
+    else if (isWin && ticket.profit >= 300) score += 50;
+    else if (isWin && ticket.profit >= 150) score += 25;
+    if (ticket.legs.every((l: any) => showcaseIsInSeason(l.sport))) score += 25;
+    return score;
+  }
+
+  function showcaseGenerateTags(ticket: any): string[] {
+    const tags: string[] = [];
+    const oddsToDecimal = (o: number) => o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o);
+    const dec = oddsToDecimal(ticket.combinedOdds);
+    const sports = [...new Set(ticket.legs.map((l: any) => l.sport as string))];
+    const isWin = ticket.result === "won";
+    const cg = ticket.combinedGrade;
+    if (cg === "A+") tags.push("ELITE GRADE");
+    else if (cg === "A" || cg === "A-") tags.push("A GRADE");
+    else if (cg === "B+") tags.push("SHARP PLAY");
+    if (dec >= 6) tags.push("LONG SHOT");
+    else if (dec >= 4) tags.push("HIGH ODDS");
+    else if (dec >= 2.5) tags.push("SOLID VALUE");
+    if (sports.length >= 3) tags.push("MULTI-SPORT");
+    else if (sports.length === 2) tags.push("CROSS-SPORT");
+    if (isWin && ticket.legs.length >= 3 && ticket.legs.every((l: any) => l.result === "won")) tags.push("SWEEP");
+    const m = new Date(ticket.date + "T12:00:00").getMonth() + 1;
+    if (sports.includes("NCAAB") && (m === 3 || m === 4)) tags.push("MARCH MADNESS");
+    return tags.slice(0, 3);
+  }
 
   async function buildShowcasePayload() {
     const { getRecentPicks } = await import("../pickOutcomeTracker");
     const allSettled = getRecentPicks({ status: "settled", limit: 5000 });
 
-    // Only include picks from games that have genuinely been played.
-    // Filter out picks whose gameTime is more than 2 hours in the future —
-    // these are pending games that got prematurely settled (gameTime drift / UTC offset).
     const now = new Date();
-    const cutoff = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours buffer
-    const settled = allSettled.filter(p => {
-      if (!p.gameTime) return true; // no gameTime stored — keep it
-      const gt = new Date(p.gameTime);
-      return gt <= cutoff; // only keep games that are in the past or very near future
+    const cutoff = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2h buffer for timezone drift
+
+    // Filter 1: only games that have genuinely been played
+    const realSettled = allSettled.filter(p => {
+      if (!p.gameTime) return true;
+      return new Date(p.gameTime) <= cutoff;
     });
 
-    const byDate: Record<string, typeof settled> = {};
-    for (const p of settled) {
-      // Group by settledAt date (when the result was confirmed), NOT gameTime.
-      // gameTime can be in UTC midnight which shifts the display date by a day.
+    // Filter 2: stale detection — drop off-season picks older than 45 days; all picks > 90 days
+    const validPicks = realSettled.filter(p => {
+      const ts = p.settledAt || p.savedAt || p.gameTime || "";
+      if (!ts) return true;
+      const daysOld = (now.getTime() - new Date(ts).getTime()) / 86400000;
+      if (daysOld > 90) return false;
+      if (daysOld > 45 && !showcaseIsInSeason(p.sport)) return false;
+      return true;
+    });
+
+    // Group by settled date
+    const byDate: Record<string, typeof validPicks> = {};
+    for (const p of validPicks) {
       const d = (p.settledAt || p.savedAt || p.gameTime || "").slice(0, 10);
       if (!d) continue;
       if (!byDate[d]) byDate[d] = [];
       byDate[d].push(p);
     }
 
-    function oddsToDecimal(o: number) { return o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o); }
-    function decimalToAmerican(d: number) { return d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1)); }
-    function parlayDecimal(legs: { odds: number }[]) { return legs.reduce((acc, l) => acc * oddsToDecimal(l.odds), 1); }
-    function gradeSort(g: string) {
+    const oddsToDecimal = (o: number) => o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o);
+    const decimalToAmerican = (d: number) => d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1));
+    const parlayDecimal = (legs: { odds: number }[]) => legs.reduce((acc, l) => acc * oddsToDecimal(l.odds), 1);
+    const gradeSort = (g: string) => {
       const order: Record<string, number> = { "A+": 0, A: 1, "A-": 2, "B+": 3, B: 4, "B-": 5, "C+": 6, C: 7, "C-": 8, D: 9, F: 10 };
       return order[g] ?? 99;
-    }
+    };
 
-    const winning: any[] = [];
-    const losing: any[] = [];
-    const allHistorical: any[] = [];
-
+    const allBuiltTickets: any[] = [];
     const dates = Object.keys(byDate).sort().reverse();
+
     for (const date of dates) {
       const dayPicks = byDate[date]
         .filter(p => p.result === "won" || p.result === "lost")
         .sort((a, b) => gradeSort(a.grade) - gradeSort(b.grade));
-
       if (dayPicks.length < 2) continue;
 
       for (let i = 0; i + 2 < dayPicks.length; i += 3) {
@@ -972,7 +1101,9 @@ export function registerIntelligenceRoutes(app: Express): void {
         const combinedOdds = decimalToAmerican(dec);
         const stake = 100;
         const payout = Math.round(stake * dec);
-        const ticket = {
+        const combinedGrade = showcaseComputeGrade(legs);
+        const sports = [...new Set(legs.map(l => l.sport))];
+        const ticket: any = {
           id: `showcase-${date}-${i}`,
           date,
           result: allWon ? "won" : "lost",
@@ -982,28 +1113,81 @@ export function registerIntelligenceRoutes(app: Express): void {
           })),
           combinedOdds, stake, payout,
           profit: allWon ? payout - stake : -stake,
+          combinedGrade,
+          sports,
+          primarySport: legs[0].sport,
+          seasonLabel: showcaseSeasonLabel(legs[0].sport, date),
+          isHighValue: false,
+          isFeatured: false,
+          significanceScore: 0,
+          tags: [],
         };
-        allHistorical.push(ticket);
-        if (allWon && winning.length < 30) winning.push(ticket);
-        else if (!allWon && losing.length < 15) losing.push(ticket);
-        if (winning.length >= 30 && losing.length >= 15) break;
+        ticket.tags = showcaseGenerateTags(ticket);
+        ticket.significanceScore = showcaseScoreTicket(ticket);
+        ticket.isHighValue = ticket.result === "won" && (ticket.significanceScore >= 370 || ticket.profit >= 200);
+        allBuiltTickets.push(ticket);
       }
-      if (winning.length >= 30 && losing.length >= 15) break;
     }
 
+    // Sort by significance (most impressive first)
+    allBuiltTickets.sort((a, b) => b.significanceScore - a.significanceScore);
+    const bestWin = allBuiltTickets.find(t => t.result === "won");
+    if (bestWin) bestWin.isFeatured = true;
+
+    const wins = allBuiltTickets.filter(t => t.result === "won");
+    const losses = allBuiltTickets.filter(t => t.result === "lost");
+
+    // Interleave: 2 wins per 1 loss for an honest but positive showcase
     const showcase: any[] = [];
     let wi = 0, li = 0;
-    while (wi < winning.length || li < losing.length) {
-      if (wi < winning.length) showcase.push(winning[wi++]);
-      if (wi < winning.length) showcase.push(winning[wi++]);
-      if (li < losing.length) showcase.push(losing[li++]);
+    const maxWins = Math.min(wins.length, 30);
+    const maxLosses = Math.min(losses.length, 12);
+    while (wi < maxWins || li < maxLosses) {
+      if (wi < maxWins) showcase.push(wins[wi++]);
+      if (wi < maxWins) showcase.push(wins[wi++]);
+      if (li < maxLosses) showcase.push(losses[li++]);
+    }
+
+    // Final showcase (what's actually displayed)
+    const finalShowcase = showcase.slice(0, 42);
+
+    // Stats are derived from the DISPLAYED showcase, not all built tickets.
+    // This accurately represents what users see on screen.
+    const shownWins = finalShowcase.filter((t: any) => t.result === "won");
+    const shownLosses = finalShowcase.filter((t: any) => t.result === "lost");
+    const shownTotal = finalShowcase.length;
+    const shownROI = shownWins.reduce((s: number, t: any) => s + t.profit, 0) - shownLosses.length * 100;
+    const bestOddsWin = shownWins.reduce((best: any, t) => !best || t.combinedOdds > best.combinedOdds ? t : best, null);
+    const bestProfitWin = shownWins.reduce((best: any, t) => !best || t.profit > best.profit ? t : best, null);
+
+    // Compute current streak from the most recent tickets (across full history by date)
+    let streak = 0;
+    let streakType: "win" | "loss" | "none" = "none";
+    const sorted = [...allBuiltTickets].sort((a, b) => b.date.localeCompare(a.date));
+    if (sorted.length > 0) {
+      streakType = sorted[0].result === "won" ? "win" : "loss";
+      for (const t of sorted) {
+        if (t.result === (streakType === "win" ? "won" : "lost")) streak++;
+        else break;
+      }
     }
 
     return {
-      tickets: showcase.slice(0, 40),
-      stats: { winning: winning.length, losing: losing.length, totalHistorical: allHistorical.length },
-      generatedDate: new Date().toISOString().slice(0, 10),
-      allHistorical,
+      tickets: finalShowcase,
+      stats: {
+        winning: shownWins.length,
+        losing: shownLosses.length,
+        totalHistorical: allBuiltTickets.length,
+        winRate: shownTotal > 0 ? Math.round((shownWins.length / shownTotal) * 100) : 0,
+        totalROI: shownROI,
+        bestOdds: bestOddsWin?.combinedOdds ?? 0,
+        bestProfit: bestProfitWin?.profit ?? 0,
+        currentStreak: streak,
+        streakType,
+      },
+      generatedDate: now.toISOString().slice(0, 10),
+      generatedAt: now.toISOString(),
+      allHistorical: allBuiltTickets,
     };
   }
 
@@ -1041,7 +1225,7 @@ export function registerIntelligenceRoutes(app: Express): void {
       const today = new Date().toISOString().slice(0, 10);
       const payload = await buildShowcasePayload();
       showcaseDailyCache = { date: today, payload };
-      res.json({ success: true, ticketCount: payload.tickets.length });
+      res.json({ success: true, ticketCount: payload.tickets.length, stats: payload.stats });
     } catch (err: any) {
       res.status(500).json({ error: "Failed to refresh showcase" });
     }
