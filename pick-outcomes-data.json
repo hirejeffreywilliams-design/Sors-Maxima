@@ -1103,6 +1103,22 @@
       "ev": 27.91,
       "gameTime": "2026-03-10T22:30Z",
       "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NHL-401803362-spread-b74421c073",
+      "gameId": "401803362",
+      "sport": "NHL",
+      "game": "Ottawa Senators @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Ottawa Senators",
+      "pick": "Vancouver Canucks -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "F",
+      "confidence": 52,
+      "ev": -44.64,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-08T12:05:03.042Z"
     }
   ],
   "settled": [
@@ -11867,7 +11883,7 @@
       "lost": 242,
       "push": 12,
       "rate": 51.2,
-      "pending": 69
+      "pending": 70
     },
     "bySport": {
       "NBA": {
@@ -11970,7 +11986,7 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-08T12:01:33.928Z",
+    "lastUpdated": "2026-03-08T12:08:36.341Z",
     "roi": 4.1,
     "brierScore": 0.2619,
     "maxDrawdown": 15.4,
