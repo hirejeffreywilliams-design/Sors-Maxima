@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -1832,17 +1833,15 @@ export default function OddsCenter() {
 
   return (
     <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto" data-testid="odds-center-page">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-5 h-5 text-primary" />
-          <h1 className="text-xl md:text-2xl font-bold" data-testid="page-title">Odds Center</h1>
-          {isFetching && <RefreshCw className="w-4 h-4 text-muted-foreground animate-spin" />}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Live odds, line movement, EV analysis, and bookmaker comparison — all in one place.
-          {lastUpdated && <span className="ml-1">Updated {lastUpdated}</span>}
-        </p>
-      </div>
+      <PageHero
+        title="Odds Center"
+        subtitle={`Live odds, line movement, EV analysis, and bookmaker comparison — all in one place.${lastUpdated ? ` Updated ${lastUpdated}` : ""}`}
+        badge="Market Intelligence"
+        variant="default"
+        icon={<DollarSign className="w-6 h-6" />}
+        actions={isFetching ? <RefreshCw className="w-4 h-4 text-muted-foreground animate-spin" /> : undefined}
+        data-testid="page-title"
+      />
 
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
         <div className="inline-flex items-center gap-1.5 min-w-max">

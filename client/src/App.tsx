@@ -169,7 +169,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
   return (
     <ErrorBoundary>
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 glass-nav shadow-[0_1px_0_0_hsl(var(--primary)/0.06)]">
         <div className="flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3">
             <Link href="/admin">
@@ -747,16 +747,17 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <>
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t safe-area-bottom">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
         <div className="flex items-center justify-around gap-0 h-16">
           {selectedItems.map((item) => {
             const Icon = NAV_ICON_MAP[item.iconName] || Zap;
             const isActive = location === item.href;
             return (
               <Link key={item.href} href={item.href}>
-                <div className={`flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={`bottom-nav-${item.id}`}>
+                <div className={`relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={`bottom-nav-${item.id}`}>
                   <Icon className="w-5 h-5" />
                   <span className="text-[10px] font-medium">{item.label}</span>
+                  {isActive && <span className="absolute bottom-1 w-3.5 h-0.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />}
                 </div>
               </Link>
             );
@@ -958,7 +959,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
   return (
     <SSEProvider enabled={true}>
     <div className="min-h-screen bg-background overflow-x-hidden">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 glass-nav shadow-[0_1px_0_0_hsl(var(--primary)/0.06)]">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center gap-3 lg:gap-4">
             <MobileBackOrLogo />

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useState, useMemo } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -112,12 +113,14 @@ export default function TrackRecordPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Real Track Record</h1>
-          <p className="text-sm text-muted-foreground">Verified accuracy data — updated every 5 minutes from real game outcomes</p>
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-3">
+        <PageHero
+          title="Real Track Record"
+          subtitle="Verified accuracy data — updated every 5 minutes from real game outcomes"
+          badge="Performance"
+          variant="gold"
+        />
+        <div className="flex items-center justify-end gap-2">
           <div className="flex bg-muted rounded-md p-1">
             <Button 
               variant={filter === "all" ? "secondary" : "ghost"} 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useUserStrategy } from "@/hooks/use-user-strategy";
@@ -1853,19 +1854,19 @@ export default function CommandCenter() {
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-5">
 
+        <PageHero
+          title="Your Picks"
+          subtitle="All engines converging to find your edge"
+          badge="Intelligence Hub"
+          variant="default"
+          icon={<Brain className="w-6 h-6" />}
+          data-testid="heading-command-center"
+        />
+
         <header className="space-y-3">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2" data-testid="heading-command-center">
-                <Brain className="w-6 h-6 text-primary" />
-                Your Picks
-              </h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                All engines converging to find your edge
-              </p>
-              <div className="mt-2">
-                <ModelHealthChip />
-              </div>
+              <ModelHealthChip />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
               <Tooltip>

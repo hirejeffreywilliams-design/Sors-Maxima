@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { PageHero } from "@/components/page-hero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -237,15 +238,14 @@ export default function PersonalizedInsightsPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-6xl mx-auto" data-testid="page-personalized-insights">
-      <div className="space-y-1">
-        <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-3" data-testid="heading-insights">
-          <Brain className="w-7 h-7 text-primary" />
-          Your Betting Intelligence
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Personalized analysis and recommendations based on your betting history
-        </p>
-      </div>
+      <PageHero
+        title="Your Betting Intelligence"
+        subtitle="Personalized analysis and recommendations based on your betting history"
+        badge="AI Insights"
+        variant="violet"
+        icon={<Brain className="w-6 h-6" />}
+        data-testid="heading-insights"
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="section-stats-overview">
         <Card className="overflow-visible" data-testid="card-stat-bets">

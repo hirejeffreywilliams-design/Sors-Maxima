@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -114,19 +115,20 @@ export default function WatchlistPage() {
 
   return (
     <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6" data-testid="page-watchlist">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2" data-testid="text-watchlist-title">
-            <Star className="w-7 h-7 text-yellow-500" />
-            Watchlist
-          </h1>
-          <p className="text-muted-foreground mt-1">Track your favorite teams and games in one place</p>
-        </div>
-        <Badge variant="secondary" className="gap-1">
-          <Eye className="w-3 h-3" />
-          {items.length} items tracked
-        </Badge>
-      </div>
+      <PageHero
+        title="Watchlist"
+        subtitle="Track your favorite teams and games in one place"
+        badge="Monitoring"
+        variant="blue"
+        icon={<Star className="w-6 h-6" />}
+        actions={
+          <Badge variant="secondary" className="gap-1">
+            <Eye className="w-3 h-3" />
+            {items.length} items tracked
+          </Badge>
+        }
+        data-testid="text-watchlist-title"
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
