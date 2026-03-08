@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
+import { CardStackDeck } from "@/components/card-stack-deck";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
@@ -290,8 +291,8 @@ export default function CardsPage() {
           </div>
 
           {isShowcaseLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)}
+            <div className="flex justify-center py-12">
+              <Skeleton className="w-[280px] aspect-[2/3] rounded-2xl" />
             </div>
           ) : showcaseCards.length === 0 ? (
             <Card className="border-dashed border-2 bg-amber-400/5 border-amber-400/20">
@@ -304,9 +305,10 @@ export default function CardsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-              {showcaseCards.map((card) => (
-                <div key={card.id} className="w-full aspect-[2/3]" data-testid={`card-system-${card.id}`}>
+            <CardStackDeck
+              cardLabel="card"
+              cards={showcaseCards.map((card) => (
+                <div key={card.id} className="w-full h-full" data-testid={`card-system-${card.id}`}>
                   <TradingCard
                     card={{ ...card, cardType: "system" }}
                     instanceNumber={1}
@@ -314,7 +316,7 @@ export default function CardsPage() {
                   />
                 </div>
               ))}
-            </div>
+            />
           )}
 
           {/* ─── LIFE CHANGER™ TRACKER ──────────────────────────────── */}
@@ -505,56 +507,93 @@ export default function CardsPage() {
         </TabsContent>
 
         {/* ─── COMMUNITY SHOWCASE ──────────────────────────────────── */}
-        <TabsContent value="community" className="space-y-6" data-testid="content-community">
-          {/* Header */}
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-muted/20">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-400/10 border border-emerald-400/20 shrink-0">
-              <Globe className="w-5 h-5 text-emerald-400" />
+        <TabsContent value="community" className="space-y-0" data-testid="content-community">
+          {/* Trophy Room Wrapper */}
+          <div
+            className="relative rounded-2xl overflow-hidden"
+            style={{
+              background: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 100%, rgba(251,191,36,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(120,53,15,0.15) 0%, transparent 50%), linear-gradient(180deg, #050404 0%, #0a0807 60%, #050504 100%)",
+              minHeight: "600px",
+            }}
+          >
+            {/* Bokeh spotlight lights */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", top: "-80px", left: "50%", transform: "translateX(-50%)", background: "radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 65%)", filter: "blur(30px)" }} />
+              <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", top: "30%", left: "15%", background: "radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 65%)", filter: "blur(20px)" }} />
+              <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", top: "30%", right: "15%", background: "radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 65%)", filter: "blur(20px)" }} />
+              <div style={{ position: "absolute", width: "100%", height: "1px", top: "3px", background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.4) 30%, rgba(251,191,36,0.7) 50%, rgba(251,191,36,0.4) 70%, transparent)" }} />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-sm">Community Showcase</span>
-                <Badge className="text-[10px] bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">MEMBER EARNED</Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">Cards that members chose to share publicly. Real picks by real members.</p>
-            </div>
-            {communityFeed && <span className="text-sm font-bold text-muted-foreground shrink-0">{communityFeed.length} cards</span>}
-          </div>
 
-          {isCommunityLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)}
-            </div>
-          ) : !communityFeed || communityFeed.length === 0 ? (
-            <Card className="border-dashed border-2 bg-emerald-400/5 border-emerald-400/20">
-              <CardContent className="py-16 text-center space-y-3">
-                <Globe className="w-10 h-10 mx-auto text-emerald-400 opacity-30" />
-                <div>
-                  <h3 className="font-bold">No showcased cards yet</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Members who toggle showcase on their winning cards will appear here.</p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-              {communityFeed.map((item) => (
-                <div key={item.collection.id} className="space-y-1.5" data-testid={`card-community-${item.collection.id}`}>
-                  <div className="w-full aspect-[2/3]">
-                    <TradingCard
-                      card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}
-                      instanceNumber={item.collection.instanceNumber}
-                      isFeatured={item.collection.isFeatured ?? false}
-                      isFlippable
-                    />
+            {/* Showroom header */}
+            <div className="relative z-10 pt-8 pb-4 px-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <div style={{ width: 40, height: 1, background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.6))" }} />
+                <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.35em", color: "rgba(251,191,36,0.5)", textTransform: "uppercase" }}>SORS MAXIMA™</span>
+                <div style={{ width: 40, height: 1, background: "linear-gradient(90deg, rgba(251,191,36,0.6), transparent)" }} />
+              </div>
+              <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "0.05em", color: "rgba(255,255,255,0.95)", textTransform: "uppercase", lineHeight: 1.1 }}>
+                THE VAULT
+              </h2>
+              <p style={{ fontSize: 11, color: "rgba(251,191,36,0.55)", fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", marginTop: 4 }}>
+                Community Showcase · Member Verified Picks
+              </p>
+              {communityFeed && communityFeed.length > 0 && (
+                <div className="flex items-center justify-center gap-4 mt-4">
+                  <div className="text-center">
+                    <p className="text-lg font-black text-amber-400">{communityFeed.length}</p>
+                    <p className="text-[9px] text-white/30 uppercase font-bold tracking-wider">Cards</p>
                   </div>
-                  <div className="px-1 flex items-center gap-1.5 flex-wrap">
-                    {item.collection.isFeatured && <Badge className="text-[9px] h-4 px-1 bg-amber-500/10 text-amber-400 border border-amber-400/20">★ Featured</Badge>}
-                    <span className="text-xs text-muted-foreground">@{item.username}</span>
+                  <div style={{ width: 1, height: 32, background: "rgba(251,191,36,0.15)" }} />
+                  <div className="text-center">
+                    <p className="text-lg font-black text-emerald-400">{communityFeed.filter(i => i.card.settledResult === "won").length}</p>
+                    <p className="text-[9px] text-white/30 uppercase font-bold tracking-wider">Winners</p>
+                  </div>
+                  <div style={{ width: 1, height: 32, background: "rgba(251,191,36,0.15)" }} />
+                  <div className="text-center">
+                    <p className="text-lg font-black text-fuchsia-400">{communityFeed.filter(i => i.collection.isFeatured).length}</p>
+                    <p className="text-[9px] text-white/30 uppercase font-bold tracking-wider">Featured</p>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-          )}
+
+            {/* Divider */}
+            <div style={{ margin: "0 24px 24px", height: 1, background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.25) 30%, rgba(251,191,36,0.25) 70%, transparent)" }} />
+
+            {/* Card display */}
+            <div className="relative z-10 pb-10 px-4">
+              {isCommunityLoading ? (
+                <div className="flex justify-center py-12">
+                  <Skeleton className="w-[280px] aspect-[2/3] rounded-2xl" style={{ background: "rgba(255,255,255,0.05)" }} />
+                </div>
+              ) : !communityFeed || communityFeed.length === 0 ? (
+                <div className="py-20 text-center space-y-4">
+                  <div style={{ fontSize: 48, opacity: 0.25 }}>🏆</div>
+                  <div>
+                    <h3 className="font-black text-white/60 text-lg">The Vault Awaits</h3>
+                    <p className="text-sm text-white/30 mt-1">Be the first to showcase a verified winning card.</p>
+                  </div>
+                </div>
+              ) : (
+                <CardStackDeck
+                  cardLabel="card"
+                  cards={[
+                    ...communityFeed.filter(i => i.collection.isFeatured),
+                    ...communityFeed.filter(i => !i.collection.isFeatured),
+                  ].map((item) => (
+                    <div key={item.collection.id} className="w-full h-full" data-testid={`card-community-${item.collection.id}`}>
+                      <TradingCard
+                        card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}
+                        instanceNumber={item.collection.instanceNumber}
+                        isFeatured={item.collection.isFeatured ?? false}
+                        isFlippable
+                      />
+                    </div>
+                  ))}
+                />
+              )}
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="trades" className="space-y-6">

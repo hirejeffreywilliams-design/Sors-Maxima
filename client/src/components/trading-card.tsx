@@ -62,60 +62,76 @@ const SPORT_PATTERNS: Record<string, string> = {
   SOCCER: "radial-gradient(circle at 50% 55%, rgba(255,255,255,0.03) 0%, transparent 40%), radial-gradient(circle at 50% 55%, transparent 39%, rgba(255,255,255,0.02) 40%, rgba(255,255,255,0.02) 41%, transparent 42%)",
 };
 
-const GRADE_FOIL: Record<string, { bg: string; border: string; badge: string; accent: string; glow: string }> = {
+const GRADE_FOIL: Record<string, { bg: string; border: string; badge: string; accent: string; glow: string; baseBg: string }> = {
+  "S+": {
+    bg: "from-violet-900 via-fuchsia-950 to-violet-900",
+    baseBg: "#0f0018",
+    border: "border-fuchsia-400",
+    badge: "bg-fuchsia-400/25 text-fuchsia-200 border-fuchsia-400/70",
+    accent: "#e879f9",
+    glow: "0 0 60px rgba(232,121,249,0.6), 0 0 120px rgba(232,121,249,0.25), 0 0 8px rgba(232,121,249,0.9)",
+  },
   "A+": {
-    bg: "from-amber-950/80 via-yellow-950/60 to-amber-950/80",
-    border: "border-amber-400/70",
-    badge: "bg-amber-400/20 text-amber-300 border-amber-400/60",
+    bg: "from-amber-900 via-yellow-950 to-amber-900",
+    baseBg: "#1a0c00",
+    border: "border-amber-400",
+    badge: "bg-amber-400/25 text-amber-200 border-amber-400/70",
     accent: "#fbbf24",
-    glow: "0 0 40px rgba(251,191,36,0.4), 0 0 80px rgba(251,191,36,0.15)",
+    glow: "0 0 50px rgba(251,191,36,0.55), 0 0 100px rgba(251,191,36,0.2), 0 0 6px rgba(251,191,36,0.8)",
   },
   "A": {
-    bg: "from-emerald-950/80 via-green-950/60 to-emerald-950/80",
-    border: "border-emerald-400/60",
-    badge: "bg-emerald-400/20 text-emerald-300 border-emerald-400/50",
+    bg: "from-emerald-900 via-green-950 to-emerald-900",
+    baseBg: "#001a0a",
+    border: "border-emerald-400",
+    badge: "bg-emerald-400/25 text-emerald-200 border-emerald-400/60",
     accent: "#34d399",
-    glow: "0 0 30px rgba(52,211,153,0.35), 0 0 60px rgba(52,211,153,0.12)",
+    glow: "0 0 40px rgba(52,211,153,0.5), 0 0 80px rgba(52,211,153,0.18)",
   },
   "B+": {
-    bg: "from-teal-950/80 via-cyan-950/60 to-teal-950/80",
-    border: "border-teal-400/50",
-    badge: "bg-teal-400/15 text-teal-300 border-teal-400/40",
+    bg: "from-teal-900 via-cyan-950 to-teal-900",
+    baseBg: "#00141a",
+    border: "border-teal-400",
+    badge: "bg-teal-400/20 text-teal-200 border-teal-400/55",
     accent: "#2dd4bf",
-    glow: "0 0 24px rgba(45,212,191,0.3), 0 0 48px rgba(45,212,191,0.1)",
+    glow: "0 0 32px rgba(45,212,191,0.45), 0 0 64px rgba(45,212,191,0.15)",
   },
   "B": {
-    bg: "from-blue-950/80 via-indigo-950/60 to-blue-950/80",
-    border: "border-blue-400/45",
-    badge: "bg-blue-400/15 text-blue-300 border-blue-400/40",
+    bg: "from-blue-900 via-indigo-950 to-blue-900",
+    baseBg: "#000a1a",
+    border: "border-blue-400",
+    badge: "bg-blue-400/20 text-blue-200 border-blue-400/50",
     accent: "#60a5fa",
-    glow: "0 0 20px rgba(96,165,250,0.25), 0 0 40px rgba(96,165,250,0.08)",
+    glow: "0 0 28px rgba(96,165,250,0.4), 0 0 56px rgba(96,165,250,0.12)",
   },
   "C+": {
-    bg: "from-yellow-950/80 via-orange-950/60 to-yellow-950/80",
-    border: "border-yellow-500/35",
-    badge: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+    bg: "from-yellow-900 via-orange-950 to-yellow-900",
+    baseBg: "#1a1200",
+    border: "border-yellow-500",
+    badge: "bg-yellow-500/20 text-yellow-300 border-yellow-500/45",
     accent: "#facc15",
-    glow: "0 0 16px rgba(250,204,21,0.2)",
+    glow: "0 0 22px rgba(250,204,21,0.35)",
   },
   "C": {
-    bg: "from-slate-900/80 via-zinc-900/60 to-slate-900/80",
-    border: "border-slate-500/30",
-    badge: "bg-slate-500/15 text-slate-400 border-slate-500/25",
+    bg: "from-slate-800 via-zinc-900 to-slate-800",
+    baseBg: "#0a0a10",
+    border: "border-slate-500",
+    badge: "bg-slate-500/20 text-slate-300 border-slate-500/35",
     accent: "#94a3b8",
-    glow: "0 0 12px rgba(148,163,184,0.15)",
+    glow: "0 0 16px rgba(148,163,184,0.22)",
   },
   "D": {
-    bg: "from-red-950/80 via-rose-950/60 to-red-950/80",
-    border: "border-red-500/25",
-    badge: "bg-red-500/10 text-red-400 border-red-500/20",
+    bg: "from-red-900 via-rose-950 to-red-900",
+    baseBg: "#1a0000",
+    border: "border-red-500",
+    badge: "bg-red-500/15 text-red-300 border-red-500/30",
     accent: "#f87171",
-    glow: "0 0 10px rgba(248,113,113,0.12)",
+    glow: "0 0 14px rgba(248,113,113,0.2)",
   },
   "F": {
-    bg: "from-gray-950/80 via-zinc-950/60 to-gray-950/80",
-    border: "border-gray-600/20",
-    badge: "bg-gray-600/10 text-gray-500 border-gray-600/15",
+    bg: "from-gray-800 via-zinc-900 to-gray-800",
+    baseBg: "#080808",
+    border: "border-gray-600",
+    badge: "bg-gray-600/15 text-gray-400 border-gray-600/20",
     accent: "#6b7280",
     glow: "",
   },
@@ -157,6 +173,7 @@ function getEventLabel(sport: string, gameTime: string): string | null {
 
 function getRarityLabel(grade: string): { label: string; color: string } {
   const g = grade.toUpperCase();
+  if (g === "S+") return { label: "🌟 LIFE CHANGER", color: "text-fuchsia-400" };
   if (g === "A+") return { label: "◆ LEGENDARY", color: "text-amber-400" };
   if (g === "A") return { label: "★ RARE", color: "text-emerald-400" };
   if (g === "B+") return { label: "✦ UNCOMMON", color: "text-teal-400" };
@@ -235,17 +252,22 @@ export function TradingCard({
 
   const safeGrade = card.grade ?? "F";
   const gradeKey = Object.keys(GRADE_FOIL).find(k =>
-    safeGrade.toUpperCase() === k || safeGrade.toUpperCase().startsWith(k)
+    safeGrade.toUpperCase() === k || safeGrade.toUpperCase() === k.toUpperCase()
   ) || "F";
   const foil = GRADE_FOIL[gradeKey] || GRADE_FOIL["F"];
   const sportPattern = SPORT_PATTERNS[card.sport ?? ""] || "";
   const sportIcon = SPORT_ICONS[card.sport ?? ""] || "🎯";
   const eventLabel = getEventLabel(card.sport ?? "", card.gameTime);
   const rarity = getRarityLabel(safeGrade);
-  const isAPlus = safeGrade === "A+";
-  const isAPremium = safeGrade.startsWith("A") || safeGrade === "B+";
+  const isSPlus = safeGrade === "S+";
+  const isAPlus = safeGrade === "A+" || isSPlus;
+  const isAPremium = safeGrade.startsWith("A") || safeGrade === "B+" || isSPlus;
   const isSettled = !!card.settledResult;
   const isWin = card.settledResult === "won";
+
+  const potentialReturn = card.odds > 0
+    ? (100 + card.odds).toFixed(0)
+    : (100 + (10000 / Math.abs(card.odds))).toFixed(0);
 
   return (
     <div
@@ -259,12 +281,13 @@ export function TradingCard({
       onMouseLeave={handleMouseLeave}
       onClick={handleFlip}
       style={{
-        perspective: "1000px",
+        perspective: "1200px",
         transformStyle: "preserve-3d",
+        WebkitTransformStyle: "preserve-3d" as any,
         transform: isFlipped
           ? "rotateY(180deg)"
           : isHovered
-          ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.02,1.02,1.02)`
+          ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.03,1.03,1.03)`
           : "rotateX(0deg) rotateY(0deg) scale3d(1,1,1)",
       }}
       data-testid={`trading-card-${card.id}`}
@@ -272,7 +295,10 @@ export function TradingCard({
       {/* === FRONT === */}
       <div
         className="absolute inset-0"
-        style={{ backfaceVisibility: "hidden" }}
+        style={{
+          backfaceVisibility: "hidden",
+          WebkitBackfaceVisibility: "hidden" as any,
+        }}
       >
         {/* Outer glow ring */}
         <div
@@ -286,7 +312,12 @@ export function TradingCard({
         {/* Card body */}
         <div
           className={`relative w-full h-full rounded-2xl border-2 overflow-hidden flex flex-col ${foil.border} bg-gradient-to-br ${foil.bg}`}
-          style={{ backgroundImage: sportPattern ? `${sportPattern}` : undefined }}
+          style={{
+            backgroundColor: foil.baseBg,
+            backgroundImage: sportPattern
+              ? sportPattern
+              : undefined,
+          }}
         >
           {/* Background dot pattern (like real cards) */}
           <div
@@ -583,7 +614,7 @@ export function TradingCard({
             </div>
             <div>
               <p className="text-[8px] text-white/30 uppercase tracking-widest font-bold truncate">{card.game}</p>
-              <h3 className="text-[15px] font-black leading-tight text-white/95 mt-0.5" style={{ lineClamp: 2 }}>{card.pick}</h3>
+              <h3 className="text-[15px] font-black leading-tight text-white/95 mt-0.5">{card.pick}</h3>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 <span
                   className="text-sm font-mono font-black tabular-nums"
@@ -596,6 +627,19 @@ export function TradingCard({
                   style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.38)" }}
                 >{(card.betType ?? "").replace(/_/g, " ")}</span>
               </div>
+              {card.odds && Math.abs(card.odds) < 2000 && (
+                <div
+                  className="inline-flex items-center gap-1 mt-1.5 px-2 py-0.5 rounded-full border"
+                  style={{
+                    background: "rgba(34,197,94,0.08)",
+                    borderColor: "rgba(34,197,94,0.25)",
+                  }}
+                >
+                  <span className="text-[8px] font-bold text-white/30">$100 bet</span>
+                  <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)" }}>→</span>
+                  <span className="text-[9px] font-black text-emerald-400">${potentialReturn} return</span>
+                </div>
+              )}
             </div>
 
             {/* Stats bars */}
@@ -743,9 +787,10 @@ export function TradingCard({
         style={{
           transform: "rotateY(180deg)",
           backfaceVisibility: "hidden",
-          background: "linear-gradient(160deg,#080810 0%,#0c0c1a 50%,#060610 100%)",
-          border: `2px solid ${foil.border}`,
-          borderColor: `${foil.accent}40`,
+          WebkitBackfaceVisibility: "hidden" as any,
+          backgroundColor: foil.baseBg,
+          background: `linear-gradient(160deg, ${foil.baseBg} 0%, #0a0a14 50%, ${foil.baseBg} 100%)`,
+          border: `2px solid ${foil.accent}60`,
         }}
       >
         <div style={{
@@ -802,7 +847,7 @@ export function TradingCard({
               { label: "Odds", value: card.odds ? (card.odds > 0 ? `+${card.odds}` : `${card.odds}`) : "—", accent: foil.accent },
               { label: "Conviction", value: `${card.confidence ?? 0}%`, accent: "#34d399" },
               { label: "Sors EV™", value: `+${card.ev ?? 0}%`, accent: "#34d399" },
-              { label: "Bet Type", value: (card.betType ?? "—").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()), accent: "rgba(255,255,255,0.5)" },
+              { label: "Win Value", value: card.odds && Math.abs(card.odds) < 2000 ? `$100 → $${potentialReturn}` : "—", accent: "#22c55e" },
               { label: "Result", value: isSettled ? (isWin ? "Called It ✓" : "No Hit") : "Pending", accent: isSettled ? (isWin ? "#34d399" : "rgba(255,255,255,0.30)") : "#fbbf24" },
             ].map(({ label, value, accent }) => (
               <div
