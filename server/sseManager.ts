@@ -72,10 +72,27 @@ export function registerSSEClient(res: Response, channels: string[] = ["all"], c
   clients.set(id, client);
 
   if (lastEventId && lastEventId > 0) {
+    // Reconnecting client — replay all missed events since their last event ID
     const missedEvents = eventBuffer.filter(e => e.id > lastEventId);
     for (const event of missedEvents) {
       if (client.channels.has(ALL_CHANNEL) || client.channels.has(event.channel)) {
         sendEventWithId(client, event.id, event.eventType, event.data);
+      }
+    }
+  } else {
+    // Fresh connection — send the latest event of each key type so the client
+    // has current state immediately instead of waiting up to 30s for next broadcast.
+    const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+    const catchUpTypes = ["intelligence-update", "live-scores", "sharp-signal"];
+    for (const type of catchUpTypes) {
+      const lastOfType = [...eventBuffer].reverse().find(
+        e => e.eventType === type && e.timestamp > fiveMinAgo
+      );
+      if (lastOfType) {
+        sendEventWithId(client, lastOfType.id, lastOfType.eventType, {
+          ...lastOfType.data,
+          catchUp: true,
+        });
       }
     }
   }

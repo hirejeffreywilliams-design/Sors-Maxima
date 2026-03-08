@@ -325,9 +325,12 @@ class AppGuardianEngine {
       const port = process.env.PORT || 5000;
       const result = await this.fetchWithTimeout(`http://localhost:${port}${check.path}`);
       const svc = this.getOrCreateService(check.name);
-      this.updateServiceStatus(svc, result.ok, result.time, result.error);
+      // 401 and 403 mean the server is responding — endpoint exists but requires auth.
+      // Treat these as healthy from a Guardian perspective.
+      const isAlive = result.ok || result.status === 401 || result.status === 403;
+      this.updateServiceStatus(svc, isAlive, result.time, isAlive ? undefined : result.error);
 
-      if (!result.ok) {
+      if (!isAlive) {
         this.addAlert("high", check.category,
           `${check.name} Not Responding`,
           result.error || `HTTP ${result.status}`,

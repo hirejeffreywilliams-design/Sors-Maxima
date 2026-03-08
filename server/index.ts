@@ -232,6 +232,14 @@ function startEnginesPhased(): void {
       });
   }, 3_000);
 
+  // ── Phase 1.5 (4s): App Guardian Engine ──────────────────────────────────
+  // Health monitoring and auto-heal. Starts early so startup failures are
+  // detected. Previously started at 150s (inside App Intelligence Engine) —
+  // moved here so the first 2.5 minutes of uptime are monitored.
+  safeStart("App Guardian Engine", () => {
+    import("./appGuardianEngine").then(({ startGuardian }) => startGuardian()).catch(() => {});
+  }, 4_000);
+
   // ── Phase 2 (5s): Live Sports Data ───────────────────────────────────────
   // Start the ESPN live scoreboard refresh cycle (60s interval).
   // This is the base data layer everything else reads from.

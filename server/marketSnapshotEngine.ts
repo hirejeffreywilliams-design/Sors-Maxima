@@ -121,6 +121,33 @@ function getOddsApiKey(): string | undefined {
 }
 
 const snapshotCache = new Map<string, { data: MarketSnapshot; timestamp: number }>();
+
+// Budget alert thresholds — track last alerted level to avoid repeated alerts per day
+let lastBudgetAlertLevel: "none" | "warning" | "critical" = "none";
+
+function checkOddsApiBudget(remaining: number): void {
+  const level: "none" | "warning" | "critical" =
+    remaining < 200 ? "critical" : remaining < 1000 ? "warning" : "none";
+  if (level === "none" && lastBudgetAlertLevel === "none") return;
+  if (level === "none") { lastBudgetAlertLevel = "none"; return; }
+  if (level === lastBudgetAlertLevel) return;
+  if (level === "warning" && lastBudgetAlertLevel === "critical") return;
+  lastBudgetAlertLevel = level;
+  const msg = `Odds API budget ${level}: ${remaining} requests remaining today`;
+  console.warn(`[MarketSnapshot] ⚠️  ${msg}`);
+  import("./sseManager").then(({ broadcastEvent }) => {
+    broadcastEvent("guardian-alert", {
+      type: "guardian-alert",
+      severity: level,
+      message: msg,
+      source: "OddsAPI-Budget",
+      timestamp: new Date().toISOString(),
+      actionRequired: level === "critical"
+        ? "Odds data will go offline soon. Check The Odds API dashboard or wait for daily reset."
+        : "Consider reducing prediction refresh frequency to conserve budget.",
+    });
+  }).catch(() => {});
+}
 const SNAPSHOT_CACHE_TTL = 3 * 60 * 1000;
 
 function mapSportToOddsApiKey(sport: string): string | null {
@@ -201,6 +228,7 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
     if (remainingNum > 0) {
       recordOddsApiCall(sport, data.length, remainingNum, "MarketSnapshot");
       apiBudgetOptimizer.reportRemaining("odds", remainingNum);
+      checkOddsApiBudget(remainingNum);
     }
     console.log(`[MarketSnapshot] Odds API OK — ${data.length} ${sport} games (${remaining} requests remaining)`);
     return data;

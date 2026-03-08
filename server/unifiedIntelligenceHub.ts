@@ -703,7 +703,43 @@ export async function generateIntelligenceFeed(): Promise<IntelligenceFeed> {
     .filter(g => g.status.state === "pre")
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  const topPicks = gatherTopPicks();
+  let topPicks = gatherTopPicks();
+
+  // Merge top international soccer/MMA picks into the feed so they appear in
+  // the app alongside domestic picks. International engine runs every 6h and
+  // caches its results; we read from the cache so this is near-zero overhead.
+  try {
+    const { getInternationalLifeChangerPicks } = await import("./internationalSportsEngine");
+    const intlPicks = getInternationalLifeChangerPicks();
+    const qualifiedIntl = intlPicks
+      .filter(p => (p.confidence ?? 0) >= 55 && (p.ev ?? 0) > 0)
+      .slice(0, 5)
+      .map((p: any) => ({
+        id: p.id || `intl-${p.fixture?.fixtureId || Math.random().toString(36).slice(2)}`,
+        sport: p.sport || "SOCCER",
+        game: p.fixture ? `${p.fixture.homeTeam} vs ${p.fixture.awayTeam}` : (p.game || ""),
+        pick: p.pick || p.outcome || "",
+        betType: p.betType || "moneyline",
+        odds: p.americanOdds || p.odds || -110,
+        confidence: p.confidence || 55,
+        grade: p.grade || "B",
+        edge: p.edge || p.ev || 0,
+        ev: p.ev || 0,
+        gameTime: p.gameTime || new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
+        reasoning: p.selectionReason || p.reasoning || "International edge pick",
+        factors: [],
+        sharpMoneyPct: p.sharpMoneyPct,
+        publicMoneyPct: p.publicMoneyPct,
+        reverseLineMove: false,
+        steamMove: false,
+        oddsSource: p.oddsSource || "International",
+        bestOddsBook: p.bestOddsBook,
+      }));
+    if (qualifiedIntl.length > 0) {
+      topPicks = [...topPicks, ...qualifiedIntl];
+    }
+  } catch { /* international feed is best-effort */ }
+
   const edgeAlerts = generateEdgeAlerts(snapshots);
 
   const sportSummaries: SportSummary[] = getInSeasonSports().map(sport => {

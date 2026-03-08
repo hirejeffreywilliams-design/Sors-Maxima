@@ -926,14 +926,10 @@ export function startContinuousLearningOrchestrator(): void {
     }
   })();
 
-  settlementInterval = setInterval(async () => {
-    try {
-      await autoSettlePredictions();
-    } catch (e: any) {
-      addError("settlement", e.message);
-    }
-    status.totalCycles++;
-  }, 5 * 60 * 1000);
+  // Settlement is handled by the dedicated settlementEngine.ts (startAutoSettlement)
+  // which runs on the same 5-minute cadence. Running it here too was redundant.
+  // The one-time initial settlement below (30s after orchestrator starts) is kept
+  // since orchestrator starts at 105s and settlement engine at 28s — they overlap fine.
 
   retrainingInterval = setInterval(async () => {
     try {
