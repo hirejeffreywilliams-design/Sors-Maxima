@@ -117,6 +117,8 @@ export const userCardCollections = pgTable("user_card_collections", {
   acquiredVia: text("acquired_via").notNull(),
   acquiredAt: timestamp("acquired_at").defaultNow().notNull(),
   isShowcase: boolean("is_showcase").default(false).notNull(),
+  cardSignature: text("card_signature"),
+  isPublicShowcase: boolean("is_public_showcase").default(false).notNull(),
 });
 
 export const cardTrades = pgTable("card_trades", {

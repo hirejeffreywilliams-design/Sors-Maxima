@@ -1,8 +1,10 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Trophy, CheckCircle2, XCircle } from "lucide-react";
+import { Brain, Trophy, CheckCircle2, XCircle, Sparkles, Share2 } from "lucide-react";
 import { getGradeGlow } from "@/lib/grade-utils";
 import { cn } from "@/lib/utils";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface TradingCardProps {
   card: {
@@ -19,8 +21,11 @@ interface TradingCardProps {
     maxCopies: number | null;
     copiesIssued: number | null;
     settledResult: string | null;
+    issuedAt?: string;
   };
   instanceNumber?: number;
+  collectionId?: number;
+  isPublicShowcase?: boolean;
   className?: string;
   showBack?: boolean;
   isFlippable?: boolean;
@@ -158,15 +163,43 @@ export function TradingCard({
   className = "",
   isFlippable = false,
   onFlip,
-  isFlipped: isFlippedProp
+  isFlipped: isFlippedProp,
+  collectionId,
+  isPublicShowcase,
 }: TradingCardProps) {
+  const { toast } = useToast();
   const [rotate, setRotate] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
   const [internalFlipped, setInternalFlipped] = useState(false);
+  const [isShowcaseToggling, setIsShowcaseToggling] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const isFlipped = isFlippedProp ?? internalFlipped;
+
+  const toggleShowcase = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!collectionId || isShowcaseToggling) return;
+
+    setIsShowcaseToggling(true);
+    try {
+      await apiRequest("POST", "/api/cards/showcase/toggle", { collectionId });
+      await queryClient.invalidateQueries({ queryKey: ["/api/cards/collection"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/cards/community/feed"] });
+      toast({
+        title: isPublicShowcase ? "Removed from Community" : "Shared to Community",
+        description: isPublicShowcase ? "This card is now private." : "Other members can now see this card!",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Action failed",
+        description: err.message || "Failed to toggle showcase status",
+        variant: "destructive",
+      });
+    } finally {
+      setIsShowcaseToggling(false);
+    }
+  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current || isFlipped) return;
@@ -358,6 +391,7 @@ export function TradingCard({
               >
                 {card.grade}
               </div>
+              <div style={{ fontSize: "7px", fontWeight: 900, letterSpacing: "0.12em", color: foil.accent, opacity: 0.6 }}>SORS CERTIFIED</div>
               <div className="text-[8px] font-bold text-white/25 uppercase tracking-wider">Grade</div>
             </div>
           </div>
@@ -460,6 +494,13 @@ export function TradingCard({
 
           {/* === Pick Info === */}
           <div className="relative z-10 flex-1 flex flex-col px-4 py-3 gap-2 min-h-0">
+            {/* Watermark */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none -rotate-[30deg] font-black tracking-widest text-white whitespace-nowrap"
+              style={{ fontSize: "11px", opacity: 0.035 }}
+            >
+              SORS MAXIMA™
+            </div>
             <div>
               <p className="text-[9px] text-white/35 uppercase tracking-wider font-bold truncate">{card.game}</p>
               <h3 className="text-sm font-black leading-tight text-white/95 truncate">{card.pick}</h3>
@@ -590,16 +631,16 @@ export function TradingCard({
             background: `radial-gradient(circle at 50% 40%, ${foil.accent}18 0%, transparent 60%)`,
           }}
         />
-        <div className="relative z-10 space-y-5">
+        <div className="relative z-10 space-y-4">
           <div
-            className="w-20 h-20 mx-auto rounded-full flex items-center justify-center border-2"
+            className="w-16 h-16 mx-auto rounded-full flex items-center justify-center border-2"
             style={{
               background: `${foil.accent}15`,
               borderColor: `${foil.accent}40`,
               boxShadow: `0 0 30px ${foil.accent}30`,
             }}
           >
-            <Trophy className="w-10 h-10" style={{ color: foil.accent }} />
+            <Trophy className="w-8 h-8" style={{ color: foil.accent }} />
           </div>
           <div>
             <div
@@ -608,24 +649,59 @@ export function TradingCard({
             >
               SORS MAXIMA™
             </div>
-            <div className="text-[10px] font-bold text-white/40 tracking-widest uppercase mt-1">
-              Intelligence Card
+            <div className="flex items-center justify-center gap-1.5 mt-1">
+              <span className="text-[10px] font-black text-primary uppercase tracking-widest">SORS CERTIFIED ✓</span>
+              <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
             </div>
-            <div className={`text-xs font-black mt-2 ${rarity.color}`}>{rarity.label}</div>
           </div>
-          <div className="pt-3 border-t border-white/8 max-w-[180px]">
+
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-white/30 tracking-[0.2em] uppercase">
+              {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "UNIQUE COPY"}
+            </p>
+            {card.gameTime && (
+              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
+                Issued: {new Date(card.gameTime).toLocaleDateString()}
+              </p>
+            )}
+          </div>
+
+          {collectionId && (
+            <div className="pt-2">
+              <button
+                onClick={toggleShowcase}
+                disabled={isShowcaseToggling}
+                className={cn(
+                  "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-2 mx-auto",
+                  isPublicShowcase 
+                    ? "bg-primary/20 text-primary border border-primary/40" 
+                    : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                {isShowcaseToggling ? (
+                  <span className="animate-pulse">...</span>
+                ) : isPublicShowcase ? (
+                  <>
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span>✓ Shared</span>
+                  </>
+                ) : (
+                  <>
+                    <span>📢 Share to Community</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+          
+          <div className="pt-3 border-t border-white/8 max-w-[180px] mx-auto">
             <p className="text-[9px] text-white/30 leading-relaxed">
               Verified signal from the Sors 46-Factor Intelligence Engine. Collect, trade, and showcase your best picks.
             </p>
           </div>
-          <div className="flex items-center justify-center gap-2 pt-1">
-            {[foil.accent, "rgba(255,255,255,0.3)", foil.accent].map((c, i) => (
-              <div key={i} className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />
-            ))}
-          </div>
         </div>
         <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="text-[8px] font-mono text-white/15 tracking-widest">SECURED BY SORS 46-FACTOR ENGINE</div>
+          <div className="text-[8px] font-mono text-white/15 tracking-widest uppercase">Secured by Sors 46-Factor Engine</div>
         </div>
       </div>
     </div>

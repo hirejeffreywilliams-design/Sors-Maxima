@@ -15,24 +15,23 @@ Do not make changes to the file `client/src/theme-toggle.tsx`.
 The application utilizes a modern web architecture with a React-based frontend and an Express.js backend, both developed in TypeScript. UI components are styled using TailwindCSS and shadcn/ui, state management is handled by TanStack Query, and Wouter manages routing. The system is designed around a unified intelligence hub that aggregates real-time data for analysis and personalized insights.
 
 **Core Architectural Decisions and Features**:
-- **Unified Intelligence Hub**: Aggregates data from various sources into a unified `IntelligenceFeed` on a 60-second cycle for comprehensive analysis.
+- **Unified Intelligence Hub**: Aggregates data from various sources into a unified `IntelligenceFeed` on a 60-second cycle.
 - **Command Center & Intelligent Ticket Generation**: Features a primary dashboard ("Today's Best Tickets"), a daily `Life Changer Ticket` generator, Smart Ticket Generator, Visual Parlay Builder, and Matchup Ticket Builder.
-- **Persistent Bet Slip & Multi-Slip Manager**: A fixed sidebar for managing parlay legs, dynamic payout calculation, and one-tap copy/share. Edge/Max tier users can manage up to 5 independent bet slips with state persistence.
+- **Persistent Bet Slip & Multi-Slip Manager**: A fixed sidebar for managing parlay legs, dynamic payout calculation, and multi-slip management for premium users.
 - **Correlation Intelligence Panel**: Provides inline analysis for bet slips, detecting conflicts, sport concentration, low-grade legs, and negative EV.
 - **HITL Smart Pick Review Queue**: A page for reviewing risk-scored picks with model probabilities, market probabilities, edge, Kelly criterion recommendations, and risk flags.
 - **Personalized Bankroll Management**: Integrates user-defined bankroll settings, Kelly fraction, and daily caps for personalized stake recommendations.
-- **Ticket Variation Engine**: Generates strategic alternative parlay blueprints (e.g., Safe Locks, EV Hunter) based on the user's current slip for premium users.
+- **Ticket Variation Engine**: Generates strategic alternative parlay blueprints (e.g., Safe Locks, EV Hunter) for premium users.
 - **Strategy Intelligence System**: A complete strategy system with universal and new sport-specific strategies, including an "Active Mode" for filtered picks, an "Auto-Parlay Builder", and "Strategy Backtest" functionality.
-- **Autonomous Learning Engine**: Bootstraps the Sors Simulation Engine (MC engine) and Stacking Meta-Learner from historical settled picks, with hourly learning cycles to keep models current.
+- **Autonomous Learning Engine**: Bootstraps the Sors Simulation Engine (MC engine) and Stacking Meta-Learner from historical settled picks, with hourly learning cycles.
 - **Advanced Analytics & Predictive Engines**: Incorporates Continuous Learning, a Multi-Factor Intelligence Engine, Scheme Recognition, Monte Carlo simulations with Kelly Criterion, and a Strategy Advisor.
 - **Intelligence Acceleration System**: A suite of five interconnected engines designed to speed up prediction-to-learning cycles and provide real-time updates.
 - **Real-time Data and Analytics**: Includes a Team Historical Form Engine, Precomputed Predictions Engine, Situational Analysis Engine, and CLV Tracker.
 - **User Engagement & Personalization**: Features Personalized Betting Insights, a Unified Tools & Analytics Page, and a Consolidated Odds Center.
 - **Real-time Updates & Notifications**: Utilizes Server-Sent Events (SSE) for live updates and a Custom Notification Engine.
 - **Tier-Based Feature Gating**: Protects API routes and features based on user subscription tiers (Sharp, Edge, Max).
-- **Sports Ticker with Speed Control**: Displays only in-season sports with adjustable speed settings.
-- **Swipe Mode (Mobile Picks)**: A Tinder-style swipe interface for picks on mobile devices.
-- **Customizable Bottom Nav**: Allows users to choose up to 4 shortcut icons for the mobile navigation.
+- **Sports Ticker**: Displays only in-season sports with adjustable speed settings.
+- **Mobile UX Enhancements**: Includes Swipe Mode for picks and customizable bottom navigation.
 - **Sors Books Intelligence Hub**: Full sportsbook management where users register books, track balances, view P&L, and compare live odds.
 - **Persistent Data Storage**: Uses PostgreSQL for storing user watchlists, preferences, subscriptions, ticket history, and betting profiles.
 - **Autonomous Intelligence & Admin Tools**: Includes a Platform Intelligence Engine, App Guardian Engine, AI-Powered Admin Assistant, and Autonomous Admin Intelligence Engine.
@@ -46,26 +45,28 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Strategy Accountability System**: Allows users to choose from preset betting strategies with per-leg violation tracking.
 - **AI Circuit Breaker**: Manages AI API quotas and error states.
 - **Grade Ambient Glow System**: Pick and ticket cards display a grade-matched ambient box-shadow glow and animated shimmer for high grades.
-- **Autonomous App Intelligence Engine**: `server/appIntelligenceEngine.ts` — hourly self-discovery system that scans all client pages, server engines, and route groups to auto-detect new features. Uses GPT-4o-mini to generate actionable health/growth insights each cycle. Admin page at `/admin/app-intelligence` shows Feature Registry (searchable), AI Insights journal, pipeline/learning coverage analysis, and a "Run Cycle Now" button. Engine starts at 150s after server boot. New features are auto-registered with timestamps and marked "NEW" for admin review. Linked from admin quick links.
-- **Enhanced Admin Pipeline Map**: `/admin/pipeline` Connection Map now shows 96px-tall nodes with 3 sub-compartment rows (live metrics A/B/C per node from backend), colored status stripe, pulsing status dot, animated SVG flow particles on live connections, layer band backgrounds, disconnect alert banner, and a rich hover detail panel with "Data Coverage / Performance / Features" metric cards plus connection I/O relationships. Backend `/api/admin/pipeline/visual-status` returns `metrics: { a, b, c }` per node with live engine counts (games analyzed, picks generated, teams profiled, insights cached, etc.).
-- **Proprietary Branding Sweep**: All user-visible vendor name references removed from non-admin pages. Fixed files: `intelligence-pipeline.tsx` (removed "BallDontLie", "6 expert models", "10,000–100K simulations"), `not-found.tsx`, `onboarding-tutorial.tsx`, `player-props.tsx`, `odds-center.tsx`, `help.tsx`, `live-factor-adjuster.tsx`, `public-vs-sharp.tsx`, `visual-parlay-builder.tsx`, `track-record.tsx`, `momentum-tracker.tsx`, `command-center.tsx` (ESPN attribution → generic). Sors branding throughout: "Sors 46-Factor Engine", "Sors Conviction Score™", "Sors Signal™ Blend", "Intelligence Closing Value™", "Sors Simulation Engine".
-- **Sors Intelligence Cards**: A collectible trading card system with prominent multi-layer rainbow holographic shimmer (A+ = full rainbow foil, A/B+ = colored shimmer), sport-specific background patterns (court lines, ice rink, baseball diamond, yard markers), event labels (March Madness, Playoffs, Stanley Cup, etc.), rarity labels (LEGENDARY/RARE/UNCOMMON/COMMON), 3D tilt hover, grade-matched glow borders, and "CALLED IT/MISSED" stamps. Admin-only "Showcase Preview" tab in the Cards page displays all pick cards from showcase tickets.
-- **Edge Alerts Collapsible**: Edge Alerts section in Command Center moved to a collapsed Collapsible dropdown by default — shows an amber trigger button with alert count badge; expands on tap.
-- **Pick Hall of Fame**: A premium showcase of winning/losing picks on the track-record page.
-- **Performance Highlights Card**: Displays key performance statistics on the track-record page.
+- **Autonomous App Intelligence Engine**: An hourly self-discovery system that scans client pages, server engines, and route groups to auto-detect new features, generating actionable health/growth insights.
+- **Enhanced Admin Pipeline Map**: Provides a visual representation of the system pipeline with live metrics, colored status, and animated flow particles.
+- **Proprietary Branding Sweep**: Replaces all user-visible vendor name references with "Sors" branding throughout the platform.
+- **Card Security & Anti-Fraud System**: Implements SHA-256 cryptographic signatures for issued cards, displayed with a "SORS CERTIFIED ✓" badge.
+- **Pack Rip Animation**: A full-screen, Pokémon-style pack opening experience for revealing cards.
+- **Community Cards Feed**: Integrates Intelligence Cards into the Community page with sharing functionality.
+- **Sors Intelligence Cards**: A collectible trading card system with visual effects (rainbow holographic shimmer, sport-specific backgrounds, rarity labels, 3D tilt hover, grade-matched glow borders, "CALLED IT/MISSED" stamps).
+- **Edge Alerts Collapsible**: Edge Alerts section in Command Center is collapsed by default, expanding on tap.
+- **Pick Hall of Fame & Performance Highlights**: Premium showcase of picks and key performance statistics on the track-record page.
 - **Share Winning Ticket**: Allows users to share winning tickets with branding.
-- **Prediction Engine Calibration**: Outcome-calibrated adjustments are applied to confidence scores for various pick types and teams.
-- **Profile Page Performance Aura**: The profile hero section features a dynamic ambient glow background reflecting the user's betting performance.
-- **Cookie Consent Auto-Accept**: Authenticated users automatically consent to cookies, with management options in their profile.
-- **Proprietary Branding**: All user-visible "Monte Carlo" references are replaced with "Sors Simulation," and "Quantum" references with "Sors Edge" / "Sors Intelligence" / "Sors 46-Factor Engine."
-- **Sors Lexicon™**: Full proprietary terminology framework replacing industry-standard betting terms throughout the UI: Intelligence Edge™, Sors Signal™, Market Drift™, Sors Conviction Score™, Intelligence Closing Value™ (ICV), Market Gap™, Sors Rating™, Intelligence Consensus™, Sors Drift Alert™, Leg Correlation Score™.
-- **Admin IP Registry & Business Intelligence**: Page at `/admin/ip-registry` with 5 tabs — Platform Vitals (401,795 LOC), IP Registry (18 proprietary assets with REGISTERED badges), Sors Lexicon table, Mission & Vision, and full Business Plan ($3.3M ARR 24-month target).
-- **Marketing Command Center**: Admin page at `/admin/marketing` renamed to "Marketing Command Center" with a new "Promo Ads" tab as the default. Contains pre-built tier-specific ready-to-post ad copy (Sharp $49, Edge $99, Max $249, All Members) across Twitter/X, Instagram, Email, Push/SMS formats (4 campaigns per tier = 16 ready ads), plus AI Tier Ad Generator that generates 3-platform ad sets per request.
-- **SSE Live Updates Complete**: Server-Sent Events infrastructure fully wired — sseManager broadcasts `intelligence-update`, `live-scores`, `edge-alerts`, `picks-update` (from PrecomputedEngine cycle), `sharp-signal`, `early-settlement`, `picks-settled`, `notification`, `guardian-alert`. SSE provider invalidates prediction caches (`/api/predictions/*`) on `picks-update`, odds caches on `odds-update`. Bet Builder page (`/builder`) shows a live SSE status indicator (pulsing green dot with last-update timestamp). Vegas Prediction™ and Public Fade™ strategies live on Edge tier.
-- **Mobile Card Stack Deck**: `MobileTicketDeck` component (`mobile-ticket-deck.tsx`) — on mobile viewports, converts ticket/pick grids into a swipeable playing-card stack sorted A+ → F, with peek-behind cards, prev/next arrows, touch swipe, and grade badge. Desktop grid layout unchanged.
-- **Single-Color Grade Glow Fix**: Ticket cards now show a single cohesive glow color (driven by computed combined grade). Per-leg grade badges inside cards use neutral muted styling so internal badges don't create a multicolored background. `ticket-showcase.tsx` uses `computeTicketGrade()` for consistent card-level color.
-- **Global Visual Redesign (Glass/Gradient System)**: Complete redesign across `index.css`, `button.tsx`, `tabs.tsx`, `App.tsx`. Global: body mesh gradient background blobs (money green + violet), dark-mode dot-grid texture, real shadow variables, `.glass-card/.glass-panel/.glass-nav` utilities, `.gradient-heading/.gradient-heading-green/.gradient-heading-gold`, `.section-divider`, `.stat-number`, `.glow-primary/.glow-amber`, `.page-hero` and variant classes. Components: primary buttons gradient bg + glow shadow; tabs glass pill with rounded-xl bg-muted/60 backdrop-blur; cards with real hover shadows. Navigation: sticky header uses `glass-nav` (backdrop-blur-xl), mobile bottom nav glass with active indicator dot (glow pulse bar under active tab). PageHero: new reusable `client/src/components/page-hero.tsx` component with variants (default/gold/blue/violet), badge, title, subtitle, stats row, actions slot — integrated into Command Center, Track Record, Odds Center, Watchlist, Personalized Insights, Strategy Advisor, Live Center, Sors Books, Community, Player Props, and Smart Ticket Generator pages.
-- **Three-Color Premium Design System**: Primary = money green `hsl(145, 68%, 28%)` light / `hsl(145, 65%, 44%)` dark (all buttons, badges, active states, highlights). Gold = 24k gold `#FFD700` (bet slip Ticket icons, leg count badges, A+ grade elements — gold-ticket-icon / gold-ticket-icon-animated / gold-slip-badge CSS classes). Emerald depth = supporting green for profit/win indicators. `.gradient-heading-green` fades green → bright green → subtle gold shimmer. `.glow-primary` emits green + faint gold outer corona.
+- **Prediction Engine Calibration**: Outcome-calibrated adjustments applied to confidence scores for various pick types and teams.
+- **Profile Page Performance Aura**: Dynamic ambient glow background on the profile hero section reflecting user's betting performance.
+- **Cookie Consent Auto-Accept**: Authenticated users automatically consent to cookies.
+- **Proprietary Branding**: Replaces "Monte Carlo" with "Sors Simulation," and "Quantum" with "Sors Edge" / "Sors Intelligence" / "Sors 46-Factor Engine."
+- **Sors Lexicon™**: Full proprietary terminology framework replacing industry-standard betting terms throughout the UI.
+- **Admin IP Registry & Business Intelligence**: Admin page with platform vitals, IP registry, Sors Lexicon table, mission & vision, and business plan.
+- **Marketing Command Center**: Admin page for marketing with pre-built tier-specific ad copy and an AI Tier Ad Generator.
+- **SSE Live Updates Complete**: Server-Sent Events infrastructure fully wired for various live updates.
+- **Mobile Card Stack Deck**: On mobile, converts ticket/pick grids into a swipeable playing-card stack.
+- **Single-Color Grade Glow Fix**: Ticket cards show a single cohesive glow color based on combined grade.
+- **Global Visual Redesign (Glass/Gradient System)**: Complete redesign across the application using glassmorphism, gradient backgrounds, and specific color palettes.
+- **Three-Color Premium Design System**: Utilizes a primary money green, 24k gold, and emerald depth for profit/win indicators.
 
 ## External Dependencies
 - **Frontend Framework**: React
@@ -75,7 +76,7 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Backend Framework**: Express.js
 - **Data Validation**: Zod
 - **Payment Processing**: Stripe
-- **Sports Data**: ESPN, BallDontLie API, API-Football, NHL Stats API, MLB Stats API
-- **Odds Data**: The Odds API
-- **AI/ML**: OpenAI
+- **Sports Data**: ESPN, BallDontLie API, API-Football, NHL Stats API, MLB Stats API, The Odds API
+- **AI/ML**: OpenAI (GPT-4o-mini)
 - **Email**: Resend
+- **Database**: PostgreSQL

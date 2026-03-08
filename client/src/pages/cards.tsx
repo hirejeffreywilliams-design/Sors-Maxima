@@ -10,7 +10,7 @@ import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye } 
 import { PageHero } from "@/components/page-hero";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PackRipReveal } from "@/components/pack-rip-reveal";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface UserCardCollection {
@@ -193,50 +193,13 @@ export default function CardsPage() {
         </Card>
       </div>
 
-      {/* Pack Reveal Modal */}
-      <Dialog open={openedPackCards !== null} onOpenChange={(open) => !open && closePackReveal()}>
-        <DialogContent className="max-w-5xl bg-black/90 border-primary/20">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black text-center text-primary tracking-tighter uppercase">
-              Pack Reveal
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center gap-8 py-10">
-            <div className="flex flex-wrap justify-center gap-6">
-              {openedPackCards?.map((item, idx) => (
-                <div key={item.collection.id} className="relative w-[240px] h-[340px]">
-                  <TradingCard
-                    card={item.card}
-                    instanceNumber={item.collection.instanceNumber}
-                    isFlippable={true}
-                    isFlipped={!revealedIndices.includes(idx)}
-                    onFlip={() => handleReveal(idx)}
-                  />
-                  {!revealedIndices.includes(idx) && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <Button variant="ghost" className="text-white font-black bg-black/40 backdrop-blur-sm border border-white/20 hover:bg-black/60">
-                        REVEAL
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {revealedIndices.length === openedPackCards?.length && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="pt-4"
-              >
-                <Button onClick={closePackReveal} className="font-black px-8 h-12">
-                  ADD TO COLLECTION
-                </Button>
-              </motion.div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Pack Reveal Overlay */}
+      {openedPackCards && (
+        <PackRipReveal
+          cards={openedPackCards}
+          onClose={closePackReveal}
+        />
+      )}
 
       <Tabs defaultValue="collection" className="space-y-6">
         <TabsList className={`bg-muted/50 p-1 w-full ${isAdmin ? "max-w-2xl" : "max-w-md"}`}>
@@ -284,6 +247,9 @@ export default function CardsPage() {
                   <TradingCard
                     card={item.card}
                     instanceNumber={item.collection.instanceNumber}
+                    collectionId={item.collection.id}
+                    isPublicShowcase={item.collection.isPublicShowcase}
+                    isFlippable={true}
                   />
                 </div>
               ))}

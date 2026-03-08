@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHero } from "@/components/page-hero";
-import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy, Info } from "lucide-react";
+import { Trophy, Users, Share2, Bell, MessageCircle, Rss, Copy, Info, Sparkles } from "lucide-react";
 import { BetSharing } from "@/components/social/bet-sharing";
 import { Leaderboard } from "@/components/social/leaderboard";
 import { FollowBettors } from "@/components/social/follow-bettors";
@@ -10,6 +10,7 @@ import { CopyBetting } from "@/components/social/copy-betting";
 import { Badge } from "@/components/ui/badge";
 import { TipsterContent } from "@/components/community/tipster-content";
 import { SharedTicketsContent } from "@/components/community/shared-tickets-content";
+import { CommunityCards } from "@/components/community/community-cards";
 import { useSEO } from "@/hooks/use-seo";
 
 export default function Community() {
@@ -35,7 +36,7 @@ export default function Community() {
         </div>
 
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-md">
             <TabsTrigger value="feed" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-feed">
               <Users className="w-4 h-4 shrink-0" />
               Feed
@@ -47,6 +48,10 @@ export default function Community() {
             <TabsTrigger value="shared-tickets" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-shared-tickets">
               <Share2 className="w-4 h-4 shrink-0" />
               <span className="hidden sm:inline">Shared</span> Tickets
+            </TabsTrigger>
+            <TabsTrigger value="cards" className="gap-1 text-xs sm:text-sm px-1.5 sm:px-3" data-testid="tab-community-cards">
+              <Sparkles className="w-4 h-4 shrink-0" />
+              Cards
             </TabsTrigger>
           </TabsList>
 
@@ -113,6 +118,10 @@ export default function Community() {
 
           <TabsContent value="shared-tickets" className="space-y-6">
             <SharedTicketsContent />
+          </TabsContent>
+
+          <TabsContent value="cards" className="space-y-6">
+            <CommunityCards />
           </TabsContent>
         </Tabs>
       </div>

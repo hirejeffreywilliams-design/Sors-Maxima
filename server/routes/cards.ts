@@ -139,21 +139,30 @@ router.post("/packs/open", async (req, res) => {
     const openedCards = [];
     
     for (const card of selected) {
+      const instanceNum = (card.copiesIssued || 0) + 1;
+      const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+      const cardSignature = crypto
+        .createHash("sha256")
+        .update(`${userId}:${card.id}:${instanceNum}:${sigKey}`)
+        .digest("hex");
+
       const [collectionEntry] = await db
         .insert(userCardCollections)
         .values({
           userId: userId,
           cardId: card.id,
-          instanceNumber: (card.copiesIssued || 0) + 1,
+          instanceNumber: instanceNum,
           acquiredVia: "pack",
           acquiredAt: new Date(),
           isShowcase: false,
+          cardSignature,
+          isPublicShowcase: false,
         })
         .returning();
         
       await db
         .update(tradingCards)
-        .set({ copiesIssued: (card.copiesIssued || 0) + 1 })
+        .set({ copiesIssued: instanceNum })
         .where(eq(tradingCards.id, card.id));
         
       openedCards.push({
@@ -293,6 +302,94 @@ router.get("/hall-of-fame", async (req, res) => {
   } catch (error) {
     console.error("Error fetching hall of fame:", error);
     res.status(500).json({ message: "Failed to fetch hall of fame" });
+  }
+});
+
+// GET /api/cards/verify/:collectionId — verify card authenticity
+router.get("/verify/:collectionId", async (req, res) => {
+  const { collectionId } = req.params;
+  try {
+    const [entry] = await db
+      .select({ collection: userCardCollections, card: tradingCards, user: users })
+      .from(userCardCollections)
+      .innerJoin(tradingCards, eq(userCardCollections.cardId, tradingCards.id))
+      .innerJoin(users, eq(userCardCollections.userId, users.id))
+      .where(eq(userCardCollections.id, parseInt(collectionId)))
+      .limit(1);
+
+    if (!entry) return res.status(404).json({ authentic: false, message: "Card not found" });
+
+    const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+    const expectedSig = crypto
+      .createHash("sha256")
+      .update(`${entry.collection.userId}:${entry.collection.cardId}:${entry.collection.instanceNumber}:${sigKey}`)
+      .digest("hex");
+
+    const authentic = entry.collection.cardSignature === expectedSig;
+    res.json({
+      authentic,
+      verificationCode: entry.collection.cardSignature?.slice(-12).toUpperCase() || "LEGACY",
+      card: { grade: entry.card.grade, sport: entry.card.sport, pick: entry.card.pick, game: entry.card.game },
+      instanceNumber: entry.collection.instanceNumber,
+      issuedTo: entry.user.username,
+      acquiredAt: entry.collection.acquiredAt,
+    });
+  } catch (error) {
+    console.error("Error verifying card:", error);
+    res.status(500).json({ authentic: false, message: "Verification failed" });
+  }
+});
+
+// GET /api/cards/community/feed — public showcase cards from all users
+router.get("/community/feed", async (req, res) => {
+  try {
+    const feed = await db
+      .select({
+        collection: userCardCollections,
+        card: tradingCards,
+        username: users.username,
+      })
+      .from(userCardCollections)
+      .innerJoin(tradingCards, eq(userCardCollections.cardId, tradingCards.id))
+      .innerJoin(users, eq(userCardCollections.userId, users.id))
+      .where(eq(userCardCollections.isPublicShowcase, true))
+      .orderBy(desc(userCardCollections.acquiredAt))
+      .limit(60);
+
+    res.json(feed);
+  } catch (error) {
+    console.error("Error fetching community feed:", error);
+    res.status(500).json({ message: "Failed to fetch community feed" });
+  }
+});
+
+// POST /api/cards/showcase/toggle — toggle public showcase for a collection item
+router.post("/showcase/toggle", async (req, res) => {
+  if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);
+  const userId = Number(req.session.userId);
+  const { collectionId } = req.body;
+
+  if (!collectionId) return res.status(400).json({ message: "collectionId required" });
+
+  try {
+    const [entry] = await db
+      .select()
+      .from(userCardCollections)
+      .where(and(eq(userCardCollections.id, Number(collectionId)), eq(userCardCollections.userId, userId)))
+      .limit(1);
+
+    if (!entry) return res.status(404).json({ message: "Card not in your collection" });
+
+    const [updated] = await db
+      .update(userCardCollections)
+      .set({ isPublicShowcase: !entry.isPublicShowcase })
+      .where(eq(userCardCollections.id, entry.id))
+      .returning();
+
+    res.json({ isPublicShowcase: updated.isPublicShowcase, collectionId: updated.id });
+  } catch (error) {
+    console.error("Error toggling showcase:", error);
+    res.status(500).json({ message: "Failed to toggle showcase" });
   }
 });
 
