@@ -195,7 +195,7 @@ export function LiveHedgeCalculator() {
                     )}
                     <div>
                       <p className="font-medium text-xs sm:text-base">
-                        {hedgeCalc.guaranteedProfit >= 0 ? "Locked-In Profit" : "Potential Loss"}
+                        {hedgeCalc.guaranteedProfit >= 0 ? "Max Secured Value" : "Potential Loss"}
                       </p>
                       <p className={`text-xl sm:text-2xl font-bold ${hedgeCalc.guaranteedProfit >= 0 ? "text-green-500" : "text-red-500"}`}>
                         {hedgeCalc.guaranteedProfit >= 0 ? "+" : ""}${hedgeCalc.guaranteedProfit.toFixed(2)}

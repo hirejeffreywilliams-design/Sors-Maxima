@@ -950,7 +950,7 @@ function EVHeatmapTab({ games, meta, isLoading, isFetching, dataUpdatedAt }: {
           <h2 className="text-lg font-bold">Arbitrage Scanner</h2>
         </div>
         <p className="text-sm text-muted-foreground">
-          Cross-book arbitrage opportunities for locked-in profit potential.
+          Cross-book arbitrage opportunities. Note: arb bets may be limited or voided by sportsbooks — always verify before placing.
         </p>
 
         {isLoading ? (

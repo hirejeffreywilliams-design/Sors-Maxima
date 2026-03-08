@@ -294,6 +294,18 @@ export default function LegalPage() {
                   </section>
 
                   <section>
+                    <h3 className="font-semibold mb-2">Cashout Engineering™ Strategy Disclaimer</h3>
+                    <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                      <p className="text-orange-800 dark:text-orange-200 text-xs">The Cashout Engineering™ strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™) are educational frameworks for analyzing cashout timing. They are based on mathematical models of typical sportsbook behavior. <strong>No cashout outcome, profit, or loss reduction is guaranteed.</strong> Actual cashout values and availability depend entirely on your sportsbook — sportsbooks may limit, modify, or refuse cashout offers at any time. Cashout strategies do not guarantee any specific return on investment. Always verify cashout options directly with your sportsbook before placing bets based on expected cashout availability.</p>
+                    </div>
+                  </section>
+
+                  <section>
+                    <h3 className="font-semibold mb-2">Arbitrage & Hedging Tools Disclaimer</h3>
+                    <p>Arbitrage opportunities identified by our scanner represent theoretical mathematical edges based on odds discrepancies between sportsbooks. <strong>Arbitrage is not guaranteed profit</strong> — sportsbooks may limit accounts engaging in arbitrage activity, refuse bets, or void wagers. Hedge and arbitrage calculations are estimates only. Always verify with sportsbooks before placing.</p>
+                  </section>
+
+                  <section>
                     <h3 className="font-semibold mb-2">Legal Compliance</h3>
                     <p>Users are responsible for ensuring that sports betting is legal in their jurisdiction. Sors Maxima makes no representations about the legality of sports betting in any location.</p>
                   </section>

@@ -217,7 +217,7 @@ export default function Live() {
           <TabsContent value="hedge" className="space-y-6">
             {isMax
               ? <LiveHedgeCalculator />
-              : <TierGate required="whale" label="Live Hedge Calculator" description="Real-time hedge sizing across your active parlay legs — lock in guaranteed profit as games go live." />
+              : <TierGate required="whale" label="Live Hedge Calculator" description="Real-time hedge sizing across your active parlay legs — maximize your position as games go live." />
             }
           </TabsContent>
 

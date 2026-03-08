@@ -124,15 +124,15 @@ const STRATEGIES = [
     color: "#34d399",
     darkBg: "rgba(52,211,153,0.08)",
     border: "rgba(52,211,153,0.25)",
-    tagline: "Guarantee no-loss with progressive partial cashouts at each leg",
-    how: `Take a partial cashout as each leg hits — banking a portion of the growing value while letting the rest ride. You can never lose money. The house's nervousness works for you at every single stage, not just the end.`,
+    tagline: "Minimize loss risk with progressive partial cashouts at each leg",
+    how: `Take a partial cashout as each leg hits — banking a portion of the growing value while letting the rest ride. The staged approach is designed to reduce your downside exposure significantly as the parlay progresses. The house's nervousness works for you at every stage, not just the end.`,
     rules: [
-      "After leg 1 hits: Take 30% partial cashout (cover partial stake)",
-      "After leg 2 hits: Take 25% more (now guaranteed break-even or better)",
-      "After leg 3 hits: Let remaining 45% ride — all upside, zero downside",
-      "Final leg: Pure profit regardless of outcome",
+      "After leg 1 hits: Take 30% partial cashout (recover partial stake)",
+      "After leg 2 hits: Take 25% more (target: at or near break-even)",
+      "After leg 3 hits: Let remaining 45% ride — reduced exposure from this point",
+      "Final leg: Remaining exposure at minimum — designed as pure upside",
     ],
-    badge: "Zero Downside",
+    badge: "Downside Reduction",
     badgeColor: "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
   },
   {
@@ -642,6 +642,15 @@ export function CashoutStrategiesEngine() {
           <StrategyRulesGuide strategy={activeStrategyData} />
         </TabsContent>
       </Tabs>
+
+      {/* Legal Risk Disclosure */}
+      <div
+        className="mt-4 rounded-xl border px-4 py-3 text-[11px] text-white/35 leading-relaxed"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(255,255,255,0.02)" }}
+        data-testid="cashout-risk-disclosure"
+      >
+        <span className="font-semibold text-white/50">Risk Disclosure:</span> Cashout Engineering™ strategies are for educational and analytical purposes only. Estimated cashout values and ROI projections are based on mathematical models of typical sportsbook behavior — actual cashout offers, availability, and amounts depend entirely on your sportsbook. Not all sportsbooks offer partial cashouts. Sportsbooks may limit, modify, or void cashout offers at any time. No outcome, profit, or loss reduction is guaranteed. Never bet more than you can afford to lose. If you or someone you know has a gambling problem, call 1-800-522-4700 (NCPG).
+      </div>
 
     </div>
   );

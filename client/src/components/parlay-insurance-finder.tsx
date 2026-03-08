@@ -219,7 +219,7 @@ export function ParlayInsuranceFinder({
                 <AlertCircle className="w-5 h-5 text-amber-500" />
               )}
               <span className="font-medium">
-                {guaranteedWithCustom > 0 ? "Locked-In Profit" : "Not Profitable"}
+                {guaranteedWithCustom > 0 ? "Est. Secured Value" : "Not Profitable"}
               </span>
             </div>
             <span className={`text-xl font-mono font-bold ${

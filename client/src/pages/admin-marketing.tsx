@@ -1044,6 +1044,15 @@ export default function AdminMarketing() {
         </Badge>
       </div>
 
+      {/* Legal Compliance Warning */}
+      <div className="flex items-start gap-3 rounded-xl border border-yellow-500/30 bg-yellow-500/8 px-4 py-3" data-testid="marketing-legal-warning">
+        <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
+        <div className="text-sm text-yellow-200/80 space-y-1">
+          <p className="font-semibold text-yellow-300">Legal Review Required Before Sending</p>
+          <p>All marketing copy — including AI-generated content — must be reviewed for compliance before distribution. Do not use: "guaranteed wins/profit," "zero-loss guarantee," specific unverified win rates (e.g., "71% hit rate"), or language implying insider or exclusive market knowledge. All performance claims require documented, verifiable data. Gambling-adjacent marketing may also require disclosure of material relationships and compliance with FTC guidelines and applicable state regulations.</p>
+        </div>
+      </div>
+
       <Tabs defaultValue="promo_ads" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="promo_ads" className="gap-2" data-testid="tab-promo-ads">

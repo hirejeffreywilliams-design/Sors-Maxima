@@ -219,11 +219,12 @@ Platform features (what members access):
 - Settings → Membership: View plan, upgrade tier, manage billing via Stripe portal
 
 Cashout Engineering™ (proprietary feature — MAX differentiator):
-Three strategies built to generate guaranteed cashout profit windows rather than full-ticket wins:
-1. Sportsbook Sweat™: Front-load heavy favorites (anchor legs -130 to -200), add underdogs last (pressure legs +120 to +250). When anchors win, book's liability spikes → cashout offer exceeds fair value. Target: 40-80% ROI, whether underdogs win or not. Interactive "Sweat Builder" shows Cashout Ladder and Sportsbook Nervousness Score (0-100).
-2. Lock & Roll™: Progressive partial cashouts. After leg 1: 30% partial. After leg 2: 25% partial (guaranteed no-loss). Remaining legs: pure upside. Zero-loss guarantee on any parlay.
+Three strategies designed to create structured cashout windows — the goal is to maximize cashout value before the full ticket resolves, not just win outright:
+1. Sportsbook Sweat™: Front-load heavy favorites (anchor legs -130 to -200), add underdogs last (pressure legs +120 to +250). When anchors win, book's liability may spike → cashout offer may exceed fair value. Target: 40-80% ROI based on typical book behavior — results vary, no outcome is guaranteed. Interactive "Sweat Builder" shows estimated Cashout Ladder and Sportsbook Nervousness Score (0-100).
+2. Lock & Roll™: Progressive partial cashouts. After leg 1: 30% partial. After leg 2: 25% partial (targeting near break-even). Remaining legs: designed as reduced-risk upside. Aimed at minimizing downside — not a guarantee of no loss; depends on sportsbook cashout availability.
 3. Steam Exit™: Build on sharp-money line-movement picks. When remaining leg lines move 5+ points in your favor, cash out to capture CLV profit without needing full ticket to win.
-Marketing angle: "We don't just teach you to win parlays — we teach you to profit from them before they're over."
+Marketing angle: "We don't just teach you to win parlays — we teach you to engineer smarter exit windows."
+Legal note: Never use "guaranteed profit," "zero-loss guarantee," or "cannot lose money" language in member-facing content. All strategy descriptions must include "results vary" or "no outcome guaranteed."
 
 Technical systems (do not expose these names or details to members — internal use only):
 - 46-Factor Model: The core prediction engine. Member-facing branding. Never expose vendor names.

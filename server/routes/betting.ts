@@ -2408,18 +2408,18 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             `• Leg 3–4: PRESSURE legs — underdogs at +120 to +250 odds. Add these at the end.\n\n` +
             `Why it works:\n` +
             `When your anchor legs win, the sportsbook's liability grows. They're now praying your underdog legs fail. Their cashout algorithm reflects this nervousness — spiking the offer well above fair mathematical value.\n\n` +
-            `At that moment, you cash out. Typical returns: 40–80% ROI on your original stake — guaranteed, whether the underdogs win or lose.\n\n` +
-            `Use the Sweat Builder in Live Center → Cashout tab to add your legs and see the exact Cashout Ladder and Sportsbook Nervousness Score™ (0–100) after each leg wins.`;
+            `At that moment, you cash out. This approach targets 40–80% ROI on your original stake based on typical book behavior — results vary and no outcome is guaranteed.\n\n` +
+            `Use the Sweat Builder in Live Center → Cashout tab to add your legs and see the estimated Cashout Ladder and Sportsbook Nervousness Score™ (0–100) after each leg wins.`;
         } else if (lockQ) {
           response = `Lock & Roll™ — Progressive Partial Cashout strategy:\n\n` +
-            `This strategy guarantees you cannot lose money on a parlay, regardless of how the final legs go.\n\n` +
+            `This strategy is designed to significantly reduce your loss exposure on a parlay through staged partial cashouts at each leg.\n\n` +
             `The sequence:\n` +
-            `• After Leg 1 wins → Take 30% partial cashout\n` +
-            `• After Leg 2 wins → Take 25% partial cashout (you're now at break-even or better)\n` +
-            `• After Leg 3 wins → The remaining amount is pure upside. Ride it.\n` +
-            `• Final leg → All profit, no more risk.\n\n` +
-            `The math: Each partial cashout "banks" the growing parlay value. The compounding effect ensures that even if the last leg loses, you've already locked in profit from the prior exits.\n\n` +
-            `This is ideal for risk-averse bettors who want parlay upside without parlay downside. Access it in Live Center → Cashout → Lock & Roll™ tab.`;
+            `• After Leg 1 wins → Take 30% partial cashout (recover partial stake)\n` +
+            `• After Leg 2 wins → Take 25% more (targeting break-even or better at this point)\n` +
+            `• After Leg 3 wins → The remaining amount rides as reduced-risk upside.\n` +
+            `• Final leg → Exposure minimized from earlier cashouts.\n\n` +
+            `The math: Each partial cashout banks a portion of the growing parlay value. The compounding effect means that even if the final leg loses, earlier cashouts have recovered much of the original stake. Note: partial cashout availability and exact values depend on your sportsbook — not all books offer this feature.\n\n` +
+            `Ideal for risk-conscious bettors who want parlay upside with reduced downside. Access it in Live Center → Cashout → Lock & Roll™ tab.`;
         } else if (steamQ) {
           response = `Steam Exit™ — Closing Line Value cashout strategy:\n\n` +
             `This strategy exploits line movement to generate CLV profit without needing the full parlay to win.\n\n` +
@@ -2431,15 +2431,15 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             `Example: You took a team at -3. The line moves to -6. Your remaining leg has gained significant value. Cash out now and bank that edge — the book hasn't fully updated their cashout model yet.\n\n` +
             `Find steam picks on the Live Center → Line Value tab. Build your ticket there, then use the Steam Exit™ calculator to see your optimal exit window.`;
         } else {
-          response = `Cashout Engineering™ — Three strategies, one goal: guaranteed profit windows.\n\n` +
+          response = `Cashout Engineering™ — Three strategies designed to create favorable cashout windows.\n\n` +
             `Sors Maxima offers three proprietary cashout strategies in the Live Center → Cashout tab:\n\n` +
             `1. SPORTSBOOK SWEAT™ — The core strategy.\n` +
-            `   Front-load heavy favorites (anchor legs), add underdogs last (pressure legs). When anchors win, the book's cashout offer spikes due to their growing liability. Cash out at peak book nervousness for 40–80% ROI — whether the underdogs win or lose.\n\n` +
-            `2. LOCK & ROLL™ — Zero-loss guarantee.\n` +
-            `   Take 30% partial after leg 1, 25% after leg 2. You're now at break-even minimum. Remaining legs = pure upside.\n\n` +
-            `3. STEAM EXIT™ — Line movement exploitation.\n` +
-            `   Build on sharp money picks. When remaining lines move 5+ points in your favor, your cashout value exceeds fair mathematical value. Take it and bank the CLV.\n\n` +
-            `Ask me about any of these by name for a full breakdown, or head to Live Center → Cashout tab to use the interactive Sweat Builder.`;
+            `   Front-load heavy favorites (anchor legs), add underdogs last (pressure legs). When anchors win, the book's cashout offer can spike due to growing liability. Target cashout at estimated peak book exposure — typically 40–80% ROI based on typical book behavior. Results vary.\n\n` +
+            `2. LOCK & ROLL™ — Progressive downside reduction.\n` +
+            `   Take 30% partial after leg 1, 25% after leg 2. Designed to recover much of your stake early, reducing remaining exposure.\n\n` +
+            `3. STEAM EXIT™ — Line movement-based exit.\n` +
+            `   Build on sharp money picks. When remaining lines move 5+ points in your favor, your cashout value may exceed fair mathematical value. Bank the CLV.\n\n` +
+            `Important: Cashout availability and actual values depend on your sportsbook. No outcome is guaranteed. Ask about any strategy by name for a full breakdown.`;
         }
       } else if (isStrategy) {
         const bySport = Object.entries(stats.bySport || {})

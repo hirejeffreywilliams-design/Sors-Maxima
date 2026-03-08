@@ -93,32 +93,36 @@ The core cashout engineering method. Structure: front-load 2 heavy favorites as
 How it works:
 - The book watches its liability grow as each anchor wins
 - When the anchors hit and the underdog leg(s) remain, the book's cashout
-  algorithm spikes to reflect their nervousness about the remaining exposure
-- The user cashes out at this exact moment — typically at 40-80% ROI on the stake
-- The ticket is built not to win, but to create maximum book anxiety at the right moment
-- The Sweat Builder shows a "Cashout Ladder" with estimated cashout value after each leg
+  algorithm may spike to reflect their exposure on the remaining legs
+- The user cashes out at this moment — targeting 40-80% ROI on the stake
+  based on typical book behavior (results vary; no outcome is guaranteed)
+- The ticket is structured to create maximum book anxiety at the optimal moment
+- The Sweat Builder shows an estimated "Cashout Ladder" after each leg
 
 Optimal exit: After both anchor legs win, the "Sportsbook Nervousness Score" peaks.
-This is the moment to take the cashout offer — it will consistently exceed what
-a fair-value calculation suggests because the book is pricing in their risk aversion.
+This is typically the moment to take the cashout offer — the book's pricing may
+exceed fair-value calculation. However, cashout availability and values vary by
+sportsbook and cannot be guaranteed.
 
 Recommended to use when: building parlays with mixed-odds legs, when a user wants
-guaranteed partial profit regardless of full ticket outcome.
+to target early cashout profits regardless of full ticket outcome.
 
 ### 2. Lock & Roll™ (Progressive Partial Cashout)
-Guarantees zero-loss parlay outcomes through staged partial cashouts.
+Designed to significantly reduce loss exposure through staged partial cashouts.
 
 How it works:
-- After leg 1 hits: Take 30% partial cashout (partially recover stake)
-- After leg 2 hits: Take 25% more (now at guaranteed break-even or better)
-- After leg 3 hits: The remaining 45% rides as pure upside
-- Final leg: All profit regardless of outcome
+- After leg 1 hits: Take 30% partial cashout (recover partial stake)
+- After leg 2 hits: Take 25% more (targeting at or near break-even)
+- After leg 3 hits: The remaining 45% rides with reduced exposure
+- Final leg: Designed as reduced-risk upside from earlier cashouts
 
-The key math: each partial cashout "banks" the growing parlay value. The compounding
-effect means even if the last leg loses, the user has already secured profit from
-the earlier partial exits.
+The key math: each partial cashout banks a portion of the growing parlay value.
+The compounding effect means even if the last leg loses, the user has already
+recovered significant stake from the earlier partial exits. Note: partial cashout
+availability and actual offer values depend on the sportsbook — not all books
+offer partial cashouts, and offers may differ from estimates.
 
-Recommended to use when: user wants absolute downside protection on a parlay.
+Recommended to use when: user wants to reduce downside exposure on a parlay.
 
 ### 3. Steam Exit™ (Closing Line Value Play)
 Build tickets on line-movement angles. Cash out when lines move your way.
@@ -202,13 +206,14 @@ Three proprietary cashout strategies are available in the Live Center → Cashou
 
 1. SPORTSBOOK SWEAT™ — Front-load 2 heavy favorites ("anchor legs" at -130 to -200),
    add 1-2 underdogs at the end ("pressure legs" at +120 to +250). When anchors win,
-   the book's cashout offer spikes due to their growing liability. Cash out at peak
-   book nervousness for 40-80% ROI on the original stake. This is a guaranteed-profit
-   strategy that works whether the full ticket wins or not.
+   the book's cashout offer may spike due to growing liability. Cash out at peak book
+   exposure — targeting 40-80% ROI on the original stake based on typical behavior.
+   Results vary; cashout availability depends on the sportsbook.
 
 2. LOCK & ROLL™ — Progressive partial cashouts after each leg wins. After leg 1: take
-   30% partial. After leg 2: take 25% more. After leg 3: remaining amount rides as
-   pure upside. Guarantees zero-loss outcome on any parlay.
+   30% partial. After leg 2: take 25% more (targeting break-even). After leg 3:
+   remaining amount rides with significantly reduced exposure. Designed to minimize
+   downside risk — actual outcomes depend on sportsbook cashout availability.
 
 3. STEAM EXIT™ — Build on line-movement picks. When remaining legs' lines move 5+
    points in your favor during the game, the book's cashout value exceeds fair value.
