@@ -278,9 +278,9 @@ export default function CardsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
               {collection?.map((item) => (
-                <div key={item.collection.id} className="w-[280px] h-[400px]">
+                <div key={item.collection.id} className="w-full aspect-[2/3]">
                   <TradingCard
                     card={item.card}
                     instanceNumber={item.collection.instanceNumber}
@@ -292,11 +292,11 @@ export default function CardsPage() {
         </TabsContent>
 
         <TabsContent value="marketplace" className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
             {isMarketplaceLoading ? (
-              [1, 2, 3, 4].map((i) => <Skeleton key={i} className="w-[280px] h-[400px] rounded-2xl" />)
+              [1, 2, 3, 4].map((i) => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)
             ) : marketplace?.map((card) => (
-              <div key={card.id} className="w-[280px] h-[400px]">
+              <div key={card.id} className="w-full aspect-[2/3]">
                 <TradingCard card={card} />
               </div>
             ))}

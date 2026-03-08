@@ -28,6 +28,12 @@ interface TradingCardProps {
   isFlipped?: boolean;
 }
 
+function parseTeams(game: string): { home: string; away: string } {
+  const m = game.match(/^(.+?)\s+(?:vs\.?|@|at)\s+(.+)$/i);
+  if (m) return { home: m[1].trim(), away: m[2].trim() };
+  return { home: game, away: "" };
+}
+
 const SPORT_ICONS: Record<string, string> = {
   NBA: "🏀", NHL: "🏒", NFL: "🏈", MLB: "⚾",
   NCAAB: "🏀", NCAAF: "🏈", MMA: "🥊", SOCCER: "⚽",
@@ -356,33 +362,101 @@ export function TradingCard({
             </div>
           </div>
 
-          {/* === Art Area === */}
-          <div className="relative z-10 flex flex-col items-center justify-center px-4 py-3 shrink-0"
-            style={{
-              background: `radial-gradient(ellipse at 50% 50%, ${foil.accent}15 0%, transparent 70%)`,
-              minHeight: "80px",
-            }}
-          >
-            <div className="text-5xl drop-shadow-lg" style={{
-              filter: isAPlus ? `drop-shadow(0 0 12px ${foil.accent})` : undefined,
-              animation: isAPlus ? "pulse 2s ease-in-out infinite" : undefined,
-            }}>
-              {sportIcon}
-            </div>
-            {eventLabel && (
+          {/* === Art Area — Matchup Showcase === */}
+          {(() => {
+            const teams = parseTeams(card.game);
+            return (
               <div
-                className="mt-2 text-[9px] font-black tracking-widest uppercase px-3 py-0.5 rounded-full border"
+                className="relative z-10 px-4 py-4 shrink-0 overflow-hidden"
                 style={{
-                  background: `${foil.accent}18`,
-                  borderColor: `${foil.accent}45`,
-                  color: foil.accent,
-                  textShadow: `0 0 8px ${foil.accent}60`,
+                  background: `linear-gradient(to bottom, ${foil.accent}14 0%, ${foil.accent}06 60%, transparent 100%)`,
+                  minHeight: "110px",
                 }}
               >
-                {eventLabel}
+                {/* Decorative watermark emoji */}
+                <div
+                  className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none select-none text-[72px] leading-none"
+                  style={{ opacity: 0.06, filter: isAPlus ? `drop-shadow(0 0 8px ${foil.accent})` : undefined }}
+                  aria-hidden="true"
+                >
+                  {sportIcon}
+                </div>
+
+                {teams.away ? (
+                  /* Two-team matchup layout */
+                  <div className="relative z-10 space-y-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[8px] font-bold uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}70` }}>Home</p>
+                        <p className="font-black text-[13px] leading-snug text-white/90 truncate">{teams.home}</p>
+                      </div>
+                      <div className="shrink-0 flex flex-col items-center gap-0.5">
+                        <span className="text-[9px] font-black tracking-widest text-white/25">VS</span>
+                        <div className="w-5 h-px" style={{ background: `${foil.accent}50` }} />
+                      </div>
+                      <div className="flex-1 min-w-0 text-right">
+                        <p className="text-[8px] font-bold uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}70` }}>Away</p>
+                        <p className="font-black text-[13px] leading-snug text-white/90 truncate">{teams.away}</p>
+                      </div>
+                    </div>
+
+                    {/* Power bar */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-white/25 shrink-0">Power</span>
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${card.confidence}%`,
+                            background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})`,
+                            boxShadow: `0 0 5px ${foil.accent}60`,
+                          }}
+                        />
+                      </div>
+                      <span
+                        className="text-[10px] font-black shrink-0 tabular-nums"
+                        style={{ color: foil.accent }}
+                      >{card.confidence}</span>
+                    </div>
+                  </div>
+                ) : (
+                  /* Single-name / no-opponent fallback */
+                  <div className="relative z-10 flex flex-col items-center justify-center h-full gap-2">
+                    <div
+                      className="text-5xl drop-shadow-lg"
+                      style={{
+                        filter: isAPlus ? `drop-shadow(0 0 12px ${foil.accent})` : undefined,
+                        animation: isAPlus ? "pulse 2s ease-in-out infinite" : undefined,
+                      }}
+                    >
+                      {sportIcon}
+                    </div>
+                    <div className="flex items-center gap-2 w-full">
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-white/25 shrink-0">Power</span>
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+                        <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}70, ${foil.accent})` }} />
+                      </div>
+                      <span className="text-[10px] font-black shrink-0" style={{ color: foil.accent }}>{card.confidence}</span>
+                    </div>
+                  </div>
+                )}
+
+                {eventLabel && (
+                  <div
+                    className="relative z-10 mt-2 inline-block text-[8px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border"
+                    style={{
+                      background: `${foil.accent}15`,
+                      borderColor: `${foil.accent}40`,
+                      color: foil.accent,
+                      textShadow: `0 0 8px ${foil.accent}55`,
+                    }}
+                  >
+                    {eventLabel}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            );
+          })()}
 
           {/* === Pick Info === */}
           <div className="relative z-10 flex-1 flex flex-col px-4 py-3 gap-2 min-h-0">
@@ -401,34 +475,34 @@ export function TradingCard({
             </div>
 
             {/* Stats bars */}
-            <div className="space-y-2 mt-auto">
+            <div className="space-y-2.5 mt-auto">
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-white/40 uppercase font-bold">Conviction</span>
-                  <span className="text-[9px] font-black text-white/80">{card.confidence}%</span>
+                  <span className="text-[8px] text-white/40 uppercase font-bold tracking-wider">Conviction</span>
+                  <span className="text-[10px] font-black text-white/90">{card.confidence}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
                   <div
                     className="h-full rounded-full"
                     style={{
                       width: `${card.confidence}%`,
-                      background: `linear-gradient(90deg, ${foil.accent}90, ${foil.accent})`,
-                      boxShadow: `0 0 6px ${foil.accent}60`,
+                      background: `linear-gradient(90deg, ${foil.accent}80, ${foil.accent})`,
+                      boxShadow: `0 0 7px ${foil.accent}65`,
                     }}
                   />
                 </div>
               </div>
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-[8px] text-white/40 uppercase font-bold">Sors EV™</span>
-                  <span className="text-[9px] font-black text-emerald-400">+{card.ev}%</span>
+                  <span className="text-[8px] text-white/40 uppercase font-bold tracking-wider">Sors EV™</span>
+                  <span className="text-[10px] font-black text-emerald-400">+{card.ev}%</span>
                 </div>
-                <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
+                <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
                   <div
                     className="h-full rounded-full bg-emerald-500"
                     style={{
                       width: `${Math.min(card.ev * 5, 100)}%`,
-                      boxShadow: "0 0 6px rgba(52,211,153,0.5)",
+                      boxShadow: "0 0 8px rgba(52,211,153,0.55)",
                     }}
                   />
                 </div>

@@ -27,7 +27,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   Activity, AlertTriangle, ArrowRight, BarChart3, Brain, Check, CheckCircle2,
-  ChevronDown, ChevronRight, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
+  ChevronDown, ChevronRight, ChevronUp, Clock, Cloud, Flame, Heart, Radio, RefreshCw,
   Shield, Sparkles, Star, Target, TrendingUp, TrendingDown, Zap, AlertCircle, Wifi, WifiOff,
   Trophy, DollarSign, Layers, Plus, Calendar, Info, Dice5, Shuffle, Smartphone,
   Loader2
@@ -949,131 +949,211 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
     );
   };
 
+  const GRADE_ACCENT: Record<string, string> = {
+    "A+": "#fbbf24", "A": "#34d399", "A-": "#34d399",
+    "B+": "#2dd4bf", "B": "#60a5fa", "B-": "#60a5fa",
+    "C+": "#facc15", "C": "#94a3b8",
+  };
+  const accent = GRADE_ACCENT[ticket.combinedGrade] || "#94a3b8";
+  const sportEmoji = SPORT_EMOJI[ticket.sport] || "🎯";
+  const topLegs = ticket.legs.slice(0, 9);
+  const hiddenLegCount = Math.max(0, ticket.legs.length - 9);
+
   return (
-    <Card className="overflow-hidden border-muted/60" data-testid={`card-matchup-${ticket.id}`}>
+    <Card className={`overflow-hidden border transition-shadow ${gradeBg(ticket.combinedGrade).includes("amber") ? "border-amber-500/30 shadow-[0_0_18px_rgba(251,191,36,0.12)]" : gradeBg(ticket.combinedGrade).includes("emerald") ? "border-emerald-500/25 shadow-[0_0_14px_rgba(52,211,153,0.10)]" : "border-muted/50"}`} data-testid={`card-matchup-${ticket.id}`}>
+
+      {/* Grade accent bar */}
+      <div className="h-[3px] w-full shrink-0" style={{ background: `linear-gradient(90deg, ${accent}60, ${accent}, ${accent}60)` }} />
+
       <CardContent className="p-0">
-        <button 
-          className="w-full text-left p-4 hover:bg-muted/30 transition-colors"
-          onClick={() => setExpanded(!expanded)}
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1 flex-1">
-              <div className="flex items-center gap-2">
-                <Badge className={sportColor(ticket.sport)}>{ticket.sport}</Badge>
-                <span className="font-bold text-sm truncate">{ticket.matchupGame}</span>
-              </div>
-              <p className="text-xs text-muted-foreground">{ticket.legCount} available legs · Win Prob: {ticket.winProbability}%</p>
+
+        {/* ── Header: sport + grade + leg count ── */}
+        <div className="flex items-center justify-between px-4 pt-3 pb-2.5 border-b border-muted/30">
+          <div className="flex items-center gap-2">
+            <span className="text-base leading-none">{sportEmoji}</span>
+            <Badge className={`text-[10px] font-black uppercase ${sportColor(ticket.sport)}`}>{ticket.sport}</Badge>
+            <span className="text-[10px] text-muted-foreground">{ticket.legCount} legs available</span>
+            {someInSlip && (
+              <Badge variant="secondary" className="text-[9px]">{inSlipCount} in slip</Badge>
+            )}
+          </div>
+          <Badge variant="outline" className={`font-black text-sm px-2.5 ${gradeBg(ticket.combinedGrade)}`}>
+            {ticket.combinedGrade}
+          </Badge>
+        </div>
+
+        {/* ── Teams VS Matchup ── */}
+        <div className="relative px-4 py-4 overflow-hidden">
+          <div
+            className="absolute inset-0 pointer-events-none select-none flex items-center justify-center opacity-[0.04] text-[80px]"
+            aria-hidden="true"
+          >{sportEmoji}</div>
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Home</p>
+              <p className="font-black text-sm leading-snug truncate">{ticket.homeTeam}</p>
             </div>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <Badge variant="outline" className={`font-mono font-bold ${gradeBg(ticket.combinedGrade)}`}>
-                {ticket.combinedGrade}
-              </Badge>
-              {expanded ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+            <div className="shrink-0 flex flex-col items-center gap-0.5 px-1">
+              <span className="text-[11px] font-black tracking-widest text-muted-foreground/50">VS</span>
+              <div className="w-6 h-px" style={{ background: `${accent}50` }} />
+            </div>
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground mb-0.5">Away</p>
+              <p className="font-black text-sm leading-snug truncate">{ticket.awayTeam}</p>
             </div>
           </div>
-          {someInSlip && (
-            <div className="mt-1.5">
-              <Badge variant="secondary" className="text-[10px]">{inSlipCount}/{selectedLegs.length} in slip</Badge>
-            </div>
-          )}
-        </button>
+        </div>
 
-        {expanded && (
-          <div className="px-4 pb-4 space-y-3 border-t pt-3">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-7 text-[10px] px-2"
-                  onClick={() => setSelectedLegIds(new Set(getTopLegIds(ticket.legs, 3)))}
-                  data-testid="button-best-3"
-                >
-                  Best 3
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-7 text-[10px] px-2"
-                  onClick={() => setSelectedLegIds(new Set(ticket.legs.map(l => l.id)))}
-                  data-testid="button-all"
-                >
-                  All
-                </Button>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="h-7 text-[10px] px-2"
-                  onClick={() => setSelectedLegIds(new Set())}
-                  data-testid="button-none"
-                >
-                  None
-                </Button>
-              </div>
-              <div className="text-[11px] font-medium text-muted-foreground">
-                {selectedLegIds.size} selected | Combined: {formatOdds(combinedAmerican)}
-              </div>
-            </div>
+        {/* ── Win Probability Bar ── */}
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Win Probability</span>
+            <span className="text-sm font-black" style={{ color: accent }}>{ticket.winProbability}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+            <div
+              className="h-full rounded-full"
+              style={{
+                width: `${ticket.winProbability}%`,
+                background: `linear-gradient(90deg, ${accent}70, ${accent})`,
+                boxShadow: `0 0 8px ${accent}50`,
+                transition: "width 0.6s ease",
+              }}
+            />
+          </div>
+        </div>
 
-            {hasCorrelatedLegs && (
-              <Badge variant="outline" className="w-full justify-center gap-1.5 py-1 bg-amber-500/10 border-amber-500/30 text-amber-600 dark:text-amber-400 text-[10px]">
-                <AlertTriangle className="w-3 h-3" />
-                Correlated legs — sportsbooks may limit parlay
-              </Badge>
+        {/* ── Top Leg Chips ── */}
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Select Picks</span>
+            <div className="flex items-center gap-1">
+              <button
+                className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded bg-muted/40 hover:bg-muted/60"
+                onClick={() => setSelectedLegIds(new Set(getTopLegIds(ticket.legs, 3)))}
+              >Best 3</button>
+              <button
+                className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded bg-muted/40 hover:bg-muted/60"
+                onClick={() => setSelectedLegIds(new Set(ticket.legs.map(l => l.id)))}
+              >All</button>
+              <button
+                className="text-[9px] font-bold text-muted-foreground hover:text-foreground transition-colors px-1.5 py-0.5 rounded bg-muted/40 hover:bg-muted/60"
+                onClick={() => setSelectedLegIds(new Set())}
+              >None</button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {topLegs.map(leg => {
+              const isSelected = selectedLegIds.has(leg.id);
+              const inSlip = legs.some(sl => sl.id === `matchup-${leg.pickId}`);
+              return (
+                <button
+                  key={leg.id}
+                  onClick={() => {
+                    const next = new Set(selectedLegIds);
+                    if (isSelected) next.delete(leg.id);
+                    else next.add(leg.id);
+                    setSelectedLegIds(next);
+                  }}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold transition-all border ${
+                    inSlip
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
+                      : isSelected
+                      ? "border-primary/40 text-primary-foreground"
+                      : "bg-muted/40 border-muted/60 text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
+                  style={isSelected && !inSlip ? { background: `${accent}18`, borderColor: `${accent}50`, color: accent } : {}}
+                  data-testid={`leg-chip-${leg.id}`}
+                >
+                  {isSelected && !inSlip && <Check className="w-2.5 h-2.5 stroke-[3px] shrink-0" />}
+                  {inSlip && <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />}
+                  <span className="truncate max-w-[110px]">{leg.outcome}</span>
+                  <span className="font-mono opacity-60 shrink-0 ml-0.5">{formatOdds(leg.americanOdds)}</span>
+                </button>
+              );
+            })}
+            {hiddenLegCount > 0 && (
+              <button
+                onClick={() => setExpanded(true)}
+                className="flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-bold bg-muted/30 border border-muted/50 text-muted-foreground hover:bg-muted/50 transition-colors"
+              >
+                +{hiddenLegCount} more
+              </button>
             )}
+          </div>
+        </div>
 
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <div className="p-1.5 rounded-md bg-muted/50">
-                <p className="text-[9px] text-muted-foreground uppercase">Odds</p>
-                <p className="font-mono font-bold text-xs">{formatOdds(ticket.americanOdds)}</p>
-              </div>
-              <div className="p-1.5 rounded-md bg-muted/50">
-                <p className="text-[9px] text-muted-foreground uppercase">Stake</p>
-                <p className="font-mono font-bold text-xs">${ticket.recommendedStake}</p>
-              </div>
-              <div className="p-1.5 rounded-md bg-emerald-500/10">
-                <p className="text-[9px] text-muted-foreground uppercase">Payout</p>
-                <p className="font-mono font-bold text-xs text-emerald-500">${ticket.potentialPayout.toLocaleString()}</p>
-              </div>
-              <div className="p-1.5 rounded-md bg-muted/50">
-                <p className="text-[9px] text-muted-foreground uppercase">Win %</p>
-                <p className="font-mono font-bold text-xs">{ticket.winProbability}%</p>
-              </div>
+        {/* ── Stats Row ── */}
+        <div className="grid grid-cols-4 border-t border-b border-muted/25">
+          {[
+            { label: "Odds", value: formatOdds(combinedAmerican) },
+            { label: "Stake", value: `$${ticket.recommendedStake}` },
+            { label: "Payout", value: `$${(ticket.potentialPayout ?? 0).toLocaleString()}`, green: true },
+            { label: "Win %", value: `${ticket.winProbability}%` },
+          ].map(({ label, value, green }) => (
+            <div key={label} className="text-center py-2.5 px-1 border-r last:border-r-0 border-muted/25">
+              <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold">{label}</p>
+              <p className={`text-xs font-black mt-0.5 ${green ? "text-emerald-400" : ""}`}>{value}</p>
             </div>
+          ))}
+        </div>
 
-            <div className="space-y-3">
+        {/* ── Correlation Warning ── */}
+        {hasCorrelatedLegs && (
+          <div className="mx-4 mt-3 px-2.5 py-1.5 rounded-md bg-amber-500/8 border border-amber-500/20 flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />
+            <p className="text-[10px] text-amber-600 dark:text-amber-400">Correlated legs — sportsbooks may limit parlay</p>
+          </div>
+        )}
+
+        {/* ── Actions ── */}
+        <div className="p-4 flex items-center gap-2">
+          <Button
+            onClick={handleAddSelected}
+            disabled={allInSlip || selectedLegIds.size === 0}
+            className="flex-1 gap-1.5 font-black text-xs h-9"
+            size="sm"
+            variant={allInSlip ? "secondary" : "default"}
+            data-testid={`button-add-matchup-${ticket.id}`}
+          >
+            {allInSlip
+              ? <><Check className="w-3.5 h-3.5" /> All in Slip</>
+              : <><Plus className="w-3.5 h-3.5" /> Add {selectedLegIds.size || ""} to Slip</>
+            }
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-9 px-3 gap-1 text-[11px] font-bold"
+            onClick={() => setExpanded(!expanded)}
+            data-testid={`button-expand-matchup-${ticket.id}`}
+          >
+            {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {expanded ? "Less" : "Full Breakdown"}
+          </Button>
+        </div>
+
+        {/* ── Expanded full leg list ── */}
+        {expanded && (
+          <div className="px-4 pb-4 pt-0 space-y-3 border-t border-muted/25">
+            {ticket.reasoning && (
+              <div className="mt-3 px-2.5 py-1.5 rounded-md bg-primary/5 border border-primary/10">
+                <div className="flex items-start gap-1.5">
+                  <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-foreground/80 leading-relaxed">{ticket.reasoning}</p>
+                </div>
+              </div>
+            )}
+            <div className="space-y-3 mt-2">
               {renderLegGroup("Spreads", ticket.marketBreakdown?.spreads || [])}
               {renderLegGroup("Totals", ticket.marketBreakdown?.totals || [])}
               {renderLegGroup("Moneylines", ticket.marketBreakdown?.moneylines || [])}
               {renderLegGroup("Player Props", ticket.marketBreakdown?.playerProps || [])}
               {renderLegGroup("Other Markets", ticket.marketBreakdown?.other || [])}
             </div>
-
-            <div className="px-2.5 py-1.5 rounded-md bg-primary/5 border border-primary/10">
-              <div className="flex items-start gap-1.5">
-                <Brain className="w-3 h-3 text-primary mt-0.5 shrink-0" />
-                <p className="text-[11px] text-foreground/80 leading-relaxed">
-                  {ticket.reasoning}
-                </p>
-              </div>
-            </div>
-
-            <Button
-              onClick={handleAddSelected}
-              disabled={allInSlip || selectedLegIds.size === 0}
-              className="w-full gap-2"
-              size="sm"
-              variant={allInSlip ? "secondary" : "default"}
-              data-testid={`button-add-matchup-${ticket.id}`}
-            >
-              {allInSlip ? (
-                <><Check className="w-3.5 h-3.5" /> Selected Legs in Slip</>
-              ) : (
-                <><Plus className="w-3.5 h-3.5" /> Add {selectedLegIds.size} Selected Legs to Slip</>
-              )}
-            </Button>
           </div>
         )}
+
       </CardContent>
     </Card>
   );
