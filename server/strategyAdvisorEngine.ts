@@ -194,6 +194,48 @@ const STRATEGY_TEMPLATES: StrategyTemplate[] = [
     example: "2-leg parlay: BOS ML + OKC ML at +180, then hedge the weaker leg with a single bet",
     bestFor: "Conservative bettors who prioritize protecting their bankroll",
     avoid: "Over-hedging — it eats into your profits. Only hedge the truly risky leg"
+  },
+  {
+    id: "vegas_prediction",
+    name: "Vegas Prediction™",
+    description: "Mirrors exactly how Las Vegas sportsbooks position themselves against the betting public. Books profit consistently by siding AGAINST the crowd — especially when the line moves opposite to where the public money is (Reverse Line Movement). That's the Vegas tell: sharp professional money is on the other side. This strategy only plays picks where sharp money, reverse line movement, or a strong model edge confirms the position.",
+    riskLevel: "medium",
+    expectedLegs: [2, 3, 4],
+    targetOdds: "+250 to +650",
+    winRate: "35-52%",
+    idealBetTypes: ["spread", "moneyline", "total"],
+    approach: [
+      "Target picks with reverse line movement — the line moved AGAINST public money direction",
+      "Follow sharp money signals: 55%+ of professional action on this side",
+      "Fade consensus public favorites — when 65%+ of bets are on one team, look the other way",
+      "Steam moves (rapid professional line movement) are the strongest confirmation signal",
+      "When sharp data is unavailable, require EV ≥5% and confidence ≥62% — the model's edge IS the sharp signal",
+      "Cap odds at +250 — Vegas doesn't chase uncapped long shots, neither should you"
+    ],
+    example: "3-leg parlay: PHI +3.5 (RLM detected, 72% sharp) + DEN ML (sharp 68%, public 29%) + Game Under 217 (steam move) = ~+480",
+    bestFor: "Disciplined bettors who understand market dynamics and want to bet like the house bets",
+    avoid: "Chasing heavy public favorites — that's the exact trap Vegas profits from"
+  },
+  {
+    id: "public_fade",
+    name: "Public Fade™",
+    description: "The purest form of contrarian betting. Sportsbooks consistently profit from public bias — primetime teams, big-market clubs, and media darlings are systematically overpriced because casual bettors stack one side. This strategy exists entirely to exploit that inefficiency: only bet when the crowd is on the other side or the model spots a real edge the public is missing.",
+    riskLevel: "medium",
+    expectedLegs: [2, 3, 4],
+    targetOdds: "+300 to +750",
+    winRate: "30-48%",
+    idealBetTypes: ["spread", "moneyline", "total"],
+    approach: [
+      "Only play picks where public money is ≤40% on this side (you're betting against the majority)",
+      "Reverse line movement is an automatic green light — books are protecting against public exposure",
+      "Target primetime and nationally-televised games — public bias is highest there",
+      "Look for big-market vs. small-market matchups where the name brand gets overvalued",
+      "When public data is unavailable, require EV ≥7% — the model must clearly see what the crowd can't",
+      "Avoid betting with 65%+ public consensus — you'd just be joining the losing side"
+    ],
+    example: "3-leg parlay: MEM ML (27% public) + MIN +6.5 (33% public, line moved against Lakers money) + SAC/POR Under 229.5 (38% public) = ~+580",
+    bestFor: "Contrarian thinkers who are comfortable going against the grain and have the discipline to stick with it",
+    avoid: "Popular games where public money has flooded one side — line shopping is already priced in"
   }
 ];
 
@@ -438,7 +480,8 @@ export function getStrategyTemplates(): StrategyTemplate[] {
 }
 
 export function getStrategyById(id: string): StrategyTemplate | undefined {
-  return STRATEGY_TEMPLATES.find(t => t.id === id);
+  const lookupId = id === "vegas_signal" ? "vegas_prediction" : id;
+  return STRATEGY_TEMPLATES.find(t => t.id === lookupId);
 }
 
 export async function analyzeTicket(legs: AnalysisLeg[]): Promise<TicketAnalysis> {

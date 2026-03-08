@@ -25,6 +25,10 @@ export interface ParlaySlipLeg extends ParlayLeg {
     convergenceScore: number;
   };
   factors?: { name: string; impact: number; direction: string }[];
+  sharpMoneyPct?: number;
+  publicMoneyPct?: number;
+  reverseLineMove?: boolean;
+  steamMove?: boolean;
 }
 
 export interface SlipData {

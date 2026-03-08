@@ -1049,7 +1049,18 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
       .map((leg, idx) => {
         const violation = checkPickAgainstStrategy(
           activeStrategy,
-          { market: leg.market, americanOdds: leg.americanOdds ?? leg.odds, evPercent: leg.evPercent, confidence: leg.confidence, grade: leg.grade },
+          {
+            market: leg.market,
+            americanOdds: leg.americanOdds ?? leg.odds,
+            evPercent: leg.evPercent,
+            confidence: leg.confidence,
+            grade: leg.grade,
+            sport: leg.sport,
+            sharpMoneyPct: leg.sharpMoneyPct,
+            publicMoneyPct: leg.publicMoneyPct,
+            reverseLineMove: leg.reverseLineMove,
+            steamMove: leg.steamMove,
+          },
           idx
         );
         return violation ? { leg, violation } : null;
@@ -1562,7 +1573,22 @@ function ConflictBanner({ legs, strategy }: { legs: ParlaySlipLeg[]; strategy: B
     return legs
       .map((leg) => ({
         leg,
-        violation: checkPickAgainstStrategy(strategy, leg, legs.length),
+        violation: checkPickAgainstStrategy(
+          strategy,
+          {
+            market: leg.market,
+            americanOdds: leg.americanOdds ?? leg.odds,
+            evPercent: leg.evPercent,
+            confidence: leg.confidence,
+            grade: leg.grade,
+            sport: leg.sport,
+            sharpMoneyPct: leg.sharpMoneyPct,
+            publicMoneyPct: leg.publicMoneyPct,
+            reverseLineMove: leg.reverseLineMove,
+            steamMove: leg.steamMove,
+          },
+          legs.length
+        ),
       }))
       .filter((v) => v.violation !== null);
   }, [legs, strategy]);

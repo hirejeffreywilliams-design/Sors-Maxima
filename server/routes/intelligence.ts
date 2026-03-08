@@ -530,11 +530,18 @@ export function registerIntelligenceRoutes(app: Express): void {
         }
       }
 
-      if (strategyId === "vegas_signal") {
+      if (strategyId === "vegas_prediction" || strategyId === "vegas_signal" || strategyId === "public_fade") {
         try {
           const vegasInsights = await getVegasInsights();
-          // Cross-reference logic: potentially boost picks that align with Vegas insights
-          // For now, we'll just ensure we have vegas predictions if available
+          if (vegasInsights) {
+            const sharpPct = vegasInsights.sharpSidePercentage ?? 0;
+            if (sharpPct > 0) {
+              allPicks = allPicks.map(p => ({
+                ...p,
+                ev: strategyId === "vegas_prediction" ? Math.max(p.ev, p.ev + (sharpPct > 55 ? 2 : 0)) : p.ev
+              }));
+            }
+          }
         } catch (err) {
           console.error("Vegas insights error in auto-picks:", err);
         }
@@ -555,9 +562,10 @@ export function registerIntelligenceRoutes(app: Express): void {
         if (pick.confidence < (s.minConfidence || 50)) return false;
         if (pick.ev < (s.minEV || 0)) return false;
 
-        // Custom rules for T001 strategies
-        if (strategyId === "vegas_signal") {
-          if (pick.confidence < 70 || pick.ev < 8) return false;
+        if (strategyId === "vegas_prediction" || strategyId === "vegas_signal") {
+          if (pick.ev < 5 || pick.confidence < 62) return false;
+        } else if (strategyId === "public_fade") {
+          if (pick.ev < 7) return false;
         } else if (strategyId === "nba_back_to_back") {
           if (pick.sport !== "NBA" || pick.betType !== "spread" || pick.confidence < 55) return false;
         } else if (strategyId === "nfl_situational") {

@@ -11,6 +11,10 @@ export interface StrategyCheckLeg {
   confidence?: number;
   grade?: string;
   sport?: string;
+  sharpMoneyPct?: number;
+  publicMoneyPct?: number;
+  reverseLineMove?: boolean;
+  steamMove?: boolean;
 }
 
 export interface BettingStrategy {
@@ -164,19 +168,108 @@ export const BETTING_STRATEGIES: BettingStrategy[] = [
     },
   },
   {
-    id: "vegas_signal",
-    name: "Vegas Signal Mode",
-    tagline: "High-confidence EV+ spikes",
-    description: "Identifies plays where model confidence and expected value both hit elite thresholds. Targets the 'sharpest' edges on the board.",
-    icon: "⚡",
-    color: "text-purple-500",
+    id: "vegas_prediction",
+    name: "Vegas Prediction™",
+    tagline: "Bet like the house bets",
+    description: "Mirrors exactly how Las Vegas sportsbooks position themselves against the betting public. Books consistently profit by taking the side that's light on public action — especially when the line moves against the crowd (Reverse Line Movement). When 65%+ of bets are on one team but the line moves the other way, sharp professional money is driving it. That's the Vegas tell. This strategy only accepts picks confirmed by sharp money flow, reverse line movement, or a strong model edge over the market.",
+    icon: "🎰",
+    color: "text-amber-500",
     tier: "edge",
-    rules: ["Confidence must be 70% or higher", "EV must be 8% or higher"],
+    rules: [
+      "Sharp money % must be ≥55% — OR — reverse line movement detected — OR — steam move confirmed",
+      "When sharp data unavailable: EV ≥5% AND confidence ≥62% (model's edge over market serves as proxy)",
+      "Flags picks where 70%+ public money is stacked without sharp backing",
+      "Max odds +250 — Vegas doesn't take uncapped long shots without purpose",
+    ],
     check: (leg) => {
-      const conf = leg.confidence ?? 0;
       const ev = leg.evPercent ?? 0;
-      if (conf < 70) return { reason: `Confidence is ${conf}% — Vegas Signal requires 70%+`, severity: "strong" };
-      if (ev < 8) return { reason: `EV is ${ev.toFixed(1)}% — Vegas Signal requires 8%+`, severity: "strong" };
+      const conf = leg.confidence ?? 0;
+      const sharp = leg.sharpMoneyPct;
+      const pub = leg.publicMoneyPct;
+      const rlm = leg.reverseLineMove ?? false;
+      const steam = leg.steamMove ?? false;
+      const o = getOdds(leg);
+
+      if (o > 250) {
+        return { reason: `Odds of +${o} — Vegas Prediction caps at +250 (books don't chase uncapped long shots)`, severity: "warn" };
+      }
+
+      if (sharp !== undefined && pub !== undefined) {
+        if (pub > 70 && sharp < 45 && !rlm && !steam) {
+          return {
+            reason: `${pub}% public money on this side with only ${sharp}% sharp backing — Vegas would fade this crowd favorite`,
+            severity: "strong",
+          };
+        }
+        if (sharp >= 55 || rlm || steam) return null;
+        if (pub > 65 && !rlm) {
+          return {
+            reason: `Heavy public action (${pub}%) without sharp confirmation — not a Vegas-style play`,
+            severity: "warn",
+          };
+        }
+        return null;
+      }
+
+      if (rlm || steam) return null;
+
+      if (ev < 5) {
+        return {
+          reason: `EV ${ev > 0 ? "+" : ""}${ev.toFixed(1)}% is below the 5% threshold — Vegas Prediction needs a real model edge over the market`,
+          severity: "strong",
+        };
+      }
+      if (conf < 62) {
+        return {
+          reason: `Confidence ${conf}% is below 62% — Vegas Prediction requires the model to strongly favor this side`,
+          severity: "warn",
+        };
+      }
+
+      return null;
+    },
+  },
+  {
+    id: "public_fade",
+    name: "Public Fade™",
+    tagline: "Bet against the crowd, every time",
+    description: "The purest form of contrarian betting. The public loses long-term because books set lines to exploit popular bias — favorites, primetime teams, and big-market clubs get inflated. This strategy only takes picks where the public is on the other side, or where the model finds a meaningful edge that the crowd is missing.",
+    icon: "🔄",
+    color: "text-rose-500",
+    tier: "edge",
+    rules: [
+      "Public money % must be ≤40% on this pick — OR — reverse line movement detected",
+      "When public data unavailable: EV ≥7% required (market is undervaluing this side)",
+      "Automatically blocks any pick where 65%+ of public bets are on the same side as you",
+    ],
+    check: (leg) => {
+      const ev = leg.evPercent ?? 0;
+      const pub = leg.publicMoneyPct;
+      const rlm = leg.reverseLineMove ?? false;
+
+      if (rlm) return null;
+
+      if (pub !== undefined) {
+        if (pub > 65) {
+          return {
+            reason: `${pub}% of bets are on this side — Public Fade strategy only plays the side the public is NOT piling onto`,
+            severity: "strong",
+          };
+        }
+        if (pub <= 40) return null;
+        return {
+          reason: `${pub}% public money on this side — ideally ≤40% for a true contrarian play`,
+          severity: "warn",
+        };
+      }
+
+      if (ev < 7) {
+        return {
+          reason: `EV ${ev > 0 ? "+" : ""}${ev.toFixed(1)}% — Public Fade needs ≥7% edge when public data isn't available (model must clearly see something the crowd doesn't)`,
+          severity: "strong",
+        };
+      }
+
       return null;
     },
   },
@@ -274,7 +367,8 @@ export const BETTING_STRATEGIES: BettingStrategy[] = [
 ];
 
 export function getStrategy(id: string): BettingStrategy | undefined {
-  return BETTING_STRATEGIES.find(s => s.id === id);
+  const lookupId = id === "vegas_signal" ? "vegas_prediction" : id;
+  return BETTING_STRATEGIES.find(s => s.id === lookupId);
 }
 
 export function checkPickAgainstStrategy(
