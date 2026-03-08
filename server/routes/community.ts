@@ -21,6 +21,13 @@ let notificationIdCounter = 1;
 const recentNotifDescriptions = new Map<string, number>();
 const NOTIF_DEDUP_WINDOW = 15 * 60 * 1000;
 
+export function injectAdminBroadcast(notif: any): void {
+  serverNotifications.unshift(notif);
+  while (serverNotifications.length > 60) {
+    serverNotifications.pop();
+  }
+}
+
 async function generateRealNotification(): Promise<any | null> {
   try {
     const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");

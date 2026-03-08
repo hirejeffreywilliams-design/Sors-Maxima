@@ -327,6 +327,114 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
     return res.status(400).json({ error: "Failed to unban user" });
   });
 
+  // Admin: Platform Broadcast — push notification to all users / specific tier / specific user
+  app.post("/api/admin/broadcast", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { title, message, type = "info", severity = "info", target = "all" } = req.body;
+      if (!title || !message) {
+        return res.status(400).json({ error: "Title and message are required" });
+      }
+      const { injectAdminBroadcast } = await import("./community");
+      const notif = {
+        id: `admin-broadcast-${Date.now()}`,
+        type,
+        title: String(title).slice(0, 120),
+        description: String(message).slice(0, 500),
+        timestamp: new Date().toISOString(),
+        read: false,
+        badge: "ADMIN",
+        badgeColor: severity === "urgent" ? "red" : severity === "warning" ? "orange" : "blue",
+        isAdminBroadcast: true,
+        target,
+      };
+      injectAdminBroadcast(notif);
+      return res.json({ success: true, notificationId: notif.id });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "Broadcast failed" });
+    }
+  });
+
+  // Admin: Get detailed user profile by ID
+  app.get("/api/admin/users/:id/profile", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.params.id);
+      const { getUserById } = await import("../dbAuthService");
+      const user = await getUserById(userId);
+      if (!user) return res.status(404).json({ error: "User not found" });
+      const recentPicksResult = await db.execute(sql`
+        SELECT sport, pick, bet_type, odds_at_pick, stake, status, created_at
+        FROM user_picks WHERE username = ${user.username}
+        ORDER BY created_at DESC LIMIT 10
+      `).catch(() => ({ rows: [] }));
+      const onboardingResult = await db.execute(sql`
+        SELECT sports, experience, bankroll_size, onboarding_completed, completed_at
+        FROM user_onboarding WHERE user_id = ${userId} LIMIT 1
+      `).catch(() => ({ rows: [] }));
+      const { passwordHash: _pw, ...safeUser } = user as any;
+      return res.json({
+        user: safeUser,
+        recentPicks: (recentPicksResult as any).rows || [],
+        onboarding: ((onboardingResult as any).rows || [])[0] || null,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "Failed to fetch profile" });
+    }
+  });
+
+  // Admin: Force change a user's tier (bypasses Stripe — admin override)
+  app.post("/api/admin/users/:id/change-tier", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const userId = Number(req.params.id);
+      const { tier } = req.body;
+      if (!tier || !['free', 'pro', 'elite', 'whale'].includes(tier)) {
+        return res.status(400).json({ error: "Valid tier required: free, pro, elite, whale" });
+      }
+      const newStatus = tier === 'free' ? 'none' : 'active';
+      await db.execute(sql`
+        UPDATE users SET subscription_tier = ${tier}, subscription_status = ${newStatus}
+        WHERE id = ${userId}
+      `);
+      return res.json({ success: true, userId, newTier: tier });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "Tier change failed" });
+    }
+  });
+
+  // Admin: Emergency — force picks cache clear + regeneration
+  app.post("/api/admin/emergency/force-refresh-picks", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { clearAllPredictionCaches, forcePredictionCycleNow } = await import("../precomputedPredictionsEngine");
+      const cleared = clearAllPredictionCaches();
+      forcePredictionCycleNow().catch(() => {});
+      return res.json({ success: true, clearedCount: cleared, message: `Cleared ${cleared} cached picks — fresh generation started` });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "Force refresh failed" });
+    }
+  });
+
+  // Admin: Emergency — broadcast a custom SSE event to all connected clients
+  app.post("/api/admin/emergency/force-sse-push", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { broadcastEvent } = await import("../sseManager");
+      const { eventType = "admin-alert", payload = {} } = req.body;
+      broadcastEvent(String(eventType), { ...payload, adminInitiated: true, timestamp: new Date().toISOString() });
+      return res.json({ success: true, eventType });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "SSE push failed" });
+    }
+  });
+
+  // Admin: Emergency — clear intelligence hub cache
+  app.post("/api/admin/emergency/clear-intelligence-cache", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { refreshMarketSnapshot } = await import("../marketSnapshotEngine").catch(() => ({ refreshMarketSnapshot: null }));
+      if (refreshMarketSnapshot) await (refreshMarketSnapshot as any)();
+      return res.json({ success: true, message: "Intelligence cache cleared and refresh triggered" });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || "Cache clear failed" });
+    }
+  });
+
   // Admin: Get error logs
   app.get("/api/admin/error-logs", requireAdmin, (req, res) => {
     const { level, limit, since } = req.query;

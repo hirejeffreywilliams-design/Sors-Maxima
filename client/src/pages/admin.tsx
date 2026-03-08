@@ -66,6 +66,13 @@ import {
   GitBranch,
   UserPlus,
   Trophy,
+  Zap,
+  Send,
+  UserCog,
+  Radio,
+  Bell,
+  Calendar,
+  Clock,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -173,6 +180,15 @@ export default function AdminDashboard() {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [rejectingApp, setRejectingApp] = useState<Application | null>(null);
   const [rejectNotes, setRejectNotes] = useState("");
+  const [broadcastTitle, setBroadcastTitle] = useState("");
+  const [broadcastMessage, setBroadcastMessage] = useState("");
+  const [broadcastTarget, setBroadcastTarget] = useState<"all" | "pro" | "elite" | "whale">("all");
+  const [broadcastSeverity, setBroadcastSeverity] = useState<"info" | "warning" | "urgent">("info");
+  const [userDetailOpen, setUserDetailOpen] = useState(false);
+  const [detailUserId, setDetailUserId] = useState<string | null>(null);
+  const [changeTierDialogOpen, setChangeTierDialogOpen] = useState(false);
+  const [changeTierUser, setChangeTierUser] = useState<User | null>(null);
+  const [newTierValue, setNewTierValue] = useState<'free' | 'pro' | 'elite' | 'whale'>('free');
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: snapshot, isLoading: snapshotLoading } = useQuery<any>({
@@ -360,6 +376,74 @@ export default function AdminDashboard() {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/error-stats'] });
       toast({ title: `Test error created: ${data.errorId}` });
     }
+  });
+
+  const broadcastMutation = useMutation({
+    mutationFn: async (payload: { title: string; message: string; target: string; severity: string }) => {
+      const response = await apiRequest('POST', '/api/admin/broadcast', payload);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Broadcast sent — notification pushed to all connected users" });
+      setBroadcastTitle("");
+      setBroadcastMessage("");
+      setBroadcastTarget("all");
+      setBroadcastSeverity("info");
+    },
+    onError: () => toast({ title: "Broadcast failed", variant: "destructive" }),
+  });
+
+  const changeTierMutation = useMutation({
+    mutationFn: async ({ userId, tier }: { userId: string; tier: string }) => {
+      const response = await apiRequest('POST', `/api/admin/users/${userId}/change-tier`, { tier });
+      return response.json();
+    },
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/subscription-stats'] });
+      toast({ title: `Tier changed to ${vars.tier.toUpperCase()} successfully` });
+      setChangeTierDialogOpen(false);
+      setChangeTierUser(null);
+    },
+    onError: () => toast({ title: "Tier change failed", variant: "destructive" }),
+  });
+
+  const emergencyRefreshMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/emergency/force-refresh-picks', {});
+      return response.json();
+    },
+    onSuccess: (data) => toast({ title: data.message || "Picks cache cleared — fresh generation started" }),
+    onError: () => toast({ title: "Force refresh failed", variant: "destructive" }),
+  });
+
+  const emergencyForceSseMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/emergency/force-sse-push', { eventType: "intelligence-update", payload: { forced: true } });
+      return response.json();
+    },
+    onSuccess: () => toast({ title: "SSE event pushed to all connected clients" }),
+    onError: () => toast({ title: "SSE push failed", variant: "destructive" }),
+  });
+
+  const emergencyClearCacheMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/emergency/clear-intelligence-cache', {});
+      return response.json();
+    },
+    onSuccess: () => toast({ title: "Intelligence cache cleared and refresh triggered" }),
+    onError: () => toast({ title: "Cache clear failed", variant: "destructive" }),
+  });
+
+  const { data: userProfile, isLoading: profileLoading } = useQuery<any>({
+    queryKey: ['/api/admin/users', detailUserId, 'profile'],
+    queryFn: async () => {
+      if (!detailUserId) return null;
+      const res = await fetch(`/api/admin/users/${detailUserId}/profile`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Failed to fetch profile');
+      return res.json();
+    },
+    enabled: !!detailUserId && userDetailOpen,
   });
 
   const filteredUsers = users.filter(user => 
@@ -771,6 +855,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="picks" data-testid="tab-picks">
                 <Target className="h-3.5 w-3.5 mr-1" />Picks
               </TabsTrigger>
+              <TabsTrigger value="broadcast" data-testid="tab-broadcast">
+                <Bell className="h-3.5 w-3.5 mr-1" />Broadcast
+              </TabsTrigger>
             </TabsList>
 
             {/* ── Overview ── */}
@@ -841,6 +928,55 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Emergency Controls */}
+              <Card className="border-orange-500/30 bg-orange-500/5">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-orange-500" />
+                    Emergency Controls
+                    <Badge variant="outline" className="ml-auto text-[10px] border-orange-500/40 text-orange-400">One-Click Actions</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-xs">Immediate platform interventions — use when standard tools are too slow</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 border-orange-500/30 text-orange-400 justify-start"
+                      onClick={() => emergencyRefreshMutation.mutate()}
+                      disabled={emergencyRefreshMutation.isPending}
+                      data-testid="button-emergency-refresh-picks"
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${emergencyRefreshMutation.isPending ? 'animate-spin' : ''}`} />
+                      {emergencyRefreshMutation.isPending ? "Refreshing…" : "Force Refresh Picks"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 border-blue-500/30 text-blue-400 justify-start"
+                      onClick={() => emergencyForceSseMutation.mutate()}
+                      disabled={emergencyForceSseMutation.isPending}
+                      data-testid="button-emergency-sse"
+                    >
+                      <Radio className={`h-3.5 w-3.5 ${emergencyForceSseMutation.isPending ? 'animate-pulse' : ''}`} />
+                      {emergencyForceSseMutation.isPending ? "Pushing…" : "Push SSE to All Clients"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-2 border-purple-500/30 text-purple-400 justify-start"
+                      onClick={() => emergencyClearCacheMutation.mutate()}
+                      disabled={emergencyClearCacheMutation.isPending}
+                      data-testid="button-emergency-clear-cache"
+                    >
+                      <Database className={`h-3.5 w-3.5 ${emergencyClearCacheMutation.isPending ? 'animate-spin' : ''}`} />
+                      {emergencyClearCacheMutation.isPending ? "Clearing…" : "Clear Intelligence Cache"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Settlement */}
               <Card>
@@ -1115,6 +1251,24 @@ export default function AdminDashboard() {
                             </TableCell>
                             <TableCell className="text-right">
                               <div className="flex items-center justify-end gap-1 flex-wrap">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 text-xs"
+                                  onClick={() => { setDetailUserId(String(user.id)); setUserDetailOpen(true); }}
+                                  data-testid={`button-view-${user.id}`}
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-xs text-blue-600 border-blue-200"
+                                  onClick={() => { setChangeTierUser(user); setNewTierValue((user as any).subscriptionTier || 'free'); setChangeTierDialogOpen(true); }}
+                                  data-testid={`button-change-tier-${user.id}`}
+                                >
+                                  <UserCog className="h-3 w-3 mr-1" />Tier
+                                </Button>
                                 {!user.isBanned ? (
                                   <Button
                                     size="sm"
@@ -1245,6 +1399,119 @@ export default function AdminDashboard() {
             {/* ── Picks ── */}
             <TabsContent value="picks" className="space-y-4">
               <PickAccuracyPanel />
+            </TabsContent>
+
+            {/* ── Broadcast ── */}
+            <TabsContent value="broadcast" className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold flex items-center gap-2"><Bell className="h-5 w-5 text-primary" />Platform Broadcast</h2>
+                  <p className="text-xs text-muted-foreground mt-0.5">Push an announcement to users — appears immediately in their notification panel</p>
+                </div>
+              </div>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Send className="h-4 w-4" />
+                    Compose Announcement
+                  </CardTitle>
+                  <CardDescription className="text-xs">Message appears in the notification feed for all targeted users</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Title <span className="text-muted-foreground font-normal">(max 120 chars)</span></label>
+                    <Input
+                      placeholder="e.g. Scheduled Maintenance Tonight at 11 PM"
+                      value={broadcastTitle}
+                      onChange={(e) => setBroadcastTitle(e.target.value.slice(0, 120))}
+                      data-testid="input-broadcast-title"
+                    />
+                    <p className="text-[11px] text-muted-foreground text-right">{broadcastTitle.length}/120</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Message <span className="text-muted-foreground font-normal">(max 500 chars)</span></label>
+                    <Textarea
+                      placeholder="Describe what users need to know. Be clear and specific."
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value.slice(0, 500))}
+                      rows={3}
+                      data-testid="input-broadcast-message"
+                    />
+                    <p className="text-[11px] text-muted-foreground text-right">{broadcastMessage.length}/500</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">Target Audience</label>
+                      <Select value={broadcastTarget} onValueChange={(v: any) => setBroadcastTarget(v)}>
+                        <SelectTrigger data-testid="select-broadcast-target">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Everyone</SelectItem>
+                          <SelectItem value="pro">Sharp members only</SelectItem>
+                          <SelectItem value="elite">Edge members only</SelectItem>
+                          <SelectItem value="whale">Max members only</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium">Severity</label>
+                      <Select value={broadcastSeverity} onValueChange={(v: any) => setBroadcastSeverity(v)}>
+                        <SelectTrigger data-testid="select-broadcast-severity">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="info">Info — blue badge</SelectItem>
+                          <SelectItem value="warning">Warning — orange badge</SelectItem>
+                          <SelectItem value="urgent">Urgent — red badge</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {broadcastTitle && broadcastMessage && (
+                    <div className={`rounded-md border p-3 space-y-1 text-sm ${broadcastSeverity === 'urgent' ? 'border-red-500/30 bg-red-500/5' : broadcastSeverity === 'warning' ? 'border-orange-500/30 bg-orange-500/5' : 'border-blue-500/30 bg-blue-500/5'}`}>
+                      <p className="text-[10px] font-bold uppercase text-muted-foreground">Preview</p>
+                      <div className="flex items-start gap-2">
+                        <Badge className={`text-[10px] shrink-0 ${broadcastSeverity === 'urgent' ? 'bg-red-600' : broadcastSeverity === 'warning' ? 'bg-orange-600' : 'bg-blue-600'} text-white`}>ADMIN</Badge>
+                        <div>
+                          <p className="font-medium text-sm">{broadcastTitle}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">{broadcastMessage}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">→ {broadcastTarget === 'all' ? 'All users' : broadcastTarget === 'pro' ? 'Sharp members' : broadcastTarget === 'elite' ? 'Edge members' : 'Max members'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <Button
+                    onClick={() => broadcastMutation.mutate({ title: broadcastTitle, message: broadcastMessage, target: broadcastTarget, severity: broadcastSeverity })}
+                    disabled={!broadcastTitle || !broadcastMessage || broadcastMutation.isPending}
+                    className="w-full gap-2"
+                    data-testid="button-send-broadcast"
+                  >
+                    <Send className="h-4 w-4" />
+                    {broadcastMutation.isPending ? "Sending…" : "Send Broadcast"}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Bell className="h-4 w-4 text-muted-foreground" />
+                    Broadcast Tips
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-xs text-muted-foreground">
+                    <li className="flex items-start gap-2"><CheckCircle className="h-3.5 w-3.5 text-emerald-500 mt-0.5 shrink-0" />Use <strong className="text-foreground">Info</strong> for updates, new features, pick availability.</li>
+                    <li className="flex items-start gap-2"><CheckCircle className="h-3.5 w-3.5 text-orange-500 mt-0.5 shrink-0" />Use <strong className="text-foreground">Warning</strong> for data delays, API degradation, known issues.</li>
+                    <li className="flex items-start gap-2"><CheckCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />Use <strong className="text-foreground">Urgent</strong> for outages, security alerts, or immediate action needed.</li>
+                    <li className="flex items-start gap-2"><Info className="h-3.5 w-3.5 text-blue-500 mt-0.5 shrink-0" />Broadcasts appear in real-time to all users currently logged in.</li>
+                  </ul>
+                </CardContent>
+              </Card>
             </TabsContent>
 
           </Tabs>
@@ -1487,6 +1754,156 @@ export default function AdminDashboard() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setSelectedError(null)}>
               Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* User Detail Dialog */}
+      <Dialog open={userDetailOpen} onOpenChange={(open) => { setUserDetailOpen(open); if (!open) setDetailUserId(null); }}>
+        <DialogContent className="max-w-[90vw] sm:max-w-2xl max-h-[85vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCheck className="h-5 w-5" />
+              Member Profile
+            </DialogTitle>
+            <DialogDescription>Full account and activity details</DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="max-h-[65vh]">
+            {profileLoading ? (
+              <div className="space-y-3 p-1">
+                {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+              </div>
+            ) : userProfile ? (
+              <div className="space-y-4 p-1">
+                {/* Identity */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg border p-3">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Username</p>
+                    <p className="font-semibold">{userProfile.user.username}</p>
+                    {userProfile.user.isAdmin && <Badge variant="outline" className="text-[10px] mt-1">Admin</Badge>}
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Email</p>
+                    <p className="text-sm break-all">{userProfile.user.email || "—"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Subscription Tier</p>
+                    <Badge className="capitalize">{userProfile.user.subscriptionTier || "free"}</Badge>
+                    <p className="text-[10px] text-muted-foreground mt-1 capitalize">Status: {userProfile.user.subscriptionStatus || "none"}</p>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground mb-1">Account Status</p>
+                    {userProfile.user.isBanned
+                      ? <Badge variant="destructive">Banned</Badge>
+                      : <Badge className="bg-emerald-600 text-white">Active</Badge>
+                    }
+                    <p className="text-[10px] text-muted-foreground mt-1">Risk score: {userProfile.user.riskScore ?? 0}/100</p>
+                  </div>
+                </div>
+
+                {/* Onboarding */}
+                {userProfile.onboarding && (
+                  <div className="rounded-lg border p-3 space-y-1">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" />Onboarding</p>
+                    <div className="grid grid-cols-3 gap-2 text-xs mt-1.5">
+                      <div><span className="text-muted-foreground">Experience:</span> <span className="capitalize">{userProfile.onboarding.experience || "—"}</span></div>
+                      <div><span className="text-muted-foreground">Bankroll:</span> {userProfile.onboarding.bankroll_size || "—"}</div>
+                      <div><span className="text-muted-foreground">Completed:</span> {userProfile.onboarding.onboarding_completed ? "Yes" : "No"}</div>
+                    </div>
+                    {Array.isArray(userProfile.onboarding.sports) && userProfile.onboarding.sports.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {userProfile.onboarding.sports.map((s: string) => <Badge key={s} variant="secondary" className="text-[10px]">{s}</Badge>)}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Recent Picks */}
+                {userProfile.recentPicks?.length > 0 ? (
+                  <div className="rounded-lg border p-3">
+                    <p className="text-[10px] font-bold uppercase text-muted-foreground mb-2 flex items-center gap-1"><Clock className="h-3 w-3" />Recent Picks ({userProfile.recentPicks.length})</p>
+                    <div className="space-y-1.5">
+                      {userProfile.recentPicks.slice(0, 8).map((pick: any, i: number) => (
+                        <div key={i} className="flex items-center gap-2 text-xs border-b border-border/40 pb-1.5 last:border-0">
+                          <Badge variant="outline" className="text-[9px] shrink-0">{pick.sport}</Badge>
+                          <span className="flex-1 truncate">{pick.pick}</span>
+                          <span className="text-muted-foreground shrink-0">{pick.odds_at_pick > 0 ? '+' : ''}{pick.odds_at_pick}</span>
+                          <Badge variant={pick.status === 'won' ? 'default' : pick.status === 'lost' ? 'destructive' : 'secondary'} className="text-[9px] shrink-0 capitalize">{pick.status || 'pending'}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border p-3 text-center">
+                    <p className="text-xs text-muted-foreground">No picks tracked yet</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-8">Failed to load profile</p>
+            )}
+          </ScrollArea>
+          <DialogFooter className="gap-2">
+            {userProfile && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-blue-600 border-blue-200"
+                onClick={() => {
+                  const u = users.find(u => String(u.id) === detailUserId);
+                  if (u) { setChangeTierUser(u); setNewTierValue((u as any).subscriptionTier || 'free'); setChangeTierDialogOpen(true); setUserDetailOpen(false); }
+                }}
+              >
+                <UserCog className="h-3.5 w-3.5 mr-1.5" />Change Tier
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => { setUserDetailOpen(false); setDetailUserId(null); }}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Tier Dialog */}
+      <Dialog open={changeTierDialogOpen} onOpenChange={setChangeTierDialogOpen}>
+        <DialogContent className="max-w-[90vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserCog className="h-5 w-5" />
+              Change Tier — {changeTierUser?.username}
+            </DialogTitle>
+            <DialogDescription>
+              Override the subscription tier for this user. This bypasses Stripe and takes effect immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">New Tier</label>
+              <Select value={newTierValue} onValueChange={(v: any) => setNewTierValue(v)}>
+                <SelectTrigger className="mt-2" data-testid="select-new-tier">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free (no access)</SelectItem>
+                  <SelectItem value="pro">Sharp — $49/mo</SelectItem>
+                  <SelectItem value="elite">Edge — $99/mo</SelectItem>
+                  <SelectItem value="whale">Max — $249/mo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-3 rounded-md bg-orange-500/10 border border-orange-500/30 text-xs text-orange-400 space-y-1">
+              <p className="font-semibold flex items-center gap-1.5"><AlertTriangle className="h-3.5 w-3.5" />Admin Override</p>
+              <p>This writes directly to the database and bypasses Stripe subscription logic. Use for comp upgrades, support resolutions, or testing only.</p>
+            </div>
+          </div>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setChangeTierDialogOpen(false)} className="w-full sm:w-auto">Cancel</Button>
+            <Button
+              onClick={() => { if (changeTierUser) changeTierMutation.mutate({ userId: String(changeTierUser.id), tier: newTierValue }); }}
+              disabled={changeTierMutation.isPending}
+              data-testid="button-confirm-change-tier"
+              className="w-full sm:w-auto"
+            >
+              {changeTierMutation.isPending ? "Changing…" : `Set to ${newTierValue.toUpperCase()}`}
             </Button>
           </DialogFooter>
         </DialogContent>
