@@ -37,6 +37,7 @@ import { startSharpSignalDetector } from "./sharpSignalDetector";
 import { pool } from "./db";
 import { preloadAllRosters, startPeriodicRefresh } from "./espn-roster-provider";
 import { liveSportsData } from "./live-sports-data";
+import { bootstrapPipelineFromHistory, startPipelineAutoScheduler } from "./predictionPipelineEngine";
 import { initTeamFormEngine, scheduleFormCacheRefresh } from "./teamHistoricalFormEngine";
 import {
   securityHeadersMiddleware,
@@ -209,6 +210,16 @@ function safeStart(name: string, fn: () => void, delayMs: number): void {
 function startEnginesPhased(): void {
   log("[Startup] Server ready — beginning phased engine startup", "startup");
 
+  // ── Phase 0 (1s): Pipeline Bootstrap ─────────────────────────────────────
+  // Load 522+ settled picks from disk into the in-memory pipeline feedback
+  // store immediately — so win-rate, calibration, and run counts show real
+  // history on page load instead of zeros until the first live cycle fires.
+  safeStart("Pipeline History Bootstrap", () => {
+    bootstrapPipelineFromHistory().catch((e) =>
+      console.error("[Startup] Pipeline bootstrap error:", e.message)
+    );
+  }, 1_000);
+
   // ── Phase 1 (3s): Roster data ─────────────────────────────────────────────
   // Preload team rosters from ESPN. Lightweight — just caching JSON.
   safeStart("Roster Preload", () => {
@@ -273,6 +284,12 @@ function startEnginesPhased(): void {
   // Monitors The Odds API line movement every 60s. Triggers CLV capture when
   // games go live, and broadcasts sharp money alerts for ≥1.5pt line moves.
   safeStart("Sharp Signal Detector", startSharpSignalDetector, 40_000);
+
+  // ── Phase 7 (50s): Prediction Pipeline Auto-Scheduler ────────────────────
+  // Starts the 30-minute prediction pipeline cycle (12-stage ML pipeline).
+  // First auto-run fires 90s after this phase starts. Admin never needs to
+  // manually click "Run Pipeline" — the system handles it autonomously.
+  safeStart("Prediction Pipeline Auto-Scheduler", startPipelineAutoScheduler, 50_000);
 
   // ── Phase 8 (70s): Notification Engine ───────────────────────────────────
   // Monitors live games and prop lines for user-subscribed alerts.
