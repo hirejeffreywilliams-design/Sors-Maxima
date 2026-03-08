@@ -12186,15 +12186,75 @@
       "homeScore": 128,
       "awayScore": 117,
       "settledAt": "2026-03-08T22:22:30.394Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851285-spread-94687e67b5",
+      "gameId": "401851285",
+      "sport": "NCAAB",
+      "game": "Kansas State Wildcats @ BYU Cougars",
+      "homeTeam": "BYU Cougars",
+      "awayTeam": "Kansas State Wildcats",
+      "pick": "BYU Cougars +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 79,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T23:38:15.332Z",
+      "result": "won",
+      "homeScore": 82,
+      "awayScore": 76,
+      "settledAt": "2026-03-08T23:40:33.947Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851285-moneyline-bb1eb9a85d",
+      "gameId": "401851285",
+      "sport": "NCAAB",
+      "game": "Kansas State Wildcats @ BYU Cougars",
+      "homeTeam": "BYU Cougars",
+      "awayTeam": "Kansas State Wildcats",
+      "pick": "BYU Cougars ML",
+      "betType": "moneyline",
+      "odds": -175,
+      "grade": "B+",
+      "confidence": 77,
+      "ev": 2.14,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T23:38:15.332Z",
+      "result": "won",
+      "homeScore": 82,
+      "awayScore": 76,
+      "settledAt": "2026-03-08T23:40:33.947Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851285-total-17acc08a35",
+      "gameId": "401851285",
+      "sport": "NCAAB",
+      "game": "Kansas State Wildcats @ BYU Cougars",
+      "homeTeam": "BYU Cougars",
+      "awayTeam": "Kansas State Wildcats",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T23:38:15.332Z",
+      "result": "won",
+      "homeScore": 82,
+      "awayScore": 76,
+      "settledAt": "2026-03-08T23:40:33.947Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 535,
-      "won": 276,
+      "total": 538,
+      "won": 279,
       "lost": 247,
       "push": 12,
-      "rate": 51.6,
+      "rate": 51.9,
       "pending": 72
     },
     "bySport": {
@@ -12209,16 +12269,16 @@
         "rate": 49.7
       },
       "NCAAB": {
-        "total": 155,
-        "won": 88,
-        "rate": 56.8
+        "total": 158,
+        "won": 91,
+        "rate": 57.6
       }
     },
     "byGrade": {
       "B+": {
-        "total": 37,
-        "won": 24,
-        "rate": 64.9
+        "total": 38,
+        "won": 25,
+        "rate": 65.8
       },
       "B": {
         "total": 41,
@@ -12251,9 +12311,9 @@
         "rate": 44.3
       },
       "A-": {
-        "total": 20,
-        "won": 7,
-        "rate": 35
+        "total": 22,
+        "won": 9,
+        "rate": 40.9
       },
       "D": {
         "total": 10,
@@ -12268,22 +12328,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 155,
-        "won": 82,
-        "rate": 52.9,
-        "roi": 12.7
+        "total": 156,
+        "won": 83,
+        "rate": 53.2,
+        "roi": 13
       },
       "Spread": {
-        "total": 158,
-        "won": 81,
-        "rate": 51.3,
-        "roi": 1.2
+        "total": 159,
+        "won": 82,
+        "rate": 51.6,
+        "roi": 1.8
       },
       "Total": {
-        "total": 151,
-        "won": 75,
-        "rate": 49.7,
-        "roi": -1
+        "total": 152,
+        "won": 76,
+        "rate": 50,
+        "roi": -0.3
       },
       "Team Total": {
         "total": 71,
@@ -12293,20 +12353,20 @@
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 21,
+      "won": 31,
+      "lost": 19,
       "push": 0,
-      "rate": 58
+      "rate": 62
     },
-    "lastUpdated": "2026-03-08T23:36:24.264Z",
-    "roi": 4.5,
-    "brierScore": 0.2613,
+    "lastUpdated": "2026-03-08T23:48:28.301Z",
+    "roi": 5,
+    "brierScore": 0.2603,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.041,
+    "sharpeRatio": 0.045,
     "homeAwayBias": {
-      "homeWinRate": 54.7,
+      "homeWinRate": 55.1,
       "awayWinRate": 44.6,
-      "homeTotal": 245,
+      "homeTotal": 247,
       "awayTotal": 65
     },
     "calibrationBuckets": [
@@ -12325,8 +12385,8 @@
       {
         "range": "60-65",
         "predicted": 62,
-        "actual": 53.4,
-        "total": 206
+        "actual": 53.6,
+        "total": 207
       },
       {
         "range": "65-70",
@@ -12342,9 +12402,9 @@
       },
       {
         "range": "75-80",
-        "predicted": 77.1,
-        "actual": 71.4,
-        "total": 14
+        "predicted": 77.3,
+        "actual": 75,
+        "total": 16
       },
       {
         "range": "80+",
