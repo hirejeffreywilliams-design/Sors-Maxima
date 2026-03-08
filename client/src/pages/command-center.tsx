@@ -315,7 +315,14 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
       style={gradeAmbientGlow(ticket.combinedGrade)}
       data-testid={`card-ticket-${ticket.id}`}
     >
-      <div className={`h-1 w-full ${ticket.combinedGrade.startsWith("A") ? "bg-green-500" : ticket.combinedGrade.startsWith("B") ? "bg-blue-500" : "bg-yellow-500"}`} />
+      <div className={`h-1 w-full ${
+        ticket.combinedGrade === "A+" ? "bg-amber-400" :
+        ticket.combinedGrade.startsWith("A") ? "bg-emerald-500" :
+        ticket.combinedGrade === "B+" ? "bg-teal-500" :
+        ticket.combinedGrade.startsWith("B") ? "bg-indigo-500" :
+        ticket.combinedGrade.startsWith("C") ? "bg-yellow-500" :
+        "bg-red-500"
+      }`} />
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1">
@@ -407,17 +414,23 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
 }
 
 function gradeColor(grade: string): string {
-  if (grade.startsWith("A")) return "text-green-500";
-  if (grade.startsWith("B")) return "text-blue-500";
-  if (grade.startsWith("C")) return "text-yellow-500";
+  const g = grade.toUpperCase();
+  if (g === "A+") return "text-amber-400";
+  if (g.startsWith("A")) return "text-emerald-500";
+  if (g === "B+") return "text-teal-500";
+  if (g.startsWith("B")) return "text-indigo-400";
+  if (g.startsWith("C")) return "text-yellow-500";
   return "text-red-500";
 }
 
 function gradeBg(grade: string): string {
-  if (grade.startsWith("A")) return "bg-green-500/10 border-green-500/30";
-  if (grade.startsWith("B")) return "bg-blue-500/10 border-blue-500/30";
-  if (grade.startsWith("C")) return "bg-yellow-500/10 border-yellow-500/30";
-  return "bg-red-500/10 border-red-500/30";
+  const g = grade.toUpperCase();
+  if (g === "A+") return "bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400";
+  if (g.startsWith("A")) return "bg-emerald-500/12 border-emerald-500/35 text-emerald-600 dark:text-emerald-400";
+  if (g === "B+") return "bg-teal-500/12 border-teal-500/35 text-teal-600 dark:text-teal-400";
+  if (g.startsWith("B")) return "bg-indigo-500/12 border-indigo-500/35 text-indigo-600 dark:text-indigo-400";
+  if (g.startsWith("C")) return "bg-yellow-500/12 border-yellow-500/35 text-yellow-600 dark:text-yellow-400";
+  return "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400";
 }
 
 function sportColor(sport: string): string {

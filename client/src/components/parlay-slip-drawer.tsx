@@ -55,6 +55,7 @@ import {
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
+import { SlipShareCard } from "@/components/slip-share-card";
 
 function copyToClipboard(text: string): Promise<void> {
   if (navigator.clipboard && window.isSecureContext) {
@@ -643,6 +644,7 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
 function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: ParlaySlipLeg[]; totalOdds: number; totalAmericanOdds: number; stake: number }) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [showHoloCard, setShowHoloCard] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const formattedOdds = totalAmericanOdds > 0 ? `+${totalAmericanOdds}` : `${totalAmericanOdds}`;
   const toWin = ((totalOdds - 1) * stake).toFixed(2);
@@ -671,48 +673,64 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
     }
   };
 
-  const handleScreenshot = () => {
-    toast({
-      title: "Screenshot the card below",
-      description: "Share it on social media or send to friends",
-    });
-  };
-
   return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-1.5">
-        <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Share Your Picks</span>
-      </div>
-      <div className="flex gap-1.5">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleCopy} data-testid="button-copy-full-slip">
-              {copied ? <CheckCircle className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-              Copy
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Copy as text for messaging</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleShare} data-testid="button-share-slip">
-              <MessageCircle className="h-3 w-3" />
-              Share
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Share via messaging apps</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleScreenshot} data-testid="button-screenshot-slip">
-              <Camera className="h-3 w-3" />
-              Screenshot
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Screenshot the visual card to share</TooltipContent>
-        </Tooltip>
-      </div>
+    <>
+      {showHoloCard && (
+        <SlipShareCard
+          legs={legs.map(l => ({
+            outcome: l.outcome,
+            americanOdds: l.americanOdds,
+            sport: l.sport,
+            market: l.market,
+            team: l.team,
+            grade: l.grade,
+          }))}
+          totalAmericanOdds={totalAmericanOdds}
+          stake={stake > 0 ? parseFloat(stake.toFixed(2)) : undefined}
+          payout={stake > 0 ? parseFloat(payout) : undefined}
+          onClose={() => setShowHoloCard(false)}
+        />
+      )}
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5">
+          <Share2 className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Share Your Picks</span>
+        </div>
+        <div className="flex gap-1.5">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleCopy} data-testid="button-copy-full-slip">
+                {copied ? <CheckCircle className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                Copy
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Copy as text for messaging</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleShare} data-testid="button-share-slip">
+                <MessageCircle className="h-3 w-3" />
+                Share
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Share via messaging apps</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 h-7 text-[10px] gap-1 border-primary/40 text-primary hover:bg-primary/10"
+                onClick={() => setShowHoloCard(true)}
+                data-testid="button-share-card-slip"
+              >
+                <Zap className="h-3 w-3" />
+                Card
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Open holographic share card</TooltipContent>
+          </Tooltip>
+        </div>
 
       <div ref={cardRef} className="rounded-lg border bg-gradient-to-br from-primary/5 to-primary/10 p-2.5 space-y-1.5" data-testid="visual-bet-card">
         <div className="flex items-center justify-between">
@@ -742,6 +760,7 @@ function ShareSection({ legs, totalOdds, totalAmericanOdds, stake }: { legs: Par
         </div>
       </div>
     </div>
+  </>
   );
 }
 
@@ -949,6 +968,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   const [stakeInitialized, setStakeInitialized] = useState(false);
   const [showPlacement, setShowPlacement] = useState(false);
   const [tracked, setTracked] = useState(false);
+  const [showHoloCard, setShowHoloCard] = useState(false);
 
   const { data: authData } = useQuery<{ authenticated: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -1082,8 +1102,15 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   }
 
   if (isMobile) {
+    const holoPayload = {
+      legs: legs.map(l => ({ outcome: l.outcome, americanOdds: l.americanOdds, sport: l.sport, market: l.market, team: l.team, grade: l.grade })),
+      totalAmericanOdds,
+      stake: stake > 0 ? stake : undefined,
+      payout: stake > 0 ? parseFloat((totalOdds * stake).toFixed(2)) : undefined,
+    };
     return (
       <>
+        {showHoloCard && <SlipShareCard {...holoPayload} onClose={() => setShowHoloCard(false)} />}
         <SlipTabBar />
         <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b">
           <div className="flex items-center justify-between mb-2">
@@ -1191,9 +1218,14 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
               <Copy className="h-4 w-4" />
               Copy Slip
             </Button>
-            <Button variant="outline" className="h-10 gap-2" onClick={handleShareSlip} data-testid="button-share-slip">
-              <Share2 className="h-4 w-4" />
-              Share
+            <Button
+              variant="outline"
+              className="h-10 gap-2 border-primary/40 text-primary hover:bg-primary/10"
+              onClick={() => setShowHoloCard(true)}
+              data-testid="button-share-slip"
+            >
+              <Zap className="h-4 w-4" />
+              Share Card
             </Button>
           </div>
 
@@ -1246,8 +1278,16 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     );
   }
 
+  const holoPayloadDesktop = {
+    legs: legs.map(l => ({ outcome: l.outcome, americanOdds: l.americanOdds, sport: l.sport, market: l.market, team: l.team, grade: l.grade })),
+    totalAmericanOdds,
+    stake: stake > 0 ? stake : undefined,
+    payout: stake > 0 ? parseFloat((totalOdds * stake).toFixed(2)) : undefined,
+  };
+
   return (
     <>
+      {showHoloCard && <SlipShareCard {...holoPayloadDesktop} onClose={() => setShowHoloCard(false)} />}
       <SlipTabBar />
       <div className="px-3 py-2 bg-muted/30 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -1347,9 +1387,15 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             <Copy className="h-3 w-3" />
             Copy
           </Button>
-          <Button variant="outline" size="sm" className="flex-1 h-7 text-[10px] gap-1" onClick={handleShareSlip} data-testid="button-share-slip">
-            <Share2 className="h-3 w-3" />
-            Share
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-7 text-[10px] gap-1 border-primary/40 text-primary hover:bg-primary/10"
+            onClick={() => setShowHoloCard(true)}
+            data-testid="button-share-slip"
+          >
+            <Zap className="h-3 w-3" />
+            Card
           </Button>
           {isAuthenticated && (
             <Button

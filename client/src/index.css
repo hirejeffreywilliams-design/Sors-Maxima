@@ -326,3 +326,31 @@
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+/* ── Holographic Card Animations ─────────────────────────── */
+@keyframes holo-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes holo-sweep {
+  0%   { transform: translateX(-200%) rotate(30deg); }
+  45%  { transform: translateX(400%) rotate(30deg); }
+  100% { transform: translateX(400%) rotate(30deg); }
+}
+
+@keyframes holo-rainbow-bar {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+@keyframes card-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+@keyframes holo-pulse {
+  0%, 100% { opacity: 0.12; }
+  50%       { opacity: 0.22; }
+}

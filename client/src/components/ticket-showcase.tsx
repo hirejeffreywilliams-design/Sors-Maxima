@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,141 +61,272 @@ function gradeColor(g: string) {
 
 function ShareProofModal({ ticket, onClose }: { ticket: ShowcaseTicket; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [glowPos, setGlowPos] = useState({ x: 50, y: 50 });
+  const [isHovered, setIsHovered] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  const isWin = ticket.result === "won";
+  const accent = isWin ? "#22c55e" : "#ef4444";
+  const accentAlt = isWin ? "#16a34a" : "#dc2626";
 
   const formatText = () => {
-    const header = `⚡ SORS MAXIMA — WINNING TICKET\n${"─".repeat(32)}`;
+    const header = `${isWin ? "🏆" : "📊"} SORS MAXIMA — ${isWin ? "WINNING" : "SETTLED"} TICKET`;
+    const divider = "─".repeat(34);
     const odds = `Combined Odds: ${ticket.combinedOdds > 0 ? "+" : ""}${ticket.combinedOdds}`;
-    const payout = `Payout: $${ticket.payout} (+$${ticket.profit} profit)`;
+    const payoutLine = `Payout: $${ticket.payout} (+$${ticket.profit} profit)`;
     const date = `Date: ${formatDate(ticket.date)}`;
     const legs = ticket.legs.map((l, i) =>
       `${i + 1}. ${sportEmoji(l.sport)} ${l.pick} (${l.odds > 0 ? "+" : ""}${l.odds}) — ${l.result === "won" ? "✓ WON" : "✗ LOST"}`
     ).join("\n");
     const footer = `\nPowered by Sors 46-Factor Engine\nsorsmaxima.com`;
-    return [header, odds, payout, date, "", legs, footer].join("\n");
+    return [header, divider, odds, payoutLine, date, "", legs, footer].join("\n");
   };
 
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(formatText());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    } catch {
-      const ta = document.createElement("textarea");
-      ta.value = formatText();
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    }
+    try { await navigator.clipboard.writeText(formatText()); } catch {}
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && "share" in navigator) {
-      try {
-        await (navigator as any).share({
-          title: "Sors Maxima — Winning Ticket",
-          text: formatText(),
-        });
-        return;
-      } catch {}
+      try { await (navigator as any).share({ title: "Sors Maxima — Ticket", text: formatText() }); return; } catch {}
     }
     handleCopy();
   };
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const nx = (e.clientX - rect.left) / rect.width;
+    const ny = (e.clientY - rect.top) / rect.height;
+    setTilt({ x: -(ny - 0.5) * 14, y: (nx - 0.5) * 14 });
+    setGlowPos({ x: nx * 100, y: ny * 100 });
+  };
+
   return (
     <div
-      className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-4 p-4"
+      style={{ background: "rgba(0,0,0,0.92)", backdropFilter: "blur(16px)" }}
       onClick={onClose}
       data-testid="share-proof-modal"
     >
       <div
-        className="w-full max-w-sm rounded-2xl overflow-hidden"
+        className="w-full max-w-sm"
+        style={{ perspective: "900px" }}
         onClick={e => e.stopPropagation()}
-        style={{
-          background: "linear-gradient(135deg, #0a1628 0%, #0d1f0e 50%, #0a1628 100%)",
-          boxShadow: "0 0 80px rgba(34,197,94,0.4), 0 0 200px rgba(34,197,94,0.15), 0 20px 60px rgba(0,0,0,0.7)",
-          border: "2px solid rgba(34,197,94,0.5)",
-        }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => { setTilt({ x: 0, y: 0 }); setGlowPos({ x: 50, y: 50 }); setIsHovered(false); }}
+        onMouseEnter={() => setIsHovered(true)}
       >
-        {/* Top strip */}
-        <div className="h-1.5 bg-gradient-to-r from-emerald-600 via-emerald-400 to-emerald-600" />
+        {/* Outer glow ring — gold for wins, silver for other */}
+        <div style={{
+          padding: "2px",
+          borderRadius: "20px",
+          background: isWin
+            ? "linear-gradient(135deg, #22c55e, #ffd700, #22c55e, #00bfff, #ffd700, #22c55e)"
+            : "linear-gradient(135deg, #ef4444, #f97316, #ef4444, #dc2626)",
+          backgroundSize: "300% 300%",
+          animation: "holo-shift 4s ease infinite",
+          boxShadow: `0 0 50px ${accent}55, 0 0 120px ${accent}22, 0 24px 80px rgba(0,0,0,0.9)`,
+        }}>
+          <div
+            ref={cardRef}
+            style={{
+              borderRadius: "18px",
+              background: isWin
+                ? "linear-gradient(160deg, #050e0a 0%, #08130c 50%, #040a07 100%)"
+                : "linear-gradient(160deg, #0f0505 0%, #170808 50%, #0b0404 100%)",
+              transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transition: isHovered ? "transform 0.08s ease-out" : "transform 0.4s ease-out",
+              transformStyle: "preserve-3d",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* Background dot pattern */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }} />
 
-        {/* Branding header */}
-        <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-emerald-500/20">
-          <div>
-            <p className="text-[10px] font-black tracking-[0.25em] text-emerald-400/80 uppercase">Sors Maxima</p>
-            <p className="text-lg font-black text-emerald-400">WINNING TICKET</p>
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] text-emerald-400/60">{formatDate(ticket.date)}</p>
-            <p className="text-2xl font-black text-emerald-400 tabular-nums">
-              {ticket.combinedOdds > 0 ? "+" : ""}{ticket.combinedOdds}
-            </p>
-          </div>
-        </div>
+            {/* Diagonal grid */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              backgroundImage: `repeating-linear-gradient(55deg, transparent, transparent 36px, rgba(255,255,255,0.015) 36px, rgba(255,255,255,0.015) 38px)`,
+            }} />
 
-        {/* Legs */}
-        <div className="px-5 py-3 space-y-2">
-          {ticket.legs.map((leg, i) => (
-            <div key={i} className="flex items-start gap-2.5">
-              <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
-                leg.result === "won" ? "bg-emerald-500/25" : "bg-red-500/20"
-              }`}>
-                {leg.result === "won"
-                  ? <Check className="w-2.5 h-2.5 text-emerald-400" />
-                  : <X className="w-2.5 h-2.5 text-red-400" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white leading-snug">{leg.pick}</p>
-                <p className="text-[10px] text-emerald-400/60">{sportEmoji(leg.sport)} {leg.sport} · {leg.odds > 0 ? "+" : ""}{leg.odds}</p>
-              </div>
-              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded ${
-                leg.result === "won" ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
-              }`}>{leg.grade}</span>
+            {/* Holographic shimmer */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: isWin
+                ? `linear-gradient(125deg, transparent 15%, rgba(34,197,94,0.08) 28%, rgba(255,215,0,0.07) 38%, rgba(0,191,255,0.07) 48%, rgba(34,197,94,0.08) 58%, transparent 72%)`
+                : `linear-gradient(125deg, transparent 15%, rgba(239,68,68,0.08) 30%, rgba(249,115,22,0.07) 45%, rgba(239,68,68,0.08) 60%, transparent 72%)`,
+              backgroundSize: "300% 300%",
+              animation: "holo-pulse 3s ease-in-out infinite",
+              mixBlendMode: "screen",
+            } as React.CSSProperties} />
+
+            {/* Moving light sweep */}
+            <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+              <div style={{
+                position: "absolute", width: "70px", height: "200%", top: "-50%", left: 0,
+                background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 50%, transparent)",
+                animation: "holo-sweep 9s ease-in-out infinite",
+              }} />
             </div>
-          ))}
-        </div>
 
-        {/* Payout */}
-        <div className="mx-5 mb-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 flex items-center justify-between">
-          <div>
-            <p className="text-[10px] text-emerald-400/60">$100 stake</p>
-            <p className="text-xs font-semibold text-white">Payout</p>
-          </div>
-          <div className="text-right">
-            <p className="text-2xl font-black text-emerald-400 tabular-nums">${ticket.payout}</p>
-            <p className="text-[10px] text-emerald-400/60">+${ticket.profit} profit</p>
-          </div>
-        </div>
+            {/* Mouse glow */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, ${accent}22 0%, transparent 55%)`,
+              transition: "background 0.06s",
+            }} />
 
-        {/* Footer branding */}
-        <div className="px-5 pb-4 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-emerald-400/60" />
-            <p className="text-[9px] text-emerald-400/50 font-semibold tracking-wider">46-FACTOR ENGINE · SORSMAXIMA.COM</p>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={handleCopy}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-semibold text-white hover:bg-white/10 transition-colors"
-              data-testid="button-share-copy"
-            >
-              {copied ? <CheckCheck className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-              {copied ? "Copied!" : "Copy"}
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-semibold text-emerald-400 hover:bg-emerald-500/30 transition-colors"
-              data-testid="button-share-send"
-            >
-              <Share2 className="w-3 h-3" />
-              Share
-            </button>
+            {/* Content */}
+            <div style={{ position: "relative", zIndex: 1 }}>
+              {/* Top rainbow bar */}
+              <div style={{
+                height: "4px",
+                background: isWin
+                  ? "linear-gradient(90deg, #22c55e, #ffd700, #00bfff, #22c55e, #ffd700)"
+                  : "linear-gradient(90deg, #ef4444, #f97316, #fbbf24, #ef4444)",
+                backgroundSize: "200% 100%",
+                animation: "holo-rainbow-bar 3s linear infinite",
+              }} />
+
+              {/* Header */}
+              <div style={{
+                padding: "14px 18px 10px",
+                borderBottom: `1px solid ${accent}20`,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <div>
+                  <div style={{
+                    fontSize: "8px", fontWeight: 900, letterSpacing: "0.35em", textTransform: "uppercase",
+                    background: "linear-gradient(135deg, #8898c8, #c0cce8, #8898c8)",
+                    WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", marginBottom: "3px",
+                  }}>SORS MAXIMA</div>
+                  <div style={{
+                    fontSize: "17px", fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase",
+                    background: `linear-gradient(135deg, ${accent}, #ffffff 50%, ${accent})`,
+                    backgroundSize: "200% 100%", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
+                    animation: "holo-shift 4s ease infinite",
+                  }}>
+                    {isWin ? "🏆 WINNING TICKET" : "SETTLED TICKET"}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: "9px", color: `${accent}80`, marginBottom: "2px" }}>{formatDate(ticket.date)}</div>
+                  <div style={{
+                    fontSize: "22px", fontWeight: 900, fontFamily: "monospace",
+                    color: accent, textShadow: `0 0 14px ${accent}80`,
+                  }}>
+                    {ticket.combinedOdds > 0 ? "+" : ""}{ticket.combinedOdds}
+                  </div>
+                </div>
+              </div>
+
+              {/* Legs */}
+              <div style={{ padding: "10px 18px", display: "flex", flexDirection: "column", gap: "5px" }}>
+                {ticket.legs.map((leg, i) => (
+                  <div key={i} style={{
+                    display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px",
+                    borderRadius: "8px",
+                    background: leg.result === "won" ? "rgba(34,197,94,0.06)" : "rgba(239,68,68,0.05)",
+                    border: `1px solid ${leg.result === "won" ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.10)"}`,
+                  }}>
+                    <div style={{
+                      width: "18px", height: "18px", borderRadius: "50%", flexShrink: 0,
+                      background: leg.result === "won" ? "rgba(34,197,94,0.2)" : "rgba(239,68,68,0.15)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      fontSize: "9px",
+                    }}>
+                      {leg.result === "won" ? "✓" : "✗"}
+                    </div>
+                    <span style={{ fontSize: "10px", flexShrink: 0 }}>{sportEmoji(leg.sport)}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: "11px", fontWeight: 700, color: "rgba(255,255,255,0.9)",
+                        whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                      }}>{leg.pick}</div>
+                      <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.35)", marginTop: "1px" }}>
+                        {leg.sport} · {leg.odds > 0 ? "+" : ""}{leg.odds}
+                      </div>
+                    </div>
+                    <span style={{
+                      fontSize: "8px", fontWeight: 900, padding: "2px 6px", borderRadius: "4px",
+                      background: leg.result === "won" ? "rgba(34,197,94,0.18)" : "rgba(239,68,68,0.15)",
+                      color: leg.result === "won" ? "#22c55e" : "#f87171",
+                    }}>{leg.grade}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Stats */}
+              <div style={{
+                margin: "0 18px 14px", padding: "11px 16px", borderRadius: "10px",
+                border: `1px solid ${accent}40`,
+                background: `linear-gradient(135deg, ${accent}12, rgba(255,255,255,0.02))`,
+                display: "flex", alignItems: "center", justifyContent: "space-around",
+              }}>
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "2px" }}>Payout</div>
+                  <div style={{ fontSize: "22px", fontWeight: 900, color: accent, lineHeight: 1, textShadow: `0 0 12px ${accent}70` }}>${ticket.payout}</div>
+                </div>
+                <div style={{ width: "1px", height: "36px", background: "rgba(255,255,255,0.08)" }} />
+                <div style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "8px", color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: "2px" }}>Profit</div>
+                  <div style={{ fontSize: "22px", fontWeight: 900, color: "#22c55e", lineHeight: 1 }}>+${ticket.profit}</div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div style={{
+                padding: "10px 18px 15px", borderTop: "1px solid rgba(255,255,255,0.06)",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <div style={{ fontSize: "8px", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "rgba(255,255,255,0.2)" }}>
+                  46-Factor Intelligence
+                </div>
+                <div style={{ display: "flex", gap: "6px" }}>
+                  <button
+                    onClick={handleCopy}
+                    style={{
+                      padding: "6px 12px", borderRadius: "8px",
+                      background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)",
+                      color: copied ? "#22c55e" : "rgba(255,255,255,0.75)",
+                      fontSize: "9px", fontWeight: 900, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                    }}
+                    data-testid="button-share-copy"
+                  >
+                    {copied ? "✓ COPIED" : "COPY"}
+                  </button>
+                  <button
+                    onClick={handleShare}
+                    style={{
+                      padding: "6px 16px", borderRadius: "8px",
+                      background: `linear-gradient(135deg, ${accent}90, ${accent}55)`,
+                      border: `1px solid ${accent}70`,
+                      color: "#fff", fontSize: "9px", fontWeight: 900, letterSpacing: "0.1em",
+                      textTransform: "uppercase", cursor: "pointer", boxShadow: `0 0 12px ${accent}45`,
+                    }}
+                    data-testid="button-share-send"
+                  >
+                    SHARE
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.25)", letterSpacing: "0.15em", textTransform: "uppercase" }}>
+        Tap outside to close
+      </p>
     </div>
   );
 }
