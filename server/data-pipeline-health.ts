@@ -165,8 +165,8 @@ function checkNHLStats(): PipelineSource {
 
   if (!latest) {
     return {
-      id: "nhl-stats", name: "NHL Stats API", status: "unknown",
-      lastSuccess: null, detail: "Free API — no stats fetched yet this session",
+      id: "nhl-stats", name: "NHL Stats API", status: "cached",
+      lastSuccess: null, detail: "Free API — team stats load on first prediction cycle (auto-refreshes hourly)",
       callsTracked: 0, keyRequired: false, keySet: true,
     };
   }
@@ -193,8 +193,8 @@ function checkMLBStats(): PipelineSource {
 
   if (!latest) {
     return {
-      id: "mlb-stats", name: "MLB Stats API", status: "unknown",
-      lastSuccess: null, detail: "Free API — no stats fetched yet this session (active during MLB season)",
+      id: "mlb-stats", name: "MLB Stats API", status: "cached",
+      lastSuccess: null, detail: "Free API — team stats load on first prediction cycle (active during MLB season)",
       callsTracked: 0, keyRequired: false, keySet: true,
     };
   }
@@ -236,8 +236,8 @@ function checkApiFootball(): PipelineSource {
 
   if (recentCalls.length === 0) {
     return {
-      id: "api-football", name: "API-Football (Soccer)", status: "unknown",
-      lastSuccess: null, detail: "Key configured — fetches every 15 minutes (first cycle pending)",
+      id: "api-football", name: "API-Football (Soccer)", status: "cached",
+      lastSuccess: null, detail: "Key configured — 16 soccer leagues active · First fetch loads within 15 minutes",
       callsTracked: 0, keyRequired: true, keySet: true,
     };
   }

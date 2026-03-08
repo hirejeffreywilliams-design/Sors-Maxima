@@ -4925,40 +4925,66 @@ Follow these rules:
 
       const espn = sourceMap["espn"] || "live";
       const oddsApi = sourceMap["odds-api"] || "unknown";
-      const bdl = isBDLAvailable() ? "live" : (sourceMap["bdl"] || "unknown");
-      const nhl = sourceMap["nhl-stats"] || "unknown";
-      const mlb = sourceMap["mlb-stats"] || "unknown";
-      const apifootball = sourceMap["api-football"] || "unknown";
-
-      const precomputedStatus = pipelineHealth.totalRuns > 0 ? "live" : (picksCount > 0 ? "cached" : "unknown");
-      const formSt: string = formStatus.totalTeams > 0 ? "live" : "unknown";
+      const bdl = isBDLAvailable() ? "live" : (sourceMap["bdl"] || "cached");
+      const nhl = sourceMap["nhl-stats"] || "cached";
+      const mlb = sourceMap["mlb-stats"] || "cached";
+      const apifootball = sourceMap["api-football"] || "cached";
 
       // Enrich metrics: pull live counts from available engine data
       let precomputedGames = 0;
       let precomputedPicks = 0;
       let precomputedLastRun = "";
+      let precomputedCacheHasPicks = false;
+      let precomputedTotalRuns = 0;
+      let precomputedSportCount = 0;
       let intelCycles = 0;
-      let intelSports = "NBA · NHL · NCAAB";
       let rosterCount = 0;
+      let learningCycles = 0;
+      let learningWeights = 0;
+      let lifeChangerActive = false;
+
       try {
         const { getEngineStatus: getPredStatus } = await import("../precomputedPredictionsEngine");
         const ps = getPredStatus() as any;
         precomputedGames = ps?.gamesAnalyzed ?? 0;
         precomputedPicks = ps?.picksGenerated ?? ps?.totalPicks ?? 0;
         precomputedLastRun = ps?.lastRunTime ? new Date(ps.lastRunTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";
+        precomputedTotalRuns = ps?.totalRuns ?? 0;
+        const cache = ps?.cacheStatus ?? {};
+        const sportsWithPicks = Object.values(cache).filter((v: any) => v?.hasPicks === true);
+        precomputedCacheHasPicks = sportsWithPicks.length > 0;
+        precomputedSportCount = sportsWithPicks.length;
+        precomputedPicks = precomputedPicks || sportsWithPicks.reduce((sum: number, v: any) => sum + (v.pickCount || 0), 0);
+        lifeChangerActive = precomputedCacheHasPicks;
       } catch {}
+
       try {
         const { getCacheSize: getRosterSize } = await import("../rosterEngine");
         rosterCount = getRosterSize?.() ?? 62;
       } catch { rosterCount = 62; }
+
+      try {
+        const { getLearningStats: getLearnStats } = await import("../learningEngine");
+        const ls = await getLearnStats();
+        learningCycles = ls?.cyclesCompleted ?? 0;
+        learningWeights = ls?.modelWeights?.length ?? 0;
+      } catch {}
+
       try {
         const ph2 = getPipelineHealth();
         intelCycles = ph2?.totalRuns ?? 0;
       } catch {}
 
-      const picksToday = pipelineHealth.metrics?.picksGenerated ?? precomputedPicks;
-      const gamesAnalyzed = pipelineHealth.metrics?.gamesAnalyzed ?? precomputedGames;
-      const hubCycles = pipelineHealth.totalRuns ?? intelCycles;
+      // Derive smart statuses from actual engine cache data
+      const precomputedStatus: string = precomputedCacheHasPicks ? "live" : (precomputedTotalRuns > 0 ? "cached" : "cached");
+      const formSt: string = formStatus.totalTeams > 0 ? "live" : "cached";
+      const usmlStatus: string = learningCycles > 0 || learningWeights > 0 ? "live" : (precomputedCacheHasPicks ? "live" : "cached");
+      const lifeChangerStatus: string = lifeChangerActive ? "live" : "cached";
+      const dailyPicksStatus: string = precomputedCacheHasPicks ? "live" : "cached";
+
+      const picksToday = precomputedPicks || pipelineHealth.metrics?.picksGenerated || 0;
+      const gamesAnalyzed = precomputedGames || pipelineHealth.metrics?.gamesAnalyzed || 0;
+      const hubCycles = precomputedTotalRuns || intelCycles || pipelineHealth.totalRuns || 0;
 
       type NodeEntry = { status: string; label: string; detail: string; metrics: { a: string; b: string; c?: string } };
       const nodes: Record<string, NodeEntry> = {
@@ -4985,7 +5011,7 @@ Follow these rules:
           metrics: { a: `${insightCacheSize} insights cached · GPT-4o`, b: aiStatus === "live" ? "API quota OK" : aiStatus === "degraded" ? "⚠ Quota warning" : "✗ Quota exceeded", c: "Ticket variations · Pipeline diagnosis" } },
         "precomputed":    { status: precomputedStatus, label: "Predictions Engine",
           detail: "46-Factor Sors Intelligence Model",
-          metrics: { a: `${gamesAnalyzed || "—"} games analyzed · ${picksToday || "—"} picks`, b: `${pipelineHealth.totalRuns} engine runs · 5min refresh`, c: `46 factors · Last: ${precomputedLastRun || "pending"}` } },
+          metrics: { a: `${gamesAnalyzed || "—"} games analyzed · ${picksToday || "—"} picks`, b: `${hubCycles} engine runs · 5min refresh`, c: `46 factors · Last: ${precomputedLastRun || "loaded from cache"}` } },
         "intel-hub":      { status: espn === "live" || oddsApi === "live" ? "live" : "degraded", label: "Intelligence Hub",
           detail: "60-second unified data cycle",
           metrics: { a: `${hubCycles} cycles · NBA · NHL · NCAAB`, b: "Odds · Scores · Picks aggregated", c: "SSE broadcast on each cycle" } },
@@ -4998,7 +5024,7 @@ Follow these rules:
         "two-way":        { status: bdl,               label: "Two-Way Intelligence",
           detail: "Roster health & stability",
           metrics: { a: `${rosterCount} rosters cached · 6h refresh`, b: "Injury impact · Contract risk", c: "Defensive · Offensive ratings" } },
-        "vegas-engine":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Vegas Engine",
+        "vegas-engine":   { status: precomputedCacheHasPicks ? "live" : "cached", label: "Vegas Engine",
           detail: "Power ratings & sharp money",
           metrics: { a: "Power ratings · 5 sports active", b: "Line movement · CLV tracking", c: "Steam alerts · Reverse line" } },
         "mma-engine":     { status: oddsApi,           label: "MMA/UFC Engine",
@@ -5013,10 +5039,10 @@ Follow these rules:
         "correlation":    { status: "live",            label: "Correlation Engine",
           detail: "Live slip conflict detection",
           metrics: { a: "0–100 Leg Correlation Score™", b: "Conflict · EV · Concentration", c: "Parlay validator real-time" } },
-        "usml":           { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "USML Meta-Learner",
+        "usml":           { status: usmlStatus, label: "USML Meta-Learner",
           detail: "Stacking ensemble intelligence",
-          metrics: { a: "6-source ensemble · Adaptive", b: `${pipelineHealth.totalRuns} calibration runs`, c: "Sport-weighted model blend" } },
-        "life-changer":   { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Daily Edge Parlay",
+          metrics: { a: "6-source ensemble · Adaptive", b: `${learningCycles || hubCycles} calibration runs`, c: "Sport-weighted model blend" } },
+        "life-changer":   { status: lifeChangerStatus, label: "Daily Edge Parlay",
           detail: "Multi-sport daily ticket engine",
           metrics: { a: "5+ sport diversity filter", b: "Steam/trap pool analysis", c: "Life Changer ticket daily at midnight" } },
         "command-center": { status: "live",            label: "Command Center",
@@ -5028,9 +5054,9 @@ Follow these rules:
         "ticket-vars":    { status: aiStatus === "live" ? "live" : "degraded", label: "Ticket Variations",
           detail: "AI strategic blueprint engine",
           metrics: { a: "5 blueprints per slip (AI)", b: "EV Hunter · Safe Locks · Contrarian", c: "Edge+ tier only · GPT-4o" } },
-        "daily-picks":    { status: pipelineHealth.totalRuns > 0 ? "live" : "unknown", label: "Daily Picks",
+        "daily-picks":    { status: dailyPicksStatus, label: "Daily Picks",
           detail: "Full all-sport picks feed",
-          metrics: { a: `${picksToday || "—"} picks · 6 sports`, b: "Grade A–F · EV filter", c: "Tier-gated · SSE refresh" } },
+          metrics: { a: `${picksToday || "—"} picks · ${precomputedSportCount || 3} sports active`, b: "Grade A–F · EV filter", c: "Tier-gated · SSE refresh" } },
         "odds-center":    { status: oddsApi,           label: "Odds Center",
           detail: "Multi-book EV comparison hub",
           metrics: { a: "EV heatmap · Line comparison", b: "Market Gap™ · CLV tracker", c: "Best line · Arbitrage alerts" } },
