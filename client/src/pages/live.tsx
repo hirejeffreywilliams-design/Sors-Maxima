@@ -3,6 +3,7 @@ import { PageHero } from "@/components/page-hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders, Lock } from "lucide-react";
 import { LiveScoresFeed } from "@/components/live/live-scores-feed";
+import { CashoutStrategiesEngine } from "@/components/live/cashout-strategies-engine";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
@@ -185,10 +186,28 @@ export default function Live() {
           </TabsContent>
 
           <TabsContent value="cashout" className="space-y-6">
-            {isMax
-              ? <CashoutAdvisor />
-              : <TierGate required="whale" label="Live Cashout Advisor" description="EV-adjusted cashout recommendations updated every 30 seconds. Know precisely when to cash out vs. ride it out." />
-            }
+            {isMax ? (
+              <Tabs defaultValue="strategies" className="space-y-4">
+                <TabsList className="grid w-full grid-cols-2 max-w-sm">
+                  <TabsTrigger value="strategies" className="gap-1.5 text-[11px]">
+                    <DollarSign className="w-3.5 h-3.5" />
+                    Cashout Engineering
+                  </TabsTrigger>
+                  <TabsTrigger value="live" className="gap-1.5 text-[11px]">
+                    <Activity className="w-3.5 h-3.5" />
+                    Live Advice
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="strategies">
+                  <CashoutStrategiesEngine />
+                </TabsContent>
+                <TabsContent value="live">
+                  <CashoutAdvisor />
+                </TabsContent>
+              </Tabs>
+            ) : (
+              <TierGate required="whale" label="Cashout Engineering™ + Live Advisor" description="Build tickets engineered to force profitable cashout windows — plus EV-adjusted live cashout recommendations updated every 30 seconds." />
+            )}
           </TabsContent>
 
           <TabsContent value="schemes" className="space-y-6">
