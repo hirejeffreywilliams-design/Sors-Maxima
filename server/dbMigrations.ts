@@ -187,6 +187,31 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    // ── Research Notes ────────────────────────────────────────────────────────
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS research_notes (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        title VARCHAR(200) NOT NULL DEFAULT 'Untitled Note',
+        content TEXT NOT NULL DEFAULT '',
+        note_type VARCHAR(30) NOT NULL DEFAULT 'general',
+        sport VARCHAR(20),
+        related_game TEXT,
+        related_pick TEXT,
+        related_team TEXT,
+        tags TEXT[] NOT NULL DEFAULT '{}',
+        pinned BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_rn_user_id ON research_notes(user_id)
+    `);
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_rn_updated_at ON research_notes(updated_at)
+    `);
+
     // ── Community Integrity Tables ──────────────────────────────────────────
     await db.execute(sql`
       ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS card_signature TEXT

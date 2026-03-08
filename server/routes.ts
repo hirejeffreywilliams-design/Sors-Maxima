@@ -12,6 +12,7 @@ import { registerAiRoutes } from "./routes/ai";
 import { registerTicketRoutes } from "./routes/tickets";
 import { registerSorsbooksRoutes } from "./routes/sorsbooks";
 import cardsRouter from "./routes/cards";
+import { registerResearchRoutes } from "./routes/research";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -30,6 +31,7 @@ export async function registerRoutes(
   registerSorsbooksRoutes(app);
   
   app.use("/api/cards", cardsRouter);
+  registerResearchRoutes(app);
 
   return httpServer;
 }

@@ -81,6 +81,7 @@ const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
 const CardsPage = lazy(() => import("@/pages/cards"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
+const ResearchNotesPage = lazy(() => import("@/pages/research-notes"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
@@ -329,6 +330,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/round-robin">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/watchlist" component={WatchlistPage} />
+        <Route path="/research" component={ResearchNotesPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
         <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
         <Route path="/cards" component={CardsPage} />
@@ -360,6 +362,7 @@ interface NavItem {
 // Map every secondary route → { label, parent }
 const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/watchlist":            { label: "Watchlist",            parent: "/" },
+  "/research":             { label: "Research Notes",       parent: "/" },
   "/insights":             { label: "My Insights",          parent: "/" },
   "/track-record":         { label: "Track Record",         parent: "/" },
   "/bankroll":             { label: "Bankroll Manager",     parent: "/" },
@@ -555,6 +558,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
           { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
+          { href: "/research", icon: BookOpen, label: "Research Notes", testId: "mobile-nav-research" },
           { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
         ])}
 
@@ -877,6 +881,7 @@ function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () 
         <Link href="/profile"><DropdownMenuItem className="gap-2 cursor-pointer"><User className="w-4 h-4" />My Profile</DropdownMenuItem></Link>
         <Link href="/track-record"><DropdownMenuItem className="gap-2 cursor-pointer"><BarChart2 className="w-4 h-4" />Track Record</DropdownMenuItem></Link>
         <Link href="/watchlist"><DropdownMenuItem className="gap-2 cursor-pointer"><Eye className="w-4 h-4" />Watchlist</DropdownMenuItem></Link>
+        <Link href="/research"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-research"><BookOpen className="w-4 h-4" />Research Notes</DropdownMenuItem></Link>
         <Link href="/bankroll"><DropdownMenuItem className="gap-2 cursor-pointer"><Wallet className="w-4 h-4" />Bankroll</DropdownMenuItem></Link>
         <Link href="/insights"><DropdownMenuItem className="gap-2 cursor-pointer"><LineChart className="w-4 h-4" />My Insights</DropdownMenuItem></Link>
         <DropdownMenuSeparator />
