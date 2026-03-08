@@ -83,6 +83,7 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
+const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark } from "lucide-react";
@@ -1074,6 +1075,10 @@ function PublicRoutes() {
   if (location === '/pricing') {
     return <Suspense fallback={<PageSpinner />}><Pricing /></Suspense>;
   }
+
+  if (location.startsWith('/c/')) {
+    return <Suspense fallback={<PageSpinner />}><CardVerifyPage /></Suspense>;
+  }
   
   return null;
 }
@@ -1087,7 +1092,7 @@ function AppContent() {
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
-    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email' && location !== '/apply' && location !== '/reset-password',
+    enabled: location !== '/legal' && location !== '/pricing' && location !== '/help' && location !== '/changelog' && location !== '/login' && location !== '/verify-email' && location !== '/apply' && location !== '/reset-password' && !location.startsWith('/c/'),
   });
 
   useUTMCapture();
@@ -1163,6 +1168,14 @@ function AppContent() {
     return (
       <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
         <ApplyPage />
+      </Suspense>
+    );
+  }
+
+  if (location.startsWith('/c/')) {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-zinc-950 flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <CardVerifyPage />
       </Suspense>
     );
   }
