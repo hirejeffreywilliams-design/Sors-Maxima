@@ -428,6 +428,127 @@ router.post("/showcase/toggle", async (req, res) => {
   }
 });
 
+// ─── ADMIN ENDPOINTS ─────────────────────────────────────────────────────────
+
+// GET /api/cards/admin/all — every card ever minted + ownership counts
+router.get("/admin/all", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const allCards = await db
+      .select()
+      .from(tradingCards)
+      .orderBy(desc(tradingCards.createdAt));
+
+    // For each card get ownership details
+    const withOwners = await Promise.all(
+      allCards.map(async (card) => {
+        const owners = await db
+          .select({ userId: userCardCollections.userId, instanceNumber: userCardCollections.instanceNumber, acquiredVia: userCardCollections.acquiredVia, username: users.username })
+          .from(userCardCollections)
+          .innerJoin(users, eq(userCardCollections.userId, users.id))
+          .where(eq(userCardCollections.cardId, card.id));
+        return { ...card, owners };
+      })
+    );
+    res.json(withOwners);
+  } catch (err) {
+    console.error("admin/all cards error:", err);
+    res.status(500).json({ message: "Failed to fetch all cards" });
+  }
+});
+
+// GET /api/cards/admin/stats — mint statistics
+router.get("/admin/stats", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const allCards = await db.select().from(tradingCards);
+    const allCollections = await db.select().from(userCardCollections);
+
+    const bySport: Record<string, number> = {};
+    const byGrade: Record<string, number> = {};
+    let totalCopies = 0;
+    let settledWon = 0;
+    let settledLost = 0;
+
+    for (const c of allCards) {
+      bySport[c.sport] = (bySport[c.sport] || 0) + 1;
+      byGrade[c.grade] = (byGrade[c.grade] || 0) + 1;
+      totalCopies += c.copiesIssued || 0;
+      if (c.settledResult === "won") settledWon++;
+      if (c.settledResult === "lost") settledLost++;
+    }
+
+    res.json({
+      totalCards: allCards.length,
+      totalCopies,
+      totalCollectionEntries: allCollections.length,
+      bySport,
+      byGrade,
+      settledWon,
+      settledLost,
+      pending: allCards.filter((c) => c.settledResult === "pending" || !c.settledResult).length,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch stats" });
+  }
+});
+
+// POST /api/cards/admin/seed — mint demo showcase cards (admin only)
+router.post("/admin/seed", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminUserId = sessionUserId(req);
+  if (!adminUserId) return res.status(400).json({ message: "Admin user ID required" });
+
+  const SEED_CARDS = [
+    { sport: "NBA", pick: "LeBron James Over 28.5 Points", betType: "player_points", odds: -115, confidence: 72, ev: 14.8, grade: "A+", game: "Lakers vs Celtics", maxCopies: 25, settledResult: "won" },
+    { sport: "NHL", pick: "Vegas Golden Knights -1.5", betType: "puck_line", odds: 195, confidence: 68, ev: 22.3, grade: "A", game: "Oilers @ Golden Knights", maxCopies: 50, settledResult: "won" },
+    { sport: "NCAAB", pick: "Kansas Jayhawks -7", betType: "spread", odds: -110, confidence: 65, ev: 11.4, grade: "B+", game: "Kansas vs Texas", maxCopies: 100, settledResult: "pending" },
+    { sport: "NBA", pick: "Stephen Curry Over 5.5 Three Pointers", betType: "player_threes", odds: -120, confidence: 74, ev: 16.2, grade: "A+", game: "Warriors vs Suns", maxCopies: 10, settledResult: "won" },
+    { sport: "NFL", pick: "Patrick Mahomes Over 285.5 Passing Yards", betType: "player_pass_yards", odds: -110, confidence: 69, ev: 13.7, grade: "A", game: "Chiefs @ Raiders", maxCopies: 75, settledResult: "won" },
+    { sport: "NHL", pick: "Colorado Avalanche ML", betType: "moneyline", odds: -135, confidence: 63, ev: 9.8, grade: "B+", game: "Avalanche vs Blues", maxCopies: 200, settledResult: "lost" },
+  ];
+
+  const inserted: any[] = [];
+  for (const seed of SEED_CARDS) {
+    const cardId = `seed-${seed.sport.toLowerCase()}-${crypto.randomBytes(4).toString("hex")}`;
+    try {
+      const [card] = await db.insert(tradingCards).values({
+        id: cardId,
+        sport: seed.sport,
+        pick: seed.pick,
+        betType: seed.betType,
+        odds: seed.odds,
+        confidence: seed.confidence,
+        ev: seed.ev,
+        grade: seed.grade,
+        game: seed.game,
+        gameTime: new Date(Date.now() + 3 * 60 * 60 * 1000),
+        maxCopies: seed.maxCopies,
+        copiesIssued: 1,
+        settledResult: seed.settledResult,
+        createdAt: new Date(),
+      }).onConflictDoNothing().returning();
+
+      if (card) {
+        await db.insert(userCardCollections).values({
+          userId: adminUserId,
+          cardId: card.id,
+          instanceNumber: 1,
+          acquiredVia: "admin_seed",
+          isShowcase: true,
+          isPublicShowcase: true,
+          acquiredAt: new Date(),
+        }).onConflictDoNothing();
+        inserted.push(card);
+      }
+    } catch (e) {
+      // Skip duplicates
+    }
+  }
+
+  res.json({ seeded: inserted.length, cards: inserted });
+});
+
 // POST /api/cards/mint — mint cards from a pick (called by pick engine)
 router.post("/mint", async (req, res) => {
   if (!req.session?.isAuthenticated || !req.session?.userId) return res.sendStatus(401);

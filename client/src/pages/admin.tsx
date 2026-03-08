@@ -65,6 +65,7 @@ import {
   PieChart,
   GitBranch,
   UserPlus,
+  Trophy,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -425,6 +426,7 @@ export default function AdminDashboard() {
     { href: "/admin/assistant",          label: "AI Assistant",           desc: "Chat with admin AI assistant",          icon: Bot },
     { href: "/admin/security",           label: "Security Center",        desc: "Threats, IP blocks, sessions",          icon: Lock },
     { href: "/admin/model-integrity",    label: "Model Integrity",        desc: "ROI, Brier score, calibration",         icon: ShieldAlert },
+    { href: "/admin/cards",              label: "Cards Vault",            desc: "All minted Intelligence Cards, rarity stats & seed tools", icon: Trophy },
     { href: "/admin/community-integrity", label: "Community Integrity",   desc: "Card fraud, Discord abuse, tier bypass",  icon: ShieldAlert },
     { href: "/admin/user-health",        label: "User Health",            desc: "Churn risk, engagement & LTV",          icon: Activity },
     { href: "/admin/api-budget",         label: "API Budget",             desc: "Quota usage & burn rate",               icon: Gauge },

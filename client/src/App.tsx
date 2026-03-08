@@ -63,6 +63,7 @@ const AdminLaunchControl = lazy(() => import("@/pages/admin-launch-control"));
 const AdminOwnerPlaybook = lazy(() => import("@/pages/admin-owner-playbook"));
 const AdminMonetization = lazy(() => import("@/pages/admin-monetization"));
 const AdminCommunityIntegrity = lazy(() => import("@/pages/admin-community-integrity"));
+const AdminCardsVault = lazy(() => import("@/pages/admin-cards"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
@@ -239,6 +240,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/owner-playbook">{() => <AdminGuard component={AdminOwnerPlaybook} authState={authState} />}</Route>
               <Route path="/admin/monetization">{() => <AdminGuard component={AdminMonetization} authState={authState} />}</Route>
               <Route path="/admin/community-integrity">{() => <AdminGuard component={AdminCommunityIntegrity} authState={authState} />}</Route>
+              <Route path="/admin/cards">{() => <AdminGuard component={AdminCardsVault} authState={authState} />}</Route>
               <Route path="/admin/update-planner">{() => <AdminGuard component={AdminUpdatePlanner} authState={authState} />}</Route>
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
@@ -529,6 +531,12 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
                   <span>Admin Center</span>
                 </div>
               </Link>
+              <Link href="/admin/cards" onClick={onClose}>
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin/cards' ? 'bg-amber-500/15 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`} data-testid="mobile-nav-admin-cards">
+                  <Trophy className="w-4 h-4" />
+                  <span>Cards Vault</span>
+                </div>
+              </Link>
             </nav>
           </div>
         )}
@@ -679,6 +687,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
       <NavBtn href="/sorsbooks" icon={Landmark} label="Books" testId="nav-sorsbooks" tooltip="Sors Books — sportsbook intelligence hub" />
       <NavBtn href="/tools" icon={BarChart2} label="Analysis" testId="nav-pro-tools" tooltip="Analytics, calculators & factor tools" />
       <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
+      <NavBtn href="/cards" icon={Trophy} label="Cards" testId="nav-cards" tooltip="Sors Intelligence Cards — collect, trade & showcase" />
       {authState.isAdmin && (
         <Link href="/admin">
           <Button variant={location === "/admin" ? "secondary" : "ghost"} size="sm" className="gap-1.5 text-purple-500" data-testid="nav-admin">

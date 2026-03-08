@@ -1252,6 +1252,62 @@ function formatLCStake(v: number): string {
   return v < 1 ? `$${v.toFixed(2)}` : `$${v % 1 === 0 ? v.toFixed(0) : v.toFixed(2)}`;
 }
 
+// ─── Featured Cards Banner ────────────────────────────────────────────────────
+const SPORT_ICONS: Record<string, string> = { NBA: "🏀", NHL: "🏒", NFL: "🏈", MLB: "⚾", NCAAB: "🏀", MMA: "🥊", SOCCER: "⚽" };
+const PREVIEW_CARDS = [
+  { sport: "NBA", grade: "A+", pick: "LeBron James Over 28.5 Pts" },
+  { sport: "NHL", grade: "A",  pick: "Golden Knights -1.5" },
+  { sport: "NFL", grade: "A+", pick: "Mahomes Over 285.5 Yds" },
+];
+
+function FeaturedCardsBanner() {
+  return (
+    <Link href="/cards">
+      <div
+        className="rounded-2xl border border-amber-400/25 bg-gradient-to-r from-amber-950/40 via-yellow-900/20 to-amber-950/40 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 cursor-pointer group transition-all hover:border-amber-400/50 hover:bg-amber-950/50"
+        data-testid="banner-sors-cards"
+      >
+        {/* Left: icon + text */}
+        <div className="flex items-start gap-3 flex-1">
+          <div className="p-2.5 rounded-xl bg-amber-400/15 border border-amber-400/25 shrink-0">
+            <Trophy className="w-5 h-5 text-amber-400" />
+          </div>
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-amber-300">Sors Intelligence Cards™</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-semibold">NEW</span>
+            </div>
+            <p className="text-xs text-amber-200/70 max-w-md">
+              Collectible cards issued for every top pick — limited copies, grade-matched rarity, holographic finishes. Win big and the card becomes a trophy.
+            </p>
+          </div>
+        </div>
+
+        {/* Middle: preview cards */}
+        <div className="flex gap-2 shrink-0">
+          {PREVIEW_CARDS.map((c, i) => (
+            <div
+              key={i}
+              className="relative rounded-lg border border-amber-400/30 bg-gradient-to-b from-amber-900/40 to-black/60 px-2.5 py-2 text-center w-[90px] shadow-md"
+              style={{ transform: `rotate(${(i - 1) * 3}deg)` }}
+            >
+              <div className="text-lg mb-0.5">{SPORT_ICONS[c.sport] || "🏅"}</div>
+              <div className={`text-[11px] font-black ${c.grade === "A+" ? "text-amber-400" : "text-emerald-400"}`}>{c.grade}</div>
+              <div className="text-[9px] text-amber-200/60 leading-tight mt-0.5 line-clamp-2">{c.pick}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Right: CTA */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-400 group-hover:gap-2.5 transition-all shrink-0">
+          View Collection
+          <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const { data, isLoading, dataUpdatedAt } = useQuery<{ ticket: LifeChangerTicket | null; message?: string }>({
     queryKey: ["/api/life-changer-ticket"],
@@ -2229,6 +2285,9 @@ export default function CommandCenter() {
             </TierGate>
           )
         )}
+
+        {/* ── Sors Intelligence Cards Feature Banner ─────────────────────────── */}
+        <FeaturedCardsBanner />
 
         <Tabs value={activeSportTab} onValueChange={setActiveSportTab}>
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
