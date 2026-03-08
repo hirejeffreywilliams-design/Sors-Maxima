@@ -2306,6 +2306,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       const isApply = /apply|sign.?up|join|register|get.access|application|how.do.i.get|how.to.join|get.started/.test(lc);
       const isOffseason = /offseason|off.season|nfl.draft|free.agency|no.games|no.nfl/.test(lc);
       const isHelp = /help|what.can.you|how.does|guide|explain|what.is|how.do|feature|navigation|where.is|how.to/.test(lc);
+      const isCashout = /cashout|cash.out|cash out|sportsbook sweat|lock.and.roll|lock and roll|lock & roll|steam exit|partial cash|cash.back|exit strategy|sweat builder|sweat score|book.nervous|nervousness|cash my|when to cash|should i cash/.test(lc);
 
       if (isApply) {
         response = `Sors Maxima is members-only — here's how access works:\n\n` +
@@ -2394,6 +2395,52 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       } else if (isLive) {
         const upStr = upcoming.slice(0, 4).map((g: any) => `• ${g.awayTeam?.displayName} @ ${g.homeTeam?.displayName} — ${new Date(g.date || "").toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`).join("\n");
         response = `No games are live right now. Upcoming today:\n\n${upStr || "No upcoming games found."}\n\nThe Momentum tab will auto-populate with live analysis once games start.`;
+      } else if (isCashout) {
+        const sweatQ = /sweat|anchor|pressure leg|sportsbook sweat/.test(lc);
+        const lockQ = /lock.and.roll|lock & roll|progressive|partial|guaranteed|no.loss|zero.loss/.test(lc);
+        const steamQ = /steam exit|clv|closing line|line.move|steam/.test(lc);
+
+        if (sweatQ) {
+          response = `Sportsbook Sweat™ — Cashout Engineering explained:\n\n` +
+            `This is our primary cashout strategy. The concept: build a parlay that creates maximum financial pressure on the sportsbook, then cash out when their nervousness peaks — not when you win outright.\n\n` +
+            `How to structure it:\n` +
+            `• Leg 1–2: ANCHOR legs — heavy favorites at -130 to -200 odds. These are near-locks that build your parlay multiplier.\n` +
+            `• Leg 3–4: PRESSURE legs — underdogs at +120 to +250 odds. Add these at the end.\n\n` +
+            `Why it works:\n` +
+            `When your anchor legs win, the sportsbook's liability grows. They're now praying your underdog legs fail. Their cashout algorithm reflects this nervousness — spiking the offer well above fair mathematical value.\n\n` +
+            `At that moment, you cash out. Typical returns: 40–80% ROI on your original stake — guaranteed, whether the underdogs win or lose.\n\n` +
+            `Use the Sweat Builder in Live Center → Cashout tab to add your legs and see the exact Cashout Ladder and Sportsbook Nervousness Score™ (0–100) after each leg wins.`;
+        } else if (lockQ) {
+          response = `Lock & Roll™ — Progressive Partial Cashout strategy:\n\n` +
+            `This strategy guarantees you cannot lose money on a parlay, regardless of how the final legs go.\n\n` +
+            `The sequence:\n` +
+            `• After Leg 1 wins → Take 30% partial cashout\n` +
+            `• After Leg 2 wins → Take 25% partial cashout (you're now at break-even or better)\n` +
+            `• After Leg 3 wins → The remaining amount is pure upside. Ride it.\n` +
+            `• Final leg → All profit, no more risk.\n\n` +
+            `The math: Each partial cashout "banks" the growing parlay value. The compounding effect ensures that even if the last leg loses, you've already locked in profit from the prior exits.\n\n` +
+            `This is ideal for risk-averse bettors who want parlay upside without parlay downside. Access it in Live Center → Cashout → Lock & Roll™ tab.`;
+        } else if (steamQ) {
+          response = `Steam Exit™ — Closing Line Value cashout strategy:\n\n` +
+            `This strategy exploits line movement to generate CLV profit without needing the full parlay to win.\n\n` +
+            `How it works:\n` +
+            `• Build your ticket on picks where sharp money is already moving the line in your favor.\n` +
+            `• Monitor line movement on remaining legs during the event.\n` +
+            `• When a remaining leg's line moves 5+ points in your favor, the fair value of your cashout position now exceeds what the book charges for it.\n` +
+            `• You cash out and capture that CLV profit — information asymmetry in your favor.\n\n` +
+            `Example: You took a team at -3. The line moves to -6. Your remaining leg has gained significant value. Cash out now and bank that edge — the book hasn't fully updated their cashout model yet.\n\n` +
+            `Find steam picks on the Live Center → Line Value tab. Build your ticket there, then use the Steam Exit™ calculator to see your optimal exit window.`;
+        } else {
+          response = `Cashout Engineering™ — Three strategies, one goal: guaranteed profit windows.\n\n` +
+            `Sors Maxima offers three proprietary cashout strategies in the Live Center → Cashout tab:\n\n` +
+            `1. SPORTSBOOK SWEAT™ — The core strategy.\n` +
+            `   Front-load heavy favorites (anchor legs), add underdogs last (pressure legs). When anchors win, the book's cashout offer spikes due to their growing liability. Cash out at peak book nervousness for 40–80% ROI — whether the underdogs win or lose.\n\n` +
+            `2. LOCK & ROLL™ — Zero-loss guarantee.\n` +
+            `   Take 30% partial after leg 1, 25% after leg 2. You're now at break-even minimum. Remaining legs = pure upside.\n\n` +
+            `3. STEAM EXIT™ — Line movement exploitation.\n` +
+            `   Build on sharp money picks. When remaining lines move 5+ points in your favor, your cashout value exceeds fair mathematical value. Take it and bank the CLV.\n\n` +
+            `Ask me about any of these by name for a full breakdown, or head to Live Center → Cashout tab to use the interactive Sweat Builder.`;
+        }
       } else if (isStrategy) {
         const bySport = Object.entries(stats.bySport || {})
           .sort(([, a]: any, [, b]: any) => b.rate - a.rate)
@@ -2442,6 +2489,8 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           `• "NBA picks" / "NHL strategy" — sport-specific intelligence\n` +
           `• "How is the model performing?" — win rate and grade breakdowns\n` +
           `• "How do I upgrade my plan?" — tier and billing information\n` +
+          `• "How does Cashout Engineering work?" — Sportsbook Sweat™, Lock & Roll™, Steam Exit™\n` +
+          `• "How does Sportsbook Sweat work?" — deep-dive on the primary cashout strategy\n` +
           `• "Help" — full feature guide`;
       }
 

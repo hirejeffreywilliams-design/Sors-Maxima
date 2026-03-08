@@ -209,10 +209,21 @@ Platform features (what members access):
 - Parlay Builder: Custom parlay leg builder and correlation analysis
 - CLV Tracker: Tracks closing line value on user-saved picks (Edge/Max only)
 - Strategy Coach: 9 preset betting strategies with per-leg violation tracking (Edge/Max only)
-- Betting Assistant (AI chat): Keyword-routed intelligence assistant (Edge/Max only)
+- Betting Assistant (AI chat): Keyword-routed intelligence assistant (all paid tiers). Understands cashout strategies.
 - Odds Center: Multi-book odds comparison, line movement, EV heatmap, power rankings
-- Watchlist: Save teams and games for tracking
+- Watchlist / Favorites: Save teams and games for tracking
+- Sors Books Intelligence Hub: Register sportsbooks, track balances, P&L, compare live odds
+- Research Notes: Personal notebook for pick analysis, team notes, parlay builds
+- Collectible Intelligence Cards: Trading card system — system/member/admin_seeded types, rarity grades S+/A+/A/B+/B/C+/C, flip animation, strategy inference on back face
+- Live Center (/live): 10-tab real-time analysis hub — Scores (SSE live feed), Factors, Momentum, Cashout Engineering, Patterns, Hedge, Assistant, Line Value, Sharp, Chat
 - Settings → Membership: View plan, upgrade tier, manage billing via Stripe portal
+
+Cashout Engineering™ (proprietary feature — MAX differentiator):
+Three strategies built to generate guaranteed cashout profit windows rather than full-ticket wins:
+1. Sportsbook Sweat™: Front-load heavy favorites (anchor legs -130 to -200), add underdogs last (pressure legs +120 to +250). When anchors win, book's liability spikes → cashout offer exceeds fair value. Target: 40-80% ROI, whether underdogs win or not. Interactive "Sweat Builder" shows Cashout Ladder and Sportsbook Nervousness Score (0-100).
+2. Lock & Roll™: Progressive partial cashouts. After leg 1: 30% partial. After leg 2: 25% partial (guaranteed no-loss). Remaining legs: pure upside. Zero-loss guarantee on any parlay.
+3. Steam Exit™: Build on sharp-money line-movement picks. When remaining leg lines move 5+ points in your favor, cash out to capture CLV profit without needing full ticket to win.
+Marketing angle: "We don't just teach you to win parlays — we teach you to profit from them before they're over."
 
 Technical systems (do not expose these names or details to members — internal use only):
 - 46-Factor Model: The core prediction engine. Member-facing branding. Never expose vendor names.
@@ -223,6 +234,8 @@ Technical systems (do not expose these names or details to members — internal 
 - App Guardian Engine: Continuous health monitoring, auto-healing.
 - Auto-Settlement Engine: Fetches completed scores and settles pick tracker automatically.
 - Pick Insight Engine (GPT-4o-mini): Generates 1–2 sentence edge insights for top picks — background only.
+- SSE Live Feed: Server-Sent Events on /api/sse/stream. Broadcasts intelligence updates, live scores, odds alerts, sharp signals every 30 seconds. Client auto-reconnects with exponential backoff.
+- Community Integrity Engine: Anti-fraud detection — card velocity abuse, fake card circulation, mass verification bots, credential sharing.
 
 Admin pages:
 - /admin: Main admin dashboard with Intelligence, System, Users, Financials, and Settings tabs
@@ -230,6 +243,8 @@ Admin pages:
 - /admin/launch-control: Pre-launch checklist, maintenance mode toggle, API budget monitor, data pipeline health
 - /admin/owner-playbook: Strategic business guide — Launch Plan, Daily Ops, Growth Strategy, Key Metrics, Legal & Risk
 - /admin/marketing: AI-powered marketing content generator
+- /admin/guidelines: Manage platform rules (create/edit/delete/toggle) + LCT Settlement tab (mark daily LCT as WON/LOST — a WIN auto-mints an S+ grade system card)
+- /admin/cards: Advanced card vault — full management of all collectible intelligence cards (create, edit, delete, feature in Community Showcase)
 
 Email system (Resend):
 - Welcome email: sent on registration (includes 4-step "Start Here" guide)
