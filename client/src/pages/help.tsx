@@ -183,7 +183,7 @@ const FEATURES: Feature[] = [
       "Click Over or Under on any market to add it directly to your slip",
     ],
     tips: [
-      "Full ESPN injury reports now show under each player — check if a key teammate is out (boosts other players' lines)",
+      "Full injury reports now show under each player — check if a key teammate is out (boosts other players' lines)",
       "Props graded A or B+ have the strongest statistical backing from the engine",
       "The 'Top Props' section at the top surfaces the system's highest-confidence props across all players",
     ],
@@ -227,7 +227,7 @@ const FEATURES: Feature[] = [
     where: "Navigation bar → Activity icon (Live). Shows all currently in-progress games sorted by sport.",
     how: [
       "Navigate to Live Center when games are in progress",
-      "Watch score updates refresh every 60 seconds from ESPN's live API",
+      "Watch score updates refresh every 60 seconds from our live data feed",
       "Check momentum indicators — teams on scoring runs often have lagging live spreads",
       "Use the cashout advisor if you have a live bet and want to know whether to hold or exit",
       "Check the hedge calculator to lock in profit on a running parlay",
@@ -297,7 +297,7 @@ const FEATURES: Feature[] = [
     category: "track",
     path: "/profile",
     pathLabel: "Bet Slip → 'Track My Bet' button (login required)",
-    why: "You can't improve what you don't measure. Tracking bets reveals your actual win rate by sport, market type, and confidence tier. The system auto-settles picks from ESPN scores — you don't manage any of it manually.",
+    why: "You can't improve what you don't measure. Tracking bets reveals your actual win rate by sport, market type, and confidence tier. The system auto-settles picks from live final scores — you don't manage any of it manually.",
     when: "Every single time before you place a bet. Click it once, then go to the sportsbook. Results will appear on your Profile automatically within minutes of the game ending.",
     where: "In the Bet Slip (right sidebar on desktop, or open the mobile drawer). The button only shows when you're logged in.",
     how: [
@@ -305,11 +305,11 @@ const FEATURES: Feature[] = [
       "Build any parlay in the slip",
       "Click 'Track My Bet' — a confirmation shows that your picks are recorded",
       "Place the bet at the sportsbook as normal",
-      "Check your Profile to see results — auto-settled from real ESPN final scores",
+      "Check your Profile to see results — auto-settled from live final scores",
       "View your personal win rate by sport, market, and confidence tier over time",
     ],
     tips: [
-      "You do nothing after clicking Track My Bet — the settlement engine checks ESPN every 5 minutes automatically",
+      "You do nothing after clicking Track My Bet — the settlement engine checks live scores every 5 minutes automatically",
       "After 50+ tracked picks, your personal win rate becomes statistically meaningful",
       "Closing Line Value (CLV) is also tracked — it predicts long-term profitability better than win rate alone",
     ],
@@ -323,7 +323,7 @@ const FEATURES: Feature[] = [
     category: "track",
     path: "/track-record",
     pathLabel: "Track Record (from Profile or direct URL)",
-    why: "Every pick the system generates is recorded before the game starts and settled against real ESPN final scores. No cherry-picking, no hiding losses. This is full accountability — you can see exactly how the AI performs before trusting it with real money.",
+    why: "Every pick the system generates is recorded before the game starts and settled against verified final scores. No cherry-picking, no hiding losses. This is full accountability — you can see exactly how the engine performs before trusting it with real money.",
     when: "Before subscribing, review the track record to make an informed decision. Check weekly to confirm the system continues to perform as expected.",
     where: "Accessible from your Profile page or directly at /track-record. Public — no login required.",
     how: [
@@ -433,7 +433,7 @@ const FAQ_ITEMS = [
   {
     category: "Getting Started",
     q: "What sports does the platform cover?",
-    a: "We cover NBA, NFL, MLB, NHL, College Basketball (NCAAB), College Football (NCAAF), Soccer, Tennis, Golf, MMA, Boxing, NASCAR, and WNBA. All game data is sourced from ESPN's live API.",
+    a: "We cover NBA, NFL, MLB, NHL, College Basketball (NCAAB), College Football (NCAAF), Soccer, Tennis, Golf, MMA, Boxing, NASCAR, and WNBA. All game data is sourced from live verified data feeds.",
   },
   {
     category: "Features",

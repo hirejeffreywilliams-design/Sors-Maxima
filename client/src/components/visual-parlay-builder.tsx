@@ -777,7 +777,7 @@ interface TutorialStep {
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Browse Available Games",
-    description: "Games are loaded live from ESPN with real odds. Use sport tabs at the top to switch leagues. Each game card shows matchup, time, and betting markets.",
+    description: "Games are loaded live from our real-time data feed with current odds. Use sport tabs at the top to switch leagues. Each game card shows matchup, time, and betting markets.",
     icon: LayoutGrid,
     iconColor: "text-blue-500",
   },

@@ -244,7 +244,7 @@ export default function TrackRecordPage() {
               <p className="text-sm font-semibold text-blue-400">Methodology & Transparency</p>
               <p className="text-xs text-muted-foreground">
                 Track Record includes backtested picks (45-day historical lookback) and live forward-tracked picks. 
-                Backtested picks use simplified spread/total models against actual ESPN game results to provide a baseline for engine calibration.
+                Backtested picks use simplified spread/total models against verified game results to provide a baseline for engine calibration.
               </p>
             </div>
           </div>

@@ -1895,7 +1895,7 @@ export default function CommandCenter() {
                     className={`hidden sm:inline-flex text-[10px] px-1.5 py-0 ${isMultiBook ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-orange-500/10 border-orange-500/30 text-orange-500"}`}
                     data-testid="indicator-odds-source"
                   >
-                    {isMultiBook ? "Multi-Book" : "ESPN Only"}
+                    {isMultiBook ? "Multi-Book" : "Standard"}
                   </Badge>
                 );
               })()}

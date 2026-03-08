@@ -396,7 +396,7 @@ export function LiveFactorAdjuster() {
         <div className="flex items-start gap-2 px-3 py-2 bg-blue-500/5 border border-blue-500/20 rounded-lg">
           <Info className="w-3.5 h-3.5 text-blue-500 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
-            All 6 factors recalibrate every 30 seconds using ESPN live scores. Cover probability uses game-time-adjusted standard deviation — the less time remaining, the more certain the outcome.
+            All 6 factors recalibrate every 30 seconds using live scores. Cover probability uses game-time-adjusted standard deviation — the less time remaining, the more certain the outcome.
           </p>
         </div>
 

@@ -1922,7 +1922,7 @@ export default function OddsCenter() {
       </Tabs>
 
       <div className="pt-2 text-[10px] text-muted-foreground text-center">
-        Data from ESPN & The Odds API. Odds refresh every 30 seconds. For entertainment purposes only.
+        Live data · Odds refresh every 30 seconds · For entertainment purposes only.
       </div>
     </div>
   );

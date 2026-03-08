@@ -141,34 +141,34 @@ export function IntelligencePipeline() {
               <PipelineLayer
                 step={1}
                 icon={<Database className="w-3 h-3" />}
-                label="Data Ingestion (Every 60 Seconds)"
+                label="Live Data Collection (Every 60 Seconds)"
                 color="text-blue-400"
                 borderColor="border-blue-500/25"
-                outputLabel="Raw game, odds, and player data staged for analysis"
+                outputLabel="Live game, odds, and player data staged for the Sors 46-Factor Engine"
                 nodes={[
-                  { name: "Live Odds", detail: "15+ books, every market, every second", icon: <DollarSign className="w-3 h-3" /> },
-                  { name: "Game Scores", detail: "Real-time scores, period, clock, status", icon: <Activity className="w-3 h-3" /> },
-                  { name: "Team Stats", detail: "Season stats, rolling form, injuries", icon: <BarChart3 className="w-3 h-3" /> },
-                  { name: "Player Data", detail: "Rosters, props, performance trends", icon: <Users className="w-3 h-3" /> },
-                  { name: "Sharp Money", detail: "Professional betting flow vs. public", icon: <TrendingUp className="w-3 h-3" /> },
-                  { name: "Situational", detail: "Rest days, travel, weather, schedule", icon: <Clock className="w-3 h-3" /> },
+                  { name: "Live Market Odds", detail: "15+ sportsbooks · Every line · Every second", icon: <DollarSign className="w-3 h-3" /> },
+                  { name: "Live Scores", detail: "Real-time game scores, clocks, and status", icon: <Activity className="w-3 h-3" /> },
+                  { name: "Team Intelligence", detail: "Season trends, rolling form, situational edge", icon: <BarChart3 className="w-3 h-3" /> },
+                  { name: "Roster Intelligence", detail: "Active rosters, props, performance profiles", icon: <Users className="w-3 h-3" /> },
+                  { name: "Market Signals", detail: "Professional vs. public money flow patterns", icon: <TrendingUp className="w-3 h-3" /> },
+                  { name: "Situational Context", detail: "Rest, travel, schedule density, home/away", icon: <Clock className="w-3 h-3" /> },
                 ]}
               />
 
               <PipelineLayer
                 step={2}
                 icon={<Brain className="w-3 h-3" />}
-                label="46-Factor Analysis (Every 5 Minutes)"
+                label="Sors 46-Factor Engine (Every 5 Minutes)"
                 color="text-purple-400"
                 borderColor="border-purple-500/25"
-                outputLabel="Confidence score, grade (A–F), and expected value per pick"
+                outputLabel="Sors Conviction Score™, grade (A–F), and Intelligence Edge™ per pick"
                 nodes={[
-                  { name: "Prediction Engine", detail: "46 weighted factors → win probability", icon: <Brain className="w-3 h-3" /> },
-                  { name: "Scheme Recognition", detail: "Offensive/defensive tendencies vs. matchup", icon: <Layers className="w-3 h-3" /> },
-                  { name: "Sors Simulation Engine", detail: "10,000–100K path simulations per matchup", icon: <Sparkles className="w-3 h-3" /> },
-                  { name: "Kelly Criterion", detail: "Optimal stake sizing per pick", icon: <Shield className="w-3 h-3" /> },
-                  { name: "CLV Analysis", detail: "Closing line value vs. current number", icon: <TrendingUp className="w-3 h-3" /> },
-                  { name: "Ensemble Blend", detail: "6 expert models weighted by sport", icon: <Zap className="w-3 h-3" /> },
+                  { name: "46-Factor Engine", detail: "Proprietary weighted factor model → win probability", icon: <Brain className="w-3 h-3" /> },
+                  { name: "Scheme Intelligence", detail: "Offensive/defensive tendency vs. matchup type", icon: <Layers className="w-3 h-3" /> },
+                  { name: "Sors Simulation Engine", detail: "Deep path simulation engine per matchup", icon: <Sparkles className="w-3 h-3" /> },
+                  { name: "Bankroll Intelligence", detail: "Optimal stake sizing per Sors Conviction Score™", icon: <Shield className="w-3 h-3" /> },
+                  { name: "Intelligence Closing Value™", detail: "Market Gap™ vs. current number", icon: <TrendingUp className="w-3 h-3" /> },
+                  { name: "Sors Signal™ Blend", detail: "Multi-source intelligence weighted by sport", icon: <Zap className="w-3 h-3" /> },
                 ]}
               />
 
@@ -178,14 +178,14 @@ export function IntelligencePipeline() {
                 label="Pick Output (Continuously Updated)"
                 color="text-green-400"
                 borderColor="border-green-500/25"
-                outputLabel="Grade A–F picks released to your tier, auto-built into tickets"
+                outputLabel="Grade A–F picks released to your tier, auto-built into intelligence tickets"
                 nodes={[
-                  { name: "Ranked Picks", detail: "Confidence-sorted, grade-labeled", icon: <Target className="w-3 h-3" /> },
-                  { name: "Smart Tickets", detail: "Auto-assembled daily parlays", icon: <CheckCircle2 className="w-3 h-3" /> },
-                  { name: "Daily Edge Parlay", detail: "High-value combo picks (Edge+)", icon: <Sparkles className="w-3 h-3" /> },
-                  { name: "Matchup Tickets", detail: "Game-specific correlated leg bundles", icon: <Layers className="w-3 h-3" /> },
+                  { name: "Ranked Picks", detail: "Sors Conviction Score™ sorted, grade-labeled", icon: <Target className="w-3 h-3" /> },
+                  { name: "Smart Tickets", detail: "Auto-assembled daily intelligence parlays", icon: <CheckCircle2 className="w-3 h-3" /> },
+                  { name: "Daily Edge Parlay", detail: "High-edge combo picks (Edge+ tier)", icon: <Sparkles className="w-3 h-3" /> },
+                  { name: "Matchup Intelligence", detail: "Game-specific correlated leg bundles", icon: <Layers className="w-3 h-3" /> },
                   { name: "Tier Release", detail: "Max → Edge → Sharp, staggered timing", icon: <Clock className="w-3 h-3" /> },
-                  { name: "Your Slip", detail: "One click to add any pick or ticket", icon: <CheckCircle2 className="w-3 h-3" /> },
+                  { name: "Your Slip", detail: "One tap to add any pick or ticket", icon: <CheckCircle2 className="w-3 h-3" /> },
                 ]}
               />
             </div>

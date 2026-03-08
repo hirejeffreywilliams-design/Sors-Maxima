@@ -34,11 +34,11 @@ interface TutorialStep {
 const tutorialSteps: TutorialStep[] = [
   {
     title: "Welcome to Sors Maxima",
-    description: "This guide will show you exactly how to generate, read, and pick winning tickets step by step. Every pick is powered by real ESPN game data and live odds from major sportsbooks.",
+    description: "This guide will show you exactly how to generate, read, and pick winning tickets step by step. Every pick is powered by live game data and real-time odds from 15+ major sportsbooks.",
     icon: <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 text-primary" />,
     tips: [
-      "All game data comes live from ESPN (scores, records, rosters)",
-      "Odds are pulled from DraftKings, FanDuel, BetMGM & more",
+      "All game data comes live — scores, records, rosters, and injuries",
+      "Odds are pulled from 15+ major sportsbooks in real time",
       "Our engine analyzes 46 different factors before recommending a pick",
       "Nothing is made up - every number is backed by real data"
     ]

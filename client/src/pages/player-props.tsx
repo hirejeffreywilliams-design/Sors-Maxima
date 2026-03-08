@@ -1132,7 +1132,7 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
 }
 
 export default function PlayerPropsPage() {
-  useSEO({ title: "Player Props — Over/Under", description: "Real-time player prop over/under picks from The Odds API" });
+  useSEO({ title: "Player Props — Over/Under", description: "Real-time player prop over/under picks powered by Sors Intelligence" });
   const [selectedSport, setSelectedSport] = useState("NBA");
   const [searchQuery, setSearchQuery] = useState("");
   const [marketFilter, setMarketFilter] = useState("All");

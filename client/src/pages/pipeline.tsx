@@ -94,7 +94,7 @@ interface VisualNode {
 }
 
 interface VisualStatus {
-  nodes: Record<string, { status: string; label: string; detail: string }>;
+  nodes: Record<string, { status: string; label: string; detail: string; metrics?: { a: string; b: string; c?: string } }>;
   summary: { totalNodes: number; liveNodes: number; degradedNodes: number; offlineNodes: number; unknownNodes: number };
   lastUpdated: string;
 }
@@ -107,35 +107,39 @@ interface DiagnosisResult {
   recommendations: string[];
 }
 
+// Node height 96px — enough for 3 sub-compartment rows + title
+const NODE_H = 96;
+const ROW_Y = [28, 256, 484, 712];
+
 const MAP_NODES: Record<string, VisualNode> = {
-  "espn":           { x: 20,   y: 24,  w: 128, h: 50, row: 0, label: "ESPN Live",           sublabel: "Scores · Rosters",    layer: "Data Sources" },
-  "odds-api":       { x: 190,  y: 24,  w: 128, h: 50, row: 0, label: "The Odds API",         sublabel: "Multi-book Odds",     layer: "Data Sources" },
-  "bdl":            { x: 360,  y: 24,  w: 128, h: 50, row: 0, label: "BallDontLie",          sublabel: "NBA/NFL/MLB Stats",   layer: "Data Sources" },
-  "nhl-stats":      { x: 530,  y: 24,  w: 128, h: 50, row: 0, label: "NHL Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
-  "mlb-stats":      { x: 700,  y: 24,  w: 128, h: 50, row: 0, label: "MLB Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
-  "api-football":   { x: 872,  y: 24,  w: 148, h: 50, row: 0, label: "API-Football",         sublabel: "16 Soccer Leagues",   layer: "Data Sources" },
-  "openai":         { x: 1072, y: 24,  w: 128, h: 50, row: 0, label: "OpenAI",               sublabel: "AI Insights",         layer: "Data Sources" },
+  "espn":           { x: 20,   y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "ESPN Live",           sublabel: "Scores · Rosters",    layer: "Data Sources" },
+  "odds-api":       { x: 190,  y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "The Odds API",         sublabel: "Multi-book Odds",     layer: "Data Sources" },
+  "bdl":            { x: 360,  y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "BallDontLie",          sublabel: "NBA/NFL/MLB Stats",   layer: "Data Sources" },
+  "nhl-stats":      { x: 530,  y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "NHL Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
+  "mlb-stats":      { x: 700,  y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "MLB Stats API",        sublabel: "Team & Player Data",  layer: "Data Sources" },
+  "api-football":   { x: 872,  y: ROW_Y[0], w: 148, h: NODE_H, row: 0, label: "API-Football",         sublabel: "16 Soccer Leagues",   layer: "Data Sources" },
+  "openai":         { x: 1072, y: ROW_Y[0], w: 128, h: NODE_H, row: 0, label: "OpenAI GPT-4o",        sublabel: "AI Insights",         layer: "Data Sources" },
 
-  "precomputed":    { x: 20,   y: 188, w: 155, h: 50, row: 1, label: "Predictions Engine",   sublabel: "46-Factor Model",     layer: "Core Engines" },
-  "intel-hub":      { x: 222,  y: 188, w: 148, h: 50, row: 1, label: "Intelligence Hub",     sublabel: "60-sec Cycle",        layer: "Core Engines" },
-  "team-form":      { x: 418,  y: 188, w: 148, h: 50, row: 1, label: "Team Form Engine",     sublabel: "60d Historical",      layer: "Core Engines" },
-  "situational":    { x: 614,  y: 188, w: 160, h: 50, row: 1, label: "Situational Analysis", sublabel: "Rest · B2B · Travel", layer: "Core Engines" },
-  "two-way":        { x: 822,  y: 188, w: 172, h: 50, row: 1, label: "Two-Way Intelligence", sublabel: "Roster Stability",    layer: "Core Engines" },
-  "vegas-engine":   { x: 1042, y: 188, w: 158, h: 50, row: 1, label: "Vegas Engine",         sublabel: "Power Ratings",       layer: "Core Engines" },
+  "precomputed":    { x: 20,   y: ROW_Y[1], w: 155, h: NODE_H, row: 1, label: "Predictions Engine",   sublabel: "46-Factor Model",     layer: "Core Engines" },
+  "intel-hub":      { x: 222,  y: ROW_Y[1], w: 148, h: NODE_H, row: 1, label: "Intelligence Hub",     sublabel: "60-sec Cycle",        layer: "Core Engines" },
+  "team-form":      { x: 418,  y: ROW_Y[1], w: 148, h: NODE_H, row: 1, label: "Team Form Engine",     sublabel: "60d Historical",      layer: "Core Engines" },
+  "situational":    { x: 614,  y: ROW_Y[1], w: 160, h: NODE_H, row: 1, label: "Situational Analysis", sublabel: "Rest · B2B · Travel", layer: "Core Engines" },
+  "two-way":        { x: 822,  y: ROW_Y[1], w: 172, h: NODE_H, row: 1, label: "Two-Way Intelligence", sublabel: "Roster Stability",    layer: "Core Engines" },
+  "vegas-engine":   { x: 1042, y: ROW_Y[1], w: 158, h: NODE_H, row: 1, label: "Vegas Engine",         sublabel: "Power Ratings",       layer: "Core Engines" },
 
-  "mma-engine":     { x: 20,   y: 352, w: 132, h: 50, row: 2, label: "MMA Engine",           sublabel: "UFC/MMA Odds & EV",   layer: "Specialized" },
-  "intl-sports":    { x: 200,  y: 352, w: 152, h: 50, row: 2, label: "Intl Sports Engine",   sublabel: "Soccer Fixtures",     layer: "Specialized" },
-  "pick-insight":   { x: 402,  y: 352, w: 160, h: 50, row: 2, label: "Pick Insight Engine",  sublabel: "AI Sharp Insights",   layer: "Specialized" },
-  "correlation":    { x: 614,  y: 352, w: 162, h: 50, row: 2, label: "Correlation Engine",   sublabel: "Slip Analysis 0–100", layer: "Specialized" },
-  "usml":           { x: 828,  y: 352, w: 128, h: 50, row: 2, label: "USML Meta-Learner",    sublabel: "6-Source Ensemble",   layer: "Specialized" },
-  "life-changer":   { x: 1008, y: 352, w: 192, h: 50, row: 2, label: "Daily Edge Parlay",     sublabel: "5-Sport Pool",       layer: "Specialized" },
+  "mma-engine":     { x: 20,   y: ROW_Y[2], w: 132, h: NODE_H, row: 2, label: "MMA/UFC Engine",       sublabel: "UFC/MMA Odds & EV",   layer: "Specialized" },
+  "intl-sports":    { x: 200,  y: ROW_Y[2], w: 152, h: NODE_H, row: 2, label: "Intl Sports Engine",   sublabel: "Soccer Fixtures",     layer: "Specialized" },
+  "pick-insight":   { x: 402,  y: ROW_Y[2], w: 160, h: NODE_H, row: 2, label: "Pick Insight Engine",  sublabel: "AI Sharp Insights",   layer: "Specialized" },
+  "correlation":    { x: 614,  y: ROW_Y[2], w: 162, h: NODE_H, row: 2, label: "Correlation Engine",   sublabel: "Slip Analysis 0–100", layer: "Specialized" },
+  "usml":           { x: 828,  y: ROW_Y[2], w: 128, h: NODE_H, row: 2, label: "USML Meta-Learner",    sublabel: "6-Source Ensemble",   layer: "Specialized" },
+  "life-changer":   { x: 1008, y: ROW_Y[2], w: 192, h: NODE_H, row: 2, label: "Daily Edge Parlay",    sublabel: "5-Sport Pool",        layer: "Specialized" },
 
-  "command-center": { x: 20,   y: 516, w: 168, h: 50, row: 3, label: "Command Center",       sublabel: "Today's Picks",       layer: "User Features" },
-  "bet-slip":       { x: 238,  y: 516, w: 128, h: 50, row: 3, label: "Bet Slip",             sublabel: "Multi-Slip · Parlay", layer: "User Features" },
-  "ticket-vars":    { x: 420,  y: 516, w: 160, h: 50, row: 3, label: "Ticket Variations",    sublabel: "5 Strategy Blueprints",layer: "User Features" },
-  "daily-picks":    { x: 634,  y: 516, w: 142, h: 50, row: 3, label: "Daily Picks",          sublabel: "All Sports Feed",     layer: "User Features" },
-  "odds-center":    { x: 834,  y: 516, w: 152, h: 50, row: 3, label: "Odds Center",          sublabel: "EV · Lines · Comparison",layer:"User Features"},
-  "player-props":   { x: 1042, y: 516, w: 158, h: 50, row: 3, label: "Player Props",         sublabel: "Over/Under Lines",    layer: "User Features" },
+  "command-center": { x: 20,   y: ROW_Y[3], w: 168, h: NODE_H, row: 3, label: "Command Center",       sublabel: "Today's Picks",       layer: "User Features" },
+  "bet-slip":       { x: 238,  y: ROW_Y[3], w: 128, h: NODE_H, row: 3, label: "Bet Slip",             sublabel: "Multi-Slip · Parlay", layer: "User Features" },
+  "ticket-vars":    { x: 420,  y: ROW_Y[3], w: 160, h: NODE_H, row: 3, label: "Ticket Variations",    sublabel: "5 Strategy Blueprints",layer: "User Features" },
+  "daily-picks":    { x: 634,  y: ROW_Y[3], w: 142, h: NODE_H, row: 3, label: "Daily Picks",          sublabel: "All Sports Feed",     layer: "User Features" },
+  "odds-center":    { x: 834,  y: ROW_Y[3], w: 152, h: NODE_H, row: 3, label: "Odds Center",          sublabel: "EV · Lines · Comparison",layer:"User Features"},
+  "player-props":   { x: 1042, y: ROW_Y[3], w: 158, h: NODE_H, row: 3, label: "Player Props",         sublabel: "Over/Under Lines",    layer: "User Features" },
 };
 
 const MAP_CONNECTIONS: [string, string][] = [
@@ -246,12 +250,18 @@ function PipelineConnectionMap() {
   const getNodeStyle = (id: string) => STATUS_NODE_STYLES[getNodeStatus(id)] ?? STATUS_NODE_STYLES.unknown;
 
   const CANVAS_W = 1220;
-  const CANVAS_H = 610;
+  const CANVAS_H = ROW_Y[3] + NODE_H + 50; // dynamic based on node positions
 
   const priorityColors: Record<string, string> = {
     none: "emerald", low: "blue", medium: "yellow", high: "orange", critical: "red",
   };
   const pc = priorityColors[diagnosis?.priority ?? "none"] ?? "blue";
+
+  // Offline / degraded connections highlighted in hover panel
+  const disconnectedEdges = MAP_CONNECTIONS.filter(([from]) => {
+    const s = getNodeStatus(from);
+    return s === "offline" || s === "degraded";
+  });
 
   return (
     <div className="space-y-4" data-testid="pipeline-connection-map">
@@ -266,15 +276,25 @@ function PipelineConnectionMap() {
                 {summary.liveNodes}/{summary.totalNodes} live
               </Badge>
             )}
+            {summary && summary.offlineNodes > 0 && (
+              <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-red-500/40 text-red-400">
+                {summary.offlineNodes} offline
+              </Badge>
+            )}
+            {summary && summary.degradedNodes > 0 && (
+              <Badge variant="outline" className="text-[10px] h-4 px-1.5 border-yellow-500/40 text-yellow-400">
+                {summary.degradedNodes} degraded
+              </Badge>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Real-time view of all 26 nodes — data sources, engines, and user features. Updates every 6 seconds.
+            26 nodes with live sub-compartment metrics — data sources, engines, user features. Updates every 6 seconds.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {dataUpdatedAt > 0 && (
             <span className="text-[10px] text-muted-foreground">
-              Updated {new Date(dataUpdatedAt).toLocaleTimeString()}
+              {new Date(dataUpdatedAt).toLocaleTimeString()}
             </span>
           )}
           <Button
@@ -296,21 +316,34 @@ function PipelineConnectionMap() {
       <div className="flex flex-wrap items-center gap-4 text-[11px] text-muted-foreground">
         {(["live","cached","degraded","offline","unknown"] as const).map(s => (
           <span key={s} className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${STATUS_NODE_STYLES[s].dot}`} />
+            <span className={`w-2.5 h-2.5 rounded-full ${STATUS_NODE_STYLES[s].dot}`} />
             {s.charAt(0).toUpperCase() + s.slice(1)}
           </span>
         ))}
-        <span className="ml-auto text-[10px] flex items-center gap-3">
+        <span className="ml-auto text-[10px] hidden sm:flex items-center gap-3">
           {Object.entries(LAYER_COLORS).map(([layer, cls]) => (
-            <span key={layer} className={`font-medium ${cls}`}>{layer}</span>
+            <span key={layer} className={`font-semibold ${cls}`}>{layer}</span>
           ))}
         </span>
       </div>
 
+      {/* Disconnect alert banner */}
+      {disconnectedEdges.length > 0 && !isLoading && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-red-500/25 bg-red-500/5 text-xs text-red-400">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span className="font-medium">
+            {disconnectedEdges.length} pipeline connection{disconnectedEdges.length > 1 ? "s" : ""} degraded or offline.{" "}
+            <span className="text-muted-foreground font-normal">
+              Affected: {[...new Set(disconnectedEdges.map(([f]) => MAP_NODES[f]?.label ?? f))].join(", ")}
+            </span>
+          </span>
+        </div>
+      )}
+
       {/* SVG Diagram */}
-      <div className="relative border rounded-lg bg-card/40 overflow-x-auto">
+      <div className="relative border rounded-xl bg-card/30 overflow-x-auto">
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10 rounded-lg">
+          <div className="absolute inset-0 flex items-center justify-center bg-background/70 z-10 rounded-xl">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <RefreshCw className="h-4 w-4 animate-spin" />
               Loading pipeline data…
@@ -325,18 +358,21 @@ function PipelineConnectionMap() {
             className="block"
             style={{ maxWidth: "100%" }}
           >
-            {/* Layer labels */}
+            {/* Layer band backgrounds */}
             {[
-              { y: 10, label: "EXTERNAL DATA SOURCES", color: "#60a5fa" },
-              { y: 174, label: "CORE PROCESSING ENGINES", color: "#a78bfa" },
-              { y: 338, label: "SPECIALIZED INTELLIGENCE ENGINES", color: "#fbbf24" },
-              { y: 502, label: "USER-FACING FEATURES", color: "#34d399" },
-            ].map(({ y, label, color }) => (
-              <text key={label} x={CANVAS_W / 2} y={y} textAnchor="middle" fill={color}
-                fontSize="9" fontWeight="600" letterSpacing="1.5" opacity="0.7"
-                style={{ userSelect: "none" }}>
-                {label}
-              </text>
+              { y: ROW_Y[0] - 20, h: NODE_H + 36, color: "#60a5fa", label: "EXTERNAL DATA SOURCES" },
+              { y: ROW_Y[1] - 20, h: NODE_H + 36, color: "#a78bfa", label: "CORE PROCESSING ENGINES" },
+              { y: ROW_Y[2] - 20, h: NODE_H + 36, color: "#fbbf24", label: "SPECIALIZED INTELLIGENCE ENGINES" },
+              { y: ROW_Y[3] - 20, h: NODE_H + 36, color: "#34d399", label: "USER-FACING FEATURES" },
+            ].map(({ y, h, color, label }) => (
+              <g key={label}>
+                <rect x={0} y={y} width={CANVAS_W} height={h} fill={color} fillOpacity={0.025} rx={0} />
+                <text x={CANVAS_W / 2} y={y + 13} textAnchor="middle" fill={color}
+                  fontSize="8.5" fontWeight="700" letterSpacing="2" opacity={0.6}
+                  style={{ userSelect: "none" }}>
+                  {label}
+                </text>
+              </g>
             ))}
 
             {/* Connection edges */}
@@ -345,69 +381,123 @@ function PipelineConnectionMap() {
               const status = getNodeStatus(from);
               const color = STATUS_EDGE_COLOR[status] ?? STATUS_EDGE_COLOR.unknown;
               const isHoveredSource = hoveredNode === from || hoveredNode === to;
+              const isOffline = status === "offline";
+              const isDegraded = status === "degraded";
               return (
                 <path
                   key={`${from}-${to}`}
                   d={d}
                   fill="none"
                   stroke={color}
-                  strokeWidth={isHoveredSource ? 2 : 1}
-                  strokeOpacity={isHoveredSource ? 0.9 : 0.3}
-                  strokeDasharray={status === "offline" ? "4 3" : status === "unknown" ? "2 3" : "none"}
+                  strokeWidth={isHoveredSource ? 2.5 : isOffline ? 1 : 1.2}
+                  strokeOpacity={isHoveredSource ? 1 : isOffline ? 0.5 : 0.28}
+                  strokeDasharray={isOffline ? "5 4" : isDegraded ? "3 3" : "none"}
                   style={{ transition: "stroke-opacity 0.2s, stroke-width 0.2s" }}
                 />
               );
             })}
 
-            {/* Nodes */}
+            {/* Flow particles on live connections */}
+            {MAP_CONNECTIONS.filter(([from]) => getNodeStatus(from) === "live").map(([from, to], i) => {
+              const d = getConnectionPath(from, to);
+              if (!d) return null;
+              return (
+                <circle key={`particle-${from}-${to}`} r="2.5" fill={STATUS_EDGE_COLOR["live"]} opacity={0.8}>
+                  <animateMotion
+                    dur={`${2.2 + (i % 5) * 0.4}s`}
+                    begin={`${(i % 8) * 0.35}s`}
+                    repeatCount="indefinite"
+                    path={d}
+                  />
+                </circle>
+              );
+            })}
+
+            {/* Nodes with sub-compartments */}
             {Object.entries(MAP_NODES).map(([id, node]) => {
               const status = getNodeStatus(id);
-              const style = getNodeStyle(id);
               const nodeData = nodes[id];
               const isHovered = hoveredNode === id;
               const isConnected = hoveredNode
                 ? MAP_CONNECTIONS.some(([f, t]) => (f === hoveredNode && t === id) || (t === hoveredNode && f === id))
                 : false;
               const dimmed = hoveredNode && !isHovered && !isConnected;
+              const edgeColor = STATUS_EDGE_COLOR[status] ?? "#6b7280";
+              const metrics = nodeData?.metrics;
 
               return (
                 <g
                   key={id}
                   transform={`translate(${node.x}, ${node.y})`}
-                  style={{ cursor: "pointer", opacity: dimmed ? 0.35 : 1, transition: "opacity 0.15s" }}
+                  style={{ cursor: "pointer", opacity: dimmed ? 0.25 : 1, transition: "opacity 0.15s" }}
                   onMouseEnter={() => setHoveredNode(id)}
                   onMouseLeave={() => setHoveredNode(null)}
                   data-testid={`node-${id}`}
                 >
+                  {/* Shadow on hover */}
+                  {isHovered && (
+                    <rect x={-2} y={-2} width={node.w + 4} height={node.h + 4} rx={8}
+                      fill={edgeColor} fillOpacity={0.08} />
+                  )}
+
+                  {/* Main card */}
                   <rect
                     x={0} y={0} width={node.w} height={node.h} rx={6}
-                    fill={isHovered || isConnected ? "hsl(var(--card))" : "hsl(var(--card))"}
-                    fillOpacity={isHovered ? 1 : 0.85}
-                    stroke={isHovered ? (STATUS_EDGE_COLOR[status] ?? "#6b7280") : (status === "live" ? "#10b98130" : status === "offline" ? "#ef444440" : "#6b728030")}
-                    strokeWidth={isHovered ? 1.5 : 1}
+                    fill="hsl(var(--card))"
+                    fillOpacity={isHovered ? 1 : 0.9}
+                    stroke={edgeColor}
+                    strokeWidth={isHovered ? 1.5 : 0.8}
+                    strokeOpacity={isHovered ? 0.8 : (status === "live" ? 0.35 : status === "offline" ? 0.5 : 0.2)}
                   />
-                  {/* Status dot */}
-                  <circle
-                    cx={node.w - 8} cy={8} r={3.5}
-                    fill={STATUS_EDGE_COLOR[status] ?? "#6b7280"}
-                    opacity={0.9}
-                  >
+
+                  {/* Top status stripe */}
+                  <rect x={0} y={0} width={node.w} height={3} rx={3}
+                    fill={edgeColor} opacity={status === "live" ? 0.7 : status === "offline" ? 0.9 : 0.5} />
+
+                  {/* Pulsing status dot */}
+                  <circle cx={node.w - 9} cy={13} r={4} fill={edgeColor} opacity={0.9}>
                     {status === "live" && (
-                      <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.5s" repeatCount="indefinite" />
+                    )}
+                    {status === "offline" && (
+                      <animate attributeName="r" values="4;3;4" dur="1.5s" repeatCount="indefinite" />
                     )}
                   </circle>
-                  {/* Label */}
-                  <text x={8} y={20} fill="hsl(var(--foreground))" fontSize="9.5" fontWeight="600"
+
+                  {/* Title */}
+                  <text x={7} y={17} fill="hsl(var(--foreground))" fontSize="9.5" fontWeight="700"
                     style={{ userSelect: "none" }}>
-                    {node.label}
+                    {node.label.length > 16 ? node.label.slice(0, 15) + "…" : node.label}
                   </text>
-                  {/* Sublabel */}
-                  <text x={8} y={34} fill="hsl(var(--muted-foreground))" fontSize="8"
+
+                  {/* Divider after title */}
+                  <line x1={7} y1={22} x2={node.w - 7} y2={22} stroke="hsl(var(--border))" strokeWidth={0.5} opacity={0.5} />
+
+                  {/* Sub-compartment A — primary metric */}
+                  <text x={7} y={33} fill={edgeColor} fontSize="8" fontWeight="600"
                     style={{ userSelect: "none" }}>
-                    {nodeData?.detail?.slice(0, 30) ?? node.sublabel}
+                    {(metrics?.a ?? node.sublabel).slice(0, Math.floor(node.w / 5.5))}
                   </text>
-                  {/* Status text */}
-                  <text x={8} y={46} fill={STATUS_EDGE_COLOR[status] ?? "#6b7280"} fontSize="7.5" fontWeight="500"
+
+                  {/* Sub-compartment B — secondary metric */}
+                  <text x={7} y={46} fill="hsl(var(--muted-foreground))" fontSize="7.5"
+                    style={{ userSelect: "none" }}>
+                    {(metrics?.b ?? "").slice(0, Math.floor(node.w / 5))}
+                  </text>
+
+                  {/* Divider before status */}
+                  <line x1={7} y1={54} x2={node.w - 7} y2={54} stroke="hsl(var(--border))" strokeWidth={0.4} opacity={0.35} />
+
+                  {/* Sub-compartment C — tertiary metric */}
+                  <text x={7} y={65} fill="hsl(var(--muted-foreground))" fontSize="7"
+                    style={{ userSelect: "none" }} opacity={0.75}>
+                    {(metrics?.c ?? "").slice(0, Math.floor(node.w / 4.8))}
+                  </text>
+
+                  {/* Status badge */}
+                  <rect x={7} y={73} width={40} height={13} rx={3}
+                    fill={edgeColor} fillOpacity={0.15} />
+                  <text x={11} y={83} fill={edgeColor} fontSize="7" fontWeight="700"
                     style={{ userSelect: "none" }}>
                     {status.toUpperCase()}
                   </text>
@@ -418,25 +508,44 @@ function PipelineConnectionMap() {
         </div>
       </div>
 
-      {/* Hovered node detail tooltip */}
+      {/* Hovered node detail panel */}
       {hoveredNode && nodes[hoveredNode] && (
-        <div className="rounded-lg border bg-card/80 px-4 py-3 text-sm animate-in fade-in slide-in-from-bottom-1 duration-150">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className={`w-2 h-2 rounded-full ${STATUS_NODE_STYLES[nodes[hoveredNode].status]?.dot ?? "bg-muted-foreground"}`} />
-                <span className="font-semibold">{nodes[hoveredNode].label}</span>
-                <Badge variant="outline" className="text-[10px] h-4 px-1.5 capitalize">
+        <div className="rounded-xl border bg-card/90 px-4 py-3 space-y-2 animate-in fade-in slide-in-from-bottom-1 duration-150">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`w-2.5 h-2.5 rounded-full ${STATUS_NODE_STYLES[nodes[hoveredNode].status]?.dot ?? "bg-muted-foreground"}`} />
+                <span className="font-bold text-sm">{nodes[hoveredNode].label}</span>
+                <Badge variant="outline" className="text-[10px] h-5 px-2 capitalize">
                   {nodes[hoveredNode].status}
                 </Badge>
+                <span className="text-[10px] text-muted-foreground/60">{MAP_NODES[hoveredNode]?.layer}</span>
               </div>
               <p className="text-xs text-muted-foreground">{nodes[hoveredNode].detail}</p>
             </div>
-            <div className="text-[10px] text-muted-foreground shrink-0">
-              <div>Inputs: {MAP_CONNECTIONS.filter(([, t]) => t === hoveredNode).map(([f]) => MAP_NODES[f]?.label ?? f).join(", ") || "—"}</div>
-              <div>Outputs: {MAP_CONNECTIONS.filter(([f]) => f === hoveredNode).map(([, t]) => MAP_NODES[t]?.label ?? t).join(", ") || "—"}</div>
+            <div className="text-[10px] text-muted-foreground grid grid-cols-2 gap-x-6 gap-y-0.5 shrink-0">
+              <div>
+                <span className="font-semibold text-muted-foreground/50 uppercase tracking-wide block">Inputs from</span>
+                {MAP_CONNECTIONS.filter(([, t]) => t === hoveredNode).map(([f]) => MAP_NODES[f]?.label ?? f).join(", ") || "—"}
+              </div>
+              <div>
+                <span className="font-semibold text-muted-foreground/50 uppercase tracking-wide block">Feeds into</span>
+                {MAP_CONNECTIONS.filter(([f]) => f === hoveredNode).map(([, t]) => MAP_NODES[t]?.label ?? t).join(", ") || "—"}
+              </div>
             </div>
           </div>
+          {nodes[hoveredNode].metrics && (
+            <div className="grid grid-cols-3 gap-2 pt-1 border-t border-border/40">
+              {[nodes[hoveredNode].metrics!.a, nodes[hoveredNode].metrics!.b, nodes[hoveredNode].metrics!.c].filter(Boolean).map((m, i) => (
+                <div key={i} className="rounded-lg bg-muted/30 px-2.5 py-1.5">
+                  <p className="text-[10px] text-muted-foreground/50 uppercase tracking-wider font-bold">
+                    {i === 0 ? "Data Coverage" : i === 1 ? "Performance" : "Features"}
+                  </p>
+                  <p className="text-[11px] text-foreground/80 font-medium mt-0.5">{m}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
