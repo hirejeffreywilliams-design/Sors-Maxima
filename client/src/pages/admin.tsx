@@ -403,6 +403,7 @@ export default function AdminDashboard() {
     { href: "/admin/autonomous", label: "Autonomous Monitor", desc: "24/7 AI health watch", icon: Brain },
     { href: "/admin/model-integrity", label: "Model Integrity", desc: "ROI, Brier score, calibration", icon: ShieldAlert },
     { href: "/admin/api-budget", label: "API Budget", desc: "Quota usage & burn rate", icon: Gauge },
+    { href: "/admin/ip-registry", label: "IP Registry", desc: "IP assets, lexicon & business plan", icon: Shield },
     { href: "/admin/launch-control", label: "Launch Control", desc: "Pre-launch checklist", icon: Rocket },
     { href: "/admin/update-planner", label: "Update Planner", desc: "Bugs, features & ideas", icon: ListTodo },
     { href: "/admin/owner-playbook", label: "Owner's Playbook", desc: "Ops, growth & legal guide", icon: BookOpen },

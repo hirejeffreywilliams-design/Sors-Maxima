@@ -173,7 +173,7 @@ export function EdgeFinder({ sport: sportProp }: EdgeFinderProps) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
             <Zap className="w-5 h-5 text-yellow-500" />
-            Edge Finder
+            Intelligence Edge™ Finder
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -192,7 +192,7 @@ export function EdgeFinder({ sport: sportProp }: EdgeFinderProps) {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
             <Zap className="w-5 h-5 text-yellow-500" />
-            Edge Finder
+            Intelligence Edge™ Finder
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -209,7 +209,7 @@ export function EdgeFinder({ sport: sportProp }: EdgeFinderProps) {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
           <Zap className="w-5 h-5 text-yellow-500" />
-          Edge Finder
+          Intelligence Edge™ Finder
           {data?.meta && (
             <Badge variant="outline" className="text-xs font-normal">
               {data.meta.gamesWithOdds}/{data.meta.totalGames} games with odds
@@ -410,7 +410,7 @@ export function EdgeFinder({ sport: sportProp }: EdgeFinderProps) {
                         <div className="flex justify-between items-start mb-2 gap-2 flex-wrap">
                           <span className="text-sm font-medium">{game.shortName}</span>
                           <Badge className="bg-purple-500 text-white">
-                            {ev > 0 ? "+" : ""}{ev.toFixed(2)} EV
+                            {ev > 0 ? "+" : ""}{ev.toFixed(2)} Intelligence Edge™
                           </Badge>
                         </div>
                         <div className="text-xs space-y-1">

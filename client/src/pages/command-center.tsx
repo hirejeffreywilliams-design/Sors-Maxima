@@ -39,6 +39,7 @@ import { OffseasonPanel } from "@/components/offseason-panel";
 import { PickTrackNudge } from "@/components/pick-track-nudge";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { TicketShowcase } from "@/components/ticket-showcase";
+import { MobileTicketDeck } from "@/components/mobile-ticket-deck";
 import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 
 interface TopPick {
@@ -123,7 +124,7 @@ function CompactPickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: st
         </div>
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground">
-            <span>Confidence</span>
+            <span>Sors Conviction Score™</span>
             <span>{pick.confidence}%</span>
           </div>
           <Progress value={pick.confidence} className="h-1" />
@@ -447,7 +448,7 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
                 <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${sportColor(leg.sport)}`}>{leg.sport}</Badge>
                 <span className="font-medium truncate flex-1">{leg.outcome}</span>
                 <span className="font-mono text-muted-foreground shrink-0">{formatOdds(leg.americanOdds)}</span>
-                <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${gradeBg(leg.grade)}`}>{leg.grade}</Badge>
+                <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 bg-muted/50 text-muted-foreground border-muted">{leg.grade}</Badge>
                 {inSlip && <Check className="w-3 h-3 text-primary shrink-0" />}
               </div>
             );
@@ -464,9 +465,9 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
         </div>
 
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span>Confidence: {ticket.combinedConfidence}%</span>
+          <span>Sors Conviction Score™: {ticket.combinedConfidence}%</span>
           <span className="text-muted-foreground/30">|</span>
-          <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 35 ? "35%+" : (ticket.combinedEV > 0 ? "+" : "") + ticket.combinedEV + "%"}</span>
+          <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>Intelligence Edge™: {ticket.combinedEV > 35 ? "35%+" : (ticket.combinedEV > 0 ? "+" : "") + ticket.combinedEV + "%"}</span>
           <span className="text-muted-foreground/30">|</span>
           <span>Win Prob: {ticket.winProbability}%</span>
         </div>
@@ -936,7 +937,7 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
                   <span className="text-[10px] font-mono text-muted-foreground">{formatOdds(leg.americanOdds)}</span>
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0">
-                  <Badge variant="outline" className={`text-[9px] px-1 py-0 ${gradeBg(leg.grade)}`}>{leg.grade}</Badge>
+                  <Badge variant="outline" className="text-[9px] px-1 py-0 bg-muted/50 text-muted-foreground border-muted">{leg.grade}</Badge>
                   {inSlip && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                 </div>
               </div>
@@ -1298,7 +1299,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base font-bold text-amber-300 leading-tight">Daily Edge Parlay</h2>
+                <h2 className="text-base font-bold text-amber-300 leading-tight">Life Changer™ Ticket</h2>
                 <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border-amber-500/40 border">Daily Parlay</Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
@@ -1743,6 +1744,29 @@ export default function CommandCenter() {
     refetchInterval: 60000,
   });
 
+  const gradeOrder = (g: string) => {
+    const order: Record<string, number> = { "A+": 0, "A": 1, "B+": 2, "B": 3, "C+": 4, "C": 5, "D": 6, "F": 7 };
+    return order[g.toUpperCase()] ?? 8;
+  };
+
+  const sortedTickets = useMemo(() => {
+    if (!ticketsData?.tickets) return [];
+    return [...ticketsData.tickets].sort((a, b) => gradeOrder(a.combinedGrade) - gradeOrder(b.combinedGrade));
+  }, [ticketsData?.tickets]);
+
+  const sortedMatchupTickets = useMemo(() => {
+    if (!matchupData?.matchupTickets) return [];
+    return [...matchupData.matchupTickets].sort((a, b) => gradeOrder(a.combinedGrade) - gradeOrder(b.combinedGrade));
+  }, [matchupData?.matchupTickets]);
+
+  const filteredPicks = activeSportTab === "all"
+    ? (feed?.topPicks ?? [])
+    : (feed?.topPicks ?? []).filter(p => p.sport === activeSportTab);
+
+  const sortedTopPicks = useMemo(() => {
+    return [...filteredPicks].sort((a, b) => gradeOrder(a.grade) - gradeOrder(b.grade));
+  }, [filteredPicks]);
+
   if (isLoading || !feed) {
     return (
       <div className="min-h-full" data-testid="loading-skeleton-command-center">
@@ -1802,10 +1826,6 @@ export default function CommandCenter() {
       </div>
     );
   }
-
-  const filteredPicks = activeSportTab === "all"
-    ? feed.topPicks
-    : feed.topPicks.filter(p => p.sport === activeSportTab);
 
   const filteredUpcoming = activeSportTab === "all"
     ? feed.upcomingGames
@@ -2020,7 +2040,7 @@ export default function CommandCenter() {
                 <Trophy className="w-4 h-4 text-primary" />
               </span>
               <h2 className="text-lg font-bold tracking-tight">
-                {ticketDateFilter === "today" ? "Today's" : ticketDateFilter === "future" ? "Upcoming" : "Best"} Tickets
+                {ticketDateFilter === "today" ? "Today's Intelligence Tickets™" : ticketDateFilter === "future" ? "Upcoming Intelligence Tickets™" : "Intelligence Tickets™"}
               </h2>
               {ticketsData && (
                 <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-primary/20">{ticketsData.tickets.length} ready</Badge>
@@ -2056,11 +2076,19 @@ export default function CommandCenter() {
             </div>
           </div>
           {ticketsData && ticketsData.tickets.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-              {ticketsData.tickets.slice(0, 6).map(ticket => (
-                <TicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
-              ))}
-            </div>
+            <>
+              <MobileTicketDeck
+                items={sortedTickets}
+                renderCard={(ticket) => <TicketCard ticket={ticket} legs={legs} addLeg={addLeg} />}
+                getGrade={(t) => t.combinedGrade}
+                label="Intelligence Tickets™"
+              />
+              <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-3">
+                {sortedTickets.slice(0, 6).map(ticket => (
+                  <TicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
+                ))}
+              </div>
+            </>
           ) : (
             <Card>
               <CardContent className="p-6 text-center">
@@ -2082,13 +2110,19 @@ export default function CommandCenter() {
             <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
               <div className="flex items-center gap-2">
                 <Layers className="w-5 h-5 text-primary" />
-                <h2 className="text-lg font-bold">Game Matchup Parlays</h2>
+                <h2 className="text-lg font-bold">Matchup Intelligence Tickets™</h2>
                 <Badge variant="secondary" className="text-[10px]">{matchupData.matchupTickets.length} matchups</Badge>
               </div>
               <p className="text-xs text-muted-foreground">Full game breakdowns with 10-20 leg parlays</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {matchupData.matchupTickets.map(ticket => (
+            <MobileTicketDeck
+              items={sortedMatchupTickets}
+              renderCard={(ticket) => <MatchupTicketCard ticket={ticket} legs={legs} addLeg={addLeg} />}
+              getGrade={(t) => t.combinedGrade}
+              label="Matchup Intelligence Tickets™"
+            />
+            <div className="hidden md:grid md:grid-cols-2 gap-3">
+              {sortedMatchupTickets.map(ticket => (
                 <MatchupTicketCard key={ticket.id} ticket={ticket} legs={legs} addLeg={addLeg} />
               ))}
             </div>
@@ -2160,7 +2194,7 @@ export default function CommandCenter() {
                       <span className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/15">
                         <Zap className="w-3.5 h-3.5 text-primary" />
                       </span>
-                      <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Edge Picks</span>
+                      <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Intelligence Picks™</span>
                       {filteredPicks.length > 0 && (
                         <span className="text-[10px] font-normal text-muted-foreground">({filteredPicks.length})</span>
                       )}
@@ -2168,9 +2202,19 @@ export default function CommandCenter() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {filteredPicks.length > 0 ? (
-                      filteredPicks.map(pick => (
-                        <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
-                      ))
+                      <>
+                        <MobileTicketDeck
+                          items={sortedTopPicks}
+                          renderCard={(pick) => <PickCard pick={pick} legs={legs} addLeg={addLeg} />}
+                          getGrade={(p) => p.grade}
+                          label="Top Intelligence Picks™"
+                        />
+                        <div className="hidden md:contents">
+                          {sortedTopPicks.map(pick => (
+                            <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
+                          ))}
+                        </div>
+                      </>
                     ) : (
                       <div className="col-span-full p-8 text-center border rounded-lg bg-muted/20">
                         <p className="text-sm text-muted-foreground">No picks available for {activeSportTab} right now.</p>

@@ -134,8 +134,20 @@ function confidenceColor(conf: number): string {
   return "text-red-500";
 }
 
+const FACTOR_LABELS: Record<string, string> = {
+  scheme_mismatch: "Favorable Matchup", coaching_tendency: "Coaching Edge",
+  sharp_money_flow: "Sors Signal™", public_fade: "Contrarian Value",
+  line_movement: "Market Drift™", momentum_score: "Team Momentum",
+  monte_carlo: "Sors Simulation", player_efficiency: "Player Performance",
+  injury_adjustment: "Injury Impact", weather_impact: "Weather Factor",
+  home_field: "Home Court/Field", rest_advantage: "Rest Advantage",
+  pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
+  point_differential: "Point Differential", strength_schedule: "Schedule Strength",
+  historical_h2h: "Head-to-Head", predictive_model: "Sors Intelligence",
+};
+
 function formatFactorName(name: string): string {
-  return name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function directionIcon(dir: string) {
@@ -195,13 +207,13 @@ function PickSignalRow({ pick }: { pick: PrecomputedPick }) {
           Market <span className="font-mono font-semibold text-foreground">{marketPct}%</span>
         </span>
         <span className={edgePositive ? "text-green-500 font-semibold" : edgeNeutral ? "text-yellow-500 font-semibold" : "text-red-500 font-semibold"}>
-          Edge {edgePct >= 0 ? "+" : ""}{edgePct.toFixed(1)}%
+          Intelligence Edge™ {edgePct >= 0 ? "+" : ""}{edgePct.toFixed(1)}%
         </span>
       </div>
       <div className="flex flex-wrap gap-1" data-testid={`pick-risk-flags-${pick.id}`}>
         {(pick.ev ?? 0) >= 8 && (
           <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-600 dark:text-green-400 border border-green-500/20 font-medium">
-            High Value
+            Intelligence Edge™
           </span>
         )}
         {(pick.ev ?? 0) >= 0 && (pick.ev ?? 0) < 3 && (
@@ -375,13 +387,13 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
             <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
               {pick.confidence}%
             </p>
-            <p className="text-[10px] text-muted-foreground">Confidence</p>
+            <p className="text-[10px] text-muted-foreground">Sors Grade™</p>
           </div>
           <div>
             <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-pick-ev-${pick.id}`}>
               {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
             </p>
-            <p className="text-[10px] text-muted-foreground">EV</p>
+            <p className="text-[10px] text-muted-foreground">Intelligence Edge™</p>
           </div>
           <div>
             <p className="text-lg font-bold font-mono" data-testid={`text-pick-odds-${pick.id}`}>
@@ -658,7 +670,7 @@ export function PrecomputedPicks() {
               </div>
               <div>
                 <CardTitle className="text-lg flex items-center gap-2" data-testid="text-top-picks-title">
-                  Sors Top Picks
+                  Intelligence Picks™
                   {engineStatus?.running && (
                     <Badge variant="outline" className="text-[10px] h-5 bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400 gap-0.5">
                       <Activity className="w-2.5 h-2.5 animate-pulse" />

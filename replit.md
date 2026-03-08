@@ -54,6 +54,10 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Profile Page Performance Aura**: The profile hero section features a dynamic ambient glow background reflecting the user's betting performance.
 - **Cookie Consent Auto-Accept**: Authenticated users automatically consent to cookies, with management options in their profile.
 - **Proprietary Branding**: All user-visible "Monte Carlo" references are replaced with "Sors Simulation," and "Quantum" references with "Sors Edge" / "Sors Intelligence" / "Sors 46-Factor Engine."
+- **Sors Lexicon™**: Full proprietary terminology framework replacing industry-standard betting terms throughout the UI: Intelligence Edge™, Sors Signal™, Market Drift™, Sors Conviction Score™, Intelligence Closing Value™ (ICV), Market Gap™, Sors Rating™, Intelligence Consensus™, Sors Drift Alert™, Leg Correlation Score™.
+- **Admin IP Registry & Business Intelligence**: Page at `/admin/ip-registry` with 5 tabs — Platform Vitals (401,795 LOC), IP Registry (18 proprietary assets with REGISTERED badges), Sors Lexicon table, Mission & Vision, and full Business Plan ($3.3M ARR 24-month target).
+- **Mobile Card Stack Deck**: `MobileTicketDeck` component (`mobile-ticket-deck.tsx`) — on mobile viewports, converts ticket/pick grids into a swipeable playing-card stack sorted A+ → F, with peek-behind cards, prev/next arrows, touch swipe, and grade badge. Desktop grid layout unchanged.
+- **Single-Color Grade Glow Fix**: Ticket cards now show a single cohesive glow color (driven by computed combined grade). Per-leg grade badges inside cards use neutral muted styling so internal badges don't create a multicolored background. `ticket-showcase.tsx` uses `computeTicketGrade()` for consistent card-level color.
 
 ## External Dependencies
 - **Frontend Framework**: React

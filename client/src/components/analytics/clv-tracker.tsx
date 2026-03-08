@@ -52,7 +52,7 @@ export function CLVTracker() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <LineChart className="w-5 h-5 text-blue-500" />
-            Closing Line Value (CLV) Tracker
+            Intelligence Closing Value™ (ICV) Tracker
           </CardTitle>
         </CardHeader>
         <CardContent><Skeleton className="h-60 w-full" /></CardContent>
@@ -67,11 +67,11 @@ export function CLVTracker() {
           <div>
             <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
               <LineChart className="w-5 h-5 text-blue-500" />
-              Closing Line Value Audit
+              Intelligence Closing Value™ Audit
               <QuantumBadge />
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Measures the quality of your line shopping — every pick logged at placement, compared to the closing number. Positive CLV over time = proven edge.
+              Measures the quality of your line shopping — every pick logged at placement, compared to the closing number. Positive ICV (Intelligence Closing Value™) over time = proven edge.
             </p>
           </div>
           <Select value={timeframe} onValueChange={setTimeframe}>
@@ -89,14 +89,14 @@ export function CLVTracker() {
       <CardContent className="space-y-6">
         <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-sm">
           <Info className="w-4 h-4 shrink-0" />
-          <span>CLV derived from settled picks vs sport benchmark closing lines. Positive CLV = getting better than market odds.</span>
+          <span>ICV (Intelligence Closing Value™) derived from settled picks vs sport benchmark closing lines. Positive ICV = getting better than market odds.</span>
         </div>
 
         <div className="p-4 rounded-lg bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-          <p className="text-sm text-muted-foreground mb-2">What is CLV?</p>
+          <p className="text-sm text-muted-foreground mb-2">What is ICV (Intelligence Closing Value™)?</p>
           <p className="text-xs text-muted-foreground">
-            CLV measures whether you're getting better odds than the market closing line. 
-            Consistently positive CLV indicates sharp betting and long-term profitability.
+            ICV measures whether you're getting better odds than the market closing line. 
+            Consistently positive ICV indicates sharp betting and long-term profitability.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export function CLVTracker() {
                 <p className={`text-lg sm:text-2xl font-bold ${avgCLV >= 0 ? "text-green-500" : "text-red-500"}`}>
                   {avgCLV >= 0 ? "+" : ""}{avgCLV.toFixed(1)}%
                 </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">Avg CLV</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground">Avg ICV (Intelligence Closing Value™)</p>
               </div>
               <div className="p-2 sm:p-4 rounded-lg bg-muted/50 text-center">
                 <p className="text-lg sm:text-2xl font-bold text-blue-500">{beatingClosing.toFixed(0)}%</p>
@@ -129,14 +129,14 @@ export function CLVTracker() {
               <div className="p-2 sm:p-3 rounded-lg bg-green-500/10 border border-green-500/30">
                 <div className="flex items-center gap-1 sm:gap-2 mb-1">
                   <Trophy className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500" />
-                  <span className="text-xs sm:text-sm font-medium">Positive CLV</span>
+                  <span className="text-xs sm:text-sm font-medium">Positive ICV</span>
                 </div>
                 <p className="text-base sm:text-xl font-bold text-green-500">+{avgPositive.toFixed(1)}%</p>
               </div>
               <div className="p-2 sm:p-3 rounded-lg bg-red-500/10 border border-red-500/30">
                 <div className="flex items-center gap-1 sm:gap-2 mb-1">
                   <TrendingDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500" />
-                  <span className="text-xs sm:text-sm font-medium">Negative CLV</span>
+                  <span className="text-xs sm:text-sm font-medium">Negative ICV</span>
                 </div>
                 <p className="text-base sm:text-xl font-bold text-red-500">{avgNegative.toFixed(1)}%</p>
               </div>
@@ -160,7 +160,7 @@ export function CLVTracker() {
                     </div>
                     <div className="text-right">
                       <p className={`font-bold ${entry.clvPercent >= 0 ? "text-green-500" : "text-red-500"}`}>
-                        {entry.clvPercent >= 0 ? "+" : ""}{entry.clvPercent}% CLV
+                        {entry.clvPercent >= 0 ? "+" : ""}{entry.clvPercent}% ICV
                       </p>
                       <Badge variant="outline" className={
                         entry.direction === "positive" ? "text-green-500" : 
@@ -183,7 +183,7 @@ export function CLVTracker() {
               <div>
                 <p className="font-medium text-green-500">You're Beating the Market!</p>
                 <p className="text-sm text-muted-foreground">
-                  Your average +{avgCLV.toFixed(1)}% CLV indicates sharp betting. Keep it up!
+                  Your average +{avgCLV.toFixed(1)}% ICV indicates sharp betting. Keep it up!
                 </p>
               </div>
             </div>

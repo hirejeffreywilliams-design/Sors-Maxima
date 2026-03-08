@@ -171,7 +171,7 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <CardTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-primary" />
-            Market Timing Alerts
+            Sors Drift Alert™ System
           </CardTitle>
           <Select value={selectedSport} onValueChange={setSelectedSport}>
             <SelectTrigger className="w-[120px]" data-testid="select-sport">
@@ -215,7 +215,7 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
           <TabsList className="grid w-full grid-cols-3 mb-4">
             <TabsTrigger value="movements" className="flex items-center gap-1" data-testid="tab-movements">
               <Activity className="h-3 w-3" />
-              Line Movement
+              Market Drift™
             </TabsTrigger>
             <TabsTrigger value="windows" className="flex items-center gap-1" data-testid="tab-windows">
               <Target className="h-3 w-3" />
@@ -223,7 +223,7 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
             </TabsTrigger>
             <TabsTrigger value="sharp" className="flex items-center gap-1" data-testid="tab-sharp">
               <Zap className="h-3 w-3" />
-              Sharp Action
+              Sors Signal™
             </TabsTrigger>
           </TabsList>
 
@@ -233,7 +233,7 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
             ) : lineMovements.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground" data-testid="empty-movements">
                 <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No line movements detected</p>
+                <p>No Market Drift™ detected</p>
                 <p className="text-xs">Check back closer to game time</p>
               </div>
             ) : (
@@ -347,10 +347,16 @@ export function MarketTimingAlerts({ events }: MarketTimingAlertsProps = {}) {
                       <p className="font-medium text-sm" data-testid={`text-sharp-game-${sa.gameId}`}>{sa.gameName}</p>
                       <p className="text-xs text-muted-foreground">{sa.market}</p>
                     </div>
-                    <Badge variant="destructive" data-testid="badge-sharp-alert">
-                      <Zap className="h-3 w-3 mr-1" />
-                      {Math.abs(sa.movement)} pt move
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getVelocityColor(sa.velocity)} data-testid={`badge-velocity-${sa.velocity}`}>
+                        {sa.velocity === "steam" && <Zap className="h-3 w-3 mr-1" />}
+                        {sa.velocity.toUpperCase()}
+                      </Badge>
+                      <Badge variant="destructive" data-testid="badge-sharp-alert">
+                        <Zap className="h-3 w-3 mr-1" />
+                        Sors Signal™
+                      </Badge>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 text-xs">

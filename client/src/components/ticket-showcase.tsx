@@ -331,6 +331,22 @@ function ShareProofModal({ ticket, onClose }: { ticket: ShowcaseTicket; onClose:
   );
 }
 
+function computeTicketGrade(legs: ShowcaseLeg[]): string {
+  if (!legs || legs.length === 0) return "C";
+  if (legs.length === 1) return legs[0].grade;
+
+  const gradeMap: Record<string, number> = {
+    "A+": 10, "A": 9, "B+": 8, "B": 7, "C+": 6, "C": 5, "D": 4, "F": 3
+  };
+  const reverseMap: Record<number, string> = {
+    10: "A+", 9: "A", 8: "B+", 7: "B", 6: "C+", 5: "C", 4: "D", 3: "F"
+  };
+
+  const sum = legs.reduce((acc, leg) => acc + (gradeMap[leg.grade] || 5), 0);
+  const avg = Math.floor(sum / legs.length);
+  return reverseMap[avg] || "C";
+}
+
 export function TicketShowcase({ onClose }: TicketShowcaseProps) {
   const { data, isLoading } = useQuery<{ tickets: ShowcaseTicket[]; stats: { winning: number; losing: number } }>({
     queryKey: ["/api/showcase-tickets"],
@@ -349,6 +365,7 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
 
   const active = tickets.filter((_, i) => !seen.has(i));
   const ticket = active[0];
+  const ticketGrade = ticket ? computeTicketGrade(ticket.legs) : "C";
   const ticketIdx = tickets.indexOf(ticket);
   const progress = tickets.length > 0 ? Math.round((seen.size / tickets.length) * 100) : 0;
 
@@ -517,14 +534,14 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
             isWin
               ? "border-emerald-500/40 bg-card"
               : "border-red-500/40 bg-card"
-          } ${getGradeShimmerClass(ticket.legs[0]?.grade)}`}
+          } ${getGradeShimmerClass(ticketGrade)}`}
           style={{
             ...cardStyle,
-            ...gradeAmbientGlow(ticket.legs[0]?.grade),
+            ...gradeAmbientGlow(ticketGrade),
             zIndex: 1,
             boxShadow: isWin
-              ? `${gradeAmbientGlow(ticket.legs[0]?.grade).boxShadow}, 0 0 50px rgba(34,197,94,0.35), 0 0 100px rgba(34,197,94,0.15), 0 8px 32px rgba(0,0,0,0.4)`
-              : `${gradeAmbientGlow(ticket.legs[0]?.grade).boxShadow}, 0 0 50px rgba(239,68,68,0.35), 0 0 100px rgba(239,68,68,0.15), 0 8px 32px rgba(0,0,0,0.4)`,
+              ? `${gradeAmbientGlow(ticketGrade).boxShadow}, 0 0 50px rgba(34,197,94,0.35), 0 0 100px rgba(34,197,94,0.15), 0 8px 32px rgba(0,0,0,0.4)`
+              : `${gradeAmbientGlow(ticketGrade).boxShadow}, 0 0 50px rgba(239,68,68,0.35), 0 0 100px rgba(239,68,68,0.15), 0 8px 32px rgba(0,0,0,0.4)`,
           }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -599,7 +616,7 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
                   <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
                     <span className="text-[10px]">{sportEmoji(leg.sport)}</span>
                     <Badge variant="secondary" className="text-[9px] px-1.5 py-0">{leg.sport}</Badge>
-                    <span className={`text-[10px] font-bold ${gradeColor(leg.grade)}`}>{leg.grade}</span>
+                    <span className="text-[10px] font-bold text-muted-foreground">{leg.grade}</span>
                   </div>
                   <p className="text-xs text-muted-foreground truncate mb-0.5">{leg.game}</p>
                   <p className="text-sm font-semibold leading-tight">{leg.pick}</p>

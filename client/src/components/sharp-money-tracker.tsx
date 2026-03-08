@@ -88,7 +88,7 @@ export function SharpMoneyTracker() {
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <Eye className="w-5 h-5 text-chart-1" />
-            Sharp Money Tracker
+            Sors Signal Tracker™
           </CardTitle>
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className="gap-1" data-testid="badge-strong-signals">
@@ -127,7 +127,7 @@ export function SharpMoneyTracker() {
         {!isLoading && !isError && sharpSignals.length === 0 && (
           <div className="text-center py-6" data-testid="empty-sharp">
             <Eye className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-            <p className="text-sm text-muted-foreground">No sharp money signals detected for {sport}</p>
+            <p className="text-sm text-muted-foreground">No Sors signals detected for {sport}</p>
           </div>
         )}
 
@@ -186,7 +186,7 @@ export function SharpMoneyTracker() {
               {signal.sharpAction && (
                 <Badge variant="outline" className="text-xs gap-1">
                   <Zap className="w-2.5 h-2.5" />
-                  Sharp
+                  Sors Signal™
                 </Badge>
               )}
             </div>

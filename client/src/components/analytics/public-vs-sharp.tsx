@@ -70,7 +70,7 @@ export function PublicVsSharp() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="w-5 h-5 text-blue-500" />
-            Public vs Sharp Money
+            Intelligence Consensus™
           </CardTitle>
         </CardHeader>
         <CardContent><Skeleton className="h-60 w-full" /></CardContent>
@@ -85,11 +85,11 @@ export function PublicVsSharp() {
           <div>
             <CardTitle className="flex items-center gap-2 text-lg flex-wrap">
               <Users className="w-5 h-5 text-blue-500" />
-              Public vs Sharp Money Flow
+              Intelligence Consensus™
               <QuantumBadge />
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Live betting percentage split — when sharp (professional) money disagrees with the public by 20%+, that's the market signal the engine looks for.
+              Live betting percentage split — when Sors Signal™ (professional) money disagrees with the public by 20%+, that's the market signal the engine looks for.
             </p>
           </div>
           <Select value={sport} onValueChange={setSport}>
@@ -119,11 +119,11 @@ export function PublicVsSharp() {
         <div className="grid grid-cols-3 gap-3">
           <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-center">
             <p className="text-2xl font-bold text-green-500">{sharpPlays}</p>
-            <p className="text-xs text-muted-foreground">Sharp Leans</p>
+            <p className="text-xs text-muted-foreground">Sors Signal™ Leans</p>
           </div>
           <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
             <p className="text-2xl font-bold text-yellow-500">{publicPlays}</p>
-            <p className="text-xs text-muted-foreground">Public Heavy</p>
+            <p className="text-xs text-muted-foreground">Public Consensus™</p>
           </div>
           <div className="p-3 rounded-lg bg-muted/50 border text-center">
             <p className="text-2xl font-bold">{filtered.length - sharpPlays - publicPlays}</p>
@@ -157,7 +157,7 @@ export function PublicVsSharp() {
                       <span className="text-xs text-muted-foreground">{formatShortTime(game.gameDate)}</span>
                     )}
                     <Badge variant="outline" className={`text-xs ${getConsensusColor(game.consensus)}`}>
-                      {getConsensusLabel(game.consensus)}
+                      {game.consensus === "sharp" ? "Sors Signal™ Lean" : game.consensus === "public" ? "Public Consensus™" : "Split"}
                     </Badge>
                   </div>
                 </div>
@@ -191,12 +191,12 @@ export function PublicVsSharp() {
                       {game.consensus === "sharp" ? (
                         <>
                           <Zap className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                          <span className="text-green-600 dark:text-green-400">Sharp lean: {game.sharpHome > game.sharpAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()}</span>
+                          <span className="text-green-600 dark:text-green-400">Sors Signal™ lean: {game.sharpHome > game.sharpAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()}</span>
                         </>
                       ) : (
                         <>
                           <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-                          <span className="text-yellow-600 dark:text-yellow-400">Public heavy: {game.publicHome > game.publicAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()} — consider fade</span>
+                          <span className="text-yellow-600 dark:text-yellow-400">Public Consensus™: {game.publicHome > game.publicAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()} — consider fade</span>
                         </>
                       )}
                     </div>
