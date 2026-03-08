@@ -996,7 +996,29 @@ export function startContinuousLearningOrchestrator(): void {
     } catch {}
   }, 120000);
 
-  logInfo("[Orchestrator] Continuous Learning Orchestrator started — auto-settlement (5min), retraining (24hr), freshness (3min), weight sync (1hr), calibration (30min)");
+  // Initial historical learning run — fires 3 minutes after startup so we don't
+  // have to wait 24 hours for the first training pass. Uses a 7-day window for
+  // speed; the daily 24hr interval uses 14 days.
+  setTimeout(async () => {
+    try {
+      const lastRun = status.lastRetrainingRun;
+      if (lastRun) return; // already ran this session
+      logInfo("[Orchestrator] Running startup historical learning (7 days)...");
+      await runLearningWeightUpdate();
+      const { runHistoricalLearning } = await import("./historicalLearningEngine");
+      const result = await runHistoricalLearning({ daysBack: 7, sports: Object.keys(SPORT_PATHS) });
+      if (result.success) {
+        status.totalRetrained++;
+        status.lastRetrainingRun = new Date().toISOString();
+        logInfo(`[Orchestrator] Startup training complete: ${result.gamesProcessed} games, ${result.weightsUpdated} weights updated`);
+      }
+    } catch (e: any) {
+      addError("startupRetraining", e.message);
+      logWarn(`[Orchestrator] Startup training failed: ${e.message}`);
+    }
+  }, 180000);
+
+  logInfo("[Orchestrator] Continuous Learning Orchestrator started — auto-settlement (5min), retraining (24hr), freshness (3min), weight sync (1hr), calibration (weekly). Startup training queued at +3min.");
 }
 
 export function stopContinuousLearningOrchestrator(): void {

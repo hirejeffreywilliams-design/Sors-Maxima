@@ -18,6 +18,7 @@ import { serveStatic } from "./static";
 import { createServer } from "http";
 import { errorLogger } from "./errorLogger";
 import { startContinuousLearning } from "./learningEngine";
+import { startContinuousLearningOrchestrator } from "./continuousLearningOrchestrator";
 import { initCommunityPatternEngine } from "./communityLossPatternEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import { startAutonomousAdminIntelligence } from "./autonomousAdminIntelligence";
@@ -298,6 +299,7 @@ function startEnginesPhased(): void {
   // ── Phase 9 (Background): Learning + Backtest ────────────────────────────
   // Pure background work — run last to avoid competing with user-facing engines.
   safeStart("Continuous Learning Engine", startContinuousLearning, 100_000);
+  safeStart("Learning Orchestrator", startContinuousLearningOrchestrator, 105_000);
   safeStart("Community Pattern Engine", initCommunityPatternEngine, 108_000);
   safeStart("Analytics Agent", startAnalyticsAgent, 115_000);
   safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 120_000);

@@ -537,7 +537,13 @@ export function startContinuousLearning(): void {
   }
 
   initializeModelWeights().then(() => {
-    logInfo("Learning engine initialized (weight updates handled by orchestrator)");
+    // Run an immediate first cycle once weights are ready
+    runLearningCycle().catch(() => {});
+    // Then schedule micro-learning cycles every 20 minutes
+    learningInterval = setInterval(() => {
+      runLearningCycle().catch(() => {});
+    }, 20 * 60 * 1000);
+    logInfo("[LearningEngine] Continuous learning started — micro-cycles every 20min");
   });
 }
 
