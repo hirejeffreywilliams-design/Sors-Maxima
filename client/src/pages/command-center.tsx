@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSSEContext } from "@/context/sse-provider";
 import { queryClient } from "@/lib/queryClient";
@@ -2246,25 +2247,37 @@ export default function CommandCenter() {
                 </div>
 
                 <div className="space-y-4">
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-bold flex items-center gap-2">
-                      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
-                        <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                      </span>
-                      <span>Edge Alerts</span>
-                    </h3>
-                    <div className="space-y-2.5">
-                      {filteredAlerts.length > 0 ? (
-                        filteredAlerts.map(alert => (
-                          <AlertCard key={alert.id} alert={alert} feed={feed} legs={legs} addLeg={addLeg} />
-                        ))
-                      ) : (
-                        <div className="p-6 text-center border rounded-lg bg-muted/20">
-                          <p className="text-xs text-muted-foreground">No critical alerts for {activeSportTab}.</p>
+                  <Collapsible defaultOpen={false} data-testid="collapsible-edge-alerts">
+                    <CollapsibleTrigger asChild>
+                      <button className="w-full flex items-center justify-between gap-2 p-3 rounded-xl border border-amber-500/25 bg-amber-500/5 hover:bg-amber-500/10 transition-colors group">
+                        <div className="flex items-center gap-2">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
+                            <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                          </span>
+                          <span className="text-sm font-bold">Edge Alerts</span>
+                          {filteredAlerts.length > 0 && (
+                            <Badge className="text-[10px] px-1.5 py-0 bg-amber-500/15 text-amber-400 border-amber-500/30 border font-bold">
+                              {filteredAlerts.length}
+                            </Badge>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      <div className="space-y-2.5">
+                        {filteredAlerts.length > 0 ? (
+                          filteredAlerts.map(alert => (
+                            <AlertCard key={alert.id} alert={alert} feed={feed} legs={legs} addLeg={addLeg} />
+                          ))
+                        ) : (
+                          <div className="p-6 text-center border rounded-lg bg-muted/20">
+                            <p className="text-xs text-muted-foreground">No critical alerts for {activeSportTab}.</p>
+                          </div>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   <div className="space-y-3">
                     <h3 className="text-sm font-bold flex items-center gap-2">

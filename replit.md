@@ -46,7 +46,8 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Strategy Accountability System**: Allows users to choose from preset betting strategies with per-leg violation tracking.
 - **AI Circuit Breaker**: Manages AI API quotas and error states.
 - **Grade Ambient Glow System**: Pick and ticket cards display a grade-matched ambient box-shadow glow and animated shimmer for high grades.
-- **Sors Intelligence Cards**: A collectible trading card system with grade-based holographic shimmer, 3D tilt hover, and "CALLED IT/MISSED" stamps.
+- **Sors Intelligence Cards**: A collectible trading card system with prominent multi-layer rainbow holographic shimmer (A+ = full rainbow foil, A/B+ = colored shimmer), sport-specific background patterns (court lines, ice rink, baseball diamond, yard markers), event labels (March Madness, Playoffs, Stanley Cup, etc.), rarity labels (LEGENDARY/RARE/UNCOMMON/COMMON), 3D tilt hover, grade-matched glow borders, and "CALLED IT/MISSED" stamps. Admin-only "Showcase Preview" tab in the Cards page displays all pick cards from showcase tickets.
+- **Edge Alerts Collapsible**: Edge Alerts section in Command Center moved to a collapsed Collapsible dropdown by default — shows an amber trigger button with alert count badge; expands on tap.
 - **Pick Hall of Fame**: A premium showcase of winning/losing picks on the track-record page.
 - **Performance Highlights Card**: Displays key performance statistics on the track-record page.
 - **Share Winning Ticket**: Allows users to share winning tickets with branding.

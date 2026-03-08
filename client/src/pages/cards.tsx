@@ -1,12 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, Plus, X } from "lucide-react";
+import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -50,12 +50,38 @@ interface Trade {
   createdAt: string;
 }
 
+interface ShowcaseLeg {
+  sport: string;
+  game: string;
+  pick: string;
+  betType: string;
+  odds: number;
+  grade: string;
+  confidence: number;
+  result: "won" | "lost";
+}
+
+interface ShowcaseTicket {
+  id: string;
+  date: string;
+  result: "won" | "lost";
+  legs: ShowcaseLeg[];
+  combinedOdds: number;
+  stake: number;
+  payout: number;
+  profit: number;
+}
+
 export default function CardsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("collection");
   const [openedPackCards, setOpenedPackCards] = useState<UserCardCollection[] | null>(null);
   const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
+
+  const { data: authData } = useQuery<{ isAdmin?: boolean; username?: string }>({
+    queryKey: ["/api/auth/check"],
+  });
+  const isAdmin = authData?.isAdmin ?? false;
 
   const { data: collection, isLoading: isCollectionLoading } = useQuery<UserCardCollection[]>({
     queryKey: ["/api/cards/collection"],
@@ -71,6 +97,14 @@ export default function CardsPage() {
 
   const { data: packStatus } = useQuery<{ available: boolean; remainingToday: number; nextPackAt: string }>({
     queryKey: ["/api/cards/packs/available"],
+  });
+
+  const { data: showcaseData, isLoading: isShowcaseLoading, refetch: refetchShowcase } = useQuery<{
+    tickets: ShowcaseTicket[];
+    stats: { winning: number; losing: number };
+  }>({
+    queryKey: ["/api/showcase-tickets"],
+    enabled: isAdmin,
   });
 
   const openPackMutation = useMutation({
@@ -104,6 +138,25 @@ export default function CardsPage() {
     setRevealedIndices([]);
   };
 
+  const showcaseCards = (showcaseData?.tickets ?? []).flatMap((ticket, tIdx) =>
+    ticket.legs.map((leg, lIdx) => ({
+      id: `showcase-${ticket.id}-${lIdx}`,
+      sport: leg.sport,
+      pick: leg.pick,
+      grade: leg.grade,
+      betType: leg.betType,
+      odds: leg.odds,
+      confidence: leg.confidence,
+      ev: Math.round(leg.confidence * 0.18),
+      game: leg.game,
+      gameTime: ticket.date + "T20:00:00",
+      maxCopies: 99,
+      copiesIssued: tIdx + lIdx + 1,
+      settledResult: leg.result as string,
+      ticketResult: ticket.result,
+    }))
+  );
+
   return (
     <div className="container max-w-screen-2xl mx-auto py-6 px-4 space-y-8" data-testid="cards-page">
       {/* Header & Pack Drops */}
@@ -125,8 +178,8 @@ export default function CardsPage() {
                 <span className="text-lg font-black">{packStatus?.remainingToday || 0} Left</span>
               </div>
             </div>
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={() => openPackMutation.mutate()}
               disabled={!packStatus?.available || openPackMutation.isPending}
               className="font-black tracking-wider hover-elevate active-elevate-2"
@@ -149,14 +202,13 @@ export default function CardsPage() {
           <div className="flex flex-col items-center gap-8 py-10">
             <div className="flex flex-wrap justify-center gap-6">
               {openedPackCards?.map((item, idx) => (
-                <div key={item.collection.id} className="relative">
-                  <TradingCard 
-                    card={item.card} 
+                <div key={item.collection.id} className="relative w-[240px] h-[340px]">
+                  <TradingCard
+                    card={item.card}
                     instanceNumber={item.collection.instanceNumber}
                     isFlippable={true}
                     isFlipped={!revealedIndices.includes(idx)}
                     onFlip={() => handleReveal(idx)}
-                    className="w-[240px] h-[340px]"
                   />
                   {!revealedIndices.includes(idx) && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -168,9 +220,9 @@ export default function CardsPage() {
                 </div>
               ))}
             </div>
-            
+
             {revealedIndices.length === openedPackCards?.length && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="pt-4"
@@ -184,8 +236,8 @@ export default function CardsPage() {
         </DialogContent>
       </Dialog>
 
-      <Tabs defaultValue="collection" onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="bg-muted/50 p-1 w-full max-w-md">
+      <Tabs defaultValue="collection" className="space-y-6">
+        <TabsList className={`bg-muted/50 p-1 w-full ${isAdmin ? "max-w-2xl" : "max-w-md"}`}>
           <TabsTrigger value="collection" className="flex-1 font-bold gap-2">
             <Users className="w-4 h-4" /> My Collection
           </TabsTrigger>
@@ -195,6 +247,11 @@ export default function CardsPage() {
           <TabsTrigger value="trades" className="flex-1 font-bold gap-2">
             <History className="w-4 h-4" /> Trades
           </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="showcase-preview" className="flex-1 font-bold gap-2 text-amber-400" data-testid="tab-showcase-preview">
+              <Eye className="w-4 h-4" /> Showcase Preview
+            </TabsTrigger>
+          )}
         </TabsList>
 
 
@@ -221,11 +278,12 @@ export default function CardsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
               {collection?.map((item) => (
-                <TradingCard 
-                  key={item.collection.id} 
-                  card={item.card} 
-                  instanceNumber={item.collection.instanceNumber}
-                />
+                <div key={item.collection.id} className="w-[280px] h-[400px]">
+                  <TradingCard
+                    card={item.card}
+                    instanceNumber={item.collection.instanceNumber}
+                  />
+                </div>
               ))}
             </div>
           )}
@@ -236,7 +294,9 @@ export default function CardsPage() {
             {isMarketplaceLoading ? (
               [1, 2, 3, 4].map((i) => <Skeleton key={i} className="w-[280px] h-[400px] rounded-2xl" />)
             ) : marketplace?.map((card) => (
-              <TradingCard key={card.id} card={card} />
+              <div key={card.id} className="w-[280px] h-[400px]">
+                <TradingCard card={card} />
+              </div>
             ))}
           </div>
         </TabsContent>
@@ -282,6 +342,85 @@ export default function CardsPage() {
             </div>
           )}
         </TabsContent>
+
+        {isAdmin && (
+          <TabsContent value="showcase-preview" className="space-y-6" data-testid="content-showcase-preview">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="space-y-1">
+                <h2 className="text-xl font-black flex items-center gap-2">
+                  <Eye className="w-5 h-5 text-amber-400" />
+                  Showcase Card Preview
+                  <Badge className="text-[10px] bg-amber-500/15 text-amber-400 border-amber-500/30 border font-black">
+                    ADMIN ONLY
+                  </Badge>
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Preview all cards generated from showcase tickets — {showcaseCards.length} cards from{" "}
+                  {showcaseData?.tickets.length ?? 0} tickets
+                  ({showcaseData?.stats.winning ?? 0}W / {showcaseData?.stats.losing ?? 0}L).
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
+                onClick={() => refetchShowcase()}
+                disabled={isShowcaseLoading}
+                data-testid="button-refresh-showcase"
+              >
+                <RefreshCw className={`w-4 h-4 ${isShowcaseLoading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
+
+            {isShowcaseLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <Skeleton key={i} className="w-[280px] h-[400px] rounded-2xl" />
+                ))}
+              </div>
+            ) : showcaseCards.length === 0 ? (
+              <Card className="border-dashed border-2 bg-muted/20">
+                <CardContent className="py-16 text-center space-y-3">
+                  <Eye className="w-10 h-10 mx-auto text-muted-foreground opacity-30" />
+                  <div>
+                    <h3 className="font-bold">No showcase tickets loaded</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Showcase tickets will appear here once the system generates them.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 rounded-xl border bg-muted/20">
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-primary">{showcaseData?.tickets.length ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Tickets</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-emerald-400">{showcaseData?.stats.winning ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Winning</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-red-400">{showcaseData?.stats.losing ?? 0}</p>
+                    <p className="text-xs text-muted-foreground">Losing</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-black text-amber-400">{showcaseCards.length}</p>
+                    <p className="text-xs text-muted-foreground">Total Cards</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12 justify-items-center">
+                  {showcaseCards.map((card) => (
+                    <div key={card.id} className="w-[280px] h-[400px]" data-testid={`card-showcase-preview-${card.id}`}>
+                      <TradingCard card={card} />
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
