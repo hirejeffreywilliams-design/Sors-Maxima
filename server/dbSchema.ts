@@ -106,6 +106,11 @@ export const tradingCards = pgTable("trading_cards", {
   maxCopies: integer("max_copies").notNull(),
   copiesIssued: integer("copies_issued").default(0).notNull(),
   settledResult: text("settled_result").default("pending"),
+  cardType: text("card_type").default("member"),
+  isFrozen: boolean("is_frozen").default(false),
+  frozenReason: text("frozen_reason"),
+  frozenAt: timestamp("frozen_at"),
+  frozenBy: integer("frozen_by"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -119,6 +124,11 @@ export const userCardCollections = pgTable("user_card_collections", {
   isShowcase: boolean("is_showcase").default(false).notNull(),
   cardSignature: text("card_signature"),
   isPublicShowcase: boolean("is_public_showcase").default(false).notNull(),
+  isFeatured: boolean("is_featured").default(false),
+  isRevoked: boolean("is_revoked").default(false),
+  revokedReason: text("revoked_reason"),
+  revokedAt: timestamp("revoked_at"),
+  revokedBy: integer("revoked_by"),
 });
 
 export const cardTrades = pgTable("card_trades", {
@@ -132,9 +142,22 @@ export const cardTrades = pgTable("card_trades", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const cardAuditLog = pgTable("card_audit_log", {
+  id: serial("id").primaryKey(),
+  actionType: text("action_type").notNull(),
+  cardId: text("card_id"),
+  collectionId: integer("collection_id"),
+  targetUserId: integer("target_user_id"),
+  adminId: integer("admin_id"),
+  reason: text("reason"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertTradingCardSchema = createInsertSchema(tradingCards);
 export const insertUserCardCollectionSchema = createInsertSchema(userCardCollections);
 export const insertCardTradeSchema = createInsertSchema(cardTrades);
+export const insertCardAuditLogSchema = createInsertSchema(cardAuditLog);
 
 export type TradingCard = typeof tradingCards.$inferSelect;
 export type UserCardCollection = typeof userCardCollections.$inferSelect;

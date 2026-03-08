@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Trophy, CheckCircle2, XCircle, Sparkles, Share2, Copy, MessageSquare } from "lucide-react";
+import { Brain, Trophy, CheckCircle2, XCircle, Sparkles, Share2, Copy, MessageSquare, Lock, AlertTriangle, Settings2, Star } from "lucide-react";
 import { getGradeGlow } from "@/lib/grade-utils";
 import { cn } from "@/lib/utils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -23,10 +23,16 @@ interface TradingCardProps {
     copiesIssued: number | null;
     settledResult: string | null;
     issuedAt?: string;
+    cardType?: string;
+    isFrozen?: boolean;
+    frozenReason?: string;
+    isRevoked?: boolean;
+    revokedReason?: string;
   };
   instanceNumber?: number;
   collectionId?: number;
   isPublicShowcase?: boolean;
+  isFeatured?: boolean;
   className?: string;
   showBack?: boolean;
   isFlippable?: boolean;
@@ -381,6 +387,18 @@ export function TradingCard({
                 <div className="text-xs font-black tracking-wider uppercase text-white/80">
                   {card.sport}
                 </div>
+                {card.cardType === "system" && (
+                  <div className="flex items-center gap-0.5 mt-0.5">
+                    <Settings2 className="w-2.5 h-2.5" style={{ color: "rgba(251,191,36,0.75)" }} />
+                    <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(251,191,36,0.75)" }}>SYSTEM</span>
+                  </div>
+                )}
+                {card.cardType === "admin_seeded" && (
+                  <div className="flex items-center gap-0.5 mt-0.5">
+                    <Star className="w-2.5 h-2.5" style={{ color: "rgba(148,163,184,0.55)" }} />
+                    <span style={{ fontSize: 7, fontWeight: 900, letterSpacing: "0.10em", textTransform: "uppercase", color: "rgba(148,163,184,0.55)" }}>DEMO</span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex flex-col items-center gap-0.5">
@@ -658,6 +676,26 @@ export function TradingCard({
                 #{String(instanceNumber).padStart(3, "0")} / {card.maxCopies}
               </span>
               <span className="text-[8px] text-white/15 font-medium">SORS MAXIMA™</span>
+            </div>
+          )}
+
+          {/* === FROZEN OVERLAY === */}
+          {card.isFrozen && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl pointer-events-none"
+              style={{ background: "rgba(14,30,60,0.82)", backdropFilter: "blur(2px)" }}>
+              <Lock className="w-10 h-10 text-blue-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(96,165,250,0.7))" }} />
+              <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "0.15em", color: "rgba(147,197,253,0.9)", textTransform: "uppercase" }}>FROZEN</span>
+              {card.frozenReason && <span style={{ fontSize: 9, color: "rgba(147,197,253,0.5)", marginTop: 4, textAlign: "center", padding: "0 12px" }}>{card.frozenReason}</span>}
+            </div>
+          )}
+
+          {/* === REVOKED OVERLAY === */}
+          {card.isRevoked && (
+            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center rounded-2xl pointer-events-none"
+              style={{ background: "rgba(50,10,10,0.88)", backdropFilter: "blur(2px)" }}>
+              <AlertTriangle className="w-10 h-10 text-red-400 mb-2" style={{ filter: "drop-shadow(0 0 8px rgba(248,113,113,0.7))" }} />
+              <span style={{ fontSize: 18, fontWeight: 900, letterSpacing: "0.15em", color: "rgba(252,165,165,0.9)", textTransform: "uppercase" }}>REVOKED</span>
+              {card.revokedReason && <span style={{ fontSize: 9, color: "rgba(252,165,165,0.5)", marginTop: 4, textAlign: "center", padding: "0 12px" }}>{card.revokedReason}</span>}
             </div>
           )}
 

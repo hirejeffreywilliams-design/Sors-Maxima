@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { tradingCards, userCardCollections, cardTrades, users, subscriptions } from "../dbSchema";
+import { tradingCards, userCardCollections, cardTrades, users, subscriptions, cardAuditLog } from "../dbSchema";
 import { db } from "../db";
-import { eq, and, desc, or, gt } from "drizzle-orm";
+import { eq, and, desc, or, gt, sql, asc, isNull, ne } from "drizzle-orm";
 import crypto from "crypto";
 
 const router = Router();
@@ -526,6 +526,7 @@ router.post("/admin/seed", async (req, res) => {
         maxCopies: seed.maxCopies,
         copiesIssued: 1,
         settledResult: seed.settledResult,
+        cardType: "admin_seeded",
         createdAt: new Date(),
       }).onConflictDoNothing().returning();
 
@@ -547,6 +548,436 @@ router.post("/admin/seed", async (req, res) => {
   }
 
   res.json({ seeded: inserted.length, cards: inserted });
+});
+
+// ─── ADMIN: CARD REGISTRY ────────────────────────────────────────────────────
+
+// GET /api/cards/admin/registry — full card listing with type, status, owners
+router.get("/admin/registry", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const allCards = await db
+      .select()
+      .from(tradingCards)
+      .orderBy(desc(tradingCards.createdAt));
+
+    const withOwners = await Promise.all(
+      allCards.map(async (card) => {
+        const owners = await db
+          .select({ id: userCardCollections.id, userId: userCardCollections.userId, instanceNumber: userCardCollections.instanceNumber, acquiredVia: userCardCollections.acquiredVia, isRevoked: userCardCollections.isRevoked, isFeatured: userCardCollections.isFeatured, isPublicShowcase: userCardCollections.isPublicShowcase, username: users.username })
+          .from(userCardCollections)
+          .innerJoin(users, eq(userCardCollections.userId, users.id))
+          .where(eq(userCardCollections.cardId, card.id));
+        return { ...card, owners };
+      })
+    );
+
+    res.json(withOwners);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch registry" });
+  }
+});
+
+// POST /api/cards/admin/:cardId/freeze — freeze a card (disables all operations)
+router.post("/admin/:cardId/freeze", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const { cardId } = req.params;
+  const { reason } = req.body;
+
+  try {
+    const [card] = await db
+      .update(tradingCards)
+      .set({ isFrozen: true, frozenReason: reason || "Admin freeze", frozenAt: new Date(), frozenBy: adminId })
+      .where(eq(tradingCards.id, cardId))
+      .returning();
+
+    if (!card) return res.status(404).json({ message: "Card not found" });
+
+    await db.insert(cardAuditLog).values({
+      actionType: "freeze",
+      cardId,
+      adminId,
+      reason: reason || "Admin freeze",
+      metadata: { cardGrade: card.grade, cardSport: card.sport },
+    });
+
+    res.json({ success: true, card });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to freeze card" });
+  }
+});
+
+// POST /api/cards/admin/:cardId/unfreeze — unfreeze a card
+router.post("/admin/:cardId/unfreeze", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const { cardId } = req.params;
+
+  try {
+    const [card] = await db
+      .update(tradingCards)
+      .set({ isFrozen: false, frozenReason: null, frozenAt: null, frozenBy: null })
+      .where(eq(tradingCards.id, cardId))
+      .returning();
+
+    if (!card) return res.status(404).json({ message: "Card not found" });
+
+    await db.insert(cardAuditLog).values({
+      actionType: "unfreeze",
+      cardId,
+      adminId,
+      reason: "Admin unfreeze",
+      metadata: {},
+    });
+
+    res.json({ success: true, card });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to unfreeze card" });
+  }
+});
+
+// POST /api/cards/admin/collection/:id/revoke — revoke a user's specific card copy
+router.post("/admin/collection/:id/revoke", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const collId = parseInt(req.params.id);
+  const { reason } = req.body;
+
+  try {
+    const [entry] = await db
+      .update(userCardCollections)
+      .set({ isRevoked: true, revokedReason: reason || "Admin revoke", revokedAt: new Date(), revokedBy: adminId, isPublicShowcase: false, isFeatured: false })
+      .where(eq(userCardCollections.id, collId))
+      .returning();
+
+    if (!entry) return res.status(404).json({ message: "Collection entry not found" });
+
+    await db.insert(cardAuditLog).values({
+      actionType: "revoke",
+      cardId: entry.cardId,
+      collectionId: collId,
+      targetUserId: entry.userId,
+      adminId,
+      reason: reason || "Admin revoke",
+      metadata: {},
+    });
+
+    res.json({ success: true, entry });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to revoke card" });
+  }
+});
+
+// POST /api/cards/admin/collection/:id/restore — restore revoked card
+router.post("/admin/collection/:id/restore", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const collId = parseInt(req.params.id);
+
+  try {
+    const [entry] = await db
+      .update(userCardCollections)
+      .set({ isRevoked: false, revokedReason: null, revokedAt: null, revokedBy: null })
+      .where(eq(userCardCollections.id, collId))
+      .returning();
+
+    if (!entry) return res.status(404).json({ message: "Collection entry not found" });
+
+    await db.insert(cardAuditLog).values({
+      actionType: "restore",
+      cardId: entry.cardId,
+      collectionId: collId,
+      targetUserId: entry.userId,
+      adminId,
+      reason: "Admin restore",
+      metadata: {},
+    });
+
+    res.json({ success: true, entry });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to restore card" });
+  }
+});
+
+// POST /api/cards/admin/manual-mint — admin manually issues a card to a user
+router.post("/admin/manual-mint", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const { username, sport, pick, grade, betType, odds, confidence, ev, game, maxCopies, cardType } = req.body;
+
+  if (!username || !sport || !pick || !grade) {
+    return res.status(400).json({ message: "username, sport, pick, grade required" });
+  }
+
+  try {
+    const [targetUser] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    if (!targetUser) return res.status(404).json({ message: "User not found" });
+
+    const cardId = `admin-${crypto.randomBytes(6).toString("hex")}`;
+
+    const [newCard] = await db.insert(tradingCards).values({
+      id: cardId,
+      sport: sport || "NBA",
+      pick: pick || "Manual Pick",
+      grade: grade || "B",
+      betType: betType || "moneyline",
+      odds: Number(odds) || -110,
+      confidence: Number(confidence) || 65,
+      ev: Number(ev) || 10,
+      game: game || "Manual Game",
+      gameTime: new Date(Date.now() + 3 * 60 * 60 * 1000),
+      maxCopies: Number(maxCopies) || 10,
+      copiesIssued: 1,
+      cardType: cardType || "admin_seeded",
+      createdAt: new Date(),
+    }).returning();
+
+    const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+    const sig = crypto.createHash("sha256").update(`${targetUser.id}:${cardId}:1:${sigKey}`).digest("hex");
+
+    const [collEntry] = await db.insert(userCardCollections).values({
+      userId: targetUser.id,
+      cardId,
+      instanceNumber: 1,
+      acquiredVia: "admin_issued",
+      acquiredAt: new Date(),
+      isShowcase: false,
+      cardSignature: sig,
+      isPublicShowcase: false,
+    }).returning();
+
+    await db.insert(cardAuditLog).values({
+      actionType: "manual_mint",
+      cardId,
+      collectionId: collEntry.id,
+      targetUserId: targetUser.id,
+      adminId,
+      reason: `Manually issued to ${username}`,
+      metadata: { sport, grade, cardType: cardType || "admin_seeded" },
+    });
+
+    res.json({ success: true, card: newCard, collection: collEntry, issuedTo: username });
+  } catch (err: any) {
+    res.status(500).json({ message: "Failed to mint card", error: err.message });
+  }
+});
+
+// GET /api/cards/admin/audit-log — paginated admin action log
+router.get("/admin/audit-log", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+  const offset = (page - 1) * limit;
+
+  try {
+    const rows = await db
+      .select({
+        log: cardAuditLog,
+        adminUsername: users.username,
+      })
+      .from(cardAuditLog)
+      .leftJoin(users, eq(cardAuditLog.adminId, users.id))
+      .orderBy(desc(cardAuditLog.createdAt))
+      .limit(limit)
+      .offset(offset);
+
+    const [{ count }] = await db.select({ count: sql<number>`count(*)::int` }).from(cardAuditLog);
+
+    res.json({ rows, total: count, page, limit });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch audit log" });
+  }
+});
+
+// GET /api/cards/admin/security/stats — fraud + verification stats
+router.get("/admin/security/stats", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [verifyToday] = await db.execute(sql`
+      SELECT count(*)::int as total, 
+             count(*) FILTER (WHERE result = 'authentic')::int as authentic,
+             count(*) FILTER (WHERE result = 'tampered')::int as tampered,
+             count(*) FILTER (WHERE result = 'not_found')::int as not_found
+      FROM card_verification_log 
+      WHERE verified_at >= ${today}
+    `).catch(() => ([{ total: 0, authentic: 0, tampered: 0, not_found: 0 }]));
+
+    const topIps = await db.execute(sql`
+      SELECT ip_address, count(*)::int as verifications
+      FROM card_verification_log 
+      WHERE verified_at >= NOW() - INTERVAL '24 hours'
+      GROUP BY ip_address 
+      ORDER BY verifications DESC 
+      LIMIT 10
+    `).catch(() => []);
+
+    const fraudAlerts = await db.execute(sql`
+      SELECT id, alert_type, severity, username, details, created_at, reviewed
+      FROM community_fraud_alerts 
+      ORDER BY created_at DESC 
+      LIMIT 20
+    `).catch(() => []);
+
+    const [frozenCount] = await db.select({ count: sql<number>`count(*)::int` }).from(tradingCards).where(eq(tradingCards.isFrozen, true));
+    const [revokedCount] = await db.select({ count: sql<number>`count(*)::int` }).from(userCardCollections).where(eq(userCardCollections.isRevoked, true));
+
+    res.json({
+      verifyToday: verifyToday || { total: 0, authentic: 0, tampered: 0, not_found: 0 },
+      topIps: Array.isArray(topIps) ? topIps : [],
+      fraudAlerts: Array.isArray(fraudAlerts) ? fraudAlerts : [],
+      frozenCards: frozenCount?.count || 0,
+      revokedCopies: revokedCount?.count || 0,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch security stats" });
+  }
+});
+
+// GET /api/cards/admin/community-showcase — all publicly showcased cards
+router.get("/admin/community-showcase", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const feed = await db
+      .select({
+        collection: userCardCollections,
+        card: tradingCards,
+        username: users.username,
+      })
+      .from(userCardCollections)
+      .innerJoin(tradingCards, eq(userCardCollections.cardId, tradingCards.id))
+      .innerJoin(users, eq(userCardCollections.userId, users.id))
+      .where(eq(userCardCollections.isPublicShowcase, true))
+      .orderBy(desc(userCardCollections.acquiredAt));
+
+    res.json(feed);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch community showcase" });
+  }
+});
+
+// POST /api/cards/admin/community/:id/hide — remove from public showcase
+router.post("/admin/community/:id/hide", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const collId = parseInt(req.params.id);
+
+  try {
+    const [entry] = await db
+      .update(userCardCollections)
+      .set({ isPublicShowcase: false, isFeatured: false })
+      .where(eq(userCardCollections.id, collId))
+      .returning();
+
+    await db.insert(cardAuditLog).values({
+      actionType: "community_hide",
+      cardId: entry?.cardId,
+      collectionId: collId,
+      targetUserId: entry?.userId,
+      adminId,
+      reason: "Removed from community showcase by admin",
+      metadata: {},
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to hide card" });
+  }
+});
+
+// POST /api/cards/admin/community/:id/feature — feature a card in spotlight
+router.post("/admin/community/:id/feature", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  const adminId = sessionUserId(req);
+  const collId = parseInt(req.params.id);
+
+  try {
+    const [current] = await db.select().from(userCardCollections).where(eq(userCardCollections.id, collId)).limit(1);
+    if (!current) return res.status(404).json({ message: "Not found" });
+
+    const [entry] = await db
+      .update(userCardCollections)
+      .set({ isFeatured: !current.isFeatured })
+      .where(eq(userCardCollections.id, collId))
+      .returning();
+
+    await db.insert(cardAuditLog).values({
+      actionType: entry.isFeatured ? "community_feature" : "community_unfeature",
+      cardId: entry.cardId,
+      collectionId: collId,
+      targetUserId: entry.userId,
+      adminId,
+      reason: entry.isFeatured ? "Featured in community spotlight" : "Removed from spotlight",
+      metadata: {},
+    });
+
+    res.json({ success: true, isFeatured: entry.isFeatured });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to toggle feature" });
+  }
+});
+
+// GET /api/cards/admin/analytics — system analytics
+router.get("/admin/analytics", async (req, res) => {
+  if (!req.session?.isAdmin) return res.sendStatus(403);
+  try {
+    const [totals] = await db.execute(sql`
+      SELECT 
+        count(*)::int as total_cards,
+        count(*) FILTER (WHERE card_type = 'system')::int as system_cards,
+        count(*) FILTER (WHERE card_type = 'member')::int as member_cards,
+        count(*) FILTER (WHERE card_type = 'admin_seeded')::int as admin_seeded_cards,
+        count(*) FILTER (WHERE is_frozen = true)::int as frozen_cards,
+        count(*) FILTER (WHERE settled_result = 'won')::int as won_cards,
+        count(*) FILTER (WHERE settled_result = 'lost')::int as lost_cards,
+        count(*) FILTER (WHERE settled_result = 'pending' OR settled_result IS NULL)::int as pending_cards
+      FROM trading_cards
+    `);
+
+    const [collTotals] = await db.execute(sql`
+      SELECT 
+        count(*)::int as total_copies,
+        count(*) FILTER (WHERE is_revoked = true)::int as revoked_copies,
+        count(*) FILTER (WHERE is_public_showcase = true)::int as showcased_copies,
+        count(*) FILTER (WHERE is_featured = true)::int as featured_copies,
+        count(*) FILTER (WHERE acquired_via = 'pack')::int as pack_opens
+      FROM user_card_collections
+    `);
+
+    const gradeDistrib = await db.execute(sql`
+      SELECT grade, count(*)::int as count 
+      FROM trading_cards 
+      GROUP BY grade 
+      ORDER BY grade
+    `);
+
+    const sportDistrib = await db.execute(sql`
+      SELECT sport, count(*)::int as count 
+      FROM trading_cards 
+      GROUP BY sport 
+      ORDER BY count DESC
+    `);
+
+    const recentActivity = await db
+      .select({ log: cardAuditLog, username: users.username })
+      .from(cardAuditLog)
+      .leftJoin(users, eq(cardAuditLog.adminId, users.id))
+      .orderBy(desc(cardAuditLog.createdAt))
+      .limit(10);
+
+    res.json({
+      totals: totals || {},
+      collTotals: collTotals || {},
+      gradeDistrib: Array.isArray(gradeDistrib) ? gradeDistrib : [],
+      sportDistrib: Array.isArray(sportDistrib) ? sportDistrib : [],
+      recentActivity,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: "Failed to fetch analytics", error: err.message });
+  }
 });
 
 // POST /api/cards/mint — mint cards from a pick (called by pick engine)

@@ -320,6 +320,36 @@ export async function runMigrations(): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_tbl_attempted_at ON tier_bypass_log(attempted_at)
     `);
 
+    // Card system: type, freeze, revoke columns
+    await db.execute(sql`ALTER TABLE trading_cards ADD COLUMN IF NOT EXISTS card_type TEXT NOT NULL DEFAULT 'member'`);
+    await db.execute(sql`ALTER TABLE trading_cards ADD COLUMN IF NOT EXISTS is_frozen BOOLEAN NOT NULL DEFAULT FALSE`);
+    await db.execute(sql`ALTER TABLE trading_cards ADD COLUMN IF NOT EXISTS frozen_reason TEXT`);
+    await db.execute(sql`ALTER TABLE trading_cards ADD COLUMN IF NOT EXISTS frozen_at TIMESTAMPTZ`);
+    await db.execute(sql`ALTER TABLE trading_cards ADD COLUMN IF NOT EXISTS frozen_by INTEGER`);
+
+    await db.execute(sql`ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS is_featured BOOLEAN NOT NULL DEFAULT FALSE`);
+    await db.execute(sql`ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS is_revoked BOOLEAN NOT NULL DEFAULT FALSE`);
+    await db.execute(sql`ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS revoked_reason TEXT`);
+    await db.execute(sql`ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS revoked_at TIMESTAMPTZ`);
+    await db.execute(sql`ALTER TABLE user_card_collections ADD COLUMN IF NOT EXISTS revoked_by INTEGER`);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS card_audit_log (
+        id SERIAL PRIMARY KEY,
+        action_type TEXT NOT NULL,
+        card_id TEXT,
+        collection_id INTEGER,
+        target_user_id INTEGER,
+        admin_id INTEGER,
+        reason TEXT,
+        metadata JSONB NOT NULL DEFAULT '{}',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_cal_action_type ON card_audit_log(action_type)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_cal_card_id ON card_audit_log(card_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_cal_created_at ON card_audit_log(created_at)`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

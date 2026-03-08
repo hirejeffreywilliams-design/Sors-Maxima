@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye } from "lucide-react";
+import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PackRipReveal } from "@/components/pack-rip-reveal";
+import { formatDistanceToNow } from "date-fns";
 
 interface UserCardCollection {
   collection: {
@@ -88,8 +89,12 @@ export default function CardsPage() {
     queryKey: ["/api/cards/collection"],
   });
 
-  const { data: marketplace, isLoading: isMarketplaceLoading } = useQuery<any[]>({
-    queryKey: ["/api/cards/marketplace"],
+  const { data: communityFeed, isLoading: isCommunityLoading } = useQuery<{
+    collection: { id: number; userId: number; cardId: string; instanceNumber: number; isPublicShowcase: boolean; isFeatured: boolean | null };
+    card: { id: string; sport: string; pick: string; grade: string; betType: string; odds: number; confidence: number; ev: number; game: string; gameTime: string; maxCopies: number | null; copiesIssued: number | null; settledResult: string | null; cardType?: string };
+    username: string;
+  }[]>({
+    queryKey: ["/api/cards/community/feed"],
   });
 
   const { data: trades, isLoading: isTradesLoading } = useQuery<Trade[]>({
@@ -105,7 +110,6 @@ export default function CardsPage() {
     stats: { winning: number; losing: number };
   }>({
     queryKey: ["/api/showcase-tickets"],
-    enabled: isAdmin,
   });
 
   const openPackMutation = useMutation({
@@ -207,26 +211,119 @@ export default function CardsPage() {
         />
       )}
 
-      <Tabs defaultValue="collection" className="space-y-6">
-        <TabsList className={`bg-muted/50 p-1 w-full ${isAdmin ? "max-w-2xl" : "max-w-md"}`}>
-          <TabsTrigger value="collection" className="flex-1 font-bold gap-2">
+      <Tabs defaultValue="system-record" className="space-y-6">
+        <TabsList className="bg-muted/50 p-1 w-full flex flex-wrap h-auto gap-0.5 max-w-2xl">
+          <TabsTrigger value="system-record" className="flex-1 min-w-[120px] font-bold gap-1.5 text-amber-400" data-testid="tab-system-record">
+            <Settings2 className="w-4 h-4" /> System Record
+          </TabsTrigger>
+          <TabsTrigger value="collection" className="flex-1 min-w-[120px] font-bold gap-1.5" data-testid="tab-collection">
             <Users className="w-4 h-4" /> My Collection
           </TabsTrigger>
-          <TabsTrigger value="marketplace" className="flex-1 font-bold gap-2">
-            <ShoppingBag className="w-4 h-4" /> Marketplace
+          <TabsTrigger value="community" className="flex-1 min-w-[100px] font-bold gap-1.5" data-testid="tab-community">
+            <Globe className="w-4 h-4" /> Community
           </TabsTrigger>
-          <TabsTrigger value="trades" className="flex-1 font-bold gap-2">
+          <TabsTrigger value="trades" className="flex-1 min-w-[80px] font-bold gap-1.5" data-testid="tab-trades">
             <History className="w-4 h-4" /> Trades
           </TabsTrigger>
           {isAdmin && (
-            <TabsTrigger value="showcase-preview" className="flex-1 font-bold gap-2 text-amber-400" data-testid="tab-showcase-preview">
-              <Eye className="w-4 h-4" /> Showcase Preview
+            <TabsTrigger value="showcase-preview" className="flex-1 min-w-[80px] font-bold gap-1.5 text-amber-400/70 text-xs" data-testid="tab-showcase-preview">
+              <Eye className="w-3.5 h-3.5" /> Preview
             </TabsTrigger>
           )}
         </TabsList>
 
 
-        <TabsContent value="collection" className="space-y-6">
+        {/* ─── SYSTEM TRACK RECORD ─────────────────────────────────── */}
+        <TabsContent value="system-record" className="space-y-6" data-testid="content-system-record">
+          {/* Identity banner */}
+          <div
+            className="relative rounded-2xl overflow-hidden p-5 flex items-center gap-5 border"
+            style={{
+              background: "linear-gradient(135deg, rgba(251,191,36,0.10) 0%, rgba(16,24,40,0.95) 60%)",
+              borderColor: "rgba(251,191,36,0.22)",
+            }}
+          >
+            <div className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
+              style={{ background: "rgba(251,191,36,0.10)", border: "2px solid rgba(251,191,36,0.35)" }}>
+              <Settings2 className="w-7 h-7 text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-lg font-black text-amber-400">SORS System Track Record</h2>
+                <Badge className="text-[10px] border bg-amber-500/15 text-amber-400 border-amber-400/30 font-black">LIVE ENGINE</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Every card here was generated by the Sors 46-Factor Intelligence Engine. Real picks. Real results.
+              </p>
+            </div>
+            {showcaseData && (
+              <div className="hidden md:flex items-center gap-4 shrink-0">
+                <div className="text-center">
+                  <p className="text-xl font-black text-emerald-400">{showcaseData.stats.winning}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Wins</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-black text-red-400">{showcaseData.stats.losing}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Losses</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xl font-black text-amber-400">{showcaseCards.length}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold">Cards</p>
+                </div>
+              </div>
+            )}
+            <Button variant="outline" size="sm" onClick={() => refetchShowcase()} disabled={isShowcaseLoading}
+              className="shrink-0 border-amber-400/30 text-amber-400" data-testid="button-refresh-system-record">
+              <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${isShowcaseLoading ? "animate-spin" : ""}`} />Refresh
+            </Button>
+          </div>
+
+          {isShowcaseLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)}
+            </div>
+          ) : showcaseCards.length === 0 ? (
+            <Card className="border-dashed border-2 bg-amber-400/5 border-amber-400/20">
+              <CardContent className="py-16 text-center space-y-3">
+                <Settings2 className="w-10 h-10 mx-auto text-amber-400 opacity-30" />
+                <div>
+                  <h3 className="font-bold">No system cards loaded yet</h3>
+                  <p className="text-sm text-muted-foreground mt-1">The Sors engine generates cards from settled picks. Check back after picks settle.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+              {showcaseCards.map((card) => (
+                <div key={card.id} className="w-full aspect-[2/3]" data-testid={`card-system-${card.id}`}>
+                  <TradingCard
+                    card={{ ...card, cardType: "system" }}
+                    instanceNumber={1}
+                    isFlippable
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ─── MY COLLECTION ───────────────────────────────────────── */}
+        <TabsContent value="collection" className="space-y-6" data-testid="content-collection">
+          {/* Member collection header */}
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-muted/20">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-400/10 border border-blue-400/20 shrink-0">
+              <Users className="w-5 h-5 text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-sm">Member Collection</span>
+                <Badge className="text-[10px] bg-blue-400/10 text-blue-400 border border-blue-400/20">EARNED</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground">Cards you earned by opening packs. Showcase winners to the community.</p>
+            </div>
+            {collection && <span className="text-sm font-bold text-muted-foreground shrink-0">{collection.length} cards</span>}
+          </div>
+
           {isCollectionLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {[1, 2, 3, 4].map((i) => (
@@ -241,7 +338,7 @@ export default function CardsPage() {
                   <h3 className="text-xl font-bold">Your collection is empty</h3>
                   <p className="text-muted-foreground">Open your first daily pack to start collecting Sors Intelligence cards.</p>
                 </div>
-                <Button onClick={() => openPackMutation.mutate()} disabled={!packStatus?.available} className="font-bold">
+                <Button onClick={() => openPackMutation.mutate()} disabled={!packStatus?.available} className="font-bold hover-elevate active-elevate-2">
                   Open Your First Pack
                 </Button>
               </CardContent>
@@ -251,10 +348,10 @@ export default function CardsPage() {
               {collection?.map((item) => (
                 <div key={item.collection.id} className="w-full aspect-[2/3]">
                   <TradingCard
-                    card={item.card}
+                    card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}
                     instanceNumber={item.collection.instanceNumber}
                     collectionId={item.collection.id}
-                    isPublicShowcase={item.collection.isPublicShowcase}
+                    isPublicShowcase={(item.collection as any).isPublicShowcase}
                     isFlippable={true}
                   />
                 </div>
@@ -263,16 +360,57 @@ export default function CardsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="marketplace" className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
-            {isMarketplaceLoading ? (
-              [1, 2, 3, 4].map((i) => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)
-            ) : marketplace?.map((card) => (
-              <div key={card.id} className="w-full aspect-[2/3]">
-                <TradingCard card={card} />
+        {/* ─── COMMUNITY SHOWCASE ──────────────────────────────────── */}
+        <TabsContent value="community" className="space-y-6" data-testid="content-community">
+          {/* Header */}
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-muted/20">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-emerald-400/10 border border-emerald-400/20 shrink-0">
+              <Globe className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-black text-sm">Community Showcase</span>
+                <Badge className="text-[10px] bg-emerald-400/10 text-emerald-400 border border-emerald-400/20">MEMBER EARNED</Badge>
               </div>
-            ))}
+              <p className="text-xs text-muted-foreground">Cards that members chose to share publicly. Real picks by real members.</p>
+            </div>
+            {communityFeed && <span className="text-sm font-bold text-muted-foreground shrink-0">{communityFeed.length} cards</span>}
           </div>
+
+          {isCommunityLoading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {[1, 2, 3, 4, 5, 6].map(i => <Skeleton key={i} className="w-full aspect-[2/3] rounded-2xl" />)}
+            </div>
+          ) : !communityFeed || communityFeed.length === 0 ? (
+            <Card className="border-dashed border-2 bg-emerald-400/5 border-emerald-400/20">
+              <CardContent className="py-16 text-center space-y-3">
+                <Globe className="w-10 h-10 mx-auto text-emerald-400 opacity-30" />
+                <div>
+                  <h3 className="font-bold">No showcased cards yet</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Members who toggle showcase on their winning cards will appear here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+              {communityFeed.map((item) => (
+                <div key={item.collection.id} className="space-y-1.5" data-testid={`card-community-${item.collection.id}`}>
+                  <div className="w-full aspect-[2/3]">
+                    <TradingCard
+                      card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}
+                      instanceNumber={item.collection.instanceNumber}
+                      isFeatured={item.collection.isFeatured ?? false}
+                      isFlippable
+                    />
+                  </div>
+                  <div className="px-1 flex items-center gap-1.5 flex-wrap">
+                    {item.collection.isFeatured && <Badge className="text-[9px] h-4 px-1 bg-amber-500/10 text-amber-400 border border-amber-400/20">★ Featured</Badge>}
+                    <span className="text-xs text-muted-foreground">@{item.username}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="trades" className="space-y-6">
