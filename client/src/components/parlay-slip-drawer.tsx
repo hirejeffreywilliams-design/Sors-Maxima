@@ -1494,9 +1494,9 @@ export function ParlaySlipDesktopSidebar() {
         data-testid="button-toggle-bet-slip"
         aria-label="Toggle bet slip"
       >
-        <Ticket className="h-4 w-4" />
+        <Ticket className="h-4 w-4 gold-ticket-icon" />
         {legCount > 0 ? (
-          <span className="bg-white/20 text-white text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+          <span className="gold-slip-badge text-[10px] rounded-full h-5 w-5 flex items-center justify-center">
             {legCount}
           </span>
         ) : null}
@@ -1514,7 +1514,7 @@ export function ParlaySlipDesktopSidebar() {
         data-testid="desktop-bet-slip"
       >
         <div className="px-3 py-2.5 border-b bg-gradient-to-r from-primary/5 to-primary/10 flex items-center gap-2 shrink-0">
-          <Ticket className="h-4 w-4 text-primary" />
+          <Ticket className="h-4 w-4 gold-ticket-icon" />
           <span className="font-bold text-sm">Bet Slip</span>
           {legCount > 0 && (
             <Badge variant="default" className="ml-1 text-[10px] h-5 px-2">
@@ -1553,7 +1553,7 @@ export function ParlaySlipMobileDrawer() {
         <SheetHeader className="px-4 pt-3 pb-2">
           <div className="w-10 h-1 bg-muted-foreground/30 rounded-full mx-auto mb-2" />
           <SheetTitle className="flex items-center gap-2">
-            <Ticket className="h-5 w-5 text-primary" />
+            <Ticket className="h-5 w-5 gold-ticket-icon" />
             Bet Slip
             {legCount > 0 && (
               <Badge variant="outline">{legCount} leg{legCount !== 1 ? "s" : ""}</Badge>

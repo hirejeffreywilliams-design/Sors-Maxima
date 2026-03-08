@@ -224,7 +224,7 @@ export function ExportBetSlip({ legs: externalLegs }: ExportBetSlipProps = {}) {
       {source === "slip" && (
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="py-3 px-4 flex items-center gap-3">
-            <Ticket className="h-5 w-5 text-primary shrink-0" />
+            <Ticket className="h-5 w-5 gold-ticket-icon shrink-0" />
             <div className="flex-1">
               <p className="text-sm font-medium">Using your active bet slip ({slipLegs.length} leg{slipLegs.length !== 1 ? "s" : ""})</p>
               <p className="text-xs text-muted-foreground">Picks added from across the platform</p>

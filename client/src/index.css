@@ -602,3 +602,45 @@
 .animate-glow-pulse {
   animation: glow-pulse 2.5s ease-in-out infinite;
 }
+
+/* ── 24k Gold Ticket Icon ────────────────────────────────── */
+.gold-ticket-icon {
+  color: #FFD700;
+  filter: drop-shadow(0 0 4px rgba(255, 185, 0, 0.55));
+}
+
+@keyframes gold-shine {
+  0%   {
+    color: #FFD700;
+    filter: drop-shadow(0 0 2px rgba(255,185,0,0.4)) brightness(1);
+  }
+  25%  {
+    color: #FFE863;
+    filter: drop-shadow(0 0 10px rgba(255,220,0,0.9)) brightness(1.3);
+  }
+  50%  {
+    color: #FFD700;
+    filter: drop-shadow(0 0 5px rgba(255,185,0,0.6)) brightness(1.05);
+  }
+  75%  {
+    color: #FFC200;
+    filter: drop-shadow(0 0 8px rgba(255,200,0,0.75)) brightness(1.15);
+  }
+  100% {
+    color: #FFD700;
+    filter: drop-shadow(0 0 2px rgba(255,185,0,0.4)) brightness(1);
+  }
+}
+
+.gold-ticket-icon-animated {
+  color: #FFD700;
+  animation: gold-shine 3s ease-in-out infinite;
+}
+
+/* Gold ticket slip badge counter */
+.gold-slip-badge {
+  background: linear-gradient(135deg, #FFE863 0%, #FFD700 50%, #B8860B 100%);
+  color: #1a0e00;
+  font-weight: 800;
+  box-shadow: 0 0 8px rgba(255,185,0,0.7);
+}

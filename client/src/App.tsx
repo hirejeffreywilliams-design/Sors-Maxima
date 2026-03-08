@@ -87,7 +87,7 @@ const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
-import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
+import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
 import { SportsTicker } from "@/components/sports-ticker";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
@@ -770,14 +770,14 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
             aria-label="Open bet slip"
           >
             <div className="relative">
-              <Ticket className="w-5 h-5" />
+              <Ticket className="w-5 h-5 gold-ticket-icon-animated" />
               {legCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold leading-none">
+                <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full gold-slip-badge text-[10px] leading-none">
                   {legCount > 9 ? "9+" : legCount}
                 </span>
               )}
             </div>
-            <span className="text-[10px] font-bold">Slip</span>
+            <span className="text-[10px] font-bold text-yellow-500">Slip</span>
           </button>
 
           <button
