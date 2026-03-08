@@ -739,173 +739,344 @@ export function TradingCard({
             background: `radial-gradient(circle at 50% 40%, ${foil.accent}18 0%, transparent 60%)`,
           }}
         />
-        <div className="relative z-10 w-full space-y-3">
-          {/* Back header */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div
-                className="text-base font-black tracking-tighter"
-                style={{ color: foil.accent }}
-              >
-                SORS MAXIMA™
-              </div>
-              <div className="flex items-center gap-1 mt-0.5">
-                <span className="text-[8px] font-black text-primary uppercase tracking-widest">SORS CERTIFIED ✓</span>
-                <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
-              </div>
-            </div>
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center border"
-              style={{
-                background: `${foil.accent}12`,
-                borderColor: `${foil.accent}40`,
-                boxShadow: `0 0 16px ${foil.accent}25`,
-              }}
-            >
-              <Trophy className="w-5 h-5" style={{ color: foil.accent }} />
-            </div>
-          </div>
+        {/* === BACK CONTENT === */}
+        {(() => {
+          // ── Strategy inference ──────────────────────────────────
+          const odds = card.odds ?? 0;
+          const ev = card.ev ?? 0;
+          const conf = card.confidence ?? 0;
+          const bt = (card.betType ?? "").toLowerCase();
+          const implied = odds > 0
+            ? Math.round(10000 / (odds + 100))
+            : Math.round(Math.abs(odds) / (Math.abs(odds) + 100) * 100);
 
-          {/* Pick summary */}
-          <div
-            className="w-full rounded-lg px-3 py-2 text-left"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
-          >
-            <p className="text-[8px] text-white/35 uppercase tracking-widest font-bold truncate">{card.game || "—"}</p>
-            <p className="text-[11px] font-black text-white/90 leading-tight mt-0.5 line-clamp-2">{card.pick || "—"}</p>
-          </div>
+          const strategy: { name: string; icon: string; color: string; tagline: string; desc: string; signals: string[] } =
+            odds >= 300
+              ? {
+                  name: "LONG SHOT SLEEPER",
+                  icon: "💎",
+                  color: "#fbbf24",
+                  tagline: "Extreme value at a price nobody else saw",
+                  desc: `Market priced this at only ${implied}% win probability — our model saw ${conf}%. That gap is pure profit. This is the kind of line that makes careers.`,
+                  signals: ["Price inefficiency", "Line value gap", "Model override"],
+                }
+              : ev >= 15 && odds > 100
+              ? {
+                  name: "STEAM MOVE DETECTED",
+                  icon: "🔥",
+                  color: "#f97316",
+                  tagline: "Sharp money moved before the public noticed",
+                  desc: `Professional bettors were already on this. Our 46-Factor Engine tracked the steam and locked in before the line adjusted. ${conf}% conviction.`,
+                  signals: ["Sharp action", "Line movement signal", "Professional alignment"],
+                }
+              : odds >= 110 && odds < 300
+              ? {
+                  name: "UNDERDOG VALUE",
+                  icon: "⚡",
+                  color: "#a78bfa",
+                  tagline: "Bet against the crowd — the math says so",
+                  desc: `Market says ${implied}% chance. Our model says ${conf}%. Every time that gap exists, betting the underdog is the winning long-term play. This was one of those.`,
+                  signals: ["Market mispricing", `+${ev}% edge`, "Model vs public gap"],
+                }
+              : bt !== "moneyline" && bt !== "h2h"
+              ? {
+                  name: "ALT-MARKET EDGE",
+                  icon: "📐",
+                  color: "#2dd4bf",
+                  tagline: "Found value where others weren't looking",
+                  desc: `While everyone watches the moneyline, our model found a ${ev}% edge in the ${bt.replace(/_/g, " ")} market. Alternative lines are where the real value hides.`,
+                  signals: ["Alt-line value", `${ev}% EV detected`, "Non-moneyline alpha"],
+                }
+              : conf >= 72
+              ? {
+                  name: "HIGH CONVICTION",
+                  icon: "🎯",
+                  color: "#34d399",
+                  tagline: "All 46 factors pointed the same direction",
+                  desc: `${conf}% conviction across every single model factor. When the signals all align like this, you don't hesitate — you bet with confidence. The math was overwhelming.`,
+                  signals: ["Full factor alignment", `${conf}% conviction`, "Maximum model certainty"],
+                }
+              : {
+                  name: "CONTRARIAN FADE",
+                  icon: "↩️",
+                  color: "#60a5fa",
+                  tagline: "Fade the public. Follow the model.",
+                  desc: `When the whole world is on one side, the value is always on the other. Our model detected ${ev}% expected value fading the public narrative on this game.`,
+                  signals: ["Public fade", "Contrarian edge", `+${ev}% expected value`],
+                };
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-2 gap-1.5 w-full">
-            {[
-              { label: "Grade", value: safeGrade, accent: foil.accent },
-              { label: "Odds", value: card.odds ? (card.odds > 0 ? `+${card.odds}` : `${card.odds}`) : "—", accent: foil.accent },
-              { label: "Conviction", value: `${card.confidence ?? 0}%`, accent: "#34d399" },
-              { label: "Sors EV™", value: `+${card.ev ?? 0}%`, accent: "#34d399" },
-              { label: "Win Value", value: card.odds && Math.abs(card.odds) < 2000 ? `$100 → $${potentialReturn}` : "—", accent: "#22c55e" },
-              { label: "Result", value: isSettled ? (isWin ? "Called It ✓" : "No Hit") : "Pending", accent: isSettled ? (isWin ? "#34d399" : "rgba(255,255,255,0.30)") : "#fbbf24" },
-            ].map(({ label, value, accent }) => (
-              <div
-                key={label}
-                className="rounded px-2 py-1.5"
-                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.06)" }}
-              >
-                <p className="text-[7px] font-bold text-white/30 uppercase tracking-widest">{label}</p>
-                <p className="text-[10px] font-black mt-0.5 truncate" style={{ color: accent }}>{value}</p>
-              </div>
-            ))}
-          </div>
+          return (
+            <div className="relative z-10 w-full flex flex-col gap-2.5">
 
-          <div className="flex items-center justify-between w-full">
-            <p className="text-[9px] font-black text-white/25 tracking-[0.2em] uppercase">
-              {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "UNIQUE COPY"}
-            </p>
-            {card.maxCopies && (
-              <p className="text-[8px] font-bold uppercase tracking-wider" style={{ color: `${foil.accent}60` }}>
-                1 of {card.maxCopies}
-              </p>
-            )}
-          </div>
-
-          {collectionId && (
-            <div className="pt-2 space-y-2">
-              <button
-                onClick={toggleShowcase}
-                disabled={isShowcaseToggling}
-                className={cn(
-                  "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-2 mx-auto",
-                  isPublicShowcase 
-                    ? "bg-primary/20 text-primary border border-primary/40" 
-                    : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10 hover:text-white"
-                )}
-              >
-                {isShowcaseToggling ? (
-                  <span className="animate-pulse">...</span>
-                ) : isPublicShowcase ? (
-                  <>
-                    <CheckCircle2 className="w-3 h-3" />
-                    <span>✓ Shared</span>
-                  </>
-                ) : (
-                  <>
-                    <span>📢 Share to Community</span>
-                  </>
-                )}
-              </button>
-
-              {canAccess("whale") ? (
-                <div className="flex items-center gap-2 justify-center">
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const url = `${window.location.origin}/c/${collectionId}`;
-                      await navigator.clipboard.writeText(url);
-                      setCopiedProof("link");
-                      toast({ title: "Proof link copied!", description: "Share it to prove this win is real." });
-                      setTimeout(() => setCopiedProof(null), 2500);
-                    }}
-                    data-testid={`button-copy-proof-${collectionId}`}
-                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 bg-white/5 border border-white/10 hover:bg-white/10"
-                    style={{ color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.45)" }}
-                  >
-                    {copiedProof === "link" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
-                    {copiedProof === "link" ? "Copied!" : "Proof Link"}
-                  </button>
-
-                  <button
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      const url = `${window.location.origin}/c/${collectionId}`;
-                      const isWin = card.settledResult === "won";
-                      const isPending = !card.settledResult || card.settledResult === "pending";
-                      const resultLabel = isWin ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "✗ NO HIT";
-                      const gradeEmoji = card.grade?.startsWith("A") ? "🏆" : card.grade?.startsWith("B") ? "⚡" : "📊";
-                      const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
-                      const msg = [
-                        `${gradeEmoji} **SORS MAXIMA™ VERIFIED PICK**`,
-                        `━━━━━━━━━━━━━━━━━━━━`,
-                        `🎯 **${card.pick}**`,
-                        `🏅 Grade: **${card.grade}** | Sport: ${card.sport}`,
-                        card.game ? `🏟️ ${card.game}` : null,
-                        `💰 Odds: ${oddsStr}`,
-                        `📊 Result: ${resultLabel}`,
-                        `━━━━━━━━━━━━━━━━━━━━`,
-                        `🔗 Verify: ${url}`,
-                        `*Cannot be fabricated — Sors 46-Factor Engine™*`,
-                      ].filter(Boolean).join("\n");
-                      await navigator.clipboard.writeText(msg);
-                      setCopiedProof("discord");
-                      toast({ title: "Discord message copied!", description: "Paste it into your server." });
-                      setTimeout(() => setCopiedProof(null), 2500);
-                    }}
-                    data-testid={`button-copy-discord-${collectionId}`}
-                    className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 border"
-                    style={{
-                      background: copiedProof === "discord" ? "rgba(34,197,94,0.15)" : "rgba(var(--primary-rgb, 34 197 94) / 0.10)",
-                      borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.40)" : "rgba(var(--primary-rgb, 34 197 94) / 0.25)",
-                      color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))",
-                    }}
-                  >
-                    {copiedProof === "discord" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <MessageSquare className="w-2.5 h-2.5" />}
-                    {copiedProof === "discord" ? "Copied!" : "Discord"}
-                  </button>
+              {/* ── Header ── */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-black tracking-tighter text-[15px]" style={{ color: foil.accent }}>
+                    SORS MAXIMA™
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 5px #10b981" }} />
+                    <span className="text-[7px] font-black uppercase tracking-widest text-emerald-400">46-Factor Certified</span>
+                  </div>
                 </div>
-              ) : (
-                <div className="flex items-center justify-center gap-1.5 px-2 py-1">
-                  <span className="text-[9px] text-amber-400/60 font-bold uppercase tracking-wider">👑 Max — Discord Proof</span>
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center border"
+                  style={{ background: `${foil.accent}12`, borderColor: `${foil.accent}40`, boxShadow: `0 0 14px ${foil.accent}25` }}
+                >
+                  <span className="text-[18px]">{sportIcon}</span>
+                </div>
+              </div>
+
+              {/* ── Pick Summary ── */}
+              <div
+                className="w-full rounded-lg px-2.5 py-2 text-left"
+                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${foil.accent}25` }}
+              >
+                <p className="text-[7px] font-bold uppercase tracking-widest truncate" style={{ color: `${foil.accent}70` }}>{card.game || "—"}</p>
+                <p className="text-[12px] font-black text-white/95 leading-tight mt-0.5 line-clamp-2">{card.pick || "—"}</p>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-[9px] font-mono font-black tabular-nums" style={{ color: foil.accent }}>
+                    {odds > 0 ? `+${odds}` : odds}
+                  </span>
+                  <span className="text-[7px] font-black uppercase px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.40)" }}>
+                    {(card.betType ?? "").replace(/_/g, " ")}
+                  </span>
+                  <span className="ml-auto text-[8px] font-black" style={{ color: foil.accent }}>{safeGrade}</span>
+                </div>
+              </div>
+
+              {/* ── STRATEGY USED ── */}
+              <div
+                className="w-full rounded-xl px-3 py-2.5"
+                style={{
+                  background: `linear-gradient(135deg, ${strategy.color}14 0%, rgba(0,0,0,0.30) 100%)`,
+                  border: `1px solid ${strategy.color}35`,
+                  boxShadow: `0 0 16px ${strategy.color}15`,
+                }}
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-[14px] leading-none">{strategy.icon}</span>
+                  <div>
+                    <div
+                      className="text-[8px] font-black uppercase tracking-widest"
+                      style={{ color: strategy.color }}
+                    >{strategy.name}</div>
+                    <div className="text-[7px] font-medium" style={{ color: `${strategy.color}90` }}>{strategy.tagline}</div>
+                  </div>
+                </div>
+                <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.62)" }}>
+                  {strategy.desc}
+                </p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {strategy.signals.map(s => (
+                    <span
+                      key={s}
+                      className="text-[7px] font-black uppercase px-2 py-0.5 rounded-full"
+                      style={{ background: `${strategy.color}18`, color: `${strategy.color}CC`, border: `1px solid ${strategy.color}30` }}
+                    >{s}</span>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── Stats Row ── */}
+              <div className="grid grid-cols-4 gap-1 w-full">
+                {[
+                  { label: "Grade", value: safeGrade, color: foil.accent },
+                  { label: "Odds", value: odds > 0 ? `+${odds}` : `${odds}`, color: foil.accent },
+                  { label: "Conviction", value: `${conf}%`, color: "#34d399" },
+                  { label: "Sors EV™", value: `+${ev}%`, color: "#34d399" },
+                ].map(({ label, value, color }) => (
+                  <div
+                    key={label}
+                    className="rounded-lg px-1.5 py-1.5 text-center"
+                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+                  >
+                    <p className="text-[6px] font-bold uppercase tracking-widest text-white/28">{label}</p>
+                    <p className="text-[9px] font-black mt-0.5 tabular-nums" style={{ color }}>{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* ── Win Value ── */}
+              {ret100 && (
+                <div
+                  className="w-full rounded-xl px-3 py-2.5 text-center"
+                  style={{
+                    background: isWin ? "rgba(251,191,36,0.12)" : "rgba(255,255,255,0.03)",
+                    border: `2px solid ${isWin ? "rgba(251,191,36,0.50)" : "rgba(255,255,255,0.08)"}`,
+                    boxShadow: isWin ? "0 0 20px rgba(251,191,36,0.18)" : "none",
+                  }}
+                >
+                  <div className="text-[7px] font-black uppercase tracking-widest mb-1.5" style={{ color: isWin ? "rgba(251,191,36,0.65)" : "rgba(255,255,255,0.28)" }}>
+                    {isWin ? "★ What This Win Would Have Paid ★" : "If You Had Bet"}
+                  </div>
+                  <div className="flex items-end justify-around gap-2">
+                    {[{ stake: "$1", val: ret1 }, { stake: "$10", val: ret10 }, { stake: "$100", val: ret100 }].map(({ stake, val }) => val ? (
+                      <div key={stake} className="flex flex-col items-center">
+                        <span className="text-[7px] font-black uppercase" style={{ color: isWin ? "rgba(251,191,36,0.50)" : "rgba(255,255,255,0.22)" }}>{stake}</span>
+                        <span
+                          className="font-black tabular-nums leading-none"
+                          style={{
+                            fontSize: stake === "$100" ? "20px" : stake === "$10" ? "15px" : "11px",
+                            color: isWin ? "#FCD34D" : "rgba(52,211,153,0.85)",
+                            textShadow: isWin ? "0 0 14px rgba(251,191,36,0.70)" : "none",
+                            fontFamily: "Georgia, serif",
+                          }}
+                        >{val}</span>
+                      </div>
+                    ) : null)}
+                  </div>
                 </div>
               )}
+
+              {/* ── Marketing Seal ── */}
+              <div
+                className="w-full rounded-lg px-3 py-2 flex items-center gap-3"
+                style={{ background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0"
+                  style={{ background: `${foil.accent}15`, border: `1.5px solid ${foil.accent}45`, boxShadow: `0 0 10px ${foil.accent}30` }}
+                >
+                  <Brain className="w-4 h-4" style={{ color: foil.accent }} />
+                </div>
+                <div>
+                  <p className="text-[8px] font-black uppercase tracking-wider" style={{ color: foil.accent }}>Sors 46-Factor Engine™</p>
+                  <p className="text-[7px] text-white/38 leading-snug mt-0.5">
+                    Data-driven. Cryptographically verified. The smartest pick engine in sports.
+                  </p>
+                </div>
+              </div>
+
+              {/* ── Result Stamp ── */}
+              <div className="flex items-center justify-between w-full">
+                <p className="text-[7px] font-mono" style={{ color: `${foil.accent}45` }}>
+                  {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "SORS MAXIMA™"}
+                </p>
+                <div className="flex items-center gap-1.5">
+                  {isSettled ? (
+                    isWin ? (
+                      <div className="flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                        <span className="text-[8px] font-black uppercase text-emerald-400">Called It ✓</span>
+                      </div>
+                    ) : (
+                      <span className="text-[8px] font-black uppercase text-white/25">No Hit</span>
+                    )
+                  ) : (
+                    <div className="flex items-center gap-1 animate-pulse">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: foil.accent }} />
+                      <span className="text-[8px] font-black uppercase" style={{ color: `${foil.accent}90` }}>Live</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Action Buttons ── */}
+              {collectionId && (
+                <div className="space-y-2 pt-1">
+                  <button
+                    onClick={toggleShowcase}
+                    disabled={isShowcaseToggling}
+                    className={cn(
+                      "w-full px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2",
+                      isPublicShowcase
+                        ? "bg-primary/20 text-primary border border-primary/40"
+                        : "border border-white/12 text-white/60 hover:bg-white/08 hover:text-white"
+                    )}
+                    style={{ background: isPublicShowcase ? undefined : "rgba(255,255,255,0.04)" }}
+                  >
+                    {isShowcaseToggling ? (
+                      <span className="animate-pulse">...</span>
+                    ) : isPublicShowcase ? (
+                      <><CheckCircle2 className="w-3 h-3" /><span>✓ In Community Showcase</span></>
+                    ) : (
+                      <><span>📢 Share to Community Showcase</span></>
+                    )}
+                  </button>
+
+                  {canAccess("whale") ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/c/${collectionId}`;
+                          await navigator.clipboard.writeText(url);
+                          setCopiedProof("link");
+                          toast({ title: "Proof link copied!", description: "Share it to prove this win is real." });
+                          setTimeout(() => setCopiedProof(null), 2500);
+                        }}
+                        data-testid={`button-copy-proof-${collectionId}`}
+                        className="flex-1 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 border transition-colors"
+                        style={{
+                          background: "rgba(255,255,255,0.04)",
+                          borderColor: copiedProof === "link" ? "rgba(34,197,94,0.40)" : "rgba(255,255,255,0.10)",
+                          color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.50)",
+                        }}
+                      >
+                        {copiedProof === "link" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <Copy className="w-2.5 h-2.5" />}
+                        {copiedProof === "link" ? "Copied!" : "Proof Link"}
+                      </button>
+
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          const url = `${window.location.origin}/c/${collectionId}`;
+                          const winVal = card.settledResult === "won";
+                          const isPending = !card.settledResult || card.settledResult === "pending";
+                          const resultLabel = winVal ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "✗ NO HIT";
+                          const gradeEmoji = card.grade?.startsWith("A") ? "🏆" : card.grade?.startsWith("B") ? "⚡" : "📊";
+                          const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
+                          const msg = [
+                            `${gradeEmoji} **SORS MAXIMA™ VERIFIED PICK**`,
+                            `━━━━━━━━━━━━━━━━━━━━`,
+                            `🎯 **${card.pick}**`,
+                            `🏅 Grade: **${card.grade}** | Sport: ${card.sport}`,
+                            card.game ? `🏟️ ${card.game}` : null,
+                            `💰 Odds: ${oddsStr}`,
+                            `📊 Result: ${resultLabel}`,
+                            `━━━━━━━━━━━━━━━━━━━━`,
+                            `🔗 Verify: ${url}`,
+                            `*Cannot be fabricated — Sors 46-Factor Engine™*`,
+                          ].filter(Boolean).join("\n");
+                          await navigator.clipboard.writeText(msg);
+                          setCopiedProof("discord");
+                          toast({ title: "Discord message copied!", description: "Paste it into your server." });
+                          setTimeout(() => setCopiedProof(null), 2500);
+                        }}
+                        data-testid={`button-copy-discord-${collectionId}`}
+                        className="flex-1 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 border transition-colors"
+                        style={{
+                          background: copiedProof === "discord" ? "rgba(34,197,94,0.10)" : "rgba(var(--primary-rgb, 34 197 94) / 0.08)",
+                          borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.40)" : "rgba(var(--primary-rgb, 34 197 94) / 0.25)",
+                          color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))",
+                        }}
+                      >
+                        {copiedProof === "discord" ? <CheckCircle2 className="w-2.5 h-2.5" /> : <MessageSquare className="w-2.5 h-2.5" />}
+                        {copiedProof === "discord" ? "Copied!" : "Discord"}
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <span className="text-[8px] text-amber-400/55 font-bold uppercase tracking-wider">👑 Upgrade to Max for Discord Proof</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── Bottom Tagline ── */}
+              <div className="pt-2 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
+                <p className="text-[7px] text-center font-medium" style={{ color: "rgba(255,255,255,0.25)", lineHeight: 1.6 }}>
+                  Trust the model. The data never lies.
+                </p>
+              </div>
+
             </div>
-          )}
-          
-          <div className="pt-3 border-t border-white/8 max-w-[180px] mx-auto">
-            <p className="text-[9px] text-white/30 leading-relaxed">
-              Verified signal from the Sors 46-Factor Intelligence Engine. Collect, trade, and showcase your best picks.
-            </p>
-          </div>
-        </div>
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <div className="text-[8px] font-mono text-white/15 tracking-widest uppercase">Secured by Sors 46-Factor Engine</div>
+          );
+        })()}
+
+        <div className="absolute bottom-2 left-0 right-0 flex justify-center pointer-events-none">
+          <div className="text-[7px] font-mono tracking-widest uppercase" style={{ color: `${foil.accent}25` }}>Sors 46-Factor Engine™</div>
         </div>
       </div>
     </div>

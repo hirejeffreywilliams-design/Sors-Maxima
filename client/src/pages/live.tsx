@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { PageHero } from "@/components/page-hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Activity, Shield, Bot, LineChart, Users, Brain, DollarSign, MessageSquare, Wifi, WifiOff, Sliders, Lock } from "lucide-react";
+import { LiveScoresFeed } from "@/components/live/live-scores-feed";
 import { MomentumTracker } from "@/components/live/momentum-tracker";
 import { LiveHedgeCalculator } from "@/components/live/live-hedge-calculator";
 import { BettingAssistant } from "@/components/ai/betting-assistant";
@@ -114,13 +115,19 @@ export default function Live() {
           <LiveGamesStrip games={momentumGames} />
         )}
 
-        <Tabs defaultValue="factors" className="space-y-6">
+        <Tabs defaultValue="scores" className="space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-9 sm:max-w-4xl">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-10 sm:max-w-5xl">
+              <TabsTrigger value="scores" className="gap-1 px-2 sm:px-3 relative" data-testid="tab-scores">
+                <Activity className="w-4 h-4 shrink-0 text-red-400" />
+                <span className="hidden sm:inline">Scores</span>
+                {sse.lastEvent?.type === "live-scores" || sse.lastEvent?.type === "intelligence-update" ? (
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                ) : null}
+              </TabsTrigger>
               <TabsTrigger value="factors" className="gap-1 px-2 sm:px-3 relative" data-testid="tab-factors">
                 <Sliders className="w-4 h-4 shrink-0 text-blue-500" />
                 <span className="hidden sm:inline">Factors</span>
-                <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-red-500 animate-pulse sm:hidden" />
               </TabsTrigger>
               <TabsTrigger value="momentum" className="gap-1 px-2 sm:px-3" data-testid="tab-momentum">
                 <Activity className="w-4 h-4 shrink-0" />
@@ -161,6 +168,10 @@ export default function Live() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="scores" className="space-y-6">
+            <LiveScoresFeed />
+          </TabsContent>
 
           <TabsContent value="factors" className="space-y-6">
             <LiveFactorAdjuster />
