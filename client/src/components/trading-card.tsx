@@ -383,20 +383,42 @@ export function TradingCard({
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-end gap-0.5">
+            <div className="flex flex-col items-center gap-0.5">
               <div
-                className={`font-black text-2xl leading-none ${
-                  isAPlus ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" :
-                  safeGrade.startsWith("A") ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
+                className="w-12 h-12 rounded-full flex items-center justify-center shrink-0"
+                style={{
+                  border: isAPlus
+                    ? "2px solid rgba(251,191,36,0.80)"
+                    : safeGrade.startsWith("A")
+                    ? "2px solid rgba(52,211,153,0.70)"
+                    : safeGrade === "B+"
+                    ? "2px solid rgba(45,212,191,0.60)"
+                    : safeGrade.startsWith("B")
+                    ? "2px solid rgba(96,165,250,0.50)"
+                    : "2px solid rgba(255,255,255,0.15)",
+                  background: isAPlus
+                    ? "rgba(251,191,36,0.09)"
+                    : safeGrade.startsWith("A")
+                    ? "rgba(52,211,153,0.07)"
+                    : "rgba(255,255,255,0.04)",
+                  boxShadow: isAPlus
+                    ? "0 0 18px rgba(251,191,36,0.40), inset 0 0 8px rgba(251,191,36,0.10)"
+                    : safeGrade.startsWith("A")
+                    ? "0 0 14px rgba(52,211,153,0.30)"
+                    : safeGrade === "B+"
+                    ? "0 0 10px rgba(45,212,191,0.22)"
+                    : "none",
+                }}
+              >
+                <span className={`font-black text-lg leading-none ${
+                  isAPlus ? "text-amber-400" :
+                  safeGrade.startsWith("A") ? "text-emerald-400" :
                   safeGrade === "B+" ? "text-teal-400" :
                   safeGrade.startsWith("B") ? "text-blue-400" :
                   "text-slate-400"
-                }`}
-              >
-                {safeGrade}
+                }`}>{safeGrade}</span>
               </div>
-              <div style={{ fontSize: "7px", fontWeight: 900, letterSpacing: "0.12em", color: foil.accent, opacity: 0.6 }}>SORS CERTIFIED</div>
-              <div className="text-[8px] font-bold text-white/25 uppercase tracking-wider">Grade</div>
+              <div style={{ fontSize: "7px", fontWeight: 900, letterSpacing: "0.12em", color: foil.accent, opacity: 0.55 }}>GRADE</div>
             </div>
           </div>
 
@@ -479,43 +501,82 @@ export function TradingCard({
                   </div>
                 )}
 
-                {eventLabel && (
-                  <div
-                    className="relative z-10 mt-2 inline-block text-[8px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border"
-                    style={{
-                      background: `${foil.accent}15`,
-                      borderColor: `${foil.accent}40`,
-                      color: foil.accent,
-                      textShadow: `0 0 8px ${foil.accent}55`,
-                    }}
-                  >
-                    {eventLabel}
-                  </div>
-                )}
+                <div className="relative z-10 mt-2 flex items-center gap-2 flex-wrap">
+                  {eventLabel && (
+                    <div
+                      className="inline-block text-[8px] font-black tracking-widest uppercase px-2.5 py-0.5 rounded-full border"
+                      style={{
+                        background: `${foil.accent}15`,
+                        borderColor: `${foil.accent}40`,
+                        color: foil.accent,
+                        textShadow: `0 0 8px ${foil.accent}55`,
+                      }}
+                    >
+                      {eventLabel}
+                    </div>
+                  )}
+                  {card.ev >= 15 && (
+                    <div
+                      className="inline-flex items-center gap-1 text-[7px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border"
+                      style={{
+                        background: "rgba(251,191,36,0.10)",
+                        borderColor: "rgba(251,191,36,0.35)",
+                        color: "rgba(251,191,36,0.85)",
+                      }}
+                    >
+                      🔥 HIGH EDGE
+                    </div>
+                  )}
+                  {isAPlus && !eventLabel && (
+                    <div
+                      className="inline-flex items-center gap-1 text-[7px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full border"
+                      style={{
+                        background: "rgba(251,191,36,0.08)",
+                        borderColor: "rgba(251,191,36,0.30)",
+                        color: "rgba(251,191,36,0.75)",
+                      }}
+                    >
+                      ◆ LEGENDARY
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })()}
 
           {/* === Pick Info === */}
           <div className="relative z-10 flex-1 flex flex-col px-4 py-3 gap-2 min-h-0">
-            {/* Watermark */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none -rotate-[30deg] font-black tracking-widest text-white whitespace-nowrap"
-              style={{ fontSize: "11px", opacity: 0.035 }}
+            {/* Brand "S" monogram watermark */}
+            <div
+              className="absolute inset-0 flex items-center justify-end pr-3 pointer-events-none select-none"
+              aria-hidden="true"
             >
-              SORS MAXIMA™
+              <span
+                style={{
+                  fontSize: "88px",
+                  fontWeight: 900,
+                  fontFamily: "Georgia, 'Times New Roman', serif",
+                  color: "white",
+                  opacity: 0.032,
+                  lineHeight: 1,
+                  userSelect: "none",
+                }}
+              >S</span>
             </div>
             <div>
-              <p className="text-[9px] text-white/35 uppercase tracking-wider font-bold truncate">{card.game}</p>
-              <h3 className="text-sm font-black leading-tight text-white/95 truncate">{card.pick}</h3>
-              <div className="flex items-center gap-2 mt-1">
+              <p className="text-[8px] text-white/30 uppercase tracking-widest font-bold truncate">{card.game}</p>
+              <h3 className="text-[15px] font-black leading-tight text-white/95 mt-0.5" style={{ lineClamp: 2 }}>{card.pick}</h3>
+              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 <span
-                  className="text-xs font-mono font-black"
-                  style={{ color: foil.accent }}
+                  className="text-sm font-mono font-black tabular-nums"
+                  style={{ color: foil.accent, textShadow: `0 0 10px ${foil.accent}60` }}
                 >
                   {card.odds > 0 ? `+${card.odds}` : card.odds}
                 </span>
-                <span className="text-[9px] text-white/40 uppercase">{(card.betType ?? "").replace(/_/g, " ")}</span>
+                <span
+                  className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded"
+                  style={{ background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.38)" }}
+                >{(card.betType ?? "").replace(/_/g, " ")}</span>
               </div>
             </div>
 
@@ -564,6 +625,11 @@ export function TradingCard({
               <Brain className="w-3 h-3 text-white/30" />
               <span className="text-[8px] font-black uppercase tracking-widest text-white/30">46-Factor</span>
             </div>
+            {isFlippable && !isSettled && (
+              <span className="text-[7px] font-black uppercase tracking-widest text-white/18 flex items-center gap-0.5">
+                ↺ flip
+              </span>
+            )}
             {isSettled ? (
               isWin ? (
                 <div className="flex items-center gap-1">
@@ -572,8 +638,8 @@ export function TradingCard({
                 </div>
               ) : (
                 <div className="flex items-center gap-1">
-                  <XCircle className="w-3.5 h-3.5 text-red-400" />
-                  <span className="text-[9px] font-black uppercase text-red-400">Missed</span>
+                  <XCircle className="w-3.5 h-3.5 text-white/30" />
+                  <span className="text-[9px] font-black uppercase text-white/35">No Hit</span>
                 </div>
               )
             ) : (
@@ -595,18 +661,38 @@ export function TradingCard({
             </div>
           )}
 
-          {/* Result Stamp */}
+          {/* Branded Result Stamp */}
           {isSettled && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none rotate-[-12deg] z-20">
+            <div
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+              style={{ transform: "rotate(-12deg)" }}
+            >
               <div
-                className={`border-[6px] px-6 py-2 text-3xl font-black uppercase tracking-widest ${
-                  isWin
-                    ? "border-emerald-500 text-emerald-500"
-                    : "border-red-500 text-red-500"
-                }`}
-                style={{ opacity: 0.22, letterSpacing: "0.15em" }}
+                className="flex flex-col items-center gap-0.5"
+                style={{
+                  border: isWin
+                    ? "4px solid rgba(52,211,153,0.60)"
+                    : "3px solid rgba(255,255,255,0.13)",
+                  padding: "10px 22px 8px",
+                  borderRadius: 2,
+                  opacity: isWin ? 1 : 0.9,
+                }}
               >
-                {isWin ? "WINNER" : "MISSED"}
+                <span style={{
+                  fontSize: 7, fontWeight: 900, letterSpacing: "0.45em",
+                  color: isWin ? "rgba(52,211,153,0.75)" : "rgba(255,255,255,0.22)",
+                  textTransform: "uppercase",
+                }}>SORS MAXIMA™</span>
+                <span style={{
+                  fontSize: 28, fontWeight: 900, letterSpacing: "0.06em", lineHeight: 1.1,
+                  color: isWin ? "rgba(52,211,153,0.70)" : "rgba(255,255,255,0.18)",
+                  textTransform: "uppercase",
+                }}>{isWin ? "CALLED IT" : "NO HIT"}</span>
+                <span style={{
+                  fontSize: 7, fontWeight: 900, letterSpacing: "0.35em",
+                  color: isWin ? "rgba(52,211,153,0.55)" : "rgba(255,255,255,0.14)",
+                  textTransform: "uppercase",
+                }}>{isWin ? "✓ WIN ✓" : "— MISS —"}</span>
               </div>
             </div>
           )}
@@ -635,37 +721,70 @@ export function TradingCard({
             background: `radial-gradient(circle at 50% 40%, ${foil.accent}18 0%, transparent 60%)`,
           }}
         />
-        <div className="relative z-10 space-y-4">
-          <div
-            className="w-16 h-16 mx-auto rounded-full flex items-center justify-center border-2"
-            style={{
-              background: `${foil.accent}15`,
-              borderColor: `${foil.accent}40`,
-              boxShadow: `0 0 30px ${foil.accent}30`,
-            }}
-          >
-            <Trophy className="w-8 h-8" style={{ color: foil.accent }} />
-          </div>
-          <div>
-            <div
-              className="text-lg font-black tracking-tighter"
-              style={{ color: foil.accent }}
-            >
-              SORS MAXIMA™
+        <div className="relative z-10 w-full space-y-3">
+          {/* Back header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <div
+                className="text-base font-black tracking-tighter"
+                style={{ color: foil.accent }}
+              >
+                SORS MAXIMA™
+              </div>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-[8px] font-black text-primary uppercase tracking-widest">SORS CERTIFIED ✓</span>
+                <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
+              </div>
             </div>
-            <div className="flex items-center justify-center gap-1.5 mt-1">
-              <span className="text-[10px] font-black text-primary uppercase tracking-widest">SORS CERTIFIED ✓</span>
-              <div className="w-1 h-1 rounded-full bg-emerald-500 shadow-[0_0_4px_#10b981]" />
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center border"
+              style={{
+                background: `${foil.accent}12`,
+                borderColor: `${foil.accent}40`,
+                boxShadow: `0 0 16px ${foil.accent}25`,
+              }}
+            >
+              <Trophy className="w-5 h-5" style={{ color: foil.accent }} />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-white/30 tracking-[0.2em] uppercase">
+          {/* Pick summary */}
+          <div
+            className="w-full rounded-lg px-3 py-2 text-left"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <p className="text-[8px] text-white/35 uppercase tracking-widest font-bold truncate">{card.game || "—"}</p>
+            <p className="text-[11px] font-black text-white/90 leading-tight mt-0.5 line-clamp-2">{card.pick || "—"}</p>
+          </div>
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-1.5 w-full">
+            {[
+              { label: "Grade", value: safeGrade, accent: foil.accent },
+              { label: "Odds", value: card.odds ? (card.odds > 0 ? `+${card.odds}` : `${card.odds}`) : "—", accent: foil.accent },
+              { label: "Conviction", value: `${card.confidence ?? 0}%`, accent: "#34d399" },
+              { label: "Sors EV™", value: `+${card.ev ?? 0}%`, accent: "#34d399" },
+              { label: "Bet Type", value: (card.betType ?? "—").replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()), accent: "rgba(255,255,255,0.5)" },
+              { label: "Result", value: isSettled ? (isWin ? "Called It ✓" : "No Hit") : "Pending", accent: isSettled ? (isWin ? "#34d399" : "rgba(255,255,255,0.30)") : "#fbbf24" },
+            ].map(({ label, value, accent }) => (
+              <div
+                key={label}
+                className="rounded px-2 py-1.5"
+                style={{ background: "rgba(255,255,255,0.035)", border: "1px solid rgba(255,255,255,0.06)" }}
+              >
+                <p className="text-[7px] font-bold text-white/30 uppercase tracking-widest">{label}</p>
+                <p className="text-[10px] font-black mt-0.5 truncate" style={{ color: accent }}>{value}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between w-full">
+            <p className="text-[9px] font-black text-white/25 tracking-[0.2em] uppercase">
               {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "UNIQUE COPY"}
             </p>
-            {card.gameTime && (
-              <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
-                Issued: {new Date(card.gameTime).toLocaleDateString()}
+            {card.maxCopies && (
+              <p className="text-[8px] font-bold uppercase tracking-wider" style={{ color: `${foil.accent}60` }}>
+                1 of {card.maxCopies}
               </p>
             )}
           </div>
@@ -721,7 +840,7 @@ export function TradingCard({
                       const url = `${window.location.origin}/c/${collectionId}`;
                       const isWin = card.settledResult === "won";
                       const isPending = !card.settledResult || card.settledResult === "pending";
-                      const resultLabel = isWin ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "❌ MISSED";
+                      const resultLabel = isWin ? "✅ CALLED IT" : isPending ? "⏳ LIVE PICK" : "✗ NO HIT";
                       const gradeEmoji = card.grade?.startsWith("A") ? "🏆" : card.grade?.startsWith("B") ? "⚡" : "📊";
                       const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
                       const msg = [
