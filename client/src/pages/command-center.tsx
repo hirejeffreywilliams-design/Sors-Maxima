@@ -378,7 +378,7 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
         </div>
 
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span>Signal: {ticket.combinedConfidence}%</span>
+          <span>Confidence: {ticket.combinedConfidence}%</span>
           <span className="text-muted-foreground/30">|</span>
           <span className={ticket.combinedEV > 0 ? "text-green-500" : "text-red-500"}>EV: {ticket.combinedEV > 35 ? "35%+" : (ticket.combinedEV > 0 ? "+" : "") + ticket.combinedEV + "%"}</span>
           <span className="text-muted-foreground/30">|</span>
@@ -472,13 +472,23 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
   const rec = pick.recommendation ? REC_STYLES[pick.recommendation] : null;
   const topFactors = (pick.factors || []).filter(f => f.direction === "bullish").slice(0, 3);
 
+  const gradeAccent = (g: string) => {
+    if (g === "A+") return "rgba(245,158,11,0.9)";
+    if (g.startsWith("A")) return "rgba(34,197,94,0.85)";
+    if (g === "B+") return "rgba(20,184,166,0.8)";
+    if (g.startsWith("B")) return "rgba(59,130,246,0.8)";
+    if (g.startsWith("C")) return "rgba(234,179,8,0.7)";
+    return "rgba(239,68,68,0.6)";
+  };
+
   return (
     <div
-      className={`group relative p-3 sm:p-4 rounded-lg bg-card border hover:border-primary/30 transition-all duration-200 ${getGradeShimmerClass(pick.grade)}`}
+      className={`group relative overflow-hidden rounded-lg bg-card border hover:border-primary/30 transition-all duration-200 ${getGradeShimmerClass(pick.grade)}`}
       style={gradeAmbientGlow(pick.grade)}
       data-testid={`card-pick-${pick.id}`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: gradeAccent(pick.grade) }} />
+      <div className="p-3 sm:p-4 pl-4 sm:pl-5 flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${sportColor(pick.sport)}`}>
@@ -497,7 +507,7 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
             {pick.winProbability ? (
               <span className="text-primary font-medium">Win: {pick.winProbability}%</span>
             ) : (
-              <span>Signal: {pick.confidence}%</span>
+              <span>Confidence: {pick.confidence}%</span>
             )}
             <span className={pick.ev > 0 ? "text-green-500" : "text-red-500"}>
               EV: {displayEv(pick.ev)}
@@ -683,7 +693,7 @@ function AlertCard({ alert, feed, legs, addLeg }: { alert: EdgeAlert; feed: Inte
             )}
             {matchingPick && (
               <span className="text-[9px] text-muted-foreground">
-                {matchingPick.pick} · {matchingPick.confidence}% signal strength
+                {matchingPick.pick} · {matchingPick.confidence}% confidence
               </span>
             )}
           </div>
@@ -1357,7 +1367,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                             {leg.ev > 0 && (
                               <span className="text-[10px] font-medium text-emerald-400">{leg.ev > 35 ? "35%+" : `+${leg.ev.toFixed(1)}%`} EV</span>
                             )}
-                            <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% signal</span>
+                            <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% confidence</span>
                           </div>
                           <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
                         </div>
@@ -1673,7 +1683,7 @@ export default function CommandCenter() {
                     ) : (
                       <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-amber-500/10 border-amber-500/30 text-amber-500">
                         <WifiOff className="w-2.5 h-2.5" />
-                        Syncing
+                        Connecting
                       </Badge>
                     )}
                   </div>
@@ -1717,19 +1727,17 @@ export default function CommandCenter() {
           </div>
         </header>
 
-        <PickDisclaimer variant="banner" />
-
-        <IntelligencePipeline />
-
         {showAdvanced && <section data-testid="section-best-tickets">
           <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
             <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-bold">
+              <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/15" style={{ boxShadow: "0 0 12px rgba(99,102,241,0.3)" }}>
+                <Trophy className="w-4 h-4 text-primary" />
+              </span>
+              <h2 className="text-lg font-bold tracking-tight">
                 {ticketDateFilter === "today" ? "Today's" : ticketDateFilter === "future" ? "Upcoming" : "Best"} Tickets
               </h2>
               {ticketsData && (
-                <Badge variant="secondary" className="text-[10px]">{ticketsData.tickets.length} ready</Badge>
+                <Badge variant="secondary" className="text-[10px] bg-primary/10 text-primary border-primary/20">{ticketsData.tickets.length} ready</Badge>
               )}
             </div>
             <div className="flex items-center gap-2">
@@ -1816,14 +1824,40 @@ export default function CommandCenter() {
 
         <Tabs value={activeSportTab} onValueChange={setActiveSportTab}>
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-max h-8">
-              <TabsTrigger value="all" className="text-xs px-2.5 sm:px-3 h-7 shrink-0" data-testid="tab-sport-all">All</TabsTrigger>
-              {activeSports.map(s => (
-                <TabsTrigger key={s.sport} value={s.sport} className="text-xs px-2.5 sm:px-3 h-7 shrink-0" data-testid={`tab-sport-${s.sport}`}>
-                  {s.sport}
-                  {s.liveCount > 0 && <Radio className="w-2.5 h-2.5 ml-1 text-red-500" />}
-                </TabsTrigger>
-              ))}
+            <TabsList className="inline-flex w-auto min-w-max h-9 bg-muted/60 p-1 gap-0.5">
+              <TabsTrigger
+                value="all"
+                className="text-xs px-3 h-7 shrink-0 rounded-md transition-all data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm"
+                style={activeSportTab === "all" ? { boxShadow: "0 0 10px rgba(99,102,241,0.35)" } : {}}
+                data-testid="tab-sport-all"
+              >
+                All
+              </TabsTrigger>
+              {activeSports.map(s => {
+                const sportStyles: Record<string, { active: string; glow: string }> = {
+                  NBA: { active: "data-[state=active]:bg-orange-500/15 data-[state=active]:text-orange-400", glow: "rgba(249,115,22,0.4)" },
+                  NFL: { active: "data-[state=active]:bg-green-500/15 data-[state=active]:text-green-400", glow: "rgba(34,197,94,0.4)" },
+                  MLB: { active: "data-[state=active]:bg-blue-500/15 data-[state=active]:text-blue-400", glow: "rgba(59,130,246,0.4)" },
+                  NHL: { active: "data-[state=active]:bg-cyan-500/15 data-[state=active]:text-cyan-400", glow: "rgba(6,182,212,0.4)" },
+                  NCAAB: { active: "data-[state=active]:bg-purple-500/15 data-[state=active]:text-purple-400", glow: "rgba(168,85,247,0.4)" },
+                  NCAAF: { active: "data-[state=active]:bg-rose-500/15 data-[state=active]:text-rose-400", glow: "rgba(244,63,94,0.4)" },
+                  MMA: { active: "data-[state=active]:bg-red-500/15 data-[state=active]:text-red-400", glow: "rgba(239,68,68,0.4)" },
+                  Soccer: { active: "data-[state=active]:bg-emerald-500/15 data-[state=active]:text-emerald-400", glow: "rgba(16,185,129,0.4)" },
+                };
+                const ss = sportStyles[s.sport] || { active: "data-[state=active]:bg-muted data-[state=active]:text-foreground", glow: "rgba(99,102,241,0.3)" };
+                return (
+                  <TabsTrigger
+                    key={s.sport}
+                    value={s.sport}
+                    className={`text-xs px-3 h-7 shrink-0 rounded-md transition-all ${ss.active} data-[state=active]:shadow-sm`}
+                    style={activeSportTab === s.sport ? { boxShadow: `0 0 12px ${ss.glow}` } : {}}
+                    data-testid={`tab-sport-${s.sport}`}
+                  >
+                    {s.sport}
+                    {s.liveCount > 0 && <Radio className="w-2.5 h-2.5 ml-1 text-red-500 animate-pulse" />}
+                  </TabsTrigger>
+                );
+              })}
             </TabsList>
           </div>
 
@@ -1837,8 +1871,13 @@ export default function CommandCenter() {
                 <div className="lg:col-span-2 space-y-4">
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="text-sm font-bold flex items-center gap-2">
-                      <Zap className="w-4 h-4 text-primary" />
-                      Top Edge Picks
+                      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/15">
+                        <Zap className="w-3.5 h-3.5 text-primary" />
+                      </span>
+                      <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Top Edge Picks</span>
+                      {filteredPicks.length > 0 && (
+                        <span className="text-[10px] font-normal text-muted-foreground">({filteredPicks.length})</span>
+                      )}
                     </h3>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1856,8 +1895,13 @@ export default function CommandCenter() {
                   {feed.liveGames.length > 0 && (activeSportTab === "all" || feed.liveGames.some(g => g.sport === activeSportTab)) && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-bold flex items-center gap-2">
-                        <Radio className="w-4 h-4 text-red-500" />
+                        <span className="flex items-center justify-center w-6 h-6 rounded-md bg-red-500/15">
+                          <Radio className="w-3.5 h-3.5 text-red-500" />
+                        </span>
                         Live Analysis
+                        <span className="inline-flex items-center gap-1 text-[9px] font-normal text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded-full">
+                          <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />LIVE
+                        </span>
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {feed.liveGames
@@ -1874,8 +1918,10 @@ export default function CommandCenter() {
                 <div className="space-y-4">
                   <div className="space-y-3">
                     <h3 className="text-sm font-bold flex items-center gap-2">
-                      <AlertCircle className="w-4 h-4 text-primary" />
-                      Edge Alerts
+                      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-amber-500/15">
+                        <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
+                      </span>
+                      <span>Edge Alerts</span>
                     </h3>
                     <div className="space-y-2.5">
                       {filteredAlerts.length > 0 ? (
@@ -1892,8 +1938,10 @@ export default function CommandCenter() {
 
                   <div className="space-y-3">
                     <h3 className="text-sm font-bold flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      Upcoming Games
+                      <span className="flex items-center justify-center w-6 h-6 rounded-md bg-primary/15">
+                        <Calendar className="w-3.5 h-3.5 text-primary" />
+                      </span>
+                      <span>Upcoming Games</span>
                     </h3>
                     <Card>
                       <CardContent className="p-3">
@@ -1914,6 +1962,8 @@ export default function CommandCenter() {
             )}
           </div>
         </Tabs>
+
+        <IntelligencePipeline />
 
         {/* ── Ticket Showcase Banner ── */}
         <div
@@ -2038,10 +2088,15 @@ export default function CommandCenter() {
           </div>
         </div>
 
-        <div className="mt-4 pt-4 border-t border-border/40">
-          <p className="text-xs text-muted-foreground text-center leading-relaxed">
-            Picks are analytical recommendations only — not guaranteed outcomes. Must be 21+ and in a jurisdiction where sports betting is legal. Bet responsibly. View full disclaimer at <Link href="/legal" className="text-primary hover:underline">/legal</Link>
-          </p>
+        <div className="mt-6 pt-4 border-t border-border/20 flex items-center justify-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+            <p className="text-[10px] text-muted-foreground/50">
+              Statistical analysis only · 21+ · Bet responsibly
+            </p>
+            <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+          <Link href="/legal" className="text-[10px] text-muted-foreground/40 hover:text-muted-foreground transition-colors">Legal</Link>
         </div>
 
       </div>
