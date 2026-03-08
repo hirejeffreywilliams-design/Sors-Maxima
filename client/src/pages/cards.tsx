@@ -12,7 +12,6 @@ import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PackRipReveal } from "@/components/pack-rip-reveal";
-import { AnimatePresence, motion } from "framer-motion";
 
 interface UserCardCollection {
   collection: {

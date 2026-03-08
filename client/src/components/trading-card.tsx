@@ -227,16 +227,17 @@ export function TradingCard({
     else setInternalFlipped(!internalFlipped);
   };
 
+  const safeGrade = card.grade ?? "F";
   const gradeKey = Object.keys(GRADE_FOIL).find(k =>
-    card.grade.toUpperCase() === k || card.grade.toUpperCase().startsWith(k)
+    safeGrade.toUpperCase() === k || safeGrade.toUpperCase().startsWith(k)
   ) || "F";
   const foil = GRADE_FOIL[gradeKey] || GRADE_FOIL["F"];
-  const sportPattern = SPORT_PATTERNS[card.sport] || "";
-  const sportIcon = SPORT_ICONS[card.sport] || "🎯";
-  const eventLabel = getEventLabel(card.sport, card.gameTime);
-  const rarity = getRarityLabel(card.grade);
-  const isAPlus = card.grade === "A+";
-  const isAPremium = card.grade.startsWith("A") || card.grade === "B+";
+  const sportPattern = SPORT_PATTERNS[card.sport ?? ""] || "";
+  const sportIcon = SPORT_ICONS[card.sport ?? ""] || "🎯";
+  const eventLabel = getEventLabel(card.sport ?? "", card.gameTime);
+  const rarity = getRarityLabel(safeGrade);
+  const isAPlus = safeGrade === "A+";
+  const isAPremium = safeGrade.startsWith("A") || safeGrade === "B+";
   const isSettled = !!card.settledResult;
   const isWin = card.settledResult === "won";
 
@@ -386,13 +387,13 @@ export function TradingCard({
               <div
                 className={`font-black text-2xl leading-none ${
                   isAPlus ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" :
-                  card.grade.startsWith("A") ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
-                  card.grade === "B+" ? "text-teal-400" :
-                  card.grade.startsWith("B") ? "text-blue-400" :
+                  safeGrade.startsWith("A") ? "text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" :
+                  safeGrade === "B+" ? "text-teal-400" :
+                  safeGrade.startsWith("B") ? "text-blue-400" :
                   "text-slate-400"
                 }`}
               >
-                {card.grade}
+                {safeGrade}
               </div>
               <div style={{ fontSize: "7px", fontWeight: 900, letterSpacing: "0.12em", color: foil.accent, opacity: 0.6 }}>SORS CERTIFIED</div>
               <div className="text-[8px] font-bold text-white/25 uppercase tracking-wider">Grade</div>
@@ -514,7 +515,7 @@ export function TradingCard({
                 >
                   {card.odds > 0 ? `+${card.odds}` : card.odds}
                 </span>
-                <span className="text-[9px] text-white/40 uppercase">{card.betType.replace(/_/g, " ")}</span>
+                <span className="text-[9px] text-white/40 uppercase">{(card.betType ?? "").replace(/_/g, " ")}</span>
               </div>
             </div>
 
