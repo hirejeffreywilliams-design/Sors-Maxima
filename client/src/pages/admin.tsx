@@ -48,6 +48,23 @@ import {
   ListTodo,
   Gauge,
   Network,
+  Megaphone,
+  Lock,
+  Flag,
+  BarChart2,
+  UserCheck,
+  DollarSign,
+  FlaskConical,
+  GraduationCap,
+  Mail,
+  MessageSquare,
+  AlertOctagon,
+  Layers,
+  Tag,
+  Globe,
+  PieChart,
+  GitBranch,
+  UserPlus,
 } from "lucide-react";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -398,16 +415,83 @@ export default function AdminDashboard() {
   };
 
   const quickLinks = [
-    { href: "/admin/quality-watchdog", label: "Quality Watchdog", desc: "Pick accuracy, EV integrity, reasoning", icon: ShieldCheck },
-    { href: "/admin/pipeline", label: "Intelligence Pipeline", desc: "Live node map, AI diagnosis", icon: Network },
-    { href: "/admin/app-intelligence", label: "App Intelligence Engine", desc: "Feature discovery · AI growth insights", icon: Cpu },
-    { href: "/admin/autonomous", label: "Autonomous Monitor", desc: "24/7 AI health watch", icon: Brain },
-    { href: "/admin/model-integrity", label: "Model Integrity", desc: "ROI, Brier score, calibration", icon: ShieldAlert },
-    { href: "/admin/api-budget", label: "API Budget", desc: "Quota usage & burn rate", icon: Gauge },
-    { href: "/admin/ip-registry", label: "IP Registry", desc: "IP assets, lexicon & business plan", icon: Shield },
-    { href: "/admin/launch-control", label: "Launch Control", desc: "Pre-launch checklist", icon: Rocket },
-    { href: "/admin/update-planner", label: "Update Planner", desc: "Bugs, features & ideas", icon: ListTodo },
-    { href: "/admin/owner-playbook", label: "Owner's Playbook", desc: "Ops, growth & legal guide", icon: BookOpen },
+    { href: "/admin/marketing",          label: "Marketing",              desc: "Promo ads, campaigns & AI ad gen",      icon: Megaphone },
+    { href: "/admin/growth",             label: "Growth Analytics",       desc: "Revenue, LTV/CAC & acquisition",        icon: TrendingUp },
+    { href: "/admin/pipeline",           label: "Intelligence Pipeline",  desc: "Live node map, AI diagnosis",           icon: Network },
+    { href: "/admin/app-intelligence",   label: "App Intelligence",       desc: "Feature discovery · AI insights",       icon: Cpu },
+    { href: "/admin/quality-watchdog",   label: "Quality Watchdog",       desc: "Pick accuracy, EV integrity",           icon: ShieldCheck },
+    { href: "/admin/autonomous",         label: "Autonomous Monitor",     desc: "24/7 AI health watch",                  icon: Brain },
+    { href: "/admin/assistant",          label: "AI Assistant",           desc: "Chat with admin AI assistant",          icon: Bot },
+    { href: "/admin/security",           label: "Security Center",        desc: "Threats, IP blocks, sessions",          icon: Lock },
+    { href: "/admin/model-integrity",    label: "Model Integrity",        desc: "ROI, Brier score, calibration",         icon: ShieldAlert },
+    { href: "/admin/user-health",        label: "User Health",            desc: "Churn risk, engagement & LTV",          icon: Activity },
+    { href: "/admin/api-budget",         label: "API Budget",             desc: "Quota usage & burn rate",               icon: Gauge },
+    { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
+  ];
+
+  const allToolSections = [
+    {
+      label: "Marketing & Growth",
+      tools: [
+        { href: "/admin/marketing",            label: "Marketing Command Center", icon: Megaphone },
+        { href: "/admin/growth",               label: "Growth Analytics",         icon: TrendingUp },
+        { href: "/admin/acquisition",          label: "Acquisition",              icon: UserPlus },
+        { href: "/admin/promos",               label: "Promo Manager",            icon: Tag },
+        { href: "/admin/ab-tests",             label: "A/B Tests",                icon: FlaskConical },
+        { href: "/admin/lifecycle-campaigns",  label: "Lifecycle Campaigns",      icon: Mail },
+        { href: "/admin/segmentation",         label: "Segmentation",             icon: Layers },
+        { href: "/admin/analytics-dashboard",  label: "Analytics Dashboard",      icon: BarChart2 },
+      ],
+    },
+    {
+      label: "Members & Support",
+      tools: [
+        { href: "/admin/user-health",    label: "User Health",       icon: Activity },
+        { href: "/admin/applications",   label: "Applications",      icon: UserCheck },
+        { href: "/admin/support",        label: "Support Dashboard", icon: MessageSquare },
+        { href: "/admin/fraud",          label: "Fraud Dashboard",   icon: AlertOctagon },
+        { href: "/admin/assistant",      label: "AI Assistant",      icon: Bot },
+      ],
+    },
+    {
+      label: "Models & Intelligence",
+      tools: [
+        { href: "/admin/quality-watchdog",    label: "Quality Watchdog",     icon: ShieldCheck },
+        { href: "/admin/model-integrity",     label: "Model Integrity",      icon: ShieldAlert },
+        { href: "/admin/model-performance",   label: "Model Performance",    icon: BarChart2 },
+        { href: "/admin/training",            label: "Training Center",      icon: GraduationCap },
+        { href: "/admin/data-provenance",     label: "Data Provenance",      icon: Database },
+        { href: "/admin/correlation-matrix",  label: "Correlation Matrix",   icon: Globe },
+        { href: "/admin/sport-analysis",      label: "Sport Factor Analysis",icon: Target },
+      ],
+    },
+    {
+      label: "Platform & Finance",
+      tools: [
+        { href: "/admin/security",               label: "Security Center",        icon: Lock },
+        { href: "/admin/feature-flags",          label: "Feature Flags",          icon: Flag },
+        { href: "/admin/api-budget",             label: "API Budget",             icon: Gauge },
+        { href: "/admin/financial-projections",  label: "Financial Projections",  icon: DollarSign },
+        { href: "/admin/pricing-intelligence",   label: "Pricing Intelligence",   icon: PieChart },
+        { href: "/admin/risk-register",          label: "Risk Register",          icon: AlertCircle },
+        { href: "/admin/orchestration",          label: "Orchestration",          icon: GitBranch },
+        { href: "/admin/platform-intelligence",  label: "Platform Intelligence",  icon: Globe },
+        { href: "/admin/diagnostics",            label: "Diagnostics",            icon: Activity },
+        { href: "/admin/guardian",               label: "App Guardian",           icon: Eye },
+      ],
+    },
+    {
+      label: "Strategy & Business",
+      tools: [
+        { href: "/admin/launch-control",   label: "Launch Control",  icon: Rocket },
+        { href: "/admin/owner-playbook",   label: "Owner's Playbook",icon: BookOpen },
+        { href: "/admin/update-planner",   label: "Update Planner",  icon: ListTodo },
+        { href: "/admin/ip-registry",      label: "IP Registry",     icon: Shield },
+        { href: "/admin/autonomous",       label: "Auto Monitor",    icon: Brain },
+        { href: "/admin/app-intelligence", label: "App Intelligence",icon: Cpu },
+        { href: "/admin/pipeline",         label: "Intel Pipeline",  icon: Network },
+      ],
+    },
   ];
 
   return (
@@ -641,6 +725,29 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </Link>
+            ))}
+          </div>
+
+          {/* All Admin Tools — organized by category */}
+          <div className="space-y-4" data-testid="section-all-tools">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-0.5">All Admin Tools</p>
+            {allToolSections.map((section) => (
+              <div key={section.label}>
+                <p className="text-[11px] font-medium text-muted-foreground mb-2 px-0.5">{section.label}</p>
+                <div className="flex flex-wrap gap-2">
+                  {section.tools.map((tool) => (
+                    <Link key={tool.href} href={tool.href}>
+                      <div
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border border-border/60 bg-muted/30 hover:bg-muted hover:border-primary/40 transition-colors cursor-pointer"
+                        data-testid={`chip-tool-${tool.label.replace(/\s+/g, '-').toLowerCase()}`}
+                      >
+                        <tool.icon className="h-3 w-3 text-primary shrink-0" />
+                        <span className="text-[11px] font-medium whitespace-nowrap">{tool.label}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
 

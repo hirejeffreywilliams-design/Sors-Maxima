@@ -37,7 +37,6 @@ import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { TierGate, useTier } from "@/components/tier-gate";
 import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 import { OffseasonPanel } from "@/components/offseason-panel";
-import { PickTrackNudge } from "@/components/pick-track-nudge";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { TicketShowcase } from "@/components/ticket-showcase";
 import { MobileTicketDeck } from "@/components/mobile-ticket-deck";
@@ -1613,6 +1612,7 @@ export default function CommandCenter() {
   const activeMode = isActiveMode();
   const { toast } = useToast();
   const [parlayModalOpen, setParlayModalOpen] = useState(false);
+  const [sseEverConnected, setSseEverConnected] = useState(false);
 
   const { data: stratPicks, isLoading: isStratLoading } = useQuery<{ picks: TopPick[] }>({
     queryKey: ["/api/strategy/auto-picks", activeStrategy?.id],
@@ -1700,6 +1700,12 @@ export default function CommandCenter() {
       queryClient.invalidateQueries({ queryKey: ["/api/matchup-tickets"] });
     }
   }, [sse.lastEvent]);
+
+  useEffect(() => {
+    if (sse.connected && !sseEverConnected) {
+      setSseEverConnected(true);
+    }
+  }, [sse.connected, sseEverConnected]);
 
   const { data: authData } = useQuery<{ isAdmin?: boolean; authenticated?: boolean }>({
     queryKey: ["/api/auth/check"],
@@ -1870,12 +1876,12 @@ export default function CommandCenter() {
                         <Wifi className="w-2.5 h-2.5" />
                         Live
                       </Badge>
-                    ) : (
+                    ) : sseEverConnected ? (
                       <Badge variant="outline" className="text-[10px] h-5 gap-1 bg-amber-500/10 border-amber-500/30 text-amber-500">
                         <WifiOff className="w-2.5 h-2.5" />
-                        Connecting
+                        Reconnecting
                       </Badge>
-                    )}
+                    ) : null}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -2478,7 +2484,6 @@ export default function CommandCenter() {
         <TicketShowcase onClose={() => setShowShowcase(false)} />
       )}
 
-      <PickTrackNudge />
     </div>
   );
 }

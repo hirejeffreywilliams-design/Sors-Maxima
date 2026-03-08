@@ -69,6 +69,7 @@ import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
 import { Link } from "wouter";
 import { getCookieConsent, grantCookieConsent } from "@/components/cookie-consent";
 import { TradingCard } from "@/components/trading-card";
+import { PickTrackNudge } from "@/components/pick-track-nudge";
 
 type RiskTolerance = "conservative" | "moderate" | "aggressive";
 type BankrollStrategy = "flat" | "percentage" | "kelly";
@@ -1265,6 +1266,8 @@ function BettingDNATab() {
 
   return (
     <div className="space-y-6">
+      <PickTrackNudge variant="inline" />
+
       <Card data-testid="card-archetype">
         <CardContent className="p-5">
           <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/15">

@@ -23,7 +23,7 @@ import { sports } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { Link } from "wouter";
-import { PickTrackNudge } from "@/components/pick-track-nudge";
+
 
 interface ChampionshipContender {
   team: string;
@@ -960,7 +960,6 @@ export default function DailyParlays() {
         </div>
 
         <PickDisclaimer variant="banner" />
-        <PickTrackNudge />
 
         <MarchMadnessFutures />
 
