@@ -1,5 +1,7 @@
 import type { Express, Request, Response } from "express";
 import crypto from "crypto";
+import { db } from "../db";
+import { sql } from "drizzle-orm";
 import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier, formatUptime } from "./helpers";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";

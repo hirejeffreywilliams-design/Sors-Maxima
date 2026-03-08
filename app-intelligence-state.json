@@ -1,0 +1,1561 @@
+{
+  "features": {
+    "page:admin-ab-tests": {
+      "id": "page:admin-ab-tests",
+      "name": "Admin Ab Tests",
+      "type": "page",
+      "path": "client/src/pages/admin-ab-tests.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-acquisition": {
+      "id": "page:admin-acquisition",
+      "name": "Admin Acquisition",
+      "type": "page",
+      "path": "client/src/pages/admin-acquisition.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-analytics": {
+      "id": "page:admin-analytics",
+      "name": "Admin Analytics",
+      "type": "page",
+      "path": "client/src/pages/admin-analytics.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-api-budget": {
+      "id": "page:admin-api-budget",
+      "name": "Admin Api Budget",
+      "type": "page",
+      "path": "client/src/pages/admin-api-budget.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-app-intelligence": {
+      "id": "page:admin-app-intelligence",
+      "name": "Admin App Intelligence",
+      "type": "page",
+      "path": "client/src/pages/admin-app-intelligence.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-applications": {
+      "id": "page:admin-applications",
+      "name": "Admin Applications",
+      "type": "page",
+      "path": "client/src/pages/admin-applications.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-assistant": {
+      "id": "page:admin-assistant",
+      "name": "Admin Assistant",
+      "type": "page",
+      "path": "client/src/pages/admin-assistant.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-autonomous": {
+      "id": "page:admin-autonomous",
+      "name": "Admin Autonomous",
+      "type": "page",
+      "path": "client/src/pages/admin-autonomous.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-data-provenance": {
+      "id": "page:admin-data-provenance",
+      "name": "Admin Data Provenance",
+      "type": "page",
+      "path": "client/src/pages/admin-data-provenance.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-diagnostics": {
+      "id": "page:admin-diagnostics",
+      "name": "Admin Diagnostics",
+      "type": "page",
+      "path": "client/src/pages/admin-diagnostics.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-feature-flags": {
+      "id": "page:admin-feature-flags",
+      "name": "Admin Feature Flags",
+      "type": "page",
+      "path": "client/src/pages/admin-feature-flags.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-financial-projections": {
+      "id": "page:admin-financial-projections",
+      "name": "Admin Financial Projections",
+      "type": "page",
+      "path": "client/src/pages/admin-financial-projections.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-fraud": {
+      "id": "page:admin-fraud",
+      "name": "Admin Fraud",
+      "type": "page",
+      "path": "client/src/pages/admin-fraud.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-growth": {
+      "id": "page:admin-growth",
+      "name": "Admin Growth",
+      "type": "page",
+      "path": "client/src/pages/admin-growth.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-guardian": {
+      "id": "page:admin-guardian",
+      "name": "Admin Guardian",
+      "type": "page",
+      "path": "client/src/pages/admin-guardian.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-ip-registry": {
+      "id": "page:admin-ip-registry",
+      "name": "Admin Ip Registry",
+      "type": "page",
+      "path": "client/src/pages/admin-ip-registry.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-launch-control": {
+      "id": "page:admin-launch-control",
+      "name": "Admin Launch Control",
+      "type": "page",
+      "path": "client/src/pages/admin-launch-control.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-lifecycle-campaigns": {
+      "id": "page:admin-lifecycle-campaigns",
+      "name": "Admin Lifecycle Campaigns",
+      "type": "page",
+      "path": "client/src/pages/admin-lifecycle-campaigns.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-marketing": {
+      "id": "page:admin-marketing",
+      "name": "Admin Marketing",
+      "type": "page",
+      "path": "client/src/pages/admin-marketing.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-model-integrity": {
+      "id": "page:admin-model-integrity",
+      "name": "Admin Model Integrity",
+      "type": "page",
+      "path": "client/src/pages/admin-model-integrity.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-model-performance": {
+      "id": "page:admin-model-performance",
+      "name": "Admin Model Performance",
+      "type": "page",
+      "path": "client/src/pages/admin-model-performance.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-orchestration": {
+      "id": "page:admin-orchestration",
+      "name": "Admin Orchestration",
+      "type": "page",
+      "path": "client/src/pages/admin-orchestration.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-owner-playbook": {
+      "id": "page:admin-owner-playbook",
+      "name": "Admin Owner Playbook",
+      "type": "page",
+      "path": "client/src/pages/admin-owner-playbook.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-pricing-intelligence": {
+      "id": "page:admin-pricing-intelligence",
+      "name": "Admin Pricing Intelligence",
+      "type": "page",
+      "path": "client/src/pages/admin-pricing-intelligence.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-promos": {
+      "id": "page:admin-promos",
+      "name": "Admin Promos",
+      "type": "page",
+      "path": "client/src/pages/admin-promos.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-quality-watchdog": {
+      "id": "page:admin-quality-watchdog",
+      "name": "Admin Quality Watchdog",
+      "type": "page",
+      "path": "client/src/pages/admin-quality-watchdog.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-risk-register": {
+      "id": "page:admin-risk-register",
+      "name": "Admin Risk Register",
+      "type": "page",
+      "path": "client/src/pages/admin-risk-register.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-security": {
+      "id": "page:admin-security",
+      "name": "Admin Security",
+      "type": "page",
+      "path": "client/src/pages/admin-security.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-segmentation": {
+      "id": "page:admin-segmentation",
+      "name": "Admin Segmentation",
+      "type": "page",
+      "path": "client/src/pages/admin-segmentation.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-support": {
+      "id": "page:admin-support",
+      "name": "Admin Support",
+      "type": "page",
+      "path": "client/src/pages/admin-support.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-update-planner": {
+      "id": "page:admin-update-planner",
+      "name": "Admin Update Planner",
+      "type": "page",
+      "path": "client/src/pages/admin-update-planner.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin-user-health": {
+      "id": "page:admin-user-health",
+      "name": "Admin User Health",
+      "type": "page",
+      "path": "client/src/pages/admin-user-health.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:admin": {
+      "id": "page:admin",
+      "name": "Admin",
+      "type": "page",
+      "path": "client/src/pages/admin.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:apply": {
+      "id": "page:apply",
+      "name": "Apply",
+      "type": "page",
+      "path": "client/src/pages/apply.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:auto-generator": {
+      "id": "page:auto-generator",
+      "name": "Auto Generator",
+      "type": "page",
+      "path": "client/src/pages/auto-generator.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:bankroll": {
+      "id": "page:bankroll",
+      "name": "Bankroll",
+      "type": "page",
+      "path": "client/src/pages/bankroll.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:cards": {
+      "id": "page:cards",
+      "name": "Cards",
+      "type": "page",
+      "path": "client/src/pages/cards.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:changelog": {
+      "id": "page:changelog",
+      "name": "Changelog",
+      "type": "page",
+      "path": "client/src/pages/changelog.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:command-center": {
+      "id": "page:command-center",
+      "name": "Command Center",
+      "type": "page",
+      "path": "client/src/pages/command-center.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:community": {
+      "id": "page:community",
+      "name": "Community",
+      "type": "page",
+      "path": "client/src/pages/community.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:correlation-matrix": {
+      "id": "page:correlation-matrix",
+      "name": "Correlation Matrix",
+      "type": "page",
+      "path": "client/src/pages/correlation-matrix.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:daily-parlays": {
+      "id": "page:daily-parlays",
+      "name": "Daily Parlays",
+      "type": "page",
+      "path": "client/src/pages/daily-parlays.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:dashboard": {
+      "id": "page:dashboard",
+      "name": "Dashboard",
+      "type": "page",
+      "path": "client/src/pages/dashboard.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:help": {
+      "id": "page:help",
+      "name": "Help",
+      "type": "page",
+      "path": "client/src/pages/help.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:international": {
+      "id": "page:international",
+      "name": "International",
+      "type": "page",
+      "path": "client/src/pages/international.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:landing": {
+      "id": "page:landing",
+      "name": "Landing",
+      "type": "page",
+      "path": "client/src/pages/landing.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:legal": {
+      "id": "page:legal",
+      "name": "Legal",
+      "type": "page",
+      "path": "client/src/pages/legal.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:live": {
+      "id": "page:live",
+      "name": "Live",
+      "type": "page",
+      "path": "client/src/pages/live.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:login": {
+      "id": "page:login",
+      "name": "Login",
+      "type": "page",
+      "path": "client/src/pages/login.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:mma": {
+      "id": "page:mma",
+      "name": "Mma",
+      "type": "page",
+      "path": "client/src/pages/mma.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:not-found": {
+      "id": "page:not-found",
+      "name": "Not Found",
+      "type": "page",
+      "path": "client/src/pages/not-found.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:odds-center": {
+      "id": "page:odds-center",
+      "name": "Odds Center",
+      "type": "page",
+      "path": "client/src/pages/odds-center.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:onboarding": {
+      "id": "page:onboarding",
+      "name": "Onboarding",
+      "type": "page",
+      "path": "client/src/pages/onboarding.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:personalized-insights": {
+      "id": "page:personalized-insights",
+      "name": "Personalized Insights",
+      "type": "page",
+      "path": "client/src/pages/personalized-insights.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:pick-review": {
+      "id": "page:pick-review",
+      "name": "Pick Review",
+      "type": "page",
+      "path": "client/src/pages/pick-review.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:pipeline": {
+      "id": "page:pipeline",
+      "name": "Pipeline",
+      "type": "page",
+      "path": "client/src/pages/pipeline.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:platform-intelligence": {
+      "id": "page:platform-intelligence",
+      "name": "Platform Intelligence",
+      "type": "page",
+      "path": "client/src/pages/platform-intelligence.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:player-props": {
+      "id": "page:player-props",
+      "name": "Player Props",
+      "type": "page",
+      "path": "client/src/pages/player-props.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:pricing": {
+      "id": "page:pricing",
+      "name": "Pricing",
+      "type": "page",
+      "path": "client/src/pages/pricing.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:profile": {
+      "id": "page:profile",
+      "name": "Profile",
+      "type": "page",
+      "path": "client/src/pages/profile.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:prop-parlay-builder": {
+      "id": "page:prop-parlay-builder",
+      "name": "Prop Parlay Builder",
+      "type": "page",
+      "path": "client/src/pages/prop-parlay-builder.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:reset-password": {
+      "id": "page:reset-password",
+      "name": "Reset Password",
+      "type": "page",
+      "path": "client/src/pages/reset-password.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:rewards": {
+      "id": "page:rewards",
+      "name": "Rewards",
+      "type": "page",
+      "path": "client/src/pages/rewards.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:roadmap": {
+      "id": "page:roadmap",
+      "name": "Roadmap",
+      "type": "page",
+      "path": "client/src/pages/roadmap.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:rosters": {
+      "id": "page:rosters",
+      "name": "Rosters",
+      "type": "page",
+      "path": "client/src/pages/rosters.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:settings": {
+      "id": "page:settings",
+      "name": "Settings",
+      "type": "page",
+      "path": "client/src/pages/settings.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:sorsbooks": {
+      "id": "page:sorsbooks",
+      "name": "Sorsbooks",
+      "type": "page",
+      "path": "client/src/pages/sorsbooks.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:sport-factor-analysis": {
+      "id": "page:sport-factor-analysis",
+      "name": "Sport Factor Analysis",
+      "type": "page",
+      "path": "client/src/pages/sport-factor-analysis.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:strategy-advisor": {
+      "id": "page:strategy-advisor",
+      "name": "Strategy Advisor",
+      "type": "page",
+      "path": "client/src/pages/strategy-advisor.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:ticket-variations": {
+      "id": "page:ticket-variations",
+      "name": "Ticket Variations",
+      "type": "page",
+      "path": "client/src/pages/ticket-variations.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:tools": {
+      "id": "page:tools",
+      "name": "Tools",
+      "type": "page",
+      "path": "client/src/pages/tools.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:track-record": {
+      "id": "page:track-record",
+      "name": "Track Record",
+      "type": "page",
+      "path": "client/src/pages/track-record.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:training-center": {
+      "id": "page:training-center",
+      "name": "Training Center",
+      "type": "page",
+      "path": "client/src/pages/training-center.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:verify-email": {
+      "id": "page:verify-email",
+      "name": "Verify Email",
+      "type": "page",
+      "path": "client/src/pages/verify-email.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "page:watchlist": {
+      "id": "page:watchlist",
+      "name": "Watchlist",
+      "type": "page",
+      "path": "client/src/pages/watchlist.tsx",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:abTestEngine": {
+      "id": "engine:abTestEngine",
+      "name": "Ab Test Engine",
+      "type": "engine",
+      "path": "server/abTestEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:acquisitionAnalyticsEngine": {
+      "id": "engine:acquisitionAnalyticsEngine",
+      "name": "Acquisition Analytics Engine",
+      "type": "engine",
+      "path": "server/acquisitionAnalyticsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:adminAssistantEngine": {
+      "id": "engine:adminAssistantEngine",
+      "name": "Admin Assistant Engine",
+      "type": "engine",
+      "path": "server/adminAssistantEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:aiErrorTracker": {
+      "id": "engine:aiErrorTracker",
+      "name": "Ai Error Tracker",
+      "type": "engine",
+      "path": "server/aiErrorTracker.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:analyticsAgentEngine": {
+      "id": "engine:analyticsAgentEngine",
+      "name": "Analytics Agent Engine",
+      "type": "engine",
+      "path": "server/analyticsAgentEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:analyticsDashboardEngine": {
+      "id": "engine:analyticsDashboardEngine",
+      "name": "Analytics Dashboard Engine",
+      "type": "engine",
+      "path": "server/analyticsDashboardEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:apiBudgetOptimizer": {
+      "id": "engine:apiBudgetOptimizer",
+      "name": "Api Budget Optimizer",
+      "type": "engine",
+      "path": "server/apiBudgetOptimizer.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:appGuardianEngine": {
+      "id": "engine:appGuardianEngine",
+      "name": "App Guardian Engine",
+      "type": "engine",
+      "path": "server/appGuardianEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:appIntelligenceEngine": {
+      "id": "engine:appIntelligenceEngine",
+      "name": "App Intelligence Engine",
+      "type": "engine",
+      "path": "server/appIntelligenceEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:autonomousLearningEngine": {
+      "id": "engine:autonomousLearningEngine",
+      "name": "Autonomous Learning Engine",
+      "type": "engine",
+      "path": "server/autonomousLearningEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:backtestEngine": {
+      "id": "engine:backtestEngine",
+      "name": "Backtest Engine",
+      "type": "engine",
+      "path": "server/backtestEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:calibrationEngine": {
+      "id": "engine:calibrationEngine",
+      "name": "Calibration Engine",
+      "type": "engine",
+      "path": "server/calibrationEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:communityLossPatternEngine": {
+      "id": "engine:communityLossPatternEngine",
+      "name": "Community Loss Pattern Engine",
+      "type": "engine",
+      "path": "server/communityLossPatternEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:confidenceEngine": {
+      "id": "engine:confidenceEngine",
+      "name": "Confidence Engine",
+      "type": "engine",
+      "path": "server/confidenceEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:continuousLearningOrchestrator": {
+      "id": "engine:continuousLearningOrchestrator",
+      "name": "Continuous Learning Orchestrator",
+      "type": "engine",
+      "path": "server/continuousLearningOrchestrator.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:correlationEngine": {
+      "id": "engine:correlationEngine",
+      "name": "Correlation Engine",
+      "type": "engine",
+      "path": "server/correlationEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:earlySettlementEngine": {
+      "id": "engine:earlySettlementEngine",
+      "name": "Early Settlement Engine",
+      "type": "engine",
+      "path": "server/earlySettlementEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:featureRegistryEngine": {
+      "id": "engine:featureRegistryEngine",
+      "name": "Feature Registry Engine",
+      "type": "engine",
+      "path": "server/featureRegistryEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:historicalLearningEngine": {
+      "id": "engine:historicalLearningEngine",
+      "name": "Historical Learning Engine",
+      "type": "engine",
+      "path": "server/historicalLearningEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:internationalSportsEngine": {
+      "id": "engine:internationalSportsEngine",
+      "name": "International Sports Engine",
+      "type": "engine",
+      "path": "server/internationalSportsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:learningEngine": {
+      "id": "engine:learningEngine",
+      "name": "Learning Engine",
+      "type": "engine",
+      "path": "server/learningEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:lifecycleCampaignEngine": {
+      "id": "engine:lifecycleCampaignEngine",
+      "name": "Lifecycle Campaign Engine",
+      "type": "engine",
+      "path": "server/lifecycleCampaignEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:liveAnalyticsEngine": {
+      "id": "engine:liveAnalyticsEngine",
+      "name": "Live Analytics Engine",
+      "type": "engine",
+      "path": "server/liveAnalyticsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:marketSnapshotEngine": {
+      "id": "engine:marketSnapshotEngine",
+      "name": "Market Snapshot Engine",
+      "type": "engine",
+      "path": "server/marketSnapshotEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:mcStackedLearner": {
+      "id": "engine:mcStackedLearner",
+      "name": "Mc Stacked Learner",
+      "type": "engine",
+      "path": "server/mcStackedLearner.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:monteCarloEngine": {
+      "id": "engine:monteCarloEngine",
+      "name": "Monte Carlo Engine",
+      "type": "engine",
+      "path": "server/monteCarloEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:notificationEngine": {
+      "id": "engine:notificationEngine",
+      "name": "Notification Engine",
+      "type": "engine",
+      "path": "server/notificationEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:personalizedInsightsEngine": {
+      "id": "engine:personalizedInsightsEngine",
+      "name": "Personalized Insights Engine",
+      "type": "engine",
+      "path": "server/personalizedInsightsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:pickOutcomeTracker": {
+      "id": "engine:pickOutcomeTracker",
+      "name": "Pick Outcome Tracker",
+      "type": "engine",
+      "path": "server/pickOutcomeTracker.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:pickProtectionEngine": {
+      "id": "engine:pickProtectionEngine",
+      "name": "Pick Protection Engine",
+      "type": "engine",
+      "path": "server/pickProtectionEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:platformIntelligenceEngine": {
+      "id": "engine:platformIntelligenceEngine",
+      "name": "Platform Intelligence Engine",
+      "type": "engine",
+      "path": "server/platformIntelligenceEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:precomputedPredictionsEngine": {
+      "id": "engine:precomputedPredictionsEngine",
+      "name": "Precomputed Predictions Engine",
+      "type": "engine",
+      "path": "server/precomputedPredictionsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:predictionPipelineEngine": {
+      "id": "engine:predictionPipelineEngine",
+      "name": "Prediction Pipeline Engine",
+      "type": "engine",
+      "path": "server/predictionPipelineEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:pricingIntelligenceEngine": {
+      "id": "engine:pricingIntelligenceEngine",
+      "name": "Pricing Intelligence Engine",
+      "type": "engine",
+      "path": "server/pricingIntelligenceEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:proToolsEngine": {
+      "id": "engine:proToolsEngine",
+      "name": "Pro Tools Engine",
+      "type": "engine",
+      "path": "server/proToolsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:promoOffersEngine": {
+      "id": "engine:promoOffersEngine",
+      "name": "Promo Offers Engine",
+      "type": "engine",
+      "path": "server/promoOffersEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:propParlayEngine": {
+      "id": "engine:propParlayEngine",
+      "name": "Prop Parlay Engine",
+      "type": "engine",
+      "path": "server/propParlayEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:quantumFusionEngine": {
+      "id": "engine:quantumFusionEngine",
+      "name": "Quantum Fusion Engine",
+      "type": "engine",
+      "path": "server/quantumFusionEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:schemeRecognitionEngine": {
+      "id": "engine:schemeRecognitionEngine",
+      "name": "Scheme Recognition Engine",
+      "type": "engine",
+      "path": "server/schemeRecognitionEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:segmentationEngine": {
+      "id": "engine:segmentationEngine",
+      "name": "Segmentation Engine",
+      "type": "engine",
+      "path": "server/segmentationEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:settlementEngine": {
+      "id": "engine:settlementEngine",
+      "name": "Settlement Engine",
+      "type": "engine",
+      "path": "server/settlementEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:sharpSignalDetector": {
+      "id": "engine:sharpSignalDetector",
+      "name": "Sharp Signal Detector",
+      "type": "engine",
+      "path": "server/sharpSignalDetector.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:situationalEngine": {
+      "id": "engine:situationalEngine",
+      "name": "Situational Engine",
+      "type": "engine",
+      "path": "server/situationalEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:socialDataEngine": {
+      "id": "engine:socialDataEngine",
+      "name": "Social Data Engine",
+      "type": "engine",
+      "path": "server/socialDataEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:sportFactorsEngine": {
+      "id": "engine:sportFactorsEngine",
+      "name": "Sport Factors Engine",
+      "type": "engine",
+      "path": "server/sportFactorsEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:strategyAdvisorEngine": {
+      "id": "engine:strategyAdvisorEngine",
+      "name": "Strategy Advisor Engine",
+      "type": "engine",
+      "path": "server/strategyAdvisorEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:teamHistoricalFormEngine": {
+      "id": "engine:teamHistoricalFormEngine",
+      "name": "Team Historical Form Engine",
+      "type": "engine",
+      "path": "server/teamHistoricalFormEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:ticketOrchestrator": {
+      "id": "engine:ticketOrchestrator",
+      "name": "Ticket Orchestrator",
+      "type": "engine",
+      "path": "server/ticketOrchestrator.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:ticketingEngine": {
+      "id": "engine:ticketingEngine",
+      "name": "Ticketing Engine",
+      "type": "engine",
+      "path": "server/ticketingEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:trialFraudEngine": {
+      "id": "engine:trialFraudEngine",
+      "name": "Trial Fraud Engine",
+      "type": "engine",
+      "path": "server/trialFraudEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:unifiedStackingMetaLearner": {
+      "id": "engine:unifiedStackingMetaLearner",
+      "name": "Unified Stacking Meta Learner",
+      "type": "engine",
+      "path": "server/unifiedStackingMetaLearner.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "engine:userDataEngine": {
+      "id": "engine:userDataEngine",
+      "name": "User Data Engine",
+      "type": "engine",
+      "path": "server/userDataEngine.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:account": {
+      "id": "route:account",
+      "name": "Account API",
+      "type": "route-group",
+      "path": "server/routes/account.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:admin": {
+      "id": "route:admin",
+      "name": "Admin API",
+      "type": "route-group",
+      "path": "server/routes/admin.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:ai": {
+      "id": "route:ai",
+      "name": "Ai API",
+      "type": "route-group",
+      "path": "server/routes/ai.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:apply": {
+      "id": "route:apply",
+      "name": "Apply API",
+      "type": "route-group",
+      "path": "server/routes/apply.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:auth": {
+      "id": "route:auth",
+      "name": "Auth API",
+      "type": "route-group",
+      "path": "server/routes/auth.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:betting": {
+      "id": "route:betting",
+      "name": "Betting API",
+      "type": "route-group",
+      "path": "server/routes/betting.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:cards": {
+      "id": "route:cards",
+      "name": "Cards API",
+      "type": "route-group",
+      "path": "server/routes/cards.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:community": {
+      "id": "route:community",
+      "name": "Community API",
+      "type": "route-group",
+      "path": "server/routes/community.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:helpers": {
+      "id": "route:helpers",
+      "name": "Helpers API",
+      "type": "route-group",
+      "path": "server/routes/helpers.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:intelligence": {
+      "id": "route:intelligence",
+      "name": "Intelligence API",
+      "type": "route-group",
+      "path": "server/routes/intelligence.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:notifications": {
+      "id": "route:notifications",
+      "name": "Notifications API",
+      "type": "route-group",
+      "path": "server/routes/notifications.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:sorsbooks": {
+      "id": "route:sorsbooks",
+      "name": "Sorsbooks API",
+      "type": "route-group",
+      "path": "server/routes/sorsbooks.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    },
+    "route:tickets": {
+      "id": "route:tickets",
+      "name": "Tickets API",
+      "type": "route-group",
+      "path": "server/routes/tickets.ts",
+      "firstSeen": "2026-03-08T10:25:01.962Z",
+      "lastSeen": "2026-03-08T10:32:16.915Z",
+      "isNew": false
+    }
+  },
+  "insights": [
+    {
+      "id": "ai-1772966537931-9w6r",
+      "timestamp": "2026-03-08T10:42:12.780Z",
+      "category": "growth",
+      "title": "Enhance Feature Utilization",
+      "summary": "With 140 features available but no recent developments or generated content, it's crucial to focus on promoting existing features effectively to maximize user engagement.",
+      "priority": "high",
+      "actionItems": [
+        "Conduct a user survey to identify underutilized features",
+        "Create marketing campaigns to highlight key features"
+      ]
+    },
+    {
+      "id": "ai-1772966537931-5ixu",
+      "timestamp": "2026-03-08T10:42:12.780Z",
+      "category": "health",
+      "title": "Implement Performance Metrics",
+      "summary": "The current lack of picks generated and games analyzed indicates a need for performance tracking to assess the platform's efficacy and usability.",
+      "priority": "medium",
+      "actionItems": [
+        "Develop and integrate performance metrics dashboard",
+        "Set up regular reviews of key performance indicators"
+      ]
+    },
+    {
+      "id": "ai-1772966537931-03sw",
+      "timestamp": "2026-03-08T10:42:12.780Z",
+      "category": "recommendation",
+      "title": "Pipeline and Feature Roadmap Initiation",
+      "summary": "The absence of recent developments in the pipeline signifies the need to initiate a systematic approach for continuous improvement and feature updates.",
+      "priority": "high",
+      "actionItems": [
+        "Establish a development cycle for new features and improvements",
+        "Launch an internal brainstorming session for new feature ideas"
+      ]
+    },
+    {
+      "id": "ai-1772965940812-gmwq",
+      "timestamp": "2026-03-08T10:32:16.917Z",
+      "category": "health",
+      "title": "Increase Engagement Metrics",
+      "summary": "With a zero output in picks generated, games analyzed, and pipeline runs, it's crucial to drive engagement by analyzing the current features and optimizing user interaction.",
+      "priority": "high",
+      "actionItems": [
+        "Conduct a user survey to identify feature gaps",
+        "Implement user feedback loops for existing features"
+      ]
+    },
+    {
+      "id": "ai-1772965940812-lsr3",
+      "timestamp": "2026-03-08T10:32:16.917Z",
+      "category": "growth",
+      "title": "Expand Feature Offerings",
+      "summary": "With 140 total features but none added this cycle, consider exploring new feature development to maintain user interest and attract new customers.",
+      "priority": "medium",
+      "actionItems": [
+        "Research industry trends for new feature ideas",
+        "Allocate resources to prioritize new feature development"
+      ]
+    },
+    {
+      "id": "ai-1772965940812-8r4v",
+      "timestamp": "2026-03-08T10:32:16.917Z",
+      "category": "performance",
+      "title": "Optimize Pipeline Functionality",
+      "summary": "The lack of pipeline runs indicates inefficiency in processing data; optimizing this system could enhance overall platform performance.",
+      "priority": "high",
+      "actionItems": [
+        "Audit current pipeline for bottlenecks",
+        "Implement enhancements to streamline data processing"
+      ]
+    },
+    {
+      "id": "ai-1772965608830-vsct",
+      "timestamp": "2026-03-08T10:26:43.318Z",
+      "category": "health",
+      "title": "Improve Feature Utilization",
+      "summary": "With 140 features available but no new additions this cycle and no picks generated, it's crucial to analyze feature engagement and address any underutilization. This can prevent stagnation and improve user satisfaction.",
+      "priority": "high",
+      "actionItems": [
+        "Conduct a user survey to identify underused features and gather feedback on the most desired functionalities."
+      ]
+    },
+    {
+      "id": "ai-1772965608830-anvu",
+      "timestamp": "2026-03-08T10:26:43.318Z",
+      "category": "growth",
+      "title": "Boost Content and Analytics Production",
+      "summary": "The absence of generated picks and analyzed games indicates a need to increase content output and analytical efforts, which are key for user engagement and retention.",
+      "priority": "medium",
+      "actionItems": [
+        "Implement a scheduled pipeline for regular analysis of games and automatic pick generation to enhance platform activity."
+      ]
+    },
+    {
+      "id": "ai-1772965608830-n6m6",
+      "timestamp": "2026-03-08T10:26:43.318Z",
+      "category": "recommendation",
+      "title": "Enhance User Engagement Strategies",
+      "summary": "To foster growth, it’s important to develop targeted marketing strategies and user engagement tactics, especially when the platform currently has no new initiatives this cycle.",
+      "priority": "medium",
+      "actionItems": [
+        "Explore potential partnerships or promotional campaigns that could attract new users to the platform."
+      ]
+    },
+    {
+      "id": "discovery-1772965501964",
+      "timestamp": "2026-03-08T10:25:01.964Z",
+      "category": "discovery",
+      "title": "140 New Features Auto-Registered",
+      "summary": "Discovery engine detected and added to monitoring: Admin Ab Tests, Admin Acquisition, Admin Analytics, Admin Api Budget, Admin App Intelligence, Admin Applications, Admin Assistant, Admin Autonomous, Admin Data Provenance, Admin Diagnostics, Admin Feature Flags, Admin Financial Projections, Admin Fraud, Admin Growth, Admin Guardian, Admin Ip Registry, Admin Launch Control, Admin Lifecycle Campaigns, Admin Marketing, Admin Model Integrity, Admin Model Performance, Admin Orchestration, Admin Owner Playbook, Admin Pricing Intelligence, Admin Promos, Admin Quality Watchdog, Admin Risk Register, Admin Security, Admin Segmentation, Admin Support, Admin Update Planner, Admin User Health, Admin, Apply, Auto Generator, Bankroll, Cards, Changelog, Command Center, Community, Correlation Matrix, Daily Parlays, Dashboard, Help, International, Landing, Legal, Live, Login, Mma, Not Found, Odds Center, Onboarding, Personalized Insights, Pick Review, Pipeline, Platform Intelligence, Player Props, Pricing, Profile, Prop Parlay Builder, Reset Password, Rewards, Roadmap, Rosters, Settings, Sorsbooks, Sport Factor Analysis, Strategy Advisor, Ticket Variations, Tools, Track Record, Training Center, Verify Email, Watchlist, Ab Test Engine, Acquisition Analytics Engine, Admin Assistant Engine, Ai Error Tracker, Analytics Agent Engine, Analytics Dashboard Engine, Api Budget Optimizer, App Guardian Engine, App Intelligence Engine, Autonomous Learning Engine, Backtest Engine, Calibration Engine, Community Loss Pattern Engine, Confidence Engine, Continuous Learning Orchestrator, Correlation Engine, Early Settlement Engine, Feature Registry Engine, Historical Learning Engine, International Sports Engine, Learning Engine, Lifecycle Campaign Engine, Live Analytics Engine, Market Snapshot Engine, Mc Stacked Learner, Monte Carlo Engine, Notification Engine, Personalized Insights Engine, Pick Outcome Tracker, Pick Protection Engine, Platform Intelligence Engine, Precomputed Predictions Engine, Prediction Pipeline Engine, Pricing Intelligence Engine, Pro Tools Engine, Promo Offers Engine, Prop Parlay Engine, Quantum Fusion Engine, Scheme Recognition Engine, Segmentation Engine, Settlement Engine, Sharp Signal Detector, Situational Engine, Social Data Engine, Sport Factors Engine, Strategy Advisor Engine, Team Historical Form Engine, Ticket Orchestrator, Ticketing Engine, Trial Fraud Engine, Unified Stacking Meta Learner, User Data Engine, Account API, Admin API, Ai API, Apply API, Auth API, Betting API, Cards API, Community API, Helpers API, Intelligence API, Notifications API, Sorsbooks API, Tickets API.",
+      "priority": "medium",
+      "actionItems": [
+        "Verify Admin Ab Tests (page) is covered in pipeline monitoring",
+        "Verify Admin Acquisition (page) is covered in pipeline monitoring",
+        "Verify Admin Analytics (page) is covered in pipeline monitoring",
+        "Verify Admin Api Budget (page) is covered in pipeline monitoring",
+        "Verify Admin App Intelligence (page) is covered in pipeline monitoring",
+        "Verify Admin Applications (page) is covered in pipeline monitoring",
+        "Verify Admin Assistant (page) is covered in pipeline monitoring",
+        "Verify Admin Autonomous (page) is covered in pipeline monitoring",
+        "Verify Admin Data Provenance (page) is covered in pipeline monitoring",
+        "Verify Admin Diagnostics (page) is covered in pipeline monitoring",
+        "Verify Admin Feature Flags (page) is covered in pipeline monitoring",
+        "Verify Admin Financial Projections (page) is covered in pipeline monitoring",
+        "Verify Admin Fraud (page) is covered in pipeline monitoring",
+        "Verify Admin Growth (page) is covered in pipeline monitoring",
+        "Verify Admin Guardian (page) is covered in pipeline monitoring",
+        "Verify Admin Ip Registry (page) is covered in pipeline monitoring",
+        "Verify Admin Launch Control (page) is covered in pipeline monitoring",
+        "Verify Admin Lifecycle Campaigns (page) is covered in pipeline monitoring",
+        "Verify Admin Marketing (page) is covered in pipeline monitoring",
+        "Verify Admin Model Integrity (page) is covered in pipeline monitoring",
+        "Verify Admin Model Performance (page) is covered in pipeline monitoring",
+        "Verify Admin Orchestration (page) is covered in pipeline monitoring",
+        "Verify Admin Owner Playbook (page) is covered in pipeline monitoring",
+        "Verify Admin Pricing Intelligence (page) is covered in pipeline monitoring",
+        "Verify Admin Promos (page) is covered in pipeline monitoring",
+        "Verify Admin Quality Watchdog (page) is covered in pipeline monitoring",
+        "Verify Admin Risk Register (page) is covered in pipeline monitoring",
+        "Verify Admin Security (page) is covered in pipeline monitoring",
+        "Verify Admin Segmentation (page) is covered in pipeline monitoring",
+        "Verify Admin Support (page) is covered in pipeline monitoring",
+        "Verify Admin Update Planner (page) is covered in pipeline monitoring",
+        "Verify Admin User Health (page) is covered in pipeline monitoring",
+        "Verify Admin (page) is covered in pipeline monitoring",
+        "Verify Apply (page) is covered in pipeline monitoring",
+        "Verify Auto Generator (page) is covered in pipeline monitoring",
+        "Verify Bankroll (page) is covered in pipeline monitoring",
+        "Verify Cards (page) is covered in pipeline monitoring",
+        "Verify Changelog (page) is covered in pipeline monitoring",
+        "Verify Command Center (page) is covered in pipeline monitoring",
+        "Verify Community (page) is covered in pipeline monitoring",
+        "Verify Correlation Matrix (page) is covered in pipeline monitoring",
+        "Verify Daily Parlays (page) is covered in pipeline monitoring",
+        "Verify Dashboard (page) is covered in pipeline monitoring",
+        "Verify Help (page) is covered in pipeline monitoring",
+        "Verify International (page) is covered in pipeline monitoring",
+        "Verify Landing (page) is covered in pipeline monitoring",
+        "Verify Legal (page) is covered in pipeline monitoring",
+        "Verify Live (page) is covered in pipeline monitoring",
+        "Verify Login (page) is covered in pipeline monitoring",
+        "Verify Mma (page) is covered in pipeline monitoring",
+        "Verify Not Found (page) is covered in pipeline monitoring",
+        "Verify Odds Center (page) is covered in pipeline monitoring",
+        "Verify Onboarding (page) is covered in pipeline monitoring",
+        "Verify Personalized Insights (page) is covered in pipeline monitoring",
+        "Verify Pick Review (page) is covered in pipeline monitoring",
+        "Verify Pipeline (page) is covered in pipeline monitoring",
+        "Verify Platform Intelligence (page) is covered in pipeline monitoring",
+        "Verify Player Props (page) is covered in pipeline monitoring",
+        "Verify Pricing (page) is covered in pipeline monitoring",
+        "Verify Profile (page) is covered in pipeline monitoring",
+        "Verify Prop Parlay Builder (page) is covered in pipeline monitoring",
+        "Verify Reset Password (page) is covered in pipeline monitoring",
+        "Verify Rewards (page) is covered in pipeline monitoring",
+        "Verify Roadmap (page) is covered in pipeline monitoring",
+        "Verify Rosters (page) is covered in pipeline monitoring",
+        "Verify Settings (page) is covered in pipeline monitoring",
+        "Verify Sorsbooks (page) is covered in pipeline monitoring",
+        "Verify Sport Factor Analysis (page) is covered in pipeline monitoring",
+        "Verify Strategy Advisor (page) is covered in pipeline monitoring",
+        "Verify Ticket Variations (page) is covered in pipeline monitoring",
+        "Verify Tools (page) is covered in pipeline monitoring",
+        "Verify Track Record (page) is covered in pipeline monitoring",
+        "Verify Training Center (page) is covered in pipeline monitoring",
+        "Verify Verify Email (page) is covered in pipeline monitoring",
+        "Verify Watchlist (page) is covered in pipeline monitoring",
+        "Verify Ab Test Engine (engine) is covered in pipeline monitoring",
+        "Verify Acquisition Analytics Engine (engine) is covered in pipeline monitoring",
+        "Verify Admin Assistant Engine (engine) is covered in pipeline monitoring",
+        "Verify Ai Error Tracker (engine) is covered in pipeline monitoring",
+        "Verify Analytics Agent Engine (engine) is covered in pipeline monitoring",
+        "Verify Analytics Dashboard Engine (engine) is covered in pipeline monitoring",
+        "Verify Api Budget Optimizer (engine) is covered in pipeline monitoring",
+        "Verify App Guardian Engine (engine) is covered in pipeline monitoring",
+        "Verify App Intelligence Engine (engine) is covered in pipeline monitoring",
+        "Verify Autonomous Learning Engine (engine) is covered in pipeline monitoring",
+        "Verify Backtest Engine (engine) is covered in pipeline monitoring",
+        "Verify Calibration Engine (engine) is covered in pipeline monitoring",
+        "Verify Community Loss Pattern Engine (engine) is covered in pipeline monitoring",
+        "Verify Confidence Engine (engine) is covered in pipeline monitoring",
+        "Verify Continuous Learning Orchestrator (engine) is covered in pipeline monitoring",
+        "Verify Correlation Engine (engine) is covered in pipeline monitoring",
+        "Verify Early Settlement Engine (engine) is covered in pipeline monitoring",
+        "Verify Feature Registry Engine (engine) is covered in pipeline monitoring",
+        "Verify Historical Learning Engine (engine) is covered in pipeline monitoring",
+        "Verify International Sports Engine (engine) is covered in pipeline monitoring",
+        "Verify Learning Engine (engine) is covered in pipeline monitoring",
+        "Verify Lifecycle Campaign Engine (engine) is covered in pipeline monitoring",
+        "Verify Live Analytics Engine (engine) is covered in pipeline monitoring",
+        "Verify Market Snapshot Engine (engine) is covered in pipeline monitoring",
+        "Verify Mc Stacked Learner (engine) is covered in pipeline monitoring",
+        "Verify Monte Carlo Engine (engine) is covered in pipeline monitoring",
+        "Verify Notification Engine (engine) is covered in pipeline monitoring",
+        "Verify Personalized Insights Engine (engine) is covered in pipeline monitoring",
+        "Verify Pick Outcome Tracker (engine) is covered in pipeline monitoring",
+        "Verify Pick Protection Engine (engine) is covered in pipeline monitoring",
+        "Verify Platform Intelligence Engine (engine) is covered in pipeline monitoring",
+        "Verify Precomputed Predictions Engine (engine) is covered in pipeline monitoring",
+        "Verify Prediction Pipeline Engine (engine) is covered in pipeline monitoring",
+        "Verify Pricing Intelligence Engine (engine) is covered in pipeline monitoring",
+        "Verify Pro Tools Engine (engine) is covered in pipeline monitoring",
+        "Verify Promo Offers Engine (engine) is covered in pipeline monitoring",
+        "Verify Prop Parlay Engine (engine) is covered in pipeline monitoring",
+        "Verify Quantum Fusion Engine (engine) is covered in pipeline monitoring",
+        "Verify Scheme Recognition Engine (engine) is covered in pipeline monitoring",
+        "Verify Segmentation Engine (engine) is covered in pipeline monitoring",
+        "Verify Settlement Engine (engine) is covered in pipeline monitoring",
+        "Verify Sharp Signal Detector (engine) is covered in pipeline monitoring",
+        "Verify Situational Engine (engine) is covered in pipeline monitoring",
+        "Verify Social Data Engine (engine) is covered in pipeline monitoring",
+        "Verify Sport Factors Engine (engine) is covered in pipeline monitoring",
+        "Verify Strategy Advisor Engine (engine) is covered in pipeline monitoring",
+        "Verify Team Historical Form Engine (engine) is covered in pipeline monitoring",
+        "Verify Ticket Orchestrator (engine) is covered in pipeline monitoring",
+        "Verify Ticketing Engine (engine) is covered in pipeline monitoring",
+        "Verify Trial Fraud Engine (engine) is covered in pipeline monitoring",
+        "Verify Unified Stacking Meta Learner (engine) is covered in pipeline monitoring",
+        "Verify User Data Engine (engine) is covered in pipeline monitoring",
+        "Verify Account API (route-group) is covered in pipeline monitoring",
+        "Verify Admin API (route-group) is covered in pipeline monitoring",
+        "Verify Ai API (route-group) is covered in pipeline monitoring",
+        "Verify Apply API (route-group) is covered in pipeline monitoring",
+        "Verify Auth API (route-group) is covered in pipeline monitoring",
+        "Verify Betting API (route-group) is covered in pipeline monitoring",
+        "Verify Cards API (route-group) is covered in pipeline monitoring",
+        "Verify Community API (route-group) is covered in pipeline monitoring",
+        "Verify Helpers API (route-group) is covered in pipeline monitoring",
+        "Verify Intelligence API (route-group) is covered in pipeline monitoring",
+        "Verify Notifications API (route-group) is covered in pipeline monitoring",
+        "Verify Sorsbooks API (route-group) is covered in pipeline monitoring",
+        "Verify Tickets API (route-group) is covered in pipeline monitoring",
+        "Review new additions in the Feature Registry tab"
+      ]
+    },
+    {
+      "id": "ai-1772965507163-4je7",
+      "timestamp": "2026-03-08T10:25:01.964Z",
+      "category": "growth",
+      "title": "Enhance User Engagement Features",
+      "summary": "With 0 picks generated and no games analyzed, focusing on user engagement features like live betting insights or interactive tutorials could boost user interaction.",
+      "priority": "high",
+      "actionItems": [
+        "Implement live betting analytics",
+        "Develop interactive tutorials for new users"
+      ]
+    },
+    {
+      "id": "ai-1772965507163-6ovn",
+      "timestamp": "2026-03-08T10:25:01.964Z",
+      "category": "health",
+      "title": "Monitor Performance of New Features",
+      "summary": "The introduction of multiple admin pages should be closely monitored to ensure they contribute positively to platform performance and user satisfaction.",
+      "priority": "medium",
+      "actionItems": [
+        "Analyze user feedback on new admin features",
+        "Track usage metrics of newly added pages"
+      ]
+    },
+    {
+      "id": "ai-1772965507163-7dhi",
+      "timestamp": "2026-03-08T10:25:01.964Z",
+      "category": "recommendation",
+      "title": "Strengthen API Integrations",
+      "summary": "Given the extensive structure of route groups, enhancing API integrations could facilitate better data sharing, increasing the versatility of the platform.",
+      "priority": "medium",
+      "actionItems": [
+        "Evaluate current API performance",
+        "Explore partnerships for external integrations"
+      ]
+    }
+  ],
+  "cycleCount": 4,
+  "lastCycle": "2026-03-08T10:42:17.931Z",
+  "bootstrapped": true
+}

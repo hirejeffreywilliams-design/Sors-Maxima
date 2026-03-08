@@ -959,6 +959,150 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T04:00Z",
       "savedAt": "2026-03-07T23:39:31.521Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851170-spread-6aebbb03b1",
+      "gameId": "401851170",
+      "sport": "NCAAB",
+      "game": "Pittsburgh Panthers @ Stanford Cardinal",
+      "homeTeam": "Stanford Cardinal",
+      "awayTeam": "Pittsburgh Panthers",
+      "pick": "Stanford Cardinal +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 82,
+      "ev": 35.55,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851611-spread-d6dbb7ee21",
+      "gameId": "401851611",
+      "sport": "NCAAB",
+      "game": "TBD @ Stephen F. Austin Lumberjacks",
+      "homeTeam": "Stephen F. Austin Lumberjacks",
+      "awayTeam": "TBD",
+      "pick": "Stephen F. Austin Lumberjacks +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 82,
+      "ev": 43.18,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851405-spread-f1b304544c",
+      "gameId": "401851405",
+      "sport": "NCAAB",
+      "game": "Missouri State Bears @ Florida International Panthers",
+      "homeTeam": "Florida International Panthers",
+      "awayTeam": "Missouri State Bears",
+      "pick": "Florida International Panthers 0",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 81,
+      "ev": 27.91,
+      "gameTime": "2026-03-10T22:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851170-moneyline-bdd8ba6885",
+      "gameId": "401851170",
+      "sport": "NCAAB",
+      "game": "Pittsburgh Panthers @ Stanford Cardinal",
+      "homeTeam": "Stanford Cardinal",
+      "awayTeam": "Pittsburgh Panthers",
+      "pick": "Stanford Cardinal ML",
+      "betType": "moneyline",
+      "odds": -167,
+      "grade": "B+",
+      "confidence": 77,
+      "ev": 7.12,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851611-moneyline-35553c9138",
+      "gameId": "401851611",
+      "sport": "NCAAB",
+      "game": "TBD @ Stephen F. Austin Lumberjacks",
+      "homeTeam": "Stephen F. Austin Lumberjacks",
+      "awayTeam": "TBD",
+      "pick": "Stephen F. Austin Lumberjacks ML",
+      "betType": "moneyline",
+      "odds": -174,
+      "grade": "A-",
+      "confidence": 77,
+      "ev": 13.38,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851405-moneyline-15df5ba782",
+      "gameId": "401851405",
+      "sport": "NCAAB",
+      "game": "Missouri State Bears @ Florida International Panthers",
+      "homeTeam": "Florida International Panthers",
+      "awayTeam": "Missouri State Bears",
+      "pick": "Florida International Panthers ML",
+      "betType": "moneyline",
+      "odds": -107,
+      "grade": "B",
+      "confidence": 76,
+      "ev": 29.62,
+      "gameTime": "2026-03-10T22:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851170-total-7619e5d093",
+      "gameId": "401851170",
+      "sport": "NCAAB",
+      "game": "Pittsburgh Panthers @ Stanford Cardinal",
+      "homeTeam": "Stanford Cardinal",
+      "awayTeam": "Pittsburgh Panthers",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 35.55,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851611-total-f7d8ee932c",
+      "gameId": "401851611",
+      "sport": "NCAAB",
+      "game": "TBD @ Stephen F. Austin Lumberjacks",
+      "homeTeam": "Stephen F. Austin Lumberjacks",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 43.18,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851405-total-09dd850ccb",
+      "gameId": "401851405",
+      "sport": "NCAAB",
+      "game": "Missouri State Bears @ Florida International Panthers",
+      "homeTeam": "Florida International Panthers",
+      "awayTeam": "Missouri State Bears",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 60,
+      "ev": 27.91,
+      "gameTime": "2026-03-10T22:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z"
     }
   ],
   "settled": [
@@ -11494,16 +11638,236 @@
       "homeScore": 106,
       "awayScore": 102,
       "settledAt": "2026-03-08T00:16:19.313Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851282-spread-375fd5cb0f",
+      "gameId": "401851282",
+      "sport": "NCAAB",
+      "game": "Baylor Bears @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Baylor Bears",
+      "pick": "Arizona State Sun Devils 0",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 78,
+      "ev": 24.09,
+      "gameTime": "2026-03-10T16:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "won",
+      "homeScore": 86,
+      "awayScore": 65,
+      "settledAt": "2026-03-08T10:40:30.424Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851282-moneyline-9c104dcf17",
+      "gameId": "401851282",
+      "sport": "NCAAB",
+      "game": "Baylor Bears @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Baylor Bears",
+      "pick": "Arizona State Sun Devils ML",
+      "betType": "moneyline",
+      "odds": -100,
+      "grade": "B-",
+      "confidence": 76,
+      "ev": 30,
+      "gameTime": "2026-03-10T16:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "won",
+      "homeScore": 86,
+      "awayScore": 65,
+      "settledAt": "2026-03-08T10:40:30.424Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851282-total-9b03ecd5dd",
+      "gameId": "401851282",
+      "sport": "NCAAB",
+      "game": "Baylor Bears @ Arizona State Sun Devils",
+      "homeTeam": "Arizona State Sun Devils",
+      "awayTeam": "Baylor Bears",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 60,
+      "ev": 24.09,
+      "gameTime": "2026-03-10T16:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "won",
+      "homeScore": 86,
+      "awayScore": 65,
+      "settledAt": "2026-03-08T10:40:30.424Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851171-spread-2521125938",
+      "gameId": "401851171",
+      "sport": "NCAAB",
+      "game": "Syracuse Orange @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Syracuse Orange",
+      "pick": "SMU Mustangs +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 82,
+      "ev": 18.36,
+      "gameTime": "2026-03-10T20:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "lost",
+      "homeScore": 69,
+      "awayScore": 77,
+      "settledAt": "2026-03-08T10:40:30.430Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851171-moneyline-b70e0de339",
+      "gameId": "401851171",
+      "sport": "NCAAB",
+      "game": "Syracuse Orange @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Syracuse Orange",
+      "pick": "SMU Mustangs ML",
+      "betType": "moneyline",
+      "odds": -127,
+      "grade": "B",
+      "confidence": 76,
+      "ev": 9.03,
+      "gameTime": "2026-03-10T20:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "lost",
+      "homeScore": 69,
+      "awayScore": 77,
+      "settledAt": "2026-03-08T10:40:30.430Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851171-total-fba61f2017",
+      "gameId": "401851171",
+      "sport": "NCAAB",
+      "game": "Syracuse Orange @ SMU Mustangs",
+      "homeTeam": "SMU Mustangs",
+      "awayTeam": "Syracuse Orange",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 60,
+      "ev": 18.36,
+      "gameTime": "2026-03-10T20:30Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "won",
+      "homeScore": 69,
+      "awayScore": 77,
+      "settledAt": "2026-03-08T10:40:30.430Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851283-spread-f28b594e14",
+      "gameId": "401851283",
+      "sport": "NCAAB",
+      "game": "Utah Utes @ Cincinnati Bearcats",
+      "homeTeam": "Cincinnati Bearcats",
+      "awayTeam": "Utah Utes",
+      "pick": "Cincinnati Bearcats +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 82,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T19:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "lost",
+      "homeScore": 59,
+      "awayScore": 75,
+      "settledAt": "2026-03-08T10:40:30.447Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851283-moneyline-74d8593428",
+      "gameId": "401851283",
+      "sport": "NCAAB",
+      "game": "Utah Utes @ Cincinnati Bearcats",
+      "homeTeam": "Cincinnati Bearcats",
+      "awayTeam": "Utah Utes",
+      "pick": "Cincinnati Bearcats ML",
+      "betType": "moneyline",
+      "odds": -170,
+      "grade": "B+",
+      "confidence": 77,
+      "ev": 4.82,
+      "gameTime": "2026-03-10T19:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "lost",
+      "homeScore": 59,
+      "awayScore": 75,
+      "settledAt": "2026-03-08T10:40:30.447Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851283-total-e8e91ce725",
+      "gameId": "401851283",
+      "sport": "NCAAB",
+      "game": "Utah Utes @ Cincinnati Bearcats",
+      "homeTeam": "Cincinnati Bearcats",
+      "awayTeam": "Utah Utes",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 61,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T19:00Z",
+      "savedAt": "2026-03-08T10:38:49.788Z",
+      "result": "lost",
+      "homeScore": 59,
+      "awayScore": 75,
+      "settledAt": "2026-03-08T10:40:30.447Z"
+    },
+    {
+      "id": "precomp-NHL-401803360-total-f4e3a2fbcb",
+      "gameId": "401803360",
+      "sport": "NHL",
+      "game": "Calgary Flames @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Calgary Flames",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 52,
+      "ev": 16.45,
+      "gameTime": "2026-03-09T23:00Z",
+      "savedAt": "2026-03-08T10:44:17.823Z",
+      "result": "lost",
+      "homeScore": 3,
+      "awayScore": 1,
+      "settledAt": "2026-03-08T10:44:29.979Z"
+    },
+    {
+      "id": "precomp-NHL-401803361-spread-bca5281869",
+      "gameId": "401803361",
+      "sport": "NHL",
+      "game": "Utah Mammoth @ Chicago Blackhawks",
+      "homeTeam": "Chicago Blackhawks",
+      "awayTeam": "Utah Mammoth",
+      "pick": "Chicago Blackhawks -1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 57,
+      "ev": -29.36,
+      "gameTime": "2026-03-10T00:30Z",
+      "savedAt": "2026-03-08T10:44:17.823Z",
+      "result": "lost",
+      "homeScore": 4,
+      "awayScore": 5,
+      "settledAt": "2026-03-08T10:44:29.985Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 510,
-      "won": 263,
-      "lost": 235,
+      "total": 521,
+      "won": 267,
+      "lost": 242,
       "push": 12,
-      "rate": 51.6,
-      "pending": 60
+      "rate": 51.2,
+      "pending": 69
     },
     "bySport": {
       "NBA": {
@@ -11512,31 +11876,31 @@
         "rate": 48.6
       },
       "NHL": {
-        "total": 189,
+        "total": 191,
         "won": 94,
-        "rate": 49.7
+        "rate": 49.2
       },
       "NCAAB": {
-        "total": 146,
-        "won": 84,
-        "rate": 57.5
+        "total": 155,
+        "won": 88,
+        "rate": 56.8
       }
     },
     "byGrade": {
       "B+": {
-        "total": 36,
+        "total": 37,
         "won": 24,
-        "rate": 66.7
+        "rate": 64.9
       },
       "B": {
-        "total": 36,
-        "won": 26,
-        "rate": 72.2
+        "total": 39,
+        "won": 27,
+        "rate": 69.2
       },
       "B-": {
-        "total": 125,
-        "won": 64,
-        "rate": 51.2
+        "total": 129,
+        "won": 67,
+        "rate": 51.9
       },
       "C+": {
         "total": 113,
@@ -11554,14 +11918,14 @@
         "rate": 54.3
       },
       "C": {
-        "total": 101,
+        "total": 102,
         "won": 45,
-        "rate": 44.6
+        "rate": 44.1
       },
       "A-": {
-        "total": 18,
+        "total": 20,
         "won": 7,
-        "rate": 38.9
+        "rate": 35
       },
       "D": {
         "total": 10,
@@ -11576,22 +11940,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 149,
-        "won": 80,
-        "rate": 53.7,
-        "roi": 14.8
+        "total": 152,
+        "won": 81,
+        "rate": 53.3,
+        "roi": 13.8
       },
       "Spread": {
-        "total": 149,
-        "won": 77,
-        "rate": 51.7,
-        "roi": 2.2
+        "total": 153,
+        "won": 78,
+        "rate": 51,
+        "roi": 0.8
       },
       "Total": {
-        "total": 141,
-        "won": 68,
-        "rate": 48.2,
-        "roi": -3.4
+        "total": 145,
+        "won": 70,
+        "rate": 48.3,
+        "roi": -3.5
       },
       "Team Total": {
         "total": 71,
@@ -11601,40 +11965,40 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 20,
+      "won": 29,
+      "lost": 21,
       "push": 0,
-      "rate": 60
+      "rate": 58
     },
-    "lastUpdated": "2026-03-08T10:13:21.277Z",
-    "roi": 4.9,
-    "brierScore": 0.2598,
+    "lastUpdated": "2026-03-08T10:49:58.477Z",
+    "roi": 4.1,
+    "brierScore": 0.2619,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.044,
+    "sharpeRatio": 0.037,
     "homeAwayBias": {
-      "homeWinRate": 55.8,
+      "homeWinRate": 55,
       "awayWinRate": 43.8,
-      "homeTotal": 231,
+      "homeTotal": 238,
       "awayTotal": 64
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.1,
-        "actual": 63.6,
-        "total": 22
+        "actual": 60.9,
+        "total": 23
       },
       {
         "range": "55-60",
         "predicted": 57.8,
-        "actual": 43.1,
-        "total": 72
+        "actual": 42.5,
+        "total": 73
       },
       {
         "range": "60-65",
         "predicted": 62,
-        "actual": 52.8,
-        "total": 197
+        "actual": 53,
+        "total": 200
       },
       {
         "range": "65-70",
@@ -11650,15 +12014,15 @@
       },
       {
         "range": "75-80",
-        "predicted": 77.3,
-        "actual": 80,
-        "total": 10
+        "predicted": 77.1,
+        "actual": 71.4,
+        "total": 14
       },
       {
         "range": "80+",
-        "predicted": 81.3,
-        "actual": 100,
-        "total": 3
+        "predicted": 81.6,
+        "actual": 60,
+        "total": 5
       }
     ]
   },

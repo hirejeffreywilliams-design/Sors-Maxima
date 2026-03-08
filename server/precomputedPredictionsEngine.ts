@@ -2,6 +2,7 @@ import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { tradingCards } from "./dbSchema";
 import { db } from "./db";
 import { eq, and, desc, or, gt } from "drizzle-orm";

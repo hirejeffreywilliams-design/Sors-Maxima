@@ -65,6 +65,7 @@ const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
 const AdminAutonomous = lazy(() => import("@/pages/admin-autonomous"));
+const AdminAppIntelligence = lazy(() => import("@/pages/admin-app-intelligence"));
 const AdminIPRegistry = lazy(() => import("@/pages/admin-ip-registry"));
 const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
 const PipelineIntelligence = lazy(() => import("@/pages/pipeline"));
@@ -236,6 +237,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
               <Route path="/admin/autonomous">{() => <AdminGuard component={AdminAutonomous} authState={authState} />}</Route>
+              <Route path="/admin/app-intelligence">{() => <AdminGuard component={AdminAppIntelligence} authState={authState} />}</Route>
               <Route path="/admin/ip-registry">{() => <AdminGuard component={AdminIPRegistry} authState={authState} />}</Route>
               <Route path="/admin/applications">{() => <AdminGuard component={AdminApplications} authState={authState} />}</Route>
               <Route path="/admin/training">{() => <AdminGuard component={TrainingCenter} authState={authState} />}</Route>
@@ -279,6 +281,7 @@ function Router({ authState }: { authState: AuthState }) {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/" component={CommandCenter} />
+        <Route path="/command-center">{() => { const [, setLocation] = useLocation(); setLocation("/"); return null; }}</Route>
         <Route path="/generate" component={AutoGenerator} />
         <Route path="/strategy" component={StrategyAdvisor} />
         <Route path="/sorsbooks" component={SorsBooksPage} />

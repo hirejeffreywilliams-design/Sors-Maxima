@@ -287,6 +287,11 @@ function startEnginesPhased(): void {
   safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 135_000);
   safeStart("Historical Backtest", initBacktestOnStartup, 130_000);
   safeStart("Quality Watchdog", startQualityWatchdog, 140_000);
+  safeStart("App Intelligence Engine", () => {
+    import("./appIntelligenceEngine").then(({ startAppIntelligenceEngine }) => {
+      startAppIntelligenceEngine();
+    }).catch(() => {});
+  }, 150_000);
   safeStart("International Sports Engine", () => {
     generateInternationalFeed().catch(() => {});
     setInterval(() => generateInternationalFeed().catch(() => {}), 6 * 60 * 60 * 1000);

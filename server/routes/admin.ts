@@ -5291,4 +5291,51 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  // ── App Intelligence Engine ────────────────────────────────────────────────
+
+  app.get("/api/admin/app-intelligence/status", requireAdmin, async (_req, res) => {
+    try {
+      const { getAppIntelligenceStatus } = await import("../appIntelligenceEngine");
+      res.json(getAppIntelligenceStatus());
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/app-intelligence/features", requireAdmin, async (_req, res) => {
+    try {
+      const { getAppIntelligenceStatus } = await import("../appIntelligenceEngine");
+      const status = getAppIntelligenceStatus();
+      res.json({ features: status.features, featuresByType: status.featuresByType, total: status.featuresTracked });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.get("/api/admin/app-intelligence/insights", requireAdmin, async (_req, res) => {
+    try {
+      const { getAppIntelligenceStatus } = await import("../appIntelligenceEngine");
+      const status = getAppIntelligenceStatus();
+      res.json({ insights: status.allInsights, total: status.allInsights.length });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/app-intelligence/run-cycle", requireAdmin, async (_req, res) => {
+    try {
+      const { runIntelligenceCycle } = await import("../appIntelligenceEngine");
+      const result = await runIntelligenceCycle();
+      res.json({
+        success: true,
+        newFeatures: result.newFeatures.length,
+        removedFeatures: result.removedFeatures.length,
+        insightsGenerated: result.insights.length,
+        insights: result.insights,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }
