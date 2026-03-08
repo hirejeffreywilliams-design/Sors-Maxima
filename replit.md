@@ -51,6 +51,7 @@ The application utilizes a modern web architecture with a React-based frontend a
 - **Card Security & Anti-Fraud System**: Implements SHA-256 cryptographic signatures for issued cards, displayed with a "SORS CERTIFIED ✓" badge.
 - **Pack Rip Animation**: A full-screen, Pokémon-style pack opening experience for revealing cards.
 - **Community Cards Feed**: Integrates Intelligence Cards into the Community page with sharing functionality.
+- **Golden Ticket Hero (Landing Page)**: Interactive cinematic hero replacing static landing hero. A large gold-gradient ticket with "S"/"M" embossed monogram halves, quantum particle field (money green + gold + emerald), orbital ring animations, shimmer overlay, and a vertical split-open animation on click that reveals a glassmorphism access panel with Member Login, Request Access buttons, and tier pricing pills. Component: `client/src/components/golden-ticket-hero.tsx`. Routes back via "↩ Back" button. Replaces old static section in `client/src/pages/landing.tsx`.
 - **Sors Intelligence Cards**: A collectible trading card system with visual effects (rainbow holographic shimmer, sport-specific backgrounds, rarity labels, 3D tilt hover, grade-matched glow borders, "CALLED IT/MISSED" stamps).
 - **Edge Alerts Collapsible**: Edge Alerts section in Command Center is collapsed by default, expanding on tap.
 - **Pick Hall of Fame & Performance Highlights**: Premium showcase of picks and key performance statistics on the track-record page.

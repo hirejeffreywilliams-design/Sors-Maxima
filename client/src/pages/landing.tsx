@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { useSEO } from "@/hooks/use-seo";
+import { GoldenTicketHero } from "@/components/golden-ticket-hero";
 
 const features = [
   {
@@ -227,49 +228,7 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <section className="relative overflow-hidden" data-testid="section-hero">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-background" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
-        <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 py-20 sm:py-32">
-          <div className="flex flex-col items-center text-center space-y-8">
-            <img
-              src={sorsMaximaLogo}
-              alt="Sors Maxima"
-              className="w-20 h-20 rounded-2xl"
-              data-testid="img-logo"
-            />
-            <Badge variant="outline" className="gap-1 bg-purple-500/10 border-purple-500/30 text-purple-300 backdrop-blur-sm">
-              <Atom className="w-3 h-3" />
-              Private Betting Intelligence Platform
-            </Badge>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white max-w-4xl leading-tight">
-              Exclusive Intelligence for the Modern Bettor.
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-300 max-w-2xl">
-              Sors Maxima is a closed-door platform providing institutional-grade data and proprietary simulations. 
-              We don't just find picks; we identify market inefficiencies.
-            </p>
-            <div className="flex items-center gap-4 flex-wrap justify-center">
-              <Link href="/apply">
-                <Button size="lg" data-testid="button-hero-join-now">
-                  Request Access
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-              <Link href="/pricing">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="backdrop-blur-sm bg-white/5"
-                  data-testid="button-hero-see-pricing"
-                >
-                  View Tiers
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <GoldenTicketHero />
 
       <section className="border-y bg-muted/30" data-testid="section-trust-signals">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
