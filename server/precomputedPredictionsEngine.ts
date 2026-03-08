@@ -1828,6 +1828,15 @@ async function runPredictionCycle(): Promise<void> {
   lastRunTime = Date.now();
   console.log(`[PrecomputedEngine] Prediction cycle #${totalRuns} complete`);
 
+  import("./sseManager").then(({ broadcastEvent }) => {
+    broadcastEvent("picks-update", {
+      type: "picks-update",
+      timestamp: new Date().toISOString(),
+      cycle: totalRuns,
+      sportsUpdated: sports.length,
+    });
+  }).catch(() => {});
+
 }
 
 export function startPrecomputedEngine(): void {

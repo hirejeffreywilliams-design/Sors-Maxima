@@ -33,7 +33,7 @@ import {
 } from "../monteCarloEngine";
 import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
-import { getClientIp, requireAuth, requireTier, requireSubscription } from "./helpers";
+import { getClientIp, requireAuth, requireAdmin, requireTier, requireSubscription } from "./helpers";
 import { getTwoWayMatchupImpact } from "../two-way-contracts";
 
 const GOOD_GRADES = ["A+", "A", "A-", "B+", "B", "B-"];
@@ -914,96 +914,123 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
   // ── Ticket Showcase ─────────────────────────────────────────────────────────
-  app.get("/api/showcase-tickets", responseCacheMiddleware(300_000), async (_req: Request, res: Response) => {
-    try {
-      const { getRecentPicks } = await import("../pickOutcomeTracker");
-      const settled = getRecentPicks({ status: "settled", limit: 5000 });
+  // Daily-stable cache: same tickets all day, refreshes at midnight
+  let showcaseDailyCache: { date: string; payload: any } | null = null;
 
-      // Group by game date
-      const byDate: Record<string, typeof settled> = {};
-      for (const p of settled) {
-        const d = (p.gameTime || p.savedAt || "").slice(0, 10);
-        if (!d) continue;
-        if (!byDate[d]) byDate[d] = [];
-        byDate[d].push(p);
-      }
+  async function buildShowcasePayload() {
+    const { getRecentPicks } = await import("../pickOutcomeTracker");
+    const settled = getRecentPicks({ status: "settled", limit: 5000 });
 
-      function oddsToDecimal(o: number) {
-        return o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o);
-      }
-      function decimalToAmerican(d: number) {
-        if (d >= 2) return Math.round((d - 1) * 100);
-        return Math.round(-100 / (d - 1));
-      }
-      function parlayDecimal(legs: { odds: number }[]) {
-        return legs.reduce((acc, l) => acc * oddsToDecimal(l.odds), 1);
-      }
-      function gradeSort(g: string) {
-        const order: Record<string, number> = { "A+": 0, A: 1, "A-": 2, "B+": 3, B: 4, "B-": 5, "C+": 6, C: 7, "C-": 8, D: 9, F: 10 };
-        return order[g] ?? 99;
-      }
+    const byDate: Record<string, typeof settled> = {};
+    for (const p of settled) {
+      const d = (p.gameTime || p.savedAt || "").slice(0, 10);
+      if (!d) continue;
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push(p);
+    }
 
-      const winning: any[] = [];
-      const losing: any[] = [];
+    function oddsToDecimal(o: number) { return o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o); }
+    function decimalToAmerican(d: number) { return d >= 2 ? Math.round((d - 1) * 100) : Math.round(-100 / (d - 1)); }
+    function parlayDecimal(legs: { odds: number }[]) { return legs.reduce((acc, l) => acc * oddsToDecimal(l.odds), 1); }
+    function gradeSort(g: string) {
+      const order: Record<string, number> = { "A+": 0, A: 1, "A-": 2, "B+": 3, B: 4, "B-": 5, "C+": 6, C: 7, "C-": 8, D: 9, F: 10 };
+      return order[g] ?? 99;
+    }
 
-      const dates = Object.keys(byDate).sort().reverse();
-      for (const date of dates) {
-        const dayPicks = byDate[date]
-          .filter(p => p.result === "won" || p.result === "lost")
-          .sort((a, b) => gradeSort(a.grade) - gradeSort(b.grade));
+    const winning: any[] = [];
+    const losing: any[] = [];
+    const allHistorical: any[] = [];
 
-        if (dayPicks.length < 2) continue;
+    const dates = Object.keys(byDate).sort().reverse();
+    for (const date of dates) {
+      const dayPicks = byDate[date]
+        .filter(p => p.result === "won" || p.result === "lost")
+        .sort((a, b) => gradeSort(a.grade) - gradeSort(b.grade));
 
-        // Build 3-leg tickets, sliding window
-        for (let i = 0; i + 2 < dayPicks.length; i += 3) {
-          const legs = dayPicks.slice(i, i + 3);
-          const allWon = legs.every(l => l.result === "won");
-          const anyLost = legs.some(l => l.result === "lost");
-          if (!allWon && !anyLost) continue;
+      if (dayPicks.length < 2) continue;
 
-          const dec = parlayDecimal(legs);
-          const combinedOdds = decimalToAmerican(dec);
-          const stake = 100;
-          const payout = Math.round(stake * dec);
-          const ticket = {
-            id: `showcase-${date}-${i}`,
-            date,
-            result: allWon ? "won" : "lost",
-            legs: legs.map(l => ({
-              sport: l.sport,
-              game: l.game,
-              pick: l.pick,
-              betType: l.betType,
-              odds: l.odds,
-              grade: l.grade,
-              confidence: l.confidence,
-              result: l.result,
-            })),
-            combinedOdds,
-            stake,
-            payout,
-            profit: allWon ? payout - stake : -stake,
-          };
-          if (allWon && winning.length < 30) winning.push(ticket);
-          else if (!allWon && losing.length < 15) losing.push(ticket);
-          if (winning.length >= 30 && losing.length >= 15) break;
-        }
+      for (let i = 0; i + 2 < dayPicks.length; i += 3) {
+        const legs = dayPicks.slice(i, i + 3);
+        const allWon = legs.every(l => l.result === "won");
+        const anyLost = legs.some(l => l.result === "lost");
+        if (!allWon && !anyLost) continue;
+
+        const dec = parlayDecimal(legs);
+        const combinedOdds = decimalToAmerican(dec);
+        const stake = 100;
+        const payout = Math.round(stake * dec);
+        const ticket = {
+          id: `showcase-${date}-${i}`,
+          date,
+          result: allWon ? "won" : "lost",
+          legs: legs.map(l => ({
+            sport: l.sport, game: l.game, pick: l.pick, betType: l.betType,
+            odds: l.odds, grade: l.grade, confidence: l.confidence, result: l.result,
+          })),
+          combinedOdds, stake, payout,
+          profit: allWon ? payout - stake : -stake,
+        };
+        allHistorical.push(ticket);
+        if (allWon && winning.length < 30) winning.push(ticket);
+        else if (!allWon && losing.length < 15) losing.push(ticket);
         if (winning.length >= 30 && losing.length >= 15) break;
       }
+      if (winning.length >= 30 && losing.length >= 15) break;
+    }
 
-      // Interleave: ~2 wins, 1 loss for compelling showcase
-      const showcase: any[] = [];
-      let wi = 0, li = 0;
-      while (wi < winning.length || li < losing.length) {
-        if (wi < winning.length) showcase.push(winning[wi++]);
-        if (wi < winning.length) showcase.push(winning[wi++]);
-        if (li < losing.length) showcase.push(losing[li++]);
+    const showcase: any[] = [];
+    let wi = 0, li = 0;
+    while (wi < winning.length || li < losing.length) {
+      if (wi < winning.length) showcase.push(winning[wi++]);
+      if (wi < winning.length) showcase.push(winning[wi++]);
+      if (li < losing.length) showcase.push(losing[li++]);
+    }
+
+    return {
+      tickets: showcase.slice(0, 40),
+      stats: { winning: winning.length, losing: losing.length, totalHistorical: allHistorical.length },
+      generatedDate: new Date().toISOString().slice(0, 10),
+      allHistorical,
+    };
+  }
+
+  app.get("/api/showcase-tickets", async (_req: Request, res: Response) => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      if (!showcaseDailyCache || showcaseDailyCache.date !== today) {
+        const payload = await buildShowcasePayload();
+        showcaseDailyCache = { date: today, payload };
       }
-
-      res.json({ tickets: showcase.slice(0, 40), stats: { winning: winning.length, losing: losing.length } });
+      const { allHistorical: _omit, ...publicPayload } = showcaseDailyCache.payload;
+      res.json(publicPayload);
     } catch (err: any) {
       console.error("[showcase-tickets] Error:", err.message);
       res.status(500).json({ error: "Failed to build showcase tickets" });
+    }
+  });
+
+  app.get("/api/admin/showcase-history", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const payload = await buildShowcasePayload();
+      res.json({
+        allHistorical: payload.allHistorical,
+        stats: payload.stats,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to load showcase history" });
+    }
+  });
+
+  app.post("/api/admin/showcase-tickets/refresh", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      showcaseDailyCache = null;
+      const today = new Date().toISOString().slice(0, 10);
+      const payload = await buildShowcasePayload();
+      showcaseDailyCache = { date: today, payload };
+      res.json({ success: true, ticketCount: payload.tickets.length });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to refresh showcase" });
     }
   });
 

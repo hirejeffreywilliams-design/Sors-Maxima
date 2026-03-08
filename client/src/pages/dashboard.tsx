@@ -16,6 +16,7 @@ import { InsightsPanel } from "@/components/insights-panel";
 import { BettingSettings, getDefaultBettingEnvironment } from "@/components/betting-settings";
 import { TodaysBestBets } from "@/components/todays-best-bets";
 import { DataFreshnessBar } from "@/components/data-freshness";
+import { useSSEContext } from "@/context/sse-provider";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
@@ -930,6 +931,7 @@ function RoundRobinContent() {
 
 export default function Dashboard() {
   useSEO({ title: "Bet Builder", description: "Build, analyze, and optimize your bets — parlays, straight bets, SGPs, teasers, and round robins" });
+  const sse = useSSEContext();
   const [activeTab, setActiveTab] = useState("generator");
   const [preloadedLegs, setPreloadedLegs] = useState<ParlayLeg[]>([]);
   const [selectedLegs, setSelectedLegs] = useState<ParlayLeg[]>([]);
@@ -994,6 +996,16 @@ export default function Dashboard() {
               <DataFreshnessBar sources={freshnessData.sources} />
             </div>
           )}
+          <div className="flex items-center justify-center gap-2 pt-0.5" data-testid="sse-status-bar">
+            <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border ${sse.connected ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400"}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${sse.connected ? "bg-green-500 animate-pulse" : "bg-amber-500"}`} />
+              {sse.connected
+                ? sse.lastUpdate
+                  ? `Live · Updated ${new Date(sse.lastUpdate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+                  : "Live · Connected"
+                : "Connecting..."}
+            </span>
+          </div>
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">

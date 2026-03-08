@@ -720,6 +720,309 @@ function AudienceSegments() {
   );
 }
 
+const PROMO_LIBRARY: Record<string, { tier: string; color: string; campaigns: { type: string; platform: string; copy: string }[] }> = {
+  all_members: {
+    tier: "All Members",
+    color: "from-slate-600 to-slate-800",
+    campaigns: [
+      {
+        type: "Awareness",
+        platform: "X / Twitter",
+        copy: `🎰 Sors Maxima doesn't guess. Our 46-Factor Intelligence Engine analyzes real-time odds, sharp money flow, and situational data so you don't have to.\n\nExclusive members-only access. No free tier. No casual bettors.\n\nIf you're serious about betting — this is your edge.\n\n🔒 sors-maxima.com #SorsMaxima #SmartBetting #SportsIntelligence`,
+      },
+      {
+        type: "Awareness",
+        platform: "Instagram",
+        copy: `The public bets on feelings. Our members bet on data.\n\n46 factors. Real-time odds. Sharp money signals. Monte Carlo simulations.\n\nSors Maxima is the intelligence layer serious bettors use to separate themselves from the crowd.\n\nMembers only. Apply your tier today.\n\n#SorsMaxima #BettingIntelligence #SharpMoney #SportsBetting #DataDriven #ExclusiveAccess`,
+      },
+      {
+        type: "Win Showcase",
+        platform: "X / Twitter",
+        copy: `📊 This week's member picks:\n✅ NBA: +A grade · 73% confidence · Hit\n✅ NFL: Sharp money confirmed · RLM detected · Hit\n✅ MLB: Vegas Prediction™ play · Faded 68% public · Hit\n\nWhen the model says A+, members listen.\nWhen sharp money moves, members follow.\n\nSors Maxima — Intelligence Edge™, not guesswork.\n#SorsMaxima #WinningEdge`,
+      },
+      {
+        type: "Exclusivity",
+        platform: "SMS / Push",
+        copy: `Sors Maxima | Exclusive Access\n\nYou're in. Most aren't.\n\nYour daily Intelligence Tickets™ are ready — built by the 46-Factor Engine, confirmed by sharp money flow.\n\nOpen the app. Your edge is waiting.`,
+      },
+    ],
+  },
+  sharp_tier: {
+    tier: "Sharp ($49/mo)",
+    color: "from-blue-600 to-blue-800",
+    campaigns: [
+      {
+        type: "Retention",
+        platform: "Email",
+        copy: `Subject: Your Sharp intelligence is live — here's what's waiting\n\nHey [First Name],\n\nYour Sors Maxima Sharp membership means you're already ahead of 99% of bettors who rely on gut instinct.\n\nHere's what your engine generated today:\n• Daily Intelligence Tickets™ — fresh 46-factor picks\n• Sors Simulation™ results from overnight runs\n• Sharp money flow alerts\n\nBut here's the thing — Edge and Max members are seeing something you're not:\n→ Real-time odds convergence alerts\n→ Vegas Prediction™ strategy access\n→ AI Pick Edge Insight per pick\n\nYour sharp foundation deserves sharper tools. Upgrade to Edge for $50 more.\n\n[Upgrade to Edge →]\n\n— The Sors Maxima Team`,
+      },
+      {
+        type: "Upgrade Promo",
+        platform: "X / Twitter",
+        copy: `Sharp members: you've seen the picks. You've seen the grades.\n\nBut have you seen the WHY behind every A+ call?\n\nEdge members get the Intel Insight™ — the AI breakdown of exactly why the model is on this side, what sharp money is doing, and what Vegas is protecting against.\n\nUpgrade. Know more. Bet sharper.\n#SorsMaxima #SharpTier #UpgradeYourEdge`,
+      },
+      {
+        type: "FOMO",
+        platform: "Push Notification",
+        copy: `⚡ Edge members just got a Steam Move alert on tonight's game. Sharp: you have the pick. Edge: they know why the line is moving. Upgrade to see the full picture.`,
+      },
+      {
+        type: "Conversion",
+        platform: "Instagram",
+        copy: `Sharp tier = a loaded weapon with the safety on.\n\nYou have the 46-Factor picks. The grades. The confidence scores.\n\nEdge tier removes the safety:\n• Real-time line movement alerts\n• Vegas Prediction™ strategy\n• Sors Drift Alert™ when sharp money hits\n• AI breakdown of every A+ pick\n\nOne upgrade. Infinite edge.\n\n#SorsMaxima #SharpMember #EdgeTier #BettingIntelligence`,
+      },
+    ],
+  },
+  edge_tier: {
+    tier: "Edge ($99/mo)",
+    color: "from-purple-600 to-purple-800",
+    campaigns: [
+      {
+        type: "Retention",
+        platform: "Email",
+        copy: `Subject: Your Edge membership — the intelligence behind this week's best plays\n\nHey [First Name],\n\nEdge members had a strong week. Here's why:\n\n• Vegas Prediction™ confirmed 3 reverse line movement plays\n• Sharp money flow hit 65%+ on 4 of our top picks\n• Public Fade™ strategy: public was 71% on the other side — we hit\n\nThis is the advantage casual bettors will never have.\n\nAs an Edge member, you're already in the top tier of data-driven bettors.\n\nBut there's one level above. Max members get:\n→ Up to 5 independent bet slips\n→ First access to high-conviction Life Changer Tickets™\n→ Direct AI consultation — ask the model anything\n→ Priority match to Max-only picks unavailable below\n\nSee what Max looks like → [View Max Benefits]\n\n— The Sors Maxima Team`,
+      },
+      {
+        type: "Upgrade Promo",
+        platform: "X / Twitter",
+        copy: `Edge members already see what the public can't.\n\nMax members see what most Edge members can't.\n\nWhen the Life Changer Ticket™ fires — the A+ 5-leg play the engine has been building toward all week — Max gets it first.\n\nFront-running the information is the game. Max is how you win it.\n\n#SorsMaxima #EdgeTier #MaxAccess #IntelligenceEdge`,
+      },
+      {
+        type: "Win Showcase",
+        platform: "Instagram",
+        copy: `Edge member results this week:\n\n📊 Vegas Prediction™ plays: 4-1\n📊 Public Fade™ plays: 3-1  \n📊 A+ grade hit rate: 71%\n📊 Sharp confirmed picks: 5-2\n\nThis isn't luck. This is 46 factors, sharp money tracking, and Vegas positioning — all working for you.\n\nEdge members know what Vegas knows.\n\n#SorsMaxima #EdgeMember #SharpMoney #WinRate #DataDriven`,
+      },
+      {
+        type: "FOMO",
+        platform: "Push Notification",
+        copy: `🔥 A Life Changer Ticket™ just generated for Max members — A+ grade, 79% confidence, 4-leg parlay at +680. Edge members get this next. Max gets it now.`,
+      },
+    ],
+  },
+  max_tier: {
+    tier: "Max ($249/mo)",
+    color: "from-amber-600 to-orange-700",
+    campaigns: [
+      {
+        type: "Retention",
+        platform: "Email",
+        copy: `Subject: Max — your intelligence briefing for the week\n\nHey [First Name],\n\nYou're at the top of the intelligence stack. Here's your weekly summary:\n\n🏆 Life Changer Ticket™ this week: +A grade · 4-leg parlay · +740 odds\n⚡ Sharp steam moves detected: 7 (you were alerted on all)\n🎰 Vegas Prediction™ rate: 83% of confirmed RLM plays went your direction\n📊 AI consultations available: Unlimited — ask anything about any pick\n\nMax members don't just see the picks — they understand the entire market.\n\nYour 5 independent bet slips are ready. Your bankroll recommendations are updated.\n\nThis is what maximum intelligence looks like.\n\n— The Sors Maxima Team`,
+      },
+      {
+        type: "Conversion",
+        platform: "X / Twitter",
+        copy: `Max tier members at Sors Maxima:\n\n→ 5 simultaneous bet slips running different strategies\n→ Life Changer Tickets™ before anyone else sees them\n→ Unlimited AI consultation on any pick, any time\n→ Every sharp signal, every steam move, every reverse line movement\n→ The full 46-factor breakdown — not just the grade\n\nThis is what maximum access looks like.\nThis is what serious bettors use.\n\n#SorsMaxima #MaxTier #SeriousBettors #IntelligenceEdge`,
+      },
+      {
+        type: "Awareness",
+        platform: "Instagram",
+        copy: `There's casual. There's sharp. There's Max.\n\nSors Maxima Max members operate at the highest level of sports betting intelligence available to non-institutional bettors.\n\n5 simultaneous strategies. Life Changer Tickets™. Real-time sharp money tracking. Unlimited AI analysis. Vegas positioning intelligence.\n\nThis isn't for everyone. It was never meant to be.\n\nMax. The intelligence ceiling.\n\n#SorsMaxima #MaxTier #ExclusiveAccess #BettingIntelligence #SeriousBettors`,
+      },
+      {
+        type: "Win Showcase",
+        platform: "Push Notification",
+        copy: `🏆 Max Alert: Life Changer Ticket™ fired. 4-leg A+ parlay at +740. 78% Sors Conviction Score™. Sharp money 69%. Vegas Prediction™ confirmed. This is yours first.`,
+      },
+    ],
+  },
+};
+
+function promoTierColor(tier: string) {
+  if (tier === "All Members") return "border-slate-400";
+  if (tier.includes("Sharp")) return "border-blue-400";
+  if (tier.includes("Edge")) return "border-purple-400";
+  if (tier.includes("Max")) return "border-amber-400";
+  return "border-border";
+}
+
+function PromoAdLibrary() {
+  const { toast } = useToast();
+  const [activeTier, setActiveTier] = useState<keyof typeof PROMO_LIBRARY>("all_members");
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null);
+  const [aiTier, setAiTier] = useState("sharp_tier");
+  const [aiCampaignType, setAiCampaignType] = useState("upgrade_promo");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiResult, setAiResult] = useState<string | null>(null);
+  const [aiCopied, setAiCopied] = useState(false);
+
+  const tierData = PROMO_LIBRARY[activeTier];
+
+  const copySnippet = (text: string, idx: number) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIdx(idx);
+      setTimeout(() => setCopiedIdx(null), 2000);
+      toast({ title: "Copied!", description: "Ad copy is ready to paste" });
+    });
+  };
+
+  const generateTierAd = useMutation({
+    mutationFn: async () => {
+      const tierLabels: Record<string, string> = {
+        sharp_tier: "Sharp ($49/mo)",
+        edge_tier: "Edge ($99/mo)",
+        max_tier: "Max ($249/mo)",
+        all_members: "All Paid Members",
+      };
+      const campaignLabels: Record<string, string> = {
+        upgrade_promo: "upgrade upsell (convince them to upgrade to the next tier)",
+        retention: "retention (remind them of their value and keep them engaged)",
+        win_showcase: "win showcase (highlight recent AI pick performance)",
+        fomo: "FOMO urgency (they're missing out on picks/signals right now)",
+        exclusivity: "exclusivity (reinforce the members-only, elite nature of the platform)",
+        awareness: "awareness (introduce the platform to potential new members)",
+      };
+      const response = await apiRequest("POST", "/api/admin/marketing/generate", {
+        contentType: "tier_promo",
+        customPrompt: `Create a compelling ready-to-post marketing ad targeting ${tierLabels[aiTier]} members. Campaign type: ${campaignLabels[aiCampaignType]}. Use the Sors Maxima exclusive brand voice — no free tier exists, this is elite members-only betting intelligence. Use proprietary terms: Intelligence Edge™, Sors Signal™, Life Changer Ticket™, Sors Simulation™, 46-Factor Engine, Vegas Prediction™, Public Fade™. Emphasize exclusivity and data superiority over public bettors. Make it ready to post immediately — no placeholders except [First Name] for emails. Generate 3 versions: one for X/Twitter (under 280 chars), one for Instagram (with hashtags), one for email/SMS.`,
+      });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      setAiResult(data.content);
+    },
+    onError: () => {
+      toast({ title: "Generation failed", variant: "destructive" });
+    },
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {Object.entries(PROMO_LIBRARY).map(([key, val]) => (
+          <button
+            key={key}
+            onClick={() => setActiveTier(key as keyof typeof PROMO_LIBRARY)}
+            data-testid={`button-promo-tier-${key}`}
+            className={`rounded-xl border-2 p-4 text-left transition-all ${
+              activeTier === key
+                ? `${promoTierColor(val.tier)} bg-muted`
+                : "border-border hover:border-muted-foreground/50"
+            }`}
+          >
+            <div className={`inline-flex items-center gap-1.5 text-xs font-bold px-2 py-1 rounded-full bg-gradient-to-r ${val.color} text-white mb-2`}>
+              <Trophy className="w-3 h-3" />
+              {val.tier}
+            </div>
+            <p className="text-xs text-muted-foreground">{val.campaigns.length} ready ads</p>
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-4" data-testid="promo-snippets-list">
+        <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+          Ready-to-Post: {tierData.tier}
+        </h3>
+        {tierData.campaigns.map((campaign, idx) => (
+          <Card key={idx} className={`border-l-4 ${promoTierColor(tierData.tier)}`} data-testid={`card-promo-${idx}`}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="outline" className="text-xs">{campaign.type}</Badge>
+                  <Badge className="text-xs bg-muted text-muted-foreground border border-border">{campaign.platform}</Badge>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1.5 h-7 text-xs"
+                  onClick={() => copySnippet(campaign.copy, idx)}
+                  data-testid={`button-copy-promo-${idx}`}
+                >
+                  {copiedIdx === idx ? (
+                    <><Check className="w-3 h-3 text-green-500" />Copied!</>
+                  ) : (
+                    <><Copy className="w-3 h-3" />Copy</>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <pre className="text-xs whitespace-pre-wrap text-muted-foreground bg-muted/40 rounded-lg p-3 border leading-relaxed" data-testid={`text-promo-copy-${idx}`}>
+                {campaign.copy}
+              </pre>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Separator />
+
+      <div className="space-y-4">
+        <h3 className="font-semibold flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-primary" />
+          AI Tier Ad Generator
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Generate custom ads targeting a specific tier. Outputs 3 ready-to-post versions: X/Twitter, Instagram, and Email/SMS.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-xs mb-1.5 block">Target Tier</Label>
+            <Select value={aiTier} onValueChange={setAiTier}>
+              <SelectTrigger data-testid="select-ai-tier">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all_members">All Paid Members</SelectItem>
+                <SelectItem value="sharp_tier">Sharp ($49/mo)</SelectItem>
+                <SelectItem value="edge_tier">Edge ($99/mo)</SelectItem>
+                <SelectItem value="max_tier">Max ($249/mo)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label className="text-xs mb-1.5 block">Campaign Type</Label>
+            <Select value={aiCampaignType} onValueChange={setAiCampaignType}>
+              <SelectTrigger data-testid="select-ai-campaign-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="upgrade_promo">Upgrade Promo</SelectItem>
+                <SelectItem value="retention">Retention / Re-engage</SelectItem>
+                <SelectItem value="win_showcase">Win Showcase</SelectItem>
+                <SelectItem value="fomo">FOMO / Urgency</SelectItem>
+                <SelectItem value="exclusivity">Exclusivity / Prestige</SelectItem>
+                <SelectItem value="awareness">Awareness</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        <Button
+          onClick={() => generateTierAd.mutate()}
+          disabled={generateTierAd.isPending}
+          className="w-full gap-2"
+          data-testid="button-generate-tier-ad"
+        >
+          {generateTierAd.isPending ? (
+            <><Loader2 className="w-4 h-4 animate-spin" />Generating 3-platform ad set...</>
+          ) : (
+            <><Rocket className="w-4 h-4" />Generate Tier Ad Set</>
+          )}
+        </Button>
+        {aiResult && (
+          <div className="space-y-3">
+            <ScrollArea className="h-[300px] rounded-lg border p-4 bg-muted/30">
+              <pre className="text-sm whitespace-pre-wrap" data-testid="text-ai-tier-ad-result">{aiResult}</pre>
+            </ScrollArea>
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              onClick={() => {
+                navigator.clipboard.writeText(aiResult);
+                setAiCopied(true);
+                setTimeout(() => setAiCopied(false), 2000);
+                toast({ title: "All 3 versions copied!" });
+              }}
+              data-testid="button-copy-ai-tier-ad"
+            >
+              {aiCopied ? <><Check className="w-4 h-4 text-green-500" />Copied!</> : <><Copy className="w-4 h-4" />Copy All Versions</>}
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AdminMarketing() {
   useSEO({ title: "Marketing Dashboard", description: "Marketing performance and campaign analytics" });
   return (
@@ -730,10 +1033,10 @@ export default function AdminMarketing() {
             <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-purple-600">
               <Megaphone className="w-6 h-6 text-white" />
             </div>
-            AI Marketing Tools
+            Marketing Command Center
           </h1>
           <p className="text-muted-foreground mt-1">
-            Marketing automation to drive growth
+            Generate, manage, and deploy exclusive member marketing — Sharp · Edge · Max
           </p>
         </div>
         <Badge className="bg-gradient-to-r from-pink-500 to-purple-600 text-white">
@@ -741,15 +1044,19 @@ export default function AdminMarketing() {
         </Badge>
       </div>
 
-      <Tabs defaultValue="generate" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="promo_ads" className="space-y-4">
+        <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="promo_ads" className="gap-2" data-testid="tab-promo-ads">
+            <Rocket className="w-4 h-4" />
+            Promo Ads
+          </TabsTrigger>
           <TabsTrigger value="generate" className="gap-2" data-testid="tab-generate">
             <Sparkles className="w-4 h-4" />
-            Content Generator
+            AI Generator
           </TabsTrigger>
           <TabsTrigger value="analytics" className="gap-2" data-testid="tab-analytics">
             <BarChart3 className="w-4 h-4" />
-            Growth Analytics
+            Growth
           </TabsTrigger>
           <TabsTrigger value="campaigns" className="gap-2" data-testid="tab-campaigns">
             <Megaphone className="w-4 h-4" />
@@ -764,6 +1071,10 @@ export default function AdminMarketing() {
             Audiences
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="promo_ads">
+          <PromoAdLibrary />
+        </TabsContent>
 
         <TabsContent value="generate">
           <ContentGenerator />

@@ -38,14 +38,30 @@ export function SSEProvider({ enabled, children }: SSEProviderProps) {
     switch (event.type) {
       case "intelligence-update":
         queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/data-freshness"] });
         break;
 
       case "live-scores":
         queryClient.invalidateQueries({ queryKey: ["/api/live/momentum"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/live-games"] });
         break;
 
       case "edge-alerts":
         queryClient.invalidateQueries({ queryKey: ["/api/intelligence/feed"] });
+        break;
+
+      case "picks-update":
+      case "predictions-ready":
+        queryClient.invalidateQueries({ queryKey: ["/api/predictions/straight-bets"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/predictions/sgp"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/predictions/teasers"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/picks/daily"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/picks"] });
+        break;
+
+      case "odds-update":
+        queryClient.invalidateQueries({ queryKey: ["/api/odds"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/odds/live"] });
         break;
 
       case "sharp-signal": {
