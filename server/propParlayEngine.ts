@@ -9,6 +9,79 @@ import {
 } from "./odds-provider";
 import { getInjuries } from "./espn-injury-provider";
 import { getVenueWeather } from "./weather-provider";
+import { db } from "./db";
+import { sql } from "drizzle-orm";
+
+// ── Prop Market Accuracy Cache ────────────────────────────────────────────────
+// Queries prop_track_records to learn which markets the engine is best at.
+// Results are cached for 15 minutes to avoid repeated DB hits during a session.
+interface MarketAccuracy {
+  market: string;
+  total: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  avgEdge: number;
+}
+let _marketAccuracyCache: MarketAccuracy[] = [];
+let _marketAccuracyCacheAt = 0;
+const ACCURACY_CACHE_TTL = 15 * 60 * 1000;
+
+export async function getMarketAccuracyStats(): Promise<MarketAccuracy[]> {
+  if (Date.now() - _marketAccuracyCacheAt < ACCURACY_CACHE_TTL && _marketAccuracyCache.length > 0) {
+    return _marketAccuracyCache;
+  }
+  try {
+    const rows = await db.execute(sql`
+      SELECT
+        market,
+        COUNT(*) AS total,
+        SUM(CASE WHEN outcome = 'won' THEN 1 ELSE 0 END) AS wins,
+        SUM(CASE WHEN outcome = 'lost' THEN 1 ELSE 0 END) AS losses,
+        AVG(CASE WHEN outcome != 'pending' THEN edge ELSE NULL END) AS avg_edge
+      FROM prop_track_records
+      WHERE outcome != 'pending'
+      GROUP BY market
+      HAVING COUNT(*) >= 5
+    `);
+    _marketAccuracyCache = (rows.rows as any[]).map(r => ({
+      market: r.market as string,
+      total: Number(r.total),
+      wins: Number(r.wins),
+      losses: Number(r.losses),
+      winRate: Number(r.wins) / Math.max(1, Number(r.wins) + Number(r.losses)),
+      avgEdge: Number(r.avg_edge) || 0,
+    }));
+    _marketAccuracyCacheAt = Date.now();
+  } catch (_e) {
+    _marketAccuracyCache = [];
+  }
+  return _marketAccuracyCache;
+}
+
+export async function savePropToTrackRecord(leg: AnalyzedPropLeg): Promise<number | null> {
+  if (leg.type !== "player_prop" || !leg.playerName) return null;
+  try {
+    const side = leg.selection.toLowerCase().startsWith("over") ? "over" : "under";
+    const result = await db.execute(sql`
+      INSERT INTO prop_track_records
+        (player_name, sport, market, market_label, line, selection, american_odds,
+         home_team, away_team, confidence_score, confidence_grade, edge,
+         model_probability, implied_probability, factors, bookmaker, data_source)
+      VALUES
+        (${leg.playerName}, ${leg.sport}, ${leg.market || "unknown"}, ${leg.marketLabel || leg.market || "unknown"},
+         ${leg.line ?? 0}, ${side}, ${leg.americanOdds},
+         ${leg.homeTeam}, ${leg.awayTeam}, ${leg.confidenceScore}, ${leg.confidenceGrade},
+         ${leg.edge}, ${leg.modelProbability}, ${leg.impliedProbability},
+         ${JSON.stringify(leg.factors || [])}, ${leg.bookmaker ?? null}, ${leg.dataSource})
+      ON CONFLICT DO NOTHING
+      RETURNING id
+    `);
+    return (result.rows[0] as any)?.id ?? null;
+  } catch (_e) {
+    return null;
+  }
+}
 
 export interface AnalyzedPropLeg {
   id: string;
@@ -121,7 +194,13 @@ function evRatingFromEdge(edge: number): "strong" | "moderate" | "weak" | "negat
   return "negative";
 }
 
-function analyzePropLeg(prop: RealPlayerProp, side: "over" | "under", injuredPlayers: Map<string, string>, weatherImpacts: Map<string, string>): AnalyzedPropLeg {
+function analyzePropLeg(
+  prop: RealPlayerProp,
+  side: "over" | "under",
+  injuredPlayers: Map<string, string>,
+  weatherImpacts: Map<string, string>,
+  marketAccuracy: MarketAccuracy[] = [],
+): AnalyzedPropLeg {
   const odds = side === "over" ? prop.overOdds : prop.underOdds;
   const decimal = side === "over" ? prop.overDecimal : prop.underDecimal;
   const impliedProb = 1 / decimal;
@@ -142,6 +221,7 @@ function analyzePropLeg(prop: RealPlayerProp, side: "over" | "under", injuredPla
     factors.push({ name: "Market Depth", impact: bookCount * 2, detail: `${bookCount} bookmakers offering this line` });
   }
 
+  // ── Vig analysis ──────────────────────────────────────────────────────────
   const overJuice = prop.overImpliedProb;
   const underJuice = prop.underImpliedProb;
   const totalJuice = overJuice + underJuice;
@@ -160,6 +240,59 @@ function analyzePropLeg(prop: RealPlayerProp, side: "over" | "under", injuredPla
     factors.push({ name: "Vig-Adjusted Edge", impact: adjustment * 100, detail: `True probability ${(sideProb * 100).toFixed(1)}% vs implied ${(impliedProb * 100).toFixed(1)}%` });
   }
 
+  // ── Public Over-bias correction (Under value detection) ────────────────────
+  // The public overwhelmingly bets Overs on player props — books shade lines up.
+  // When the Over is carrying most of the juice, the Under has structural value.
+  if (side === "under") {
+    const overHeavy = normalizedOver > 0.53; // books are loaded on the Over
+    if (overHeavy) {
+      const correction = (normalizedOver - 0.53) * 0.5;
+      modelProb += correction;
+      factors.push({
+        name: "Public Bias Correction",
+        impact: correction * 100,
+        detail: `Over side carries ${(normalizedOver * 100).toFixed(0)}% of market weight — Under has structural value`,
+      });
+    }
+  }
+
+  // ── Sharp signal: bookmaker odds dispersion ───────────────────────────────
+  // Large variance across bookmakers signals sharp line movement.
+  if (bookCount >= 3) {
+    const allUnderOdds = prop.allBookmakers
+      .map(b => b.underOdds)
+      .filter((o): o is number => typeof o === "number" && !isNaN(o));
+    const allOverOdds = prop.allBookmakers
+      .map(b => b.overOdds)
+      .filter((o): o is number => typeof o === "number" && !isNaN(o));
+    const targetOdds = side === "under" ? allUnderOdds : allOverOdds;
+
+    if (targetOdds.length >= 3) {
+      const max = Math.max(...targetOdds);
+      const min = Math.min(...targetOdds);
+      const dispersion = Math.abs(max - min);
+      if (dispersion >= 20) {
+        factors.push({
+          name: "Sharp Line Movement",
+          impact: 4,
+          detail: `${bookCount} books show ${dispersion}-cent spread on this side — sharp activity detected`,
+        });
+        modelProb += 0.015;
+      }
+    }
+
+    // If the best Under odds beat the best Over odds (unusual) → sharp Under money
+    if (side === "under" && prop.bestUnder.odds > prop.bestOver.odds) {
+      factors.push({
+        name: "Reverse Book Pricing",
+        impact: 6,
+        detail: `Under (${prop.bestUnder.odds > 0 ? "+" : ""}${prop.bestUnder.odds}) priced better than Over — sharp Under signal`,
+      });
+      modelProb += 0.02;
+    }
+  }
+
+  // ── Injury impact ─────────────────────────────────────────────────────────
   const injuryKey = prop.playerName.toLowerCase();
   let injuryImpact: string | undefined;
   const injuredNames = Array.from(injuredPlayers.keys());
@@ -173,6 +306,7 @@ function analyzePropLeg(prop: RealPlayerProp, side: "over" | "under", injuredPla
     }
   }
 
+  // ── Weather impact (outdoor sports) ──────────────────────────────────────
   const teamKey = `${prop.homeTeam}|${prop.awayTeam}`;
   const weather = weatherImpacts.get(teamKey);
   let weatherImpactStr: string | undefined;
@@ -186,6 +320,22 @@ function analyzePropLeg(prop: RealPlayerProp, side: "over" | "under", injuredPla
           factors.push({ name: "Weather", impact: -5, detail: `${weather} — affects passing/receiving` });
         }
       }
+    }
+  }
+
+  // ── Historical model accuracy feedback ───────────────────────────────────
+  // If this engine has track record data on this market, adjust confidence accordingly.
+  const mktAccuracy = marketAccuracy.find(m => m.market === prop.market);
+  if (mktAccuracy && mktAccuracy.total >= 10) {
+    const winRateDrift = mktAccuracy.winRate - 0.52; // 52% is breakeven at -110
+    if (Math.abs(winRateDrift) > 0.05) {
+      const feedback = winRateDrift * 0.15;
+      modelProb = Math.min(0.95, Math.max(0.05, modelProb + feedback));
+      factors.push({
+        name: "Historical Accuracy",
+        impact: Math.round(winRateDrift * 100),
+        detail: `Model is ${(mktAccuracy.winRate * 100).toFixed(0)}% on ${mktAccuracy.total} settled ${prop.marketLabel || prop.market} props — confidence adjusted`,
+      });
     }
   }
 
@@ -388,6 +538,9 @@ export async function generatePropParlays(request: ParlayRequest): Promise<Parla
   const injuredPlayers = new Map<string, string>();
   const weatherImpacts = new Map<string, string>();
 
+  // Load historical market accuracy for learning-based confidence adjustment
+  const marketAccuracy = await getMarketAccuracyStats();
+
   for (const sport of sports) {
     try {
       const injuryReports = await getInjuries(sport.toUpperCase());
@@ -404,8 +557,8 @@ export async function generatePropParlays(request: ParlayRequest): Promise<Parla
       try {
         const realProps = await fetchRealPlayerProps(sport, 5);
         for (const prop of realProps) {
-          const overLeg = analyzePropLeg(prop, "over", injuredPlayers, weatherImpacts);
-          const underLeg = analyzePropLeg(prop, "under", injuredPlayers, weatherImpacts);
+          const overLeg = analyzePropLeg(prop, "over", injuredPlayers, weatherImpacts, marketAccuracy);
+          const underLeg = analyzePropLeg(prop, "under", injuredPlayers, weatherImpacts, marketAccuracy);
           allLegs.push(overLeg, underLeg);
         }
       } catch (e) {
@@ -588,6 +741,8 @@ export async function getAvailableLegs(sport: string): Promise<{
   const injuredPlayers = new Map<string, string>();
   const weatherImpacts = new Map<string, string>();
 
+  const marketAccuracy = await getMarketAccuracyStats();
+
   try {
     const injuryReports = await getInjuries(sport.toUpperCase());
     if (injuryReports && Array.isArray(injuryReports)) {
@@ -607,8 +762,8 @@ export async function getAvailableLegs(sport: string): Promise<{
   try {
     const realProps = await fetchRealPlayerProps(sport, 5);
     for (const prop of realProps) {
-      props.push(analyzePropLeg(prop, "over", injuredPlayers, weatherImpacts));
-      props.push(analyzePropLeg(prop, "under", injuredPlayers, weatherImpacts));
+      props.push(analyzePropLeg(prop, "over", injuredPlayers, weatherImpacts, marketAccuracy));
+      props.push(analyzePropLeg(prop, "under", injuredPlayers, weatherImpacts, marketAccuracy));
     }
   } catch (e) {}
 

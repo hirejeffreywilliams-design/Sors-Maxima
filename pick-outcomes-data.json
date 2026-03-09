@@ -1183,6 +1183,38 @@
       "ev": 46.43,
       "gameTime": "2026-03-10T22:00Z",
       "savedAt": "2026-03-09T17:27:19.979Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851716-spread-3e750eb332",
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "game": "Alcorn State Braves @ Prairie View A&M Panthers",
+      "homeTeam": "Prairie View A&M Panthers",
+      "awayTeam": "Alcorn State Braves",
+      "pick": "Prairie View A&M Panthers +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 79,
+      "ev": 26,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-09T20:21:17.708Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851716-total-4a50cc6513",
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "game": "Alcorn State Braves @ Prairie View A&M Panthers",
+      "homeTeam": "Prairie View A&M Panthers",
+      "awayTeam": "Alcorn State Braves",
+      "pick": "Over 136.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 61,
+      "ev": 26,
+      "gameTime": "2026-03-10T18:00Z",
+      "savedAt": "2026-03-09T20:21:17.708Z"
     }
   ],
   "settled": [
@@ -13247,7 +13279,7 @@
       "lost": 273,
       "push": 12,
       "rate": 51.4,
-      "pending": 74
+      "pending": 76
     },
     "bySport": {
       "NBA": {
@@ -13350,7 +13382,7 @@
       "push": 0,
       "rate": 48
     },
-    "lastUpdated": "2026-03-09T20:09:12.153Z",
+    "lastUpdated": "2026-03-09T20:22:16.445Z",
     "roi": 3.6,
     "brierScore": 0.2618,
     "maxDrawdown": 15.4,

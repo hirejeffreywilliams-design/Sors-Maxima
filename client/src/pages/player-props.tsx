@@ -6,19 +6,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSEO } from "@/hooks/use-seo";
 import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
   Zap, Star, Target, Shield, Search, X, SlidersHorizontal,
-  Minus, Plus, RotateCcw,
+  Minus, Plus, RotateCcw, BarChart3, Trophy, BookOpen,
 } from "lucide-react";
 
 interface MarketProp {
@@ -1132,6 +1138,180 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
   );
 }
 
+// ── Prop Track Record Section ─────────────────────────────────────────────────
+interface PropTrackStats {
+  overall: {
+    total: number; wins: number; losses: number; pushes: number;
+    pending: number; settled: number; winRate: number | null;
+    avgEdge: number; avgConfidence: number;
+  };
+  byMarket: { market: string; market_label: string; total: string; wins: string; losses: string; avg_confidence: string; avg_edge: string }[];
+  bySport: { sport: string; total: string; wins: string; losses: string }[];
+  byGrade: { grade: string; total: string; wins: string; losses: string }[];
+}
+
+function PropTrackRecord() {
+  const [open, setOpen] = useState(false);
+
+  const { data: stats, isLoading } = useQuery<PropTrackStats>({
+    queryKey: ["/api/prop-track-record/stats"],
+    enabled: open,
+    refetchInterval: open ? 60000 : false,
+  });
+
+  const { data: recentData } = useQuery<{ picks: any[]; total: number }>({
+    queryKey: ["/api/prop-track-record"],
+    enabled: open,
+    refetchInterval: open ? 60000 : false,
+  });
+
+  const outcomeColor = (outcome: string) => {
+    if (outcome === "won") return "text-green-500 bg-green-500/10 border-green-500/30";
+    if (outcome === "lost") return "text-red-500 bg-red-500/10 border-red-500/30";
+    if (outcome === "push") return "text-amber-500 bg-amber-500/10 border-amber-500/30";
+    return "text-muted-foreground bg-muted/40";
+  };
+
+  const winRatePct = stats?.overall?.winRate != null
+    ? `${(stats.overall.winRate * 100).toFixed(1)}%`
+    : "—";
+
+  return (
+    <div data-testid="section-prop-track-record">
+      <Separator />
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button
+            className="w-full flex items-center gap-3 py-4 text-left"
+            data-testid="button-toggle-track-record"
+          >
+            <div className="p-1.5 rounded-lg bg-primary/10">
+              <Trophy className="w-4 h-4 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Prop Intelligence Track Record</p>
+              <p className="text-xs text-muted-foreground">
+                Live record of every model-recommended prop pick — learning in real time
+              </p>
+            </div>
+            {stats?.overall?.settled != null && stats.overall.settled > 0 && (
+              <Badge variant="outline" className="text-xs shrink-0">
+                {winRatePct} on {stats.overall.settled} settled
+              </Badge>
+            )}
+            {open ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+          </button>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent className="space-y-4 pb-4">
+          {isLoading && (
+            <div className="space-y-2">
+              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-40 rounded-xl" />
+            </div>
+          )}
+
+          {stats && (
+            <>
+              {/* Overall Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="track-record-overall">
+                {[
+                  { label: "Win Rate", value: winRatePct, sub: `${stats.overall.settled} settled` },
+                  { label: "Record", value: `${stats.overall.wins}–${stats.overall.losses}`, sub: `${stats.overall.pushes} push` },
+                  { label: "Avg Confidence", value: stats.overall.avgConfidence > 0 ? `${Math.round(stats.overall.avgConfidence)}%` : "—", sub: "model score" },
+                  { label: "Pending", value: stats.overall.pending.toString(), sub: "awaiting results" },
+                ].map(({ label, value, sub }) => (
+                  <div key={label} className="rounded-xl border bg-card p-3 text-center" data-testid={`track-stat-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <p className="text-lg font-bold">{value}</p>
+                    <p className="text-[10px] text-muted-foreground">{sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Learning notice */}
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-start gap-2.5">
+                <BookOpen className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <span className="text-foreground font-medium">Self-improving system:</span> As picks are settled, the model automatically adjusts its confidence for each market type. Markets where it's historically accurate receive higher confidence boosts. Markets where it underperforms are down-weighted — so every settled pick makes future recommendations smarter.
+                </p>
+              </div>
+
+              {/* Per-market breakdown */}
+              {stats.byMarket.length > 0 && (
+                <div className="space-y-2" data-testid="track-record-by-market">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Performance by Market</p>
+                  <div className="space-y-1.5">
+                    {stats.byMarket.map(m => {
+                      const wins = Number(m.wins);
+                      const losses = Number(m.losses);
+                      const total = wins + losses;
+                      const rate = total > 0 ? wins / total : 0;
+                      return (
+                        <div key={m.market} className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2" data-testid={`market-row-${m.market}`}>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{m.market_label || m.market}</p>
+                            <p className="text-[10px] text-muted-foreground">{total} settled</p>
+                          </div>
+                          <div className="text-xs font-bold">
+                            {wins}–{losses}
+                          </div>
+                          <div className={`text-xs font-bold w-14 text-right ${rate >= 0.55 ? "text-green-500" : rate >= 0.50 ? "text-amber-500" : "text-red-500"}`}>
+                            {total > 0 ? `${(rate * 100).toFixed(0)}%` : "—"}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent picks */}
+              {recentData && recentData.picks.length > 0 && (
+                <div className="space-y-2" data-testid="track-record-recent">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent Picks ({recentData.total} total)</p>
+                  <div className="space-y-1.5">
+                    {recentData.picks.slice(0, 10).map((pick: any) => (
+                      <div key={pick.id} className="flex items-start gap-2.5 rounded-lg border bg-card px-3 py-2" data-testid={`pick-row-${pick.id}`}>
+                        <div className="flex-1 min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <p className="text-xs font-semibold truncate">{pick.player_name}</p>
+                            <Badge variant="outline" className="text-[9px] px-1 py-0">{pick.sport}</Badge>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">
+                            {pick.selection === "under" ? "Under" : "Over"} {pick.line} {pick.market_label}
+                            {pick.actual_result != null && (
+                              <span className="ml-1 font-medium">→ Actual: {pick.actual_result}</span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="shrink-0 flex items-center gap-1.5">
+                          <span className="text-xs text-muted-foreground">{pick.confidence_grade}</span>
+                          <Badge className={`text-[9px] px-1.5 py-0 border ${outcomeColor(pick.outcome)}`}>
+                            {pick.outcome}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {stats.overall.total === 0 && (
+                <div className="text-center py-6 text-muted-foreground">
+                  <BarChart3 className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No picks recorded yet.</p>
+                  <p className="text-xs mt-1">Picks are automatically saved as the model generates prop recommendations.</p>
+                </div>
+              )}
+            </>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
+  );
+}
+
 export default function PlayerPropsPage() {
   useSEO({ title: "Player Props — Over/Under", description: "Real-time player prop over/under picks powered by Sors Intelligence" });
   const [selectedSport, setSelectedSport] = useState("NBA");
@@ -1356,6 +1536,8 @@ export default function PlayerPropsPage() {
             )}
           </>
         )}
+
+        <PropTrackRecord />
       </div>
     </div>
   );

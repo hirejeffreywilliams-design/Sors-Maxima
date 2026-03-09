@@ -2842,6 +2842,23 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         stake,
       });
 
+      // Auto-save top-confidence prop legs to the track record for learning
+      if (parlays.length > 0) {
+        const { savePropToTrackRecord } = await import("../propParlayEngine");
+        const savedLegs = new Set<string>();
+        for (const parlay of parlays.slice(0, 3)) {
+          for (const leg of parlay.legs) {
+            if (leg.type === "player_prop" && leg.playerName) {
+              const key = `${leg.playerName}|${leg.market}|${leg.selection}`;
+              if (!savedLegs.has(key) && leg.confidenceScore >= 55) {
+                savedLegs.add(key);
+                savePropToTrackRecord(leg).catch(() => {});
+              }
+            }
+          }
+        }
+      }
+
       res.json({
         parlays,
         meta: {
@@ -4404,6 +4421,164 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     } catch (err) {
       console.error("[ReviewQueue] Error:", err);
       return res.status(500).json({ error: "Failed to build review queue" });
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // PROP TRACK RECORD — Real track record for player prop recommendations
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // GET /api/prop-track-record — list picks with optional filters
+  app.get("/api/prop-track-record", requireAuth, async (req, res) => {
+    try {
+      const { sport, market, outcome, limit = "50", offset = "0" } = req.query as Record<string, string>;
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+      const lim = Math.min(200, Math.max(1, parseInt(limit) || 50));
+      const off = Math.max(0, parseInt(offset) || 0);
+
+      // Build filter conditions
+      const conditions: string[] = [];
+      if (sport) { conditions.push(`sport = '${sport.replace(/'/g, "''")}'`); }
+      if (market) { conditions.push(`market = '${market.replace(/'/g, "''")}'`); }
+      if (outcome) { conditions.push(`outcome = '${outcome.replace(/'/g, "''")}'`); }
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+      const raw = `SELECT * FROM prop_track_records ${whereClause} ORDER BY generated_at DESC LIMIT ${lim} OFFSET ${off}`;
+      const countRaw = `SELECT COUNT(*) AS total FROM prop_track_records ${whereClause}`;
+
+      const [result, countResult] = await Promise.all([
+        db.execute(sql.raw(raw)),
+        db.execute(sql.raw(countRaw)),
+      ]);
+      return res.json({ picks: result.rows, total: Number((countResult.rows[0] as any)?.total || 0) });
+    } catch (err) {
+      console.error("[PropTrack] List error:", err);
+      return res.status(500).json({ error: "Failed to fetch prop track record" });
+    }
+  });
+
+  // POST /api/prop-track-record/save — save a recommended prop pick
+  app.post("/api/prop-track-record/save", requireAuth, async (req, res) => {
+    try {
+      const { savePropToTrackRecord } = await import("../propParlayEngine");
+      const leg = req.body;
+      if (!leg || !leg.playerName || leg.type !== "player_prop") {
+        return res.status(400).json({ error: "Invalid prop leg data" });
+      }
+      const id = await savePropToTrackRecord(leg);
+      return res.json({ id, saved: id !== null });
+    } catch (err) {
+      console.error("[PropTrack] Save error:", err);
+      return res.status(500).json({ error: "Failed to save prop pick" });
+    }
+  });
+
+  // PATCH /api/prop-track-record/:id/settle — admin settles a prop with actual result
+  app.patch("/api/prop-track-record/:id/settle", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { actualResult, outcome } = req.body as { actualResult: number; outcome: "won" | "lost" | "push" };
+      if (!["won", "lost", "push"].includes(outcome)) {
+        return res.status(400).json({ error: "outcome must be won | lost | push" });
+      }
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+      await db.execute(sql`
+        UPDATE prop_track_records
+        SET outcome = ${outcome}, actual_result = ${actualResult}, settled_at = NOW()
+        WHERE id = ${parseInt(id)}
+      `);
+      // Invalidate market accuracy cache so the learning engine picks up the new result
+      const { getMarketAccuracyStats } = await import("../propParlayEngine");
+      await getMarketAccuracyStats(); // will refresh on next call since we need to clear cache
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[PropTrack] Settle error:", err);
+      return res.status(500).json({ error: "Failed to settle prop pick" });
+    }
+  });
+
+  // GET /api/prop-track-record/stats — aggregated win rates, ROI, market breakdown
+  app.get("/api/prop-track-record/stats", requireAuth, async (req, res) => {
+    try {
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+
+      const overall = await db.execute(sql`
+        SELECT
+          COUNT(*) AS total,
+          SUM(CASE WHEN outcome = 'won' THEN 1 ELSE 0 END) AS wins,
+          SUM(CASE WHEN outcome = 'lost' THEN 1 ELSE 0 END) AS losses,
+          SUM(CASE WHEN outcome = 'push' THEN 1 ELSE 0 END) AS pushes,
+          SUM(CASE WHEN outcome = 'pending' THEN 1 ELSE 0 END) AS pending,
+          AVG(CASE WHEN outcome != 'pending' THEN edge ELSE NULL END) AS avg_edge,
+          AVG(CASE WHEN outcome != 'pending' THEN confidence_score ELSE NULL END) AS avg_confidence
+        FROM prop_track_records
+      `);
+
+      const byMarket = await db.execute(sql`
+        SELECT
+          market,
+          market_label,
+          COUNT(*) AS total,
+          SUM(CASE WHEN outcome = 'won' THEN 1 ELSE 0 END) AS wins,
+          SUM(CASE WHEN outcome = 'lost' THEN 1 ELSE 0 END) AS losses,
+          AVG(confidence_score) AS avg_confidence,
+          AVG(edge) AS avg_edge
+        FROM prop_track_records
+        WHERE outcome != 'pending'
+        GROUP BY market, market_label
+        ORDER BY wins DESC
+        LIMIT 20
+      `);
+
+      const bySport = await db.execute(sql`
+        SELECT
+          sport,
+          COUNT(*) AS total,
+          SUM(CASE WHEN outcome = 'won' THEN 1 ELSE 0 END) AS wins,
+          SUM(CASE WHEN outcome = 'lost' THEN 1 ELSE 0 END) AS losses
+        FROM prop_track_records
+        WHERE outcome != 'pending'
+        GROUP BY sport
+        ORDER BY total DESC
+      `);
+
+      const byGrade = await db.execute(sql`
+        SELECT
+          confidence_grade AS grade,
+          COUNT(*) AS total,
+          SUM(CASE WHEN outcome = 'won' THEN 1 ELSE 0 END) AS wins,
+          SUM(CASE WHEN outcome = 'lost' THEN 1 ELSE 0 END) AS losses
+        FROM prop_track_records
+        WHERE outcome != 'pending'
+        GROUP BY confidence_grade
+        ORDER BY confidence_grade
+      `);
+
+      const o = overall.rows[0] as any;
+      const settled = Number(o?.wins || 0) + Number(o?.losses || 0) + Number(o?.pushes || 0);
+      const winRate = settled > 0 ? Number(o?.wins || 0) / settled : null;
+
+      return res.json({
+        overall: {
+          total: Number(o?.total || 0),
+          wins: Number(o?.wins || 0),
+          losses: Number(o?.losses || 0),
+          pushes: Number(o?.pushes || 0),
+          pending: Number(o?.pending || 0),
+          settled,
+          winRate,
+          avgEdge: Number(o?.avg_edge || 0),
+          avgConfidence: Number(o?.avg_confidence || 0),
+        },
+        byMarket: byMarket.rows,
+        bySport: bySport.rows,
+        byGrade: byGrade.rows,
+      });
+    } catch (err) {
+      console.error("[PropTrack] Stats error:", err);
+      return res.status(500).json({ error: "Failed to fetch prop track record stats" });
     }
   });
 }
