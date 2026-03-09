@@ -556,7 +556,7 @@ function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onR
               <Icon className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
               <span className="text-[10px] text-muted-foreground capitalize">{(leg.market || "").replace(/_/g, " ")}</span>
             </div>
-            <p className="text-xs font-semibold mt-0.5 leading-tight truncate" data-testid={`slip-outcome-${leg.id}`}>{leg.outcome}</p>
+            <p className="text-xs font-semibold mt-0.5 leading-tight line-clamp-2" data-testid={`slip-outcome-${leg.id}`}>{leg.outcome}</p>
             <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
               <span className="truncate">{leg.team}{leg.opponent ? ` vs ${leg.opponent}` : ""}</span>
             </div>
@@ -640,16 +640,15 @@ function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onR
           </div>
         )}
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-6 w-6 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors shrink-0"
+      <button
+        className="h-8 w-8 rounded-md flex items-center justify-center text-red-400/70 hover:text-red-500 hover:bg-red-500/10 active:bg-red-500/20 transition-colors shrink-0"
         onClick={onRemove}
         data-testid={`remove-leg-${leg.id}`}
-        title="Remove leg"
+        title="Remove from slip"
+        aria-label="Remove this bet from your slip"
       >
-        <X className="h-3.5 w-3.5" />
-      </Button>
+        <X className="h-4 w-4" />
+      </button>
     </div>
   );
 }

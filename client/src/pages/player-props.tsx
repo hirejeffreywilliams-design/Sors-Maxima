@@ -229,11 +229,12 @@ function matchStatToMarket(category: string, market: string): boolean {
   return false;
 }
 
-function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, currentStat, isReadOnly }: {
+function PropCard({ prop, playerName, sport, addLeg, removeLeg, overInSlip, underInSlip, currentStat, isReadOnly }: {
   prop: MarketProp;
   playerName: string;
   sport: string;
   addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
   overInSlip: boolean;
   underInSlip: boolean;
   currentStat?: { value: string; category: string } | null;
@@ -289,10 +290,16 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
       : "bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400";
 
   const handleAdd = (side: "over" | "under") => {
+    const legId = `prop-${playerName}-${prop.market}-${side}`.replace(/\s+/g, "-").toLowerCase();
+    const alreadyInSlip = side === "over" ? overInSlip : underInSlip;
+    if (alreadyInSlip) {
+      removeLeg(legId);
+      return;
+    }
     const odds = side === "over" ? prop.overOdds : prop.underOdds;
     const decOdds = odds < 0 ? 1 + 100 / Math.abs(odds) : 1 + odds / 100;
     addLeg({
-      id: `prop-${playerName}-${prop.market}-${side}`.replace(/\s+/g, "-").toLowerCase(),
+      id: legId,
       team: playerName,
       opponent: `${prop.marketLabel} ${effectiveLine}`,
       market: "player_prop" as any,
@@ -472,58 +479,64 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
         <div className="grid grid-cols-2 gap-2" role="group" aria-label={`${prop.marketLabel} over under selection`}>
           <button
             onClick={() => handleAdd("over")}
-            disabled={overInSlip}
-            aria-label={`${playerName} Over ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
-            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
-              isOver
-                ? "border-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20"
+            aria-label={overInSlip ? `Remove ${playerName} Over from slip` : `${playerName} Over ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all cursor-pointer active:scale-[0.98] ${
+              overInSlip
+                ? "border-emerald-500 bg-emerald-500/15 ring-2 ring-emerald-500/30"
                 : "border-border hover:border-emerald-500/40 hover:bg-emerald-500/5"
-            } ${overInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
+            }`}
             data-testid={`button-over-${playerName}-${prop.market}`}
           >
             <div className="flex items-center gap-1">
-              <ArrowUp className={`w-4 h-4 ${isOver ? "text-emerald-500" : "text-muted-foreground"}`} />
-              <span className={`text-sm font-bold ${isOver ? "text-emerald-500" : "text-foreground"}`}>OVER</span>
+              <ArrowUp className={`w-4 h-4 ${overInSlip ? "text-emerald-500" : "text-muted-foreground"}`} />
+              <span className={`text-sm font-bold ${overInSlip ? "text-emerald-500" : "text-foreground"}`}>OVER</span>
+              {isOver && !overInSlip && (
+                <span className="text-[8px] font-bold text-emerald-500/60 uppercase tracking-wide">REC</span>
+              )}
             </div>
-            <span className={`text-lg font-mono font-bold mt-0.5 ${isOver ? "text-emerald-500" : "text-foreground"}`}>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${overInSlip ? "text-emerald-500" : "text-foreground"}`}>
               {formatOdds(prop.overOdds)}
             </span>
-            {isOver && (
-              <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 mt-0.5">
+            {overInSlip ? (
+              <span className="text-[10px] font-medium text-emerald-500 mt-0.5 flex items-center gap-0.5">
+                <Check className="w-2.5 h-2.5" /> In Slip · tap to remove
+              </span>
+            ) : isOver ? (
+              <span className="text-[10px] font-medium text-emerald-600/60 dark:text-emerald-400/60 mt-0.5">
                 {isAdjusted ? `Grade ${adjustedGrade} · ${adjustedConf}%` : "Recommended"}
               </span>
-            )}
-            {overInSlip && (
-              <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
-            )}
+            ) : null}
           </button>
 
           <button
             onClick={() => handleAdd("under")}
-            disabled={underInSlip}
-            aria-label={`${playerName} Under ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
-            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all touch-target ${
-              isUnder
-                ? "border-red-500 bg-red-500/10 ring-1 ring-red-500/20"
+            aria-label={underInSlip ? `Remove ${playerName} Under from slip` : `${playerName} Under ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all cursor-pointer active:scale-[0.98] ${
+              underInSlip
+                ? "border-red-500 bg-red-500/15 ring-2 ring-red-500/30"
                 : "border-border hover:border-red-500/40 hover:bg-red-500/5"
-            } ${underInSlip ? "opacity-50 cursor-not-allowed" : "cursor-pointer active:scale-[0.98]"}`}
+            }`}
             data-testid={`button-under-${playerName}-${prop.market}`}
           >
             <div className="flex items-center gap-1">
-              <ArrowDown className={`w-4 h-4 ${isUnder ? "text-red-500" : "text-muted-foreground"}`} />
-              <span className={`text-sm font-bold ${isUnder ? "text-red-500" : "text-foreground"}`}>UNDER</span>
+              <ArrowDown className={`w-4 h-4 ${underInSlip ? "text-red-500" : "text-muted-foreground"}`} />
+              <span className={`text-sm font-bold ${underInSlip ? "text-red-500" : "text-foreground"}`}>UNDER</span>
+              {isUnder && !underInSlip && (
+                <span className="text-[8px] font-bold text-red-500/60 uppercase tracking-wide">REC</span>
+              )}
             </div>
-            <span className={`text-lg font-mono font-bold mt-0.5 ${isUnder ? "text-red-500" : "text-foreground"}`}>
+            <span className={`text-lg font-mono font-bold mt-0.5 ${underInSlip ? "text-red-500" : "text-foreground"}`}>
               {formatOdds(prop.underOdds)}
             </span>
-            {isUnder && (
-              <span className="text-[10px] font-medium text-red-600 dark:text-red-400 mt-0.5">
+            {underInSlip ? (
+              <span className="text-[10px] font-medium text-red-500 mt-0.5 flex items-center gap-0.5">
+                <Check className="w-2.5 h-2.5" /> In Slip · tap to remove
+              </span>
+            ) : isUnder ? (
+              <span className="text-[10px] font-medium text-red-600/60 dark:text-red-400/60 mt-0.5">
                 {isAdjusted ? `Grade ${adjustedGrade} · ${adjustedConf}%` : "Recommended"}
               </span>
-            )}
-            {underInSlip && (
-              <span className="text-[10px] font-medium text-primary mt-0.5">In Slip</span>
-            )}
+            ) : null}
           </button>
         </div>
       )}
@@ -614,10 +627,11 @@ function PropCard({ prop, playerName, sport, addLeg, overInSlip, underInSlip, cu
   );
 }
 
-function PlayerSection({ player, sport, addLeg, slipLegIds, isLive, isReadOnly }: {
+function PlayerSection({ player, sport, addLeg, removeLeg, slipLegIds, isLive, isReadOnly }: {
   player: GamePlayer;
   sport: string;
   addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
   slipLegIds: Set<string>;
   isLive?: boolean;
   isReadOnly?: boolean;
@@ -698,6 +712,7 @@ function PlayerSection({ player, sport, addLeg, slipLegIds, isLive, isReadOnly }
                 playerName={player.playerName}
                 sport={sport}
                 addLeg={addLeg}
+                removeLeg={removeLeg}
                 overInSlip={slipLegIds.has(overId)}
                 underInSlip={slipLegIds.has(underId)}
                 currentStat={matchedStat}
@@ -711,10 +726,11 @@ function PlayerSection({ player, sport, addLeg, slipLegIds, isLive, isReadOnly }
   );
 }
 
-function GameSection({ game, sport, addLeg, slipLegIds }: {
+function GameSection({ game, sport, addLeg, removeLeg, slipLegIds }: {
   game: GameData;
   sport: string;
   addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
   slipLegIds: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(true);
@@ -849,6 +865,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           player={player}
                           sport={sport}
                           addLeg={addLeg}
+                          removeLeg={removeLeg}
                           slipLegIds={slipLegIds}
                           isLive={isLive}
                           isReadOnly={isLive && game.isPreGameReference}
@@ -881,6 +898,7 @@ function GameSection({ game, sport, addLeg, slipLegIds }: {
                           player={player}
                           sport={sport}
                           addLeg={addLeg}
+                          removeLeg={removeLeg}
                           slipLegIds={slipLegIds}
                           isLive={isLive}
                           isReadOnly={isLive && game.isPreGameReference}
@@ -910,9 +928,10 @@ function gradeBg(grade: string): string {
   return "bg-muted/50 border-border";
 }
 
-function TopPickCard({ pick, addLeg, slipLegIds, sport }: {
+function TopPickCard({ pick, addLeg, removeLeg, slipLegIds, sport }: {
   pick: TopPick;
   addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
   slipLegIds: Set<string>;
   sport: string;
 }) {
@@ -924,7 +943,10 @@ function TopPickCard({ pick, addLeg, slipLegIds, sport }: {
   const inSlip = slipLegIds.has(legId);
 
   const handleAdd = () => {
-    if (inSlip) return;
+    if (inSlip) {
+      removeLeg(legId);
+      return;
+    }
     addLeg({
       id: legId,
       team: pick.playerName,
@@ -1059,9 +1081,10 @@ function TopPickCard({ pick, addLeg, slipLegIds, sport }: {
   );
 }
 
-function TopPicksHero({ sport, addLeg, slipLegIds }: {
+function TopPicksHero({ sport, addLeg, removeLeg, slipLegIds }: {
   sport: string;
   addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
   slipLegIds: Set<string>;
 }) {
   const { data, isLoading } = useQuery<TopPropsResponse>({
@@ -1122,6 +1145,7 @@ function TopPicksHero({ sport, addLeg, slipLegIds }: {
               key={`${pick.playerName}-${pick.market}`}
               pick={pick}
               addLeg={addLeg}
+              removeLeg={removeLeg}
               slipLegIds={slipLegIds}
               sport={sport}
             />
@@ -1317,7 +1341,7 @@ export default function PlayerPropsPage() {
   const [selectedSport, setSelectedSport] = useState("NBA");
   const [searchQuery, setSearchQuery] = useState("");
   const [marketFilter, setMarketFilter] = useState("All");
-  const { legs, addLeg } = useParlaySlip();
+  const { legs, addLeg, removeLeg } = useParlaySlip();
 
   const slipLegIds = new Set(legs.map(l => l.id));
 
@@ -1456,7 +1480,7 @@ export default function PlayerPropsPage() {
           )}
         </header>
 
-        <TopPicksHero sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
+        <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
 
         {isLoading && (
           <div className="space-y-4" data-testid="loading-skeleton">
@@ -1529,6 +1553,7 @@ export default function PlayerPropsPage() {
                     game={game}
                     sport={selectedSport}
                     addLeg={addLeg}
+                    removeLeg={removeLeg}
                     slipLegIds={slipLegIds}
                   />
                 ))}
