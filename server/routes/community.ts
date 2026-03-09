@@ -1133,8 +1133,32 @@ export function registerCommunityRoutes(app: Express): void {
     res.json({ success: true });
   });
 
-  app.get("/api/social/copy-bettors", async (_req, res) => {
+  app.get("/api/social/copy-bettors", async (req, res) => {
     const socialDataEngine = await socialDataEnginePromise;
-    res.json(socialDataEngine.getCopyBettors());
+    const sessionId = (req.session as any)?.username || "default";
+    res.json(socialDataEngine.getCopyBettors(sessionId));
+  });
+
+  app.post("/api/social/copy-bettors/:tipsterId/toggle", async (req, res) => {
+    const socialDataEngine = await socialDataEnginePromise;
+    const sessionId = (req.session as any)?.username || "default";
+    const copying = socialDataEngine.toggleCopyBettor(req.params.tipsterId, sessionId);
+    res.json({ copying, tipsterId: req.params.tipsterId });
+  });
+
+  app.post("/api/social/feed/post", async (req, res) => {
+    const socialDataEngine = await socialDataEnginePromise;
+    const { content } = req.body;
+    if (!content || typeof content !== "string") {
+      return res.status(400).json({ error: "Content is required" });
+    }
+    const username = (req.session as any)?.username || "Member";
+    const newItem = socialDataEngine.addFeedItem({
+      type: "tip_shared",
+      userId: username,
+      username,
+      message: content,
+    });
+    res.json(newItem);
   });
 }

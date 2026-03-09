@@ -231,13 +231,28 @@ export function joinCompetition(competitionId: string, username: string): boolea
   return true;
 }
 
-export function getCopyBettors(sessionId?: string): (SocialBettor & { recentPicks: { sport: string; selection: string; odds: number; result: string }[] })[] {
+export function getCopyBettors(sessionId?: string): (SocialBettor & { copying: boolean; recentPicks: { sport: string; selection: string; odds: number; result: string }[] })[] {
   ensureInitialData();
   const userId = sessionId || "default";
   const following = followedUsers.get(userId) || new Set();
   return socialBettors.slice(0, 5).map(b => ({
     ...b,
+    copying: following.has(b.id),
     isFollowing: following.has(b.id),
     recentPicks: [],
   }));
+}
+
+export function toggleCopyBettor(bettorId: string, sessionId?: string): boolean {
+  ensureInitialData();
+  const userId = sessionId || "default";
+  if (!followedUsers.has(userId)) followedUsers.set(userId, new Set());
+  const following = followedUsers.get(userId)!;
+  if (following.has(bettorId)) {
+    following.delete(bettorId);
+    return false;
+  } else {
+    following.add(bettorId);
+    return true;
+  }
 }

@@ -23,21 +23,21 @@ export function SocialFeed() {
   const [newPost, setNewPost] = useState("");
 
   const { data: posts = [], isLoading } = useQuery<FeedPost[]>({
-    queryKey: ["/api/social/feed"],
+    queryKey: ["/api/social-feed"],
   });
 
   const postMutation = useMutation({
-    mutationFn: (content: string) => apiRequest("POST", "/api/social/feed", { content }),
+    mutationFn: (content: string) => apiRequest("POST", "/api/social-feed", { content }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social-feed"] });
       setNewPost("");
     },
   });
 
   const likeMutation = useMutation({
-    mutationFn: (postId: string) => apiRequest("POST", `/api/social/feed/${postId}/like`),
+    mutationFn: (postId: string) => apiRequest("POST", `/api/social-feed/${postId}/like`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/social/feed"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/social-feed"] });
     },
   });
 

@@ -384,6 +384,7 @@ export default function ResearchNotes() {
                 onEdit={() => openEdit(note)}
                 onDelete={() => setDeleteNoteId(note.id)}
                 onPin={() => pinMutation.mutate({ id: note.id, pinned: !note.pinned })}
+                onTagClick={(tag) => setSearchQuery(tag)}
               />
             ))}
           </div>
@@ -404,6 +405,7 @@ export default function ResearchNotes() {
                 onEdit={() => openEdit(note)}
                 onDelete={() => setDeleteNoteId(note.id)}
                 onPin={() => pinMutation.mutate({ id: note.id, pinned: !note.pinned })}
+                onTagClick={(tag) => setSearchQuery(tag)}
               />
             ))}
           </div>
@@ -600,12 +602,13 @@ export default function ResearchNotes() {
 
 // ── Note Card Component ───────────────────────────────────────────────────────
 function NoteCard({
-  note, onEdit, onDelete, onPin
+  note, onEdit, onDelete, onPin, onTagClick
 }: {
   note: ResearchNote;
   onEdit: () => void;
   onDelete: () => void;
   onPin: () => void;
+  onTagClick: (tag: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const typeInfo = getNoteTypeInfo(note.note_type);
@@ -701,8 +704,8 @@ function NoteCard({
             {note.tags.map(tag => (
               <button
                 key={tag}
-                onClick={() => {}}
-                className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => onTagClick(tag)}
+                className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50 border border-border/30 text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
                 data-testid={`tag-${tag}`}
               >
                 #{tag}

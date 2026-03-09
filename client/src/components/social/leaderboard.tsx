@@ -42,6 +42,7 @@ function getRankIcon(rank: number) {
 
 export function Leaderboard() {
   const [timeframe, setTimeframe] = useState("weekly");
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   const { data: users = [], isLoading } = useQuery<LeaderboardUser[]>({
     queryKey: ["/api/social/leaderboard", timeframe],
@@ -140,10 +141,41 @@ export function Leaderboard() {
                       </p>
                     </div>
 
-                    <Button size="icon" variant="ghost" data-testid={`button-view-user-${user.id}`}>
-                      <ChevronRight className="w-4 h-4" />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
+                      data-testid={`button-view-user-${user.id}`}
+                    >
+                      <ChevronRight
+                        className="w-4 h-4 transition-transform"
+                        style={{ transform: expandedUserId === user.id ? "rotate(90deg)" : "rotate(0deg)" }}
+                      />
                     </Button>
                   </div>
+
+                  {expandedUserId === user.id && (
+                    <div className="hidden sm:grid grid-cols-4 gap-3 px-3 pb-3 text-center">
+                      <div className="rounded-md bg-muted/40 p-2">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Bets</p>
+                        <p className="text-sm font-bold">{user.totalBets}</p>
+                      </div>
+                      <div className="rounded-md bg-muted/40 p-2">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Win Rate</p>
+                        <p className="text-sm font-bold text-green-500">{user.winRate}%</p>
+                      </div>
+                      <div className="rounded-md bg-muted/40 p-2">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Win Streak</p>
+                        <p className="text-sm font-bold text-orange-500">{user.streak}</p>
+                      </div>
+                      <div className="rounded-md bg-muted/40 p-2">
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Net Profit</p>
+                        <p className={`text-sm font-bold ${user.profit >= 0 ? "text-green-500" : "text-red-500"}`}>
+                          {user.profit >= 0 ? "+" : ""}${user.profit}
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="sm:hidden p-3 space-y-2">
                     <div className="flex items-center gap-2.5">

@@ -5,11 +5,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  Share2, Twitter, Instagram, Copy, Check, Download, 
-  Trophy, Zap, TrendingUp, Atom, Info
+  Share2, Twitter, Copy, Check, Download, 
+  Trophy, Zap, Heart, Info
 } from "lucide-react";
 import { QuantumBadge } from "../quantum-analysis-badge";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface BetTicket {
   id: string;
@@ -19,10 +20,29 @@ interface BetTicket {
   actualPayout?: number;
   status: "pending" | "won" | "lost";
   createdAt: string;
+  likes?: number;
 }
 
 export function BetSharing() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const handleDownload = (ticket: BetTicket) => {
+    const lines = [
+      `🎟 Sors Maxima — Shared Ticket`,
+      `Status: ${ticket.status.toUpperCase()}`,
+      `Stake: $${ticket.stake} → To Win: $${ticket.potentialPayout.toFixed(0)}`,
+      ``,
+      ...ticket.legs.map((leg, i) => `${i + 1}. ${leg.pick} (${leg.odds})`),
+      ``,
+      `Shared via Sors Maxima — sors.app`,
+    ].join("\n");
+    navigator.clipboard.writeText(lines).then(() => {
+      toast({ title: "Copied to clipboard", description: "Ticket details ready to share." });
+    }).catch(() => {
+      toast({ title: "Copy failed", description: "Please try again.", variant: "destructive" });
+    });
+  };
 
   const { data: tickets = [], isLoading } = useQuery<BetTicket[]>({
     queryKey: ["/api/social/shared-tickets"],
@@ -138,13 +158,30 @@ export function BetSharing() {
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => likeMutation.mutate(ticket.id)}
+                      disabled={likeMutation.isPending}
+                      className="gap-1.5 text-pink-500 border-pink-500/30 hover:bg-pink-500/10"
+                      data-testid={`button-like-ticket-${ticket.id}`}
+                    >
+                      <Heart className="w-3.5 h-3.5" />
+                      <span className="text-xs font-bold">{ticket.likes ?? 0}</span>
+                    </Button>
                     <Button size="icon" variant="outline" onClick={() => handleCopy(ticket.id)} data-testid={`button-copy-${ticket.id}`}>
                       {copiedId === ticket.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </Button>
                     <Button size="icon" variant="outline" onClick={() => shareMutation.mutate(ticket.id)} data-testid={`button-share-twitter-${ticket.id}`}>
                       <Twitter className="w-4 h-4" />
                     </Button>
-                    <Button size="icon" variant="outline" data-testid={`button-download-${ticket.id}`}>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => handleDownload(ticket)}
+                      data-testid={`button-download-${ticket.id}`}
+                      title="Copy ticket to clipboard"
+                    >
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
