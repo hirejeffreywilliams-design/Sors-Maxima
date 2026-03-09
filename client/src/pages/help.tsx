@@ -970,6 +970,51 @@ export default function HelpCenter() {
         </Accordion>
       </div>
 
+      <Separator />
+
+      {/* ── Betting Glossary ── */}
+      <div className="space-y-4" id="glossary" data-testid="section-glossary">
+        <div className="flex items-center gap-2">
+          <BookOpen className="w-4 h-4 text-primary" />
+          <span className="text-sm font-semibold">Betting Glossary — Plain English</span>
+          <Badge variant="outline" className="text-[10px] ml-auto">New to betting? Start here</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Every term you'll see on Sors Maxima — explained in plain language. No jargon assumed.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { term: "Moneyline", def: "A straight-up bet on who wins the game. No point spread involved. A -150 moneyline means you bet $150 to win $100. A +130 means bet $100 to win $130." },
+            { term: "Spread (ATS)", def: "A bet where one team must win by a certain number of points. The favorite 'gives' points (e.g. -6.5) and the underdog 'gets' them (+6.5). ATS = Against The Spread." },
+            { term: "Over/Under (Totals)", def: "A bet on the combined score of both teams — whether the final total will be Over or Under a number set by the sportsbook." },
+            { term: "Parlay", def: "Combining 2 or more picks into a single bet. All legs must win for the bet to pay out, but the potential payout is much higher than betting each separately." },
+            { term: "SGP (Same Game Parlay)", def: "A parlay built from different bets within the same game — e.g. Team A wins + Player X scores. Higher risk due to correlations, but offered by all major books." },
+            { term: "Expected Value (EV)", def: "A measure of long-term value. Positive EV (+EV) means the true probability of winning is higher than what the odds imply. The foundation of professional betting." },
+            { term: "Closing Line Value (CLV)", def: "How your odds compare to the final line just before the game starts. Consistently beating the closing line is the strongest indicator of long-term profitability." },
+            { term: "Kelly Criterion", def: "A mathematical formula that calculates the optimal bet size based on your edge and bankroll. Sors uses a fractional Kelly (25%) to reduce variance." },
+            { term: "Vig / Juice", def: "The sportsbook's commission on every bet — typically around 10%. A -110 line means you must bet $110 to win $100. The extra $10 is the vig." },
+            { term: "Sharp Money", def: "Bets placed by professional or high-volume bettors who move the line. When sharp money is identified, it often signals the more informed side of a game." },
+            { term: "Line Movement", def: "The change in point spread or odds from open to close. Meaningful movement often indicates sharp action, injury news, or significant public money." },
+            { term: "Steam Move", def: "A rapid, coordinated line movement across multiple sportsbooks simultaneously — typically caused by sharp betting syndicates acting at the same time." },
+            { term: "Opening Line", def: "The initial odds posted by a sportsbook before public and sharp money moves them. Opening lines often have the most value before the market adjusts." },
+            { term: "Arbitrage (Arb)", def: "Betting opposite sides of the same game at different sportsbooks to guarantee a profit regardless of outcome by exploiting odds discrepancies between books." },
+            { term: "Grade (A+ to F)", def: "Sors Maxima's proprietary quality score for every pick and ticket. A+ and A grades represent the highest model confidence and positive expected value. Aim for B+ or higher." },
+            { term: "Bankroll", def: "The total amount of money you've set aside specifically for betting. Proper bankroll management — betting a consistent % — is the single most important factor in long-term sustainability." },
+            { term: "Unit", def: "A standardized bet size relative to your bankroll — typically 1–5% of your total bankroll. Using units (rather than dollar amounts) lets you track performance independently of bankroll size." },
+            { term: "Teaser", def: "A type of parlay where you move the point spread in your favor on 2+ games in exchange for lower odds. Most common in NFL and NBA (e.g. 6-point teaser)." },
+            { term: "ROI (Return on Investment)", def: "Your profit expressed as a percentage of total amount wagered. Profitable bettors typically aim for a 3–8% ROI over a large sample of bets." },
+            { term: "Reverse Line Movement (RLM)", def: "When the line moves opposite to the direction of public betting — i.e. the public is on Team A but the line moves toward Team B. Usually signals sharp or professional action." },
+          ].map(({ term, def }) => (
+            <div key={term} className="rounded-lg border bg-card p-3 space-y-1" data-testid={`glossary-term-${term.toLowerCase().replace(/[^a-z0-9]/g, "-")}`}>
+              <p className="text-xs font-bold text-foreground">{term}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{def}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="rounded-xl border bg-muted/30 p-4 text-center space-y-2">
         <Mail className="w-4 h-4 text-muted-foreground mx-auto" />
         <p className="text-xs font-semibold">Still need help?</p>

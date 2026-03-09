@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
-import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical, Target, Layers, ArrowUpDown, Shuffle, Loader2, Lock, Zap, BarChart3, Eye, DollarSign, Star, Shield, Link2, ArrowDown, Plus, Trash2, Calculator, AlertTriangle } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical, Target, Layers, ArrowUpDown, Shuffle, Loader2, Lock, Zap, BarChart3, Eye, DollarSign, Star, Shield, Link2, ArrowDown, Plus, Trash2, Calculator, AlertTriangle, BookOpen, X } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -119,37 +120,99 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
-          <div className="bg-muted/50 rounded-lg p-2">
-            <p className="text-xs text-muted-foreground">Confidence</p>
-            <p className="text-sm font-bold">{pick.confidence}%</p>
+        <TooltipProvider delayDuration={200}>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="bg-muted/50 rounded-lg p-2 cursor-help">
+                  <p className="text-xs text-muted-foreground">Confidence</p>
+                  <p className="text-sm font-bold">{pick.confidence}%</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                How confident the 46-Factor Model is in this pick. Above 65% is considered strong; above 75% is exceptional.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="bg-muted/50 rounded-lg p-2 cursor-help">
+                  <p className="text-xs text-muted-foreground">Edge</p>
+                  <p className={`text-sm font-bold ${pick.edge > 3 ? "text-green-500" : pick.edge > 0 ? "text-blue-500" : "text-red-500"}`}>{pick.edge}%</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                Expected value edge over the sportsbook's line. Positive means this bet has long-term value. Above +3% is excellent.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="bg-muted/50 rounded-lg p-2 cursor-help">
+                  <p className="text-xs text-muted-foreground">True Prob</p>
+                  <p className="text-sm font-bold">{pick.trueProbability}%</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                The model's estimated real probability of this outcome — after removing sportsbook vig from the implied odds.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="bg-muted/50 rounded-lg p-2 cursor-help">
+                  <p className="text-xs text-muted-foreground">Units</p>
+                  <p className="text-sm font-bold">{pick.unitRecommendation}u</p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                Kelly Criterion-derived stake recommendation. 1u typically equals 1–2% of your bankroll. Higher units = higher edge.
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <div className="bg-muted/50 rounded-lg p-2">
-            <p className="text-xs text-muted-foreground">Edge</p>
-            <p className={`text-sm font-bold ${pick.edge > 3 ? "text-green-500" : pick.edge > 0 ? "text-blue-500" : "text-red-500"}`}>{pick.edge}%</p>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-2">
-            <p className="text-xs text-muted-foreground">True Prob</p>
-            <p className="text-sm font-bold">{pick.trueProbability}%</p>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-2">
-            <p className="text-xs text-muted-foreground">Units</p>
-            <p className="text-sm font-bold">{pick.unitRecommendation}u</p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Eye className="w-3 h-3" />
-            <span>Sharp: {pick.sharpMoney}%</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-help">
+                  <Eye className="w-3 h-3" />
+                  <span>Sharp: {pick.sharpMoney}%</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                Percentage of sharp (professional) money wagered on this side. Above 60% signals professional consensus.
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1 text-xs text-muted-foreground cursor-help">
+                  <BarChart3 className="w-3 h-3" />
+                  <span>Models: {pick.modelAgreement}/5</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-xs">
+                How many of 5 independent prediction sub-models agree on this pick. 4/5 or 5/5 indicates strong multi-model consensus.
+              </TooltipContent>
+            </Tooltip>
+            {pick.steamMove && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge variant="destructive" className="text-xs cursor-help">Steam Move</Badge>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-xs">
+                  A rapid line movement across multiple sportsbooks simultaneously — signals coordinated sharp action.
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {pick.reverseLineMove && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Badge className="bg-amber-500 text-white text-xs cursor-help">RLM</Badge>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-xs">
+                  Reverse Line Movement — the line moved opposite to public betting, indicating sharp money is on this side.
+                </TooltipContent>
+              </Tooltip>
+            )}
           </div>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <BarChart3 className="w-3 h-3" />
-            <span>Models: {pick.modelAgreement}/5</span>
-          </div>
-          {pick.steamMove && <Badge variant="destructive" className="text-xs">Steam Move</Badge>}
-          {pick.reverseLineMove && <Badge className="bg-amber-500 text-white text-xs">RLM</Badge>}
-        </div>
+        </TooltipProvider>
 
         {expanded && (
           <div className="space-y-2 pt-2 border-t">
@@ -929,6 +992,50 @@ function RoundRobinContent() {
   );
 }
 
+function StartHereBanner() {
+  const [dismissed, setDismissed] = useState(() => {
+    try { return localStorage.getItem("startHereDismissed") === "true"; } catch { return false; }
+  });
+
+  const dismiss = () => {
+    setDismissed(true);
+    try { localStorage.setItem("startHereDismissed", "true"); } catch {}
+  };
+
+  if (dismissed) return null;
+
+  return (
+    <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex items-start gap-3" data-testid="banner-start-here">
+      <div className="p-2 rounded-lg bg-primary/10 shrink-0">
+        <BookOpen className="w-4 h-4 text-primary" />
+      </div>
+      <div className="flex-1 space-y-2 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <p className="text-sm font-semibold">New here? Start with the Beginner's Path</p>
+          <Badge variant="outline" className="text-[10px]">Recommended</Badge>
+        </div>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          The <span className="font-medium text-foreground">Beginner's Path</span> in the Help Center walks you through reading picks, understanding confidence scores, building your first parlay, and managing your bankroll — step by step.
+        </p>
+        <div className="flex items-center gap-2 flex-wrap pt-0.5">
+          <a href="/help">
+            <Button size="sm" className="text-xs h-7 gap-1.5" data-testid="banner-start-here-cta">
+              <BookOpen className="w-3 h-3" />
+              Open Beginner's Path
+            </Button>
+          </a>
+          <Button size="sm" variant="ghost" className="text-xs h-7 text-muted-foreground" onClick={dismiss} data-testid="banner-start-here-dismiss">
+            Got it, thanks
+          </Button>
+        </div>
+      </div>
+      <button onClick={dismiss} className="text-muted-foreground hover:text-foreground shrink-0 mt-0.5" data-testid="banner-start-here-close">
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </div>
+  );
+}
+
 export default function Dashboard() {
   useSEO({ title: "Bet Builder", description: "Build, analyze, and optimize your bets — parlays, straight bets, SGPs, teasers, and round robins" });
   const sse = useSSEContext();
@@ -1007,6 +1114,8 @@ export default function Dashboard() {
             </span>
           </div>
         </header>
+
+        <StartHereBanner />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">

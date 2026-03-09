@@ -93,7 +93,7 @@ interface GameResult {
 }
 
 export default function TrainingCenter() {
-  useSEO({ title: "Training Center", description: "Learn betting strategies and improve your skills" });
+  useSEO({ title: "Model Lab — Engine Analytics | Sors Maxima", description: "Backtesting, factor analysis, stress testing, and prediction engine performance analytics." });
   const [isTraining, setIsTraining] = useState(false);
   const [progress, setProgress] = useState(0);
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
@@ -250,8 +250,8 @@ export default function TrainingCenter() {
     <div className="container max-w-7xl mx-auto px-4 py-6 space-y-6">
       <PageHero
         icon={<GraduationCap className="w-6 h-6" />}
-        title="Algorithm Training Center"
-        subtitle="Advanced training, testing, and optimization for launch readiness"
+        title="Model Lab"
+        subtitle="Backtesting, factor analysis, stress testing, and prediction engine performance analytics"
         actions={
           <div className="flex items-center gap-3">
             <div className="text-right">

@@ -389,7 +389,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/pipeline":             { label: "Intelligence Pipeline",parent: "/tools" },
   "/admin/platform-intelligence":{ label: "Platform Intelligence",parent: "/admin" },
   "/correlation-matrix":   { label: "Correlation Matrix",  parent: "/tools" },
-  "/training":             { label: "Training Center",      parent: "/tools" },
+  "/training":             { label: "Model Lab",             parent: "/tools" },
   "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },
   "/strategy":             { label: "Strategy Advisor",     parent: "/" },
   "/onboarding":           { label: "Onboarding",           parent: "/" },
