@@ -1,0 +1,75 @@
+Understood — I’ve added a concise, ordered set of actions to the previous process that includes pre‑computing, priming, and off‑peak work so the app is warmed and ready before users or games start. Follow steps in order; stop after each if memory/latency are acceptable.
+
+Ordered process with pre-compute & warmup (apply now → short term)
+
+1) Define critical vs non‑critical (15–60 min)
+- Mark real‑time decision paths (must be exact/low‑latency).
+- Mark analytics, dashboards, model retrains as non‑critical/can be delayed or approximate.
+
+2) Telemetry & alerts (5–30 min)
+- Heap used/max, RSS, GC, processing lag, queue length, decision latency, precompute job health.
+- Alerts: ≥80% heap, decision latency spike, precompute failures.
+
+3) Immediate low‑risk memory limits (15–60 min)
+- Bounded queues, cache caps (LRU), reduced batch sizes.
+- Backpressure policy: block critical producers, drop/aggregate non‑critical.
+
+4) Isolate live decision service (15–60 min)
+- Separate process with reserved memory & tuned GC; only keep hot working set.
+
+5) Pre‑compute / Off‑peak jobs (design and schedule) (30–180 min)
+- Identify expensive tasks to precompute: feature windows, historical aggregates, full model snapshots, player/team stats, matchup indices.
+- Schedule jobs in off‑peak windows (e.g., overnight, or 2–6 hours before major games). Use cron, scheduler (Airflow/Kubernetes CronJobs), or cloud scheduled functions.
+- Use incremental compute where possible (delta updates) instead of full recompute.
+- Persist outputs to fast external store (RocksDB/Redis/S3 + index) so runtime just fetches ready results.
+
+6) Cache priming & warmup (15–60 min)
+- After precompute runs, run a warmup step to load hot keys into the live service’s cache:
+  - Either push hot entries to Redis or call an API endpoint that loads them into in‑process cache.
+  - For multiple instances, parallelize warmup with rate limits to avoid overload.
+- Implement cache versioning and atomic swap so warmup replaces old data without inconsistency.
+
+7) Spill large state & keep working set minimal (30–120 min)
+- Move long history to RocksDB/Redis/S3; load only recent N hours/days into memory.
+- Use memory-mapped files or fast local DB for very heavy lookups.
+
+8) Graded accuracy modes (30–180 min)
+- Live decisions: exact, pinned hot data from precompute.
+- Secondary analytics: approximate sketches or delayed recompute; mark as approximate.
+
+9) Backpressure & graceful degradation (30–90 min)
+- Token-bucket ingestion throttles when processing lag or memory high.
+- Degrade dashboards and non‑critical refresh rates first.
+
+10) Background workers & orchestration (30–120 min)
+- Move full model retrains and heavy joins to separate workers. Ensure they checkpoint outputs to persistent store used by runtime.
+- Stagger heavy jobs and throttle concurrency during warmup.
+
+11) Warm startup & rolling deploy (ongoing)
+- On deploy or scale‑out:
+  - Run precompute if needed (or ensure latest precompute exists).
+  - Run cache warmup, then mark instance ready.
+  - Use rolling deploys with feature flags; keep a portion of old instances until new ones warm.
+
+12) Runtime quick wins (15–60 min)
+- GC tuning for live service; reserved heap size, low‑pause collector.
+- Object reuse on hot paths if profiler indicates benefit.
+
+13) Monitor, iterate, and test (ongoing)
+- Add synthetic tests that simulate precompute + warmup + normal traffic to validate memory & latency.
+- Measure warmup time, cache hit rate after warmup, decision latency, memory usage.
+
+Practical implementation notes (short)
+- Schedule: run full precompute nightly; run targeted incremental precompute 2–6 hours before matches and a small final delta 10–30 minutes before kickoff.
+- Warmup flow: precompute → persist → warmup API call per instance → health check → route traffic.
+- Precompute persistence: store both raw precompute files and indexed fast lookup store (Redis/RocksDB). Use small TTLs for time‑sensitive data.
+- Use feature flags to enable/disable costly precompute or warmup during incidents.
+
+Quick checklist to enable immediately
+- Pick 3 highest‑cost computations and convert to scheduled precompute jobs.
+- Persist results to fast store and implement a warmup API that loads hot keys.
+- Schedule warmup 10–30 minutes before expected user surge; run incremental updates 2–6 hours prior.
+- Bound queues/caches and isolate live decision service.
+- Add telemetry on warmup success, cache hit rate, and decision latency.
+
+If you share stack (language, runtime, caching layer, scheduler, typical match start time, and traffic pattern) I’ll give exact cron timings, cache priming code snippets, and recommended sizes for warmup batches.

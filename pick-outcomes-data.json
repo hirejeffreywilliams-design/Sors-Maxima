@@ -12842,15 +12842,275 @@
       "homeScore": 4,
       "awayScore": 5,
       "settledAt": "2026-03-09T00:21:59.430Z"
+    },
+    {
+      "id": "precomp-NHL-401803372-moneyline-a06ab8d3fb",
+      "gameId": "401803372",
+      "sport": "NHL",
+      "game": "Utah Mammoth @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Utah Mammoth",
+      "pick": "Minnesota Wild ML",
+      "betType": "moneyline",
+      "odds": -121,
+      "grade": "C+",
+      "confidence": 52,
+      "ev": -17.81,
+      "gameTime": "2026-03-11T00:00Z",
+      "savedAt": "2026-03-09T00:29:34.414Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-09T00:29:53.141Z"
+    },
+    {
+      "id": "precomp-NHL-401803371-total-ae475bdb57",
+      "gameId": "401803371",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Dallas Stars",
+      "homeTeam": "Dallas Stars",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 52,
+      "ev": -17.91,
+      "gameTime": "2026-03-11T00:00Z",
+      "savedAt": "2026-03-09T00:34:35.740Z",
+      "result": "won",
+      "homeScore": 4,
+      "awayScore": 3,
+      "settledAt": "2026-03-09T00:34:53.028Z"
+    },
+    {
+      "id": "precomp-NHL-401803370-moneyline-567beafb90",
+      "gameId": "401803370",
+      "sport": "NHL",
+      "game": "New York Islanders @ St. Louis Blues",
+      "homeTeam": "St. Louis Blues",
+      "awayTeam": "New York Islanders",
+      "pick": "St. Louis Blues ML",
+      "betType": "moneyline",
+      "odds": 135,
+      "grade": "B-",
+      "confidence": 57,
+      "ev": 5.75,
+      "gameTime": "2026-03-10T23:30Z",
+      "savedAt": "2026-03-09T00:34:35.740Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 2,
+      "settledAt": "2026-03-09T00:34:53.037Z"
+    },
+    {
+      "id": "precomp-NHL-401803370-spread-cb6ae25675",
+      "gameId": "401803370",
+      "sport": "NHL",
+      "game": "New York Islanders @ St. Louis Blues",
+      "homeTeam": "St. Louis Blues",
+      "awayTeam": "New York Islanders",
+      "pick": "St. Louis Blues -1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 55,
+      "ev": -17.91,
+      "gameTime": "2026-03-10T23:30Z",
+      "savedAt": "2026-03-09T00:34:35.740Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 2,
+      "settledAt": "2026-03-09T00:34:53.037Z"
+    },
+    {
+      "id": "precomp-NHL-401803367-moneyline-d576cbe14e",
+      "gameId": "401803367",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Florida Panthers",
+      "homeTeam": "Florida Panthers",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Florida Panthers ML",
+      "betType": "moneyline",
+      "odds": 121,
+      "grade": "C+",
+      "confidence": 58,
+      "ev": -13.81,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-09T00:34:35.740Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-09T00:34:53.057Z"
+    },
+    {
+      "id": "precomp-NHL-401803367-spread-9aaa6a59b0",
+      "gameId": "401803367",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Florida Panthers",
+      "homeTeam": "Florida Panthers",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Florida Panthers -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 57,
+      "ev": -27.45,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-09T00:34:35.740Z",
+      "result": "lost",
+      "homeScore": 1,
+      "awayScore": 3,
+      "settledAt": "2026-03-09T00:34:53.057Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851362-spread-d16164db1f",
+      "gameId": "401851362",
+      "sport": "NCAAB",
+      "game": "Maryland Terrapins @ Oregon Ducks",
+      "homeTeam": "Oregon Ducks",
+      "awayTeam": "Maryland Terrapins",
+      "pick": "Oregon Ducks +0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 78,
+      "ev": 8.82,
+      "gameTime": "2026-03-10T21:00Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "lost",
+      "homeScore": 72,
+      "awayScore": 78,
+      "settledAt": "2026-03-09T12:21:07.680Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851362-moneyline-47ea51b560",
+      "gameId": "401851362",
+      "sport": "NCAAB",
+      "game": "Maryland Terrapins @ Oregon Ducks",
+      "homeTeam": "Oregon Ducks",
+      "awayTeam": "Maryland Terrapins",
+      "pick": "Oregon Ducks ML",
+      "betType": "moneyline",
+      "odds": -109,
+      "grade": "B-",
+      "confidence": 74,
+      "ev": 9.29,
+      "gameTime": "2026-03-10T21:00Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "lost",
+      "homeScore": 72,
+      "awayScore": 78,
+      "settledAt": "2026-03-09T12:21:07.680Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851362-total-9b7b828b59",
+      "gameId": "401851362",
+      "sport": "NCAAB",
+      "game": "Maryland Terrapins @ Oregon Ducks",
+      "homeTeam": "Oregon Ducks",
+      "awayTeam": "Maryland Terrapins",
+      "pick": "Over 136",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 58,
+      "ev": 8.82,
+      "gameTime": "2026-03-10T21:00Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "won",
+      "homeScore": 72,
+      "awayScore": 78,
+      "settledAt": "2026-03-09T12:21:07.680Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851760-total-53742bab31",
+      "gameId": "401851760",
+      "sport": "NCAAB",
+      "game": "Santa Clara Broncos @ Saint Mary's Gaels",
+      "homeTeam": "Saint Mary's Gaels",
+      "awayTeam": "Santa Clara Broncos",
+      "pick": "Over 147.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 77,
+      "ev": 18.36,
+      "gameTime": "2026-03-10T03:30Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-09T12:21:07.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851760-spread-ac6468cffc",
+      "gameId": "401851760",
+      "sport": "NCAAB",
+      "game": "Santa Clara Broncos @ Saint Mary's Gaels",
+      "homeTeam": "Saint Mary's Gaels",
+      "awayTeam": "Santa Clara Broncos",
+      "pick": "Saint Mary's Gaels -4",
+      "betType": "spread",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 76,
+      "ev": 15.91,
+      "gameTime": "2026-03-10T03:30Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "won",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-09T12:21:07.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851759-total-6f06cdd5f5",
+      "gameId": "401851759",
+      "sport": "NCAAB",
+      "game": "Oregon State Beavers @ Gonzaga Bulldogs",
+      "homeTeam": "Gonzaga Bulldogs",
+      "awayTeam": "Oregon State Beavers",
+      "pick": "Over 145.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 74,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-09T12:21:07.690Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851759-spread-cc9410921d",
+      "gameId": "401851759",
+      "sport": "NCAAB",
+      "game": "Oregon State Beavers @ Gonzaga Bulldogs",
+      "homeTeam": "Gonzaga Bulldogs",
+      "awayTeam": "Oregon State Beavers",
+      "pick": "Gonzaga Bulldogs -18.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 59,
+      "ev": 31.73,
+      "gameTime": "2026-03-10T01:00Z",
+      "savedAt": "2026-03-09T12:19:59.643Z",
+      "result": "lost",
+      "homeScore": 70,
+      "awayScore": 59,
+      "settledAt": "2026-03-09T12:21:07.690Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 567,
-      "won": 296,
-      "lost": 259,
+      "total": 580,
+      "won": 300,
+      "lost": 268,
       "push": 12,
-      "rate": 52.2,
+      "rate": 51.7,
       "pending": 73
     },
     "bySport": {
@@ -12860,21 +13120,21 @@
         "rate": 49.5
       },
       "NHL": {
-        "total": 205,
-        "won": 104,
-        "rate": 50.7
+        "total": 211,
+        "won": 106,
+        "rate": 50.2
       },
       "NCAAB": {
-        "total": 158,
-        "won": 91,
-        "rate": 57.6
+        "total": 165,
+        "won": 93,
+        "rate": 56.4
       }
     },
     "byGrade": {
       "B+": {
-        "total": 38,
+        "total": 40,
         "won": 25,
-        "rate": 65.8
+        "rate": 62.5
       },
       "B": {
         "total": 47,
@@ -12882,14 +13142,14 @@
         "rate": 72.3
       },
       "B-": {
-        "total": 131,
-        "won": 68,
-        "rate": 51.9
+        "total": 138,
+        "won": 70,
+        "rate": 50.7
       },
       "C+": {
-        "total": 122,
-        "won": 66,
-        "rate": 54.1
+        "total": 126,
+        "won": 68,
+        "rate": 54
       },
       "D+": {
         "total": 33,
@@ -12924,22 +13184,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 167,
-        "won": 90,
-        "rate": 53.9,
-        "roi": 13.8
+        "total": 171,
+        "won": 91,
+        "rate": 53.2,
+        "roi": 12.2
       },
       "Spread": {
-        "total": 169,
-        "won": 89,
-        "rate": 52.7,
-        "roi": 3.7
+        "total": 174,
+        "won": 90,
+        "rate": 51.7,
+        "roi": 1.8
       },
       "Total": {
-        "total": 160,
-        "won": 79,
+        "total": 164,
+        "won": 81,
         "rate": 49.4,
-        "roi": -1.8
+        "roi": -1.9
       },
       "Team Total": {
         "total": 71,
@@ -12949,34 +13209,34 @@
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 21,
+      "won": 26,
+      "lost": 24,
       "push": 0,
-      "rate": 58
+      "rate": 52
     },
-    "lastUpdated": "2026-03-09T00:24:48.957Z",
-    "roi": 5.4,
-    "brierScore": 0.2594,
+    "lastUpdated": "2026-03-09T12:21:07.692Z",
+    "roi": 4.3,
+    "brierScore": 0.2616,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.049,
+    "sharpeRatio": 0.039,
     "homeAwayBias": {
-      "homeWinRate": 56,
+      "homeWinRate": 54.9,
       "awayWinRate": 44.6,
-      "homeTotal": 268,
+      "homeTotal": 277,
       "awayTotal": 65
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.2,
-        "actual": 59.5,
-        "total": 37
+        "actual": 61.5,
+        "total": 39
       },
       {
         "range": "55-60",
         "predicted": 57.7,
-        "actual": 46.7,
-        "total": 92
+        "actual": 44.9,
+        "total": 98
       },
       {
         "range": "60-65",
@@ -12992,15 +13252,15 @@
       },
       {
         "range": "70-75",
-        "predicted": 70.2,
-        "actual": 53.4,
-        "total": 73
+        "predicted": 70.3,
+        "actual": 52,
+        "total": 75
       },
       {
         "range": "75-80",
-        "predicted": 77.3,
-        "actual": 75,
-        "total": 16
+        "predicted": 77.2,
+        "actual": 68.4,
+        "total": 19
       },
       {
         "range": "80+",
