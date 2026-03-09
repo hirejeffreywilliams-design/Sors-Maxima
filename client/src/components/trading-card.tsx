@@ -678,38 +678,36 @@ export function TradingCard({
             </div>
           )}
 
-          {/* Branded Result Stamp */}
+          {/* Result Corner Ribbon — small and unobtrusive, doesn't block content */}
           {isSettled && (
             <div
-              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
-              style={{ transform: "rotate(-12deg)" }}
+              className="absolute top-0 right-0 pointer-events-none z-25 overflow-hidden rounded-tr-2xl"
+              style={{ width: 72, height: 72 }}
             >
-              <div
-                className="flex flex-col items-center gap-0.5"
-                style={{
-                  border: isWin
-                    ? "4px solid rgba(52,211,153,0.60)"
-                    : "3px solid rgba(255,255,255,0.13)",
-                  padding: "10px 22px 8px",
-                  borderRadius: 2,
-                  opacity: isWin ? 1 : 0.9,
-                }}
-              >
+              {/* Triangle ribbon */}
+              <div style={{
+                position: "absolute", top: 0, right: 0,
+                width: 0, height: 0,
+                borderStyle: "solid",
+                borderWidth: "0 72px 72px 0",
+                borderColor: isWin
+                  ? "transparent rgba(52,211,153,0.70) transparent transparent"
+                  : "transparent rgba(255,255,255,0.12) transparent transparent",
+              }} />
+              {/* Label inside ribbon */}
+              <div style={{
+                position: "absolute", top: 12, right: 2,
+                transform: "rotate(45deg)",
+                textAlign: "center",
+                width: 52,
+              }}>
                 <span style={{
-                  fontSize: 7, fontWeight: 900, letterSpacing: "0.45em",
-                  color: isWin ? "rgba(52,211,153,0.75)" : "rgba(255,255,255,0.22)",
-                  textTransform: "uppercase",
-                }}>SORS MAXIMA™</span>
-                <span style={{
-                  fontSize: 28, fontWeight: 900, letterSpacing: "0.06em", lineHeight: 1.1,
-                  color: isWin ? "rgba(52,211,153,0.70)" : "rgba(255,255,255,0.18)",
-                  textTransform: "uppercase",
-                }}>{isWin ? "CALLED IT" : "NO HIT"}</span>
-                <span style={{
-                  fontSize: 7, fontWeight: 900, letterSpacing: "0.35em",
-                  color: isWin ? "rgba(52,211,153,0.55)" : "rgba(255,255,255,0.14)",
-                  textTransform: "uppercase",
-                }}>{isWin ? "✓ WIN ✓" : "— MISS —"}</span>
+                  fontSize: 8, fontWeight: 900, letterSpacing: "0.06em",
+                  color: isWin ? "#ffffff" : "rgba(255,255,255,0.55)",
+                  textTransform: "uppercase", display: "block", lineHeight: 1.2,
+                }}>
+                  {isWin ? "WIN ✓" : "MISS"}
+                </span>
               </div>
             </div>
           )}

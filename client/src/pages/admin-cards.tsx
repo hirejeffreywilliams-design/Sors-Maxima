@@ -480,7 +480,7 @@ export default function AdminCardsVault() {
                   <div className="border-t border-border/40 bg-muted/10 px-4 py-4 space-y-4">
                     <div className="flex flex-wrap gap-4">
                       {/* Card preview */}
-                      <div className="w-36 shrink-0">
+                      <div className="w-52 shrink-0 aspect-[2/3]">
                         <TradingCard card={{ ...card, isFrozen: card.isFrozen ?? false }} instanceNumber={1} isFlippable />
                       </div>
 

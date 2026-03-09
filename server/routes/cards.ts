@@ -797,38 +797,42 @@ router.get("/admin/security/stats", async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const [verifyToday] = await db.execute(sql`
+    const verifyTodayRes = await db.execute(sql`
       SELECT count(*)::int as total, 
              count(*) FILTER (WHERE result = 'authentic')::int as authentic,
              count(*) FILTER (WHERE result = 'tampered')::int as tampered,
              count(*) FILTER (WHERE result = 'not_found')::int as not_found
       FROM card_verification_log 
       WHERE verified_at >= ${today}
-    `).catch(() => ([{ total: 0, authentic: 0, tampered: 0, not_found: 0 }]));
+    `).catch(() => ({ rows: [{ total: 0, authentic: 0, tampered: 0, not_found: 0 }] }));
 
-    const topIps = await db.execute(sql`
+    const topIpsRes = await db.execute(sql`
       SELECT ip_address, count(*)::int as verifications
       FROM card_verification_log 
       WHERE verified_at >= NOW() - INTERVAL '24 hours'
       GROUP BY ip_address 
       ORDER BY verifications DESC 
       LIMIT 10
-    `).catch(() => []);
+    `).catch(() => ({ rows: [] }));
 
-    const fraudAlerts = await db.execute(sql`
+    const fraudAlertsRes = await db.execute(sql`
       SELECT id, alert_type, severity, username, details, created_at, reviewed
       FROM community_fraud_alerts 
       ORDER BY created_at DESC 
       LIMIT 20
-    `).catch(() => []);
+    `).catch(() => ({ rows: [] }));
+
+    const verifyToday = (verifyTodayRes as any)?.rows?.[0] || { total: 0, authentic: 0, tampered: 0, not_found: 0 };
+    const topIps = (topIpsRes as any)?.rows || [];
+    const fraudAlerts = (fraudAlertsRes as any)?.rows || [];
 
     const [frozenCount] = await db.select({ count: sql<number>`count(*)::int` }).from(tradingCards).where(eq(tradingCards.isFrozen, true));
     const [revokedCount] = await db.select({ count: sql<number>`count(*)::int` }).from(userCardCollections).where(eq(userCardCollections.isRevoked, true));
 
     res.json({
-      verifyToday: verifyToday || { total: 0, authentic: 0, tampered: 0, not_found: 0 },
-      topIps: Array.isArray(topIps) ? topIps : [],
-      fraudAlerts: Array.isArray(fraudAlerts) ? fraudAlerts : [],
+      verifyToday,
+      topIps,
+      fraudAlerts,
       frozenCards: frozenCount?.count || 0,
       revokedCopies: revokedCount?.count || 0,
     });
@@ -924,7 +928,7 @@ router.post("/admin/community/:id/feature", async (req, res) => {
 router.get("/admin/analytics", async (req, res) => {
   if (!req.session?.isAdmin) return res.sendStatus(403);
   try {
-    const [totals] = await db.execute(sql`
+    const totalsRes = await db.execute(sql`
       SELECT 
         count(*)::int as total_cards,
         count(*) FILTER (WHERE card_type = 'system')::int as system_cards,
@@ -937,7 +941,7 @@ router.get("/admin/analytics", async (req, res) => {
       FROM trading_cards
     `);
 
-    const [collTotals] = await db.execute(sql`
+    const collTotalsRes = await db.execute(sql`
       SELECT 
         count(*)::int as total_copies,
         count(*) FILTER (WHERE is_revoked = true)::int as revoked_copies,
@@ -947,19 +951,24 @@ router.get("/admin/analytics", async (req, res) => {
       FROM user_card_collections
     `);
 
-    const gradeDistrib = await db.execute(sql`
+    const gradeDistribRes = await db.execute(sql`
       SELECT grade, count(*)::int as count 
       FROM trading_cards 
       GROUP BY grade 
       ORDER BY grade
     `);
 
-    const sportDistrib = await db.execute(sql`
+    const sportDistribRes = await db.execute(sql`
       SELECT sport, count(*)::int as count 
       FROM trading_cards 
       GROUP BY sport 
       ORDER BY count DESC
     `);
+
+    const totals = (totalsRes as any)?.rows?.[0] || {};
+    const collTotals = (collTotalsRes as any)?.rows?.[0] || {};
+    const gradeDistrib = (gradeDistribRes as any)?.rows || [];
+    const sportDistrib = (sportDistribRes as any)?.rows || [];
 
     const recentActivity = await db
       .select({ log: cardAuditLog, username: users.username })
@@ -969,10 +978,10 @@ router.get("/admin/analytics", async (req, res) => {
       .limit(10);
 
     res.json({
-      totals: totals || {},
-      collTotals: collTotals || {},
-      gradeDistrib: Array.isArray(gradeDistrib) ? gradeDistrib : [],
-      sportDistrib: Array.isArray(sportDistrib) ? sportDistrib : [],
+      totals,
+      collTotals,
+      gradeDistrib,
+      sportDistrib,
       recentActivity,
     });
   } catch (err: any) {

@@ -635,9 +635,9 @@ export default function CardsPage() {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6 justify-items-center">
               {collection?.map((item) => (
-                <div key={item.collection.id} className="w-full aspect-[2/3]">
+                <div key={item.collection.id} className="w-full max-w-[280px] aspect-[2/3]">
                   <TradingCard
                     card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}
                     instanceNumber={item.collection.instanceNumber}
