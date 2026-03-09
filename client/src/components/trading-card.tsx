@@ -280,34 +280,45 @@ export function TradingCard({
   const ret100 = calcReturn(100);
 
   return (
+    /*
+     * ── Card container ─────────────────────────────────────────────────────
+     * perspective MUST be on a PARENT of the flip element — putting it on the
+     * same element as transformStyle + rotation breaks backface-visibility on
+     * mobile (cards bleed through each other).
+     */
     <div
       ref={cardRef}
-      className={cn(
-        "relative w-full h-full transition-all duration-500 ease-out cursor-pointer select-none",
-        className
-      )}
+      className={cn("relative w-full h-full cursor-pointer select-none", className)}
+      style={{ perspective: "1200px" }}
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       onClick={handleFlip}
-      style={{
-        perspective: "1200px",
-        transformStyle: "preserve-3d",
-        WebkitTransformStyle: "preserve-3d" as any,
-        transform: isFlipped
-          ? "rotateY(180deg)"
-          : isHovered
-          ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.03,1.03,1.03)`
-          : "rotateX(0deg) rotateY(0deg) scale3d(1,1,1)",
-      }}
       data-testid={`trading-card-${card.id}`}
     >
-      {/* === FRONT === */}
+      {/* ── Flip container: this is the only element that transforms ── */}
       <div
         className="absolute inset-0"
         style={{
+          transformStyle: "preserve-3d",
+          WebkitTransformStyle: "preserve-3d" as any,
+          transform: isFlipped
+            ? "rotateY(180deg)"
+            : isHovered
+            ? `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale3d(1.03,1.03,1.03)`
+            : "rotateX(0deg) rotateY(0deg) scale3d(1,1,1)",
+          transition: "transform 0.55s cubic-bezier(0.4,0,0.2,1)",
+        }}
+      >
+
+      {/* === FRONT === */}
+      <div
+        className="absolute inset-0 rounded-2xl"
+        style={{
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden" as any,
+          /* Solid opaque base — prevents any bleed-through from back face */
+          backgroundColor: foil.baseBg,
         }}
       >
         {/* Outer glow ring */}
@@ -698,15 +709,23 @@ export function TradingCard({
       </div>
 
       {/* === BACK === */}
+      {/*
+       * The back face MUST have a fully opaque background so the front face
+       * never bleeds through. We layer: solid baseBg → gradient → overlays.
+       */}
       <div
         className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col p-4"
         style={{
           transform: "rotateY(180deg)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden" as any,
+          /* Step 1: solid opaque base – the wall that stops bleed-through */
           backgroundColor: foil.baseBg,
-          background: `linear-gradient(160deg, ${foil.baseBg} 0%, #0a0a14 50%, ${foil.baseBg} 100%)`,
-          border: `2px solid ${foil.accent}60`,
+          /* Step 2: rich gradient on top of the solid base */
+          backgroundImage: `linear-gradient(160deg, ${foil.baseBg} 0%, #07070f 40%, #0d0d1a 60%, ${foil.baseBg} 100%)`,
+          border: `2px solid ${foil.accent}80`,
+          /* Crisp inset highlight gives the back a different "feel" from front */
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.6)`,
         }}
       >
         <div style={{
@@ -976,6 +995,8 @@ export function TradingCard({
           );
         })()}
       </div>
+
+      </div> {/* ── end flip container ── */}
     </div>
   );
 }

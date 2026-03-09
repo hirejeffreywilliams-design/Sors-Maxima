@@ -69,25 +69,31 @@ export function CardStackDeck({ cards, className, cardLabel = "card", emptyConte
         opacity: animDir ? 0 : 1,
         zIndex: 30,
         transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease",
+        /* Strong shadow separates front card visually from the stack */
+        filter: "drop-shadow(0 18px 36px rgba(0,0,0,0.85)) drop-shadow(0 4px 12px rgba(0,0,0,0.7))",
+        isolation: "isolate",
       };
     }
     if (stackPos === 1) {
       return {
         transform: animDir
           ? "translateY(0px) scale(1) rotateZ(0deg)"
-          : "translateY(14px) scale(0.95) rotateZ(1.5deg)",
-        opacity: animDir ? 1 : 0.85,
+          : "translateY(12px) scale(0.94) rotateZ(1.5deg)",
+        /* Lower opacity + dark filter so it reads clearly as "behind" */
+        opacity: animDir ? 0.9 : 0.55,
+        filter: "brightness(0.45) saturate(0.6)",
         zIndex: 20,
-        transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease",
+        transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease, filter 0.28s ease",
       };
     }
     return {
       transform: animDir
-        ? "translateY(14px) scale(0.95) rotateZ(1.5deg)"
-        : "translateY(26px) scale(0.905) rotateZ(-1deg)",
-      opacity: animDir ? 0.85 : 0.6,
+        ? "translateY(12px) scale(0.94) rotateZ(1.5deg)"
+        : "translateY(22px) scale(0.885) rotateZ(-1deg)",
+      opacity: animDir ? 0.55 : 0.35,
+      filter: "brightness(0.3) saturate(0.4)",
       zIndex: 10,
-      transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease",
+      transition: "transform 0.28s cubic-bezier(0.4,0,0.2,1), opacity 0.28s ease, filter 0.28s ease",
     };
   };
 
