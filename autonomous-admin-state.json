@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773059435751_8xoba",
+      "timestamp": "2026-03-09T12:30:35.751Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "47,920 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773016520958_n41pk",
       "timestamp": "2026-03-09T00:35:20.958Z",
       "resolved": false,
@@ -275,6 +285,77 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1773059975749_mdmed",
+      "timestamp": "2026-03-09T12:39:35.749Z",
+      "durationMs": 10864,
+      "summary": [
+        "Win rate at 52.8% is currently above the break-even threshold of 52.4%.",
+        "Pipeline alert: calibration error exceeds threshold (0.1330 > 0.08), requires investigation.",
+        "API budget for Odds API is close to 50K requests; current usage indicates a need for throttling.",
+        "Total win rate by market is declining in 'Total' category at 49.4%."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Investigate Calibration Error",
+          "description": "Review the cause of the pipeline calibration error and implement necessary adjustments.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 3
+        },
+        {
+          "title": "Throttle Odds API Requests",
+          "description": "Adjust polling frequency for Odds API to reduce request consumption and avoid breaching budget.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Analyze Total Market Performance",
+          "description": "Investigate the decline in win rate for 'Total' market bets and identify potential issues.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Calibration Error",
+          "description": "Calibrate pipeline showing error above the acceptable threshold, indicating potential performance issues.",
+          "severity": "high"
+        },
+        {
+          "title": "Odds API Usage Warning",
+          "description": "Odds API remaining requests closing in on 50K limit; consider modifying usage to prevent critical warnings.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Investigate the calibration error in the pipeline.",
+          "Throttle API requests for Odds API to optimize budget.",
+          "Review the current betting strategy for 'Total' market performance."
+        ],
+        "this_week": [
+          "Conduct a detailed analysis of 'Total' market betting results.",
+          "Monitor API request consumption regularly.",
+          "Assess overall performance metrics in relation to operating costs."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 52.8,
+        "settledPicks": 580,
+        "oddsApiRemaining": 47920,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 100,
+        "cacheHitRate": 22,
+        "heapUsedMb": 78,
+        "heapTotalMb": 110,
+        "hubLastCycleMs": 70,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate at 52.8% is currently above the break-even threshold of 52.4%.\",\n    \"Pipeline alert: calibration error exceeds threshold (0.1330 > 0.08), requires investigation.\",\n    \"API budget for Odds API is close to 50K requests; current usage indicates a need for throttling.\",\n    \"Total win rate by market is declining in 'Total' category at 49.4%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Calibration Error\",\n      \"description\": \"Review the cause of the pipeline calibration error and implement necessary adjustments.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Throttle Odds API Requests\",\n      \"description\": \"Adjust polling frequency for Odds API to reduce request consumption and avoid breaching budget.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Analyze Total Market Performance\",\n      \"description\": \"Investigate the decline in win rate for 'Total' market bets and identify potential issues.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Calibration Error\",\n      \"description\": \"Calibrate pipeline showing error above the acceptable threshold, indicating potential performance issues.\",\n      \"severity\": \"high\"\n    },\n    {\n      \"title\": \"Odds API Usage Warning\",\n      \"description\": \"Odds API remaining requests closing in on 50K limit; consider modifying usage to prevent critical warnings.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate the calibration error in the pipeline.\",\n      \"Throttle API requests for Odds API to optimize budget.\",\n      \"Review the current betting strategy for 'Total' market performance.\"\n    ],\n    \"this_week\": [\n      \"Conduct a detailed analysis of 'Total' market betting results.\",\n      \"Monitor API request consumption regularly.\",\n      \"Assess overall performance metrics in relation to operating costs.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1773005304060_ghn78",
       "timestamp": "2026-03-08T21:28:24.061Z",
@@ -1490,8 +1571,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical: Win rate has dropped to 47.2%, below the 48% threshold over 641 picks. Immediate review required.\",\n    \"Critical: Odds API requests are critically low, with only 500 requests remaining, risking stoppage of live odds.\",\n    \"Warning: Memory usage is high, with 63MB used out of 71MB, reaching 89% capacity.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review Betting Model\",\n      \"description\": \"Conduct an immediate review of the betting model and strategies to improve win rate above 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Increase API Call Budget or Optimize Usage\",\n      \"description\": \"Evaluate options to increase the Odds API request budget or optimize usage to prevent running out of requests.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Memory Management Review\",\n      \"description\": \"Investigate high memory usage and implement optimizations to reduce heap memory consumption.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Critical\",\n      \"description\": \"Win rate below 48%, indicating potential model failure and necessitating immediate action.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Critical Usage\",\n      \"description\": \"Less than 10,000 requests left; urgent action needed to prevent loss of live data access.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"High Memory Usage\",\n      \"description\": \"Heap memory usage is above 75%, indicating potential performance issues.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Conduct a review of the betting model performance and strategies.\",\n      \"Assess and address the low request count for the Odds API.\",\n      \"Check memory usage metrics and explore options for optimization.\"\n    ],\n    \"this_week\": [\n      \"Implement changes to improve the model's win rate.\",\n      \"Develop an action plan for optimizing API call budget.\",\n      \"Monitor memory usage trends and apply necessary fixes.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-09T00:35:20.958Z",
-  "lastDeepCheck": "2026-03-08T21:28:24.061Z",
-  "totalQuickChecks": 98,
-  "totalDeepChecks": 19
+  "lastQuickCheck": "2026-03-09T12:30:35.751Z",
+  "lastDeepCheck": "2026-03-09T12:39:35.749Z",
+  "totalQuickChecks": 99,
+  "totalDeepChecks": 20
 }

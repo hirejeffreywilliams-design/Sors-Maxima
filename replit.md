@@ -53,6 +53,8 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Responsible Gambling Notice**: `client/src/components/responsible-gambling-notice.tsx` — 3 variants (banner/compact/footer), localStorage dismissal, helpline 1-800-522-4700. Compact variant shown on Parlay Builder page.
 - **SSE Authentication**: `/api/sse/stream` is protected by `requireAuth` middleware — unauthenticated connections return 401.
 - **TBD Team Filtering**: All ticket builders (`buildOptimalTickets`, `buildMatchupTickets`, `buildLifeChangerTicket`) and `gatherTopPicks` in `unifiedIntelligenceHub.ts` filter out picks where `homeTeam === "TBD"` or `awayTeam === "TBD"` — prevents unresolved tournament bracket opponents (ESPN returns `displayName: "TBD"`) from appearing in any ticket or intelligence feed. Final safety filter also applied in the `/api/intelligence/feed` route.
+- **Adaptive Engine Scheduling**: `precomputedPredictionsEngine.ts` uses a self-scheduling `setTimeout` pattern instead of a fixed `setInterval`. After each cycle, `getAdaptiveInterval()` recalculates the next delay: 2 min when games start within 15 min, 5 min within 1 hour, 10 min within 2 hours, 20 min idle daytime, 30 min off-peak (1–7am). Cycle duration is tracked via `lastCycleDurationMs`.
+- **Admin System Health Page**: New page at `/admin/system-health` — live dashboard showing heap memory usage %, engine cycle status (last run, next run countdown, adaptive interval label), per-sport cache status table, and Odds API quota remaining. Auto-refreshes every 30 seconds. Backend: `GET /api/admin/system-health` in `server/routes/admin.ts`.
 
 ## External Dependencies
 - **Frontend Framework**: React

@@ -413,9 +413,43 @@ function buildReleaseSchedule(generatedAt: string): PickReleaseSchedule {
 
 let engineRunning = false;
 let lastRunTime: number | null = null;
+let lastCycleDurationMs: number | null = null;
 let totalRuns = 0;
 let failedRuns = 0;
-let intervalHandle: ReturnType<typeof setInterval> | null = null;
+let intervalHandle: ReturnType<typeof setTimeout> | null = null;
+let nextRunTime: number | null = null;
+let currentIntervalMs: number = 5 * 60 * 1000;
+
+/**
+ * Adaptive scheduling: compute the next refresh interval based on upcoming game times.
+ * - 1am–7am (off-peak): 30 min — minimal API usage while users sleep
+ * - Next game < 15 min away: 2 min — maximum freshness at tip-off
+ * - Next game < 60 min away: 5 min — stay sharp before games start
+ * - Next game < 2 hrs away: 10 min — moderate refresh before game window
+ * - Otherwise (daytime, games > 2 hrs): 20 min — balanced idle refresh
+ */
+function getAdaptiveInterval(): number {
+  const hour = new Date().getHours();
+
+  // Off-peak window: 1am–7am — slow down to save API quota
+  if (hour >= 1 && hour < 7) return 30 * 60 * 1000;
+
+  // Find the nearest upcoming game from all cached picks
+  const now = Date.now();
+  let nearestGameMs = Infinity;
+  for (const [, entry] of predictionCache.entries()) {
+    for (const pick of entry.snapshot.picks) {
+      if (!pick.gameTime) continue;
+      const t = new Date(pick.gameTime).getTime();
+      if (t > now && t - now < nearestGameMs) nearestGameMs = t - now;
+    }
+  }
+
+  if (nearestGameMs < 15 * 60 * 1000)  return 2 * 60 * 1000;   // < 15 min to tip-off
+  if (nearestGameMs < 60 * 60 * 1000)  return 5 * 60 * 1000;   // < 1 hr to tip-off
+  if (nearestGameMs < 2 * 60 * 60 * 1000) return 10 * 60 * 1000; // < 2 hrs to games
+  return 20 * 60 * 1000; // daytime idle
+}
 
 function determinePickTiming(
   gameTime: string | undefined,
@@ -1848,6 +1882,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 }
 
 async function runPredictionCycle(): Promise<void> {
+  const cycleStart = Date.now();
   const { getInSeasonSports } = await import("./sportSeasons");
   const sports = getInSeasonSports();
   totalRuns++;
@@ -1865,7 +1900,8 @@ async function runPredictionCycle(): Promise<void> {
   }
 
   lastRunTime = Date.now();
-  console.log(`[PrecomputedEngine] Prediction cycle #${totalRuns} complete`);
+  lastCycleDurationMs = Date.now() - cycleStart;
+  console.log(`[PrecomputedEngine] Prediction cycle #${totalRuns} complete (${(lastCycleDurationMs / 1000).toFixed(1)}s)`);
 
   // Wire into prediction pipeline engine — run one concurrent pipeline per active sport
   import("./predictionPipelineEngine").then(({ runPipeline }) => {
@@ -1937,15 +1973,31 @@ export function startPrecomputedEngine(): void {
     setTimeout(() => runPredictionCycle(), 5_000);
   }
 
-  intervalHandle = setInterval(() => runPredictionCycle(), REFRESH_INTERVAL);
+  // Kick off the self-scheduling adaptive loop
+  scheduleNextCycle();
+}
+
+function scheduleNextCycle(): void {
+  if (!engineRunning) return;
+  const interval = getAdaptiveInterval();
+  currentIntervalMs = interval;
+  nextRunTime = Date.now() + interval;
+  const mins = (interval / 60_000).toFixed(0);
+  console.log(`[PrecomputedEngine] Next cycle in ${mins}m (adaptive — based on game schedule)`);
+  intervalHandle = setTimeout(async () => {
+    if (!engineRunning) return;
+    await runPredictionCycle();
+    scheduleNextCycle();
+  }, interval);
 }
 
 export function stopPrecomputedEngine(): void {
   if (intervalHandle) {
-    clearInterval(intervalHandle);
+    clearTimeout(intervalHandle);
     intervalHandle = null;
   }
   engineRunning = false;
+  nextRunTime = null;
   console.log("[PrecomputedEngine] Engine stopped");
 }
 
@@ -2852,9 +2904,12 @@ export function getEngineStatus() {
   return {
     running: engineRunning,
     lastRunTime: lastRunTime ? new Date(lastRunTime).toISOString() : null,
+    lastCycleDurationMs,
     totalRuns,
     failedRuns,
-    refreshIntervalMs: REFRESH_INTERVAL,
+    currentIntervalMs,
+    nextRunTime: nextRunTime ? new Date(nextRunTime).toISOString() : null,
+    nextRunInMs: nextRunTime ? Math.max(0, nextRunTime - Date.now()) : null,
     cacheStatus,
   };
 }

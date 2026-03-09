@@ -5697,4 +5697,66 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  // ── System Health ──────────────────────────────────────────────────────────
+  app.get("/api/admin/system-health", requireAdmin, async (_req, res) => {
+    try {
+      const mem = process.memoryUsage();
+      const heapUsedMb   = Math.round(mem.heapUsed   / 1024 / 1024);
+      const heapTotalMb  = Math.round(mem.heapTotal  / 1024 / 1024);
+      const rssMb        = Math.round(mem.rss        / 1024 / 1024);
+      const externalMb   = Math.round(mem.external   / 1024 / 1024);
+      const heapLimitMb  = 1024; // NODE_OPTIONS='--max-old-space-size=1024'
+      const heapUsedPct  = Math.round((heapUsedMb / heapLimitMb) * 100);
+
+      const { getEngineStatus } = await import("../precomputedPredictionsEngine");
+      const engine = getEngineStatus();
+
+      // Nearest upcoming game across all cached sports
+      let nearestGameMs: number | null = null;
+      let nearestGameLabel = "No games found";
+      for (const [, sport] of Object.entries(engine.cacheStatus)) {
+        // sport is the cacheStatus entry per sport
+      }
+      // Use nextRunInMs from engine to determine adaptive interval label
+      const intervalLabel = (() => {
+        const ms = engine.currentIntervalMs;
+        if (ms <= 2 * 60 * 1000)  return "2 min (pre-game)";
+        if (ms <= 5 * 60 * 1000)  return "5 min (game window)";
+        if (ms <= 10 * 60 * 1000) return "10 min (approaching games)";
+        if (ms <= 20 * 60 * 1000) return "20 min (idle)";
+        return "30 min (off-peak)";
+      })();
+
+      // API budget via sportsDataService
+      let oddsApiRemaining: number | null = null;
+      try {
+        const oddsStatus = sportsDataService.getApiStatus();
+        oddsApiRemaining = oddsStatus?.requestsRemaining ?? null;
+      } catch { /* ignore */ }
+
+      res.json({
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        memory: {
+          heapUsedMb,
+          heapTotalMb,
+          heapLimitMb,
+          heapUsedPct,
+          rssMb,
+          externalMb,
+          status: heapUsedPct >= 85 ? "critical" : heapUsedPct >= 70 ? "warning" : "healthy",
+        },
+        engine: {
+          ...engine,
+          intervalLabel,
+        },
+        oddsApiRemaining,
+        nodeVersion: process.version,
+        platform: process.platform,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

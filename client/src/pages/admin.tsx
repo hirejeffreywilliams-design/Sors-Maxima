@@ -514,6 +514,7 @@ export default function AdminDashboard() {
     { href: "/admin/community-integrity", label: "Community Integrity",   desc: "Card fraud, Discord abuse, tier bypass",  icon: ShieldAlert },
     { href: "/admin/user-health",        label: "User Health",            desc: "Churn risk, engagement & LTV",          icon: Activity },
     { href: "/admin/api-budget",         label: "API Budget",             desc: "Quota usage & burn rate",               icon: Gauge },
+    { href: "/admin/system-health",      label: "System Health",          desc: "Memory, engine cycles & cache status",  icon: Activity },
     { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
     { href: "/admin/policy-standards",   label: "Policy & Standards",     desc: "Company policies, procedures, grade standards & AI compliance", icon: ShieldCheck },
   ];
@@ -562,6 +563,7 @@ export default function AdminDashboard() {
         { href: "/admin/community-integrity",    label: "Community Integrity",    icon: ShieldAlert },
         { href: "/admin/feature-flags",          label: "Feature Flags",          icon: Flag },
         { href: "/admin/api-budget",             label: "API Budget",             icon: Gauge },
+        { href: "/admin/system-health",          label: "System Health",          icon: Activity },
         { href: "/admin/financial-projections",  label: "Financial Projections",  icon: DollarSign },
         { href: "/admin/pricing-intelligence",   label: "Pricing Intelligence",   icon: PieChart },
         { href: "/admin/risk-register",          label: "Risk Register",          icon: AlertCircle },
