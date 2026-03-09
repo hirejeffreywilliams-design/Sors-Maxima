@@ -43,7 +43,7 @@ export function CardStackDeck({ cards, className, cardLabel = "card", emptyConte
     if (touchStartX.current === null || touchStartY.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStartX.current;
     const dy = e.changedTouches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 22) {
       goTo(dx < 0 ? "next" : "prev");
     }
     touchStartX.current = null;
@@ -130,9 +130,9 @@ export function CardStackDeck({ cards, className, cardLabel = "card", emptyConte
           onClick={() => goTo("prev")}
           disabled={isAnimating || total <= 1}
           data-testid="button-cardstack-prev"
-          className="w-9 h-9 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="w-11 h-11 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
-          <ChevronLeft className="w-4 h-4" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         <div className="flex items-center gap-2">
@@ -150,15 +150,15 @@ export function CardStackDeck({ cards, className, cardLabel = "card", emptyConte
           onClick={() => goTo("next")}
           disabled={isAnimating || total <= 1}
           data-testid="button-cardstack-next"
-          className="w-9 h-9 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          className="w-11 h-11 rounded-full flex items-center justify-center border border-white/15 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Dot navigation for up to 12 cards */}
+      {/* Dot navigation for up to 20 cards */}
       {total > 1 && total <= 20 && (
-        <div className="flex items-center gap-1.5 flex-wrap justify-center max-w-[240px]">
+        <div className="flex items-center flex-wrap justify-center max-w-[240px]">
           {Array.from({ length: total }, (_, i) => (
             <button
               key={i}
@@ -170,12 +170,23 @@ export function CardStackDeck({ cards, className, cardLabel = "card", emptyConte
               data-testid={`button-cardstack-dot-${i}`}
               className="transition-all duration-200"
               style={{
-                width: i === currentIndex ? "16px" : "6px",
-                height: "6px",
-                borderRadius: "3px",
-                background: i === currentIndex ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.2)",
+                padding: "10px 5px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <span
+                style={{
+                  display: "block",
+                  width: i === currentIndex ? "16px" : "6px",
+                  height: "6px",
+                  borderRadius: "3px",
+                  background: i === currentIndex ? "rgba(255,255,255,0.8)" : "rgba(255,255,255,0.2)",
+                  transition: "all 0.2s",
+                }}
+              />
+            </button>
           ))}
         </div>
       )}

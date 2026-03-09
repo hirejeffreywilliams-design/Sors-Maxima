@@ -27,7 +27,7 @@ interface SwipePickCardsProps {
   onClose: () => void;
 }
 
-const SWIPE_THRESHOLD = 80;
+const SWIPE_THRESHOLD = 40;
 
 function gradeColor(grade: string) {
   if (grade.startsWith("A")) return "text-green-400";

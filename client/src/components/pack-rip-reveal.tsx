@@ -9,7 +9,7 @@ interface PackRipRevealProps {
   onClose: () => void;
 }
 
-const TEAR_THRESHOLD = 80;
+const TEAR_THRESHOLD = 42;
 
 const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
   id: i,
