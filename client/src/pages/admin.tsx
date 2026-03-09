@@ -515,6 +515,7 @@ export default function AdminDashboard() {
     { href: "/admin/user-health",        label: "User Health",            desc: "Churn risk, engagement & LTV",          icon: Activity },
     { href: "/admin/api-budget",         label: "API Budget",             desc: "Quota usage & burn rate",               icon: Gauge },
     { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
+    { href: "/admin/policy-standards",   label: "Policy & Standards",     desc: "Company policies, procedures, grade standards & AI compliance", icon: ShieldCheck },
   ];
 
   const allToolSections = [
@@ -557,6 +558,7 @@ export default function AdminDashboard() {
       label: "Platform & Finance",
       tools: [
         { href: "/admin/security",               label: "Security Center",        icon: Lock },
+        { href: "/admin/policy-standards",       label: "Policy & Standards",     icon: ShieldCheck },
         { href: "/admin/community-integrity",    label: "Community Integrity",    icon: ShieldAlert },
         { href: "/admin/feature-flags",          label: "Feature Flags",          icon: Flag },
         { href: "/admin/api-budget",             label: "API Budget",             icon: Gauge },

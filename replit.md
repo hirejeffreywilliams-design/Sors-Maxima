@@ -43,9 +43,15 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Security Architecture**: Multi-layered security framework including headers, IP blocking, input sanitization, rate limiting, and session fingerprinting.
 - **Autonomous Intelligence & Admin Tools**: Includes a Platform Intelligence Engine, App Guardian Engine, AI-Powered Admin Assistant, and an Autonomous App Intelligence Engine.
 - **Mobile UX Enhancements**: Includes Swipe Mode for picks and a Mobile Card Stack Deck.
-- **React.lazy Code Splitting**: All pages use `React.lazy` with `Suspense` for faster initial load times.
+- **React.lazy Code Splitting**: All pages use `React.lazy` with `Suspense` for faster initial load times — including NotFound, LoginPage, and LandingPage.
 - **Onboarding Flow**: Guided first-time experience at `/onboarding`.
 - **Odds Source Attribution**: Every precomputed pick card shows which sportsbook offers the best odds, with attribution from "The Odds API" or "ESPN-derived".
+- **Favorites & Watchlist**: DB-backed watchlist at `/watchlist` with add/remove teams and games, persisted to PostgreSQL.
+- **Data Freshness Indicator**: `client/src/components/data-freshness.tsx` — displays last-updated timestamps and source labels across data views.
+- **Company Standards System**: `server/companyStandards.ts` — single source of truth for grade thresholds (A+ through C), prohibited phrases, brand voice, tier standards, and AI compliance context. All AI engines inject `getAIStandardsContext()` and validate output with `validateAIContent()`. Exposed via `GET /api/admin/company-standards/metadata`.
+- **Admin Policy & Standards Page**: Full CRUD interface at `/admin/policy-standards` — 4 tabs (Company Policies, Operational Procedures, Model & Grade Standards, AI Brand Standards). Grade thresholds and prohibited phrases auto-populated from the server-side standards module, not hardcoded. 19 default entries seeded to `platform_rules` table.
+- **Responsible Gambling Notice**: `client/src/components/responsible-gambling-notice.tsx` — 3 variants (banner/compact/footer), localStorage dismissal, helpline 1-800-522-4700. Compact variant shown on Parlay Builder page.
+- **SSE Authentication**: `/api/sse/stream` is protected by `requireAuth` middleware — unauthenticated connections return 401.
 
 ## External Dependencies
 - **Frontend Framework**: React

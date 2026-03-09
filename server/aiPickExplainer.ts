@@ -1,4 +1,5 @@
 import { createOpenAIClient } from "./openaiClient";
+import { getAIStandardsContext, validateAIContent, BRAND_VOICE } from "./companyStandards";
 import type { PrecomputedPick } from "./precomputedPredictionsEngine";
 
 const explanationCache = new Map<string, string>();
@@ -48,7 +49,10 @@ function buildPickPrompt(pick: PrecomputedPick): string {
 
   parts.push(`Model recommendation: ${pick.recommendation.replace(/_/g, ' ')}`);
 
-  return `You are a sharp sports betting analyst for a members-only intelligence platform. Write a 2-3 sentence explanation for why this is a strong betting pick. Be direct and specific. Reference the most important factors. Use present tense. No em dashes. Third person when referring to teams.
+  const standards = getAIStandardsContext();
+  return `${standards}
+
+TASK: Write a 2-3 sentence explanation for why this is a strong betting pick. Be direct and specific. Reference the most important factors. Use present tense. No em dashes. Third person when referring to teams.
 
 ${parts.join('\n')}
 
@@ -88,7 +92,12 @@ export async function generatePickExplanation(pick: PrecomputedPick): Promise<st
       max_tokens: 160,
       temperature: 0.65,
     });
-    const explanation = response.choices[0]?.message?.content?.trim() || formatFallbackExplanation(pick);
+    let explanation = response.choices[0]?.message?.content?.trim() || formatFallbackExplanation(pick);
+    const violations = validateAIContent(explanation);
+    if (violations.length > 0) {
+      console.warn(`[AIExplainer] Content violations for pick ${pick.id}: ${violations.join('; ')} — using fallback`);
+      explanation = formatFallbackExplanation(pick);
+    }
     explanationCache.set(pick.id, explanation);
     cacheTimestamps.set(pick.id, Date.now());
     return explanation;

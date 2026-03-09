@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PageHero } from "@/components/page-hero";
+import { ResponsibleGamblingNotice } from "@/components/responsible-gambling-notice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -391,6 +392,8 @@ export default function PropParlayBuilder() {
         subtitle="Advanced multi-leg parlay analysis combining player props, moneylines, spreads, and totals"
         data-testid="page-title"
       />
+
+      <ResponsibleGamblingNotice variant="compact" storageKey="rg-parlay-builder" />
 
       <Card data-testid="builder-config">
         <CardHeader>

@@ -12,9 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import NotFound from "@/pages/not-found";
-import LoginPage from "@/pages/login";
-import LandingPage from "@/pages/landing";
+const NotFound = lazy(() => import("@/pages/not-found"));
+const LoginPage = lazy(() => import("@/pages/login"));
+const LandingPage = lazy(() => import("@/pages/landing"));
 const CommandCenter = lazy(() => import("@/pages/command-center"));
 const AutoGenerator = lazy(() => import("@/pages/auto-generator"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
@@ -65,6 +65,7 @@ const AdminMonetization = lazy(() => import("@/pages/admin-monetization"));
 const AdminCommunityIntegrity = lazy(() => import("@/pages/admin-community-integrity"));
 const AdminCardsVault = lazy(() => import("@/pages/admin-cards"));
 const AdminGuidelines = lazy(() => import("@/pages/admin-guidelines"));
+const AdminPolicyStandards = lazy(() => import("@/pages/admin-policy-standards"));
 const GuidelinesPage = lazy(() => import("@/pages/guidelines"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
@@ -92,7 +93,7 @@ const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -244,6 +245,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/community-integrity">{() => <AdminGuard component={AdminCommunityIntegrity} authState={authState} />}</Route>
               <Route path="/admin/cards">{() => <AdminGuard component={AdminCardsVault} authState={authState} />}</Route>
               <Route path="/admin/guidelines">{() => <AdminGuard component={AdminGuidelines} authState={authState} />}</Route>
+              <Route path="/admin/policy-standards">{() => <AdminGuard component={AdminPolicyStandards} authState={authState} />}</Route>
               <Route path="/admin/update-planner">{() => <AdminGuard component={AdminUpdatePlanner} authState={authState} />}</Route>
               <Route path="/admin/model-integrity">{() => <AdminGuard component={AdminModelIntegrity} authState={authState} />}</Route>
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
@@ -545,6 +547,12 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
                 <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin/guidelines' ? 'bg-amber-500/15 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`} data-testid="mobile-nav-admin-guidelines">
                   <Scale className="w-4 h-4" />
                   <span>Guidelines & LCT</span>
+                </div>
+              </Link>
+              <Link href="/admin/policy-standards" onClick={onClose}>
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-sm ${location === '/admin/policy-standards' ? 'bg-amber-500/15 text-amber-400' : 'hover:bg-amber-500/10 text-amber-400'}`} data-testid="mobile-nav-admin-policy-standards">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Policy & Standards</span>
                 </div>
               </Link>
             </nav>

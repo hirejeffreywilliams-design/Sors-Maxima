@@ -106,4 +106,109 @@ export function registerGuidelinesRoutes(app: Express): void {
       res.status(500).json({ error: "Failed to delete rule" });
     }
   });
+
+  // POST /api/admin/policy-standards/seed — seed default policies/procedures/standards
+  app.post("/api/admin/policy-standards/seed", async (req: Request, res: Response) => {
+    if (!req.session?.isAdmin) return res.sendStatus(403);
+    try {
+      const { getDefaultPoliciesForSeeding } = await import("../companyStandards");
+      const defaults = getDefaultPoliciesForSeeding();
+      let inserted = 0;
+      let skipped = 0;
+
+      for (const entry of defaults) {
+        const existing = await db.execute(sql`
+          SELECT id FROM platform_rules WHERE category = ${entry.category} AND title = ${entry.title} LIMIT 1
+        `);
+        if (existing.rows.length > 0) {
+          skipped++;
+          continue;
+        }
+        await db.execute(sql`
+          INSERT INTO platform_rules (category, title, body, rule_order, is_active, created_at, updated_at)
+          VALUES (${entry.category}, ${entry.title}, ${entry.body}, ${entry.rule_order}, TRUE, NOW(), NOW())
+        `);
+        inserted++;
+      }
+
+      res.json({ success: true, inserted, skipped, total: defaults.length });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to seed defaults: " + err.message });
+    }
+  });
+
+  // GET /api/admin/policy-standards — grouped view of all policy/standards categories
+  app.get("/api/admin/policy-standards", async (req: Request, res: Response) => {
+    if (!req.session?.isAdmin) return res.sendStatus(403);
+    const POLICY_CATEGORIES = [
+      "Company Policies",
+      "Operational Procedures",
+      "Model & Grade Standards",
+      "AI Brand Standards",
+    ];
+    try {
+      const rows = await db.execute(sql`
+        SELECT id, category, title, body, rule_order, is_active, created_at, updated_at
+        FROM platform_rules
+        WHERE category = ANY(${POLICY_CATEGORIES})
+        ORDER BY category ASC, rule_order ASC
+      `);
+      const grouped: Record<string, any[]> = {};
+      for (const row of rows.rows as any[]) {
+        if (!grouped[row.category]) grouped[row.category] = [];
+        grouped[row.category].push(row);
+      }
+      const total = rows.rows.length;
+      res.json({ grouped, total, categories: Object.keys(grouped) });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch policy standards" });
+    }
+  });
+
+  // GET /api/admin/company-standards/metadata — expose grade thresholds + prohibited phrases from companyStandards.ts
+  app.get("/api/admin/company-standards/metadata", async (req: Request, res: Response) => {
+    if (!req.session?.isAdmin) return res.sendStatus(403);
+    try {
+      const {
+        GRADE_STANDARDS, PROHIBITED_PHRASES, BRAND_VOICE, MODEL_STANDARDS,
+        PLATFORM_NAME, MODEL_NAME, CASHOUT_BRAND,
+      } = await import("../companyStandards");
+
+      const gradeRows = Object.entries(GRADE_STANDARDS).map(([grade, cfg]: [string, any]) => ({
+        grade,
+        label: cfg.label,
+        minConfidence: cfg.minConfidence,
+        minEV: cfg.minEV,
+      }));
+
+      res.json({
+        platformName: PLATFORM_NAME,
+        modelName: MODEL_NAME,
+        cashoutBrand: CASHOUT_BRAND,
+        gradeRows,
+        prohibitedPhrases: PROHIBITED_PHRASES,
+        toneRequirements: BRAND_VOICE.tone,
+        requiredDisclosures: BRAND_VOICE.requiredDisclosures,
+        modelFactors: MODEL_STANDARDS.factorCount,
+        simulationRuns: MODEL_STANDARDS.simulationRuns,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch company standards metadata" });
+    }
+  });
+
+  // GET /api/policy-standards — public read of Company Policies and AI Brand Standards
+  app.get("/api/policy-standards", async (_req: Request, res: Response) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT id, category, title, body, rule_order
+        FROM platform_rules
+        WHERE category IN ('Company Policies', 'AI Brand Standards') AND is_active = TRUE
+        ORDER BY category ASC, rule_order ASC
+      `);
+      res.json({ policies: rows.rows });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch policies" });
+    }
+  });
 }

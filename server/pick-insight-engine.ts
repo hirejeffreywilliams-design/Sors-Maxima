@@ -6,6 +6,7 @@
 
 import { logInfo, logWarn } from "./errorLogger";
 import { recordAiError, recordAiSuccess, getAiAvailability } from "./aiErrorTracker";
+import { getAIStandardsContext, validateAIContent } from "./companyStandards";
 import type { PrecomputedPick } from "./precomputedPredictionsEngine";
 
 let openai: any = null;
@@ -39,7 +40,10 @@ function formatFactorList(factors: PrecomputedPick["factors"]): string {
 
 function buildPrompt(pick: PrecomputedPick): string {
   const factorStr = formatFactorList(pick.factors);
-  return `You are a professional sports betting analyst. Write exactly 1-2 sentences (max 30 words total) summarizing the sharp edge for this pick. Be specific, analytical, and direct. Do NOT say "I" or "we". No fluff.
+  const standards = getAIStandardsContext();
+  return `${standards}
+
+TASK: Write exactly 1-2 sentences (max 30 words total) summarizing the sharp edge for this pick. Be specific, analytical, and direct. Do NOT say "I" or "we". No fluff.
 
 Pick: ${pick.pick} (${pick.sport})
 Game: ${pick.game}
@@ -61,8 +65,16 @@ async function generateInsightForPick(pick: PrecomputedPick, client: any): Promi
       max_tokens: 80,
       temperature: 0.5,
     });
-    const text = resp.choices?.[0]?.message?.content?.trim();
-    if (text) recordAiSuccess();
+    let text = resp.choices?.[0]?.message?.content?.trim();
+    if (text) {
+      const violations = validateAIContent(text);
+      if (violations.length > 0) {
+        logWarn(`[InsightEngine] Standards violations for pick ${pick.id}: ${violations.join('; ')} — suppressing`);
+        text = undefined;
+      } else {
+        recordAiSuccess();
+      }
+    }
     return text || null;
   } catch (err: any) {
     logWarn(`[InsightEngine] Failed for pick ${pick.id}: ${err.message}`);

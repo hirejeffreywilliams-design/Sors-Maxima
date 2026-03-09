@@ -74,7 +74,12 @@ export function registerAiRoutes(app: Express): void {
       ? `+${Math.round((decimalOdds - 1) * 100)}`
       : `-${Math.round(100 / (decimalOdds - 1))}`;
 
-    const prompt = `You are a sharp sports betting analyst. Analyze this ${legs.length}-leg parlay and return ONLY a valid JSON object.
+    const { getAIStandardsContext } = await import("../companyStandards");
+    const standardsContext = getAIStandardsContext();
+
+    const prompt = `${standardsContext}
+
+TASK: You are analyzing a ${legs.length}-leg parlay for a Sors Maxima member. Return ONLY a valid JSON object.
 
 PARLAY:
 ${legDescriptions}
@@ -85,12 +90,12 @@ Return this exact JSON structure:
 {
   "grade": "A" | "B" | "C" | "D",
   "verdict": "sharp" | "moderate" | "recreational" | "avoid",
-  "assessment": "One clear sentence on overall parlay value",
+  "assessment": "One clear sentence on overall parlay value — data-driven, no hype",
   "strengths": ["strength 1", "strength 2"],
   "risks": ["risk 1", "risk 2"],
   "correlationNote": "One sentence about leg correlation",
-  "stakeAdvice": "Recommended stake as % of bankroll",
-  "keyInsight": "The single most important factor"
+  "stakeAdvice": "Recommended stake as % of bankroll (quarter Kelly: 25% of Kelly calculation)",
+  "keyInsight": "The single most important statistical factor"
 }`;
 
     try {
