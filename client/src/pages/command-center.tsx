@@ -36,7 +36,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { TierGate, useTier } from "@/components/tier-gate";
-import { IntelligencePipeline } from "@/components/intelligence-pipeline";
 import { OffseasonPanel } from "@/components/offseason-panel";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { TicketShowcase } from "@/components/ticket-showcase";
@@ -2451,8 +2450,6 @@ export default function CommandCenter() {
             )}
           </div>
         </Tabs>
-
-        <IntelligencePipeline />
 
         {/* ── Ticket Showcase Banner ── */}
         <div

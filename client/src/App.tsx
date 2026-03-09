@@ -564,6 +564,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         {navSection("Picks", [
           { href: "/", icon: Zap, label: "Command Center", testId: "mobile-nav-picks" },
           { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "mobile-nav-daily" },
+          { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "mobile-nav-cards" },
         ])}
 
         {navSection("Tickets", [
@@ -585,7 +586,6 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         {navSection("Discover", [
           { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
-          { href: "/cards", icon: Trophy, label: "Sors Cards", testId: "mobile-nav-cards" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
           { href: "/research", icon: BookOpen, label: "Research Notes", testId: "mobile-nav-research" },
           { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
@@ -702,12 +702,12 @@ function DesktopNav({ authState }: { authState: AuthState }) {
     <nav className="hidden lg:flex items-center gap-0.5">
       <NavBtn href="/" icon={Zap} label="Picks" testId="nav-command-center" tooltip="Command Center — all engines live" />
       <NavBtn href="/daily" icon={Calendar} label="Daily" testId="nav-daily" tooltip="Today's top picks" />
+      <NavBtn href="/cards" icon={Trophy} label="Cards" testId="nav-cards" tooltip="Sors Intelligence Cards — collect, trade & showcase" />
       <NavDropdown label="Tickets" icon={Ticket} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
       <NavDropdown label="Markets" icon={TrendingUp} testId="nav-markets-dropdown" subitems={MARKETS_SUBITEMS} isActive={isMarketsActive} />
       <NavBtn href="/sorsbooks" icon={Landmark} label="Books" testId="nav-sorsbooks" tooltip="Sors Books — sportsbook intelligence hub" />
       <NavBtn href="/tools" icon={BarChart2} label="Analysis" testId="nav-pro-tools" tooltip="Analytics, calculators & factor tools" />
       <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
-      <NavBtn href="/cards" icon={Trophy} label="Cards" testId="nav-cards" tooltip="Sors Intelligence Cards — collect, trade & showcase" />
       {authState.isAdmin && (
         <Link href="/admin">
           <Button variant={location === "/admin" ? "secondary" : "ghost"} size="sm" className="gap-1.5 text-purple-500" data-testid="nav-admin">

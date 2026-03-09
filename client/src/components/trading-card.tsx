@@ -352,7 +352,7 @@ export function TradingCard({
             }}
           />
 
-          {/* Holographic rainbow overlay — very prominent for A+/A */}
+          {/* Holographic rainbow overlay — most prominent for A+ */}
           {isAPlus && (
             <>
               <div
@@ -365,16 +365,6 @@ export function TradingCard({
                   zIndex: 1,
                 }}
               />
-              <div
-                className="absolute inset-0 pointer-events-none overflow-hidden"
-                style={{ zIndex: 2 }}
-              >
-                <div style={{
-                  position: "absolute", width: "120px", height: "300%", top: "-100%",
-                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.22) 50%, transparent)",
-                  animation: "holo-sweep 4s ease-in-out infinite",
-                }} />
-              </div>
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -398,16 +388,6 @@ export function TradingCard({
                 }}
               />
               <div
-                className="absolute inset-0 pointer-events-none overflow-hidden"
-                style={{ zIndex: 2 }}
-              >
-                <div style={{
-                  position: "absolute", width: "80px", height: "300%", top: "-100%",
-                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.13) 50%, transparent)",
-                  animation: "holo-sweep 6s ease-in-out infinite",
-                }} />
-              </div>
-              <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
                   background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, ${foil.accent}25 0%, transparent 55%)`,
@@ -417,6 +397,18 @@ export function TradingCard({
               />
             </>
           )}
+
+          {/* Universal shimmer sweep — ALL grades get this, scaled by rarity */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 2 }}>
+            <div style={{
+              position: "absolute",
+              width: isAPlus ? "130px" : isAPremium ? "90px" : "65px",
+              height: "300%", top: "-100%",
+              background: `linear-gradient(90deg, transparent, rgba(255,255,255,${isAPlus ? "0.22" : isAPremium ? "0.13" : "0.07"}) 50%, transparent)`,
+              animation: `holo-sweep ${isAPlus ? "4s" : isAPremium ? "6s" : "14s"} ease-in-out infinite`,
+              animationDelay: isAPlus ? "0s" : isAPremium ? "1.5s" : "4s",
+            }} />
+          </div>
 
           {/* === Top rainbow bar === */}
           <div
@@ -503,20 +495,20 @@ export function TradingCard({
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}90` }}>Home</p>
-                          <p className="font-black text-[13px] leading-snug text-white truncate">{teams.home}</p>
+                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}75` }}>Home</p>
+                          <p className="font-black leading-snug text-white truncate" style={{ fontSize: "15px" }}>{teams.home}</p>
                         </div>
                         <div className="shrink-0 flex flex-col items-center gap-0.5 px-1">
                           <div
-                            className="w-6 h-6 rounded-full flex items-center justify-center"
-                            style={{ background: `${foil.accent}20`, border: `1px solid ${foil.accent}50` }}
+                            className="w-7 h-7 rounded-full flex items-center justify-center"
+                            style={{ background: `${foil.accent}22`, border: `1px solid ${foil.accent}55`, boxShadow: `0 0 8px ${foil.accent}30` }}
                           >
-                            <span className="text-[8px] font-black" style={{ color: foil.accent }}>VS</span>
+                            <span className="text-[9px] font-black" style={{ color: foil.accent }}>VS</span>
                           </div>
                         </div>
                         <div className="flex-1 min-w-0 text-right">
-                          <p className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}90` }}>Away</p>
-                          <p className="font-black text-[13px] leading-snug text-white truncate">{teams.away}</p>
+                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}75` }}>Away</p>
+                          <p className="font-black leading-snug text-white truncate" style={{ fontSize: "15px" }}>{teams.away}</p>
                         </div>
                       </div>
                       {/* Divider line */}
@@ -588,25 +580,62 @@ export function TradingCard({
             </div>
           </div>
 
-          {/* ── PAYOUT ROW ── */}
-          {ret1 && ret10 && ret100 && (
+          {/* ── PAYOUT SHOWCASE ── */}
+          {ret100 && (
             <div
-              className="relative z-10 mx-3 mt-2 rounded-lg px-2.5 py-2 shrink-0"
+              className="relative z-10 mx-3 mt-2 rounded-xl overflow-hidden shrink-0"
               style={{
-                background: isWin ? "rgba(251,191,36,0.10)" : "rgba(255,255,255,0.035)",
-                border: `1px solid ${isWin ? "rgba(251,191,36,0.40)" : "rgba(255,255,255,0.08)"}`,
+                background: isWin
+                  ? "linear-gradient(135deg, rgba(251,191,36,0.16) 0%, rgba(251,191,36,0.06) 100%)"
+                  : `linear-gradient(135deg, ${foil.accent}14 0%, rgba(0,0,0,0.30) 100%)`,
+                border: `1px solid ${isWin ? "rgba(251,191,36,0.48)" : foil.accent + "38"}`,
+                boxShadow: isWin ? "0 0 18px rgba(251,191,36,0.18) inset" : `0 0 14px ${foil.accent}10 inset`,
               }}
             >
-              <div className="text-[7px] font-black uppercase tracking-widest mb-1.5" style={{ color: isWin ? "rgba(251,191,36,0.70)" : "rgba(255,255,255,0.28)" }}>
-                {isWin ? "★ If You Bet" : "If You Bet"}
-              </div>
-              <div className="flex items-center justify-around">
-                {[{ stake: "$1", val: ret1 }, { stake: "$10", val: ret10 }, { stake: "$100", val: ret100 }].map(({ stake, val }) => (
-                  <div key={stake} className="flex flex-col items-center gap-0.5">
-                    <span className="text-[7px] font-black uppercase" style={{ color: isWin ? "rgba(251,191,36,0.50)" : "rgba(255,255,255,0.22)" }}>{stake}</span>
-                    <span className="text-[11px] font-black tabular-nums" style={{ color: isWin ? "#FBBF24" : "rgba(52,211,153,0.85)", textShadow: isWin ? "0 0 10px rgba(251,191,36,0.55)" : "none" }}>{val}</span>
+              <div className="flex items-center gap-0">
+                {/* Left: big $100 return */}
+                <div className="flex-1 px-3 py-2">
+                  <div
+                    className="text-[6px] font-black uppercase tracking-widest mb-0.5"
+                    style={{ color: isWin ? "rgba(251,191,36,0.55)" : "rgba(255,255,255,0.30)" }}
+                  >
+                    {isWin ? "★ BET $100 — WON" : "BET $100 — WIN"}
                   </div>
-                ))}
+                  <div
+                    className="font-black tabular-nums leading-none"
+                    style={{
+                      fontSize: "28px",
+                      color: isWin ? "#FCD34D" : foil.accent,
+                      textShadow: isWin
+                        ? "0 0 24px rgba(251,191,36,0.70), 0 0 8px rgba(251,191,36,0.40)"
+                        : `0 0 20px ${foil.accent}70, 0 0 6px ${foil.accent}35`,
+                      fontFamily: "Georgia, serif",
+                    }}
+                  >
+                    {ret100}
+                  </div>
+                </div>
+
+                {/* Right: secondary $1 and $10 stakes */}
+                {(ret1 || ret10) && (
+                  <div
+                    className="flex flex-col justify-center gap-1 px-3 py-2 border-l"
+                    style={{ borderColor: isWin ? "rgba(251,191,36,0.18)" : "rgba(255,255,255,0.07)" }}
+                  >
+                    {ret1 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[6px] font-black uppercase" style={{ color: "rgba(255,255,255,0.25)", minWidth: "14px" }}>$1</span>
+                        <span className="text-[9px] font-black tabular-nums" style={{ color: isWin ? "rgba(251,191,36,0.70)" : `${foil.accent}90` }}>{ret1}</span>
+                      </div>
+                    )}
+                    {ret10 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[6px] font-black uppercase" style={{ color: "rgba(255,255,255,0.25)", minWidth: "14px" }}>$10</span>
+                        <span className="text-[9px] font-black tabular-nums" style={{ color: isWin ? "rgba(251,191,36,0.70)" : `${foil.accent}90` }}>{ret10}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}

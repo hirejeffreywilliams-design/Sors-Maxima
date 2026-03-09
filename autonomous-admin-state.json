@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773092841014_y4oyx",
+      "timestamp": "2026-03-09T21:47:21.014Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "44,231 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773089458251_2qd9y",
       "timestamp": "2026-03-09T20:50:58.251Z",
       "resolved": false,
@@ -1605,8 +1615,8 @@
       "raw": "{\n  \"summary\": [\n    \"Critical memory usage - heap is exceeding safe limits at 90%+, risking OOM.\",\n    \"Odds API usage is critically low; only 500 requests remain, risking service disruption.\",\n    \"Win rate is 52.6%, above break-even, but close to degradation threshold.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Address Heap Memory Usage\",\n      \"description\": \"Investigate and optimize memory usage to reduce heap below 90%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Evaluate Odds API Usage\",\n      \"description\": \"Consider increasing budget or find alternate data sources to avoid odds service interruption.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Monitor Win Rate Trends\",\n      \"description\": \"Ensure win rate remains above 52.4% and investigate any declines promptly.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical Memory Alert\",\n      \"description\": \"Heap at 90%+ capacity poses an OOM risk.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Budget Critical\",\n      \"description\": \"Under 10K requests available for Odds API; immediate action required to prevent disruption.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate and resolve heap memory issue.\",\n      \"Evaluate Odds API request usage and budget adjustments.\"\n    ],\n    \"this_week\": [\n      \"Review win rate metrics for anomalies.\",\n      \"Optimize existing cash management strategies.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-09T20:50:58.252Z",
+  "lastQuickCheck": "2026-03-09T21:47:21.014Z",
   "lastDeepCheck": "2026-03-09T17:46:56.595Z",
-  "totalQuickChecks": 103,
+  "totalQuickChecks": 104,
   "totalDeepChecks": 21
 }

@@ -4429,7 +4429,7 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0554877569124184,
+  "mcStackedWeight": 1.0555420946056264,
   "totalPredictions": 630,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
@@ -4453,8 +4453,8 @@
       "total": 186
     }
   },
-  "learningCycles": 31,
-  "lastCycleAt": "2026-03-09T17:41:56.613Z",
-  "lastUpdated": "2026-03-09T17:41:56.613Z",
+  "learningCycles": 32,
+  "lastCycleAt": "2026-03-09T21:51:21.109Z",
+  "lastUpdated": "2026-03-09T21:51:21.109Z",
   "version": 2
 }
