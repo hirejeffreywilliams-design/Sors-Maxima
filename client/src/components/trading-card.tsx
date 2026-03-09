@@ -438,7 +438,7 @@ export function TradingCard({
               </div>
               <h2
                 className="font-black leading-tight text-white"
-                style={{ fontSize: "15px", lineHeight: 1.25, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
+                style={{ fontSize: "17px", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
               >{card.pick}</h2>
             </div>
             {/* Right: Odds (like Pokémon HP) + Grade badge */}
@@ -491,20 +491,20 @@ export function TradingCard({
                     <div className="relative z-10">
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex-1 min-w-0">
-                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}80` }}>Home</p>
-                          <p className="font-black text-[12px] leading-snug text-white/95 truncate">{teams.home}</p>
+                          <p className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}90` }}>Home</p>
+                          <p className="font-black text-[13px] leading-snug text-white truncate">{teams.home}</p>
                         </div>
                         <div className="shrink-0 flex flex-col items-center gap-0.5 px-1">
                           <div
                             className="w-6 h-6 rounded-full flex items-center justify-center"
                             style={{ background: `${foil.accent}20`, border: `1px solid ${foil.accent}50` }}
                           >
-                            <span className="text-[7px] font-black" style={{ color: foil.accent }}>VS</span>
+                            <span className="text-[8px] font-black" style={{ color: foil.accent }}>VS</span>
                           </div>
                         </div>
                         <div className="flex-1 min-w-0 text-right">
-                          <p className="text-[7px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}80` }}>Away</p>
-                          <p className="font-black text-[12px] leading-snug text-white/95 truncate">{teams.away}</p>
+                          <p className="text-[8px] font-black uppercase tracking-widest mb-0.5" style={{ color: `${foil.accent}90` }}>Away</p>
+                          <p className="font-black text-[13px] leading-snug text-white truncate">{teams.away}</p>
                         </div>
                       </div>
                       {/* Divider line */}
@@ -537,12 +537,12 @@ export function TradingCard({
           {/* ── TYPE + EVENT TAG ROW ── */}
           <div className="relative z-10 px-3 pt-2 flex items-center gap-1.5 flex-wrap shrink-0">
             <span
-              className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
-              style={{ background: `${foil.accent}15`, borderColor: `${foil.accent}45`, color: foil.accent }}
+              className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border"
+              style={{ background: `${foil.accent}20`, borderColor: `${foil.accent}55`, color: foil.accent }}
             >{card.sport}</span>
             <span
-              className="text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
-              style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.50)" }}
+              className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full"
+              style={{ background: "rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.70)" }}
             >{(card.betType ?? "").replace(/_/g, " ")}</span>
             {eventLabel && (
               <span
@@ -561,14 +561,14 @@ export function TradingCard({
           {/* ── ABILITY BOX (Pokémon-style move description) ── */}
           <div
             className="relative z-10 mx-3 mt-2 rounded-lg px-2.5 py-2 shrink-0"
-            style={{ background: "rgba(255,255,255,0.045)", border: "1px solid rgba(255,255,255,0.09)" }}
+            style={{ background: "rgba(255,255,255,0.055)", border: "1px solid rgba(255,255,255,0.13)" }}
           >
             <div className="flex items-center gap-1.5 mb-1">
-              <Brain className="w-2.5 h-2.5 shrink-0" style={{ color: foil.accent }} />
-              <span className="text-[7px] font-black uppercase tracking-widest" style={{ color: foil.accent }}>46-Factor Analysis</span>
-              <span className="ml-auto text-[9px] font-black tabular-nums text-emerald-400">EV +{card.ev}%</span>
+              <Brain className="w-3 h-3 shrink-0" style={{ color: foil.accent }} />
+              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: foil.accent }}>46-Factor Analysis</span>
+              <span className="ml-auto text-[10px] font-black tabular-nums text-emerald-400">EV +{card.ev}%</span>
             </div>
-            <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.60)" }}>
+            <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>
               {(card.betType ?? "").replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase())} pick — {card.confidence}% conviction. Model targets positive expected value on this line.
             </p>
           </div>
@@ -576,18 +576,18 @@ export function TradingCard({
           {/* ── STAT BARS (Pokémon-style weakness/resistance) ── */}
           <div className="relative z-10 px-3 pt-2 space-y-1.5 shrink-0">
             <div className="flex items-center gap-2">
-              <span className="text-[7px] font-black uppercase text-white/30 shrink-0" style={{ width: "52px" }}>Conviction</span>
-              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+              <span className="text-[9px] font-black uppercase text-white/55 shrink-0" style={{ width: "58px" }}>Conviction</span>
+              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.10)" }}>
                 <div className="h-full rounded-full" style={{ width: `${card.confidence}%`, background: `linear-gradient(90deg, ${foil.accent}80, ${foil.accent})`, boxShadow: `0 0 6px ${foil.accent}60` }} />
               </div>
-              <span className="text-[9px] font-black tabular-nums shrink-0" style={{ color: foil.accent, minWidth: "28px", textAlign: "right" }}>{card.confidence}%</span>
+              <span className="text-[10px] font-black tabular-nums shrink-0" style={{ color: foil.accent, minWidth: "32px", textAlign: "right" }}>{card.confidence}%</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[7px] font-black uppercase text-white/30 shrink-0" style={{ width: "52px" }}>Sors EV™</span>
-              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.07)" }}>
+              <span className="text-[9px] font-black uppercase text-white/55 shrink-0" style={{ width: "58px" }}>Sors EV™</span>
+              <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.10)" }}>
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${Math.min(card.ev * 5, 100)}%`, boxShadow: "0 0 6px rgba(52,211,153,0.55)" }} />
               </div>
-              <span className="text-[9px] font-black tabular-nums text-emerald-400 shrink-0" style={{ minWidth: "28px", textAlign: "right" }}>+{card.ev}%</span>
+              <span className="text-[10px] font-black tabular-nums text-emerald-400 shrink-0" style={{ minWidth: "32px", textAlign: "right" }}>+{card.ev}%</span>
             </div>
           </div>
 
@@ -829,19 +829,19 @@ export function TradingCard({
 
               {/* ── Pick Summary ── */}
               <div
-                className="w-full rounded-lg px-2.5 py-2 text-left"
-                style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${foil.accent}25` }}
+                className="w-full rounded-lg px-2.5 py-2.5 text-left"
+                style={{ background: "rgba(255,255,255,0.06)", border: `1px solid ${foil.accent}35` }}
               >
-                <p className="text-[7px] font-bold uppercase tracking-widest truncate" style={{ color: `${foil.accent}70` }}>{card.game || "—"}</p>
-                <p className="text-[12px] font-black text-white/95 leading-tight mt-0.5 line-clamp-2">{card.pick || "—"}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest truncate" style={{ color: `${foil.accent}90` }}>{card.game || "—"}</p>
+                <p className="text-[14px] font-black text-white leading-tight mt-0.5 line-clamp-2">{card.pick || "—"}</p>
                 <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-[9px] font-mono font-black tabular-nums" style={{ color: foil.accent }}>
+                  <span className="text-[11px] font-mono font-black tabular-nums" style={{ color: foil.accent }}>
                     {odds > 0 ? `+${odds}` : odds}
                   </span>
-                  <span className="text-[7px] font-black uppercase px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.40)" }}>
+                  <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded" style={{ background: "rgba(255,255,255,0.09)", color: "rgba(255,255,255,0.65)" }}>
                     {(card.betType ?? "").replace(/_/g, " ")}
                   </span>
-                  <span className="ml-auto text-[8px] font-black" style={{ color: foil.accent }}>{safeGrade}</span>
+                  <span className="ml-auto text-[10px] font-black" style={{ color: foil.accent }}>{safeGrade}</span>
                 </div>
               </div>
 
@@ -855,24 +855,24 @@ export function TradingCard({
                 }}
               >
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-[14px] leading-none">{strategy.icon}</span>
+                  <span className="text-[16px] leading-none">{strategy.icon}</span>
                   <div>
                     <div
-                      className="text-[8px] font-black uppercase tracking-widest"
+                      className="text-[10px] font-black uppercase tracking-widest"
                       style={{ color: strategy.color }}
                     >{strategy.name}</div>
-                    <div className="text-[7px] font-medium" style={{ color: `${strategy.color}90` }}>{strategy.tagline}</div>
+                    <div className="text-[9px] font-medium" style={{ color: `${strategy.color}BB` }}>{strategy.tagline}</div>
                   </div>
                 </div>
-                <p className="text-[8px] leading-relaxed" style={{ color: "rgba(255,255,255,0.62)" }}>
+                <p className="text-[10px] leading-relaxed" style={{ color: "rgba(255,255,255,0.78)" }}>
                   {strategy.desc}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
                   {strategy.signals.map(s => (
                     <span
                       key={s}
-                      className="text-[7px] font-black uppercase px-2 py-0.5 rounded-full"
-                      style={{ background: `${strategy.color}18`, color: `${strategy.color}CC`, border: `1px solid ${strategy.color}30` }}
+                      className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full"
+                      style={{ background: `${strategy.color}20`, color: `${strategy.color}DD`, border: `1px solid ${strategy.color}35` }}
                     >{s}</span>
                   ))}
                 </div>
@@ -888,11 +888,11 @@ export function TradingCard({
                 ].map(({ label, value, color }) => (
                   <div
                     key={label}
-                    className="rounded-lg px-1.5 py-1.5 text-center"
-                    style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+                    className="rounded-lg px-1.5 py-2 text-center"
+                    style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}
                   >
-                    <p className="text-[6px] font-bold uppercase tracking-widest text-white/28">{label}</p>
-                    <p className="text-[9px] font-black mt-0.5 tabular-nums" style={{ color }}>{value}</p>
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-white/50">{label}</p>
+                    <p className="text-[11px] font-black mt-0.5 tabular-nums" style={{ color }}>{value}</p>
                   </div>
                 ))}
               </div>

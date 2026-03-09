@@ -145,6 +145,23 @@ export default function CardsPage() {
     },
   });
 
+  const tradeActionMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: "accepted" | "declined" | "cancelled" }) => {
+      const res = await apiRequest("PUT", `/api/cards/trades/${id}`, { status });
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cards/trades"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/cards/collection"] });
+      const label = variables.status === "accepted" ? "Trade Accepted" : variables.status === "declined" ? "Trade Declined" : "Trade Cancelled";
+      const desc = variables.status === "accepted" ? "Cards have been exchanged!" : variables.status === "declined" ? "Offer has been declined." : "Offer has been cancelled.";
+      toast({ title: label, description: desc });
+    },
+    onError: (err: any) => {
+      toast({ title: "Action failed", description: err.message || "An error occurred", variant: "destructive" });
+    },
+  });
+
   const handleReveal = (index: number) => {
     if (!revealedIndices.includes(index)) {
       setRevealedIndices([...revealedIndices, index]);
@@ -640,29 +657,39 @@ export default function CardsPage() {
           <div
             className="relative rounded-2xl overflow-hidden"
             style={{
-              background: "radial-gradient(ellipse at 50% 0%, rgba(251,191,36,0.12) 0%, transparent 60%), radial-gradient(ellipse at 20% 100%, rgba(251,191,36,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(120,53,15,0.15) 0%, transparent 50%), linear-gradient(180deg, #050404 0%, #0a0807 60%, #050504 100%)",
-              minHeight: "600px",
+              background: "linear-gradient(180deg, #0d0800 0%, #130c01 30%, #0a0804 70%, #060402 100%)",
+              minHeight: "640px",
+              boxShadow: "inset 0 0 120px rgba(251,191,36,0.08), 0 0 0 1px rgba(251,191,36,0.15)",
             }}
           >
-            {/* Bokeh spotlight lights */}
+            {/* Dramatic floor + ceiling lights */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div style={{ position: "absolute", width: 300, height: 300, borderRadius: "50%", top: "-80px", left: "50%", transform: "translateX(-50%)", background: "radial-gradient(circle, rgba(251,191,36,0.18) 0%, transparent 65%)", filter: "blur(30px)" }} />
-              <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", top: "30%", left: "15%", background: "radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 65%)", filter: "blur(20px)" }} />
-              <div style={{ position: "absolute", width: 200, height: 200, borderRadius: "50%", top: "30%", right: "15%", background: "radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 65%)", filter: "blur(20px)" }} />
-              <div style={{ position: "absolute", width: "100%", height: "1px", top: "3px", background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.4) 30%, rgba(251,191,36,0.7) 50%, rgba(251,191,36,0.4) 70%, transparent)" }} />
+              {/* ceiling spotlight */}
+              <div style={{ position: "absolute", width: 500, height: 400, borderRadius: "50%", top: "-180px", left: "50%", transform: "translateX(-50%)", background: "radial-gradient(circle, rgba(251,191,36,0.28) 0%, rgba(251,191,36,0.08) 40%, transparent 70%)", filter: "blur(10px)" }} />
+              {/* floor glow */}
+              <div style={{ position: "absolute", width: "80%", height: 200, borderRadius: "50%", bottom: "-100px", left: "10%", background: "radial-gradient(ellipse, rgba(251,191,36,0.10) 0%, transparent 65%)", filter: "blur(24px)" }} />
+              {/* side spotlights */}
+              <div style={{ position: "absolute", width: 220, height: 400, borderRadius: "50%", top: "15%", left: "-60px", background: "radial-gradient(ellipse, rgba(251,191,36,0.12) 0%, transparent 65%)", filter: "blur(20px)" }} />
+              <div style={{ position: "absolute", width: 220, height: 400, borderRadius: "50%", top: "15%", right: "-60px", background: "radial-gradient(ellipse, rgba(251,191,36,0.12) 0%, transparent 65%)", filter: "blur(20px)" }} />
+              {/* top gold bar */}
+              <div style={{ position: "absolute", width: "100%", height: "2px", top: 0, background: "linear-gradient(90deg, transparent 5%, rgba(251,191,36,0.25) 20%, rgba(251,191,36,0.65) 50%, rgba(251,191,36,0.25) 80%, transparent 95%)" }} />
+              {/* bottom gold bar */}
+              <div style={{ position: "absolute", width: "60%", height: "1px", bottom: 0, left: "20%", background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.30), transparent)" }} />
+              {/* subtle marble pattern */}
+              <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 80px, rgba(251,191,36,0.018) 80px, rgba(251,191,36,0.018) 81px)", opacity: 0.6 }} />
             </div>
 
             {/* Showroom header */}
-            <div className="relative z-10 pt-8 pb-4 px-6 text-center">
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <div style={{ width: 40, height: 1, background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.6))" }} />
-                <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: "0.35em", color: "rgba(251,191,36,0.5)", textTransform: "uppercase" }}>SORS MAXIMA™</span>
-                <div style={{ width: 40, height: 1, background: "linear-gradient(90deg, rgba(251,191,36,0.6), transparent)" }} />
+            <div className="relative z-10 pt-10 pb-4 px-6 text-center">
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div style={{ width: 60, height: 1, background: "linear-gradient(90deg, transparent, rgba(251,191,36,0.8))" }} />
+                <span style={{ fontSize: 10, fontWeight: 900, letterSpacing: "0.40em", color: "rgba(251,191,36,0.75)", textTransform: "uppercase" }}>SORS MAXIMA™</span>
+                <div style={{ width: 60, height: 1, background: "linear-gradient(90deg, rgba(251,191,36,0.8), transparent)" }} />
               </div>
-              <h2 style={{ fontSize: 28, fontWeight: 900, letterSpacing: "0.05em", color: "rgba(255,255,255,0.95)", textTransform: "uppercase", lineHeight: 1.1 }}>
+              <h2 style={{ fontSize: 34, fontWeight: 900, letterSpacing: "0.08em", color: "#FFFFFF", textTransform: "uppercase", lineHeight: 1.1, textShadow: "0 0 40px rgba(251,191,36,0.40), 0 2px 0 rgba(0,0,0,0.6)" }}>
                 THE VAULT
               </h2>
-              <p style={{ fontSize: 11, color: "rgba(251,191,36,0.55)", fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", marginTop: 4 }}>
+              <p style={{ fontSize: 12, color: "rgba(251,191,36,0.75)", fontWeight: 700, letterSpacing: "0.30em", textTransform: "uppercase", marginTop: 6 }}>
                 Community Showcase · Member Verified Picks
               </p>
               {communityFeed && communityFeed.length > 0 && (
@@ -751,11 +778,41 @@ export default function CardsPage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm font-medium mb-4">{trade.message || "No message included."}</p>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       {trade.status === "pending" && (
                         <>
-                          <Button size="sm" variant="default" className="font-bold">Accept Offer</Button>
-                          <Button size="sm" variant="outline" className="font-bold">Decline</Button>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="font-bold hover-elevate active-elevate-2"
+                            disabled={tradeActionMutation.isPending}
+                            onClick={() => tradeActionMutation.mutate({ id: trade.id, status: "accepted" })}
+                            data-testid={`button-accept-trade-${trade.id}`}
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5 mr-1.5" />
+                            Accept Offer
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="font-bold hover-elevate active-elevate-2"
+                            disabled={tradeActionMutation.isPending}
+                            onClick={() => tradeActionMutation.mutate({ id: trade.id, status: "declined" })}
+                            data-testid={`button-decline-trade-${trade.id}`}
+                          >
+                            <XCircle className="w-3.5 h-3.5 mr-1.5" />
+                            Decline
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="font-bold text-muted-foreground"
+                            disabled={tradeActionMutation.isPending}
+                            onClick={() => tradeActionMutation.mutate({ id: trade.id, status: "cancelled" })}
+                            data-testid={`button-cancel-trade-${trade.id}`}
+                          >
+                            Cancel
+                          </Button>
                         </>
                       )}
                     </div>

@@ -2,31 +2,31 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 54539,
-      "manualRemaining": 45461,
-      "lastReported": "2026-03-09T20:23:37.446Z",
+      "currentUsage": 54656,
+      "manualRemaining": 45344,
+      "lastReported": "2026-03-09T20:29:24.196Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-09T20:23:36.602Z"
+      "lastSeasonCheck": "2026-03-09T20:29:23.444Z"
     },
     "apifootball": {
       "currentUsage": 0,
-      "manualRemaining": 74775,
-      "lastReported": "2026-03-09T20:21:31.940Z",
+      "manualRemaining": 74759,
+      "lastReported": "2026-03-09T20:29:17.542Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-09T20:23:36.602Z"
+      "lastSeasonCheck": "2026-03-09T20:29:23.444Z"
     },
     "balldontlie": {
-      "currentUsage": 3379,
+      "currentUsage": 3392,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -2138,13 +2138,65 @@
         {
           "ts": 1773087830379,
           "count": 1
+        },
+        {
+          "ts": 1773087859077,
+          "count": 1
+        },
+        {
+          "ts": 1773087904194,
+          "count": 1
+        },
+        {
+          "ts": 1773087904201,
+          "count": 1
+        },
+        {
+          "ts": 1773087904210,
+          "count": 1
+        },
+        {
+          "ts": 1773087932314,
+          "count": 1
+        },
+        {
+          "ts": 1773088022498,
+          "count": 1
+        },
+        {
+          "ts": 1773088022502,
+          "count": 1
+        },
+        {
+          "ts": 1773088022505,
+          "count": 1
+        },
+        {
+          "ts": 1773088050642,
+          "count": 1
+        },
+        {
+          "ts": 1773088177079,
+          "count": 1
+        },
+        {
+          "ts": 1773088177118,
+          "count": 1
+        },
+        {
+          "ts": 1773088177149,
+          "count": 1
+        },
+        {
+          "ts": 1773088205182,
+          "count": 1
         }
       ],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-09T20:23:36.602Z"
+      "lastSeasonCheck": "2026-03-09T20:29:23.444Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -2156,7 +2208,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-09T20:23:36.602Z"
+      "lastSeasonCheck": "2026-03-09T20:29:23.444Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -2168,10 +2220,10 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-09T20:23:36.602Z"
+      "lastSeasonCheck": "2026-03-09T20:29:23.444Z"
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-09T20:23:50.379Z",
+  "lastSaved": "2026-03-09T20:30:05.182Z",
   "alerts": []
 }
