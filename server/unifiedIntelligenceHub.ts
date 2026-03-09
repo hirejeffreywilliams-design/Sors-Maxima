@@ -538,6 +538,8 @@ function gatherTopPicks(): TopPick[] {
 
     for (const pick of cached.picks) {
       const p = pick as any;
+      // Skip picks with unresolved opponents (tournament TBD bracket games)
+      if (p.homeTeam === "TBD" || p.awayTeam === "TBD" || (p.game && (p.game.includes(" TBD") || p.game.startsWith("TBD ")))) continue;
       allPicks.push({
         id: p.id,
         sport,

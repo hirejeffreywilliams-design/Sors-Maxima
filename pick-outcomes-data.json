@@ -12822,15 +12822,35 @@
       "homeScore": 4,
       "awayScore": 5,
       "settledAt": "2026-03-09T00:09:39.221Z"
+    },
+    {
+      "id": "precomp-NHL-401803371-moneyline-e9efccb0b8",
+      "gameId": "401803371",
+      "sport": "NHL",
+      "game": "Vegas Golden Knights @ Dallas Stars",
+      "homeTeam": "Dallas Stars",
+      "awayTeam": "Vegas Golden Knights",
+      "pick": "Dallas Stars ML",
+      "betType": "moneyline",
+      "odds": -123,
+      "grade": "C-",
+      "confidence": 52,
+      "ev": -23.85,
+      "gameTime": "2026-03-11T00:00Z",
+      "savedAt": "2026-03-09T00:19:29.069Z",
+      "result": "lost",
+      "homeScore": 4,
+      "awayScore": 5,
+      "settledAt": "2026-03-09T00:21:59.430Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 566,
+      "total": 567,
       "won": 296,
-      "lost": 258,
+      "lost": 259,
       "push": 12,
-      "rate": 52.3,
+      "rate": 52.2,
       "pending": 73
     },
     "bySport": {
@@ -12840,9 +12860,9 @@
         "rate": 49.5
       },
       "NHL": {
-        "total": 204,
+        "total": 205,
         "won": 104,
-        "rate": 51
+        "rate": 50.7
       },
       "NCAAB": {
         "total": 158,
@@ -12877,9 +12897,9 @@
         "rate": 39.4
       },
       "C-": {
-        "total": 37,
+        "total": 38,
         "won": 20,
-        "rate": 54.1
+        "rate": 52.6
       },
       "C": {
         "total": 118,
@@ -12904,10 +12924,10 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 166,
+        "total": 167,
         "won": 90,
-        "rate": 54.2,
-        "roi": 14.5
+        "rate": 53.9,
+        "roi": 13.8
       },
       "Spread": {
         "total": 169,
@@ -12934,23 +12954,23 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-09T00:13:33.568Z",
-    "roi": 5.6,
+    "lastUpdated": "2026-03-09T00:24:48.957Z",
+    "roi": 5.4,
     "brierScore": 0.2594,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.051,
+    "sharpeRatio": 0.049,
     "homeAwayBias": {
-      "homeWinRate": 56.2,
+      "homeWinRate": 56,
       "awayWinRate": 44.6,
-      "homeTotal": 267,
+      "homeTotal": 268,
       "awayTotal": 65
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.2,
-        "actual": 61.1,
-        "total": 36
+        "actual": 59.5,
+        "total": 37
       },
       {
         "range": "55-60",

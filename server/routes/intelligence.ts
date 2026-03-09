@@ -70,6 +70,7 @@ export function registerIntelligenceRoutes(app: Express): void {
       if (feed.topPicks) {
         feed.topPicks = feed.topPicks
           .filter((p: any) => GOOD_GRADES.includes(p.grade))
+          .filter((p: any) => p.homeTeam !== "TBD" && p.awayTeam !== "TBD" && !String(p.game || "").includes(" TBD") && !String(p.game || "").startsWith("TBD "))
           .slice(0, 40)
           .map((p: any) => trimPick(p));
       }

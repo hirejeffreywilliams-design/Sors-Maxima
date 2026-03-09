@@ -52,6 +52,7 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Admin Policy & Standards Page**: Full CRUD interface at `/admin/policy-standards` — 4 tabs (Company Policies, Operational Procedures, Model & Grade Standards, AI Brand Standards). Grade thresholds and prohibited phrases auto-populated from the server-side standards module, not hardcoded. 19 default entries seeded to `platform_rules` table.
 - **Responsible Gambling Notice**: `client/src/components/responsible-gambling-notice.tsx` — 3 variants (banner/compact/footer), localStorage dismissal, helpline 1-800-522-4700. Compact variant shown on Parlay Builder page.
 - **SSE Authentication**: `/api/sse/stream` is protected by `requireAuth` middleware — unauthenticated connections return 401.
+- **TBD Team Filtering**: All ticket builders (`buildOptimalTickets`, `buildMatchupTickets`, `buildLifeChangerTicket`) and `gatherTopPicks` in `unifiedIntelligenceHub.ts` filter out picks where `homeTeam === "TBD"` or `awayTeam === "TBD"` — prevents unresolved tournament bracket opponents (ESPN returns `displayName: "TBD"`) from appearing in any ticket or intelligence feed. Final safety filter also applied in the `/api/intelligence/feed` route.
 
 ## External Dependencies
 - **Frontend Framework**: React

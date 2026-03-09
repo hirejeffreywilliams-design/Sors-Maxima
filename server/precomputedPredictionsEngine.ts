@@ -2157,6 +2157,9 @@ export function buildOptimalTickets(options: {
 
   const eligible = allPicks
     .filter(p => {
+      // Skip picks with unresolved opponents (tournament TBD bracket games)
+      if (p.homeTeam === "TBD" || p.awayTeam === "TBD" || p.game.includes(" TBD") || p.game.startsWith("TBD ")) return false;
+
       const gs = gradeToScore(p.grade);
       if (!(gs >= 5 && p.ev > 2 && p.confidence >= 50 && p.recommendation !== "fade" && p.recommendation !== "avoid")) return false;
 
@@ -2355,6 +2358,8 @@ export function buildMatchupTickets(options: {
 
   const gameGroups = new Map<string, PrecomputedPick[]>();
   for (const pick of allPicks) {
+    // Skip games with unresolved opponents (tournament TBD bracket games)
+    if (pick.homeTeam === "TBD" || pick.awayTeam === "TBD" || pick.game.includes(" TBD") || pick.game.startsWith("TBD ")) continue;
     const existing = gameGroups.get(pick.game) || [];
     existing.push(pick);
     gameGroups.set(pick.game, existing);
@@ -2608,10 +2613,12 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
     .map(mmaFightToPrecomputed);
   allPicks.push(...mmaConverted);
 
-  // ── Filter 1: Remove games that have already started ──────────────────────
+  // ── Filter 1: Remove games that have already started + TBD opponents ──────
   // Allow a 5-minute grace window for very recently started games
   const GRACE_MS = 5 * 60 * 1000;
   const upcoming = allPicks.filter(p => {
+    // Exclude picks with unresolved opponents (tournament TBD bracket games)
+    if (p.homeTeam === "TBD" || p.awayTeam === "TBD" || p.game.includes(" TBD") || p.game.startsWith("TBD ")) return false;
     if (!p.gameTime) return true; // no time = assume future
     const gameMs = new Date(p.gameTime).getTime();
     return gameMs > now - GRACE_MS;
