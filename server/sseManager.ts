@@ -293,3 +293,34 @@ export function getSSEStatus() {
   };
 }
 
+// ── Proactive Memory Monitor ──────────────────────────────────────────────────
+// Checks heap every 60 seconds and broadcasts a system-alert SSE event to all
+// connected admin sessions when memory crosses the 80% threshold.
+let memoryMonitorHandle: NodeJS.Timeout | null = null;
+let lastMemoryAlertAt = 0;
+const HEAP_LIMIT_MB = 1024; // matches NODE_OPTIONS='--max-old-space-size=1024'
+const MEMORY_ALERT_THRESHOLD_PCT = 80;
+const MEMORY_ALERT_COOLDOWN_MS = 5 * 60 * 1000; // max one alert per 5 min
+
+export function startMemoryMonitor(): void {
+  if (memoryMonitorHandle) return;
+  memoryMonitorHandle = setInterval(() => {
+    const heapUsedMb = process.memoryUsage().heapUsed / 1024 / 1024;
+    const heapPct = (heapUsedMb / HEAP_LIMIT_MB) * 100;
+    const now = Date.now();
+    if (heapPct > MEMORY_ALERT_THRESHOLD_PCT && now - lastMemoryAlertAt > MEMORY_ALERT_COOLDOWN_MS) {
+      lastMemoryAlertAt = now;
+      console.warn(`[MemoryMonitor] ⚠ Heap at ${heapPct.toFixed(0)}% — broadcasting system-alert`);
+      broadcastEvent("system-alert", {
+        type: "high-memory",
+        message: `Server heap at ${heapPct.toFixed(0)}% of ${HEAP_LIMIT_MB} MB limit`,
+        heapUsedMb: Math.round(heapUsedMb),
+        heapLimitMb: HEAP_LIMIT_MB,
+        heapUsedPct: Math.round(heapPct),
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }, 60_000);
+  console.log("[MemoryMonitor] Heap monitor started — alert threshold: 80% of 1 GB");
+}
+

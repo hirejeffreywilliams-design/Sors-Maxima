@@ -25,6 +25,7 @@ import { startAutonomousAdminIntelligence } from "./autonomousAdminIntelligence"
 import { startAutoSettlement } from "./settlementEngine";
 import { startIntelligenceHub } from "./unifiedIntelligenceHub";
 import { startPrecomputedEngine } from "./precomputedPredictionsEngine";
+import { startMemoryMonitor } from "./sseManager";
 import { startPlatformIntelligenceEngine } from "./platformIntelligenceEngine";
 import { startMonteCarloEngine } from "./monteCarloEngine";
 import { startNotificationEngine } from "./notificationEngine";
@@ -275,6 +276,7 @@ function startEnginesPhased(): void {
   // Builds AI picks from hub data. Disk cache serves instant picks while this
   // warms up — hub will have started its first cycle by 10s so 14s is safe.
   safeStart("Precomputed Predictions Engine", startPrecomputedEngine, 14_000);
+  safeStart("Memory Monitor", startMemoryMonitor, 15_000);
 
   // ── Phase 5 (28s): Auto-Settlement ───────────────────────────────────────
   // Settle picks from completed games. Runs once at startup, then every 5 min.

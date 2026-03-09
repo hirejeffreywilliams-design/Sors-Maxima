@@ -1883,11 +1883,35 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
 
 async function runPredictionCycle(): Promise<void> {
   const cycleStart = Date.now();
+
+  // ── Memory pressure guard ─────────────────────────────────────────────────
+  // If heap is above 80% of the 1024 MB limit, skip this cycle entirely and
+  // serve users the last cached picks. This prevents OOM crashes under load.
+  const HEAP_LIMIT_MB = 1024;
+  const heapUsedMb = process.memoryUsage().heapUsed / 1024 / 1024;
+  const heapPct = (heapUsedMb / HEAP_LIMIT_MB) * 100;
+  if (heapPct > 80) {
+    console.warn(`[PrecomputedEngine] ⚠ Memory pressure at ${heapPct.toFixed(0)}% — skipping this cycle, serving stale cache.`);
+    // Broadcast an alert to admin sessions via SSE
+    try {
+      const { broadcastEvent } = await import("./sseManager");
+      broadcastEvent("system-alert", {
+        type: "high-memory",
+        message: `Heap at ${heapPct.toFixed(0)}% — prediction cycle skipped, serving cached picks`,
+        heapUsedMb: Math.round(heapUsedMb),
+        heapLimitMb: HEAP_LIMIT_MB,
+        heapUsedPct: Math.round(heapPct),
+        timestamp: new Date().toISOString(),
+      });
+    } catch { /* SSE may not be ready yet */ }
+    return;
+  }
+
   const { getInSeasonSports } = await import("./sportSeasons");
   const sports = getInSeasonSports();
   totalRuns++;
 
-  console.log(`[PrecomputedEngine] Starting prediction cycle #${totalRuns}...`);
+  console.log(`[PrecomputedEngine] Starting prediction cycle #${totalRuns} (heap: ${heapPct.toFixed(0)}%)...`);
 
   for (const sport of sports) {
     try {

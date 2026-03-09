@@ -293,6 +293,17 @@ function formatGameTime(iso?: string): string {
 
 const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
 
+function formatCacheAge(generatedAt?: string): string | null {
+  if (!generatedAt) return null;
+  const ageMs = Date.now() - new Date(generatedAt).getTime();
+  const mins = Math.floor(ageMs / 60_000);
+  if (mins < 10) return null; // fresh enough — no label needed
+  if (mins < 60) return `${mins}m old`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h old`;
+  return `${Math.floor(hrs / 24)}d old`;
+}
+
 function isGameStarted(gameTime?: string): boolean {
   if (!gameTime) return false;
   try {
@@ -355,6 +366,15 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
                     Live
                   </Badge>
                 )}
+                {pick.dataSource !== "live" && (() => {
+                  const age = formatCacheAge(pick.generatedAt);
+                  return age ? (
+                    <span className="text-[10px] text-muted-foreground/60 flex items-center gap-0.5" data-testid={`text-cache-age-${pick.id}`} title="Pick data from cached snapshot">
+                      <Clock className="w-2.5 h-2.5" />
+                      {age}
+                    </span>
+                  ) : null;
+                })()}
                 {pick.gameTime && !gameStarted && (
                   <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
                     <Clock className="w-2.5 h-2.5" />

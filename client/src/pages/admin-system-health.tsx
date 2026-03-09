@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { apiRequest } from "@/lib/queryClient";
+import { useSSE } from "@/hooks/use-sse";
+import { useToast } from "@/hooks/use-toast";
 
 interface CacheEntry {
   hasPicks: boolean;
@@ -140,6 +142,26 @@ export default function AdminSystemHealth() {
     queryFn: () => apiRequest("GET", "/api/admin/system-health").then(r => r.json()),
     refetchInterval: 30_000,
     staleTime: 0,
+  });
+
+  const { toast } = useToast();
+  const lastAlertRef = useRef<number>(0);
+
+  // SSE: listen for high-memory system-alert events and surface as a toast
+  useSSE({
+    onEvent: (event) => {
+      if (event.type !== "system-alert") return;
+      const now = Date.now();
+      if (now - lastAlertRef.current < 5 * 60_000) return; // debounce — once per 5 min
+      lastAlertRef.current = now;
+      toast({
+        title: "⚠ Memory Alert",
+        description: event.data?.message ?? "Server heap usage is high — consider forcing a cache refresh.",
+        variant: "destructive",
+        duration: 10_000,
+      });
+      refetch(); // immediately refresh health data when alert fires
+    },
   });
 
   // Countdown timer
