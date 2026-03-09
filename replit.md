@@ -29,7 +29,7 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Cashout Smart Alerts**: Features like StructureFeedback, Progressive Cashout Calculator (Lock & Roll™), and Line Movement Exit Calculator (Steam Exit™) provide contextual cashout advice.
 - **User Engagement & Personalization**: Offers Personalized Betting Insights, a Consolidated Odds Center, and a persistent bet slip with multi-slip management.
 - **Sors Books Intelligence Hub**: Allows users to manage sportsbooks, track balances, and compare live odds.
-- **Collectible Intelligence Cards**: A trading card system with `system`, `member`, and `admin_seeded` card types, visual effects, and strategy inference on card backs.
+- **Intelligence Cards™** (official product name — also called "Collectible Intelligence Cards" internally): A trading card system with `system`, `member`, and `admin_seeded` card types, visual effects, and strategy inference on card backs. The official name displayed to members is "Intelligence Cards™". Defined in the Help/Glossary page. Card back uses a universal deep-navy (#05070f) background with a grade-colored top header band so flipping the card is visually unmistakable. CSS 3D flip uses separated perspective (outer div) + transformStyle (inner flip div) + explicit `transform: rotateY(0deg)` on front face for cross-browser backface-visibility support.
 - **Research Notes**: Personal notebook functionality for users to save pick analysis.
 - **Platform Guidelines System**: Admin-managed rules for community conduct, card policies, and responsible gambling.
 - **Admin Operational Tools**: Includes Platform Broadcasts, Emergency Controls (Force Refresh Picks, Push SSE, Clear Intelligence Cache), User Detail Panel, and Force Tier Change.

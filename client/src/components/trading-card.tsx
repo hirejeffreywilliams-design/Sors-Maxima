@@ -317,7 +317,10 @@ export function TradingCard({
         style={{
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden" as any,
-          /* Solid opaque base — prevents any bleed-through from back face */
+          /* rotateY(0deg): explicitly places face in 3D context — required for
+             Safari/mobile to correctly honour backface-visibility on BOTH faces */
+          transform: "rotateY(0deg)",
+          /* Solid opaque base — stops any bleed-through from back face */
           backgroundColor: foil.baseBg,
         }}
       >
@@ -708,214 +711,218 @@ export function TradingCard({
         </div>
       </div>
 
-      {/* === BACK === */}
-      {/*
-       * The back face MUST have a fully opaque background so the front face
-       * never bleeds through. We layer: solid baseBg → gradient → overlays.
+      {/* === BACK ===
+       * Universal midnight-navy background (#05070f) — intentionally different
+       * from every front-face gradient so the flip is visually unmistakable.
+       * Both backgroundColor + backgroundImage are set separately (not the
+       * shorthand) so the solid base color is always the opaque fallback layer.
        */}
       <div
-        className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col p-4"
+        className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col"
         style={{
           transform: "rotateY(180deg)",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden" as any,
-          /* Step 1: solid opaque base – the wall that stops bleed-through */
-          backgroundColor: foil.baseBg,
-          /* Step 2: rich gradient on top of the solid base */
-          backgroundImage: `linear-gradient(160deg, ${foil.baseBg} 0%, #07070f 40%, #0d0d1a 60%, ${foil.baseBg} 100%)`,
-          border: `2px solid ${foil.accent}80`,
-          /* Crisp inset highlight gives the back a different "feel" from front */
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.6)`,
+          backgroundColor: "#05070f",
+          backgroundImage: "linear-gradient(160deg, #06080e 0%, #080b18 45%, #070a16 100%)",
+          border: `2px solid ${foil.accent}70`,
         }}
       >
+        {/* Subtle dot texture */}
         <div style={{
           position: "absolute", inset: 0, pointerEvents: "none",
-          backgroundImage: "radial-gradient(circle,rgba(255,255,255,0.04) 1px,transparent 1px)",
-          backgroundSize: "18px 18px",
+          backgroundImage: "radial-gradient(circle,rgba(255,255,255,0.022) 1px,transparent 1px)",
+          backgroundSize: "20px 20px",
         }} />
+
+        {/* === TOP HEADER BAND — the visual separator that screams "you flipped" === */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="flex items-center justify-between px-3 py-2 shrink-0 relative z-10"
           style={{
-            background: `radial-gradient(circle at 50% 40%, ${foil.accent}18 0%, transparent 60%)`,
+            background: `linear-gradient(90deg, ${foil.accent}40 0%, ${foil.accent}20 60%, transparent 100%)`,
+            borderBottom: `1px solid ${foil.accent}55`,
           }}
-        />
-        {/* === BACK CONTENT === */}
+        >
+          <div>
+            <div className="font-black tracking-tighter text-[13px]" style={{ color: foil.accent }}>
+              SORS MAXIMA™
+            </div>
+            <div className="text-[7px] font-bold uppercase tracking-[0.12em] text-white/65">
+              Intelligence Card
+            </div>
+          </div>
+          {/* Grade badge — solid fill for maximum contrast */}
+          <div
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+            style={{
+              background: foil.accent,
+              boxShadow: `0 0 14px ${foil.accent}60`,
+            }}
+          >
+            <span className="font-black text-[13px]" style={{ color: "#000" }}>{safeGrade}</span>
+          </div>
+        </div>
+
+        {/* === CONTENT AREA === */}
         {(() => {
           const odds = card.odds ?? 0;
-          const ev = card.ev ?? 0;
+          const ev   = card.ev ?? 0;
           const conf = card.confidence ?? 0;
-          const bt = (card.betType ?? "").toLowerCase();
+          const bt   = (card.betType ?? "").toLowerCase();
           const implied = odds > 0
             ? Math.round(10000 / (odds + 100))
             : Math.round(Math.abs(odds) / (Math.abs(odds) + 100) * 100);
 
-          const strategy: { name: string; icon: string; color: string; tagline: string; signals: string[] } =
+          const strategy: { name: string; icon: string; color: string; tagline: string; signal: string } =
             odds >= 300
-              ? { name: "LONGSHOT SLEEPER", icon: "💎", color: "#fbbf24", tagline: "Market gap pure profit", signals: ["Price inefficiency", `${implied}% → ${conf}%`] }
+              ? { name: "LONGSHOT SLEEPER", icon: "💎", color: "#fbbf24", tagline: "Market gap — pure profit", signal: `${implied}%→${conf}%` }
               : ev >= 15 && odds > 100
-              ? { name: "STEAM DETECTED", icon: "🔥", color: "#f97316", tagline: "Sharp money in early", signals: ["Sharp action", "Line move"] }
+              ? { name: "STEAM DETECTED",   icon: "🔥", color: "#f97316", tagline: "Sharp money moving in",  signal: "Line move" }
               : odds >= 110 && odds < 300
-              ? { name: "UNDERDOG VALUE", icon: "⚡", color: "#a78bfa", tagline: "Math beats the crowd", signals: ["Market gap", `+${ev}% edge`] }
+              ? { name: "UNDERDOG VALUE",   icon: "⚡", color: "#a78bfa", tagline: "Math beats the crowd",   signal: `+${ev}% edge` }
               : bt !== "moneyline" && bt !== "h2h"
-              ? { name: "ALT-MARKET EDGE", icon: "📐", color: "#2dd4bf", tagline: "Value off the main line", signals: ["Alt-line", `${ev}% EV`] }
+              ? { name: "ALT-MARKET EDGE",  icon: "📐", color: "#2dd4bf", tagline: "Value off the main line", signal: `${ev}% EV` }
               : conf >= 72
-              ? { name: "HIGH CONVICTION", icon: "🎯", color: "#34d399", tagline: "All signals aligned", signals: [`${conf}% conviction`, "Full alignment"] }
-              : { name: "CONTRARIAN FADE", icon: "↩️", color: "#60a5fa", tagline: "Fade public, trust model", signals: ["Public fade", `+${ev}% EV`] };
+              ? { name: "HIGH CONVICTION",  icon: "🎯", color: "#34d399", tagline: "All signals aligned",    signal: `${conf}% conv` }
+              : { name: "CONTRARIAN FADE",  icon: "↩️", color: "#60a5fa", tagline: "Fade public, trust model", signal: `+${ev}% EV` };
 
-          // Confidence arc for SVG: r=44, circumference ≈ 276
-          const circ = 276;
-          const arc = (conf / 100) * circ;
+          // Confidence arc: r=30, circumference = 2π×30 ≈ 188
+          const arcCirc = 188;
+          const arcLen  = (conf / 100) * arcCirc;
 
           return (
-            <div className="relative z-10 w-full h-full flex flex-col gap-2">
+            <div className="relative z-10 flex flex-col flex-1 px-3 pt-2 pb-2 gap-2 overflow-hidden">
 
-              {/* ── Header ── */}
-              <div className="flex items-center justify-between shrink-0">
-                <div>
-                  <div className="font-black tracking-tighter text-[14px]" style={{ color: foil.accent }}>SORS MAXIMA™</div>
-                  <div className="text-[7px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.30)" }}>Intelligence Card</div>
-                </div>
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center border"
-                  style={{ background: `${foil.accent}15`, borderColor: `${foil.accent}50`, boxShadow: `0 0 10px ${foil.accent}30` }}
-                >
-                  <span className="font-black text-[11px]" style={{ color: foil.accent }}>{safeGrade}</span>
-                </div>
+              {/* Pick name + game */}
+              <div className="shrink-0">
+                <div className="text-[11px] font-black text-white leading-tight line-clamp-2">{card.pick}</div>
+                <div className="text-[8px] font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.58)" }}>{card.game}</div>
               </div>
 
-              {/* ── RADAR ART ── unique data visualization */}
+              {/* Radar visualization (compact) */}
               <div
                 className="relative w-full shrink-0 rounded-xl overflow-hidden"
-                style={{ height: 118, background: `radial-gradient(ellipse at 50% 50%, ${foil.accent}12 0%, transparent 65%)`, border: `1px solid ${foil.accent}20` }}
+                style={{
+                  height: 84,
+                  background: `radial-gradient(ellipse at 50% 50%, ${foil.accent}0e 0%, transparent 70%)`,
+                  border: `1px solid ${foil.accent}28`,
+                }}
               >
-                <svg width="100%" height="118" viewBox="0 0 238 118" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="100%" height="84" viewBox="0 0 238 84" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* Corner brackets */}
-                  <rect x="8" y="8" width="14" height="1.2" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="8" y="8" width="1.2" height="14" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="216" y="8" width="14" height="1.2" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="228.8" y="8" width="1.2" height="14" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="8" y="109" width="14" height="1.2" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="8" y="96" width="1.2" height="14" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="216" y="109" width="14" height="1.2" fill={foil.accent} fillOpacity="0.4"/>
-                  <rect x="228.8" y="96" width="1.2" height="14" fill={foil.accent} fillOpacity="0.4"/>
-
-                  {/* Scanning lines — subtle grid */}
-                  <line x1="119" y1="4" x2="119" y2="114" stroke={foil.accent} strokeOpacity="0.07" strokeWidth="0.6"/>
-                  <line x1="24" y1="59" x2="214" y2="59" stroke={foil.accent} strokeOpacity="0.07" strokeWidth="0.6"/>
-
-                  {/* Outer ring */}
-                  <circle cx="119" cy="59" r="44" stroke={foil.accent} strokeOpacity="0.18" strokeWidth="0.8"/>
-                  {/* Tick marks every 30° on outer ring */}
-                  {[0,30,60,90,120,150,180,210,240,270,300,330].map(a => {
-                    const r = (a - 90) * Math.PI / 180;
-                    return <line key={a} x1={119+41*Math.cos(r)} y1={59+41*Math.sin(r)} x2={119+44*Math.cos(r)} y2={59+44*Math.sin(r)} stroke={foil.accent} strokeOpacity="0.35" strokeWidth="1"/>;
+                  {[
+                    [8,8,14,1.2,1.2,14],[216,8,14,1.2,228.8,8],
+                    [8,76,14,1.2,1.2,62],[216,76,14,1.2,228.8,62],
+                  ].map(([x,y,lw,lh,vx,vy],i) => (
+                    <g key={i}>
+                      <rect x={x} y={y} width={lw} height={lh} fill={foil.accent} fillOpacity="0.38"/>
+                      <rect x={vx} y={vy} width={lh} height={lw} fill={foil.accent} fillOpacity="0.38"/>
+                    </g>
+                  ))}
+                  {/* Rings */}
+                  <circle cx="119" cy="42" r="30" stroke={foil.accent} strokeOpacity="0.20" strokeWidth="0.8"/>
+                  <circle cx="119" cy="42" r="20" stroke={foil.accent} strokeOpacity="0.14" strokeWidth="0.6"/>
+                  <circle cx="119" cy="42" r="11" stroke={foil.accent} strokeOpacity="0.30" strokeWidth="0.8"/>
+                  {/* Tick marks */}
+                  {[0,45,90,135,180,225,270,315].map(a => {
+                    const rad = (a - 90) * Math.PI / 180;
+                    return <line key={a}
+                      x1={119 + 27*Math.cos(rad)} y1={42 + 27*Math.sin(rad)}
+                      x2={119 + 30*Math.cos(rad)} y2={42 + 30*Math.sin(rad)}
+                      stroke={foil.accent} strokeOpacity="0.40" strokeWidth="1.2"/>;
                   })}
-
-                  {/* Mid ring */}
-                  <circle cx="119" cy="59" r="30" stroke={foil.accent} strokeOpacity="0.14" strokeWidth="0.6"/>
-
-                  {/* Inner ring */}
-                  <circle cx="119" cy="59" r="17" stroke={foil.accent} strokeOpacity="0.28" strokeWidth="0.8"/>
-
-                  {/* EV signal dots on mid ring */}
-                  {Array.from({ length: Math.min(Math.round(ev / 2.5), 8) }).map((_, i) => {
-                    const a = ((i * 45) - 90) * Math.PI / 180;
-                    return <circle key={i} cx={119+30*Math.cos(a)} cy={59+30*Math.sin(a)} r="2" fill={foil.accent} fillOpacity={0.25 + i * 0.06}/>;
+                  {/* EV dots on mid ring */}
+                  {Array.from({ length: Math.min(Math.round(ev / 3), 6) }).map((_, i) => {
+                    const a = ((i * 60) - 90) * Math.PI / 180;
+                    return <circle key={i}
+                      cx={119 + 20*Math.cos(a)} cy={42 + 20*Math.sin(a)}
+                      r="2" fill={foil.accent} fillOpacity={0.35 + i * 0.08}/>;
                   })}
-
-                  {/* Confidence arc — clockwise from top */}
-                  <circle cx="119" cy="59" r="44"
-                    stroke={foil.accent} strokeWidth="2.5" strokeOpacity="0.65"
+                  {/* Confidence arc */}
+                  <circle cx="119" cy="42" r="30"
+                    stroke={foil.accent} strokeWidth="3" strokeOpacity="0.80"
                     strokeLinecap="round"
-                    strokeDasharray={`${arc} ${circ}`}
-                    transform="rotate(-90 119 59)"
+                    strokeDasharray={`${arcLen} ${arcCirc}`}
+                    transform="rotate(-90 119 42)"
                   />
-
-                  {/* Confidence arc end dot */}
+                  {/* Arc end dot */}
                   {(() => {
                     const a = ((conf / 100) * 360 - 90) * Math.PI / 180;
-                    return <circle cx={119+44*Math.cos(a)} cy={59+44*Math.sin(a)} r="3" fill={foil.accent} fillOpacity="0.9"/>;
+                    return <circle cx={119+30*Math.cos(a)} cy={42+30*Math.sin(a)} r="3.5" fill={foil.accent} fillOpacity="0.95"/>;
                   })()}
-
-                  {/* Center core glow */}
-                  <circle cx="119" cy="59" r="14" fill={foil.accent} fillOpacity="0.06"/>
-                  <circle cx="119" cy="59" r="9" fill={foil.accent} fillOpacity="0.10"/>
-                  <circle cx="119" cy="59" r="4" fill={foil.accent} fillOpacity="0.20"/>
-
-                  {/* Diagonal axis lines */}
-                  <line x1="79" y1="20" x2="159" y2="98" stroke={foil.accent} strokeOpacity="0.06" strokeWidth="0.5"/>
-                  <line x1="159" y1="20" x2="79" y2="98" stroke={foil.accent} strokeOpacity="0.06" strokeWidth="0.5"/>
-
-                  {/* Conf label */}
-                  <text x="119" y="72" textAnchor="middle" fill={foil.accent} fillOpacity="0.55" fontSize="8" fontWeight="bold" fontFamily="monospace">{conf}%</text>
-
-                  {/* Implied vs model labels */}
-                  <text x="30" y="30" fill="white" fillOpacity="0.22" fontSize="6" fontFamily="monospace">MKT {implied}%</text>
-                  <text x="170" y="30" fill={foil.accent} fillOpacity="0.55" fontSize="6" fontFamily="monospace">MDL {conf}%</text>
+                  {/* Center */}
+                  <circle cx="119" cy="42" r="8" fill={foil.accent} fillOpacity="0.07"/>
+                  <circle cx="119" cy="42" r="4" fill={foil.accent} fillOpacity="0.16"/>
+                  {/* Labels */}
+                  <text x="119" y="46" textAnchor="middle" fill={foil.accent} fillOpacity="0.85"
+                    fontSize="8" fontWeight="bold" fontFamily="monospace">{conf}%</text>
+                  <text x="28" y="18" fill="white" fillOpacity="0.40" fontSize="6" fontFamily="monospace">MKT {implied}%</text>
+                  <text x="168" y="18" fill={foil.accent} fillOpacity="0.75" fontSize="6" fontFamily="monospace">MDL {conf}%</text>
                 </svg>
-
-                {/* Sport icon floating in center */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ paddingBottom: 12 }}>
-                  <span style={{ fontSize: 32, lineHeight: 1, filter: `drop-shadow(0 0 10px ${foil.accent}50)` }}>{sportIcon}</span>
+                {/* Sport icon */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <span style={{ fontSize: 26, filter: `drop-shadow(0 0 8px ${foil.accent}55)` }}>{sportIcon}</span>
                 </div>
-
-                {/* EV badge bottom-right of art */}
-                <div className="absolute bottom-2 right-3 flex items-center gap-1 pointer-events-none">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 4px #10b981" }}/>
-                  <span className="text-[7px] font-black tabular-nums" style={{ color: "rgba(52,211,153,0.80)" }}>EV +{ev}%</span>
+                {/* EV badge */}
+                <div className="absolute bottom-1.5 right-2 flex items-center gap-1 pointer-events-none">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#34d399", boxShadow: "0 0 4px #10b981" }}/>
+                  <span className="text-[7px] font-black" style={{ color: "rgba(52,211,153,0.90)" }}>EV +{ev}%</span>
                 </div>
               </div>
 
-              {/* ── Strategy badge — compact ── */}
+              {/* Strategy badge */}
               <div
-                className="w-full rounded-xl px-2.5 py-2 shrink-0"
-                style={{ background: `linear-gradient(135deg, ${strategy.color}12 0%, rgba(0,0,0,0.25) 100%)`, border: `1px solid ${strategy.color}30` }}
+                className="w-full rounded-xl px-2.5 py-1.5 shrink-0 flex items-center gap-2"
+                style={{ background: `${strategy.color}1a`, border: `1px solid ${strategy.color}45` }}
               >
-                <div className="flex items-center gap-2">
-                  <span className="text-[18px] leading-none">{strategy.icon}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[9px] font-black uppercase tracking-wider leading-none" style={{ color: strategy.color }}>{strategy.name}</div>
-                    <div className="text-[8px] mt-0.5 leading-none" style={{ color: `${strategy.color}90` }}>{strategy.tagline}</div>
+                <span className="text-[17px] leading-none shrink-0">{strategy.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[8px] font-black uppercase tracking-wider leading-none" style={{ color: strategy.color }}>
+                    {strategy.name}
                   </div>
-                  <div className="flex flex-col gap-0.5 shrink-0">
-                    {strategy.signals.map(s => (
-                      <span key={s} className="text-[7px] font-black uppercase px-1.5 py-0.5 rounded-full text-right"
-                        style={{ background: `${strategy.color}18`, color: `${strategy.color}CC`, border: `1px solid ${strategy.color}28` }}>
-                        {s}
-                      </span>
-                    ))}
-                  </div>
+                  <div className="text-[7px] mt-0.5 leading-none text-white/65">{strategy.tagline}</div>
                 </div>
+                <span
+                  className="text-[6px] font-black px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap"
+                  style={{ background: `${strategy.color}22`, color: strategy.color, border: `1px solid ${strategy.color}40` }}
+                >
+                  {strategy.signal}
+                </span>
               </div>
 
-              {/* ── Stats grid ── */}
+              {/* Stats grid */}
               <div className="grid grid-cols-4 gap-1 w-full shrink-0">
                 {[
-                  { label: "Grade", value: safeGrade, color: foil.accent },
-                  { label: "Odds", value: odds > 0 ? `+${odds}` : `${odds}`, color: foil.accent },
-                  { label: "Conv", value: `${conf}%`, color: "#34d399" },
-                  { label: "EV", value: `+${ev}%`, color: "#34d399" },
+                  { label: "Grade", value: safeGrade,                      color: foil.accent },
+                  { label: "Odds",  value: odds > 0 ? `+${odds}` : `${odds}`, color: "#fff" },
+                  { label: "Conv",  value: `${conf}%`,                     color: "#34d399" },
+                  { label: "EV",    value: `+${ev}%`,                      color: "#34d399" },
                 ].map(({ label, value, color }) => (
-                  <div key={label} className="rounded-lg py-1.5 text-center" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.09)" }}>
-                    <p className="text-[7px] font-bold uppercase tracking-wide text-white/40">{label}</p>
+                  <div key={label} className="rounded-lg py-1.5 text-center"
+                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.14)" }}>
+                    <p className="text-[6px] font-bold uppercase tracking-wide text-white/55">{label}</p>
                     <p className="text-[10px] font-black mt-0.5 tabular-nums" style={{ color }}>{value}</p>
                   </div>
                 ))}
               </div>
 
-              {/* ── Payout row ── */}
+              {/* Payout row */}
               {ret1 && ret10 && ret100 && (
-                <div className="w-full rounded-xl px-2.5 py-2 shrink-0"
-                  style={{ background: isWin ? "rgba(251,191,36,0.10)" : "rgba(255,255,255,0.03)", border: `1px solid ${isWin ? "rgba(251,191,36,0.40)" : "rgba(255,255,255,0.07)"}` }}>
-                  <div className="text-[7px] font-black uppercase tracking-widest mb-1" style={{ color: isWin ? "rgba(251,191,36,0.60)" : "rgba(255,255,255,0.25)" }}>
-                    {isWin ? "★ This Win Paid" : "If You Bet"}
+                <div className="w-full rounded-xl px-2.5 py-1.5 shrink-0"
+                  style={{
+                    background: isWin ? "rgba(251,191,36,0.10)" : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${isWin ? "rgba(251,191,36,0.45)" : "rgba(255,255,255,0.10)"}`,
+                  }}>
+                  <div className="text-[6px] font-black uppercase tracking-widest mb-1"
+                    style={{ color: isWin ? "rgba(251,191,36,0.80)" : "rgba(255,255,255,0.40)" }}>
+                    {isWin ? "★ This Win Paid" : "Projected Payout"}
                   </div>
                   <div className="flex items-end justify-around">
                     {[{ stake: "$1", val: ret1 }, { stake: "$10", val: ret10 }, { stake: "$100", val: ret100 }].map(({ stake, val }) => val ? (
                       <div key={stake} className="flex flex-col items-center gap-0.5">
-                        <span className="text-[7px] font-black uppercase" style={{ color: isWin ? "rgba(251,191,36,0.45)" : "rgba(255,255,255,0.20)" }}>{stake}</span>
+                        <span className="text-[6px] font-bold text-white/45">{stake}</span>
                         <span className="font-black tabular-nums leading-none"
-                          style={{ fontSize: stake === "$100" ? "16px" : "11px", color: isWin ? "#FCD34D" : "rgba(52,211,153,0.80)", fontFamily: "Georgia, serif" }}>
+                          style={{ fontSize: stake === "$100" ? "14px" : "10px", color: isWin ? "#FCD34D" : "rgba(52,211,153,0.90)", fontFamily: "Georgia, serif" }}>
                           {val}
                         </span>
                       </div>
@@ -924,69 +931,64 @@ export function TradingCard({
                 </div>
               )}
 
-              {/* ── Action Buttons ── */}
+              {/* Share buttons */}
               {collectionId && (
-                <div className="space-y-1.5 shrink-0">
+                <div className="space-y-1 shrink-0">
                   <button
                     onClick={toggleShowcase}
                     disabled={isShowcaseToggling}
                     className={cn(
-                      "w-full px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5",
-                      isPublicShowcase ? "border border-primary/40 text-primary" : "border border-white/10 text-white/50"
+                      "w-full px-3 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 border",
+                      isPublicShowcase ? "border-primary/50 text-primary" : "border-white/12 text-white/55"
                     )}
-                    style={{ background: isPublicShowcase ? "rgba(var(--primary-rgb,34 197 94)/0.08)" : "rgba(255,255,255,0.03)" }}
+                    style={{ background: isPublicShowcase ? "rgba(var(--primary-rgb,34 197 94)/0.10)" : "rgba(255,255,255,0.04)" }}
                   >
-                    {isShowcaseToggling ? "..." : isPublicShowcase ? <><CheckCircle2 className="w-2.5 h-2.5"/>✓ In Community</> : <>📢 Share to Community</>}
+                    {isShowcaseToggling ? "…" : isPublicShowcase
+                      ? <><CheckCircle2 className="w-2.5 h-2.5"/>✓ In Community</>
+                      : <>📢 Share to Community</>}
                   </button>
-
                   {canAccess("whale") ? (
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1">
                       <button
                         onClick={async (e) => { e.stopPropagation(); const url = `${window.location.origin}/c/${collectionId}`; await navigator.clipboard.writeText(url); setCopiedProof("link"); toast({ title: "Proof link copied!" }); setTimeout(() => setCopiedProof(null), 2500); }}
                         data-testid={`button-copy-proof-${collectionId}`}
-                        className="flex-1 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1 border transition-colors"
-                        style={{ background: "rgba(255,255,255,0.03)", borderColor: copiedProof === "link" ? "rgba(34,197,94,0.40)" : "rgba(255,255,255,0.10)", color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.45)" }}
+                        className="flex-1 px-2 py-1.5 rounded-xl text-[7px] font-black uppercase tracking-wider flex items-center justify-center gap-1 border"
+                        style={{ background: "rgba(255,255,255,0.04)", borderColor: copiedProof === "link" ? "rgba(34,197,94,0.55)" : "rgba(255,255,255,0.14)", color: copiedProof === "link" ? "#22c55e" : "rgba(255,255,255,0.60)" }}
                       >
-                        {copiedProof === "link" ? <><CheckCircle2 className="w-2.5 h-2.5"/>Copied!</> : <><Copy className="w-2.5 h-2.5"/>Proof Link</>}
+                        {copiedProof === "link" ? <><CheckCircle2 className="w-2.5 h-2.5"/>Copied!</> : <><Copy className="w-2.5 h-2.5"/>Proof</>}
                       </button>
                       <button
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          const url = `${window.location.origin}/c/${collectionId}`;
-                          const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`;
-                          const resultLabel = isWin ? "✅ CALLED IT" : !card.settledResult ? "⏳ LIVE" : "✗ NO HIT";
-                          const msg = [`🎯 **SORS MAXIMA™ VERIFIED PICK**`, `**${card.pick}**`, `Grade: ${card.grade} | ${card.sport} | ${oddsStr}`, `Result: ${resultLabel}`, `🔗 ${url}`].join("\n");
-                          await navigator.clipboard.writeText(msg);
-                          setCopiedProof("discord");
-                          toast({ title: "Discord message copied!" });
-                          setTimeout(() => setCopiedProof(null), 2500);
-                        }}
+                        onClick={async (e) => { e.stopPropagation(); const url = `${window.location.origin}/c/${collectionId}`; const oddsStr = card.odds > 0 ? `+${card.odds}` : `${card.odds}`; const resultLabel = isWin ? "✅ CALLED IT" : !card.settledResult ? "⏳ LIVE" : "✗ NO HIT"; const msg = [`🎯 **SORS MAXIMA™ VERIFIED PICK**`, `**${card.pick}**`, `Grade: ${card.grade} | ${card.sport} | ${oddsStr}`, `Result: ${resultLabel}`, `🔗 ${url}`].join("\n"); await navigator.clipboard.writeText(msg); setCopiedProof("discord"); toast({ title: "Discord message copied!" }); setTimeout(() => setCopiedProof(null), 2500); }}
                         data-testid={`button-copy-discord-${collectionId}`}
-                        className="flex-1 px-2 py-1.5 rounded-xl text-[8px] font-black uppercase tracking-wider flex items-center justify-center gap-1 border transition-colors"
-                        style={{ background: copiedProof === "discord" ? "rgba(34,197,94,0.08)" : "rgba(var(--primary-rgb,34 197 94)/0.05)", borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.40)" : "rgba(var(--primary-rgb,34 197 94)/0.25)", color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))" }}
+                        className="flex-1 px-2 py-1.5 rounded-xl text-[7px] font-black uppercase tracking-wider flex items-center justify-center gap-1 border"
+                        style={{ background: copiedProof === "discord" ? "rgba(34,197,94,0.08)" : "rgba(var(--primary-rgb,34 197 94)/0.05)", borderColor: copiedProof === "discord" ? "rgba(34,197,94,0.55)" : "rgba(var(--primary-rgb,34 197 94)/0.30)", color: copiedProof === "discord" ? "#22c55e" : "hsl(var(--primary))" }}
                       >
                         {copiedProof === "discord" ? <><CheckCircle2 className="w-2.5 h-2.5"/>Copied!</> : <><MessageSquare className="w-2.5 h-2.5"/>Discord</>}
                       </button>
                     </div>
                   ) : (
-                    <p className="text-center text-[7px] text-amber-400/50 font-bold uppercase tracking-wider">👑 Max tier unlocks Discord Proof</p>
+                    <p className="text-center text-[6px] text-amber-400/60 font-bold uppercase tracking-wider">👑 Max tier: Discord Proof</p>
                   )}
                 </div>
               )}
 
-              {/* ── Footer ── */}
-              <div className="flex items-center justify-between w-full mt-auto pt-1.5 border-t shrink-0" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                <span className="text-[7px] font-mono" style={{ color: `${foil.accent}40` }}>
+              {/* Footer */}
+              <div className="flex items-center justify-between w-full mt-auto pt-1.5 border-t shrink-0"
+                style={{ borderColor: "rgba(255,255,255,0.10)" }}>
+                <span className="text-[7px] font-mono text-white/35">
                   {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "SORS MAXIMA™"}
                 </span>
                 {isSettled ? (
                   isWin
-                    ? <div className="flex items-center gap-1"><CheckCircle2 className="w-2.5 h-2.5 text-emerald-400"/><span className="text-[7px] font-black uppercase text-emerald-400">Called It ✓</span></div>
-                    : <span className="text-[7px] font-black uppercase text-white/22">No Hit</span>
+                    ? <div className="flex items-center gap-1">
+                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400"/>
+                        <span className="text-[7px] font-black uppercase text-emerald-400">Called It ✓</span>
+                      </div>
+                    : <span className="text-[7px] font-black uppercase text-white/45">No Hit</span>
                 ) : (
                   <div className="flex items-center gap-1 animate-pulse">
                     <div className="w-1 h-1 rounded-full" style={{ background: foil.accent }}/>
-                    <span className="text-[7px] font-black uppercase" style={{ color: `${foil.accent}90` }}>Live</span>
+                    <span className="text-[7px] font-black uppercase" style={{ color: `${foil.accent}95` }}>Live</span>
                   </div>
                 )}
               </div>
