@@ -916,6 +916,290 @@ function GameSection({ game, sport, addLeg, removeLeg, slipLegIds }: {
   );
 }
 
+const MARKET_PRIORITY = [
+  "player_points", "player_points_ncaab", "player_points_nhl",
+  "player_rebounds", "player_rebounds_ncaab",
+  "player_assists", "player_assists_ncaab", "player_assists_nhl",
+  "player_threes",
+  "player_points_rebounds_assists",
+  "player_goals", "player_shots_on_goal", "goalie_saves",
+  "player_blocks", "player_steals", "player_turnovers",
+];
+
+const MARKET_SHORT: Record<string, string> = {
+  player_points: "PTS", player_points_ncaab: "PTS", player_points_nhl: "PTS",
+  player_rebounds: "REB", player_rebounds_ncaab: "REB",
+  player_assists: "AST", player_assists_ncaab: "AST", player_assists_nhl: "AST",
+  player_threes: "3PT",
+  player_points_rebounds_assists: "PRA",
+  player_goals: "GOL", player_shots_on_goal: "SOG", goalie_saves: "SAV",
+  player_blocks: "BLK", player_steals: "STL", player_turnovers: "TO",
+};
+
+function CompactPropRow({
+  player, prop, sport, addLeg, removeLeg, overInSlip, underInSlip,
+}: {
+  player: GamePlayer;
+  prop: MarketProp;
+  sport: string;
+  addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
+  overInSlip: boolean;
+  underInSlip: boolean;
+}) {
+  const isRec = prop.recommendation !== "push";
+  const recOver = prop.recommendation === "over";
+  const recUnder = prop.recommendation === "under";
+  const overId = `prop-${player.playerName}-${prop.market}-over`.replace(/\s+/g, "-").toLowerCase();
+  const underId = `prop-${player.playerName}-${prop.market}-under`.replace(/\s+/g, "-").toLowerCase();
+
+  const buildLeg = (side: "over" | "under") => {
+    const odds = side === "over" ? prop.overOdds : prop.underOdds;
+    const decOdds = odds < 0 ? 1 + 100 / Math.abs(odds) : 1 + odds / 100;
+    return {
+      id: side === "over" ? overId : underId,
+      team: player.playerName,
+      opponent: `${prop.marketLabel} ${prop.line}`,
+      market: "player_prop" as any,
+      outcome: `${player.playerName} ${side === "over" ? "Over" : "Under"} ${prop.line} ${prop.marketLabel}`,
+      decimalOdds: decOdds,
+      americanOdds: odds,
+      addedFrom: "Player Props",
+      addedAt: new Date().toISOString(),
+      sport,
+      confidence: prop.confidence,
+      evPercent: prop.edge,
+      reasoning: prop.reasoning,
+    };
+  };
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-2.5" data-testid={`row-compact-${player.playerName}-${prop.market}`}>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="text-sm font-semibold leading-tight" style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {player.playerName}
+          </span>
+          {player.injury && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
+          {isRec && (
+            <span className={`text-[8px] font-bold px-1 py-0.5 rounded shrink-0 ${
+              recOver ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-600 dark:text-red-400"
+            }`}>
+              {recOver ? "↑" : "↓"} REC
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
+          {player.team && <span style={{ maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{player.team}</span>}
+          {player.position && <><span className="opacity-40">·</span><span>{player.position}</span></>}
+          {prop.seasonAvg !== null && prop.seasonAvg !== undefined && (
+            <><span className="opacity-40">·</span><span className="font-mono">avg {prop.seasonAvg}</span></>
+          )}
+        </div>
+      </div>
+
+      <div className="text-center shrink-0 w-11">
+        <div className="text-base font-bold font-mono leading-tight">{prop.line}</div>
+        <div className="text-[9px] text-muted-foreground leading-tight">{prop.confidence}%</div>
+      </div>
+
+      <div className="flex gap-1 shrink-0">
+        <button
+          onClick={() => overInSlip ? removeLeg(overId) : addLeg(buildLeg("over"))}
+          className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
+            overInSlip
+              ? "border-emerald-500 bg-emerald-500/15 text-emerald-500"
+              : recOver
+              ? "border-emerald-500/50 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15"
+              : "border-border text-muted-foreground hover:border-emerald-500/30 hover:text-emerald-600 hover:bg-emerald-500/5"
+          }`}
+          style={{ minWidth: 52 }}
+          data-testid={`button-compact-over-${player.playerName}-${prop.market}`}
+          aria-label={overInSlip ? `Remove ${player.playerName} Over from slip` : `Add ${player.playerName} Over ${prop.line}`}
+        >
+          <ArrowUp className="w-3 h-3" />
+          <span className="text-[9px] font-bold leading-tight">OVR</span>
+          <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.overOdds)}</span>
+          {overInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
+        </button>
+        <button
+          onClick={() => underInSlip ? removeLeg(underId) : addLeg(buildLeg("under"))}
+          className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
+            underInSlip
+              ? "border-red-500 bg-red-500/15 text-red-500"
+              : recUnder
+              ? "border-red-500/50 bg-red-500/8 text-red-600 dark:text-red-400 hover:bg-red-500/15"
+              : "border-border text-muted-foreground hover:border-red-500/30 hover:text-red-600 hover:bg-red-500/5"
+          }`}
+          style={{ minWidth: 52 }}
+          data-testid={`button-compact-under-${player.playerName}-${prop.market}`}
+          aria-label={underInSlip ? `Remove ${player.playerName} Under from slip` : `Add ${player.playerName} Under ${prop.line}`}
+        >
+          <ArrowDown className="w-3 h-3" />
+          <span className="text-[9px] font-bold leading-tight">UND</span>
+          <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.underOdds)}</span>
+          {underInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function GamePropGrid({ game, sport, addLeg, removeLeg, slipLegIds }: {
+  game: GameData;
+  sport: string;
+  addLeg: (leg: any) => boolean;
+  removeLeg: (legId: string) => void;
+  slipLegIds: Set<string>;
+}) {
+  const allMarkets = useMemo<[string, string][]>(() => {
+    const marketMap = new Map<string, string>();
+    game.players.forEach(p => {
+      p.markets.forEach(m => {
+        if (!marketMap.has(m.market)) marketMap.set(m.market, m.marketLabel);
+      });
+    });
+    return [...marketMap.entries()].sort((a, b) => {
+      const ai = MARKET_PRIORITY.indexOf(a[0]);
+      const bi = MARKET_PRIORITY.indexOf(b[0]);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
+  }, [game]);
+
+  const [selectedMarket, setSelectedMarket] = useState<string>(() => allMarkets[0]?.[0] ?? "");
+
+  const isLive = game.status.state === "in";
+
+  const playersForMarket = useMemo(
+    () => game.players.filter(p => p.markets.some(m => m.market === selectedMarket)),
+    [game, selectedMarket]
+  );
+
+  const legCountForGame = useMemo(() => {
+    let count = 0;
+    game.players.forEach(p => {
+      p.markets.forEach(m => {
+        const overId = `prop-${p.playerName}-${m.market}-over`.replace(/\s+/g, "-").toLowerCase();
+        const underId = `prop-${p.playerName}-${m.market}-under`.replace(/\s+/g, "-").toLowerCase();
+        if (slipLegIds.has(overId) || slipLegIds.has(underId)) count++;
+      });
+    });
+    return count;
+  }, [game, slipLegIds]);
+
+  if (allMarkets.length === 0) return null;
+
+  const gameTime = new Date(game.gameTime);
+  const timeStr = gameTime.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const dateStr = gameTime.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+
+  return (
+    <Card className="overflow-hidden" data-testid={`card-game-${game.gameId}`}>
+      <div className="flex items-center gap-3 px-3 py-2.5 border-b bg-muted/10">
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 shrink-0">
+            {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-5 h-5" />}
+            <span className="text-sm font-bold">{game.awayTeam.abbreviation}</span>
+          </div>
+          <span className="text-[10px] text-muted-foreground">@</span>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-5 h-5" />}
+            <span className="text-sm font-bold">{game.homeTeam.abbreviation}</span>
+          </div>
+          <div className="ml-1 min-w-0">
+            {isLive ? (
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-red-500/10 border-red-500/30 text-red-500 animate-pulse">
+                LIVE {game.status.detail}
+              </Badge>
+            ) : (
+              <span className="text-[10px] text-muted-foreground truncate block">{dateStr} · {timeStr}</span>
+            )}
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {legCountForGame > 0 && (
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-primary/10 border-primary/30 text-primary">
+              {legCountForGame} in slip
+            </Badge>
+          )}
+          <span className="text-[10px] text-muted-foreground">
+            {game.players.filter(p => p.markets.length > 0).length}P · {allMarkets.length}M
+          </span>
+        </div>
+      </div>
+
+      <div className="flex gap-1.5 overflow-x-auto px-3 py-2 border-b" style={{ scrollbarWidth: "none" }}>
+        {allMarkets.map(([marketKey, marketLabel]) => {
+          const short = MARKET_SHORT[marketKey] || marketLabel.slice(0, 3).toUpperCase();
+          const active = selectedMarket === marketKey;
+          const cnt = game.players.filter(p => p.markets.some(m => m.market === marketKey)).length;
+          return (
+            <button
+              key={marketKey}
+              onClick={() => setSelectedMarket(marketKey)}
+              data-testid={`button-market-tab-${marketKey}`}
+              className={`shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold transition-all ${
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+              }`}
+            >
+              {short}
+              <span className={`text-[9px] rounded-full px-1 min-w-[14px] text-center leading-tight ${
+                active ? "bg-white/25 text-white" : "bg-background/60"
+              }`}>
+                {cnt}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="flex items-center gap-2 px-3 py-1 bg-muted/10 border-b">
+        <div className="flex-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Player</div>
+        <div className="w-11 text-center text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Line</div>
+        <div className="flex gap-1 shrink-0" style={{ minWidth: 108 }}>
+          <div className="text-center text-[9px] font-bold uppercase tracking-wider text-emerald-500/80" style={{ minWidth: 52 }}>Over</div>
+          <div className="text-center text-[9px] font-bold uppercase tracking-wider text-red-500/80" style={{ minWidth: 52 }}>Under</div>
+        </div>
+      </div>
+
+      <div className="divide-y divide-border/30">
+        {playersForMarket.length === 0 ? (
+          <p className="text-center text-sm text-muted-foreground py-8">No players with this prop in this game</p>
+        ) : (
+          playersForMarket.map(player => {
+            const prop = player.markets.find(m => m.market === selectedMarket)!;
+            const overId = `prop-${player.playerName}-${selectedMarket}-over`.replace(/\s+/g, "-").toLowerCase();
+            const underId = `prop-${player.playerName}-${selectedMarket}-under`.replace(/\s+/g, "-").toLowerCase();
+            return (
+              <CompactPropRow
+                key={player.playerName}
+                player={player}
+                prop={prop}
+                sport={sport}
+                addLeg={addLeg}
+                removeLeg={removeLeg}
+                overInSlip={slipLegIds.has(overId)}
+                underInSlip={slipLegIds.has(underId)}
+              />
+            );
+          })
+        )}
+      </div>
+
+      <div className="px-3 py-1.5 border-t bg-muted/10 flex items-center gap-2">
+        <span className="text-[10px] text-muted-foreground flex-1">
+          {playersForMarket.length} player{playersForMarket.length !== 1 ? "s" : ""} with this prop · tap a category above to switch
+        </span>
+        {game.dataSource && (
+          <span className="text-[9px] text-muted-foreground/50">{game.dataSource}</span>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function gradeColor(grade: string): string {
   if (grade.startsWith("A")) return "text-emerald-500";
   if (grade.startsWith("B")) return "text-amber-500";
@@ -1548,7 +1832,7 @@ export default function PlayerPropsPage() {
             ) : (
               <div className="space-y-4">
                 {filteredGames.map((game) => (
-                  <GameSection
+                  <GamePropGrid
                     key={game.gameId}
                     game={game}
                     sport={selectedSport}
