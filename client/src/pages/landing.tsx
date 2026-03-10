@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -199,6 +200,16 @@ const pricingTiers = [
 export default function LandingPage() {
   useSEO({ title: "Sors Maxima — Private Betting Intelligence", description: "Exclusive sports betting intelligence platform. 46 analysis factors, real-time data, advanced simulations. Members only." });
 
+  const { data: trackStats } = useQuery<{ settledPicks: number }>({
+    queryKey: ["/api/track-record"],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const picksTrackedLabel = trackStats?.settledPicks
+    ? `${trackStats.settledPicks.toLocaleString()}+ Picks Tracked`
+    : "3,800+ Picks Tracked";
+
   return (
     <div className="min-h-screen bg-background">
       {/* ── Navigation Bar ── */}
@@ -233,17 +244,20 @@ export default function LandingPage() {
       <section className="border-y bg-muted/30" data-testid="section-trust-signals">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {trustSignals.map((signal) => (
-              <div key={signal.label} className="flex items-center gap-3 justify-center lg:justify-start" data-testid={`trust-signal-${signal.label.toLowerCase().replace(/\s+/g, "-")}`}>
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <signal.icon className="w-5 h-5 text-primary" />
+            {trustSignals.map((signal) => {
+              const displayLabel = signal.label.includes("Picks Tracked") ? picksTrackedLabel : signal.label;
+              return (
+                <div key={signal.label} className="flex items-center gap-3 justify-center lg:justify-start" data-testid={`trust-signal-${signal.label.toLowerCase().replace(/\s+/g, "-")}`}>
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <signal.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-sm font-bold leading-none">{displayLabel}</div>
+                    <div className="text-xs text-muted-foreground">{signal.description}</div>
+                  </div>
                 </div>
-                <div className="text-left">
-                  <div className="text-sm font-bold leading-none">{signal.label}</div>
-                  <div className="text-xs text-muted-foreground">{signal.description}</div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

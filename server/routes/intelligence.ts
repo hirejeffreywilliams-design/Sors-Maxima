@@ -4,7 +4,7 @@ import { generateIntelligenceFeed, getUnifiedSnapshot, getHubStatus } from "../u
 import { generateInternationalFeed, getLeagueEmoji } from "../internationalSportsEngine";
 import { generateMMAFeed, generateNCAABFutures } from "../mma-engine";
 import { getStrategyTemplates, analyzeTicket, getSmartSuggestions, getStrategyById } from "../strategyAdvisorEngine";
-import { registerSSEClient, getSSEStatus } from "../sseManager";
+import { registerSSEClient, getSSEStatus, broadcastEvent } from "../sseManager";
 import { getPrecomputedPredictions, getPrecomputedCache, getEngineStatus as getPrecomputedEngineStatus, buildOptimalTickets, buildMatchupTickets, buildLifeChangerTicket, getAlternativePicks, type PrecomputedSnapshot, type PrecomputedPick, type OptimalTicket, type MatchupTicket } from "../precomputedPredictionsEngine";
 import { getRecentPropMovements, getSharpPropAlerts, getPropMovementsForPlayer } from "../notificationEngine";
 import { isPickReleasedForTier, diversifyPicksForUser, getCapacityStatus, recordTail, getProtectionStats, getPickReleaseTime } from "../pickProtectionEngine";
@@ -1359,6 +1359,14 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
   // GET /api/lct-track-record — public LCT performance history
   app.get("/api/lct-track-record", async (_req: Request, res: Response) => {
     try {
+      // Auto-expire LCTs that are still pending after 3 days — results should be known by then
+      await db.execute(drizzleSql`
+        UPDATE life_changer_log
+        SET outcome = 'expired', settled_at = NOW()
+        WHERE outcome = 'pending'
+          AND date < (CURRENT_DATE - INTERVAL '3 days')
+      `);
+
       const rows = await db.execute(drizzleSql`
         SELECT id, date, ticket_id, legs, total_legs, outcome, won_legs, settled_at, minted_card_id, created_at
         FROM life_changer_log
@@ -1498,6 +1506,15 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
           console.error("[LCT] Auto-mint failed:", mintErr.message);
         }
       }
+
+      // Broadcast track-record-update so all connected clients invalidate their cache immediately
+      broadcastEvent("track-record-update", {
+        type: "lct-settled",
+        date: lct.date,
+        outcome,
+        mintedCard: mintedCard?.id ?? null,
+        timestamp: new Date().toISOString(),
+      });
 
       res.json({ success: true, outcome, mintedCard });
     } catch (err: any) {

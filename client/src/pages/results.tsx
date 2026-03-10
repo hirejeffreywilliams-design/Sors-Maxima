@@ -1,4 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import { useSSE } from "@/hooks/use-sse";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -110,6 +113,17 @@ export default function Results() {
     description:
       "Verified track record of the Sors Maxima 46-Factor Intelligence Model™ — 664 settled picks, 53.1% win rate, live calibration data.",
   });
+
+  const qc = useQueryClient();
+
+  const handleSSEEvent = useCallback((event: { type: string }) => {
+    if (event.type === "track-record-update") {
+      qc.invalidateQueries({ queryKey: ["/api/track-record"] });
+      qc.invalidateQueries({ queryKey: ["/api/lct-track-record"] });
+    }
+  }, [qc]);
+
+  useSSE({ onEvent: handleSSEEvent });
 
   const { data: track } = useQuery<TrackRecord>({
     queryKey: ["/api/track-record"],

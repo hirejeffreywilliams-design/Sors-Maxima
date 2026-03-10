@@ -1,5 +1,6 @@
 import * as React from "react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { useSSE } from "@/hooks/use-sse";
 import { PageHero } from "@/components/page-hero";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -75,6 +76,15 @@ export default function TrackRecordPage() {
   });
 
   const qc = useQueryClient();
+
+  const handleSSEEvent = useCallback((event: { type: string }) => {
+    if (event.type === "track-record-update") {
+      qc.invalidateQueries({ queryKey: ["/api/track-record"] });
+      qc.invalidateQueries({ queryKey: ["/api/lct-track-record"] });
+    }
+  }, [qc]);
+
+  useSSE({ onEvent: handleSSEEvent });
 
   const { data, isLoading } = useQuery<TrackRecord>({
     queryKey: ["/api/track-record"],
