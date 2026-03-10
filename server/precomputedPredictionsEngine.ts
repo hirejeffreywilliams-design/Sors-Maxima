@@ -32,6 +32,7 @@ import { getCachedMMAFights, type MMAFight } from "./mma-engine";
 import { enrichPicksWithInsights, injectCachedInsights, evictStaleInsights } from "./pick-insight-engine";
 import { getMCVarianceAdjustment, getMCStackedWeight, getMCBiasCorrection, recordMCPrediction } from "./mcStackedLearner";
 import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } from "./unifiedStackingMetaLearner";
+import { getPatternBoost } from "./acceleratedPatternEngine";
 import { getTeamFormData } from "./teamHistoricalFormEngine";
 import { getTrackRecord } from "./calibrationEngine";
 import type { Sport } from "@shared/schema";
@@ -1283,6 +1284,20 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         }
       }
 
+      // ── Accelerated Pattern Intelligence Engine™ ───────────────────────────
+      // Mines all 600+ historical picks to find factor-combination win rates.
+      // Applies a data-driven confidence boost/penalty based on how similar
+      // picks have historically performed. Re-mines every 15 min.
+      const patternBoostAmt = getPatternBoost(sport, bet.betType, bet.odds, confidence, ev);
+      if (patternBoostAmt !== 0) {
+        confidence = Math.min(getConfidenceCeiling(), Math.max(22, confidence + patternBoostAmt));
+        if (patternBoostAmt > 0) {
+          mappedFactors.push({ name: "Pattern Intelligence Edge™", impact: patternBoostAmt, direction: "positive" });
+        } else {
+          mappedFactors.push({ name: "Pattern Risk Signal™", impact: Math.abs(patternBoostAmt), direction: "negative" });
+        }
+      }
+
       // Add sport-specific factors from official stats APIs
       try {
         if (sport === "NHL" && homeNHLStats && awayNHLStats) {
@@ -1735,11 +1750,17 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
       awayMoneyline: vp.awayMoneyline || undefined,
     };
     const fusion = analyzeLeg(sport, vp.description || vp.game, vp.odds || -110, { hasRealOdds: !!vp.hasRealOdds }, vpMarketCtx);
-    const confidence = Math.min(getConfidenceCeiling(), Math.max(22, fusion.confidence));
-    const impliedProb = (vp.odds || -110) < 0 ? Math.abs(vp.odds || -110) / (Math.abs(vp.odds || -110) + 100) : 100 / ((vp.odds || -110) + 100);
-    const vpFusionWinFrac = fusion.winProbability && fusion.winProbability > 0
-      ? Math.min(0.92, Math.max(0.08, fusion.winProbability / 100))
-      : null;
+    const vpBetTypeRaw = vp.betType || "moneyline";
+    const vpOddsNum = vp.odds || -110;
+    const vpBaseConf = Math.min(getConfidenceCeiling(), Math.max(22, fusion.confidence));
+    const vpImpliedProb0 = vpOddsNum < 0 ? Math.abs(vpOddsNum) / (Math.abs(vpOddsNum) + 100) : 100 / (vpOddsNum + 100);
+    const vpFusionWinFrac0 = fusion.winProbability && fusion.winProbability > 0 ? Math.min(0.92, Math.max(0.08, fusion.winProbability / 100)) : null;
+    const vpTrueProb0 = vpFusionWinFrac0 ?? vpBaseConf / 100;
+    const vpEv0 = ((vpTrueProb0 * (1 / vpImpliedProb0 - 1)) - (1 - vpTrueProb0)) * 100;
+    const vpPatternBoost = getPatternBoost(sport, vpBetTypeRaw, vpOddsNum, vpBaseConf, vpEv0);
+    const confidence = Math.min(getConfidenceCeiling(), Math.max(22, vpBaseConf + vpPatternBoost));
+    const impliedProb = vpImpliedProb0;
+    const vpFusionWinFrac = vpFusionWinFrac0;
     const trueProb = vpFusionWinFrac ?? confidence / 100;
     const ev = ((trueProb * (1 / impliedProb - 1)) - (1 - trueProb)) * 100;
 

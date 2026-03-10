@@ -5710,6 +5710,8 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
 
       const { getEngineStatus } = await import("../precomputedPredictionsEngine");
       const engine = getEngineStatus();
+      const { getAcceleratedPatternStatus } = await import("../acceleratedPatternEngine");
+      const patternEngine = getAcceleratedPatternStatus();
 
       // Nearest upcoming game across all cached sports
       let nearestGameMs: number | null = null;
@@ -5750,6 +5752,7 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
           ...engine,
           intervalLabel,
         },
+        patternEngine,
         oddsApiRemaining,
         nodeVersion: process.version,
         platform: process.platform,

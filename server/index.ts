@@ -34,6 +34,7 @@ import { generateInternationalFeed } from "./internationalSportsEngine";
 import { runMigrations } from "./dbMigrations";
 import { startQualityWatchdog } from "./qualityWatchdog";
 import { startAutonomousLearningEngine } from "./autonomousLearningEngine";
+import { startAcceleratedPatternEngine } from "./acceleratedPatternEngine";
 import { startEarlySettlementEngine } from "./earlySettlementEngine";
 import { startSharpSignalDetector } from "./sharpSignalDetector";
 import { pool } from "./db";
@@ -312,6 +313,7 @@ function startEnginesPhased(): void {
   // boot so they don't compete with user-facing engines during the critical
   // first-load window. Memory pressure on a 512 MB heap was hitting 91% because
   // these were all loading within the first 2.5 minutes.
+  safeStart("Accelerated Pattern Engine", startAcceleratedPatternEngine, 90_000);  // 1.5 min — mines before prediction cycles
   safeStart("Continuous Learning Engine", startContinuousLearning, 100_000);
   safeStart("Learning Orchestrator", startContinuousLearningOrchestrator, 105_000);
   safeStart("Community Pattern Engine", initCommunityPatternEngine, 360_000);   // 6 min

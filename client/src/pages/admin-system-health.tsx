@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, Activity, Cpu, Clock, RefreshCw, CheckCircle2,
   AlertTriangle, XCircle, Database, Zap, Timer, BarChart3,
-  Server, Globe, TrendingUp,
+  Server, Globe, TrendingUp, Brain, ChevronUp, ChevronDown,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { apiRequest } from "@/lib/queryClient";
@@ -47,11 +47,31 @@ interface MemoryStatus {
   status: "healthy" | "warning" | "critical";
 }
 
+interface PatternCell {
+  key: string;
+  winRate: number;
+  total: number;
+  boost?: number;
+  penalty?: number;
+}
+
+interface PatternEngineStatus {
+  patternCount: number;
+  totalSettled: number;
+  lastMined: string | null;
+  cycleCount: number;
+  topWinPatterns: PatternCell[];
+  topLosePatterns: PatternCell[];
+  sportAccuracy: Record<string, { wins: number; total: number; winRate: number }>;
+  marketAccuracy: Record<string, { wins: number; total: number; winRate: number }>;
+}
+
 interface SystemHealth {
   timestamp: string;
   uptime: number;
   memory: MemoryStatus;
   engine: EngineStatus;
+  patternEngine?: PatternEngineStatus;
   oddsApiRemaining: number | null;
   nodeVersion: string;
   platform: string;
@@ -389,6 +409,119 @@ export default function AdminSystemHealth() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Accelerated Pattern Intelligence Engine™ */}
+        <Card data-testid="card-pattern-engine">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Brain className="w-4 h-4 text-violet-400" />
+              Accelerated Pattern Intelligence Engine™
+              {health?.patternEngine && (
+                <Badge variant="outline" className="ml-auto text-xs bg-violet-500/10 text-violet-300 border-violet-500/20">
+                  {health.patternEngine.cycleCount > 0 ? `Cycle #${health.patternEngine.cycleCount}` : "Starting…"}
+                </Badge>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="space-y-2">{[1,2].map(i => <Skeleton key={i} className="h-10 w-full" />)}</div>
+            ) : !health?.patternEngine || health.patternEngine.totalSettled < 5 ? (
+              <p className="text-muted-foreground text-sm text-center py-6">Engine starting — mining historical picks…</p>
+            ) : (
+              <div className="space-y-4">
+                {/* Summary stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <div className="text-xs text-muted-foreground mb-1">Settled Picks Mined</div>
+                    <div className="font-bold text-lg" data-testid="value-pattern-settled">{health.patternEngine.totalSettled.toLocaleString()}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <div className="text-xs text-muted-foreground mb-1">Pattern Cells</div>
+                    <div className="font-bold text-lg" data-testid="value-pattern-count">{health.patternEngine.patternCount.toLocaleString()}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <div className="text-xs text-muted-foreground mb-1">Learning Cycles</div>
+                    <div className="font-bold text-lg" data-testid="value-pattern-cycles">{health.patternEngine.cycleCount}</div>
+                  </div>
+                  <div className="p-3 rounded-lg bg-muted/40">
+                    <div className="text-xs text-muted-foreground mb-1">Last Mined</div>
+                    <div className="font-semibold text-sm" data-testid="value-pattern-last">{timeAgo(health.patternEngine.lastMined)}</div>
+                    <div className="text-xs text-muted-foreground">refreshes every 15m</div>
+                  </div>
+                </div>
+
+                {/* Sport accuracy breakdown */}
+                {Object.keys(health.patternEngine.sportAccuracy).length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-muted-foreground uppercase mb-2">Sport Accuracy (Historical)</div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {Object.entries(health.patternEngine.sportAccuracy)
+                        .sort(([,a],[,b]) => b.winRate - a.winRate)
+                        .map(([sport, acc]) => (
+                          <div key={sport} className="flex items-center justify-between p-2 rounded border border-border bg-muted/20" data-testid={`row-pattern-sport-${sport}`}>
+                            <span className="text-xs font-semibold">{sport}</span>
+                            <div className="text-right">
+                              <span className={`text-xs font-bold ${acc.winRate >= 55 ? "text-emerald-400" : acc.winRate >= 48 ? "text-yellow-400" : "text-red-400"}`}>
+                                {acc.winRate}%
+                              </span>
+                              <span className="text-xs text-muted-foreground ml-1">({acc.total})</span>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Top winning patterns */}
+                {health.patternEngine.topWinPatterns.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-emerald-400 uppercase mb-2 flex items-center gap-1">
+                      <ChevronUp className="w-3 h-3" />Top Winning Patterns (Confidence Boost)
+                    </div>
+                    <div className="space-y-1">
+                      {health.patternEngine.topWinPatterns.slice(0, 5).map((p, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-emerald-500/5 border border-emerald-500/10" data-testid={`row-win-pattern-${i}`}>
+                          <span className="font-mono text-muted-foreground truncate max-w-[60%]">{p.key}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-emerald-400 font-semibold">{p.winRate}% W</span>
+                            <Badge variant="outline" className="text-xs py-0 bg-emerald-500/10 text-emerald-300 border-emerald-500/20">
+                              +{p.boost} conf
+                            </Badge>
+                            <span className="text-muted-foreground">n={p.total}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Top losing patterns */}
+                {health.patternEngine.topLosePatterns.length > 0 && (
+                  <div>
+                    <div className="text-xs font-semibold text-red-400 uppercase mb-2 flex items-center gap-1">
+                      <ChevronDown className="w-3 h-3" />Risk Patterns (Confidence Penalty)
+                    </div>
+                    <div className="space-y-1">
+                      {health.patternEngine.topLosePatterns.slice(0, 4).map((p, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs p-2 rounded bg-red-500/5 border border-red-500/10" data-testid={`row-lose-pattern-${i}`}>
+                          <span className="font-mono text-muted-foreground truncate max-w-[60%]">{p.key}</span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-red-400 font-semibold">{p.winRate}% W</span>
+                            <Badge variant="outline" className="text-xs py-0 bg-red-500/10 text-red-300 border-red-500/20">
+                              -{p.penalty} conf
+                            </Badge>
+                            <span className="text-muted-foreground">n={p.total}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
