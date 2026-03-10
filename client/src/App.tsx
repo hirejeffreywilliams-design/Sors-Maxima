@@ -69,6 +69,7 @@ const AdminPolicyStandards = lazy(() => import("@/pages/admin-policy-standards")
 const GuidelinesPage = lazy(() => import("@/pages/guidelines"));
 const AdminUpdatePlanner = lazy(() => import("@/pages/admin-update-planner"));
 const AdminModelIntegrity = lazy(() => import("@/pages/admin-model-integrity"));
+const Results = lazy(() => import("@/pages/results"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
 const AdminSystemHealth = lazy(() => import("@/pages/admin-system-health"));
 const AdminAutonomous = lazy(() => import("@/pages/admin-autonomous"));
@@ -310,6 +311,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/international" component={InternationalPage} />
         <Route path="/mma" component={MMAPage} />
         <Route path="/pricing" component={Pricing} />
+        <Route path="/results" component={Results} />
         <Route path="/apply" component={ApplyPage} />
         <Route path="/legal" component={LegalPage} />
         <Route path="/guidelines" component={GuidelinesPage} />
