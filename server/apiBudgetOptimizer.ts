@@ -84,7 +84,7 @@ const DEFAULT_CONFIGS: Record<ServiceKey, ServiceConfig> = {
   },
   apifootball: {
     name: "API-Football",
-    monthlyBudget: 100,
+    monthlyBudget: 75000,
     description: "International soccer fixtures & odds",
     unit: "requests",
     resetDay: 1,

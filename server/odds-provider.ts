@@ -52,7 +52,17 @@ interface OddsApiGame {
 }
 
 const oddsApiCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
-const ODDS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes for real-time accuracy
+const ODDS_CACHE_TTL = 2 * 60 * 1000; // 2 minutes baseline for real-time accuracy
+const ODDS_CACHE_TTL_THROTTLED = 20 * 60 * 1000; // 20 minutes when budget optimizer signals throttle
+
+function getEffectiveOddsCacheTTL(): number {
+  try {
+    const opt = apiBudgetOptimizer.getOptimization("odds");
+    return opt.shouldThrottle ? ODDS_CACHE_TTL_THROTTLED : ODDS_CACHE_TTL;
+  } catch {
+    return ODDS_CACHE_TTL;
+  }
+}
 
 interface ApiPlayerProp {
   playerName: string;
@@ -277,7 +287,7 @@ async function fetchOddsApi(sport: string): Promise<OddsApiGame[]> {
 
   const cacheKey = `odds-${sport}`;
   const cached = oddsApiCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < ODDS_CACHE_TTL) {
+  if (cached && (Date.now() - cached.timestamp) < getEffectiveOddsCacheTTL()) {
     return cached.data;
   }
 
@@ -1140,6 +1150,16 @@ export function eventsToLegs(events: SportEvent[]): ParlayLeg[] {
 
 const oddsCache: Map<Sport, { events: SportEvent[]; timestamp: number }> = new Map();
 const CACHE_TTL = 5 * 60 * 1000;
+const CACHE_TTL_THROTTLED = 25 * 60 * 1000;
+
+function getEffectiveOddsEventCacheTTL(): number {
+  try {
+    const opt = apiBudgetOptimizer.getOptimization("odds");
+    return opt.shouldThrottle ? CACHE_TTL_THROTTLED : CACHE_TTL;
+  } catch {
+    return CACHE_TTL;
+  }
+}
 
 function ensureRostersLoaded(sport: Sport) {
   if (!isRosterPreloaded(sport)) {
@@ -1153,7 +1173,7 @@ export async function getOddsForSportAsync(sport: Sport): Promise<SportEvent[]> 
   const cached = oddsCache.get(sport);
   const now = Date.now();
 
-  if (cached && now - cached.timestamp < CACHE_TTL) {
+  if (cached && now - cached.timestamp < getEffectiveOddsEventCacheTTL()) {
     return cached.events.sort((a, b) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
@@ -1404,7 +1424,7 @@ async function fetchEventIds(sport: string): Promise<{ id: string; home_team: st
 
   const cacheKey = `events-${sport}`;
   const cached = oddsApiCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < ODDS_CACHE_TTL) {
+  if (cached && (Date.now() - cached.timestamp) < getEffectiveOddsCacheTTL()) {
     return cached.data.map(g => ({ id: g.id, home_team: g.home_team, away_team: g.away_team, commence_time: g.commence_time }));
   }
 

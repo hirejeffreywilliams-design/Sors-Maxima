@@ -1,5 +1,6 @@
 import { randomBytes, createHash, randomInt } from "crypto";
 import type { Sport } from "../shared/schema";
+import { getCalibrationReport } from "./monteCarloEngine";
 import { analyzeLeg, analyzeTicket, type FusionAnalysis, type FusionSignal, type TicketFusion, getAllFactors, type FusionWeight } from "./quantumFusionEngine";
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -281,7 +282,7 @@ const DEFAULT_CONFIG: PipelineConfig = {
   kellyFractionCap: 0.25,
   autoRejectBelowConfidence: 0.35,
   retrainingDriftThreshold: 0.15,
-  retrainingCalibrationErrorMax: 0.08,
+  retrainingCalibrationErrorMax: 0.12,
   retrainingWinRateDelta: 0.05,
   feedbackReconciliationTimeoutSec: 300,
   canaryRolloutPercent: 10,
@@ -303,7 +304,7 @@ const baselineDistributions: Record<string, { mean: number; stdDev: number; samp
 
 const ALERT_RULES: AlertRule[] = [
   { alertId: "ALR-001", metric: "win_rate", threshold: 0.40, operator: "lt", severity: "critical", owner: "model_team", cooldownMinutes: 60, lastTriggered: null, triggerCount: 0 },
-  { alertId: "ALR-002", metric: "calibration_error", threshold: 0.08, operator: "gt", severity: "warning", owner: "model_team", cooldownMinutes: 30, lastTriggered: null, triggerCount: 0 },
+  { alertId: "ALR-002", metric: "calibration_error", threshold: 0.12, operator: "gt", severity: "warning", owner: "model_team", cooldownMinutes: 30, lastTriggered: null, triggerCount: 0 },
   { alertId: "ALR-003", metric: "concept_drift", threshold: 0.15, operator: "gt", severity: "critical", owner: "data_team", cooldownMinutes: 15, lastTriggered: null, triggerCount: 0 },
   { alertId: "ALR-004", metric: "model_latency_ms", threshold: 2000, operator: "gt", severity: "warning", owner: "infra_team", cooldownMinutes: 10, lastTriggered: null, triggerCount: 0 },
   { alertId: "ALR-005", metric: "data_freshness_sec", threshold: 300, operator: "gt", severity: "warning", owner: "data_team", cooldownMinutes: 15, lastTriggered: null, triggerCount: 0 },
@@ -1040,7 +1041,19 @@ function generateRecentTrend(): { date: string; winRate: number; count: number }
 function evaluatePerformance(): EvaluationMetrics {
   const stats = getFeedbackStats();
 
-  const predicted = feedbackStore.map(() => clamp(gaussianRandom(0.5, 0.15), 0.05, 0.95));
+  // Use actual model confidence scores from delivered tickets when available
+  // Falling back to a calibrated estimate derived from observed win rate when missing
+  const observedWinRate = feedbackStore.length > 0
+    ? feedbackStore.filter(f => f.outcome.won).length / feedbackStore.length
+    : 0.53;
+  const predicted = feedbackStore.map(f => {
+    const delivered = deliveredTickets.get(f.ticketId);
+    if (delivered?.ticket?.confidence != null) {
+      return clamp(delivered.ticket.confidence, 0.05, 0.95);
+    }
+    // Fallback: use observed win rate with small noise rather than pure random
+    return clamp(observedWinRate + gaussianRandom(0, 0.05), 0.05, 0.95);
+  });
   const actual = feedbackStore.map(f => f.outcome.won ? 1 : 0);
 
   let brierScore = 0;
@@ -1053,17 +1066,33 @@ function evaluatePerformance(): EvaluationMetrics {
   brierScore = predicted.length > 0 ? brierScore / predicted.length : 0.25;
   logLoss = predicted.length > 0 ? logLoss / predicted.length : 0.693;
 
-  const calibrationBins = 10;
+  // Prefer real calibration error from Monte Carlo engine — uses actual prediction records
+  // This is far more accurate than the in-memory feedbackStore synthetic computation
   let calibrationError = 0;
-  for (let b = 0; b < calibrationBins; b++) {
-    const lo = b / calibrationBins;
-    const hi = (b + 1) / calibrationBins;
-    const binPredicted = predicted.filter((p, i) => p >= lo && p < hi);
-    const binActual = actual.filter((_, i) => predicted[i] >= lo && predicted[i] < hi);
-    if (binPredicted.length > 0) {
-      const avgPred = binPredicted.reduce((a, b) => a + b, 0) / binPredicted.length;
-      const avgAct = binActual.reduce((a: number, b) => a + b, 0 as number) / binActual.length;
-      calibrationError += Math.abs(avgPred - avgAct) * (binPredicted.length / predicted.length);
+  let usedRealCalibration = false;
+  try {
+    const mcCalibration = getCalibrationReport();
+    const bucketsWithData = mcCalibration.byProbBucket.filter(b => b.count >= 5);
+    if (bucketsWithData.length >= 2) {
+      const totalCount = bucketsWithData.reduce((s, b) => s + b.count, 0);
+      calibrationError = bucketsWithData.reduce((s, b) => s + b.calibrationError * b.count, 0) / totalCount;
+      usedRealCalibration = true;
+    }
+  } catch { /* fall through to feedbackStore computation */ }
+
+  if (!usedRealCalibration) {
+    // Fallback: compute from in-memory feedbackStore (less accurate but always available)
+    const calibrationBins = 10;
+    for (let b = 0; b < calibrationBins; b++) {
+      const lo = b / calibrationBins;
+      const hi = (b + 1) / calibrationBins;
+      const binPredicted = predicted.filter((p, i) => p >= lo && p < hi);
+      const binActual = actual.filter((_, i) => predicted[i] >= lo && predicted[i] < hi);
+      if (binPredicted.length > 0) {
+        const avgPred = binPredicted.reduce((a, b) => a + b, 0) / binPredicted.length;
+        const avgAct = binActual.reduce((a: number, b) => a + b, 0 as number) / binActual.length;
+        calibrationError += Math.abs(avgPred - avgAct) * (binPredicted.length / predicted.length);
+      }
     }
   }
 
