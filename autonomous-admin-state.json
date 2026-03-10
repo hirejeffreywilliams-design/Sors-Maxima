@@ -1,14 +1,26 @@
 {
   "alerts": [
     {
-      "id": "alert_1773148915634_yn3fa",
-      "timestamp": "2026-03-10T13:21:55.634Z",
-      "resolved": false,
+      "id": "alert_1773150302412_cpo52",
+      "timestamp": "2026-03-10T13:45:02.412Z",
+      "resolved": true,
       "severity": "warning",
       "category": "api_budget",
       "title": "Odds API Below 50K Requests",
       "detail": "39,161 requests remaining. Consider reducing polling frequency via API Budget settings.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-10T13:45:17.388Z"
+    },
+    {
+      "id": "alert_1773148915634_yn3fa",
+      "timestamp": "2026-03-10T13:21:55.634Z",
+      "resolved": true,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "39,161 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick",
+      "resolvedAt": "2026-03-10T13:45:18.731Z"
     },
     {
       "id": "alert_1773142344899_a669l",
@@ -1742,8 +1754,8 @@
       "raw": "{\n  \"summary\": [\n    \"Pipeline health is critical; win rate is below expected thresholds at 51.9%.\",\n    \"Model degradation alert: win rate is 46.6% for Total bets, triggering a critical risk alert.\",\n    \"Cash on hand is stable at $100,000, monthly burn is manageable at $45,000.\",\n    \"API usage is healthy, with plenty of remaining budget.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Pipeline Health\",\n      \"description\": \"Deep dive into the reasons behind the critical pipeline health and win rate drop.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Model Adjustments\",\n      \"description\": \"Review the predictive model, focusing on Total market bets and adjust for performance improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 6\n    },\n    {\n      \"title\": \"Communication Plan\",\n      \"description\": \"Prepare communication for members regarding the current performance and upcoming improvements without exposing vendor details.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Model Degradation Detected\",\n      \"description\": \"Total market win rate below 48%, indicating critical model performance issues that need immediate attention.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Pipeline Health Critical\",\n      \"description\": \"Overall pipeline health rated as critical; requires urgent investigation and remediation.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and investigate causes for critical pipeline health.\",\n      \"Assess model predictions across different markets specifically focusing on Total bets.\",\n      \"Begin drafting communication for members regarding current performance.\"\n    ],\n    \"this_week\": [\n      \"Implement any required adjustments to the predictive model.\",\n      \"Monitor win rates closely across all markets.\",\n      \"Plan a review meeting to discuss model strategies with any key team members involved.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-10T13:21:55.634Z",
+  "lastQuickCheck": "2026-03-10T13:45:02.412Z",
   "lastDeepCheck": "2026-03-10T13:14:39.283Z",
-  "totalQuickChecks": 114,
+  "totalQuickChecks": 115,
   "totalDeepChecks": 23
 }
