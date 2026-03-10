@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Sheet,
   SheetContent,
@@ -54,6 +55,10 @@ import {
   ArrowUp,
   ArrowDown,
   Radio,
+  Clock,
+  Trophy,
+  History,
+  Trash,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -66,6 +71,186 @@ interface LiveLegOdds {
   decimalOdds: number | null;
   book: string | null;
   found: boolean;
+}
+
+interface SavedBet {
+  id: string;
+  timestamp: string;
+  legs: Array<{
+    pick: string;
+    market: string;
+    odds: number;
+    game: string;
+    sport: string;
+    team: string;
+    opponent?: string;
+  }>;
+  totalOdds: number;
+  totalAmericanOdds: number;
+  stake: number | null;
+  status: "pending" | "won" | "lost";
+}
+
+function useMyBets() {
+  const [bets, setBets] = useState<SavedBet[]>([]);
+
+  useEffect(() => {
+    const raw = localStorage.getItem("sors_my_bets");
+    if (raw) {
+      try {
+        setBets(JSON.parse(raw));
+      } catch (e) {
+        console.error("Failed to parse sors_my_bets", e);
+      }
+    }
+  }, []);
+
+  const saveBet = useCallback((bet: SavedBet) => {
+    setBets(prev => {
+      const next = [bet, ...prev];
+      localStorage.setItem("sors_my_bets", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const updateBetStatus = useCallback((id: string, status: "won" | "lost" | "pending") => {
+    setBets(prev => {
+      const next = prev.map(b => b.id === id ? { ...b, status } : b);
+      localStorage.setItem("sors_my_bets", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  const removeBet = useCallback((id: string) => {
+    setBets(prev => {
+      const next = prev.filter(b => b.id !== id);
+      localStorage.setItem("sors_my_bets", JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
+  return { bets, saveBet, updateBetStatus, removeBet };
+}
+
+function MyBetsTab() {
+  const { bets, updateBetStatus, removeBet } = useMyBets();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  if (bets.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 text-center gap-4">
+        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+          <History className="h-8 w-8 text-muted-foreground/40" />
+        </div>
+        <div className="space-y-1">
+          <p className="font-bold text-sm">No bets tracked yet</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Build a parlay above and tap 'Place at Sportsbook' to log it here.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <ScrollArea className="flex-1">
+      <div className="p-3 space-y-3">
+        {bets.map((bet) => {
+          const isExpanded = expandedId === bet.id;
+          const date = new Date(bet.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          const legSummary = bet.legs.length > 2
+            ? `${bet.legs[0].team} · ${bet.legs[1].team} · ${bet.legs.length - 2} more`
+            : bet.legs.map(l => l.team).join(" · ");
+
+          return (
+            <div
+              key={bet.id}
+              className={`rounded-xl border bg-card transition-all overflow-hidden ${isExpanded ? "ring-1 ring-primary/20" : "hover:bg-muted/30"}`}
+              data-testid={`bet-row-${bet.id}`}
+            >
+              <button
+                className="w-full text-left p-3"
+                onClick={() => setExpandedId(isExpanded ? null : bet.id)}
+                data-testid={`button-expand-bet-${bet.id}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{date}</span>
+                  <Badge
+                    variant="outline"
+                    className={`text-[9px] font-bold px-1.5 py-0 ${
+                      bet.status === "won" ? "bg-green-500/10 text-green-600 border-green-500/20" :
+                      bet.status === "lost" ? "bg-red-500/10 text-red-600 border-red-500/20" :
+                      "bg-yellow-500/10 text-yellow-600 border-yellow-500/20"
+                    }`}
+                    data-testid={`status-bet-${bet.id}`}
+                  >
+                    {bet.status.toUpperCase()}
+                  </Badge>
+                </div>
+                <div className="flex items-baseline justify-between gap-2">
+                  <p className="text-xs font-bold truncate flex-1">{legSummary}</p>
+                  <p className="text-xs font-black shrink-0">
+                    {bet.totalAmericanOdds > 0 ? `+${bet.totalAmericanOdds}` : bet.totalAmericanOdds}
+                  </p>
+                </div>
+                {bet.stake && (
+                  <p className="text-[10px] text-muted-foreground mt-1">Stake: ${bet.stake}</p>
+                )}
+              </button>
+
+              {isExpanded && (
+                <div className="px-3 pb-3 pt-0 border-t bg-muted/10 space-y-3">
+                  <div className="space-y-2 pt-3">
+                    {bet.legs.map((leg, i) => (
+                      <div key={i} className="flex flex-col gap-0.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold">{leg.team} · {leg.pick}</span>
+                          <span className="text-[10px] text-muted-foreground">{leg.odds > 0 ? `+${leg.odds}` : leg.odds}</span>
+                        </div>
+                        <span className="text-[9px] text-muted-foreground">{leg.game}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 h-7 text-[10px] bg-green-500/5 hover:bg-green-500/10 text-green-600 border-green-500/20"
+                      onClick={() => updateBetStatus(bet.id, "won")}
+                      data-testid={`button-mark-won-${bet.id}`}
+                    >
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Mark Won
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="flex-1 h-7 text-[10px] bg-red-500/5 hover:bg-red-500/10 text-red-600 border-red-500/20"
+                      onClick={() => updateBetStatus(bet.id, "lost")}
+                      data-testid={`button-mark-lost-${bet.id}`}
+                    >
+                      <X className="h-3 w-3 mr-1" />
+                      Mark Lost
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      onClick={() => removeBet(bet.id)}
+                      data-testid={`button-remove-bet-${bet.id}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </ScrollArea>
+  );
 }
 
 function useSlipLiveOdds(legs: ParlaySlipLeg[]): Map<string, LiveLegOdds> {
@@ -526,76 +711,62 @@ function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onR
     prevLiveOdds.current = liveAmerican;
   }, [liveAmerican]);
 
+  const matchup = leg.opponent ? `${leg.team} @ ${leg.opponent}` : leg.team;
+  const marketLabel = (leg.market || "").replace(/_/g, " ");
+
   return (
     <div
-      className={`flex items-start gap-2 py-2 px-1 pl-2.5 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent transition-colors duration-300 ${flashing ? (oddsImproved ? "bg-emerald-500/10" : "bg-red-500/10") : ""}`}
+      className={`flex items-start gap-2 py-3 px-3 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent transition-colors duration-300 ${flashing ? (oddsImproved ? "bg-emerald-500/10" : "bg-red-500/10") : ""}`}
       data-testid={`slip-leg-${leg.id}`}
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-1">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              {leg.sport && (
-                <span className="text-[9px] font-bold bg-muted px-1.5 py-0.5 rounded text-muted-foreground uppercase tracking-wide shrink-0">
-                  {SPORT_EMOJI[leg.sport] ?? ""} {leg.sport}
-                </span>
-              )}
-              {leg.grade && (
-                <Badge variant="outline" className={`text-[9px] h-4 px-1 font-bold shrink-0 ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
-                  {leg.grade}
-                </Badge>
-              )}
-              {liveOdds?.found && (
-                <span className="text-[8px] font-bold text-sky-500 flex items-center gap-0.5 shrink-0" data-testid={`live-odds-badge-${leg.id}`}>
-                  <Radio className="h-2 w-2 animate-pulse" />
-                  LIVE
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1 mt-0.5">
-              <Icon className="h-2.5 w-2.5 text-muted-foreground shrink-0" />
-              <span className="text-[10px] text-muted-foreground capitalize">{(leg.market || "").replace(/_/g, " ")}</span>
-            </div>
-            <p className="text-xs font-semibold mt-0.5 leading-tight line-clamp-2" data-testid={`slip-outcome-${leg.id}`}>{leg.outcome}</p>
-            <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
-              <span className="truncate">{leg.team}{leg.opponent ? ` vs ${leg.opponent}` : ""}</span>
-            </div>
-            {leg.gameTime && (
-              <p className="text-[9px] text-muted-foreground/60 mt-0.5">{formatGameDate(leg.gameTime)}</p>
-            )}
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <h4 className="text-xs font-bold text-foreground leading-tight">
+              {leg.team} — <span className="text-primary">{leg.outcome}</span>
+            </h4>
+            <p className="text-[10px] text-muted-foreground font-medium leading-tight mt-0.5">
+              {matchup}
+            </p>
           </div>
-          <div className="flex flex-col items-end gap-0.5 shrink-0">
+          <div className="flex flex-col items-end shrink-0 gap-1">
+            <Badge variant="outline" className={`text-[9px] h-4 px-1 font-bold ${gradeColor(leg.grade)}`} data-testid={`slip-grade-${leg.id}`}>
+              {leg.grade}
+            </Badge>
+            <button
+              onClick={onRemove}
+              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-destructive/10 hover:text-destructive rounded"
+              data-testid={`button-remove-leg-${leg.id}`}
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="secondary" className="text-[9px] h-4 px-1.5 py-0 font-semibold uppercase tracking-wider bg-muted/50 border-none shrink-0">
+            {marketLabel}
+          </Badge>
+          
+          <div className="flex items-center gap-1.5 ml-auto">
             {oddsChanged ? (
-              <>
+              <div className="flex items-center gap-1.5">
                 <span className="text-[10px] font-mono tabular-nums text-muted-foreground/50 line-through">
                   {formattedOdds}
                 </span>
-                <span className={`text-sm font-bold font-mono tabular-nums flex items-center gap-0.5 ${oddsImproved ? "text-emerald-500" : "text-red-500"}`} data-testid={`live-odds-value-${leg.id}`}>
+                <span className={`text-xs font-black font-mono tabular-nums flex items-center gap-0.5 ${oddsImproved ? "text-emerald-500" : "text-red-500"}`} data-testid={`live-odds-value-${leg.id}`}>
                   {oddsImproved ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
                   {formattedLiveOdds}
                 </span>
-                {liveOdds?.book && (
-                  <span className="text-[8px] text-sky-500/80 font-medium">{liveOdds.book}</span>
-                )}
-              </>
+              </div>
             ) : (
-              <>
-                <span className={`text-sm font-bold font-mono tabular-nums ${liveOdds?.found ? "text-sky-400" : isPositiveOdds ? "text-emerald-500" : "text-foreground"}`}>
-                  {formattedLiveOdds ?? formattedOdds}
-                </span>
-                {liveOdds?.book && liveOdds.found && (
-                  <span className="text-[8px] text-sky-500/60 font-medium">{liveOdds.book}</span>
-                )}
-              </>
-            )}
-            {leg.evPercent !== undefined && leg.evPercent > 0 && (
-              <span className="text-[9px] font-bold text-emerald-500/80">+{leg.evPercent.toFixed(1)}% EV</span>
-            )}
-            {leg.confidence && (
-              <span className="text-[9px] text-muted-foreground">{Math.round(leg.confidence)}% conf</span>
+              <span className={`text-xs font-black font-mono tabular-nums ${liveOdds?.found ? "text-sky-500" : isPositiveOdds ? "text-emerald-500" : "text-foreground"}`}>
+                {formattedLiveOdds ?? formattedOdds}
+              </span>
             )}
           </div>
         </div>
+
         {!compact && leg.monteCarloData && (
           <div className="mt-1 px-1.5 py-1 rounded bg-muted/60 text-[10px] space-y-0.5" data-testid={`slip-mc-${leg.id}`}>
             <div className="flex items-center gap-1 text-muted-foreground">
@@ -653,7 +824,7 @@ function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onR
   );
 }
 
-function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLeg[]; totalAmericanOdds: number; stake: number }) {
+function PlacementGuide({ legs, totalAmericanOdds, stake, onPlaced }: { legs: ParlaySlipLeg[]; totalAmericanOdds: number; stake: number; onPlaced?: () => void }) {
   const [checkedLegs, setCheckedLegs] = useState<Set<number>>(new Set());
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
   const { toast } = useToast();
@@ -670,6 +841,7 @@ function PlacementGuide({ legs, totalAmericanOdds, stake }: { legs: ParlaySlipLe
 
   const handleOpenBook = (book: typeof SPORTSBOOKS[0]) => {
     setSelectedBook(book.id);
+    onPlaced?.();
     const url = getSportLink(book, primarySport);
     window.open(url, "_blank", "noopener,noreferrer");
   };
@@ -1076,6 +1248,7 @@ function SlipTabBar() {
 
 function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
   const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip } = useParlaySlip();
+  const { bets: myBetsList, saveBet } = useMyBets();
   const liveOddsMap = useSlipLiveOdds(legs);
   const liveLegsCount = useMemo(() => [...liveOddsMap.values()].filter(o => o.found).length, [liveOddsMap]);
   const { toast } = useToast();
@@ -1084,6 +1257,31 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
   const [showPlacement, setShowPlacement] = useState(false);
   const [tracked, setTracked] = useState(false);
   const [showHoloCard, setShowHoloCard] = useState(false);
+  const [slipTab, setSlipTab] = useState<"build" | "my-bets">("build");
+
+  const handleBetPlaced = useCallback(() => {
+    if (legs.length === 0) return;
+    const newBet: SavedBet = {
+      id: `bet-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      legs: legs.map(l => ({
+        pick: l.outcome,
+        market: l.market,
+        odds: l.americanOdds ?? (l.decimalOdds ? Math.round(l.decimalOdds >= 2 ? (l.decimalOdds - 1) * 100 : -100 / (l.decimalOdds - 1)) : -110),
+        game: l.game || `${l.team}${l.opponent ? ` vs ${l.opponent}` : ""}`,
+        sport: l.sport || "unknown",
+        team: l.team,
+        opponent: l.opponent
+      })),
+      totalOdds,
+      totalAmericanOdds,
+      stake: stake || null,
+      status: "pending"
+    };
+    saveBet(newBet);
+    setSlipTab("my-bets");
+    toast({ title: "Bet logged", description: "Saved to My Bets. Mark it won or lost after the game.", duration: 3000 });
+  }, [legs, totalOdds, totalAmericanOdds, stake, saveBet, toast]);
 
   const { data: authData } = useQuery<{ authenticated: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -1205,6 +1403,39 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     }
   };
 
+  const __slipTabSwitcher = (
+    <div className="flex border-b shrink-0">
+      <button
+        className={`flex-1 py-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors ${slipTab === "build" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+        onClick={() => setSlipTab("build")}
+        data-testid="button-tab-build"
+      >
+        <Ticket className="h-3 w-3" />
+        Build
+        {legCount > 0 && <span className="bg-primary/20 text-primary rounded-full px-1.5 py-0.5 text-[9px] leading-none">{legCount}</span>}
+      </button>
+      <button
+        className={`flex-1 py-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors ${slipTab === "my-bets" ? "border-b-2 border-primary text-primary bg-primary/5" : "text-muted-foreground hover:text-foreground hover:bg-muted/30"}`}
+        onClick={() => setSlipTab("my-bets")}
+        data-testid="button-tab-my-bets"
+      >
+        <History className="h-3 w-3" />
+        My Bets
+        {myBetsList.length > 0 && <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[9px] leading-none">{myBetsList.length}</span>}
+      </button>
+    </div>
+  );
+
+  if (slipTab === "my-bets") {
+    return (
+      <div className="flex flex-col flex-1 min-h-0">
+        <SlipTabBar />
+        {__slipTabSwitcher}
+        <MyBetsTab />
+      </div>
+    );
+  }
+
   if (legCount === 0) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-4 py-6">
@@ -1256,6 +1487,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
       <>
         {showHoloCard && <SlipShareCard {...holoPayload} onClose={() => setShowHoloCard(false)} />}
         <SlipTabBar />
+        {__slipTabSwitcher}
         <div className="px-4 py-3 bg-gradient-to-r from-primary/5 to-primary/10 border-b">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
@@ -1410,7 +1642,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
             {showPlacement ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
           </button>
           {showPlacement && (
-            <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+            <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} onPlaced={handleBetPlaced} />
           )}
 
           {canUseMultiSlip && (
@@ -1440,6 +1672,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
     <>
       {showHoloCard && <SlipShareCard {...holoPayloadDesktop} onClose={() => setShowHoloCard(false)} />}
       <SlipTabBar />
+      {__slipTabSwitcher}
       <div className="px-3 pt-2.5 pb-2 bg-gradient-to-br from-primary/8 via-primary/5 to-transparent border-b space-y-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -1626,7 +1859,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
           {showPlacement ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
         {showPlacement && (
-          <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} />
+          <PlacementGuide legs={legs} totalAmericanOdds={totalAmericanOdds} stake={stake} onPlaced={handleBetPlaced} />
         )}
 
         {canUseMultiSlip && (

@@ -7,13 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { TradingCard } from "@/components/trading-card";
 import { CardStackDeck } from "@/components/card-stack-deck";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award, ChevronDown, ChevronUp, HelpCircle } from "lucide-react";
+import { Trophy, Users, ShoppingBag, History, Sparkles, Brain, RefreshCw, Eye, Settings2, Flame, Star, CheckCircle2, XCircle, Globe, Ticket, TrendingUp, Clock, Award, ChevronDown, ChevronUp, HelpCircle, Filter } from "lucide-react";
 import { PageHero } from "@/components/page-hero";
 import { TierGate } from "@/components/tier-gate";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { PackRipReveal } from "@/components/pack-rip-reveal";
 import { formatDistanceToNow } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface UserCardCollection {
   collection: {
@@ -81,6 +84,9 @@ export default function CardsPage() {
   const [openedPackCards, setOpenedPackCards] = useState<UserCardCollection[] | null>(null);
   const [revealedIndices, setRevealedIndices] = useState<number[]>([]);
   const [rarityGuideOpen, setRarityGuideOpen] = useState(false);
+  const [gradeFilter, setGradeFilter] = useState<string>("All");
+  const [sportFilter, setSportFilter] = useState<string>("All");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   const { data: authData } = useQuery<{ isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -172,6 +178,23 @@ export default function CardsPage() {
     setOpenedPackCards(null);
     setRevealedIndices([]);
   };
+
+  const filteredCollection = collection?.filter(item => {
+    const gradeMatch = gradeFilter === "All" || item.card.grade === gradeFilter;
+    const sportMatch = sportFilter === "All" || item.card.sport === sportFilter;
+    return gradeMatch && sportMatch;
+  }).sort((a, b) => {
+    if (sortBy === "newest") return new Date(b.collection.acquiredAt).getTime() - new Date(a.collection.acquiredAt).getTime();
+    if (sortBy === "oldest") return new Date(a.collection.acquiredAt).getTime() - new Date(b.collection.acquiredAt).getTime();
+    
+    const gradeOrder: Record<string, number> = { "S+": 7, "A+": 6, "A": 5, "B+": 4, "B": 3, "C+": 2, "C": 1 };
+    const gradeA = gradeOrder[a.card.grade] || 0;
+    const gradeB = gradeOrder[b.card.grade] || 0;
+    
+    if (sortBy === "grade-high") return gradeB - gradeA;
+    if (sortBy === "grade-low") return gradeA - gradeB;
+    return 0;
+  });
 
   const showcaseCards = (showcaseData?.tickets ?? []).flatMap((ticket, tIdx) =>
     ticket.legs.map((leg, lIdx) => ({
@@ -374,7 +397,7 @@ export default function CardsPage() {
             <Settings2 className="w-4 h-4" /> System Record
           </TabsTrigger>
           <TabsTrigger value="collection" className="flex-1 min-w-[120px] font-bold gap-1.5" data-testid="tab-collection">
-            <Users className="w-4 h-4" /> My Collection
+            <Users className="w-4 h-4" /> My Collection {collection ? `(${collection.length})` : ""}
           </TabsTrigger>
           <TabsTrigger value="community" className="flex-1 min-w-[100px] font-bold gap-1.5" data-testid="tab-community">
             <Globe className="w-4 h-4" /> Community
@@ -601,18 +624,69 @@ export default function CardsPage() {
         {/* ─── MY COLLECTION ───────────────────────────────────────── */}
         <TabsContent value="collection" className="space-y-6" data-testid="content-collection">
           {/* Member collection header */}
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-muted/20">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-400/10 border border-blue-400/20 shrink-0">
-              <Users className="w-5 h-5 text-blue-400" />
-            </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <span className="font-black text-sm">Member Collection</span>
-                <Badge className="text-[10px] bg-blue-400/10 text-blue-400 border border-blue-400/20">EARNED</Badge>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3 p-4 rounded-xl border border-border/40 bg-muted/20">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center bg-blue-400/10 border border-blue-400/20 shrink-0">
+                <Users className="w-5 h-5 text-blue-400" />
               </div>
-              <p className="text-xs text-muted-foreground">Cards you earned by opening packs. Showcase winners to the community.</p>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-black text-sm">Member Collection</span>
+                  <Badge className="text-[10px] bg-blue-400/10 text-blue-400 border border-blue-400/20">EARNED</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">Cards you earned by opening packs. Showcase winners to the community.</p>
+              </div>
+              {collection && <span className="text-sm font-bold text-muted-foreground shrink-0">{collection.length} cards</span>}
             </div>
-            {collection && <span className="text-sm font-bold text-muted-foreground shrink-0">{collection.length} cards</span>}
+
+            {/* Filter Bar */}
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between p-2 rounded-xl bg-muted/10 border border-border/20">
+              <div className="flex flex-col gap-2 w-full md:w-auto">
+                <div className="flex items-center gap-2 px-2">
+                  <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Filters</span>
+                </div>
+                <ScrollArea className="w-full whitespace-nowrap">
+                  <div className="flex gap-2 pb-2">
+                    <ToggleGroup type="single" value={gradeFilter} onValueChange={(v) => v && setGradeFilter(v)} className="justify-start">
+                      {["All", "S+", "A+", "A", "B+", "B", "C+", "C"].map((grade) => (
+                        <ToggleGroupItem key={grade} value={grade} className="h-8 px-3 text-xs font-bold rounded-full">
+                          {grade}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+                  <ScrollBar orientation="horizontal" className="hidden" />
+                </ScrollArea>
+                <ScrollArea className="w-full whitespace-nowrap">
+                  <div className="flex gap-2 pb-1">
+                    <ToggleGroup type="single" value={sportFilter} onValueChange={(v) => v && setSportFilter(v)} className="justify-start">
+                      {["All", "NBA", "NFL", "NHL", "NCAAB", "NCAAF", "MLB"].map((sport) => (
+                        <ToggleGroupItem key={sport} value={sport} className="h-8 px-3 text-xs font-bold rounded-full">
+                          {sport}
+                        </ToggleGroupItem>
+                      ))}
+                    </ToggleGroup>
+                  </div>
+                  <ScrollBar orientation="horizontal" className="hidden" />
+                </ScrollArea>
+              </div>
+
+              <div className="flex items-center gap-3 w-full md:w-auto px-2 md:px-0">
+                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Sort By</span>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full md:w-[160px] h-9 text-xs font-bold">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest First</SelectItem>
+                    <SelectItem value="oldest">Oldest First</SelectItem>
+                    <SelectItem value="grade-high">Grade (High to Low)</SelectItem>
+                    <SelectItem value="grade-low">Grade (Low to High)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
           {isCollectionLoading ? (
@@ -621,22 +695,22 @@ export default function CardsPage() {
                 <Skeleton key={i} className="w-[280px] h-[400px] rounded-2xl mx-auto" />
               ))}
             </div>
-          ) : collection?.length === 0 ? (
+          ) : filteredCollection?.length === 0 ? (
             <Card className="border-dashed border-2 bg-muted/20">
               <CardContent className="py-20 text-center space-y-4">
-                <Brain className="w-12 h-12 mx-auto text-muted-foreground opacity-30" />
+                <Sparkles className="w-12 h-12 mx-auto text-muted-foreground opacity-30" />
                 <div className="space-y-1">
                   <h3 className="text-xl font-bold">Your collection is empty</h3>
-                  <p className="text-muted-foreground">Open your first daily pack to start collecting Sors Intelligence cards.</p>
+                  <p className="text-muted-foreground">Cards are minted automatically when you use the platform. Open your first Daily Intelligence Pack to get started.</p>
                 </div>
                 <Button onClick={() => openPackMutation.mutate()} disabled={!packStatus?.available} className="font-bold hover-elevate active-elevate-2">
-                  Open Your First Pack
+                  Get My First Pack
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6 justify-items-center">
-              {collection?.map((item) => (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 justify-items-center">
+              {filteredCollection?.map((item) => (
                 <div key={item.collection.id} className="w-full max-w-[280px] aspect-[2/3]">
                   <TradingCard
                     card={{ ...item.card, cardType: (item.card as any).cardType || "member" }}

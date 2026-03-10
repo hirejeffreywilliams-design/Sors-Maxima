@@ -224,17 +224,33 @@ type GradeFilter = "all" | "A" | "B" | "C";
 type SortMode = "confidence" | "ev" | "grade" | "odds";
 
 function gradeColor(grade: string): string {
+  if (grade.startsWith("S") || grade === "A+") return "text-violet-400";
   if (grade.startsWith("A")) return "text-emerald-400";
+  if (grade.startsWith("B+")) return "text-teal-400";
   if (grade.startsWith("B")) return "text-blue-400";
-  if (grade.startsWith("C")) return "text-amber-400";
+  if (grade.startsWith("C+")) return "text-yellow-400";
+  if (grade.startsWith("C")) return "text-slate-400";
   return "text-red-400";
 }
 
 function gradeBg(grade: string): string {
+  if (grade.startsWith("S") || grade === "A+") return "bg-violet-500/15 border-violet-500/30 text-violet-400";
   if (grade.startsWith("A")) return "bg-emerald-500/15 border-emerald-500/30 text-emerald-400";
+  if (grade.startsWith("B+")) return "bg-teal-500/15 border-teal-500/30 text-teal-400";
   if (grade.startsWith("B")) return "bg-blue-500/15 border-blue-500/30 text-blue-400";
-  if (grade.startsWith("C")) return "bg-amber-500/15 border-amber-500/30 text-amber-400";
+  if (grade.startsWith("C+")) return "bg-yellow-500/15 border-yellow-500/30 text-yellow-400";
+  if (grade.startsWith("C")) return "bg-slate-500/15 border-slate-500/30 text-slate-400";
   return "bg-red-500/15 border-red-500/30 text-red-400";
+}
+
+function gradeBorder(grade: string): string {
+  if (grade.startsWith("S") || grade === "A+") return "border-l-violet-500";
+  if (grade.startsWith("A")) return "border-l-emerald-500";
+  if (grade.startsWith("B+")) return "border-l-teal-500";
+  if (grade.startsWith("B")) return "border-l-blue-500";
+  if (grade.startsWith("C+")) return "border-l-yellow-500";
+  if (grade.startsWith("C")) return "border-l-slate-500";
+  return "border-l-red-500";
 }
 
 function confidenceColor(conf: number): string {
@@ -328,10 +344,10 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
 
   return (
     <div
-      className={`group relative rounded-xl border transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 ${
+      className={`group relative rounded-xl border-l-4 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 ${gradeBorder(pick.grade)} ${
         isTopPick
-          ? "border-primary/25 bg-gradient-to-br from-primary/5 via-transparent to-primary/3"
-          : "border-border/60 hover:border-primary/20 bg-card"
+          ? "border-y-primary/25 border-r-primary/25 bg-gradient-to-br from-primary/5 via-transparent to-primary/3"
+          : "border-y-border/60 border-r-border/60 hover:border-y-primary/20 hover:border-r-primary/20 bg-card"
       }`}
       data-testid={`card-pick-${pick.id}`}
     >
@@ -391,9 +407,14 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge variant="outline" className={`font-mono font-bold text-sm px-2.5 ${gradeBg(pick.grade)}`} data-testid={`text-pick-grade-${pick.id}`}>
-              {pick.grade}
-            </Badge>
+            <div 
+              className={`w-14 h-14 rounded-full flex items-center justify-center border-2 shadow-sm ${gradeBg(pick.grade)}`}
+              data-testid={`text-pick-grade-${pick.id}`}
+            >
+              <span className="text-2xl font-black tracking-tighter">
+                {pick.grade}
+              </span>
+            </div>
           </div>
         </div>
 

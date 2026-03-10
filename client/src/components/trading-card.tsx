@@ -91,7 +91,7 @@ const GRADE_FOIL: Record<string, { bg: string; border: string; badge: string; ac
     border: "border-teal-400",
     badge: "bg-teal-400/20 text-teal-200 border-teal-400/55",
     accent: "#2dd4bf",
-    glow: "0 0 32px rgba(45,212,191,0.45), 0 0 64px rgba(45,212,191,0.15)",
+    glow: "0 0 12px rgba(45,212,191,0.4), 0 0 24px rgba(45,212,191,0.1)",
   },
   "B": {
     bg: "from-blue-900 via-indigo-950 to-blue-900",
@@ -99,15 +99,15 @@ const GRADE_FOIL: Record<string, { bg: string; border: string; badge: string; ac
     border: "border-blue-400",
     badge: "bg-blue-400/20 text-blue-200 border-blue-400/50",
     accent: "#60a5fa",
-    glow: "0 0 28px rgba(96,165,250,0.4), 0 0 56px rgba(96,165,250,0.12)",
+    glow: "0 0 10px rgba(96,165,250,0.35), 0 0 20px rgba(96,165,250,0.1)",
   },
   "C+": {
-    bg: "from-yellow-900 via-orange-950 to-yellow-900",
-    baseBg: "#1a1200",
-    border: "border-yellow-500",
-    badge: "bg-yellow-500/20 text-yellow-300 border-yellow-500/45",
-    accent: "#facc15",
-    glow: "0 0 22px rgba(250,204,21,0.35)",
+    bg: "from-slate-800 via-zinc-900 to-slate-800",
+    baseBg: "#0a0a10",
+    border: "border-slate-500",
+    badge: "bg-slate-500/20 text-slate-300 border-slate-500/35",
+    accent: "#94a3b8",
+    glow: "",
   },
   "C": {
     bg: "from-slate-800 via-zinc-900 to-slate-800",
@@ -115,7 +115,7 @@ const GRADE_FOIL: Record<string, { bg: string; border: string; badge: string; ac
     border: "border-slate-500",
     badge: "bg-slate-500/20 text-slate-300 border-slate-500/35",
     accent: "#94a3b8",
-    glow: "0 0 16px rgba(148,163,184,0.22)",
+    glow: "",
   },
   "D": {
     bg: "from-red-900 via-rose-950 to-red-900",
@@ -171,12 +171,11 @@ function getEventLabel(sport: string, gameTime: string): string | null {
 
 function getRarityLabel(grade: string): { label: string; color: string } {
   const g = grade.toUpperCase();
-  if (g === "S+") return { label: "🌟 LIFE CHANGER", color: "text-fuchsia-400" };
-  if (g === "A+") return { label: "◆ LEGENDARY", color: "text-amber-400" };
-  if (g === "A") return { label: "★ RARE", color: "text-emerald-400" };
-  if (g === "B+") return { label: "✦ UNCOMMON", color: "text-teal-400" };
-  if (g === "B") return { label: "• UNCOMMON", color: "text-blue-400" };
-  return { label: "· COMMON", color: "text-muted-foreground" };
+  if (g === "S+") return { label: "LIFE CHANGER™", color: "text-fuchsia-400" };
+  if (g === "A+") return { label: "LEGENDARY", color: "text-amber-400" };
+  if (g === "A") return { label: "RARE", color: "text-emerald-400" };
+  if (g === "B+" || g === "B") return { label: "UNCOMMON", color: "text-teal-400" };
+  return { label: "COMMON", color: "text-muted-foreground" };
 }
 
 export function TradingCard({
@@ -429,10 +428,6 @@ export function TradingCard({
             <div className="flex-1 min-w-0 pr-2">
               <div className="flex items-center gap-1.5 mb-1">
                 <span className="text-lg leading-none drop-shadow-md">{sportIcon}</span>
-                <span
-                  className="text-[8px] font-black uppercase tracking-widest"
-                  style={{ color: foil.accent }}
-                >{rarity.label}</span>
                 {card.cardType === "system" && (
                   <span style={{ fontSize: 7, fontWeight: 900, color: "rgba(251,191,36,0.80)", letterSpacing: "0.12em" }}>✦ SYSTEM</span>
                 )}
@@ -445,8 +440,8 @@ export function TradingCard({
                 style={{ fontSize: "17px", lineHeight: 1.2, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}
               >{card.pick}</h2>
             </div>
-            {/* Right: Odds (like Pokémon HP) + Grade badge */}
-            <div className="shrink-0 flex flex-col items-end gap-1.5 pt-0.5">
+            {/* Right: Odds (like Pokémon HP) + Grade badge + Rarity Pill */}
+            <div className="shrink-0 flex flex-col items-end gap-1.5 pt-0.5 relative">
               <div className="flex items-baseline gap-0.5">
                 <span className="text-[8px] font-black uppercase text-white/30">ODDS</span>
                 <span
@@ -457,7 +452,7 @@ export function TradingCard({
                 </span>
               </div>
               <div
-                className="w-9 h-9 rounded-full flex items-center justify-center"
+                className="w-9 h-9 rounded-full flex items-center justify-center relative"
                 style={{
                   border: `2px solid ${foil.accent}70`,
                   background: `${foil.accent}10`,
@@ -465,6 +460,17 @@ export function TradingCard({
                 }}
               >
                 <span className="font-black text-sm leading-none" style={{ color: foil.accent }}>{safeGrade}</span>
+                {/* Rarity Label Pill */}
+                <div 
+                  className={cn(
+                    "absolute -bottom-2 -right-1 px-1.5 py-0.5 rounded-full border bg-background/80 backdrop-blur-sm shadow-sm",
+                    "text-[10px] font-bold whitespace-nowrap z-20",
+                    rarity.color,
+                    foil.border.replace('border-', 'border-')
+                  )}
+                >
+                  {rarity.label}
+                </div>
               </div>
             </div>
           </div>
@@ -819,6 +825,23 @@ export function TradingCard({
           const arcCirc = 188;
           const arcLen  = (conf / 100) * arcCirc;
 
+          const getWhatThisMeans = (grade: string, ev: number) => {
+            const g = grade.toUpperCase();
+            if (g === "S+" || g === "A+") {
+              return `Our model gives this pick a significant edge over the posted odds. The 46-Factor analysis shows strong alignment across value and momentum signals.`;
+            }
+            if (g === "A") {
+              return `High-conviction pick with substantial mathematical edge. Strong support from historical form and situational factors.`;
+            }
+            if (g === "B+" || g === "B") {
+              return `Solid value play with moderate confidence. Suitable for smaller stakes in a multi-leg parlay.`;
+            }
+            if (g === "C+" || g === "C") {
+              return `Baseline model output. Use as a supporting leg only — edge is narrow.`;
+            }
+            return `Baseline model output. Narrow edge detected.`;
+          };
+
           return (
             <div className="relative z-10 flex flex-col flex-1 px-3 pt-2 pb-2 gap-2 overflow-hidden">
 
@@ -826,6 +849,14 @@ export function TradingCard({
               <div className="shrink-0">
                 <div className="text-[11px] font-black text-white leading-tight line-clamp-2">{card.pick}</div>
                 <div className="text-[8px] font-medium mt-0.5" style={{ color: "rgba(255,255,255,0.58)" }}>{card.game}</div>
+              </div>
+
+              {/* What This Means section */}
+              <div className="shrink-0 rounded-lg p-2.5 bg-white/10 border border-white/5">
+                <div className="text-[10px] font-black uppercase tracking-wider text-white/40 mb-1">What This Means</div>
+                <div className="text-[10px] leading-relaxed text-white/80 font-medium italic">
+                  "{getWhatThisMeans(safeGrade, ev)}"
+                </div>
               </div>
 
               {/* Radar visualization (compact) */}
@@ -1004,22 +1035,15 @@ export function TradingCard({
               {/* Footer */}
               <div className="flex items-center justify-between w-full mt-auto pt-1.5 border-t shrink-0"
                 style={{ borderColor: "rgba(255,255,255,0.10)" }}>
-                <span className="text-[7px] font-mono text-white/35">
-                  {instanceNumber ? `#${instanceNumber.toString().padStart(6, "0")}` : "SORS MAXIMA™"}
-                </span>
-                {isSettled ? (
-                  isWin
-                    ? <div className="flex items-center gap-1">
-                        <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400"/>
-                        <span className="text-[7px] font-black uppercase text-emerald-400">Called It ✓</span>
-                      </div>
-                    : <span className="text-[7px] font-black uppercase text-white/45">No Hit</span>
-                ) : (
-                  <div className="flex items-center gap-1 animate-pulse">
-                    <div className="w-1 h-1 rounded-full" style={{ background: foil.accent }}/>
-                    <span className="text-[7px] font-black uppercase" style={{ color: `${foil.accent}95` }}>Live</span>
-                  </div>
-                )}
+                <div className="flex items-center gap-1 text-[9px] text-white/40">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]" />
+                  <span>Minted · {card.issuedAt ? new Date(card.issuedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Mar 10, 2026'}</span>
+                </div>
+                <div className="text-[9px] font-black uppercase tracking-tighter text-white/30">
+                  {card.cardType === "system" ? "Daily Intelligence Feed" : 
+                   card.cardType === "member" ? "Member Pick" : 
+                   card.cardType === "admin_seeded" ? "Platform Seeded" : "Verified Intelligence"}
+                </div>
               </div>
 
             </div>

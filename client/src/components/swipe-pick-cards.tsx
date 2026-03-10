@@ -30,10 +30,33 @@ interface SwipePickCardsProps {
 const SWIPE_THRESHOLD = 40;
 
 function gradeColor(grade: string) {
-  if (grade.startsWith("A")) return "text-green-400";
+  if (grade.startsWith("S") || grade === "A+") return "text-violet-400";
+  if (grade.startsWith("A")) return "text-emerald-400";
+  if (grade.startsWith("B+")) return "text-teal-400";
   if (grade.startsWith("B")) return "text-blue-400";
-  if (grade.startsWith("C")) return "text-yellow-400";
+  if (grade.startsWith("C+")) return "text-yellow-400";
+  if (grade.startsWith("C")) return "text-slate-400";
   return "text-muted-foreground";
+}
+
+function gradeBg(grade: string) {
+  if (grade.startsWith("S") || grade === "A+") return "bg-violet-500/15 border-violet-500/30 text-violet-400";
+  if (grade.startsWith("A")) return "bg-emerald-500/15 border-emerald-500/30 text-emerald-400";
+  if (grade.startsWith("B+")) return "bg-teal-500/15 border-teal-500/30 text-teal-400";
+  if (grade.startsWith("B")) return "bg-blue-500/15 border-blue-500/30 text-blue-400";
+  if (grade.startsWith("C+")) return "bg-yellow-500/15 border-yellow-500/30 text-yellow-400";
+  if (grade.startsWith("C")) return "bg-slate-500/15 border-slate-500/30 text-slate-400";
+  return "bg-muted/50 border-border/40 text-muted-foreground";
+}
+
+function gradeBorder(grade: string): string {
+  if (grade.startsWith("S") || grade === "A+") return "border-l-violet-500";
+  if (grade.startsWith("A")) return "border-l-emerald-500";
+  if (grade.startsWith("B+")) return "border-l-teal-500";
+  if (grade.startsWith("B")) return "border-l-blue-500";
+  if (grade.startsWith("C+")) return "border-l-yellow-500";
+  if (grade.startsWith("C")) return "border-l-slate-500";
+  return "border-l-muted";
 }
 
 function formatOdds(o: number) {
@@ -169,7 +192,7 @@ export function SwipePickCards({ picks, onAdd, onClose }: SwipePickCardsProps) {
         {/* Main card */}
         <div
           ref={cardRef}
-          className="absolute inset-x-4 rounded-2xl border bg-card shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing"
+          className={`absolute inset-x-4 rounded-2xl border-y border-r border-l-4 bg-card shadow-2xl overflow-hidden cursor-grab active:cursor-grabbing ${gradeBorder(pick.grade)}`}
           style={{ ...cardStyle, zIndex: 1, touchAction: "none" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -202,7 +225,13 @@ export function SwipePickCards({ picks, onAdd, onClose }: SwipePickCardsProps) {
                 <Badge variant="secondary" className="text-[10px] font-bold">{pick.sport}</Badge>
                 <Badge variant="outline" className="text-[10px]">{pick.betType}</Badge>
               </div>
-              <span className={`text-2xl font-black ${gradeColor(pick.grade)}`}>{pick.grade}</span>
+              <div 
+                className={`w-14 h-14 rounded-full flex items-center justify-center border-2 shadow-sm ${gradeBg(pick.grade)}`}
+              >
+                <span className="text-2xl font-black tracking-tighter">
+                  {pick.grade}
+                </span>
+              </div>
             </div>
 
             {/* Game */}

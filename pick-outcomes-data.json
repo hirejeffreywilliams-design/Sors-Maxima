@@ -1263,6 +1263,54 @@
       "ev": 39.36,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T00:33:16.960Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851434-spread-e9d1332c88",
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "game": "TBD @ Wright State Raiders",
+      "homeTeam": "Wright State Raiders",
+      "awayTeam": "TBD",
+      "pick": "Wright State Raiders +1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 83,
+      "ev": 33.64,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851434-moneyline-7e5cfc29e6",
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "game": "TBD @ Wright State Raiders",
+      "homeTeam": "Wright State Raiders",
+      "awayTeam": "TBD",
+      "pick": "Wright State Raiders ML",
+      "betType": "moneyline",
+      "odds": -133,
+      "grade": "B-",
+      "confidence": 77,
+      "ev": 20.88,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851434-total-4b3b3c8c0b",
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "game": "TBD @ Wright State Raiders",
+      "homeTeam": "Wright State Raiders",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 61,
+      "ev": 33.64,
+      "gameTime": "2026-03-10T23:00Z",
+      "savedAt": "2026-03-10T01:24:30.364Z"
     }
   ],
   "settled": [
@@ -13987,7 +14035,7 @@
       "lost": 286,
       "push": 12,
       "rate": 51.9,
-      "pending": 79
+      "pending": 82
     },
     "bySport": {
       "NBA": {
@@ -14090,7 +14138,7 @@
       "push": 0,
       "rate": 46
     },
-    "lastUpdated": "2026-03-10T01:20:28.125Z",
+    "lastUpdated": "2026-03-10T01:40:18.264Z",
     "roi": 4.6,
     "brierScore": 0.26,
     "maxDrawdown": 15.4,
