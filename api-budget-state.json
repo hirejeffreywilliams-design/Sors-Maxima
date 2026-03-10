@@ -2,9 +2,9 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 63485,
-      "manualRemaining": 36515,
-      "lastReported": "2026-03-10T20:38:37.701Z",
+      "currentUsage": 64094,
+      "manualRemaining": 35906,
+      "lastReported": "2026-03-10T21:23:47.589Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
@@ -14,9 +14,9 @@
       "lastSeasonCheck": "2026-03-10T21:18:04.659Z"
     },
     "apifootball": {
-      "currentUsage": 560,
-      "manualRemaining": 74440,
-      "lastReported": "2026-03-10T20:41:05.567Z",
+      "currentUsage": 576,
+      "manualRemaining": 74424,
+      "lastReported": "2026-03-10T21:20:33.610Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [],
       "suspended": false,
@@ -26,47 +26,11 @@
       "lastSeasonCheck": "2026-03-10T21:18:04.659Z"
     },
     "balldontlie": {
-      "currentUsage": 3949,
+      "currentUsage": 3954,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [
-        {
-          "ts": 1773091318597,
-          "count": 1
-        },
-        {
-          "ts": 1773091400235,
-          "count": 1
-        },
-        {
-          "ts": 1773091400241,
-          "count": 1
-        },
-        {
-          "ts": 1773091400266,
-          "count": 1
-        },
-        {
-          "ts": 1773091428366,
-          "count": 1
-        },
-        {
-          "ts": 1773091483549,
-          "count": 1
-        },
-        {
-          "ts": 1773091483554,
-          "count": 1
-        },
-        {
-          "ts": 1773091483579,
-          "count": 1
-        },
-        {
-          "ts": 1773091511717,
-          "count": 1
-        },
         {
           "ts": 1773091867062,
           "count": 1
@@ -2118,6 +2082,26 @@
         {
           "ts": 1773177498572,
           "count": 1
+        },
+        {
+          "ts": 1773177526486,
+          "count": 1
+        },
+        {
+          "ts": 1773177881571,
+          "count": 1
+        },
+        {
+          "ts": 1773178017246,
+          "count": 1
+        },
+        {
+          "ts": 1773178017264,
+          "count": 1
+        },
+        {
+          "ts": 1773178017270,
+          "count": 1
         }
       ],
       "suspended": false,
@@ -2152,6 +2136,6 @@
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-10T21:18:18.572Z",
+  "lastSaved": "2026-03-10T21:26:57.270Z",
   "alerts": []
 }
