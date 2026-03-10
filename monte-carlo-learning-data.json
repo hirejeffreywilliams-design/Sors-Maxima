@@ -1,15 +1,6 @@
 {
   "predictions": [
     {
-      "gameId": "401810749",
-      "sport": "NBA",
-      "market": "team_total",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773141100430,
-      "odds": 1.9090909090909092
-    },
-    {
       "gameId": "401825554",
       "sport": "NCAAB",
       "market": "moneyline",
@@ -4499,6 +4490,15 @@
       "actualOutcome": 1,
       "timestamp": 1773169061999,
       "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803376",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1773173006848,
+      "odds": 1.9090909090909092
     }
   ],
   "bayesianParams": {
@@ -4527,8 +4527,8 @@
       "beta": 104.25726890041715
     },
     "NHL": {
-      "alpha": 106.24987828656495,
-      "beta": 93.75012171343506
+      "alpha": 106.7162968025522,
+      "beta": 93.28370319744782
     },
     "NHL-moneyline": {
       "alpha": 108.38491862316783,
@@ -4539,8 +4539,8 @@
       "beta": 92.98947171209758
     },
     "NHL-total": {
-      "alpha": 101.5253188874464,
-      "beta": 98.47468111255363
+      "alpha": 102.01524267407602,
+      "beta": 97.984757325924
     },
     "NCAAB-moneyline": {
       "alpha": 110.82723834836906,
