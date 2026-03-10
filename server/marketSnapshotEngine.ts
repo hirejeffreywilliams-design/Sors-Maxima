@@ -1,9 +1,40 @@
 import type { Sport } from "@shared/schema";
+import * as fs from "fs";
+import * as path from "path";
 import { getMultiDayScoreboard, getScoreboard, type ESPNScoreboardGame } from "./espn-scoreboard-provider";
 import { getTeamsFromCache, getPlayersFromCacheById, getRosterFromCacheById } from "./espn-roster-provider";
 import { fetchRealOddsForGame } from "./odds-provider";
 import { recordOddsApiCall } from "./api-usage-tracker";
 import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
+
+// ── Disk cache paths ─────────────────────────────────────────────────────────
+const ODDS_DISK_CACHE_PATH     = path.join(process.cwd(), "odds-api-disk-cache.json");
+const SNAPSHOT_DISK_CACHE_PATH = path.join(process.cwd(), "market-snapshot-disk-cache.json");
+
+// How long disk cache is considered fresh — no API call needed within this window
+const ODDS_DISK_CACHE_TTL_MS     = 25 * 60 * 1000; // 25 minutes
+const SNAPSHOT_DISK_CACHE_TTL_MS = 22 * 60 * 1000; // 22 minutes
+
+function readDiskCache<T>(filePath: string): Map<string, { data: T; timestamp: number }> {
+  const result = new Map<string, { data: T; timestamp: number }>();
+  try {
+    if (!fs.existsSync(filePath)) return result;
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const obj = JSON.parse(raw) as Record<string, { data: T; timestamp: number }>;
+    for (const [k, v] of Object.entries(obj)) {
+      result.set(k, v);
+    }
+  } catch { /* ignore corrupt cache */ }
+  return result;
+}
+
+function writeDiskCache<T>(filePath: string, map: Map<string, { data: T; timestamp: number }>): void {
+  try {
+    const obj: Record<string, { data: T; timestamp: number }> = {};
+    for (const [k, v] of map.entries()) obj[k] = v;
+    fs.writeFileSync(filePath, JSON.stringify(obj));
+  } catch { /* ignore write failures */ }
+}
 
 export interface BookmakerOdds {
   book: string;
@@ -120,7 +151,8 @@ function getOddsApiKey(): string | undefined {
   return process.env.THE_ODDS_API_KEY?.trim();
 }
 
-const snapshotCache = new Map<string, { data: MarketSnapshot; timestamp: number }>();
+// Load snapshot cache from disk on startup — avoids re-processing ESPN + odds on restart
+const snapshotCache: Map<string, { data: MarketSnapshot; timestamp: number }> = readDiskCache<MarketSnapshot>(SNAPSHOT_DISK_CACHE_PATH);
 
 // Budget alert thresholds — track last alerted level to avoid repeated alerts per day
 let lastBudgetAlertLevel: "none" | "warning" | "critical" = "none";
@@ -148,7 +180,7 @@ function checkOddsApiBudget(remaining: number): void {
     });
   }).catch(() => {});
 }
-const SNAPSHOT_CACHE_TTL = 3 * 60 * 1000;
+const SNAPSHOT_CACHE_TTL = SNAPSHOT_DISK_CACHE_TTL_MS; // 22 minutes — consistent with disk cache TTL
 
 function mapSportToOddsApiKey(sport: string): string | null {
   const mapping: Record<string, string> = {
@@ -185,7 +217,8 @@ interface OddsApiGame {
   bookmakers: OddsApiBookmaker[];
 }
 
-const oddsFullCache = new Map<string, { data: OddsApiGame[]; timestamp: number }>();
+// Load odds cache from disk on startup — prevents Odds API calls on restart
+const oddsFullCache: Map<string, { data: OddsApiGame[]; timestamp: number }> = readDiskCache<OddsApiGame[]>(ODDS_DISK_CACHE_PATH);
 let oddsApiWarned = false;
 
 async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
@@ -199,7 +232,16 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
 
   const cacheKey = `full-odds-${sport}`;
   const cached = oddsFullCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < 5 * 60 * 1000) return cached.data;
+  const cacheAgeMs = cached ? Date.now() - cached.timestamp : Infinity;
+
+  // Return cached data (disk or memory) if still within TTL — no API call
+  if (cached && cacheAgeMs < ODDS_DISK_CACHE_TTL_MS) {
+    if (cacheAgeMs > 5 * 60 * 1000) {
+      // Only log when it was loaded from disk (>5 min old means it survived restart)
+      console.log(`[MarketSnapshot] Using disk cache for ${sport} (${Math.round(cacheAgeMs / 60000)}m old) — skipping Odds API call`);
+    }
+    return cached.data;
+  }
 
   try {
     const url = `${THE_ODDS_API_BASE}/${sportKey}/odds/?apiKey=${apiKey}&regions=us&markets=h2h,spreads,totals&oddsFormat=american`;
@@ -224,6 +266,8 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
     const remaining = res.headers.get("x-requests-remaining");
     const data: OddsApiGame[] = await res.json();
     oddsFullCache.set(cacheKey, { data, timestamp: Date.now() });
+    // Persist to disk immediately so the next restart is free
+    writeDiskCache(ODDS_DISK_CACHE_PATH, oddsFullCache);
     const remainingNum = parseInt(remaining || "0") || 0;
     if (remainingNum > 0) {
       recordOddsApiCall(sport, data.length, remainingNum, "MarketSnapshot");
@@ -506,7 +550,13 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
 export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapshot> {
   const cacheKey = `snapshot-${sport}`;
   const cached = snapshotCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < SNAPSHOT_CACHE_TTL) return cached.data;
+  if (cached && (Date.now() - cached.timestamp) < SNAPSHOT_CACHE_TTL) {
+    const ageMin = Math.round((Date.now() - cached.timestamp) / 60000);
+    if (ageMin >= 2) {
+      console.log(`[MarketSnapshot] ${sport}: serving from disk cache (${ageMin}m old) — no API call`);
+    }
+    return cached.data;
+  }
 
   const [espnGames, oddsGames] = await Promise.all([
     getMultiDayScoreboard(sport, 3),
@@ -677,6 +727,8 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
   };
 
   snapshotCache.set(cacheKey, { data: result, timestamp: Date.now() });
+  // Persist to disk so the next server restart reuses this without re-calling APIs
+  writeDiskCache(SNAPSHOT_DISK_CACHE_PATH, snapshotCache);
   return result;
 }
 
