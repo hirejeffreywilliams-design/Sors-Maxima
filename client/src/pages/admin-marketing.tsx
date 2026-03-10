@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { 
   Sparkles,
   TrendingUp,
@@ -37,7 +37,17 @@ import {
   Shield,
   CheckCircle2,
   AlertTriangle,
-  Eye
+  Eye,
+  RefreshCcw,
+  Send,
+  PlayCircle,
+  Gift,
+  Star,
+  Clock,
+  Activity,
+  TrendingDown,
+  ChevronRight,
+  Bell
 } from "lucide-react";
 import { SiX, SiFacebook, SiInstagram, SiLinkedin, SiTiktok } from "react-icons/si";
 import { useSEO } from "@/hooks/use-seo";
@@ -1023,6 +1033,321 @@ function PromoAdLibrary() {
   );
 }
 
+// ── Revenue Intelligence Panel ────────────────────────────────────────────────
+function RevenueIntelligencePanel() {
+  const { data, isLoading, refetch, isRefetching } = useQuery<any>({
+    queryKey: ["/api/admin/revenue/intelligence"],
+    refetchInterval: 60_000,
+  });
+
+  const fmt = (n: number) => n >= 1000 ? `$${(n / 1000).toFixed(1)}k` : `$${n}`;
+
+  const metrics = [
+    { label: "MRR", value: data ? fmt(data.MRR) : "—", sub: "Monthly recurring", icon: DollarSign, color: "from-emerald-500 to-teal-500", test: "mrr" },
+    { label: "ARR", value: data ? fmt(data.ARR) : "—", sub: "Annual run rate", icon: TrendingUp, color: "from-blue-500 to-indigo-500", test: "arr" },
+    { label: "Avg LTV", value: data ? fmt(data.avgLTV) : "—", sub: "Per paid member", icon: Star, color: "from-purple-500 to-pink-500", test: "ltv" },
+    { label: "Trial Conv.", value: data ? `${data.trialConversionRate}%` : "—", sub: `${data?.trialCount ?? 0} active trials`, icon: PlayCircle, color: "from-amber-500 to-orange-500", test: "trial-conv" },
+    { label: "Active", value: data ? String(data.activeCount) : "—", sub: "Paid subscribers", icon: Users, color: "from-indigo-500 to-violet-500", test: "active-subs" },
+    { label: "Churn Est.", value: data ? `${data.churnEstimate}%` : "—", sub: "Estimated churn", icon: TrendingDown, color: "from-red-500 to-rose-500", test: "churn" },
+  ];
+
+  return (
+    <div className="space-y-3" data-testid="revenue-intelligence-panel">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-emerald-400" />
+          <span className="text-sm font-semibold text-foreground">Revenue Intelligence™</span>
+          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-xs">Live</Badge>
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          data-testid="button-refresh-revenue"
+        >
+          <RefreshCcw className={`w-3 h-3 ${isRefetching ? "animate-spin" : ""}`} />
+          {data?.generatedAt ? new Date(data.generatedAt).toLocaleTimeString() : "Refresh"}
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-20 rounded-xl bg-muted/40 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          {metrics.map((m) => (
+            <div
+              key={m.label}
+              className="relative overflow-hidden rounded-xl border border-border/50 bg-card/60 p-3 text-center"
+              data-testid={`metric-${m.test}`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${m.color} opacity-5`} />
+              <m.icon className={`w-4 h-4 mx-auto mb-1 bg-gradient-to-br ${m.color} bg-clip-text`} style={{ stroke: "url(#none)" }} />
+              <div className="text-xl font-bold">{m.value}</div>
+              <div className="text-xs font-semibold">{m.label}</div>
+              <div className="text-[10px] text-muted-foreground">{m.sub}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {data && (
+        <div className="grid grid-cols-3 gap-3 text-xs">
+          <div className="rounded-lg border border-indigo-500/20 bg-indigo-500/5 px-3 py-2 text-center">
+            <div className="font-semibold text-indigo-400">${data.ltvByTier?.sharp ?? 0}</div>
+            <div className="text-muted-foreground">Sharp LTV</div>
+          </div>
+          <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2 text-center">
+            <div className="font-semibold text-purple-400">${data.ltvByTier?.edge ?? 0}</div>
+            <div className="text-muted-foreground">Edge LTV</div>
+          </div>
+          <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-center">
+            <div className="font-semibold text-amber-400">${data.ltvByTier?.max ?? 0}</div>
+            <div className="text-muted-foreground">Max LTV</div>
+          </div>
+        </div>
+      )}
+
+      {data?.revenueAtRisk > 0 && (
+        <div className="flex items-center gap-2 rounded-lg border border-yellow-500/30 bg-yellow-500/8 px-3 py-2 text-xs" data-testid="revenue-at-risk">
+          <AlertTriangle className="w-3 h-3 text-yellow-400 shrink-0" />
+          <span className="text-yellow-300"><strong>{fmt(data.revenueAtRisk)}</strong> revenue at risk if all {data.trialCount} Edge trial(s) churn.</span>
+          <span className="text-yellow-500/70 ml-auto">Launch Trial Ending campaign →</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Campaign Launcher ─────────────────────────────────────────────────────────
+interface CampaignRecord {
+  id: string;
+  type: string;
+  label: string;
+  targetCount: number;
+  sentCount: number;
+  launchedAt: string;
+  launchedBy: string;
+  status: "completed" | "partial" | "failed";
+}
+
+function CampaignLauncher() {
+  const { toast } = useToast();
+  const [launching, setLaunching] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const { data: campaignLog = [], refetch: refetchLog } = useQuery<CampaignRecord[]>({
+    queryKey: ["/api/admin/marketing/campaign-log"],
+    refetchInterval: 30_000,
+  });
+
+  const { data: retentionStatus } = useQuery<any>({
+    queryKey: ["/api/admin/marketing/retention-status"],
+    refetchInterval: 60_000,
+  });
+
+  const launch = async (endpoint: string, label: string) => {
+    setLaunching(endpoint);
+    try {
+      const res = await apiRequest("POST", `/api/admin/marketing/launch/${endpoint}`);
+      const data = await res.json();
+      toast({
+        title: `${label} launched`,
+        description: `Sent to ${data.sentCount ?? 0} of ${data.targetCount ?? 0} users. Status: ${data.status ?? "done"}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/marketing/campaign-log"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/revenue/intelligence"] });
+    } catch {
+      toast({ title: "Launch failed", description: "Check server logs for details", variant: "destructive" });
+    } finally {
+      setLaunching(null);
+    }
+  };
+
+  const generatePromo = async () => {
+    setLaunching("promo");
+    try {
+      const res = await apiRequest("POST", "/api/admin/marketing/generate-promo");
+      const data = await res.json();
+      setPromoCode(data.code);
+      toast({ title: "Promo code generated", description: `${data.code} — ${data.discount} off, expires ${new Date(data.expires).toLocaleDateString()}` });
+    } catch {
+      toast({ title: "Failed to generate promo", variant: "destructive" });
+    } finally {
+      setLaunching(null);
+    }
+  };
+
+  const copyPromo = () => {
+    if (promoCode) {
+      navigator.clipboard.writeText(promoCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const campaigns = [
+    {
+      id: "trial-ending",
+      icon: Clock,
+      color: "from-amber-500 to-orange-500",
+      label: "Trial Ending Soon",
+      desc: "Urgency email to users in trial days 5-7",
+      target: "Active trial users ≤ 3 days left",
+      endpoint: "trial-ending",
+    },
+    {
+      id: "win-back",
+      icon: Zap,
+      color: "from-blue-500 to-indigo-500",
+      label: "Win-Back Campaign",
+      desc: "Re-engagement email with 30% off promo code",
+      target: "Cancelled subscribers (25+ days ago)",
+      endpoint: "win-back",
+    },
+    {
+      id: "upgrade-nudge",
+      icon: TrendingUp,
+      color: "from-purple-500 to-pink-500",
+      label: "Sharp → Edge Upgrade Nudge",
+      desc: "Offer Edge 7-day trial to long-time Sharp members",
+      target: "Sharp members (90+ days on plan)",
+      endpoint: "upgrade-nudge",
+    },
+    {
+      id: "vip-unlock",
+      icon: Trophy,
+      color: "from-amber-500 to-yellow-500",
+      label: "VIP Unlock — Edge → Max",
+      desc: "Exclusive Max tier upgrade offer to Edge members",
+      target: "Active Edge subscribers",
+      endpoint: "vip-unlock",
+    },
+    {
+      id: "welcome",
+      icon: Star,
+      color: "from-emerald-500 to-teal-500",
+      label: "Welcome Sequence",
+      desc: "Send welcome email to current trial users",
+      target: "Active trial users",
+      endpoint: "welcome",
+    },
+  ];
+
+  const statusColor = (s: string) =>
+    s === "completed" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30"
+    : s === "partial" ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/30"
+    : "bg-red-500/20 text-red-400 border-red-500/30";
+
+  return (
+    <div className="space-y-6">
+      {/* Retention Engine Status */}
+      {retentionStatus && (
+        <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Activity className="w-4 h-4 text-indigo-400" />
+            <span className="text-sm font-semibold">Smart Retention Sequence Engine™</span>
+            <Badge className="bg-indigo-500/20 text-indigo-400 border-indigo-500/30 text-xs">Autonomous</Badge>
+          </div>
+          <div className="grid grid-cols-3 gap-3 text-xs">
+            <div className="text-center"><div className="font-bold text-lg">{retentionStatus.totalEmailsSent}</div><div className="text-muted-foreground">Emails sent (auto)</div></div>
+            <div className="text-center"><div className="font-bold text-lg">{retentionStatus.sequencesSent}</div><div className="text-muted-foreground">Sequences fired</div></div>
+            <div className="text-center"><div className="font-bold text-sm">{retentionStatus.lastRunAt ? new Date(retentionStatus.lastRunAt).toLocaleTimeString() : "Pending"}</div><div className="text-muted-foreground">Last cycle</div></div>
+          </div>
+        </div>
+      )}
+
+      {/* One-Click Campaign Buttons */}
+      <div>
+        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2"><Send className="w-4 h-4 text-primary" /> One-Click Campaigns</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {campaigns.map((c) => (
+            <div
+              key={c.id}
+              className="rounded-xl border border-border/60 bg-card/60 p-4 flex gap-3"
+              data-testid={`campaign-card-${c.id}`}
+            >
+              <div className={`shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br ${c.color} flex items-center justify-center`}>
+                <c.icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm">{c.label}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{c.desc}</div>
+                <div className="text-[10px] text-muted-foreground/70 mt-1 flex items-center gap-1">
+                  <Target className="w-3 h-3" />
+                  {c.target}
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="shrink-0 self-center"
+                onClick={() => launch(c.endpoint, c.label)}
+                disabled={launching === c.endpoint}
+                data-testid={`button-launch-${c.id}`}
+              >
+                {launching === c.endpoint ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Send className="w-3 h-3 mr-1" />Send</>}
+              </Button>
+            </div>
+          ))}
+
+          {/* Promo Code Generator */}
+          <div className="rounded-xl border border-border/60 bg-card/60 p-4 flex gap-3" data-testid="campaign-card-promo">
+            <div className="shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+              <Gift className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm">Generate Promo Code</div>
+              <div className="text-xs text-muted-foreground mt-0.5">One-click random promo code — 30% off, 7-day expiry</div>
+              {promoCode && (
+                <div className="mt-2 flex items-center gap-2">
+                  <code className="text-sm font-mono font-bold text-primary bg-primary/10 px-2 py-1 rounded">{promoCode}</code>
+                  <button onClick={copyPromo} className="text-muted-foreground hover:text-foreground transition-colors" data-testid="button-copy-promo">
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shrink-0 self-center"
+              onClick={generatePromo}
+              disabled={launching === "promo"}
+              data-testid="button-generate-promo"
+            >
+              {launching === "promo" ? <Loader2 className="w-3 h-3 animate-spin" /> : <><Gift className="w-3 h-3 mr-1" />Generate</>}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Campaign Launch Log */}
+      {campaignLog.length > 0 && (
+        <div>
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2"><Clock className="w-4 h-4 text-muted-foreground" /> Launch History</h3>
+          <div className="space-y-2">
+            {campaignLog.slice(0, 10).map((rec) => (
+              <div
+                key={rec.id}
+                className="flex items-center gap-3 rounded-lg border border-border/40 bg-muted/20 px-3 py-2 text-xs"
+                data-testid={`log-${rec.id}`}
+              >
+                <Badge className={`${statusColor(rec.status)} text-[10px] shrink-0`}>{rec.status}</Badge>
+                <div className="flex-1 font-medium">{rec.label}</div>
+                <div className="text-muted-foreground shrink-0">{rec.sentCount}/{rec.targetCount} sent</div>
+                <div className="text-muted-foreground shrink-0">{new Date(rec.launchedAt).toLocaleTimeString()}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminMarketing() {
   useSEO({ title: "Marketing Dashboard", description: "Marketing performance and campaign analytics" });
   return (
@@ -1044,6 +1369,13 @@ export default function AdminMarketing() {
         </Badge>
       </div>
 
+      {/* Revenue Intelligence Panel */}
+      <Card className="border-emerald-500/20 bg-card/60">
+        <CardContent className="pt-4 pb-3 px-4">
+          <RevenueIntelligencePanel />
+        </CardContent>
+      </Card>
+
       {/* Legal Compliance Warning */}
       <div className="flex items-start gap-3 rounded-xl border border-yellow-500/30 bg-yellow-500/8 px-4 py-3" data-testid="marketing-legal-warning">
         <AlertTriangle className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
@@ -1053,8 +1385,12 @@ export default function AdminMarketing() {
         </div>
       </div>
 
-      <Tabs defaultValue="promo_ads" className="space-y-4">
+      <Tabs defaultValue="launcher" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="launcher" className="gap-2" data-testid="tab-launcher">
+            <Send className="w-4 h-4" />
+            Campaign Launcher
+          </TabsTrigger>
           <TabsTrigger value="promo_ads" className="gap-2" data-testid="tab-promo-ads">
             <Rocket className="w-4 h-4" />
             Promo Ads
@@ -1080,6 +1416,21 @@ export default function AdminMarketing() {
             Audiences
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="launcher">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Send className="w-5 h-5 text-primary" />
+                One-Click Campaign Launcher
+              </CardTitle>
+              <CardDescription>Fire targeted email campaigns instantly. The Smart Retention Sequence Engine™ runs autonomously every hour — these buttons let you manually trigger campaigns on demand.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CampaignLauncher />
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="promo_ads">
           <PromoAdLibrary />

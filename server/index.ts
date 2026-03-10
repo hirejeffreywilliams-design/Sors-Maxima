@@ -35,6 +35,7 @@ import { runMigrations } from "./dbMigrations";
 import { startQualityWatchdog } from "./qualityWatchdog";
 import { startAutonomousLearningEngine } from "./autonomousLearningEngine";
 import { startAcceleratedPatternEngine } from "./acceleratedPatternEngine";
+import { startRetentionSequenceEngine } from "./retentionSequenceEngine";
 import { startEarlySettlementEngine } from "./earlySettlementEngine";
 import { startSharpSignalDetector } from "./sharpSignalDetector";
 import { pool } from "./db";
@@ -321,6 +322,7 @@ function startEnginesPhased(): void {
   safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 480_000); // 8 min
   safeStart("Historical Backtest", initBacktestOnStartup, 540_000);             // 9 min
   safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 600_000); // 10 min
+  safeStart("Retention Sequence Engine", startRetentionSequenceEngine, 120_000);  // 2 min
   safeStart("Quality Watchdog", startQualityWatchdog, 660_000);                 // 11 min
   safeStart("App Intelligence Engine", () => {
     import("./appIntelligenceEngine").then(({ startAppIntelligenceEngine }) => {

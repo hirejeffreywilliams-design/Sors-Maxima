@@ -773,7 +773,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
         messages: [
           {
             role: "system",
-            content: "You are a marketing expert for Sors Maxima, an exclusive members-only sports betting intelligence platform. There is NO free trial — all access requires a paid subscription. Create compelling, conversion-focused content. The platform offers three members-only tiers: Sharp ($49/mo), Edge ($99/mo), and Max ($249/mo), each with data-driven 46-factor betting analysis powered by real ESPN data, The Odds API odds, Monte Carlo simulations, and advanced analytics engines."
+            content: "You are a marketing expert for Sors Maxima, an exclusive members-only sports betting intelligence platform. The Edge (middle) tier at $99/mo offers a 7-day free trial — use this as the primary conversion hook in Edge-targeted marketing. Sharp ($49/mo) and Max ($249/mo) do NOT have a free trial. Create compelling, conversion-focused content that maximises LTV. The platform offers three members-only tiers: Sharp ($49/mo), Edge ($99/mo — 7-day free trial), and Max ($249/mo), each with data-driven 46-factor betting analysis powered by real ESPN data, The Odds API odds, Monte Carlo simulations, and advanced analytics engines. Never use: 'guaranteed wins', 'zero-loss', or specific unverified win rates."
           },
           { role: "user", content: fullPrompt }
         ],
@@ -850,6 +850,99 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
     } catch (err) {
       console.error("Campaign creation error:", err);
       res.status(500).json({ error: "Failed to create campaign" });
+    }
+  });
+
+  // ── One-Click Campaign Launcher ─────────────────────────────────────────────
+  app.post("/api/admin/marketing/launch/trial-ending", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { launchTrialEndingCampaign } = await import("../retentionSequenceEngine");
+      const record = await launchTrialEndingCampaign((req as any).user?.username || "admin");
+      res.json(record);
+    } catch (err) {
+      console.error("Trial ending campaign error:", err);
+      res.status(500).json({ error: "Failed to launch campaign" });
+    }
+  });
+
+  app.post("/api/admin/marketing/launch/win-back", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { launchWinBackCampaign } = await import("../retentionSequenceEngine");
+      const record = await launchWinBackCampaign((req as any).user?.username || "admin");
+      res.json(record);
+    } catch (err) {
+      console.error("Win-back campaign error:", err);
+      res.status(500).json({ error: "Failed to launch campaign" });
+    }
+  });
+
+  app.post("/api/admin/marketing/launch/upgrade-nudge", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { launchUpgradeNudgeCampaign } = await import("../retentionSequenceEngine");
+      const record = await launchUpgradeNudgeCampaign((req as any).user?.username || "admin");
+      res.json(record);
+    } catch (err) {
+      console.error("Upgrade nudge campaign error:", err);
+      res.status(500).json({ error: "Failed to launch campaign" });
+    }
+  });
+
+  app.post("/api/admin/marketing/launch/welcome", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const { launchWelcomeCampaign } = await import("../retentionSequenceEngine");
+      const record = await launchWelcomeCampaign((req as any).user?.username || "admin");
+      res.json(record);
+    } catch (err) {
+      console.error("Welcome campaign error:", err);
+      res.status(500).json({ error: "Failed to launch campaign" });
+    }
+  });
+
+  app.post("/api/admin/marketing/launch/vip-unlock", requireAdmin, async (req: Request, res: Response) => {
+    try {
+      const allSubs = await stripeService.getAllSubscriptions();
+      const targets = allSubs.filter((s: any) => s.subscriptionTier === "elite" && s.subscriptionStatus === "active");
+      let sentCount = 0;
+      for (const sub of targets) {
+        const userResult = await db.execute(sql.raw(`SELECT email FROM users WHERE username = '${sub.username.replace(/'/g, "''")}'`));
+        const email = userResult.rows[0]?.email as string | undefined;
+        if (!email) continue;
+        const { sendUpgradeNudgeEmail } = await import("../emailService");
+        const ok = await sendUpgradeNudgeEmail(email, sub.username);
+        if (ok) sentCount++;
+      }
+      res.json({ type: "vip_unlock", label: "VIP Unlock — Edge → Max", targetCount: targets.length, sentCount, status: sentCount > 0 ? "completed" : "failed", launchedAt: new Date().toISOString() });
+    } catch (err) {
+      console.error("VIP unlock campaign error:", err);
+      res.status(500).json({ error: "Failed to launch VIP unlock campaign" });
+    }
+  });
+
+  app.post("/api/admin/marketing/generate-promo", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const code = "SORS" + Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+      res.json({ code, discount: "30%", expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to generate promo code" });
+    }
+  });
+
+  app.get("/api/admin/marketing/campaign-log", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { getCampaignLog } = await import("../retentionSequenceEngine");
+      res.json(getCampaignLog());
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get campaign log" });
+    }
+  });
+
+  app.get("/api/admin/marketing/retention-status", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const { getRetentionEngineStatus } = await import("../retentionSequenceEngine");
+      res.json(getRetentionEngineStatus());
+    } catch (err) {
+      res.status(500).json({ error: "Failed to get retention status" });
     }
   });
 
@@ -1674,6 +1767,73 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
     }
   });
 
+
+  // Real-Time Revenue Intelligence Dashboard
+  app.get("/api/admin/revenue/intelligence", requireAdmin, async (_req: Request, res: Response) => {
+    try {
+      const allSubs = await stripeService.getAllSubscriptions();
+      const users   = await storage.getUsers();
+
+      let proCount = 0, eliteCount = 0, whaleCount = 0;
+      let trialCount = 0, cancelledCount = 0, activeCount = 0;
+      let trialConverted = 0; // users who were trialing and are now active
+
+      for (const sub of allSubs) {
+        if (sub.subscriptionTier === "pro") proCount++;
+        else if (sub.subscriptionTier === "elite") eliteCount++;
+        else if (sub.subscriptionTier === "whale") whaleCount++;
+
+        if (sub.subscriptionStatus === "trialing") trialCount++;
+        else if (sub.subscriptionStatus === "cancelled") cancelledCount++;
+        else if (sub.subscriptionStatus === "active") activeCount++;
+
+        // If user has trial start + is now active → counted as converted
+        if (sub.trialStartDate && sub.subscriptionStatus === "active") trialConverted++;
+      }
+
+      const MRR = (proCount * 49) + (eliteCount * 99) + (whaleCount * 249);
+      const ARR = MRR * 12;
+      const totalPaid = proCount + eliteCount + whaleCount;
+      const totalTrialEver = trialCount + trialConverted;
+      const trialConversionRate = totalTrialEver > 0
+        ? Math.round((trialConverted / totalTrialEver) * 100 * 10) / 10
+        : 0;
+      const avgLTV = totalPaid > 0 ? Math.round(MRR / totalPaid * 14) : 0; // ~14-month avg sub life
+      const ltvByTier = {
+        sharp: proCount > 0 ? 49 * 14 : 0,
+        edge:  eliteCount > 0 ? 99 * 14 : 0,
+        max:   whaleCount > 0 ? 249 * 14 : 0,
+      };
+      const churnEstimate = cancelledCount > 0 && totalPaid > 0
+        ? Math.round((cancelledCount / (totalPaid + cancelledCount)) * 100 * 10) / 10
+        : 0;
+      const revenueAtRisk = trialCount * 99; // If all trials churn = max downside on Edge
+
+      const { getRetentionEngineStatus } = await import("../retentionSequenceEngine");
+      const retentionStatus = getRetentionEngineStatus();
+
+      res.json({
+        MRR,
+        ARR,
+        totalPaid,
+        trialCount,
+        cancelledCount,
+        activeCount,
+        trialConversionRate,
+        avgLTV,
+        ltvByTier,
+        churnEstimate,
+        revenueAtRisk,
+        tierBreakdown: { pro: proCount, elite: eliteCount, whale: whaleCount },
+        totalUsers: users.length,
+        retentionEngine: retentionStatus,
+        generatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error("Revenue intelligence error:", err);
+      res.status(500).json({ error: "Failed to compute revenue intelligence" });
+    }
+  });
 
   // === Cost Monitoring (Admin) ===
   app.get("/api/admin/cost-monitor", requireAdmin, (_req, res) => {

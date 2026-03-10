@@ -36,7 +36,10 @@ The frontend is pre-built (`npx vite build`) and served as static files from `di
 - **Life-Changing Ticket (LCT) Track Record**: Daily LCTs are logged, settled by admin, and winning LCTs mint `S+` grade system cards.
 - **Community Integrity Engine**: An anti-fraud system to detect card velocity abuse and credential sharing.
 - **Cashout Engineering™**: Three proprietary cashout strategies: Sportsbook Sweat™, Lock & Roll™, and Steam Exit™.
-- **Monetization & Tiered Features**: Implements Stripe for subscriptions (Sharp, Edge, Max tiers) and a Referral System, with features gated by subscription.
+- **Monetization & Tiered Features**: Implements Stripe for subscriptions (Sharp, Edge, Max tiers) and a Referral System, with features gated by subscription. **Edge tier ($99/mo) exclusively offers a 7-day free trial** — surfaced in pricing page with an emerald "7-Day Free Trial" badge, AI marketing prompt, and Stripe checkout session.
+- **Smart Retention Sequence Engine™**: `server/retentionSequenceEngine.ts` — runs hourly, autonomously fires Resend emails for: Trial Day 3 (education), Trial Day 5 (urgency), Trial Day Last Day (final CTA), Win-Back at 30 days (30% promo code), Sharp→Edge Upgrade Nudge at 90 days. Tracks sent sequences in memory; started 2 min after server boot.
+- **Revenue Intelligence Dashboard**: `GET /api/admin/revenue/intelligence` — computes live MRR, ARR, avg LTV, trial conversion rate, churn estimate, revenue at risk. Shown as animated metric cards at top of `/admin/marketing` page. Auto-refreshes every 60 seconds.
+- **One-Click Campaign Launcher**: Tab on `/admin/marketing` with 5 instant campaign buttons (Trial Ending, Win-Back, Upgrade Nudge, VIP Unlock, Welcome) + promo code generator. Each fires targeted Resend emails to the right segment. Backend routes: `POST /api/admin/marketing/launch/*`. Launch log tracks history. Campaign log: `GET /api/admin/marketing/campaign-log`.
 - **Proprietary Branding & Lexicon**: Uses "Sors" branding and a proprietary terminology framework (Sors Lexicon™).
 - **Global Visual Redesign**: Utilizes a glassmorphism, gradient-based design system with a premium three-color palette.
 - **Persistent Data Storage**: Uses PostgreSQL for storing user data, watchlists, preferences, and betting profiles.

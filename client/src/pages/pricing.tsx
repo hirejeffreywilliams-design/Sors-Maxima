@@ -263,10 +263,13 @@ export default function Pricing() {
               data-testid={`card-tier-${tier.id}`}
             >
               {tier.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 flex gap-2 items-center flex-col">
                   <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-md px-4">
                     <Trophy className="w-3 h-3 mr-1" />
                     Most Popular
+                  </Badge>
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 shadow-md px-4 text-xs">
+                    ✦ 7-Day Free Trial
                   </Badge>
                 </div>
               )}

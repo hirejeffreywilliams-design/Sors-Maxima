@@ -433,3 +433,129 @@ export async function sendPasswordResetEmail(to: string, username: string, reset
     return false;
   }
 }
+
+// ── Retention Sequence Emails ─────────────────────────────────────────────────
+
+const APP_URL = `https://${process.env.REPLIT_DOMAINS?.split(',')[0] || 'app.sorsmaxima.com'}`;
+
+export async function sendTrialDay3Email(to: string, username: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL, to,
+      subject: `Day 3 of your Sors Maxima Edge trial — tips to maximise it`,
+      html: `<div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:520px;margin:0 auto;">
+        <p style="color:#6366f1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Day 3 · Your Edge Trial</p>
+        <h1 style="font-size:24px;margin:0 0 8px;">You're already ahead of 90% of bettors.</h1>
+        <p style="color:#94a3b8;margin:0 0 24px;">Hi ${username}, most people just guess. You're using a 46-factor ML model and real odds data. Here are three features most trial users don't discover until it's too late:</p>
+        <div style="background:#1e293b;border-radius:8px;padding:20px;margin-bottom:12px;border-left:3px solid #6366f1;">
+          <strong style="display:block;margin-bottom:4px;">🎯 CLV Tracker</strong>
+          <span style="color:#94a3b8;font-size:14px;">Closing Line Value tells you if you're beating the market. Long-term CLV+ = long-term winner.</span>
+        </div>
+        <div style="background:#1e293b;border-radius:8px;padding:20px;margin-bottom:12px;border-left:3px solid #22c55e;">
+          <strong style="display:block;margin-bottom:4px;">⚡ Smart Ticket Generator</strong>
+          <span style="color:#94a3b8;font-size:14px;">Let the model build a correlated parlay around the day's highest-EV plays. The hard work is done for you.</span>
+        </div>
+        <div style="background:#1e293b;border-radius:8px;padding:20px;margin-bottom:24px;border-left:3px solid #f59e0b;">
+          <strong style="display:block;margin-bottom:4px;">🎲 Monte Carlo Simulations</strong>
+          <span style="color:#94a3b8;font-size:14px;">10,000 simulated outcomes per game. See your actual win probability, not just the model's score.</span>
+        </div>
+        <a href="${APP_URL}" style="display:inline-block;background:#6366f1;color:white;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Explore These Features →</a>
+        <p style="color:#475569;font-size:12px;margin-top:24px;">4 days left in your trial.</p>
+      </div>`,
+    });
+    return !error;
+  } catch { return false; }
+}
+
+export async function sendTrialDay5Email(to: string, username: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL, to,
+      subject: `⏰ 2 days left on your Edge trial — here's what you'd be leaving behind`,
+      html: `<div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:520px;margin:0 auto;">
+        <p style="color:#f59e0b;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">⏰ 2 Days Remaining</p>
+        <h1 style="font-size:24px;margin:0 0 8px;">Your trial ends in 48 hours.</h1>
+        <p style="color:#94a3b8;margin:0 0 24px;">Hi ${username}, your free access to Edge closes in 2 days. Here's what disappears when the trial ends:</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+          <tr><td style="padding:10px 0;border-bottom:1px solid #1e293b;color:#94a3b8;">✓</td><td style="padding:10px 0;border-bottom:1px solid #1e293b;">CLV Tracker &amp; Closing Line Analysis</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #1e293b;color:#94a3b8;">✓</td><td style="padding:10px 0;border-bottom:1px solid #1e293b;">Player Props Engine (600+ markets)</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #1e293b;color:#94a3b8;">✓</td><td style="padding:10px 0;border-bottom:1px solid #1e293b;">Monte Carlo Win Probability (10K sims)</td></tr>
+          <tr><td style="padding:10px 0;border-bottom:1px solid #1e293b;color:#94a3b8;">✓</td><td style="padding:10px 0;border-bottom:1px solid #1e293b;">Strategy Advisor &amp; Bankroll Tools</td></tr>
+          <tr><td style="padding:10px 0;color:#94a3b8;">✓</td><td style="padding:10px 0;">Intelligence Cards™ Collection</td></tr>
+        </table>
+        <p style="color:#cbd5e1;margin-bottom:24px;">Edge is $99/month — about the cost of one small bet. If you use it once a week, it pays for itself. Lock in your rate today and we'll never raise your price.</p>
+        <a href="${APP_URL}/pricing" style="display:inline-block;background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:700;font-size:16px;">Convert to Edge — $99/mo →</a>
+        <p style="color:#475569;font-size:12px;margin-top:24px;">Cancel anytime. No price increases for existing members.</p>
+      </div>`,
+    });
+    return !error;
+  } catch { return false; }
+}
+
+export async function sendTrialLastDayEmail(to: string, username: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL, to,
+      subject: `🚨 Last day — your Sors Maxima Edge trial expires today`,
+      html: `<div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:520px;margin:0 auto;">
+        <div style="background:#ef444415;border:1px solid #ef444430;border-radius:8px;padding:16px;margin-bottom:24px;text-align:center;">
+          <span style="font-size:32px;">🚨</span>
+          <p style="color:#fca5a5;font-weight:700;margin:8px 0 0;">Trial expires tonight</p>
+        </div>
+        <h1 style="font-size:22px;margin:0 0 16px;">This is your last chance, ${username}.</h1>
+        <p style="color:#94a3b8;margin:0 0 24px;">After midnight, your Edge access will close. You'll drop to free tier — no CLV tracking, no Monte Carlo, no props engine, no edge.</p>
+        <p style="color:#cbd5e1;font-weight:600;margin:0 0 24px;">Every day you delay is a day you're betting without the full model.</p>
+        <a href="${APP_URL}/pricing" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:16px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:18px;margin-bottom:16px;">Keep My Edge Access →</a>
+        <p style="color:#64748b;font-size:13px;margin:0;">$99/month. Cancel anytime. Members keep their pick history forever.</p>
+      </div>`,
+    });
+    return !error;
+  } catch { return false; }
+}
+
+export async function sendWinBackEmail(to: string, username: string, promoCode: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL, to,
+      subject: `We miss you — here's 30% off your first month back`,
+      html: `<div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:520px;margin:0 auto;">
+        <h1 style="font-size:24px;margin:0 0 8px;">Come back to your edge, ${username}.</h1>
+        <p style="color:#94a3b8;margin:0 0 24px;">The model has continued learning since you left. We've settled 600+ picks, improved accuracy, and added new engines. You're missing out.</p>
+        <div style="background:#1e293b;border:2px dashed #6366f1;border-radius:8px;padding:24px;text-align:center;margin-bottom:24px;">
+          <p style="color:#94a3b8;font-size:13px;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px;">Your personal promo code</p>
+          <div style="font-size:28px;font-weight:900;letter-spacing:4px;color:#6366f1;">${promoCode}</div>
+          <p style="color:#94a3b8;font-size:12px;margin:8px 0 0;">30% off your first month back. Expires in 7 days.</p>
+        </div>
+        <a href="${APP_URL}/pricing" style="display:inline-block;background:#6366f1;color:white;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:700;">Reactivate with ${promoCode} →</a>
+      </div>`,
+    });
+    return !error;
+  } catch { return false; }
+}
+
+export async function sendUpgradeNudgeEmail(to: string, username: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL, to,
+      subject: `Unlock the full model — Edge is now available to you`,
+      html: `<div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:520px;margin:0 auto;">
+        <p style="color:#6366f1;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Exclusive Upgrade Offer</p>
+        <h1 style="font-size:24px;margin:0 0 8px;">Hi ${username} — you've been a Sharp member.</h1>
+        <p style="color:#94a3b8;margin:0 0 24px;">You've been using the core picks. Here's what Edge members get that you don't:</p>
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><span style="color:#6366f1;font-size:18px;">⚡</span><div><strong>CLV Tracker</strong><br/><span style="color:#94a3b8;font-size:14px;">Know if you're beating the closing line — the #1 predictor of long-term profitability.</span></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;"><span style="color:#6366f1;font-size:18px;">🎲</span><div><strong>Monte Carlo Simulations</strong><br/><span style="color:#94a3b8;font-size:14px;">10,000 game simulations to give you real win probabilities, not just grades.</span></div></div>
+          <div style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#6366f1;font-size:18px;">📊</span><div><strong>Player Props Engine</strong><br/><span style="color:#94a3b8;font-size:14px;">600+ prop markets analyzed in real-time. Find value in player lines before the books adjust.</span></div></div>
+        </div>
+        <p style="color:#6366f1;font-weight:600;margin-bottom:16px;">Try Edge free for 7 days — no charge until your trial ends.</p>
+        <a href="${APP_URL}/pricing" style="display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:700;">Start My 7-Day Edge Trial →</a>
+      </div>`,
+    });
+    return !error;
+  } catch { return false; }
+}

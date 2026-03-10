@@ -164,7 +164,9 @@ export class StripeService {
       success_url: successUrl,
       cancel_url: cancelUrl,
     };
-    if (tier === 'pro') {
+    if (tier === 'elite') {
+      // 7-day free trial on Edge (middle) tier only — maximizes LTV by letting users
+      // experience the full Edge feature set before committing to $99/mo
       sessionParams.subscription_data = { trial_period_days: 7 };
     }
     return await stripe.checkout.sessions.create(sessionParams);
