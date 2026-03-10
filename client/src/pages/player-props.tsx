@@ -53,6 +53,13 @@ interface MarketProp {
   situationalNote?: string | null;
   vegasEdge?: number | null;
   engineSources?: string[];
+  // Live boxscore fields — populated only for in-progress games
+  isLiveStat?: boolean;
+  currentStat?: number | null;
+  projection?: number | null;
+  gameProgress?: number | null;
+  period?: number | null;
+  clockDisplay?: string | null;
 }
 
 interface GamePlayer {
@@ -973,6 +980,82 @@ function CompactPropRow({
     };
   };
 
+  // ── Live Stat Row (in-game projections) ──────────────────────────────────
+  if (prop.isLiveStat) {
+    const pct = prop.gameProgress != null ? Math.round(prop.gameProgress * 100) : 0;
+    const proj = prop.projection ?? prop.currentStat ?? 0;
+    const curr = prop.currentStat ?? 0;
+    const trending = proj > (prop.seasonAvg ?? proj) ? "over" : proj < (prop.seasonAvg ?? proj) * 0.9 ? "under" : "neutral";
+
+    return (
+      <div className="flex items-center gap-2 px-3 py-2.5 bg-amber-500/3 border-l-2 border-amber-500/40"
+        data-testid={`row-live-${player.playerName}-${prop.market}`}>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold leading-tight truncate max-w-[140px]">{player.playerName}</span>
+            {player.injury && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
+            <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 animate-pulse shrink-0">
+              LIVE
+            </span>
+          </div>
+          <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
+            {player.team && <span className="truncate max-w-[60px]">{player.team}</span>}
+            {prop.seasonAvg != null && (
+              <><span className="opacity-40">·</span><span className="font-mono">avg {prop.seasonAvg}</span></>
+            )}
+            <span className="opacity-40">·</span>
+            <span className="font-mono text-amber-600 dark:text-amber-400 font-semibold">{curr} now</span>
+          </div>
+          <div className="mt-1 h-0.5 rounded-full bg-muted/40 overflow-hidden" style={{ maxWidth: 120 }}>
+            <div
+              className="h-full rounded-full bg-amber-400 transition-all"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="text-[9px] text-muted-foreground mt-0.5">{pct}% through game</div>
+        </div>
+
+        <div className="text-center shrink-0 w-16">
+          <div className="text-[10px] text-muted-foreground leading-tight">Pace proj.</div>
+          <div className={`text-base font-bold font-mono leading-tight ${
+            trending === "over" ? "text-emerald-500" : trending === "under" ? "text-red-500" : "text-foreground"
+          }`}>
+            {proj.toFixed(1)}
+          </div>
+          <div className="text-[9px] text-muted-foreground leading-tight">{prop.confidence}% conf</div>
+        </div>
+
+        <div className="flex gap-1 shrink-0">
+          <div
+            className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 px-2 ${
+              trending === "over"
+                ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-500"
+                : "border-border/50 text-muted-foreground/50"
+            }`}
+            style={{ minWidth: 48 }}
+          >
+            <ArrowUp className="w-3 h-3" />
+            <span className="text-[9px] font-bold leading-tight">OVER</span>
+            <span className="text-[9px] leading-tight font-mono">{prop.seasonAvg != null ? prop.seasonAvg : "—"}</span>
+          </div>
+          <div
+            className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 px-2 ${
+              trending === "under"
+                ? "border-red-500/60 bg-red-500/10 text-red-500"
+                : "border-border/50 text-muted-foreground/50"
+            }`}
+            style={{ minWidth: 48 }}
+          >
+            <ArrowDown className="w-3 h-3" />
+            <span className="text-[9px] font-bold leading-tight">UNDER</span>
+            <span className="text-[9px] leading-tight font-mono">{prop.seasonAvg != null ? prop.seasonAvg : "—"}</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Standard Pre-Game Prop Row ────────────────────────────────────────────
   return (
     <div className="flex items-center gap-2 px-3 py-2.5" data-testid={`row-compact-${player.playerName}-${prop.market}`}>
       <div className="flex-1 min-w-0">
@@ -1157,11 +1240,23 @@ function GamePropGrid({ game, sport, addLeg, removeLeg, slipLegIds }: {
 
       <div className="flex items-center gap-2 px-3 py-1 bg-muted/10 border-b">
         <div className="flex-1 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Player</div>
-        <div className="w-11 text-center text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Line</div>
-        <div className="flex gap-1 shrink-0" style={{ minWidth: 108 }}>
-          <div className="text-center text-[9px] font-bold uppercase tracking-wider text-emerald-500/80" style={{ minWidth: 52 }}>Over</div>
-          <div className="text-center text-[9px] font-bold uppercase tracking-wider text-red-500/80" style={{ minWidth: 52 }}>Under</div>
-        </div>
+        {isLive ? (
+          <>
+            <div className="w-16 text-center text-[9px] font-bold uppercase tracking-wider text-amber-500/80">Projection</div>
+            <div className="flex gap-1 shrink-0" style={{ minWidth: 100 }}>
+              <div className="text-center text-[9px] font-bold uppercase tracking-wider text-emerald-500/80" style={{ minWidth: 48 }}>Over</div>
+              <div className="text-center text-[9px] font-bold uppercase tracking-wider text-red-500/80" style={{ minWidth: 48 }}>Under</div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="w-11 text-center text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Line</div>
+            <div className="flex gap-1 shrink-0" style={{ minWidth: 108 }}>
+              <div className="text-center text-[9px] font-bold uppercase tracking-wider text-emerald-500/80" style={{ minWidth: 52 }}>Over</div>
+              <div className="text-center text-[9px] font-bold uppercase tracking-wider text-red-500/80" style={{ minWidth: 52 }}>Under</div>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="divide-y divide-border/30">
@@ -1189,9 +1284,15 @@ function GamePropGrid({ game, sport, addLeg, removeLeg, slipLegIds }: {
       </div>
 
       <div className="px-3 py-1.5 border-t bg-muted/10 flex items-center gap-2">
-        <span className="text-[10px] text-muted-foreground flex-1">
-          {playersForMarket.length} player{playersForMarket.length !== 1 ? "s" : ""} with this prop · tap a category above to switch
-        </span>
+        {isLive ? (
+          <span className="text-[10px] text-amber-600 dark:text-amber-400 flex-1">
+            Live pace projections — sportsbooks suspend prop lines during play
+          </span>
+        ) : (
+          <span className="text-[10px] text-muted-foreground flex-1">
+            {playersForMarket.length} player{playersForMarket.length !== 1 ? "s" : ""} with this prop · tap a category above to switch
+          </span>
+        )}
         {game.dataSource && (
           <span className="text-[9px] text-muted-foreground/50">{game.dataSource}</span>
         )}

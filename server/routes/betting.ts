@@ -2886,6 +2886,217 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  // ── Live Boxscore Props Engine ───────────────────────────────────────────────
+  // When a game goes live, sportsbooks pull player prop lines. This engine fetches
+  // the ESPN live boxscore, calculates pace-adjusted projections, and generates
+  // synthetic prop recommendations so members always see data during live games.
+
+  const ESPN_LIVE_SPORT_PATHS: Record<string, string> = {
+    NBA: "basketball/nba",
+    NFL: "football/nfl",
+    NHL: "hockey/nhl",
+    MLB: "baseball/mlb",
+    NCAAB: "basketball/mens-college-basketball",
+    NCAAF: "football/college-football",
+  };
+
+  // ESPN boxscore stat key names — these are the actual keys the ESPN summary API returns.
+  // Keys vary by sport. Use `statKeyAlt` as a fallback if the primary key is not found.
+  const LIVE_SPORT_MARKETS: Record<string, Array<{ market: string; label: string; statKey: string; statKeyAlt?: string; groupHint?: string; isMadeAtt?: boolean }>> = {
+    NBA: [
+      { market: "player_points",   label: "Points",          statKey: "points",   statKeyAlt: "PTS" },
+      { market: "player_rebounds",  label: "Rebounds",        statKey: "rebounds", statKeyAlt: "REB" },
+      { market: "player_assists",   label: "Assists",         statKey: "assists",  statKeyAlt: "AST" },
+      { market: "player_threes",    label: "3-Pointers Made", statKey: "threePointFieldGoalsMade-threePointFieldGoalsAttempted", statKeyAlt: "3PT", isMadeAtt: true },
+      { market: "player_steals",    label: "Steals",          statKey: "steals",   statKeyAlt: "STL" },
+      { market: "player_blocks",    label: "Blocks",          statKey: "blocks",   statKeyAlt: "BLK" },
+    ],
+    NHL: [
+      { market: "player_goals",         label: "Goals",         statKey: "goals",        statKeyAlt: "G"   },
+      { market: "player_assists",       label: "Assists",        statKey: "assists",      statKeyAlt: "A"   },
+      { market: "player_shots_on_goal", label: "Shots on Goal",  statKey: "shotsOnGoal",  statKeyAlt: "SOG" },
+    ],
+    NFL: [
+      { market: "player_pass_yds",         label: "Passing Yards",   statKey: "passingYards",   statKeyAlt: "YDS", groupHint: "passing"   },
+      { market: "player_pass_tds",         label: "Passing TDs",     statKey: "passingTouchdowns", statKeyAlt: "TD", groupHint: "passing"   },
+      { market: "player_rush_yds",         label: "Rushing Yards",   statKey: "rushingYards",   statKeyAlt: "YDS", groupHint: "rushing"   },
+      { market: "player_reception_yds",    label: "Receiving Yards", statKey: "receivingYards", statKeyAlt: "YDS", groupHint: "receiving" },
+      { market: "player_receptions",       label: "Receptions",      statKey: "receptions",     statKeyAlt: "REC", groupHint: "receiving" },
+    ],
+    MLB: [
+      { market: "batter_hits",          label: "Hits",               statKey: "hits",       statKeyAlt: "H",  groupHint: "batting"  },
+      { market: "batter_home_runs",     label: "Home Runs",          statKey: "homeRuns",   statKeyAlt: "HR", groupHint: "batting"  },
+      { market: "pitcher_strikeouts",   label: "Pitcher Strikeouts", statKey: "strikeouts", statKeyAlt: "K",  groupHint: "pitching" },
+    ],
+    NCAAB: [
+      { market: "player_points",   label: "Points",   statKey: "points",   statKeyAlt: "PTS" },
+      { market: "player_rebounds", label: "Rebounds", statKey: "rebounds", statKeyAlt: "REB" },
+      { market: "player_assists",  label: "Assists",  statKey: "assists",  statKeyAlt: "AST" },
+    ],
+    NCAAF: [
+      { market: "player_pass_yds",      label: "Passing Yards",   statKey: "passingYards",   statKeyAlt: "YDS", groupHint: "passing"   },
+      { market: "player_rush_yds",      label: "Rushing Yards",   statKey: "rushingYards",   statKeyAlt: "YDS", groupHint: "rushing"   },
+      { market: "player_reception_yds", label: "Receiving Yards", statKey: "receivingYards", statKeyAlt: "YDS", groupHint: "receiving" },
+    ],
+  };
+
+  function parseBoxscoreStat(raw: string, statKey: string): number {
+    if (!raw || raw === "--" || raw === "-") return 0;
+    if (statKey === "MIN" || statKey === "TOI") {
+      const parts = raw.split(":");
+      return (parseFloat(parts[0]) || 0) + (parseFloat(parts[1]) || 0) / 60;
+    }
+    // "made-attempted" format like "3-7" → take made count
+    if (/^\d+-\d+$/.test(raw)) return parseFloat(raw.split("-")[0]) || 0;
+    return parseFloat(raw) || 0;
+  }
+
+  function calcLiveGameProgress(sport: string, period: number, clockDisplay: string): number {
+    if (!period || period < 1) return 0;
+    const parts = (clockDisplay || "0:00").split(":");
+    const remSecs = (parseFloat(parts[0]) || 0) * 60 + (parseFloat(parts[1]) || 0);
+    if (sport === "NBA" || sport === "NCAAB") {
+      const periodSecs = sport === "NCAAB" ? 1200 : 720;
+      const totalSecs  = sport === "NCAAB" ? 2400 : 2880;
+      const elapsed = Math.max(0, (period - 1) * periodSecs + (periodSecs - remSecs));
+      return Math.min(0.99, elapsed / totalSecs);
+    }
+    if (sport === "NHL") {
+      const elapsed = Math.max(0, (period - 1) * 1200 + (1200 - remSecs));
+      return Math.min(0.99, elapsed / 3600);
+    }
+    if (sport === "NFL" || sport === "NCAAF") {
+      const elapsed = Math.max(0, (period - 1) * 900 + (900 - remSecs));
+      return Math.min(0.99, elapsed / 3600);
+    }
+    if (sport === "MLB") {
+      return Math.min(0.99, Math.max(0, (period - 1) / 18));
+    }
+    return 0;
+  }
+
+  async function fetchLiveBoxscoreProps(sport: string, gameId: string, homeTeamName: string, awayTeamName: string): Promise<any[]> {
+    const sportPath = ESPN_LIVE_SPORT_PATHS[sport];
+    if (!sportPath) return [];
+    const liveMarkets = LIVE_SPORT_MARKETS[sport];
+    if (!liveMarkets?.length) return [];
+
+    try {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/${sportPath}/summary?event=${gameId}`;
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(t);
+      if (!res.ok) return [];
+      const data = await res.json();
+
+      const comp = data.header?.competitions?.[0];
+      const status = comp?.status || {};
+      const period = status.period || 0;
+      const clockDisplay = status.displayClock || "0:00";
+      const gameProgress = calcLiveGameProgress(sport, period, clockDisplay);
+      if (gameProgress < 0.04) return []; // too early — not enough data for projection
+
+      const boxscore = data.boxscore;
+      if (!boxscore?.players?.length) return [];
+
+      const syntheticProps: any[] = [];
+      const processed = new Set<string>();
+
+      for (const teamData of (boxscore.players as any[])) {
+        const teamAbbr: string = teamData.team?.abbreviation || "";
+        const teamDisplayName: string = teamData.team?.displayName || "";
+
+        for (const statGroup of (teamData.statistics || []) as any[]) {
+          const groupName: string = (statGroup.name || "").toLowerCase();
+          const keys: string[] = statGroup.keys || [];
+
+          for (const athleteEntry of (statGroup.athletes || []) as any[]) {
+            const playerName: string = athleteEntry.athlete?.displayName || "";
+            if (!playerName) continue;
+
+            const rawStats: string[] = athleteEntry.stats || [];
+            const statMap: Record<string, number> = {};
+            rawStats.forEach((v: string, i: number) => {
+              if (keys[i]) statMap[keys[i]] = parseBoxscoreStat(v, keys[i]);
+            });
+
+            // Minutes played — ESPN uses "minutes" (full name) or short "MIN"/"TOI"
+            const minutes = statMap["minutes"] ?? statMap["MIN"] ?? statMap["TOI"] ?? (sport === "NFL" || sport === "MLB" ? 99 : 0);
+            // Skip players who haven't played meaningful time (NBA/NHL/NCAAB)
+            if ((sport === "NBA" || sport === "NCAAB") && minutes < 4) continue;
+            if (sport === "NHL" && minutes < 3) continue;
+
+            for (const mktDef of liveMarkets) {
+              if (mktDef.groupHint && !groupName.includes(mktDef.groupHint)) continue;
+              const playerGroupKey = `${playerName}|${mktDef.market}`;
+              if (processed.has(playerGroupKey)) continue;
+
+              // Look up by primary key first, then alt key (handles ESPN's full-name vs abbrev keys)
+              const currentStat: number = statMap[mktDef.statKey] ?? statMap[mktDef.statKeyAlt ?? ""] ?? 0;
+
+              // Skip if player has zero and game is less than 30% complete (likely didn't play yet)
+              if (currentStat === 0 && gameProgress < 0.30) continue;
+
+              const projection = gameProgress > 0.08
+                ? Math.round((currentStat / gameProgress) * 10) / 10
+                : currentStat;
+
+              // Set implied probs based on pace vs a fair baseline
+              // If projection is notably above current stat (player trending high), lean over
+              const paceRatio = gameProgress > 0 ? projection / Math.max(currentStat, 0.1) : 1;
+              const overImplied  = projection > currentStat * 1.1 ? 0.55 : 0.50;
+              const underImplied = overImplied === 0.55 ? 0.50 : 0.55;
+
+              // Line = projection rounded to nearest 0.5, this is the natural comparison baseline
+              const line = Math.round(projection * 2) / 2;
+
+              // Confidence grows as the game progresses (more data = higher certainty)
+              const baseConfidence = Math.round(48 + gameProgress * 22); // 48–70
+
+              syntheticProps.push({
+                playerName,
+                market: mktDef.market,
+                marketLabel: mktDef.label,
+                line,
+                overOdds:  -110,
+                underOdds: -110,
+                overDecimal:  1.909,
+                underDecimal: 1.909,
+                overImpliedProb:  overImplied,
+                underImpliedProb: underImplied,
+                bookmaker: "ESPN Live",
+                allBookmakers: [{ bookmaker: "ESPN Live", overOdds: -110, underOdds: -110, line }],
+                bestOver:  { bookmaker: "ESPN Live", odds: -110 },
+                bestUnder: { bookmaker: "ESPN Live", odds: -110 },
+                consensusLine: line,
+                homeTeam: homeTeamName,
+                awayTeam: awayTeamName,
+                team: teamAbbr,
+                dataSource: "ESPN Live Boxscore",
+                // Live-specific fields
+                isLiveStat: true,
+                currentStat,
+                projection,
+                gameProgress,
+                period,
+                clockDisplay,
+                baseConfidence,
+              });
+              processed.add(playerGroupKey);
+            }
+          }
+        }
+      }
+
+      console.log(`[LiveBoxscore] ${sport} game ${gameId}: ${syntheticProps.length} live props generated (progress: ${Math.round(gameProgress * 100)}%)`);
+      return syntheticProps;
+    } catch (e: any) {
+      console.warn(`[LiveBoxscore] Failed for ${sport} game ${gameId}:`, e.message);
+      return [];
+    }
+  }
+
   app.get("/api/game-player-props/:sport", async (req, res) => {
     try {
       const { fetchRealPlayerProps, isOddsApiAvailable, fetchRealOddsForGame, MARKET_LABELS } = await import("../odds-provider");
@@ -3058,6 +3269,17 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           }
         }
 
+        // ── Live Boxscore Fallback ─────────────────────────────────────────────
+        // When a game is in progress and no prop odds are available from any source,
+        // fetch the ESPN live boxscore and build pace-adjusted projections for each
+        // player so members always see live intelligence during games.
+        if (matchedProps.length === 0 && gameIsLive) {
+          const liveProps = await fetchLiveBoxscoreProps(sport, game.id, homeTeamName, awayTeamName);
+          if (liveProps.length > 0) {
+            matchedProps = liveProps;
+          }
+        }
+
         const leaders = (game as any).leaders || [];
         const leaderMap = new Map<string, { category: string; value: string; team: string }[]>();
         for (const l of leaders) {
@@ -3071,10 +3293,14 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         for (const prop of matchedProps) {
           const pName = prop.playerName;
           const pKey = pName.toLowerCase();
+          // Derive playerTeam here so it's accessible throughout the entire loop body,
+          // not just inside the playersByName initialization block.
+          const _existingPlayer = playersByName.get(pKey);
+          const _propLeaderStats = _existingPlayer ? _existingPlayer.leaderStats : (leaderMap.get(pKey) || []);
+          const playerTeam = _existingPlayer?.team || (_propLeaderStats.length > 0 ? _propLeaderStats[0].team : (prop.team || ""));
           if (!playersByName.has(pKey)) {
             const injury = injuryMap.get(pKey);
             const leaderStats = leaderMap.get(pKey) || [];
-            const playerTeam = leaderStats.length > 0 ? leaderStats[0].team : (prop.team || "");
             let teamAbbr = "";
             if (playerTeam) {
               const ptLower = playerTeam.toLowerCase();
@@ -3346,6 +3572,13 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             situationalNote,
             vegasEdge,
             engineSources,
+            // Live boxscore fields — populated only during in-progress games
+            isLiveStat: prop.isLiveStat || false,
+            currentStat: prop.isLiveStat ? (prop.currentStat ?? null) : null,
+            projection:  prop.isLiveStat ? (prop.projection  ?? null) : null,
+            gameProgress: prop.isLiveStat ? (prop.gameProgress ?? null) : null,
+            period:       prop.isLiveStat ? (prop.period      ?? null) : null,
+            clockDisplay: prop.isLiveStat ? (prop.clockDisplay ?? null) : null,
           });
         }
 

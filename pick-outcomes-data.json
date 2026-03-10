@@ -13898,27 +13898,107 @@
       "homeScore": 76,
       "awayScore": 72,
       "settledAt": "2026-03-10T00:34:22.921Z"
+    },
+    {
+      "id": "precomp-NBA-401810804-total-dc04a24ff2",
+      "gameId": "401810804",
+      "sport": "NBA",
+      "game": "New York Knicks @ Utah Jazz",
+      "homeTeam": "Utah Jazz",
+      "awayTeam": "New York Knicks",
+      "pick": "Over 219",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 55,
+      "ev": -25.55,
+      "gameTime": "2026-03-12T01:00Z",
+      "savedAt": "2026-03-10T00:43:24.133Z",
+      "result": "lost",
+      "homeScore": 110,
+      "awayScore": 97,
+      "settledAt": "2026-03-10T00:45:08.014Z"
+    },
+    {
+      "id": "precomp-NHL-401803377-moneyline-53b741c047",
+      "gameId": "401803377",
+      "sport": "NHL",
+      "game": "Washington Capitals @ Philadelphia Flyers",
+      "homeTeam": "Philadelphia Flyers",
+      "awayTeam": "Washington Capitals",
+      "pick": "Philadelphia Flyers ML",
+      "betType": "moneyline",
+      "odds": -105,
+      "grade": "B",
+      "confidence": 61,
+      "ev": -0.43,
+      "gameTime": "2026-03-11T23:30Z",
+      "savedAt": "2026-03-10T00:43:24.480Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 1,
+      "settledAt": "2026-03-10T00:45:08.023Z"
+    },
+    {
+      "id": "precomp-NHL-401803376-moneyline-54f427c8fc",
+      "gameId": "401803376",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ Ottawa Senators",
+      "homeTeam": "Ottawa Senators",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Montreal Canadiens ML",
+      "betType": "moneyline",
+      "odds": -112,
+      "grade": "C-",
+      "confidence": 56,
+      "ev": -35.64,
+      "gameTime": "2026-03-11T23:30Z",
+      "savedAt": "2026-03-10T00:43:24.480Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 4,
+      "settledAt": "2026-03-10T00:45:08.189Z"
+    },
+    {
+      "id": "precomp-NHL-401803376-spread-3f89c47e1d",
+      "gameId": "401803376",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ Ottawa Senators",
+      "homeTeam": "Ottawa Senators",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Ottawa Senators -0.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 56,
+      "ev": -35.09,
+      "gameTime": "2026-03-11T23:30Z",
+      "savedAt": "2026-03-10T00:43:24.480Z",
+      "result": "lost",
+      "homeScore": 3,
+      "awayScore": 4,
+      "settledAt": "2026-03-10T00:45:08.189Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 615,
-      "won": 319,
-      "lost": 284,
+      "total": 619,
+      "won": 321,
+      "lost": 286,
       "push": 12,
       "rate": 51.9,
       "pending": 79
     },
     "bySport": {
       "NBA": {
-        "total": 220,
+        "total": 221,
         "won": 110,
-        "rate": 50
+        "rate": 49.8
       },
       "NHL": {
-        "total": 227,
-        "won": 113,
-        "rate": 49.8
+        "total": 230,
+        "won": 115,
+        "rate": 50
       },
       "NCAAB": {
         "total": 168,
@@ -13933,9 +14013,9 @@
         "rate": 62.5
       },
       "B": {
-        "total": 48,
-        "won": 34,
-        "rate": 70.8
+        "total": 49,
+        "won": 35,
+        "rate": 71.4
       },
       "B-": {
         "total": 146,
@@ -13953,14 +14033,14 @@
         "rate": 41.2
       },
       "C-": {
-        "total": 42,
-        "won": 22,
-        "rate": 52.4
+        "total": 44,
+        "won": 23,
+        "rate": 52.3
       },
       "C": {
-        "total": 126,
+        "total": 127,
         "won": 60,
-        "rate": 47.6
+        "rate": 47.2
       },
       "A-": {
         "total": 22,
@@ -13980,22 +14060,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 180,
-        "won": 98,
-        "rate": 54.4,
-        "roi": 14.9
+        "total": 182,
+        "won": 100,
+        "rate": 54.9,
+        "roi": 15.8
       },
       "Spread": {
-        "total": 186,
+        "total": 187,
         "won": 97,
-        "rate": 52.2,
-        "roi": 2.5
+        "rate": 51.9,
+        "roi": 1.9
       },
       "Total": {
-        "total": 178,
+        "total": 179,
         "won": 86,
-        "rate": 48.3,
-        "roi": -4.2
+        "rate": 48,
+        "roi": -4.7
       },
       "Team Total": {
         "total": 71,
@@ -14010,16 +14090,16 @@
       "push": 0,
       "rate": 46
     },
-    "lastUpdated": "2026-03-10T00:35:03.952Z",
+    "lastUpdated": "2026-03-10T01:05:28.141Z",
     "roi": 4.6,
-    "brierScore": 0.2601,
+    "brierScore": 0.26,
     "maxDrawdown": 15.4,
     "sharpeRatio": 0.042,
     "homeAwayBias": {
       "homeWinRate": 55.9,
-      "awayWinRate": 44.1,
-      "homeTotal": 295,
-      "awayTotal": 68
+      "awayWinRate": 44.9,
+      "homeTotal": 297,
+      "awayTotal": 69
     },
     "calibrationBuckets": [
       {
@@ -14030,15 +14110,15 @@
       },
       {
         "range": "55-60",
-        "predicted": 57.6,
-        "actual": 45,
-        "total": 109
+        "predicted": 57.5,
+        "actual": 44.6,
+        "total": 112
       },
       {
         "range": "60-65",
         "predicted": 62,
-        "actual": 53.2,
-        "total": 222
+        "actual": 53.4,
+        "total": 223
       },
       {
         "range": "65-70",
