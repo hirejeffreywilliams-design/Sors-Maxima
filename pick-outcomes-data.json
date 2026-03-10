@@ -14926,15 +14926,55 @@
       "homeScore": 108,
       "awayScore": 110,
       "settledAt": "2026-03-10T10:56:42.861Z"
+    },
+    {
+      "id": "precomp-NHL-401803377-total-2c1c8f7391",
+      "gameId": "401803377",
+      "sport": "NHL",
+      "game": "Washington Capitals @ Philadelphia Flyers",
+      "homeTeam": "Philadelphia Flyers",
+      "awayTeam": "Washington Capitals",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 53,
+      "ev": -0.73,
+      "gameTime": "2026-03-11T23:30Z",
+      "savedAt": "2026-03-10T16:16:54.943Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 6,
+      "settledAt": "2026-03-10T16:18:01.663Z"
+    },
+    {
+      "id": "precomp-NHL-401803376-total-bca8a450ea",
+      "gameId": "401803376",
+      "sport": "NHL",
+      "game": "Montreal Canadiens @ Ottawa Senators",
+      "homeTeam": "Ottawa Senators",
+      "awayTeam": "Montreal Canadiens",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 54,
+      "ev": -31.27,
+      "gameTime": "2026-03-11T23:30Z",
+      "savedAt": "2026-03-10T19:02:56.787Z",
+      "result": "won",
+      "homeScore": 0,
+      "awayScore": 2,
+      "settledAt": "2026-03-10T19:03:14.612Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 664,
-      "won": 346,
+      "total": 666,
+      "won": 348,
       "lost": 305,
       "push": 13,
-      "rate": 52.1,
+      "rate": 52.3,
       "pending": 82
     },
     "bySport": {
@@ -14944,9 +14984,9 @@
         "rate": 49.8
       },
       "NHL": {
-        "total": 230,
-        "won": 115,
-        "rate": 50
+        "total": 232,
+        "won": 117,
+        "rate": 50.4
       },
       "NCAAB": {
         "total": 213,
@@ -14971,9 +15011,9 @@
         "rate": 51.7
       },
       "C+": {
-        "total": 139,
-        "won": 73,
-        "rate": 52.5
+        "total": 140,
+        "won": 74,
+        "rate": 52.9
       },
       "D+": {
         "total": 34,
@@ -14986,9 +15026,9 @@
         "rate": 52.3
       },
       "C": {
-        "total": 127,
-        "won": 60,
-        "rate": 47.2
+        "total": 128,
+        "won": 61,
+        "rate": 47.7
       },
       "A-": {
         "total": 40,
@@ -15020,10 +15060,10 @@
         "roi": 1.4
       },
       "Total": {
-        "total": 194,
-        "won": 97,
-        "rate": 50,
-        "roi": -1.1
+        "total": 196,
+        "won": 99,
+        "rate": 50.5,
+        "roi": -0.2
       },
       "Team Total": {
         "total": 71,
@@ -15033,16 +15073,16 @@
       }
     },
     "recentForm": {
-      "won": 28,
-      "lost": 21,
+      "won": 29,
+      "lost": 20,
       "push": 1,
-      "rate": 56
+      "rate": 58
     },
-    "lastUpdated": "2026-03-10T14:25:13.842Z",
-    "roi": 4.5,
-    "brierScore": 0.263,
+    "lastUpdated": "2026-03-10T19:48:54.846Z",
+    "roi": 4.7,
+    "brierScore": 0.2629,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.041,
+    "sharpeRatio": 0.044,
     "homeAwayBias": {
       "homeWinRate": 55.2,
       "awayWinRate": 44.9,
@@ -15053,8 +15093,8 @@
       {
         "range": "50-55",
         "predicted": 52.4,
-        "actual": 58.7,
-        "total": 46
+        "actual": 60.4,
+        "total": 48
       },
       {
         "range": "55-60",

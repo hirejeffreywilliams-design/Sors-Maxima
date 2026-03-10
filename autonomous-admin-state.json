@@ -1,6 +1,36 @@
 {
   "alerts": [
     {
+      "id": "alert_1773170441996_kwzix",
+      "timestamp": "2026-03-10T19:20:41.996Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "37,643 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773168821996_ty21e",
+      "timestamp": "2026-03-10T18:53:41.996Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "37,643 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773160049532_0t1i1",
+      "timestamp": "2026-03-10T16:27:29.532Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "38,000 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773150302412_cpo52",
       "timestamp": "2026-03-10T13:45:02.412Z",
       "resolved": true,
@@ -464,6 +494,67 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1773169361994_tj30z",
+      "timestamp": "2026-03-10T19:02:41.994Z",
+      "durationMs": 8662,
+      "summary": [
+        "Overall win rate is at 52.2%, just below the break-even threshold of 52.4%.",
+        "Odds API is currently below 50K requests remaining, flagged for action.",
+        "Model performance is marginally acceptable but needs improvement; monitor closely."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Adjust Odds API Polling Frequency",
+          "description": "Reduce the polling frequency of the Odds API to maintain budget levels.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Improve Pick Accuracy",
+          "description": "Review models to enhance the accuracy of bets, aiming for above 52.4% win rate.",
+          "priority": "P1",
+          "due_by": "this_week",
+          "effort_hours": 3
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Win Rate Below Break-Even",
+          "description": "Overall pick accuracy is at 52.2%, which is below the break-even win rate of 52.4%.",
+          "severity": "critical"
+        },
+        {
+          "title": "Odds API Request Warning",
+          "description": "Odds API requests are below 50K; take action to avoid potential issues.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Implement changes to Odds API polling settings.",
+          "Monitor real-time metrics for any further deviation in win rate."
+        ],
+        "this_week": [
+          "Analyze pick accuracy by market and adjust strategy accordingly.",
+          "Draft a report on current user behavior and churn rate to inform marketing efforts."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 53.2,
+        "settledPicks": 665,
+        "oddsApiRemaining": 37643,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 100,
+        "cacheHitRate": 18,
+        "heapUsedMb": 69,
+        "heapTotalMb": 77,
+        "hubLastCycleMs": 100,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Overall win rate is at 52.2%, just below the break-even threshold of 52.4%.\",\n    \"Odds API is currently below 50K requests remaining, flagged for action.\",\n    \"Model performance is marginally acceptable but needs improvement; monitor closely.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Odds API Polling Frequency\",\n      \"description\": \"Reduce the polling frequency of the Odds API to maintain budget levels.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Improve Pick Accuracy\",\n      \"description\": \"Review models to enhance the accuracy of bets, aiming for above 52.4% win rate.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Below Break-Even\",\n      \"description\": \"Overall pick accuracy is at 52.2%, which is below the break-even win rate of 52.4%.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Odds API Request Warning\",\n      \"description\": \"Odds API requests are below 50K; take action to avoid potential issues.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement changes to Odds API polling settings.\",\n      \"Monitor real-time metrics for any further deviation in win rate.\"\n    ],\n    \"this_week\": [\n      \"Analyze pick accuracy by market and adjust strategy accordingly.\",\n      \"Draft a report on current user behavior and churn rate to inform marketing efforts.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1773148479282_i1bat",
       "timestamp": "2026-03-10T13:14:39.283Z",
@@ -1681,81 +1772,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Win rate currently at 52.9%, above break-even threshold but showing overall average of 51.9%.\",\n    \"API usage is healthy, but adjust usage to avoid budget variance in the future, particularly with the apifootball service.\",\n    \"No critical alerts or compliance issues reported.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor API Usage\",\n      \"description\": \"Regularly review APIfotball usage to avoid exceeding the budget as it's currently showing negative variance.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Evaluate Pick Accuracy\",\n      \"description\": \"Investigate low win rate in the Total market which stands at 46.6%. Potential model adjustments may be necessary.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Develop strategies to augment monthly active users in response to churn rate of 4.2%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 6\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review all API budgets and adjust usage accordingly.\",\n      \"Analyze recent pick performance across all markets.\",\n      \"Communicate with marketing for user retention strategies.\"\n    ],\n    \"this_week\": [\n      \"Draft a report on pick accuracy metrics for quarterly evaluation.\",\n      \"Set up meetings to discuss potential model updates.\",\n      \"Implement user feedback mechanisms to address churn.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1772678872547_se299",
-      "timestamp": "2026-03-05T02:47:52.547Z",
-      "durationMs": 7425,
-      "summary": [
-        "Pipeline health is critical; win rate is below expected thresholds at 51.9%.",
-        "Model degradation alert: win rate is 46.6% for Total bets, triggering a critical risk alert.",
-        "Cash on hand is stable at $100,000, monthly burn is manageable at $45,000.",
-        "API usage is healthy, with plenty of remaining budget."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Investigate Pipeline Health",
-          "description": "Deep dive into the reasons behind the critical pipeline health and win rate drop.",
-          "priority": "P1",
-          "due_by": "today",
-          "effort_hours": 4
-        },
-        {
-          "title": "Model Adjustments",
-          "description": "Review the predictive model, focusing on Total market bets and adjust for performance improvement.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 6
-        },
-        {
-          "title": "Communication Plan",
-          "description": "Prepare communication for members regarding the current performance and upcoming improvements without exposing vendor details.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 2
-        }
-      ],
-      "risk_alerts": [
-        {
-          "title": "Model Degradation Detected",
-          "description": "Total market win rate below 48%, indicating critical model performance issues that need immediate attention.",
-          "severity": "critical"
-        },
-        {
-          "title": "Pipeline Health Critical",
-          "description": "Overall pipeline health rated as critical; requires urgent investigation and remediation.",
-          "severity": "high"
-        }
-      ],
-      "ops_checklist": {
-        "today": [
-          "Review and investigate causes for critical pipeline health.",
-          "Assess model predictions across different markets specifically focusing on Total bets.",
-          "Begin drafting communication for members regarding current performance."
-        ],
-        "this_week": [
-          "Implement any required adjustments to the predictive model.",
-          "Monitor win rates closely across all markets.",
-          "Plan a review meeting to discuss model strategies with any key team members involved."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 52.9,
-        "settledPicks": 347,
-        "oddsApiRemaining": 85605,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 80,
-        "cacheHitRate": 0,
-        "heapUsedMb": 68,
-        "heapTotalMb": 71,
-        "hubLastCycleMs": 6,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Pipeline health is critical; win rate is below expected thresholds at 51.9%.\",\n    \"Model degradation alert: win rate is 46.6% for Total bets, triggering a critical risk alert.\",\n    \"Cash on hand is stable at $100,000, monthly burn is manageable at $45,000.\",\n    \"API usage is healthy, with plenty of remaining budget.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Pipeline Health\",\n      \"description\": \"Deep dive into the reasons behind the critical pipeline health and win rate drop.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Model Adjustments\",\n      \"description\": \"Review the predictive model, focusing on Total market bets and adjust for performance improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 6\n    },\n    {\n      \"title\": \"Communication Plan\",\n      \"description\": \"Prepare communication for members regarding the current performance and upcoming improvements without exposing vendor details.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Model Degradation Detected\",\n      \"description\": \"Total market win rate below 48%, indicating critical model performance issues that need immediate attention.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Pipeline Health Critical\",\n      \"description\": \"Overall pipeline health rated as critical; requires urgent investigation and remediation.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and investigate causes for critical pipeline health.\",\n      \"Assess model predictions across different markets specifically focusing on Total bets.\",\n      \"Begin drafting communication for members regarding current performance.\"\n    ],\n    \"this_week\": [\n      \"Implement any required adjustments to the predictive model.\",\n      \"Monitor win rates closely across all markets.\",\n      \"Plan a review meeting to discuss model strategies with any key team members involved.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-10T13:45:02.412Z",
-  "lastDeepCheck": "2026-03-10T13:14:39.283Z",
-  "totalQuickChecks": 115,
-  "totalDeepChecks": 23
+  "lastQuickCheck": "2026-03-10T19:20:41.996Z",
+  "lastDeepCheck": "2026-03-10T19:02:41.994Z",
+  "totalQuickChecks": 118,
+  "totalDeepChecks": 24
 }
