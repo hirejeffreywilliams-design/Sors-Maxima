@@ -16146,15 +16146,35 @@
       "homeScore": 76,
       "awayScore": 61,
       "settledAt": "2026-03-11T00:28:32.734Z"
+    },
+    {
+      "id": "precomp-NHL-401803384-total-e3b6d32696",
+      "gameId": "401803384",
+      "sport": "NHL",
+      "game": "St. Louis Blues @ Carolina Hurricanes",
+      "homeTeam": "Carolina Hurricanes",
+      "awayTeam": "St. Louis Blues",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 52,
+      "ev": -0.73,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T00:44:41.234Z",
+      "result": "lost",
+      "homeScore": 0,
+      "awayScore": 4,
+      "settledAt": "2026-03-11T00:46:50.338Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 725,
+      "total": 726,
       "won": 388,
-      "lost": 324,
+      "lost": 325,
       "push": 13,
-      "rate": 53.5,
+      "rate": 53.4,
       "pending": 82
     },
     "bySport": {
@@ -16164,9 +16184,9 @@
         "rate": 52
       },
       "NHL": {
-        "total": 255,
+        "total": 256,
         "won": 134,
-        "rate": 52.5
+        "rate": 52.3
       },
       "NCAAB": {
         "total": 218,
@@ -16201,9 +16221,9 @@
         "rate": 41.2
       },
       "C-": {
-        "total": 47,
+        "total": 48,
         "won": 24,
-        "rate": 51.1
+        "rate": 50
       },
       "C": {
         "total": 137,
@@ -16240,10 +16260,10 @@
         "roi": 6.1
       },
       "Total": {
-        "total": 211,
+        "total": 212,
         "won": 110,
-        "rate": 52.1,
-        "roi": 2.8
+        "rate": 51.9,
+        "roi": 2.3
       },
       "Team Total": {
         "total": 71,
@@ -16253,16 +16273,16 @@
       }
     },
     "recentForm": {
-      "won": 36,
-      "lost": 14,
+      "won": 35,
+      "lost": 15,
       "push": 0,
-      "rate": 72
+      "rate": 70
     },
-    "lastUpdated": "2026-03-11T00:41:54.041Z",
-    "roi": 7,
+    "lastUpdated": "2026-03-11T00:47:34.365Z",
+    "roi": 6.8,
     "brierScore": 0.2605,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.065,
+    "sharpeRatio": 0.063,
     "homeAwayBias": {
       "homeWinRate": 57.5,
       "awayWinRate": 42,
@@ -16273,8 +16293,8 @@
       {
         "range": "50-55",
         "predicted": 52.7,
-        "actual": 64.3,
-        "total": 70
+        "actual": 63.4,
+        "total": 71
       },
       {
         "range": "55-60",
