@@ -36,8 +36,8 @@ const tiers: PricingTier[] = [
     description: 'Full engine access, daily ready-made tickets, and every tool recreational bettors never see. This is where serious betting begins.',
     monthlyPrice: 49,
     yearlyPrice: 468,
-    monthlyPriceId: 'price_1T6Z8MCsa9MEIxma1AtmvcQa',
-    yearlyPriceId: 'price_1T6Z8MCsa9MEIxmajGN5GBnE',
+    monthlyPriceId: 'price_1T9g5NCsa9MEIxma4ubid3pw',
+    yearlyPriceId: 'price_1T9g5NCsa9MEIxma4ubid3pw',
     features: [
       "Today's Best Tickets — pre-built daily parlays",
       '46-Factor Prediction Engine across 6 US sports',
@@ -63,8 +63,8 @@ const tiers: PricingTier[] = [
     description: 'Full analytics suite, Sors Intelligence Cards, sharp money signals, advanced Kelly sizing, and every tool serious bettors use to find consistent edge.',
     monthlyPrice: 99,
     yearlyPrice: 948,
-    monthlyPriceId: 'price_1T6Z8NCsa9MEIxmaEjp1NamA',
-    yearlyPriceId: 'price_1T6Z8NCsa9MEIxma6NAdgBQB',
+    monthlyPriceId: 'price_1T9g6TCsa9MEIxmarohPvZl3',
+    yearlyPriceId: 'price_1T9g6TCsa9MEIxmarohPvZl3',
     features: [
       'Everything in Sharp, plus:',
       'Sors Intelligence Cards — collect, trade & showcase verified wins',
@@ -92,8 +92,8 @@ const tiers: PricingTier[] = [
     description: 'Zero restrictions. Life Changer™ Ticket every morning, cryptographic Discord proof links, HITL pick review queue, and every elite tool on the platform.',
     monthlyPrice: 249,
     yearlyPrice: 2388,
-    monthlyPriceId: 'price_1T6Z8OCsa9MEIxmapbFeapNC',
-    yearlyPriceId: 'price_1T6Z8OCsa9MEIxmamlNBUxM0',
+    monthlyPriceId: 'price_1T9g8BCsa9MEIxma2XrUZW6C',
+    yearlyPriceId: 'price_1T9g8BCsa9MEIxma2XrUZW6C',
     features: [
       'Everything in Edge, plus:',
       'Life Changer™ Ticket — our highest-upside daily parlay',

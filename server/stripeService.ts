@@ -2,21 +2,15 @@ import { getUncachableStripeClient, getStripePublishableKey, isStripeAvailable }
 import { pool } from './db';
 
 const ALLOWED_PRICE_IDS = new Set([
-  'price_1T6Z8MCsa9MEIxma1AtmvcQa',
-  'price_1T6Z8MCsa9MEIxmajGN5GBnE',
-  'price_1T6Z8NCsa9MEIxmaEjp1NamA',
-  'price_1T6Z8NCsa9MEIxma6NAdgBQB',
-  'price_1T6Z8OCsa9MEIxmapbFeapNC',
-  'price_1T6Z8OCsa9MEIxmamlNBUxM0',
+  'price_1T9g5NCsa9MEIxma4ubid3pw', // Sharp monthly
+  'price_1T9g6TCsa9MEIxmarohPvZl3', // Edge monthly
+  'price_1T9g8BCsa9MEIxma2XrUZW6C', // Max monthly
 ]);
 
 const PRICE_TO_TIER: Record<string, 'pro' | 'elite' | 'whale'> = {
-  'price_1T6Z8MCsa9MEIxma1AtmvcQa': 'pro',
-  'price_1T6Z8MCsa9MEIxmajGN5GBnE': 'pro',
-  'price_1T6Z8NCsa9MEIxmaEjp1NamA': 'elite',
-  'price_1T6Z8NCsa9MEIxma6NAdgBQB': 'elite',
-  'price_1T6Z8OCsa9MEIxmapbFeapNC': 'whale',
-  'price_1T6Z8OCsa9MEIxmamlNBUxM0': 'whale',
+  'price_1T9g5NCsa9MEIxma4ubid3pw': 'pro',
+  'price_1T9g6TCsa9MEIxmarohPvZl3': 'elite',
+  'price_1T9g8BCsa9MEIxma2XrUZW6C': 'whale',
 };
 
 export interface UserSubscription {
