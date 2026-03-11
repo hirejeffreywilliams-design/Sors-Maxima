@@ -354,17 +354,21 @@ export function GoldenTicketHero() {
           style={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
             gap: 8,
             marginBottom: 32,
             opacity: open ? 0 : 1,
             transition: "opacity 0.4s",
+            maxWidth: "100%",
+            padding: "0 8px",
           }}
         >
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-          <span style={{ fontSize: "clamp(10px, 1.5vw, 13px)", letterSpacing: "0.3em", color: "#22c55e", textTransform: "uppercase", fontWeight: 600 }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e", flexShrink: 0 }} />
+          <span style={{ fontSize: "clamp(10px, 1.5vw, 13px)", letterSpacing: "clamp(0.1em, 0.3vw, 0.3em)", color: "#22c55e", textTransform: "uppercase", fontWeight: 600, textAlign: "center" }}>
             Private Intelligence Platform
           </span>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e", flexShrink: 0 }} />
         </div>
 
         {/* ── THE TICKET ── */}

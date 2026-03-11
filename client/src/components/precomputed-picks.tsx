@@ -212,7 +212,7 @@ function PickSignalRow({ pick }: { pick: PrecomputedPick }) {
           Market <span className="font-mono font-semibold text-foreground">{marketPct}%</span>
         </span>
         <span className={edgePositive ? "text-green-500 font-semibold" : edgeNeutral ? "text-yellow-500 font-semibold" : "text-red-500 font-semibold"}>
-          Intelligence Edge™ {edgePct >= 0 ? "+" : ""}{edgePct.toFixed(1)}%
+          Edge™ {edgePct >= 0 ? "+" : ""}{edgePct.toFixed(1)}%
         </span>
       </div>
       <div className="flex flex-wrap gap-1" data-testid={`pick-risk-flags-${pick.id}`}>
@@ -380,8 +380,8 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
         </div>
 
         {pick.pick && (
-          <div className="px-2.5 py-2 rounded-lg bg-muted/50">
-            <p className="text-sm font-medium" data-testid={`text-pick-value-${pick.id}`}>
+          <div className="px-2.5 py-2 rounded-lg bg-muted/50 overflow-hidden">
+            <p className="text-sm font-medium break-words" data-testid={`text-pick-value-${pick.id}`}>
               {pick.pick}
             </p>
           </div>
@@ -392,19 +392,19 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
             <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
               {pick.confidence}%
             </p>
-            <p className="text-[10px] text-muted-foreground">Sors Grade™</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">Confidence</p>
           </div>
           <div>
             <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-green-500" : "text-red-500"}`} data-testid={`text-pick-ev-${pick.id}`}>
               {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
             </p>
-            <p className="text-[10px] text-muted-foreground">Intelligence Edge™</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">Edge™</p>
           </div>
           <div>
             <p className="text-lg font-bold font-mono" data-testid={`text-pick-odds-${pick.id}`}>
               {pick.odds > 0 ? "+" : ""}{pick.odds}
             </p>
-            <p className="text-[10px] text-muted-foreground">Odds</p>
+            <p className="text-[10px] text-muted-foreground leading-tight">Odds</p>
           </div>
         </div>
 
@@ -516,21 +516,21 @@ function ExclusivePicksBanner({ count, userTier }: { count: number; userTier: st
     <Card className="border-amber-500/20 bg-gradient-to-r from-amber-500/5 via-yellow-500/5 to-amber-500/5" data-testid="banner-exclusive-picks">
       <CardContent className="py-3 px-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-600 flex items-center justify-center shrink-0">
               <Crown className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 truncate">
                 {count} Exclusive Max Pick{count > 1 ? "s" : ""} Available
               </p>
-              <p className="text-xs text-muted-foreground">
-                High-confidence picks visible only to Max tier members
+              <p className="text-xs text-muted-foreground truncate">
+                Visible only to Max tier members
               </p>
             </div>
           </div>
           <Button size="sm" variant="outline" className="border-amber-500/30 text-amber-600 hover:bg-amber-500/10 shrink-0" asChild data-testid="button-upgrade-exclusive">
-            <a href="/pricing">Upgrade to Max</a>
+            <a href="/pricing">Upgrade</a>
           </Button>
         </div>
       </CardContent>
@@ -567,21 +567,21 @@ function PendingReleaseBanner({ count, nextRelease, userTier }: { count: number;
     <Card className="border-blue-500/20 bg-gradient-to-r from-blue-500/5 to-cyan-500/5" data-testid="banner-pending-picks">
       <CardContent className="py-3 px-4">
         <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shrink-0">
               <Timer className="w-4 h-4 text-white" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                {count} Pick{count > 1 ? "s" : ""} Releasing in {timeLeft}
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-blue-600 dark:text-blue-400 truncate">
+                {count} Pick{count > 1 ? "s" : ""} releasing in {timeLeft}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Upgrade to {tierUpgrade} for faster access ({upgradeDelay} delay)
+              <p className="text-xs text-muted-foreground truncate">
+                Upgrade to {tierUpgrade} for faster access
               </p>
             </div>
           </div>
-          <Button size="sm" variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10 shrink-0" asChild data-testid="button-upgrade-early-access">
-            <a href="/pricing">Get Earlier Access</a>
+          <Button size="sm" variant="outline" className="border-blue-500/30 text-blue-600 hover:bg-blue-500/10 shrink-0 whitespace-nowrap" asChild data-testid="button-upgrade-early-access">
+            <a href="/pricing">Get Early Access</a>
           </Button>
         </div>
       </CardContent>

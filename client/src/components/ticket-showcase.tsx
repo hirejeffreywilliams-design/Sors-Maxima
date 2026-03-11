@@ -467,12 +467,12 @@ export function TicketShowcase({ onClose }: TicketShowcaseProps) {
         <div className="max-w-3xl mx-auto px-4 pt-4 pb-3 space-y-4">
           {/* Nav row */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onClose} className="gap-1.5 text-muted-foreground hover:text-foreground" data-testid="button-showcase-back">
+            <Button variant="ghost" size="sm" onClick={onClose} className="gap-1.5 text-muted-foreground hover:text-foreground shrink-0" data-testid="button-showcase-back">
               <ChevronLeft className="w-4 h-4" /> Back
             </Button>
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-black tracking-tight flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base font-black tracking-tight flex items-center gap-1.5 shrink-0">
                   <Shield className="w-4 h-4 text-primary" />
                   Intelligence Showcase
                 </h2>
