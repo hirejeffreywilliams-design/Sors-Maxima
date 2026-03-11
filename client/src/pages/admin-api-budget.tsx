@@ -19,6 +19,7 @@ import {
   Gauge, AlertTriangle, CheckCircle2, XCircle, Users, Calendar,
   Clock, Zap, RefreshCw, Settings, ChevronDown, ChevronRight,
   Info, PauseCircle, PlayCircle, Bell, BellOff, Leaf, Snowflake,
+  TrendingUp, Shield, Wrench, UserCheck, Database, Activity,
 } from "lucide-react";
 
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -138,16 +139,19 @@ function SeasonCalendar({ months, currentMonth }: { months: number[]; currentMon
   );
 }
 
-function AlertPanel({ alerts, onDismiss }: {
+function AlertPanel({ alerts, onDismiss, onResume, onAutoSuspend, configs }: {
   alerts: SeasonAlert[];
   onDismiss: (id: string) => void;
+  onResume: (service: string) => void;
+  onAutoSuspend: (service: string, enabled: boolean) => void;
+  configs: Record<string, ServiceConfig>;
 }) {
   if (alerts.length === 0) return null;
   return (
     <div className="space-y-2">
       <h2 className="text-sm font-semibold flex items-center gap-2">
         <Bell className="w-4 h-4 text-amber-500" />
-        Season Alerts
+        Alerts
         <Badge className="text-[10px] px-1.5 py-0 bg-amber-500/20 text-amber-500 border-amber-500/30">
           {alerts.length}
         </Badge>
@@ -156,28 +160,240 @@ function AlertPanel({ alerts, onDismiss }: {
         const cfg = ALERT_CONFIG[alert.type];
         const Icon = cfg.icon;
         const timeAgo = getTimeAgo(alert.createdAt);
+        const serviceName = configs[alert.service]?.name || alert.service;
         return (
-          <div key={alert.id} className={`rounded-lg border p-3 flex items-start gap-3 ${cfg.bg}`}>
-            <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className={`text-[10px] font-semibold uppercase tracking-wide ${cfg.color}`}>{cfg.label}</span>
-                <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+          <div key={alert.id} className={`rounded-lg border p-3 ${cfg.bg}`}>
+            <div className="flex items-start gap-3">
+              <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${cfg.color}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className={`text-[10px] font-semibold uppercase tracking-wide ${cfg.color}`}>{cfg.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{timeAgo}</span>
+                  <span className="text-[10px] text-muted-foreground">· {serviceName}</span>
+                </div>
+                <p className="text-xs">{alert.message}</p>
               </div>
-              <p className="text-xs">{alert.message}</p>
+              <button
+                onClick={() => onDismiss(alert.id)}
+                className="text-muted-foreground hover:text-foreground shrink-0"
+                data-testid={`button-dismiss-alert-${alert.id}`}
+                title="Dismiss alert"
+              >
+                <BellOff className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <button
-              onClick={() => onDismiss(alert.id)}
-              className="text-muted-foreground hover:text-foreground shrink-0"
-              data-testid={`button-dismiss-alert-${alert.id}`}
-              title="Dismiss"
-            >
-              <BellOff className="w-3.5 h-3.5" />
-            </button>
+
+            <div className="flex items-center gap-2 mt-2.5 ml-7">
+              {alert.type === "restart_needed" && (
+                <Button
+                  size="sm"
+                  className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => { onResume(alert.service); onDismiss(alert.id); }}
+                  data-testid={`button-fix-restart-${alert.id}`}
+                >
+                  <PlayCircle className="w-3 h-3 mr-1" />
+                  Resume {serviceName}
+                </Button>
+              )}
+              {alert.type === "auto_suspended" && (
+                <Button
+                  size="sm"
+                  className="h-7 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => { onResume(alert.service); onDismiss(alert.id); }}
+                  data-testid={`button-fix-suspended-${alert.id}`}
+                >
+                  <PlayCircle className="w-3 h-3 mr-1" />
+                  Resume API Calls
+                </Button>
+              )}
+              {alert.type === "season_ending_soon" && (
+                <Button
+                  size="sm"
+                  className="h-7 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() => { onAutoSuspend(alert.service, true); onDismiss(alert.id); }}
+                  data-testid={`button-fix-season-${alert.id}`}
+                >
+                  <Snowflake className="w-3 h-3 mr-1" />
+                  Enable Auto-Suspend
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 text-xs text-muted-foreground"
+                onClick={() => onDismiss(alert.id)}
+                data-testid={`button-dismiss-only-${alert.id}`}
+              >
+                Dismiss Only
+              </Button>
+            </div>
           </div>
         );
       })}
     </div>
+  );
+}
+
+const ENGINE_OVERHEAD: Record<string, number> = {
+  odds: 800,
+  apifootball: 400,
+  balldontlie: 300,
+  openai: 8000,
+  espn: 2000,
+};
+const PER_USER_DAILY: Record<string, number> = {
+  odds: 12,
+  apifootball: 3,
+  balldontlie: 4,
+  openai: 120,
+  espn: 0,
+};
+const PER_USER_LABEL: Record<string, string> = {
+  odds: "Live odds refresh for active bet slips",
+  apifootball: "International picks & fixture data",
+  balldontlie: "NBA player & team stat lookups",
+  openai: "AI edge insight generation per session",
+  espn: "Unlimited — public/unofficial endpoint",
+};
+
+function UserCapacityPanel({ data }: { data: BudgetData }) {
+  const scenarios = [10, 25, 50, 100, 250];
+
+  const capacities = data.optimizations
+    .filter(o => o.service !== "espn")
+    .map(opt => {
+      const engineOverhead = ENGINE_OVERHEAD[opt.service] ?? 500;
+      const perUserDaily = PER_USER_DAILY[opt.service] ?? 10;
+      const daysLeft = Math.max(1, opt.daysRemaining);
+      const budgetLeft = Math.max(0, opt.remaining);
+      const availableForUsers = Math.max(0, budgetLeft - engineOverhead * daysLeft);
+      const maxUsers = perUserDaily > 0 ? Math.floor(availableForUsers / (perUserDaily * daysLeft)) : 9999;
+      const enginePct = opt.budget > 0 ? Math.round((engineOverhead * 30 / opt.budget) * 100) : 0;
+      return {
+        service: opt.service,
+        name: data.configs[opt.service]?.name || opt.service,
+        maxUsers: Math.max(0, maxUsers),
+        enginePct,
+        perUserDaily,
+        budgetLeft,
+        daysLeft,
+        status: opt.status,
+        suspended: opt.suspended,
+        unit: data.configs[opt.service]?.unit || "requests",
+      };
+    });
+
+  const bottleneck = capacities.reduce((min, c) => (!c.suspended && c.maxUsers < min.maxUsers ? c : min), { maxUsers: 99999, name: "None", service: "" } as any);
+  const safeMax = bottleneck.maxUsers === 99999 ? "Unlimited" : bottleneck.maxUsers.toLocaleString();
+
+  return (
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/3 to-transparent">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <UserCheck className="w-4 h-4 text-primary" />
+          User Capacity Calculator
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 ml-auto border-primary/30 text-primary">
+            This Month
+          </Badge>
+        </CardTitle>
+        <p className="text-[11px] text-muted-foreground">
+          Estimated maximum users your current API budgets can support for the rest of this billing cycle, based on background engine overhead and per-user API activity.
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="rounded-lg border bg-muted/30 p-4 text-center">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Max Supported Users This Month</p>
+          <p className={`text-4xl font-black font-mono ${bottleneck.maxUsers < 10 ? "text-red-500" : bottleneck.maxUsers < 50 ? "text-amber-500" : "text-emerald-500"}`}>
+            {safeMax}
+          </p>
+          {bottleneck.service && bottleneck.maxUsers < 99999 && (
+            <p className="text-[11px] text-muted-foreground mt-1">
+              Bottleneck: <span className="font-medium text-foreground">{bottleneck.name}</span>
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          {capacities.map(c => (
+            <div key={c.service} className="rounded-md bg-muted/20 border px-3 py-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-semibold">{c.name}</span>
+                <span className={`text-[11px] font-bold font-mono ${c.maxUsers < 10 ? "text-red-500" : c.maxUsers < 50 ? "text-amber-500" : "text-emerald-500"}`}>
+                  {c.suspended ? "Suspended" : c.maxUsers >= 9000 ? "Unlimited" : `~${c.maxUsers} users`}
+                </span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-[10px] text-muted-foreground">
+                <div>
+                  <span className="block font-medium text-foreground">{c.enginePct}%</span>
+                  <span>Engine overhead</span>
+                </div>
+                <div>
+                  <span className="block font-medium text-foreground">{c.perUserDaily}</span>
+                  <span>{c.unit}/user/day</span>
+                </div>
+                <div>
+                  <span className="block font-medium text-foreground">{c.budgetLeft.toLocaleString()}</span>
+                  <span>Budget left</span>
+                </div>
+              </div>
+              <p className="text-[9px] text-muted-foreground/70 mt-1 italic">{PER_USER_LABEL[c.service]}</p>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <p className="text-[11px] font-semibold mb-2 flex items-center gap-1.5">
+            <TrendingUp className="w-3.5 h-3.5 text-primary" />
+            Budget Survival by User Count
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-[10px]">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left pb-1.5 pr-3 font-semibold text-muted-foreground">Users</th>
+                  {capacities.map(c => (
+                    <th key={c.service} className="text-right pb-1.5 px-2 font-semibold text-muted-foreground">{c.name.split(" ")[0]}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {scenarios.map(n => (
+                  <tr key={n} className="border-b border-border/30">
+                    <td className="py-1.5 pr-3 font-bold">{n} users</td>
+                    {capacities.map(c => {
+                      const engineOverhead = ENGINE_OVERHEAD[c.service] ?? 500;
+                      const totalDaily = engineOverhead + n * c.perUserDaily;
+                      const daysCanLast = c.perUserDaily === 0 ? c.daysLeft : Math.floor(c.budgetLeft / totalDaily);
+                      const ok = daysCanLast >= c.daysLeft;
+                      return (
+                        <td key={c.service} className={`py-1.5 px-2 text-right font-mono font-semibold ${c.suspended ? "text-muted-foreground/50" : ok ? "text-emerald-500" : daysCanLast > 7 ? "text-amber-500" : "text-red-500"}`}>
+                          {c.suspended ? "–" : c.perUserDaily === 0 ? "✓" : ok ? "✓ Full mo." : `~${daysCanLast}d`}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-[9px] text-muted-foreground mt-2">
+            ✓ = budget lasts the full month · "~Nd" = estimated days before exhaustion at that user count
+          </p>
+        </div>
+
+        <div className="rounded-md bg-muted/30 border p-3 text-[11px] space-y-2">
+          <p className="font-semibold flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-primary" />
+            Why did my API keys drain so fast?
+          </p>
+          <div className="space-y-1.5 text-muted-foreground">
+            <p>• <strong className="text-foreground">Background engines run 24/7</strong> — the Precomputed Picks engine, Monte Carlo simulator, Intelligence Hub, and Market Snapshot engine all make API calls on loops (every 30s–5min) regardless of user activity. This accounts for ~80% of your monthly quota.</p>
+            <p>• <strong className="text-foreground">Set the correct budget limits</strong> — the numbers in this panel must match your <em>actual</em> API plan limits. If your plan only allows 500 requests/month (free tier) but the system assumes 100,000, the engines will drain it in hours. Update each budget to match your plan.</p>
+            <p>• <strong className="text-foreground">Enable auto-suspend for off-season APIs</strong> — BallDontLie and API-Football have seasons. Enabling auto-suspend during off-months saves quota for when it matters.</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -656,6 +872,8 @@ export default function AdminApiBudget() {
           </div>
         )}
 
+        <UserCapacityPanel data={data} />
+
         <div className="grid sm:grid-cols-2 gap-4">
           {data.optimizations.map(opt => (
             <ServiceCard
@@ -675,7 +893,10 @@ export default function AdminApiBudget() {
         {alerts.length > 0 && (
           <AlertPanel
             alerts={alerts}
+            configs={data.configs}
             onDismiss={id => dismissAlertMutation.mutate(id)}
+            onResume={s => resumeMutation.mutate(s)}
+            onAutoSuspend={(s, v) => autoSuspendMutation.mutate({ service: s, enabled: v })}
           />
         )}
 
