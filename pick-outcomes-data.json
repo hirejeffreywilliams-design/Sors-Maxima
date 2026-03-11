@@ -16266,13 +16266,173 @@
       "homeScore": 4,
       "awayScore": 0,
       "settledAt": "2026-03-11T02:21:01.119Z"
+    },
+    {
+      "id": "precomp-NHL-401803379-total-3a1c47045f",
+      "gameId": "401803379",
+      "sport": "NHL",
+      "game": "Washington Capitals @ Buffalo Sabres",
+      "homeTeam": "Buffalo Sabres",
+      "awayTeam": "Washington Capitals",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 57,
+      "ev": 10.73,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "lost",
+      "homeScore": 6,
+      "awayScore": 3,
+      "settledAt": "2026-03-11T18:00:40.896Z"
+    },
+    {
+      "id": "precomp-NHL-401803380-total-28d34ccc5f",
+      "gameId": "401803380",
+      "sport": "NHL",
+      "game": "Anaheim Ducks @ Toronto Maple Leafs",
+      "homeTeam": "Toronto Maple Leafs",
+      "awayTeam": "Anaheim Ducks",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 57,
+      "ev": -14.09,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 1,
+      "settledAt": "2026-03-11T18:00:40.903Z"
+    },
+    {
+      "id": "precomp-NHL-401803381-total-1618648a15",
+      "gameId": "401803381",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 57,
+      "ev": -12.18,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 5,
+      "settledAt": "2026-03-11T18:00:40.924Z"
+    },
+    {
+      "id": "precomp-NHL-401803382-total-cdaa520592",
+      "gameId": "401803382",
+      "sport": "NHL",
+      "game": "Columbus Blue Jackets @ Florida Panthers",
+      "homeTeam": "Florida Panthers",
+      "awayTeam": "Columbus Blue Jackets",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C-",
+      "confidence": 56,
+      "ev": -16,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 5,
+      "settledAt": "2026-03-11T18:00:40.924Z"
+    },
+    {
+      "id": "precomp-NHL-401803385-total-7d9784258c",
+      "gameId": "401803385",
+      "sport": "NHL",
+      "game": "Edmonton Oilers @ Dallas Stars",
+      "homeTeam": "Dallas Stars",
+      "awayTeam": "Edmonton Oilers",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 57,
+      "ev": 14.55,
+      "gameTime": "2026-03-13T00:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 1,
+      "settledAt": "2026-03-11T18:00:40.960Z"
+    },
+    {
+      "id": "precomp-NHL-401803388-total-a4f0b4846b",
+      "gameId": "401803388",
+      "sport": "NHL",
+      "game": "Chicago Blackhawks @ Utah Mammoth",
+      "homeTeam": "Utah Mammoth",
+      "awayTeam": "Chicago Blackhawks",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -142,
+      "grade": "B-",
+      "confidence": 57,
+      "ev": -4.56,
+      "gameTime": "2026-03-13T01:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "won",
+      "homeScore": 5,
+      "awayScore": 0,
+      "settledAt": "2026-03-11T18:00:40.979Z"
+    },
+    {
+      "id": "precomp-NHL-401803389-spread-e86d1a8d70",
+      "gameId": "401803389",
+      "sport": "NHL",
+      "game": "Nashville Predators @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Nashville Predators",
+      "pick": "Vancouver Canucks +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 64,
+      "ev": -23.64,
+      "gameTime": "2026-03-13T02:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-11T18:00:41.105Z"
+    },
+    {
+      "id": "precomp-NHL-401803389-total-eb1f6776b5",
+      "gameId": "401803389",
+      "sport": "NHL",
+      "game": "Nashville Predators @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Nashville Predators",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 56,
+      "ev": -23.64,
+      "gameTime": "2026-03-13T02:00Z",
+      "savedAt": "2026-03-11T17:59:35.819Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-11T18:00:41.105Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 731,
-      "won": 391,
-      "lost": 327,
+      "total": 739,
+      "won": 395,
+      "lost": 331,
       "push": 13,
       "rate": 53.5,
       "pending": 82
@@ -16284,9 +16444,9 @@
         "rate": 52
       },
       "NHL": {
-        "total": 261,
-        "won": 137,
-        "rate": 52.5
+        "total": 269,
+        "won": 141,
+        "rate": 52.4
       },
       "NCAAB": {
         "total": 218,
@@ -16301,13 +16461,13 @@
         "rate": 60.9
       },
       "B": {
-        "total": 53,
-        "won": 38,
-        "rate": 71.7
+        "total": 54,
+        "won": 39,
+        "rate": 72.2
       },
       "B-": {
-        "total": 165,
-        "won": 86,
+        "total": 167,
+        "won": 87,
         "rate": 52.1
       },
       "C+": {
@@ -16316,19 +16476,19 @@
         "rate": 55.9
       },
       "D+": {
-        "total": 34,
-        "won": 14,
-        "rate": 41.2
+        "total": 36,
+        "won": 15,
+        "rate": 41.7
       },
       "C-": {
-        "total": 48,
+        "total": 50,
         "won": 24,
-        "rate": 50
+        "rate": 48
       },
       "C": {
-        "total": 139,
-        "won": 70,
-        "rate": 50.4
+        "total": 140,
+        "won": 71,
+        "rate": 50.7
       },
       "A-": {
         "total": 40,
@@ -16354,16 +16514,16 @@
         "roi": 12.2
       },
       "Spread": {
-        "total": 225,
+        "total": 226,
         "won": 122,
-        "rate": 54.2,
-        "roi": 6.4
+        "rate": 54,
+        "roi": 6
       },
       "Total": {
-        "total": 214,
-        "won": 111,
-        "rate": 51.9,
-        "roi": 2.2
+        "total": 221,
+        "won": 115,
+        "rate": 52,
+        "roi": 2.3
       },
       "Team Total": {
         "total": 71,
@@ -16373,20 +16533,20 @@
       }
     },
     "recentForm": {
-      "won": 35,
-      "lost": 15,
+      "won": 34,
+      "lost": 16,
       "push": 0,
-      "rate": 70
+      "rate": 68
     },
-    "lastUpdated": "2026-03-11T13:10:06.179Z",
-    "roi": 6.9,
+    "lastUpdated": "2026-03-11T18:00:41.105Z",
+    "roi": 6.7,
     "brierScore": 0.2604,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.064,
+    "sharpeRatio": 0.063,
     "homeAwayBias": {
-      "homeWinRate": 57.6,
+      "homeWinRate": 57.5,
       "awayWinRate": 42,
-      "homeTotal": 361,
+      "homeTotal": 362,
       "awayTotal": 81
     },
     "calibrationBuckets": [
@@ -16398,15 +16558,15 @@
       },
       {
         "range": "55-60",
-        "predicted": 57.4,
-        "actual": 48.1,
-        "total": 135
+        "predicted": 57.3,
+        "actual": 48.6,
+        "total": 142
       },
       {
         "range": "60-65",
         "predicted": 61.9,
-        "actual": 54.9,
-        "total": 246
+        "actual": 54.7,
+        "total": 247
       },
       {
         "range": "65-70",
