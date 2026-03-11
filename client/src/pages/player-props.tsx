@@ -1613,21 +1613,11 @@ function PropVarianceCalculator({ sport, addLeg }: {
 }) {
   const { data: topData, isLoading: topLoading } = useQuery<TopPropsResponse>({
     queryKey: ["/api/top-props", sport],
-    queryFn: async () => {
-      const res = await fetch(`/api/top-props/${sport}`);
-      if (!res.ok) throw new Error("Failed");
-      return res.json();
-    },
     refetchInterval: 30000,
   });
 
   const { data: gameData, isLoading: gameLoading } = useQuery<PropsResponse>({
     queryKey: ["/api/game-player-props", sport],
-    queryFn: async () => {
-      const res = await fetch(`/api/game-player-props/${sport}`);
-      if (!res.ok) throw new Error("Failed");
-      return res.json();
-    },
     refetchInterval: 30000,
   });
 

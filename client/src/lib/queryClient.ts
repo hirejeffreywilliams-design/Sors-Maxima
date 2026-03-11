@@ -42,8 +42,8 @@ export const getQueryFn: <T>(options: {
     const data = await res.json();
 
     // Cache specific keys for offline use
-    const url = queryKey[0] as string;
-    const isCacheable = Object.values(CACHE_KEYS).some(key => url.startsWith(key));
+    const url = queryKey[0];
+    const isCacheable = typeof url === "string" && Object.values(CACHE_KEYS).some(key => url.startsWith(key));
     if (isCacheable) {
       cacheApiResponse(url, data);
     }
