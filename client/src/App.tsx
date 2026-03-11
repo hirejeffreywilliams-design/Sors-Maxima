@@ -93,11 +93,12 @@ const ResearchNotesPage = lazy(() => import("@/pages/research-notes"));
 const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
+const MyBetsPage = lazy(() => import("@/pages/my-bets"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck, ReceiptText } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -284,7 +285,7 @@ function OnboardingGuard({ children, isAdmin }: { children: React.ReactNode; isA
 
   useEffect(() => {
     if (isAdmin) return;
-    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record'];
+    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record', '/my-bets'];
     if (onboardingData && !onboardingData.onboardingCompleted && !skipPaths.includes(location)) {
       setLocation('/onboarding');
     }
@@ -337,6 +338,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/track-record" component={TrackRecordPage} />
+        <Route path="/my-bets" component={MyBetsPage} />
         <Route path="/ticket-variations" component={TicketVariations} />
         <Route path="/pick-review" component={PickReview} />
         <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
@@ -502,6 +504,7 @@ const BUILD_SUBITEMS = [
   { href: "/pick-review", icon: ClipboardList, label: "Pick Review", desc: "Risk-scored picks with Kelly stake guidance" },
   { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", desc: "Manually drag & drop your own ticket" },
   { href: "/strategy", icon: Compass, label: "Strategy Advisor", desc: "Expert guidance for your betting style" },
+  { href: "/my-bets", icon: ReceiptText, label: "My Bet Tracker", desc: "Track results, edit stakes & mark outcomes" },
 ];
 
 const MARKETS_SUBITEMS = [
@@ -585,6 +588,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
           { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "mobile-nav-pick-review" },
           { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
           { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "mobile-nav-strategy" },
+          { href: "/my-bets", icon: ReceiptText, label: "My Bet Tracker", testId: "mobile-nav-my-bets" },
         ])}
 
         {navSection("Markets", [
@@ -1262,7 +1266,7 @@ function AppContent() {
       );
     }
     if (tier === 'free') {
-      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record'];
+      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record', '/my-bets'];
       if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
         return (
           <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>

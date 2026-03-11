@@ -58,6 +58,7 @@ const commandItems: CommandItem[] = [
   { label: "Help Center", href: "/help", icon: HelpCircle, group: "Pages", keywords: ["faq", "support", "help", "questions"] },
   { label: "What's New", href: "/changelog", icon: Megaphone, group: "Pages", keywords: ["changelog", "updates", "release", "new"] },
   { label: "My Profile", href: "/profile", icon: Shield, group: "Pages", keywords: ["profile", "account", "data", "export"] },
+  { label: "My Bet Tracker", href: "/my-bets", icon: FileText, group: "Pages", keywords: ["bets", "tracker", "history", "won", "lost", "parlay", "stake"] },
 
   { label: "Odds Comparison", href: "/tools", icon: TrendingUp, group: "Tools", keywords: ["odds", "compare", "sportsbook"] },
   { label: "ML Prop Projections", href: "/tools", icon: Brain, group: "Tools", keywords: ["machine learning", "props", "projections"] },

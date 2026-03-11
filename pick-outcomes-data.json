@@ -1311,54 +1311,6 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
-    },
-    {
-      "id": "precomp-NCAAB-401851565-spread-7374c3de68",
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "game": "TBD @ Florida Gators",
-      "homeTeam": "Florida Gators",
-      "awayTeam": "TBD",
-      "pick": "Florida Gators +1.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 83,
-      "ev": 33.64,
-      "gameTime": "2026-03-13T17:00Z",
-      "savedAt": "2026-03-11T21:09:44.535Z"
-    },
-    {
-      "id": "precomp-NCAAB-401851565-moneyline-d4587a786c",
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "game": "TBD @ Florida Gators",
-      "homeTeam": "Florida Gators",
-      "awayTeam": "TBD",
-      "pick": "Florida Gators ML",
-      "betType": "moneyline",
-      "odds": -161,
-      "grade": "B+",
-      "confidence": 67,
-      "ev": 13.48,
-      "gameTime": "2026-03-13T17:00Z",
-      "savedAt": "2026-03-11T21:09:44.535Z"
-    },
-    {
-      "id": "precomp-NCAAB-401851565-total-3dc2c9d32e",
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "game": "TBD @ Florida Gators",
-      "homeTeam": "Florida Gators",
-      "awayTeam": "TBD",
-      "pick": "Over 144",
-      "betType": "total",
-      "odds": -110,
-      "grade": "B+",
-      "confidence": 64,
-      "ev": 33.64,
-      "gameTime": "2026-03-13T17:00Z",
-      "savedAt": "2026-03-11T21:09:44.535Z"
     }
   ],
   "settled": [
@@ -16614,16 +16566,116 @@
       "homeScore": 91,
       "awayScore": 42,
       "settledAt": "2026-03-11T20:50:34.749Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-spread-7374c3de68",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Florida Gators +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 83,
+      "ev": 33.64,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z",
+      "result": "lost",
+      "homeScore": 77,
+      "awayScore": 84,
+      "settledAt": "2026-03-11T21:14:30.563Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-moneyline-d4587a786c",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Florida Gators ML",
+      "betType": "moneyline",
+      "odds": -161,
+      "grade": "B+",
+      "confidence": 67,
+      "ev": 13.48,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z",
+      "result": "lost",
+      "homeScore": 77,
+      "awayScore": 84,
+      "settledAt": "2026-03-11T21:14:30.563Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-total-3dc2c9d32e",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 64,
+      "ev": 33.64,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z",
+      "result": "won",
+      "homeScore": 77,
+      "awayScore": 84,
+      "settledAt": "2026-03-11T21:14:30.563Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851376-total-10ad56f594",
+      "gameId": "401851376",
+      "sport": "NCAAB",
+      "game": "Washington Huskies @ Wisconsin Badgers",
+      "homeTeam": "Wisconsin Badgers",
+      "awayTeam": "Washington Huskies",
+      "pick": "Over 150",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 62,
+      "ev": 29.82,
+      "gameTime": "2026-03-12T18:30Z",
+      "savedAt": "2026-03-11T21:19:50.460Z",
+      "result": "won",
+      "homeScore": 93,
+      "awayScore": 97,
+      "settledAt": "2026-03-11T21:27:52.006Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851376-spread-7ba5f3f1d4",
+      "gameId": "401851376",
+      "sport": "NCAAB",
+      "game": "Washington Huskies @ Wisconsin Badgers",
+      "homeTeam": "Wisconsin Badgers",
+      "awayTeam": "Washington Huskies",
+      "pick": "Wisconsin Badgers -6.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 74,
+      "ev": 29.82,
+      "gameTime": "2026-03-12T18:30Z",
+      "savedAt": "2026-03-11T21:30:20.107Z",
+      "result": "lost",
+      "homeScore": 93,
+      "awayScore": 97,
+      "settledAt": "2026-03-11T21:32:16.845Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 746,
-      "won": 399,
-      "lost": 334,
+      "total": 751,
+      "won": 401,
+      "lost": 337,
       "push": 13,
-      "rate": 53.5,
-      "pending": 85
+      "rate": 53.4,
+      "pending": 82
     },
     "bySport": {
       "NBA": {
@@ -16637,16 +16689,16 @@
         "rate": 52.4
       },
       "NCAAB": {
-        "total": 225,
-        "won": 127,
-        "rate": 56.4
+        "total": 230,
+        "won": 129,
+        "rate": 56.1
       }
     },
     "byGrade": {
       "B+": {
-        "total": 65,
-        "won": 39,
-        "rate": 60
+        "total": 69,
+        "won": 40,
+        "rate": 58
       },
       "B": {
         "total": 56,
@@ -16654,9 +16706,9 @@
         "rate": 71.4
       },
       "B-": {
-        "total": 167,
-        "won": 87,
-        "rate": 52.1
+        "total": 168,
+        "won": 88,
+        "rate": 52.4
       },
       "C+": {
         "total": 170,
@@ -16701,22 +16753,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 222,
+        "total": 223,
         "won": 121,
-        "rate": 54.5,
-        "roi": 12.4
+        "rate": 54.3,
+        "roi": 11.9
       },
       "Spread": {
-        "total": 229,
+        "total": 231,
         "won": 124,
-        "rate": 54.1,
-        "roi": 6.2
+        "rate": 53.7,
+        "roi": 5.3
       },
       "Total": {
-        "total": 224,
-        "won": 116,
-        "rate": 51.8,
-        "roi": 1.8
+        "total": 226,
+        "won": 118,
+        "rate": 52.2,
+        "roi": 2.6
       },
       "Team Total": {
         "total": 71,
@@ -16726,20 +16778,20 @@
       }
     },
     "recentForm": {
-      "won": 33,
-      "lost": 17,
+      "won": 30,
+      "lost": 20,
       "push": 0,
-      "rate": 66
+      "rate": 60
     },
-    "lastUpdated": "2026-03-11T21:00:11.645Z",
-    "roi": 6.7,
-    "brierScore": 0.2606,
+    "lastUpdated": "2026-03-11T21:36:06.866Z",
+    "roi": 6.5,
+    "brierScore": 0.2614,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.062,
+    "sharpeRatio": 0.061,
     "homeAwayBias": {
-      "homeWinRate": 57.7,
+      "homeWinRate": 57.2,
       "awayWinRate": 42,
-      "homeTotal": 366,
+      "homeTotal": 369,
       "awayTotal": 81
     },
     "calibrationBuckets": [
@@ -16758,20 +16810,20 @@
       {
         "range": "60-65",
         "predicted": 61.9,
-        "actual": 54.8,
-        "total": 248
+        "actual": 55.2,
+        "total": 250
       },
       {
         "range": "65-70",
         "predicted": 66.2,
-        "actual": 54,
-        "total": 126
+        "actual": 53.5,
+        "total": 127
       },
       {
         "range": "70-75",
-        "predicted": 70.3,
-        "actual": 54.4,
-        "total": 79
+        "predicted": 70.4,
+        "actual": 53.8,
+        "total": 80
       },
       {
         "range": "75-80",
@@ -16782,8 +16834,8 @@
       {
         "range": "80+",
         "predicted": 82.8,
-        "actual": 52.2,
-        "total": 23
+        "actual": 50,
+        "total": 24
       }
     ]
   },

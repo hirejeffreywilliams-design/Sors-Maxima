@@ -155,6 +155,12 @@ function MyBetsTab() {
   return (
     <ScrollArea className="flex-1">
       <div className="p-3 space-y-3">
+        <Link href="/my-bets">
+          <button className="w-full flex items-center justify-between px-3 py-2 rounded-lg border bg-primary/5 hover:bg-primary/10 transition-colors text-xs font-semibold text-primary" data-testid="button-view-full-tracker">
+            <span className="flex items-center gap-1.5">📋 View Full Bet Tracker</span>
+            <span className="text-[10px] text-muted-foreground">{bets.length} bet{bets.length !== 1 ? "s" : ""} →</span>
+          </button>
+        </Link>
         {bets.map((bet) => {
           const isExpanded = expandedId === bet.id;
           const date = new Date(bet.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" });
