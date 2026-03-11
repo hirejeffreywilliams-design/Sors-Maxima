@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { recordPickOutcome } from "./communityLossPatternEngine";
 // Lazy-import to avoid circular deps — resolved at runtime
 let _onPickSettled: ((p: { id: string; gameId: string; sport: string; betType: string; confidence: number; result: "won" | "lost"; odds?: number }) => void) | null = null;
@@ -15,9 +14,7 @@ function getOnPickSettled() {
   return _onPickSettled;
 }
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const DATA_FILE = path.join(__dirname, "..", "pick-outcomes-data.json");
+const DATA_FILE = path.join(process.cwd(), "pick-outcomes-data.json");
 
 const MAX_SETTLED = 5000;
 const MAX_PENDING = 2000;

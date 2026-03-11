@@ -18,12 +18,9 @@
 
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { logInfo, logWarn } from "./errorLogger";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-const STATE_FILE  = path.join(__dirname, "..", ".usml-state.json");
+const STATE_FILE = path.join(process.cwd(), ".usml-state.json");
 
 // ─── Source IDs ────────────────────────────────────────────────────────────
 export type SourceId =

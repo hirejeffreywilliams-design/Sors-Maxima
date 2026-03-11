@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 import { getMultiDayScoreboard } from "./espn-scoreboard-provider";
 import { tradingCards } from "./dbSchema";
 import { db } from "./db";
@@ -321,9 +320,7 @@ const REFRESH_INTERVAL = 5 * 60 * 1000;
 const STALE_THRESHOLD = 30 * 60 * 1000;
 
 // ── Disk cache: persist predictions across restarts so users get instant results ──
-const __filename_pe = fileURLToPath(import.meta.url);
-const __dirname_pe = path.dirname(__filename_pe);
-const CACHE_PERSIST_FILE = path.join(__dirname_pe, "..", "precomputed-picks-cache.json");
+const CACHE_PERSIST_FILE = path.join(process.cwd(), "precomputed-picks-cache.json");
 const CACHE_MAX_AGE_MS = 4 * 60 * 60 * 1000; // 4 hours — stale beyond this
 
 // ── Dynamic Confidence Ceiling ─────────────────────────────────────────────────
