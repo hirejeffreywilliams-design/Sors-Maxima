@@ -48,6 +48,8 @@ function trimPick(p: any, maxFactors = 5) {
     id: p.id,
     sport: p.sport,
     game: p.game,
+    homeTeam: p.homeTeam,
+    awayTeam: p.awayTeam,
     pick: p.pick,
     betType: p.betType,
     odds: p.odds,
@@ -59,6 +61,7 @@ function trimPick(p: any, maxFactors = 5) {
     isUnderdog: p.isUnderdog,
     reasoning: p.reasoning,
     insight: p.insight,
+    winProbability: p.winProbability,
     factors: Array.isArray(p.factors) ? p.factors.slice(0, maxFactors) : [],
   };
 }

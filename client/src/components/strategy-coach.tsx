@@ -84,13 +84,18 @@ function StrategyRecordCard({ strategyStreak }: { strategyStreak: any }) {
         const decimalOdds = pick.odds < 0
           ? 1 + (100 / Math.abs(pick.odds))
           : 1 + (pick.odds / 100);
+        const gameParts = (pick.game || "").split(" @ ");
+        const parsedAway = gameParts[0]?.trim() || "";
+        const parsedHome = gameParts[1]?.trim() || gameParts[0]?.trim() || "";
+        const teamName = pick.homeTeam || parsedHome || pick.game || "";
+        const opponentName = pick.awayTeam || parsedAway || "";
 
         addLeg({
           id: legId,
-          team: pick.homeTeam,
-          opponent: pick.awayTeam,
+          team: teamName,
+          opponent: opponentName,
           market: (pick.betType || "moneyline") as any,
-          outcome: pick.pick,
+          outcome: pick.pick || `${teamName} vs ${opponentName}`,
           decimalOdds,
           americanOdds: pick.odds,
           addedFrom: "Strategy Coach",

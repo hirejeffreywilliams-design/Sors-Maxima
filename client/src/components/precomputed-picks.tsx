@@ -256,12 +256,17 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
 
   const handleAdd = () => {
     const decimalOdds = pick.odds > 0 ? (pick.odds / 100) + 1 : (-100 / pick.odds) + 1;
+    const gameParts = (pick.game || "").split(" @ ");
+    const parsedAway = gameParts[0]?.trim() || "";
+    const parsedHome = gameParts[1]?.trim() || gameParts[0]?.trim() || "";
+    const teamName = pick.homeTeam || parsedHome || pick.game || "";
+    const opponentName = pick.awayTeam || parsedAway || "";
     const slipLeg: ParlaySlipLeg = {
       id: legId,
-      team: pick.homeTeam,
-      opponent: pick.awayTeam,
+      team: teamName,
+      opponent: opponentName,
       market: (["moneyline", "spread", "total", "player_prop"].includes(pick.betType) ? pick.betType : "moneyline") as "moneyline" | "spread" | "total" | "player_prop",
-      outcome: pick.pick || `${pick.homeTeam} vs ${pick.awayTeam}`,
+      outcome: pick.pick || `${teamName} vs ${opponentName}`,
       decimalOdds,
       americanOdds: pick.odds,
       addedFrom: "46-Factor Model Analysis",
