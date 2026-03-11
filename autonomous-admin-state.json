@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773259742644_u6hnw",
+      "timestamp": "2026-03-11T20:09:02.644Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "29,862 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773252611924_wqqgv",
       "timestamp": "2026-03-11T18:10:11.924Z",
       "resolved": false,
@@ -1936,8 +1946,8 @@
       "raw": "{\n  \"summary\": [\n    \"Current win rate is 52.9%, above the break-even threshold of 52.4%.\",\n    \"API usage is healthy; odds API used 25,073 requests of 100,000 budget with a recommendation to throttle.\",\n    \"Overall pick accuracy at 51.4% remains under watch, particularly the Total market at 46.7%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor Pick Performance\",\n      \"description\": \"Increase scrutiny on the Total market due to low accuracy (46.7%). Assess strategies for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Optimize API Usage\",\n      \"description\": \"Implement throttling for odds API to ensure budget remains intact as current usage trends toward high variance.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Evaluate churn rate at 4.2%. Develop initiatives to maintain and increase user engagement.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Total Market Performance\",\n      \"description\": \"Total market has a win rate of 46.7%, indicating potential model degradation. Needs immediate attention.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling for the odds API usage.\",\n      \"Begin a detailed performance review of the Total market picks.\",\n      \"Check budget allocations against projected month-end usage.\"\n    ],\n    \"this_week\": [\n      \"Develop a user engagement strategy to reduce churn rate.\",\n      \"Analyze the current win rate trends for potential adjustments.\",\n      \"Review liability across all markets for risk management.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T18:10:11.924Z",
+  "lastQuickCheck": "2026-03-11T20:09:02.644Z",
   "lastDeepCheck": "2026-03-11T18:19:11.923Z",
-  "totalQuickChecks": 137,
+  "totalQuickChecks": 138,
   "totalDeepChecks": 33
 }
