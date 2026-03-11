@@ -1311,6 +1311,22 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NHL-401803386-total-bc08a05b4f",
+      "gameId": "401803386",
+      "sport": "NHL",
+      "game": "Philadelphia Flyers @ Minnesota Wild",
+      "homeTeam": "Minnesota Wild",
+      "awayTeam": "Philadelphia Flyers",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 53,
+      "ev": 26,
+      "gameTime": "2026-03-13T00:00Z",
+      "savedAt": "2026-03-11T01:39:23.866Z"
     }
   ],
   "settled": [
@@ -16195,7 +16211,7 @@
       "lost": 325,
       "push": 13,
       "rate": 53.5,
-      "pending": 82
+      "pending": 83
     },
     "bySport": {
       "NBA": {
@@ -16298,7 +16314,7 @@
       "push": 0,
       "rate": 72
     },
-    "lastUpdated": "2026-03-11T01:35:41.312Z",
+    "lastUpdated": "2026-03-11T01:41:22.637Z",
     "roi": 6.9,
     "brierScore": 0.2604,
     "maxDrawdown": 15.4,

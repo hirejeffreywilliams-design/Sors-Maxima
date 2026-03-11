@@ -21,6 +21,10 @@ import {
   Layers,
   DollarSign,
   Activity,
+  Bookmark,
+  Flame,
+  MessageSquare,
+  Wifi,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -59,12 +63,16 @@ const betTypes = [
 ];
 
 const features = [
-  { icon: Brain, title: "46-Factor Prediction Engine", description: "Every pick analyzed across 46 data points including sharp money, injury impact, weather, and momentum" },
-  { icon: Target, title: "Smart Ticket Generator", description: "AI builds optimized parlays with correlation detection and risk grading" },
-  { icon: TrendingUp, title: "+EV Finder", description: "Identifies positive expected value bets across all major sportsbooks" },
-  { icon: BarChart3, title: "Analytics Dashboard", description: "Track your performance, ROI, and betting patterns over time" },
-  { icon: Shield, title: "Bet Grading (A-F)", description: "Every ticket graded on quality so you know exactly what you're betting" },
-  { icon: Zap, title: "Real-Time Alerts", description: "Line movement alerts, sharp action notifications, and injury updates" },
+  { icon: Brain, title: "46-Factor Prediction Engine", description: "Every pick analyzed across 46 data points — sharp money, injuries, line movement, weather, and momentum" },
+  { icon: Flame, title: "Life Changer Ticket™", description: "One daily high-ceiling parlay with no risk ceiling — the platform's best play, fresh every morning" },
+  { icon: Target, title: "Smart Ticket Generator", description: "AI builds optimized parlays in seconds with correlation detection and risk grading" },
+  { icon: TrendingUp, title: "+EV Odds Center", description: "Identifies positive expected value bets across all major sportsbooks with live line movement alerts" },
+  { icon: Sparkles, title: "Intelligence Cards™", description: "Earn collectible pick cards from your bets — rip packs, flip cards, and showcase wins to the community" },
+  { icon: Wifi, title: "Live Data Stream", description: "Real-time scores, odds, and sharp signals pushed to your screen every 30 seconds — no refresh needed" },
+  { icon: Bookmark, title: "Watchlist & Research Notes", description: "Save teams you're tracking and keep a private betting journal to log your reasoning and review results" },
+  { icon: Shield, title: "Bet Grading & Track Record", description: "Every ticket graded A+ to F. All picks publicly logged and settled — full transparency, no cherry-picking" },
+  { icon: MessageSquare, title: "Member Feedback System", description: "Rate your experience, report bugs, or suggest features — the team reads and replies to all submissions" },
+  { icon: BarChart3, title: "Bankroll & Performance Tracker", description: "Track P&L, ROI, and win rate by sport and market. Auto-settlement from live final scores" },
 ];
 
 const sportsbookOptions = [

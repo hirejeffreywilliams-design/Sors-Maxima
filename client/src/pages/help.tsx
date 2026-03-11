@@ -12,7 +12,8 @@ import {
   ArrowRight, Clock, MapPin, HelpCircle, Lightbulb,
   DollarSign, BookOpen, Trophy, ChevronDown, ChevronUp,
   CheckCircle, Ticket, Eye, RefreshCw, Heart, Mail,
-  Phone, ExternalLink, AlertTriangle, Sparkles,
+  Phone, ExternalLink, AlertTriangle, Sparkles, Bookmark,
+  StickyNote, MessageSquare, Flame, Wifi,
 } from "lucide-react";
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
@@ -492,31 +493,6 @@ const FEATURES: Feature[] = [
     tags: ["bankroll", "money", "roi", "units", "tracking", "sportsbooks", "p&l", "tax"],
   },
   {
-    id: "cards",
-    name: "Intelligence Cards",
-    tagline: "Collect verified pick cards from your real winning bets",
-    icon: <Sparkles className="w-5 h-5" />,
-    category: "edge",
-    path: "/cards",
-    pathLabel: "Cards (Trophy icon in nav)",
-    why: "Every pick the Sors engines generate can be issued as a cryptographically signed digital card — your permanent proof of conviction. When your pick wins, the card gets a 'WINNER' stamp and becomes a collector's item.",
-    when: "Open packs after a winning session. Show off your A+ cards in the community. Trade rare cards with other members.",
-    where: "Cards page (Trophy icon in nav). Your collection is in My Collection tab. Open packs with the 'Open Pack' button.",
-    how: [
-      "Navigate to the Cards page",
-      "Click 'Open Pack' to reveal 3 random Intelligence Cards from recent picks",
-      "Each card shows the pick, odds, grade, conviction score, and EV",
-      "Flip any card to see its back with rarity and certification info",
-      "Share A+ or winning cards to the Community Cards feed",
-    ],
-    tips: [
-      "A+ cards are LEGENDARY rarity — the highest grade the engine produces",
-      "Packs refresh weekly (Sharp: 3/week, Edge: 5/week, Max: daily)",
-      "Cards from winning picks get a 'CALLED IT ✓' stamp — these are the rarest",
-    ],
-    tags: ["cards", "pack", "community", "collect"],
-  },
-  {
     id: "pack-rip",
     name: "Pack Opening Experience",
     tagline: "Rip open packs like a real trading card game",
@@ -590,6 +566,134 @@ const FEATURES: Feature[] = [
       "Full Breakdown shows reasoning and all market types",
     ],
     tags: ["matchup", "parlay", "analysis", "ai"],
+  },
+  {
+    id: "life-changer",
+    name: "Life Changer Ticket™",
+    tagline: "One high-conviction daily ticket built to swing big — refreshed every morning",
+    icon: <Flame className="w-5 h-5" />,
+    category: "edge",
+    path: "/",
+    pathLabel: "Command Center → Life Changer Ticket™ section",
+    why: "Most platform picks are calibrated for consistency. The Life Changer Ticket™ is the opposite — it's the one daily ticket where the engines are given no risk ceiling and told to find the highest-ceiling, best-value parlay available. One ticket. Maximum edge.",
+    when: "Check it first thing every morning. It's posted before market open and expires at midnight. These tickets are only available for that calendar day.",
+    where: "Command Center (home page) → scroll to the Life Changer Ticket™ section. It's the visually distinct gold/premium panel.",
+    how: [
+      "Open the Command Center (home / Zap icon)",
+      "Scroll to the Life Changer Ticket™ section — the premium gold panel",
+      "Read the ticket reasoning — each leg includes the full factor breakdown",
+      "Add all legs to your slip with one click",
+      "Review the combined grade and Kelly stake recommendation in your slip",
+      "Act early — popular LCTs sometimes move the lines by midday",
+    ],
+    tips: [
+      "LCTs are logged and settled publicly — you can see the historical track record at /track-record",
+      "Winning LCTs earn an 'S+' grade system card — the rarest card in the platform",
+      "Tickets older than 3 days auto-expire — check daily to catch the fresh one",
+    ],
+    tags: ["life changer", "lct", "daily", "premium", "ticket", "big", "parlay"],
+  },
+  {
+    id: "watchlist",
+    name: "Watchlist & Favorites",
+    tagline: "Save teams and games you're tracking — get instant context when they appear",
+    icon: <Bookmark className="w-5 h-5" />,
+    category: "track",
+    path: "/watchlist",
+    pathLabel: "Watchlist page (Bookmark icon in nav or from any team card)",
+    why: "You often know which teams or matchups you want to track before the picks go live. The Watchlist lets you bookmark teams now and instantly surface all picks, odds, and upcoming games involving them whenever you return.",
+    when: "Use it whenever you have conviction on a team or matchup before pick time. Great for tracking a team on a winning streak, monitoring a rivalry, or following a star player's game.",
+    where: "Watchlist page at /watchlist. Also reachable from any team's card or pick — tap the Bookmark icon to add on the spot.",
+    how: [
+      "Navigate to the Watchlist page (bookmark icon in nav)",
+      "Search for any team or click 'Add Team' on any pick card",
+      "Saved teams appear in your Watchlist with upcoming games and current picks",
+      "Click any entry to jump directly to that team's full analysis",
+      "Remove any team by clicking the bookmark icon again (it toggles off)",
+    ],
+    tips: [
+      "Watchlist syncs across devices — add a team on desktop and see it on mobile",
+      "You can track up to 20 teams simultaneously across all sports",
+      "The badge count on the Watchlist nav icon shows how many saved teams have games today",
+    ],
+    tags: ["watchlist", "favorites", "save", "bookmark", "teams", "follow", "track"],
+  },
+  {
+    id: "research-notes",
+    name: "Research Notes",
+    tagline: "Your private notebook — save analysis, hunches, and reasoning before the game",
+    icon: <StickyNote className="w-5 h-5" />,
+    category: "track",
+    path: "/research",
+    pathLabel: "Research Notes page (/research)",
+    why: "The best bettors write down their reasoning before placing a bet — then compare it to the result. Research Notes gives you a private space to record your conviction, your read on a matchup, or notes from a sharp source. No one else sees it.",
+    when: "Write a note the morning of a game when you first form your opinion. Come back after the game settles to review how your reasoning held up. This is how you identify your own edges.",
+    where: "Navigate to /research or access it from the Profile menu.",
+    how: [
+      "Open Research Notes from the nav or Profile menu",
+      "Click 'New Note' to create a fresh entry",
+      "Title your note with the game or team (e.g. 'Lakers vs Celtics — March 11')",
+      "Write your full reasoning — factors you like, sharp signals you spotted, injury context",
+      "Save it before the game starts",
+      "After settlement, review the note and mark it as a win or loss for your personal log",
+    ],
+    tips: [
+      "Notes are private — only you can see them, not even admins",
+      "Reference your notes when reviewing your track record to understand why picks hit or missed",
+      "Writing forces clarity — if you can't explain why you like a pick in writing, reconsider the bet",
+    ],
+    tags: ["notes", "research", "journal", "private", "notebook", "analysis", "reasoning"],
+  },
+  {
+    id: "feedback",
+    name: "Member Feedback",
+    tagline: "Rate your experience, report issues, and suggest features — we read everything",
+    icon: <MessageSquare className="w-5 h-5" />,
+    category: "track",
+    path: "/feedback",
+    pathLabel: "Floating feedback button (bottom right of any page) · or /feedback",
+    why: "Sors Maxima is built around member input. Every piece of feedback goes directly to the team. Feature requests shape the roadmap. Bug reports get patched. We reply to as many submissions as possible — your voice matters here.",
+    when: "Whenever you have a suggestion, notice something not working right, or want to compliment or critique the platform. The widget is always one click away.",
+    where: "The floating chat bubble in the bottom-right corner of every page. Or visit /feedback to see your submission history and any replies from the team.",
+    how: [
+      "Click the floating feedback button (bottom right of any page)",
+      "Step 1: Choose a category — Bug Report, Feature Request, Pick Quality, General, or Compliment",
+      "Step 2: Give a star rating (1–5) and describe your feedback in the text box",
+      "Step 3: Rate your Net Promoter Score (how likely you are to recommend Sors)",
+      "Submit — the team receives it immediately",
+      "Visit /feedback to see your submission history and any replies from the team",
+    ],
+    tips: [
+      "The more specific your bug report (what page, what action, what happened), the faster it gets fixed",
+      "Feature requests with high NPS from multiple users get prioritized on the roadmap",
+      "You'll receive a reply directly in your feedback history when the team responds",
+    ],
+    tags: ["feedback", "bug", "feature request", "support", "contact", "report", "suggest"],
+  },
+  {
+    id: "live-updates",
+    name: "Live Updates (SSE)",
+    tagline: "Real-time odds, scores, and sharp signals delivered to your screen without refreshing",
+    icon: <Wifi className="w-5 h-5" />,
+    category: "deep",
+    path: "/live",
+    pathLabel: "Active automatically on all pages when logged in",
+    why: "The platform is connected to a live data stream that pushes odds changes, score updates, line movement alerts, and system picks every 30 seconds — without you having to reload the page. The data freshness badge on every pick card shows you exactly how old the data is.",
+    when: "It runs automatically as long as you're logged in and the browser tab is active. No setup needed. If the connection drops (bad network), it reconnects automatically.",
+    where: "Always on in the background. Visible as the 'Last updated' timestamp and freshness badge on pick cards, the live scores on the Live Center page, and the odds updating in the Odds Center.",
+    how: [
+      "Log in — the live stream connects automatically",
+      "On any pick card, see the freshness badge (e.g. '2m ago') showing when data last refreshed",
+      "Live Center shows scores updating every 30–60 seconds without a page reload",
+      "Odds Center updates spreads and lines as the stream pushes new data",
+      "If you see a 'stale data' badge (orange), the stream reconnected and refreshed automatically",
+    ],
+    tips: [
+      "Mobile browsers may throttle the connection when the tab is in the background — bring it to front for live data",
+      "The data freshness badge turns orange when data is older than 10 minutes — worth a manual refresh in that case",
+      "Live updates include sharp signal alerts — when a steam move is detected, an alert appears in the Live Center",
+    ],
+    tags: ["live", "real-time", "sse", "updates", "scores", "odds", "stream", "alerts", "freshness"],
   },
 ];
 
@@ -670,6 +774,31 @@ const FAQ_ITEMS = [
     category: "Security",
     q: "How is my data protected?",
     a: "Multi-layered security: TLS encryption in transit, scrypt password hashing, rate limiting, input sanitization, session fingerprinting, and account lockout after failed attempts. PII is minimized in logs.",
+  },
+  {
+    category: "Features",
+    q: "What is the Life Changer Ticket™?",
+    a: "The Life Changer Ticket™ is one special daily parlay the system generates with no risk ceiling — it's the highest-ceiling, best-value ticket the engines can produce for that day. It's logged, publicly tracked, and winning tickets earn an 'S+' grade system card — the rarest on the platform. Find it on the home page each morning. Tickets auto-expire after 3 days.",
+  },
+  {
+    category: "Features",
+    q: "How does the Watchlist work?",
+    a: "The Watchlist lets you bookmark any team or matchup. Once saved, every time that team appears in picks, odds, or live games, it's instantly surfaced in your Watchlist view. You can add teams directly from any pick card using the bookmark icon, or manage your full list at /watchlist. Saves sync across devices.",
+  },
+  {
+    category: "Features",
+    q: "What are Research Notes?",
+    a: "Research Notes is your private betting journal — a space to write down your pre-game reasoning, sharp signals you spotted, or context you want to remember. Notes are 100% private (only you can see them). After a game settles, come back to review your reasoning and mark each note as a win or a miss. Over time this builds your personal edge log.",
+  },
+  {
+    category: "Features",
+    q: "How do live updates and data freshness work?",
+    a: "The platform maintains a persistent live connection (Server-Sent Events) that pushes odds, scores, line movement, and system picks to your browser every 30 seconds without a page reload. Each pick card shows a freshness badge with the last update time. If data is older than 10 minutes, the badge turns orange — a manual refresh or page focus refreshes the stream.",
+  },
+  {
+    category: "Features",
+    q: "How do I send feedback or report a bug?",
+    a: "Click the floating feedback button in the bottom-right corner of any page. The 3-step widget lets you choose a category (Bug, Feature Request, Pick Quality, General, or Compliment), rate your experience, and write a message. You can view your submission history and any replies from the team at /feedback. All feedback is read by the team.",
   },
 ];
 
@@ -930,6 +1059,10 @@ export default function HelpCenter() {
             { label: "Community", path: "/community", icon: <Users className="w-3.5 h-3.5" /> },
             { label: "Bankroll", path: "/bankroll", icon: <DollarSign className="w-3.5 h-3.5" /> },
             { label: "Builder", path: "/builder", icon: <Layers className="w-3.5 h-3.5" /> },
+            { label: "Watchlist", path: "/watchlist", icon: <Bookmark className="w-3.5 h-3.5" /> },
+            { label: "Research Notes", path: "/research", icon: <StickyNote className="w-3.5 h-3.5" /> },
+            { label: "My Feedback", path: "/feedback", icon: <MessageSquare className="w-3.5 h-3.5" /> },
+            { label: "Roadmap", path: "/roadmap", icon: <Flame className="w-3.5 h-3.5" /> },
           ].map(item => (
             <Link key={item.path} href={item.path}>
               <div
@@ -1018,13 +1151,23 @@ export default function HelpCenter() {
       <Separator />
 
       <div className="rounded-xl border bg-muted/30 p-4 text-center space-y-2">
-        <Mail className="w-4 h-4 text-muted-foreground mx-auto" />
+        <MessageSquare className="w-4 h-4 text-muted-foreground mx-auto" />
         <p className="text-xs font-semibold">Still need help?</p>
-        <p className="text-xs text-muted-foreground">Can't find what you're looking for? Contact our team.</p>
-        <Button variant="outline" size="sm" className="gap-2" data-testid="button-contact-support">
-          <Mail className="w-3.5 h-3.5" />
-          support@sorsmaxima.com
-        </Button>
+        <p className="text-xs text-muted-foreground">
+          Use the feedback widget (bottom-right corner of any page) to send a message directly to the team — or email us.
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
+          <Link href="/feedback">
+            <Button variant="default" size="sm" className="gap-2" data-testid="button-view-feedback">
+              <MessageSquare className="w-3.5 h-3.5" />
+              My Feedback
+            </Button>
+          </Link>
+          <Button variant="outline" size="sm" className="gap-2" data-testid="button-contact-support">
+            <Mail className="w-3.5 h-3.5" />
+            support@sorsmaxima.com
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
