@@ -17,6 +17,7 @@
 import fs from "fs";
 import path from "path";
 import { db } from "./db";
+import { sql } from "drizzle-orm";
 import { logInfo, logWarn, logError } from "./errorLogger";
 
 const PATTERN_FILE = path.join(process.cwd(), "community-patterns.json");
@@ -218,7 +219,7 @@ async function collectSettledPicksFromDB(): Promise<PickRecord[]> {
   const records: PickRecord[] = [];
   try {
     const rows = await db.execute(
-      `SELECT sport, bet_type, odds_at_pick, won FROM user_picks WHERE settled = true AND won IS NOT NULL LIMIT 2000`
+      sql`SELECT sport, bet_type, odds_at_pick, won FROM user_picks WHERE settled = true AND won IS NOT NULL LIMIT 2000`
     );
     for (const row of (rows as any).rows || []) {
       if (row.sport && row.bet_type) {

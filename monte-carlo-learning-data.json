@@ -1,78 +1,6 @@
 {
   "predictions": [
     {
-      "gameId": "401803326",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773190628227,
-      "odds": 2.2
-    },
-    {
-      "gameId": "401803323",
-      "sport": "NHL",
-      "market": "team_total",
-      "predictedProb": 0.6,
-      "actualOutcome": 0,
-      "timestamp": 1773190628230,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803325",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773190628233,
-      "odds": 1.6756756756756757
-    },
-    {
-      "gameId": "401803325",
-      "sport": "NHL",
-      "market": "team_total",
-      "predictedProb": 0.66,
-      "actualOutcome": 1,
-      "timestamp": 1773190628238,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803325",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773190628245,
-      "odds": 2.7
-    },
-    {
-      "gameId": "401803325",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773190628248,
-      "odds": 1.847457627118644
-    },
-    {
-      "gameId": "401825556",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.7,
-      "actualOutcome": 1,
-      "timestamp": 1773190628249,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401825556",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773190628252,
-      "odds": 1.1623376623376624
-    },
-    {
       "gameId": "401825561",
       "sport": "NCAAB",
       "market": "moneyline",
@@ -4499,6 +4427,78 @@
       "actualOutcome": 0,
       "timestamp": 1773198376233,
       "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803379",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1773252851932,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803380",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773252851936,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803381",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1773252851949,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803382",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1773252851951,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803385",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773252851962,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803388",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773252851973,
+      "odds": 1.704225352112676
+    },
+    {
+      "gameId": "401803389",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1773252851978,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803389",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1773252851989,
+      "odds": 1.9090909090909092
     }
   ],
   "bayesianParams": {
@@ -4527,20 +4527,20 @@
       "beta": 104.24836076484794
     },
     "NHL": {
-      "alpha": 111.63083428734146,
-      "beta": 88.36916571265857
+      "alpha": 111.19052774118235,
+      "beta": 88.80947225881766
     },
     "NHL-moneyline": {
       "alpha": 112.36809448592612,
       "beta": 87.6319055140739
     },
     "NHL-spread": {
-      "alpha": 108.50484120530088,
-      "beta": 91.49515879469915
+      "alpha": 107.96501612467748,
+      "beta": 92.03498387532252
     },
     "NHL-total": {
-      "alpha": 103.57353500914662,
-      "beta": 96.42646499085339
+      "alpha": 103.96065489819676,
+      "beta": 96.03934510180324
     },
     "NCAAB-moneyline": {
       "alpha": 109.33142415604841,
@@ -4573,7 +4573,7 @@
     "NHL": {
       "homeAdvantage": 0.000004650930992125897,
       "scoreMean": 3,
-      "scoreStdDev": 1748.887997514358,
+      "scoreStdDev": 1487.8892389223215,
       "totalMean": 6
     },
     "NCAAB": {
@@ -4690,6 +4690,6 @@
       "predictions": 500
     }
   ],
-  "totalSimulations": 780000,
+  "totalSimulations": 980000,
   "engineVersion": 1
 }
