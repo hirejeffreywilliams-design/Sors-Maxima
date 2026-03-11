@@ -12,8 +12,8 @@
     },
     "NCAAB": {
       "wins": 129,
-      "total": 228,
-      "winRate": 56.6
+      "total": 229,
+      "winRate": 56.3
     }
   },
   "marketAccuracy": {
@@ -24,8 +24,8 @@
     },
     "spread": {
       "wins": 124,
-      "total": 226,
-      "winRate": 54.9
+      "total": 227,
+      "winRate": 54.6
     },
     "total": {
       "wins": 118,
@@ -100,16 +100,16 @@
       "boost": 6
     },
     {
-      "key": "NCAAB:spread:neutral:70s:high",
-      "winRate": 68.8,
-      "total": 16,
-      "boost": 4
-    },
-    {
       "key": "NHL:total:neutral:60s:low",
       "winRate": 66.7,
       "total": 9,
       "boost": 2
+    },
+    {
+      "key": "NCAAB:spread:neutral:70s:high",
+      "winRate": 64.7,
+      "total": 17,
+      "boost": 3
     }
   ],
   "topLosePatterns": [
@@ -162,8 +162,8 @@
       "penalty": 4
     }
   ],
-  "totalSettled": 737,
-  "lastMined": "2026-03-11T21:32:14.663Z",
+  "totalSettled": 738,
+  "lastMined": "2026-03-11T21:40:14.853Z",
   "cycleCount": 1,
   "patternCount": 176
 }
