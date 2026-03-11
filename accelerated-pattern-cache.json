@@ -11,25 +11,25 @@
       "winRate": 54.7
     },
     "NCAAB": {
-      "wins": 123,
-      "total": 217,
-      "winRate": 56.7
+      "wins": 127,
+      "total": 223,
+      "winRate": 57
     }
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 120,
-      "total": 221,
-      "winRate": 54.3
+      "wins": 121,
+      "total": 222,
+      "winRate": 54.5
     },
     "spread": {
-      "wins": 122,
-      "total": 222,
-      "winRate": 55
+      "wins": 124,
+      "total": 225,
+      "winRate": 55.1
     },
     "total": {
-      "wins": 115,
-      "total": 214,
+      "wins": 116,
+      "total": 216,
       "winRate": 53.7
     },
     "team_total": {
@@ -162,8 +162,8 @@
       "penalty": 4
     }
   ],
-  "totalSettled": 726,
-  "lastMined": "2026-03-11T19:59:32.646Z",
-  "cycleCount": 1,
-  "patternCount": 173
+  "totalSettled": 732,
+  "lastMined": "2026-03-11T20:14:32.667Z",
+  "cycleCount": 2,
+  "patternCount": 174
 }
