@@ -16666,15 +16666,35 @@
       "homeScore": 93,
       "awayScore": 97,
       "settledAt": "2026-03-11T21:32:16.845Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851562-total-0e842a00ad",
+      "gameId": "401851562",
+      "sport": "NCAAB",
+      "game": "Auburn Tigers @ Tennessee Volunteers",
+      "homeTeam": "Tennessee Volunteers",
+      "awayTeam": "Auburn Tigers",
+      "pick": "Over 150",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 61,
+      "ev": 22.18,
+      "gameTime": "2026-03-12T19:00Z",
+      "savedAt": "2026-03-11T21:40:48.999Z",
+      "result": "won",
+      "homeScore": 96,
+      "awayScore": 84,
+      "settledAt": "2026-03-11T21:41:58.178Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 751,
-      "won": 401,
+      "total": 752,
+      "won": 402,
       "lost": 337,
       "push": 13,
-      "rate": 53.4,
+      "rate": 53.5,
       "pending": 82
     },
     "bySport": {
@@ -16689,9 +16709,9 @@
         "rate": 52.4
       },
       "NCAAB": {
-        "total": 230,
-        "won": 129,
-        "rate": 56.1
+        "total": 231,
+        "won": 130,
+        "rate": 56.3
       }
     },
     "byGrade": {
@@ -16701,9 +16721,9 @@
         "rate": 58
       },
       "B": {
-        "total": 56,
-        "won": 40,
-        "rate": 71.4
+        "total": 57,
+        "won": 41,
+        "rate": 71.9
       },
       "B-": {
         "total": 168,
@@ -16765,10 +16785,10 @@
         "roi": 5.3
       },
       "Total": {
-        "total": 226,
-        "won": 118,
-        "rate": 52.2,
-        "roi": 2.6
+        "total": 227,
+        "won": 119,
+        "rate": 52.4,
+        "roi": 3
       },
       "Team Total": {
         "total": 71,
@@ -16783,11 +16803,11 @@
       "push": 0,
       "rate": 60
     },
-    "lastUpdated": "2026-03-11T21:39:12.853Z",
-    "roi": 6.5,
-    "brierScore": 0.2614,
+    "lastUpdated": "2026-03-11T21:53:19.603Z",
+    "roi": 6.6,
+    "brierScore": 0.2613,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.061,
+    "sharpeRatio": 0.062,
     "homeAwayBias": {
       "homeWinRate": 57.2,
       "awayWinRate": 42,
@@ -16810,8 +16830,8 @@
       {
         "range": "60-65",
         "predicted": 61.9,
-        "actual": 55.2,
-        "total": 250
+        "actual": 55.4,
+        "total": 251
       },
       {
         "range": "65-70",

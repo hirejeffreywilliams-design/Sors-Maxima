@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { SlidersHorizontal, Zap, Trophy, AlertTriangle, TrendingUp, Calendar, Radio, Star, ChevronDown } from "lucide-react";
+import { useParlaySlip } from "@/hooks/use-parlay-slip";
 
 interface TickerItem {
   id: string;
@@ -329,6 +330,34 @@ function AdvancedFilterPanel({
   );
 }
 
+// ── Convert slip legs → ticker items ────────────────────────────────────────
+function slipLegToTickerItem(leg: { id: string; team: string; opponent?: string; market: string; outcome: string; americanOdds?: number; decimalOdds: number; playerName?: string; propLine?: number; propCategory?: string; sport?: string }): TickerItem {
+  const oddsStr = leg.americanOdds != null
+    ? (leg.americanOdds > 0 ? `+${leg.americanOdds}` : `${leg.americanOdds}`)
+    : `${leg.decimalOdds.toFixed(2)}x`;
+
+  let text: string;
+  if (leg.playerName) {
+    const dir = leg.outcome?.toLowerCase().includes("over") ? "Over" : leg.outcome?.toLowerCase().includes("under") ? "Under" : leg.outcome;
+    const line = leg.propLine != null ? ` ${leg.propLine}` : "";
+    const cat = leg.propCategory ? ` ${leg.propCategory.toUpperCase()}` : "";
+    text = `${leg.playerName}  ·  ${dir}${line}${cat}  ·  ${oddsStr}`;
+  } else {
+    const vs = leg.opponent ? `  vs ${leg.opponent}` : "";
+    text = `${leg.team}  ·  ${leg.market}${vs}  ·  ${oddsStr}`;
+  }
+
+  return {
+    id: `slip_${leg.id}`,
+    type: "my_pick",
+    badge: "MY SLIP",
+    badgeColor: "yellow",
+    text,
+    sport: leg.sport?.toUpperCase() ?? "ALL",
+    priority: 10,
+  };
+}
+
 // ── Main Ticker ────────────────────────────────────────────────────────────
 export function SportsTicker() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -398,6 +427,12 @@ export function SportsTicker() {
     retry: 1,
   });
 
+  const { legs: slipLegs } = useParlaySlip();
+  const slipTickerItems = useMemo<TickerItem[]>(
+    () => slipLegs.map(slipLegToTickerItem),
+    [slipLegs]
+  );
+
   const cycleSpeed = () => {
     setSpeed(prev => {
       const next = SPEED_NEXT[prev];
@@ -428,15 +463,21 @@ export function SportsTicker() {
 
   const filteredMyPicks = myPickItems.filter(item => typeMatches(item.type));
 
-  const mergedItems = filteredMyPicks.length > 0
-    ? [...filteredMyPicks, ...filteredItems]
-    : filteredItems;
+  // Active slip legs → always shown first when my_pick type is enabled
+  const filteredSlipItems = typeMatches("my_pick") ? slipTickerItems : [];
+
+  const mergedItems = [
+    ...filteredSlipItems,
+    ...filteredMyPicks,
+    ...filteredItems,
+  ];
 
   const displayItems = mergedItems.length > 0 ? mergedItems : FALLBACK_ITEMS;
 
   const liveCount    = rawItems.filter(i => i.type === "live").length;
   const sharpCount   = rawItems.filter(i => i.type === "sharp").length;
   const myPickCount  = myPickItems.filter(i => i.type === "my_pick" || i.type === "my_parlay").length;
+  const slipCount    = slipLegs.length;
 
   const baseDuration   = Math.min(160, Math.max(50, displayItems.length * 3));
   const scrollDuration = baseDuration / SPEED_DIVISORS[speed];
@@ -477,8 +518,16 @@ export function SportsTicker() {
             </div>
           )}
 
-          {/* My picks count */}
-          {myPickCount > 0 && (
+          {/* Active slip count (always show when legs are in slip) */}
+          {slipCount > 0 && (
+            <div className="flex items-center gap-1 px-2.5 h-full border-r border-white/5">
+              <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400 animate-pulse" />
+              <span className="text-[8px] font-bold text-yellow-400">{slipCount} SLIP</span>
+            </div>
+          )}
+
+          {/* My picks count from saved history */}
+          {myPickCount > 0 && slipCount === 0 && (
             <div className="hidden sm:flex items-center gap-1 px-2.5 h-full border-r border-white/5">
               <Star className="w-2.5 h-2.5 fill-yellow-400 text-yellow-400" />
               <span className="text-[8px] font-bold text-yellow-400">{myPickCount} MINE</span>

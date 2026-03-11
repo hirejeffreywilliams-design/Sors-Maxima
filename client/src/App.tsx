@@ -1057,19 +1057,19 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </header>
 
-      <div className="sticky top-14 z-40 w-full">
-        <OfflineBanner />
-        <SportsTicker />
-      </div>
-
-      <ContextualNavBar />
-
-      <div className="max-w-screen-2xl mx-auto px-4 lg:px-6 pt-2">
-        <GeoComplianceBanner />
-        <EmailVerificationBanner authState={authState} />
-      </div>
-      
       <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authState.tier ?? "")}>
+        <div className="sticky top-14 z-40 w-full">
+          <OfflineBanner />
+          <SportsTicker />
+        </div>
+
+        <ContextualNavBar />
+
+        <div className="max-w-screen-2xl mx-auto px-4 lg:px-6 pt-2">
+          <GeoComplianceBanner />
+          <EmailVerificationBanner authState={authState} />
+        </div>
+
         <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
           <Router authState={authState} />
         </main>
