@@ -15,8 +15,8 @@
     },
     "apifootball": {
       "currentUsage": 612,
-      "manualRemaining": 74719,
-      "lastReported": "2026-03-11T02:47:41.458Z",
+      "manualRemaining": 74703,
+      "lastReported": "2026-03-11T02:53:44.319Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [
         {
@@ -55,7 +55,7 @@
       "lastSeasonCheck": "2026-03-11T02:51:15.932Z"
     },
     "balldontlie": {
-      "currentUsage": 4290,
+      "currentUsage": 4291,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -2567,6 +2567,10 @@
         {
           "ts": 1773197489431,
           "count": 1
+        },
+        {
+          "ts": 1773197517553,
+          "count": 1
         }
       ],
       "suspended": false,
@@ -2601,6 +2605,6 @@
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-11T02:51:29.431Z",
+  "lastSaved": "2026-03-11T02:53:44.319Z",
   "alerts": []
 }
