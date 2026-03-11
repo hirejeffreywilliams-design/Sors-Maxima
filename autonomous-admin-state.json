@@ -1,6 +1,46 @@
 {
   "alerts": [
     {
+      "id": "alert_1773186401098_e4g0g",
+      "timestamp": "2026-03-10T23:46:41.098Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "35,005 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773181565097_juhny",
+      "timestamp": "2026-03-10T22:26:05.097Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "35,266 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773179765097_fi37y",
+      "timestamp": "2026-03-10T21:56:05.097Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "35,906 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773178145098_1349v",
+      "timestamp": "2026-03-10T21:29:05.098Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "35,906 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773175777323_e2i7e",
       "timestamp": "2026-03-10T20:49:37.323Z",
       "resolved": false,
@@ -514,6 +554,76 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1773178685096_wontr",
+      "timestamp": "2026-03-10T21:38:05.096Z",
+      "durationMs": 9084,
+      "summary": [
+        "The win rate is currently at 53.3%, above the break-even threshold of 52.4%.",
+        "Odds API usage is critically low, with only 35,906 requests remaining; immediate action needed to adjust polling frequency.",
+        "Overall pick accuracy is 52.3%, which is just below the critical model threshold.",
+        "Active user count is stable at 1,247 with a churn rate of 4.2%."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Adjust Odds API Polling Frequency",
+          "description": "Reduce the polling frequency for the Odds API to avoid hitting the critical request limit.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Monitor Overall Pick Accuracy",
+          "description": "Track the pick accuracy closely to ensure it doesn't drop below 48%.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 1
+        },
+        {
+          "title": "Analyze Churn Rate",
+          "description": "Conduct a churn analysis to understand the reasons behind the current rate and strategize improvement.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Odds API Budget Warning",
+          "description": "Odds API requests are critically low, raising the risk of service disruption.",
+          "severity": "critical"
+        },
+        {
+          "title": "Model Degradation Risk",
+          "description": "Pick accuracy is slightly below critical levels; continuous monitoring is required.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Adjust the Odds API polling settings.",
+          "Verify the current request limits on all APIs."
+        ],
+        "this_week": [
+          "Review the feedback from users for insights into churn.",
+          "Analyze trends in pick accuracy by market.",
+          "Ensure all APIs are operating within budget limits."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 53.3,
+        "settledPicks": 666,
+        "oddsApiRemaining": 35906,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 100,
+        "cacheHitRate": 17,
+        "heapUsedMb": 70,
+        "heapTotalMb": 74,
+        "hubLastCycleMs": 56,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"The win rate is currently at 53.3%, above the break-even threshold of 52.4%.\",\n    \"Odds API usage is critically low, with only 35,906 requests remaining; immediate action needed to adjust polling frequency.\",\n    \"Overall pick accuracy is 52.3%, which is just below the critical model threshold.\",\n    \"Active user count is stable at 1,247 with a churn rate of 4.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Odds API Polling Frequency\",\n      \"description\": \"Reduce the polling frequency for the Odds API to avoid hitting the critical request limit.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Monitor Overall Pick Accuracy\",\n      \"description\": \"Track the pick accuracy closely to ensure it doesn't drop below 48%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Analyze Churn Rate\",\n      \"description\": \"Conduct a churn analysis to understand the reasons behind the current rate and strategize improvement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Odds API Budget Warning\",\n      \"description\": \"Odds API requests are critically low, raising the risk of service disruption.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Model Degradation Risk\",\n      \"description\": \"Pick accuracy is slightly below critical levels; continuous monitoring is required.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust the Odds API polling settings.\",\n      \"Verify the current request limits on all APIs.\"\n    ],\n    \"this_week\": [\n      \"Review the feedback from users for insights into churn.\",\n      \"Analyze trends in pick accuracy by market.\",\n      \"Ensure all APIs are operating within budget limits.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1773176317320_9k0wc",
       "timestamp": "2026-03-10T20:58:37.321Z",
@@ -1729,70 +1839,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Current win rate is 54.1%, above the break-even threshold of 52.4%.\",\n    \"Total settled picks stand at 397, indicating active engagement.\",\n    \"API usage is on track with healthy budgets across services, but there is an anomaly with apifootball having a negative usage value.\",\n    \"Pick accuracy is showing a decline in 'Total' market with a win rate of 46.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate apifootball API Usage\",\n      \"description\": \"Analyze the unexpected negative usage of apifootball and resolve the discrepancy.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Review Total Market Performance\",\n      \"description\": \"Conduct a thorough review of selections in the Total market due to the win rate dropping below 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Initiate investigation into apifootball API budget discrepancy.\",\n      \"Contact service provider to clarify usage metrics for apifootball.\",\n      \"Prepare a report summarizing current win rates across different markets.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments in predictions for the Total market based on review findings.\",\n      \"Monitor win rates and API usage trends regularly throughout the week.\",\n      \"Evaluate long-term strategies to maintain or improve win rates across all markets.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1772741337631_qyb6g",
-      "timestamp": "2026-03-05T20:08:57.631Z",
-      "durationMs": 6922,
-      "summary": [
-        "Win rate is at 52.9%, exceeding the break-even threshold of 52.4%.",
-        "Total pick accuracy is satisfactory, but the 'Total' market has a low win rate of 46.6%.",
-        "API usage is well within healthy limits, with significant remaining budget.",
-        "The model is not experiencing degradation, as win rate is above the critical threshold."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Investigate Total Market Picks",
-          "description": "Analyze the factors contributing to the low win rate of 46.6% in the Total market to improve performance.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 4
-        },
-        {
-          "title": "Enhance User Engagement",
-          "description": "Increase user engagement strategies to reduce churn rate from 4.2%, aiming for enhanced retention.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 3
-        },
-        {
-          "title": "Monitor API Call Efficiency",
-          "description": "Continue to monitor API calls and ensure optimal performance, evaluating the current recommendation of 1-minute intervals.",
-          "priority": "P3",
-          "due_by": "this_month",
-          "effort_hours": 2
-        }
-      ],
-      "risk_alerts": [],
-      "ops_checklist": {
-        "today": [
-          "Prepare report on Total market performance for review.",
-          "Assess current user retention strategies and brainstorm improvements.",
-          "Check resource allocations for efficient API usage."
-        ],
-        "this_week": [
-          "Complete investigation into low win rate in Total market.",
-          "Draft a new engagement plan targeting user retention.",
-          "Review API performance metrics and adjust usage accordingly."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 52.9,
-        "settledPicks": 347,
-        "oddsApiRemaining": 82335,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 80,
-        "cacheHitRate": 6,
-        "heapUsedMb": 63,
-        "heapTotalMb": 70,
-        "hubLastCycleMs": 11,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Win rate is at 52.9%, exceeding the break-even threshold of 52.4%.\",\n    \"Total pick accuracy is satisfactory, but the 'Total' market has a low win rate of 46.6%.\",\n    \"API usage is well within healthy limits, with significant remaining budget.\",\n    \"The model is not experiencing degradation, as win rate is above the critical threshold.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Total Market Picks\",\n      \"description\": \"Analyze the factors contributing to the low win rate of 46.6% in the Total market to improve performance.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Enhance User Engagement\",\n      \"description\": \"Increase user engagement strategies to reduce churn rate from 4.2%, aiming for enhanced retention.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Monitor API Call Efficiency\",\n      \"description\": \"Continue to monitor API calls and ensure optimal performance, evaluating the current recommendation of 1-minute intervals.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Prepare report on Total market performance for review.\",\n      \"Assess current user retention strategies and brainstorm improvements.\",\n      \"Check resource allocations for efficient API usage.\"\n    ],\n    \"this_week\": [\n      \"Complete investigation into low win rate in Total market.\",\n      \"Draft a new engagement plan targeting user retention.\",\n      \"Review API performance metrics and adjust usage accordingly.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-10T20:49:37.323Z",
-  "lastDeepCheck": "2026-03-10T20:58:37.321Z",
-  "totalQuickChecks": 120,
-  "totalDeepChecks": 26
+  "lastQuickCheck": "2026-03-10T23:46:41.098Z",
+  "lastDeepCheck": "2026-03-10T21:38:05.096Z",
+  "totalQuickChecks": 124,
+  "totalDeepChecks": 27
 }

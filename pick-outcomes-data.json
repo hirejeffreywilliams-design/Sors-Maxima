@@ -14966,15 +14966,55 @@
       "homeScore": 0,
       "awayScore": 2,
       "settledAt": "2026-03-10T19:03:14.612Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851174-total-96c2f0d503",
+      "gameId": "401851174",
+      "sport": "NCAAB",
+      "game": "SMU Mustangs @ Louisville Cardinals",
+      "homeTeam": "Louisville Cardinals",
+      "awayTeam": "SMU Mustangs",
+      "pick": "Under 164.5",
+      "betType": "total",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 78,
+      "ev": 15.91,
+      "gameTime": "2026-03-11T18:30Z",
+      "savedAt": "2026-03-10T23:36:09.615Z",
+      "result": "lost",
+      "homeScore": 89,
+      "awayScore": 92,
+      "settledAt": "2026-03-10T23:37:12.519Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851174-spread-48ea3c4663",
+      "gameId": "401851174",
+      "sport": "NCAAB",
+      "game": "SMU Mustangs @ Louisville Cardinals",
+      "homeTeam": "Louisville Cardinals",
+      "awayTeam": "SMU Mustangs",
+      "pick": "Louisville Cardinals -7.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 67,
+      "ev": 20.27,
+      "gameTime": "2026-03-11T18:30Z",
+      "savedAt": "2026-03-10T23:36:09.615Z",
+      "result": "lost",
+      "homeScore": 89,
+      "awayScore": 92,
+      "settledAt": "2026-03-10T23:37:12.519Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 666,
+      "total": 668,
       "won": 348,
-      "lost": 305,
+      "lost": 307,
       "push": 13,
-      "rate": 52.3,
+      "rate": 52.1,
       "pending": 82
     },
     "bySport": {
@@ -14989,9 +15029,9 @@
         "rate": 50.4
       },
       "NCAAB": {
-        "total": 213,
+        "total": 215,
         "won": 121,
-        "rate": 56.8
+        "rate": 56.3
       }
     },
     "byGrade": {
@@ -15006,9 +15046,9 @@
         "rate": 71.4
       },
       "B-": {
-        "total": 149,
+        "total": 151,
         "won": 77,
-        "rate": 51.7
+        "rate": 51
       },
       "C+": {
         "total": 140,
@@ -15054,16 +15094,16 @@
         "roi": 12.6
       },
       "Spread": {
-        "total": 202,
+        "total": 203,
         "won": 104,
-        "rate": 51.5,
-        "roi": 1.4
+        "rate": 51.2,
+        "roi": 0.9
       },
       "Total": {
-        "total": 196,
+        "total": 197,
         "won": 99,
-        "rate": 50.5,
-        "roi": -0.2
+        "rate": 50.3,
+        "roi": -0.7
       },
       "Team Total": {
         "total": 71,
@@ -15073,20 +15113,20 @@
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 20,
+      "won": 27,
+      "lost": 22,
       "push": 1,
-      "rate": 58
+      "rate": 54
     },
-    "lastUpdated": "2026-03-10T21:18:33.102Z",
-    "roi": 4.7,
-    "brierScore": 0.2629,
+    "lastUpdated": "2026-03-10T23:59:19.836Z",
+    "roi": 4.4,
+    "brierScore": 0.2637,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.044,
+    "sharpeRatio": 0.041,
     "homeAwayBias": {
-      "homeWinRate": 55.2,
+      "homeWinRate": 55,
       "awayWinRate": 44.9,
-      "homeTotal": 326,
+      "homeTotal": 327,
       "awayTotal": 69
     },
     "calibrationBuckets": [
@@ -15111,8 +15151,8 @@
       {
         "range": "65-70",
         "predicted": 66.2,
-        "actual": 53.7,
-        "total": 123
+        "actual": 53.2,
+        "total": 124
       },
       {
         "range": "70-75",
@@ -15122,9 +15162,9 @@
       },
       {
         "range": "75-80",
-        "predicted": 77.1,
-        "actual": 61.1,
-        "total": 36
+        "predicted": 77.2,
+        "actual": 59.5,
+        "total": 37
       },
       {
         "range": "80+",

@@ -7,6 +7,8 @@ import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 import { getMomentumGames, type MomentumGame } from "./liveAnalyticsEngine";
 import { logError, logWarn } from "./errorLogger";
 import { getInSeasonSports } from "./sportSeasons";
+import { getCachedMMAFights } from "./mma-engine";
+import { getInternationalLifeChangerPicks } from "./internationalSportsEngine";
 const HUB_REFRESH_INTERVAL = 120_000;
 
 export interface UnifiedGame {
@@ -531,14 +533,15 @@ function generateEdgeAlerts(snapshots: SportSnapshot[]): EdgeAlert[] {
 
 function gatherTopPicks(): TopPick[] {
   const allPicks: TopPick[] = [];
+  const now = Date.now();
 
+  // In-season sport picks (NBA, NHL, NCAAB, etc.)
   for (const sport of getInSeasonSports()) {
     const cached = getPrecomputedCache(sport);
     if (!cached || !cached.picks) continue;
 
     for (const pick of cached.picks) {
       const p = pick as any;
-      // Skip picks with unresolved opponents (tournament TBD bracket games)
       if (p.homeTeam === "TBD" || p.awayTeam === "TBD" || (p.game && (p.game.includes(" TBD") || p.game.startsWith("TBD ")))) continue;
       allPicks.push({
         id: p.id,
@@ -563,13 +566,70 @@ function gatherTopPicks(): TopPick[] {
     }
   }
 
+  // MMA/UFC picks — year-round, sourced from The Odds API (separate cache)
+  try {
+    const mmaFights = getCachedMMAFights().filter(f =>
+      f.gameTime && new Date(f.gameTime).getTime() > now
+    );
+    for (const f of mmaFights) {
+      allPicks.push({
+        id: f.id,
+        sport: "MMA" as any,
+        game: `${f.fighter1} vs ${f.fighter2}`,
+        pick: f.pick,
+        betType: "moneyline",
+        odds: f.pickOdds,
+        confidence: f.confidence,
+        grade: f.grade,
+        edge: f.edge,
+        ev: f.ev,
+        factors: [],
+        gameTime: f.gameTime,
+        homeTeam: f.fighter2,
+        awayTeam: f.fighter1,
+        reasoning: f.reasoning,
+        recommendation: "lean_bet",
+        winProbability: f.trueWinProbability,
+        insights: [f.reasoning],
+      });
+    }
+  } catch { /* MMA cache may be empty on first start — handled gracefully */ }
+
+  // International Soccer picks — EPL, La Liga, Champions League, etc.
+  try {
+    const soccerPicks = getInternationalLifeChangerPicks()
+      .filter(p => (p.confidence ?? 0) >= 55 && (p.ev ?? 0) > 0 && !p.isLive);
+    for (const p of soccerPicks) {
+      allPicks.push({
+        id: p.id || `soccer-${Math.random().toString(36).slice(2)}`,
+        sport: (p.sport || "SOCCER") as any,
+        game: p.fixture ? `${p.fixture.homeTeam} vs ${p.fixture.awayTeam}` : (p.game || ""),
+        pick: p.pick || p.outcome || "",
+        betType: p.betType || "moneyline",
+        odds: p.americanOdds || p.odds || -110,
+        confidence: p.confidence || 55,
+        grade: p.grade || "B",
+        edge: p.edge || p.ev || 0,
+        ev: p.ev || 0,
+        factors: [],
+        gameTime: p.gameTime || new Date(now + 3 * 60 * 60 * 1000).toISOString(),
+        homeTeam: p.fixture?.homeTeam || "",
+        awayTeam: p.fixture?.awayTeam || "",
+        reasoning: p.selectionReason || p.reasoning || "International edge pick",
+        recommendation: "lean_bet",
+        winProbability: (p.confidence || 55) * 0.95,
+        insights: [p.selectionReason || p.reasoning || ""],
+      });
+    }
+  } catch { /* International cache may be empty — handled gracefully */ }
+
   allPicks.sort((a, b) => {
     const scoreA = (a.confidence / 100) * Math.max(0, a.ev + 5);
     const scoreB = (b.confidence / 100) * Math.max(0, b.ev + 5);
     return scoreB - scoreA;
   });
 
-  return allPicks.slice(0, 20);
+  return allPicks.slice(0, 40);
 }
 
 function buildReasoning(pick: any): string {
@@ -707,40 +767,8 @@ export async function generateIntelligenceFeed(): Promise<IntelligenceFeed> {
 
   let topPicks = gatherTopPicks();
 
-  // Merge top international soccer/MMA picks into the feed so they appear in
-  // the app alongside domestic picks. International engine runs every 6h and
-  // caches its results; we read from the cache so this is near-zero overhead.
-  try {
-    const { getInternationalLifeChangerPicks } = await import("./internationalSportsEngine");
-    const intlPicks = getInternationalLifeChangerPicks();
-    const qualifiedIntl = intlPicks
-      .filter(p => (p.confidence ?? 0) >= 55 && (p.ev ?? 0) > 0)
-      .slice(0, 5)
-      .map((p: any) => ({
-        id: p.id || `intl-${p.fixture?.fixtureId || Math.random().toString(36).slice(2)}`,
-        sport: p.sport || "SOCCER",
-        game: p.fixture ? `${p.fixture.homeTeam} vs ${p.fixture.awayTeam}` : (p.game || ""),
-        pick: p.pick || p.outcome || "",
-        betType: p.betType || "moneyline",
-        odds: p.americanOdds || p.odds || -110,
-        confidence: p.confidence || 55,
-        grade: p.grade || "B",
-        edge: p.edge || p.ev || 0,
-        ev: p.ev || 0,
-        gameTime: p.gameTime || new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString(),
-        reasoning: p.selectionReason || p.reasoning || "International edge pick",
-        factors: [],
-        sharpMoneyPct: p.sharpMoneyPct,
-        publicMoneyPct: p.publicMoneyPct,
-        reverseLineMove: false,
-        steamMove: false,
-        oddsSource: p.oddsSource || "International",
-        bestOddsBook: p.bestOddsBook,
-      }));
-    if (qualifiedIntl.length > 0) {
-      topPicks = [...topPicks, ...qualifiedIntl];
-    }
-  } catch { /* international feed is best-effort */ }
+  // MMA + Soccer picks are now merged directly inside gatherTopPicks()
+  // using static imports — no additional merging needed here.
 
   const edgeAlerts = generateEdgeAlerts(snapshots);
 

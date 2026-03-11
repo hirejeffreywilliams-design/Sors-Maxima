@@ -2001,6 +2001,22 @@ export function startPrecomputedEngine(): void {
     featureFlags.syncSeasonFlags();
   }).catch(() => {});
 
+  // Warm up MMA cache at startup so getCachedMMAFights() has data immediately.
+  // MMA events happen year-round — no season window needed.
+  const warmUpMMA = async () => {
+    try {
+      const { generateMMAFeed } = await import("./mma-engine");
+      const feed = await generateMMAFeed();
+      console.log(`[PrecomputedEngine] MMA warm-up: ${feed.fights.length} fights cached`);
+    } catch (err: any) {
+      console.warn(`[PrecomputedEngine] MMA warm-up failed: ${err.message}`);
+    }
+  };
+  setTimeout(warmUpMMA, 8_000);
+
+  // Refresh MMA cache every 30 minutes independently of the main cycle
+  setInterval(warmUpMMA, 30 * 60 * 1000);
+
   // Smart startup: if disk cache is fresh, serve from it and defer the first
   // API refresh cycle — this prevents wasting external API calls on every restart
   const cacheEntries = Array.from(predictionCache.values());
