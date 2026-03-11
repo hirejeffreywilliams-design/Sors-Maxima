@@ -1611,7 +1611,7 @@ function PropVarianceCalculator({ sport, addLeg }: {
   sport: string;
   addLeg: (leg: any) => boolean;
 }) {
-  const { data: topData } = useQuery<TopPropsResponse>({
+  const { data: topData, isLoading: topLoading } = useQuery<TopPropsResponse>({
     queryKey: ["/api/top-props", sport],
     queryFn: async () => {
       const res = await fetch(`/api/top-props/${sport}`);
@@ -1621,7 +1621,7 @@ function PropVarianceCalculator({ sport, addLeg }: {
     refetchInterval: 30000,
   });
 
-  const { data: gameData } = useQuery<PropsResponse>({
+  const { data: gameData, isLoading: gameLoading } = useQuery<PropsResponse>({
     queryKey: ["/api/game-player-props", sport],
     queryFn: async () => {
       const res = await fetch(`/api/game-player-props/${sport}`);
@@ -1632,10 +1632,12 @@ function PropVarianceCalculator({ sport, addLeg }: {
   });
 
   const [addedTickets, setAddedTickets] = useState<Set<string>>(new Set());
+  const isLoading = topLoading || gameLoading;
 
   const variants = useMemo<TicketVariant[]>(() => {
     const topPicks = topData?.topPicks;
-    if (!topPicks || topPicks.length < 2) return [];
+    if (!topPicks || topPicks.length < 1) return [];
+    const capped = topPicks.slice(0, 7);
 
     const topKeys = new Set(topPicks.map(p => `${p.playerName}-${p.market}`));
 
@@ -1679,22 +1681,26 @@ function PropVarianceCalculator({ sport, addLeg }: {
       return { id, label, description, legs, ...calcTicket(legs) };
     };
 
-    const byConf = [...topPicks].map((p, i) => ({ p, i })).sort((a, b) => a.p.confidence - b.p.confidence);
+    const byConf = [...capped].map((p, i) => ({ p, i })).sort((a, b) => a.p.confidence - b.p.confidence);
     const result: TicketVariant[] = [];
 
-    const top3 = [...topPicks].sort((a, b) => b.confidence - a.confidence).slice(0, 3);
-    if (top3.length === 3) {
+    const top3 = [...capped].sort((a, b) => b.confidence - a.confidence).slice(0, 3);
+    if (top3.length >= 2) {
       const legs = top3.map(pickToLeg);
-      result.push({ id: "power", label: "Power Pick", description: "3 strongest legs only — highest win probability", legs, ...calcTicket(legs) });
+      result.push({ id: "power", label: "Power Pick", description: `${top3.length} strongest legs only — highest win probability`, legs, ...calcTicket(legs) });
     }
 
-    result.push(makeVariant("full", "Full Card", "All engine picks as recommended", topPicks));
+    if (capped.length >= 2) {
+      result.push(makeVariant("full", "Full Card", `All ${capped.length} engine picks as recommended`, capped));
+    } else if (capped.length === 1) {
+      result.push(makeVariant("full", "Best Pick", "Engine's top recommended prop", capped));
+    }
 
     const weakest = byConf[0];
     if (weakest) {
       const alt = (altsByGame[weakest.p.gameId] || [])[0];
       if (alt) {
-        result.push(makeVariant("swap1", "Smart Swap", `Weakest leg swapped — same game, stronger signal`, topPicks, { [weakest.i]: alt }));
+        result.push(makeVariant("swap1", "Smart Swap", `Weakest leg swapped — same game, stronger signal`, capped, { [weakest.i]: alt }));
       }
     }
 
@@ -1709,14 +1715,35 @@ function PropVarianceCalculator({ sport, addLeg }: {
         }
       }
       if (Object.keys(swaps).length > 0) {
-        result.push(makeVariant("swap2", "Double Swap", "Two weakest legs replaced with better alternatives", topPicks, swaps));
+        result.push(makeVariant("swap2", "Double Swap", "Two weakest legs replaced with better alternatives", capped, swaps));
       }
     }
 
     return result;
   }, [topData, gameData]);
 
-  if (!topData || variants.length === 0) return null;
+  if (isLoading) {
+    return (
+      <Card data-testid="section-variance-calculator">
+        <CardContent className="p-3 sm:p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Skeleton className="w-7 h-7 rounded-lg" />
+            <div className="space-y-1">
+              <Skeleton className="h-4 w-44" />
+              <Skeleton className="h-3 w-64" />
+            </div>
+          </div>
+          <div className="flex gap-3 overflow-hidden">
+            {[0, 1, 2].map(i => (
+              <Skeleton key={i} className="h-64 w-[280px] rounded-xl shrink-0" />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (variants.length === 0) return null;
 
   const handleAddTicket = (variant: TicketVariant) => {
     let added = 0;
