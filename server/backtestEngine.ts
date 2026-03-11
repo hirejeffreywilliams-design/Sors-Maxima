@@ -2,11 +2,8 @@ import crypto from "crypto";
 import { TrackedPick, saveBacktestPicks, getPickAccuracyStats, getBacktestCount } from "./pickOutcomeTracker";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const LOCK_FILE = path.join(__dirname, "..", ".backtest-done");
+const LOCK_FILE = path.join(process.cwd(), ".backtest-done");
 
 interface BacktestResult {
   sport: string;
