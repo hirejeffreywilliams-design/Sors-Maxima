@@ -15,8 +15,8 @@
     },
     "apifootball": {
       "currentUsage": 612,
-      "manualRemaining": 74671,
-      "lastReported": "2026-03-11T03:30:51.700Z",
+      "manualRemaining": 74655,
+      "lastReported": "2026-03-11T03:38:07.982Z",
       "monthReset": "2026-03-01T00:00:00.000Z",
       "callLog": [
         {
@@ -2545,6 +2545,6 @@
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-11T03:36:21.379Z",
+  "lastSaved": "2026-03-11T03:38:07.982Z",
   "alerts": []
 }
