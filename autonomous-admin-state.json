@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773252611924_wqqgv",
+      "timestamp": "2026-03-11T18:10:11.924Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "30,274 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773236858180_0wovz",
       "timestamp": "2026-03-11T13:47:38.180Z",
       "resolved": false,
@@ -1935,8 +1945,8 @@
       "raw": "{\n  \"summary\": [\n    \"Win rate is at 52.9%, above the break-even threshold.\",\n    \"API requests are within healthy limits (24,392 out of 100,000).\",\n    \"Total picks settled are at 449; no model degradation detected.\",\n    \"Active user count is strong at 1,247 with a churn rate of 4.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor API Budget Usage\",\n      \"description\": \"Ensure usage of the Odds API stays on track and assess if throttling strategies are needed as we approach the monthly cap.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Review Total Market Picks\",\n      \"description\": \"Analyze the pick accuracy for the 'Total' market, as it currently shows a win rate of only 46.7% which is below acceptable performance levels.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Evaluate User Engagement Strategies\",\n      \"description\": \"Develop and implement strategies to enhance user engagement to reduce churn further below 4.2%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Check API health metrics and adjust usage if nearing limits.\",\n      \"Conduct a review on the effectiveness of the current betting strategies.\",\n      \"Prepare a report on user engagement metrics for discussion.\"\n    ],\n    \"this_week\": [\n      \"Assess pick accuracy across all markets and identify areas for improvement.\",\n      \"Implement user engagement initiatives based on the evaluation.\",\n      \"Revisit the predictions model for performance tuning if needed.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T13:47:38.181Z",
+  "lastQuickCheck": "2026-03-11T18:10:11.924Z",
   "lastDeepCheck": "2026-03-11T13:29:38.178Z",
-  "totalQuickChecks": 136,
+  "totalQuickChecks": 137,
   "totalDeepChecks": 32
 }
