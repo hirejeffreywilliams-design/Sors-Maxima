@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773211452480_0527m",
+      "timestamp": "2026-03-11T06:44:12.480Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "30,733 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773209637122_c0wym",
       "timestamp": "2026-03-11T06:13:57.122Z",
       "resolved": false,
@@ -1901,8 +1911,8 @@
       "raw": "{\n  \"summary\": [\n    \"Current win rate is 53.9%, above the break-even threshold of 52.4%.\",\n    \"Key metrics show healthy usage of the odds API with 22,556 requests, well below warning thresholds.\",\n    \"Total liability exposure across markets is stable but requires monitoring to prevent potential overexposure as handle is 0.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor exposure and handle\",\n      \"description\": \"Increase monitoring of market liabilities and implement strategies to boost user engagement and betting handle.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Evaluate Total Pick Strategy\",\n      \"description\": \"Analyze the low pick accuracy in Totals (46.7%) and adjust model strategies accordingly.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Enhance User Engagement\",\n      \"description\": \"Develop and implement strategies to reduce churn rate (currently at 4.2%) and improve new user acquisition.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 5\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review market liabilities and set limits as necessary.\",\n      \"Audit the effectiveness of current user engagement strategies.\",\n      \"Update members on performance benchmarks considering current metrics.\"\n    ],\n    \"this_week\": [\n      \"Conduct a detailed analysis of pick accuracy by market.\",\n      \"Revisit marketing strategies to attract new users.\",\n      \"Prepare a report on API usage metrics for operational efficiency.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T06:13:57.122Z",
+  "lastQuickCheck": "2026-03-11T06:44:12.480Z",
   "lastDeepCheck": "2026-03-11T06:22:57.121Z",
-  "totalQuickChecks": 131,
+  "totalQuickChecks": 132,
   "totalDeepChecks": 30
 }
