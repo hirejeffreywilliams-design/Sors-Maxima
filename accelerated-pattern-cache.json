@@ -7,8 +7,8 @@
     },
     "NHL": {
       "wins": 134,
-      "total": 244,
-      "winRate": 54.9
+      "total": 245,
+      "winRate": 54.7
     },
     "NCAAB": {
       "wins": 123,
@@ -29,8 +29,8 @@
     },
     "total": {
       "wins": 110,
-      "total": 204,
-      "winRate": 53.9
+      "total": 205,
+      "winRate": 53.7
     },
     "team_total": {
       "wins": 38,
@@ -162,8 +162,8 @@
       "penalty": 4
     }
   ],
-  "totalSettled": 712,
-  "lastMined": "2026-03-11T00:46:47.551Z",
+  "totalSettled": 713,
+  "lastMined": "2026-03-11T00:48:36.365Z",
   "cycleCount": 1,
   "patternCount": 173
 }
