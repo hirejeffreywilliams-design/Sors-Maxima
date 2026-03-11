@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
+  --border: 0 0% 89%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 9%;
+  --card-border: 0 0% 91%;
+  --primary: 145 68% 28%;
+  --primary-foreground: 145 68% 98%;
+  --secondary: 0 0% 90%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 4% 88%;
+  --muted-foreground: 0 4% 35%;
+  --accent: 142 12% 88%;
+  --accent-foreground: 142 12% 12%;
+  --destructive: 0 84% 32%;
+  --destructive-foreground: 0 84% 98%;
+  --input: 0 0% 70%;
+  --ring: 145 68% 28%;
+  --radius: 0.5rem;
+  --font-sans: Inter, sans-serif;
+}
+
+* { font-family: Inter, sans-serif; }

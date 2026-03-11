@@ -16426,15 +16426,135 @@
       "homeScore": 2,
       "awayScore": 4,
       "settledAt": "2026-03-11T18:00:41.105Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851296-spread-2830beea84",
+      "gameId": "401851296",
+      "sport": "NCAAB",
+      "game": "Iowa State Cyclones @ Texas Tech Red Raiders",
+      "homeTeam": "Texas Tech Red Raiders",
+      "awayTeam": "Iowa State Cyclones",
+      "pick": "Texas Tech Red Raiders +5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 85,
+      "ev": 14.55,
+      "gameTime": "2026-03-12T16:30Z",
+      "savedAt": "2026-03-11T19:58:29.941Z",
+      "result": "won",
+      "homeScore": 91,
+      "awayScore": 42,
+      "settledAt": "2026-03-11T19:59:35.171Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851380-spread-551b8da191",
+      "gameId": "401851380",
+      "sport": "NCAAB",
+      "game": "TBD @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "TBD",
+      "pick": "Michigan Wolverines +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 84,
+      "ev": 43.18,
+      "gameTime": "2026-03-13T16:00Z",
+      "savedAt": "2026-03-11T19:58:29.941Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 80,
+      "settledAt": "2026-03-11T19:59:35.183Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851380-moneyline-7a00a16634",
+      "gameId": "401851380",
+      "sport": "NCAAB",
+      "game": "TBD @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "TBD",
+      "pick": "Michigan Wolverines ML",
+      "betType": "moneyline",
+      "odds": -187,
+      "grade": "A-",
+      "confidence": 78,
+      "ev": 8.97,
+      "gameTime": "2026-03-13T16:00Z",
+      "savedAt": "2026-03-11T19:58:29.941Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 80,
+      "settledAt": "2026-03-11T19:59:35.183Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851380-total-e2b9ced96b",
+      "gameId": "401851380",
+      "sport": "NCAAB",
+      "game": "TBD @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A",
+      "confidence": 62,
+      "ev": 43.18,
+      "gameTime": "2026-03-13T16:00Z",
+      "savedAt": "2026-03-11T19:58:29.941Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 80,
+      "settledAt": "2026-03-11T19:59:35.183Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851177-total-7e18565466",
+      "gameId": "401851177",
+      "sport": "NCAAB",
+      "game": "NC State Wolfpack @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "NC State Wolfpack",
+      "pick": "Over 159",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 58,
+      "ev": 27.91,
+      "gameTime": "2026-03-12T16:00Z",
+      "savedAt": "2026-03-11T18:25:28.086Z",
+      "result": "lost",
+      "homeScore": 76,
+      "awayScore": 72,
+      "settledAt": "2026-03-11T19:59:35.195Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851177-spread-10f99bd8a1",
+      "gameId": "401851177",
+      "sport": "NCAAB",
+      "game": "NC State Wolfpack @ Virginia Cavaliers",
+      "homeTeam": "Virginia Cavaliers",
+      "awayTeam": "NC State Wolfpack",
+      "pick": "Virginia Cavaliers -4.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 81,
+      "ev": 27.91,
+      "gameTime": "2026-03-12T16:00Z",
+      "savedAt": "2026-03-11T19:58:29.941Z",
+      "result": "lost",
+      "homeScore": 76,
+      "awayScore": 72,
+      "settledAt": "2026-03-11T19:59:35.195Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 739,
-      "won": 395,
-      "lost": 331,
+      "total": 745,
+      "won": 399,
+      "lost": 333,
       "push": 13,
-      "rate": 53.5,
+      "rate": 53.6,
       "pending": 82
     },
     "bySport": {
@@ -16449,21 +16569,21 @@
         "rate": 52.4
       },
       "NCAAB": {
-        "total": 218,
-        "won": 123,
-        "rate": 56.4
+        "total": 224,
+        "won": 127,
+        "rate": 56.7
       }
     },
     "byGrade": {
       "B+": {
-        "total": 64,
+        "total": 65,
         "won": 39,
-        "rate": 60.9
+        "rate": 60
       },
       "B": {
-        "total": 54,
-        "won": 39,
-        "rate": 72.2
+        "total": 55,
+        "won": 40,
+        "rate": 72.7
       },
       "B-": {
         "total": 167,
@@ -16486,14 +16606,14 @@
         "rate": 48
       },
       "C": {
-        "total": 140,
+        "total": 141,
         "won": 71,
-        "rate": 50.7
+        "rate": 50.4
       },
       "A-": {
-        "total": 40,
-        "won": 18,
-        "rate": 45
+        "total": 41,
+        "won": 19,
+        "rate": 46.3
       },
       "D": {
         "total": 10,
@@ -16504,24 +16624,29 @@
         "total": 8,
         "won": 4,
         "rate": 50
+      },
+      "A": {
+        "total": 2,
+        "won": 2,
+        "rate": 100
       }
     },
     "byMarket": {
       "Moneyline": {
-        "total": 221,
-        "won": 120,
-        "rate": 54.3,
-        "roi": 12.2
+        "total": 222,
+        "won": 121,
+        "rate": 54.5,
+        "roi": 12.4
       },
       "Spread": {
-        "total": 226,
-        "won": 122,
-        "rate": 54,
-        "roi": 6
+        "total": 229,
+        "won": 124,
+        "rate": 54.1,
+        "roi": 6.2
       },
       "Total": {
-        "total": 221,
-        "won": 115,
+        "total": 223,
+        "won": 116,
         "rate": 52,
         "roi": 2.3
       },
@@ -16538,15 +16663,15 @@
       "push": 0,
       "rate": 68
     },
-    "lastUpdated": "2026-03-11T18:00:41.105Z",
-    "roi": 6.7,
-    "brierScore": 0.2604,
+    "lastUpdated": "2026-03-11T19:59:35.198Z",
+    "roi": 6.8,
+    "brierScore": 0.26,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.063,
+    "sharpeRatio": 0.064,
     "homeAwayBias": {
-      "homeWinRate": 57.5,
+      "homeWinRate": 57.7,
       "awayWinRate": 42,
-      "homeTotal": 362,
+      "homeTotal": 366,
       "awayTotal": 81
     },
     "calibrationBuckets": [
@@ -16559,14 +16684,14 @@
       {
         "range": "55-60",
         "predicted": 57.3,
-        "actual": 48.6,
-        "total": 142
+        "actual": 48.3,
+        "total": 143
       },
       {
         "range": "60-65",
         "predicted": 61.9,
-        "actual": 54.7,
-        "total": 247
+        "actual": 54.8,
+        "total": 248
       },
       {
         "range": "65-70",
@@ -16583,14 +16708,14 @@
       {
         "range": "75-80",
         "predicted": 77.2,
-        "actual": 59.5,
-        "total": 37
+        "actual": 60.5,
+        "total": 38
       },
       {
         "range": "80+",
-        "predicted": 82.7,
-        "actual": 52.6,
-        "total": 19
+        "predicted": 82.8,
+        "actual": 54.5,
+        "total": 22
       }
     ]
   },

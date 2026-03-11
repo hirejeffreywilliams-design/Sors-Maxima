@@ -685,6 +685,57 @@
   ],
   "reports": [
     {
+      "id": "report_1773253151922_uf8vc",
+      "timestamp": "2026-03-11T18:19:11.923Z",
+      "durationMs": 7517,
+      "summary": [
+        "API Budget for Odds API is approaching critical levels, with 30K requests remaining.",
+        "Win rate is healthy at 54.4%, well above break-even threshold.",
+        "Current monthly burn is 45K with 100K cash on hand; financial status is stable."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Reduce Odds API Polling Frequency",
+          "description": "Adjust polling settings to decrease frequency and extend request budget.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Odds API Budget Warning",
+          "description": "Remaining requests below 50K. Action needed to mitigate risk of hitting budget ceiling.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Review and adjust Odds API polling frequency.",
+          "Monitor user engagement metrics and churn rate.",
+          "Evaluate current exposures across various markets."
+        ],
+        "this_week": [
+          "Analyze pick performance to identify areas for improvement.",
+          "Assess financial forecasting for next month’s burn rate.",
+          "Plan communications regarding API budget status."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 54.4,
+        "settledPicks": 739,
+        "oddsApiRemaining": 30274,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 100,
+        "cacheHitRate": 18,
+        "heapUsedMb": 69,
+        "heapTotalMb": 89,
+        "hubLastCycleMs": 4,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"API Budget for Odds API is approaching critical levels, with 30K requests remaining.\",\n    \"Win rate is healthy at 54.4%, well above break-even threshold.\",\n    \"Current monthly burn is 45K with 100K cash on hand; financial status is stable.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Reduce Odds API Polling Frequency\",\n      \"description\": \"Adjust polling settings to decrease frequency and extend request budget.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Odds API Budget Warning\",\n      \"description\": \"Remaining requests below 50K. Action needed to mitigate risk of hitting budget ceiling.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and adjust Odds API polling frequency.\",\n      \"Monitor user engagement metrics and churn rate.\",\n      \"Evaluate current exposures across various markets.\"\n    ],\n    \"this_week\": [\n      \"Analyze pick performance to identify areas for improvement.\",\n      \"Assess financial forecasting for next month’s burn rate.\",\n      \"Plan communications regarding API budget status.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1773235778178_azg7i",
       "timestamp": "2026-03-11T13:29:38.178Z",
       "durationMs": 4989,
@@ -1883,70 +1934,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Current win rate is 52.9%, above the break-even threshold of 52.4%.\",\n    \"API usage is healthy; odds API used 25,073 requests of 100,000 budget with a recommendation to throttle.\",\n    \"Overall pick accuracy at 51.4% remains under watch, particularly the Total market at 46.7%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor Pick Performance\",\n      \"description\": \"Increase scrutiny on the Total market due to low accuracy (46.7%). Assess strategies for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Optimize API Usage\",\n      \"description\": \"Implement throttling for odds API to ensure budget remains intact as current usage trends toward high variance.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"User Engagement Strategy\",\n      \"description\": \"Evaluate churn rate at 4.2%. Develop initiatives to maintain and increase user engagement.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Total Market Performance\",\n      \"description\": \"Total market has a win rate of 46.7%, indicating potential model degradation. Needs immediate attention.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling for the odds API usage.\",\n      \"Begin a detailed performance review of the Total market picks.\",\n      \"Check budget allocations against projected month-end usage.\"\n    ],\n    \"this_week\": [\n      \"Develop a user engagement strategy to reduce churn rate.\",\n      \"Analyze the current win rate trends for potential adjustments.\",\n      \"Review liability across all markets for risk management.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1772883278513_yg2ax",
-      "timestamp": "2026-03-07T11:34:38.513Z",
-      "durationMs": 7447,
-      "summary": [
-        "Win rate is at 52.9%, above the break-even threshold.",
-        "API requests are within healthy limits (24,392 out of 100,000).",
-        "Total picks settled are at 449; no model degradation detected.",
-        "Active user count is strong at 1,247 with a churn rate of 4.2%."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Monitor API Budget Usage",
-          "description": "Ensure usage of the Odds API stays on track and assess if throttling strategies are needed as we approach the monthly cap.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 2
-        },
-        {
-          "title": "Review Total Market Picks",
-          "description": "Analyze the pick accuracy for the 'Total' market, as it currently shows a win rate of only 46.7% which is below acceptable performance levels.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 3
-        },
-        {
-          "title": "Evaluate User Engagement Strategies",
-          "description": "Develop and implement strategies to enhance user engagement to reduce churn further below 4.2%.",
-          "priority": "P2",
-          "due_by": "this_month",
-          "effort_hours": 4
-        }
-      ],
-      "risk_alerts": [],
-      "ops_checklist": {
-        "today": [
-          "Check API health metrics and adjust usage if nearing limits.",
-          "Conduct a review on the effectiveness of the current betting strategies.",
-          "Prepare a report on user engagement metrics for discussion."
-        ],
-        "this_week": [
-          "Assess pick accuracy across all markets and identify areas for improvement.",
-          "Implement user engagement initiatives based on the evaluation.",
-          "Revisit the predictions model for performance tuning if needed."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 52.9,
-        "settledPicks": 449,
-        "oddsApiRemaining": 75744,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 80,
-        "cacheHitRate": 21,
-        "heapUsedMb": 68,
-        "heapTotalMb": 71,
-        "hubLastCycleMs": 10,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Win rate is at 52.9%, above the break-even threshold.\",\n    \"API requests are within healthy limits (24,392 out of 100,000).\",\n    \"Total picks settled are at 449; no model degradation detected.\",\n    \"Active user count is strong at 1,247 with a churn rate of 4.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Monitor API Budget Usage\",\n      \"description\": \"Ensure usage of the Odds API stays on track and assess if throttling strategies are needed as we approach the monthly cap.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Review Total Market Picks\",\n      \"description\": \"Analyze the pick accuracy for the 'Total' market, as it currently shows a win rate of only 46.7% which is below acceptable performance levels.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Evaluate User Engagement Strategies\",\n      \"description\": \"Develop and implement strategies to enhance user engagement to reduce churn further below 4.2%.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Check API health metrics and adjust usage if nearing limits.\",\n      \"Conduct a review on the effectiveness of the current betting strategies.\",\n      \"Prepare a report on user engagement metrics for discussion.\"\n    ],\n    \"this_week\": [\n      \"Assess pick accuracy across all markets and identify areas for improvement.\",\n      \"Implement user engagement initiatives based on the evaluation.\",\n      \"Revisit the predictions model for performance tuning if needed.\"\n    ]\n  }\n}"
     }
   ],
   "lastQuickCheck": "2026-03-11T18:10:11.924Z",
-  "lastDeepCheck": "2026-03-11T13:29:38.178Z",
+  "lastDeepCheck": "2026-03-11T18:19:11.923Z",
   "totalQuickChecks": 137,
-  "totalDeepChecks": 32
+  "totalDeepChecks": 33
 }
