@@ -51,6 +51,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **SSE Authentication**: `/api/sse/stream` is protected by `requireAuth` middleware.
 - **TBD Team Filtering**: All ticket builders and the unified intelligence hub filter out picks where `homeTeam === "TBD"` or `awayTeam === "TBD"`.
 - **Adaptive Engine Scheduling**: `precomputedPredictionsEngine.ts` uses a self-scheduling `setTimeout` pattern with an adaptive interval based on game proximity.
+- **Game Window Scheduler**: `server/gameWindowScheduler.ts` exports `isGameWindowActive()`, `getGameWindowInfo()`, `msUntilNextGameWindow()`. Detects active windows: 90-min pre-game, in-progress, 60-min post-game cooldown. Sharp Signal Detector and Monte Carlo Engine skip Odds API calls when idle, saving ~780+ calls/day overnight. Intelligence Hub uses 120s refresh when active vs 5-min when idle. Market snapshot TTL extends from 22→45 min off-peak. Admin visibility at `/api/admin/game-window` and on the System Health page.
 - **Admin System Health Page**: Live dashboard at `/admin/system-health` showing system metrics, engine status, and Odds API quota.
 - **Memory Pressure Guard**: `precomputedPredictionsEngine.ts` skips prediction cycles and serves stale cache if heap memory usage exceeds 80%, broadcasting a `system-alert` SSE event. `sseManager.ts` also proactively monitors memory.
 - **Stale Cache Age Badge**: Displays a badge on pick cards indicating data age when `dataSource !== "live"` and data is older than 10 minutes.

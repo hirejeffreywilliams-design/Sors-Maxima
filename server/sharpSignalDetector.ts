@@ -16,6 +16,7 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { broadcastEvent } from "./sseManager";
 import { logInfo, logWarn } from "./errorLogger";
+import { isGameWindowActive, getGameWindowInfo } from "./gameWindowScheduler";
 
 const THE_ODDS_BASE = "https://api.the-odds-api.com/v4";
 const BOOKMAKER_PRIORITY = ["draftkings", "fanduel", "betmgm", "caesars", "bovada"];
@@ -139,6 +140,12 @@ async function fetchGamesForSport(sportKey: string): Promise<any[]> {
 async function runDetectionCycle(): Promise<void> {
   engineStatus.lastRunAt = new Date().toISOString();
   engineStatus.cyclesRun++;
+
+  if (!isGameWindowActive()) {
+    const info = getGameWindowInfo();
+    logInfo(`[SharpSignal] Skipping — ${info.reason} (API quota preserved)`);
+    return;
+  }
 
   let totalGames = 0;
   const now = Date.now();

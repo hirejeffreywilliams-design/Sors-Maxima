@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from "crypto";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import type { ParlayLeg, Sport } from "@shared/schema";
+import { isGameWindowActive } from "./gameWindowScheduler";
 
 const LEARNING_DATA_FILE = "monte-carlo-learning-data.json";
 
@@ -1488,6 +1489,11 @@ async function buildTeamRecordsMap(): Promise<Map<string, { avgPointsFor: number
 // Standard 5-minute refresh cycle (lightweight — updates live and upcoming games)
 async function runPreSimulationCycle(): Promise<void> {
   try {
+    if (!isGameWindowActive()) {
+      console.log("[MonteCarlo] Skipping cycle — no active game window (CPU preserved)");
+      return;
+    }
+
     const { generateIntelligenceFeed } = await import("./unifiedIntelligenceHub");
     const feed = await generateIntelligenceFeed();
     if (!feed) return;

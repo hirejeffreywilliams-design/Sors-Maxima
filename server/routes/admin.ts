@@ -5825,6 +5825,31 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
   });
 
   // ── System Health ──────────────────────────────────────────────────────────
+  app.get("/api/admin/game-window", requireAdmin, async (_req, res) => {
+    try {
+      const { getGameWindowInfo } = await import("../gameWindowScheduler");
+      const info = getGameWindowInfo();
+      const { liveSportsData } = await import("../live-sports-data");
+      const allGames = liveSportsData.getGames();
+      const now = Date.now();
+      const upcoming = allGames
+        .filter(g => g.status === "scheduled" && g.startTime.getTime() > now)
+        .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+        .slice(0, 10)
+        .map(g => ({
+          id: g.id,
+          sport: g.sport,
+          homeTeam: g.homeTeam,
+          awayTeam: g.awayTeam,
+          startTime: g.startTime.toISOString(),
+          minutesUntilStart: Math.round((g.startTime.getTime() - now) / 60000),
+        }));
+      res.json({ ...info, upcoming, totalGames: allGames.length, checkedAt: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/admin/system-health", requireAdmin, async (_req, res) => {
     try {
       const mem = process.memoryUsage();

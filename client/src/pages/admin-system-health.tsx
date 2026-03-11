@@ -165,6 +165,21 @@ export default function AdminSystemHealth() {
     staleTime: 0,
   });
 
+  const { data: gameWindow } = useQuery<{
+    active: boolean;
+    reason: string;
+    liveGames: number;
+    upcomingSoonGames: number;
+    nextWindowStartMs: number | null;
+    estimatedSavingsPercent: number;
+    upcoming: Array<{ sport: string; homeTeam: string; awayTeam: string; minutesUntilStart: number }>;
+    totalGames: number;
+  }>({
+    queryKey: ["/api/admin/game-window"],
+    queryFn: () => apiRequest("GET", "/api/admin/game-window").then(r => r.json()),
+    refetchInterval: 60_000,
+  });
+
   const { toast } = useToast();
   const lastAlertRef = useRef<number>(0);
 
@@ -226,6 +241,54 @@ export default function AdminSystemHealth() {
             </Button>
           </div>
         </div>
+
+        {/* Game Window Status */}
+        {gameWindow && (
+          <Card data-testid="card-game-window" className={gameWindow.active ? "border-emerald-500/30 bg-emerald-500/5" : "border-muted/40"}>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${gameWindow.active ? "bg-emerald-500/15" : "bg-muted/40"}`}>
+                    <Activity className={`w-4 h-4 ${gameWindow.active ? "text-emerald-400" : "text-muted-foreground"}`} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold">Game Window Scheduler</p>
+                      <Badge variant="outline" className={gameWindow.active ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs" : "bg-muted/40 text-muted-foreground text-xs"} data-testid="badge-game-window">
+                        {gameWindow.active ? "Active" : "Idle"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5" data-testid="text-game-window-reason">{gameWindow.reason}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 text-right">
+                  {!gameWindow.active && gameWindow.estimatedSavingsPercent > 0 && (
+                    <div>
+                      <p className="text-lg font-bold text-emerald-400" data-testid="value-api-savings">{gameWindow.estimatedSavingsPercent}%</p>
+                      <p className="text-xs text-muted-foreground">API quota saved</p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-lg font-bold" data-testid="value-total-games">{gameWindow.totalGames}</p>
+                    <p className="text-xs text-muted-foreground">games loaded</p>
+                  </div>
+                </div>
+              </div>
+              {!gameWindow.active && gameWindow.upcoming && gameWindow.upcoming.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-border/40">
+                  <p className="text-xs font-semibold text-muted-foreground mb-2">Engines wake up 90 min before first game:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {gameWindow.upcoming.slice(0, 5).map((g, i) => (
+                      <Badge key={i} variant="outline" className="text-xs" data-testid={`badge-upcoming-game-${i}`}>
+                        {g.sport} · {g.awayTeam} @ {g.homeTeam} · in {g.minutesUntilStart}m
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Uptime & Node row */}
         {isLoading ? (

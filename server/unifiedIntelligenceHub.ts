@@ -9,6 +9,7 @@ import { logError, logWarn } from "./errorLogger";
 import { getInSeasonSports } from "./sportSeasons";
 import { getCachedMMAFights } from "./mma-engine";
 import { getInternationalLifeChangerPicks } from "./internationalSportsEngine";
+import { isGameWindowActive } from "./gameWindowScheduler";
 const HUB_REFRESH_INTERVAL = 120_000;
 
 export interface UnifiedGame {
@@ -861,22 +862,31 @@ async function runHubCycle(): Promise<void> {
   console.log(`[IntelligenceHub] Cycle #${totalCycles} complete in ${lastCycleTime}ms [${sportCounts}]`);
 }
 
+const HUB_INTERVAL_IDLE = 5 * 60 * 1000; // 5 min when no game window active
+
+function scheduleNextHubCycle(): void {
+  if (!hubRunning) return;
+  const interval = isGameWindowActive() ? HUB_REFRESH_INTERVAL : HUB_INTERVAL_IDLE;
+  hubInterval = setTimeout(async () => {
+    await runHubCycle().catch(err => logError("[IntelligenceHub] Cycle failed", { error: String(err) }));
+    scheduleNextHubCycle();
+  }, interval);
+}
+
 export function startIntelligenceHub(): void {
   if (hubRunning) return;
   hubRunning = true;
   console.log("[IntelligenceHub] Starting Unified Intelligence Hub...");
 
-  runHubCycle().catch(err => logError("[IntelligenceHub] Initial cycle failed", { error: String(err) }));
-
-  hubInterval = setInterval(() => {
-    runHubCycle().catch(err => logError("[IntelligenceHub] Cycle failed", { error: String(err) }));
-  }, HUB_REFRESH_INTERVAL);
+  runHubCycle()
+    .catch(err => logError("[IntelligenceHub] Initial cycle failed", { error: String(err) }))
+    .finally(() => scheduleNextHubCycle());
 }
 
 export function stopIntelligenceHub(): void {
   if (!hubRunning) return;
   if (hubInterval) {
-    clearInterval(hubInterval);
+    clearTimeout(hubInterval);
     hubInterval = null;
   }
   hubRunning = false;

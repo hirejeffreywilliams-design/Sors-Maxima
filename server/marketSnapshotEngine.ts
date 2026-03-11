@@ -6,6 +6,7 @@ import { getTeamsFromCache, getPlayersFromCacheById, getRosterFromCacheById } fr
 import { fetchRealOddsForGame } from "./odds-provider";
 import { recordOddsApiCall } from "./api-usage-tracker";
 import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
+import { isGameWindowActive } from "./gameWindowScheduler";
 
 // ── Disk cache paths ─────────────────────────────────────────────────────────
 const ODDS_DISK_CACHE_PATH     = path.join(process.cwd(), "odds-api-disk-cache.json");
@@ -234,11 +235,10 @@ async function fetchFullOddsApi(sport: string): Promise<OddsApiGame[]> {
   const cached = oddsFullCache.get(cacheKey);
   const cacheAgeMs = cached ? Date.now() - cached.timestamp : Infinity;
 
-  // Return cached data (disk or memory) if still within TTL — no API call
-  if (cached && cacheAgeMs < ODDS_DISK_CACHE_TTL_MS) {
+  const oddsActiveTTL = isGameWindowActive() ? ODDS_DISK_CACHE_TTL_MS : 45 * 60 * 1000; // extend to 45m off-peak
+  if (cached && cacheAgeMs < oddsActiveTTL) {
     if (cacheAgeMs > 5 * 60 * 1000) {
-      // Only log when it was loaded from disk (>5 min old means it survived restart)
-      console.log(`[MarketSnapshot] Using disk cache for ${sport} (${Math.round(cacheAgeMs / 60000)}m old) — skipping Odds API call`);
+      console.log(`[MarketSnapshot] Using disk cache for ${sport} (${Math.round(cacheAgeMs / 60000)}m old, TTL=${Math.round(oddsActiveTTL / 60000)}m) — skipping Odds API call`);
     }
     return cached.data;
   }
@@ -547,13 +547,16 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
   return movements;
 }
 
+const SNAPSHOT_CACHE_TTL_IDLE = 45 * 60 * 1000; // 45 min off-peak — no reason to refresh odds when no games
+
 export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapshot> {
   const cacheKey = `snapshot-${sport}`;
   const cached = snapshotCache.get(cacheKey);
-  if (cached && (Date.now() - cached.timestamp) < SNAPSHOT_CACHE_TTL) {
+  const activeTTL = isGameWindowActive() ? SNAPSHOT_CACHE_TTL : SNAPSHOT_CACHE_TTL_IDLE;
+  if (cached && (Date.now() - cached.timestamp) < activeTTL) {
     const ageMin = Math.round((Date.now() - cached.timestamp) / 60000);
     if (ageMin >= 2) {
-      console.log(`[MarketSnapshot] ${sport}: serving from disk cache (${ageMin}m old) — no API call`);
+      console.log(`[MarketSnapshot] ${sport}: serving from cache (${ageMin}m old, TTL=${Math.round(activeTTL / 60000)}m) — no API call`);
     }
     return cached.data;
   }
