@@ -12,8 +12,8 @@
     },
     "NCAAB": {
       "wins": 127,
-      "total": 223,
-      "winRate": 57
+      "total": 224,
+      "winRate": 56.7
     }
   },
   "marketAccuracy": {
@@ -29,8 +29,8 @@
     },
     "total": {
       "wins": 116,
-      "total": 216,
-      "winRate": 53.7
+      "total": 217,
+      "winRate": 53.5
     },
     "team_total": {
       "wins": 38,
@@ -162,8 +162,8 @@
       "penalty": 4
     }
   ],
-  "totalSettled": 732,
-  "lastMined": "2026-03-11T20:46:32.106Z",
+  "totalSettled": 733,
+  "lastMined": "2026-03-11T20:55:28.743Z",
   "cycleCount": 1,
-  "patternCount": 174
+  "patternCount": 175
 }
