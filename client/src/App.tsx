@@ -386,10 +386,18 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/profile":              { label: "My Profile",           parent: "/" },
   "/settings":             { label: "Settings",             parent: "/" },
   "/help":                 { label: "Help Center",          parent: "/" },
+  "/feedback":             { label: "My Feedback",          parent: "/" },
   "/changelog":            { label: "What's New",           parent: "/" },
   "/roadmap":              { label: "Roadmap",              parent: "/" },
   "/legal":                { label: "Legal",                parent: "/" },
   "/pricing":              { label: "Pricing & Plans",      parent: "/" },
+  "/apply":                { label: "Apply for Access",     parent: "/" },
+  "/leaderboard":          { label: "Leaderboard",          parent: "/community" },
+  "/pick-review":          { label: "Pick Review",          parent: "/" },
+  "/ticket-variations":    { label: "Ticket Variations",    parent: "/builder" },
+  "/straight-bets":        { label: "Straight Bets",        parent: "/builder" },
+  "/verify-email":         { label: "Verify Email",         parent: "/" },
+  "/onboarding":           { label: "Onboarding",           parent: "/" },
   "/rosters":              { label: "Rosters & Injuries",   parent: "/tools" },
   "/sport-factor-analysis":{ label: "Factor Analysis",      parent: "/tools" },
   "/pipeline":             { label: "Intelligence Pipeline",parent: "/tools" },
@@ -398,7 +406,6 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/training":             { label: "Model Lab",             parent: "/tools" },
   "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },
   "/strategy":             { label: "Strategy Advisor",     parent: "/" },
-  "/onboarding":           { label: "Onboarding",           parent: "/" },
   "/cards":                { label: "Sors Cards",           parent: "/" },
   "/dashboard":            { label: "Dashboard",            parent: "/" },
 };
@@ -852,14 +859,14 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
 function MobileBackOrLogo() {
   const [location] = useLocation();
-  const isSecondary = Boolean(SECONDARY_ROUTES[location]) && !PRIMARY_NAV_HREFS.has(location);
+  const isNonPrimary = !PRIMARY_NAV_HREFS.has(location) && location !== "/";
 
-  if (isSecondary) {
+  if (isNonPrimary) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           onClick={() => window.history.length > 1 ? window.history.back() : (window.location.href = "/")}
-          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+          className="lg:hidden flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
           data-testid="button-mobile-header-back"
           aria-label="Go back"
         >
@@ -867,8 +874,8 @@ function MobileBackOrLogo() {
         </button>
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
-            <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
-            <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
+            <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-7 h-7 rounded-lg" />
+            <span className="font-bold text-base bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
               Sors Maxima
             </span>
           </div>
@@ -881,7 +888,7 @@ function MobileBackOrLogo() {
     <Link href="/">
       <div className="flex items-center gap-2 cursor-pointer">
         <img src={sorsMaximaLogo} alt="Sors Maxima" className="w-8 h-8 rounded-lg" />
-        <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent hidden sm:inline">
+        <span className="font-bold text-lg bg-gradient-to-r from-primary to-chart-1 bg-clip-text text-transparent">
           Sors Maxima
         </span>
       </div>
