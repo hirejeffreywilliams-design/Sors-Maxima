@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { useSEO } from "@/hooks/use-seo";
 import { apiRequest } from "@/lib/queryClient";
 import { useSSE } from "@/hooks/use-sse";
 import { useToast } from "@/hooks/use-toast";
+import { AdminAIResolve } from "@/components/admin-ai-resolve";
 
 interface CacheEntry {
   hasPicks: boolean;
@@ -272,6 +273,25 @@ export default function AdminSystemHealth() {
               <Cpu className="w-4 h-4 text-primary" />
               Memory Usage
               {health && <StatusBadge status={health.memory.status} />}
+              {health && health.memory.status !== "healthy" && (
+                <div className="ml-auto">
+                  <AdminAIResolve
+                    category="Memory"
+                    issue={`Heap memory is ${health.memory.status}: ${health.memory.heapUsedPct}% used (${health.memory.heapUsedMb} MB / ${health.memory.heapLimitMb} MB)`}
+                    severity={health.memory.status === "critical" ? "critical" : "high"}
+                    metrics={{
+                      heapUsedMb: health.memory.heapUsedMb,
+                      heapTotalMb: health.memory.heapTotalMb,
+                      heapLimitMb: health.memory.heapLimitMb,
+                      heapUsedPct: health.memory.heapUsedPct,
+                      rssMb: health.memory.rssMb,
+                      status: health.memory.status,
+                    }}
+                    label="Fix Memory"
+                    compact
+                  />
+                </div>
+              )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -312,6 +332,31 @@ export default function AdminSystemHealth() {
           </CardContent>
         </Card>
 
+        {/* Odds quota alert band */}
+        {health && health.oddsApiRemaining !== null && health.oddsApiRemaining < 500 && (
+          <div className={`flex items-center justify-between gap-3 p-3 rounded-lg border ${health.oddsApiRemaining < 100 ? "bg-red-500/8 border-red-500/30" : "bg-yellow-500/8 border-yellow-500/30"}`} data-testid="alert-odds-quota">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className={`w-4 h-4 shrink-0 ${health.oddsApiRemaining < 100 ? "text-red-400" : "text-yellow-400"}`} />
+              <div>
+                <p className={`text-sm font-semibold ${health.oddsApiRemaining < 100 ? "text-red-400" : "text-yellow-400"}`}>
+                  {health.oddsApiRemaining < 100 ? "Critical:" : "Warning:"} Odds API quota almost exhausted
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Only <span className="font-bold">{health.oddsApiRemaining.toLocaleString()}</span> requests remaining — picks will stop updating when quota hits 0
+                </p>
+              </div>
+            </div>
+            <AdminAIResolve
+              category="Odds API Quota"
+              issue={`Odds API quota critically low: only ${health.oddsApiRemaining} requests remaining`}
+              severity={health.oddsApiRemaining < 100 ? "critical" : "high"}
+              metrics={{ oddsApiRemaining: health.oddsApiRemaining }}
+              label="Fix Quota"
+              compact
+            />
+          </div>
+        )}
+
         {/* Engine Status */}
         <Card data-testid="card-engine">
           <CardHeader className="pb-3">
@@ -326,6 +371,26 @@ export default function AdminSystemHealth() {
                 >
                   {health.engine.running ? "Running" : "Stopped"}
                 </Badge>
+              )}
+              {health && (!health.engine.running || (health.engine.totalRuns > 0 && health.engine.failedRuns / health.engine.totalRuns > 0.2)) && (
+                <div className="ml-auto">
+                  <AdminAIResolve
+                    category="Prediction Engine"
+                    issue={!health.engine.running
+                      ? "Prediction engine has stopped running — picks are no longer being updated"
+                      : `High failure rate: ${health.engine.failedRuns} of ${health.engine.totalRuns} cycles failed (${Math.round((health.engine.failedRuns / health.engine.totalRuns) * 100)}%)`}
+                    severity={!health.engine.running ? "critical" : "high"}
+                    metrics={{
+                      running: health.engine.running,
+                      totalRuns: health.engine.totalRuns,
+                      failedRuns: health.engine.failedRuns,
+                      lastRunTime: health.engine.lastRunTime,
+                      intervalLabel: health.engine.intervalLabel,
+                    }}
+                    label={!health.engine.running ? "Restart Engine" : "Fix Failures"}
+                    compact
+                  />
+                </div>
               )}
             </CardTitle>
           </CardHeader>
@@ -390,7 +455,7 @@ export default function AdminSystemHealth() {
                         <div className="text-xs text-muted-foreground">{entry.dataSource}</div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-right">
+                    <div className="flex items-center gap-3 text-right">
                       <div>
                         <div className="text-sm font-bold" data-testid={`value-picks-${sport}`}>{entry.pickCount}</div>
                         <div className="text-xs text-muted-foreground">picks</div>
@@ -406,6 +471,16 @@ export default function AdminSystemHealth() {
                       >
                         {entry.hasPicks ? "OK" : "Empty"}
                       </Badge>
+                      {!entry.hasPicks && (
+                        <AdminAIResolve
+                          category="Cache"
+                          issue={`${sport} cache is empty — no picks available for this sport`}
+                          severity="medium"
+                          metrics={{ sport, pickCount: entry.pickCount, dataSource: entry.dataSource, age: entry.age }}
+                          label="Fix"
+                          compact
+                        />
+                      )}
                     </div>
                   </div>
                 ))}
@@ -424,6 +499,21 @@ export default function AdminSystemHealth() {
                 <Badge variant="outline" className="ml-auto text-xs bg-violet-500/10 text-violet-300 border-violet-500/20">
                   {health.patternEngine.cycleCount > 0 ? `Cycle #${health.patternEngine.cycleCount}` : "Starting…"}
                 </Badge>
+              )}
+              {health?.patternEngine && health.patternEngine.lastMined && (Date.now() - new Date(health.patternEngine.lastMined).getTime()) > 30 * 60_000 && (
+                <AdminAIResolve
+                  category="Pattern Engine"
+                  issue={`Pattern Intelligence Engine has not mined in over 30 minutes — last run: ${timeAgo(health.patternEngine.lastMined)}`}
+                  severity="medium"
+                  metrics={{
+                    lastMined: health.patternEngine.lastMined,
+                    cycleCount: health.patternEngine.cycleCount,
+                    totalSettled: health.patternEngine.totalSettled,
+                    patternCount: health.patternEngine.patternCount,
+                  }}
+                  label="Diagnose"
+                  compact
+                />
               )}
             </CardTitle>
           </CardHeader>

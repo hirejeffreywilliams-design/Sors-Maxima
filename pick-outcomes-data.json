@@ -16246,15 +16246,35 @@
       "homeScore": 2,
       "awayScore": 5,
       "settledAt": "2026-03-11T01:51:13.229Z"
+    },
+    {
+      "id": "precomp-NHL-401803383-total-39300b0fb8",
+      "gameId": "401803383",
+      "sport": "NHL",
+      "game": "Calgary Flames @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Calgary Flames",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 52,
+      "ev": 12.64,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T02:20:31.006Z",
+      "result": "lost",
+      "homeScore": 4,
+      "awayScore": 0,
+      "settledAt": "2026-03-11T02:21:01.119Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 730,
+      "total": 731,
       "won": 391,
-      "lost": 326,
+      "lost": 327,
       "push": 13,
-      "rate": 53.6,
+      "rate": 53.5,
       "pending": 82
     },
     "bySport": {
@@ -16264,9 +16284,9 @@
         "rate": 52
       },
       "NHL": {
-        "total": 260,
+        "total": 261,
         "won": 137,
-        "rate": 52.7
+        "rate": 52.5
       },
       "NCAAB": {
         "total": 218,
@@ -16286,9 +16306,9 @@
         "rate": 71.7
       },
       "B-": {
-        "total": 164,
+        "total": 165,
         "won": 86,
-        "rate": 52.4
+        "rate": 52.1
       },
       "C+": {
         "total": 170,
@@ -16340,10 +16360,10 @@
         "roi": 6.4
       },
       "Total": {
-        "total": 213,
+        "total": 214,
         "won": 111,
-        "rate": 52.1,
-        "roi": 2.7
+        "rate": 51.9,
+        "roi": 2.2
       },
       "Team Total": {
         "total": 71,
@@ -16353,16 +16373,16 @@
       }
     },
     "recentForm": {
-      "won": 36,
-      "lost": 14,
+      "won": 35,
+      "lost": 15,
       "push": 0,
-      "rate": 72
+      "rate": 70
     },
-    "lastUpdated": "2026-03-11T02:19:53.351Z",
-    "roi": 7,
-    "brierScore": 0.2603,
+    "lastUpdated": "2026-03-11T02:26:40.140Z",
+    "roi": 6.9,
+    "brierScore": 0.2604,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.065,
+    "sharpeRatio": 0.064,
     "homeAwayBias": {
       "homeWinRate": 57.6,
       "awayWinRate": 42,
@@ -16373,8 +16393,8 @@
       {
         "range": "50-55",
         "predicted": 52.8,
-        "actual": 64,
-        "total": 75
+        "actual": 63.2,
+        "total": 76
       },
       {
         "range": "55-60",

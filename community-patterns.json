@@ -2,9 +2,9 @@
   "totalPatterns": 0,
   "toxicPatterns": 0,
   "goldenPatterns": 0,
-  "totalSettledPicks": 2,
-  "lastRunAt": "2026-03-11T01:51:13.230Z",
-  "nextRunAt": "2026-03-11T02:11:13.230Z",
+  "totalSettledPicks": 1,
+  "lastRunAt": "2026-03-11T02:21:01.120Z",
+  "nextRunAt": "2026-03-11T02:41:01.120Z",
   "patterns": [],
   "engineVersion": "1.0.0"
 }

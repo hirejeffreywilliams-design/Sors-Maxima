@@ -1044,11 +1044,23 @@ export default function AdminDashboard() {
                     <>
                       <div className="grid grid-cols-3 gap-3 text-center">
                         {["nba", "nfl", "mlb"].map(sport => (
-                          <div key={sport} className={`rounded-lg p-2 border ${bdlStats.availability?.[sport] ? "bg-emerald-500/10 border-emerald-500/20" : "bg-muted/30 border-border/40"}`} data-testid={`bdl-status-${sport}`}>
+                          <div key={sport} className={`rounded-lg p-2 border ${bdlStats.availability?.[sport] ? "bg-emerald-500/10 border-emerald-500/20" : "bg-red-500/8 border-red-500/30"}`} data-testid={`bdl-status-${sport}`}>
                             <p className="text-xs font-bold uppercase text-muted-foreground">{sport}</p>
-                            <p className={`text-sm font-semibold mt-0.5 ${bdlStats.availability?.[sport] ? "text-emerald-400" : "text-muted-foreground"}`}>
+                            <p className={`text-sm font-semibold mt-0.5 ${bdlStats.availability?.[sport] ? "text-emerald-400" : "text-red-400"}`}>
                               {bdlStats.availability?.[sport] ? `${bdlStats.counts?.[sport]} teams` : "Offline"}
                             </p>
+                            {!bdlStats.availability?.[sport] && (
+                              <div className="mt-1.5">
+                                <AdminAIResolve
+                                  category="Data Integration"
+                                  issue={`${sport.toUpperCase()} data integration is offline — team data unavailable`}
+                                  severity="high"
+                                  metrics={{ sport, availability: false, apiKey: "BALLDONTLIE_API_KEY" }}
+                                  label="Fix"
+                                  compact
+                                />
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -1099,7 +1111,17 @@ export default function AdminDashboard() {
                       <p className="text-xs text-muted-foreground">Cache age: {teamFormStatus.ageMins ?? "?"} min · refreshes every 22h</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Loading — check back after server startup completes</p>
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">Form data not yet loaded — engine may be starting up</p>
+                      <AdminAIResolve
+                        category="Historical Form Engine"
+                        issue="Historical Form Engine has not loaded team data yet — home/road splits and streak data unavailable"
+                        severity="medium"
+                        metrics={{ loaded: false, ageMins: teamFormStatus?.ageMins }}
+                        label="Diagnose Engine"
+                        compact
+                      />
+                    </div>
                   )}
                 </CardContent>
               </Card>
@@ -1119,13 +1141,24 @@ export default function AdminDashboard() {
                       {errorLogs.slice(0, 5).map((log) => (
                         <div
                           key={log.id}
-                          className="flex items-center gap-2 p-2 rounded border text-xs cursor-pointer hover:bg-muted/50"
-                          onClick={() => setSelectedError(log)}
+                          className="flex items-center gap-2 p-2 rounded border text-xs"
                           data-testid={`error-row-${log.id}`}
                         >
-                          {getLogLevelIcon(log.level)}
-                          <span className="flex-1 truncate">{log.message}</span>
-                          <span className="text-muted-foreground shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                          <span className="cursor-pointer flex items-center gap-2 flex-1 min-w-0" onClick={() => setSelectedError(log)}>
+                            {getLogLevelIcon(log.level)}
+                            <span className="flex-1 truncate">{log.message}</span>
+                            <span className="text-muted-foreground shrink-0">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                          </span>
+                          {(log.level === "error" || log.level === "critical") && (
+                            <AdminAIResolve
+                              category="Error Log"
+                              issue={log.message}
+                              severity={log.level === "critical" ? "critical" : "high"}
+                              metrics={{ level: log.level, service: log.service, timestamp: log.timestamp, stack: log.stack }}
+                              label="Fix"
+                              compact
+                            />
+                          )}
                         </div>
                       ))}
                     </div>
