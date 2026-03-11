@@ -2,13 +2,13 @@
   "bootstrapComplete": true,
   "bootstrapPicksProcessed": 731,
   "bootstrapRunAt": "2026-03-11T00:57:09.853Z",
-  "totalLearningCycles": 49,
-  "lastCycleAt": "2026-03-11T07:43:12.608Z",
+  "totalLearningCycles": 50,
+  "lastCycleAt": "2026-03-11T13:24:38.186Z",
   "lastCycleSettledCount": 4,
   "userFeedbackProcessed": 0,
   "mcEngineRecords": 713,
-  "mcStackedCycles": 49,
-  "usmlCycles": 49,
+  "mcStackedCycles": 50,
+  "usmlCycles": 50,
   "sportAccuracy": {
     "NBA": {
       "wins": 131,
