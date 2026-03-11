@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { TradingCard } from "@/components/trading-card";
 import { Button } from "@/components/ui/button";
-import { Zap } from "lucide-react";
+import { Zap, ArrowUp, Hand, Sparkles, Eye, Share2, ArrowRight } from "lucide-react";
 
 interface PackRipRevealProps {
   cards: { collection: any; card: any }[];
@@ -110,11 +110,38 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
         {phase !== "revealed" ? (
           <motion.div
             key="pack"
-            className="relative flex flex-col items-center"
+            className="relative flex flex-col items-center gap-0"
             initial={{ scale: 0.85, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             transition={{ type: "spring", damping: 18, stiffness: 200 }}
           >
+            {/* Step indicator + context header */}
+            <motion.div
+              className="mb-5 text-center space-y-1.5"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  style={{ background: "rgba(251,191,36,0.12)", border: "1px solid rgba(251,191,36,0.30)", color: "rgba(251,191,36,0.85)" }}
+                >
+                  <Sparkles style={{ width: 11, height: 11 }} />
+                  Step 1 of 2 · Rip Open Your Pack
+                </div>
+              </div>
+              <p
+                className="font-black uppercase tracking-tight"
+                style={{ fontSize: 22, background: "linear-gradient(135deg,#fbbf24,#f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}
+              >
+                Your Pack Is Ready
+              </p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.40)", letterSpacing: "0.05em" }}>
+                {cards.length} Intelligence Card{cards.length !== 1 ? "s" : ""} sealed inside — rip it to reveal them
+              </p>
+            </motion.div>
+
             {/* Pack wrapper */}
             <div className="relative" style={{ width: 272, height: 408 }}>
 
@@ -318,24 +345,37 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
               ))}
             </div>
 
-            {/* Drag hint hint */}
+            {/* Drag instruction — prominent */}
             {phase === "idle" && dragY === 0 && (
-              <motion.p
-                className="mt-3 text-center"
-                style={{ fontSize: 9, letterSpacing: "0.25em", color: "rgba(251,191,36,0.5)", fontWeight: 700, textTransform: "uppercase" }}
-                animate={{ opacity: [0.5, 1, 0.5] }}
+              <motion.div
+                className="mt-4 flex flex-col items-center gap-2"
+                animate={{ opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                ↑ Swipe up to rip
-              </motion.p>
+                <div className="flex items-center gap-2">
+                  <Hand style={{ width: 14, height: 14, color: "rgba(251,191,36,0.7)" }} />
+                  <span style={{ fontSize: 11, letterSpacing: "0.22em", color: "rgba(251,191,36,0.7)", fontWeight: 800, textTransform: "uppercase" }}>
+                    Grab &amp; swipe the pack upward
+                  </span>
+                  <ArrowUp style={{ width: 14, height: 14, color: "rgba(251,191,36,0.7)" }} />
+                </div>
+                <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", letterSpacing: "0.05em" }}>
+                  or use the button below
+                </p>
+              </motion.div>
             )}
             {dragY > 0 && (
-              <p
-                className="mt-3 text-center"
-                style={{ fontSize: 9, letterSpacing: "0.25em", color: "rgba(251,191,36,0.8)", fontWeight: 700 }}
-              >
-                {Math.round(tearProgress * 100)}% — keep going!
-              </p>
+              <motion.div className="mt-4 flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <ArrowUp style={{ width: 14, height: 14, color: "rgba(251,191,36,0.9)" }} />
+                  <span style={{ fontSize: 12, letterSpacing: "0.15em", color: "rgba(251,191,36,0.9)", fontWeight: 900 }}>
+                    {Math.round(tearProgress * 100)}% — keep going!
+                  </span>
+                </div>
+                {tearProgress > 0.6 && (
+                  <p style={{ fontSize: 10, color: "rgba(251,191,36,0.6)", fontWeight: 700 }}>Almost there...</p>
+                )}
+              </motion.div>
             )}
 
             {/* Fallback button */}
@@ -344,7 +384,7 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="mt-5"
+                className="mt-4"
               >
                 <Button
                   onClick={triggerRip}
@@ -365,7 +405,7 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
         ) : (
           <motion.div
             key="revealed"
-            className="flex flex-col items-center gap-10 w-full max-w-5xl px-4"
+            className="flex flex-col items-center gap-6 w-full max-w-5xl px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
@@ -384,26 +424,35 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
               ))}
             </div>
 
+            {/* Step 2 header */}
             <motion.div
               initial={{ y: -16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.15, type: "spring", damping: 15 }}
-              className="text-center"
+              className="text-center space-y-2"
             >
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <div
+                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                  style={{ background: "rgba(52,211,153,0.12)", border: "1px solid rgba(52,211,153,0.30)", color: "rgba(52,211,153,0.85)" }}
+                >
+                  <Sparkles style={{ width: 11, height: 11 }} />
+                  Step 2 of 2 · Collect Your Cards
+                </div>
+              </div>
               <h2
                 className="font-black uppercase tracking-tight"
                 style={{
-                  fontSize: 32,
+                  fontSize: 30,
                   background: "linear-gradient(135deg, #fbbf24, #f59e0b, #d97706)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
-                  textShadow: "none",
                 }}
               >
                 Pack Opened!
               </h2>
-              <p style={{ fontSize: 11, letterSpacing: "0.3em", color: "rgba(251,191,36,0.5)", fontWeight: 700, marginTop: 4 }}>
-                YOUR INTELLIGENCE CARDS
+              <p style={{ fontSize: 11, letterSpacing: "0.25em", color: "rgba(255,255,255,0.35)", fontWeight: 600 }}>
+                {cards.length} card{cards.length !== 1 ? "s" : ""} revealed below — click any card to flip it and read the full pick analysis
               </p>
             </motion.div>
 
@@ -426,6 +475,18 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
                     animate={{ opacity: 0 }}
                     transition={{ delay: 0.8 + idx * 0.18, duration: 1.2 }}
                   />
+                  {/* Flip hint on first card */}
+                  {idx === 0 && (
+                    <motion.div
+                      className="absolute -bottom-7 left-0 right-0 flex items-center justify-center gap-1 pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 0.7, 0.7, 0] }}
+                      transition={{ delay: 1.2, duration: 2.5, times: [0, 0.15, 0.85, 1] }}
+                    >
+                      <Eye style={{ width: 10, height: 10, color: "rgba(251,191,36,0.6)" }} />
+                      <span style={{ fontSize: 9, color: "rgba(251,191,36,0.6)", fontWeight: 700, letterSpacing: "0.15em" }}>TAP TO FLIP</span>
+                    </motion.div>
+                  )}
                   <TradingCard
                     card={item.card}
                     instanceNumber={item.collection?.instanceNumber}
@@ -434,6 +495,29 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
                 </motion.div>
               ))}
             </div>
+
+            {/* What to do next hints */}
+            <motion.div
+              className="flex flex-wrap items-center justify-center gap-4 max-w-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 + cards.length * 0.18 }}
+            >
+              {[
+                { icon: <Eye style={{ width: 12, height: 12 }} />, text: "Flip any card to read the full pick analysis" },
+                { icon: <Share2 style={{ width: 12, height: 12 }} />, text: "Showcase your best cards on the Community tab" },
+                { icon: <ArrowRight style={{ width: 12, height: 12 }} />, text: "Trade duplicates with other members" },
+              ].map(({ icon, text }) => (
+                <div
+                  key={text}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}
+                >
+                  <span style={{ color: "rgba(251,191,36,0.6)" }}>{icon}</span>
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.40)", fontWeight: 600 }}>{text}</span>
+                </div>
+              ))}
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
@@ -453,6 +537,9 @@ export function PackRipReveal({ cards, onClose }: PackRipRevealProps) {
               >
                 ADD ALL TO COLLECTION
               </Button>
+              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.22)", textAlign: "center", marginTop: 8, letterSpacing: "0.05em" }}>
+                Cards are permanently saved · They won't disappear
+              </p>
             </motion.div>
           </motion.div>
         )}

@@ -357,30 +357,186 @@ export default function CardsPage() {
         description="Open packs, collect cryptographically verified pick cards, showcase your wins on the community feed, and build your Discord-proof win portfolio — Edge tier and above."
       >
 
-      {/* Pack Drops */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div />
+      {/* ═══ PACK DROP — Full Explainer + CTA ═══ */}
+      <div
+        className="rounded-2xl overflow-hidden border"
+        style={{
+          borderColor: "rgba(251,191,36,0.25)",
+          background: "linear-gradient(135deg, rgba(120,53,15,0.18) 0%, rgba(10,10,10,0.92) 45%, rgba(30,27,75,0.18) 100%)",
+        }}
+        data-testid="pack-drop-section"
+      >
+        {/* Top banner */}
+        <div
+          className="px-6 py-4 flex items-center gap-3 border-b"
+          style={{ borderColor: "rgba(251,191,36,0.15)", background: "rgba(251,191,36,0.06)" }}
+        >
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            style={{ background: "rgba(251,191,36,0.12)", border: "1.5px solid rgba(251,191,36,0.35)" }}
+          >
+            <Sparkles className="w-4.5 h-4.5 text-amber-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-black uppercase tracking-widest text-amber-400">Daily Intelligence Pack Drop</p>
+            <p className="text-xs text-white/40 mt-0.5">Your exclusive member perk — resets every 24 hours</p>
+          </div>
+          {/* Pack counter */}
+          <div
+            className="flex items-center gap-2 px-4 py-2 rounded-xl shrink-0"
+            style={{ background: "rgba(251,191,36,0.10)", border: "1px solid rgba(251,191,36,0.25)" }}
+          >
+            <Flame className="w-4 h-4 text-amber-400" />
+            <span className="text-sm font-black text-amber-300">
+              {packStatus?.remainingToday ?? 0}
+            </span>
+            <span className="text-xs text-white/40 font-semibold">pack{(packStatus?.remainingToday ?? 0) !== 1 ? "s" : ""} left today</span>
+          </div>
+        </div>
 
-        <Card className="bg-primary/5 border-primary/20 shrink-0">
-          <CardContent className="pt-6 flex items-center gap-6">
-            <div className="space-y-1">
-              <p className="text-xs font-black uppercase tracking-widest text-primary/80">Pack Drop</p>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-lg font-black">{packStatus?.remainingToday || 0} Left</span>
+        {/* Body — What / Why / When / How */}
+        <div className="p-6 grid md:grid-cols-2 gap-6">
+
+          {/* Left: Explainer steps */}
+          <div className="space-y-4">
+            <h3 className="text-base font-black text-white/90">What is an Intelligence Pack?</h3>
+            <p className="text-sm text-white/55 leading-relaxed">
+              Each pack contains <span className="text-amber-300 font-bold">3 Intelligence Cards™</span> —
+              cryptographically minted pick cards generated directly by the Sors 46-Factor Engine.
+              Every card is a real pick with a real result attached to it.
+            </p>
+
+            <div className="space-y-3 pt-1">
+              {[
+                {
+                  icon: <Star className="w-4 h-4 text-amber-400 shrink-0" />,
+                  heading: "Why open packs?",
+                  body: "Cards are your permanent, tamper-proof win record. When you collect an A+ or S+ card, it proves your pick — no screenshots, no edits. Showcase them publicly and let your results speak.",
+                },
+                {
+                  icon: <Clock className="w-4 h-4 text-blue-400 shrink-0" />,
+                  heading: "When do I get packs?",
+                  body: `You receive a fresh pack drop every 24 hours. ${packStatus?.remainingToday ? `You have ${packStatus.remainingToday} pack${packStatus.remainingToday > 1 ? "s" : ""} available right now.` : packStatus?.nextPackAt ? `Your next pack unlocks ${formatDistanceToNow(new Date(packStatus.nextPackAt), { addSuffix: true })}.` : "Check back daily for your drop."}`,
+                },
+                {
+                  icon: <TrendingUp className="w-4 h-4 text-emerald-400 shrink-0" />,
+                  heading: "What can I do with cards?",
+                  body: "Showcase your best picks on the Community Feed, trade duplicates with other members, and earn the ultra-rare S+ Life Changer™ card when the daily LCT ticket hits.",
+                },
+              ].map(({ icon, heading, body }) => (
+                <div key={heading} className="flex gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <div className="mt-0.5">{icon}</div>
+                  <div>
+                    <p className="text-xs font-black text-white/80 uppercase tracking-wide mb-0.5">{heading}</p>
+                    <p className="text-xs text-white/45 leading-relaxed">{body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: How to open + CTA */}
+          <div className="flex flex-col gap-5">
+            <div>
+              <h3 className="text-base font-black text-white/90 mb-3">How to open your pack</h3>
+              <div className="space-y-2.5">
+                {[
+                  {
+                    step: "1",
+                    color: "rgba(251,191,36,0.8)",
+                    bg: "rgba(251,191,36,0.10)",
+                    border: "rgba(251,191,36,0.25)",
+                    text: "Click the \"OPEN PACK\" button below to enter the pack reveal screen.",
+                  },
+                  {
+                    step: "2",
+                    color: "rgba(96,165,250,0.9)",
+                    bg: "rgba(96,165,250,0.08)",
+                    border: "rgba(96,165,250,0.22)",
+                    text: "Swipe the pack upward — or tap \"RIP IT OPEN\" — to tear it and reveal your cards.",
+                  },
+                  {
+                    step: "3",
+                    color: "rgba(52,211,153,0.9)",
+                    bg: "rgba(52,211,153,0.08)",
+                    border: "rgba(52,211,153,0.22)",
+                    text: "Your 3 cards fan out with their grade, sport, and pick details. Click any card to flip it and read the full analysis.",
+                  },
+                  {
+                    step: "4",
+                    color: "rgba(167,139,250,0.9)",
+                    bg: "rgba(167,139,250,0.08)",
+                    border: "rgba(167,139,250,0.22)",
+                    text: "Tap \"Add All to Collection\" to save them permanently. Then toggle any card to showcase it publicly on the Community tab.",
+                  },
+                ].map(({ step, color, bg, border, text }) => (
+                  <div
+                    key={step}
+                    className="flex gap-3 items-start p-3 rounded-xl"
+                    style={{ background: bg, border: `1px solid ${border}` }}
+                  >
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                      style={{ background: "rgba(0,0,0,0.4)", border: `1.5px solid ${color}` }}
+                    >
+                      <span className="text-[11px] font-black" style={{ color }}>{step}</span>
+                    </div>
+                    <p className="text-xs text-white/60 leading-relaxed">{text}</p>
+                  </div>
+                ))}
               </div>
             </div>
-            <Button
-              size="lg"
-              onClick={() => openPackMutation.mutate()}
-              disabled={!packStatus?.available || openPackMutation.isPending}
-              className="font-black tracking-wider hover-elevate active-elevate-2"
-              data-testid="button-open-pack"
-            >
-              {openPackMutation.isPending ? "OPENING..." : "OPEN PACK"}
-            </Button>
-          </CardContent>
-        </Card>
+
+            {/* CTA */}
+            <div className="mt-auto pt-2">
+              {!packStatus?.available && packStatus?.nextPackAt ? (
+                <div
+                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl"
+                  style={{ background: "rgba(255,255,255,0.03)", border: "1px dashed rgba(255,255,255,0.12)" }}
+                  data-testid="pack-unavailable-notice"
+                >
+                  <Clock className="w-4 h-4 text-white/30" />
+                  <div className="text-center">
+                    <p className="text-xs font-black text-white/50 uppercase tracking-widest">Next pack drop</p>
+                    <p className="text-sm font-bold text-white/70 mt-0.5">
+                      {formatDistanceToNow(new Date(packStatus.nextPackAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  size="lg"
+                  onClick={() => openPackMutation.mutate()}
+                  disabled={!packStatus?.available || openPackMutation.isPending}
+                  className="w-full h-14 font-black text-base tracking-widest hover-elevate active-elevate-2"
+                  style={{
+                    background: packStatus?.available
+                      ? "linear-gradient(135deg, #b45309, #fbbf24, #b45309)"
+                      : undefined,
+                    color: packStatus?.available ? "#1c0a00" : undefined,
+                    boxShadow: packStatus?.available ? "0 0 28px rgba(251,191,36,0.30)" : undefined,
+                  }}
+                  data-testid="button-open-pack"
+                >
+                  {openPackMutation.isPending ? (
+                    <span className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      GENERATING YOUR CARDS...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="w-5 h-5" />
+                      OPEN PACK — {packStatus?.remainingToday ?? 0} AVAILABLE
+                    </span>
+                  )}
+                </Button>
+              )}
+              <p className="text-center text-[10px] text-white/25 mt-2 tracking-wide">
+                Cards are permanently saved to your collection after opening · Limit 1 pack per day
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Pack Reveal Overlay */}
