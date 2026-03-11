@@ -23,6 +23,7 @@ export default function Community() {
           title="Community"
           badge="Connect"
           subtitle="Connect with bettors, follow tipsters, and share wins"
+          description="Browse picks and winning tickets posted by other members, follow top performers to curate your activity feed, and share your own wins using the post button. The leaderboard updates daily based on verified betting performance. All posted picks are linked to the member's real track record — no unverifiable claims."
           variant="violet"
         />
 

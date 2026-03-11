@@ -472,6 +472,7 @@ export default function StrategyAdvisorPage() {
         icon={<Compass className="w-6 h-6" />}
         title="Strategy Advisor"
         subtitle="Choose a strategy, build your ticket, and we'll tell you exactly how good it is"
+        description="Select a betting template that matches your risk tolerance and bankroll goals — from conservative single-game plays to high-variance 5-leg parlays. Each strategy shows its recommended odds range, expected win rate, and ideal stake size. Once you select a strategy, build your ticket within that framework and get an instant graded verdict with EV analysis."
       />
 
       <div className="space-y-3">

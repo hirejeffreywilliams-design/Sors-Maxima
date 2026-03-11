@@ -219,8 +219,9 @@ export default function CardsPage() {
     <div className="container max-w-screen-2xl mx-auto py-6 px-4 space-y-8" data-testid="cards-page">
       <PageHero
         icon={<Trophy className="w-6 h-6" />}
-        title="Sors Intelligence Cards"
+        title="Intelligence Cards™"
         subtitle="Collect, trade, and showcase your best-performing picks"
+        description="Every Grade A+ pick you receive gets permanently minted as a collectible Intelligence Card. Open card packs to reveal new picks across various rarity tiers. Your card collection builds a verifiable performance portfolio — share individual cards or full collections on the member feed to prove your track record."
         variant="gold"
       />
 

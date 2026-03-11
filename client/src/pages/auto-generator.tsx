@@ -607,6 +607,7 @@ export default function AutoGenerator() {
           icon={<Sparkles className="w-6 h-6" />}
           title="Smart Ticket Generator"
           subtitle="Pick your sports, tap Generate, and get optimized tickets backed by real data"
+          description="Configure your sport, bet category, number of legs, and bankroll budget — then tap Generate. The 46-Factor Engine scores thousands of combinations and returns the highest-edge ticket for your setup. Review the pick breakdown and confidence scores, adjust any legs, then add the whole ticket to your parlay slip."
           actions={<TutorialButton onClick={() => setShowTutorial(true)} />}
         />
 

@@ -468,6 +468,7 @@ export default function SorsBooks() {
         title="Sors Books"
         badge="Intelligence Hub"
         subtitle="Track your sportsbook accounts, compare live lines, and maximize every bet"
+        description="Add each sportsbook account you use, track your balance and P&L per book, and use the live odds comparison table to find the best line before placing any bet. Before adding a pick to your slip, check here first — even a half-point difference in the spread can significantly change expected value over time."
         actions={
           <div className="flex items-center gap-2 shrink-0">
             <Button

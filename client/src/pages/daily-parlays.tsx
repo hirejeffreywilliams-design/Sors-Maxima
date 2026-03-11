@@ -952,6 +952,9 @@ export default function DailyParlays() {
                   46-factor model analysis across all sports
                   {lastUpdate && <span className="text-primary"> · Updated {getTimeAgo(lastUpdate)}</span>}
                 </p>
+                <p className="text-sm text-muted-foreground/60 mt-1 hidden sm:block max-w-lg">
+                  Browse model-generated parlay combinations for today's slate, pre-graded by combined edge. Tap any ticket to expand its legs and view confidence scores. Use the sport tabs to filter, then add a full ticket to your slip with one tap.
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3">

@@ -2060,6 +2060,7 @@ export default function CommandCenter() {
               <div>
                 <h1 className="text-lg font-bold tracking-tight leading-none">Intelligence Hub</h1>
                 <p className="text-[10px] text-muted-foreground mt-0.5">46-Factor Model Analysis™</p>
+                <p className="text-[10px] text-muted-foreground/60 mt-1 max-w-md hidden sm:block">Your daily picks dashboard — browse AI-ranked picks, monitor live scores, check sharp money alerts, and build your parlay slip. All data updates automatically every 30 seconds.</p>
               </div>
             </div>
             <ModelHealthChip />

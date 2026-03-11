@@ -294,6 +294,7 @@ export default function InternationalPage() {
           icon={<Globe className="w-6 h-6" />}
           title="International Sports"
           subtitle="Soccer picks from 7 global leagues — draws and underdogs the US market ignores"
+          description="Covers EPL, La Liga, Bundesliga, Serie A, Ligue 1, MLS, and UEFA competitions. The model specifically targets draw value and double-chance spots that American sportsbooks systematically underprice. Filter by league using the tabs above, or scroll the full ranked list sorted by edge. Each pick shows the vig-removed true probability alongside the market line."
           data-testid="heading-international"
           actions={feed ? (
             <div className="flex items-center gap-3 flex-shrink-0">

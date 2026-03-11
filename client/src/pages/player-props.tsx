@@ -1774,6 +1774,7 @@ export default function PlayerPropsPage() {
             icon={<Target className="w-6 h-6" />}
             title="Player Props"
             subtitle="Over/Under picks — tap a side to add to your slip"
+            description="Prop lines are screened for public over-bias, sharp signal alignment, and historical accuracy before being surfaced here. Lines tagged Sharp signal that our model strongly disagrees with public money. Tap the Over or Under button on any prop to instantly add it to your parlay slip. Filter by sport using the tabs at the top."
           />
 
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1" data-testid="sport-tabs">

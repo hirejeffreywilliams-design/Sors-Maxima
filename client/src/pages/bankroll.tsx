@@ -19,6 +19,7 @@ export default function Bankroll() {
           title="Finance"
           badge="Tracking"
           subtitle="Track bets, balances, and performance"
+          description="Log every wager — sport, stake, odds, and result — then watch your profit/loss update in real time. The Kelly Criterion tab calculates optimal stake sizes based on your current balance and edge. Set daily loss limits and session caps under Settings to protect your capital."
         />
 
         <Tabs defaultValue="history" className="space-y-6">

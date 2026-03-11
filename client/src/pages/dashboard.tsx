@@ -1098,6 +1098,9 @@ export default function Dashboard() {
           <p className="text-muted-foreground text-sm sm:text-base">
             Build parlays, straight bets, SGPs, teasers, and round robins
           </p>
+          <p className="text-sm text-muted-foreground/60 max-w-2xl mx-auto hidden sm:block">
+            Use the Quick Picks tab to get AI-suggested legs, or switch to Parlay Builder to add legs manually. The Correlation Analyzer grades your ticket combination, estimates EV, and recommends a stake based on your bankroll settings. Use the Visual Builder tab for a drag-and-drop interface.
+          </p>
           {freshnessData?.sources && (
             <div className="flex justify-center pt-1">
               <DataFreshnessBar sources={freshnessData.sources} />

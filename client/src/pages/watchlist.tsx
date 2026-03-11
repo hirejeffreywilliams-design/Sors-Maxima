@@ -118,6 +118,7 @@ export default function WatchlistPage() {
       <PageHero
         title="Watchlist"
         subtitle="Track your favorite teams and games in one place"
+        description="Search for any team and save them here. Once added, upcoming games for your tracked teams appear automatically with current odds and any available model picks. Use the notification toggle on each team to get alerts when their odds move significantly. This page is your shortlist before building a daily parlay."
         badge="Monitoring"
         variant="blue"
         icon={<Star className="w-6 h-6" />}

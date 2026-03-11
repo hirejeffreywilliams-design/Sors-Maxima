@@ -19,6 +19,7 @@ export default function Rewards() {
           title="Rewards & Practice"
           badge="Challenges"
           subtitle="Earn achievements and practice risk-free"
+          description="Complete betting challenges to earn achievement badges — milestones track streaks, discipline goals, and platform activity. A risk-free practice bankroll lets you simulate picks without spending real money, perfect for testing new strategies. Your progress and badge history carry over between sessions."
           variant="gold"
         />
 

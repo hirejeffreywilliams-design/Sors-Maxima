@@ -218,6 +218,7 @@ export default function Live() {
           title="Live Center"
           badge="LIVE"
           subtitle="Real-time scores, cashout engineering, hedge tools & AI analysis"
+          description="Switch between six tabs: Live Scores (game updates), Cashout Advisor (when to exit an active bet), Hedge Calculator (lock in profit on parlays), Momentum Tracker (which team is surging), Analytics (sharp money signals and CLV), and AI Assistant (ask anything about your active bets). All data refreshes every 30 seconds automatically."
           actions={
             <div className="flex items-center gap-2" data-testid="sse-live-status">
               {sse.connected ? (

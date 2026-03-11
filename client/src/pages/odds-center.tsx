@@ -1836,6 +1836,7 @@ export default function OddsCenter() {
       <PageHero
         title="Odds Center"
         subtitle={`Live odds, line movement, EV analysis, and bookmaker comparison — all in one place.${lastUpdated ? ` Updated ${lastUpdated}` : ""}`}
+        description="Every game's moneyline, spread, and total are pulled from up to 15 sportsbooks and refreshed automatically. Green EV percentages mean the market is offering better-than-fair pricing on that side — those are positive-value spots. Click any row to expand the full book-by-book odds grid. Use this before any bet to verify you're getting the best available number."
         badge="Market Intelligence"
         variant="default"
         icon={<DollarSign className="w-6 h-6" />}

@@ -135,6 +135,7 @@ export default function Tools() {
           icon={<BarChart3 className="w-6 h-6" />}
           title="Tools & Analytics"
           subtitle="Advanced betting analytics and research"
+          description="Use the category dropdown to switch between tool groups: AI Predictions, Matchup Analyzer, Sharp Action Tracker, Arbitrage Scanner, Bankroll Advisor, and more. Each tool provides a different analytical angle on today's slate. Tools marked with a tier badge require an Edge or Max subscription to unlock."
           actions={
             <Select value={activeGroup} onValueChange={handleGroupChange}>
               <SelectTrigger className="w-full sm:w-56 h-9 sm:h-10" data-testid="select-category">

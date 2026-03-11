@@ -240,6 +240,9 @@ export default function ResearchNotes() {
           <p className="text-sm text-muted-foreground mt-1">
             Save picks, stats, and analysis for your own parlay research. Your private notebook.
           </p>
+          <p className="text-sm text-muted-foreground/60 mt-1 hidden sm:block max-w-lg">
+            Tap New Note to write analysis for any pick, game, or trend you're tracking. Tag notes by sport, note type, and related game so you can find them later. Use the search bar and filters to navigate your history. Notes are private — only you can see them.
+          </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {notes.length > 0 && (

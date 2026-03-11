@@ -10,6 +10,7 @@ export interface PageHeroStat {
 export interface PageHeroProps extends React.HTMLAttributes<HTMLDivElement> {
   title: string;
   subtitle?: string;
+  description?: string;
   badge?: string;
   variant?: "default" | "gold" | "blue" | "violet";
   icon?: React.ReactNode;
@@ -55,6 +56,7 @@ const statColorMap: Record<string, string> = {
 export function PageHero({
   title,
   subtitle,
+  description,
   badge,
   variant = "default",
   icon,
@@ -83,6 +85,9 @@ export function PageHero({
           </h1>
           {subtitle && (
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">{subtitle}</p>
+          )}
+          {description && (
+            <p className="text-sm text-muted-foreground/70 leading-relaxed max-w-2xl">{description}</p>
           )}
         </div>
         {actions && (

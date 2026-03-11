@@ -280,6 +280,9 @@ export default function MMAPage() {
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Market-consensus analysis · Vig-removed true probabilities · {stats.total} fights
                 </p>
+                <p className="text-sm text-muted-foreground/60 mt-1 hidden sm:block max-w-lg">
+                  Picks are built using method-of-victory modeling, stance matchup analysis, and vig-removed market probabilities. The Edge % column shows how much our true probability disagrees with the market — higher positive edge means stronger expected value. Tap any fight card to expand the full reasoning breakdown.
+                </p>
               </div>
             </div>
             <Button

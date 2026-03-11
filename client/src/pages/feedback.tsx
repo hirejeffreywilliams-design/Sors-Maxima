@@ -142,6 +142,7 @@ export default function FeedbackPage() {
             My Feedback
           </h1>
           <p className="text-sm text-muted-foreground mt-1">Your submissions and responses from our team</p>
+          <p className="text-sm text-muted-foreground/60 mt-1 hidden sm:block max-w-lg">View every suggestion, bug report, and feature request you've submitted. Each item shows its current status (open, reviewed, resolved) and any reply from the team. To submit new feedback, use the feedback button at the bottom-right of any page.</p>
         </div>
         <Button
           variant="outline"
