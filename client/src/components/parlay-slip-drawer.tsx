@@ -416,7 +416,8 @@ function getPrimarySport(legs: ParlaySlipLeg[]): string | undefined {
   return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
 }
 
-function gradeColor(grade: string): string {
+function gradeColor(grade?: string): string {
+  if (!grade) return "bg-muted/50 text-muted-foreground border-border";
   if (grade.startsWith("A")) return "bg-green-500/15 text-green-600 border-green-500/30";
   if (grade.startsWith("B")) return "bg-blue-500/15 text-blue-600 border-blue-500/30";
   if (grade.startsWith("C")) return "bg-yellow-500/15 text-yellow-600 border-yellow-500/30";

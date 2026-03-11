@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773263443644_kvkey",
+      "timestamp": "2026-03-11T21:10:43.644Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "27,639 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773259742644_u6hnw",
       "timestamp": "2026-03-11T20:09:02.644Z",
       "resolved": false,
@@ -1932,8 +1942,8 @@
       "raw": "{\n  \"summary\": [\n    \"Overall win rate is slightly above break-even at 52.9%, but Total market is at 46.7% which may indicate potential model degradation.\",\n    \"API usage is healthy, but OpenAI budget usage is significantly below expected, requiring attention.\",\n    \"Churn rate is moderate at 4.2%, indicating some user retention issues that may need addressing.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Evaluate Model for Total Bets\",\n      \"description\": \"Investigate low performance in Total market (46.7% win rate) and consider adjustments to improve predictions.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"User Retention Strategy Review\",\n      \"description\": \"Assess the churn rate of 4.2% and develop strategies to enhance user retention and engagement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review OpenAI Budget Usage\",\n      \"description\": \"Examine why OpenAI usage is significantly under budget and ensure that necessary AI insights are being generated.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Potential Model Degradation in Total Market\",\n      \"description\": \"The win rate for Total bets is below 48%, indicating potential degradation of predictive model performance.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate OpenAI budget usage issues.\",\n      \"Monitor user engagement metrics over the next few days.\"\n    ],\n    \"this_week\": [\n      \"Conduct a thorough analysis of the Total market performance.\",\n      \"Develop a plan for improving user retention metrics.\",\n      \"Review and optimize betting strategies based on current performance data.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T20:09:02.644Z",
+  "lastQuickCheck": "2026-03-11T21:10:43.644Z",
   "lastDeepCheck": "2026-03-11T20:18:02.644Z",
-  "totalQuickChecks": 138,
+  "totalQuickChecks": 139,
   "totalDeepChecks": 34
 }

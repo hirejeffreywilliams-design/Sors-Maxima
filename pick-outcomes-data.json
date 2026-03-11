@@ -1311,6 +1311,54 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-spread-7374c3de68",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Florida Gators +1.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 83,
+      "ev": 33.64,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-moneyline-d4587a786c",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Florida Gators ML",
+      "betType": "moneyline",
+      "odds": -161,
+      "grade": "B+",
+      "confidence": 67,
+      "ev": 13.48,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851565-total-3dc2c9d32e",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "game": "TBD @ Florida Gators",
+      "homeTeam": "Florida Gators",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 64,
+      "ev": 33.64,
+      "gameTime": "2026-03-13T17:00Z",
+      "savedAt": "2026-03-11T21:09:44.535Z"
     }
   ],
   "settled": [
@@ -16575,7 +16623,7 @@
       "lost": 334,
       "push": 13,
       "rate": 53.5,
-      "pending": 82
+      "pending": 85
     },
     "bySport": {
       "NBA": {
