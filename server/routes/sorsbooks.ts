@@ -12,23 +12,61 @@ function numericUserId(req: Request): number | null {
   return isNaN(n) ? null : n;
 }
 
-const KNOWN_BOOKS: { key: string; name: string; color: string; url: string }[] = [
-  { key: "draftkings", name: "DraftKings", color: "#1a7f3c", url: "https://www.draftkings.com" },
-  { key: "fanduel", name: "FanDuel", color: "#1493ff", url: "https://www.fanduel.com" },
-  { key: "betmgm", name: "BetMGM", color: "#c8a415", url: "https://www.betmgm.com" },
-  { key: "caesars", name: "Caesars", color: "#0a2351", url: "https://www.williamhill.com/us" },
-  { key: "espnbet", name: "ESPN BET", color: "#d00", url: "https://www.espnbet.com" },
-  { key: "pointsbet", name: "PointsBet", color: "#cc0000", url: "https://www.pointsbet.com" },
-  { key: "betrivers", name: "BetRivers", color: "#003087", url: "https://www.betrivers.com" },
-  { key: "bet365", name: "Bet365", color: "#027b5b", url: "https://www.bet365.com" },
-  { key: "unibet", name: "Unibet", color: "#147b45", url: "https://www.unibet.com" },
-  { key: "fanatics", name: "Fanatics", color: "#c8102e", url: "https://www.fanatics.com/sportsbook" },
+export const KNOWN_BOOKS: { key: string; name: string; color: string; url: string; tier?: "primary" | "secondary" | "sharp" }[] = [
+  // Primary US Tier 1 — largest operators
+  { key: "draftkings",     name: "DraftKings",        color: "#1a7f3c", url: "https://www.draftkings.com",             tier: "primary" },
+  { key: "fanduel",        name: "FanDuel",            color: "#1493ff", url: "https://www.fanduel.com",               tier: "primary" },
+  { key: "betmgm",         name: "BetMGM",             color: "#c8a415", url: "https://www.betmgm.com",               tier: "primary" },
+  { key: "caesars",        name: "Caesars",            color: "#0a2351", url: "https://www.caesarssportsbook.com",     tier: "primary" },
+  { key: "espnbet",        name: "ESPN BET",           color: "#cc0000", url: "https://www.espnbet.com",              tier: "primary" },
+  { key: "bet365_us",      name: "bet365",             color: "#027b5b", url: "https://www.bet365.com",               tier: "primary" },
+  { key: "fanatics",       name: "Fanatics",           color: "#c8102e", url: "https://sportsbook.fanatics.com",      tier: "primary" },
+  { key: "hardrockbet",    name: "Hard Rock Bet",      color: "#b22222", url: "https://www.hardrockbet.com",          tier: "primary" },
+  // Primary US Tier 2 — established mid-size books
+  { key: "betrivers",      name: "BetRivers",          color: "#003087", url: "https://www.betrivers.com",            tier: "secondary" },
+  { key: "pointsbet_us",   name: "PointsBet",          color: "#cc0000", url: "https://www.pointsbet.com",           tier: "secondary" },
+  { key: "unibet_us",      name: "Unibet",             color: "#147b45", url: "https://www.unibet.com/betting",      tier: "secondary" },
+  { key: "wynnbet",        name: "WynnBET",            color: "#b08d57", url: "https://www.wynnbet.com",             tier: "secondary" },
+  { key: "betparx",        name: "BetParx",            color: "#4a0e8f", url: "https://www.betparx.com",             tier: "secondary" },
+  { key: "ballybet",       name: "Bally Bet",          color: "#e86428", url: "https://www.ballybet.com",            tier: "secondary" },
+  { key: "betway_us",      name: "Betway",             color: "#00a651", url: "https://betway.com/en/sports",        tier: "secondary" },
+  { key: "circasports",    name: "Circa Sports",       color: "#0047ab", url: "https://www.circasports.com",         tier: "secondary" },
+  { key: "fliff",          name: "Fliff",              color: "#2563eb", url: "https://www.getfliff.com",            tier: "secondary" },
+  { key: "superdraft",     name: "SuperDraft",         color: "#005cde", url: "https://www.superdraft.com",          tier: "secondary" },
+  // Sharp / offshore reference books — used for line movement and EV analysis
+  { key: "pinnacle",       name: "Pinnacle",           color: "#8b1a2e", url: "https://www.pinnacle.com",            tier: "sharp" },
+  { key: "betfair_ex_uk",  name: "Betfair Exchange",   color: "#f5a623", url: "https://www.betfair.com",             tier: "sharp" },
+  { key: "betonlineag",    name: "BetOnline",          color: "#1e66ac", url: "https://www.betonline.ag",            tier: "sharp" },
+  { key: "mybookie_ag",    name: "MyBookie",           color: "#b58e3f", url: "https://www.mybookie.ag",             tier: "sharp" },
+  { key: "lowvig_ag",      name: "LowVig",             color: "#374151", url: "https://www.lowvig.ag",               tier: "sharp" },
+  { key: "bookmaker_eu",   name: "Bookmaker",          color: "#1f2937", url: "https://www.bookmaker.eu",            tier: "sharp" },
 ];
+
+// Backward-compatible key aliases — old keys stored in DB map to current catalog keys
+const KEY_ALIASES: Record<string, string> = {
+  "pointsbet":    "pointsbet_us",
+  "unibet":       "unibet_us",
+  "bet365":       "bet365_us",
+  "betway":       "betway_us",
+  "betfair":      "betfair_ex_uk",
+  "betfairexuk":  "betfair_ex_uk",
+  "betfairexeu":  "betfair_ex_eu",
+  "mybookie":     "mybookie_ag",
+  "betonline":    "betonlineag",
+  "lowvig":       "lowvig_ag",
+  "bookmaker":    "bookmaker_eu",
+};
+
+function resolveBookKey(raw: string): string {
+  const normalized = raw.toLowerCase().replace(/[\s.()\-]/g, "");
+  return KEY_ALIASES[normalized] ?? normalized;
+}
 
 export function registerSorsbooksRoutes(app: Express) {
   // GET all known sportsbooks (public — used for the add-book picker)
+  // Returns only primary + secondary tier books; sharp/offshore books are excluded from the user-facing catalog
   app.get("/api/sorsbooks/catalog", (_req: Request, res: Response) => {
-    res.json(KNOWN_BOOKS);
+    res.json(KNOWN_BOOKS.filter(b => b.tier !== "sharp"));
   });
 
   // GET per-book stats combining account balances + bet history aggregation
@@ -55,7 +93,7 @@ export function registerSorsbooksRoutes(app: Express) {
 
       const bookStats: Record<string, any> = {};
       for (const row of historyRows.rows as any[]) {
-        const bk = (row.sportsbook || "").toLowerCase().replace(/\s+/g, "");
+        const bk = resolveBookKey(row.sportsbook || "");
         bookStats[bk] = {
           totalBets: Number(row.total_bets),
           wins: Number(row.wins),
@@ -68,8 +106,8 @@ export function registerSorsbooksRoutes(app: Express) {
 
       // Enrich accounts with catalog info + bet history stats
       const enriched = accounts.map(a => {
-        const key = a.sportsbookName.toLowerCase().replace(/\s+/g, "");
-        const catalog = KNOWN_BOOKS.find(b => b.key === key || b.name.toLowerCase().replace(/\s+/g, "") === key);
+        const key = resolveBookKey(a.sportsbookName);
+        const catalog = KNOWN_BOOKS.find(b => b.key === key || resolveBookKey(b.name) === key);
         const stats = bookStats[key] || { totalBets: 0, wins: 0, losses: 0, totalStaked: 0, netProfit: 0, winRate: 0 };
         return {
           ...a,
@@ -85,7 +123,7 @@ export function registerSorsbooksRoutes(app: Express) {
       const historyOnlyBooks = Object.entries(bookStats)
         .filter(([k]) => !accountKeys.has(k))
         .map(([k, stats]) => {
-          const catalog = KNOWN_BOOKS.find(b => b.key === k);
+          const catalog = KNOWN_BOOKS.find(b => b.key === k || resolveBookKey(b.name) === k);
           return {
             id: null,
             sportsbookName: catalog?.name || k,

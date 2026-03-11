@@ -1,35 +1,85 @@
 import { useState } from "react";
 import { ChevronDown, ChevronUp, ExternalLink, Database, BookOpen } from "lucide-react";
 
-const BOOK_COLORS: Record<string, string> = {
-  "DraftKings":   "#53d338",
-  "FanDuel":      "#1493ff",
-  "BetMGM":       "#c8a951",
-  "Caesars":      "#004f9f",
-  "PointsBet":    "#c8102e",
-  "BetRivers":    "#003087",
-  "WynnBET":      "#9a7c4d",
-  "Unibet":       "#147b45",
-  "Barstool":     "#d62828",
-  "ESPN Bet":     "#cc0000",
-  "bet365":       "#027b5b",
-  "Hard Rock":    "#1a1a1a",
+interface BookConfig {
+  color: string;
+  short: string;
+  url?: string;
+}
+
+const BOOK_REGISTRY: Record<string, BookConfig> = {
+  // US Tier 1 — major operators (keyed by display name AND API key)
+  "DraftKings":              { color: "#53d338", short: "DK",   url: "https://www.draftkings.com" },
+  "draftkings":              { color: "#53d338", short: "DK",   url: "https://www.draftkings.com" },
+  "FanDuel":                 { color: "#1493ff", short: "FD",   url: "https://www.fanduel.com" },
+  "fanduel":                 { color: "#1493ff", short: "FD",   url: "https://www.fanduel.com" },
+  "BetMGM":                  { color: "#c8a951", short: "MGM",  url: "https://www.betmgm.com" },
+  "betmgm":                  { color: "#c8a951", short: "MGM",  url: "https://www.betmgm.com" },
+  "Caesars":                 { color: "#004f9f", short: "CZR",  url: "https://www.caesarssportsbook.com" },
+  "caesars":                 { color: "#004f9f", short: "CZR",  url: "https://www.caesarssportsbook.com" },
+  "ESPN BET":                { color: "#cc0000", short: "ESPN", url: "https://www.espnbet.com" },
+  "espnbet":                 { color: "#cc0000", short: "ESPN", url: "https://www.espnbet.com" },
+  "bet365":                  { color: "#027b5b", short: "365",  url: "https://www.bet365.com" },
+  "bet365_us":               { color: "#027b5b", short: "365",  url: "https://www.bet365.com" },
+  "Fanatics Sportsbook":     { color: "#c8102e", short: "FAN",  url: "https://sportsbook.fanatics.com" },
+  "Fanatics":                { color: "#c8102e", short: "FAN",  url: "https://sportsbook.fanatics.com" },
+  "fanatics":                { color: "#c8102e", short: "FAN",  url: "https://sportsbook.fanatics.com" },
+  "Hard Rock Bet":           { color: "#b22222", short: "HR",   url: "https://www.hardrockbet.com" },
+  "hardrockbet":             { color: "#b22222", short: "HR",   url: "https://www.hardrockbet.com" },
+  // US Tier 2 — established mid-size books
+  "BetRivers":               { color: "#003087", short: "BR",   url: "https://www.betrivers.com" },
+  "betrivers":               { color: "#003087", short: "BR",   url: "https://www.betrivers.com" },
+  "PointsBet (US)":          { color: "#cc0000", short: "PB",   url: "https://www.pointsbet.com" },
+  "PointsBet":               { color: "#cc0000", short: "PB",   url: "https://www.pointsbet.com" },
+  "pointsbet_us":            { color: "#cc0000", short: "PB",   url: "https://www.pointsbet.com" },
+  "pointsbet":               { color: "#cc0000", short: "PB",   url: "https://www.pointsbet.com" },
+  "Unibet (US)":             { color: "#147b45", short: "UNI",  url: "https://www.unibet.com" },
+  "Unibet":                  { color: "#147b45", short: "UNI",  url: "https://www.unibet.com" },
+  "unibet_us":               { color: "#147b45", short: "UNI",  url: "https://www.unibet.com" },
+  "unibet":                  { color: "#147b45", short: "UNI",  url: "https://www.unibet.com" },
+  "WynnBET":                 { color: "#b08d57", short: "WYN",  url: "https://www.wynnbet.com" },
+  "wynnbet":                 { color: "#b08d57", short: "WYN",  url: "https://www.wynnbet.com" },
+  "BetParx":                 { color: "#4a0e8f", short: "BPX",  url: "https://www.betparx.com" },
+  "betparx":                 { color: "#4a0e8f", short: "BPX",  url: "https://www.betparx.com" },
+  "Bally Bet":               { color: "#e86428", short: "BLY",  url: "https://www.ballybet.com" },
+  "ballybet":                { color: "#e86428", short: "BLY",  url: "https://www.ballybet.com" },
+  "Betway":                  { color: "#00a651", short: "BTW",  url: "https://betway.com/en/sports" },
+  "betway_us":               { color: "#00a651", short: "BTW",  url: "https://betway.com/en/sports" },
+  "Circa Sports":            { color: "#0047ab", short: "CRC",  url: "https://www.circasports.com" },
+  "circasports":             { color: "#0047ab", short: "CRC",  url: "https://www.circasports.com" },
+  "Fliff":                   { color: "#2563eb", short: "FLF",  url: "https://www.getfliff.com" },
+  "fliff":                   { color: "#2563eb", short: "FLF",  url: "https://www.getfliff.com" },
+  "SuperDraft":              { color: "#005cde", short: "SD",   url: "https://www.superdraft.com" },
+  "superdraft":              { color: "#005cde", short: "SD",   url: "https://www.superdraft.com" },
+  "Barstool Sportsbook":     { color: "#d62828", short: "BST",  url: "https://www.barstoolsportsbook.com" },
+  "Barstool":                { color: "#d62828", short: "BST",  url: "https://www.barstoolsportsbook.com" },
+  "barstool":                { color: "#d62828", short: "BST",  url: "https://www.barstoolsportsbook.com" },
+  // Sharp / offshore reference books
+  "Pinnacle":                { color: "#8b1a2e", short: "PIN",  url: "https://www.pinnacle.com" },
+  "pinnacle":                { color: "#8b1a2e", short: "PIN",  url: "https://www.pinnacle.com" },
+  "Betfair Exchange":        { color: "#f5a623", short: "BFX",  url: "https://www.betfair.com" },
+  "Betfair Exchange (UK)":   { color: "#f5a623", short: "BFX",  url: "https://www.betfair.com" },
+  "Betfair Exchange (EU)":   { color: "#f5a623", short: "BFX",  url: "https://www.betfair.com" },
+  "betfair_ex_uk":           { color: "#f5a623", short: "BFX",  url: "https://www.betfair.com" },
+  "betfair_ex_eu":           { color: "#f5a623", short: "BFX",  url: "https://www.betfair.com" },
+  "BetOnline.ag":            { color: "#1e66ac", short: "BOL",  url: "https://www.betonline.ag" },
+  "BetOnline":               { color: "#1e66ac", short: "BOL",  url: "https://www.betonline.ag" },
+  "betonlineag":             { color: "#1e66ac", short: "BOL",  url: "https://www.betonline.ag" },
+  "MyBookie.ag":             { color: "#b58e3f", short: "MBK",  url: "https://www.mybookie.ag" },
+  "MyBookie":                { color: "#b58e3f", short: "MBK",  url: "https://www.mybookie.ag" },
+  "mybookie_ag":             { color: "#b58e3f", short: "MBK",  url: "https://www.mybookie.ag" },
+  "LowVig.ag":               { color: "#374151", short: "LVG",  url: "https://www.lowvig.ag" },
+  "LowVig":                  { color: "#374151", short: "LVG",  url: "https://www.lowvig.ag" },
+  "lowvig_ag":               { color: "#374151", short: "LVG",  url: "https://www.lowvig.ag" },
+  "Bookmaker":               { color: "#1f2937", short: "BKM",  url: "https://www.bookmaker.eu" },
+  "bookmaker_eu":            { color: "#1f2937", short: "BKM",  url: "https://www.bookmaker.eu" },
+  "BetCris":                 { color: "#005f73", short: "BTC",  url: "https://www.betcris.com" },
+  "betcris":                 { color: "#005f73", short: "BTC",  url: "https://www.betcris.com" },
 };
 
-const BOOK_SHORT: Record<string, string> = {
-  "DraftKings":   "DK",
-  "FanDuel":      "FD",
-  "BetMGM":       "MGM",
-  "Caesars":      "CZR",
-  "PointsBet":    "PB",
-  "BetRivers":    "BR",
-  "WynnBET":      "WYN",
-  "Unibet":       "UNI",
-  "Barstool":     "BST",
-  "ESPN Bet":     "ESPN",
-  "bet365":       "365",
-  "Hard Rock":    "HR",
-};
+function getBookConfig(book: string): BookConfig {
+  return BOOK_REGISTRY[book] ?? { color: "#6b7280", short: book.substring(0, 3).toUpperCase() };
+}
 
 function formatOdds(odds: number): string {
   if (!odds) return "—";
@@ -37,20 +87,19 @@ function formatOdds(odds: number): string {
 }
 
 function BookBadge({ book, odds, isBest }: { book: string; odds: number; isBest?: boolean }) {
-  const color = BOOK_COLORS[book] ?? "#6b7280";
-  const shortName = BOOK_SHORT[book] ?? book.split(" ")[0];
+  const cfg = getBookConfig(book);
   return (
     <div
       className="flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-bold shrink-0"
       style={{
-        background: isBest ? `${color}18` : "rgba(255,255,255,0.04)",
-        borderColor: isBest ? `${color}45` : "rgba(255,255,255,0.08)",
-        color: isBest ? color : "rgba(255,255,255,0.5)",
+        background: isBest ? `${cfg.color}18` : "rgba(255,255,255,0.04)",
+        borderColor: isBest ? `${cfg.color}45` : "rgba(255,255,255,0.08)",
+        color: isBest ? cfg.color : "rgba(255,255,255,0.5)",
       }}
       title={`${book}: ${formatOdds(odds)}`}
     >
-      {isBest && <span className="w-1 h-1 rounded-full mr-0.5 shrink-0" style={{ background: color }} />}
-      <span>{shortName}</span>
+      {isBest && <span className="w-1 h-1 rounded-full mr-0.5 shrink-0" style={{ background: cfg.color }} />}
+      <span>{cfg.short}</span>
       <span className="tabular-nums">{formatOdds(odds)}</span>
     </div>
   );
@@ -85,7 +134,6 @@ export function OddsAttribution({
   }
 
   const bestBook = allBookOdds?.[0];
-  const otherBooks = allBookOdds?.slice(1, 4) ?? [];
 
   if (compact) {
     return (
@@ -119,7 +167,7 @@ export function OddsAttribution({
           <>
             <span className="text-[7px] text-white/20">·</span>
             <span className="text-[8px] font-bold text-white/40">
-              Best: {BOOK_SHORT[bestBook.book] ?? bestBook.book} ({formatOdds(bestBook.odds)})
+              Best: {getBookConfig(bestBook.book).short} ({formatOdds(bestBook.odds)})
             </span>
           </>
         )}

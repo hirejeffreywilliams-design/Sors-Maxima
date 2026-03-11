@@ -345,8 +345,12 @@ function generateEVAnalysis(decimalOdds: number, outcomeId: string, marketOdds?:
       const avgDecimal = americanToDecimal(avgAmerican);
       const consensusProb = 1 / avgDecimal;
 
-      const sharpBooks = marketOdds.bookmakers.filter(b => 
-        ["pinnacle", "betfair", "betcris", "bookmaker"].includes(b.key.toLowerCase())
+      const SHARP_BOOK_KEYS = [
+        "pinnacle", "betfair_ex_uk", "betfair_ex_eu", "betfair",
+        "betcris", "bookmaker_eu", "bookmaker", "lowvig_ag",
+      ];
+      const sharpBooks = marketOdds.bookmakers.filter(b =>
+        SHARP_BOOK_KEYS.includes(b.key.toLowerCase())
       );
       let sharpProb = consensusProb;
       if (sharpBooks.length > 0) {

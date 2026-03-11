@@ -104,9 +104,11 @@ function AffiliateDetailsDialog({ open, onOpenChange }: { open: boolean; onOpenC
           <div className="space-y-2">
             <h4 className="font-medium">Partner Sportsbooks</h4>
             <p className="text-muted-foreground">
-              We partner with licensed, regulated sportsbooks including DraftKings, FanDuel, 
-              BetMGM, Caesars, PointsBet, and BetRivers. All partners are licensed in their 
-              respective jurisdictions.
+              We display odds from licensed, regulated sportsbooks including DraftKings, FanDuel,
+              BetMGM, Caesars, ESPN BET, bet365, Fanatics, Hard Rock Bet, BetRivers, PointsBet,
+              WynnBET, BetParx, Bally Bet, Betway, Circa Sports, and Unibet. All sportsbooks
+              displayed are licensed in their respective jurisdictions. Line data is sourced from
+              The Odds API and refreshed in real time.
             </p>
           </div>
 

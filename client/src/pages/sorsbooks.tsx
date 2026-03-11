@@ -11,7 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Landmark, Plus, TrendingUp, TrendingDown, DollarSign, BarChart3,
@@ -66,6 +66,7 @@ interface CatalogBook {
   name: string;
   color: string;
   url: string;
+  tier?: "primary" | "secondary" | "sharp";
 }
 
 function formatOdds(o: number) {
@@ -139,14 +140,33 @@ function AddBookDialog({ catalog }: { catalog: CatalogBook[] }) {
                 <SelectValue placeholder="Choose your sportsbook…" />
               </SelectTrigger>
               <SelectContent>
-                {catalog.map(b => (
-                  <SelectItem key={b.key} value={b.key}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded" style={{ backgroundColor: b.color }} />
-                      {b.name}
-                    </div>
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Major Books</SelectLabel>
+                  {catalog.filter(b => !b.tier || b.tier === "primary").map(b => (
+                    <SelectItem key={b.key} value={b.key}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: b.color }} />
+                        {b.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                {catalog.some(b => b.tier === "secondary") && (
+                  <>
+                    <SelectSeparator />
+                    <SelectGroup>
+                      <SelectLabel className="text-[10px] uppercase tracking-widest text-muted-foreground/60">Regional & Emerging</SelectLabel>
+                      {catalog.filter(b => b.tier === "secondary").map(b => (
+                        <SelectItem key={b.key} value={b.key}>
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: b.color }} />
+                            {b.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </>
+                )}
               </SelectContent>
             </Select>
           </div>
