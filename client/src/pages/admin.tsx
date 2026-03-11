@@ -517,6 +517,7 @@ export default function AdminDashboard() {
     { href: "/admin/system-health",      label: "System Health",          desc: "Memory, engine cycles & cache status",  icon: Activity },
     { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
     { href: "/admin/policy-standards",   label: "Policy & Standards",     desc: "Company policies, procedures, grade standards & AI compliance", icon: ShieldCheck },
+    { href: "/admin/feedback",           label: "Member Feedback",         desc: "All user submissions, ratings & NPS scores", icon: MessageSquare },
   ];
 
   const allToolSections = [
@@ -539,6 +540,7 @@ export default function AdminDashboard() {
         { href: "/admin/user-health",    label: "User Health",       icon: Activity },
         { href: "/admin/applications",   label: "Applications",      icon: UserCheck },
         { href: "/admin/support",        label: "Support Dashboard", icon: MessageSquare },
+        { href: "/admin/feedback",       label: "Member Feedback",   icon: MessageSquare },
         { href: "/admin/fraud",          label: "Fraud Dashboard",   icon: AlertOctagon },
         { href: "/admin/assistant",      label: "AI Assistant",      icon: Bot },
       ],

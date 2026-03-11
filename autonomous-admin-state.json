@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773190686362_uuc1w",
+      "timestamp": "2026-03-11T00:58:06.362Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "34,500 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773187992904_gnpnu",
       "timestamp": "2026-03-11T00:13:12.904Z",
       "resolved": false,
@@ -1851,8 +1861,8 @@
       "raw": "{\n  \"summary\": [\n    \"Current win rate is 54.1%, above the break-even threshold of 52.4%.\",\n    \"Total settled picks stand at 397, indicating active engagement.\",\n    \"API usage is on track with healthy budgets across services, but there is an anomaly with apifootball having a negative usage value.\",\n    \"Pick accuracy is showing a decline in 'Total' market with a win rate of 46.2%.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate apifootball API Usage\",\n      \"description\": \"Analyze the unexpected negative usage of apifootball and resolve the discrepancy.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Review Total Market Performance\",\n      \"description\": \"Conduct a thorough review of selections in the Total market due to the win rate dropping below 48%.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Initiate investigation into apifootball API budget discrepancy.\",\n      \"Contact service provider to clarify usage metrics for apifootball.\",\n      \"Prepare a report summarizing current win rates across different markets.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments in predictions for the Total market based on review findings.\",\n      \"Monitor win rates and API usage trends regularly throughout the week.\",\n      \"Evaluate long-term strategies to maintain or improve win rates across all markets.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T00:13:12.904Z",
+  "lastQuickCheck": "2026-03-11T00:58:06.362Z",
   "lastDeepCheck": "2026-03-10T21:38:05.096Z",
-  "totalQuickChecks": 125,
+  "totalQuickChecks": 126,
   "totalDeepChecks": 27
 }

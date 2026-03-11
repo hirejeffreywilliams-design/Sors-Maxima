@@ -16166,15 +16166,35 @@
       "homeScore": 0,
       "awayScore": 4,
       "settledAt": "2026-03-11T00:46:50.338Z"
+    },
+    {
+      "id": "precomp-NHL-401803381-spread-a597897d77",
+      "gameId": "401803381",
+      "sport": "NHL",
+      "game": "Detroit Red Wings @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Detroit Red Wings",
+      "pick": "Tampa Bay Lightning 0",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 54,
+      "ev": -16,
+      "gameTime": "2026-03-12T23:00Z",
+      "savedAt": "2026-03-11T00:54:48.559Z",
+      "result": "won",
+      "homeScore": 8,
+      "awayScore": 7,
+      "settledAt": "2026-03-11T00:57:40.507Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 726,
-      "won": 388,
+      "total": 727,
+      "won": 389,
       "lost": 325,
       "push": 13,
-      "rate": 53.4,
+      "rate": 53.5,
       "pending": 82
     },
     "bySport": {
@@ -16184,9 +16204,9 @@
         "rate": 52
       },
       "NHL": {
-        "total": 256,
-        "won": 134,
-        "rate": 52.3
+        "total": 257,
+        "won": 135,
+        "rate": 52.5
       },
       "NCAAB": {
         "total": 218,
@@ -16211,9 +16231,9 @@
         "rate": 52.1
       },
       "C+": {
-        "total": 169,
-        "won": 94,
-        "rate": 55.6
+        "total": 170,
+        "won": 95,
+        "rate": 55.9
       },
       "D+": {
         "total": 34,
@@ -16254,10 +16274,10 @@
         "roi": 12.2
       },
       "Spread": {
-        "total": 222,
-        "won": 120,
-        "rate": 54.1,
-        "roi": 6.1
+        "total": 223,
+        "won": 121,
+        "rate": 54.3,
+        "roi": 6.5
       },
       "Total": {
         "total": 212,
@@ -16273,28 +16293,28 @@
       }
     },
     "recentForm": {
-      "won": 35,
-      "lost": 15,
+      "won": 36,
+      "lost": 14,
       "push": 0,
-      "rate": 70
+      "rate": 72
     },
-    "lastUpdated": "2026-03-11T00:47:34.365Z",
-    "roi": 6.8,
-    "brierScore": 0.2605,
+    "lastUpdated": "2026-03-11T01:32:03.319Z",
+    "roi": 6.9,
+    "brierScore": 0.2604,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.063,
+    "sharpeRatio": 0.065,
     "homeAwayBias": {
-      "homeWinRate": 57.5,
+      "homeWinRate": 57.7,
       "awayWinRate": 42,
-      "homeTotal": 358,
+      "homeTotal": 359,
       "awayTotal": 81
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
-        "predicted": 52.7,
-        "actual": 63.4,
-        "total": 71
+        "predicted": 52.8,
+        "actual": 63.9,
+        "total": 72
       },
       {
         "range": "55-60",

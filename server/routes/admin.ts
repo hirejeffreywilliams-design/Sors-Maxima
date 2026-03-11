@@ -1962,40 +1962,7 @@ Follow these rules:
     }
   });
 
-  // ── Feedback System ──
-  const feedbackStore: Array<{ id: string; category: string; message: string; page: string; username: string; timestamp: string }> = [];
-
-  app.post("/api/feedback", (req, res) => {
-    try {
-      const { category, message, page } = req.body;
-      if (!category || !message) {
-        return res.status(400).json({ error: "Category and message are required" });
-      }
-      const entry = {
-        id: crypto.randomUUID(),
-        category,
-        message: String(message).slice(0, 500),
-        page: page || "/",
-        username: req.session?.username || "anonymous",
-        timestamp: new Date().toISOString(),
-      };
-      feedbackStore.push(entry);
-      auditTrail.record(
-        req.session?.userId || "anonymous",
-        "feedback_submitted",
-        "feedback",
-        entry.id,
-        { ip: req.ip || "unknown", metadata: { category } }
-      );
-      res.json({ success: true, id: entry.id });
-    } catch (err) {
-      res.status(500).json({ error: "Failed to submit feedback" });
-    }
-  });
-
-  app.get("/api/admin/feedback", requireAdmin, (_req, res) => {
-    res.json(feedbackStore.slice().reverse());
-  });
+  // ── Feedback System moved to server/routes/feedback.ts ──
 
   // ── Account / GDPR Data Tools ──
   app.get("/api/account/export", requireAuth, async (req, res) => {

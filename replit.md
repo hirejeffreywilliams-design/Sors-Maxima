@@ -60,6 +60,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **API Budget Optimizer Correction**: Corrected `apifootball` budget and implemented throttle-aware cache TTL in `odds-provider.ts`.
 - **LCT Auto-Expiry**: `/api/life-changer-ticket` route automatically expires pending LCT tickets older than 3 days.
 - **SSE track-record-update Event**: Broadcasts `track-record-update` SSE event on every LCT settlement and track record invalidation, updating relevant frontend pages.
+- **Member Feedback System**: Full feedback pipeline with `user_feedback` PostgreSQL table. Members submit via a 3-step floating widget (category cards → star rating + message → NPS score). Feedback history visible at `/feedback` with admin reply display. Admin manages all submissions at `/admin/feedback` with filters, reply functionality, and status management (open/reviewed/resolved/closed). Routes at `POST /api/feedback`, `GET /api/feedback/my` (auth required), `GET/PATCH/DELETE /api/admin/feedback` (admin required).
 
 ## External Dependencies
 - **Frontend Framework**: React

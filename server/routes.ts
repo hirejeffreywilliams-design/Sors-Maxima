@@ -14,6 +14,7 @@ import { registerSorsbooksRoutes } from "./routes/sorsbooks";
 import cardsRouter from "./routes/cards";
 import { registerResearchRoutes } from "./routes/research";
 import { registerGuidelinesRoutes } from "./routes/guidelines";
+import { registerFeedbackRoutes } from "./routes/feedback";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -34,6 +35,7 @@ export async function registerRoutes(
   app.use("/api/cards", cardsRouter);
   registerResearchRoutes(app);
   registerGuidelinesRoutes(app);
+  registerFeedbackRoutes(app);
 
   return httpServer;
 }

@@ -84,6 +84,8 @@ const MMAPage = lazy(() => import("@/pages/mma"));
 const OddsCenter = lazy(() => import("@/pages/odds-center"));
 const PropParlayBuilder = lazy(() => import("@/pages/prop-parlay-builder"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
+const FeedbackPage = lazy(() => import("@/pages/feedback"));
+const AdminFeedback = lazy(() => import("@/pages/admin-feedback"));
 const PlatformIntelligencePage = lazy(() => import("@/pages/platform-intelligence"));
 const CardsPage = lazy(() => import("@/pages/cards"));
 const WatchlistPage = lazy(() => import("@/pages/watchlist"));
@@ -230,6 +232,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/user-health">{() => <AdminGuard component={AdminUserHealth} authState={authState} />}</Route>
               <Route path="/admin/support">{() => <AdminGuard component={AdminSupportDashboard} authState={authState} />}</Route>
               <Route path="/admin/fraud">{() => <AdminGuard component={AdminFraudDashboard} authState={authState} />}</Route>
+              <Route path="/admin/feedback">{() => <AdminGuard component={AdminFeedback} authState={authState} />}</Route>
               <Route path="/admin/ab-tests">{() => <AdminGuard component={AdminABTests} authState={authState} />}</Route>
               <Route path="/admin/lifecycle-campaigns">{() => <AdminGuard component={AdminLifecycleCampaigns} authState={authState} />}</Route>
               <Route path="/admin/segmentation">{() => <AdminGuard component={AdminSegmentation} authState={authState} />}</Route>
@@ -341,6 +344,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/round-robin">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
         <Route path="/onboarding" component={OnboardingPage} />
+        <Route path="/feedback" component={FeedbackPage} />
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/research" component={ResearchNotesPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
