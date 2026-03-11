@@ -24,7 +24,7 @@ import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
   Zap, Star, Target, Shield, Search, X, SlidersHorizontal,
-  Minus, Plus, RotateCcw, BarChart3, Trophy, BookOpen,
+  Minus, Plus, RotateCcw, BarChart3, Trophy, BookOpen, Shuffle, ArrowLeftRight,
 } from "lucide-react";
 
 interface MarketProp {
@@ -1547,6 +1547,323 @@ function TopPicksHero({ sport, addLeg, removeLeg, slipLegIds }: {
   );
 }
 
+// ── Prop Variance / Variety Calculator ───────────────────────────────────────
+
+function americanToDecimal(odds: number): number {
+  return odds > 0 ? odds / 100 + 1 : 100 / Math.abs(odds) + 1;
+}
+
+function decimalToAmerican(decimal: number): number {
+  if (decimal >= 2) return Math.round((decimal - 1) * 100);
+  return Math.round(-100 / (decimal - 1));
+}
+
+interface TicketLeg {
+  playerName: string;
+  market: string;
+  marketLabel: string;
+  line: number;
+  recommendation: "over" | "under";
+  confidence: number;
+  edge: number;
+  odds: number;
+  gameId: string;
+  gameName: string;
+  isSwapped?: boolean;
+  swappedFrom?: string;
+}
+
+interface TicketVariant {
+  id: string;
+  label: string;
+  description: string;
+  legs: TicketLeg[];
+  combinedDecimalOdds: number;
+  combinedAmerican: number;
+  winProbability: number;
+  expectedValue: number;
+}
+
+function calcTicket(legs: TicketLeg[]): Pick<TicketVariant, "combinedDecimalOdds" | "combinedAmerican" | "winProbability" | "expectedValue"> {
+  const combinedDecimalOdds = legs.reduce((acc, l) => acc * americanToDecimal(l.odds), 1);
+  const combinedAmerican = decimalToAmerican(combinedDecimalOdds);
+  const winProbability = legs.reduce((acc, l) => acc * (l.confidence / 100), 1);
+  const expectedValue = winProbability * combinedDecimalOdds - 1;
+  return { combinedDecimalOdds, combinedAmerican, winProbability, expectedValue };
+}
+
+function pickToLeg(p: TopPick): TicketLeg {
+  return {
+    playerName: p.playerName,
+    market: p.market,
+    marketLabel: p.marketLabel,
+    line: p.line,
+    recommendation: p.recommendation,
+    confidence: p.confidence,
+    edge: p.edge,
+    odds: p.recommendation === "over" ? p.overOdds : p.underOdds,
+    gameId: p.gameId,
+    gameName: p.gameName,
+  };
+}
+
+function PropVarianceCalculator({ sport, addLeg }: {
+  sport: string;
+  addLeg: (leg: any) => boolean;
+}) {
+  const { data: topData } = useQuery<TopPropsResponse>({
+    queryKey: ["/api/top-props", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/top-props/${sport}`);
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+
+  const { data: gameData } = useQuery<PropsResponse>({
+    queryKey: ["/api/game-player-props", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/game-player-props/${sport}`);
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+
+  const [addedTickets, setAddedTickets] = useState<Set<string>>(new Set());
+
+  const variants = useMemo<TicketVariant[]>(() => {
+    const topPicks = topData?.topPicks;
+    if (!topPicks || topPicks.length < 2) return [];
+
+    const topKeys = new Set(topPicks.map(p => `${p.playerName}-${p.market}`));
+
+    const altsByGame: Record<string, TicketLeg[]> = {};
+    if (gameData?.games) {
+      for (const game of gameData.games) {
+        const alts: TicketLeg[] = [];
+        for (const player of game.players) {
+          for (const m of player.markets) {
+            if (
+              !topKeys.has(`${player.playerName}-${m.market}`) &&
+              m.recommendation !== "push" &&
+              m.confidence >= 58
+            ) {
+              alts.push({
+                playerName: player.playerName,
+                market: m.market,
+                marketLabel: m.marketLabel,
+                line: m.line,
+                recommendation: m.recommendation as "over" | "under",
+                confidence: m.confidence,
+                edge: m.edge,
+                odds: m.recommendation === "over" ? m.overOdds : m.underOdds,
+                gameId: game.gameId,
+                gameName: game.gameName,
+              });
+            }
+          }
+        }
+        altsByGame[game.gameId] = alts.sort((a, b) => b.confidence - a.confidence);
+      }
+    }
+
+    const makeVariant = (
+      id: string, label: string, description: string,
+      basePicks: TopPick[], swaps: Record<number, TicketLeg> = {}
+    ): TicketVariant => {
+      const legs = basePicks.map((p, i) =>
+        swaps[i] ? { ...swaps[i], isSwapped: true, swappedFrom: p.playerName } : pickToLeg(p)
+      );
+      return { id, label, description, legs, ...calcTicket(legs) };
+    };
+
+    const byConf = [...topPicks].map((p, i) => ({ p, i })).sort((a, b) => a.p.confidence - b.p.confidence);
+    const result: TicketVariant[] = [];
+
+    const top3 = [...topPicks].sort((a, b) => b.confidence - a.confidence).slice(0, 3);
+    if (top3.length === 3) {
+      const legs = top3.map(pickToLeg);
+      result.push({ id: "power", label: "Power Pick", description: "3 strongest legs only — highest win probability", legs, ...calcTicket(legs) });
+    }
+
+    result.push(makeVariant("full", "Full Card", "All engine picks as recommended", topPicks));
+
+    const weakest = byConf[0];
+    if (weakest) {
+      const alt = (altsByGame[weakest.p.gameId] || [])[0];
+      if (alt) {
+        result.push(makeVariant("swap1", "Smart Swap", `Weakest leg swapped — same game, stronger signal`, topPicks, { [weakest.i]: alt }));
+      }
+    }
+
+    if (byConf.length >= 2) {
+      const usedAlts = new Set<string>();
+      const swaps: Record<number, TicketLeg> = {};
+      for (const { p, i } of byConf.slice(0, 2)) {
+        const alt = (altsByGame[p.gameId] || []).find(a => !usedAlts.has(`${a.playerName}-${a.market}`));
+        if (alt) {
+          swaps[i] = alt;
+          usedAlts.add(`${alt.playerName}-${alt.market}`);
+        }
+      }
+      if (Object.keys(swaps).length > 0) {
+        result.push(makeVariant("swap2", "Double Swap", "Two weakest legs replaced with better alternatives", topPicks, swaps));
+      }
+    }
+
+    return result;
+  }, [topData, gameData]);
+
+  if (!topData || variants.length === 0) return null;
+
+  const handleAddTicket = (variant: TicketVariant) => {
+    let added = 0;
+    for (const leg of variant.legs) {
+      const legId = `prop-${leg.playerName}-${leg.market}-${leg.recommendation}`.replace(/\s+/g, "-").toLowerCase();
+      const ok = addLeg({
+        id: legId,
+        team: leg.playerName,
+        opponent: "",
+        market: leg.recommendation === "over" ? "Over" : "Under",
+        outcome: `${leg.playerName} ${leg.recommendation === "over" ? "Over" : "Under"} ${leg.line} ${leg.marketLabel}`,
+        decimalOdds: americanToDecimal(leg.odds),
+        americanOdds: leg.odds,
+        addedFrom: "Variety Builder",
+        addedAt: new Date().toISOString(),
+        sport,
+        confidence: leg.confidence,
+        evPercent: leg.edge,
+      });
+      if (ok) added++;
+    }
+    if (added > 0) setAddedTickets(s => new Set([...s, variant.id]));
+  };
+
+  const accentMap: Record<string, { top: string; badge: string; swapBg: string }> = {
+    power: { top: "border-t-emerald-500", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", swapBg: "" },
+    full:  { top: "border-t-blue-500",    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",           swapBg: "" },
+    swap1: { top: "border-t-violet-500",  badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",   swapBg: "bg-violet-50 border border-violet-200 dark:bg-violet-950/30 dark:border-violet-800" },
+    swap2: { top: "border-t-amber-500",   badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",       swapBg: "bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800" },
+  };
+
+  return (
+    <Card data-testid="section-variance-calculator">
+      <CardContent className="p-3 sm:p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0">
+            <Shuffle className="w-4 h-4 text-violet-500" />
+          </div>
+          <div>
+            <h2 className="text-sm sm:text-base font-bold">Ticket Variety Builder</h2>
+            <p className="text-[10px] text-muted-foreground">
+              {variants.length} ticket options · stronger legs kept, weaker ones swapped for better same-game alternatives
+            </p>
+          </div>
+        </div>
+
+        <div
+          className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-1 px-1"
+          data-testid="variance-tickets-scroll"
+        >
+          {variants.map((variant) => {
+            const colors = accentMap[variant.id] ?? accentMap.full;
+            const added = addedTickets.has(variant.id);
+            return (
+              <div
+                key={variant.id}
+                className={`shrink-0 snap-start w-[272px] sm:w-[296px] rounded-xl border-2 border-t-4 overflow-hidden bg-card ${colors.top}`}
+                data-testid={`variance-ticket-${variant.id}`}
+              >
+                <div className="p-3 space-y-3">
+                  <div>
+                    <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 ${colors.badge}`}>
+                      {variant.label}
+                    </span>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">{variant.description}</p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {variant.legs.map((leg, i) => (
+                      <div
+                        key={i}
+                        className={`flex items-start gap-2 p-2 rounded-lg text-[11px] ${leg.isSwapped && colors.swapBg ? colors.swapBg : "bg-muted/40"}`}
+                        data-testid={`variance-leg-${variant.id}-${i}`}
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <span className={`font-semibold truncate max-w-[130px] ${leg.isSwapped ? "text-violet-700 dark:text-violet-300" : ""}`}>
+                              {leg.playerName}
+                            </span>
+                            {leg.isSwapped && (
+                              <Badge className="text-[8px] px-1 py-0 h-3.5 bg-violet-500 text-white border-0">NEW</Badge>
+                            )}
+                          </div>
+                          {leg.isSwapped && leg.swappedFrom && (
+                            <p className="text-[9px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
+                              <ArrowLeftRight className="w-2.5 h-2.5 shrink-0" />
+                              replaces {leg.swappedFrom}
+                            </p>
+                          )}
+                          <p className="text-muted-foreground mt-0.5">
+                            {leg.recommendation === "over" ? "▲" : "▼"} {leg.recommendation === "over" ? "Over" : "Under"} {leg.line} {leg.marketLabel}
+                          </p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="font-mono font-bold">{formatOdds(leg.odds)}</p>
+                          <p className={`text-[9px] font-medium ${leg.confidence >= 70 ? "text-emerald-600" : leg.confidence >= 60 ? "text-amber-600" : "text-muted-foreground"}`}>
+                            {leg.confidence}%
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-1.5 text-center border-t pt-2">
+                    <div>
+                      <p className="text-[9px] text-muted-foreground mb-0.5">Combined</p>
+                      <p className="text-sm font-bold font-mono">{formatOdds(variant.combinedAmerican)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-muted-foreground mb-0.5">Win Prob</p>
+                      <p className="text-sm font-bold">{(variant.winProbability * 100).toFixed(1)}%</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-muted-foreground mb-0.5">EV</p>
+                      <p className={`text-sm font-bold ${variant.expectedValue >= 0 ? "text-emerald-600" : "text-red-500"}`}>
+                        {variant.expectedValue >= 0 ? "+" : ""}{(variant.expectedValue * 100).toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant={added ? "outline" : "default"}
+                    className="w-full text-xs h-8 gap-1.5"
+                    onClick={() => !added && handleAddTicket(variant)}
+                    data-testid={`button-add-ticket-${variant.id}`}
+                  >
+                    {added ? (
+                      <><Check className="w-3 h-3" /> Added to Slip</>
+                    ) : (
+                      <><Plus className="w-3 h-3" /> Add All {variant.legs.length} Legs to Slip</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-[10px] text-muted-foreground border-t pt-2">
+          Swapped legs come from the same game as the pick they replace — keeping your ticket tied to the same matchups while improving overall confidence.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ── Prop Track Record Section ─────────────────────────────────────────────────
 interface PropTrackStats {
   overall: {
@@ -1867,6 +2184,8 @@ export default function PlayerPropsPage() {
         </header>
 
         <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
+
+        <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} />
 
         {isLoading && (
           <div className="space-y-4" data-testid="loading-skeleton">
