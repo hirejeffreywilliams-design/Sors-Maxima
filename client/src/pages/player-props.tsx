@@ -1607,9 +1607,14 @@ function pickToLeg(p: TopPick): TicketLeg {
   };
 }
 
-function PropVarianceCalculator({ sport, addLeg }: {
+function makeLegId(leg: TicketLeg) {
+  return `prop-${leg.playerName}-${leg.market}-${leg.recommendation}`.replace(/\s+/g, "-").toLowerCase();
+}
+
+function PropVarianceCalculator({ sport, addLeg, slipLegIds }: {
   sport: string;
   addLeg: (leg: any) => boolean;
+  slipLegIds: Set<string>;
 }) {
   const { data: topData, isLoading: topLoading } = useQuery<TopPropsResponse>({
     queryKey: ["/api/top-props", sport],
@@ -1621,13 +1626,11 @@ function PropVarianceCalculator({ sport, addLeg }: {
     refetchInterval: 30000,
   });
 
-  const [addedTickets, setAddedTickets] = useState<Set<string>>(new Set());
   const isLoading = topLoading || gameLoading;
 
   const variants = useMemo<TicketVariant[]>(() => {
     const topPicks = topData?.topPicks;
     if (!topPicks || topPicks.length < 1) return [];
-    const capped = topPicks.slice(0, 7);
 
     const topKeys = new Set(topPicks.map(p => `${p.playerName}-${p.market}`));
 
@@ -1671,29 +1674,31 @@ function PropVarianceCalculator({ sport, addLeg }: {
       return { id, label, description, legs, ...calcTicket(legs) };
     };
 
-    const byConf = [...capped].map((p, i) => ({ p, i })).sort((a, b) => a.p.confidence - b.p.confidence);
+    const byConf = [...topPicks].map((p, i) => ({ p, i })).sort((a, b) => a.p.confidence - b.p.confidence);
     const result: TicketVariant[] = [];
 
-    const top3 = [...capped].sort((a, b) => b.confidence - a.confidence).slice(0, 3);
+    // Power Pick — top 3 highest-confidence only
+    const top3 = [...topPicks].sort((a, b) => b.confidence - a.confidence).slice(0, 3);
     if (top3.length >= 2) {
       const legs = top3.map(pickToLeg);
-      result.push({ id: "power", label: "Power Pick", description: `${top3.length} strongest legs only — highest win probability`, legs, ...calcTicket(legs) });
+      result.push({ id: "power", label: "Power Pick", description: `Top ${top3.length} highest-confidence legs — best win probability`, legs, ...calcTicket(legs) });
     }
 
-    if (capped.length >= 2) {
-      result.push(makeVariant("full", "Full Card", `All ${capped.length} engine picks as recommended`, capped));
-    } else if (capped.length === 1) {
-      result.push(makeVariant("full", "Best Pick", "Engine's top recommended prop", capped));
+    // Full Card — all engine picks, no cap
+    if (topPicks.length >= 1) {
+      result.push(makeVariant("full", "Full Card", `All ${topPicks.length} engine picks as recommended`, topPicks));
     }
 
+    // Smart Swap — replace weakest leg with better alternative from same game
     const weakest = byConf[0];
     if (weakest) {
       const alt = (altsByGame[weakest.p.gameId] || [])[0];
       if (alt) {
-        result.push(makeVariant("swap1", "Smart Swap", `Weakest leg swapped — same game, stronger signal`, capped, { [weakest.i]: alt }));
+        result.push(makeVariant("swap1", "Smart Swap", `Weakest leg swapped for a stronger same-game alternative`, topPicks, { [weakest.i]: alt }));
       }
     }
 
+    // Double Swap — replace two weakest legs with better alternatives
     if (byConf.length >= 2) {
       const usedAlts = new Set<string>();
       const swaps: Record<number, TicketLeg> = {};
@@ -1705,12 +1710,41 @@ function PropVarianceCalculator({ sport, addLeg }: {
         }
       }
       if (Object.keys(swaps).length > 0) {
-        result.push(makeVariant("swap2", "Double Swap", "Two weakest legs replaced with better alternatives", capped, swaps));
+        result.push(makeVariant("swap2", "Double Swap", "Two weakest legs replaced with stronger same-game alternatives", topPicks, swaps));
       }
     }
 
     return result;
   }, [topData, gameData]);
+
+  const handleAddLeg = (leg: TicketLeg) => {
+    const legId = makeLegId(leg);
+    addLeg({
+      id: legId,
+      team: leg.playerName,
+      opponent: "",
+      market: leg.recommendation === "over" ? "Over" : "Under",
+      outcome: `${leg.playerName} ${leg.recommendation === "over" ? "Over" : "Under"} ${leg.line} ${leg.marketLabel}`,
+      decimalOdds: americanToDecimal(leg.odds),
+      americanOdds: leg.odds,
+      addedFrom: "Variety Builder",
+      addedAt: new Date().toISOString(),
+      sport,
+      confidence: leg.confidence,
+      evPercent: leg.edge,
+    });
+  };
+
+  const handleAddAllLegs = (variant: TicketVariant) => {
+    variant.legs.forEach(leg => handleAddLeg(leg));
+  };
+
+  const accentMap: Record<string, { top: string; badge: string; swapBg: string; btn: string }> = {
+    power: { top: "border-t-emerald-500", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", swapBg: "", btn: "bg-emerald-600 hover:bg-emerald-700 text-white" },
+    full:  { top: "border-t-blue-500",    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",           swapBg: "", btn: "" },
+    swap1: { top: "border-t-violet-500",  badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",   swapBg: "bg-violet-50 border border-violet-200 dark:bg-violet-950/30 dark:border-violet-800", btn: "" },
+    swap2: { top: "border-t-amber-500",   badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",       swapBg: "bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800", btn: "" },
+  };
 
   if (isLoading) {
     return (
@@ -1725,7 +1759,7 @@ function PropVarianceCalculator({ sport, addLeg }: {
           </div>
           <div className="flex gap-3 overflow-hidden">
             {[0, 1, 2].map(i => (
-              <Skeleton key={i} className="h-64 w-[280px] rounded-xl shrink-0" />
+              <Skeleton key={i} className="h-72 w-[280px] rounded-xl shrink-0" />
             ))}
           </div>
         </CardContent>
@@ -1734,36 +1768,6 @@ function PropVarianceCalculator({ sport, addLeg }: {
   }
 
   if (variants.length === 0) return null;
-
-  const handleAddTicket = (variant: TicketVariant) => {
-    let added = 0;
-    for (const leg of variant.legs) {
-      const legId = `prop-${leg.playerName}-${leg.market}-${leg.recommendation}`.replace(/\s+/g, "-").toLowerCase();
-      const ok = addLeg({
-        id: legId,
-        team: leg.playerName,
-        opponent: "",
-        market: leg.recommendation === "over" ? "Over" : "Under",
-        outcome: `${leg.playerName} ${leg.recommendation === "over" ? "Over" : "Under"} ${leg.line} ${leg.marketLabel}`,
-        decimalOdds: americanToDecimal(leg.odds),
-        americanOdds: leg.odds,
-        addedFrom: "Variety Builder",
-        addedAt: new Date().toISOString(),
-        sport,
-        confidence: leg.confidence,
-        evPercent: leg.edge,
-      });
-      if (ok) added++;
-    }
-    if (added > 0) setAddedTickets(s => new Set([...s, variant.id]));
-  };
-
-  const accentMap: Record<string, { top: string; badge: string; swapBg: string }> = {
-    power: { top: "border-t-emerald-500", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300", swapBg: "" },
-    full:  { top: "border-t-blue-500",    badge: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",           swapBg: "" },
-    swap1: { top: "border-t-violet-500",  badge: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",   swapBg: "bg-violet-50 border border-violet-200 dark:bg-violet-950/30 dark:border-violet-800" },
-    swap2: { top: "border-t-amber-500",   badge: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",       swapBg: "bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-800" },
-  };
 
   return (
     <Card data-testid="section-variance-calculator">
@@ -1775,7 +1779,7 @@ function PropVarianceCalculator({ sport, addLeg }: {
           <div>
             <h2 className="text-sm sm:text-base font-bold">Ticket Variety Builder</h2>
             <p className="text-[10px] text-muted-foreground">
-              {variants.length} ticket options · stronger legs kept, weaker ones swapped for better same-game alternatives
+              {variants.length} ticket options · tap any leg to add it, or add all at once
             </p>
           </div>
         </div>
@@ -1786,14 +1790,14 @@ function PropVarianceCalculator({ sport, addLeg }: {
         >
           {variants.map((variant) => {
             const colors = accentMap[variant.id] ?? accentMap.full;
-            const added = addedTickets.has(variant.id);
+            const allInSlip = variant.legs.every(l => slipLegIds.has(makeLegId(l)));
             return (
               <div
                 key={variant.id}
-                className={`shrink-0 snap-start w-[272px] sm:w-[296px] rounded-xl border-2 border-t-4 overflow-hidden bg-card ${colors.top}`}
+                className={`shrink-0 snap-start w-[280px] sm:w-[300px] rounded-xl border-2 border-t-4 overflow-hidden bg-card ${colors.top}`}
                 data-testid={`variance-ticket-${variant.id}`}
               >
-                <div className="p-3 space-y-3">
+                <div className="p-3 space-y-2.5">
                   <div>
                     <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 ${colors.badge}`}>
                       {variant.label}
@@ -1801,45 +1805,66 @@ function PropVarianceCalculator({ sport, addLeg }: {
                     <p className="text-[10px] text-muted-foreground leading-relaxed">{variant.description}</p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    {variant.legs.map((leg, i) => (
-                      <div
-                        key={i}
-                        className={`flex items-start gap-2 p-2 rounded-lg text-[11px] ${leg.isSwapped && colors.swapBg ? colors.swapBg : "bg-muted/40"}`}
-                        data-testid={`variance-leg-${variant.id}-${i}`}
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 flex-wrap">
-                            <span className={`font-semibold truncate max-w-[130px] ${leg.isSwapped ? "text-violet-700 dark:text-violet-300" : ""}`}>
-                              {leg.playerName}
-                            </span>
-                            {leg.isSwapped && (
-                              <Badge className="text-[8px] px-1 py-0 h-3.5 bg-violet-500 text-white border-0">NEW</Badge>
+                  <div className="space-y-1">
+                    {variant.legs.map((leg, i) => {
+                      const legId = makeLegId(leg);
+                      const inSlip = slipLegIds.has(legId);
+                      const isOver = leg.recommendation === "over";
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => !inSlip && handleAddLeg(leg)}
+                          className={`w-full flex items-center gap-2 p-2 rounded-lg text-[11px] text-left transition-colors ${
+                            inSlip
+                              ? "bg-primary/10 border border-primary/30 cursor-default"
+                              : leg.isSwapped && colors.swapBg
+                              ? `${colors.swapBg} hover:opacity-80 cursor-pointer`
+                              : "bg-muted/40 hover:bg-muted/70 cursor-pointer"
+                          }`}
+                          data-testid={`variance-leg-${variant.id}-${i}`}
+                          title={inSlip ? "Already in slip" : `Add ${leg.playerName} to slip`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              <span className={`font-semibold truncate max-w-[120px] ${leg.isSwapped ? "text-violet-700 dark:text-violet-300" : ""}`}>
+                                {leg.playerName}
+                              </span>
+                              {leg.isSwapped && (
+                                <Badge className="text-[8px] px-1 py-0 h-3.5 bg-violet-500 text-white border-0">SWAP</Badge>
+                              )}
+                            </div>
+                            {leg.isSwapped && leg.swappedFrom && (
+                              <p className="text-[9px] text-muted-foreground flex items-center gap-0.5">
+                                <ArrowLeftRight className="w-2.5 h-2.5 shrink-0" />
+                                replaces {leg.swappedFrom}
+                              </p>
                             )}
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className={`text-[10px] font-bold px-1.5 py-0 rounded ${isOver ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-red-500/15 text-red-700 dark:text-red-400"}`}>
+                                {isOver ? "▲ OVER" : "▼ UNDER"} {leg.line}
+                              </span>
+                              <span className="text-[9px] text-muted-foreground">{leg.marketLabel}</span>
+                            </div>
                           </div>
-                          {leg.isSwapped && leg.swappedFrom && (
-                            <p className="text-[9px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
-                              <ArrowLeftRight className="w-2.5 h-2.5 shrink-0" />
-                              replaces {leg.swappedFrom}
+                          <div className="text-right shrink-0 flex flex-col items-end gap-0.5">
+                            {inSlip ? (
+                              <Check className="w-4 h-4 text-primary" />
+                            ) : (
+                              <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+                            )}
+                            <p className="font-mono font-bold text-[11px]">{formatOdds(leg.odds)}</p>
+                            <p className={`text-[9px] font-medium ${leg.confidence >= 70 ? "text-emerald-600" : leg.confidence >= 60 ? "text-amber-600" : "text-muted-foreground"}`}>
+                              {leg.confidence}%
                             </p>
-                          )}
-                          <p className="text-muted-foreground mt-0.5">
-                            {leg.recommendation === "over" ? "▲" : "▼"} {leg.recommendation === "over" ? "Over" : "Under"} {leg.line} {leg.marketLabel}
-                          </p>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <p className="font-mono font-bold">{formatOdds(leg.odds)}</p>
-                          <p className={`text-[9px] font-medium ${leg.confidence >= 70 ? "text-emerald-600" : leg.confidence >= 60 ? "text-amber-600" : "text-muted-foreground"}`}>
-                            {leg.confidence}%
-                          </p>
-                        </div>
-                      </div>
-                    ))}
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
 
-                  <div className="grid grid-cols-3 gap-1.5 text-center border-t pt-2">
+                  <div className="grid grid-cols-3 gap-1 text-center border-t pt-2">
                     <div>
-                      <p className="text-[9px] text-muted-foreground mb-0.5">Combined</p>
+                      <p className="text-[9px] text-muted-foreground mb-0.5">Parlay Odds</p>
                       <p className="text-sm font-bold font-mono">{formatOdds(variant.combinedAmerican)}</p>
                     </div>
                     <div>
@@ -1856,15 +1881,15 @@ function PropVarianceCalculator({ sport, addLeg }: {
 
                   <Button
                     size="sm"
-                    variant={added ? "outline" : "default"}
-                    className="w-full text-xs h-8 gap-1.5"
-                    onClick={() => !added && handleAddTicket(variant)}
+                    variant={allInSlip ? "outline" : "default"}
+                    className={`w-full text-xs h-8 gap-1.5 ${!allInSlip && colors.btn ? colors.btn : ""}`}
+                    onClick={() => !allInSlip && handleAddAllLegs(variant)}
                     data-testid={`button-add-ticket-${variant.id}`}
                   >
-                    {added ? (
-                      <><Check className="w-3 h-3" /> Added to Slip</>
+                    {allInSlip ? (
+                      <><Check className="w-3 h-3" /> All in Slip</>
                     ) : (
-                      <><Plus className="w-3 h-3" /> Add All {variant.legs.length} Legs to Slip</>
+                      <><Plus className="w-3 h-3" /> Add All {variant.legs.length} Legs</>
                     )}
                   </Button>
                 </div>
@@ -1874,7 +1899,7 @@ function PropVarianceCalculator({ sport, addLeg }: {
         </div>
 
         <p className="text-[10px] text-muted-foreground border-t pt-2">
-          Swapped legs come from the same game as the pick they replace — keeping your ticket tied to the same matchups while improving overall confidence.
+          Tap any leg to add it individually, or use "Add All" to load the full ticket. Swapped legs come from the same game as the pick they replace.
         </p>
       </CardContent>
     </Card>
@@ -2202,7 +2227,7 @@ export default function PlayerPropsPage() {
 
         <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
 
-        <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} />
+        <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
 
         {isLoading && (
           <div className="space-y-4" data-testid="loading-skeleton">
