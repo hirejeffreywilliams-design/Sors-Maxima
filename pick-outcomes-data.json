@@ -1311,22 +1311,6 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
-    },
-    {
-      "id": "precomp-NHL-401803391-total-73416499d8",
-      "gameId": "401803391",
-      "sport": "NHL",
-      "game": "Colorado Avalanche @ Seattle Kraken",
-      "homeTeam": "Seattle Kraken",
-      "awayTeam": "Colorado Avalanche",
-      "pick": "Under 6.5",
-      "betType": "total",
-      "odds": -105,
-      "grade": "C-",
-      "confidence": 52,
-      "ev": -19.95,
-      "gameTime": "2026-03-13T02:00Z",
-      "savedAt": "2026-03-12T20:00:26.147Z"
     }
   ],
   "settled": [
@@ -17682,16 +17666,36 @@
       "homeScore": 82,
       "awayScore": 86,
       "settledAt": "2026-03-12T19:51:25.242Z"
+    },
+    {
+      "id": "precomp-NHL-401803391-total-73416499d8",
+      "gameId": "401803391",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Seattle Kraken",
+      "homeTeam": "Seattle Kraken",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -105,
+      "grade": "C-",
+      "confidence": 52,
+      "ev": -19.95,
+      "gameTime": "2026-03-13T02:00Z",
+      "savedAt": "2026-03-12T20:00:26.147Z",
+      "result": "lost",
+      "homeScore": 3,
+      "awayScore": 4,
+      "settledAt": "2026-03-12T20:02:02.568Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 801,
+      "total": 802,
       "won": 431,
-      "lost": 357,
+      "lost": 358,
       "push": 13,
-      "rate": 53.8,
-      "pending": 83
+      "rate": 53.7,
+      "pending": 82
     },
     "bySport": {
       "NBA": {
@@ -17700,9 +17704,9 @@
         "rate": 53.9
       },
       "NHL": {
-        "total": 276,
+        "total": 277,
         "won": 147,
-        "rate": 53.3
+        "rate": 53.1
       },
       "NCAAB": {
         "total": 256,
@@ -17737,9 +17741,9 @@
         "rate": 46.2
       },
       "C-": {
-        "total": 55,
+        "total": 56,
         "won": 29,
-        "rate": 52.7
+        "rate": 51.8
       },
       "C": {
         "total": 144,
@@ -17781,10 +17785,10 @@
         "roi": 4
       },
       "Total": {
-        "total": 245,
+        "total": 246,
         "won": 131,
-        "rate": 53.5,
-        "roi": 4.9
+        "rate": 53.3,
+        "roi": 4.4
       },
       "Team Total": {
         "total": 71,
@@ -17794,16 +17798,16 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 20,
+      "won": 29,
+      "lost": 21,
       "push": 0,
-      "rate": 60
+      "rate": 58
     },
-    "lastUpdated": "2026-03-12T20:00:59.291Z",
-    "roi": 7.2,
+    "lastUpdated": "2026-03-12T20:02:02.571Z",
+    "roi": 7,
     "brierScore": 0.263,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.067,
+    "sharpeRatio": 0.066,
     "homeAwayBias": {
       "homeWinRate": 56.6,
       "awayWinRate": 44.7,
@@ -17814,8 +17818,8 @@
       {
         "range": "50-55",
         "predicted": 52.8,
-        "actual": 62.5,
-        "total": 80
+        "actual": 61.7,
+        "total": 81
       },
       {
         "range": "55-60",
