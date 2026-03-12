@@ -1311,6 +1311,54 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851382-spread-5c8d1de970",
+      "gameId": "401851382",
+      "sport": "NCAAB",
+      "game": "TBD @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "TBD",
+      "pick": "Nebraska Cornhuskers +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 81,
+      "ev": 39.36,
+      "gameTime": "2026-03-13T22:30Z",
+      "savedAt": "2026-03-12T20:50:58.782Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851382-moneyline-f1ee994fda",
+      "gameId": "401851382",
+      "sport": "NCAAB",
+      "game": "TBD @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "TBD",
+      "pick": "Nebraska Cornhuskers ML",
+      "betType": "moneyline",
+      "odds": -168,
+      "grade": "B+",
+      "confidence": 77,
+      "ev": 10.07,
+      "gameTime": "2026-03-13T22:30Z",
+      "savedAt": "2026-03-12T20:50:58.782Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851382-total-274b3a4e72",
+      "gameId": "401851382",
+      "sport": "NCAAB",
+      "game": "TBD @ Nebraska Cornhuskers",
+      "homeTeam": "Nebraska Cornhuskers",
+      "awayTeam": "TBD",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "A-",
+      "confidence": 67,
+      "ev": 39.36,
+      "gameTime": "2026-03-13T22:30Z",
+      "savedAt": "2026-03-12T20:50:58.782Z"
     }
   ],
   "settled": [
@@ -17695,7 +17743,7 @@
       "lost": 358,
       "push": 13,
       "rate": 53.7,
-      "pending": 82
+      "pending": 85
     },
     "bySport": {
       "NBA": {
@@ -17803,7 +17851,7 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-03-12T20:44:16.726Z",
+    "lastUpdated": "2026-03-12T20:49:29.327Z",
     "roi": 7,
     "brierScore": 0.263,
     "maxDrawdown": 15.4,
