@@ -85,7 +85,7 @@ async function warmOddsCache() {
   let warmed = 0;
   for (const sport of activeSports) {
     try {
-      await getOddsForSportAsync(sport as any);
+      await getOddsForSportAsync(sport as any, true);
       warmed++;
     } catch { /* non-critical */ }
   }
@@ -131,20 +131,25 @@ export function startPrefetchScheduler() {
   running = true;
   startedAt = new Date().toISOString();
 
+  const oddsIntervalMs = parseInt(process.env.PREFETCH_ODDS_INTERVAL_MS || "180000", 10);
+  const scoreboardIntervalMs = parseInt(process.env.PREFETCH_SCOREBOARD_INTERVAL_MS || "120000", 10);
+  const propsIntervalMs = parseInt(process.env.PREFETCH_PROPS_INTERVAL_MS || "600000", 10);
+  const tickIntervalMs = parseInt(process.env.PREFETCH_TICK_INTERVAL_MS || "30000", 10);
+
   tasks = [];
-  registerTask("odds-cache", warmOddsCache, 3 * 60 * 1000);
-  registerTask("scoreboard-cache", warmScoreboardCache, 2 * 60 * 1000);
-  registerTask("props-cache", warmPropsCache, 10 * 60 * 1000);
+  registerTask("odds-cache", warmOddsCache, oddsIntervalMs);
+  registerTask("scoreboard-cache", warmScoreboardCache, scoreboardIntervalMs);
+  registerTask("props-cache", warmPropsCache, propsIntervalMs);
 
   schedulerTimer = setInterval(() => {
     runDueTasks().catch(err => logError(err as Error, { context: "prefetch-scheduler" }));
-  }, 30_000);
+  }, tickIntervalMs);
 
   setTimeout(() => {
     runDueTasks().catch(err => logError(err as Error, { context: "prefetch-scheduler-init" }));
   }, 10_000);
 
-  logInfo("[Prefetch] Scheduler started — odds every 3m, scoreboard every 2m, props every 10m");
+  logInfo(`[Prefetch] Scheduler started — odds every ${oddsIntervalMs/60000}m, scoreboard every ${scoreboardIntervalMs/60000}m, props every ${propsIntervalMs/60000}m`);
   addToLog("start", "Prefetch scheduler started");
 }
 
@@ -170,7 +175,7 @@ export function getPrefetchStatus() {
       lastError: t.lastError,
       lastDurationMs: t.lastDurationMs,
     })),
-    recentLog: actionLog.slice(0, 20),
+    recentLog: actionLog.slice(0, 10),
   };
 }
 

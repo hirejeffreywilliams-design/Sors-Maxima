@@ -2621,7 +2621,7 @@ function ControlRoomTab() {
             <Clock className="h-4 w-4 text-primary" />
             Action Log
           </CardTitle>
-          <CardDescription className="text-xs">Last 20 control room actions</CardDescription>
+          <CardDescription className="text-xs">Last 10 control room actions</CardDescription>
         </CardHeader>
         <CardContent>
           {recentLog.length === 0 ? (

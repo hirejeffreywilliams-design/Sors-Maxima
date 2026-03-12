@@ -5947,7 +5947,7 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
           hitRate: cacheStats.hitRate,
         },
         budget: budgetSummary,
-        recentLog: recentLog.slice(0, 20),
+        recentLog: recentLog.slice(0, 10),
         timestamp: new Date().toISOString(),
       });
     } catch (err: any) {

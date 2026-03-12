@@ -1171,13 +1171,21 @@ function ensureRostersLoaded(sport: Sport) {
   }
 }
 
-export async function getOddsForSportAsync(sport: Sport): Promise<SportEvent[]> {
+const STALE_ODDS_TTL = 30 * 60 * 1000;
+
+export async function getOddsForSportAsync(sport: Sport, callerIsScheduler: boolean = false): Promise<SportEvent[]> {
   ensureRostersLoaded(sport);
 
   const cached = oddsCache.get(sport);
   const now = Date.now();
 
   if (cached && now - cached.timestamp < getEffectiveOddsEventCacheTTL()) {
+    return cached.events.sort((a, b) =>
+      new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+    );
+  }
+
+  if (!callerIsScheduler && cached && now - cached.timestamp < STALE_ODDS_TTL) {
     return cached.events.sort((a, b) =>
       new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
     );
