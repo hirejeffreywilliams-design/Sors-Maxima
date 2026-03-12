@@ -137,16 +137,34 @@ export function OddsAttribution({
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-        <div className="flex items-center gap-1">
-          <BookOpen className="w-2.5 h-2.5 text-blue-400/60 shrink-0" />
-          <span className="text-[8px] font-bold text-blue-400/70">The Odds API</span>
-        </div>
-        {bestBook && (
-          <BookBadge book={bestBook.book} odds={bestBook.odds} isBest />
-        )}
-        {oddsBookCount && oddsBookCount > 1 && (
-          <span className="text-[7px] text-white/25">+{oddsBookCount - 1} more</span>
+      <div className="mt-1 space-y-1">
+        <button
+          onClick={(e) => { e.stopPropagation(); setExpanded(v => !v); }}
+          className="flex items-center gap-1.5 flex-wrap group w-full text-left"
+          data-testid="btn-odds-attribution-compact-toggle"
+        >
+          <div className="flex items-center gap-1">
+            <BookOpen className="w-2.5 h-2.5 text-blue-400/60 shrink-0" />
+            <span className="text-[8px] font-bold text-blue-400/70 group-hover:text-blue-400 transition-colors">The Odds API</span>
+          </div>
+          {bestBook && (
+            <BookBadge book={bestBook.book} odds={bestBook.odds} isBest />
+          )}
+          {oddsBookCount && oddsBookCount > 1 && (
+            <span className="text-[7px] text-white/25">+{oddsBookCount - 1} more</span>
+          )}
+          <span className="text-white/20 group-hover:text-white/40 transition-colors ml-auto">
+            {expanded ? <ChevronUp className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+          </span>
+        </button>
+        {expanded && allBookOdds && allBookOdds.length > 0 && (
+          <div className="pl-4 space-y-1">
+            <div className="flex flex-wrap gap-1">
+              {allBookOdds.map((b, i) => (
+                <BookBadge key={b.book} book={b.book} odds={b.odds} isBest={i === 0} />
+              ))}
+            </div>
+          </div>
         )}
       </div>
     );

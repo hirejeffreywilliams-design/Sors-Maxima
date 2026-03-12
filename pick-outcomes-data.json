@@ -1311,6 +1311,22 @@
       "ev": 33.64,
       "gameTime": "2026-03-10T23:00Z",
       "savedAt": "2026-03-10T01:24:30.364Z"
+    },
+    {
+      "id": "precomp-NHL-401803391-total-73416499d8",
+      "gameId": "401803391",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Seattle Kraken",
+      "homeTeam": "Seattle Kraken",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Under 6.5",
+      "betType": "total",
+      "odds": -105,
+      "grade": "C-",
+      "confidence": 52,
+      "ev": -19.95,
+      "gameTime": "2026-03-13T02:00Z",
+      "savedAt": "2026-03-12T20:00:26.147Z"
     }
   ],
   "settled": [
@@ -17675,7 +17691,7 @@
       "lost": 357,
       "push": 13,
       "rate": 53.8,
-      "pending": 82
+      "pending": 83
     },
     "bySport": {
       "NBA": {
@@ -17783,7 +17799,7 @@
       "push": 0,
       "rate": 60
     },
-    "lastUpdated": "2026-03-12T19:56:46.550Z",
+    "lastUpdated": "2026-03-12T20:00:59.291Z",
     "roi": 7.2,
     "brierScore": 0.263,
     "maxDrawdown": 15.4,
