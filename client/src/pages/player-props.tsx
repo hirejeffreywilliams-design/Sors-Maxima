@@ -2088,6 +2088,7 @@ export default function PlayerPropsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [marketFilter, setMarketFilter] = useState("All");
   const [tierGated, setTierGated] = useState(false);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const { legs, addLeg, removeLeg } = useParlaySlip();
 
   const slipLegIds = new Set(legs.map(l => l.id));
@@ -2096,17 +2097,23 @@ export default function PlayerPropsPage() {
     queryKey: ["/api/game-player-props", selectedSport],
     queryFn: async () => {
       const res = await fetch(`/api/game-player-props/${selectedSport}`, { credentials: "include" });
-      if (res.status === 403 || res.status === 401) {
+      if (res.status === 401) {
+        setNeedsAuth(true);
+        setTierGated(false);
+        throw new Error("needs-auth");
+      }
+      if (res.status === 403) {
         setTierGated(true);
+        setNeedsAuth(false);
         throw new Error("tier-gated");
       }
       if (!res.ok) throw new Error("Failed to fetch player props");
       setTierGated(false);
       return res.json();
     },
-    refetchInterval: tierGated ? false : 30000,
+    refetchInterval: (tierGated || needsAuth) ? false : 30000,
     retry: (failureCount, err) => {
-      if (err instanceof Error && err.message === "tier-gated") return false;
+      if (err instanceof Error && (err.message === "tier-gated" || err.message === "needs-auth")) return false;
       return failureCount < 2;
     },
   });
@@ -2237,7 +2244,7 @@ export default function PlayerPropsPage() {
           )}
         </header>
 
-        {!tierGated && (
+        {!tierGated && !needsAuth && (
           <>
             <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
             <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
@@ -2269,6 +2276,25 @@ export default function PlayerPropsPage() {
               </Card>
             ))}
           </div>
+        )}
+
+        {needsAuth && (
+          <Card className="border-blue-500/30 bg-gradient-to-br from-blue-500/5 to-blue-600/5" data-testid="auth-required-card">
+            <CardContent className="p-6 sm:p-8 text-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <Lock className="w-6 h-6 text-blue-500" />
+                <h3 className="text-lg font-bold text-blue-500">Sign In Required</h3>
+              </div>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Player Props requires an active account. Sign in to access real-time over/under projections powered by Sors Intelligence.
+              </p>
+              <Link href="/login">
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white" data-testid="button-sign-in">
+                  Sign In
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         )}
 
         {tierGated && (
