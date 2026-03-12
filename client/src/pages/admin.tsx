@@ -864,6 +864,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="broadcast" data-testid="tab-broadcast">
                 <Bell className="h-3.5 w-3.5 mr-1" />Broadcast
               </TabsTrigger>
+              <TabsTrigger value="control-room" data-testid="tab-control-room">
+                <Gauge className="h-3.5 w-3.5 mr-1" />Control Room
+              </TabsTrigger>
             </TabsList>
 
             {/* ── Overview ── */}
@@ -1551,6 +1554,10 @@ export default function AdminDashboard() {
                   </ul>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="control-room" className="space-y-4">
+              <ControlRoomTab />
             </TabsContent>
 
           </Tabs>
@@ -2408,6 +2415,220 @@ function PickAccuracyPanel() {
                 </div>
               ))}
             </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function ControlRoomTab() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: controlRoom, isLoading } = useQuery<any>({
+    queryKey: ["/api/admin/control-room"],
+    refetchInterval: 10000,
+  });
+
+  const actionMutation = useMutation({
+    mutationFn: async (endpoint: string) => {
+      const response = apiRequest("POST", endpoint, {});
+      return (await response).json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/control-room"] });
+      toast({ title: data.message || "Action completed" });
+    },
+    onError: () => toast({ title: "Action failed", variant: "destructive" }),
+  });
+
+  const actions = [
+    { label: "Clear Response Cache", endpoint: "/api/admin/control-room/clear-response-cache", icon: <Database className="h-4 w-4" />, desc: "Flush in-memory HTTP response cache", color: "text-blue-500" },
+    { label: "Flush Disk Cache", endpoint: "/api/admin/control-room/flush-disk-cache", icon: <XCircle className="h-4 w-4" />, desc: "Delete market-snapshot & odds-api disk files", color: "text-orange-500" },
+    { label: "Force Prefetch", endpoint: "/api/admin/control-room/force-prefetch", icon: <RefreshCw className="h-4 w-4" />, desc: "Warm all odds + scoreboard caches now", color: "text-emerald-500" },
+    { label: "Rotate API Key", endpoint: "/api/admin/control-room/rotate-api-key", icon: <Lock className="h-4 w-4" />, desc: "Check and rotate odds API key", color: "text-purple-500" },
+    { label: "Resume Budget Optimizer", endpoint: "/api/admin/control-room/reset-budget-optimizer", icon: <DollarSign className="h-4 w-4" />, desc: "Resume odds service if suspended", color: "text-yellow-500" },
+    { label: "Force Refresh Picks", endpoint: "/api/admin/emergency/force-refresh-picks", icon: <Zap className="h-4 w-4" />, desc: "Clear prediction cache, trigger fresh generation", color: "text-red-500" },
+    { label: "Restart Autonomous Monitor", endpoint: "/api/admin/control-room/restart-autonomous-monitor", icon: <Bot className="h-4 w-4" />, desc: "Stop and restart the autonomous admin agent", color: "text-cyan-500" },
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}><CardContent className="p-4"><Skeleton className="h-20 w-full" /></CardContent></Card>
+        ))}
+      </div>
+    );
+  }
+
+  const apiKeys = controlRoom?.apiKeys;
+  const cacheStats = controlRoom?.cacheStats;
+  const prefetch = controlRoom?.prefetch;
+  const budget = controlRoom?.budget;
+  const recentLog = controlRoom?.recentLog || [];
+
+  return (
+    <div className="space-y-4" data-testid="control-room">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Cache Entries</p>
+            <p className="text-xl font-bold text-foreground" data-testid="text-cache-size">{cacheStats?.size ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">Hit rate: {cacheStats?.hitRate ?? 0}%</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Odds API Remaining</p>
+            <p className={`text-xl font-bold ${(budget?.odds?.remaining ?? 0) < 10000 ? "text-red-500" : (budget?.odds?.remaining ?? 0) < 50000 ? "text-yellow-500" : "text-emerald-500"}`} data-testid="text-odds-remaining">
+              {budget?.odds?.remaining != null ? budget.odds.remaining.toLocaleString() : "N/A"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">{budget?.odds?.status || "unknown"}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">API Keys</p>
+            <p className="text-xl font-bold text-foreground" data-testid="text-api-keys">
+              {apiKeys?.odds?.activeKeys ?? 0}/{apiKeys?.odds?.totalKeys ?? 0}
+            </p>
+            <p className="text-[10px] text-muted-foreground">active / total</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Prefetch</p>
+            <p className={`text-xl font-bold ${prefetch?.running ? "text-emerald-500" : "text-red-500"}`} data-testid="text-prefetch-status">
+              {prefetch?.running ? "Active" : "Stopped"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">{prefetch?.tasks?.length ?? 0} tasks</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            Quick Actions
+          </CardTitle>
+          <CardDescription className="text-xs">Execute system operations — effects are immediate</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {actions.map((action) => (
+              <Button
+                key={action.endpoint}
+                variant="outline"
+                size="sm"
+                className="justify-start h-auto py-2.5 px-3 text-left"
+                disabled={actionMutation.isPending}
+                onClick={() => actionMutation.mutate(action.endpoint)}
+                data-testid={`button-action-${action.label.toLowerCase().replace(/\s+/g, "-")}`}
+              >
+                <div className={`${action.color} mr-2 shrink-0`}>{action.icon}</div>
+                <div className="min-w-0">
+                  <p className="text-xs font-medium">{action.label}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">{action.desc}</p>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {apiKeys && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              API Key Quota Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {Object.entries(apiKeys as Record<string, any>).map(([service, status]: [string, any]) => (
+                <div key={service} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-[10px] uppercase">{service}</Badge>
+                    <span className="text-xs text-muted-foreground">{status.totalKeys} key(s)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={status.activeKeys === status.totalKeys ? "default" : "destructive"} className="text-[10px]" data-testid={`badge-key-status-${service}`}>
+                      {status.activeKeys}/{status.totalKeys} active
+                    </Badge>
+                    {status.keyStates?.map((ks: any) => (
+                      <span key={ks.index} className="text-[10px] text-muted-foreground">
+                        #{ks.index}: {ks.remaining != null ? `${ks.remaining.toLocaleString()} left` : "N/A"}
+                        {ks.coolingDown && <span className="text-red-500 ml-1">(cooldown)</span>}
+                        {ks.errorCount > 0 && <span className="text-yellow-500 ml-1">({ks.errorCount} errs)</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {prefetch?.tasks && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" />
+              Prefetch Tasks
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {prefetch.tasks.map((task: any) => (
+                <div key={task.name} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${task.enabled ? "bg-emerald-500" : "bg-red-500"}`} />
+                    <span className="text-xs font-medium">{task.name}</span>
+                    <span className="text-[10px] text-muted-foreground">every {Math.round(task.intervalMs / 60000)}m</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                    <span>{task.runCount} runs</span>
+                    {task.lastRun && <span>{new Date(task.lastRun).toLocaleTimeString()}</span>}
+                    {task.lastError && <Badge variant="destructive" className="text-[9px]">err</Badge>}
+                    {task.lastDurationMs > 0 && <span>{task.lastDurationMs}ms</span>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Clock className="h-4 w-4 text-primary" />
+            Action Log
+          </CardTitle>
+          <CardDescription className="text-xs">Last 20 control room actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {recentLog.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">No actions recorded yet</p>
+          ) : (
+            <ScrollArea className="h-48">
+              <div className="space-y-1">
+                {recentLog.map((entry: any, i: number) => (
+                  <div key={i} className="flex items-start gap-2 py-1 border-b border-border/20 last:border-0" data-testid={`log-entry-${i}`}>
+                    <span className="text-[10px] text-muted-foreground shrink-0 w-16 font-mono">
+                      {new Date(entry.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                    <Badge variant="outline" className="text-[9px] shrink-0">{entry.action}</Badge>
+                    <span className="text-[10px] text-muted-foreground truncate">{entry.detail}</span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           )}
         </CardContent>
       </Card>

@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/collapsible";
 import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSEO } from "@/hooks/use-seo";
+import { Link } from "wouter";
+import { Lock, Crown } from "lucide-react";
 import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
@@ -2085,6 +2087,7 @@ export default function PlayerPropsPage() {
   const [selectedSport, setSelectedSport] = useState("NBA");
   const [searchQuery, setSearchQuery] = useState("");
   const [marketFilter, setMarketFilter] = useState("All");
+  const [tierGated, setTierGated] = useState(false);
   const { legs, addLeg, removeLeg } = useParlaySlip();
 
   const slipLegIds = new Set(legs.map(l => l.id));
@@ -2092,11 +2095,20 @@ export default function PlayerPropsPage() {
   const { data, isLoading, error, dataUpdatedAt } = useQuery<PropsResponse>({
     queryKey: ["/api/game-player-props", selectedSport],
     queryFn: async () => {
-      const res = await fetch(`/api/game-player-props/${selectedSport}`);
+      const res = await fetch(`/api/game-player-props/${selectedSport}`, { credentials: "include" });
+      if (res.status === 403 || res.status === 401) {
+        setTierGated(true);
+        throw new Error("tier-gated");
+      }
       if (!res.ok) throw new Error("Failed to fetch player props");
+      setTierGated(false);
       return res.json();
     },
-    refetchInterval: 30000,
+    refetchInterval: tierGated ? false : 30000,
+    retry: (failureCount, err) => {
+      if (err instanceof Error && err.message === "tier-gated") return false;
+      return failureCount < 2;
+    },
   });
 
   const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" }) : "";
@@ -2225,9 +2237,12 @@ export default function PlayerPropsPage() {
           )}
         </header>
 
-        <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
-
-        <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
+        {!tierGated && (
+          <>
+            <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
+            <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
+          </>
+        )}
 
         {isLoading && (
           <div className="space-y-4" data-testid="loading-skeleton">
@@ -2256,7 +2271,46 @@ export default function PlayerPropsPage() {
           </div>
         )}
 
-        {error && (
+        {tierGated && (
+          <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-amber-600/5" data-testid="tier-gate-teaser">
+            <CardContent className="p-6 sm:p-8 text-center space-y-4">
+              <div className="flex items-center justify-center gap-2">
+                <Lock className="w-6 h-6 text-amber-500" />
+                <Crown className="w-8 h-8 text-amber-500" />
+                <Lock className="w-6 h-6 text-amber-500" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-foreground">Elite Feature</h3>
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                  Player Props with real-time over/under picks, Monte Carlo simulations, and multi-book line comparison 
+                  is available on <span className="font-semibold text-amber-500">Elite</span> and <span className="font-semibold text-amber-500">Whale</span> plans.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto text-left">
+                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <Target className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                  <span>AI-graded prop picks across 6 sports</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <BarChart3 className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                  <span>Multi-book odds comparison</span>
+                </div>
+                <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                  <Zap className="w-3.5 h-3.5 text-amber-500 mt-0.5 shrink-0" />
+                  <span>Custom line adjustments</span>
+                </div>
+              </div>
+              <Link href="/pricing">
+                <Button className="bg-amber-500 hover:bg-amber-600 text-white mt-2" data-testid="button-upgrade-elite">
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Elite
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        {error && !tierGated && (
           <Card>
             <CardContent className="p-6 text-center">
               <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-2" />

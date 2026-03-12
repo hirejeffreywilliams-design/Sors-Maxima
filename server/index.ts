@@ -22,6 +22,7 @@ import { startContinuousLearningOrchestrator } from "./continuousLearningOrchest
 import { initCommunityPatternEngine } from "./communityLossPatternEngine";
 import { startAnalyticsAgent } from "./analyticsAgentEngine";
 import { startAutonomousAdminIntelligence } from "./autonomousAdminIntelligence";
+import { startPrefetchScheduler } from "./prefetchScheduler";
 import { startAutoSettlement } from "./settlementEngine";
 import { startIntelligenceHub } from "./unifiedIntelligenceHub";
 import { startPrecomputedEngine } from "./precomputedPredictionsEngine";
@@ -320,6 +321,7 @@ function startEnginesPhased(): void {
   safeStart("Community Pattern Engine", initCommunityPatternEngine, 360_000);   // 6 min
   safeStart("Analytics Agent", startAnalyticsAgent, 420_000);                   // 7 min
   safeStart("Autonomous Admin Intelligence", startAutonomousAdminIntelligence, 480_000); // 8 min
+  safeStart("Prefetch Scheduler", startPrefetchScheduler, 490_000);
   safeStart("Historical Backtest", initBacktestOnStartup, 540_000);             // 9 min
   safeStart("Autonomous Learning Engine", startAutonomousLearningEngine, 600_000); // 10 min
   safeStart("Retention Sequence Engine", startRetentionSequenceEngine, 120_000);  // 2 min

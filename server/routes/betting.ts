@@ -3097,7 +3097,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   }
 
-  app.get("/api/game-player-props/:sport", async (req, res) => {
+  app.get("/api/game-player-props/:sport", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { fetchRealPlayerProps, isOddsApiAvailable, fetchRealOddsForGame, MARKET_LABELS } = await import("../odds-provider");
       const { getScoreboard } = await import("../espn-scoreboard-provider");
@@ -3689,7 +3689,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/top-props/:sport", async (req, res) => {
+  app.get("/api/top-props/:sport", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { fetchRealPlayerProps, isOddsApiAvailable, MARKET_LABELS } = await import("../odds-provider");
       const { getScoreboard } = await import("../espn-scoreboard-provider");
@@ -4010,7 +4010,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
-  app.get("/api/real-player-props/:sport", async (req, res) => {
+  app.get("/api/real-player-props/:sport", requireTier("elite", "whale"), async (req, res) => {
     try {
       const { fetchRealPlayerProps, isOddsApiAvailable } = await import("../odds-provider");
       const sport = req.params.sport;

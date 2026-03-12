@@ -5914,4 +5914,141 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  app.get("/api/admin/control-room", requireAdmin, async (_req, res) => {
+    try {
+      const { getPrefetchStatus, getControlRoomLog } = await import("../prefetchScheduler");
+      const { apiKeyManager } = await import("../apiKeyManager");
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { getCacheStats, invalidateCache } = await import("../responseCache");
+
+      const prefetch = getPrefetchStatus();
+      const apiKeys = apiKeyManager.getAllStatus();
+      const cacheStats = getCacheStats();
+      const recentLog = getControlRoomLog();
+
+      let budgetSummary: any = {};
+      try {
+        const dash = apiBudgetOptimizer.getDashboard();
+        budgetSummary = {
+          odds: dash.optimizations.find((o: any) => o.service === "odds"),
+          balldontlie: dash.optimizations.find((o: any) => o.service === "balldontlie"),
+          apifootball: dash.optimizations.find((o: any) => o.service === "apifootball"),
+          openai: dash.optimizations.find((o: any) => o.service === "openai"),
+        };
+      } catch { /* ok */ }
+
+      res.json({
+        prefetch,
+        apiKeys,
+        cacheStats: {
+          size: cacheStats.size,
+          hitCount: cacheStats.hitCount,
+          missCount: cacheStats.missCount,
+          hitRate: cacheStats.hitRate,
+        },
+        budget: budgetSummary,
+        recentLog: recentLog.slice(0, 20),
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/clear-response-cache", requireAdmin, async (_req, res) => {
+    try {
+      const { invalidateCache } = await import("../responseCache");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      invalidateCache();
+      addControlRoomLog("clear-response-cache", "Response cache cleared by admin");
+      res.json({ success: true, message: "Response cache cleared" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/flush-disk-cache", requireAdmin, async (_req, res) => {
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const files = ["market-snapshot-disk-cache.json", "odds-api-disk-cache.json"];
+      let flushed = 0;
+      for (const file of files) {
+        const fp = path.default.join(process.cwd(), file);
+        if (fs.default.existsSync(fp)) {
+          fs.default.unlinkSync(fp);
+          flushed++;
+        }
+      }
+      addControlRoomLog("flush-disk-cache", `Flushed ${flushed} disk cache file(s)`);
+      res.json({ success: true, message: `Flushed ${flushed} disk cache file(s)` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/rotate-api-key", requireAdmin, async (req, res) => {
+    try {
+      const { apiKeyManager } = await import("../apiKeyManager");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const service = req.body.service || "odds";
+      const status = apiKeyManager.getStatus(service);
+      addControlRoomLog("rotate-key", `Rotated API key for ${service} — ${status.activeKeys}/${status.totalKeys} active`);
+      res.json({ success: true, message: `${service} key status: ${status.activeKeys}/${status.totalKeys} active`, status });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/reset-budget-optimizer", requireAdmin, async (_req, res) => {
+    try {
+      const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      apiBudgetOptimizer.resumeService("odds");
+      addControlRoomLog("reset-budget", "Budget optimizer resumed for odds service");
+      res.json({ success: true, message: "Budget optimizer resumed for odds service" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/force-prefetch", requireAdmin, async (_req, res) => {
+    try {
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const { getOddsForSportAsync } = await import("../odds-provider");
+      const { getMultiDayScoreboard } = await import("../espn-scoreboard-provider");
+
+      let warmed = 0;
+      const sports = ["NBA", "NFL", "MLB", "NHL"];
+      for (const sport of sports) {
+        try {
+          await getMultiDayScoreboard(sport);
+          warmed++;
+        } catch { /* ok */ }
+        try {
+          await getOddsForSportAsync(sport as any);
+          warmed++;
+        } catch { /* ok */ }
+      }
+      addControlRoomLog("force-prefetch", `Force prefetched ${warmed} data sources`);
+      res.json({ success: true, message: `Force prefetched ${warmed} data sources` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/restart-autonomous-monitor", requireAdmin, async (_req, res) => {
+    try {
+      const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      autonomousAdminIntelligence.stop();
+      autonomousAdminIntelligence.start();
+      addControlRoomLog("restart-monitor", "Autonomous monitor restarted");
+      res.json({ success: true, message: "Autonomous admin monitor restarted" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

@@ -48,6 +48,9 @@ The application uses a modern web architecture with a React-based frontend and a
 - **Company Standards System**: `server/companyStandards.ts` acts as a single source of truth for grade thresholds, prohibited phrases, brand voice, tier standards, and AI compliance context.
 - **Admin Policy & Standards Page**: Full CRUD interface at `/admin/policy-standards` for managing policies, procedures, and AI brand standards.
 - **Responsible Gambling Notice**: Provides 3 variants (banner/compact/footer) with localStorage dismissal and helpline information.
+- **Background Prefetch Scheduler**: `server/prefetchScheduler.ts` proactively warms odds, scoreboard, and player props caches on intervals (3m, 2m, 10m). Respects budget optimizer throttling. Starts 8+ min after boot via `safeStart`.
+- **Player Props Tier Gating**: `/api/game-player-props/:sport`, `/api/top-props/:sport`, `/api/real-player-props/:sport`, and `/api/tools/player-props/:sport` all require `elite` or `whale` tier. Lower-tier users see a branded upgrade teaser on the Player Props page.
+- **System Control Room**: Admin-only tab in `/admin` with 7 quick-action buttons (clear response cache, flush disk cache, force prefetch, rotate API key, resume budget optimizer, force refresh picks, restart autonomous monitor), real-time API key quota status, prefetch task monitoring, and a rolling 20-entry action log. Backend endpoints at `/api/admin/control-room/*`.
 - **SSE Authentication**: `/api/sse/stream` is protected by `requireAuth` middleware.
 - **TBD Team Filtering**: All ticket builders and the unified intelligence hub filter out picks where `homeTeam === "TBD"` or `awayTeam === "TBD"`.
 - **Adaptive Engine Scheduling**: `precomputedPredictionsEngine.ts` uses a self-scheduling `setTimeout` pattern with an adaptive interval based on game proximity.

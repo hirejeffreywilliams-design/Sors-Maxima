@@ -6359,6 +6359,114 @@
       "mcBoostApplied": -2,
       "pickConfidence": 60,
       "recordedAt": 1773274838500
+    },
+    {
+      "id": "401810810_moneyline",
+      "gameId": "401810810",
+      "sport": "NBA",
+      "betType": "moneyline",
+      "mcWinProb": 0.367,
+      "mcVariance": 50644882138918126000,
+      "mcConvergence": 0.943,
+      "mcBoostApplied": -6,
+      "pickConfidence": 55,
+      "recordedAt": 1773346228360
+    },
+    {
+      "id": "401810810_spread",
+      "gameId": "401810810",
+      "sport": "NBA",
+      "betType": "spread",
+      "mcWinProb": 0.355,
+      "mcVariance": 50644882138918126000,
+      "mcConvergence": 0.943,
+      "mcBoostApplied": -13,
+      "pickConfidence": 48,
+      "recordedAt": 1773346228774
+    },
+    {
+      "id": "401810810_total",
+      "gameId": "401810810",
+      "sport": "NBA",
+      "betType": "total",
+      "mcWinProb": 0.355,
+      "mcVariance": 50644882138918126000,
+      "mcConvergence": 0.943,
+      "mcBoostApplied": 12,
+      "pickConfidence": 73,
+      "recordedAt": 1773346228775
+    },
+    {
+      "id": "401810811_moneyline",
+      "gameId": "401810811",
+      "sport": "NBA",
+      "betType": "moneyline",
+      "mcWinProb": 0.364,
+      "mcVariance": 49330772147585650000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": -6,
+      "pickConfidence": 55,
+      "recordedAt": 1773346228780
+    },
+    {
+      "id": "401810811_spread",
+      "gameId": "401810811",
+      "sport": "NBA",
+      "betType": "spread",
+      "mcWinProb": 0.367,
+      "mcVariance": 49330772147585650000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": 12,
+      "pickConfidence": 73,
+      "recordedAt": 1773346229138
+    },
+    {
+      "id": "401810811_total",
+      "gameId": "401810811",
+      "sport": "NBA",
+      "betType": "total",
+      "mcWinProb": 0.367,
+      "mcVariance": 49330772147585650000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": 12,
+      "pickConfidence": 73,
+      "recordedAt": 1773346229139
+    },
+    {
+      "id": "401810812_moneyline",
+      "gameId": "401810812",
+      "sport": "NBA",
+      "betType": "moneyline",
+      "mcWinProb": 0.363,
+      "mcVariance": 51276547860368270000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": -6,
+      "pickConfidence": 55,
+      "recordedAt": 1773346229143
+    },
+    {
+      "id": "401810812_spread",
+      "gameId": "401810812",
+      "sport": "NBA",
+      "betType": "spread",
+      "mcWinProb": 0.368,
+      "mcVariance": 51276547860368270000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": -13,
+      "pickConfidence": 48,
+      "recordedAt": 1773346229443
+    },
+    {
+      "id": "401810812_total",
+      "gameId": "401810812",
+      "sport": "NBA",
+      "betType": "total",
+      "mcWinProb": 0.368,
+      "mcVariance": 51276547860368270000,
+      "mcConvergence": 0.942,
+      "mcBoostApplied": 12,
+      "pickConfidence": 73,
+      "recordedAt": 1773346229444
     }
   ],
   "sportCalibration": {
@@ -6409,8 +6517,8 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0558437782717012,
-  "totalPredictions": 795,
+  "mcStackedWeight": 1.0558447127610169,
+  "totalPredictions": 804,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
   "varianceAccuracy": {
@@ -6433,8 +6541,8 @@
       "total": 186
     }
   },
-  "learningCycles": 56,
-  "lastCycleAt": "2026-03-12T00:22:12.204Z",
-  "lastUpdated": "2026-03-12T00:22:12.204Z",
+  "learningCycles": 57,
+  "lastCycleAt": "2026-03-12T20:10:37.166Z",
+  "lastUpdated": "2026-03-12T20:10:37.166Z",
   "version": 2
 }
