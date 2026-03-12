@@ -45,7 +45,6 @@ const tiers: PricingTier[] = [
       'Visual drag-and-drop parlay builder',
       '+EV finder scanning every betting market',
       '8 international soccer leagues (draws & underdogs)',
-      'Player props analyzer — ML-powered projections',
       'Closing Line Value (CLV) tracker',
       'ROI dashboard & performance analytics',
       'Full track record — every settled pick with win rate, CLV, and calibration data',
@@ -67,6 +66,7 @@ const tiers: PricingTier[] = [
     yearlyPriceId: 'price_1T9g6TCsa9MEIxmarohPvZl3',
     features: [
       'Everything in Sharp, plus:',
+      'Player Props Analyzer — ML-powered over/under projections',
       'Sors Intelligence Cards — collect, trade & showcase verified wins',
       'Real-time line movement push alerts',
       'Live odds comparison across 6 sportsbooks',

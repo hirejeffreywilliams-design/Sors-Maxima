@@ -6038,6 +6038,85 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  app.post("/api/admin/control-room/clear-all-caches", requireAdmin, async (_req, res) => {
+    try {
+      const { invalidateCache } = await import("../responseCache");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const fs = await import("fs");
+      const path = await import("path");
+      invalidateCache();
+      const diskFiles = ["market-snapshot-disk-cache.json", "odds-api-disk-cache.json"];
+      let flushed = 0;
+      for (const file of diskFiles) {
+        const fp = path.default.join(process.cwd(), file);
+        if (fs.default.existsSync(fp)) {
+          fs.default.unlinkSync(fp);
+          flushed++;
+        }
+      }
+      try {
+        const { clearAllPredictionCaches } = await import("../precomputedPredictionsEngine");
+        clearAllPredictionCaches();
+      } catch { /* ok */ }
+      addControlRoomLog("clear-all-caches", `Cleared response cache + ${flushed} disk files + prediction cache`);
+      res.json({ success: true, message: `All caches cleared (response + ${flushed} disk files + predictions)` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/flush-props-cache", requireAdmin, async (_req, res) => {
+    try {
+      const { invalidateCache } = await import("../responseCache");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      invalidateCache("player-props");
+      invalidateCache("top-props");
+      invalidateCache("real-player-props");
+      addControlRoomLog("flush-props-cache", "Flushed all player props caches");
+      res.json({ success: true, message: "Player props caches flushed" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/refresh-scores", requireAdmin, async (_req, res) => {
+    try {
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const { getMultiDayScoreboard } = await import("../espn-scoreboard-provider");
+      const sports = ["NBA", "NFL", "MLB", "NHL"];
+      let warmed = 0;
+      for (const sport of sports) {
+        try {
+          await getMultiDayScoreboard(sport);
+          warmed++;
+        } catch { /* ok */ }
+      }
+      addControlRoomLog("refresh-scores", `Refreshed scoreboards for ${warmed} sports`);
+      res.json({ success: true, message: `Refreshed scoreboards for ${warmed} sports` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/refresh-odds", requireAdmin, async (_req, res) => {
+    try {
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const { getOddsForSportAsync } = await import("../odds-provider");
+      const sports = ["NBA", "NFL", "MLB", "NHL"];
+      let warmed = 0;
+      for (const sport of sports) {
+        try {
+          await getOddsForSportAsync(sport as any);
+          warmed++;
+        } catch { /* ok */ }
+      }
+      addControlRoomLog("refresh-odds", `Refreshed odds for ${warmed} sports`);
+      res.json({ success: true, message: `Refreshed odds for ${warmed} sports` });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.post("/api/admin/control-room/restart-autonomous-monitor", requireAdmin, async (_req, res) => {
     try {
       const { autonomousAdminIntelligence } = await import("../autonomousAdminIntelligence");
