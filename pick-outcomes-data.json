@@ -16686,13 +16686,113 @@
       "homeScore": 96,
       "awayScore": 84,
       "settledAt": "2026-03-11T21:41:58.178Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851299-total-99d96ae9ba",
+      "gameId": "401851299",
+      "sport": "NCAAB",
+      "game": "UCF Knights @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "UCF Knights",
+      "pick": "Over 159",
+      "betType": "total",
+      "odds": -108,
+      "grade": "B+",
+      "confidence": 73,
+      "ev": 36.74,
+      "gameTime": "2026-03-12T19:00Z",
+      "savedAt": "2026-03-11T22:44:16.697Z",
+      "result": "won",
+      "homeScore": 79,
+      "awayScore": 89,
+      "settledAt": "2026-03-11T22:45:23.006Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851299-spread-d8fae5ec80",
+      "gameId": "401851299",
+      "sport": "NCAAB",
+      "game": "UCF Knights @ Arizona Wildcats",
+      "homeTeam": "Arizona Wildcats",
+      "awayTeam": "UCF Knights",
+      "pick": "Arizona Wildcats -17",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 58,
+      "ev": 35.55,
+      "gameTime": "2026-03-12T19:00Z",
+      "savedAt": "2026-03-11T22:44:16.697Z",
+      "result": "lost",
+      "homeScore": 79,
+      "awayScore": 89,
+      "settledAt": "2026-03-11T22:45:23.006Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851562-spread-0e4e994390",
+      "gameId": "401851562",
+      "sport": "NCAAB",
+      "game": "Auburn Tigers @ Tennessee Volunteers",
+      "homeTeam": "Tennessee Volunteers",
+      "awayTeam": "Auburn Tigers",
+      "pick": "Tennessee Volunteers -5.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 74,
+      "ev": 20.27,
+      "gameTime": "2026-03-12T19:00Z",
+      "savedAt": "2026-03-11T22:44:16.697Z",
+      "result": "won",
+      "homeScore": 96,
+      "awayScore": 84,
+      "settledAt": "2026-03-11T22:45:23.016Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851311-spread-aab6fc0a5e",
+      "gameId": "401851311",
+      "sport": "NCAAB",
+      "game": "Providence Friars @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Providence Friars",
+      "pick": "St. John's Red Storm -10.5",
+      "betType": "spread",
+      "odds": -108,
+      "grade": "A-",
+      "confidence": 73,
+      "ev": 40.59,
+      "gameTime": "2026-03-12T16:00Z",
+      "savedAt": "2026-03-11T22:44:16.697Z",
+      "result": "lost",
+      "homeScore": 65,
+      "awayScore": 72,
+      "settledAt": "2026-03-11T22:45:23.031Z"
+    },
+    {
+      "id": "precomp-NCAAB-401851311-total-937db67772",
+      "gameId": "401851311",
+      "sport": "NCAAB",
+      "game": "Providence Friars @ St. John's Red Storm",
+      "homeTeam": "St. John's Red Storm",
+      "awayTeam": "Providence Friars",
+      "pick": "Under 158.5",
+      "betType": "total",
+      "odds": -105,
+      "grade": "A-",
+      "confidence": 71,
+      "ev": 42.52,
+      "gameTime": "2026-03-12T16:00Z",
+      "savedAt": "2026-03-11T22:44:16.697Z",
+      "result": "won",
+      "homeScore": 65,
+      "awayScore": 72,
+      "settledAt": "2026-03-11T22:45:23.031Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 752,
-      "won": 402,
-      "lost": 337,
+      "total": 757,
+      "won": 405,
+      "lost": 339,
       "push": 13,
       "rate": 53.5,
       "pending": 82
@@ -16709,21 +16809,21 @@
         "rate": 52.4
       },
       "NCAAB": {
-        "total": 231,
-        "won": 130,
-        "rate": 56.3
+        "total": 236,
+        "won": 133,
+        "rate": 56.4
       }
     },
     "byGrade": {
       "B+": {
-        "total": 69,
-        "won": 40,
-        "rate": 58
+        "total": 71,
+        "won": 41,
+        "rate": 57.7
       },
       "B": {
-        "total": 57,
-        "won": 41,
-        "rate": 71.9
+        "total": 58,
+        "won": 42,
+        "rate": 72.4
       },
       "B-": {
         "total": 168,
@@ -16751,9 +16851,9 @@
         "rate": 50.4
       },
       "A-": {
-        "total": 41,
-        "won": 19,
-        "rate": 46.3
+        "total": 43,
+        "won": 20,
+        "rate": 46.5
       },
       "D": {
         "total": 10,
@@ -16779,16 +16879,16 @@
         "roi": 11.9
       },
       "Spread": {
-        "total": 231,
-        "won": 124,
-        "rate": 53.7,
-        "roi": 5.3
+        "total": 234,
+        "won": 125,
+        "rate": 53.4,
+        "roi": 4.8
       },
       "Total": {
-        "total": 227,
-        "won": 119,
-        "rate": 52.4,
-        "roi": 3
+        "total": 229,
+        "won": 121,
+        "rate": 52.8,
+        "roi": 3.8
       },
       "Team Total": {
         "total": 71,
@@ -16798,20 +16898,20 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 20,
+      "won": 29,
+      "lost": 21,
       "push": 0,
-      "rate": 60
+      "rate": 58
     },
-    "lastUpdated": "2026-03-11T21:53:19.603Z",
-    "roi": 6.6,
-    "brierScore": 0.2613,
+    "lastUpdated": "2026-03-11T22:45:23.036Z",
+    "roi": 6.7,
+    "brierScore": 0.261,
     "maxDrawdown": 15.4,
     "sharpeRatio": 0.062,
     "homeAwayBias": {
-      "homeWinRate": 57.2,
+      "homeWinRate": 57,
       "awayWinRate": 42,
-      "homeTotal": 369,
+      "homeTotal": 372,
       "awayTotal": 81
     },
     "calibrationBuckets": [
@@ -16824,8 +16924,8 @@
       {
         "range": "55-60",
         "predicted": 57.3,
-        "actual": 48.3,
-        "total": 143
+        "actual": 47.9,
+        "total": 144
       },
       {
         "range": "60-65",
@@ -16841,9 +16941,9 @@
       },
       {
         "range": "70-75",
-        "predicted": 70.4,
-        "actual": 53.8,
-        "total": 80
+        "predicted": 70.5,
+        "actual": 54.8,
+        "total": 84
       },
       {
         "range": "75-80",

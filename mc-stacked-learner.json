@@ -6179,6 +6179,42 @@
       "mcBoostApplied": -2,
       "pickConfidence": 67,
       "recordedAt": 1773259109938
+    },
+    {
+      "id": "401851565_moneyline",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "betType": "moneyline",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 9,
+      "pickConfidence": 77,
+      "recordedAt": 1773266466040
+    },
+    {
+      "id": "401851565_spread",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "betType": "spread",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 15,
+      "pickConfidence": 83,
+      "recordedAt": 1773266466042
+    },
+    {
+      "id": "401851565_total",
+      "gameId": "401851565",
+      "sport": "NCAAB",
+      "betType": "total",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -2,
+      "pickConfidence": 66,
+      "recordedAt": 1773266466043
     }
   ],
   "sportCalibration": {
@@ -6229,8 +6265,8 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0558380736139208,
-  "totalPredictions": 780,
+  "mcStackedWeight": 1.0558426788725064,
+  "totalPredictions": 783,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
   "varianceAccuracy": {
@@ -6253,8 +6289,8 @@
       "total": 186
     }
   },
-  "learningCycles": 52,
-  "lastCycleAt": "2026-03-11T20:13:02.852Z",
-  "lastUpdated": "2026-03-11T20:13:02.852Z",
+  "learningCycles": 55,
+  "lastCycleAt": "2026-03-11T23:53:52.649Z",
+  "lastUpdated": "2026-03-11T23:53:52.649Z",
   "version": 2
 }

@@ -1,6 +1,46 @@
 {
   "alerts": [
     {
+      "id": "alert_1773273112648_nl8vp",
+      "timestamp": "2026-03-11T23:51:52.648Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "24,372 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773271312646_m8i0k",
+      "timestamp": "2026-03-11T23:21:52.646Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "25,559 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773269692646_ppa8c",
+      "timestamp": "2026-03-11T22:54:52.646Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "26,414 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773266631602_hydt8",
+      "timestamp": "2026-03-11T22:03:51.602Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "26,942 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773263443644_kvkey",
       "timestamp": "2026-03-11T21:10:43.644Z",
       "resolved": false,
@@ -704,6 +744,63 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1773270232645_hwucy",
+      "timestamp": "2026-03-11T23:03:52.645Z",
+      "durationMs": 6451,
+      "summary": [
+        "Win rate is at 54.4%, above break-even of 52.4%. No immediate action needed on performance.",
+        "Odds API usage is critical, with only 26,414 requests remaining. Immediate reduction of polling frequency is required.",
+        "Platform has healthy cash flow; current cash on hand is $100,000 with a monthly burn of $45,000.",
+        "No compliance flags or severe issues reported."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Reduce Odds API Polling Frequency",
+          "description": "Throttle the polling frequency for the Odds API to stay within the remaining request limit.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        },
+        {
+          "title": "Review API Usage Patterns",
+          "description": "Analyze the API usage to identify areas of unnecessary excess usage and optimize henceforth.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 2
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Odds API Below Threshold",
+          "description": "Current usage is at 26,414 requests remaining; this is a warning level. Address by reducing frequency.",
+          "severity": "high"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Implement throttling for Odds API requests.",
+          "Monitor real-time metrics for any sudden changes."
+        ],
+        "this_week": [
+          "Conduct a financial review based on current monthly burn and cash on hand.",
+          "Evaluate user engagement strategies to reduce churn rate."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 54.4,
+        "settledPicks": 757,
+        "oddsApiRemaining": 26414,
+        "oddsApiStatus": "warning",
+        "guardianHealth": 100,
+        "cacheHitRate": 20,
+        "heapUsedMb": 72,
+        "heapTotalMb": 91,
+        "hubLastCycleMs": 2,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate is at 54.4%, above break-even of 52.4%. No immediate action needed on performance.\",\n    \"Odds API usage is critical, with only 26,414 requests remaining. Immediate reduction of polling frequency is required.\",\n    \"Platform has healthy cash flow; current cash on hand is $100,000 with a monthly burn of $45,000.\",\n    \"No compliance flags or severe issues reported.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Reduce Odds API Polling Frequency\",\n      \"description\": \"Throttle the polling frequency for the Odds API to stay within the remaining request limit.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Review API Usage Patterns\",\n      \"description\": \"Analyze the API usage to identify areas of unnecessary excess usage and optimize henceforth.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Odds API Below Threshold\",\n      \"description\": \"Current usage is at 26,414 requests remaining; this is a warning level. Address by reducing frequency.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling for Odds API requests.\",\n      \"Monitor real-time metrics for any sudden changes.\"\n    ],\n    \"this_week\": [\n      \"Conduct a financial review based on current monthly burn and cash on hand.\",\n      \"Evaluate user engagement strategies to reduce churn rate.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1773260282644_n1nn2",
       "timestamp": "2026-03-11T20:18:02.644Z",
@@ -1876,74 +1973,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Current overall win rate is 52.9%, maintaining above break-even threshold.\",\n    \"API usage is healthy; however, API football shows a significant budget variance due to overestimation of usage.\",\n    \"Pick accuracy in 'Total' market is critically low at 46.7%, affecting overall performance.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Optimize API Budget Usage\",\n      \"description\": \"Review and update API football budget strategy to address negative usage projection.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Address Total Market Performance\",\n      \"description\": \"Investigate the low pick accuracy in 'Total' bets and adjust model inputs accordingly.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Monitor API Calls\",\n      \"description\": \"Ensure all services remain under the optimal usage recommendations for the remainder of the month.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical Budget Variance for API Football\",\n      \"description\": \"Current projections indicate a heavily negative budget variance for API football service usage.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Low Performance in Total Market\",\n      \"description\": \"Total market pick accuracy is below acceptable thresholds, potentially impacting user satisfaction.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Begin reviewing API football budget usage limits.\",\n      \"Assess trends in Total market picks to develop action plan.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments to improve Total picks accuracy.\",\n      \"Verify and maintain optimal intervals for all API services.\",\n      \"Prepare a report on current user retention and churn rate dynamics.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1772907503705_cvj9r",
-      "timestamp": "2026-03-07T18:18:23.705Z",
-      "durationMs": 7790,
-      "summary": [
-        "Overall win rate is slightly above break-even at 52.9%, but Total market is at 46.7% which may indicate potential model degradation.",
-        "API usage is healthy, but OpenAI budget usage is significantly below expected, requiring attention.",
-        "Churn rate is moderate at 4.2%, indicating some user retention issues that may need addressing."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Evaluate Model for Total Bets",
-          "description": "Investigate low performance in Total market (46.7% win rate) and consider adjustments to improve predictions.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 5
-        },
-        {
-          "title": "User Retention Strategy Review",
-          "description": "Assess the churn rate of 4.2% and develop strategies to enhance user retention and engagement.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 4
-        },
-        {
-          "title": "Review OpenAI Budget Usage",
-          "description": "Examine why OpenAI usage is significantly under budget and ensure that necessary AI insights are being generated.",
-          "priority": "P2",
-          "due_by": "today",
-          "effort_hours": 2
-        }
-      ],
-      "risk_alerts": [
-        {
-          "title": "Potential Model Degradation in Total Market",
-          "description": "The win rate for Total bets is below 48%, indicating potential degradation of predictive model performance.",
-          "severity": "critical"
-        }
-      ],
-      "ops_checklist": {
-        "today": [
-          "Investigate OpenAI budget usage issues.",
-          "Monitor user engagement metrics over the next few days."
-        ],
-        "this_week": [
-          "Conduct a thorough analysis of the Total market performance.",
-          "Develop a plan for improving user retention metrics.",
-          "Review and optimize betting strategies based on current performance data."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 52.9,
-        "settledPicks": 449,
-        "oddsApiRemaining": 73913,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 80,
-        "cacheHitRate": 20,
-        "heapUsedMb": 68,
-        "heapTotalMb": 71,
-        "hubLastCycleMs": 16,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Overall win rate is slightly above break-even at 52.9%, but Total market is at 46.7% which may indicate potential model degradation.\",\n    \"API usage is healthy, but OpenAI budget usage is significantly below expected, requiring attention.\",\n    \"Churn rate is moderate at 4.2%, indicating some user retention issues that may need addressing.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Evaluate Model for Total Bets\",\n      \"description\": \"Investigate low performance in Total market (46.7% win rate) and consider adjustments to improve predictions.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"User Retention Strategy Review\",\n      \"description\": \"Assess the churn rate of 4.2% and develop strategies to enhance user retention and engagement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review OpenAI Budget Usage\",\n      \"description\": \"Examine why OpenAI usage is significantly under budget and ensure that necessary AI insights are being generated.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Potential Model Degradation in Total Market\",\n      \"description\": \"The win rate for Total bets is below 48%, indicating potential degradation of predictive model performance.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate OpenAI budget usage issues.\",\n      \"Monitor user engagement metrics over the next few days.\"\n    ],\n    \"this_week\": [\n      \"Conduct a thorough analysis of the Total market performance.\",\n      \"Develop a plan for improving user retention metrics.\",\n      \"Review and optimize betting strategies based on current performance data.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-11T21:10:43.644Z",
-  "lastDeepCheck": "2026-03-11T20:18:02.644Z",
-  "totalQuickChecks": 139,
-  "totalDeepChecks": 34
+  "lastQuickCheck": "2026-03-11T23:51:52.648Z",
+  "lastDeepCheck": "2026-03-11T23:03:52.645Z",
+  "totalQuickChecks": 143,
+  "totalDeepChecks": 35
 }
