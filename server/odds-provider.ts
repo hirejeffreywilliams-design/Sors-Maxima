@@ -1487,6 +1487,10 @@ export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5,
     return cached.data;
   }
 
+  if (!callerIsScheduler && !cached) {
+    return [];
+  }
+
   const sportUpper = sport.toUpperCase();
   const markets = PLAYER_PROP_MARKETS[sportUpper];
   if (!markets || !getOddsApiKey()) return [];
