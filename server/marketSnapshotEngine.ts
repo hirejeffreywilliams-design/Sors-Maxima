@@ -508,10 +508,11 @@ function computeLineMovement(bookmakers: BookmakerOdds[], espnOdds?: ESPNScorebo
 
   if (spreads.length >= 2) {
     const avg = spreads.reduce((s, v) => s + v, 0) / spreads.length;
-    const hasEspnLine = !!espnOdds?.spread;
+    const espnSpread = espnOdds?.spreadLine;
+    const hasEspnLine = espnSpread !== undefined && Math.abs(espnSpread) <= 50;
     const openingGuess = hasEspnLine
-      ? parseFloat(espnOdds!.spread!.replace(/[^-.\d]/g, "") || "0")
-      : avg; // use avg as baseline when no ESPN opening — avoids false "down" bias
+      ? espnSpread
+      : avg;
     const movement = avg - openingGuess;
     const absMov = Math.abs(movement);
 
@@ -607,9 +608,14 @@ export async function generateMarketSnapshot(sport: Sport): Promise<MarketSnapsh
         const derivedAwayML = probToAmerican(awayAdjProb);
 
         let derivedSpread: number | undefined;
-        if (game.odds?.spread) {
+        if (game.odds?.spreadLine !== undefined) {
+          derivedSpread = game.odds.spreadLine;
+        } else if (game.odds?.spread) {
           const spreadMatch = game.odds.spread.match(/-?\d+\.?\d*/);
-          if (spreadMatch) derivedSpread = parseFloat(spreadMatch[0]);
+          if (spreadMatch) {
+            const parsed = parseFloat(spreadMatch[0]);
+            if (Math.abs(parsed) <= 50) derivedSpread = parsed;
+          }
         }
         if (derivedSpread === undefined) {
           const diff = (homeProb - 0.5) * 14;

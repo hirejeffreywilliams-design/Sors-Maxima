@@ -58,6 +58,7 @@ export interface ESPNScoreboardGame {
   broadcast?: string;
   odds?: {
     spread?: string;
+    spreadLine?: number;
     overUnder?: number;
     homeMoneyline?: number;
     awayMoneyline?: number;
@@ -154,6 +155,7 @@ function parseGame(event: any, sport: Sport): ESPNScoreboardGame {
     const o = competition.odds[0];
     odds = {
       spread: o.details || undefined,
+      spreadLine: typeof o.spread === "number" && Math.abs(o.spread) <= 50 ? o.spread : undefined,
       overUnder: o.overUnder || undefined,
     };
   }
