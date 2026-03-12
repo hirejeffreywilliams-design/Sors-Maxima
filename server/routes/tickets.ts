@@ -88,6 +88,10 @@ function buildVariation(
         addedAt: new Date().toISOString(),
         monteCarloData: p.monteCarloData,
         factors: p.factors,
+        oddsSourceBook: (p as any).oddsSourceBook,
+        oddsBookCount: (p as any).oddsBookCount,
+        oddsApiSource: (p as any).oddsApiSource,
+        allBookOdds: (p as any).allBookOdds,
       };
     }),
     totalDecimalOdds: parseFloat(totalDecimalOdds.toFixed(4)),

@@ -41,6 +41,7 @@ import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { TicketShowcase } from "@/components/ticket-showcase";
 import { MobileTicketDeck } from "@/components/mobile-ticket-deck";
 import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
+import { OddsAttribution } from "@/components/ui/odds-attribution";
 
 interface TopPick {
   id: string;
@@ -273,6 +274,10 @@ interface OptimalTicketLeg {
   timingAdvice: string;
   sport: string;
   gameTime?: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 interface OptimalTicket {
@@ -443,13 +448,24 @@ function TicketCard({ ticket, legs, addLeg }: { ticket: OptimalTicket; legs: { i
           {ticket.legs.map((leg, i) => {
             const inSlip = legs.some(sl => sl.id === `ticket-${leg.pickId}`);
             return (
-              <div key={leg.id} className={`flex items-center gap-2 text-xs p-1.5 rounded ${inSlip ? "bg-primary/5 border border-primary/20" : "bg-muted/30"}`} data-testid={`row-leg-${leg.id}`}>
-                <span className="text-muted-foreground w-4 shrink-0">L{i + 1}</span>
-                <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${sportColor(leg.sport)}`}>{leg.sport}</Badge>
-                <span className="font-medium truncate flex-1">{leg.outcome}</span>
-                <span className="font-mono text-muted-foreground shrink-0">{formatOdds(leg.americanOdds)}</span>
-                <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 bg-muted/50 text-muted-foreground border-muted">{leg.grade}</Badge>
-                {inSlip && <Check className="w-3 h-3 text-primary shrink-0" />}
+              <div key={leg.id} className={`text-xs p-1.5 rounded ${inSlip ? "bg-primary/5 border border-primary/20" : "bg-muted/30"}`} data-testid={`row-leg-${leg.id}`}>
+                <div className="flex items-center gap-2">
+                  <span className="text-muted-foreground w-4 shrink-0">L{i + 1}</span>
+                  <Badge variant="outline" className={`text-[9px] px-1 py-0 shrink-0 ${sportColor(leg.sport)}`}>{leg.sport}</Badge>
+                  <span className="font-medium truncate flex-1">{leg.outcome}</span>
+                  <span className="font-mono text-muted-foreground shrink-0">{formatOdds(leg.americanOdds)}</span>
+                  <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 bg-muted/50 text-muted-foreground border-muted">{leg.grade}</Badge>
+                  {inSlip && <Check className="w-3 h-3 text-primary shrink-0" />}
+                </div>
+                <div className="pl-6">
+                  <OddsAttribution
+                    oddsSourceBook={leg.oddsSourceBook}
+                    oddsBookCount={leg.oddsBookCount}
+                    oddsApiSource={leg.oddsApiSource}
+                    allBookOdds={leg.allBookOdds}
+                    compact
+                  />
+                </div>
               </div>
             );
           })}
@@ -983,6 +999,15 @@ function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; le
                   <Badge variant="outline" className="text-[9px] px-1 py-0 bg-muted/50 text-muted-foreground border-muted">{leg.grade}</Badge>
                   {inSlip && <CheckCircle2 className="w-3 h-3 text-emerald-500" />}
                 </div>
+                <div className="col-span-full pl-6">
+                  <OddsAttribution
+                    oddsSourceBook={leg.oddsSourceBook}
+                    oddsBookCount={leg.oddsBookCount}
+                    oddsApiSource={leg.oddsApiSource}
+                    allBookOdds={leg.allBookOdds}
+                    compact
+                  />
+                </div>
               </div>
             );
           })}
@@ -1218,6 +1243,10 @@ interface LifeChangerLeg {
   edge: number;
   isUnderdog: boolean;
   reasoning: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 interface LifeChangerTicket {
@@ -1642,6 +1671,13 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                             <span className="text-[10px] text-muted-foreground/60">{leg.confidence}% confidence</span>
                           </div>
                           <p className="text-[10px] text-amber-300/70 mt-0.5 line-clamp-2">{leg.selectionReason}</p>
+                          <OddsAttribution
+                            oddsSourceBook={leg.oddsSourceBook}
+                            oddsBookCount={leg.oddsBookCount}
+                            oddsApiSource={leg.oddsApiSource}
+                            allBookOdds={leg.allBookOdds}
+                            compact
+                          />
                         </div>
                         <div className="flex flex-col items-end gap-1 shrink-0 w-[68px]">
                           <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>

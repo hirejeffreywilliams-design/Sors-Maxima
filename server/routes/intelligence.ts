@@ -63,6 +63,10 @@ function trimPick(p: any, maxFactors = 5) {
     insight: p.insight,
     winProbability: p.winProbability,
     factors: Array.isArray(p.factors) ? p.factors.slice(0, maxFactors) : [],
+    oddsSourceBook: p.oddsSourceBook,
+    oddsBookCount: p.oddsBookCount,
+    oddsApiSource: p.oddsApiSource,
+    allBookOdds: p.allBookOdds,
   };
 }
 

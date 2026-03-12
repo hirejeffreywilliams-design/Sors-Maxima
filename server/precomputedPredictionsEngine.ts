@@ -136,6 +136,10 @@ export interface PrecomputedPick {
     detectedAt: string;
   };
   aiInsight?: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -2097,6 +2101,10 @@ export interface OptimalTicketLeg {
   timingAdvice: string;
   sport: string;
   gameTime?: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 export interface OptimalTicket {
@@ -2160,6 +2168,10 @@ function pickToLeg(pick: PrecomputedPick): OptimalTicketLeg {
     timingAdvice: pick.timingAdvice,
     sport: pick.sport,
     gameTime: pick.gameTime,
+    oddsSourceBook: (pick as any).oddsSourceBook,
+    oddsBookCount: (pick as any).oddsBookCount,
+    oddsApiSource: (pick as any).oddsApiSource,
+    allBookOdds: (pick as any).allBookOdds,
   };
 }
 
@@ -2602,6 +2614,10 @@ export interface LifeChangerLeg {
   edge: number;
   isUnderdog: boolean;
   reasoning: string;
+  oddsSourceBook?: string;
+  oddsBookCount?: number;
+  oddsApiSource?: string;
+  allBookOdds?: { book: string; odds: number }[];
 }
 
 export interface LifeChangerTicket {
@@ -2919,6 +2935,10 @@ export function buildLifeChangerTicket(): LifeChangerTicket | null {
       edge: Math.min(p.edge, 55),
       isUnderdog: p.odds >= 100,
       reasoning: p.reasoning || "",
+      oddsSourceBook: (p as any).oddsSourceBook,
+      oddsBookCount: (p as any).oddsBookCount,
+      oddsApiSource: (p as any).oddsApiSource,
+      allBookOdds: (p as any).allBookOdds,
     })),
     totalDecimalOdds: Math.round(totalDecimalOdds * 100) / 100,
     americanOdds: americanOddsStr,
