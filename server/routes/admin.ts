@@ -6007,13 +6007,14 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
-  app.post("/api/admin/control-room/reset-budget-optimizer", requireAdmin, async (_req, res) => {
+  app.post("/api/admin/control-room/reset-budget-optimizer", requireAdmin, async (req, res) => {
     try {
       const { apiBudgetOptimizer } = await import("../apiBudgetOptimizer");
       const { addControlRoomLog } = await import("../prefetchScheduler");
-      apiBudgetOptimizer.resumeService("odds");
-      addControlRoomLog("reset-budget", "Budget optimizer resumed for odds service");
-      res.json({ success: true, message: "Budget optimizer resumed for odds service" });
+      const service = req.body.service || "odds";
+      apiBudgetOptimizer.resetCounters(service);
+      addControlRoomLog("reset-budget", `Budget optimizer counters reset for ${service} — usage zeroed, service resumed`);
+      res.json({ success: true, message: `Budget optimizer counters reset for ${service}` });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

@@ -2453,7 +2453,7 @@ function ControlRoomTab() {
     { label: "Refresh Scores", endpoint: "/api/admin/control-room/refresh-scores", icon: <Activity className="h-4 w-4" />, desc: "Force refresh scoreboards for all sports", color: "text-teal-500" },
     { label: "Force Prefetch All", endpoint: "/api/admin/control-room/force-prefetch", icon: <Zap className="h-4 w-4" />, desc: "Warm all odds + scoreboard caches now", color: "text-amber-500" },
     { label: "Rotate API Key", endpoint: "/api/admin/control-room/rotate-api-key", icon: <Lock className="h-4 w-4" />, desc: "Check and rotate odds API key", color: "text-purple-500" },
-    { label: "Resume Budget Optimizer", endpoint: "/api/admin/control-room/reset-budget-optimizer", icon: <DollarSign className="h-4 w-4" />, desc: "Resume odds service if suspended", color: "text-yellow-500" },
+    { label: "Reset Budget Counters", endpoint: "/api/admin/control-room/reset-budget-optimizer", icon: <DollarSign className="h-4 w-4" />, desc: "Zero usage counters & resume service", color: "text-yellow-500" },
     { label: "Force Refresh Picks", endpoint: "/api/admin/emergency/force-refresh-picks", icon: <Rocket className="h-4 w-4" />, desc: "Clear prediction cache, trigger fresh generation", color: "text-red-500" },
     { label: "Restart Autonomous Monitor", endpoint: "/api/admin/control-room/restart-autonomous-monitor", icon: <Bot className="h-4 w-4" />, desc: "Stop and restart the autonomous admin agent", color: "text-cyan-500" },
   ];
@@ -2564,9 +2564,15 @@ function ControlRoomTab() {
                     <Badge variant={status.activeKeys === status.totalKeys ? "default" : "destructive"} className="text-[10px]" data-testid={`badge-key-status-${service}`}>
                       {status.activeKeys}/{status.totalKeys} active
                     </Badge>
+                    {status.activeKeyIndex && (
+                      <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                        Active: #{status.activeKeyIndex}
+                      </Badge>
+                    )}
                     {status.keyStates?.map((ks: any) => (
-                      <span key={ks.index} className="text-[10px] text-muted-foreground">
+                      <span key={ks.index} className={`text-[10px] ${ks.isActive ? "text-emerald-500 font-medium" : "text-muted-foreground"}`}>
                         #{ks.index}: {ks.remaining != null ? `${ks.remaining.toLocaleString()} left` : "N/A"}
+                        {ks.isActive && <span className="ml-0.5">(active)</span>}
                         {ks.coolingDown && <span className="text-red-500 ml-1">(cooldown)</span>}
                         {ks.errorCount > 0 && <span className="text-yellow-500 ml-1">({ks.errorCount} errs)</span>}
                       </span>

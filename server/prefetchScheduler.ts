@@ -119,7 +119,7 @@ async function warmPropsCache() {
   let warmed = 0;
   for (const sport of sports) {
     try {
-      await fetchRealPlayerProps(sport, 3);
+      await fetchRealPlayerProps(sport, 3, true);
       warmed++;
     } catch { /* non-critical */ }
   }

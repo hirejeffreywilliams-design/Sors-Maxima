@@ -115,14 +115,17 @@ class ApiKeyManager {
   getStatus(service: ServiceName): { totalKeys: number; activeKeys: number; keyStates: { index: number; remaining: number | null; coolingDown: boolean; errorCount: number }[] } {
     const states = this.keys[service] || [];
     const now = Date.now();
+    const activeIdx = states.findIndex(s => !s.cooldownUntil || now >= s.cooldownUntil);
     return {
       totalKeys: states.length,
       activeKeys: states.filter(s => !s.cooldownUntil || now >= s.cooldownUntil).length,
+      activeKeyIndex: activeIdx >= 0 ? activeIdx + 1 : null,
       keyStates: states.map((s, i) => ({
         index: i + 1,
         remaining: s.remaining,
         coolingDown: !!(s.cooldownUntil && now < s.cooldownUntil),
         errorCount: s.errorCount,
+        isActive: i === activeIdx,
       })),
     };
   }

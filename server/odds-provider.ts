@@ -1474,10 +1474,16 @@ async function fetchPlayerPropsForEvent(
   }
 }
 
-export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5): Promise<RealPlayerProp[]> {
+const STALE_PROPS_TTL = 15 * 60 * 1000;
+
+export async function fetchRealPlayerProps(sport: string, maxEvents: number = 5, callerIsScheduler: boolean = false): Promise<RealPlayerProp[]> {
   const cacheKey = `props-${sport}`;
   const cached = playerPropsCache.get(cacheKey);
   if (cached && (Date.now() - cached.timestamp) < PROPS_CACHE_TTL) {
+    return cached.data;
+  }
+
+  if (!callerIsScheduler && cached && (Date.now() - cached.timestamp) < STALE_PROPS_TTL) {
     return cached.data;
   }
 

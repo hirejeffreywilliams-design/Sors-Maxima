@@ -376,6 +376,19 @@ class ApiBudgetOptimizer {
     this.save();
   }
 
+  resetCounters(service: ServiceKey): void {
+    const s = this.state.states[service];
+    if (!s) return;
+    s.currentUsage = 0;
+    s.suspended = false;
+    s.suspendedAt = null;
+    s.suspendedReason = "";
+    s.autoSuspend = false;
+    this.addAlert(service, "restart_needed", `${this.configs[service]?.name || service} usage counters reset by admin.`);
+    this.save();
+    console.log(`[BudgetOptimizer] ${service} counters reset to 0 by admin`);
+  }
+
   resumeService(service: ServiceKey): void {
     const s = this.state.states[service];
     if (!s) return;
