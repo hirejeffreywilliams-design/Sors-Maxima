@@ -5993,9 +5993,15 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
       const { apiKeyManager } = await import("../apiKeyManager");
       const { addControlRoomLog } = await import("../prefetchScheduler");
       const service = req.body.service || "odds";
+      const result = apiKeyManager.forceRotate(service);
       const status = apiKeyManager.getStatus(service);
-      addControlRoomLog("rotate-key", `Rotated API key for ${service} — ${status.activeKeys}/${status.totalKeys} active`);
-      res.json({ success: true, message: `${service} key status: ${status.activeKeys}/${status.totalKeys} active`, status });
+      if (result.rotated) {
+        addControlRoomLog("rotate-key", `Force rotated ${service} API key — now using next key (${status.activeKeys}/${status.totalKeys} active)`);
+        res.json({ success: true, message: `${service} key rotated — now using next key`, rotated: true, status });
+      } else {
+        addControlRoomLog("rotate-key", `${service} has only ${status.totalKeys} key(s) — nothing to rotate`);
+        res.json({ success: true, message: `${service} has only ${status.totalKeys} key(s) — nothing to rotate`, rotated: false, status });
+      }
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
@@ -6074,6 +6080,29 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
       invalidateCache("real-player-props");
       addControlRoomLog("flush-props-cache", "Flushed all player props caches");
       res.json({ success: true, message: "Player props caches flushed" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/control-room/refresh-props", requireAdmin, async (_req, res) => {
+    try {
+      const { invalidateCache } = await import("../responseCache");
+      const { addControlRoomLog } = await import("../prefetchScheduler");
+      const { fetchRealPlayerProps } = await import("../odds-provider");
+      invalidateCache("player-props");
+      invalidateCache("top-props");
+      invalidateCache("real-player-props");
+      const sports = ["NBA", "NFL", "MLB", "NHL"];
+      let warmed = 0;
+      for (const sport of sports) {
+        try {
+          await fetchRealPlayerProps(sport, 3);
+          warmed++;
+        } catch { /* ok */ }
+      }
+      addControlRoomLog("refresh-props", `Flushed + refreshed player props for ${warmed} sports`);
+      res.json({ success: true, message: `Flushed + refreshed player props for ${warmed} sports` });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

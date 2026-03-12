@@ -2449,6 +2449,7 @@ function ControlRoomTab() {
     { label: "Flush Disk Cache", endpoint: "/api/admin/control-room/flush-disk-cache", icon: <XCircle className="h-4 w-4" />, desc: "Delete market-snapshot & odds-api disk files", color: "text-orange-500" },
     { label: "Flush Props Cache", endpoint: "/api/admin/control-room/flush-props-cache", icon: <Target className="h-4 w-4" />, desc: "Flush all player props response caches", color: "text-pink-500" },
     { label: "Refresh Odds", endpoint: "/api/admin/control-room/refresh-odds", icon: <RefreshCw className="h-4 w-4" />, desc: "Force refresh odds for all 4 major sports", color: "text-emerald-500" },
+    { label: "Refresh Props", endpoint: "/api/admin/control-room/refresh-props", icon: <Target className="h-4 w-4" />, desc: "Flush + refresh player props for all sports", color: "text-violet-500" },
     { label: "Refresh Scores", endpoint: "/api/admin/control-room/refresh-scores", icon: <Activity className="h-4 w-4" />, desc: "Force refresh scoreboards for all sports", color: "text-teal-500" },
     { label: "Force Prefetch All", endpoint: "/api/admin/control-room/force-prefetch", icon: <Zap className="h-4 w-4" />, desc: "Warm all odds + scoreboard caches now", color: "text-amber-500" },
     { label: "Rotate API Key", endpoint: "/api/admin/control-room/rotate-api-key", icon: <Lock className="h-4 w-4" />, desc: "Check and rotate odds API key", color: "text-purple-500" },

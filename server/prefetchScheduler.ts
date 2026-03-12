@@ -119,17 +119,8 @@ async function warmPropsCache() {
   let warmed = 0;
   for (const sport of sports) {
     try {
-      const { getScoreboard } = await import("./espn-scoreboard-provider");
-      const games = await getScoreboard(sport as any);
-      if (games.length > 0) {
-        const eventIds = games.slice(0, 3).map((g: any) => g.id || g.gameId).filter(Boolean);
-        for (const eid of eventIds) {
-          try {
-            await fetchRealPlayerProps(sport, eid, 3);
-            warmed++;
-          } catch { /* non-critical */ }
-        }
-      }
+      await fetchRealPlayerProps(sport, 3);
+      warmed++;
     } catch { /* non-critical */ }
   }
   addToLog("props-warm", `Warmed props cache for ${warmed} game(s)`);

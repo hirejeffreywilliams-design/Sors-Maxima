@@ -102,6 +102,16 @@ class ApiKeyManager {
     }
   }
 
+  forceRotate(service: ServiceName): { rotated: boolean; fromIndex: number; toIndex: number } {
+    const states = this.keys[service];
+    if (!states || states.length <= 1) return { rotated: false, fromIndex: 0, toIndex: 0 };
+    const first = states.shift()!;
+    states.push(first);
+    this.keys[service] = states;
+    console.log(`[ApiKeyManager] ${service}: force rotated — moved key #1 to end, new active is previous key #2`);
+    return { rotated: true, fromIndex: 0, toIndex: states.length - 1 };
+  }
+
   getStatus(service: ServiceName): { totalKeys: number; activeKeys: number; keyStates: { index: number; remaining: number | null; coolingDown: boolean; errorCount: number }[] } {
     const states = this.keys[service] || [];
     const now = Date.now();
