@@ -1,14 +1,14 @@
 {
   "bootstrapComplete": true,
-  "bootstrapPicksProcessed": 802,
-  "bootstrapRunAt": "2026-03-12T20:10:37.168Z",
-  "totalLearningCycles": 57,
-  "lastCycleAt": "2026-03-12T20:10:37.168Z",
+  "bootstrapPicksProcessed": 821,
+  "bootstrapRunAt": "2026-03-12T22:45:25.204Z",
+  "totalLearningCycles": 60,
+  "lastCycleAt": "2026-03-12T22:50:25.215Z",
   "lastCycleSettledCount": 5,
   "userFeedbackProcessed": 0,
-  "mcEngineRecords": 789,
-  "mcStackedCycles": 57,
-  "usmlCycles": 57,
+  "mcEngineRecords": 808,
+  "mcStackedCycles": 60,
+  "usmlCycles": 60,
   "sportAccuracy": {
     "NBA": {
       "wins": 145,
@@ -21,9 +21,9 @@
       "winRate": 0.5526315789473685
     },
     "NCAAB": {
-      "wins": 139,
-      "total": 255,
-      "winRate": 0.5450980392156862
+      "wins": 155,
+      "total": 274,
+      "winRate": 0.5656934306569343
     }
   },
   "errors": []

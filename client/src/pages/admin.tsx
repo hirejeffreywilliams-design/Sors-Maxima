@@ -864,6 +864,9 @@ export default function AdminDashboard() {
               <TabsTrigger value="broadcast" data-testid="tab-broadcast">
                 <Bell className="h-3.5 w-3.5 mr-1" />Broadcast
               </TabsTrigger>
+              <TabsTrigger value="nervous-system" data-testid="tab-nervous-system">
+                <Network className="h-3.5 w-3.5 mr-1" />Nervous System
+              </TabsTrigger>
               <TabsTrigger value="control-room" data-testid="tab-control-room">
                 <Gauge className="h-3.5 w-3.5 mr-1" />Control Room
               </TabsTrigger>
@@ -1554,6 +1557,10 @@ export default function AdminDashboard() {
                   </ul>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="nervous-system" className="space-y-4">
+              <NervousSystemTab />
             </TabsContent>
 
             <TabsContent value="control-room" className="space-y-4">
@@ -2416,6 +2423,233 @@ function PickAccuracyPanel() {
               ))}
             </div>
           )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function NervousSystemTab() {
+  const { data: health, isLoading } = useQuery<any>({
+    queryKey: ["/api/admin/system-health"],
+    refetchInterval: 10000,
+  });
+
+  if (isLoading || !health) {
+    return (
+      <div className="space-y-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i}><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+        ))}
+      </div>
+    );
+  }
+
+  const memStatus = health.memory?.status || "unknown";
+  const memColor = memStatus === "critical" ? "text-red-500" : memStatus === "warning" ? "text-yellow-500" : "text-emerald-500";
+  const uptimeHours = Math.floor((health.uptime || 0) / 3600);
+  const uptimeMin = Math.floor(((health.uptime || 0) % 3600) / 60);
+
+  const engines = health.engines?.engines || [];
+  const engineSummary = health.engines?.summary || {};
+  const pipeline = health.pipeline || {};
+  const quality = health.quality;
+
+  const statusIcon = (status: string) => {
+    if (status === "running" || status === "live") return <CheckCircle className="h-3.5 w-3.5 text-emerald-500" />;
+    if (status === "failed" || status === "offline") return <XCircle className="h-3.5 w-3.5 text-red-500" />;
+    if (status === "pending" || status === "cached") return <Clock className="h-3.5 w-3.5 text-yellow-500" />;
+    if (status === "degraded") return <AlertTriangle className="h-3.5 w-3.5 text-orange-500" />;
+    return <Info className="h-3.5 w-3.5 text-muted-foreground" />;
+  };
+
+  return (
+    <div className="space-y-4" data-testid="nervous-system">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Heap Usage</p>
+            <p className={`text-xl font-bold ${memColor}`} data-testid="text-heap-pct">{health.memory?.heapUsedPct ?? 0}%</p>
+            <p className="text-[10px] text-muted-foreground">{health.memory?.heapUsedMb ?? 0}/{health.memory?.heapLimitMb ?? 0} MB</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Uptime</p>
+            <p className="text-xl font-bold text-foreground" data-testid="text-uptime">{uptimeHours}h {uptimeMin}m</p>
+            <p className="text-[10px] text-muted-foreground">{health.nodeVersion}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Engines</p>
+            <p className="text-xl font-bold text-emerald-500" data-testid="text-engines-running">{engineSummary.running ?? 0}/{engineSummary.total ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">{engineSummary.failed > 0 ? `${engineSummary.failed} failed` : "all healthy"}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">SSE Clients</p>
+            <p className="text-xl font-bold text-foreground" data-testid="text-sse-clients">{health.sse?.activeClients ?? 0}</p>
+            <p className="text-[10px] text-muted-foreground">{(health.sse?.totalEventsSent ?? 0).toLocaleString()} events sent</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Quality</p>
+            <p className={`text-xl font-bold ${quality?.status === "healthy" ? "text-emerald-500" : quality?.status === "fair" ? "text-yellow-500" : quality?.status === "degraded" ? "text-orange-500" : quality?.status === "critical" ? "text-red-500" : "text-muted-foreground"}`} data-testid="text-quality-grade">
+              {quality ? `${quality.grade} (${quality.score})` : "N/A"}
+            </p>
+            <p className="text-[10px] text-muted-foreground">{quality?.issueCount ?? 0} issues</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Cpu className="h-4 w-4 text-primary" />
+            Engine Manifest ({engineSummary.total ?? 0} engines)
+          </CardTitle>
+          <CardDescription className="text-xs">Boot sequence status — auto-refreshes every 10s</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {engines.map((eng: any) => (
+              <div key={eng.name} className={`flex items-center gap-2 p-2 rounded-md border ${eng.status === "failed" ? "border-red-500/30 bg-red-500/5" : eng.status === "pending" ? "border-yellow-500/20 bg-yellow-500/5" : "border-border/50"}`} data-testid={`engine-${eng.name.toLowerCase().replace(/\s+/g, "-")}`}>
+                {statusIcon(eng.status)}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-medium truncate">{eng.name}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {eng.status === "running" ? `Started ${eng.startedAt ? new Date(eng.startedAt).toLocaleTimeString() : ""}` : eng.status === "failed" ? eng.error?.substring(0, 50) : `Starts in ${(eng.delayMs / 1000).toFixed(0)}s`}
+                  </p>
+                </div>
+                <Badge variant={eng.status === "running" ? "default" : eng.status === "failed" ? "destructive" : "secondary"} className="text-[9px] shrink-0">
+                  {eng.status}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Globe className="h-4 w-4 text-primary" />
+            Data Pipeline Sources ({pipeline.summary?.total ?? 0})
+          </CardTitle>
+          <CardDescription className="text-xs">Live status of all external data feeds</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {(pipeline.sources || []).map((src: any) => (
+              <div key={src.id} className="flex items-center justify-between py-1.5 border-b border-border/30 last:border-0" data-testid={`pipeline-${src.id}`}>
+                <div className="flex items-center gap-2">
+                  {statusIcon(src.status)}
+                  <span className="text-xs font-medium">{src.name}</span>
+                  {src.sports && src.sports.length > 0 && (
+                    <span className="text-[10px] text-muted-foreground">({src.sports.join(", ")})</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={src.status === "live" ? "default" : src.status === "cached" ? "secondary" : src.status === "degraded" ? "outline" : "destructive"} className="text-[9px]">
+                    {src.status}
+                  </Badge>
+                  {src.lastSuccess && <span className="text-[10px] text-muted-foreground">{src.lastSuccess}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-3 mt-3 pt-2 border-t border-border/30">
+            <span className="text-[10px] text-emerald-500">{pipeline.summary?.live ?? 0} live</span>
+            <span className="text-[10px] text-yellow-500">{pipeline.summary?.cached ?? 0} cached</span>
+            <span className="text-[10px] text-orange-500">{pipeline.summary?.degraded ?? 0} degraded</span>
+            <span className="text-[10px] text-red-500">{pipeline.summary?.offline ?? 0} offline</span>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              API Keys
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {health.apiKeys && Object.entries(health.apiKeys as Record<string, any>).map(([service, status]: [string, any]) => (
+                <div key={service} className="flex items-center justify-between py-1" data-testid={`apikey-${service}`}>
+                  <Badge variant="outline" className="text-[10px] uppercase">{service}</Badge>
+                  <Badge variant={status.activeKeys === status.totalKeys ? "default" : "destructive"} className="text-[9px]">
+                    {status.activeKeys}/{status.totalKeys} active
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Flag className="h-4 w-4 text-primary" />
+              Feature Flags
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground" data-testid="text-flags-enabled">{health.featureFlags?.enabled ?? 0}</p>
+                <p className="text-[10px] text-emerald-500">Enabled</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground" data-testid="text-flags-disabled">{health.featureFlags?.disabled ?? 0}</p>
+                <p className="text-[10px] text-muted-foreground">Disabled</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground">{health.featureFlags?.total ?? 0}</p>
+                <p className="text-[10px] text-muted-foreground">Total</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground">{health.featureFlags?.partialRollout ?? 0}</p>
+                <p className="text-[10px] text-yellow-500">Partial Rollout</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" />
+            Prediction Engine
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="text-center">
+              <p className={`text-lg font-bold ${health.predictionEngine?.running ? "text-emerald-500" : "text-red-500"}`} data-testid="text-pred-status">
+                {health.predictionEngine?.running ? "Running" : "Stopped"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Status</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{health.predictionEngine?.totalRuns ?? 0}</p>
+              <p className="text-[10px] text-muted-foreground">Total Runs</p>
+            </div>
+            <div className="text-center">
+              <p className={`text-lg font-bold ${(health.predictionEngine?.failedRuns || 0) > 0 ? "text-red-500" : "text-foreground"}`}>{health.predictionEngine?.failedRuns ?? 0}</p>
+              <p className="text-[10px] text-muted-foreground">Failed Runs</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-foreground">{health.predictionEngine?.intervalLabel || "N/A"}</p>
+              <p className="text-[10px] text-muted-foreground">Refresh Interval</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

@@ -197,16 +197,56 @@ app.use((req, res, next) => {
   next();
 });
 
+// ─── Engine Manifest ──────────────────────────────────────────────────────────
+interface EngineEntry {
+  name: string;
+  delayMs: number;
+  status: "pending" | "running" | "failed";
+  startedAt: string | null;
+  error: string | null;
+}
+
+const engineManifest: EngineEntry[] = [];
+const serverBootTime = Date.now();
+
+export function getEngineManifest() {
+  return {
+    engines: engineManifest.map(e => ({ ...e })),
+    summary: {
+      total: engineManifest.length,
+      running: engineManifest.filter(e => e.status === "running").length,
+      pending: engineManifest.filter(e => e.status === "pending").length,
+      failed: engineManifest.filter(e => e.status === "failed").length,
+    },
+    bootTime: new Date(serverBootTime).toISOString(),
+    uptimeSeconds: Math.round((Date.now() - serverBootTime) / 1000),
+  };
+}
+
 // ─── Startup Orchestrator ─────────────────────────────────────────────────────
 // Engines start in deliberate phases after the server is listening.
 // Each phase waits for the previous to stabilize before adding more load.
 
 function safeStart(name: string, fn: () => void, delayMs: number): void {
+  const entry: EngineEntry = { name, delayMs, status: "pending", startedAt: null, error: null };
+  engineManifest.push(entry);
+
   setTimeout(() => {
     try {
-      fn();
+      const result = fn();
+      entry.status = "running";
+      entry.startedAt = new Date().toISOString();
       log(`[Phase] ${name} started`, "startup");
+      if (result && typeof (result as any).then === "function") {
+        (result as Promise<any>).catch((err: any) => {
+          entry.status = "failed";
+          entry.error = err.message || String(err);
+          console.error(`[Startup] ${name} async failure:`, err.message);
+        });
+      }
     } catch (err: any) {
+      entry.status = "failed";
+      entry.error = err.message;
       console.error(`[Startup] ${name} failed to start:`, err.message);
     }
   }, delayMs);
@@ -359,6 +399,33 @@ function startEnginesPhased(): void {
       console.warn("[CacheWarmup] Warmup partial:", err.message);
     }
   }, 25_000);
+
+  // ── Engine Manifest Print ─────────────────────────────────────────────────
+  const maxDelay = Math.max(...engineManifest.map(e => e.delayMs));
+  setTimeout(() => {
+    const m = getEngineManifest();
+    const running = m.summary.running;
+    const failed = m.summary.failed;
+    const pending = m.summary.pending;
+    console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
+    console.log(`║  SORS MAXIMA — Engine Startup Manifest                     ║`);
+    console.log(`╠══════════════════════════════════════════════════════════════╣`);
+    console.log(`║  Total: ${String(m.summary.total).padStart(2)}  │  Running: ${String(running).padStart(2)}  │  Failed: ${String(failed).padStart(2)}  │  Pending: ${String(pending).padStart(2)}  ║`);
+    console.log(`╠══════════════════════════════════════════════════════════════╣`);
+    for (const eng of m.engines) {
+      const icon = eng.status === "running" ? "✓" : eng.status === "failed" ? "✗" : "…";
+      const label = eng.name.substring(0, 40).padEnd(40);
+      const delay = `${(eng.delayMs / 1000).toFixed(0)}s`.padStart(5);
+      console.log(`║  ${icon} ${label} ${delay}  ${eng.status.padEnd(7)} ║`);
+    }
+    console.log(`╚══════════════════════════════════════════════════════════════╝\n`);
+    if (failed > 0) {
+      const failedEngines = m.engines.filter(e => e.status === "failed");
+      for (const fe of failedEngines) {
+        console.error(`[Manifest] FAILED: ${fe.name} — ${fe.error}`);
+      }
+    }
+  }, maxDelay + 5_000);
 
   // ── SSE Broadcaster is lazy ───────────────────────────────────────────────
   // It auto-starts in sseManager.ts when the first user connects to /api/sse/stream.
