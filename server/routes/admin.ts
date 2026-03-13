@@ -5957,9 +5957,14 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
 
       try {
         const { forceRunHubCycleNow } = await import("../unifiedIntelligenceHub");
-        await forceRunHubCycleNow();
-        results.push({ engine: "Intelligence Hub", status: "force-rerun complete" });
-        logEngineEvent("Intelligence Hub", "force-refresh", "Full cycle rerun by admin");
+        const hubResult = await forceRunHubCycleNow();
+        if (hubResult.ok) {
+          results.push({ engine: "Intelligence Hub", status: "force-rerun complete" });
+          logEngineEvent("Intelligence Hub", "force-refresh", "Full cycle rerun by admin");
+        } else {
+          results.push({ engine: "Intelligence Hub", status: `failed: ${hubResult.error}` });
+          logEngineEvent("Intelligence Hub", "force-refresh-failed", hubResult.error || "unknown");
+        }
       } catch (e: any) {
         results.push({ engine: "Intelligence Hub", status: `error: ${e.message}` });
         logEngineEvent("Intelligence Hub", "force-refresh-failed", e.message);
@@ -5967,9 +5972,14 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
 
       try {
         const { forceRunPredictionCycleNow } = await import("../precomputedPredictionsEngine");
-        await forceRunPredictionCycleNow();
-        results.push({ engine: "Precomputed Predictions", status: "force-rerun complete" });
-        logEngineEvent("Precomputed Predictions Engine", "force-refresh", "Full cycle rerun by admin");
+        const predResult = await forceRunPredictionCycleNow();
+        if (predResult.ok) {
+          results.push({ engine: "Precomputed Predictions", status: "force-rerun complete" });
+          logEngineEvent("Precomputed Predictions Engine", "force-refresh", "Full cycle rerun by admin");
+        } else {
+          results.push({ engine: "Precomputed Predictions", status: `failed: ${predResult.error}` });
+          logEngineEvent("Precomputed Predictions Engine", "force-refresh-failed", predResult.error || "unknown");
+        }
       } catch (e: any) {
         results.push({ engine: "Precomputed Predictions", status: `error: ${e.message}` });
         logEngineEvent("Precomputed Predictions Engine", "force-refresh-failed", e.message);

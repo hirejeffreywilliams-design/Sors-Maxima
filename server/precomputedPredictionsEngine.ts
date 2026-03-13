@@ -2053,14 +2053,25 @@ function scheduleNextCycle(): void {
   }, interval);
 }
 
-export async function forceRunPredictionCycleNow(): Promise<void> {
+let forcePredictionInProgress = false;
+
+export async function forceRunPredictionCycleNow(): Promise<{ ok: boolean; error?: string }> {
+  if (forcePredictionInProgress) return { ok: false, error: "Force cycle already in progress" };
+  forcePredictionInProgress = true;
   console.log("[PrecomputedEngine] Force rerun triggered by admin");
   if (intervalHandle) {
     clearTimeout(intervalHandle);
     intervalHandle = null;
   }
-  await runPredictionCycle();
-  if (engineRunning) scheduleNextCycle();
+  try {
+    await runPredictionCycle();
+    return { ok: true };
+  } catch (err: any) {
+    return { ok: false, error: err.message || String(err) };
+  } finally {
+    forcePredictionInProgress = false;
+    if (engineRunning) scheduleNextCycle();
+  }
 }
 
 export function stopPrecomputedEngine(): void {

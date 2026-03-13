@@ -921,14 +921,26 @@ export function startIntelligenceHub(): void {
   });
 }
 
-export async function forceRunHubCycleNow(): Promise<void> {
+let forceRunInProgress = false;
+
+export async function forceRunHubCycleNow(): Promise<{ ok: boolean; error?: string }> {
+  if (forceRunInProgress) return { ok: false, error: "Force cycle already in progress" };
+  forceRunInProgress = true;
   console.log("[IntelligenceHub] Force rerun triggered by admin");
   if (hubInterval) {
     clearTimeout(hubInterval);
     hubInterval = null;
   }
-  await runHubCycle().catch(err => logError("[IntelligenceHub] Force cycle failed", { error: String(err) }));
-  scheduleNextHubCycle();
+  try {
+    await runHubCycle();
+    return { ok: true };
+  } catch (err: any) {
+    logError("[IntelligenceHub] Force cycle failed", { error: String(err) });
+    return { ok: false, error: err.message || String(err) };
+  } finally {
+    forceRunInProgress = false;
+    scheduleNextHubCycle();
+  }
 }
 
 export function stopIntelligenceHub(): void {

@@ -6,9 +6,9 @@
       "winRate": 55.4
     },
     "NHL": {
-      "wins": 156,
-      "total": 289,
-      "winRate": 54
+      "wins": 161,
+      "total": 294,
+      "winRate": 54.8
     },
     "NCAAB": {
       "wins": 162,
@@ -18,9 +18,9 @@
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 143,
-      "total": 258,
-      "winRate": 55.4
+      "wins": 148,
+      "total": 263,
+      "winRate": 56.3
     },
     "spread": {
       "wins": 153,
@@ -162,8 +162,8 @@
       "penalty": 4
     }
   ],
-  "totalSettled": 867,
-  "lastMined": "2026-03-13T03:39:53.835Z",
+  "totalSettled": 872,
+  "lastMined": "2026-03-13T03:44:41.622Z",
   "cycleCount": 1,
   "patternCount": 186
 }
