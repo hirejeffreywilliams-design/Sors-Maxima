@@ -2053,6 +2053,16 @@ function scheduleNextCycle(): void {
   }, interval);
 }
 
+export async function forceRunPredictionCycleNow(): Promise<void> {
+  console.log("[PrecomputedEngine] Force rerun triggered by admin");
+  if (intervalHandle) {
+    clearTimeout(intervalHandle);
+    intervalHandle = null;
+  }
+  await runPredictionCycle();
+  if (engineRunning) scheduleNextCycle();
+}
+
 export function stopPrecomputedEngine(): void {
   if (intervalHandle) {
     clearTimeout(intervalHandle);

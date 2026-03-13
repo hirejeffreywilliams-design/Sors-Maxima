@@ -5924,6 +5924,7 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
         sse: {
           activeClients: sse.activeClients,
           totalEventsSent: sse.totalEventsSent,
+          channelSubscribers: sse.channelSubscribers || {},
         },
         pipeline: {
           sources: pipeline.sources,
@@ -5955,28 +5956,30 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
       logEngineEvent("System", "force-refresh", "Admin triggered full engine refresh");
 
       try {
-        const { startIntelligenceHub } = await import("../unifiedIntelligenceHub");
-        startIntelligenceHub();
-        results.push({ engine: "Intelligence Hub", status: "triggered" });
-        logEngineEvent("Intelligence Hub", "force-refresh", "Re-triggered by admin");
+        const { forceRunHubCycleNow } = await import("../unifiedIntelligenceHub");
+        await forceRunHubCycleNow();
+        results.push({ engine: "Intelligence Hub", status: "force-rerun complete" });
+        logEngineEvent("Intelligence Hub", "force-refresh", "Full cycle rerun by admin");
       } catch (e: any) {
         results.push({ engine: "Intelligence Hub", status: `error: ${e.message}` });
+        logEngineEvent("Intelligence Hub", "force-refresh-failed", e.message);
       }
 
       try {
-        const { startPrecomputedEngine } = await import("../precomputedPredictionsEngine");
-        startPrecomputedEngine();
-        results.push({ engine: "Precomputed Predictions", status: "triggered" });
-        logEngineEvent("Precomputed Predictions Engine", "force-refresh", "Re-triggered by admin");
+        const { forceRunPredictionCycleNow } = await import("../precomputedPredictionsEngine");
+        await forceRunPredictionCycleNow();
+        results.push({ engine: "Precomputed Predictions", status: "force-rerun complete" });
+        logEngineEvent("Precomputed Predictions Engine", "force-refresh", "Full cycle rerun by admin");
       } catch (e: any) {
         results.push({ engine: "Precomputed Predictions", status: `error: ${e.message}` });
+        logEngineEvent("Precomputed Predictions Engine", "force-refresh-failed", e.message);
       }
 
       try {
         const { forcePrefetchAll } = await import("../prefetchScheduler");
         await forcePrefetchAll();
-        results.push({ engine: "Prefetch Scheduler", status: "triggered" });
-        logEngineEvent("Prefetch Scheduler", "force-refresh", "Re-triggered by admin");
+        results.push({ engine: "Prefetch Scheduler", status: "force-rerun complete" });
+        logEngineEvent("Prefetch Scheduler", "force-refresh", "Full prefetch rerun by admin");
       } catch (e: any) {
         results.push({ engine: "Prefetch Scheduler", status: `error: ${e.message}` });
       }

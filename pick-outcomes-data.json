@@ -1359,86 +1359,6 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
-    },
-    {
-      "id": "precomp-NHL-401803400-moneyline-b16631a545",
-      "gameId": "401803400",
-      "sport": "NHL",
-      "game": "Carolina Hurricanes @ Tampa Bay Lightning",
-      "homeTeam": "Tampa Bay Lightning",
-      "awayTeam": "Carolina Hurricanes",
-      "pick": "Tampa Bay Lightning ML",
-      "betType": "moneyline",
-      "odds": 104,
-      "grade": "C+",
-      "confidence": 59,
-      "ev": -20.44,
-      "gameTime": "2026-03-14T23:00Z",
-      "savedAt": "2026-03-13T03:37:15.909Z"
-    },
-    {
-      "id": "precomp-NHL-401803396-moneyline-0fce627091",
-      "gameId": "401803396",
-      "sport": "NHL",
-      "game": "Colorado Avalanche @ Winnipeg Jets",
-      "homeTeam": "Winnipeg Jets",
-      "awayTeam": "Colorado Avalanche",
-      "pick": "Colorado Avalanche ML",
-      "betType": "moneyline",
-      "odds": -165,
-      "grade": "C",
-      "confidence": 58,
-      "ev": -34.15,
-      "gameTime": "2026-03-14T20:00Z",
-      "savedAt": "2026-03-13T03:37:15.909Z"
-    },
-    {
-      "id": "precomp-NHL-401803395-moneyline-632046f59b",
-      "gameId": "401803395",
-      "sport": "NHL",
-      "game": "Boston Bruins @ Washington Capitals",
-      "homeTeam": "Washington Capitals",
-      "awayTeam": "Boston Bruins",
-      "pick": "Boston Bruins ML",
-      "betType": "moneyline",
-      "odds": -111,
-      "grade": "C+",
-      "confidence": 57,
-      "ev": -6.86,
-      "gameTime": "2026-03-14T19:00Z",
-      "savedAt": "2026-03-13T03:37:15.909Z"
-    },
-    {
-      "id": "precomp-NHL-401803403-moneyline-5b8c3e86ac",
-      "gameId": "401803403",
-      "sport": "NHL",
-      "game": "Columbus Blue Jackets @ Philadelphia Flyers",
-      "homeTeam": "Philadelphia Flyers",
-      "awayTeam": "Columbus Blue Jackets",
-      "pick": "Philadelphia Flyers ML",
-      "betType": "moneyline",
-      "odds": 106,
-      "grade": "C-",
-      "confidence": 57,
-      "ev": -15.54,
-      "gameTime": "2026-03-14T23:30Z",
-      "savedAt": "2026-03-13T03:37:15.909Z"
-    },
-    {
-      "id": "precomp-NHL-401803406-moneyline-2ac04cf36a",
-      "gameId": "401803406",
-      "sport": "NHL",
-      "game": "Seattle Kraken @ Vancouver Canucks",
-      "homeTeam": "Vancouver Canucks",
-      "awayTeam": "Seattle Kraken",
-      "pick": "Seattle Kraken ML",
-      "betType": "moneyline",
-      "odds": -158,
-      "grade": "C-",
-      "confidence": 55,
-      "ev": -31.42,
-      "gameTime": "2026-03-15T02:00Z",
-      "savedAt": "2026-03-13T03:37:15.909Z"
     }
   ],
   "settled": [
@@ -19434,16 +19354,116 @@
       "homeScore": 84,
       "awayScore": 88,
       "settledAt": "2026-03-13T03:18:10.170Z"
+    },
+    {
+      "id": "precomp-NHL-401803395-moneyline-632046f59b",
+      "gameId": "401803395",
+      "sport": "NHL",
+      "game": "Boston Bruins @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Boston Bruins",
+      "pick": "Boston Bruins ML",
+      "betType": "moneyline",
+      "odds": -111,
+      "grade": "C+",
+      "confidence": 57,
+      "ev": -6.86,
+      "gameTime": "2026-03-14T19:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-13T03:39:54.521Z"
+    },
+    {
+      "id": "precomp-NHL-401803400-moneyline-b16631a545",
+      "gameId": "401803400",
+      "sport": "NHL",
+      "game": "Carolina Hurricanes @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Carolina Hurricanes",
+      "pick": "Tampa Bay Lightning ML",
+      "betType": "moneyline",
+      "odds": 104,
+      "grade": "C+",
+      "confidence": 59,
+      "ev": -20.44,
+      "gameTime": "2026-03-14T23:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z",
+      "result": "won",
+      "homeScore": 4,
+      "awayScore": 1,
+      "settledAt": "2026-03-13T03:39:54.532Z"
+    },
+    {
+      "id": "precomp-NHL-401803403-moneyline-5b8c3e86ac",
+      "gameId": "401803403",
+      "sport": "NHL",
+      "game": "Columbus Blue Jackets @ Philadelphia Flyers",
+      "homeTeam": "Philadelphia Flyers",
+      "awayTeam": "Columbus Blue Jackets",
+      "pick": "Philadelphia Flyers ML",
+      "betType": "moneyline",
+      "odds": 106,
+      "grade": "C-",
+      "confidence": 57,
+      "ev": -15.54,
+      "gameTime": "2026-03-14T23:30Z",
+      "savedAt": "2026-03-13T03:37:15.909Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 1,
+      "settledAt": "2026-03-13T03:39:54.550Z"
+    },
+    {
+      "id": "precomp-NHL-401803396-moneyline-0fce627091",
+      "gameId": "401803396",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Colorado Avalanche ML",
+      "betType": "moneyline",
+      "odds": -165,
+      "grade": "C",
+      "confidence": 58,
+      "ev": -34.15,
+      "gameTime": "2026-03-14T20:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 6,
+      "settledAt": "2026-03-13T03:39:54.567Z"
+    },
+    {
+      "id": "precomp-NHL-401803406-moneyline-2ac04cf36a",
+      "gameId": "401803406",
+      "sport": "NHL",
+      "game": "Seattle Kraken @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Seattle Kraken",
+      "pick": "Seattle Kraken ML",
+      "betType": "moneyline",
+      "odds": -158,
+      "grade": "C-",
+      "confidence": 55,
+      "ev": -31.42,
+      "gameTime": "2026-03-15T02:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z",
+      "result": "won",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-13T03:39:54.588Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 883,
-      "won": 481,
+      "total": 888,
+      "won": 486,
       "lost": 386,
       "push": 16,
-      "rate": 54.5,
-      "pending": 90
+      "rate": 54.7,
+      "pending": 85
     },
     "bySport": {
       "NBA": {
@@ -19452,9 +19472,9 @@
         "rate": 55.3
       },
       "NHL": {
-        "total": 303,
-        "won": 156,
-        "rate": 51.5
+        "total": 308,
+        "won": 161,
+        "rate": 52.3
       },
       "NCAAB": {
         "total": 285,
@@ -19479,9 +19499,9 @@
         "rate": 53.1
       },
       "C+": {
-        "total": 190,
-        "won": 111,
-        "rate": 58.4
+        "total": 192,
+        "won": 113,
+        "rate": 58.9
       },
       "D+": {
         "total": 39,
@@ -19489,14 +19509,14 @@
         "rate": 46.2
       },
       "C-": {
-        "total": 56,
-        "won": 29,
-        "rate": 51.8
+        "total": 58,
+        "won": 31,
+        "rate": 53.4
       },
       "C": {
-        "total": 146,
-        "won": 72,
-        "rate": 49.3
+        "total": 147,
+        "won": 73,
+        "rate": 49.7
       },
       "A-": {
         "total": 55,
@@ -19521,10 +19541,10 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 258,
-        "won": 143,
-        "rate": 55.4,
-        "roi": 12.5
+        "total": 263,
+        "won": 148,
+        "rate": 56.3,
+        "roi": 13.8
       },
       "Spread": {
         "total": 282,
@@ -19546,21 +19566,21 @@
       }
     },
     "recentForm": {
-      "won": 23,
-      "lost": 24,
-      "push": 3,
-      "rate": 46
+      "won": 28,
+      "lost": 21,
+      "push": 1,
+      "rate": 56
     },
-    "lastUpdated": "2026-03-13T03:38:51.835Z",
-    "roi": 8.1,
-    "brierScore": 0.259,
+    "lastUpdated": "2026-03-13T03:43:39.622Z",
+    "roi": 8.5,
+    "brierScore": 0.2586,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.077,
+    "sharpeRatio": 0.081,
     "homeAwayBias": {
-      "homeWinRate": 57.5,
-      "awayWinRate": 44.7,
-      "homeTotal": 449,
-      "awayTotal": 85
+      "homeWinRate": 57.6,
+      "awayWinRate": 46.6,
+      "homeTotal": 451,
+      "awayTotal": 88
     },
     "calibrationBuckets": [
       {
@@ -19572,8 +19592,8 @@
       {
         "range": "55-60",
         "predicted": 57.3,
-        "actual": 51.1,
-        "total": 174
+        "actual": 52.5,
+        "total": 179
       },
       {
         "range": "60-65",

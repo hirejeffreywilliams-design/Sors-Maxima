@@ -921,6 +921,16 @@ export function startIntelligenceHub(): void {
   });
 }
 
+export async function forceRunHubCycleNow(): Promise<void> {
+  console.log("[IntelligenceHub] Force rerun triggered by admin");
+  if (hubInterval) {
+    clearTimeout(hubInterval);
+    hubInterval = null;
+  }
+  await runHubCycle().catch(err => logError("[IntelligenceHub] Force cycle failed", { error: String(err) }));
+  scheduleNextHubCycle();
+}
+
 export function stopIntelligenceHub(): void {
   if (!hubRunning) return;
   if (hubInterval) {

@@ -281,9 +281,16 @@ export function stopSSEBroadcaster(): void {
 }
 
 export function getSSEStatus() {
+  const channelCounts: Record<string, number> = {};
+  for (const c of clients.values()) {
+    for (const ch of c.channels) {
+      channelCounts[ch] = (channelCounts[ch] || 0) + 1;
+    }
+  }
   return {
     activeClients: clients.size,
     totalEventsSent: eventCounter,
+    channelSubscribers: channelCounts,
     clientDetails: Array.from(clients.values()).map(c => ({
       id: c.id,
       channels: Array.from(c.channels),
