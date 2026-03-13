@@ -876,9 +876,12 @@ function scheduleNextHubCycle(): void {
 export function startIntelligenceHub(): void {
   if (hubRunning) return;
   hubRunning = true;
-  console.log("[IntelligenceHub] Starting Unified Intelligence Hub — sequential startup...");
+  console.log("[IntelligenceHub] Starting Unified Intelligence Hub — provider-ordered startup...");
 
   (async () => {
+    const { logEngineEvent } = await import("./index");
+    logEngineEvent("Intelligence Hub", "startup-begin", "Provider-ordered initialization");
+
     const sports = getInSeasonSports();
     let successCount = 0;
     let failCount = 0;
@@ -889,18 +892,23 @@ export function startIntelligenceHub(): void {
         sportSnapshots.set(sport, snapshot);
         successCount++;
         console.log(`[IntelligenceHub] ✓ ${sport} initialized (${snapshot.games.length} games)`);
+        logEngineEvent("Intelligence Hub", "sport-online", `${sport}: ${snapshot.games.length} games`);
       } catch (err) {
         failCount++;
         console.warn(`[IntelligenceHub] ✗ ${sport} failed — DEGRADED MODE for this sport: ${String(err)}`);
+        logEngineEvent("Intelligence Hub", "sport-degraded", `${sport}: ${String(err).substring(0, 80)}`);
       }
     }
 
     if (successCount === 0 && sports.length > 0) {
       console.error(`[IntelligenceHub] CRITICAL: All ${sports.length} sports failed to initialize — operating in fully degraded mode`);
+      logEngineEvent("Intelligence Hub", "critical", `All ${sports.length} sports failed — fully degraded`);
     } else if (failCount > 0) {
       console.warn(`[IntelligenceHub] Startup complete: ${successCount}/${sports.length} sports online, ${failCount} degraded`);
+      logEngineEvent("Intelligence Hub", "startup-partial", `${successCount}/${sports.length} online, ${failCount} degraded`);
     } else {
       console.log(`[IntelligenceHub] Startup complete: all ${successCount} sports online`);
+      logEngineEvent("Intelligence Hub", "startup-complete", `All ${successCount} sports online`);
     }
 
     cachedFeed = null;

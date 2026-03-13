@@ -1,4 +1,4 @@
-type ServiceName = "odds" | "apifootball" | "balldontlie";
+type ServiceName = "odds" | "apifootball" | "balldontlie" | "openai" | "resend" | "stripe";
 
 interface KeyState {
   key: string;
@@ -11,6 +11,9 @@ const LOW_THRESHOLD: Record<ServiceName, number> = {
   odds: 5000,
   apifootball: 25,
   balldontlie: 10,
+  openai: 0,
+  resend: 0,
+  stripe: 0,
 };
 
 const COOLDOWN_MS = 60 * 60 * 1000;
@@ -20,6 +23,9 @@ class ApiKeyManager {
     odds: [],
     apifootball: [],
     balldontlie: [],
+    openai: [],
+    resend: [],
+    stripe: [],
   };
 
   constructor() {
@@ -44,6 +50,9 @@ class ApiKeyManager {
     load("odds", "THE_ODDS_API_KEY");
     load("apifootball", "API_FOOTBALL_KEY");
     load("balldontlie", "BALLDONTLIE_API_KEY");
+    load("openai", "OPENAI_API_KEY");
+    load("resend", "RESEND_API_KEY");
+    load("stripe", "STRIPE_SECRET_KEY");
   }
 
   getKey(service: ServiceName): string | null {
@@ -131,11 +140,14 @@ class ApiKeyManager {
   }
 
   getAllStatus() {
-    return {
-      odds: this.getStatus("odds"),
-      apifootball: this.getStatus("apifootball"),
-      balldontlie: this.getStatus("balldontlie"),
-    };
+    const all: Record<string, ReturnType<typeof this.getStatus>> = {};
+    const services: ServiceName[] = ["odds", "apifootball", "balldontlie", "openai", "resend", "stripe"];
+    for (const svc of services) {
+      if (this.keys[svc]?.length > 0) {
+        all[svc] = this.getStatus(svc);
+      }
+    }
+    return all;
   }
 }
 

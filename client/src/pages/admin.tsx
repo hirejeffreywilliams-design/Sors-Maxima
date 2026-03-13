@@ -2430,9 +2430,24 @@ function PickAccuracyPanel() {
 }
 
 function NervousSystemTab() {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const { data: health, isLoading } = useQuery<any>({
     queryKey: ["/api/admin/system-health"],
     refetchInterval: 10000,
+  });
+
+  const forceRefreshMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/force-refresh-engines", {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/system-health"] });
+      const triggered = data.results?.filter((r: any) => r.status === "triggered" || r.status === "cleared").length || 0;
+      toast({ title: `Force refresh triggered (${triggered} engines)` });
+    },
+    onError: () => toast({ title: "Force refresh failed", variant: "destructive" }),
   });
 
   if (isLoading || !health) {
@@ -2463,8 +2478,24 @@ function NervousSystemTab() {
     return <Info className="h-3.5 w-3.5 text-muted-foreground" />;
   };
 
+  const recentEvents = health.engines?.recentEvents || [];
+
   return (
     <div className="space-y-4" data-testid="nervous-system">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs text-muted-foreground">Auto-refreshes every 10s</p>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={forceRefreshMutation.isPending}
+          onClick={() => forceRefreshMutation.mutate()}
+          data-testid="button-force-refresh-engines"
+          className="text-xs"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${forceRefreshMutation.isPending ? "animate-spin" : ""}`} />
+          {forceRefreshMutation.isPending ? "Refreshing..." : "Force Refresh All Engines"}
+        </Button>
+      </div>
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <Card>
           <CardContent className="p-3 text-center">
@@ -2652,6 +2683,30 @@ function NervousSystemTab() {
           </div>
         </CardContent>
       </Card>
+
+      {recentEvents.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              Engine Activity Log (last {recentEvents.length})
+            </CardTitle>
+            <CardDescription className="text-xs">Recent engine lifecycle events</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {recentEvents.map((evt: any, i: number) => (
+                <div key={i} className="flex items-center gap-2 py-1 border-b border-border/20 last:border-0 text-xs" data-testid={`event-log-${i}`}>
+                  <span className="text-[10px] text-muted-foreground shrink-0 w-16">{new Date(evt.timestamp).toLocaleTimeString()}</span>
+                  <Badge variant={evt.event === "failed" ? "destructive" : evt.event === "started" ? "default" : "secondary"} className="text-[9px] shrink-0">{evt.event}</Badge>
+                  <span className="font-medium truncate">{evt.engine}</span>
+                  {evt.detail && <span className="text-muted-foreground truncate">{evt.detail}</span>}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

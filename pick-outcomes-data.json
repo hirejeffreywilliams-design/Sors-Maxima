@@ -1359,6 +1359,86 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
+    },
+    {
+      "id": "precomp-NHL-401803400-moneyline-b16631a545",
+      "gameId": "401803400",
+      "sport": "NHL",
+      "game": "Carolina Hurricanes @ Tampa Bay Lightning",
+      "homeTeam": "Tampa Bay Lightning",
+      "awayTeam": "Carolina Hurricanes",
+      "pick": "Tampa Bay Lightning ML",
+      "betType": "moneyline",
+      "odds": 104,
+      "grade": "C+",
+      "confidence": 59,
+      "ev": -20.44,
+      "gameTime": "2026-03-14T23:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z"
+    },
+    {
+      "id": "precomp-NHL-401803396-moneyline-0fce627091",
+      "gameId": "401803396",
+      "sport": "NHL",
+      "game": "Colorado Avalanche @ Winnipeg Jets",
+      "homeTeam": "Winnipeg Jets",
+      "awayTeam": "Colorado Avalanche",
+      "pick": "Colorado Avalanche ML",
+      "betType": "moneyline",
+      "odds": -165,
+      "grade": "C",
+      "confidence": 58,
+      "ev": -34.15,
+      "gameTime": "2026-03-14T20:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z"
+    },
+    {
+      "id": "precomp-NHL-401803395-moneyline-632046f59b",
+      "gameId": "401803395",
+      "sport": "NHL",
+      "game": "Boston Bruins @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Boston Bruins",
+      "pick": "Boston Bruins ML",
+      "betType": "moneyline",
+      "odds": -111,
+      "grade": "C+",
+      "confidence": 57,
+      "ev": -6.86,
+      "gameTime": "2026-03-14T19:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z"
+    },
+    {
+      "id": "precomp-NHL-401803403-moneyline-5b8c3e86ac",
+      "gameId": "401803403",
+      "sport": "NHL",
+      "game": "Columbus Blue Jackets @ Philadelphia Flyers",
+      "homeTeam": "Philadelphia Flyers",
+      "awayTeam": "Columbus Blue Jackets",
+      "pick": "Philadelphia Flyers ML",
+      "betType": "moneyline",
+      "odds": 106,
+      "grade": "C-",
+      "confidence": 57,
+      "ev": -15.54,
+      "gameTime": "2026-03-14T23:30Z",
+      "savedAt": "2026-03-13T03:37:15.909Z"
+    },
+    {
+      "id": "precomp-NHL-401803406-moneyline-2ac04cf36a",
+      "gameId": "401803406",
+      "sport": "NHL",
+      "game": "Seattle Kraken @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Seattle Kraken",
+      "pick": "Seattle Kraken ML",
+      "betType": "moneyline",
+      "odds": -158,
+      "grade": "C-",
+      "confidence": 55,
+      "ev": -31.42,
+      "gameTime": "2026-03-15T02:00Z",
+      "savedAt": "2026-03-13T03:37:15.909Z"
     }
   ],
   "settled": [
@@ -19363,7 +19443,7 @@
       "lost": 386,
       "push": 16,
       "rate": 54.5,
-      "pending": 85
+      "pending": 90
     },
     "bySport": {
       "NBA": {
@@ -19471,7 +19551,7 @@
       "push": 3,
       "rate": 46
     },
-    "lastUpdated": "2026-03-13T03:31:16.105Z",
+    "lastUpdated": "2026-03-13T03:38:51.835Z",
     "roi": 8.1,
     "brierScore": 0.259,
     "maxDrawdown": 15.4,

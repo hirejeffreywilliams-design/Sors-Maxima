@@ -206,8 +206,22 @@ interface EngineEntry {
   error: string | null;
 }
 
+interface EngineEvent {
+  timestamp: string;
+  engine: string;
+  event: string;
+  detail: string;
+}
+
 const engineManifest: EngineEntry[] = [];
+const engineEventLog: EngineEvent[] = [];
 const serverBootTime = Date.now();
+const MAX_EVENT_LOG = 50;
+
+export function logEngineEvent(engine: string, event: string, detail: string = "") {
+  engineEventLog.unshift({ timestamp: new Date().toISOString(), engine, event, detail });
+  if (engineEventLog.length > MAX_EVENT_LOG) engineEventLog.length = MAX_EVENT_LOG;
+}
 
 export function getEngineManifest() {
   return {
@@ -220,6 +234,7 @@ export function getEngineManifest() {
     },
     bootTime: new Date(serverBootTime).toISOString(),
     uptimeSeconds: Math.round((Date.now() - serverBootTime) / 1000),
+    recentEvents: engineEventLog.slice(0, 20),
   };
 }
 
@@ -230,6 +245,7 @@ export function getEngineManifest() {
 function safeStart(name: string, fn: () => void, delayMs: number): void {
   const entry: EngineEntry = { name, delayMs, status: "pending", startedAt: null, error: null };
   engineManifest.push(entry);
+  logEngineEvent(name, "registered", `scheduled in ${delayMs}ms`);
 
   setTimeout(() => {
     try {
@@ -237,17 +253,20 @@ function safeStart(name: string, fn: () => void, delayMs: number): void {
       entry.status = "running";
       entry.startedAt = new Date().toISOString();
       log(`[Phase] ${name} started`, "startup");
+      logEngineEvent(name, "started", "running");
       if (result && typeof (result as any).then === "function") {
         (result as Promise<any>).catch((err: any) => {
           entry.status = "failed";
           entry.error = err.message || String(err);
           console.error(`[Startup] ${name} async failure:`, err.message);
+          logEngineEvent(name, "failed", err.message || String(err));
         });
       }
     } catch (err: any) {
       entry.status = "failed";
       entry.error = err.message;
       console.error(`[Startup] ${name} failed to start:`, err.message);
+      logEngineEvent(name, "failed", err.message);
     }
   }, delayMs);
 }

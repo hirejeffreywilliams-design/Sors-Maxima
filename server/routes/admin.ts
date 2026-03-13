@@ -5947,6 +5947,55 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  app.post("/api/admin/force-refresh-engines", requireAdmin, async (_req, res) => {
+    try {
+      const { logEngineEvent } = await import("../index");
+      const results: { engine: string; status: string }[] = [];
+
+      logEngineEvent("System", "force-refresh", "Admin triggered full engine refresh");
+
+      try {
+        const { startIntelligenceHub } = await import("../unifiedIntelligenceHub");
+        startIntelligenceHub();
+        results.push({ engine: "Intelligence Hub", status: "triggered" });
+        logEngineEvent("Intelligence Hub", "force-refresh", "Re-triggered by admin");
+      } catch (e: any) {
+        results.push({ engine: "Intelligence Hub", status: `error: ${e.message}` });
+      }
+
+      try {
+        const { startPrecomputedEngine } = await import("../precomputedPredictionsEngine");
+        startPrecomputedEngine();
+        results.push({ engine: "Precomputed Predictions", status: "triggered" });
+        logEngineEvent("Precomputed Predictions Engine", "force-refresh", "Re-triggered by admin");
+      } catch (e: any) {
+        results.push({ engine: "Precomputed Predictions", status: `error: ${e.message}` });
+      }
+
+      try {
+        const { forcePrefetchAll } = await import("../prefetchScheduler");
+        await forcePrefetchAll();
+        results.push({ engine: "Prefetch Scheduler", status: "triggered" });
+        logEngineEvent("Prefetch Scheduler", "force-refresh", "Re-triggered by admin");
+      } catch (e: any) {
+        results.push({ engine: "Prefetch Scheduler", status: `error: ${e.message}` });
+      }
+
+      try {
+        const { invalidateCache } = await import("../responseCache");
+        invalidateCache();
+        results.push({ engine: "Response Cache", status: "cleared" });
+        logEngineEvent("Response Cache", "cleared", "Cleared by admin force-refresh");
+      } catch (e: any) {
+        results.push({ engine: "Response Cache", status: `error: ${e.message}` });
+      }
+
+      res.json({ success: true, results, timestamp: new Date().toISOString() });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
   app.get("/api/admin/control-room", requireAdmin, async (_req, res) => {
     try {
       const { getPrefetchStatus, getControlRoomLog } = await import("../prefetchScheduler");
