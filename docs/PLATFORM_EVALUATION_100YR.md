@@ -109,7 +109,7 @@ The platform's technology is 2–3 years ahead of its commercial maturity. What 
 
 The codebase is clean for an early-stage product. Primary technical debt items:
 1. **Some admin dashboard data uses seed/sample data** rather than live database queries — functions correctly but needs migration to real data as member count grows
-2. **No automated test suite** — manual testing and the App Guardian engine provide coverage, but CI/CD with automated tests should be added before the first hire
+2. **Test coverage exists but CI automation is absent** — server tests exist for critical engines (Monte Carlo, Quantum Fusion, settlement flow, tier gating, Stripe service, sport seasons) but no CI/CD pipeline enforces them on every commit. Adding automated test enforcement should be a priority before the first engineering hire.
 3. **Single-process architecture** — all 60+ engines run in one Node.js process; adequate for current scale but will need process isolation at 5,000+ members
 4. **API key management is in-app** — should migrate to a secrets manager for production hardening
 
@@ -161,7 +161,7 @@ The codebase is clean for an early-stage product. Primary technical debt items:
 | W4 | **Heavy reliance on third-party APIs** | Medium | Fallback systems exist for Odds API (ESPN-derived); budget optimizer active |
 | W5 | **No native mobile app** | Medium | Mobile web is functional; PWA or native app is a Year 2–3 priority |
 | W6 | **CAC and churn are estimates, not real data** | High | Replace benchmarks with real data after 90 days of operation |
-| W7 | **No automated test suite** | Medium | Add CI/CD testing before first engineering hire |
+| W7 | **Tests exist but no CI/CD enforcement** | Medium | Add CI/CD pipeline to enforce existing server tests before first engineering hire |
 | W8 | **Single-process Node.js architecture** | Low (for now) | Adequate to 1,000 members; plan process isolation at 5,000+ |
 
 ### Opportunities
@@ -265,32 +265,33 @@ The platform monetizes through tiered subscriptions:
 
 **Model Assessment:** The tier structure is well-designed with natural upgrade incentives. Edge is the high-volume tier (LCT access + free trial creates the primary conversion funnel). Max captures high-value users. Operator/Enterprise tiers are defined but not yet actively marketed — these represent significant untapped revenue.
 
+### Cost Structure at Each Scale (Itemized)
+
+All financial projections in this document are derived from this single cost model. Costs are estimated based on industry benchmarks and current platform API usage patterns.
+
+| Cost Category | 100 Members | 500 Members | 1,000 Members | 5,000 Members | 10,000 Members | 50,000 Members |
+|--------------|:-----------:|:-----------:|:-------------:|:-------------:|:--------------:|:--------------:|
+| Infrastructure (hosting, DB) | $200 | $500 | $1,500 | $6,000 | $15,000 | $60,000 |
+| API Data (Odds, ESPN, OpenAI) | $300 | $600 | $2,000 | $6,000 | $12,000 | $40,000 |
+| Stripe Fees (2.9% + $0.30) | $225 | $1,100 | $2,200 | $10,500 | $22,000 | $105,000 |
+| Email (Resend) | $20 | $50 | $100 | $300 | $500 | $2,000 |
+| Marketing | $0 | $0 | $5,000 | $20,000 | $50,000 | $200,000 |
+| Staffing | $0 | $0 | $0 | $10,000 | $25,000 | $100,000 |
+| Legal/Compliance | $100 | $200 | $500 | $2,000 | $5,000 | $15,000 |
+| **Total Monthly Costs** | **$845** | **$2,450** | **$11,300** | **$54,800** | **$129,500** | **$522,000** |
+
 ### Revenue Scenario Modeling
 
-Assumptions: Tier mix of 45% Sharp / 35% Edge / 15% Max / 5% Operator (weighted ARPU ~$96). Cost percentages scale with member count.
+Assumptions: Tier mix of 45% Sharp / 35% Edge / 15% Max / 5% Operator (weighted ARPU ~$96). Costs derived from the itemized cost model above. Tax rate of 35% applied to profit.
 
-| Members | Paid Members (70%) | Monthly Revenue | Monthly Costs | Monthly Profit | Monthly Take-Home (after 35% tax) | Annual Take-Home |
-|:-------:|:------------------:|:--------------:|:-------------:|:-------------:|:----------------------------------:|:----------------:|
-| 100 | 70 | $6,720 | $2,822 | $3,898 | $2,534 | $30,400 |
-| 500 | 350 | $33,600 | $13,440 | $20,160 | $13,104 | $157,200 |
-| 1,000 | 700 | $67,200 | $30,240 | $36,960 | $24,024 | $288,300 |
-| 5,000 | 3,500 | $336,000 | $168,000 | $168,000 | $109,200 | $1,310,400 |
-| 10,000 | 7,000 | $672,000 | $369,600 | $302,400 | $196,560 | $2,358,700 |
-| 50,000 | 35,000 | $3,360,000 | $1,848,000 | $1,512,000 | $982,800 | $11,793,600 |
-
-### Cost Structure at Each Scale
-
-| Cost Category | 100 Members | 1,000 Members | 10,000 Members | Notes |
-|--------------|:-----------:|:-------------:|:--------------:|-------|
-| Infrastructure (hosting, DB) | $200/mo | $1,500/mo | $15,000/mo | Scales with traffic and data volume |
-| API Data Costs (Odds, ESPN, OpenAI) | $300/mo | $2,000/mo | $12,000/mo | Odds API is primary cost driver |
-| Stripe Fees (2.9% + $0.30) | $225/mo | $2,200/mo | $22,000/mo | Unavoidable; scales linearly |
-| Email (Resend) | $20/mo | $100/mo | $500/mo | Low cost even at scale |
-| Marketing | $0/mo | $5,000/mo | $50,000/mo | Zero at launch; scales with paid acquisition |
-| Staffing | $0/mo | $0/mo | $25,000/mo | First hires at 1,000+ members |
-| Legal/Compliance | $100/mo | $500/mo | $5,000/mo | Retainer at scale |
-| **Total Monthly Costs** | **$845** | **$11,300** | **$129,500** | — |
-| **Cost as % of Revenue** | 12.6% | 16.8% | 19.3% | Healthy margins at all scales |
+| Members | Paid (70%) | Monthly Revenue | Monthly Costs | Monthly Profit | Take-Home (after 35% tax) | Annual Take-Home |
+|:-------:|:----------:|:--------------:|:-------------:|:-------------:|:--------------------------:|:----------------:|
+| 100 | 70 | $6,720 | $845 | $5,875 | $3,819 | $45,825 |
+| 500 | 350 | $33,600 | $2,450 | $31,150 | $20,248 | $242,970 |
+| 1,000 | 700 | $67,200 | $11,300 | $55,900 | $36,335 | $436,020 |
+| 5,000 | 3,500 | $336,000 | $54,800 | $281,200 | $182,780 | $2,193,360 |
+| 10,000 | 7,000 | $672,000 | $129,500 | $542,500 | $352,625 | $4,231,500 |
+| 50,000 | 35,000 | $3,360,000 | $522,000 | $2,838,000 | $1,844,700 | $22,136,400 |
 
 ### Break-Even and Profitability Thresholds
 
@@ -592,17 +593,19 @@ At zero revenue and zero members, Sors Maxima has two types of value:
 
 ### What It Could Be Worth
 
-| Timeframe | Scenario | Members | ARR | Estimated Valuation |
-|-----------|----------|:-------:|:---:|:-------------------:|
-| **Year 5** | Bear | 200 | $115K | $350K–$700K |
-| **Year 5** | Baseline | 800 | $460K | $2M–$4M |
-| **Year 5** | Bull | 2,000 | $1.15M | $6M–$12M |
-| **Year 10** | Bear | 500 | $290K | $1.5M–$3M |
-| **Year 10** | Baseline | 3,000 | $1.7M | $10M–$20M |
-| **Year 10** | Bull | 10,000 | $5.8M | $35M–$70M |
-| **Year 25** | Bear | 2,000 | $1.2M | $6M–$12M |
-| **Year 25** | Baseline | 15,000 | $8.6M | $50M–$100M |
-| **Year 25** | Bull | 50,000 | $29M | $175M–$350M |
+*ARR calculated at ~$96 ARPU × 70% paid rate × 12 months. Valuations use SaaS multiples from Section 4. All figures are speculative projections, not forecasts.*
+
+| Timeframe | Scenario | Total Members | Paid Members | MRR | ARR | Valuation Multiple | Estimated Valuation |
+|-----------|----------|:-------:|:---:|:---:|:---:|:---:|:-------------------:|
+| **Year 5** | Bear | 200 | 140 | $13K | $161K | 3x–5x | $480K–$800K |
+| **Year 5** | Baseline | 800 | 560 | $54K | $645K | 4x–7x | $2.6M–$4.5M |
+| **Year 5** | Bull | 2,000 | 1,400 | $134K | $1.6M | 5x–8x | $8M–$13M |
+| **Year 10** | Bear | 500 | 350 | $34K | $403K | 4x–6x | $1.6M–$2.4M |
+| **Year 10** | Baseline | 3,000 | 2,100 | $202K | $2.4M | 6x–10x | $14M–$24M |
+| **Year 10** | Bull | 10,000 | 7,000 | $672K | $8.1M | 7x–12x | $56M–$97M |
+| **Year 25** | Bear | 2,000 | 1,400 | $134K | $1.6M | 5x–8x | $8M–$13M |
+| **Year 25** | Baseline | 15,000 | 10,500 | $1.0M | $12.1M | 7x–12x | $85M–$145M |
+| **Year 25** | Bull | 50,000 | 35,000 | $3.4M | $40.3M | 8x–15x | $322M–$605M |
 
 ### What Will Determine Whether the High-End or Low-End Scenario Plays Out
 
@@ -640,6 +643,29 @@ The 100-year potential of this platform, if it establishes a verified track reco
 
 ---
 
-*Past performance does not guarantee future results. This document contains forward-looking projections based on industry benchmarks and internal modeling. Actual results will vary based on market conditions, execution, and competitive dynamics.*
+## ASSUMPTIONS & SOURCE APPENDIX
 
-*Sources: Sors Maxima platform codebase and financial engine (March 2026), American Gaming Association market data, Grand View Research betting market projections, Better Collective/Action Network acquisition disclosures, SaaS valuation benchmarks from SaaS Capital and Bessemer Cloud Index.*
+The projections in this document use data from three confidence tiers:
+
+| Confidence Level | Label | Examples |
+|:----------------:|-------|---------|
+| **Observed** | Verified from platform codebase or public data | Engine count (60+), feature inventory, tier pricing ($49/$99/$249), test files, API integrations, grade thresholds |
+| **Estimated** | Industry benchmarks and reasonable inference | CAC ranges, churn rates, cost structure scaling, LTV calculations, market size (sourced from AGA, Grand View Research) |
+| **Speculative** | Directional scenarios, not forecasts | Year 10+ valuations, 100-year brand projection, acquisition multiples, Phase 4–5 milestones |
+
+**Key assumptions that drive financial projections:**
+- Tier mix: 45% Sharp / 35% Edge / 15% Max / 5% Operator — *estimated; will vary significantly based on marketing and trial conversion*
+- ARPU of ~$96 — *derived from tier mix assumption above*
+- 70% of registered members are paid — *estimated; industry range is 50–80% for gated platforms*
+- Monthly churn of 5% (20-month average lifetime) — *estimated; industry benchmark for SaaS at $49–$249 price points. Real churn in the first 90 days may be 10–20%.*
+- Tax rate of 35% — *estimated; effective rate varies by jurisdiction, entity structure, and deductions*
+- 8 proprietary trademarked systems — *observed in codebase (companyStandards.ts and platform UI); common law trademark status, not USPTO-registered*
+
+**Market data sources:**
+- U.S. sports betting market size: American Gaming Association annual reports (2023–2025)
+- Global betting market projections: Grand View Research, Mordor Intelligence, Statista
+- Action Network acquisition: Better Collective investor disclosures (2023)
+- SaaS valuation multiples: SaaS Capital annual survey, Bessemer Cloud Index
+- Competitor pricing: publicly available pricing pages as of March 2026
+
+*Past performance does not guarantee future results. This document contains forward-looking projections based on industry benchmarks and internal modeling. Actual results will vary based on market conditions, execution, and competitive dynamics.*
