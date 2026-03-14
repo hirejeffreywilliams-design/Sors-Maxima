@@ -273,49 +273,65 @@ The platform monetizes through tiered subscriptions:
 
 *Confidence: Observed (tier pricing from companyStandards.ts); Estimated (cost structure, CAC, churn from industry benchmarks); Speculative (valuation multiples)*
 
+### ARPU Derivation
+
+The weighted ARPU is calculated from the tier mix and pricing in `server/companyStandards.ts`:
+
+| Tier | Price | Mix % | Contribution |
+|------|:-----:|:-----:|:------------:|
+| Sharp | $49 | 45% | $22.05 |
+| Edge | $99 | 35% | $34.65 |
+| Max | $249 | 15% | $37.35 |
+| Operator | $499 | 5% | $24.95 |
+| **Weighted ARPU** | — | **100%** | **$119.00** |
+
+*Note: This tier mix is an estimate. Early cohorts may skew more heavily toward Sharp (lower ARPU). The actual ARPU will depend on trial conversion rates and upgrade behavior observed after launch.*
+
 ### Cost Structure at Each Scale (Itemized)
 
-All financial projections in this document are derived from this single cost model. Costs are estimated based on industry benchmarks and current platform API usage patterns.
+All financial projections in this document are derived from this single cost model. Costs are estimated based on industry benchmarks and current platform API usage patterns. Stripe fees are computed at 2.9% of revenue + $0.30 per paid member.
 
 | Cost Category | 100 Members | 500 Members | 1,000 Members | 5,000 Members | 10,000 Members | 50,000 Members |
 |--------------|:-----------:|:-----------:|:-------------:|:-------------:|:--------------:|:--------------:|
 | Infrastructure (hosting, DB) | $200 | $500 | $1,500 | $6,000 | $15,000 | $60,000 |
 | API Data (Odds, ESPN, OpenAI) | $300 | $600 | $2,000 | $6,000 | $12,000 | $40,000 |
-| Stripe Fees (2.9% + $0.30) | $225 | $1,100 | $2,200 | $10,500 | $22,000 | $105,000 |
+| Stripe Fees (2.9% + $0.30) | $275 | $1,300 | $2,650 | $13,100 | $26,300 | $131,300 |
 | Email (Resend) | $20 | $50 | $100 | $300 | $500 | $2,000 |
 | Marketing | $0 | $0 | $5,000 | $20,000 | $50,000 | $200,000 |
 | Staffing | $0 | $0 | $0 | $10,000 | $25,000 | $100,000 |
 | Legal/Compliance | $100 | $200 | $500 | $2,000 | $5,000 | $15,000 |
-| **Total Monthly Costs** | **$845** | **$2,450** | **$11,300** | **$54,800** | **$129,500** | **$522,000** |
+| **Total Monthly Costs** | **$895** | **$2,650** | **$11,750** | **$57,400** | **$133,800** | **$548,300** |
 
 ### Revenue Scenario Modeling
 
-Assumptions: Tier mix of 45% Sharp / 35% Edge / 15% Max / 5% Operator (weighted ARPU ~$96). Costs derived from the itemized cost model above. Tax rate of 35% applied to profit.
+Assumptions: Tier mix as above (weighted ARPU $119). 70% of registered members are paid. Costs derived from the itemized cost model above. Tax rate of 35% applied to profit.
 
 | Members | Paid (70%) | Monthly Revenue | Monthly Costs | Monthly Profit | Take-Home (after 35% tax) | Annual Take-Home |
 |:-------:|:----------:|:--------------:|:-------------:|:-------------:|:--------------------------:|:----------------:|
-| 100 | 70 | $6,720 | $845 | $5,875 | $3,819 | $45,825 |
-| 500 | 350 | $33,600 | $2,450 | $31,150 | $20,248 | $242,970 |
-| 1,000 | 700 | $67,200 | $11,300 | $55,900 | $36,335 | $436,020 |
-| 5,000 | 3,500 | $336,000 | $54,800 | $281,200 | $182,780 | $2,193,360 |
-| 10,000 | 7,000 | $672,000 | $129,500 | $542,500 | $352,625 | $4,231,500 |
-| 50,000 | 35,000 | $3,360,000 | $522,000 | $2,838,000 | $1,844,700 | $22,136,400 |
+| 100 | 70 | $8,330 | $895 | $7,435 | $4,833 | $57,990 |
+| 500 | 350 | $41,650 | $2,650 | $39,000 | $25,350 | $304,200 |
+| 1,000 | 700 | $83,300 | $11,750 | $71,550 | $46,508 | $558,090 |
+| 5,000 | 3,500 | $416,500 | $57,400 | $359,100 | $233,415 | $2,800,980 |
+| 10,000 | 7,000 | $833,000 | $133,800 | $699,200 | $454,480 | $5,453,760 |
+| 50,000 | 35,000 | $4,165,000 | $548,300 | $3,616,700 | $2,350,855 | $28,210,260 |
 
 ### Break-Even and Profitability Thresholds
 
-| Milestone | Members Required | Monthly Revenue | What It Means |
-|-----------|:----------------:|:---------------:|--------------|
-| **Covers API costs** | 5–10 | $480–$960 | Platform sustains its own data feeds |
-| **Covers all infrastructure** | 15–20 | $1,440–$1,920 | Fully self-sustaining technically |
-| **$1,000/mo take-home** | ~35 | $3,360 | Meaningful supplemental income |
-| **Replaces $50K salary** | ~120 | $11,520 | Full-time income equivalent |
-| **Replaces $100K salary** | ~225 | $21,600 | Strong full-time income |
-| **$1M annual take-home** | ~3,500 | $336,000 | Life-changing wealth |
+| Milestone | Members Required (total) | Paid Members | Monthly Revenue | What It Means |
+|-----------|:------------------------:|:------------:|:---------------:|--------------|
+| **Covers API costs** | ~7 | ~5 | $595 | Platform sustains its own data feeds |
+| **Covers all infrastructure** | ~10 | ~7 | $833 | Fully self-sustaining technically |
+| **$1,000/mo take-home** | ~25 | ~18 | $2,142 | Meaningful supplemental income |
+| **Replaces $50K salary** | ~90 | ~63 | $7,497 | Full-time income equivalent |
+| **Replaces $100K salary** | ~180 | ~126 | $14,994 | Strong full-time income |
+| **$1M annual take-home** | ~1,850 | ~1,295 | $154,105 | Life-changing wealth |
 
 ### LTV/CAC Analysis
 
-| Acquisition Channel | Estimated CAC | At 5% Monthly Churn (20-mo lifetime) | LTV (Sharp) | LTV (Edge) | LTV/CAC Ratio |
-|---------------------|:------------:|:------------------------------------:|:-----------:|:----------:|:-------------:|
+LTV is calculated as monthly price × average lifetime (20 months at 5% monthly churn).
+
+| Acquisition Channel | Estimated CAC | Avg Lifetime | LTV (Sharp $49) | LTV (Edge $99) | LTV/CAC Ratio |
+|---------------------|:------------:|:------------:|:---------------:|:--------------:|:-------------:|
 | Organic (X/Twitter, Reddit, SEO) | $0–$10 | 20 months | $980 | $1,980 | 98x–198x |
 | Referral program | $49 (1 mo credit) | 20 months | $980 | $1,980 | 20x–40x |
 | Podcast sponsorship | $50–$100 | 20 months | $980 | $1,980 | 10x–20x |
@@ -607,19 +623,19 @@ At zero revenue and zero members, Sors Maxima has two types of value:
 
 ### What It Could Be Worth
 
-*ARR calculated at ~$96 ARPU × 70% paid rate × 12 months. Valuations use SaaS multiples from Section 4. All figures are speculative projections, not forecasts.*
+*ARR = paid members × $119 ARPU × 12 months (using the same ARPU derivation from Section 4). Valuations use SaaS multiples from the Section 4 valuation table. All future figures are speculative projections, not forecasts.*
 
-| Timeframe | Scenario | Total Members | Paid Members | MRR | ARR | Valuation Multiple | Estimated Valuation |
+| Timeframe | Scenario | Total Members | Paid (70%) | MRR | ARR | Multiple | Est. Valuation |
 |-----------|----------|:-------:|:---:|:---:|:---:|:---:|:-------------------:|
-| **Year 5** | Bear | 200 | 140 | $13K | $161K | 3x–5x | $480K–$800K |
-| **Year 5** | Baseline | 800 | 560 | $54K | $645K | 4x–7x | $2.6M–$4.5M |
-| **Year 5** | Bull | 2,000 | 1,400 | $134K | $1.6M | 5x–8x | $8M–$13M |
-| **Year 10** | Bear | 500 | 350 | $34K | $403K | 4x–6x | $1.6M–$2.4M |
-| **Year 10** | Baseline | 3,000 | 2,100 | $202K | $2.4M | 6x–10x | $14M–$24M |
-| **Year 10** | Bull | 10,000 | 7,000 | $672K | $8.1M | 7x–12x | $56M–$97M |
-| **Year 25** | Bear | 2,000 | 1,400 | $134K | $1.6M | 5x–8x | $8M–$13M |
-| **Year 25** | Baseline | 15,000 | 10,500 | $1.0M | $12.1M | 7x–12x | $85M–$145M |
-| **Year 25** | Bull | 50,000 | 35,000 | $3.4M | $40.3M | 8x–15x | $322M–$605M |
+| **Year 5** | Bear | 200 | 140 | $17K | $200K | 3x–5x | $600K–$1M |
+| **Year 5** | Baseline | 800 | 560 | $67K | $800K | 4x–7x | $3.2M–$5.6M |
+| **Year 5** | Bull | 2,000 | 1,400 | $167K | $2.0M | 5x–8x | $10M–$16M |
+| **Year 10** | Bear | 500 | 350 | $42K | $500K | 4x–6x | $2M–$3M |
+| **Year 10** | Baseline | 3,000 | 2,100 | $250K | $3.0M | 6x–10x | $18M–$30M |
+| **Year 10** | Bull | 10,000 | 7,000 | $833K | $10.0M | 7x–12x | $70M–$120M |
+| **Year 25** | Bear | 2,000 | 1,400 | $167K | $2.0M | 5x–8x | $10M–$16M |
+| **Year 25** | Baseline | 15,000 | 10,500 | $1.25M | $15.0M | 7x–12x | $105M–$180M |
+| **Year 25** | Bull | 50,000 | 35,000 | $4.17M | $50.0M | 8x–15x | $400M–$750M |
 
 ### What Will Determine Whether the High-End or Low-End Scenario Plays Out
 
@@ -669,7 +685,7 @@ The projections in this document use data from three confidence tiers:
 
 **Key assumptions that drive financial projections:**
 - Tier mix: 45% Sharp / 35% Edge / 15% Max / 5% Operator — *estimated; will vary significantly based on marketing and trial conversion*
-- ARPU of ~$96 — *derived from tier mix assumption above*
+- ARPU of ~$119 — *derived from weighted tier mix: 45% Sharp ($49) + 35% Edge ($99) + 15% Max ($249) + 5% Operator ($499) = $119.00; see Section 4 ARPU Derivation table*
 - 70% of registered members are paid — *estimated; industry range is 50–80% for gated platforms*
 - Monthly churn of 5% (20-month average lifetime) — *estimated; industry benchmark for SaaS at $49–$249 price points. Real churn in the first 90 days may be 10–20%.*
 - Tax rate of 35% — *estimated; effective rate varies by jurisdiction, entity structure, and deductions*
