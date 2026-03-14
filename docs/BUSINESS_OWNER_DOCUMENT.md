@@ -84,7 +84,8 @@ Members of Sors Maxima get:
 
 ### 2.2 Proprietary Engine and System Names
 
-The following named systems are proprietary to Sors Maxima and represent the platform's core intellectual property. All are original creations, not licensed from third parties:
+The following named systems are proprietary to Sors Maxima and represent the platform's primary core intellectual property. All are original creations, not licensed from third parties. This list covers the principal named systems; additional specialty subsystems exist within each category. For the complete technical inventory, refer to the engineering documentation.
+
 
 **Core Intelligence Systems**
 - Unified Intelligence Hub — the master aggregation system that coordinates all data feeds and intelligence into a single live cycle
@@ -623,6 +624,23 @@ If the founder is unable to operate the platform for up to 30 days:
 **Action:** Document all admin credentials, API keys, and Stripe login information in a secure, encrypted location known to one trusted person. Consider granting a trusted person limited admin access for continuity purposes.
 
 ---
+
+## DOCUMENT VERIFICATION & SOURCE OF TRUTH
+
+**Verification Date:** March 2026
+
+**Sources Used to Compile This Document:**
+- `server/companyStandards.ts` — grade standards, tier standards, brand voice, compliance settings, prohibited phrases, default policies
+- `replit.md` — system architecture, feature list, named engine inventory
+- `server/pricingIntelligenceEngine.ts` — cost structure, tier pricing, wealth projections, competitor benchmarks
+- `server/routes/admin.ts` — trial mechanics, financial projection logic, marketing campaign data
+- `client/src/pages/admin-owner-playbook.tsx` — launch checklist, operations schedule, growth channels, retention tactics
+
+**Before External Use (Investor, Legal, Partner):**
+1. Verify all pricing and tier details against live Stripe products — prices may have been updated since this document was last revised
+2. Verify trademark status of all ™ marks against the USPTO database if formal registration has been pursued
+3. Have legal counsel review the Legal & Compliance section before sharing with outside parties — jurisdiction-specific laws change, and this document is not a substitute for qualified legal advice
+4. Confirm the engine inventory against the current codebase if used for IP valuation — the platform continues to evolve
 
 *This document reflects the operational and business state of Sors Maxima as of March 2026.*
 *Update this document whenever material changes are made to pricing, tier structure, proprietary systems, or legal compliance requirements.*
