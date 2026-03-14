@@ -36,7 +36,9 @@
 
 **Composite Maturity Score: 6.5 / 10 — "Technology-Complete, Market-Unproven"**
 
-The platform's technology is 2–3 years ahead of its commercial maturity. What exists today in code, architecture, and operational tooling would take a well-funded startup 18–24 months to replicate. The business, however, is at Day 0: zero revenue, zero public track record, zero paying members.
+*Confidence: Observed (scores based on direct codebase audit)*
+
+The platform's technology is estimated to be 2–3 years ahead of its commercial maturity based on engine count and feature depth. What exists today in code, architecture, and operational tooling would likely take a well-funded startup 18–24 months to replicate. The business, however, is at Day 0: zero revenue, zero public track record, zero paying members.
 
 ### Technology Readiness
 
@@ -136,12 +138,14 @@ The codebase is clean for an early-stage product. Primary technical debt items:
 
 ## 2. SWOT ANALYSIS
 
+*Confidence: Observed (strengths/weaknesses from codebase audit); Estimated (opportunities/threats from market research)*
+
 ### Strengths
 
 | # | Strength | Why It Matters |
 |---|----------|---------------|
 | S1 | **Closed, members-only community model** | Creates exclusivity, filters for serious bettors, reduces churn from casual users, and positions picks as premium intelligence |
-| S2 | **Proprietary 46-Factor AI prediction engine** | 46 independently weighted factors + Monte Carlo simulations at scale — no publicly available competitor operates at this model depth |
+| S2 | **Proprietary 46-Factor AI prediction engine** | 46 independently weighted factors + Monte Carlo simulations at scale — based on current market research, no publicly available competitor operates at comparable model depth |
 | S3 | **Intelligence Cards™ gamification system** | A unique retention mechanic — members collecting cards have a reason to stay beyond the picks themselves |
 | S4 | **Daily Life Changer Ticket ritual** | Habitual daily engagement loop with no market equivalent — creates appointment viewing |
 | S5 | **Self-improving data flywheel** | More settled picks → better calibration → higher accuracy → stronger track record → more members → more data |
@@ -149,7 +153,7 @@ The codebase is clean for an early-stage product. Primary technical debt items:
 | S7 | **Deep admin operating system (40+ dashboards)** | Financial projections, pricing intelligence, wealth tracking, member health, fraud detection — enterprise-grade operational tooling |
 | S8 | **Built-in retention engine** | Smart Retention Sequence Engine™ runs hourly with automated trial conversion, win-back, and upgrade campaigns from Day 1 |
 | S9 | **Enterprise-grade resilience** | Degraded-mode fallbacks, memory pressure guards, self-healing engines — the platform does not crash when a data source fails |
-| S10 | **8 proprietary trademarked systems** | Defensible IP that cannot be legally replicated without licensing |
+| S10 | **8 proprietary trademarked systems** | Common law trademark protection established through use; formal USPTO registration would strengthen defensibility |
 
 ### Weaknesses
 
@@ -192,6 +196,8 @@ The codebase is clean for an early-stage product. Primary technical debt items:
 ---
 
 ## 3. MARKET CONTEXT
+
+*Confidence: Estimated (market size from industry reports); Speculative (TAM extrapolations and comparable company revenue estimates)*
 
 ### Global Sports Betting Market Size
 
@@ -265,6 +271,8 @@ The platform monetizes through tiered subscriptions:
 
 **Model Assessment:** The tier structure is well-designed with natural upgrade incentives. Edge is the high-volume tier (LCT access + free trial creates the primary conversion funnel). Max captures high-value users. Operator/Enterprise tiers are defined but not yet actively marketed — these represent significant untapped revenue.
 
+*Confidence: Observed (tier pricing from companyStandards.ts); Estimated (cost structure, CAC, churn from industry benchmarks); Speculative (valuation multiples)*
+
 ### Cost Structure at Each Scale (Itemized)
 
 All financial projections in this document are derived from this single cost model. Costs are estimated based on industry benchmarks and current platform API usage patterns.
@@ -334,6 +342,8 @@ Note: Data/intelligence platforms command premium multiples vs. generic SaaS bec
 ---
 
 ## 5. THE 100-YEAR PROJECTION
+
+*Confidence: Estimated (Phase 1–2 milestones based on SaaS benchmarks); Speculative (Phase 3–5 are directional scenarios, not forecasts)*
 
 ### Phase 1: Foundation (Years 0–3 — NOW through 2028)
 
@@ -483,6 +493,8 @@ If the business maintains even modest scale ($5M–$10M annual revenue) for 100 
 
 ## 6. RISK REGISTER
 
+*Confidence: Observed (existing mitigations verified in codebase); Estimated (likelihood and impact ratings based on industry experience)*
+
 ### Top 10 Business Risks
 
 | # | Risk | Category | Likelihood | Impact | Existential? |
@@ -574,6 +586,8 @@ If the business maintains even modest scale ($5M–$10M annual revenue) for 100 
 ---
 
 ## 8. HONEST BOTTOM LINE
+
+*Confidence: Observed (replacement cost based on codebase scope); Estimated (strategic value based on comparable transactions); Speculative (future valuations)*
 
 ### What This Platform Is Worth Today
 
