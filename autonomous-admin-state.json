@@ -855,6 +855,58 @@
   ],
   "reports": [
     {
+      "id": "report_1773473844614_6jtq3",
+      "timestamp": "2026-03-14T07:37:24.614Z",
+      "durationMs": 6039,
+      "summary": [
+        "Odds API usage is below the 50K requests threshold; currently at 20,310 requests remaining, requiring action to reduce polling frequency.",
+        "Overall win rate is 55.8%, which is above the break-even threshold of 52.4%.",
+        "Current budget status shows healthy cash on hand ($100,000) and manageable monthly burn ($45,000).",
+        "Pick accuracy remains stable with a total win rate of 54.8% across 950 picks."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Adjust Odds API Polling Frequency",
+          "description": "Reduce the polling frequency for the Odds API to ensure we don't exceed the request budget.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Critical API Budget Warning",
+          "description": "Odds API usage is critically low with only 20,310 requests remaining. Immediate adjustment needed.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Reduce the polling frequency for Odds API as per the budget recommendation.",
+          "Verify API settings post-adjustment to ensure optimal usage.",
+          "Monitor the request count to track if adjustments are effective."
+        ],
+        "this_week": [
+          "Review overall performance metrics and adjust strategies if required.",
+          "Analyze user churn rate trends and develop retention strategies.",
+          "Monitor exposure liabilities and adjust if needed based on market changes."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 55.8,
+        "settledPicks": 950,
+        "oddsApiRemaining": 20310,
+        "oddsApiStatus": "warning",
+        "guardianHealth": 100,
+        "cacheHitRate": 18,
+        "heapUsedMb": 70,
+        "heapTotalMb": 74,
+        "hubLastCycleMs": 84,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Odds API usage is below the 50K requests threshold; currently at 20,310 requests remaining, requiring action to reduce polling frequency.\",\n    \"Overall win rate is 55.8%, which is above the break-even threshold of 52.4%.\",\n    \"Current budget status shows healthy cash on hand ($100,000) and manageable monthly burn ($45,000).\",\n    \"Pick accuracy remains stable with a total win rate of 54.8% across 950 picks.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Odds API Polling Frequency\",\n      \"description\": \"Reduce the polling frequency for the Odds API to ensure we don't exceed the request budget.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical API Budget Warning\",\n      \"description\": \"Odds API usage is critically low with only 20,310 requests remaining. Immediate adjustment needed.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Reduce the polling frequency for Odds API as per the budget recommendation.\",\n      \"Verify API settings post-adjustment to ensure optimal usage.\",\n      \"Monitor the request count to track if adjustments are effective.\"\n    ],\n    \"this_week\": [\n      \"Review overall performance metrics and adjust strategies if required.\",\n      \"Analyze user churn rate trends and develop retention strategies.\",\n      \"Monitor exposure liabilities and adjust if needed based on market changes.\"\n    ]\n  }\n}"
+    },
+    {
       "id": "report_1773270232645_hwucy",
       "timestamp": "2026-03-11T23:03:52.645Z",
       "durationMs": 6451,
@@ -2014,79 +2066,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Current win rate is at 52.5%, meeting the break-even threshold.\",\n    \"The platform shows a significant underperformance in Total picks, with an accuracy rate of only 46.8%.\",\n    \"API usage is healthy, however, low activity indicates no actual handle or win recorded this period.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Total Pick Performance\",\n      \"description\": \"Analyze the Total picks to identify the cause of low accuracy and implement a strategy for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Enhance Marketing Engagement\",\n      \"description\": \"Develop a targeted campaign to increase user activity and betting handle, aiming to capitalize on active user base.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review API Reporting Metrics\",\n      \"description\": \"Ensure API budget and performance reports are clear to avoid any potential issues with daily limits in the future.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Low Handle and Gross Win\",\n      \"description\": \"Current handle is 0, indicating potential engagement issues. Need to investigate user activity and betting patterns.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review user engagement strategies to boost betting activity.\",\n      \"Perform a detailed audit of Total pick performance.\",\n      \"Prepare a report on API usage and implement necessary adjustments.\"\n    ],\n    \"this_week\": [\n      \"Launch marketing initiatives targeting increased user engagement.\",\n      \"Analyze data from Total picks for insights on improvement.\",\n      \"Schedule a team meeting to discuss user retention strategies.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1772909649904_aoczd",
-      "timestamp": "2026-03-07T18:54:09.904Z",
-      "durationMs": 9526,
-      "summary": [
-        "Current overall win rate is 52.9%, maintaining above break-even threshold.",
-        "API usage is healthy; however, API football shows a significant budget variance due to overestimation of usage.",
-        "Pick accuracy in 'Total' market is critically low at 46.7%, affecting overall performance."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Optimize API Budget Usage",
-          "description": "Review and update API football budget strategy to address negative usage projection.",
-          "priority": "P1",
-          "due_by": "today",
-          "effort_hours": 2
-        },
-        {
-          "title": "Address Total Market Performance",
-          "description": "Investigate the low pick accuracy in 'Total' bets and adjust model inputs accordingly.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 5
-        },
-        {
-          "title": "Monitor API Calls",
-          "description": "Ensure all services remain under the optimal usage recommendations for the remainder of the month.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 1
-        }
-      ],
-      "risk_alerts": [
-        {
-          "title": "Critical Budget Variance for API Football",
-          "description": "Current projections indicate a heavily negative budget variance for API football service usage.",
-          "severity": "critical"
-        },
-        {
-          "title": "Low Performance in Total Market",
-          "description": "Total market pick accuracy is below acceptable thresholds, potentially impacting user satisfaction.",
-          "severity": "high"
-        }
-      ],
-      "ops_checklist": {
-        "today": [
-          "Begin reviewing API football budget usage limits.",
-          "Assess trends in Total market picks to develop action plan."
-        ],
-        "this_week": [
-          "Implement adjustments to improve Total picks accuracy.",
-          "Verify and maintain optimal intervals for all API services.",
-          "Prepare a report on current user retention and churn rate dynamics."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 52.9,
-        "settledPicks": 449,
-        "oddsApiRemaining": 73285,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 90,
-        "cacheHitRate": 17,
-        "heapUsedMb": 64,
-        "heapTotalMb": 74,
-        "hubLastCycleMs": 8,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Current overall win rate is 52.9%, maintaining above break-even threshold.\",\n    \"API usage is healthy; however, API football shows a significant budget variance due to overestimation of usage.\",\n    \"Pick accuracy in 'Total' market is critically low at 46.7%, affecting overall performance.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Optimize API Budget Usage\",\n      \"description\": \"Review and update API football budget strategy to address negative usage projection.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Address Total Market Performance\",\n      \"description\": \"Investigate the low pick accuracy in 'Total' bets and adjust model inputs accordingly.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Monitor API Calls\",\n      \"description\": \"Ensure all services remain under the optimal usage recommendations for the remainder of the month.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical Budget Variance for API Football\",\n      \"description\": \"Current projections indicate a heavily negative budget variance for API football service usage.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Low Performance in Total Market\",\n      \"description\": \"Total market pick accuracy is below acceptable thresholds, potentially impacting user satisfaction.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Begin reviewing API football budget usage limits.\",\n      \"Assess trends in Total market picks to develop action plan.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments to improve Total picks accuracy.\",\n      \"Verify and maintain optimal intervals for all API services.\",\n      \"Prepare a report on current user retention and churn rate dynamics.\"\n    ]\n  }\n}"
     }
   ],
   "lastQuickCheck": "2026-03-14T07:28:24.617Z",
-  "lastDeepCheck": "2026-03-11T23:03:52.645Z",
+  "lastDeepCheck": "2026-03-14T07:37:24.614Z",
   "totalQuickChecks": 154,
-  "totalDeepChecks": 35
+  "totalDeepChecks": 36
 }
