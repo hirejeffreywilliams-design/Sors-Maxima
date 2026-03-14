@@ -78,26 +78,26 @@ const stats = [
 
 const testimonials = [
   {
-    quote: "The depth of the data is unlike anything I've seen. The Sors Engine caught line value 3 hours before the public moved the market.",
-    author: "M.T.",
+    quote: "The depth of the data is unlike anything I've seen. The engine caught line value three hours before the public moved the market.",
+    author: "Marcus T.",
     tier: "Sharp Member",
     since: "Jan 2025"
   },
   {
-    quote: "Applying for Edge was the best decision for my bankroll. The AI assistant helps me filter out the noise and focus on high-confidence plays.",
-    author: "J.D.",
+    quote: "Joining Edge was the best decision for my bankroll. The assistant helps me filter out noise and focus on high-confidence plays.",
+    author: "Jordan D.",
     tier: "Edge Member",
     since: "Feb 2025"
   },
   {
-    quote: "Sors Maxima isn't just a picker service; it's a full intelligence suite. The arbitrage scanner alone paid for my membership in week one.",
-    author: "R.S.",
+    quote: "This isn't just a picker service — it's a full intelligence suite. The arbitrage scanner alone paid for my membership in week one.",
+    author: "Ryan S.",
     tier: "Max Member",
     since: "Dec 2024"
   },
   {
-    quote: "Verified tracking is why I'm here. Knowing the 'why' behind every 46-factor prediction gives me the confidence to stick to the strategy.",
-    author: "S.K.",
+    quote: "Verified tracking is why I stay. Understanding the reasoning behind every prediction gives me confidence to stick to the strategy.",
+    author: "Sarah K.",
     tier: "Sharp Member",
     since: "Mar 2025"
   }
@@ -105,7 +105,7 @@ const testimonials = [
 
 const trustSignals = [
   { icon: Lock, label: "SSL Secured", description: "Military-grade encryption" },
-  { icon: Database, label: "5 Live Data Sources", description: "Sub-second updates" },
+  { icon: Database, label: "4 Live Data Sources", description: "Sub-second updates" },
   { icon: CheckCircle, label: "3,800+ Picks Tracked", description: "Verified performance" },
   { icon: Shield, label: "Members-Only Access", description: "Limited entry protocol" },
 ];
@@ -122,7 +122,7 @@ const intelligenceSteps = [
     icon: Database,
     title: "Live Data Harvest",
     subtitle: "Every 60 seconds",
-    description: "Six simultaneous data feeds — live scores, injury reports, line movements, roster updates, and weather — ingested and cross-validated before anything is analyzed.",
+    description: "Four simultaneous data feeds — live scores, odds & lines, injury reports, and weather — ingested and cross-validated before anything is analyzed.",
     color: "text-blue-400",
     bg: "bg-blue-500/10",
     border: "border-blue-500/20",
@@ -342,7 +342,7 @@ export default function LandingPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Every factor. Every simulation. Every grade. Running automatically so the edge is always fresh.
           </p>
-          <Link href="/apply">
+          <Link href="/register">
             <Button size="lg" className="gap-2" data-testid="button-intel-cta">
               Access the Intelligence
               <ChevronRight className="w-4 h-4" />
@@ -382,9 +382,9 @@ export default function LandingPage() {
             )))}
           </div>
           <div className="mt-12 text-center">
-            <Link href="/apply">
+            <Link href="/register">
               <Button size="lg" className="gap-2">
-                Start Your Application
+                Get Started
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -468,13 +468,13 @@ export default function LandingPage() {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Link href={tier.name === "Sharp" ? "/pricing" : `/apply?tier=${tier.name.toLowerCase()}`} className="w-full">
+                  <Link href={`/register?plan=${tier.name.toLowerCase()}`} className="w-full">
                     <Button
                       className="w-full"
                       variant={tier.variant}
                       data-testid={`button-pricing-${tier.name.toLowerCase()}`}
                     >
-                      {tier.name === "Sharp" ? "Join Sharp" : `Apply for ${tier.name}`}
+                      {tier.cta}
                     </Button>
                   </Link>
                 </CardFooter>
@@ -504,9 +504,9 @@ export default function LandingPage() {
             Apply for membership today and join the inner circle of data-driven betting.
           </p>
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <Link href="/apply">
+            <Link href="/register">
               <Button size="lg" data-testid="button-footer-join-now">
-                Start Application
+                Get Started
                 <ChevronRight className="w-4 h-4 ml-1" />
               </Button>
             </Link>

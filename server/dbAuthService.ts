@@ -93,20 +93,24 @@ export async function registerUser(
 }
 
 export async function loginUser(
-  username: string, 
+  usernameOrEmail: string, 
   password: string,
   ip?: string
 ): Promise<{ success: boolean; error?: string; user?: DbUser }> {
   try {
-    const [user] = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    let [user] = await db.select().from(users).where(eq(users.username, usernameOrEmail)).limit(1);
     
+    if (!user && usernameOrEmail.includes("@")) {
+      [user] = await db.select().from(users).where(eq(users.email, usernameOrEmail.toLowerCase())).limit(1);
+    }
+
     if (!user) {
       return { success: false, error: "Invalid credentials" };
     }
 
     if (user.lockedUntil && new Date() < new Date(user.lockedUntil)) {
       const remainingMins = Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 60000);
-      logWarn(`Login attempt on locked account: ${username}`);
+      logWarn(`Login attempt on locked account: ${usernameOrEmail}`);
       return { success: false, error: `Account locked. Try again in ${remainingMins} minutes` };
     }
 
@@ -122,7 +126,7 @@ export async function loginUser(
       
       if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
         updates.lockedUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60000);
-        logWarn(`Account locked due to failed attempts: ${username}`);
+        logWarn(`Account locked due to failed attempts: ${usernameOrEmail}`);
       }
       
       await db.update(users).set(updates).where(eq(users.id, user.id));
@@ -135,10 +139,10 @@ export async function loginUser(
       lastLoginAt: new Date(),
     }).where(eq(users.id, user.id));
 
-    logInfo(`User logged in: ${username}`);
+    logInfo(`User logged in: ${user.username}`);
     return { success: true, user: user as DbUser };
   } catch (error: any) {
-    logError(error, { context: "loginUser", username });
+    logError(error, { context: "loginUser", usernameOrEmail });
     return { success: false, error: "Login failed" };
   }
 }

@@ -521,7 +521,7 @@ export function GoldenTicketHero() {
                   Member Login
                 </button>
               </Link>
-              <Link href="/pricing">
+              <Link href="/register">
                 <button
                   style={{
                     padding: "14px 32px",
@@ -540,7 +540,7 @@ export function GoldenTicketHero() {
                   data-testid="button-request-access"
                 >
                   <Sparkles style={{ width: 16, height: 16 }} />
-                  Request Access
+                  Get Started
                 </button>
               </Link>
             </div>

@@ -1203,7 +1203,11 @@ function AppContent() {
   }
 
   if (location === '/login') {
-    return <LoginPage onLogin={handleLogin} />;
+    return <LoginPage key="login" onLogin={handleLogin} />;
+  }
+
+  if (location === '/register') {
+    return <LoginPage key="register" onLogin={handleLogin} />;
   }
 
   if (location === '/reset-password') {

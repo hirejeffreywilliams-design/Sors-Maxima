@@ -405,8 +405,15 @@ export default function OnboardingPage() {
             {step < TOTAL_STEPS && (
               <Button
                 variant="ghost"
-                onClick={() => {
-                  savePreferences.mutate();
+                onClick={async () => {
+                  try {
+                    await apiRequest("POST", "/api/user/onboarding", {
+                      onboardingCompleted: true,
+                    });
+                  } catch {}
+                  queryClient.setQueryData(["/api/user/onboarding"], { onboardingCompleted: true });
+                  queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
+                  setLocation("/");
                 }}
                 className="text-muted-foreground"
                 data-testid="button-onboarding-skip"

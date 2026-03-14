@@ -483,7 +483,7 @@ export function registerIntelligenceRoutes(app: Express): void {
     if (cached) {
       return res.json(cached);
     }
-    return res.json({ error: "Game not found in pre-simulation cache", gameId });
+    return res.status(404).json({ error: "Game not found in pre-simulation cache", gameId });
   });
 
   app.post("/api/monte-carlo/simulate", (req: Request, res: Response) => {

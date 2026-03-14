@@ -37,7 +37,7 @@ const tiers: PricingTier[] = [
     monthlyPrice: 49,
     yearlyPrice: 468,
     monthlyPriceId: 'price_1T9g5NCsa9MEIxma4ubid3pw',
-    yearlyPriceId: 'price_1T9g5NCsa9MEIxma4ubid3pw',
+    yearlyPriceId: '', // TODO: Create yearly Stripe Price ID for Sharp tier ($468/yr) and set it here
     features: [
       "Today's Best Tickets — pre-built daily parlays",
       '46-Factor Prediction Engine across 6 US sports',
@@ -63,7 +63,7 @@ const tiers: PricingTier[] = [
     monthlyPrice: 99,
     yearlyPrice: 948,
     monthlyPriceId: 'price_1T9g6TCsa9MEIxmarohPvZl3',
-    yearlyPriceId: 'price_1T9g6TCsa9MEIxmarohPvZl3',
+    yearlyPriceId: '', // TODO: Create yearly Stripe Price ID for Edge tier ($948/yr) and set it here
     features: [
       'Everything in Sharp, plus:',
       'Player Props Analyzer — ML-powered over/under projections',
@@ -93,7 +93,7 @@ const tiers: PricingTier[] = [
     monthlyPrice: 249,
     yearlyPrice: 2388,
     monthlyPriceId: 'price_1T9g8BCsa9MEIxma2XrUZW6C',
-    yearlyPriceId: 'price_1T9g8BCsa9MEIxma2XrUZW6C',
+    yearlyPriceId: '', // TODO: Create yearly Stripe Price ID for Max tier ($2388/yr) and set it here
     features: [
       'Everything in Edge, plus:',
       'Life Changer™ Ticket — our highest-upside daily parlay',
@@ -194,6 +194,13 @@ export default function Pricing() {
     }
 
     const priceId = isYearly ? tier.yearlyPriceId : tier.monthlyPriceId;
+    if (!priceId) {
+      toast({
+        title: "Yearly Billing Coming Soon",
+        description: "Yearly billing is not yet available. Please select monthly billing for now.",
+      });
+      return;
+    }
     checkoutMutation.mutate(priceId);
   };
 
@@ -249,7 +256,7 @@ export default function Pricing() {
             />
             <Label htmlFor="billing-toggle" className={isYearly ? "font-semibold" : "text-muted-foreground"}>
               Yearly
-              <Badge variant="secondary" className="ml-2 text-xs">Save 20%</Badge>
+              <Badge variant="secondary" className="ml-2 text-xs">Coming Soon</Badge>
             </Label>
           </div>
         </header>

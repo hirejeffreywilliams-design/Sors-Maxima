@@ -15,8 +15,9 @@ interface LoginPageProps {
 }
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
-  useSEO({ title: "Sign In", description: "Sign in to your Sors Maxima account" });
-  const [activeTab, setActiveTab] = useState<"login" | "register">("login");
+  const isRegisterRoute = window.location.pathname === '/register';
+  useSEO({ title: isRegisterRoute ? "Create Account" : "Sign In", description: isRegisterRoute ? "Create your Sors Maxima account" : "Sign in to your Sors Maxima account" });
+  const [activeTab, setActiveTab] = useState<"login" | "register">(isRegisterRoute ? "register" : "login");
   const [showResetForm, setShowResetForm] = useState(false);
   
   // Login form
@@ -505,10 +506,18 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
                       placeholder="Confirm your password"
                       value={regConfirmPassword}
                       onChange={(e) => setRegConfirmPassword(e.target.value)}
-                      className="pl-10"
+                      className="pl-10 pr-10"
                       required
                       data-testid="input-reg-confirm-password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      data-testid="button-toggle-confirm-password"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                   {regConfirmPassword && regPassword !== regConfirmPassword && (
                     <p className="text-xs text-destructive">Passwords do not match</p>
