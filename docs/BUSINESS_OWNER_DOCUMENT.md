@@ -4,504 +4,396 @@
 **Last Updated:** March 2026
 **Classification:** Confidential — Owner Use Only
 
+> *This document is written for the business owner, not for developers. It covers everything a founder and operator needs to know about what they own, what they've built, how it makes money, how to run it, and what the risks are. Technical implementation details are excluded — business facts and operational realities are the focus.*
+
 ---
 
 ## TABLE OF CONTENTS
 
-1. [What You Own — Platform Summary](#1-what-you-own)
-2. [Revenue Model & Pricing Tiers](#2-revenue-model--pricing-tiers)
-3. [Proprietary IP, Trademarks & Brand Standards](#3-proprietary-ip-trademarks--brand-standards)
-4. [Backend Engine Inventory](#4-backend-engine-inventory)
-5. [Frontend Pages Inventory](#5-frontend-pages-inventory)
-6. [Data Sources & External APIs](#6-data-sources--external-apis)
-7. [Technology Stack](#7-technology-stack)
-8. [Launch Checklist](#8-launch-checklist)
-9. [Daily Operations Schedule](#9-daily-operations-schedule)
+1. [Mission, Vision & Brand Identity](#1-mission-vision--brand-identity)
+2. [What You Own — Platform Summary](#2-what-you-own--platform-summary)
+3. [Intellectual Property Inventory](#3-intellectual-property-inventory)
+4. [Revenue Model & Pricing Tiers](#4-revenue-model--pricing-tiers)
+5. [Platform Architecture Summary](#5-platform-architecture-summary)
+6. [Competitive Advantages](#6-competitive-advantages)
+7. [External Dependencies](#7-external-dependencies)
+8. [Operational Responsibilities](#8-operational-responsibilities)
+9. [Launch Checklist](#9-launch-checklist)
 10. [Growth & Acquisition Strategy](#10-growth--acquisition-strategy)
 11. [Key Business Metrics](#11-key-business-metrics)
 12. [Legal & Compliance Obligations](#12-legal--compliance-obligations)
 13. [Financial Projections](#13-financial-projections)
-14. [Capital Allocation](#14-capital-allocation)
+14. [Team & Ownership](#14-team--ownership)
 15. [Policies & Procedures Reference](#15-policies--procedures-reference)
 
 ---
 
-## 1. WHAT YOU OWN
+## 1. MISSION, VISION & BRAND IDENTITY
 
-Sors Maxima is a **members-only sports betting intelligence platform** — not a sportsbook, not a tipster service, not a tout. It is a data analysis and decision-support tool for serious sports bettors who want to make better-informed wagering decisions using AI, statistical modeling, and real-time market data.
+### Mission
 
-### What makes it different from anything else on the market:
+To give serious sports bettors access to the same depth of analytical intelligence previously available only to professional sharp bettors and institutional sports investors — through a proprietary AI model, real-time market data, and a members-only platform that treats data-driven bettors as intelligent adults.
 
-- The **46-Factor Model Analysis™** — a proprietary prediction engine that scores every matchup across 46 weighted factors including team form, injury reports, rest days, line movement, sharp money signals, weather, and Monte Carlo simulations.
-- **900,000+ Monte Carlo simulations** run overnight per matchup for deep probability modeling. 10,000 simulations run on standard cycles.
-- A **Life Changer Ticket (LCT)** system — a daily AI-curated high-odds parlay with 4–6 legs, minimum combined odds of +1000, graded at A- average or better.
-- **Intelligence Cards™** — a unique collectible trading card system tied to picks and platform achievements.
-- **Smart Retention Sequence Engine™** — an automated email campaign engine that runs hourly to keep members engaged, educated, and subscribed.
-- **60+ autonomous backend engines** running on scheduled cycles covering prediction, learning, analytics, fraud detection, marketing, and system health.
+### Vision
 
-### What it is legally:
+To become the most trusted name in sports betting intelligence — a platform with a 10-year+ verified track record, a growing community of profitable members, and proprietary technology that no competitor can replicate without years of engineering effort.
 
-Sors Maxima sells **data analysis and intelligence tools**. It is not a licensed gambling operator. It does not place bets on behalf of users. It provides probabilistic analysis only. All picks are framed as model outputs, not guaranteed outcomes.
+### Brand Identity
+
+**Platform Name:** Sors Maxima
+
+**Brand Voice:** Professional, direct, analytical, data-driven. No hype. No false promises. Concise insights backed by statistical evidence.
+
+**What Sors Maxima Is:**
+An information and analytics platform. A members-only intelligence service. A tool for informed decision-making.
+
+**What Sors Maxima Is Not:**
+A sportsbook. A tipster service. A tout. A financial advisor. It does not place bets on behalf of users. It does not guarantee outcomes.
+
+**Preferred Language:**
+- "Model projects..." / "Statistical edge..." / "Data indicates..." / "Expected value of..." / "Historical patterns show..."
+
+**Absolutely Prohibited Language (Zero Exceptions):**
+- "Guaranteed profit" / "Guaranteed win" / "Zero-loss" / "Can't lose" / "Risk-free bet" / "100% win" / "Sure thing" / "Lock of the century" / "Free money" / "Locked-in profit"
+
+The platform automatically detects and blocks any prohibited language in AI-generated content before it reaches members.
 
 ---
 
-## 2. REVENUE MODEL & PRICING TIERS
+## 2. WHAT YOU OWN — PLATFORM SUMMARY
+
+Sors Maxima is a **members-only sports betting intelligence platform** built at full production scale. What has been assembled is not a picks website. It is a complete AI intelligence system with:
+
+- A proprietary 46-factor AI prediction engine that grades every matchup it analyzes
+- A real-time data layer pulling from 6 external sports and odds providers simultaneously
+- A daily "Life Changer Ticket" — an AI-curated high-odds parlay with minimum +1000 combined odds
+- An automated email retention system that runs hourly without owner involvement
+- A collectible trading card system tied to pick grades and member achievements
+- Over 60 autonomous background systems covering prediction, learning, analytics, fraud detection, and platform health
+- A comprehensive administrative operating system with 40+ admin dashboards
+
+**The platform is fully built and production-ready.** The technical work is done. What the business needs now is members, a verified track record, and consistent content presence.
+
+### Member Experience
+
+Members access the platform through a tiered subscription. Depending on their tier, they can:
+- View daily AI-graded sports picks with confidence levels and expected value percentages
+- Build and analyze parlays with live odds from 6+ sportsbooks
+- Track their personal pick history and win rates
+- Use the Life Changer Ticket for high-odds daily plays
+- Access AI analysis of any matchup through an intelligent assistant
+- Monitor live game odds, line movement, and sharp money signals in real time
+- Track their bankroll using built-in Kelly Criterion recommendations
+- Collect Intelligence Cards™ earned through platform milestones and winning picks
+
+---
+
+## 3. INTELLECTUAL PROPERTY INVENTORY
+
+### Registered Brand Name
+- **Sors Maxima** — platform name
+
+### Proprietary Trademarked Systems
+
+All of the following are proprietary to Sors Maxima and should be consistently capitalized and written exactly as shown:
+
+| Trademarked Term | What It Is |
+|-----------------|-----------|
+| **46-Factor Model Analysis™** | The core AI prediction engine. Analyzes every matchup across 46 weighted factors to produce a grade and expected value. |
+| **Intelligence Cards™** | The collectible trading card system tied to pick grades, platform achievements, and Life Changer Ticket wins. |
+| **Cashout Engineering™** | The cashout advisory system that analyzes live games for optimal cashout timing. |
+| **Lock & Roll™** | The progressive cashout calculator — tells members how much to cash out as a game progresses. |
+| **Steam Exit™** | The line movement exit calculator — detects when odds have moved against a bettor's position. |
+| **Sportsbook Sweat™** | The early cashout feature that monitors pre-game positions. |
+| **Sors Lexicon™** | The proprietary terminology framework — the complete branded language system of the platform. |
+| **Smart Retention Sequence Engine™** | The automated hourly email system that manages member lifecycle (trial education, upgrade nudges, win-back campaigns). |
+
+### The 46-Factor Model — What It Analyzes
+
+The core prediction engine scores every matchup across 46 factors including:
+- Team form across recent games (home and away splits)
+- Injury reports pulled on each prediction cycle
+- Rest days and travel distance
+- Head-to-head historical performance
+- Odds line movement and sharp money signals
+- Monte Carlo simulations (10,000 simulations per standard cycle; 100,000 per deep overnight cycle)
+- Closing Line Value (CLV) tracking
+- Market efficiency analysis
+
+**Grade Output Scale:**
+
+| Grade | Confidence Required | Min Expected Value | Label |
+|-------|--------------------|--------------------|-------|
+| A+ | ≥85% | ≥25% | Elite Pick |
+| A | ≥75% | ≥18% | Sharp Pick |
+| B+ | ≥65% | ≥12% | Strong Pick |
+| B | ≥55% | ≥8% | Solid Pick |
+| B- | ≥50% | ≥5% | Value Pick |
+| C | Below threshold | Below threshold | Informational Only |
+
+**Minimum publication threshold:** 50% confidence and 5% Expected Value. Picks below this are never shown to members.
+
+### The Life Changer Ticket (LCT)
+
+A daily AI-curated parlay generated every morning:
+- 4 to 6 legs
+- Average grade of A-level or better across all legs
+- Minimum combined odds of +1000 (10× return)
+- No same-game correlated legs (automatically excluded)
+- Winning LCTs earn the member a collectible S+ grade Intelligence Card™
+
+This is the platform's signature daily product. No equivalent exists in the market.
+
+### Responsible Gambling Commitment
+
+**Required disclaimer on all pick-displaying pages:**
+*"Sports betting involves financial risk. Past performance does not guarantee future results."*
+
+**Required footer link:** National Problem Gambling Helpline — 1-800-522-4700 / www.ncpgambling.org
+
+**Age requirement:** 21 and older only.
+
+---
+
+## 4. REVENUE MODEL & PRICING TIERS
 
 ### Subscription Tiers
 
-| Tier Name | Internal Code | Price/Month | Annual Price | Who It's For |
-|-----------|--------------|-------------|--------------|--------------|
-| Free | `free` | $0 | $0 | Public discovery only — public picks |
-| **Sharp** | `pro` | **$49** | **$468/yr** | Entry-level serious bettor — daily picks, parlay builder, basic AI |
-| **Edge** | `elite` | **$99** | **$948/yr** | Active bettor — adds LCT, live odds, cashout advisor, advanced analytics |
-| **Max** | `whale` | **$249** | **$2,388/yr** | Power user — all engines, unlimited AI, priority data |
-| **Community Operator** | `operator` | **$499** | Custom | Discord/group operators — white-label reports, community management |
-| **Enterprise** | `enterprise` | **$1,200+** | Custom SLA | Institutional — custom integration, dedicated support |
+| Tier | Price/Month | Annual Price | Who It's For |
+|------|-------------|--------------|--------------|
+| **Free** | $0 | $0 | Public discovery only — limited access, no picks |
+| **Sharp** | $49 | $468/yr | Entry-level serious bettor |
+| **Edge** | $99 | $948/yr | Active bettor who wants the full daily intelligence stack |
+| **Max** | $249 | $2,388/yr | Power user who wants every tool at maximum depth |
+| **Community Operator** | $499 | Custom | Discord/community group operators — white-label reports |
+| **Enterprise** | $1,200+** | Custom SLA | Institutional clients, media companies, custom integrations |
 
-### Feature Access by Tier
+### What Each Tier Gets
 
-| Feature | Free | Sharp | Edge | Max |
-|---------|------|-------|------|-----|
-| Daily AI Picks | Public only | ✓ | ✓ | ✓ |
-| Parlay Builder | — | ✓ | ✓ | ✓ |
-| Basic AI Analysis | — | ✓ | ✓ | ✓ |
-| Life Changer Ticket (LCT) | — | — | ✓ | ✓ |
-| Live Odds (SSE) | — | — | ✓ | ✓ |
-| Cashout Advisor | — | — | ✓ | ✓ |
-| Advanced Analytics | — | — | ✓ | ✓ |
-| Player Props | — | — | ✓ | ✓ |
-| Unlimited AI Analysis | — | — | — | ✓ |
-| All Intelligence Engines | — | — | — | ✓ |
-| Priority Data Refresh | — | — | — | ✓ |
-| Custom Model Weight Tuning | — | — | — | ✓ |
-| Community Broadcasting | — | — | — | Operator only |
+**Sharp ($49/mo):** Daily AI-graded picks, basic parlay builder, model health dashboard, bankroll calculator, basic AI analysis, Intelligence Cards™ collection, track record access.
 
-### Revenue Math
+**Edge ($99/mo):** Everything in Sharp, plus: Life Changer Ticket daily, live odds from 6+ sportsbooks (real-time), Cashout Engineering™ advisor, advanced analytics, player props, daily AI-generated parlays, line movement alerts.
 
-The financial model assumes a tier mix of **50% Sharp / 35% Edge / 15% Max** among paying subscribers, giving a blended Average Revenue Per User (ARPU) of approximately:
+**Max ($249/mo):** Everything in Edge, plus: unlimited AI analysis, all intelligence engines, custom 46-factor model weight tuning, priority data refresh, correlation matrix, advanced strategy advisor, full platform intelligence access.
 
-```
-(0.50 × $49) + (0.35 × $99) + (0.15 × $249) = $24.50 + $34.65 + $37.35 = $96.50 blended ARPU
-```
+**Community Operator ($499/mo):** Everything in Max, plus: community broadcasting tools, white-label pick reports for their group members, referral dashboard, bulk exports.
 
-At key subscriber milestones (70% paid conversion rate assumed, consistent with members-only gating):
+**Enterprise ($1,200+/mo):** Custom integration, dedicated support, SLA, API access.
 
-| Total Members | Paid | Est. MRR | Monthly Take-Home | Annual Take-Home |
-|---------------|------|----------|-------------------|-----------------|
-| 100 | 70 | ~$7,700 | ~$2,640 | ~$31,700 |
-| 500 | 350 | ~$38,500 | ~$13,200 | ~$158,000 |
-| 1,000 | 700 | ~$77,000 | ~$26,400 | ~$317,000 |
-| 5,000 | 3,500 | ~$385,000 | ~$132,000 | ~$1,580,000 |
-| 10,000 | 7,000 | ~$770,000 | ~$264,000 | ~$3,170,000 |
+### Revenue Math — Key Scenarios
 
----
+The financial engine models a blended paid-tier mix of 50% Sharp / 35% Edge / 15% Max, producing a blended Average Revenue Per User (ARPU) of approximately $96.50.
 
-## 3. PROPRIETARY IP, TRADEMARKS & BRAND STANDARDS
+| Paying Members | Estimated MRR | Monthly Take-Home (after costs & tax) | Annual Take-Home |
+|----------------|--------------|--------------------------------------|-----------------|
+| 50 | ~$4,800 | ~$1,650 | ~$19,800 |
+| 100 | ~$9,650 | ~$3,280 | ~$39,400 |
+| 500 | ~$48,250 | ~$16,400 | ~$197,000 |
+| 1,000 | ~$96,500 | ~$32,800 | ~$393,600 |
+| 5,000 | ~$482,500 | ~$164,000 | ~$1,970,000 |
+| 10,000 | ~$965,000 | ~$328,000 | ~$3,930,000 |
 
-### Trademarked Terms (Always Use Exactly As Written)
+*Based on 34% net take-home margin after platform costs (~48%) and 35% effective tax rate.*
 
-| Term | Use For | Never Say Instead |
-|------|---------|------------------|
-| **46-Factor Model Analysis™** | The core AI prediction engine | "our model", "our algorithm", "the AI" |
-| **Cashout Engineering™** | The cashout advisory system | "cashout strategy", "cashout tools" |
-| **Lock & Roll™** | Progressive cashout calculator | "progressive cashout" |
-| **Steam Exit™** | Line movement exit calculator | "line movement exit" |
-| **Sportsbook Sweat™** | Early cashout feature | "early cashout" |
-| **Sors Lexicon™** | The proprietary terminology framework | "our glossary" |
-| **Intelligence Cards™** | The trading card collectible system | "trading cards", "pick cards" |
-| **Smart Retention Sequence Engine™** | The automated email retention system | "email automation" |
+### Annual Billing Opportunity
 
-### Brand Voice Rules
+Offering annual billing at a 2-month discount creates two advantages:
+1. Upfront cash — 10 months of revenue collected immediately
+2. Lower churn — annual subscribers cancel at 2–3× lower rates than monthly
 
-- **Tone:** Professional, direct, analytical, data-driven
-- **Style:** Concise insights backed by statistical evidence. No hype. No false promises.
-- **Teams:** Always third person ("The Celtics have...")
-- **Platform:** "Our model", "the 46-Factor Model", "Sors Maxima" — not "I" or "we predict"
-- **Preferred phrases:** "Model projects", "Statistical edge", "Data indicates", "Expected value of", "Monte Carlo simulations project", "Historical patterns show"
-
-### Absolutely Prohibited Language (Zero Exceptions)
-
-The following are banned from all AI-generated content, marketing copy, and member communications:
-
-- "Guaranteed profit" / "Guaranteed win" / "Guaranteed returns"
-- "Zero-loss" / "Can't lose" / "Cannot lose"
-- "Risk-free bet" / "Risk free bet"
-- "100% win" / "Sure thing"
-- "Lock of the century" / "Free money"
-- "Arbitrage guaranteed" / "Locked-in profit" / "No-brainer win"
-
-The platform automatically scans all AI-generated output for these phrases and blocks publication if detected.
-
-### Grade Scale (The 46-Factor Model Output)
-
-| Grade | Confidence | Min EV | Label | Meaning |
-|-------|-----------|--------|-------|---------|
-| **A+** | ≥85% | ≥25% | Elite Pick | Maximum model conviction — top-tier edge |
-| **A** | ≥75% | ≥18% | Sharp Pick | High-confidence with clear market advantage |
-| **B+** | ≥65% | ≥12% | Strong Pick | Above-average conviction, solid edge |
-| **B** | ≥55% | ≥8% | Solid Pick | Standard intelligence pick |
-| **B-** | ≥50% | ≥5% | Value Pick | Marginal edge — low stake appropriate |
-| **C** | <50% | <5% | Informational | Published for reference only — not recommended |
-
-Minimum publication thresholds: **50% confidence and 5% EV**. Picks below this are suppressed automatically.
+**If 25% of paying members convert to annual:** Significant cash flow stability boost with no new acquisition cost.
 
 ---
 
-## 4. BACKEND ENGINE INVENTORY
+## 5. PLATFORM ARCHITECTURE SUMMARY
 
-Your platform runs **60+ autonomous backend engines**. This is the complete inventory:
+*This section describes the business capability categories — not the technical implementation.*
 
-### AI & Prediction Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `predictionPipelineEngine.ts` | Master prediction orchestrator — runs the 46-Factor Model on all active matchups |
-| `precomputedPredictionsEngine.ts` | Pre-computes predictions with adaptive scheduling; skips cycles if memory >80% |
-| `monteCarloEngine.ts` | 10K simulations (standard) / 100K simulations (deep overnight) per matchup |
-| `quantumFusionEngine.ts` | Advanced fusion of all prediction signals into a single confidence score |
-| `confidenceEngine.ts` | Computes and calibrates model confidence across all pick grades |
-| `calibrationEngine.ts` | Monitors and corrects model calibration drift over 90-day rolling window |
-| `backtestEngine.ts` | Backtests model performance against historical outcomes |
-| `historicalLearningEngine.ts` | Learns from past pick results to improve future predictions |
-| `learningEngine.ts` | Core ML feedback loop for continuous model improvement |
-| `continuousLearningOrchestrator.ts` | Orchestrates all learning pipelines across sports and engines |
-| `autonomousLearningEngine.ts` | Self-directed learning system that identifies weak spots in the model |
-| `mcStackedLearner.ts` | Monte Carlo stacked learning — trains on simulation results |
-| `aiPickExplainer.ts` | Generates GPT-4o-mini explanations for every published pick (max 3 sentences) |
+### What Runs Automatically (Without Owner Involvement)
 
-### Data & Odds Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `odds-provider.ts` | Primary odds fetcher from The Odds API (6 sportsbooks, 5-min refresh during games) |
-| `espn-scoreboard-provider.ts` | Live scores and game states from ESPN (60-second refresh) |
-| `espn-injury-provider.ts` | Injury reports pulled on each prediction cycle |
-| `espn-roster-provider.ts` | Roster data from ESPN |
-| `balldontlie-provider.ts` | NBA player stats and game data (BallDontLie API) |
-| `nhl-stats-provider.ts` | NHL game and player statistics |
-| `mlb-stats-provider.ts` | MLB game and player statistics |
-| `api-football-provider.ts` | Soccer fixture data (API-Football, 2025 season) |
-| `live-sports-data.ts` | Aggregator for all live sports feeds |
-| `marketSnapshotEngine.ts` | Market state snapshots for odds trend analysis |
-| `pick-insight-engine.ts` | Generates contextual insights layered on top of raw pick data |
+The platform operates more than 60 autonomous background systems. The most important categories:
 
-### Admin & System Health Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `appGuardianEngine.ts` | System health monitor — detects silent errors and anomalies |
-| `appIntelligenceEngine.ts` | Autonomous app monitoring with self-healing capabilities |
-| `platformIntelligenceEngine.ts` | Platform-wide KPI tracking and intelligence reporting |
-| `autonomousAdminIntelligence.ts` | AI-powered admin assistant with system awareness |
-| `adminAssistantEngine.ts` | Powers the AI admin assistant chat interface |
-| `qualityWatchdog.ts` | Monitors pick quality and flags grade distribution anomalies |
-| `errorLogger.ts` | Centralized error logging with severity classification |
-| `aiErrorTracker.ts` | Tracks AI-specific errors, hallucinations, and content policy violations |
-| `data-pipeline-health.ts` | Monitors all data pipeline sources for freshness and uptime |
-| `apiKeyManager.ts` | Manages API key rotation and budget tracking across 6 external services |
-| `api-usage-tracker.ts` | Tracks API request counts against monthly quotas |
-| `apiBudgetOptimizer.ts` | Throttles API calls intelligently based on remaining budget |
-| `featureRegistryEngine.ts` | Registers and tracks all platform features and their health |
-| `featureFlags.ts` | Runtime feature flag management for controlled rollouts |
+**Intelligence & Prediction**
+The prediction system runs continuous cycles, analyzing every active matchup in NFL, NBA, NHL, MLB, NCAA, MMA, and international soccer. It refreshes odds data every 5 minutes during live games and generates pick grades automatically. Picks below the quality threshold are suppressed and never reach members. Deep simulation cycles run overnight.
 
-### Engagement & Retention Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `lifecycleCampaignEngine.ts` | Smart Retention Sequence Engine™ — hourly email campaigns for trial, urgency, win-back, upgrades |
-| `notificationEngine.ts` | Push and email notifications for pick hits, system alerts |
-| `personalizedInsightsEngine.ts` | Generates personalized betting intelligence per user |
-| `promoOffersEngine.ts` | Dynamic promotional offer generation and targeting |
-| `analyticsAgentEngine.ts` | Behavioral analytics per user for engagement scoring |
-| `acquisitionAnalyticsEngine.ts` | Tracks acquisition channels and conversion funnels |
-| `liveAnalyticsEngine.ts` | Real-time analytics during live game events |
-| `analyticsDashboardEngine.ts` | Aggregates analytics for admin dashboards |
-| `abTestEngine.ts` | A/B testing framework for UI and pricing experiments |
-| `acceleratedPatternEngine.ts` | Identifies accelerating betting patterns (steam moves, sharp action) |
+**Learning & Calibration**
+The platform continuously learns from settled pick outcomes. Win rates are tracked per sport, per grade, and per factor. When model accuracy drifts, the system automatically tightens publication thresholds. A 90-day calibration window keeps the model honest.
 
-### Financial & Business Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `pricingIntelligenceEngine.ts` | Live pricing analytics, wealth projections, competitor benchmarks, upsell opportunities |
-| `analyticsEventService.ts` | Event tracking for all user actions and business metrics |
-| `communityService.ts` | Community management, member-to-member interactions |
+**Member Retention**
+The Smart Retention Sequence Engine™ runs every hour. It sends personalized emails to: new trial members in their education sequence, members approaching renewal who need a nudge, members who haven't logged in for 7+ days, and Sharp members who are candidates for Edge upgrades. This runs fully automatically.
 
-### Security & Compliance Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `communityIntegrityEngine.ts` | Anti-fraud: card velocity abuse, credential sharing detection |
-| `communityLossPatternEngine.ts` | Detects and flags problematic betting loss patterns for responsible gambling |
-| `algorithmProtection.ts` | Protects proprietary model weights from reverse engineering |
-| `authService.ts` / `dbAuthService.ts` | Authentication, session management, email verification |
-| `auditTrail.ts` | Full audit log of all admin actions |
-| `piiMinimization.ts` | Ensures personal data is minimized and handled per GDPR/CCPA |
-| `idempotency.ts` | Prevents duplicate processing of financial and pick-related events |
-| `errorCodeSystem.ts` | Standardized error codes for all platform errors |
+**System Health**
+The App Guardian monitors for silent failures, data pipeline gaps, API budget depletion, and unusual patterns. Admin alerts fire when something needs attention. The platform includes a memory pressure guard — if system resources are low, the prediction engine degrades gracefully rather than crashing.
 
-### Specialty Engines
-| Engine File | What It Does |
-|-------------|-------------|
-| `propParlayEngine.ts` | Player props parlay builder and optimization |
-| `earlySettlementEngine.ts` | Detects early settlement opportunities and cashout triggers |
-| `pickOutcomeTracker.ts` | Tracks all pick outcomes for model calibration and track record |
-| `pickProtectionEngine.ts` | Protects published picks from manipulation or override |
-| `correlationEngine.ts` | Detects correlated legs in parlays (prevents same-game combinations) |
-| `proToolsEngine.ts` | Advanced tools for Max-tier users |
-| `mma-engine.ts` | MMA/UFC specific prediction logic |
-| `internationalSportsEngine.ts` | International soccer and cricket data handling |
-| `gameWindowScheduler.ts` | Detects active game windows; conserves API calls during off-peak (saves 780+ calls/day overnight) |
-| `prefetchScheduler.ts` | Proactively warms odds, scoreboard, and player props caches |
-| `launch-control.ts` | Platform launch controls and emergency stop functions |
+**Anti-Fraud & Security**
+The Community Integrity Engine monitors for credential sharing, card velocity abuse, and unusual access patterns. Accounts triggering multiple fraud signals in 24 hours are automatically flagged for admin review.
+
+**API Budget Management**
+The platform tracks monthly request quotas for every external data provider. When The Odds API budget runs low, the system automatically switches to ESPN-derived odds. The Game Window Scheduler detects when no games are being played and pauses unnecessary API calls overnight — saving hundreds of API requests per day.
+
+### What Requires Owner Involvement
+
+- Reviewing and approving Edge/Max tier applications (daily, ~30 minutes)
+- Settling Life Changer Tickets after the last game completes
+- Responding to member support emails
+- Reviewing weekly MRR and churn metrics
+- Making content posts on social media
+- Responding to flagged fraud cases
 
 ---
 
-## 5. FRONTEND PAGES INVENTORY
+## 6. COMPETITIVE ADVANTAGES
 
-### Member-Facing Pages
+### What No Competitor Has Built
 
-| Page | URL | Tier Required | Description |
-|------|-----|--------------|-------------|
-| Landing | `/` | Public | Marketing and sign-up page |
-| Login | `/login` | Public | Authentication |
-| Apply | `/apply` | Public | Application for Edge/Max tiers |
-| Onboarding | `/onboarding` | Any | First-time setup wizard |
-| Dashboard | `/dashboard` | Sharp+ | Main intelligence hub with SSE live feed |
-| Daily Picks | `/picks` (via dashboard) | Sharp+ | AI-graded daily picks with 46-Factor analysis |
-| Parlay Builder | `/prop-parlay-builder` | Sharp+ | Visual parlay construction with live odds |
-| Life Changer Ticket | (in dashboard) | Edge+ | Daily AI-curated high-odds parlay |
-| Cards | `/cards` | Sharp+ | Intelligence Cards™ collection |
-| Track Record | `/track-record` | Sharp+ | Historical pick performance |
-| Results | `/results` | Sharp+ | Settled pick history and win rates |
-| Odds Center | `/odds-center` | Edge+ | Multi-book live odds comparison |
-| Player Props | `/player-props` | Edge+ | Player proposition bets |
-| Daily Parlays | `/daily-parlays` | Edge+ | AI-generated daily parlay recommendations |
-| Ticket Variations | `/ticket-variations` | Edge+ | Alternative ticket configurations |
-| Command Center | `/command-center` | Max | Full intelligence command center |
-| Platform Intelligence | `/platform-intelligence` | Max | Deepest analytics layer |
-| Correlation Matrix | `/correlation-matrix` | Max | Cross-sport correlation analysis |
-| Sport Factor Analysis | `/sport-factor-analysis` | Max | Per-sport 46-factor breakdown |
-| Strategy Advisor | `/strategy-advisor` | Max | AI betting strategy recommendations |
-| Bankroll | `/bankroll` | Sharp+ | Bankroll management and Kelly calculator |
-| My Bets | `/my-bets` | Sharp+ | Personal bet tracking |
-| Watchlist | `/watchlist` | Sharp+ | Saved teams and games |
-| Community | `/community` | Sharp+ | Member community hub |
-| Sors Books | `/sorsbooks` | Sharp+ | Sportsbook balance tracker |
-| Personalized Insights | `/personalized-insights` | Sharp+ | AI personalized betting DNA profile |
-| Training Center | `/training-center` | Sharp+ | Sports betting education |
-| Research Notes | `/research-notes` | Sharp+ | Personal pick analysis notebook |
-| International | `/international` | Sharp+ | International soccer data |
-| MMA | `/mma` | Sharp+ | MMA/UFC analysis |
-| Rosters | `/rosters` | Sharp+ | Current team rosters |
-| Live | `/live` | Edge+ | Live game tracking |
-| Auto Generator | `/auto-generator` | Edge+ | Automatic ticket generation |
-| Roadmap | `/roadmap` | Any | Platform development roadmap |
-| Changelog | `/changelog` | Any | Version history |
-| Help | `/help` | Any | Help center |
-| Feedback | `/feedback` | Any | Member feedback submission |
-| Settings | `/settings` | Any | Account settings |
-| Profile | `/profile` | Any | User profile |
-| Rewards | `/rewards` | Any | Referral and rewards program |
-| Pricing | `/pricing` | Public | Subscription pricing page |
-| Legal | `/legal` | Public | Terms of Service and Privacy Policy |
-| Guidelines | `/guidelines` | Any | Community guidelines |
-| Pipeline | `/pipeline` | Max | Data pipeline status |
+| Advantage | Why It Matters |
+|-----------|---------------|
+| **46-Factor Model Analysis™ with 100,000-simulation deep cycles** | Competitive intelligence tools typically use 3–10 simple factors. The depth of this model creates genuinely differentiated output. |
+| **Life Changer Ticket — verified daily AI-curated parlay** | No competitor produces a daily AI-curated high-odds parlay with documented grade thresholds and a public track record. |
+| **Intelligence Cards™ collectible system** | Gamification tied to real pick outcomes creates an engagement and retention mechanic the market has never seen. |
+| **Custom 46-factor model weight tuning (Max tier)** | Members can adjust the weight of each of the 46 factors to match their own betting philosophy. Unique to Sors Maxima. |
+| **Real-time odds across 6+ sportsbooks via SSE** | Live comparison of odds from multiple books with sub-second update latency is rare at this price point. |
+| **Personalized Betting DNA profile** | The platform builds a personalized statistical profile for each member based on their betting history and preferences. No competitor does this. |
+| **60+ autonomous engines with self-healing architecture** | The operational maturity of the infrastructure exceeds what competitors have built with larger engineering teams. |
 
-### Admin Pages
+### Competitive Pricing Position
 
-| Page | URL | Description |
-|------|-----|-------------|
-| Admin Hub | `/admin` | Main admin dashboard with Nervous System tab |
-| Owner's Playbook | `/admin/owner-playbook` | Launch checklist and operations guide |
-| Financial Projections | `/admin/financial-projections` | Bull/baseline/bear scenario planning |
-| Pricing & Wealth | `/admin/pricing-intelligence` | Revenue optimization and owner wealth tracker |
-| Analytics | `/admin/analytics` | Platform-wide analytics |
-| Acquisition | `/admin/acquisition` | Member acquisition funnel |
-| Applications | `/admin/applications` | Edge/Max tier application review |
-| App Intelligence | `/admin/app-intelligence` | AI-powered platform intelligence |
-| Autonomous | `/admin/autonomous` | Autonomous monitoring controls |
-| Cards Admin | `/admin/cards` | Intelligence Cards™ management |
-| Community Integrity | `/admin/community-integrity` | Anti-fraud monitoring |
-| Data Provenance | `/admin/data-provenance` | Data source tracking |
-| Diagnostics | `/admin/diagnostics` | System diagnostics |
-| Feature Flags | `/admin/feature-flags` | Toggle features on/off |
-| Feedback | `/admin/feedback` | Member feedback management |
-| Fraud | `/admin/fraud` | Fraud detection dashboard |
-| Growth | `/admin/growth` | Growth strategy dashboard |
-| Guardian | `/admin/guardian` | App Guardian health monitor |
-| Guidelines | `/admin/guidelines` | Community guidelines CRUD |
-| IP Registry | `/admin/ip-registry` | Proprietary IP documentation |
-| Launch Control | `/admin/launch-control` | Emergency controls and launch switches |
-| Lifecycle Campaigns | `/admin/lifecycle-campaigns` | Email campaign management |
-| Marketing | `/admin/marketing` | Revenue intelligence and campaign launcher |
-| Model Integrity | `/admin/model-integrity` | 46-Factor Model health |
-| Model Performance | `/admin/model-performance` | Pick accuracy and calibration |
-| Monetization | `/admin/monetization` | Revenue and monetization metrics |
-| Orchestration | `/admin/orchestration` | Engine orchestration status |
-| Policy Standards | `/admin/policy-standards` | Full CRUD for policies and AI standards |
-| Promos | `/admin/promos` | Promotional offers management |
-| Quality Watchdog | `/admin/quality-watchdog` | Pick quality monitoring |
-| Risk Register | `/admin/risk-register` | Business risk tracking |
-| Security | `/admin/security` | Security monitoring |
-| Segmentation | `/admin/segmentation` | User segment management |
-| Support | `/admin/support` | Member support |
-| System Health | `/admin/system-health` | All-engines health dashboard |
-| A/B Tests | `/admin/ab-tests` | Experiment management |
-| Update Planner | `/admin/update-planner` | Release planning |
-| User Health | `/admin/user-health` | Per-user health and engagement scoring |
+Sors Maxima's Sharp tier ($49) is priced at market rate against OddsJam ($49), Unabated ($99 entry), and SharpSide ($39). The Edge and Max tiers offer more analytical depth than any competitor at comparable price points. This is intentionally positioned for the track record building phase — pricing can increase as verified win rate history accumulates.
 
 ---
 
-## 6. DATA SOURCES & EXTERNAL APIS
+## 7. EXTERNAL DEPENDENCIES
 
-| Provider | Data Type | Refresh Rate | Cost |
-|----------|-----------|-------------|------|
-| **The Odds API** | Live odds from 6+ sportsbooks | 5 min (live games) / 30 min (other) | Monthly quota; budget-optimized |
-| **ESPN API** | Live scores, injuries, rosters, game state | 60 seconds (live) / 6 hours (static) | Free / rate-limited |
-| **BallDontLie API** | NBA player stats, game data | 6 hours | Free tier |
-| **NHL Stats API** | NHL game and player statistics | 6 hours | Free / official |
-| **MLB Stats API** | MLB game and player statistics | 6 hours | Free / official |
-| **API-Football** | Soccer fixtures, standings (2025 season) | 6 hours | Monthly quota |
-| **OpenAI (GPT-4o-mini / GPT-5)** | Pick explanations, admin assistant, strategy advice | Per-request | Pay-per-token |
-| **Resend** | Transactional and lifecycle emails | Per-send | Pay-per-email |
-| **Stripe** | Payment processing, subscription management | Webhook-driven | 2.9% + $0.30/transaction |
-| **PostgreSQL (Replit)** | All platform data: users, picks, history, feedback | Persistent | Included in hosting |
+These are the external services the platform relies on to function. Understanding them helps you manage risk and budget:
 
-### API Budget Management
+| Provider | Purpose | Risk If Lost | Fallback Exists? |
+|----------|---------|-------------|-----------------|
+| **The Odds API** | Live odds from 6+ sportsbooks | Loss of real-time odds data | Yes — ESPN-derived odds (automatic) |
+| **ESPN** | Live scores, injuries, rosters | Degraded prediction quality | Partial — cached data |
+| **BallDontLie (NBA)** | NBA player and game stats | NBA picks degrade | No direct fallback |
+| **NHL Stats API** | NHL game statistics | NHL picks degrade | No direct fallback |
+| **MLB Stats API** | MLB game statistics | MLB picks degrade | No direct fallback |
+| **API-Football** | Soccer fixture data | Soccer picks degrade | No direct fallback |
+| **OpenAI** | Pick explanations, AI assistant | AI text generation stops | Platform continues without AI text |
+| **Resend** | Transactional and lifecycle email | Retention emails stop | Manual email needed |
+| **Stripe** | Payment processing and billing | Cannot accept new subscriptions | No substitute — critical |
+| **PostgreSQL (Replit)** | All platform data | Data loss / platform down | Verify backup policy regularly |
 
-The platform includes an `apiBudgetOptimizer.ts` engine and `api-usage-tracker.ts` that monitor monthly API request quotas. When The Odds API budget falls below 1,000 requests, the system automatically falls back to ESPN-derived odds. The Game Window Scheduler saves approximately **780+ API calls per day** by skipping Odds API calls during overnight/idle periods.
+### API Budget Awareness
 
-Check your API budget weekly from: **Admin → System Health → API Keys tab**
-
----
-
-## 7. TECHNOLOGY STACK
-
-| Layer | Technology | Role |
-|-------|-----------|------|
-| **Frontend** | React 18, TypeScript | UI framework |
-| **Styling** | TailwindCSS, shadcn/ui | Design system |
-| **State** | TanStack Query v5 | Data fetching and caching |
-| **Routing** | Wouter | Client-side navigation |
-| **Backend** | Express.js, TypeScript | API server |
-| **Runtime** | Node.js (tsx, production via `npx tsx`) | Server runtime |
-| **Database** | PostgreSQL (Replit managed) | Primary data store |
-| **ORM** | Drizzle ORM + drizzle-zod | Type-safe queries and validation |
-| **Real-time** | Server-Sent Events (SSE) on `/api/sse/stream` | Live updates to clients |
-| **Payments** | Stripe (subscriptions, webhooks) | Billing |
-| **Email** | Resend | Transactional email |
-| **AI** | OpenAI GPT-4o-mini, GPT-5 | Pick explanations, assistant |
-| **Build** | Vite | Frontend bundler |
-| **Memory limit** | 1024 MB (`NODE_OPTIONS='--max-old-space-size=1024'`) | Server heap cap |
+Check the API budget tracker weekly. Running out of The Odds API quota mid-month means live odds features stop working for the rest of the month. The system does alert you and fall back automatically, but falling back to ESPN-derived odds is a degraded experience for Edge+ members who expect live multi-book comparison.
 
 ---
 
-## 8. LAUNCH CHECKLIST
+## 8. OPERATIONAL RESPONSIBILITIES
+
+### Every Day (Approximately 30–60 Minutes)
+
+| Task | Why It Matters |
+|------|---------------|
+| Confirm daily picks were generated | If the prediction cycle failed overnight, members woke up to no picks. Catch this early. |
+| Check App Guardian for error alerts | Silent errors can break the member experience without being immediately obvious. |
+| Review new tier applications | Edge and Max applicants expect a response within 24–48 hours. Slow approvals cost conversions. |
+| Reply to member emails and support requests | Fast, personal support is the most powerful retention tool available to a small platform. |
+
+### Every Week (Approximately 1–2 Hours)
+
+| Task | Why It Matters |
+|------|---------------|
+| Review Monthly Recurring Revenue (MRR) | This is the business's north star. Know whether it's growing, flat, or declining. |
+| Check API budget remaining | Particularly The Odds API — know where you are against your monthly quota. |
+| Review what members are clicking (analytics) | Double down on the features that are being used. |
+| Post one betting analysis piece on social media | Your cheapest and most credible acquisition channel. |
+| Check pick accuracy rate | Know your current win rate across all grades. Members and prospects will ask. |
+
+### Every Month (Approximately 2–3 Hours)
+
+| Task | Why It Matters |
+|------|---------------|
+| Calculate monthly churn rate: (Cancellations ÷ Members at start) × 100 | Healthy SaaS platforms run under 5% monthly churn. Know where you stand. |
+| Email members who have been inactive for 14+ days | A personal email re-engages 10–20% of inactive members before they cancel. |
+| Verify Stripe payouts are landing in your bank account | Don't assume — verify the money is moving. |
+| Review your legal disclaimer and responsible gambling pages | Laws around gambling-adjacent services change. Stay current. |
+| Update member count language on the pricing page | "Join 200+ members" is a meaningful social proof signal when it's accurate. |
+
+---
+
+## 9. LAUNCH CHECKLIST
 
 ### Phase 1 — Before You Announce (1–2 Weeks Before Launch)
 
-**Critical (must complete before any users):**
-- [ ] Switch Stripe from Test Mode to Live Mode (Stripe Dashboard → toggle)
-- [ ] Point a real domain to the application (Namecheap or Google Domains, ~$12/yr)
-- [ ] Add a visible legal disclaimer to every page: *"Sors Maxima is for informational and entertainment purposes only. We do not provide financial or gambling advice."*
-- [ ] Publish a Privacy Policy and Terms of Service (use Termly.io — free, covers GDPR and CCPA)
-- [ ] Test the full cancel/refund flow — know exactly what happens when a user cancels
+**Critical — Complete Before Any Real Users:**
+- [ ] Switch Stripe from Test Mode to Live Mode (no real payments process otherwise)
+- [ ] Point a real domain to the platform (a .replit.app URL significantly reduces trust)
+- [ ] Add legal disclaimer visibly on every page: *"Sors Maxima is for informational and entertainment purposes only. We do not provide financial or gambling advice."*
+- [ ] Publish Privacy Policy and Terms of Service (Termly.io — free, covers GDPR and CCPA)
+- [ ] Test the full cancel and refund flow — know exactly what happens when a member cancels
 
 **High Priority:**
 - [ ] Configure email to send from your real domain (hello@yourdomain.com via Resend)
-- [ ] Write and publish your refund policy (recommended: 7-day money-back for Sharp)
-- [ ] Do a full dry run as a real user — create a Sharp account and go through every flow
-- [ ] Set up database backup schedule and verify retention period
+- [ ] Write and publish a refund policy (recommended: 7-day money-back for Sharp tier)
+- [ ] Do a complete dry run as a real member — sign up for Sharp and go through every feature
+- [ ] Verify database backup schedule is active
 
 **Medium Priority:**
-- [ ] Secure social media handles on X/Twitter and Instagram (@sorsmaxima or your handle)
+- [ ] Secure @sorsmaxima (or your handle) on X/Twitter and Instagram
 
 ### Phase 2 — Launch Week (Days 1–7)
 
 | Day | Action |
 |-----|--------|
-| Day 1 | Soft launch to 3–5 trusted people only. No public announcement. Collect honest feedback. |
-| Days 2–3 | Fix the top 3 issues from feedback before going public |
-| Day 4 | Make your first public post on X/Twitter: honest, no hype, describe what the platform does |
-| Day 5 | Post in r/sportsbook and r/sportsbetting — authentic, value-first, not promotional |
-| Day 6 | Email your first 5 members personally, not automated — ask for honest feedback |
-| Day 7 | Review Week 1 metrics: signups, Sharp conversions, most-clicked pages |
+| Day 1 | Soft launch to 3–5 trusted people. No public announcement. Collect honest feedback. |
+| Days 2–3 | Fix the top 3 issues from feedback before going public. |
+| Day 4 | First public post on X/Twitter — honest, no hype, describe what the platform does and link to it. |
+| Day 5 | Post in r/sportsbook and r/sportsbetting — value-first, not promotional. |
+| Day 6 | Personal (not automated) email to your first 5 members asking for honest feedback. |
+| Day 7 | Review Week 1: signups, conversions, most-clicked pages. Adjust messaging based on what you learn. |
 
 ### Phase 3 — First 90 Days
 
 | Milestone | Action |
 |-----------|--------|
-| 10 paying members | Do not optimize or redesign until you hit this — real users tell you what matters |
-| Day 30 | Expect 20–40% of users to cancel. Email every cancellation: "What would have made you stay?" |
-| Day 30 | Email every Sharp member: "Here's what you're missing in Edge" — push upgrades |
-| Day 60 | Collect real written testimonials from 5 active members |
-| Day 90 | Offer one month of Edge free to Sharp members as a trial upgrade |
-| Ongoing | Post one piece of genuine betting analysis content per week on social media |
-
----
-
-## 9. DAILY OPERATIONS SCHEDULE
-
-### Every Day (30–60 minutes total)
-| Task | Why |
-|------|-----|
-| Check that picks were generated | If the pick engine failed overnight, members are unhappy |
-| Scan for app errors in App Guardian | One silent error can break the experience for new users |
-| Review new tier applications | Edge/Max applicants expect a response within 24–48 hours |
-| Reply to all member emails/feedback | Fast personal support is your biggest competitive advantage |
-
-### Every Week (1–2 hours)
-| Task | Why |
-|------|-----|
-| Review your MRR | This is your north star — if it's growing you're doing something right |
-| Check API budget remaining | Running out of Odds API calls mid-month kills key features |
-| Review what users are clicking (analytics) | Double down on popular features; deprioritize unused ones |
-| Post one betting analysis piece on social | Organic content is your cheapest acquisition channel |
-| Check pick accuracy stats | Know your current win rate — members and prospects will ask |
-
-### Every Month (2–3 hours)
-| Task | Why |
-|------|-----|
-| Calculate churn rate: (Cancels ÷ Total at month start) × 100 | Healthy SaaS churn is under 5% monthly |
-| Email members inactive for 14+ days | Personal emails re-engage 10–20% of inactive members |
-| Check Stripe payouts landed in your bank | Don't assume — verify |
-| Review disclaimer and legal pages | Gambling-adjacent laws change. Stay current. |
-| Update pricing page copy if member counts have grown | "Join 200+ members" hits differently when it's accurate |
+| 10 paying members | Do not redesign or build new features until you hit this. Real users tell you what matters. |
+| Day 30 | Expect 20–40% of members to cancel. Email every cancellation: "What would have made you stay?" |
+| Day 30 | Email every Sharp member: "Here's what you're missing in Edge." Be specific — 3 features they can't access. |
+| Day 60 | Ask 5 active members for 2-sentence testimonials. Real social proof converts far better than anything else. |
+| Day 90 | Offer Sharp members one free month of Edge as a trial upgrade. |
 
 ---
 
 ## 10. GROWTH & ACQUISITION STRATEGY
 
-### Organic Channels (Start Here — Free)
+### Organic Channels (Start Here — Zero Cost)
 
 | Channel | Expected Result | Strategy |
-|---------|----------------|----------|
-| **X/Twitter Betting Community** | ~1 signup per 100 engaged followers | Weekly data-driven breakdowns using your model; engage with @SharpSide_co, @ActionNetwork |
-| **Reddit (r/sportsbook, r/sportsbetting)** | 50–200 site visits per good post | Genuine helpful posts — never spam, always value-first |
-| **Private Discord Partnerships** | 10–50 members per quality Discord | Offer free Max membership to Discord server owners with 500–5,000 members |
-| **Referral System (already built)** | 20–30% of new signups long-term | Activate: offer Sharp members 1 month free per paying referral |
-| **YouTube Analysis** | 5–15 signups per 1,000 views | Walk through real game analysis using the platform — deep trust compound effect |
+|---------|----------------|---------|
+| **X/Twitter Betting Community** | ~1 new member per 100 engaged followers | Weekly data-driven matchup breakdowns using your model's real output. Engage with known betting accounts. |
+| **Reddit (r/sportsbook, r/sportsbetting)** | 50–200 site visits per good post | Genuine, helpful posts about betting concepts. Mention your platform as something you built. Never spam. |
+| **Discord/Community Partnerships** | 10–50 members per quality server | Offer free Max membership to server owners with 500–5,000 members in exchange for a genuine post. |
+| **Referral Program (already built)** | 20–30% of new members long-term | Activate: offer Sharp members one month free for each paying referral. |
+| **YouTube Analysis** | 5–15 new members per 1,000 views | Record yourself walking through real game analysis using platform data. Deep trust over time. |
 
 ### Paid Channels (After $5,000 MRR Only)
 
-| Channel | Risk | Note |
-|---------|------|------|
-| Facebook/Instagram Ads | High | Gambling-adjacent ads frequently banned on Meta. Start last. |
-| Google Ads | High | Similar policy restrictions. |
-| Podcast sponsorship | Medium | Betting podcasts (Covers, The Ringer, etc.) — negotiated flat rate |
+Paid advertising for gambling-adjacent products faces severe policy restrictions on Facebook, Instagram, and Google. Platform bans happen frequently with no recourse. Do not invest in paid acquisition until organic channels have proven themselves and you have resources to absorb failed campaigns. Test only after $5,000 MRR.
 
 ### Retention Tactics
 
 | Tactic | Impact | Effort |
 |--------|--------|--------|
-| Win notification when a pick hits | High | Low — already built via notification engine |
-| Weekly "Best Bets" digest email every Sunday | High | Low — Smart Retention Engine™ can drive this |
-| Show members their personal stats over time | High | Medium — personal data creates ownership |
-| Offer Edge free for 1 month to Sharp members at Day 90 | Medium | Low |
-| Exclusive Max-only content (1-on-1 calls, early access) | High | Medium |
-| Discord community for members | Medium | Low — free to set up |
+| Win notification when a tracked pick hits | High | Low — notification engine already built |
+| Weekly "Best Bets" digest email every Sunday | High | Low — Smart Retention Engine™ can power this |
+| Show members their personal win rate and stats | High | Medium — creates ownership and attachment |
+| Free one-month Edge trial for Sharp members at 90 days | Medium | Low |
+| Exclusive Max-only monthly analysis call | High | Medium |
+| Private Discord or Slack for members | Medium | Low — free to set up |
 
 ---
 
 ## 11. KEY BUSINESS METRICS
 
 ### Monthly Recurring Revenue (MRR)
-**Formula:** (# Sharp × $49) + (# Edge × $99) + (# Max × $249)
+**Formula:** (# Sharp × $49) + (# Edge × $99) + (# Max × $249) + (# Operator × $499)
 - **Healthy:** Growing month over month
 - **Warning:** Flat for 2+ consecutive months
 - **Danger:** Declining for 2+ consecutive months
@@ -514,33 +406,33 @@ Check your API budget weekly from: **Admin → System Health → API Keys tab**
 
 ### Customer Lifetime Value (LTV)
 **Formula:** Average monthly revenue per member ÷ Monthly churn rate
-- **Healthy:** Over $200 (Sharp average at 5% churn = $49 ÷ 0.05 = $980)
+- **Healthy:** Over $200 (Sharp at 5% churn = $49 ÷ 0.05 = $980)
 - **Warning:** $100–200
 - **Danger:** Under $100
 
 ### LTV/CAC Ratio
 **Formula:** LTV ÷ Customer Acquisition Cost
-- **Healthy:** Over 3x (industry benchmark for sustainable SaaS)
-- **Warning:** 1–3x
-- **Danger:** Under 1x (losing money on every customer)
+- **Healthy:** Over 3× — the standard for sustainable SaaS
+- **Warning:** 1–3×
+- **Danger:** Under 1× (losing money on every customer acquired)
 
 ### Landing Page Conversion Rate
-**Formula:** (Signups ÷ Unique visitors) × 100
+**Formula:** (New signups ÷ Unique visitors) × 100
 - **Healthy:** Over 3%
 - **Warning:** 1–3%
 - **Danger:** Under 1%
 
 ### Pick Accuracy (Win Rate)
-**Formula:** Wins ÷ Total settled picks × 100 (track each sport separately)
-- **Healthy:** Over 52.4% (minimum to be profitable against -110 lines)
+**Formula:** Winning picks ÷ Total settled picks × 100 (tracked per sport)
+- **Healthy:** Over 52.4% (minimum to profit against standard -110 lines)
 - **Warning:** 50–52.4%
 - **Danger:** Under 50%
 
 ### Daily Active Rate
-**Formula:** Users who logged in today ÷ Total active members
-- **Healthy:** Over 40% for Max, over 20% for Sharp
+**Formula:** Members who logged in today ÷ Total active members
+- **Healthy:** Over 40% for Max tier; over 20% for Sharp tier
 - **Warning:** 10–20%
-- **Danger:** Under 10% (predict cancellation within 30 days)
+- **Danger:** Under 10% (predicts cancellation within 30 days)
 
 ---
 
@@ -548,133 +440,172 @@ Check your API budget weekly from: **Admin → System Health → API Keys tab**
 
 ### What You Are (and Are Not)
 
-Sors Maxima is **an information and analytics platform**. You are NOT a:
-- Licensed sportsbook or gambling operator
-- Financial advisor
-- Sports betting advisor (in the legal regulatory sense)
+Sors Maxima is **an information and analytics platform**. It is not:
+- A licensed sportsbook or gambling operator
+- A financial advisor
+- A sports betting advisor in the regulated legal sense
 
-Your legal protection rests on consistently positioning picks as **probabilistic statistical analysis**, not as financial advice or guaranteed outcomes. The moment your marketing implies profit or guarantees, you enter legally dangerous territory.
+Legal protection rests entirely on consistently framing all picks as probabilistic statistical analysis — not as financial advice or guaranteed outcomes. Any marketing language that implies profit guarantees or certain outcomes creates legal exposure.
 
 ### Non-Negotiable Compliance Items
 
-| Item | Action Required |
-|------|----------------|
-| **Disclaimer on every page** | "Sports betting involves financial risk. Past performance does not guarantee future results." Must appear on picks page, parlay builder, LCT section, email footer, and landing page — not just Terms of Service |
-| **Privacy Policy + Terms of Service** | Must be published and accessible. Use Termly.io if not done. |
-| **GDPR/CCPA data deletion** | Users in EU and California have the legal right to request data deletion. Add a "Request Data Deletion" option to Settings page. Process manually via email for now. |
-| **Responsible gambling messaging** | Link to ncpgambling.org and display "National Problem Gambling Helpline: 1-800-522-4700" in footer. Required: age 21+ only. |
-| **No "guaranteed wins" language** | Built into the AI content filter. Also apply to manual marketing copy. |
-| **Chargeback process** | Have an email support address published so users can contact you before disputing with their bank. Each chargeback costs $15–25 Stripe dispute fee. |
-| **IP protection in ToS** | ToS must prohibit members from publicly sharing platform-generated picks. Already in your default policies. |
+| Obligation | Required Action |
+|-----------|----------------|
+| **Visible disclaimer on every page** | *"Sports betting involves financial risk. Past performance does not guarantee future results."* Must appear on picks pages, parlay builder, LCT section, emails, and landing page — not only buried in Terms of Service. |
+| **Privacy Policy and Terms of Service** | Must be published and accessible from every page. |
+| **GDPR/CCPA data deletion rights** | EU and California users have a legal right to request deletion of their data. Add a "Request Data Deletion" option to Settings. Process manually by email until volume requires automation. |
+| **Responsible gambling messaging** | Link to ncpgambling.org and display the National Problem Gambling Helpline (1-800-522-4700) in the footer. Age 21+ requirement must be visible. |
+| **No guarantee language anywhere** | Applies to marketing copy, social media posts, and AI-generated content. The platform blocks this in AI output automatically. Apply the same standard manually. |
+| **Support email before chargebacks** | Publish a support contact address prominently. Each chargeback costs the revenue plus a $15–25 Stripe dispute fee. Users who can reach you cancel instead of disputing. |
+| **IP protection in Terms of Service** | Terms must prohibit members from publicly sharing platform-generated picks or analysis. This is already included in the default policies. |
 
-### Compliance Settings (Already Configured in Platform)
+### Platform Compliance Features Already Active
 
-From `companyStandards.ts`:
-- Data retention: 365 days
-- Session timeout: 60 minutes
-- Max login attempts: 5 (then locked)
-- Minimum password length: 8 characters
-- Email verification: required
-- IP monitoring: enabled
-- Fraud detection: enabled
-- Audit log: enabled
-- Self-exclusion: enabled
-- Responsible gambling notice: displayed on parlay builder, picks page, and onboarding
+The following compliance systems are already built and operational:
+- Data retained for 365 days maximum
+- Sessions time out after 60 minutes of inactivity
+- Account locks after 5 failed login attempts
+- Email verification required for all new accounts
+- IP monitoring and session fingerprinting active
+- Fraud detection system active
+- Audit log of all admin actions active
+- Self-exclusion capability enabled
+- Responsible gambling notice displayed on parlay builder, picks pages, and during onboarding
+- AI content filter blocking all prohibited language before publication
 
 ---
 
 ## 13. FINANCIAL PROJECTIONS
 
-### Cost Structure (Engine-Computed)
+### Monthly Cost Structure
 
-| Cost Category | % of Revenue |
-|---------------|-------------|
-| Infrastructure | 15% |
-| Data / APIs | 5% |
-| Stripe fees | ~3% + $0.30/subscriber |
-| Marketing | 20% |
-| Legal | 5% |
-| **Total Costs** | **~48%** |
-| Pre-tax profit margin | ~52% |
-| Tax (35% effective) | ~18% |
-| **Net take-home margin** | **~34%** |
+| Cost Category | % of Revenue | What It Covers |
+|---------------|-------------|---------------|
+| Infrastructure | 15% | Hosting, database, server compute |
+| Data and APIs | 5% | Sports data feeds, odds providers |
+| Stripe payment fees | ~3% + $0.30/member | Payment processing |
+| Marketing | 20% | Acquisition content, paid experiments (when active) |
+| Legal | 5% | Compliance tools, legal counsel |
+| **Total Costs** | **~48%** | |
+| Pre-tax margin | ~52% | |
+| Tax (35% effective rate) | ~18% | |
+| **Net take-home margin** | **~34%** | |
 
-### Three Scenarios (12-Month Projection)
+*Note: Marketing cost of 20% is modeled at scale. At launch, before meaningful ad spend, actual take-home margins will be higher — closer to 45–55% — because marketing spend is near zero.*
 
-| Scenario | Monthly Growth | Monthly Churn | Year-End MRR (starting at 0) | Character |
-|----------|---------------|---------------|------------------------------|-----------|
-| **Bull** | 15% | 3% | Approx. 4.4x starting MRR | Strong word-of-mouth, viral content |
-| **Baseline** | 8% | 5% | Approx. 2.5x starting MRR | Steady organic growth |
-| **Bear** | 2% | 8% | Approx. 1.3x starting MRR | Slow acquisition, high churn |
+### Three Financial Scenarios (12-Month Outlook)
 
-### Key Assumptions in the Model
+| Scenario | Monthly Growth Rate | Monthly Churn | Year-End Character |
+|----------|--------------------|--------------|--------------------|
+| **Bull** | 15% | 3% | Strong word-of-mouth; content going viral |
+| **Baseline** | 8% | 5% | Steady organic growth with consistent content |
+| **Bear** | 2% | 8% | Slow acquisition; high early cancellation |
 
-| Assumption | Value | Notes |
-|-----------|-------|-------|
-| CAC (Customer Acquisition Cost) | $35 | **Industry benchmark — replace with real data ASAP** |
-| Monthly churn | 5% (baseline) | **Industry benchmark — track real cancellations** |
-| Gross margin | 75% | Reasonable for bootstrapped SaaS |
-| Tier mix (paid) | 50% Sharp / 35% Edge / 15% Max | Assumed — update as real data accumulates |
-| Valuation multiple | 5x–20x ARR | Depends on annual growth rate |
+### Key Model Assumptions (Replace With Real Data as Available)
 
-### Valuation Multiples Applied
+| Assumption | Current Value | Replace When |
+|-----------|-------------|-------------|
+| Customer Acquisition Cost (CAC) | $35 (industry benchmark) | After 90 days of real acquisition data |
+| Monthly churn rate | 5% (benchmark) | After 90 days of real cancellation data |
+| Tier mix among paid members | 50% Sharp / 35% Edge / 15% Max | After 6 months of real subscriber data |
+| Gross margin | 75% | Stable — update if infrastructure costs change materially |
 
-| Annual Growth Rate | Revenue Multiple | Implied Valuation Type |
-|--------------------|-----------------|----------------------|
-| >100% YoY | 20x ARR | Hyper-growth startup |
-| 50–100% YoY | 12x ARR | High-growth SaaS |
-| 20–50% YoY | 8x ARR | Solid growing business |
-| <20% YoY | 5x ARR | Stable / mature business |
+### Valuation Multiples
+
+Sors Maxima's business value can be estimated based on Annual Recurring Revenue (ARR) and growth rate:
+
+| Annual Growth Rate | Revenue Multiple | Type of Business |
+|--------------------|-----------------|-----------------|
+| Over 100% YoY | 20× ARR | Hyper-growth startup |
+| 50–100% YoY | 12× ARR | High-growth SaaS |
+| 20–50% YoY | 8× ARR | Solid growing business |
+| Under 20% YoY | 5× ARR | Stable / mature business |
+
+*At $100K MRR ($1.2M ARR) with 50% annual growth: estimated valuation of $7.2M–$14.4M.*
 
 ---
 
-## 14. CAPITAL ALLOCATION
+## 14. TEAM & OWNERSHIP
 
-Recommended budget distribution of annual revenue:
+### Current Structure
 
-| Category | Allocation | Purpose |
-|----------|-----------|---------|
-| R&D / Engineering | 35% | Platform development, new engines, model improvements |
-| Data Acquisition | 15% | API subscriptions, new data partnerships |
-| Infrastructure | 15% | Hosting, database, CDN, monitoring |
-| Legal & Compliance | 10% | Legal counsel, compliance tools, privacy management |
-| Growth & Marketing | 15% | Content creation, paid experiments, partnerships |
-| Capital Reserves | 10% | Emergency fund, opportunity reserve |
+Sors Maxima is a **sole founder, bootstrapped operation**. The platform was designed and built by the founder. There are no employees, no co-founders, and no outside investors as of this document's writing.
 
-**At $10K MRR ($120K ARR):**
-- R&D: $42,000/yr
-- Data: $18,000/yr
-- Infrastructure: $18,000/yr
-- Legal: $12,000/yr
-- Growth: $18,000/yr
-- Reserves: $12,000/yr
+This structure means:
+- **100% ownership retained by the founder** — no equity given up, no investors to answer to
+- **All revenue goes to the founder** — no profit splits, no salary obligations
+- **All decisions are made by the founder** — pricing, features, partnerships, future sale
+
+### Operational Responsibilities
+
+The platform is designed to run with minimal ongoing effort because of its autonomous engine architecture. The founder's primary operational role is:
+- Member acquisition and content creation (the highest-leverage activity)
+- Customer support (highest-leverage retention activity)
+- Strategic decisions (pricing changes, tier adjustments, partnerships)
+- Financial oversight (monthly MRR review, Stripe payouts, tax planning)
+
+### Succession and Transfer Considerations
+
+Because the platform is software-based with documented systems, it can be sold, transferred, or licensed relatively cleanly. What a future owner would acquire:
+- All platform code and infrastructure
+- All trademarked proprietary systems (8 registered terms)
+- All member data (under applicable data transfer law)
+- The pick track record and historical performance data
+- All operational documentation (this document and related materials)
+
+A potential acquirer would value the track record history most highly — which is why beginning the verified pick record from Day 1 of operations is the single most important asset-building activity.
+
+### If the Founder Becomes Unable to Operate
+
+The Smart Retention Sequence Engine™, pick generation, and most platform functions run automatically. In an emergency scenario where the founder cannot operate for up to 30 days:
+- Picks continue to be generated and published automatically
+- Member emails continue to be sent automatically
+- Billing continues via Stripe automatically
+- The primary gap would be: application reviews for Edge/Max, manual LCT settlement, and member support responses
+
+Document admin credentials and critical API keys in a secure location known to a trusted person.
 
 ---
 
 ## 15. POLICIES & PROCEDURES REFERENCE
 
-All policies are managed in the platform at: **Admin → Policy & Standards**
+All policies are managed within the platform at: **Admin → Policy & Standards**
 
-### Company Policies
-1. **Responsible Gambling Policy** — 21+ only, self-exclusion available, NCPG helpline required
-2. **Data Methodology & Disclaimer** — All picks are probabilistic; past performance does not guarantee results
-3. **Subscription & Refund Policy** — No refunds for partial months; access continues to end of billing period
-4. **Acceptable Use Policy** — No reselling, sharing, or scraping platform data
-5. **Privacy & Data Policy** — No data sold; 365-day retention; deletion available on request
+### Company Policies (5 Active)
 
-### Operational Procedures
-1. **SOP: Pick Generation** — Data ingestion → 46-Factor analysis → EV calculation → Grade assignment → Quality gate → Publication
-2. **SOP: Pick Settlement** — ESPN score detection → Auto-settlement → Manual review for failures → Win rate update
-3. **SOP: Tier Management** — Server-side access control; Stripe webhook-driven; upgrades immediate, downgrades at period end
-4. **SOP: Account Review & Suspension** — 3+ fraud signals triggers admin review; temp ban first, permanent ban for repeat
-5. **SOP: Life Changer Ticket (LCT) Protocol** — Daily 4–6 leg ticket; min A- grade; min +1000 combined odds; winning LCT mints S+ card
+1. **Responsible Gambling Policy** — 21+ only. Self-exclusion available on request. NCPG helpline linked. Members are responsible for their own betting decisions.
 
-### AI Brand Standards
-1. **AI Voice & Tone Guidelines** — Professional, direct, analytical; no hype; max 3 sentences per pick explanation
-2. **Prohibited Language** — 15 banned phrases with automatic detection and regeneration
-3. **Required Disclaimers** — Must appear on picks page, parlay builder, LCT section, onboarding
-4. **Sors Lexicon™** — Use all proprietary terms exactly as trademarked
+2. **Data Methodology & Disclaimer** — All picks are probabilistic statistical analysis. Past performance does not guarantee future results. Odds and lines change — always verify with your sportsbook before placing a wager.
+
+3. **Subscription & Refund Policy** — No refunds for partial months. Access continues to end of billing period on cancellation. Billing errors reviewed within 30 days of notification. Tier upgrades activate immediately; downgrades at period end.
+
+4. **Acceptable Use Policy** — Members may not resell, redistribute, or share pick data with non-members. Credential sharing and data scraping result in immediate account suspension without refund.
+
+5. **Privacy & Data Policy** — No personal data sold. Data retained for 365 days after account closure. Deletion available on request. All communications encrypted in transit.
+
+### Operational Procedures (5 Active)
+
+1. **Pick Generation SOP** — Data ingestion → 46-Factor analysis → Expected Value calculation → Grade assignment → Quality gate (50% confidence / 5% EV minimum) → Publication.
+
+2. **Pick Settlement SOP** — Game completion detected via live scores → Automatic settlement attempted → Manual admin review for failures → Win rate and model calibration updated.
+
+3. **Tier Management SOP** — All tier access enforced server-side. Stripe webhooks drive tier changes. Upgrades activate immediately; downgrades at period end.
+
+4. **Account Review & Suspension SOP** — Automated fraud signals monitored. Three or more signals in 24 hours flags for admin review. Temporary suspension for first offense; permanent ban for repeat violations.
+
+5. **Life Changer Ticket SOP** — Generated daily; 4–6 legs; minimum combined odds +1000; A-level grade average required. Admin settles within 24 hours of last game. Winning LCT mints S+ Intelligence Card™ for the member.
+
+### AI Brand Standards (4 Active)
+
+1. **Voice & Tone** — Professional, direct, analytical. Maximum 3 sentences per pick explanation. Team references in third person. Platform references as "our model" or "the 46-Factor Model."
+
+2. **Prohibited Language** — 15 banned phrases with automatic detection and content block before publication.
+
+3. **Required Disclaimers** — Risk disclosure must appear on picks pages, parlay builder, Life Changer Ticket section, and in the onboarding flow.
+
+4. **Sors Lexicon™** — All 8 proprietary trademarked terms must be used consistently and exactly as written throughout the platform and all communications.
 
 ---
 
-*This document reflects the state of Sors Maxima as of March 2026. Update whenever major architecture or pricing changes are made.*
+*This document reflects the operational and business state of Sors Maxima as of March 2026.*
+*Update this document whenever material changes are made to pricing, tier structure, proprietary systems, or legal compliance requirements.*

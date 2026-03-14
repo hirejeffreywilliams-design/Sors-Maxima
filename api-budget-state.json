@@ -26,7 +26,7 @@
       "lastSeasonCheck": "2026-03-14T07:17:19.967Z"
     },
     "balldontlie": {
-      "currentUsage": 4865,
+      "currentUsage": 4866,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -246,6 +246,10 @@
         {
           "ts": 1773473040884,
           "count": 1
+        },
+        {
+          "ts": 1773473401019,
+          "count": 1
         }
       ],
       "suspended": false,
@@ -280,6 +284,6 @@
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-14T07:25:18.713Z",
+  "lastSaved": "2026-03-14T07:30:01.019Z",
   "alerts": []
 }
