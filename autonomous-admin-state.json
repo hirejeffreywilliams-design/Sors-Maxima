@@ -1,6 +1,36 @@
 {
   "alerts": [
     {
+      "id": "alert_1773435609500_54q3n",
+      "timestamp": "2026-03-13T21:00:09.500Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "20,584 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773434663293_sux9b",
+      "timestamp": "2026-03-13T20:44:23.293Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "21,161 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773433492506_71t4c",
+      "timestamp": "2026-03-13T20:24:52.506Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "21,161 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773374232818_gjyxq",
       "timestamp": "2026-03-13T03:57:12.818Z",
       "resolved": false,
@@ -2045,8 +2075,8 @@
       "raw": "{\n  \"summary\": [\n    \"Current overall win rate is 52.9%, maintaining above break-even threshold.\",\n    \"API usage is healthy; however, API football shows a significant budget variance due to overestimation of usage.\",\n    \"Pick accuracy in 'Total' market is critically low at 46.7%, affecting overall performance.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Optimize API Budget Usage\",\n      \"description\": \"Review and update API football budget strategy to address negative usage projection.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Address Total Market Performance\",\n      \"description\": \"Investigate the low pick accuracy in 'Total' bets and adjust model inputs accordingly.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Monitor API Calls\",\n      \"description\": \"Ensure all services remain under the optimal usage recommendations for the remainder of the month.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical Budget Variance for API Football\",\n      \"description\": \"Current projections indicate a heavily negative budget variance for API football service usage.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"Low Performance in Total Market\",\n      \"description\": \"Total market pick accuracy is below acceptable thresholds, potentially impacting user satisfaction.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Begin reviewing API football budget usage limits.\",\n      \"Assess trends in Total market picks to develop action plan.\"\n    ],\n    \"this_week\": [\n      \"Implement adjustments to improve Total picks accuracy.\",\n      \"Verify and maintain optimal intervals for all API services.\",\n      \"Prepare a report on current user retention and churn rate dynamics.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-13T03:57:12.818Z",
+  "lastQuickCheck": "2026-03-13T21:00:09.500Z",
   "lastDeepCheck": "2026-03-11T23:03:52.645Z",
-  "totalQuickChecks": 150,
+  "totalQuickChecks": 153,
   "totalDeepChecks": 35
 }
