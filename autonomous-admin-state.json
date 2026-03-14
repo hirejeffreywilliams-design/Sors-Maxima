@@ -1,6 +1,26 @@
 {
   "alerts": [
     {
+      "id": "alert_1773485276061_vbt2l",
+      "timestamp": "2026-03-14T10:47:56.061Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "20,207 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773474924617_6nyr9",
+      "timestamp": "2026-03-14T07:55:24.617Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "20,310 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773473304617_5zeud",
       "timestamp": "2026-03-14T07:28:24.617Z",
       "resolved": false,
@@ -2068,8 +2088,8 @@
       "raw": "{\n  \"summary\": [\n    \"Current win rate is at 52.5%, meeting the break-even threshold.\",\n    \"The platform shows a significant underperformance in Total picks, with an accuracy rate of only 46.8%.\",\n    \"API usage is healthy, however, low activity indicates no actual handle or win recorded this period.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Investigate Total Pick Performance\",\n      \"description\": \"Analyze the Total picks to identify the cause of low accuracy and implement a strategy for improvement.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 5\n    },\n    {\n      \"title\": \"Enhance Marketing Engagement\",\n      \"description\": \"Develop a targeted campaign to increase user activity and betting handle, aiming to capitalize on active user base.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Review API Reporting Metrics\",\n      \"description\": \"Ensure API budget and performance reports are clear to avoid any potential issues with daily limits in the future.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_month\",\n      \"effort_hours\": 3\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Low Handle and Gross Win\",\n      \"description\": \"Current handle is 0, indicating potential engagement issues. Need to investigate user activity and betting patterns.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review user engagement strategies to boost betting activity.\",\n      \"Perform a detailed audit of Total pick performance.\",\n      \"Prepare a report on API usage and implement necessary adjustments.\"\n    ],\n    \"this_week\": [\n      \"Launch marketing initiatives targeting increased user engagement.\",\n      \"Analyze data from Total picks for insights on improvement.\",\n      \"Schedule a team meeting to discuss user retention strategies.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-14T07:28:24.617Z",
+  "lastQuickCheck": "2026-03-14T10:47:56.061Z",
   "lastDeepCheck": "2026-03-14T07:37:24.614Z",
-  "totalQuickChecks": 154,
+  "totalQuickChecks": 156,
   "totalDeepChecks": 36
 }

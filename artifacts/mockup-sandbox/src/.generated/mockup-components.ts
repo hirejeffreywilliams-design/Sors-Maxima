@@ -4,9 +4,9 @@ export const modules: ModuleMap = {
   "./components/mockups/attention-model/TheDailyBrief.tsx": () => import("../components/mockups/attention-model/TheDailyBrief.tsx"),
   "./components/mockups/attention-model/TheOracle.tsx": () => import("../components/mockups/attention-model/TheOracle.tsx"),
   "./components/mockups/attention-model/TheWarRoom.tsx": () => import("../components/mockups/attention-model/TheWarRoom.tsx"),
-  "./components/mockups/dashboard-refined/ElevatedRhythm.tsx": () => import("../components/mockups/dashboard-refined/ElevatedRhythm.tsx"),
-  "./components/mockups/dashboard-refined/PolishedHierarchy.tsx": () => import("../components/mockups/dashboard-refined/PolishedHierarchy.tsx"),
   "./components/mockups/dashboard-usability/AccessibilityReadability.tsx": () => import("../components/mockups/dashboard-usability/AccessibilityReadability.tsx"),
   "./components/mockups/dashboard-usability/InformationHierarchy.tsx": () => import("../components/mockups/dashboard-usability/InformationHierarchy.tsx"),
-  "./components/mockups/dashboard-usability/InteractionAffordance.tsx": () => import("../components/mockups/dashboard-usability/InteractionAffordance.tsx")
+  "./components/mockups/dashboard-usability/InteractionAffordance.tsx": () => import("../components/mockups/dashboard-usability/InteractionAffordance.tsx"),
+  "./components/mockups/dashboard-refined/ElevatedRhythm.tsx": () => import("../components/mockups/dashboard-refined/ElevatedRhythm.tsx"),
+  "./components/mockups/dashboard-refined/PolishedHierarchy.tsx": () => import("../components/mockups/dashboard-refined/PolishedHierarchy.tsx")
 };
