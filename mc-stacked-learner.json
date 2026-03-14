@@ -8231,6 +8231,78 @@
       "mcBoostApplied": -2,
       "pickConfidence": 51,
       "recordedAt": 1773472668624
+    },
+    {
+      "id": "401851570_moneyline",
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "betType": "moneyline",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 9,
+      "pickConfidence": 76,
+      "recordedAt": 1773489354848
+    },
+    {
+      "id": "401851570_spread",
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "betType": "spread",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 10,
+      "pickConfidence": 77,
+      "recordedAt": 1773489354849
+    },
+    {
+      "id": "401851570_total",
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "betType": "total",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -13,
+      "pickConfidence": 54,
+      "recordedAt": 1773489354850
+    },
+    {
+      "id": "401851183_moneyline",
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "betType": "moneyline",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 9,
+      "pickConfidence": 76,
+      "recordedAt": 1773489354881
+    },
+    {
+      "id": "401851183_spread",
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "betType": "spread",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -13,
+      "pickConfidence": 54,
+      "recordedAt": 1773489354882
+    },
+    {
+      "id": "401851183_total",
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "betType": "total",
+      "mcWinProb": 1,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": 9,
+      "pickConfidence": 76,
+      "recordedAt": 1773489354883
     }
   ],
   "sportCalibration": {
@@ -8281,8 +8353,8 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0558489656639831,
-  "totalPredictions": 951,
+  "mcStackedWeight": 1.0558491220444564,
+  "totalPredictions": 957,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
   "varianceAccuracy": {
@@ -8305,8 +8377,8 @@
       "total": 186
     }
   },
-  "learningCycles": 67,
-  "lastCycleAt": "2026-03-14T07:32:29.315Z",
-  "lastUpdated": "2026-03-14T07:32:29.315Z",
+  "learningCycles": 68,
+  "lastCycleAt": "2026-03-14T12:10:31.088Z",
+  "lastUpdated": "2026-03-14T12:10:31.088Z",
   "version": 2
 }

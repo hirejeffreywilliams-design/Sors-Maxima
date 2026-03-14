@@ -203,9 +203,9 @@ The codebase is clean for an early-stage product. Primary technical debt items:
 
 | Year | U.S. GGR (Gross Gaming Revenue) | Global GGR | Source |
 |------|:-------------------------------:|:----------:|--------|
-| 2023 | ~$11 billion | ~$80 billion | American Gaming Association, Statista |
-| 2025 | ~$15 billion (est.) | ~$100 billion (est.) | Industry projections |
-| 2030 | ~$30–$40 billion | ~$150–$180 billion | Grand View Research, Mordor Intelligence |
+| 2023 | ~$11 billion | ~$80 billion | AGA Commercial Gaming Revenue Tracker (2023 annual report); Statista Global Gambling Market Overview |
+| 2025 | ~$15 billion (est.) | ~$100 billion (est.) | Linear extrapolation from 2023 base using AGA growth trends |
+| 2030 | ~$30–$40 billion | ~$150–$180 billion | Grand View Research "U.S. Sports Betting Market" (2024 report); Mordor Intelligence "Sports Betting Market" forecast |
 | 2035 | ~$50–$70 billion | ~$200–$250 billion | Extrapolation at 15% CAGR post-2030 |
 
 The U.S. market is growing at 20–25% annually as states continue legalizing. As of early 2026, 38+ states have legalized some form of sports betting. Full national coverage is expected by 2030.
@@ -354,6 +354,19 @@ LTV is calculated as monthly price × average lifetime (20 months at 5% monthly 
 | $20M+ | 8x–15x | $160M–$300M+ | Year 10+ |
 
 Note: Data/intelligence platforms command premium multiples vs. generic SaaS because of defensible IP and data flywheel effects. Action Network sold for ~6x revenue at ~$40M ARR in 2023.
+
+### Known Unknowns
+
+The following critical variables cannot be estimated with confidence until the platform has real-world operating data:
+
+1. **Actual trial-to-paid conversion rate** — The 70% paid assumption is reasonable for gated platforms, but real conversion could be 30–80%. This single variable has the largest impact on all revenue projections.
+2. **Real churn curve shape** — The 5% monthly churn assumption produces a tidy 20-month lifetime, but early-stage products often see 10–20% churn in months 1–3 before stabilizing. The actual churn pattern will reshape all LTV calculations.
+3. **Tier mix at scale** — The 45/35/15/5 split is speculative. If the actual mix is 65% Sharp / 25% Edge / 8% Max / 2% Operator, ARPU drops to ~$84 and all downstream figures contract by ~30%.
+4. **Pick accuracy sustainability** — The 46-Factor Model has not been tested against live betting markets at scale. Whether accuracy holds above the 52.4% break-even threshold across 1,000+ picks is unknown.
+5. **Marketing CAC in practice** — Organic CAC of $0–$10 is aspirational. Paid acquisition costs in sports betting are among the highest in digital marketing ($150–$500+ per customer). The actual channel mix will determine growth rate and unit economics.
+6. **Regulatory trajectory** — U.S. state-level sports betting regulation continues to evolve. A federal regulatory change (positive or negative) could alter the entire market structure.
+
+*These unknowns are not flaws — they are the normal state of any pre-revenue business. They are listed here so that the owner can prioritize gathering real data on these variables as the first cohort of members joins.*
 
 ---
 

@@ -1,69 +1,6 @@
 {
   "predictions": [
     {
-      "gameId": "401827724",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.68,
-      "actualOutcome": 0,
-      "timestamp": 1773473247895,
-      "odds": 1.7936507936507935
-    },
-    {
-      "gameId": "401827725",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.75,
-      "actualOutcome": 0,
-      "timestamp": 1773473247896,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401827725",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.75,
-      "actualOutcome": 1,
-      "timestamp": 1773473247898,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401827725",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.7,
-      "actualOutcome": 0,
-      "timestamp": 1773473247899,
-      "odds": 1.0906618313689938
-    },
-    {
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.65,
-      "actualOutcome": 0,
-      "timestamp": 1773473247901,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.49,
-      "actualOutcome": 0,
-      "timestamp": 1773473247902,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401825567",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.47,
-      "actualOutcome": 0,
-      "timestamp": 1773473247903,
-      "odds": 1.4784688995215312
-    },
-    {
       "gameId": "401825568",
       "sport": "NCAAB",
       "market": "total",
@@ -4499,6 +4436,69 @@
       "actualOutcome": 0,
       "timestamp": 1773473249259,
       "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401803408",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1773490231004,
+      "odds": 2
+    },
+    {
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1773490231005,
+      "odds": 1.263157894736842
+    },
+    {
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.71,
+      "actualOutcome": 0,
+      "timestamp": 1773490231017,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401851183",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1773490231028,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.77,
+      "actualOutcome": 0,
+      "timestamp": 1773490231030,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.77,
+      "actualOutcome": 0,
+      "timestamp": 1773490231040,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401851570",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 0,
+      "timestamp": 1773490231043,
+      "odds": 1.2590673575129534
     }
   ],
   "bayesianParams": {
@@ -4527,12 +4527,12 @@
       "beta": 104.23117308868375
     },
     "NHL": {
-      "alpha": 113.43676198310438,
-      "beta": 86.56323801689564
+      "alpha": 113.86742485881032,
+      "beta": 86.13257514118969
     },
     "NHL-moneyline": {
-      "alpha": 117.49251033310259,
-      "beta": 82.50748966689743
+      "alpha": 117.90299535632099,
+      "beta": 82.09700464367903
     },
     "NHL-spread": {
       "alpha": 115.62557016364511,
@@ -4543,20 +4543,20 @@
       "beta": 96.96942689695193
     },
     "NCAAB-moneyline": {
-      "alpha": 114.14785110245482,
-      "beta": 85.8521488975452
+      "alpha": 114.00495146402793,
+      "beta": 85.99504853597207
     },
     "NCAAB": {
-      "alpha": 115.25903725698556,
-      "beta": 84.74096274301445
+      "alpha": 113.81174490695372,
+      "beta": 86.1882550930463
     },
     "NCAAB-spread": {
-      "alpha": 100.10647538749069,
-      "beta": 99.89352461250932
+      "alpha": 100.10294338010513,
+      "beta": 99.89705661989487
     },
     "NCAAB-total": {
-      "alpha": 120.18041142997956,
-      "beta": 79.81958857002046
+      "alpha": 118.98756112965476,
+      "beta": 81.01243887034525
     },
     "NCAAB-team_total": {
       "alpha": 143.9157215045636,
@@ -4579,7 +4579,7 @@
     "NCAAB": {
       "homeAdvantage": 0.008231016427084271,
       "scoreMean": 72,
-      "scoreStdDev": 0.000003855051585396318,
+      "scoreStdDev": 0.0000034149680747610116,
       "totalMean": 145
     }
   },
@@ -4704,6 +4704,6 @@
       "predictions": 500
     }
   ],
-  "totalSimulations": 330000,
+  "totalSimulations": 290000,
   "engineVersion": 1
 }
