@@ -1359,6 +1359,38 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-954eb764d0e9",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Indiana Pacers @ New York Knicks",
+      "homeTeam": "New York Knicks",
+      "awayTeam": "Indiana Pacers",
+      "pick": "Indiana Pacers +8.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 61,
+      "ev": 14.55,
+      "gameTime": "2026-03-15T21:55:39.874Z",
+      "savedAt": "2026-03-15T21:55:39.874Z"
+    },
+    {
+      "id": "precomp-vegas-NBA-11ef26ae091c",
+      "gameId": "NBA",
+      "sport": "NBA",
+      "game": "Utah Jazz @ Minnesota Timberwolves",
+      "homeTeam": "Minnesota Timberwolves",
+      "awayTeam": "Utah Jazz",
+      "pick": "Utah Jazz +7",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 61,
+      "ev": 14.55,
+      "gameTime": "2026-03-15T21:55:39.874Z",
+      "savedAt": "2026-03-15T21:55:39.874Z"
     }
   ],
   "settled": [
@@ -22083,7 +22115,7 @@
       "lost": 437,
       "push": 17,
       "rate": 55.4,
-      "pending": 85
+      "pending": 87
     },
     "bySport": {
       "NBA": {
