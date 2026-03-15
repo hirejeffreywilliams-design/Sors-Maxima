@@ -89,8 +89,8 @@ At 10,000 members (Year 10, bull case): $10M ARR, $70M–$120M estimated valuati
 
 ## Contact
 
-**[Founder Name]**
-[Email Address]
-[Phone Number]
+*Contact details to be added by the founder before distribution.*
+
+---
 
 *Sors Maxima is an information and analytics platform. It is not a sportsbook, gambling operator, or financial advisor. Sports betting involves financial risk. Past performance does not guarantee future results.*
