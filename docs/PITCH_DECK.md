@@ -147,7 +147,21 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 ---
 
-## SLIDE 10: TRACTION & MILESTONES
+## SLIDE 10: TEAM & FOUNDER
+
+**Solo-built by a single founder. That is both the risk and the edge.**
+
+- **Single founder** designed, engineered, and deployed the entire platform — 50+ engines, 88 pages, full Stripe billing, automated retention, and admin operating system
+- **Technical depth:** Full-stack TypeScript (React, Express, PostgreSQL, Drizzle ORM), AI/ML integration (OpenAI), real-time systems (SSE), and Monte Carlo simulation architecture
+- **Domain expertise:** Deep knowledge of sports betting markets, line movement mechanics, bankroll management, and the analytical frameworks used by professional sharps
+- **Key risk:** Single-operator dependency — mitigated by self-healing architecture that allows the platform to auto-operate for 30+ days without manual intervention
+- **Hiring plan (post-funding):** First hire is a part-time content marketer; second is a community manager. Engineering remains founder-led through Year 1
+
+> **Speaker Note:** "This platform was built by one person. That's unusual — and it's both the biggest risk and the strongest signal. It means there's no team to manage, no equity split to negotiate, and the founder understands every line of code. The platform is architected to run autonomously, which means day-to-day operations don't require constant engineering attention."
+
+---
+
+## SLIDE 11: TRACTION & MILESTONES
 
 **Pre-revenue, but the product is built.**
 
@@ -161,7 +175,7 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 ---
 
-## SLIDE 11: FINANCIAL PROJECTIONS
+## SLIDE 12: FINANCIAL PROJECTIONS
 
 **Three scenarios across three time horizons.**
 
@@ -174,20 +188,6 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 - **Bear case floor:** Even at 200 members (Year 5), the platform generates $200K ARR and covers all operating costs
 
 > **Speaker Note:** "At just 800 members — our baseline Year 5 scenario — this is close to a million-dollar ARR business. At 3,000 members, it's a $3M ARR platform with $18M+ valuation potential. These are achievable numbers in a market that's adding millions of new bettors every year. The comparable exit at Action Network was at $40M ARR, and they had no AI engine."
-
----
-
-## SLIDE 12: THE IP PORTFOLIO
-
-**8 trademarked systems. 50+ proprietary engines. One unified data flywheel.**
-
-- **8 common law trademarks:** 46-Factor Model Analysis™, Intelligence Cards™, Smart Retention Sequence Engine™, Cashout Engineering™, Lock & Roll™, Steam Exit™, Sportsbook Sweat™, Sors Lexicon™ — USPTO registration recommended
-- **50+ engines across 7 categories:** Prediction & Intelligence (12+), Learning & Adaptation (5+), Data & Market (6+), Retention (6+), Analytics (8+), Security (7+), and Specialty Systems (7+)
-- **Data assets that compound:** Every pick outcome calibrates the model; every member interaction builds a Betting DNA profile; every LCT adds to the track record
-- **90-day rolling calibration window** means the model continuously self-corrects — a competitor cannot replicate a 5-year calibration dataset by copying code
-- **Algorithm Protection System** guards proprietary model weights from reverse engineering; trade secret designation recommended
-
-> **Speaker Note:** "The IP here is not just the software — it's the system. Trademarked product names, proprietary engine architectures, and a data flywheel that gets more valuable with every game that's played. The longer this platform operates, the wider the moat becomes. A competitor can copy features. They cannot copy a 5-year calibration dataset."
 
 ---
 
