@@ -1359,118 +1359,6 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
-    },
-    {
-      "id": "precomp-NHL-401803412-spread-3524013b82",
-      "gameId": "401803412",
-      "sport": "NHL",
-      "game": "Nashville Predators @ Edmonton Oilers",
-      "homeTeam": "Edmonton Oilers",
-      "awayTeam": "Nashville Predators",
-      "pick": "Nashville Predators +1.5",
-      "betType": "spread",
-      "odds": -166,
-      "grade": "C",
-      "confidence": 53,
-      "ev": -31.1,
-      "gameTime": "2026-03-16T00:00Z",
-      "savedAt": "2026-03-15T21:51:38.190Z"
-    },
-    {
-      "id": "precomp-NBA-401810847-moneyline-ea1bf78523",
-      "gameId": "401810847",
-      "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Orlando Magic",
-      "homeTeam": "Orlando Magic",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Orlando Magic ML",
-      "betType": "moneyline",
-      "odds": 135,
-      "grade": "C",
-      "confidence": 66,
-      "ev": 19.85,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
-    },
-    {
-      "id": "precomp-NBA-401810848-moneyline-01f2b6f304",
-      "gameId": "401810848",
-      "sport": "NBA",
-      "game": "Detroit Pistons @ Washington Wizards",
-      "homeTeam": "Washington Wizards",
-      "awayTeam": "Detroit Pistons",
-      "pick": "Washington Wizards ML",
-      "betType": "moneyline",
-      "odds": 300,
-      "grade": "C",
-      "confidence": 64,
-      "ev": 52,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
-    },
-    {
-      "id": "precomp-NBA-401810847-spread-2bfcdd186e",
-      "gameId": "401810847",
-      "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Orlando Magic",
-      "homeTeam": "Orlando Magic",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Orlando Magic -1",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "C",
-      "confidence": 62,
-      "ev": -8.36,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
-    },
-    {
-      "id": "precomp-NBA-401810848-spread-d54ec246c8",
-      "gameId": "401810848",
-      "sport": "NBA",
-      "game": "Detroit Pistons @ Washington Wizards",
-      "homeTeam": "Washington Wizards",
-      "awayTeam": "Detroit Pistons",
-      "pick": "Washington Wizards -3.5",
-      "betType": "spread",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 61,
-      "ev": -35.09,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
-    },
-    {
-      "id": "precomp-NBA-401810847-total-a0417367fa",
-      "gameId": "401810847",
-      "sport": "NBA",
-      "game": "Oklahoma City Thunder @ Orlando Magic",
-      "homeTeam": "Orlando Magic",
-      "awayTeam": "Oklahoma City Thunder",
-      "pick": "Over 227",
-      "betType": "total",
-      "odds": -110,
-      "grade": "C",
-      "confidence": 54,
-      "ev": -8.36,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
-    },
-    {
-      "id": "precomp-NBA-401810848-total-2af8f30bf9",
-      "gameId": "401810848",
-      "sport": "NBA",
-      "game": "Detroit Pistons @ Washington Wizards",
-      "homeTeam": "Washington Wizards",
-      "awayTeam": "Detroit Pistons",
-      "pick": "Over 219",
-      "betType": "total",
-      "odds": -110,
-      "grade": "C+",
-      "confidence": 53,
-      "ev": -35.09,
-      "gameTime": "2026-03-17T23:00Z",
-      "savedAt": "2026-03-15T21:53:38.725Z"
     }
   ],
   "settled": [
@@ -22046,27 +21934,167 @@
       "homeScore": 3,
       "awayScore": 2,
       "settledAt": "2026-03-15T21:44:55.763Z"
+    },
+    {
+      "id": "precomp-NBA-401810847-moneyline-ea1bf78523",
+      "gameId": "401810847",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Orlando Magic ML",
+      "betType": "moneyline",
+      "odds": 135,
+      "grade": "C",
+      "confidence": 66,
+      "ev": 19.85,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "won",
+      "homeScore": 116,
+      "awayScore": 103,
+      "settledAt": "2026-03-15T21:54:55.264Z"
+    },
+    {
+      "id": "precomp-NBA-401810847-spread-2bfcdd186e",
+      "gameId": "401810847",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Orlando Magic -1",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 62,
+      "ev": -8.36,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "won",
+      "homeScore": 116,
+      "awayScore": 103,
+      "settledAt": "2026-03-15T21:54:55.264Z"
+    },
+    {
+      "id": "precomp-NBA-401810847-total-a0417367fa",
+      "gameId": "401810847",
+      "sport": "NBA",
+      "game": "Oklahoma City Thunder @ Orlando Magic",
+      "homeTeam": "Orlando Magic",
+      "awayTeam": "Oklahoma City Thunder",
+      "pick": "Over 227",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C",
+      "confidence": 54,
+      "ev": -8.36,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "lost",
+      "homeScore": 116,
+      "awayScore": 103,
+      "settledAt": "2026-03-15T21:54:55.264Z"
+    },
+    {
+      "id": "precomp-NBA-401810848-moneyline-01f2b6f304",
+      "gameId": "401810848",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Washington Wizards",
+      "homeTeam": "Washington Wizards",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Washington Wizards ML",
+      "betType": "moneyline",
+      "odds": 300,
+      "grade": "C",
+      "confidence": 64,
+      "ev": 52,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 100,
+      "settledAt": "2026-03-15T21:54:55.287Z"
+    },
+    {
+      "id": "precomp-NBA-401810848-spread-d54ec246c8",
+      "gameId": "401810848",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Washington Wizards",
+      "homeTeam": "Washington Wizards",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Washington Wizards -3.5",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 61,
+      "ev": -35.09,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "won",
+      "homeScore": 111,
+      "awayScore": 100,
+      "settledAt": "2026-03-15T21:54:55.287Z"
+    },
+    {
+      "id": "precomp-NBA-401810848-total-2af8f30bf9",
+      "gameId": "401810848",
+      "sport": "NBA",
+      "game": "Detroit Pistons @ Washington Wizards",
+      "homeTeam": "Washington Wizards",
+      "awayTeam": "Detroit Pistons",
+      "pick": "Over 219",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 53,
+      "ev": -35.09,
+      "gameTime": "2026-03-17T23:00Z",
+      "savedAt": "2026-03-15T21:53:38.725Z",
+      "result": "lost",
+      "homeScore": 111,
+      "awayScore": 100,
+      "settledAt": "2026-03-15T21:54:55.287Z"
+    },
+    {
+      "id": "precomp-NHL-401803412-spread-3524013b82",
+      "gameId": "401803412",
+      "sport": "NHL",
+      "game": "Nashville Predators @ Edmonton Oilers",
+      "homeTeam": "Edmonton Oilers",
+      "awayTeam": "Nashville Predators",
+      "pick": "Nashville Predators +1.5",
+      "betType": "spread",
+      "odds": -166,
+      "grade": "C",
+      "confidence": 53,
+      "ev": -31.1,
+      "gameTime": "2026-03-16T00:00Z",
+      "savedAt": "2026-03-15T21:51:38.190Z",
+      "result": "won",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-15T21:54:55.306Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1012,
-      "won": 560,
-      "lost": 435,
+      "total": 1019,
+      "won": 565,
+      "lost": 437,
       "push": 17,
-      "rate": 55.3,
-      "pending": 92
+      "rate": 55.4,
+      "pending": 85
     },
     "bySport": {
       "NBA": {
-        "total": 339,
-        "won": 190,
-        "rate": 56
+        "total": 345,
+        "won": 194,
+        "rate": 56.2
       },
       "NHL": {
-        "total": 359,
-        "won": 191,
-        "rate": 53.2
+        "total": 360,
+        "won": 192,
+        "rate": 53.3
       },
       "NCAAB": {
         "total": 314,
@@ -22091,9 +22119,9 @@
         "rate": 52.5
       },
       "C+": {
-        "total": 213,
-        "won": 124,
-        "rate": 58.2
+        "total": 215,
+        "won": 125,
+        "rate": 58.1
       },
       "D+": {
         "total": 45,
@@ -22106,9 +22134,9 @@
         "rate": 54.7
       },
       "C": {
-        "total": 169,
-        "won": 89,
-        "rate": 52.7
+        "total": 174,
+        "won": 93,
+        "rate": 53.4
       },
       "A-": {
         "total": 55,
@@ -22133,22 +22161,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 304,
-        "won": 175,
-        "rate": 57.6,
-        "roi": 21.3
+        "total": 306,
+        "won": 177,
+        "rate": 57.8,
+        "roi": 22.6
       },
       "Spread": {
-        "total": 321,
-        "won": 174,
-        "rate": 54.2,
-        "roi": 6.7
+        "total": 324,
+        "won": 177,
+        "rate": 54.6,
+        "roi": 7.4
       },
       "Total": {
-        "total": 316,
+        "total": 318,
         "won": 173,
-        "rate": 54.7,
-        "roi": 7.2
+        "rate": 54.4,
+        "roi": 6.5
       },
       "Team Total": {
         "total": 71,
@@ -22158,28 +22186,28 @@
       }
     },
     "recentForm": {
-      "won": 30,
-      "lost": 20,
+      "won": 29,
+      "lost": 21,
       "push": 0,
-      "rate": 60
+      "rate": 58
     },
-    "lastUpdated": "2026-03-15T21:44:55.845Z",
-    "roi": 11.2,
-    "brierScore": 0.2563,
+    "lastUpdated": "2026-03-15T21:54:55.310Z",
+    "roi": 11.6,
+    "brierScore": 0.2559,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.09,
+    "sharpeRatio": 0.093,
     "homeAwayBias": {
-      "homeWinRate": 58.3,
-      "awayWinRate": 47,
-      "homeTotal": 518,
-      "awayTotal": 100
+      "homeWinRate": 58.6,
+      "awayWinRate": 47.5,
+      "homeTotal": 522,
+      "awayTotal": 101
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
-        "predicted": 52.8,
-        "actual": 59,
-        "total": 117
+        "predicted": 52.9,
+        "actual": 58.3,
+        "total": 120
       },
       {
         "range": "55-60",
@@ -22190,14 +22218,14 @@
       {
         "range": "60-65",
         "predicted": 61.8,
-        "actual": 56.9,
-        "total": 320
+        "actual": 57.3,
+        "total": 323
       },
       {
         "range": "65-70",
         "predicted": 66.3,
-        "actual": 55,
-        "total": 149
+        "actual": 55.3,
+        "total": 150
       },
       {
         "range": "70-75",

@@ -12,8 +12,10 @@
 **SORS MAXIMA**
 *The Intelligence Engine Behind Smarter Betting*
 
-Members-Only Sports Betting Intelligence Platform
-Proprietary 46-Factor AI Model | 50+ Autonomous Engines | Production-Ready
+- Members-only sports betting intelligence platform
+- Proprietary 46-Factor AI prediction model
+- 50+ autonomous backend engines with self-healing architecture
+- Production-ready — 88 pages, full Stripe billing, pre-revenue
 
 Sors Maxima — Confidential
 
@@ -140,7 +142,7 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 - **Action Network** (acquired ~$240M, ~$40M ARR): Built a media brand, not a technology platform — limited AI, no gamification
 - **OddsJam** ($10M+ ARR est.): Strong +EV and arbitrage tools, but narrow focus limits TAM
 - **Unabated** ($5M+ ARR est.): CLV tools beloved by sharps, but high price limits casual adoption
-- No competitor offers AI-graded picks with confidence %, Monte Carlo simulations, collectible gamification, daily AI-curated parlays, or a self-calibrating prediction model
+- Based on current market research, no competitor offers AI-graded picks with confidence %, Monte Carlo simulations, collectible gamification, daily AI-curated parlays, and a self-calibrating prediction model in a single platform
 - The moat is engine depth (50+ vs. single-purpose tools) and the data flywheel that widens with every settled pick
 
 > **Speaker Note:** "Action Network proved the exit exists — $240 million. But they built a media brand, not a technology platform. We built the technology platform. OddsJam and Unabated are strong products but narrow. No competitor has the engine depth, gamification, or self-calibrating AI that Sors Maxima has. Our moat is the technology — it would take a well-funded team 18–24 months to replicate what's already built."
