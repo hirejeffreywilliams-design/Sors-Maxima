@@ -87,10 +87,6 @@ At 10,000 members (Year 10, bull case): $10M ARR, $70M–$120M estimated valuati
 | **Data Company (Sportradar, Stats Perform)** | 46-Factor Model engine as a licensable B2B intelligence feed |
 | **Entertainment (Penn Entertainment, Flutter)** | Members-only intelligence brand with gamification and retention mechanics |
 
-## Contact
-
-*Contact details to be added by the founder before distribution.*
-
 ---
 
 *Sors Maxima is an information and analytics platform. It is not a sportsbook, gambling operator, or financial advisor. Sports betting involves financial risk. Past performance does not guarantee future results.*

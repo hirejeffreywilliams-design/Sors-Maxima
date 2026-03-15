@@ -15,7 +15,7 @@
 Members-Only Sports Betting Intelligence Platform
 Proprietary 46-Factor AI Model | 50+ Autonomous Engines | Production-Ready
 
-*Presenter and date to be added by the founder before distribution.*
+Sors Maxima — Confidential
 
 > **Speaker Note:** "Sors Maxima is a members-only sports betting intelligence platform. We built the analytical depth that sharp bettors and institutions have always had — and made it available to serious everyday bettors through a subscription model. Today I want to show you what we've built, why it matters, and why the timing is right."
 
@@ -169,8 +169,8 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 - **Year 5 baseline:** 800 members, 560 paid, $800K ARR — valued at $3.2M–$5.6M (4–7x revenue multiple)
 - **Year 10 baseline:** 3,000 members, 2,100 paid, $3.0M ARR — valued at $18M–$30M
-- **Bull case (Year 10):** 10,000 members, $10M ARR, $70M–$120M valuation — still well below the Action Network exit at ~$240M
-- **At 1,000 paid members:** $83K/month revenue, $72K/month profit (84% gross margin), scaling to 87% at 10,000 members
+- **Bull case (Year 10):** 10,000 members, $10M ARR, $70M–$120M valuation (speculative; Action Network exited at ~$240M for context, not as a direct comparison)
+- **At 1,000 total members (700 paid at 70% conversion):** $83K/month revenue, $72K/month profit (84% gross margin), scaling to 87% at higher volume
 - **Bear case floor:** Even at 200 members (Year 5), the platform generates $200K ARR and covers all operating costs
 
 > **Speaker Note:** "At just 800 members — our baseline Year 5 scenario — this is close to a million-dollar ARR business. At 3,000 members, it's a $3M ARR platform with $18M+ valuation potential. These are achievable numbers in a market that's adding millions of new bettors every year. The comparable exit at Action Network was at $40M ARR, and they had no AI engine."
@@ -211,11 +211,11 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 - **Path A — Strategic Acquisition ($500K–$1.5M):** A production-ready sports intelligence platform with 50+ engines, 8 trademarks, and complete subscriber infrastructure — ready to deploy against an existing audience
 - **Ideal acquirer:** Sports media company, sportsbook, or data platform that wants premium AI intelligence as a subscriber product or B2B feed
-- **Why now:** Pre-revenue is when acquisition cost is lowest; once a 12-month track record exists, valuation increases 3–5x
+- **Why now:** Pre-revenue pricing reflects the absence of a proven track record; a 12-month verified performance history would meaningfully increase valuation
 - **Path B — Seed Investment ($250K–$500K):** 40% go-to-market, 25% native mobile app, 15% legal/trademark, 10% infrastructure scaling, 10% operating reserve
 - **What the investor gets:** Early equity in a technology-complete platform entering a market growing 20–25% annually, with a clear path to $1M+ ARR within 3 years
 
-> **Speaker Note:** "We're open to both paths. If you're a strategic acquirer, this is the cheapest this platform will ever be — before a track record adds proven value. If you're an investor, you're backing a technology-complete platform that needs go-to-market execution, not more engineering. The hard part — building the engine — is done."
+> **Speaker Note:** "We're open to both paths. For a strategic acquirer, the platform is priced at pre-revenue levels because there's no track record yet — that's a fair reflection of the risk. For an investor, this is a technology-complete platform that needs go-to-market execution, not more engineering. The hard part — building the engine — is done."
 
 ---
 
@@ -229,9 +229,9 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 **The question is not whether the market is big enough. The question is whether this platform can prove its model works against live markets.**
 
-**We believe the answer is yes. And we've built the technology to prove it.**
+**We have built the technology to find out. The data starts on Day 1.**
 
-*Contact details to be added by the founder before distribution.*
+Sors Maxima — Confidential
 
 > **Speaker Note:** "The hard part of building a sports intelligence platform is the technology — the model, the engines, the infrastructure. That's done. What's left is the go-to-market execution. Every day this platform logs picks and tracks outcomes, the data flywheel spins faster and the moat gets wider. Thank you for your time. I'd like to open it up for questions."
 
