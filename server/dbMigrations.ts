@@ -429,6 +429,8 @@ export async function runMigrations(): Promise<void> {
     `);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pf_pick_id ON pick_feedback(pick_id)`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pf_user_id ON pick_feedback(user_id)`);
+    await db.execute(sql`ALTER TABLE pick_feedback ADD COLUMN IF NOT EXISTS grade TEXT`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pf_grade ON pick_feedback(grade)`);
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS audit_trail (
@@ -468,6 +470,8 @@ export async function runMigrations(): Promise<void> {
     `);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ms_engine ON model_snapshots(engine)`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ms_created ON model_snapshots(created_at DESC)`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS label TEXT`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS notes TEXT`);
 
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {

@@ -13,13 +13,15 @@ export async function recordModelSnapshot(params: {
   marketType?: string;
   predictionsSinceLast?: number;
   accuracyAtSnapshot?: number;
+  label?: string;
+  notes?: string;
 }): Promise<string> {
   snapshotCounter++;
   const version = `v${Date.now()}-${snapshotCounter}`;
 
   try {
     await db.execute(sql`
-      INSERT INTO model_snapshots (version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot)
+      INSERT INTO model_snapshots (version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes)
       VALUES (
         ${version},
         ${params.engine},
@@ -29,7 +31,9 @@ export async function recordModelSnapshot(params: {
         ${params.sport ?? null},
         ${params.marketType ?? null},
         ${params.predictionsSinceLast ?? 0},
-        ${params.accuracyAtSnapshot ?? null}
+        ${params.accuracyAtSnapshot ?? null},
+        ${params.label ?? null},
+        ${params.notes ?? null}
       )
     `);
     logInfo(`[ModelSnapshot] Recorded snapshot ${version} for engine=${params.engine} trigger=${params.trigger}`);
@@ -44,7 +48,7 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
   try {
     if (engine) {
       const result = await db.execute(sql`
-        SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, created_at
+        SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes, created_at
         FROM model_snapshots
         WHERE engine = ${engine}
         ORDER BY created_at DESC
@@ -53,7 +57,7 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
       return result.rows as any[];
     }
     const result = await db.execute(sql`
-      SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, created_at
+      SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes, created_at
       FROM model_snapshots
       ORDER BY created_at DESC
       LIMIT ${limit}
@@ -61,6 +65,34 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
     return result.rows as any[];
   } catch (err: any) {
     logWarn(`[ModelSnapshot] Failed to fetch snapshots: ${err.message}`);
+    return [];
+  }
+}
+
+export async function getSnapshotDeltas(engine?: string, limit = 10): Promise<any[]> {
+  try {
+    const engineFilter = engine ? sql`WHERE engine = ${engine}` : sql``;
+    const result = await db.execute(sql`
+      SELECT s1.version, s1.engine, s1.accuracy_at_snapshot as current_accuracy,
+             s2.accuracy_at_snapshot as prev_accuracy,
+             CASE WHEN s2.accuracy_at_snapshot IS NOT NULL AND s1.accuracy_at_snapshot IS NOT NULL
+               THEN ROUND((s1.accuracy_at_snapshot - s2.accuracy_at_snapshot)::numeric, 4)
+               ELSE NULL
+             END as accuracy_delta,
+             s1.created_at
+      FROM model_snapshots s1
+      LEFT JOIN LATERAL (
+        SELECT accuracy_at_snapshot FROM model_snapshots s2
+        WHERE s2.engine = s1.engine AND s2.created_at < s1.created_at
+        ORDER BY s2.created_at DESC LIMIT 1
+      ) s2 ON true
+      ${engineFilter}
+      ORDER BY s1.created_at DESC
+      LIMIT ${limit}
+    `);
+    return result.rows as any[];
+  } catch (err: any) {
+    logWarn(`[ModelSnapshot] Delta query failed: ${err.message}`);
     return [];
   }
 }

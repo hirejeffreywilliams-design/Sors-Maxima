@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { useSEO } from "@/hooks/use-seo";
 import {
   Brain, ThumbsUp, ThumbsDown, Activity, Database, Clock,
-  TrendingUp, BarChart3, Shield, Zap, History, Target
+  TrendingUp, TrendingDown, BarChart3, Shield, Zap, History, Target
 } from "lucide-react";
 
 interface SnapshotSummary {
@@ -56,8 +56,19 @@ interface FeedbackStats {
   uniquePicks: number;
   helpfulnessRate: number;
   bySport: { sport: string; votes: string; up_count: string; down_count: string }[];
+  byGrade: { grade: string; votes: string; up_count: string; down_count: string }[];
+  last30Days: { totalVotes: number; totalUp: number; totalDown: number; uniqueVoters: number; helpfulnessRate: number };
   recentNegative: { pick_id: string; sport: string; bet_type: string; created_at: string; username: string }[];
   lowestRated: { pick_id: string; ups: string; downs: string; total: string }[];
+}
+
+interface SnapshotDelta {
+  version: string;
+  engine: string;
+  current_accuracy: number | null;
+  prev_accuracy: number | null;
+  accuracy_delta: number | null;
+  created_at: string;
 }
 
 function formatDate(dateStr: string | null) {
@@ -82,7 +93,7 @@ export default function AdminLearning() {
     queryKey: ["/api/admin/learning/metrics"],
   });
 
-  const { data: snapshotsData, isLoading: snapshotsLoading } = useQuery<{ snapshots: Snapshot[]; summary: SnapshotSummary }>({
+  const { data: snapshotsData, isLoading: snapshotsLoading } = useQuery<{ snapshots: Snapshot[]; summary: SnapshotSummary; deltas: SnapshotDelta[] }>({
     queryKey: ["/api/admin/learning/snapshots"],
   });
 
@@ -205,6 +216,70 @@ export default function AdminLearning() {
                             </div>
                           </div>
                         ))
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4 text-primary" />
+                        By Pick Grade
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      {(!feedbackStats.byGrade || feedbackStats.byGrade.length === 0) ? (
+                        <p className="text-sm text-muted-foreground text-center py-2">No grade data yet</p>
+                      ) : (
+                        feedbackStats.byGrade.map((g, i) => {
+                          const total = parseInt(g.up_count) + parseInt(g.down_count);
+                          const rate = total > 0 ? Math.round((parseInt(g.up_count) / total) * 100) : 0;
+                          return (
+                            <div key={i} className="flex items-center justify-between text-sm" data-testid={`text-grade-feedback-${g.grade}`}>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="font-mono text-[10px]">{g.grade}</Badge>
+                                <span className="text-xs text-muted-foreground">{rate}% helpful</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-green-500 font-mono text-xs">{g.up_count}</span>
+                                <span className="text-muted-foreground">/</span>
+                                <span className="text-red-500 font-mono text-xs">{g.down_count}</span>
+                              </div>
+                            </div>
+                          );
+                        })
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-amber-500" />
+                        Last 30 Days
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      {feedbackStats.last30Days ? (
+                        <>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Total Votes</span>
+                            <span className="font-mono font-bold" data-testid="text-30d-votes">{feedbackStats.last30Days.totalVotes}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Helpfulness</span>
+                            <span className="font-mono font-bold text-primary" data-testid="text-30d-rate">{feedbackStats.last30Days.helpfulnessRate}%</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-muted-foreground">Active Voters</span>
+                            <span className="font-mono font-bold">{feedbackStats.last30Days.uniqueVoters}</span>
+                          </div>
+                          <Progress value={feedbackStats.last30Days.helpfulnessRate} className="h-2" />
+                        </>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-2">No recent data</p>
                       )}
                     </CardContent>
                   </Card>
@@ -344,28 +419,39 @@ export default function AdminLearning() {
                       <History className="w-4 h-4 text-primary" />
                       Snapshot History
                     </CardTitle>
-                    <CardDescription>Most recent model version snapshots</CardDescription>
+                    <CardDescription>Most recent model version snapshots with accuracy deltas</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {snapshotsData.snapshots.length === 0 ? (
                       <p className="text-sm text-muted-foreground text-center py-4">No snapshots recorded yet. Snapshots are created during learning cycles.</p>
                     ) : (
                       <div className="space-y-2">
-                        {snapshotsData.snapshots.slice(0, 20).map((s, i) => (
-                          <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-                            <div className="flex items-center gap-3 min-w-0">
-                              <Badge variant="outline" className="text-[10px] shrink-0 font-mono">{s.version.slice(0, 20)}</Badge>
-                              <span className="text-sm truncate max-w-[200px]">{s.engine}</span>
+                        {snapshotsData.snapshots.slice(0, 20).map((s, i) => {
+                          const delta = snapshotsData.deltas?.find(d => d.version === s.version);
+                          return (
+                            <div key={i} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <Badge variant="outline" className="text-[10px] shrink-0 font-mono">{s.version.slice(0, 20)}</Badge>
+                                <span className="text-sm truncate max-w-[200px]">{s.engine}</span>
+                              </div>
+                              <div className="flex items-center gap-3 shrink-0">
+                                <Badge variant="secondary" className="text-[9px]">{triggerLabel(s.trigger)}</Badge>
+                                {s.accuracy_at_snapshot !== null && (
+                                  <span className="text-xs font-mono text-primary">{(s.accuracy_at_snapshot * 100).toFixed(1)}%</span>
+                                )}
+                                {delta?.accuracy_delta !== null && delta?.accuracy_delta !== undefined && (
+                                  <span className={`text-[10px] font-mono flex items-center gap-0.5 ${
+                                    delta.accuracy_delta > 0 ? "text-green-500" : delta.accuracy_delta < 0 ? "text-red-500" : "text-muted-foreground"
+                                  }`} data-testid={`text-snapshot-delta-${s.version.slice(0, 15)}`}>
+                                    {delta.accuracy_delta > 0 ? <TrendingUp className="w-3 h-3" /> : delta.accuracy_delta < 0 ? <TrendingDown className="w-3 h-3" /> : null}
+                                    {delta.accuracy_delta > 0 ? "+" : ""}{(delta.accuracy_delta * 100).toFixed(2)}%
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-muted-foreground">{formatDate(s.created_at)}</span>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <Badge variant="secondary" className="text-[9px]">{triggerLabel(s.trigger)}</Badge>
-                              {s.accuracy_at_snapshot !== null && (
-                                <span className="text-xs font-mono text-primary">{(s.accuracy_at_snapshot * 100).toFixed(1)}%</span>
-                              )}
-                              <span className="text-[10px] text-muted-foreground">{formatDate(s.created_at)}</span>
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </CardContent>

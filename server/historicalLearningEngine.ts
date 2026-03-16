@@ -452,12 +452,24 @@ export async function runHistoricalLearning(options: {
 
     const { updated, homeWinRate, spreadCoverRate } = await processTrainingBatch(allResults);
 
-    // DYNAMIC LEARNING RATE: Adjust blending based on accuracy
-    const learningRate = Math.min(0.9, Math.max(0.3, homeWinRate + 0.2));
-    
-    for (const result of allResults) {
-       // Deep reinforcement loop: If we missed a high-confidence prediction,
-       // we should penalize the underlying factors more heavily in the next cycle.
+    try {
+      const { recordModelSnapshot } = await import("./modelSnapshotService");
+      await recordModelSnapshot({
+        engine: "historical-learning",
+        weights: { weightsUpdated: updated, learningRate: Math.min(0.9, Math.max(0.3, homeWinRate + 0.2)) },
+        metrics: {
+          gamesProcessed: allResults.length,
+          trainingRecords: stored,
+          homeWinRate,
+          spreadCoverRate,
+          sportBreakdown,
+        },
+        trigger: "historical_learning",
+        predictionsSinceLast: allResults.length,
+        accuracyAtSnapshot: homeWinRate,
+      });
+    } catch (snapErr: any) {
+      logWarn(`[Historical Learning] Snapshot recording failed: ${(snapErr as Error).message}`);
     }
 
     await db.insert(learningLogs).values({

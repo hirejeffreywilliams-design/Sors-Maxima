@@ -22850,15 +22850,75 @@
       "homeScore": 78,
       "awayScore": 73,
       "settledAt": "2026-03-16T02:16:53.881Z"
+    },
+    {
+      "id": "precomp-NHL-401803425-moneyline-4267c03c82",
+      "gameId": "401803425",
+      "sport": "NHL",
+      "game": "Florida Panthers @ Vancouver Canucks",
+      "homeTeam": "Vancouver Canucks",
+      "awayTeam": "Florida Panthers",
+      "pick": "Florida Panthers ML",
+      "betType": "moneyline",
+      "odds": -152,
+      "grade": "C-",
+      "confidence": 57,
+      "ev": -25.39,
+      "gameTime": "2026-03-18T02:00Z",
+      "savedAt": "2026-03-16T03:38:37.019Z",
+      "result": "lost",
+      "homeScore": 6,
+      "awayScore": 2,
+      "settledAt": "2026-03-16T03:40:07.813Z"
+    },
+    {
+      "id": "precomp-NHL-401803427-moneyline-e7544fb304",
+      "gameId": "401803427",
+      "sport": "NHL",
+      "game": "Tampa Bay Lightning @ Seattle Kraken",
+      "homeTeam": "Seattle Kraken",
+      "awayTeam": "Tampa Bay Lightning",
+      "pick": "Tampa Bay Lightning ML",
+      "betType": "moneyline",
+      "odds": -121,
+      "grade": "C+",
+      "confidence": 57,
+      "ev": -12.33,
+      "gameTime": "2026-03-18T02:00Z",
+      "savedAt": "2026-03-16T03:38:37.019Z",
+      "result": "lost",
+      "homeScore": 6,
+      "awayScore": 2,
+      "settledAt": "2026-03-16T03:40:07.813Z"
+    },
+    {
+      "id": "precomp-NHL-401803426-moneyline-a496e8691e",
+      "gameId": "401803426",
+      "sport": "NHL",
+      "game": "Buffalo Sabres @ Vegas Golden Knights",
+      "homeTeam": "Vegas Golden Knights",
+      "awayTeam": "Buffalo Sabres",
+      "pick": "Buffalo Sabres ML",
+      "betType": "moneyline",
+      "odds": -115,
+      "grade": "B-",
+      "confidence": 56,
+      "ev": -8.39,
+      "gameTime": "2026-03-18T02:00Z",
+      "savedAt": "2026-03-16T03:38:37.019Z",
+      "result": "lost",
+      "homeScore": 3,
+      "awayScore": 2,
+      "settledAt": "2026-03-16T03:40:07.824Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1053,
+      "total": 1056,
       "won": 585,
-      "lost": 450,
+      "lost": 453,
       "push": 18,
-      "rate": 55.6,
+      "rate": 55.4,
       "pending": 91
     },
     "bySport": {
@@ -22868,9 +22928,9 @@
         "rate": 56
       },
       "NHL": {
-        "total": 365,
+        "total": 368,
         "won": 195,
-        "rate": 53.4
+        "rate": 53
       },
       "NCAAB": {
         "total": 331,
@@ -22890,14 +22950,14 @@
         "rate": 69.3
       },
       "B-": {
-        "total": 248,
+        "total": 249,
         "won": 132,
-        "rate": 53.2
+        "rate": 53
       },
       "C+": {
-        "total": 224,
+        "total": 225,
         "won": 131,
-        "rate": 58.5
+        "rate": 58.2
       },
       "D+": {
         "total": 48,
@@ -22905,9 +22965,9 @@
         "rate": 52.1
       },
       "C-": {
-        "total": 80,
+        "total": 81,
         "won": 45,
-        "rate": 56.3
+        "rate": 55.6
       },
       "C": {
         "total": 181,
@@ -22937,10 +22997,10 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 313,
+        "total": 316,
         "won": 182,
-        "rate": 58.1,
-        "roi": 23.1
+        "rate": 57.6,
+        "roi": 21.9
       },
       "Spread": {
         "total": 335,
@@ -22962,21 +23022,21 @@
       }
     },
     "recentForm": {
-      "won": 31,
-      "lost": 18,
+      "won": 29,
+      "lost": 20,
       "push": 1,
-      "rate": 62
+      "rate": 58
     },
-    "lastUpdated": "2026-03-16T03:32:35.592Z",
-    "roi": 11.8,
-    "brierScore": 0.2556,
+    "lastUpdated": "2026-03-16T03:42:46.957Z",
+    "roi": 11.4,
+    "brierScore": 0.2557,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.095,
+    "sharpeRatio": 0.093,
     "homeAwayBias": {
       "homeWinRate": 58.9,
-      "awayWinRate": 46.6,
+      "awayWinRate": 45.3,
       "homeTotal": 538,
-      "awayTotal": 103
+      "awayTotal": 106
     },
     "calibrationBuckets": [
       {
@@ -22988,8 +23048,8 @@
       {
         "range": "55-60",
         "predicted": 57.3,
-        "actual": 54.3,
-        "total": 221
+        "actual": 53.6,
+        "total": 224
       },
       {
         "range": "60-65",

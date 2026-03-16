@@ -510,13 +510,13 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
           </div>
         )}
 
-        <PickFeedbackRow pickId={pick.id} sport={pick.sport} betType={pick.betType} />
+        <PickFeedbackRow pickId={pick.id} sport={pick.sport} betType={pick.betType} grade={pick.grade} />
       </div>
     </div>
   );
 }
 
-function PickFeedbackRow({ pickId, sport, betType }: { pickId: string; sport: string; betType: string }) {
+function PickFeedbackRow({ pickId, sport, betType, grade }: { pickId: string; sport: string; betType: string; grade?: string }) {
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
   const [upCount, setUpCount] = useState(0);
   const [downCount, setDownCount] = useState(0);
@@ -541,11 +541,11 @@ function PickFeedbackRow({ pickId, sport, betType }: { pickId: string; sport: st
 
   const voteMutation = useMutation({
     mutationFn: async (vote: "up" | "down") => {
-      const res = await apiRequest("POST", `/api/picks/${pickId}/feedback`, { vote, sport, betType });
+      const res = await apiRequest("POST", `/api/picks/${pickId}/feedback`, { vote, sport, betType, grade });
       return res.json();
     },
     onSuccess: (data: any) => {
-      setUserVote(data.userVote);
+      setUserVote(data.userVote as "up" | "down" | null);
       setUpCount(data.upCount);
       setDownCount(data.downCount);
       queryClient.invalidateQueries({ queryKey: ["/api/picks", pickId, "feedback"] });

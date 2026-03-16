@@ -1754,12 +1754,13 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
 
   app.get("/api/admin/learning/snapshots", requireAdmin, async (_req, res) => {
     try {
-      const { getLatestSnapshots, getSnapshotSummary } = await import("../modelSnapshotService");
-      const [snapshots, summary] = await Promise.all([
+      const { getLatestSnapshots, getSnapshotSummary, getSnapshotDeltas } = await import("../modelSnapshotService");
+      const [snapshots, summary, deltas] = await Promise.all([
         getLatestSnapshots(undefined, 50),
         getSnapshotSummary(),
+        getSnapshotDeltas(undefined, 20),
       ]);
-      res.json({ snapshots, summary });
+      res.json({ snapshots, summary, deltas });
     } catch (err) {
       res.status(500).json({ error: "Failed to fetch learning snapshots" });
     }
