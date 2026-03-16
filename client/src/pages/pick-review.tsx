@@ -301,9 +301,9 @@ export default function PickReviewPage() {
         />
 
         <TierGate
-          required="whale"
+          required="pro"
           label="Smart Pick Review Queue"
-          description="Every pick scored by model edge, sharp money risk flags, and fractional Kelly stake guidance. The analyst layer that separates the top 1% of bettors — Max tier only."
+          description="Every pick scored by model edge, sharp money risk flags, and fractional Kelly stake guidance. The analyst layer that separates sharp bettors — available on all paid plans."
         >
 
         <Card className="border">

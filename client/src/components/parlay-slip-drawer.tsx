@@ -59,6 +59,7 @@ import {
   Trophy,
   History,
   Trash,
+  Check,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -1253,8 +1254,249 @@ function SlipTabBar() {
   );
 }
 
+interface QuickPick {
+  id: string;
+  game: string;
+  pick: string;
+  betType: string;
+  odds: number;
+  confidence: number;
+  grade: string;
+  ev: number;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  gameTime?: string;
+}
+
+function QuickPicksSection({ addLeg }: { addLeg: (leg: ParlaySlipLeg) => boolean }) {
+  const { toast } = useToast();
+  const { data: inSeasonSports } = useQuery<string[]>({
+    queryKey: ["/api/sports/in-season"],
+    staleTime: 300_000,
+    retry: false,
+  });
+  const FALLBACK_SPORTS = ["nba", "nfl", "mlb", "nhl", "ncaab", "ncaaf"];
+  const sportsToTry = useMemo(() => {
+    if (inSeasonSports?.length) return inSeasonSports.map(s => s.toLowerCase()).slice(0, 3);
+    return FALLBACK_SPORTS.slice(0, 3);
+  }, [inSeasonSports]);
+
+  const sport0 = sportsToTry[0] ?? "nba";
+  const sport1 = sportsToTry[1] ?? "nfl";
+  const sport2 = sportsToTry[2] ?? "nhl";
+
+  const { data: snap0 } = useQuery<{ picks: QuickPick[] }>({
+    queryKey: ["/api/precomputed-predictions", sport0],
+    staleTime: 60_000,
+    retry: false,
+  });
+  const { data: snap1 } = useQuery<{ picks: QuickPick[] }>({
+    queryKey: ["/api/precomputed-predictions", sport1],
+    staleTime: 60_000,
+    retry: false,
+    enabled: !!sport1,
+  });
+  const { data: snap2 } = useQuery<{ picks: QuickPick[] }>({
+    queryKey: ["/api/precomputed-predictions", sport2],
+    staleTime: 60_000,
+    retry: false,
+    enabled: !!sport2,
+  });
+
+  const { isInSlip } = useParlaySlip();
+
+  const topPicks = useMemo(() => {
+    const allPicks = [
+      ...(snap0?.picks || []),
+      ...(snap1?.picks || []),
+      ...(snap2?.picks || []),
+    ];
+    if (!allPicks.length) return [];
+    return [...allPicks]
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 3);
+  }, [snap0, snap1, snap2]);
+
+  if (!topPicks.length) return null;
+
+  const gradeColor: Record<string, string> = {
+    "A+": "text-emerald-500", A: "text-emerald-400", "A-": "text-emerald-400",
+    "B+": "text-blue-400", B: "text-blue-400", "B-": "text-blue-400",
+    "C+": "text-amber-400", C: "text-amber-400",
+  };
+
+  return (
+    <div className="w-full max-w-[280px] space-y-2" data-testid="section-quick-picks">
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider px-1">
+        <Sparkles className="h-3 w-3 text-primary" />
+        Top Picks Today
+      </div>
+      {topPicks.map((pick) => {
+        const inSlip = isInSlip(pick.id);
+        const handleQuickAdd = () => {
+          const decimalOdds = pick.odds > 0 ? pick.odds / 100 + 1 : -100 / pick.odds + 1;
+          const leg: ParlaySlipLeg = {
+            id: pick.id,
+            team: pick.homeTeam || pick.game,
+            opponent: pick.awayTeam || "",
+            market: (["moneyline", "spread", "total", "player_prop"].includes(pick.betType) ? pick.betType : "moneyline") as any,
+            outcome: pick.pick || pick.game,
+            decimalOdds,
+            americanOdds: pick.odds,
+            addedFrom: "Quick Pick",
+            addedAt: new Date().toISOString(),
+            sport: pick.sport as any,
+            confidence: pick.confidence,
+            evPercent: pick.ev,
+            grade: pick.grade,
+          };
+          if (addLeg(leg)) {
+            toast({ title: "Added to slip", description: `${leg.outcome} (${pick.grade}) added` });
+          }
+        };
+        return (
+          <div
+            key={pick.id}
+            className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-lg border bg-muted/30 hover:bg-muted/50 transition-colors"
+            data-testid={`quick-pick-card-${pick.id}`}
+          >
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold truncate">{pick.game}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className={`text-[10px] font-bold font-mono ${gradeColor[pick.grade] || "text-muted-foreground"}`}>{pick.grade}</span>
+                <span className="text-[10px] text-muted-foreground">{pick.confidence}%</span>
+                <span className="text-[10px] text-muted-foreground font-mono">{pick.odds > 0 ? "+" : ""}{pick.odds}</span>
+              </div>
+            </div>
+            <Button
+              size="icon"
+              variant={inSlip ? "secondary" : "ghost"}
+              className="h-6 w-6 shrink-0"
+              onClick={handleQuickAdd}
+              disabled={inSlip}
+              data-testid={`button-quick-add-${pick.id}`}
+            >
+              {inSlip ? <Check className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+            </Button>
+          </div>
+        );
+      })}
+      <Button variant="ghost" size="sm" className="w-full h-7 text-[10px] gap-1" asChild>
+        <Link href="/daily">
+          <ChevronRight className="h-3 w-3" />
+          View all picks
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+function ManualPickForm({ addLeg }: { addLeg: (leg: ParlaySlipLeg) => boolean }) {
+  const [open, setOpen] = useState(false);
+  const [outcome, setOutcome] = useState("");
+  const [team, setTeam] = useState("");
+  const [market, setMarket] = useState<"moneyline" | "spread" | "total" | "player_prop">("moneyline");
+  const [odds, setOdds] = useState("");
+  const { toast } = useToast();
+
+  const handleSubmit = () => {
+    const americanOdds = parseInt(odds, 10);
+    if (!outcome.trim() || isNaN(americanOdds) || americanOdds === 0) {
+      toast({ title: "Fill in the pick details", description: "Outcome and odds are required.", variant: "destructive" });
+      return;
+    }
+    if (americanOdds > -100 && americanOdds < 100) {
+      toast({ title: "Invalid odds", description: "Enter American odds (e.g. -110, +150, -200).", variant: "destructive" });
+      return;
+    }
+    const decimalOdds = americanOdds > 0 ? americanOdds / 100 + 1 : -100 / americanOdds + 1;
+    const leg: ParlaySlipLeg = {
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      team: team.trim() || outcome.trim(),
+      opponent: "",
+      market,
+      outcome: outcome.trim(),
+      decimalOdds,
+      americanOdds,
+      addedFrom: "Manual Entry",
+      addedAt: new Date().toISOString(),
+    };
+    if (addLeg(leg)) {
+      toast({ title: "Pick added to slip", description: `${outcome} (${americanOdds > 0 ? "+" : ""}${americanOdds})` });
+      setOutcome(""); setTeam(""); setOdds(""); setOpen(false);
+    }
+  };
+
+  if (!open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors border border-dashed border-border/60 hover:border-primary/40 rounded-lg px-3 py-2 w-full max-w-[280px]"
+        data-testid="button-open-manual-pick-form"
+      >
+        <Plus className="h-3.5 w-3.5" />
+        Add custom pick manually
+      </button>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[280px] rounded-lg border bg-muted/20 p-3 space-y-2" data-testid="form-manual-pick">
+      <div className="flex items-center justify-between">
+        <p className="text-[11px] font-semibold">Custom Pick</p>
+        <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground" data-testid="button-close-manual-pick">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <input
+        type="text"
+        placeholder="Pick / outcome (e.g. Lakers -5.5)"
+        value={outcome}
+        onChange={e => setOutcome(e.target.value)}
+        className="w-full text-[11px] px-2 py-1.5 rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
+        data-testid="input-manual-pick-outcome"
+      />
+      <input
+        type="text"
+        placeholder="Team / game (optional)"
+        value={team}
+        onChange={e => setTeam(e.target.value)}
+        className="w-full text-[11px] px-2 py-1.5 rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
+        data-testid="input-manual-pick-team"
+      />
+      <div className="flex gap-2">
+        <select
+          value={market}
+          onChange={e => setMarket(e.target.value as any)}
+          className="flex-1 text-[11px] px-2 py-1.5 rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary/40"
+          data-testid="select-manual-pick-market"
+        >
+          <option value="moneyline">Moneyline</option>
+          <option value="spread">Spread</option>
+          <option value="total">Total</option>
+          <option value="player_prop">Player Prop</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Odds (e.g. -110)"
+          value={odds}
+          onChange={e => setOdds(e.target.value)}
+          className="w-[90px] text-[11px] px-2 py-1.5 rounded-md border bg-background focus:outline-none focus:ring-1 focus:ring-primary/40 font-mono"
+          data-testid="input-manual-pick-odds"
+          onKeyDown={e => e.key === "Enter" && handleSubmit()}
+        />
+      </div>
+      <Button size="sm" className="w-full h-7 text-xs gap-1" onClick={handleSubmit} data-testid="button-submit-manual-pick">
+        <Plus className="h-3 w-3" />
+        Add to Slip
+      </Button>
+    </div>
+  );
+}
+
 function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: boolean }) {
-  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip } = useParlaySlip();
+  const { legs, removeLeg, clearSlip, legCount, totalOdds, totalAmericanOdds, toWin, canUseMultiSlip, addLeg } = useParlaySlip();
   const { bets: myBetsList, saveBet } = useMyBets();
   const liveOddsMap = useSlipLiveOdds(legs);
   const liveLegsCount = useMemo(() => [...liveOddsMap.values()].filter(o => o.found).length, [liveOddsMap]);
@@ -1445,41 +1687,49 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
   if (legCount === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4 text-center gap-4 py-6">
-        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-          <Ticket className="h-7 w-7 text-primary/60" />
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col items-center px-4 text-center gap-5 py-6">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+            <Ticket className="h-7 w-7 text-primary/60" />
+          </div>
+          <div className="space-y-1">
+            <p className="font-bold text-sm">Your slip is empty</p>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-[220px]">
+              Add app picks below or browse for more. You can also enter a pick manually.
+            </p>
+          </div>
+
+          <QuickPicksSection addLeg={addLeg} />
+
+          <div className="flex flex-col gap-1.5 w-full max-w-[280px]">
+            <Button variant="default" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
+              <Link href="/daily">
+                <Sparkles className="h-3.5 w-3.5" />
+                Browse Today's Picks
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
+              <Link href="/pick-review">
+                <ListChecks className="h-3.5 w-3.5" />
+                Smart Pick Review
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
+              <Link href="/odds-center">
+                <BarChart3 className="h-3.5 w-3.5" />
+                Compare Odds
+              </Link>
+            </Button>
+          </div>
+
+          <ManualPickForm addLeg={addLeg} />
+
+          <div className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
+            <Zap className="h-2.5 w-2.5" />
+            First pick auto-opens this slip
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="font-bold text-sm">No picks yet</p>
-          <p className="text-xs text-muted-foreground leading-relaxed max-w-[220px]">
-            Add picks from Daily Picks, Odds Center, or Live Center to start building your parlay.
-          </p>
-        </div>
-        <div className="flex flex-col gap-1.5 w-full max-w-[220px]">
-          <Button variant="default" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
-            <Link href="/daily">
-              <Sparkles className="h-3.5 w-3.5" />
-              Browse Today's Picks
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
-            <Link href="/odds-center">
-              <BarChart3 className="h-3.5 w-3.5" />
-              Compare Odds
-            </Link>
-          </Button>
-        </div>
-        <div className="text-[9px] text-muted-foreground/50 flex items-center gap-1">
-          <Zap className="h-2.5 w-2.5" />
-          First pick auto-opens this slip
-        </div>
-        <Button variant="outline" size="sm" asChild className="hidden">
-          <Link href="/">
-            <Sparkles className="h-3.5 w-3.5 mr-1" />
-            Browse Picks
-          </Link>
-        </Button>
-      </div>
+      </ScrollArea>
     );
   }
 

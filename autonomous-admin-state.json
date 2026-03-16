@@ -1,6 +1,26 @@
 {
   "alerts": [
     {
+      "id": "alert_1773675050971_y1gzl",
+      "timestamp": "2026-03-16T15:30:50.971Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "15,092 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
+      "id": "alert_1773673430973_2tavn",
+      "timestamp": "2026-03-16T15:03:50.973Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "15,197 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773672613185_bljq9",
       "timestamp": "2026-03-16T14:50:13.185Z",
       "resolved": false,
@@ -1014,6 +1034,58 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1773673970970_csjqh",
+      "timestamp": "2026-03-16T15:12:50.970Z",
+      "durationMs": 4103,
+      "summary": [
+        "Win rate at 56.3% is strong and above break-even threshold of 52.4%.",
+        "Odds API usage is at a warning level with <50K requests remaining.",
+        "Active user count is stable at 1247 with a churn rate of 4.2%.",
+        "No critical issues detected in model performance; all metrics within acceptable ranges."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Adjust Odds API Polling Frequency",
+          "description": "Reduce the Odds API polling frequency as we're approaching the <50K requests threshold to avoid a critical situation.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 1
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Odds API Usage Warning",
+          "description": "Odds API usage is under 50K requests limit, requires attention to prevent critical status.",
+          "severity": "warning"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Review and adjust Odds API polling frequency settings.",
+          "Monitor user engagement metrics for trends.",
+          "Check API performance and stability."
+        ],
+        "this_week": [
+          "Analyze pick accuracy to ensure optimal betting strategies.",
+          "Evaluate monthly burn rate against user engagement and handle metrics.",
+          "Prepare report on user churn strategies and retention efforts."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 56.3,
+        "settledPicks": 1058,
+        "oddsApiRemaining": 15197,
+        "oddsApiStatus": "warning",
+        "guardianHealth": 100,
+        "cacheHitRate": 0,
+        "heapUsedMb": 71,
+        "heapTotalMb": 78,
+        "hubLastCycleMs": 178,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Win rate at 56.3% is strong and above break-even threshold of 52.4%.\",\n    \"Odds API usage is at a warning level with <50K requests remaining.\",\n    \"Active user count is stable at 1247 with a churn rate of 4.2%.\",\n    \"No critical issues detected in model performance; all metrics within acceptable ranges.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Odds API Polling Frequency\",\n      \"description\": \"Reduce the Odds API polling frequency as we're approaching the <50K requests threshold to avoid a critical situation.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Odds API Usage Warning\",\n      \"description\": \"Odds API usage is under 50K requests limit, requires attention to prevent critical status.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and adjust Odds API polling frequency settings.\",\n      \"Monitor user engagement metrics for trends.\",\n      \"Check API performance and stability.\"\n    ],\n    \"this_week\": [\n      \"Analyze pick accuracy to ensure optimal betting strategies.\",\n      \"Evaluate monthly burn rate against user engagement and handle metrics.\",\n      \"Prepare report on user churn strategies and retention efforts.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1773669309143_ugw8t",
       "timestamp": "2026-03-16T13:55:09.143Z",
@@ -2090,79 +2162,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"Win rate is currently at 53.1%, above break-even threshold of 52.4%.\",\n    \"Overall pick accuracy rate has decreased to 52.1%, approaching model degradation critical threshold.\",\n    \"Calibration error alert (ALR-002) is present with a value of 0.1200, above threshold.\",\n    \"Significant budget variance with the API indicating potential overuse.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Address Calibration Error\",\n      \"description\": \"Investigate and rectify the calibration error exceeding the threshold to ensure model performance.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Monitor API Usage\",\n      \"description\": \"Review API usage trends to mitigate budget variances, especially with football-related services.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Enhance Model Evaluation\",\n      \"description\": \"Conduct a thorough analysis of pick accuracy rates to prevent potential model degradation.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Model Degradation Risk\",\n      \"description\": \"Overall pick accuracy rate is below the acceptable threshold of 52.4%, indicating potential model issues.\",\n      \"severity\": \"critical\"\n    },\n    {\n      \"title\": \"API Budget Variance Alert\",\n      \"description\": \"Monthly budget usage for the odds API has significant variance and should be watched closely to avoid service interruptions.\",\n      \"severity\": \"high\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Investigate calibration error ALR-002.\",\n      \"Review current pick accuracy and adjust strategies as needed.\"\n    ],\n    \"this_week\": [\n      \"Assess API trends and implement throttling if necessary.\",\n      \"Monitor user engagement metrics to identify potential user churn.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1773142884897_yrgod",
-      "timestamp": "2026-03-10T11:41:24.897Z",
-      "durationMs": 10087,
-      "summary": [
-        "Win rate at 53.1% is above break-even threshold, but overall accuracy at 52.1% raises concern as it's approaching critical level.",
-        "Odds API is at a warning level, with 39,884 requests remaining, indicating potential overspending if not managed.",
-        "Calibration error alert (ALR-002) indicating ongoing model performance issues—needs immediate attention."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Reduce Odds API Polling Frequency",
-          "description": "Adjust the polling frequency for the Odds API to conserve requests and avoid hitting the critical threshold.",
-          "priority": "P1",
-          "due_by": "today",
-          "effort_hours": 2
-        },
-        {
-          "title": "Investigate Calibration Error",
-          "description": "Review the cause of calibration error (ALR-002) and initiate corrective measures to stabilize model predictions.",
-          "priority": "P1",
-          "due_by": "this_week",
-          "effort_hours": 4
-        },
-        {
-          "title": "Monitor Win Rate Trends",
-          "description": "Set up daily checks on win rate metrics to ensure it does not fall below critical levels over the next few days.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 1
-        }
-      ],
-      "risk_alerts": [
-        {
-          "title": "Win Rate Drop",
-          "description": "Overall win rate dropping to 52.1% is concerning and could lead to model degradation if the trend continues.",
-          "severity": "high"
-        },
-        {
-          "title": "Pipeline Calibration Error",
-          "description": "Calibration error exceeds threshold, indicating potential model malfunction that can impact betting strategies.",
-          "severity": "critical"
-        }
-      ],
-      "ops_checklist": {
-        "today": [
-          "Adjust Odds API settings to reduce request frequency.",
-          "Document current win rate metrics and trends."
-        ],
-        "this_week": [
-          "Initiate investigation on the calibration error.",
-          "Review exposure levels across all markets for risk management.",
-          "Prepare weekly report on user engagement metrics (active users, churn rate)."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 53.1,
-        "settledPicks": 664,
-        "oddsApiRemaining": 39884,
-        "oddsApiStatus": "healthy",
-        "guardianHealth": 100,
-        "cacheHitRate": 29,
-        "heapUsedMb": 65,
-        "heapTotalMb": 73,
-        "hubLastCycleMs": 54,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Win rate at 53.1% is above break-even threshold, but overall accuracy at 52.1% raises concern as it's approaching critical level.\",\n    \"Odds API is at a warning level, with 39,884 requests remaining, indicating potential overspending if not managed.\",\n    \"Calibration error alert (ALR-002) indicating ongoing model performance issues—needs immediate attention.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Reduce Odds API Polling Frequency\",\n      \"description\": \"Adjust the polling frequency for the Odds API to conserve requests and avoid hitting the critical threshold.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Investigate Calibration Error\",\n      \"description\": \"Review the cause of calibration error (ALR-002) and initiate corrective measures to stabilize model predictions.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Monitor Win Rate Trends\",\n      \"description\": \"Set up daily checks on win rate metrics to ensure it does not fall below critical levels over the next few days.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Drop\",\n      \"description\": \"Overall win rate dropping to 52.1% is concerning and could lead to model degradation if the trend continues.\",\n      \"severity\": \"high\"\n    },\n    {\n      \"title\": \"Pipeline Calibration Error\",\n      \"description\": \"Calibration error exceeds threshold, indicating potential model malfunction that can impact betting strategies.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust Odds API settings to reduce request frequency.\",\n      \"Document current win rate metrics and trends.\"\n    ],\n    \"this_week\": [\n      \"Initiate investigation on the calibration error.\",\n      \"Review exposure levels across all markets for risk management.\",\n      \"Prepare weekly report on user engagement metrics (active users, churn rate).\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-16T14:50:13.185Z",
-  "lastDeepCheck": "2026-03-16T13:55:09.143Z",
-  "totalQuickChecks": 170,
-  "totalDeepChecks": 41
+  "lastQuickCheck": "2026-03-16T15:30:50.971Z",
+  "lastDeepCheck": "2026-03-16T15:12:50.970Z",
+  "totalQuickChecks": 172,
+  "totalDeepChecks": 42
 }
