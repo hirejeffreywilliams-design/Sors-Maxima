@@ -304,8 +304,8 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
         // ── MC Stacked Learner: feed outcome into calibration loop ──────────
         try {
           updateMCWithOutcome(sl.gameId, sl.market, sl.legResult as "won" | "lost" | "push");
-        } catch (mcErr: any) {
-          logWarn(`[Orchestrator] MC outcome update failed for ${sl.gameId}: ${mcErr.message}`);
+        } catch (mcErr: unknown) {
+          logWarn(`[Orchestrator] MC outcome update failed for ${sl.gameId}: ${(mcErr as Error).message}`);
         }
         // ── USML: feed outcome so source weights update ──────────────────────
         try {
@@ -315,12 +315,12 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             sl.market,
             sl.legResult as "won" | "lost" | "push",
           );
-        } catch (usmlErr: any) {
-          logWarn(`[Orchestrator] USML outcome feed failed for ${sl.gameId}: ${usmlErr.message}`);
+        } catch (usmlErr: unknown) {
+          logWarn(`[Orchestrator] USML outcome feed failed for ${sl.gameId}: ${(usmlErr as Error).message}`);
         }
         mcRecorded++;
-      } catch (e: any) {
-        logWarn(`[Orchestrator] Failed to record MC outcome for ${sl.gameId}: ${e.message}`);
+      } catch (e: unknown) {
+        logWarn(`[Orchestrator] Failed to record MC outcome for ${sl.gameId}: ${(e as Error).message}`);
       }
     }
 
@@ -356,8 +356,8 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             awayScore: game.awayScore,
             sport,
           });
-        } catch (settleErr: any) {
-          logWarn(`[Orchestrator] Pick settlement failed for game ${game.id}: ${settleErr.message}`);
+        } catch (settleErr: unknown) {
+          logWarn(`[Orchestrator] Pick settlement failed for game ${game.id}: ${(settleErr as Error).message}`);
         }
       });
     }
@@ -367,12 +367,12 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
 
     try {
       await updateClosingOdds(sportGames);
-    } catch (e: any) {
-      logWarn(`[Orchestrator] Failed to update closing odds for user picks: ${e.message}`);
+    } catch (e: unknown) {
+      logWarn(`[Orchestrator] Failed to update closing odds for user picks: ${(e as Error).message}`);
     }
-  } catch (error: any) {
-    addError("settlement", error.message);
-    logError(error, { context: "autoSettlePredictions" });
+  } catch (error: unknown) {
+    addError("settlement", (error as Error).message);
+    logError(error as Error, { context: "autoSettlePredictions" });
   }
 
   return { settled, checked };
@@ -950,8 +950,8 @@ async function runCalibrationCheck(): Promise<void> {
       if (mcCal.driftDetected) {
         logWarn(`[Orchestrator] Monte Carlo drift detected — accuracy ${(mcCal.overallAccuracy * 100).toFixed(1)}%, recalibrating`);
       }
-    } catch (calErr: any) {
-      logWarn(`[Orchestrator] MC calibration report failed: ${calErr.message}`);
+    } catch (calErr: unknown) {
+      logWarn(`[Orchestrator] MC calibration report failed: ${(calErr as Error).message}`);
     }
 
     if (status.totalCycles % 50 === 0) {
@@ -1035,32 +1035,32 @@ export function startContinuousLearningOrchestrator(): void {
     try {
       logInfo("[Orchestrator] Running initial auto-settlement...");
       await autoSettlePredictions();
-    } catch (e: any) {
-      logWarn(`[Orchestrator] Initial auto-settlement failed: ${e.message}`);
+    } catch (e: unknown) {
+      logWarn(`[Orchestrator] Initial auto-settlement failed: ${(e as Error).message}`);
     }
   }, 30000);
 
   setTimeout(async () => {
     try {
       await checkDataFreshness();
-    } catch (e: any) {
-      logWarn(`[Orchestrator] Initial data freshness check failed: ${e.message}`);
+    } catch (e: unknown) {
+      logWarn(`[Orchestrator] Initial data freshness check failed: ${(e as Error).message}`);
     }
   }, 60000);
 
   setTimeout(async () => {
     try {
       await syncWeightsToFusionEngine();
-    } catch (e: any) {
-      logWarn(`[Orchestrator] Initial fusion weight sync failed: ${e.message}`);
+    } catch (e: unknown) {
+      logWarn(`[Orchestrator] Initial fusion weight sync failed: ${(e as Error).message}`);
     }
   }, 90000);
 
   setTimeout(async () => {
     try {
       await runCalibrationCheck();
-    } catch (e: any) {
-      logWarn(`[Orchestrator] Initial calibration check failed: ${e.message}`);
+    } catch (e: unknown) {
+      logWarn(`[Orchestrator] Initial calibration check failed: ${(e as Error).message}`);
     }
   }, 120000);
 
