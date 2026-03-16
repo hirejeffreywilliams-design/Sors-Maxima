@@ -22930,14 +22930,34 @@
       "homeScore": 2,
       "awayScore": 3,
       "settledAt": "2026-03-16T13:36:39.765Z"
+    },
+    {
+      "id": "precomp-NHL-401803428-total-509ebdbcf0",
+      "gameId": "401803428",
+      "sport": "NHL",
+      "game": "New Jersey Devils @ New York Rangers",
+      "homeTeam": "New York Rangers",
+      "awayTeam": "New Jersey Devils",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B",
+      "confidence": 52,
+      "ev": -6.45,
+      "gameTime": "2026-03-18T23:00Z",
+      "savedAt": "2026-03-16T13:55:23.865Z",
+      "result": "push",
+      "homeScore": 2,
+      "awayScore": 4,
+      "settledAt": "2026-03-16T13:55:40.660Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1057,
+      "total": 1058,
       "won": 585,
       "lost": 454,
-      "push": 18,
+      "push": 19,
       "rate": 55.3,
       "pending": 91
     },
@@ -22948,9 +22968,9 @@
         "rate": 56
       },
       "NHL": {
-        "total": 369,
+        "total": 370,
         "won": 195,
-        "rate": 52.8
+        "rate": 52.7
       },
       "NCAAB": {
         "total": 331,
@@ -22965,9 +22985,9 @@
         "rate": 55
       },
       "B": {
-        "total": 88,
+        "total": 89,
         "won": 61,
-        "rate": 69.3
+        "rate": 68.5
       },
       "B-": {
         "total": 249,
@@ -23029,9 +23049,9 @@
         "roi": 6.9
       },
       "Total": {
-        "total": 334,
+        "total": 335,
         "won": 182,
-        "rate": 54.5,
+        "rate": 54.3,
         "roi": 6.8
       },
       "Team Total": {
@@ -23042,12 +23062,12 @@
       }
     },
     "recentForm": {
-      "won": 29,
+      "won": 28,
       "lost": 20,
-      "push": 1,
-      "rate": 58
+      "push": 2,
+      "rate": 56
     },
-    "lastUpdated": "2026-03-16T13:36:39.769Z",
+    "lastUpdated": "2026-03-16T13:55:40.665Z",
     "roi": 11.3,
     "brierScore": 0.2558,
     "maxDrawdown": 15.4,
