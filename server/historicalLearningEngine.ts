@@ -490,7 +490,7 @@ export async function runHistoricalLearning(options: {
         homeWinRate,
         spreadCoverRate,
       });
-    } catch (snapErr: any) {
+    } catch (snapErr: unknown) {
       logWarn(`[Historical Learning] Snapshot recording failed: ${(snapErr as Error).message}`);
     }
 

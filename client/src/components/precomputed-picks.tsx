@@ -271,7 +271,7 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
       americanOdds: pick.odds,
       addedFrom: "46-Factor Model Analysis",
       addedAt: new Date().toISOString(),
-      sport: pick.sport as any,
+      sport: pick.sport,
       confidence: pick.confidence,
       evPercent: pick.ev,
       grade: pick.grade,
@@ -544,8 +544,8 @@ function PickFeedbackRow({ pickId, sport, betType, grade }: { pickId: string; sp
       const res = await apiRequest("POST", `/api/picks/${pickId}/feedback`, { vote, sport, betType, grade });
       return res.json();
     },
-    onSuccess: (data: any) => {
-      setUserVote(data.userVote as "up" | "down" | null);
+    onSuccess: (data: { userVote: "up" | "down" | null; upCount: number; downCount: number }) => {
+      setUserVote(data.userVote);
       setUpCount(data.upCount);
       setDownCount(data.downCount);
       queryClient.invalidateQueries({ queryKey: ["/api/picks", pickId, "feedback"] });

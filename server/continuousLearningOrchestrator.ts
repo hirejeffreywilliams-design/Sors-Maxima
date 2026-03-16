@@ -619,13 +619,13 @@ async function runLearningWeightUpdate(): Promise<void> {
           accuracy: overallAcc,
           brierScore,
         });
-      } catch (snapErr: any) {
-        logWarn(`[Orchestrator] Snapshot after weight update failed: ${snapErr.message}`);
+      } catch (snapErr: unknown) {
+        logWarn(`[Orchestrator] Snapshot after weight update failed: ${(snapErr as Error).message}`);
       }
     }
-  } catch (error: any) {
-    addError("learningWeightUpdate", error.message);
-    logError(error, { context: "runLearningWeightUpdate" });
+  } catch (error: unknown) {
+    addError("learningWeightUpdate", (error as Error).message);
+    logError(error as Error, { context: "runLearningWeightUpdate" });
   }
 }
 
@@ -661,13 +661,13 @@ async function scheduledRetraining(): Promise<void> {
           homeWinRate: result.homeWinRate,
           spreadCoverRate: result.spreadCoverRate,
         });
-      } catch (snapErr: any) {
-        logWarn(`[Orchestrator] Snapshot after retraining failed: ${snapErr.message}`);
+      } catch (snapErr: unknown) {
+        logWarn(`[Orchestrator] Snapshot after retraining failed: ${(snapErr as Error).message}`);
       }
     }
-  } catch (error: any) {
-    addError("retraining", error.message);
-    logError(error, { context: "scheduledRetraining" });
+  } catch (error: unknown) {
+    addError("retraining", (error as Error).message);
+    logError(error as Error, { context: "scheduledRetraining" });
   }
 }
 
