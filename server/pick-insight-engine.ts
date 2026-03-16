@@ -7,14 +7,14 @@
 import { logInfo, logWarn } from "./errorLogger";
 import { recordAiError, recordAiSuccess, getAiAvailability } from "./aiErrorTracker";
 import { getAIStandardsContext, validateAIContent } from "./companyStandards";
+import { createOpenAIClient, isOpenAIAvailable } from "./openaiClient";
 import type { PrecomputedPick } from "./precomputedPredictionsEngine";
 
 let openai: any = null;
 async function getOpenAI() {
   if (openai) return openai;
   try {
-    const { default: OpenAI } = await import("openai");
-    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    openai = createOpenAIClient();
     return openai;
   } catch {
     return null;
@@ -85,7 +85,7 @@ async function generateInsightForPick(pick: PrecomputedPick, client: any): Promi
 
 export async function enrichPicksWithInsights(picks: PrecomputedPick[]): Promise<void> {
   if (generationRunning) return;
-  if (!process.env.OPENAI_API_KEY) return;
+  if (!isOpenAIAvailable()) return;
 
   const aiStatus = getAiAvailability();
   if (!aiStatus.available) {

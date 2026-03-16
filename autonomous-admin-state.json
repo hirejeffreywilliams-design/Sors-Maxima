@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1773672613185_bljq9",
+      "timestamp": "2026-03-16T14:50:13.185Z",
+      "resolved": false,
+      "severity": "warning",
+      "category": "api_budget",
+      "title": "Odds API Below 50K Requests",
+      "detail": "15,197 requests remaining. Consider reducing polling frequency via API Budget settings.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1773671807545_tahkm",
       "timestamp": "2026-03-16T14:36:47.545Z",
       "resolved": false,
@@ -2151,8 +2161,8 @@
       "raw": "{\n  \"summary\": [\n    \"Win rate at 53.1% is above break-even threshold, but overall accuracy at 52.1% raises concern as it's approaching critical level.\",\n    \"Odds API is at a warning level, with 39,884 requests remaining, indicating potential overspending if not managed.\",\n    \"Calibration error alert (ALR-002) indicating ongoing model performance issues—needs immediate attention.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Reduce Odds API Polling Frequency\",\n      \"description\": \"Adjust the polling frequency for the Odds API to conserve requests and avoid hitting the critical threshold.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Investigate Calibration Error\",\n      \"description\": \"Review the cause of calibration error (ALR-002) and initiate corrective measures to stabilize model predictions.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    },\n    {\n      \"title\": \"Monitor Win Rate Trends\",\n      \"description\": \"Set up daily checks on win rate metrics to ensure it does not fall below critical levels over the next few days.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Win Rate Drop\",\n      \"description\": \"Overall win rate dropping to 52.1% is concerning and could lead to model degradation if the trend continues.\",\n      \"severity\": \"high\"\n    },\n    {\n      \"title\": \"Pipeline Calibration Error\",\n      \"description\": \"Calibration error exceeds threshold, indicating potential model malfunction that can impact betting strategies.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust Odds API settings to reduce request frequency.\",\n      \"Document current win rate metrics and trends.\"\n    ],\n    \"this_week\": [\n      \"Initiate investigation on the calibration error.\",\n      \"Review exposure levels across all markets for risk management.\",\n      \"Prepare weekly report on user engagement metrics (active users, churn rate).\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-16T14:36:47.546Z",
+  "lastQuickCheck": "2026-03-16T14:50:13.185Z",
   "lastDeepCheck": "2026-03-16T13:55:09.143Z",
-  "totalQuickChecks": 169,
+  "totalQuickChecks": 170,
   "totalDeepChecks": 41
 }

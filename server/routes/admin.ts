@@ -1158,10 +1158,11 @@ Format your response clearly with sections and bullet points.`;
       })(),
       // 5. OpenAI
       (async () => {
-        const key = process.env.OPENAI_API_KEY;
+        const { isOpenAIAvailable: aiAvail } = await import("../openaiClient");
+        const key = aiAvail();
         const { getCircuitBreakerState } = await import("../aiCircuitBreaker").catch(() => ({ getCircuitBreakerState: () => ({ open: false }) }));
         const circuit = getCircuitBreakerState?.() || { open: false };
-        const ok = !!key && !(circuit as any).open;
+        const ok = key && !(circuit as any).open;
         return { id: "openai", name: "OpenAI (AI Insights)", latencyMs: 0, status: (ok ? "healthy" : !key ? "down" : "degraded") as "healthy" | "degraded" | "down", detail: !key ? "API key missing" : (circuit as any).open ? "Circuit breaker open — quota exceeded" : "GPT-4o active" };
       })(),
       // 6. Precomputed Predictions Engine
@@ -5421,16 +5422,17 @@ Follow these rules:
         });
       }
 
-      // Check: OpenAI key
-      if (!process.env.OPENAI_API_KEY?.trim()) {
+      // Check: OpenAI key (accepts either direct OPENAI_API_KEY or Replit AI integration)
+      const { isOpenAIAvailable: checkOpenAI } = await import("../openaiClient");
+      if (!checkOpenAI()) {
         dataQualityAlerts.push({
           id: "dqa-openai-key",
           severity: "critical",
           node: "openai",
           label: "OpenAI GPT-4o",
-          issue: "API key not configured (OPENAI_API_KEY missing)",
+          issue: "API key not configured (neither OPENAI_API_KEY nor AI integration key found)",
           impact: "AI pick insights, ticket variations, pipeline diagnosis, and marketing copy generator are all offline.",
-          resolution: "Set OPENAI_API_KEY in environment secrets.",
+          resolution: "Set OPENAI_API_KEY in environment secrets, or enable the OpenAI AI integration.",
           status: "open",
         });
       } else if (aiStatus === "offline") {
@@ -5567,8 +5569,8 @@ Follow these rules:
         });
       }
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const { createOpenAIClient: makeOAI } = await import("../openaiClient");
+      const openai = makeOAI();
 
       const prompt = `You are a senior systems engineer for Sors Maxima, an elite sports betting intelligence platform.
 
