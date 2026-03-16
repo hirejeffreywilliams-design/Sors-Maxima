@@ -296,7 +296,12 @@ export function registerPickFeedbackRoutes(app: Express) {
         helpfulnessRate: stats?.total_votes && parseInt(stats.total_votes) > 0
           ? Math.round((parseInt(stats.total_up) / parseInt(stats.total_votes)) * 100)
           : 0,
-        bySport: bySport.rows as SportRow[],
+        bySport: (bySport.rows as SportRow[]).map(s => ({
+          ...s,
+          helpfulnessRate: parseInt(s.votes) > 0
+            ? Math.round((parseInt(s.up_count) / parseInt(s.votes)) * 100)
+            : 0,
+        })),
         byGrade: byGrade.rows as GradeRow[],
         last30Days: {
           totalVotes: parseInt(last30?.total_votes || "0"),
