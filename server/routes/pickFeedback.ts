@@ -18,6 +18,35 @@ interface HelpfulnessRow { pick_id: string; ups: string; downs: string; total: s
 interface CountOnlyRow { cnt: string }
 interface AuditRow { audit_id: string; user_id: string; action: string; entity_type: string; entity_id: string; metadata: unknown; created_at: string }
 
+const VALID_SPORTS = new Set(["NBA", "NHL", "NCAAB", "MLB", "NFL", "NCAAF", "MMA", "SOCCER"]);
+const VALID_BET_TYPES = new Set(["moneyline", "spread", "total", "player_prop"]);
+const VALID_GRADES = new Set(["S+", "S", "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"]);
+const PICK_ID_PATTERN = /^precomp-[A-Z]+-\d+-\w+/;
+
+const feedbackRateLimits = new Map<number, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 30;
+
+function checkFeedbackRateLimit(userId: number): boolean {
+  const now = Date.now();
+  const timestamps = feedbackRateLimits.get(userId) || [];
+  const recent = timestamps.filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (recent.length >= RATE_LIMIT_MAX) return false;
+  recent.push(now);
+  feedbackRateLimits.set(userId, recent);
+  return true;
+}
+
+function parsePickIdMetadata(pickId: string): { sport: string; betType: string } | null {
+  const parts = pickId.split("-");
+  if (parts.length < 4 || parts[0] !== "precomp") return null;
+  const sport = parts[1];
+  const betType = parts[3];
+  if (!VALID_SPORTS.has(sport)) return null;
+  if (!VALID_BET_TYPES.has(betType)) return null;
+  return { sport, betType };
+}
+
 export function registerPickFeedbackRoutes(app: Express) {
   app.post("/api/picks/:pickId/feedback", requireAuth, async (req, res) => {
     try {
@@ -27,11 +56,21 @@ export function registerPickFeedbackRoutes(app: Express) {
         return res.status(400).json({ error: "Vote must be 'up' or 'down'" });
       }
 
+      if (!PICK_ID_PATTERN.test(pickId)) {
+        return res.status(400).json({ error: "Invalid pick ID format" });
+      }
+
       const userId = req.session!.userId;
+      if (!checkFeedbackRateLimit(userId)) {
+        return res.status(429).json({ error: "Too many feedback requests. Please wait." });
+      }
+
       const username = req.session!.username || "anonymous";
-      const sport = req.body.sport || null;
-      const betType = req.body.betType || null;
-      const grade = req.body.grade || null;
+      const pickMeta = parsePickIdMetadata(pickId);
+      const sport = pickMeta?.sport || null;
+      const betType = pickMeta?.betType || null;
+      const rawGrade = typeof req.body.grade === "string" ? req.body.grade : null;
+      const grade = rawGrade && VALID_GRADES.has(rawGrade) ? rawGrade : null;
 
       const existing = await db.execute(sql`
         SELECT vote FROM pick_feedback WHERE pick_id = ${pickId} AND user_id = ${userId} LIMIT 1
@@ -63,19 +102,19 @@ export function registerPickFeedbackRoutes(app: Express) {
         { metadata: { vote: newVote, action: existingVote === vote ? "remove" : "set", sport, betType } }
       );
 
-      try {
-        const { recordUserTicketOutcome } = await import("../autonomousLearningEngine");
-        if (newVote) {
+      if (newVote && sport) {
+        try {
+          const { recordUserTicketOutcome } = await import("../autonomousLearningEngine");
           recordUserTicketOutcome({
             gameId: pickId,
-            sport: sport || "UNKNOWN",
+            sport,
             betType: betType || "moneyline",
             confidence: newVote === "up" ? 75 : 25,
             result: newVote === "up" ? "won" : "lost",
           });
+        } catch (learnErr: unknown) {
+          logWarn(`[PickFeedback] Learning engine update failed: ${(learnErr as Error).message}`);
         }
-      } catch (learnErr: unknown) {
-        logWarn(`[PickFeedback] Learning engine update failed: ${(learnErr as Error).message}`);
       }
 
       const counts = await db.execute(sql`
