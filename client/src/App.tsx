@@ -323,36 +323,36 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/guidelines" component={GuidelinesPage} />
         <Route path="/roadmap" component={Roadmap} />
         <Route path="/settings" component={Settings} />
-        <Route path="/tipster-communities">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
+        <Route path="/tipster-communities"><Redirect to="/community" /></Route>
         <Route path="/rosters" component={RostersPage} />
         <Route path="/help" component={HelpCenter} />
         <Route path="/profile" component={ProfilePage} />
         <Route path="/changelog" component={ChangelogPage} />
         <Route path="/odds-center" component={OddsCenter} />
-        <Route path="/ev-heatmap">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
-        <Route path="/line-movement">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
-        <Route path="/power-rankings">{() => { const [, setLocation] = useLocation(); setLocation("/odds-center"); return null; }}</Route>
-        <Route path="/ticket-history">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
-        <Route path="/betting-profile">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
-        <Route path="/bet-history">{() => { const [, setLocation] = useLocation(); setLocation("/profile"); return null; }}</Route>
+        <Route path="/ev-heatmap"><Redirect to="/odds-center" /></Route>
+        <Route path="/line-movement"><Redirect to="/odds-center" /></Route>
+        <Route path="/power-rankings"><Redirect to="/odds-center" /></Route>
+        <Route path="/ticket-history"><Redirect to="/profile" /></Route>
+        <Route path="/betting-profile"><Redirect to="/profile" /></Route>
+        <Route path="/bet-history"><Redirect to="/profile" /></Route>
         <Route path="/insights" component={PersonalizedInsights} />
-        <Route path="/pro-tools">{() => { const [, setLocation] = useLocation(); setLocation("/tools"); return null; }}</Route>
+        <Route path="/pro-tools"><Redirect to="/tools" /></Route>
         <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/track-record" component={TrackRecordPage} />
         <Route path="/my-bets" component={MyBetsPage} />
         <Route path="/ticket-variations" component={TicketVariations} />
         <Route path="/pick-review" component={PickReview} />
-        <Route path="/straight-bets">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
-        <Route path="/sgp">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
-        <Route path="/teasers">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
-        <Route path="/round-robin">{() => { const [, setLocation] = useLocation(); setLocation("/builder"); return null; }}</Route>
+        <Route path="/straight-bets"><Redirect to="/builder" /></Route>
+        <Route path="/sgp"><Redirect to="/builder" /></Route>
+        <Route path="/teasers"><Redirect to="/builder" /></Route>
+        <Route path="/round-robin"><Redirect to="/builder" /></Route>
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/feedback" component={FeedbackPage} />
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/research" component={ResearchNotesPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
-        <Route path="/shared-tickets">{() => { const [, setLocation] = useLocation(); setLocation("/community"); return null; }}</Route>
+        <Route path="/shared-tickets"><Redirect to="/community" /></Route>
         <Route path="/cards" component={CardsPage} />
         <Route path="/verify-email" component={VerifyEmail} />
         <Route component={NotFound} />
@@ -1205,11 +1205,11 @@ function AppContent() {
   }
 
   if (location === '/login') {
-    return <LoginPage key="login" onLogin={handleLogin} />;
+    return <Suspense fallback={<PageSpinner />}><LoginPage key="login" onLogin={handleLogin} /></Suspense>;
   }
 
   if (location === '/register') {
-    return <LoginPage key="register" onLogin={handleLogin} />;
+    return <Suspense fallback={<PageSpinner />}><LoginPage key="register" onLogin={handleLogin} /></Suspense>;
   }
 
   if (location === '/reset-password') {
@@ -1256,7 +1256,7 @@ function AppContent() {
   }
 
   if (!isAuthenticated) {
-    return <LandingPage />;
+    return <Suspense fallback={<PageSpinner />}><LandingPage /></Suspense>;
   }
 
   if (!authState.isAdmin) {
