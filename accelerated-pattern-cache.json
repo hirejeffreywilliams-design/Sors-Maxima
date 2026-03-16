@@ -1,36 +1,36 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 194,
-      "total": 344,
-      "winRate": 56.4
+      "wins": 200,
+      "total": 356,
+      "winRate": 56.2
     },
     "NHL": {
-      "wins": 192,
-      "total": 346,
-      "winRate": 55.5
+      "wins": 195,
+      "total": 351,
+      "winRate": 55.6
     },
     "NCAAB": {
-      "wins": 179,
-      "total": 312,
-      "winRate": 57.4
+      "wins": 190,
+      "total": 328,
+      "winRate": 57.9
     }
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 177,
-      "total": 306,
-      "winRate": 57.8
+      "wins": 182,
+      "total": 313,
+      "winRate": 58.1
     },
     "spread": {
-      "wins": 177,
-      "total": 317,
+      "wins": 183,
+      "total": 328,
       "winRate": 55.8
     },
     "total": {
-      "wins": 173,
-      "total": 310,
-      "winRate": 55.8
+      "wins": 182,
+      "total": 325,
+      "winRate": 56
     },
     "team_total": {
       "wins": 38,
@@ -70,22 +70,34 @@
       "boost": 4
     },
     {
+      "key": "NHL:spread:neutral:50s:medium",
+      "winRate": 80,
+      "total": 10,
+      "boost": 4
+    },
+    {
       "key": "NBA:spread:neutral:60s:low",
       "winRate": 78.9,
       "total": 19,
       "boost": 7
     },
     {
-      "key": "NHL:spread:neutral:50s:medium",
-      "winRate": 77.8,
-      "total": 9,
-      "boost": 3
-    },
-    {
       "key": "NCAAB:moneyline:fav:70s:low",
       "winRate": 75,
       "total": 16,
       "boost": 5
+    },
+    {
+      "key": "NBA:moneyline:heavy_fav:60s:low",
+      "winRate": 72.7,
+      "total": 11,
+      "boost": 3
+    },
+    {
+      "key": "NBA:moneyline:heavy_fav",
+      "winRate": 72.7,
+      "total": 11,
+      "boost": 3
     },
     {
       "key": "NHL:spread:neutral:60s:low",
@@ -98,18 +110,6 @@
       "winRate": 72,
       "total": 25,
       "boost": 7
-    },
-    {
-      "key": "NCAAB:team_total",
-      "winRate": 72,
-      "total": 25,
-      "boost": 7
-    },
-    {
-      "key": "NBA:moneyline:heavy_fav:60s:low",
-      "winRate": 70,
-      "total": 10,
-      "boost": 3
     }
   ],
   "topLosePatterns": [
@@ -124,6 +124,12 @@
       "winRate": 33.3,
       "total": 9,
       "penalty": 3
+    },
+    {
+      "key": "NCAAB:total:neutral:60s:low",
+      "winRate": 35.7,
+      "total": 14,
+      "penalty": 4
     },
     {
       "key": "NBA:moneyline:fav:60s:low",
@@ -154,16 +160,10 @@
       "winRate": 40,
       "total": 20,
       "penalty": 4
-    },
-    {
-      "key": "NHL:spread:heavy_fav",
-      "winRate": 40,
-      "total": 10,
-      "penalty": 2
     }
   ],
-  "totalSettled": 1002,
-  "lastMined": "2026-03-15T21:55:53.250Z",
-  "cycleCount": 3,
-  "patternCount": 198
+  "totalSettled": 1035,
+  "lastMined": "2026-03-16T03:00:52.112Z",
+  "cycleCount": 2,
+  "patternCount": 200
 }
