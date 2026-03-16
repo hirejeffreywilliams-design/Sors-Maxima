@@ -73,6 +73,7 @@ const Results = lazy(() => import("@/pages/results"));
 const AdminApiBudget = lazy(() => import("@/pages/admin-api-budget"));
 const AdminSystemHealth = lazy(() => import("@/pages/admin-system-health"));
 const AdminAutonomous = lazy(() => import("@/pages/admin-autonomous"));
+const AdminLearning = lazy(() => import("@/pages/admin-learning"));
 const AdminAppIntelligence = lazy(() => import("@/pages/admin-app-intelligence"));
 const AdminIPRegistry = lazy(() => import("@/pages/admin-ip-registry"));
 const SportFactorAnalysis = lazy(() => import("@/pages/sport-factor-analysis"));
@@ -257,6 +258,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/api-budget">{() => <AdminGuard component={AdminApiBudget} authState={authState} />}</Route>
               <Route path="/admin/system-health">{() => <AdminGuard component={AdminSystemHealth} authState={authState} />}</Route>
               <Route path="/admin/autonomous">{() => <AdminGuard component={AdminAutonomous} authState={authState} />}</Route>
+              <Route path="/admin/learning">{() => <AdminGuard component={AdminLearning} authState={authState} />}</Route>
               <Route path="/admin/app-intelligence">{() => <AdminGuard component={AdminAppIntelligence} authState={authState} />}</Route>
               <Route path="/admin/ip-registry">{() => <AdminGuard component={AdminIPRegistry} authState={authState} />}</Route>
               <Route path="/admin/applications">{() => <AdminGuard component={AdminApplications} authState={authState} />}</Route>

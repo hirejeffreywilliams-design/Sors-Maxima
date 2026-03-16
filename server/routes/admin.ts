@@ -629,7 +629,7 @@ export async function registerAdminRoutes(app: Express): Promise<void> {
 
       const recentErrors = errorLogger.getLogs({ limit: 10, level: "error" });
       const recentSecurityEvents = securityService.getEvents({ limit: 10 });
-      const auditStats = auditTrail.getStats();
+      const auditStats = await auditTrail.getStats();
 
       res.json({
         health: {
@@ -1490,10 +1490,10 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
   });
 
   // === Audit Trail Routes ===
-  app.get("/api/audit/entries", requireAdmin, (req, res) => {
+  app.get("/api/audit/entries", requireAdmin, async (req, res) => {
     try {
       const { userId, action, entityType, limit, since } = req.query;
-      const entries = auditTrail.getEntries({
+      const entries = await auditTrail.getEntries({
         userId: userId as string,
         action: action as any,
         entityType: entityType as string,
@@ -1506,10 +1506,10 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
     }
   });
 
-  app.get("/api/audit/stats", requireAdmin, (req, res) => {
+  app.get("/api/audit/stats", requireAdmin, async (req, res) => {
     try {
       const { userId, since } = req.query;
-      const stats = auditTrail.getStats({
+      const stats = await auditTrail.getStats({
         userId: userId as string,
         since: since as string,
       });
@@ -1737,9 +1737,69 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
         metadata: { action: "model_snapshot" },
       });
 
+      const { recordModelSnapshot } = await import("../modelSnapshotService");
+      await recordModelSnapshot({
+        engine: "learning-engine",
+        weights: weights as Record<string, unknown>,
+        metrics: { notes: notes || "Manual snapshot", factorCount: Object.keys(weights).length },
+        trigger: "manual",
+        accuracyAtSnapshot: undefined,
+      });
+
       res.json({ success: true, snapshot });
     } catch (err) {
       res.status(500).json({ error: "Failed to create model snapshot" });
+    }
+  });
+
+  app.get("/api/admin/learning/snapshots", requireAdmin, async (_req, res) => {
+    try {
+      const { getLatestSnapshots, getSnapshotSummary } = await import("../modelSnapshotService");
+      const [snapshots, summary] = await Promise.all([
+        getLatestSnapshots(undefined, 50),
+        getSnapshotSummary(),
+      ]);
+      res.json({ snapshots, summary });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch learning snapshots" });
+    }
+  });
+
+  app.get("/api/admin/learning/metrics", requireAdmin, async (_req, res) => {
+    try {
+      const { getSnapshotSummary } = await import("../modelSnapshotService");
+      const [snapshotSummary] = await Promise.all([
+        getSnapshotSummary(),
+      ]);
+
+      const auditStats = await auditTrail.getStats();
+      const feedbackStats = await db.execute(sql`
+        SELECT
+          COUNT(*) as total_votes,
+          SUM(CASE WHEN vote = 'up' THEN 1 ELSE 0 END) as total_up,
+          SUM(CASE WHEN vote = 'down' THEN 1 ELSE 0 END) as total_down,
+          COUNT(DISTINCT user_id) as unique_voters,
+          COUNT(DISTINCT pick_id) as unique_picks
+        FROM pick_feedback
+      `);
+      const fb = feedbackStats.rows[0] as any;
+
+      res.json({
+        snapshots: snapshotSummary,
+        auditTrail: auditStats,
+        pickFeedback: {
+          totalVotes: parseInt(fb?.total_votes || "0"),
+          totalUp: parseInt(fb?.total_up || "0"),
+          totalDown: parseInt(fb?.total_down || "0"),
+          uniqueVoters: parseInt(fb?.unique_voters || "0"),
+          uniquePicks: parseInt(fb?.unique_picks || "0"),
+          helpfulnessRate: fb?.total_votes > 0
+            ? Math.round((parseInt(fb.total_up) / parseInt(fb.total_votes)) * 100)
+            : 0,
+        },
+      });
+    } catch (err) {
+      res.status(500).json({ error: "Failed to fetch learning metrics" });
     }
   });
 
@@ -1836,7 +1896,7 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
   });
 
   // === Cost Monitoring (Admin) ===
-  app.get("/api/admin/cost-monitor", requireAdmin, (_req, res) => {
+  app.get("/api/admin/cost-monitor", requireAdmin, async (_req, res) => {
     try {
       const uptime = process.uptime();
       const memUsage = process.memoryUsage();
@@ -1851,7 +1911,7 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
         },
         apiCalls: {
           oddsProvider: idempotencyStore.getStats().totalRecords,
-          auditEntries: auditTrail.getStats().total,
+          auditEntries: (await auditTrail.getStats()).total,
           featureFlags: featureFlags.getStats().total,
         },
         alerts: [],

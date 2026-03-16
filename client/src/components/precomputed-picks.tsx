@@ -11,7 +11,7 @@ import {
   Zap, Target, BarChart3, Clock, Shield, Flame,
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Star,
   Check, Info, Activity, Lock, Crown, Users, AlertTriangle,
-  Timer, Sparkles
+  Timer, Sparkles, ThumbsUp, ThumbsDown
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
@@ -509,6 +509,84 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
             ))}
           </div>
         )}
+
+        <PickFeedbackRow pickId={pick.id} sport={pick.sport} betType={pick.betType} />
+      </div>
+    </div>
+  );
+}
+
+function PickFeedbackRow({ pickId, sport, betType }: { pickId: string; sport: string; betType: string }) {
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+  const [upCount, setUpCount] = useState(0);
+  const [downCount, setDownCount] = useState(0);
+
+  const { data: feedbackData } = useQuery<{ userVote: string | null; upCount: number; downCount: number }>({
+    queryKey: ["/api/picks", pickId, "feedback"],
+    queryFn: async () => {
+      const res = await fetch(`/api/picks/${pickId}/feedback`);
+      if (!res.ok) return { userVote: null, upCount: 0, downCount: 0 };
+      return res.json();
+    },
+    staleTime: 60000,
+  });
+
+  useEffect(() => {
+    if (feedbackData) {
+      setUserVote(feedbackData.userVote as "up" | "down" | null);
+      setUpCount(feedbackData.upCount);
+      setDownCount(feedbackData.downCount);
+    }
+  }, [feedbackData]);
+
+  const voteMutation = useMutation({
+    mutationFn: async (vote: "up" | "down") => {
+      const res = await apiRequest("POST", `/api/picks/${pickId}/feedback`, { vote, sport, betType });
+      return res.json();
+    },
+    onSuccess: (data: any) => {
+      setUserVote(data.userVote);
+      setUpCount(data.upCount);
+      setDownCount(data.downCount);
+      queryClient.invalidateQueries({ queryKey: ["/api/picks", pickId, "feedback"] });
+    },
+  });
+
+  const handleVote = (vote: "up" | "down") => {
+    if (voteMutation.isPending) return;
+    voteMutation.mutate(vote);
+  };
+
+  return (
+    <div className="flex items-center justify-between pt-1.5 border-t border-border/40" data-testid={`pick-feedback-row-${pickId}`}>
+      <span className="text-[10px] text-muted-foreground">Was this pick helpful?</span>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => handleVote("up")}
+          disabled={voteMutation.isPending}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
+            userVote === "up"
+              ? "bg-green-500/20 text-green-600 dark:text-green-400 border border-green-500/30"
+              : "bg-muted/50 hover:bg-green-500/10 text-muted-foreground hover:text-green-600"
+          }`}
+          data-testid={`button-thumbs-up-${pickId}`}
+        >
+          <ThumbsUp className="w-3 h-3" />
+          {upCount > 0 && <span className="font-mono">{upCount}</span>}
+        </button>
+        <button
+          onClick={() => handleVote("down")}
+          disabled={voteMutation.isPending}
+          className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] transition-colors ${
+            userVote === "down"
+              ? "bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/30"
+              : "bg-muted/50 hover:bg-red-500/10 text-muted-foreground hover:text-red-600"
+          }`}
+          data-testid={`button-thumbs-down-${pickId}`}
+        >
+          <ThumbsDown className="w-3 h-3" />
+          {downCount > 0 && <span className="font-mono">{downCount}</span>}
+        </button>
       </div>
     </div>
   );

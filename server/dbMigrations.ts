@@ -414,6 +414,61 @@ export async function runMigrations(): Promise<void> {
       console.log("[Migrations] Seeded 15 default platform rules");
     }
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS pick_feedback (
+        id SERIAL PRIMARY KEY,
+        pick_id TEXT NOT NULL,
+        user_id INTEGER,
+        username TEXT NOT NULL DEFAULT 'anonymous',
+        vote TEXT NOT NULL CHECK (vote IN ('up', 'down')),
+        sport TEXT,
+        bet_type TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE(pick_id, user_id)
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pf_pick_id ON pick_feedback(pick_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_pf_user_id ON pick_feedback(user_id)`);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS audit_trail (
+        id SERIAL PRIMARY KEY,
+        audit_id TEXT NOT NULL UNIQUE,
+        user_id TEXT NOT NULL,
+        action TEXT NOT NULL,
+        entity_type TEXT NOT NULL,
+        entity_id TEXT NOT NULL,
+        before_state JSONB,
+        after_state JSONB,
+        metadata JSONB,
+        ip TEXT,
+        user_agent TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_at_user_id ON audit_trail(user_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_at_action ON audit_trail(action)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_at_entity ON audit_trail(entity_type, entity_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_at_created ON audit_trail(created_at DESC)`);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS model_snapshots (
+        id SERIAL PRIMARY KEY,
+        version TEXT NOT NULL,
+        engine TEXT NOT NULL,
+        weights JSONB NOT NULL DEFAULT '{}',
+        metrics JSONB NOT NULL DEFAULT '{}',
+        trigger TEXT NOT NULL DEFAULT 'scheduled',
+        sport TEXT,
+        market_type TEXT,
+        predictions_since_last INTEGER DEFAULT 0,
+        accuracy_at_snapshot REAL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ms_engine ON model_snapshots(engine)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ms_created ON model_snapshots(created_at DESC)`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

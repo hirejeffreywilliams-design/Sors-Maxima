@@ -304,7 +304,9 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
         // ── MC Stacked Learner: feed outcome into calibration loop ──────────
         try {
           updateMCWithOutcome(sl.gameId, sl.market, sl.legResult as "won" | "lost" | "push");
-        } catch {}
+        } catch (mcErr: any) {
+          logWarn(`[Orchestrator] MC outcome update failed for ${sl.gameId}: ${mcErr.message}`);
+        }
         // ── USML: feed outcome so source weights update ──────────────────────
         try {
           feedEnsembleOutcomeByGame(
@@ -313,7 +315,9 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             sl.market,
             sl.legResult as "won" | "lost" | "push",
           );
-        } catch {}
+        } catch (usmlErr: any) {
+          logWarn(`[Orchestrator] USML outcome feed failed for ${sl.gameId}: ${usmlErr.message}`);
+        }
         mcRecorded++;
       } catch (e: any) {
         logWarn(`[Orchestrator] Failed to record MC outcome for ${sl.gameId}: ${e.message}`);
@@ -352,7 +356,9 @@ async function autoSettlePredictions(): Promise<{ settled: number; checked: numb
             awayScore: game.awayScore,
             sport,
           });
-        } catch {}
+        } catch (settleErr: any) {
+          logWarn(`[Orchestrator] Pick settlement failed for game ${game.id}: ${settleErr.message}`);
+        }
       });
     }
     if (picksSettled > 0) {
@@ -582,6 +588,27 @@ async function runLearningWeightUpdate(): Promise<void> {
 
     if (weightsAdjusted > 0) {
       logInfo(`[Orchestrator] Learning weight update: adjusted ${weightsAdjusted} factor weights from ${settledPredictions.length} predictions`);
+
+      try {
+        const { recordModelSnapshot } = await import("./modelSnapshotService");
+        const weightMap: Record<string, unknown> = {};
+        for (const w of allWeights) {
+          weightMap[w.factorName] = { weight: w.weight, accuracy: w.accuracy };
+        }
+        const overallAcc = settledPredictions.length > 0
+          ? settledPredictions.filter(p => p.actualResult === "won").length / settledPredictions.length
+          : undefined;
+        await recordModelSnapshot({
+          engine: "orchestrator-weight-update",
+          weights: weightMap,
+          metrics: { weightsAdjusted, predictionsUsed: settledPredictions.length },
+          trigger: "weight_update",
+          predictionsSinceLast: settledPredictions.length,
+          accuracyAtSnapshot: overallAcc,
+        });
+      } catch (snapErr: any) {
+        logWarn(`[Orchestrator] Snapshot after weight update failed: ${snapErr.message}`);
+      }
     }
   } catch (error: any) {
     addError("learningWeightUpdate", error.message);
@@ -602,6 +629,20 @@ async function scheduledRetraining(): Promise<void> {
       status.totalRetrained++;
       status.lastRetrainingRun = new Date().toISOString();
       logInfo(`[Orchestrator] Retraining complete: ${result.gamesProcessed} games, ${result.weightsUpdated} weights updated. Accuracy: ${(result.homeWinRate * 100).toFixed(1)}%`);
+
+      try {
+        const { recordModelSnapshot } = await import("./modelSnapshotService");
+        await recordModelSnapshot({
+          engine: "historical-retraining",
+          weights: { weightsUpdated: result.weightsUpdated },
+          metrics: { gamesProcessed: result.gamesProcessed, homeWinRate: result.homeWinRate },
+          trigger: "scheduled_retraining",
+          predictionsSinceLast: result.gamesProcessed,
+          accuracyAtSnapshot: result.homeWinRate,
+        });
+      } catch (snapErr: any) {
+        logWarn(`[Orchestrator] Snapshot after retraining failed: ${snapErr.message}`);
+      }
     }
   } catch (error: any) {
     addError("retraining", error.message);
@@ -888,7 +929,9 @@ async function runCalibrationCheck(): Promise<void> {
       if (mcCal.driftDetected) {
         logWarn(`[Orchestrator] Monte Carlo drift detected — accuracy ${(mcCal.overallAccuracy * 100).toFixed(1)}%, recalibrating`);
       }
-    } catch {}
+    } catch (calErr: any) {
+      logWarn(`[Orchestrator] MC calibration report failed: ${calErr.message}`);
+    }
 
     if (status.totalCycles % 50 === 0) {
       logInfo(`[Orchestrator] Calibration: overall accuracy ${(status.accuracyMetrics.overall * 100).toFixed(1)}%, drift ${(status.accuracyMetrics.calibrationDrift * 100).toFixed(1)}%, EV accuracy ${(status.accuracyMetrics.evAccuracy * 100).toFixed(1)}%`);
@@ -971,25 +1014,33 @@ export function startContinuousLearningOrchestrator(): void {
     try {
       logInfo("[Orchestrator] Running initial auto-settlement...");
       await autoSettlePredictions();
-    } catch {}
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Initial auto-settlement failed: ${e.message}`);
+    }
   }, 30000);
 
   setTimeout(async () => {
     try {
       await checkDataFreshness();
-    } catch {}
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Initial data freshness check failed: ${e.message}`);
+    }
   }, 60000);
 
   setTimeout(async () => {
     try {
       await syncWeightsToFusionEngine();
-    } catch {}
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Initial fusion weight sync failed: ${e.message}`);
+    }
   }, 90000);
 
   setTimeout(async () => {
     try {
       await runCalibrationCheck();
-    } catch {}
+    } catch (e: any) {
+      logWarn(`[Orchestrator] Initial calibration check failed: ${e.message}`);
+    }
   }, 120000);
 
   // Initial historical learning run — fires 3 minutes after startup so we don't

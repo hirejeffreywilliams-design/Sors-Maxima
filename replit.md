@@ -68,6 +68,7 @@ The application uses a modern web architecture with a React-based frontend and a
 - **LCT Auto-Expiry**: `/api/life-changer-ticket` route automatically expires pending LCT tickets older than 3 days.
 - **SSE track-record-update Event**: Broadcasts `track-record-update` SSE event on every LCT settlement and track record invalidation, updating relevant frontend pages.
 - **Member Feedback System**: Full feedback pipeline with `user_feedback` PostgreSQL table. Members submit via a 3-step floating widget (category cards → star rating + message → NPS score). Feedback history visible at `/feedback` with admin reply display. Admin manages all submissions at `/admin/feedback` with filters, reply functionality, and status management (open/reviewed/resolved/closed). Routes at `POST /api/feedback`, `GET /api/feedback/my` (auth required), `GET/PATCH/DELETE /api/admin/feedback` (admin required).
+- **Learning System Improvements (Task #10)**: Per-pick thumbs-up/down feedback (`pick_feedback` table), persistent DB-backed audit trail (`audit_trail` table replacing in-memory), model version snapshots (`model_snapshots` table), and admin learning metrics dashboard at `/admin/learning` with 3 tabs (Pick Feedback, Model Snapshots, Audit Trail). Pick feedback API at `/api/picks/:pickId/feedback`. All queries use parameterized SQL (no string interpolation). Orchestrator snapshot failures are logged via `logWarn`.
 
 ## External Dependencies
 - **Frontend Framework**: React

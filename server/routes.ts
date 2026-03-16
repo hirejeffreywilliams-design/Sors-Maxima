@@ -15,6 +15,7 @@ import cardsRouter from "./routes/cards";
 import { registerResearchRoutes } from "./routes/research";
 import { registerGuidelinesRoutes } from "./routes/guidelines";
 import { registerFeedbackRoutes } from "./routes/feedback";
+import { registerPickFeedbackRoutes } from "./routes/pickFeedback";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -36,6 +37,7 @@ export async function registerRoutes(
   registerResearchRoutes(app);
   registerGuidelinesRoutes(app);
   registerFeedbackRoutes(app);
+  registerPickFeedbackRoutes(app);
 
   return httpServer;
 }
