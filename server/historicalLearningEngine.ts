@@ -454,9 +454,27 @@ export async function runHistoricalLearning(options: {
 
     try {
       const { recordModelSnapshot } = await import("./modelSnapshotService");
+      const freshWeights = await db.select().from(modelWeights);
+      const fullWeightMap: Record<string, unknown> = {};
+      for (const w of freshWeights) {
+        fullWeightMap[w.factorName] = { weight: w.weight, accuracy: w.accuracy, totalPredictions: w.totalPredictions, correctPredictions: w.correctPredictions };
+      }
+      let brierScore: number | undefined;
+      if (allResults.length > 0) {
+        let brierSum = 0;
+        for (const r of allResults) {
+          const actual = r.homeWin ? 1 : 0;
+          const factorValues = Object.values(r.factors);
+          const predicted = factorValues.length > 0
+            ? factorValues.reduce((s, v) => s + v, 0) / factorValues.length
+            : 0.5;
+          brierSum += (predicted - actual) ** 2;
+        }
+        brierScore = brierSum / allResults.length;
+      }
       await recordModelSnapshot({
         engine: "historical-learning",
-        weights: { weightsUpdated: updated, learningRate: Math.min(0.9, Math.max(0.3, homeWinRate + 0.2)) },
+        weights: fullWeightMap,
         metrics: {
           gamesProcessed: allResults.length,
           trainingRecords: stored,
@@ -467,6 +485,10 @@ export async function runHistoricalLearning(options: {
         trigger: "historical_learning",
         predictionsSinceLast: allResults.length,
         accuracyAtSnapshot: homeWinRate,
+        accuracy: homeWinRate,
+        brierScore,
+        homeWinRate,
+        spreadCoverRate,
       });
     } catch (snapErr: any) {
       logWarn(`[Historical Learning] Snapshot recording failed: ${(snapErr as Error).message}`);

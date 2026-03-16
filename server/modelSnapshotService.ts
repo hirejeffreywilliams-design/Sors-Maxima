@@ -15,13 +15,21 @@ export async function recordModelSnapshot(params: {
   accuracyAtSnapshot?: number;
   label?: string;
   notes?: string;
+  accuracy?: number;
+  brierScore?: number;
+  homeWinRate?: number;
+  spreadCoverRate?: number;
 }): Promise<string> {
   snapshotCounter++;
   const version = `v${Date.now()}-${snapshotCounter}`;
 
   try {
     await db.execute(sql`
-      INSERT INTO model_snapshots (version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes)
+      INSERT INTO model_snapshots (
+        version, engine, weights, metrics, trigger, sport, market_type,
+        predictions_since_last, accuracy_at_snapshot, label, notes,
+        accuracy, brier_score, home_win_rate, spread_cover_rate
+      )
       VALUES (
         ${version},
         ${params.engine},
@@ -33,7 +41,11 @@ export async function recordModelSnapshot(params: {
         ${params.predictionsSinceLast ?? 0},
         ${params.accuracyAtSnapshot ?? null},
         ${params.label ?? null},
-        ${params.notes ?? null}
+        ${params.notes ?? null},
+        ${params.accuracy ?? params.accuracyAtSnapshot ?? null},
+        ${params.brierScore ?? null},
+        ${params.homeWinRate ?? null},
+        ${params.spreadCoverRate ?? null}
       )
     `);
     logInfo(`[ModelSnapshot] Recorded snapshot ${version} for engine=${params.engine} trigger=${params.trigger}`);
@@ -45,10 +57,13 @@ export async function recordModelSnapshot(params: {
 }
 
 export async function getLatestSnapshots(engine?: string, limit = 20): Promise<any[]> {
+  const cols = `id, version, engine, weights, metrics, trigger, sport, market_type,
+    predictions_since_last, accuracy_at_snapshot, label, notes,
+    accuracy, brier_score, home_win_rate, spread_cover_rate, created_at`;
   try {
     if (engine) {
       const result = await db.execute(sql`
-        SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes, created_at
+        SELECT ${sql.raw(cols)}
         FROM model_snapshots
         WHERE engine = ${engine}
         ORDER BY created_at DESC
@@ -57,7 +72,7 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
       return result.rows as any[];
     }
     const result = await db.execute(sql`
-      SELECT id, version, engine, weights, metrics, trigger, sport, market_type, predictions_since_last, accuracy_at_snapshot, label, notes, created_at
+      SELECT ${sql.raw(cols)}
       FROM model_snapshots
       ORDER BY created_at DESC
       LIMIT ${limit}

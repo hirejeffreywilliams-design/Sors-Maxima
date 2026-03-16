@@ -27,6 +27,12 @@ interface Snapshot {
   market_type: string | null;
   predictions_since_last: number;
   accuracy_at_snapshot: number | null;
+  accuracy: number | null;
+  brier_score: number | null;
+  home_win_rate: number | null;
+  spread_cover_rate: number | null;
+  label: string | null;
+  notes: string | null;
   created_at: string;
 }
 
@@ -434,10 +440,16 @@ export default function AdminLearning() {
                                 <Badge variant="outline" className="text-[10px] shrink-0 font-mono">{s.version.slice(0, 20)}</Badge>
                                 <span className="text-sm truncate max-w-[200px]">{s.engine}</span>
                               </div>
-                              <div className="flex items-center gap-3 shrink-0">
+                              <div className="flex items-center gap-3 shrink-0 flex-wrap justify-end">
                                 <Badge variant="secondary" className="text-[9px]">{triggerLabel(s.trigger)}</Badge>
-                                {s.accuracy_at_snapshot !== null && (
-                                  <span className="text-xs font-mono text-primary">{(s.accuracy_at_snapshot * 100).toFixed(1)}%</span>
+                                {(s.accuracy ?? s.accuracy_at_snapshot) !== null && (
+                                  <span className="text-xs font-mono text-primary" data-testid={`text-snapshot-accuracy-${s.id}`}>{((s.accuracy ?? s.accuracy_at_snapshot ?? 0) * 100).toFixed(1)}%</span>
+                                )}
+                                {s.brier_score !== null && (
+                                  <span className="text-[10px] font-mono text-amber-500" title="Brier Score">B:{s.brier_score.toFixed(3)}</span>
+                                )}
+                                {s.home_win_rate !== null && (
+                                  <span className="text-[10px] font-mono text-blue-400" title="Home Win Rate">HW:{(s.home_win_rate * 100).toFixed(0)}%</span>
                                 )}
                                 {delta?.accuracy_delta !== null && delta?.accuracy_delta !== undefined && (
                                   <span className={`text-[10px] font-mono flex items-center gap-0.5 ${

@@ -591,13 +591,24 @@ async function runLearningWeightUpdate(): Promise<void> {
 
       try {
         const { recordModelSnapshot } = await import("./modelSnapshotService");
+        const freshWeights = await db.select().from(modelWeights);
         const weightMap: Record<string, unknown> = {};
-        for (const w of allWeights) {
-          weightMap[w.factorName] = { weight: w.weight, accuracy: w.accuracy };
+        for (const w of freshWeights) {
+          weightMap[w.factorName] = { weight: w.weight, accuracy: w.accuracy, totalPredictions: w.totalPredictions, correctPredictions: w.correctPredictions };
         }
         const overallAcc = settledPredictions.length > 0
           ? settledPredictions.filter(p => p.actualResult === "won").length / settledPredictions.length
           : undefined;
+        let brierScore: number | undefined;
+        if (settledPredictions.length > 0) {
+          let brierSum = 0;
+          for (const p of settledPredictions) {
+            const actual = p.actualResult === "won" ? 1 : 0;
+            const predicted = p.predictedProbability ?? 0.5;
+            brierSum += (predicted - actual) ** 2;
+          }
+          brierScore = brierSum / settledPredictions.length;
+        }
         await recordModelSnapshot({
           engine: "orchestrator-weight-update",
           weights: weightMap,
@@ -605,6 +616,8 @@ async function runLearningWeightUpdate(): Promise<void> {
           trigger: "weight_update",
           predictionsSinceLast: settledPredictions.length,
           accuracyAtSnapshot: overallAcc,
+          accuracy: overallAcc,
+          brierScore,
         });
       } catch (snapErr: any) {
         logWarn(`[Orchestrator] Snapshot after weight update failed: ${snapErr.message}`);
@@ -632,13 +645,21 @@ async function scheduledRetraining(): Promise<void> {
 
       try {
         const { recordModelSnapshot } = await import("./modelSnapshotService");
+        const freshWeights = await db.select().from(modelWeights);
+        const weightMap: Record<string, unknown> = {};
+        for (const w of freshWeights) {
+          weightMap[w.factorName] = { weight: w.weight, accuracy: w.accuracy, totalPredictions: w.totalPredictions, correctPredictions: w.correctPredictions };
+        }
         await recordModelSnapshot({
-          engine: "historical-retraining",
-          weights: { weightsUpdated: result.weightsUpdated },
-          metrics: { gamesProcessed: result.gamesProcessed, homeWinRate: result.homeWinRate },
+          engine: "scheduled-retraining",
+          weights: weightMap,
+          metrics: { gamesProcessed: result.gamesProcessed, homeWinRate: result.homeWinRate, spreadCoverRate: result.spreadCoverRate },
           trigger: "scheduled_retraining",
           predictionsSinceLast: result.gamesProcessed,
           accuracyAtSnapshot: result.homeWinRate,
+          accuracy: result.homeWinRate,
+          homeWinRate: result.homeWinRate,
+          spreadCoverRate: result.spreadCoverRate,
         });
       } catch (snapErr: any) {
         logWarn(`[Orchestrator] Snapshot after retraining failed: ${snapErr.message}`);

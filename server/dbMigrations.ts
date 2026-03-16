@@ -472,6 +472,10 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ms_created ON model_snapshots(created_at DESC)`);
     await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS label TEXT`);
     await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS notes TEXT`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS accuracy REAL`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS brier_score REAL`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS home_win_rate REAL`);
+    await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS spread_cover_rate REAL`);
 
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
