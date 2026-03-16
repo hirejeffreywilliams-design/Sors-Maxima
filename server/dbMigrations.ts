@@ -477,6 +477,17 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS home_win_rate REAL`);
     await db.execute(sql`ALTER TABLE model_snapshots ADD COLUMN IF NOT EXISTS spread_cover_rate REAL`);
 
+    // ── user_picks performance indexes ────────────────────────────────────────
+    // These are the most-queried columns: every user's bet history page,
+    // settlement engine, and CLV reports hit user_picks hard. Without indexes
+    // the DB does full table scans as pick count grows.
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_username       ON user_picks(username)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_settled        ON user_picks(settled)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_placed_at      ON user_picks(placed_at DESC)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_sport          ON user_picks(sport)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_username_settled ON user_picks(username, settled)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_username_placed  ON user_picks(username, placed_at DESC)`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

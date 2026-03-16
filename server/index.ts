@@ -54,6 +54,8 @@ import {
   csrfValidationMiddleware,
 } from "./securityMiddleware";
 import { isMaintenanceMode, getMaintenanceMessage } from "./launch-control";
+import { startUptimeMonitor } from "./uptimeMonitor";
+import { startBackupScheduler } from "./backupService";
 
 // ─── Crash Guards ─────────────────────────────────────────────────────────────
 process.on("uncaughtException", (err) => {
@@ -418,6 +420,10 @@ function startEnginesPhased(): void {
       console.warn("[CacheWarmup] Warmup partial:", err.message);
     }
   }, 25_000);
+
+  // ── Uptime Monitor + Backup Scheduler ────────────────────────────────────
+  safeStart("Uptime Monitor", startUptimeMonitor, 5_000);
+  safeStart("Backup Scheduler", startBackupScheduler, 10_000);
 
   // ── Engine Manifest Print ─────────────────────────────────────────────────
   const maxDelay = Math.max(...engineManifest.map(e => e.delayMs));

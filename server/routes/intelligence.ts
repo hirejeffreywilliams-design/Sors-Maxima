@@ -33,7 +33,7 @@ import {
 } from "../monteCarloEngine";
 import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
-import { getClientIp, requireAuth, requireAdmin, requireTier, requireSubscription } from "./helpers";
+import { getClientIp, requireAuth, requireAdmin, requireTier, requireSubscription, rateLimitByTier } from "./helpers";
 import { getTwoWayMatchupImpact } from "../two-way-contracts";
 import { db } from "../db";
 import { sql as drizzleSql } from "drizzle-orm";
@@ -1245,7 +1245,7 @@ export function registerIntelligenceRoutes(app: Express): void {
   });
 
   // ── AI Track Record Analysis ────────────────────────────────────────────────
-  app.post("/api/track-record/ai-analysis", requireAuth, async (_req: Request, res: Response) => {
+  app.post("/api/track-record/ai-analysis", requireAuth, rateLimitByTier("track-record-ai", { free: 3, sharp: 10, edge: 20, max: 40, whale: 200 }, 3_600_000), async (_req: Request, res: Response) => {
     try {
       const { getTrackRecord } = await import("../calibrationEngine");
       const { createOpenAIClient } = await import("../openaiClient");

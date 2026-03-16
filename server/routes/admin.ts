@@ -6327,4 +6327,30 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  // ── Backup Management ─────────────────────────────────────────────────────
+
+  app.get("/api/admin/backups", requireAdmin, async (_req, res) => {
+    try {
+      const { listBackups } = await import("../backupService");
+      const backups = await listBackups();
+      res.json({ backups, count: backups.length });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/backups/run", requireAdmin, async (_req, res) => {
+    try {
+      const { runBackup } = await import("../backupService");
+      const result = await runBackup();
+      if (result.success) {
+        res.json({ success: true, key: result.key, sizeBytes: result.sizeBytes });
+      } else {
+        res.status(500).json({ success: false, error: result.error });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

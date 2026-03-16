@@ -2499,7 +2499,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     return res.redirect(307, "/api/live/assistant");
   });
 
-  app.post("/api/live/assistant", requireTier("pro", "elite", "whale"), async (req, res) => {
+  app.post("/api/live/assistant", requireTier("pro", "elite", "whale"), rateLimitByTier("ai-assistant", { pro: 20, elite: 40, whale: 200 }, 3_600_000), async (req, res) => {
     try {
       const { message } = req.body;
       if (!message) return res.status(400).json({ error: "Message required" });
