@@ -108,28 +108,34 @@ export async function loginUser(
       return { success: false, error: "Invalid credentials" };
     }
 
-    if (user.lockedUntil && new Date() < new Date(user.lockedUntil)) {
-      const remainingMins = Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 60000);
-      logWarn(`Login attempt on locked account: ${usernameOrEmail}`);
-      return { success: false, error: `Account locked. Try again in ${remainingMins} minutes` };
-    }
+    // Admins are never subject to lockout or bans — they must always have access
+    if (!user.isAdmin) {
+      if (user.lockedUntil && new Date() < new Date(user.lockedUntil)) {
+        const remainingMins = Math.ceil((new Date(user.lockedUntil).getTime() - Date.now()) / 60000);
+        logWarn(`Login attempt on locked account: ${usernameOrEmail}`);
+        return { success: false, error: `Account locked. Try again in ${remainingMins} minutes` };
+      }
 
-    if (user.isBanned) {
-      return { success: false, error: `Account suspended: ${user.banReason || "Contact support"}` };
+      if (user.isBanned) {
+        return { success: false, error: `Account suspended: ${user.banReason || "Contact support"}` };
+      }
     }
 
     const validPassword = await bcrypt.compare(password, user.passwordHash);
     
     if (!validPassword) {
-      const newAttempts = user.loginAttempts + 1;
-      const updates: any = { loginAttempts: newAttempts };
-      
-      if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
-        updates.lockedUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60000);
-        logWarn(`Account locked due to failed attempts: ${usernameOrEmail}`);
+      // Never lock or track failed attempts for admin accounts
+      if (!user.isAdmin) {
+        const newAttempts = user.loginAttempts + 1;
+        const updates: Partial<{ loginAttempts: number; lockedUntil: Date }> = { loginAttempts: newAttempts };
+        
+        if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+          updates.lockedUntil = new Date(Date.now() + LOCK_DURATION_MINUTES * 60000);
+          logWarn(`Account locked due to failed attempts: ${usernameOrEmail}`);
+        }
+        
+        await db.update(users).set(updates).where(eq(users.id, user.id));
       }
-      
-      await db.update(users).set(updates).where(eq(users.id, user.id));
       return { success: false, error: "Invalid credentials" };
     }
 

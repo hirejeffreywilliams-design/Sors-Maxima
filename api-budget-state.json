@@ -11,7 +11,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-16T14:17:50.985Z"
+      "lastSeasonCheck": "2026-03-16T14:25:47.179Z"
     },
     "apifootball": {
       "currentUsage": 612,
@@ -23,10 +23,10 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-16T14:17:50.985Z"
+      "lastSeasonCheck": "2026-03-16T14:25:47.179Z"
     },
     "balldontlie": {
-      "currentUsage": 5389,
+      "currentUsage": 5396,
       "manualRemaining": null,
       "lastReported": null,
       "monthReset": "2026-03-01T00:00:00.000Z",
@@ -1946,13 +1946,41 @@
         {
           "ts": 1773670712747,
           "count": 1
+        },
+        {
+          "ts": 1773671067699,
+          "count": 1
+        },
+        {
+          "ts": 1773671124787,
+          "count": 1
+        },
+        {
+          "ts": 1773671124832,
+          "count": 1
+        },
+        {
+          "ts": 1773671125055,
+          "count": 1
+        },
+        {
+          "ts": 1773671160799,
+          "count": 1
+        },
+        {
+          "ts": 1773671160845,
+          "count": 1
+        },
+        {
+          "ts": 1773671160872,
+          "count": 1
         }
       ],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-16T14:17:50.985Z"
+      "lastSeasonCheck": "2026-03-16T14:25:47.179Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -1964,7 +1992,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-16T14:17:50.985Z"
+      "lastSeasonCheck": "2026-03-16T14:25:47.179Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -1976,10 +2004,10 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-03-16T14:17:50.985Z"
+      "lastSeasonCheck": "2026-03-16T14:25:47.179Z"
     }
   },
   "activeUsers": 4,
-  "lastSaved": "2026-03-16T14:23:02.513Z",
+  "lastSaved": "2026-03-16T14:26:00.872Z",
   "alerts": []
 }
