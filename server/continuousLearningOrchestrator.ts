@@ -604,7 +604,7 @@ async function runLearningWeightUpdate(): Promise<void> {
           let brierSum = 0;
           for (const p of settledPredictions) {
             const actual = p.actualResult === "won" ? 1 : 0;
-            const predicted = p.predictedProbability ?? 0.5;
+            const predicted = p.predictedWinProb ?? 0.5;
             brierSum += (predicted - actual) ** 2;
           }
           brierScore = brierSum / settledPredictions.length;

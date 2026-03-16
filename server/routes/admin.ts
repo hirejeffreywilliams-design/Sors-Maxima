@@ -1783,7 +1783,7 @@ Identify ALL real issues. Only suggest autoFixable=true if the fix action would 
           COUNT(DISTINCT pick_id) as unique_picks
         FROM pick_feedback
       `);
-      const fb = feedbackStats.rows[0] as any;
+      const fb = feedbackStats.rows[0] as { total_votes: string; total_up: string; total_down: string; unique_voters: string; unique_picks: string } | undefined;
 
       res.json({
         snapshots: snapshotSummary,
