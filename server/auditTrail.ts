@@ -3,6 +3,23 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { logWarn } from "./errorLogger";
 
+interface AuditDbRow {
+  audit_id: string;
+  user_id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  before_state: Record<string, unknown> | null;
+  after_state: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
+  ip: string | null;
+  user_agent: string | null;
+  created_at: string;
+}
+
+interface ActionCountRow { action: string; cnt: string }
+interface StatsRow { total: string; unique_users: string; oldest: string | null; newest: string | null }
+
 interface AuditEntry {
   id: string;
   timestamp: string;
@@ -109,8 +126,8 @@ class AuditTrail {
         )
         ON CONFLICT (audit_id) DO NOTHING
       `);
-    } catch (err: any) {
-      logWarn(`[AuditTrail] Failed to persist entry ${entry.id}: ${err.message}`);
+    } catch (err: unknown) {
+      logWarn(`[AuditTrail] Failed to persist entry ${entry.id}: ${(err as Error).message}`);
     }
   }
 
@@ -138,7 +155,7 @@ class AuditTrail {
         FROM audit_trail WHERE ${whereClause} ORDER BY created_at DESC LIMIT ${lim}
       `);
 
-      return (result.rows as any[]).map(r => ({
+      return (result.rows as AuditDbRow[]).map(r => ({
         id: r.audit_id,
         timestamp: r.created_at,
         userId: r.user_id,
@@ -151,8 +168,8 @@ class AuditTrail {
         ip: r.ip || undefined,
         userAgent: r.user_agent || undefined,
       }));
-    } catch (err: any) {
-      logWarn(`[AuditTrail] DB query failed, falling back to memory: ${err.message}`);
+    } catch (err: unknown) {
+      logWarn(`[AuditTrail] DB query failed, falling back to memory: ${(err as Error).message}`);
       let result = [...this.memoryBuffer];
       if (options?.userId) result = result.filter(e => e.userId === options.userId);
       if (options?.action) result = result.filter(e => e.action === options.action);
@@ -172,7 +189,7 @@ class AuditTrail {
         SELECT audit_id, user_id, action, entity_type, entity_id, before_state, after_state, metadata, ip, user_agent, created_at
         FROM audit_trail WHERE audit_id = ${id} LIMIT 1
       `);
-      const r = result.rows[0] as any;
+      const r = result.rows[0] as AuditDbRow | undefined;
       if (!r) return undefined;
       return {
         id: r.audit_id,
@@ -217,10 +234,10 @@ class AuditTrail {
       `);
 
       const actionCounts: Record<string, number> = {};
-      for (const row of result.rows as any[]) {
+      for (const row of result.rows as ActionCountRow[]) {
         actionCounts[row.action] = parseInt(row.cnt);
       }
-      const stats = totalResult.rows[0] as any;
+      const stats = totalResult.rows[0] as StatsRow | undefined;
 
       return {
         total: parseInt(stats?.total || "0"),
@@ -231,8 +248,8 @@ class AuditTrail {
           newest: stats?.newest || null,
         },
       };
-    } catch (err: any) {
-      logWarn(`[AuditTrail] Stats query failed: ${err.message}`);
+    } catch (err: unknown) {
+      logWarn(`[AuditTrail] Stats query failed: ${(err as Error).message}`);
       return { total: 0, actionCounts: {}, uniqueUsers: 0, timeRange: { oldest: null, newest: null } };
     }
   }

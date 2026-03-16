@@ -1,12 +1,15 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useSEO } from "@/hooks/use-seo";
 import {
   Brain, ThumbsUp, ThumbsDown, Activity, Database, Clock,
-  TrendingUp, TrendingDown, BarChart3, Shield, Zap, History, Target
+  TrendingUp, TrendingDown, BarChart3, Shield, Zap, History, Target,
+  ChevronLeft, ChevronRight
 } from "lucide-react";
 
 interface SnapshotSummary {
@@ -77,6 +80,21 @@ interface SnapshotDelta {
   created_at: string;
 }
 
+interface AuditEntry {
+  audit_id: string;
+  user_id: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
+interface AuditTrailResponse {
+  entries: AuditEntry[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
 function formatDate(dateStr: string | null) {
   if (!dateStr) return "N/A";
   return new Date(dateStr).toLocaleString();
@@ -94,6 +112,7 @@ function triggerLabel(trigger: string): string {
 
 export default function AdminLearning() {
   useSEO({ title: "Learning System | Admin", description: "Model learning, pick feedback, and audit trail metrics." });
+  const [auditPage, setAuditPage] = useState(1);
 
   const { data: metrics, isLoading: metricsLoading } = useQuery<LearningMetrics>({
     queryKey: ["/api/admin/learning/metrics"],
@@ -105,6 +124,11 @@ export default function AdminLearning() {
 
   const { data: feedbackStats, isLoading: feedbackLoading } = useQuery<FeedbackStats>({
     queryKey: ["/api/admin/pick-feedback/stats"],
+  });
+
+  const { data: auditTrailData, isLoading: auditTrailLoading } = useQuery<AuditTrailResponse>({
+    queryKey: ["/api/admin/audit-trail", auditPage],
+    queryFn: () => fetch(`/api/admin/audit-trail?page=${auditPage}&limit=20`).then(r => r.json()),
   });
 
   return (
@@ -526,6 +550,82 @@ export default function AdminLearning() {
                     </CardContent>
                   </Card>
                 </div>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-primary" />
+                      Audit Event Log
+                    </CardTitle>
+                    <CardDescription>Paginated view of all audit trail entries</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {auditTrailLoading ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">Loading events...</p>
+                    ) : auditTrailData && auditTrailData.entries.length > 0 ? (
+                      <>
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm" data-testid="table-audit-events">
+                            <thead>
+                              <tr className="border-b border-border text-left">
+                                <th className="pb-2 pr-3 text-muted-foreground font-medium text-xs">Time</th>
+                                <th className="pb-2 pr-3 text-muted-foreground font-medium text-xs">Action</th>
+                                <th className="pb-2 pr-3 text-muted-foreground font-medium text-xs">Entity</th>
+                                <th className="pb-2 pr-3 text-muted-foreground font-medium text-xs">User</th>
+                                <th className="pb-2 text-muted-foreground font-medium text-xs">Details</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {auditTrailData.entries.map((entry) => (
+                                <tr key={entry.audit_id} className="border-b border-border/30 last:border-0" data-testid={`row-audit-${entry.audit_id}`}>
+                                  <td className="py-2 pr-3 text-[10px] text-muted-foreground whitespace-nowrap">{formatDate(entry.created_at)}</td>
+                                  <td className="py-2 pr-3">
+                                    <Badge variant="outline" className="text-[9px] font-mono">{entry.action.replace(/_/g, " ")}</Badge>
+                                  </td>
+                                  <td className="py-2 pr-3 text-xs">
+                                    <span className="text-muted-foreground">{entry.entity_type}/</span>
+                                    <span className="font-mono truncate max-w-[120px] inline-block align-bottom">{entry.entity_id}</span>
+                                  </td>
+                                  <td className="py-2 pr-3 text-xs font-mono text-muted-foreground">{entry.user_id}</td>
+                                  <td className="py-2 text-[10px] text-muted-foreground max-w-[200px] truncate">
+                                    {entry.metadata ? JSON.stringify(entry.metadata).slice(0, 80) : "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+                          <span className="text-xs text-muted-foreground" data-testid="text-audit-pagination">
+                            Page {auditTrailData.pagination.page} of {auditTrailData.pagination.totalPages} ({auditTrailData.pagination.total} entries)
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={auditPage <= 1}
+                              onClick={() => setAuditPage(p => Math.max(1, p - 1))}
+                              data-testid="button-audit-prev"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={auditPage >= auditTrailData.pagination.totalPages}
+                              onClick={() => setAuditPage(p => p + 1)}
+                              data-testid="button-audit-next"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted-foreground text-center py-4">No audit events recorded yet</p>
+                    )}
+                  </CardContent>
+                </Card>
 
                 <Card className="border-blue-500/20 bg-blue-500/5">
                   <CardContent className="py-3 px-4">

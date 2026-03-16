@@ -4,6 +4,40 @@ import { logInfo, logWarn } from "./errorLogger";
 
 let snapshotCounter = 0;
 
+interface SnapshotRow {
+  id: number;
+  version: string;
+  engine: string;
+  weights: unknown;
+  metrics: unknown;
+  trigger: string;
+  sport: string | null;
+  market_type: string | null;
+  predictions_since_last: number;
+  accuracy_at_snapshot: number | null;
+  label: string | null;
+  notes: string | null;
+  accuracy: number | null;
+  brier_score: number | null;
+  home_win_rate: number | null;
+  spread_cover_rate: number | null;
+  created_at: string;
+}
+
+interface DeltaRow {
+  version: string;
+  engine: string;
+  current_accuracy: number | null;
+  prev_accuracy: number | null;
+  accuracy_delta: string | null;
+  created_at: string;
+}
+
+interface CountRow { cnt: string }
+interface EngineRow { engine: string; cnt: string; latest: string | null }
+interface TriggerRow { trigger: string; cnt: string }
+interface AvgAccRow { avg_acc: string | null }
+
 export async function recordModelSnapshot(params: {
   engine: string;
   weights: Record<string, unknown>;
@@ -50,13 +84,13 @@ export async function recordModelSnapshot(params: {
     `);
     logInfo(`[ModelSnapshot] Recorded snapshot ${version} for engine=${params.engine} trigger=${params.trigger}`);
     return version;
-  } catch (err: any) {
-    logWarn(`[ModelSnapshot] Failed to record snapshot: ${err.message}`);
+  } catch (err: unknown) {
+    logWarn(`[ModelSnapshot] Failed to record snapshot: ${(err as Error).message}`);
     return version;
   }
 }
 
-export async function getLatestSnapshots(engine?: string, limit = 20): Promise<any[]> {
+export async function getLatestSnapshots(engine?: string, limit = 20): Promise<SnapshotRow[]> {
   const cols = `id, version, engine, weights, metrics, trigger, sport, market_type,
     predictions_since_last, accuracy_at_snapshot, label, notes,
     accuracy, brier_score, home_win_rate, spread_cover_rate, created_at`;
@@ -69,7 +103,7 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
         ORDER BY created_at DESC
         LIMIT ${limit}
       `);
-      return result.rows as any[];
+      return result.rows as SnapshotRow[];
     }
     const result = await db.execute(sql`
       SELECT ${sql.raw(cols)}
@@ -77,14 +111,14 @@ export async function getLatestSnapshots(engine?: string, limit = 20): Promise<a
       ORDER BY created_at DESC
       LIMIT ${limit}
     `);
-    return result.rows as any[];
-  } catch (err: any) {
-    logWarn(`[ModelSnapshot] Failed to fetch snapshots: ${err.message}`);
+    return result.rows as SnapshotRow[];
+  } catch (err: unknown) {
+    logWarn(`[ModelSnapshot] Failed to fetch snapshots: ${(err as Error).message}`);
     return [];
   }
 }
 
-export async function getSnapshotDeltas(engine?: string, limit = 10): Promise<any[]> {
+export async function getSnapshotDeltas(engine?: string, limit = 10): Promise<DeltaRow[]> {
   try {
     const engineFilter = engine ? sql`WHERE engine = ${engine}` : sql``;
     const result = await db.execute(sql`
@@ -105,9 +139,9 @@ export async function getSnapshotDeltas(engine?: string, limit = 10): Promise<an
       ORDER BY s1.created_at DESC
       LIMIT ${limit}
     `);
-    return result.rows as any[];
-  } catch (err: any) {
-    logWarn(`[ModelSnapshot] Delta query failed: ${err.message}`);
+    return result.rows as DeltaRow[];
+  } catch (err: unknown) {
+    logWarn(`[ModelSnapshot] Delta query failed: ${(err as Error).message}`);
     return [];
   }
 }
@@ -120,13 +154,14 @@ export async function getSnapshotSummary(): Promise<{
 }> {
   try {
     const totalResult = await db.execute(sql`SELECT COUNT(*) as cnt FROM model_snapshots`);
-    const totalSnapshots = parseInt((totalResult.rows[0] as any)?.cnt || "0");
+    const countRow = totalResult.rows[0] as CountRow | undefined;
+    const totalSnapshots = parseInt(countRow?.cnt || "0");
 
     const enginesResult = await db.execute(sql`
       SELECT engine, COUNT(*) as cnt, MAX(created_at) as latest
       FROM model_snapshots GROUP BY engine ORDER BY cnt DESC
     `);
-    const engines = (enginesResult.rows as any[]).map(r => ({
+    const engines = (enginesResult.rows as EngineRow[]).map(r => ({
       engine: r.engine,
       count: parseInt(r.cnt),
       latest: r.latest,
@@ -136,7 +171,7 @@ export async function getSnapshotSummary(): Promise<{
       SELECT trigger, COUNT(*) as cnt
       FROM model_snapshots GROUP BY trigger ORDER BY cnt DESC
     `);
-    const recentTriggers = (triggersResult.rows as any[]).map(r => ({
+    const recentTriggers = (triggersResult.rows as TriggerRow[]).map(r => ({
       trigger: r.trigger,
       count: parseInt(r.cnt),
     }));
@@ -145,11 +180,12 @@ export async function getSnapshotSummary(): Promise<{
       SELECT ROUND(AVG(accuracy_at_snapshot)::numeric, 2) as avg_acc
       FROM model_snapshots WHERE accuracy_at_snapshot IS NOT NULL
     `);
-    const avgAccuracy = accResult.rows[0] ? parseFloat((accResult.rows[0] as any).avg_acc) || null : null;
+    const accRow = accResult.rows[0] as AvgAccRow | undefined;
+    const avgAccuracy = accRow ? parseFloat(accRow.avg_acc || "0") || null : null;
 
     return { totalSnapshots, engines, recentTriggers, avgAccuracy };
-  } catch (err: any) {
-    logWarn(`[ModelSnapshot] Summary query failed: ${err.message}`);
+  } catch (err: unknown) {
+    logWarn(`[ModelSnapshot] Summary query failed: ${(err as Error).message}`);
     return { totalSnapshots: 0, engines: [], recentTriggers: [], avgAccuracy: null };
   }
 }

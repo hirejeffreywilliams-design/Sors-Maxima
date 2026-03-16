@@ -5,6 +5,19 @@ import { requireAuth, requireAdmin } from "./helpers";
 import { auditTrail } from "../auditTrail";
 import { logWarn } from "../errorLogger";
 
+interface VoteRow { vote: string }
+interface CountRow { up_count: string; down_count: string }
+interface BatchCountRow { pick_id: string; up_count: string; down_count: string }
+interface BatchVoteRow { pick_id: string; vote: string }
+interface SummaryRow { total_votes: string; total_up: string; total_down: string; unique_voters: string; unique_picks: string }
+interface SportRow { sport: string; votes: string; up_count: string; down_count: string }
+interface GradeRow { grade: string; votes: string; up_count: string; down_count: string }
+interface Last30Row { total_votes: string; total_up: string; total_down: string; unique_voters: string }
+interface NegativeRow { pick_id: string; sport: string; bet_type: string; created_at: string; username: string }
+interface HelpfulnessRow { pick_id: string; ups: string; downs: string; total: string }
+interface CountOnlyRow { cnt: string }
+interface AuditRow { audit_id: string; user_id: string; action: string; entity_type: string; entity_id: string; metadata: unknown; created_at: string }
+
 export function registerPickFeedbackRoutes(app: Express) {
   app.post("/api/picks/:pickId/feedback", requireAuth, async (req, res) => {
     try {
@@ -23,7 +36,8 @@ export function registerPickFeedbackRoutes(app: Express) {
       const existing = await db.execute(sql`
         SELECT vote FROM pick_feedback WHERE pick_id = ${pickId} AND user_id = ${userId} LIMIT 1
       `);
-      const existingVote = (existing.rows[0] as any)?.vote || null;
+      const existingRow = existing.rows[0] as VoteRow | undefined;
+      const existingVote = existingRow?.vote || null;
 
       let newVote: string | null;
       if (existingVote === vote) {
@@ -60,8 +74,8 @@ export function registerPickFeedbackRoutes(app: Express) {
             result: newVote === "up" ? "won" : "lost",
           });
         }
-      } catch (learnErr: any) {
-        logWarn(`[PickFeedback] Learning engine update failed: ${learnErr.message}`);
+      } catch (learnErr: unknown) {
+        logWarn(`[PickFeedback] Learning engine update failed: ${(learnErr as Error).message}`);
       }
 
       const counts = await db.execute(sql`
@@ -70,7 +84,7 @@ export function registerPickFeedbackRoutes(app: Express) {
           SUM(CASE WHEN vote = 'down' THEN 1 ELSE 0 END) as down_count
         FROM pick_feedback WHERE pick_id = ${pickId}
       `);
-      const row = counts.rows[0] as any;
+      const row = counts.rows[0] as CountRow | undefined;
 
       res.json({
         success: true,
@@ -79,8 +93,8 @@ export function registerPickFeedbackRoutes(app: Express) {
         upCount: parseInt(row?.up_count || "0"),
         downCount: parseInt(row?.down_count || "0"),
       });
-    } catch (err: any) {
-      console.error("[PickFeedback] Submit error:", err.message);
+    } catch (err: unknown) {
+      console.error("[PickFeedback] Submit error:", (err as Error).message);
       res.status(500).json({ error: "Failed to submit pick feedback" });
     }
   });
@@ -96,14 +110,15 @@ export function registerPickFeedbackRoutes(app: Express) {
           SUM(CASE WHEN vote = 'down' THEN 1 ELSE 0 END) as down_count
         FROM pick_feedback WHERE pick_id = ${pickId}
       `);
-      const row = counts.rows[0] as any;
+      const row = counts.rows[0] as CountRow | undefined;
 
       let userVote: string | null = null;
       if (userId) {
         const userResult = await db.execute(sql`
           SELECT vote FROM pick_feedback WHERE pick_id = ${pickId} AND user_id = ${userId} LIMIT 1
         `);
-        userVote = (userResult.rows[0] as any)?.vote || null;
+        const voteRow = userResult.rows[0] as VoteRow | undefined;
+        userVote = voteRow?.vote || null;
       }
 
       res.json({
@@ -112,7 +127,7 @@ export function registerPickFeedbackRoutes(app: Express) {
         upCount: parseInt(row?.up_count || "0"),
         downCount: parseInt(row?.down_count || "0"),
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       res.status(500).json({ error: "Failed to fetch pick feedback" });
     }
   });
@@ -136,7 +151,7 @@ export function registerPickFeedbackRoutes(app: Express) {
       `);
 
       const result: Record<string, { upCount: number; downCount: number; userVote: string | null }> = {};
-      for (const row of countsResult.rows as any[]) {
+      for (const row of countsResult.rows as BatchCountRow[]) {
         result[row.pick_id] = {
           upCount: parseInt(row.up_count || "0"),
           downCount: parseInt(row.down_count || "0"),
@@ -148,7 +163,7 @@ export function registerPickFeedbackRoutes(app: Express) {
         const votesResult = await db.execute(sql`
           SELECT pick_id, vote FROM pick_feedback WHERE user_id = ${userId} AND pick_id IN (${inClause})
         `);
-        for (const row of votesResult.rows as any[]) {
+        for (const row of votesResult.rows as BatchVoteRow[]) {
           if (result[row.pick_id]) {
             result[row.pick_id].userVote = row.vote;
           } else {
@@ -162,7 +177,7 @@ export function registerPickFeedbackRoutes(app: Express) {
       }
 
       res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       res.status(500).json({ error: "Failed to fetch batch feedback" });
     }
   });
@@ -231,32 +246,32 @@ export function registerPickFeedbackRoutes(app: Express) {
         LIMIT 10
       `);
 
-      const stats = summary.rows[0] as any;
-      const last30 = last30Days.rows[0] as any;
+      const stats = summary.rows[0] as SummaryRow | undefined;
+      const last30 = last30Days.rows[0] as Last30Row | undefined;
       res.json({
         totalVotes: parseInt(stats?.total_votes || "0"),
         totalUp: parseInt(stats?.total_up || "0"),
         totalDown: parseInt(stats?.total_down || "0"),
         uniqueVoters: parseInt(stats?.unique_voters || "0"),
         uniquePicks: parseInt(stats?.unique_picks || "0"),
-        helpfulnessRate: stats?.total_votes > 0
+        helpfulnessRate: stats?.total_votes && parseInt(stats.total_votes) > 0
           ? Math.round((parseInt(stats.total_up) / parseInt(stats.total_votes)) * 100)
           : 0,
-        bySport: bySport.rows,
-        byGrade: byGrade.rows,
+        bySport: bySport.rows as SportRow[],
+        byGrade: byGrade.rows as GradeRow[],
         last30Days: {
           totalVotes: parseInt(last30?.total_votes || "0"),
           totalUp: parseInt(last30?.total_up || "0"),
           totalDown: parseInt(last30?.total_down || "0"),
           uniqueVoters: parseInt(last30?.unique_voters || "0"),
-          helpfulnessRate: last30?.total_votes > 0
+          helpfulnessRate: last30?.total_votes && parseInt(last30.total_votes) > 0
             ? Math.round((parseInt(last30.total_up) / parseInt(last30.total_votes)) * 100)
             : 0,
         },
-        recentNegative: recentNegative.rows,
-        lowestRated: helpfulness.rows,
+        recentNegative: recentNegative.rows as NegativeRow[],
+        lowestRated: helpfulness.rows as HelpfulnessRow[],
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       res.status(500).json({ error: "Failed to fetch pick feedback stats" });
     }
   });
@@ -286,9 +301,10 @@ export function registerPickFeedbackRoutes(app: Express) {
         `),
       ]);
 
-      const total = parseInt((countResult.rows[0] as any)?.cnt || "0");
+      const countRow = countResult.rows[0] as CountOnlyRow | undefined;
+      const total = parseInt(countRow?.cnt || "0");
       res.json({
-        entries: entriesResult.rows,
+        entries: entriesResult.rows as AuditRow[],
         pagination: {
           page,
           limit,
@@ -296,7 +312,7 @@ export function registerPickFeedbackRoutes(app: Express) {
           totalPages: Math.ceil(total / limit),
         },
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       res.status(500).json({ error: "Failed to fetch audit trail" });
     }
   });
