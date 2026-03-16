@@ -22910,15 +22910,35 @@
       "homeScore": 3,
       "awayScore": 2,
       "settledAt": "2026-03-16T03:40:07.824Z"
+    },
+    {
+      "id": "precomp-NHL-401803415-spread-39cbb69a22",
+      "gameId": "401803415",
+      "sport": "NHL",
+      "game": "Boston Bruins @ New Jersey Devils",
+      "homeTeam": "New Jersey Devils",
+      "awayTeam": "Boston Bruins",
+      "pick": "New Jersey Devils -1.5",
+      "betType": "spread",
+      "odds": 188,
+      "grade": "D+",
+      "confidence": 53,
+      "ev": 32.48,
+      "gameTime": "2026-03-16T23:00Z",
+      "savedAt": "2026-03-16T13:35:32.787Z",
+      "result": "lost",
+      "homeScore": 2,
+      "awayScore": 3,
+      "settledAt": "2026-03-16T13:36:39.765Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1056,
+      "total": 1057,
       "won": 585,
-      "lost": 453,
+      "lost": 454,
       "push": 18,
-      "rate": 55.4,
+      "rate": 55.3,
       "pending": 91
     },
     "bySport": {
@@ -22928,9 +22948,9 @@
         "rate": 56
       },
       "NHL": {
-        "total": 368,
+        "total": 369,
         "won": 195,
-        "rate": 53
+        "rate": 52.8
       },
       "NCAAB": {
         "total": 331,
@@ -22960,9 +22980,9 @@
         "rate": 58.2
       },
       "D+": {
-        "total": 48,
+        "total": 49,
         "won": 25,
-        "rate": 52.1
+        "rate": 51
       },
       "C-": {
         "total": 81,
@@ -23003,10 +23023,10 @@
         "roi": 21.9
       },
       "Spread": {
-        "total": 335,
+        "total": 336,
         "won": 183,
-        "rate": 54.6,
-        "roi": 7.3
+        "rate": 54.5,
+        "roi": 6.9
       },
       "Total": {
         "total": 334,
@@ -23027,23 +23047,23 @@
       "push": 1,
       "rate": 58
     },
-    "lastUpdated": "2026-03-16T04:29:16.437Z",
-    "roi": 11.4,
-    "brierScore": 0.2557,
+    "lastUpdated": "2026-03-16T13:36:39.769Z",
+    "roi": 11.3,
+    "brierScore": 0.2558,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.093,
+    "sharpeRatio": 0.092,
     "homeAwayBias": {
-      "homeWinRate": 58.9,
+      "homeWinRate": 58.8,
       "awayWinRate": 45.3,
-      "homeTotal": 538,
+      "homeTotal": 539,
       "awayTotal": 106
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 52.9,
-        "actual": 59.8,
-        "total": 132
+        "actual": 59.4,
+        "total": 133
       },
       {
         "range": "55-60",
