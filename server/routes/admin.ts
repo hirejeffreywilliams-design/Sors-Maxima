@@ -5212,13 +5212,17 @@ Follow these rules:
       const formStatus = getFormCacheStatus();
       const insightCacheSize = getInsightCacheSize();
 
-      let aiStatus: "live" | "degraded" | "offline" = "live";
-      try {
-        const raw = fs.readFileSync("ai-error-state.json", "utf-8");
-        const aiState = JSON.parse(raw);
-        if (aiState?.quota_exceeded) aiStatus = "offline";
-        else if (aiState?.error_count > 0) aiStatus = "degraded";
-      } catch {}
+      // Determine true AI status: must have a valid key AND no error circuit open
+      const { isOpenAIAvailable: checkOpenAIKey } = await import("../openaiClient");
+      let aiStatus: "live" | "degraded" | "offline" = checkOpenAIKey() ? "live" : "offline";
+      if (aiStatus === "live") {
+        try {
+          const raw = fs.readFileSync("ai-error-state.json", "utf-8");
+          const aiState = JSON.parse(raw);
+          if (aiState?.quota_exceeded) aiStatus = "offline";
+          else if (aiState?.error_count > 0) aiStatus = "degraded";
+        } catch {}
+      }
 
       const sourceMap: Record<string, string> = {};
       for (const src of (dataSources.sources || [])) {
@@ -5232,12 +5236,13 @@ Follow these rules:
         } catch { return 0; }
       })();
 
-      const espn = sourceMap["espn"] || "live";
+      const espn = sourceMap["espn"] || "unknown";
       const oddsApi = sourceMap["odds-api"] || "unknown";
-      const bdl = isBDLAvailable() ? "live" : (sourceMap["bdl"] || "cached");
+      const bdl = sourceMap["bdl"] || (isBDLAvailable() ? "cached" : "offline");
       const nhl = sourceMap["nhl-stats"] || "cached";
       const mlb = sourceMap["mlb-stats"] || "cached";
-      const apifootball = sourceMap["api-football"] || "cached";
+      const apifootball = sourceMap["api-football"] || "unknown";
+      const stripeConfigured = !!(process.env.STRIPE_SECRET_KEY?.trim());
 
       // Enrich metrics: pull live counts from available engine data
       let precomputedGames = 0;
@@ -5285,11 +5290,19 @@ Follow these rules:
       } catch {}
 
       // Derive smart statuses from actual engine cache data
+      // "live" only when data is actively flowing, not just because cache exists
       const precomputedStatus: string = precomputedCacheHasPicks ? "live" : (precomputedTotalRuns > 0 ? "cached" : "cached");
       const formSt: string = formStatus.totalTeams > 0 ? "live" : "cached";
-      const usmlStatus: string = learningCycles > 0 || learningWeights > 0 ? "live" : (precomputedCacheHasPicks ? "live" : "cached");
-      const lifeChangerStatus: string = lifeChangerActive ? "live" : "cached";
+      // USML: only "live" if the learning engine has actually run calibration cycles
+      const usmlStatus: string = (learningCycles > 0 || learningWeights > 0) ? "live" : "cached";
+      // Daily Edge Parlay: "live" only if engine has run AND there are cached picks
+      const lifeChangerStatus: string = (lifeChangerActive && precomputedTotalRuns > 0) ? "live" : "cached";
       const dailyPicksStatus: string = precomputedCacheHasPicks ? "live" : "cached";
+      // Command Center: fully "live" requires Stripe (upgrades work) + picks surfaced;
+      // "degraded" if Stripe is missing but picks still serve; "cached" if no picks yet
+      const commandCenterStatus: string = precomputedCacheHasPicks
+        ? (stripeConfigured ? "live" : "degraded")
+        : "cached";
 
       const picksToday = precomputedPicks || pipelineHealth.metrics?.picksGenerated || 0;
       const gamesAnalyzed = precomputedGames || pipelineHealth.metrics?.gamesAnalyzed || 0;
@@ -5345,7 +5358,7 @@ Follow these rules:
         "pick-insight":   { status: insightCacheSize > 0 ? "live" : (aiStatus === "live" ? "cached" : "offline"), label: "Pick Insight Engine",
           detail: "AI sharp edge analysis per pick",
           metrics: { a: `${insightCacheSize} AI insights in cache`, b: "Sharp edge · Market Gap™", c: "Sors Conviction Score™ output" } },
-        "correlation":    { status: "live",            label: "Correlation Engine",
+        "correlation":    { status: precomputedCacheHasPicks ? "live" : "cached", label: "Correlation Engine",
           detail: "Live slip conflict detection",
           metrics: { a: "0–100 Leg Correlation Score™", b: "Conflict · EV · Concentration", c: "Parlay validator real-time" } },
         "usml":           { status: usmlStatus, label: "USML Meta-Learner",
@@ -5354,10 +5367,10 @@ Follow these rules:
         "life-changer":   { status: lifeChangerStatus, label: "Daily Edge Parlay",
           detail: "Multi-sport daily ticket engine",
           metrics: { a: "5+ sport diversity filter", b: "Steam/trap pool analysis", c: "Life Changer ticket daily at midnight" } },
-        "command-center": { status: "live",            label: "Command Center",
+        "command-center": { status: commandCenterStatus, label: "Command Center",
           detail: "Today's best picks dashboard",
-          metrics: { a: `${picksToday || "—"} picks surfaced today`, b: "SSE live · Tier gate active", c: "Daily Edge · Smart tickets" } },
-        "bet-slip":       { status: "live",            label: "Bet Slip",
+          metrics: { a: `${picksToday || "—"} picks surfaced today`, b: `SSE live · ${stripeConfigured ? "Stripe active" : "⚠ Stripe missing"}`, c: "Daily Edge · Smart tickets" } },
+        "bet-slip":       { status: espn === "live" || precomputedCacheHasPicks ? "live" : "cached", label: "Bet Slip",
           detail: "Multi-slip parlay builder",
           metrics: { a: "Up to 5 independent slips", b: "Correlation panel · Kelly sizing", c: "One-tap share · Live payout calc" } },
         "ticket-vars":    { status: aiStatus === "live" ? "live" : "degraded", label: "Ticket Variations",
@@ -5375,7 +5388,7 @@ Follow these rules:
         "cards-engine":   { status: precomputedCacheHasPicks ? "live" : "cached", label: "Sors Cards Engine",
           detail: "Collectible pick cards · Crypto-signed wins",
           metrics: { a: "SHA-256 card signatures active", b: "Daily pack generation · Trade system", c: "SORS CERTIFIED badges · Holographic UI" } },
-        "research-notes": { status: "live", label: "Research Notes",
+        "research-notes": { status: precomputedCacheHasPicks || formStatus.totalTeams > 0 ? "live" : "cached", label: "Research Notes",
           detail: "Personal betting research notebook",
           metrics: { a: "CRUD notes · 6 note types · Tags", b: "Pick/team/parlay/game/line notes", c: "Search · Filter · Pin-to-top" } },
       };
@@ -5423,8 +5436,7 @@ Follow these rules:
       }
 
       // Check: OpenAI key (accepts either direct OPENAI_API_KEY or Replit AI integration)
-      const { isOpenAIAvailable: checkOpenAI } = await import("../openaiClient");
-      if (!checkOpenAI()) {
+      if (!checkOpenAIKey()) {
         dataQualityAlerts.push({
           id: "dqa-openai-key",
           severity: "critical",
@@ -5544,6 +5556,27 @@ Follow these rules:
       res.json({ nodes, summary, dataQualityAlerts, lastUpdated: new Date().toISOString() });
     } catch (err: any) {
       res.status(500).json({ error: "Visual status failed", detail: err.message });
+    }
+  });
+
+  // ── Pipeline Active Alerts ─────────────────────────────────────────────────────
+  app.get("/api/admin/pipeline/active-alerts", requireAdmin, async (_req, res) => {
+    try {
+      const { getActiveAlerts } = await import("../pipeline-alert-service");
+      res.json({ alerts: getActiveAlerts() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to fetch alerts", detail: err.message });
+    }
+  });
+
+  app.post("/api/admin/pipeline/acknowledge-alert/:id", requireAdmin, async (req, res) => {
+    try {
+      const { acknowledgeAlert } = await import("../pipeline-alert-service");
+      const ok = acknowledgeAlert(req.params.id);
+      if (!ok) return res.status(404).json({ error: "Alert not found" });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to acknowledge alert", detail: err.message });
     }
   });
 

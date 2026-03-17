@@ -370,6 +370,13 @@ function startEnginesPhased(): void {
   // Monitors live games and prop lines for user-subscribed alerts.
   safeStart("Notification Engine", startNotificationEngine, 70_000);
 
+  // ── Phase 8.5 (80s): Pipeline Alert Monitor ───────────────────────────────
+  // Polls node statuses every 60s. Detects live→offline transitions and runs
+  // OpenAI auto-diagnosis on degraded nodes. Stores alerts in pipeline-alerts.json.
+  safeStart("Pipeline Alert Monitor", () => {
+    import("./pipeline-alert-service").then(({ startAlertPolling }) => startAlertPolling()).catch(() => {});
+  }, 80_000);
+
   // ── Phase 9 (Background): Learning + Backtest ────────────────────────────
   // These engines do purely background work (model calibration, pattern mining,
   // backtest analysis). They are intentionally deferred to 5-12 minutes after

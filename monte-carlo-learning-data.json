@@ -1,435 +1,30 @@
 {
   "predictions": [
     {
-      "gameId": "401810796",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773627922166,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810798",
+      "gameId": "401810805",
       "sport": "NBA",
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922168,
-      "odds": 1.8130081300813008
-    },
-    {
-      "gameId": "401810798",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773627922170,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810798",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773627922173,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803368",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773627922174,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803368",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773627922177,
+      "timestamp": 1773706157488,
       "odds": 2.02
     },
     {
-      "gameId": "401810793",
+      "gameId": "401810805",
       "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773627922179,
-      "odds": 1.4716981132075473
-    },
-    {
-      "gameId": "401810799",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773627922181,
-      "odds": 2.0700000000000003
-    },
-    {
-      "gameId": "401810799",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773627922183,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810799",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773627922185,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810795",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773627922188,
-      "odds": 1.900900900900901
-    },
-    {
-      "gameId": "401810795",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773627922190,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810795",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773627922192,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810800",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773627922194,
-      "odds": 2.09
-    },
-    {
-      "gameId": "401803371",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773627922196,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803371",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773627922199,
-      "odds": 1.8130081300813008
-    },
-    {
-      "gameId": "401803372",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773627922202,
-      "odds": 1.8264462809917354
-    },
-    {
-      "gameId": "401803371",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773627922204,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803370",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773627922206,
-      "odds": 2.35
-    },
-    {
-      "gameId": "401803370",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773627922209,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803367",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773627922210,
-      "odds": 2.21
-    },
-    {
-      "gameId": "401803367",
-      "sport": "NHL",
       "market": "spread",
       "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773627922213,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851362",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.78,
-      "actualOutcome": 0,
-      "timestamp": 1773627922215,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851362",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.74,
-      "actualOutcome": 0,
-      "timestamp": 1773627922216,
-      "odds": 1.9174311926605505
-    },
-    {
-      "gameId": "401851362",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922218,
+      "timestamp": 1773706157491,
       "odds": 1.9090909090909092
     },
     {
-      "gameId": "401851760",
-      "sport": "NCAAB",
+      "gameId": "401810805",
+      "sport": "NBA",
       "market": "total",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773627922222,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851760",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.76,
+      "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627922225,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851759",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.74,
-      "actualOutcome": 0,
-      "timestamp": 1773627922227,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851759",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773627922229,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803372",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773627922231,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401803364",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773627922233,
-      "odds": 2.02
-    },
-    {
-      "gameId": "401803366",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773627922236,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803368",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773627922238,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803367",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773627922240,
-      "odds": 1.8064516129032258
-    },
-    {
-      "gameId": "401803370",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773627922242,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803373",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773627922326,
-      "odds": 1.7874015748031495
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773627922329,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810802",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773627922331,
-      "odds": 2.1
-    },
-    {
-      "gameId": "401810802",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773627922333,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810802",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773627922335,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810801",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.7,
-      "actualOutcome": 1,
-      "timestamp": 1773627922338,
-      "odds": 2.0300000000000002
-    },
-    {
-      "gameId": "401810801",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.7,
-      "actualOutcome": 1,
-      "timestamp": 1773627922339,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "401810801",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 0,
-      "timestamp": 1773627922341,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810804",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773627922343,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810804",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773627922346,
-      "odds": 3.12
-    },
-    {
-      "gameId": "401810803",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773627922348,
-      "odds": 2.8
-    },
-    {
-      "gameId": "401810803",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773627922350,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810803",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773627922352,
+      "timestamp": 1773706157493,
       "odds": 1.9090909090909092
     },
     {
@@ -438,43 +33,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627922354,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773627922356,
-      "odds": 2.02
-    },
-    {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773627922358,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773627922360,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773627922362,
+      "timestamp": 1773706157495,
       "odds": 1.9090909090909092
     },
     {
@@ -483,7 +42,7 @@
       "market": "moneyline",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627922365,
+      "timestamp": 1773706157499,
       "odds": 1.5555555555555556
     },
     {
@@ -492,7 +51,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627922367,
+      "timestamp": 1773706157501,
       "odds": 2.2800000000000002
     },
     {
@@ -501,7 +60,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922369,
+      "timestamp": 1773706157504,
       "odds": 2.2199999999999998
     },
     {
@@ -510,7 +69,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922371,
+      "timestamp": 1773706157507,
       "odds": 1.9090909090909092
     },
     {
@@ -519,7 +78,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922373,
+      "timestamp": 1773706157509,
       "odds": 1.9090909090909092
     },
     {
@@ -528,7 +87,7 @@
       "market": "moneyline",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922376,
+      "timestamp": 1773706157512,
       "odds": 1.819672131147541
     },
     {
@@ -537,7 +96,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627922378,
+      "timestamp": 1773706157514,
       "odds": 2.9
     },
     {
@@ -546,7 +105,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922380,
+      "timestamp": 1773706157517,
       "odds": 1.7575757575757576
     },
     {
@@ -555,7 +114,7 @@
       "market": "spread",
       "predictedProb": 0.79,
       "actualOutcome": 1,
-      "timestamp": 1773627922381,
+      "timestamp": 1773706157520,
       "odds": 1.9433962264150944
     },
     {
@@ -564,7 +123,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627922394,
+      "timestamp": 1773706157523,
       "odds": 1.7092198581560285
     },
     {
@@ -573,7 +132,7 @@
       "market": "total",
       "predictedProb": 0.72,
       "actualOutcome": 1,
-      "timestamp": 1773627922397,
+      "timestamp": 1773706157525,
       "odds": 1.8928571428571428
     },
     {
@@ -582,7 +141,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627922399,
+      "timestamp": 1773706157528,
       "odds": 1.9090909090909092
     },
     {
@@ -591,7 +150,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922401,
+      "timestamp": 1773706157530,
       "odds": 1.9523809523809523
     },
     {
@@ -600,7 +159,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922403,
+      "timestamp": 1773706157533,
       "odds": 1.8928571428571428
     },
     {
@@ -609,7 +168,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922405,
+      "timestamp": 1773706157536,
       "odds": 1.9090909090909092
     },
     {
@@ -618,7 +177,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627922407,
+      "timestamp": 1773706157539,
       "odds": 1.364963503649635
     },
     {
@@ -627,7 +186,7 @@
       "market": "spread",
       "predictedProb": 0.68,
       "actualOutcome": 1,
-      "timestamp": 1773627922409,
+      "timestamp": 1773706157541,
       "odds": 1.8695652173913042
     },
     {
@@ -636,7 +195,7 @@
       "market": "total",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627922411,
+      "timestamp": 1773706157544,
       "odds": 1.9090909090909092
     },
     {
@@ -645,7 +204,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922412,
+      "timestamp": 1773706157547,
       "odds": 1.9090909090909092
     },
     {
@@ -654,7 +213,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922414,
+      "timestamp": 1773706157549,
       "odds": 1.53475935828877
     },
     {
@@ -663,7 +222,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627922415,
+      "timestamp": 1773706157552,
       "odds": 1.9090909090909092
     },
     {
@@ -672,7 +231,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922416,
+      "timestamp": 1773706157555,
       "odds": 1.9090909090909092
     },
     {
@@ -681,7 +240,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922418,
+      "timestamp": 1773706157557,
       "odds": 1.53475935828877
     },
     {
@@ -690,7 +249,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922419,
+      "timestamp": 1773706157560,
       "odds": 1.9090909090909092
     },
     {
@@ -699,7 +258,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922421,
+      "timestamp": 1773706157563,
       "odds": 1.9090909090909092
     },
     {
@@ -708,7 +267,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922422,
+      "timestamp": 1773706157565,
       "odds": 1.5747126436781609
     },
     {
@@ -717,7 +276,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627922424,
+      "timestamp": 1773706157567,
       "odds": 1.9090909090909092
     },
     {
@@ -726,7 +285,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922425,
+      "timestamp": 1773706157570,
       "odds": 1.9090909090909092
     },
     {
@@ -735,7 +294,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922427,
+      "timestamp": 1773706157572,
       "odds": 1.62111801242236
     },
     {
@@ -744,7 +303,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922429,
+      "timestamp": 1773706157575,
       "odds": 1.9090909090909092
     },
     {
@@ -753,7 +312,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922430,
+      "timestamp": 1773706157578,
       "odds": 1.9090909090909092
     },
     {
@@ -762,7 +321,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922433,
+      "timestamp": 1773706157580,
       "odds": 1.5952380952380953
     },
     {
@@ -771,7 +330,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922435,
+      "timestamp": 1773706157583,
       "odds": 1.9090909090909092
     },
     {
@@ -780,7 +339,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922438,
+      "timestamp": 1773706157586,
       "odds": 1.9090909090909092
     },
     {
@@ -789,7 +348,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922439,
+      "timestamp": 1773706157590,
       "odds": 1.704225352112676
     },
     {
@@ -798,7 +357,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922442,
+      "timestamp": 1773706157593,
       "odds": 1.9090909090909092
     },
     {
@@ -807,7 +366,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922444,
+      "timestamp": 1773706157595,
       "odds": 1.9090909090909092
     },
     {
@@ -816,7 +375,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922446,
+      "timestamp": 1773706157597,
       "odds": 1.5747126436781609
     },
     {
@@ -825,7 +384,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922448,
+      "timestamp": 1773706157601,
       "odds": 1.9090909090909092
     },
     {
@@ -834,7 +393,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922449,
+      "timestamp": 1773706157603,
       "odds": 1.9090909090909092
     },
     {
@@ -843,7 +402,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922452,
+      "timestamp": 1773706157606,
       "odds": 1.704225352112676
     },
     {
@@ -852,7 +411,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922453,
+      "timestamp": 1773706157608,
       "odds": 1.9090909090909092
     },
     {
@@ -861,7 +420,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922455,
+      "timestamp": 1773706157611,
       "odds": 1.9090909090909092
     },
     {
@@ -870,7 +429,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922457,
+      "timestamp": 1773706157614,
       "odds": 1.9090909090909092
     },
     {
@@ -879,7 +438,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922459,
+      "timestamp": 1773706157617,
       "odds": 1.704225352112676
     },
     {
@@ -888,7 +447,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922461,
+      "timestamp": 1773706157619,
       "odds": 1.6756756756756757
     },
     {
@@ -897,7 +456,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922463,
+      "timestamp": 1773706157621,
       "odds": 1.9090909090909092
     },
     {
@@ -906,7 +465,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922466,
+      "timestamp": 1773706157624,
       "odds": 1.9090909090909092
     },
     {
@@ -915,7 +474,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922468,
+      "timestamp": 1773706157626,
       "odds": 1.9090909090909092
     },
     {
@@ -924,7 +483,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922471,
+      "timestamp": 1773706157629,
       "odds": 1.704225352112676
     },
     {
@@ -933,7 +492,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922473,
+      "timestamp": 1773706157632,
       "odds": 1.9090909090909092
     },
     {
@@ -942,7 +501,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922587,
+      "timestamp": 1773706157720,
       "odds": 1.9090909090909092
     },
     {
@@ -951,7 +510,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922589,
+      "timestamp": 1773706157723,
       "odds": 1.7407407407407407
     },
     {
@@ -960,7 +519,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922591,
+      "timestamp": 1773706157725,
       "odds": 1.9090909090909092
     },
     {
@@ -969,7 +528,7 @@
       "market": "spread",
       "predictedProb": 0.84,
       "actualOutcome": 0,
-      "timestamp": 1773627922592,
+      "timestamp": 1773706157728,
       "odds": 1.9090909090909092
     },
     {
@@ -978,7 +537,7 @@
       "market": "moneyline",
       "predictedProb": 0.78,
       "actualOutcome": 0,
-      "timestamp": 1773627922594,
+      "timestamp": 1773706157731,
       "odds": 1.62111801242236
     },
     {
@@ -987,7 +546,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922595,
+      "timestamp": 1773706157734,
       "odds": 1.9090909090909092
     },
     {
@@ -996,7 +555,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922597,
+      "timestamp": 1773706157736,
       "odds": 1.5154639175257731
     },
     {
@@ -1005,7 +564,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922612,
+      "timestamp": 1773706157739,
       "odds": 1.9090909090909092
     },
     {
@@ -1014,7 +573,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922613,
+      "timestamp": 1773706157741,
       "odds": 1.9090909090909092
     },
     {
@@ -1023,7 +582,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922615,
+      "timestamp": 1773706157745,
       "odds": 1.9090909090909092
     },
     {
@@ -1032,7 +591,7 @@
       "market": "total",
       "predictedProb": 0.78,
       "actualOutcome": 0,
-      "timestamp": 1773627922616,
+      "timestamp": 1773706157748,
       "odds": 1.8695652173913042
     },
     {
@@ -1041,7 +600,7 @@
       "market": "spread",
       "predictedProb": 0.67,
       "actualOutcome": 0,
-      "timestamp": 1773627922618,
+      "timestamp": 1773706157750,
       "odds": 1.9090909090909092
     },
     {
@@ -1050,7 +609,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922619,
+      "timestamp": 1773706157753,
       "odds": 1.9090909090909092
     },
     {
@@ -1059,7 +618,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922620,
+      "timestamp": 1773706157755,
       "odds": 2.34
     },
     {
@@ -1068,7 +627,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773627922695,
+      "timestamp": 1773706157758,
       "odds": 1.9090909090909092
     },
     {
@@ -1077,7 +636,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922697,
+      "timestamp": 1773706157760,
       "odds": 1.9090909090909092
     },
     {
@@ -1086,7 +645,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922698,
+      "timestamp": 1773706157763,
       "odds": 1.5154639175257731
     },
     {
@@ -1095,7 +654,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922700,
+      "timestamp": 1773706157766,
       "odds": 2.1100000000000003
     },
     {
@@ -1104,7 +663,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922701,
+      "timestamp": 1773706157768,
       "odds": 1.9090909090909092
     },
     {
@@ -1113,7 +672,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922703,
+      "timestamp": 1773706157771,
       "odds": 1.9090909090909092
     },
     {
@@ -1122,7 +681,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627922704,
+      "timestamp": 1773706157774,
       "odds": 2.15
     },
     {
@@ -1131,7 +690,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922705,
+      "timestamp": 1773706157776,
       "odds": 1.9090909090909092
     },
     {
@@ -1140,7 +699,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627922707,
+      "timestamp": 1773706157779,
       "odds": 2.2199999999999998
     },
     {
@@ -1149,7 +708,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922708,
+      "timestamp": 1773706157782,
       "odds": 1.9090909090909092
     },
     {
@@ -1158,7 +717,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922711,
+      "timestamp": 1773706157784,
       "odds": 1.9090909090909092
     },
     {
@@ -1167,7 +726,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922712,
+      "timestamp": 1773706157786,
       "odds": 1.9090909090909092
     },
     {
@@ -1176,7 +735,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773627922714,
+      "timestamp": 1773706157789,
       "odds": 1.9433962264150944
     },
     {
@@ -1185,7 +744,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922715,
+      "timestamp": 1773706157792,
       "odds": 1.8695652173913042
     },
     {
@@ -1194,7 +753,7 @@
       "market": "moneyline",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627922717,
+      "timestamp": 1773706157794,
       "odds": 1.8547008547008548
     },
     {
@@ -1203,7 +762,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922718,
+      "timestamp": 1773706157797,
       "odds": 1.9090909090909092
     },
     {
@@ -1212,7 +771,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922719,
+      "timestamp": 1773706157800,
       "odds": 1.8
     },
     {
@@ -1221,7 +780,7 @@
       "market": "moneyline",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922721,
+      "timestamp": 1773706157802,
       "odds": 1.9090909090909092
     },
     {
@@ -1230,7 +789,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922723,
+      "timestamp": 1773706157804,
       "odds": 1.819672131147541
     },
     {
@@ -1239,7 +798,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922724,
+      "timestamp": 1773706157807,
       "odds": 1.8620689655172413
     },
     {
@@ -1248,7 +807,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922726,
+      "timestamp": 1773706157810,
       "odds": 1.7874015748031495
     },
     {
@@ -1257,7 +816,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922727,
+      "timestamp": 1773706157812,
       "odds": 1.9090909090909092
     },
     {
@@ -1266,7 +825,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922728,
+      "timestamp": 1773706157816,
       "odds": 2.5
     },
     {
@@ -1275,7 +834,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627922730,
+      "timestamp": 1773706157819,
       "odds": 2.29
     },
     {
@@ -1284,7 +843,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922732,
+      "timestamp": 1773706157831,
       "odds": 1.9090909090909092
     },
     {
@@ -1293,7 +852,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922733,
+      "timestamp": 1773706157834,
       "odds": 1.9090909090909092
     },
     {
@@ -1302,7 +861,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922734,
+      "timestamp": 1773706157837,
       "odds": 1.9090909090909092
     },
     {
@@ -1311,7 +870,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922735,
+      "timestamp": 1773706157839,
       "odds": 1.9090909090909092
     },
     {
@@ -1320,7 +879,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773627922737,
+      "timestamp": 1773706157842,
       "odds": 1.9090909090909092
     },
     {
@@ -1329,7 +888,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922738,
+      "timestamp": 1773706157846,
       "odds": 3.47
     },
     {
@@ -1338,7 +897,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922740,
+      "timestamp": 1773706157849,
       "odds": 1.9090909090909092
     },
     {
@@ -1347,7 +906,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922741,
+      "timestamp": 1773706157851,
       "odds": 1.9090909090909092
     },
     {
@@ -1356,7 +915,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922743,
+      "timestamp": 1773706157854,
       "odds": 1.9090909090909092
     },
     {
@@ -1365,7 +924,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922744,
+      "timestamp": 1773706157856,
       "odds": 1.8849557522123894
     },
     {
@@ -1374,7 +933,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627922746,
+      "timestamp": 1773706157868,
       "odds": 1.8849557522123894
     },
     {
@@ -1383,7 +942,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922747,
+      "timestamp": 1773706157871,
       "odds": 1.9433962264150944
     },
     {
@@ -1392,7 +951,7 @@
       "market": "spread",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627922748,
+      "timestamp": 1773706157873,
       "odds": 1.9090909090909092
     },
     {
@@ -1401,7 +960,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922750,
+      "timestamp": 1773706157876,
       "odds": 1.7518796992481203
     },
     {
@@ -1410,7 +969,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627922751,
+      "timestamp": 1773706157879,
       "odds": 1.6578947368421053
     },
     {
@@ -1419,7 +978,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922753,
+      "timestamp": 1773706157882,
       "odds": 1.9090909090909092
     },
     {
@@ -1428,7 +987,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922754,
+      "timestamp": 1773706157885,
       "odds": 1.9090909090909092
     },
     {
@@ -1437,7 +996,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922756,
+      "timestamp": 1773706157887,
       "odds": 2
     },
     {
@@ -1446,7 +1005,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922757,
+      "timestamp": 1773706157890,
       "odds": 1.6666666666666665
     },
     {
@@ -1455,7 +1014,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922759,
+      "timestamp": 1773706157892,
       "odds": 1.9090909090909092
     },
     {
@@ -1464,7 +1023,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627922760,
+      "timestamp": 1773706157895,
       "odds": 3.13
     },
     {
@@ -1473,7 +1032,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627922761,
+      "timestamp": 1773706157897,
       "odds": 1.9090909090909092
     },
     {
@@ -1482,7 +1041,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922762,
+      "timestamp": 1773706157899,
       "odds": 1.8695652173913042
     },
     {
@@ -1491,7 +1050,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922764,
+      "timestamp": 1773706157902,
       "odds": 1.9090909090909092
     },
     {
@@ -1500,7 +1059,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922765,
+      "timestamp": 1773706157905,
       "odds": 1.9090909090909092
     },
     {
@@ -1509,7 +1068,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922767,
+      "timestamp": 1773706157907,
       "odds": 1.9090909090909092
     },
     {
@@ -1518,7 +1077,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922768,
+      "timestamp": 1773706157910,
       "odds": 1.9090909090909092
     },
     {
@@ -1527,7 +1086,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627922769,
+      "timestamp": 1773706157913,
       "odds": 1.9090909090909092
     },
     {
@@ -1536,7 +1095,7 @@
       "market": "spread",
       "predictedProb": 0.84,
       "actualOutcome": 1,
-      "timestamp": 1773627922771,
+      "timestamp": 1773706157915,
       "odds": 1.9090909090909092
     },
     {
@@ -1545,7 +1104,7 @@
       "market": "moneyline",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627922772,
+      "timestamp": 1773706157918,
       "odds": 1.6451612903225805
     },
     {
@@ -1554,7 +1113,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627922774,
+      "timestamp": 1773706157920,
       "odds": 1.9090909090909092
     },
     {
@@ -1563,7 +1122,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922775,
+      "timestamp": 1773706157923,
       "odds": 1.9090909090909092
     },
     {
@@ -1572,7 +1131,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922776,
+      "timestamp": 1773706157926,
       "odds": 1.9090909090909092
     },
     {
@@ -1581,7 +1140,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922778,
+      "timestamp": 1773706157929,
       "odds": 1.9090909090909092
     },
     {
@@ -1590,7 +1149,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922779,
+      "timestamp": 1773706157931,
       "odds": 1.9090909090909092
     },
     {
@@ -1599,7 +1158,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922780,
+      "timestamp": 1773706157933,
       "odds": 1.9090909090909092
     },
     {
@@ -1608,7 +1167,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922781,
+      "timestamp": 1773706157936,
       "odds": 1.9090909090909092
     },
     {
@@ -1617,7 +1176,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773627922783,
+      "timestamp": 1773706157937,
       "odds": 1.9090909090909092
     },
     {
@@ -1626,7 +1185,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922784,
+      "timestamp": 1773706157940,
       "odds": 1.9090909090909092
     },
     {
@@ -1635,7 +1194,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773627922786,
+      "timestamp": 1773706157943,
       "odds": 1.9090909090909092
     },
     {
@@ -1644,7 +1203,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922787,
+      "timestamp": 1773706157945,
       "odds": 1.9090909090909092
     },
     {
@@ -1653,7 +1212,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922789,
+      "timestamp": 1773706157947,
       "odds": 1.9090909090909092
     },
     {
@@ -1662,7 +1221,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922790,
+      "timestamp": 1773706157950,
       "odds": 1.704225352112676
     },
     {
@@ -1671,7 +1230,7 @@
       "market": "spread",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627922791,
+      "timestamp": 1773706157953,
       "odds": 1.9090909090909092
     },
     {
@@ -1680,7 +1239,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922793,
+      "timestamp": 1773706157955,
       "odds": 1.9090909090909092
     },
     {
@@ -1689,7 +1248,7 @@
       "market": "spread",
       "predictedProb": 0.85,
       "actualOutcome": 1,
-      "timestamp": 1773627922794,
+      "timestamp": 1773706157958,
       "odds": 1.9090909090909092
     },
     {
@@ -1698,7 +1257,7 @@
       "market": "spread",
       "predictedProb": 0.84,
       "actualOutcome": 1,
-      "timestamp": 1773627922796,
+      "timestamp": 1773706157961,
       "odds": 1.9090909090909092
     },
     {
@@ -1707,7 +1266,7 @@
       "market": "moneyline",
       "predictedProb": 0.78,
       "actualOutcome": 1,
-      "timestamp": 1773627922797,
+      "timestamp": 1773706157963,
       "odds": 1.53475935828877
     },
     {
@@ -1716,7 +1275,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922798,
+      "timestamp": 1773706157966,
       "odds": 1.9090909090909092
     },
     {
@@ -1725,7 +1284,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922810,
+      "timestamp": 1773706157969,
       "odds": 1.9090909090909092
     },
     {
@@ -1734,7 +1293,7 @@
       "market": "spread",
       "predictedProb": 0.81,
       "actualOutcome": 0,
-      "timestamp": 1773627922811,
+      "timestamp": 1773706157972,
       "odds": 1.9090909090909092
     },
     {
@@ -1743,7 +1302,7 @@
       "market": "total",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922813,
+      "timestamp": 1773706157974,
       "odds": 1.8695652173913042
     },
     {
@@ -1752,7 +1311,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922814,
+      "timestamp": 1773706157976,
       "odds": 1.9090909090909092
     },
     {
@@ -1761,7 +1320,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 0,
-      "timestamp": 1773627922815,
+      "timestamp": 1773706157979,
       "odds": 1.62111801242236
     },
     {
@@ -1770,7 +1329,7 @@
       "market": "total",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627922817,
+      "timestamp": 1773706157982,
       "odds": 1.9090909090909092
     },
     {
@@ -1779,7 +1338,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922818,
+      "timestamp": 1773706157985,
       "odds": 1.9090909090909092
     },
     {
@@ -1788,7 +1347,7 @@
       "market": "spread",
       "predictedProb": 0.74,
       "actualOutcome": 0,
-      "timestamp": 1773627922819,
+      "timestamp": 1773706157987,
       "odds": 1.9090909090909092
     },
     {
@@ -1797,7 +1356,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922821,
+      "timestamp": 1773706157989,
       "odds": 1.9090909090909092
     },
     {
@@ -1806,7 +1365,7 @@
       "market": "total",
       "predictedProb": 0.73,
       "actualOutcome": 1,
-      "timestamp": 1773627922822,
+      "timestamp": 1773706157992,
       "odds": 1.925925925925926
     },
     {
@@ -1815,7 +1374,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922824,
+      "timestamp": 1773706157995,
       "odds": 1.9090909090909092
     },
     {
@@ -1824,7 +1383,7 @@
       "market": "spread",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627922825,
+      "timestamp": 1773706157998,
       "odds": 1.9090909090909092
     },
     {
@@ -1833,7 +1392,7 @@
       "market": "spread",
       "predictedProb": 0.73,
       "actualOutcome": 0,
-      "timestamp": 1773627922826,
+      "timestamp": 1773706158001,
       "odds": 1.925925925925926
     },
     {
@@ -1842,7 +1401,7 @@
       "market": "total",
       "predictedProb": 0.71,
       "actualOutcome": 1,
-      "timestamp": 1773627922827,
+      "timestamp": 1773706158003,
       "odds": 1.9523809523809523
     },
     {
@@ -1851,7 +1410,7 @@
       "market": "moneyline",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773627922828,
+      "timestamp": 1773706158006,
       "odds": 1.5
     },
     {
@@ -1860,7 +1419,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922830,
+      "timestamp": 1773706158008,
       "odds": 1.9090909090909092
     },
     {
@@ -1869,7 +1428,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922831,
+      "timestamp": 1773706158012,
       "odds": 1.9090909090909092
     },
     {
@@ -1878,7 +1437,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922832,
+      "timestamp": 1773706158015,
       "odds": 1.9090909090909092
     },
     {
@@ -1887,7 +1446,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922834,
+      "timestamp": 1773706158027,
       "odds": 1.9090909090909092
     },
     {
@@ -1896,7 +1455,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922835,
+      "timestamp": 1773706158029,
       "odds": 2.9
     },
     {
@@ -1905,7 +1464,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922836,
+      "timestamp": 1773706158032,
       "odds": 1.510204081632653
     },
     {
@@ -1914,7 +1473,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922838,
+      "timestamp": 1773706158035,
       "odds": 1.9090909090909092
     },
     {
@@ -1923,7 +1482,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922840,
+      "timestamp": 1773706158038,
       "odds": 2.04
     },
     {
@@ -1932,7 +1491,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627922841,
+      "timestamp": 1773706158040,
       "odds": 1.9090909090909092
     },
     {
@@ -1941,7 +1500,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922843,
+      "timestamp": 1773706158042,
       "odds": 1.9090909090909092
     },
     {
@@ -1950,7 +1509,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922844,
+      "timestamp": 1773706158045,
       "odds": 1.9090909090909092
     },
     {
@@ -1959,7 +1518,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627922846,
+      "timestamp": 1773706158048,
       "odds": 2.25
     },
     {
@@ -1968,7 +1527,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922847,
+      "timestamp": 1773706158051,
       "odds": 1.9090909090909092
     },
     {
@@ -1977,7 +1536,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922848,
+      "timestamp": 1773706158054,
       "odds": 3.69
     },
     {
@@ -1986,7 +1545,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627922851,
+      "timestamp": 1773706158056,
       "odds": 1.9090909090909092
     },
     {
@@ -1995,7 +1554,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922854,
+      "timestamp": 1773706158059,
       "odds": 1.9090909090909092
     },
     {
@@ -2004,7 +1563,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773627922856,
+      "timestamp": 1773706158060,
       "odds": 1.8620689655172413
     },
     {
@@ -2013,7 +1572,7 @@
       "market": "spread",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627922858,
+      "timestamp": 1773706158062,
       "odds": 1.9090909090909092
     },
     {
@@ -2022,7 +1581,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922860,
+      "timestamp": 1773706158065,
       "odds": 1.9090909090909092
     },
     {
@@ -2031,7 +1590,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922861,
+      "timestamp": 1773706158067,
       "odds": 1.9090909090909092
     },
     {
@@ -2040,7 +1599,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922863,
+      "timestamp": 1773706158070,
       "odds": 1.5050505050505052
     },
     {
@@ -2049,7 +1608,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627922864,
+      "timestamp": 1773706158073,
       "odds": 1.6289308176100628
     },
     {
@@ -2058,7 +1617,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922865,
+      "timestamp": 1773706158075,
       "odds": 1.9090909090909092
     },
     {
@@ -2067,7 +1626,7 @@
       "market": "total",
       "predictedProb": 0.79,
       "actualOutcome": 0,
-      "timestamp": 1773627922867,
+      "timestamp": 1773706158077,
       "odds": 1.9090909090909092
     },
     {
@@ -2076,7 +1635,7 @@
       "market": "spread",
       "predictedProb": 0.75,
       "actualOutcome": 0,
-      "timestamp": 1773627922868,
+      "timestamp": 1773706158080,
       "odds": 1.9090909090909092
     },
     {
@@ -2085,7 +1644,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922870,
+      "timestamp": 1773706158083,
       "odds": 1.9090909090909092
     },
     {
@@ -2094,7 +1653,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922873,
+      "timestamp": 1773706158086,
       "odds": 1.6451612903225805
     },
     {
@@ -2103,7 +1662,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922875,
+      "timestamp": 1773706158088,
       "odds": 1.9090909090909092
     },
     {
@@ -2112,7 +1671,7 @@
       "market": "spread",
       "predictedProb": 0.75,
       "actualOutcome": 0,
-      "timestamp": 1773627922876,
+      "timestamp": 1773706158091,
       "odds": 1.8333333333333335
     },
     {
@@ -2121,7 +1680,7 @@
       "market": "total",
       "predictedProb": 0.72,
       "actualOutcome": 1,
-      "timestamp": 1773627922877,
+      "timestamp": 1773706158093,
       "odds": 1.8928571428571428
     },
     {
@@ -2130,7 +1689,7 @@
       "market": "spread",
       "predictedProb": 0.73,
       "actualOutcome": 0,
-      "timestamp": 1773627922879,
+      "timestamp": 1773706158096,
       "odds": 1.9090909090909092
     },
     {
@@ -2139,7 +1698,7 @@
       "market": "total",
       "predictedProb": 0.69,
       "actualOutcome": 1,
-      "timestamp": 1773627922880,
+      "timestamp": 1773706158098,
       "odds": 1.9090909090909092
     },
     {
@@ -2148,7 +1707,7 @@
       "market": "total",
       "predictedProb": 0.8,
       "actualOutcome": 0,
-      "timestamp": 1773627922882,
+      "timestamp": 1773706158100,
       "odds": 1.9090909090909092
     },
     {
@@ -2157,7 +1716,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773627922883,
+      "timestamp": 1773706158102,
       "odds": 1.8695652173913042
     },
     {
@@ -2166,7 +1725,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773627922884,
+      "timestamp": 1773706158105,
       "odds": 1.9090909090909092
     },
     {
@@ -2175,7 +1734,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922886,
+      "timestamp": 1773706158108,
       "odds": 1.9523809523809523
     },
     {
@@ -2184,7 +1743,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627922887,
+      "timestamp": 1773706158110,
       "odds": 1.9090909090909092
     },
     {
@@ -2193,7 +1752,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627922888,
+      "timestamp": 1773706158112,
       "odds": 1.9090909090909092
     },
     {
@@ -2202,7 +1761,7 @@
       "market": "spread",
       "predictedProb": 0.74,
       "actualOutcome": 0,
-      "timestamp": 1773627922889,
+      "timestamp": 1773706158114,
       "odds": 1.8695652173913042
     },
     {
@@ -2211,7 +1770,7 @@
       "market": "total",
       "predictedProb": 0.7,
       "actualOutcome": 1,
-      "timestamp": 1773627922891,
+      "timestamp": 1773706158117,
       "odds": 1.9090909090909092
     },
     {
@@ -2220,7 +1779,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627922892,
+      "timestamp": 1773706158119,
       "odds": 1.9090909090909092
     },
     {
@@ -2229,7 +1788,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922893,
+      "timestamp": 1773706158122,
       "odds": 1.6451612903225805
     },
     {
@@ -2238,7 +1797,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922895,
+      "timestamp": 1773706158124,
       "odds": 1.9090909090909092
     },
     {
@@ -2247,7 +1806,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922905,
+      "timestamp": 1773706158126,
       "odds": 1.9523809523809523
     },
     {
@@ -2256,7 +1815,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922907,
+      "timestamp": 1773706158128,
       "odds": 1.9090909090909092
     },
     {
@@ -2265,7 +1824,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922908,
+      "timestamp": 1773706158130,
       "odds": 1.617283950617284
     },
     {
@@ -2274,7 +1833,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922909,
+      "timestamp": 1773706158133,
       "odds": 1.9090909090909092
     },
     {
@@ -2283,7 +1842,7 @@
       "market": "spread",
       "predictedProb": 0.81,
       "actualOutcome": 1,
-      "timestamp": 1773627922910,
+      "timestamp": 1773706158136,
       "odds": 1.9090909090909092
     },
     {
@@ -2292,7 +1851,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922912,
+      "timestamp": 1773706158138,
       "odds": 1.5952380952380953
     },
     {
@@ -2301,7 +1860,7 @@
       "market": "total",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773627922913,
+      "timestamp": 1773706158140,
       "odds": 1.9090909090909092
     },
     {
@@ -2310,7 +1869,7 @@
       "market": "total",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627922914,
+      "timestamp": 1773706158142,
       "odds": 1.9090909090909092
     },
     {
@@ -2319,7 +1878,7 @@
       "market": "moneyline",
       "predictedProb": 0.75,
       "actualOutcome": 1,
-      "timestamp": 1773627922916,
+      "timestamp": 1773706158144,
       "odds": 1.5128205128205128
     },
     {
@@ -2328,7 +1887,7 @@
       "market": "spread",
       "predictedProb": 0.68,
       "actualOutcome": 1,
-      "timestamp": 1773627922917,
+      "timestamp": 1773706158146,
       "odds": 1.9523809523809523
     },
     {
@@ -2337,7 +1896,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922918,
+      "timestamp": 1773706158149,
       "odds": 1.9090909090909092
     },
     {
@@ -2346,7 +1905,7 @@
       "market": "moneyline",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627922920,
+      "timestamp": 1773706158152,
       "odds": 1.5494505494505495
     },
     {
@@ -2355,7 +1914,7 @@
       "market": "spread",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773627922921,
+      "timestamp": 1773706158154,
       "odds": 1.9090909090909092
     },
     {
@@ -2364,7 +1923,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922923,
+      "timestamp": 1773706158157,
       "odds": 1.9523809523809523
     },
     {
@@ -2373,7 +1932,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922925,
+      "timestamp": 1773706158159,
       "odds": 1.9090909090909092
     },
     {
@@ -2382,7 +1941,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922927,
+      "timestamp": 1773706158162,
       "odds": 1.8333333333333335
     },
     {
@@ -2391,7 +1950,7 @@
       "market": "total",
       "predictedProb": 0.69,
       "actualOutcome": 1,
-      "timestamp": 1773627922928,
+      "timestamp": 1773706158165,
       "odds": 1.9090909090909092
     },
     {
@@ -2400,7 +1959,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 1,
-      "timestamp": 1773627922930,
+      "timestamp": 1773706158168,
       "odds": 1.9090909090909092
     },
     {
@@ -2409,7 +1968,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627922931,
+      "timestamp": 1773706158170,
       "odds": 1.6756756756756757
     },
     {
@@ -2418,7 +1977,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922932,
+      "timestamp": 1773706158173,
       "odds": 1.9090909090909092
     },
     {
@@ -2427,7 +1986,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922934,
+      "timestamp": 1773706158176,
       "odds": 1.9090909090909092
     },
     {
@@ -2436,7 +1995,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922935,
+      "timestamp": 1773706158178,
       "odds": 1.4854368932038835
     },
     {
@@ -2445,7 +2004,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627922937,
+      "timestamp": 1773706158180,
       "odds": 1.9090909090909092
     },
     {
@@ -2454,7 +2013,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627922938,
+      "timestamp": 1773706158183,
       "odds": 1.3717472118959106
     },
     {
@@ -2463,7 +2022,7 @@
       "market": "spread",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627922940,
+      "timestamp": 1773706158186,
       "odds": 1.9090909090909092
     },
     {
@@ -2472,7 +2031,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922941,
+      "timestamp": 1773706158188,
       "odds": 1.9090909090909092
     },
     {
@@ -2481,7 +2040,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922942,
+      "timestamp": 1773706158191,
       "odds": 2
     },
     {
@@ -2490,7 +2049,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922944,
+      "timestamp": 1773706158194,
       "odds": 1.9090909090909092
     },
     {
@@ -2499,7 +2058,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922945,
+      "timestamp": 1773706158196,
       "odds": 1.9090909090909092
     },
     {
@@ -2508,7 +2067,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922946,
+      "timestamp": 1773706158199,
       "odds": 1.78125
     },
     {
@@ -2517,7 +2076,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922947,
+      "timestamp": 1773706158202,
       "odds": 1.9090909090909092
     },
     {
@@ -2526,7 +2085,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922948,
+      "timestamp": 1773706158204,
       "odds": 1.9090909090909092
     },
     {
@@ -2535,7 +2094,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627922950,
+      "timestamp": 1773706158207,
       "odds": 1.9090909090909092
     },
     {
@@ -2544,7 +2103,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922951,
+      "timestamp": 1773706158209,
       "odds": 1.8130081300813008
     },
     {
@@ -2553,7 +2112,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922952,
+      "timestamp": 1773706158211,
       "odds": 1.9090909090909092
     },
     {
@@ -2562,7 +2121,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922954,
+      "timestamp": 1773706158213,
       "odds": 1.7633587786259541
     },
     {
@@ -2571,7 +2130,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922955,
+      "timestamp": 1773706158216,
       "odds": 1.9090909090909092
     },
     {
@@ -2580,7 +2139,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627922957,
+      "timestamp": 1773706158218,
       "odds": 1.9090909090909092
     },
     {
@@ -2589,7 +2148,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627922958,
+      "timestamp": 1773706158221,
       "odds": 2
     },
     {
@@ -2598,7 +2157,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922960,
+      "timestamp": 1773706158223,
       "odds": 1.9090909090909092
     },
     {
@@ -2607,7 +2166,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627922961,
+      "timestamp": 1773706158226,
       "odds": 1.819672131147541
     },
     {
@@ -2616,7 +2175,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627922963,
+      "timestamp": 1773706158228,
       "odds": 1.9090909090909092
     },
     {
@@ -2625,7 +2184,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922964,
+      "timestamp": 1773706158231,
       "odds": 1.9090909090909092
     },
     {
@@ -2634,7 +2193,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922966,
+      "timestamp": 1773706158234,
       "odds": 1.7246376811594204
     },
     {
@@ -2643,7 +2202,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627922967,
+      "timestamp": 1773706158237,
       "odds": 2.04
     },
     {
@@ -2652,7 +2211,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773627922969,
+      "timestamp": 1773706158239,
       "odds": 1.5208333333333335
     },
     {
@@ -2661,7 +2220,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627922970,
+      "timestamp": 1773706158241,
       "odds": 2.2800000000000002
     },
     {
@@ -2670,7 +2229,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922971,
+      "timestamp": 1773706158244,
       "odds": 1.9090909090909092
     },
     {
@@ -2679,7 +2238,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 0,
-      "timestamp": 1773627922973,
+      "timestamp": 1773706158246,
       "odds": 1.9090909090909092
     },
     {
@@ -2688,7 +2247,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627922974,
+      "timestamp": 1773706158249,
       "odds": 1.9090909090909092
     },
     {
@@ -2697,7 +2256,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627922976,
+      "timestamp": 1773706158251,
       "odds": 1.6711409395973154
     },
     {
@@ -2706,7 +2265,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627922977,
+      "timestamp": 1773706158254,
       "odds": 1.9090909090909092
     },
     {
@@ -2715,7 +2274,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922979,
+      "timestamp": 1773706158256,
       "odds": 1.9090909090909092
     },
     {
@@ -2724,7 +2283,7 @@
       "market": "spread",
       "predictedProb": 0.85,
       "actualOutcome": 1,
-      "timestamp": 1773627922980,
+      "timestamp": 1773706158259,
       "odds": 1.9090909090909092
     },
     {
@@ -2733,7 +2292,7 @@
       "market": "total",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627922981,
+      "timestamp": 1773706158262,
       "odds": 2
     },
     {
@@ -2742,7 +2301,7 @@
       "market": "moneyline",
       "predictedProb": 0.65,
       "actualOutcome": 0,
-      "timestamp": 1773627922983,
+      "timestamp": 1773706158264,
       "odds": 1.10752688172043
     },
     {
@@ -2751,7 +2310,7 @@
       "market": "spread",
       "predictedProb": 0.65,
       "actualOutcome": 0,
-      "timestamp": 1773627922984,
+      "timestamp": 1773706158267,
       "odds": 1.9090909090909092
     },
     {
@@ -2760,7 +2319,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922986,
+      "timestamp": 1773706158269,
       "odds": 1.9090909090909092
     },
     {
@@ -2769,7 +2328,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922987,
+      "timestamp": 1773706158272,
       "odds": 1.9803921568627452
     },
     {
@@ -2778,7 +2337,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627922989,
+      "timestamp": 1773706158274,
       "odds": 1.9090909090909092
     },
     {
@@ -2787,7 +2346,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627922990,
+      "timestamp": 1773706158277,
       "odds": 1.9090909090909092
     },
     {
@@ -2796,7 +2355,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627922991,
+      "timestamp": 1773706158279,
       "odds": 1.4694835680751175
     },
     {
@@ -2805,7 +2364,7 @@
       "market": "spread",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627922993,
+      "timestamp": 1773706158282,
       "odds": 1.9090909090909092
     },
     {
@@ -2814,7 +2373,7 @@
       "market": "moneyline",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922994,
+      "timestamp": 1773706158285,
       "odds": 1.6849315068493151
     },
     {
@@ -2823,7 +2382,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627922995,
+      "timestamp": 1773706158288,
       "odds": 1.9090909090909092
     },
     {
@@ -2832,7 +2391,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627922997,
+      "timestamp": 1773706158290,
       "odds": 1.9090909090909092
     },
     {
@@ -2841,7 +2400,7 @@
       "market": "moneyline",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627922998,
+      "timestamp": 1773706158292,
       "odds": 1.1904761904761905
     },
     {
@@ -2850,7 +2409,7 @@
       "market": "spread",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627922999,
+      "timestamp": 1773706158295,
       "odds": 1.9090909090909092
     },
     {
@@ -2859,7 +2418,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923000,
+      "timestamp": 1773706158297,
       "odds": 1.9433962264150944
     },
     {
@@ -2868,7 +2427,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627923001,
+      "timestamp": 1773706158299,
       "odds": 2.15
     },
     {
@@ -2877,7 +2436,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627923003,
+      "timestamp": 1773706158302,
       "odds": 1.9090909090909092
     },
     {
@@ -2886,7 +2445,7 @@
       "market": "spread",
       "predictedProb": 0.81,
       "actualOutcome": 1,
-      "timestamp": 1773627923004,
+      "timestamp": 1773706158305,
       "odds": 1.9090909090909092
     },
     {
@@ -2895,7 +2454,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627923006,
+      "timestamp": 1773706158307,
       "odds": 1.8547008547008548
     },
     {
@@ -2904,7 +2463,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923007,
+      "timestamp": 1773706158311,
       "odds": 1.9090909090909092
     },
     {
@@ -2913,7 +2472,7 @@
       "market": "total",
       "predictedProb": 0.78,
       "actualOutcome": 0,
-      "timestamp": 1773627923009,
+      "timestamp": 1773706158313,
       "odds": 1.9523809523809523
     },
     {
@@ -2922,7 +2481,7 @@
       "market": "spread",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627923010,
+      "timestamp": 1773706158315,
       "odds": 1.9523809523809523
     },
     {
@@ -2931,7 +2490,7 @@
       "market": "spread",
       "predictedProb": 0.83,
       "actualOutcome": 0,
-      "timestamp": 1773627923011,
+      "timestamp": 1773706158318,
       "odds": 1.9090909090909092
     },
     {
@@ -2940,7 +2499,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627923013,
+      "timestamp": 1773706158320,
       "odds": 1.6756756756756757
     },
     {
@@ -2949,7 +2508,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923014,
+      "timestamp": 1773706158323,
       "odds": 1.9090909090909092
     },
     {
@@ -2958,7 +2517,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627923016,
+      "timestamp": 1773706158325,
       "odds": 1.900900900900901
     },
     {
@@ -2967,7 +2526,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923017,
+      "timestamp": 1773706158328,
       "odds": 2.04
     },
     {
@@ -2976,7 +2535,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627923019,
+      "timestamp": 1773706158331,
       "odds": 2.06
     },
     {
@@ -2985,7 +2544,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923020,
+      "timestamp": 1773706158334,
       "odds": 1.606060606060606
     },
     {
@@ -2994,7 +2553,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627923022,
+      "timestamp": 1773706158336,
       "odds": 1.6329113924050633
     },
     {
@@ -3003,7 +2562,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923023,
+      "timestamp": 1773706158339,
       "odds": 1.9090909090909092
     },
     {
@@ -3012,7 +2571,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627923025,
+      "timestamp": 1773706158342,
       "odds": 1.9090909090909092
     },
     {
@@ -3021,7 +2580,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923026,
+      "timestamp": 1773706158344,
       "odds": 1.9090909090909092
     },
     {
@@ -3030,7 +2589,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923028,
+      "timestamp": 1773706158347,
       "odds": 1.9090909090909092
     },
     {
@@ -3039,7 +2598,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627923029,
+      "timestamp": 1773706158348,
       "odds": 1.9090909090909092
     },
     {
@@ -3048,7 +2607,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923030,
+      "timestamp": 1773706158351,
       "odds": 1.9090909090909092
     },
     {
@@ -3057,7 +2616,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923032,
+      "timestamp": 1773706158353,
       "odds": 1.9090909090909092
     },
     {
@@ -3066,7 +2625,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923103,
+      "timestamp": 1773706158356,
       "odds": 1.9090909090909092
     },
     {
@@ -3075,7 +2634,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923104,
+      "timestamp": 1773706158358,
       "odds": 1.9090909090909092
     },
     {
@@ -3084,7 +2643,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627923106,
+      "timestamp": 1773706158361,
       "odds": 1.165837479270315
     },
     {
@@ -3093,7 +2652,7 @@
       "market": "total",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627923107,
+      "timestamp": 1773706158364,
       "odds": 1.9090909090909092
     },
     {
@@ -3102,7 +2661,7 @@
       "market": "spread",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627923109,
+      "timestamp": 1773706158366,
       "odds": 1.9615384615384617
     },
     {
@@ -3111,7 +2670,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627923110,
+      "timestamp": 1773706158368,
       "odds": 1.403225806451613
     },
     {
@@ -3120,7 +2679,7 @@
       "market": "total",
       "predictedProb": 0.69,
       "actualOutcome": 1,
-      "timestamp": 1773627923112,
+      "timestamp": 1773706158371,
       "odds": 1.9090909090909092
     },
     {
@@ -3129,7 +2688,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773627923113,
+      "timestamp": 1773706158374,
       "odds": 1.8695652173913042
     },
     {
@@ -3138,7 +2697,7 @@
       "market": "moneyline",
       "predictedProb": 0.79,
       "actualOutcome": 1,
-      "timestamp": 1773627923114,
+      "timestamp": 1773706158376,
       "odds": 1.0595238095238095
     },
     {
@@ -3147,7 +2706,7 @@
       "market": "total",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627923116,
+      "timestamp": 1773706158379,
       "odds": 1.9090909090909092
     },
     {
@@ -3156,7 +2715,7 @@
       "market": "spread",
       "predictedProb": 0.7,
       "actualOutcome": 1,
-      "timestamp": 1773627923117,
+      "timestamp": 1773706158382,
       "odds": 1.8333333333333335
     },
     {
@@ -3165,7 +2724,7 @@
       "market": "total",
       "predictedProb": 0.8,
       "actualOutcome": 0,
-      "timestamp": 1773627923119,
+      "timestamp": 1773706158384,
       "odds": 1.9090909090909092
     },
     {
@@ -3174,7 +2733,7 @@
       "market": "spread",
       "predictedProb": 0.7,
       "actualOutcome": 0,
-      "timestamp": 1773627923120,
+      "timestamp": 1773706158387,
       "odds": 1.9523809523809523
     },
     {
@@ -3183,7 +2742,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923121,
+      "timestamp": 1773706158389,
       "odds": 1.9090909090909092
     },
     {
@@ -3192,7 +2751,7 @@
       "market": "total",
       "predictedProb": 0.78,
       "actualOutcome": 1,
-      "timestamp": 1773627923122,
+      "timestamp": 1773706158392,
       "odds": 1.9090909090909092
     },
     {
@@ -3201,7 +2760,7 @@
       "market": "moneyline",
       "predictedProb": 0.77,
       "actualOutcome": 1,
-      "timestamp": 1773627923124,
+      "timestamp": 1773706158393,
       "odds": 1.1818181818181819
     },
     {
@@ -3210,7 +2769,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627923125,
+      "timestamp": 1773706158396,
       "odds": 1.8333333333333335
     },
     {
@@ -3219,7 +2778,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923127,
+      "timestamp": 1773706158399,
       "odds": 2.3
     },
     {
@@ -3228,7 +2787,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923128,
+      "timestamp": 1773706158401,
       "odds": 1.9090909090909092
     },
     {
@@ -3237,7 +2796,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923129,
+      "timestamp": 1773706158403,
       "odds": 1.9090909090909092
     },
     {
@@ -3246,7 +2805,7 @@
       "market": "total",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627923131,
+      "timestamp": 1773706158406,
       "odds": 1.9090909090909092
     },
     {
@@ -3255,7 +2814,7 @@
       "market": "moneyline",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923132,
+      "timestamp": 1773706158409,
       "odds": 1.7692307692307692
     },
     {
@@ -3264,7 +2823,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923134,
+      "timestamp": 1773706158412,
       "odds": 1.9090909090909092
     },
     {
@@ -3273,7 +2832,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923135,
+      "timestamp": 1773706158414,
       "odds": 1.9090909090909092
     },
     {
@@ -3282,7 +2841,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627923137,
+      "timestamp": 1773706158417,
       "odds": 1.5376344086021505
     },
     {
@@ -3291,7 +2850,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773627923138,
+      "timestamp": 1773706158419,
       "odds": 1.9090909090909092
     },
     {
@@ -3300,7 +2859,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627923140,
+      "timestamp": 1773706158422,
       "odds": 1.9090909090909092
     },
     {
@@ -3309,7 +2868,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923141,
+      "timestamp": 1773706158424,
       "odds": 1.9090909090909092
     },
     {
@@ -3318,7 +2877,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923142,
+      "timestamp": 1773706158426,
       "odds": 1.5376344086021505
     },
     {
@@ -3327,7 +2886,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627923144,
+      "timestamp": 1773706158429,
       "odds": 1.7874015748031495
     },
     {
@@ -3336,7 +2895,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627923145,
+      "timestamp": 1773706158431,
       "odds": 1.9090909090909092
     },
     {
@@ -3345,7 +2904,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923147,
+      "timestamp": 1773706158434,
       "odds": 1.9090909090909092
     },
     {
@@ -3354,7 +2913,7 @@
       "market": "total",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773627923149,
+      "timestamp": 1773706158436,
       "odds": 1.9090909090909092
     },
     {
@@ -3363,7 +2922,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923150,
+      "timestamp": 1773706158439,
       "odds": 2.25
     },
     {
@@ -3372,7 +2931,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923152,
+      "timestamp": 1773706158441,
       "odds": 1.900900900900901
     },
     {
@@ -3381,7 +2940,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923153,
+      "timestamp": 1773706158444,
       "odds": 1.9090909090909092
     },
     {
@@ -3390,7 +2949,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923154,
+      "timestamp": 1773706158447,
       "odds": 1.9090909090909092
     },
     {
@@ -3399,7 +2958,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627923156,
+      "timestamp": 1773706158449,
       "odds": 1.6802721088435373
     },
     {
@@ -3408,7 +2967,7 @@
       "market": "total",
       "predictedProb": 0.7,
       "actualOutcome": 0,
-      "timestamp": 1773627923157,
+      "timestamp": 1773706158452,
       "odds": 1.9523809523809523
     },
     {
@@ -3417,7 +2976,7 @@
       "market": "spread",
       "predictedProb": 0.68,
       "actualOutcome": 1,
-      "timestamp": 1773627923159,
+      "timestamp": 1773706158454,
       "odds": 1.8928571428571428
     },
     {
@@ -3426,7 +2985,7 @@
       "market": "moneyline",
       "predictedProb": 0.75,
       "actualOutcome": 0,
-      "timestamp": 1773627923160,
+      "timestamp": 1773706158457,
       "odds": 1.6711409395973154
     },
     {
@@ -3435,7 +2994,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773627923162,
+      "timestamp": 1773706158460,
       "odds": 1.9090909090909092
     },
     {
@@ -3444,7 +3003,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 0,
-      "timestamp": 1773627923163,
+      "timestamp": 1773706158462,
       "odds": 1.9090909090909092
     },
     {
@@ -3453,7 +3012,7 @@
       "market": "moneyline",
       "predictedProb": 0.74,
       "actualOutcome": 1,
-      "timestamp": 1773627923165,
+      "timestamp": 1773706158465,
       "odds": 1.3546099290780143
     },
     {
@@ -3462,7 +3021,7 @@
       "market": "spread",
       "predictedProb": 0.72,
       "actualOutcome": 0,
-      "timestamp": 1773627923167,
+      "timestamp": 1773706158467,
       "odds": 1.9523809523809523
     },
     {
@@ -3471,7 +3030,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 0,
-      "timestamp": 1773627923179,
+      "timestamp": 1773706158470,
       "odds": 1.9090909090909092
     },
     {
@@ -3480,7 +3039,7 @@
       "market": "total",
       "predictedProb": 0.8,
       "actualOutcome": 1,
-      "timestamp": 1773627923180,
+      "timestamp": 1773706158472,
       "odds": 1.9090909090909092
     },
     {
@@ -3489,7 +3048,7 @@
       "market": "moneyline",
       "predictedProb": 0.79,
       "actualOutcome": 1,
-      "timestamp": 1773627923181,
+      "timestamp": 1773706158474,
       "odds": 1.2816901408450705
     },
     {
@@ -3498,7 +3057,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923183,
+      "timestamp": 1773706158476,
       "odds": 2.0700000000000003
     },
     {
@@ -3507,7 +3066,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923184,
+      "timestamp": 1773706158479,
       "odds": 1.9090909090909092
     },
     {
@@ -3516,7 +3075,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923198,
+      "timestamp": 1773706158481,
       "odds": 1.9090909090909092
     },
     {
@@ -3525,7 +3084,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627923199,
+      "timestamp": 1773706158484,
       "odds": 1.423728813559322
     },
     {
@@ -3534,7 +3093,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627923201,
+      "timestamp": 1773706158486,
       "odds": 1.9615384615384617
     },
     {
@@ -3543,7 +3102,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627923202,
+      "timestamp": 1773706158489,
       "odds": 1.8849557522123894
     },
     {
@@ -3552,7 +3111,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923204,
+      "timestamp": 1773706158491,
       "odds": 2
     },
     {
@@ -3561,7 +3120,7 @@
       "market": "spread",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627923205,
+      "timestamp": 1773706158493,
       "odds": 1.9090909090909092
     },
     {
@@ -3570,7 +3129,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923206,
+      "timestamp": 1773706158496,
       "odds": 2.88
     },
     {
@@ -3579,7 +3138,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627923208,
+      "timestamp": 1773706158497,
       "odds": 1.9090909090909092
     },
     {
@@ -3588,7 +3147,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923210,
+      "timestamp": 1773706158500,
       "odds": 2.44
     },
     {
@@ -3597,7 +3156,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923212,
+      "timestamp": 1773706158503,
       "odds": 1.9090909090909092
     },
     {
@@ -3606,7 +3165,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627923213,
+      "timestamp": 1773706158506,
       "odds": 1.9090909090909092
     },
     {
@@ -3615,7 +3174,7 @@
       "market": "moneyline",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627923215,
+      "timestamp": 1773706158508,
       "odds": 1.8849557522123894
     },
     {
@@ -3624,7 +3183,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627923217,
+      "timestamp": 1773706158510,
       "odds": 1.9090909090909092
     },
     {
@@ -3633,7 +3192,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923219,
+      "timestamp": 1773706158513,
       "odds": 1.9090909090909092
     },
     {
@@ -3642,7 +3201,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627923220,
+      "timestamp": 1773706158516,
       "odds": 3
     },
     {
@@ -3651,7 +3210,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773627923221,
+      "timestamp": 1773706158519,
       "odds": 1.9090909090909092
     },
     {
@@ -3660,7 +3219,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923223,
+      "timestamp": 1773706158521,
       "odds": 1.9090909090909092
     },
     {
@@ -3669,7 +3228,7 @@
       "market": "moneyline",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923224,
+      "timestamp": 1773706158524,
       "odds": 2.01
     },
     {
@@ -3678,7 +3237,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923226,
+      "timestamp": 1773706158527,
       "odds": 1.9090909090909092
     },
     {
@@ -3687,7 +3246,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627923228,
+      "timestamp": 1773706158530,
       "odds": 1.9090909090909092
     },
     {
@@ -3696,7 +3255,7 @@
       "market": "total",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627923230,
+      "timestamp": 1773706158532,
       "odds": 1.8
     },
     {
@@ -3705,7 +3264,7 @@
       "market": "moneyline",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773627923231,
+      "timestamp": 1773706158535,
       "odds": 1.6711409395973154
     },
     {
@@ -3714,7 +3273,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923233,
+      "timestamp": 1773706158538,
       "odds": 1.5
     },
     {
@@ -3723,7 +3282,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923235,
+      "timestamp": 1773706158540,
       "odds": 2.6399999999999997
     },
     {
@@ -3732,7 +3291,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923236,
+      "timestamp": 1773706158543,
       "odds": 2.35
     },
     {
@@ -3741,7 +3300,7 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923238,
+      "timestamp": 1773706158546,
       "odds": 2.1399999999999997
     },
     {
@@ -3750,7 +3309,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923240,
+      "timestamp": 1773706158549,
       "odds": 1.3900000000000001
     },
     {
@@ -3759,7 +3318,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923241,
+      "timestamp": 1773706158551,
       "odds": 1.9090909090909092
     },
     {
@@ -3768,7 +3327,7 @@
       "market": "moneyline",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627923243,
+      "timestamp": 1773706158554,
       "odds": 1.9433962264150944
     },
     {
@@ -3777,7 +3336,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773627923244,
+      "timestamp": 1773706158557,
       "odds": 1.9090909090909092
     },
     {
@@ -3786,7 +3345,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923245,
+      "timestamp": 1773706158560,
       "odds": 1.434782608695652
     },
     {
@@ -3795,7 +3354,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923247,
+      "timestamp": 1773706158562,
       "odds": 1.970873786407767
     },
     {
@@ -3804,7 +3363,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923248,
+      "timestamp": 1773706158565,
       "odds": 1.9345794392523366
     },
     {
@@ -3813,7 +3372,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 0,
-      "timestamp": 1773627923250,
+      "timestamp": 1773706158568,
       "odds": 1.392156862745098
     },
     {
@@ -3822,7 +3381,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 0,
-      "timestamp": 1773627923251,
+      "timestamp": 1773706158570,
       "odds": 2
     },
     {
@@ -3831,7 +3390,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923253,
+      "timestamp": 1773706158573,
       "odds": 1.3773584905660377
     },
     {
@@ -3840,7 +3399,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923254,
+      "timestamp": 1773706158575,
       "odds": 1.8333333333333335
     },
     {
@@ -3849,7 +3408,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773627923256,
+      "timestamp": 1773706158579,
       "odds": 1.8399999999999999
     },
     {
@@ -3858,7 +3417,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923257,
+      "timestamp": 1773706158581,
       "odds": 1.8
     },
     {
@@ -3867,7 +3426,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627923258,
+      "timestamp": 1773706158584,
       "odds": 1.9090909090909092
     },
     {
@@ -3876,7 +3435,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923260,
+      "timestamp": 1773706158587,
       "odds": 2.52
     },
     {
@@ -3885,7 +3444,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923261,
+      "timestamp": 1773706158590,
       "odds": 1.8264462809917354
     },
     {
@@ -3894,7 +3453,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773627923263,
+      "timestamp": 1773706158591,
       "odds": 1.617283950617284
     },
     {
@@ -3903,7 +3462,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627923264,
+      "timestamp": 1773706158594,
       "odds": 2.4299999999999997
     },
     {
@@ -3912,7 +3471,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923266,
+      "timestamp": 1773706158596,
       "odds": 1.9615384615384617
     },
     {
@@ -3921,7 +3480,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773627923267,
+      "timestamp": 1773706158599,
       "odds": 1.434782608695652
     },
     {
@@ -3930,7 +3489,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923269,
+      "timestamp": 1773706158602,
       "odds": 2.1399999999999997
     },
     {
@@ -3939,7 +3498,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923270,
+      "timestamp": 1773706158604,
       "odds": 2.1
     },
     {
@@ -3948,7 +3507,7 @@
       "market": "spread",
       "predictedProb": 0.82,
       "actualOutcome": 1,
-      "timestamp": 1773627923272,
+      "timestamp": 1773706158607,
       "odds": 1.8695652173913042
     },
     {
@@ -3957,7 +3516,7 @@
       "market": "total",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773627923273,
+      "timestamp": 1773706158609,
       "odds": 1.9090909090909092
     },
     {
@@ -3966,7 +3525,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773627923274,
+      "timestamp": 1773706158612,
       "odds": 22.5
     },
     {
@@ -3975,7 +3534,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923276,
+      "timestamp": 1773706158615,
       "odds": 1.8620689655172413
     },
     {
@@ -3984,7 +3543,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923278,
+      "timestamp": 1773706158617,
       "odds": 1.9090909090909092
     },
     {
@@ -3993,7 +3552,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923279,
+      "timestamp": 1773706158619,
       "odds": 1.9090909090909092
     },
     {
@@ -4002,7 +3561,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923281,
+      "timestamp": 1773706158622,
       "odds": 2.01
     },
     {
@@ -4011,7 +3570,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923283,
+      "timestamp": 1773706158625,
       "odds": 1.9090909090909092
     },
     {
@@ -4020,7 +3579,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923284,
+      "timestamp": 1773706158627,
       "odds": 1.9090909090909092
     },
     {
@@ -4029,7 +3588,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627923286,
+      "timestamp": 1773706158629,
       "odds": 2.5
     },
     {
@@ -4038,7 +3597,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923287,
+      "timestamp": 1773706158630,
       "odds": 2.05
     },
     {
@@ -4047,7 +3606,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923289,
+      "timestamp": 1773706158633,
       "odds": 1.819672131147541
     },
     {
@@ -4056,7 +3615,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923290,
+      "timestamp": 1773706158635,
       "odds": 1.9090909090909092
     },
     {
@@ -4065,7 +3624,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773627923292,
+      "timestamp": 1773706158637,
       "odds": 1.6578947368421053
     },
     {
@@ -4074,7 +3633,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773627923293,
+      "timestamp": 1773706158640,
       "odds": 1.8333333333333335
     },
     {
@@ -4083,7 +3642,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773627923294,
+      "timestamp": 1773706158642,
       "odds": 1.8849557522123894
     },
     {
@@ -4092,7 +3651,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627923295,
+      "timestamp": 1773706158645,
       "odds": 1.606060606060606
     },
     {
@@ -4101,7 +3660,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923297,
+      "timestamp": 1773706158648,
       "odds": 2.2
     },
     {
@@ -4110,7 +3669,7 @@
       "market": "moneyline",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773627923298,
+      "timestamp": 1773706158650,
       "odds": 2.35
     },
     {
@@ -4119,7 +3678,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773627923300,
+      "timestamp": 1773706158653,
       "odds": 1.9090909090909092
     },
     {
@@ -4128,7 +3687,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627923301,
+      "timestamp": 1773706158656,
       "odds": 1.9090909090909092
     },
     {
@@ -4137,7 +3696,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773627923303,
+      "timestamp": 1773706158660,
       "odds": 4
     },
     {
@@ -4146,7 +3705,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923374,
+      "timestamp": 1773706158663,
       "odds": 1.9090909090909092
     },
     {
@@ -4155,7 +3714,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923376,
+      "timestamp": 1773706158666,
       "odds": 1.9090909090909092
     },
     {
@@ -4164,7 +3723,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923377,
+      "timestamp": 1773706158668,
       "odds": 1.6024096385542168
     },
     {
@@ -4173,7 +3732,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923379,
+      "timestamp": 1773706158671,
       "odds": 1.9090909090909092
     },
     {
@@ -4182,7 +3741,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773627923380,
+      "timestamp": 1773706158674,
       "odds": 1.9090909090909092
     },
     {
@@ -4191,7 +3750,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773627923382,
+      "timestamp": 1773706158676,
       "odds": 1.3546099290780143
     },
     {
@@ -4200,7 +3759,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923384,
+      "timestamp": 1773706158679,
       "odds": 1.9090909090909092
     },
     {
@@ -4209,7 +3768,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 1,
-      "timestamp": 1773627923385,
+      "timestamp": 1773706158681,
       "odds": 1.9090909090909092
     },
     {
@@ -4218,7 +3777,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627923387,
+      "timestamp": 1773706158684,
       "odds": 1.9090909090909092
     },
     {
@@ -4227,7 +3786,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773627923388,
+      "timestamp": 1773706158687,
       "odds": 1.9090909090909092
     },
     {
@@ -4236,7 +3795,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923390,
+      "timestamp": 1773706158689,
       "odds": 2.7857142857142856
     },
     {
@@ -4245,7 +3804,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923391,
+      "timestamp": 1773706158691,
       "odds": 1.9615384615384617
     },
     {
@@ -4254,7 +3813,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773627923392,
+      "timestamp": 1773706158693,
       "odds": 1.9090909090909092
     },
     {
@@ -4263,7 +3822,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773627923394,
+      "timestamp": 1773706158696,
       "odds": 1.9090909090909092
     },
     {
@@ -4272,7 +3831,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627923396,
+      "timestamp": 1773706158698,
       "odds": 2.44
     },
     {
@@ -4281,7 +3840,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773627923397,
+      "timestamp": 1773706158701,
       "odds": 1.9090909090909092
     },
     {
@@ -4290,7 +3849,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923399,
+      "timestamp": 1773706158704,
       "odds": 1.9090909090909092
     },
     {
@@ -4299,7 +3858,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923400,
+      "timestamp": 1773706158707,
       "odds": 1.900900900900901
     },
     {
@@ -4308,7 +3867,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773627923401,
+      "timestamp": 1773706158710,
       "odds": 1.9090909090909092
     },
     {
@@ -4317,7 +3876,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773627923403,
+      "timestamp": 1773706158713,
       "odds": 1.9090909090909092
     },
     {
@@ -4326,7 +3885,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923405,
+      "timestamp": 1773706158716,
       "odds": 1.9090909090909092
     },
     {
@@ -4335,7 +3894,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923406,
+      "timestamp": 1773706158719,
       "odds": 1.9803921568627452
     },
     {
@@ -4344,7 +3903,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773627923408,
+      "timestamp": 1773706158721,
       "odds": 1.9523809523809523
     },
     {
@@ -4353,7 +3912,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773627923409,
+      "timestamp": 1773706158724,
       "odds": 1.9090909090909092
     },
     {
@@ -4362,7 +3921,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773627923411,
+      "timestamp": 1773706158727,
       "odds": 2.0700000000000003
     },
     {
@@ -4371,7 +3930,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773627923412,
+      "timestamp": 1773706158730,
       "odds": 1.9090909090909092
     },
     {
@@ -4380,7 +3939,7 @@
       "market": "total",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773627923414,
+      "timestamp": 1773706158732,
       "odds": 1.9090909090909092
     },
     {
@@ -4389,7 +3948,7 @@
       "market": "total",
       "predictedProb": 0.71,
       "actualOutcome": 1,
-      "timestamp": 1773627923416,
+      "timestamp": 1773706158735,
       "odds": 1.925925925925926
     },
     {
@@ -4398,7 +3957,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773627923417,
+      "timestamp": 1773706158738,
       "odds": 1.8695652173913042
     },
     {
@@ -4407,7 +3966,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773627923419,
+      "timestamp": 1773706158740,
       "odds": 1.9090909090909092
     },
     {
@@ -4416,7 +3975,7 @@
       "market": "total",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773627923420,
+      "timestamp": 1773706158743,
       "odds": 1.9523809523809523
     },
     {
@@ -4425,7 +3984,7 @@
       "market": "total",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773627923422,
+      "timestamp": 1773706158746,
       "odds": 1.9090909090909092
     },
     {
@@ -4434,7 +3993,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773627923423,
+      "timestamp": 1773706158748,
       "odds": 1.9090909090909092
     },
     {
@@ -4443,7 +4002,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 0,
-      "timestamp": 1773627923425,
+      "timestamp": 1773706158751,
       "odds": 1.9090909090909092
     },
     {
@@ -4452,7 +4011,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 0,
-      "timestamp": 1773627923426,
+      "timestamp": 1773706158754,
       "odds": 1.9523809523809523
     },
     {
@@ -4461,7 +4020,7 @@
       "market": "total",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773627923427,
+      "timestamp": 1773706158757,
       "odds": 1.925925925925926
     },
     {
@@ -4470,7 +4029,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773669009153,
+      "timestamp": 1773706158760,
       "odds": 1.6578947368421053
     },
     {
@@ -4479,7 +4038,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773669009155,
+      "timestamp": 1773706158762,
       "odds": 1.8264462809917354
     },
     {
@@ -4488,7 +4047,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773669009157,
+      "timestamp": 1773706158765,
       "odds": 1.8695652173913042
     },
     {
@@ -4497,90 +4056,553 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773669009159,
+      "timestamp": 1773706158768,
       "odds": 2.88
+    },
+    {
+      "gameId": "401803422",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1773706158771,
+      "odds": 1.9615384615384617
+    },
+    {
+      "gameId": "401803424",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1773706158773,
+      "odds": 2.1
+    },
+    {
+      "gameId": "401803419",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1773706158775,
+      "odds": 1.425531914893617
+    },
+    {
+      "gameId": "401803423",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1773706158777,
+      "odds": 1.617283950617284
+    },
+    {
+      "gameId": "401803425",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158780,
+      "odds": 1.4166666666666667
+    },
+    {
+      "gameId": "401803427",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158783,
+      "odds": 1.5649717514124295
+    },
+    {
+      "gameId": "401803426",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1773706158786,
+      "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401803421",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773706158789,
+      "odds": 1.8547008547008548
+    },
+    {
+      "gameId": "401803419",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1773706158791,
+      "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401803425",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1773706158794,
+      "odds": 1.8547008547008548
+    },
+    {
+      "gameId": "401803427",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1773706158796,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401833228",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.69,
+      "actualOutcome": 0,
+      "timestamp": 1773706158799,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833228",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.66,
+      "actualOutcome": 0,
+      "timestamp": 1773706158802,
+      "odds": 1.617283950617284
+    },
+    {
+      "gameId": "401833228",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158804,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833245",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1773706158807,
+      "odds": 2.63
+    },
+    {
+      "gameId": "401833239",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158809,
+      "odds": 2.08
+    },
+    {
+      "gameId": "401833239",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158812,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833242",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158814,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833242",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773706158817,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401833239",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1773706158820,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833242",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1773706158822,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833243",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.7,
+      "actualOutcome": 1,
+      "timestamp": 1773706158825,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833243",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.67,
+      "actualOutcome": 1,
+      "timestamp": 1773706158828,
+      "odds": 1.7246376811594204
+    },
+    {
+      "gameId": "401833243",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1773706158831,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833241",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1773706158833,
+      "odds": 2.45
+    },
+    {
+      "gameId": "401833241",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1773706158836,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833236",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1773706158839,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833235",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158842,
+      "odds": 2.17
+    },
+    {
+      "gameId": "401833235",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158844,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833236",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773706158847,
+      "odds": 1.847457627118644
+    },
+    {
+      "gameId": "401833235",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1773706158849,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833236",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1773706158851,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833244",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158854,
+      "odds": 2.91
+    },
+    {
+      "gameId": "401833244",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1773706158857,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833246",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1773706158859,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833246",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1773706158862,
+      "odds": 1.9803921568627452
+    },
+    {
+      "gameId": "401833231",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158864,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833231",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158866,
+      "odds": 2.06
+    },
+    {
+      "gameId": "401833246",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1773706158870,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833231",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1773706158872,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833226",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.67,
+      "actualOutcome": 0,
+      "timestamp": 1773706158875,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833226",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.66,
+      "actualOutcome": 0,
+      "timestamp": 1773706158877,
+      "odds": 1.819672131147541
+    },
+    {
+      "gameId": "401833226",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158880,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833233",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1773706158882,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833233",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1773706158885,
+      "odds": 2
+    },
+    {
+      "gameId": "401833233",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1773706158887,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833238",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.69,
+      "actualOutcome": 1,
+      "timestamp": 1773706158890,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833238",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1773706158893,
+      "odds": 1.5464480874316942
+    },
+    {
+      "gameId": "401833238",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1773706158895,
+      "odds": 1.9090909090909092
     }
   ],
   "bayesianParams": {
     "NBA-moneyline": {
-      "alpha": 114.2415820923302,
-      "beta": 85.75841790766981
+      "alpha": 115.53558820166485,
+      "beta": 84.46441179833516
     },
     "NBA": {
-      "alpha": 118.95343822021105,
-      "beta": 81.04656177978896
+      "alpha": 118.92155501994682,
+      "beta": 81.07844498005319
     },
     "NBA-spread": {
-      "alpha": 119.89173259507737,
-      "beta": 80.10826740492266
+      "alpha": 120.38268574622019,
+      "beta": 79.61731425377984
     },
     "NBA-total": {
-      "alpha": 111.73623895685525,
-      "beta": 88.26376104314477
+      "alpha": 110.92924190659431,
+      "beta": 89.0707580934057
     },
     "NBA-team_total": {
-      "alpha": 85.96522235528256,
-      "beta": 114.03477764471747
+      "alpha": 85.96335048390468,
+      "beta": 114.03664951609534
     },
     "NHL-team_total": {
-      "alpha": 95.77238512032223,
-      "beta": 104.2276148796778
+      "alpha": 95.77388052367462,
+      "beta": 104.2261194763254
     },
     "NHL": {
-      "alpha": 111.89476431434757,
-      "beta": 88.10523568565246
+      "alpha": 110.4138903432834,
+      "beta": 89.58610965671662
     },
     "NHL-moneyline": {
-      "alpha": 114.9410567680519,
-      "beta": 85.0589432319481
+      "alpha": 113.54225028717774,
+      "beta": 86.45774971282228
     },
     "NHL-spread": {
-      "alpha": 114.15212728187207,
-      "beta": 85.84787271812793
+      "alpha": 113.47523945363709,
+      "beta": 86.52476054636291
     },
     "NHL-total": {
-      "alpha": 106.58051576108701,
-      "beta": 93.419484238913
+      "alpha": 106.66094050186938,
+      "beta": 93.33905949813065
     },
     "NCAAB-moneyline": {
-      "alpha": 117.93777939071968,
-      "beta": 82.06222060928035
+      "alpha": 119.13842851218394,
+      "beta": 80.86157148781608
     },
     "NCAAB": {
-      "alpha": 117.10924823610516,
-      "beta": 82.89075176389485
+      "alpha": 117.41939724528791,
+      "beta": 82.5806027547121
     },
     "NCAAB-spread": {
-      "alpha": 100.70369932534292,
-      "beta": 99.29630067465709
+      "alpha": 101.02093274201329,
+      "beta": 98.97906725798673
     },
     "NCAAB-total": {
-      "alpha": 119.81799274026464,
-      "beta": 80.18200725973537
+      "alpha": 120.13203175189192,
+      "beta": 79.8679682481081
     },
     "NCAAB-team_total": {
-      "alpha": 143.99776791025963,
-      "beta": 56.002232089740396
+      "alpha": 144.03172721460803,
+      "beta": 55.968272785391996
+    },
+    "MLB-spread": {
+      "alpha": 11,
+      "beta": 5
+    },
+    "MLB": {
+      "alpha": 30,
+      "beta": 12
+    },
+    "MLB-moneyline": {
+      "alpha": 13,
+      "beta": 5
+    },
+    "MLB-total": {
+      "alpha": 10,
+      "beta": 6
     }
   },
   "sportAdjustments": {
     "NBA": {
-      "homeAdvantage": 1.3448854613183184e-15,
+      "homeAdvantage": 2.1219497206690646e-16,
       "scoreMean": 112,
-      "scoreStdDev": 52643053427.78513,
+      "scoreStdDev": 47528575901.029915,
       "totalMean": 224
     },
     "NHL": {
-      "homeAdvantage": 1.4214940801064089e-7,
+      "homeAdvantage": 1.922939681884232e-8,
       "scoreMean": 3,
-      "scoreStdDev": 6.137788815307001,
+      "scoreStdDev": 9.80496345597965,
       "totalMean": 6
     },
     "NCAAB": {
-      "homeAdvantage": 0.001172061686168853,
+      "homeAdvantage": 0.0004422816996694233,
       "scoreMean": 72,
-      "scoreStdDev": 3.4667739904629127e-7,
+      "scoreStdDev": 7.449093858506206e-8,
       "totalMean": 145
+    },
+    "MLB": {
+      "homeAdvantage": 0.3,
+      "scoreMean": 4.5,
+      "scoreStdDev": 1.9074513478716975,
+      "totalMean": 8.5
     }
   },
   "calibrationHistory": [
@@ -4715,6 +4737,13 @@
       "accuracy": 60,
       "brierScore": 0.2511,
       "driftScore": 0.0725,
+      "predictions": 500
+    },
+    {
+      "date": "2026-03-17",
+      "accuracy": 59.4,
+      "brierScore": 0.2516,
+      "driftScore": 0.0614,
       "predictions": 500
     }
   ],

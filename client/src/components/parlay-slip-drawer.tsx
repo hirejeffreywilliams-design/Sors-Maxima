@@ -1327,7 +1327,7 @@ function QuickPicksSection({ addLeg }: { addLeg: (leg: ParlaySlipLeg) => boolean
   };
 
   return (
-    <div className="w-full max-w-[280px] space-y-2" data-testid="section-quick-picks">
+    <div className="w-full space-y-2" data-testid="section-quick-picks">
       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-semibold uppercase tracking-wider px-1">
         <Sparkles className="h-3 w-3 text-primary" />
         Top Picks Today
@@ -1432,7 +1432,7 @@ function ManualPickForm({ addLeg }: { addLeg: (leg: ParlaySlipLeg) => boolean })
     return (
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors border border-dashed border-border/60 hover:border-primary/40 rounded-lg px-3 py-2 w-full max-w-[280px]"
+        className="flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors border border-dashed border-border/60 hover:border-primary/40 rounded-lg px-3 py-2 w-full"
         data-testid="button-open-manual-pick-form"
       >
         <Plus className="h-3.5 w-3.5" />
@@ -1442,7 +1442,7 @@ function ManualPickForm({ addLeg }: { addLeg: (leg: ParlaySlipLeg) => boolean })
   }
 
   return (
-    <div className="w-full max-w-[280px] rounded-lg border bg-muted/20 p-3 space-y-2" data-testid="form-manual-pick">
+    <div className="w-full rounded-lg border bg-muted/20 p-3 space-y-2" data-testid="form-manual-pick">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-semibold">Custom Pick</p>
         <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground" data-testid="button-close-manual-pick">
@@ -1701,7 +1701,7 @@ function SlipContent({ compact, isMobile }: { compact?: boolean; isMobile?: bool
 
           <QuickPicksSection addLeg={addLeg} />
 
-          <div className="flex flex-col gap-1.5 w-full max-w-[280px]">
+          <div className="flex flex-col gap-1.5 w-full">
             <Button variant="default" size="sm" className="w-full gap-2 h-8 text-xs" asChild>
               <Link href="/daily">
                 <Sparkles className="h-3.5 w-3.5" />

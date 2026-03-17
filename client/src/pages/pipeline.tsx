@@ -86,6 +86,102 @@ const STATUS_BG: Record<string, string> = {
   skipped: "bg-yellow-500/10 border-yellow-500/20",
 };
 
+// ─── Node Alert Card ──────────────────────────────────────────────────────────
+
+function NodeAlertCard({
+  alert,
+  onAcknowledge,
+  ackPending,
+}: {
+  alert: PipelineNodeAlert;
+  onAcknowledge: () => void;
+  ackPending: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const priorityStyles: Record<string, { border: string; bg: string; text: string; dot: string }> = {
+    critical: { border: "border-red-500/40",    bg: "bg-red-500/5",    text: "text-red-500",    dot: "bg-red-500" },
+    high:     { border: "border-orange-500/40", bg: "bg-orange-500/5", text: "text-orange-500", dot: "bg-orange-500" },
+    medium:   { border: "border-yellow-500/40", bg: "bg-yellow-500/5", text: "text-yellow-500", dot: "bg-yellow-500" },
+    low:      { border: "border-border",        bg: "bg-muted/30",     text: "text-muted-foreground", dot: "bg-muted-foreground" },
+  };
+  const style = priorityStyles[alert.priority] ?? priorityStyles.low;
+
+  const timeAgo = (iso: string) => {
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diffMs / 60_000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
+  };
+
+  return (
+    <Card className={`border ${style.border} ${style.bg}`} data-testid={`node-alert-card-${alert.id}`}>
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <div className={`w-2 h-2 rounded-full ${style.dot} mt-1.5 shrink-0`} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm font-semibold">{alert.nodeLabel}</span>
+                <Badge variant="outline" className={`text-[10px] py-0 ${style.border} ${style.text}`}>
+                  {alert.currentStatus}
+                </Badge>
+                <Badge variant="outline" className="text-[10px] py-0 text-muted-foreground border-border">
+                  {alert.priority}
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {alert.previousStatus} → {alert.currentStatus} · {timeAgo(alert.triggeredAt)}
+              </p>
+
+              {alert.diagnosis && (
+                <p className="text-xs mt-2 leading-relaxed">{alert.diagnosis}</p>
+              )}
+
+              {alert.recommendations.length > 0 && (
+                <div className="mt-2">
+                  <button
+                    onClick={() => setExpanded(e => !e)}
+                    className="flex items-center gap-1 text-[11px] text-primary font-medium"
+                    data-testid={`button-expand-alert-${alert.id}`}
+                  >
+                    <Bot className="h-3 w-3" />
+                    AI Fix Suggestions ({alert.recommendations.length})
+                    {expanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
+                  </button>
+                  {expanded && (
+                    <ul className="mt-1.5 space-y-1">
+                      {alert.recommendations.map((rec, i) => (
+                        <li key={i} className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                          <span className="font-mono text-primary/70 shrink-0">{i + 1}.</span>
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            variant="ghost"
+            className="shrink-0 h-7 text-[11px] text-muted-foreground hover:text-foreground"
+            onClick={onAcknowledge}
+            disabled={ackPending}
+            data-testid={`button-ack-alert-${alert.id}`}
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+            Dismiss
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 // ─── Pipeline Connection Map ───────────────────────────────────────────────────
 
 interface VisualNode {
@@ -117,6 +213,21 @@ interface DiagnosisResult {
   headline: string;
   analysis: string;
   recommendations: string[];
+}
+
+interface PipelineNodeAlert {
+  id: string;
+  nodeId: string;
+  nodeLabel: string;
+  previousStatus: string;
+  currentStatus: string;
+  triggeredAt: string;
+  diagnosis: string | null;
+  recommendations: string[];
+  priority: "low" | "medium" | "high" | "critical";
+  acknowledged: boolean;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
 }
 
 // Node height 96px — enough for 3 sub-compartment rows + title
@@ -721,6 +832,22 @@ export default function PipelineIntelligence() {
     queryKey: ["/api/pipeline/alerts"],
   });
 
+  const { data: nodeAlertsData } = useQuery<{ alerts: PipelineNodeAlert[] }>({
+    queryKey: ["/api/admin/pipeline/active-alerts"],
+    refetchInterval: 30_000,
+  });
+  const activeNodeAlerts = nodeAlertsData?.alerts ?? [];
+
+  const ackNodeAlertMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await apiRequest("POST", `/api/admin/pipeline/acknowledge-alert/${id}`, {});
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pipeline/active-alerts"] });
+    },
+  });
+
   const { data: config, isLoading: configLoading } = useQuery<Record<string, any>>({
     queryKey: ["/api/pipeline/config"],
   });
@@ -753,9 +880,11 @@ export default function PipelineIntelligence() {
   const latestRun = runs?.[0];
   const activeAlerts = alerts?.filter((a: any) => !a.acknowledged) || [];
 
+  const criticalNodeAlerts = activeNodeAlerts.filter(a => a.priority === "critical" || a.priority === "high");
+
   const tabs = [
     { id: "overview", label: "Overview", icon: Activity },
-    { id: "connection-map", label: "Connection Map", icon: Network },
+    { id: "connection-map", label: "Connection Map", icon: Network, count: activeNodeAlerts.length },
     { id: "pipeline", label: "Pipeline", icon: GitBranch },
     { id: "metrics", label: "Metrics", icon: BarChart3 },
     { id: "alerts", label: "Alerts", icon: AlertTriangle, count: activeAlerts.length },
@@ -801,6 +930,19 @@ export default function PipelineIntelligence() {
         </div>
       </div>
 
+      {criticalNodeAlerts.length > 0 && (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3 flex items-center justify-between gap-3" data-testid="banner-critical-node-alerts">
+          <div className="flex items-center gap-2 min-w-0">
+            <AlertTriangle className="h-4 w-4 text-red-500 shrink-0" />
+            <span className="text-sm font-semibold text-red-500">{criticalNodeAlerts.length} critical node alert{criticalNodeAlerts.length !== 1 ? "s" : ""} detected</span>
+            <span className="text-xs text-muted-foreground hidden sm:inline">— {criticalNodeAlerts.map(a => a.nodeLabel).join(", ")}</span>
+          </div>
+          <Button size="sm" variant="outline" className="border-red-500/30 text-red-500 hover:bg-red-500/10 text-xs shrink-0 h-7" onClick={() => setActiveTab("connection-map")} data-testid="button-view-node-alerts">
+            View Alerts
+          </Button>
+        </div>
+      )}
+
       <div className="flex items-center gap-0 border-b -mb-px overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -828,7 +970,35 @@ export default function PipelineIntelligence() {
       </div>
 
       {activeTab === "connection-map" && (
-        <PipelineConnectionMap />
+        <div className="space-y-4">
+          {activeNodeAlerts.length > 0 && (
+            <div className="space-y-2" data-testid="section-node-alerts">
+              <div className="flex items-center gap-2 mb-3">
+                <Bot className="h-4 w-4 text-primary" />
+                <h3 className="text-sm font-semibold">AI-Diagnosed Node Alerts</h3>
+                <Badge variant="destructive" className="text-[10px]">{activeNodeAlerts.length}</Badge>
+                <span className="text-xs text-muted-foreground ml-auto">Auto-refreshes every 30s · Polled every 60s</span>
+              </div>
+              {activeNodeAlerts.map((alert) => (
+                <NodeAlertCard
+                  key={alert.id}
+                  alert={alert}
+                  onAcknowledge={() => ackNodeAlertMutation.mutate(alert.id)}
+                  ackPending={ackNodeAlertMutation.isPending}
+                />
+              ))}
+            </div>
+          )}
+
+          {activeNodeAlerts.length === 0 && (
+            <div className="flex items-center gap-2 text-xs text-emerald-500 px-1" data-testid="text-no-node-alerts">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              No active node alerts — all status transitions healthy
+            </div>
+          )}
+
+          <PipelineConnectionMap />
+        </div>
       )}
 
       {activeTab === "overview" && healthLoading && (

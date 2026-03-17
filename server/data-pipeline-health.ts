@@ -98,11 +98,10 @@ function checkESPN(): PipelineSource {
   const activeSports = [...new Set(recentCalls.map(c => c.sport))];
 
   if (recentCalls.length === 0) {
-    // ESPN is always running — if no tracked calls yet, show as live (server just started)
     return {
-      id: "espn", name: "ESPN (Live Scores)", status: "live",
-      lastSuccess: "At startup",
-      detail: "Free API — live game data, scores, rosters, injuries",
+      id: "espn", name: "ESPN (Live Scores)", status: "unknown",
+      lastSuccess: null,
+      detail: "Free API — waiting for first data cycle (no calls tracked yet)",
       callsTracked: 0, dataPoints: 0, keyRequired: false, keySet: true,
     };
   }
