@@ -32347,13 +32347,33 @@
       "homeScore": 0,
       "awayScore": 7,
       "settledAt": "2026-03-24T22:02:30.581Z"
+    },
+    {
+      "id": "precomp-NHL-401803474-spread-553481cee3",
+      "gameId": "401803474",
+      "sport": "NHL",
+      "game": "Seattle Kraken @ Florida Panthers",
+      "homeTeam": "Florida Panthers",
+      "awayTeam": "Seattle Kraken",
+      "pick": "Seattle Kraken +1.5",
+      "betType": "spread",
+      "odds": -230,
+      "grade": "C-",
+      "confidence": 52,
+      "ev": -42.61,
+      "gameTime": "2026-03-24T23:00Z",
+      "savedAt": "2026-03-24T22:11:20.617Z",
+      "result": "lost",
+      "homeScore": 5,
+      "awayScore": 2,
+      "settledAt": "2026-03-24T22:13:07.418Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1544,
+      "total": 1545,
       "won": 866,
-      "lost": 647,
+      "lost": 648,
       "push": 31,
       "rate": 56.1,
       "pending": 69
@@ -32365,9 +32385,9 @@
         "rate": 56.5
       },
       "NHL": {
-        "total": 485,
+        "total": 486,
         "won": 248,
-        "rate": 51.1
+        "rate": 51
       },
       "NCAAB": {
         "total": 443,
@@ -32407,9 +32427,9 @@
         "rate": 47.3
       },
       "C-": {
-        "total": 137,
+        "total": 138,
         "won": 73,
-        "rate": 53.3
+        "rate": 52.9
       },
       "C": {
         "total": 288,
@@ -32445,10 +32465,10 @@
         "roi": 22.7
       },
       "Spread": {
-        "total": 498,
+        "total": 499,
         "won": 277,
-        "rate": 55.6,
-        "roi": 9.8
+        "rate": 55.5,
+        "roi": 9.5
       },
       "Total": {
         "total": 495,
@@ -32469,23 +32489,23 @@
       "push": 3,
       "rate": 68
     },
-    "lastUpdated": "2026-03-24T22:03:03.763Z",
+    "lastUpdated": "2026-03-24T22:40:30.210Z",
     "roi": 12.4,
     "brierScore": 0.2504,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.106,
+    "sharpeRatio": 0.105,
     "homeAwayBias": {
       "homeWinRate": 60.2,
-      "awayWinRate": 46.6,
+      "awayWinRate": 46.3,
       "homeTotal": 815,
-      "awayTotal": 146
+      "awayTotal": 147
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 53,
-        "actual": 57.6,
-        "total": 224
+        "actual": 57.3,
+        "total": 225
       },
       {
         "range": "55-60",

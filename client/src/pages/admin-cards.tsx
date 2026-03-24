@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { TradingCard } from "@/components/trading-card";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Trophy, Sparkles, Users, BarChart2, Layers, RefreshCw, Search, Filter, CheckCircle2, Clock, XCircle, Zap, Shield, Lock, AlertTriangle, Eye, EyeOff, Star, FileText, Settings2, PlusCircle, Unlock, RotateCcw, Flame, Activity } from "lucide-react";
+import { Trophy, Sparkles, Users, BarChart2, Layers, RefreshCw, Search, CheckCircle2, Clock, XCircle, Zap, Shield, Lock, AlertTriangle, Eye, EyeOff, Star, FileText, Settings2, PlusCircle, Unlock, RotateCcw, Flame, Activity, ChevronDown, ChevronUp, Ticket, Award, TrendingUp, CalendarDays } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -111,8 +111,209 @@ interface CommunityCard {
   username: string;
 }
 
+// ─── Vault Door Animation ────────────────────────────────────────────────────
+function VaultDoorAnimation({ onComplete }: { onComplete: () => void }) {
+  const [phase, setPhase] = useState(0);
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setPhase(1), 900),
+      setTimeout(() => setPhase(2), 1900),
+      setTimeout(() => setPhase(3), 2800),
+      setTimeout(() => setPhase(4), 3600),
+      setTimeout(() => onComplete(), 4300),
+    ];
+    return () => timers.forEach(clearTimeout);
+  }, [onComplete]);
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: "9px", letterSpacing: "2px", fontWeight: 700,
+    color: "rgba(255,255,255,0.75)", textTransform: "uppercase" as const,
+  };
+
+  const dialStyle = (spinning: boolean): React.CSSProperties => ({
+    width: "44px", height: "44px", borderRadius: "50%",
+    border: "3px solid rgba(255,255,255,0.45)",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    background: "rgba(0,0,0,0.35)",
+    animation: spinning ? "vaultSpin 1.2s linear infinite" : "none",
+    zIndex: 1, flexShrink: 0,
+  });
+
+  const notchStyle: React.CSSProperties = {
+    width: "14px", height: "3px",
+    background: "rgba(255,255,255,0.85)",
+    borderRadius: "2px",
+  };
+
+  function SafeDoor({
+    emoji1, emoji2, subtitle, bg, border, glowColor,
+    height, isOpen, spinning,
+  }: {
+    emoji1: string; emoji2?: string; subtitle: string;
+    bg: string; border: string; glowColor: string;
+    height: number; isOpen: boolean; spinning: boolean;
+  }) {
+    return (
+      <div style={{ perspective: "700px", flexShrink: 0 }}>
+        <div style={{
+          width: "148px", height: `${height}px`,
+          background: bg, border: `4px solid ${border}`,
+          borderRadius: "10px 10px 4px 4px",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "space-evenly",
+          boxShadow: `0 0 45px ${glowColor}, 6px 0 25px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.25)`,
+          transform: isOpen ? "rotateY(-88deg)" : "rotateY(0deg)",
+          transformOrigin: "left center",
+          transition: "transform 1s cubic-bezier(0.4,0,0.2,1)",
+          padding: "14px 10px",
+          position: "relative", overflow: "hidden",
+        }}>
+          {/* Decorative horizontal bars (like a real vault door) */}
+          {[20, 50, 80].map(pct => (
+            <div key={pct} style={{
+              position: "absolute", left: 0, right: 0,
+              top: `${pct}%`, height: "2px",
+              background: "rgba(255,255,255,0.07)",
+            }} />
+          ))}
+          {/* Door handle bar */}
+          <div style={{
+            position: "absolute", right: "10px", top: "50%",
+            transform: "translateY(-50%)",
+            width: "8px", height: "50px",
+            background: "rgba(255,255,255,0.2)",
+            borderRadius: "4px",
+          }} />
+          <span style={{ fontSize: "40px", zIndex: 1, lineHeight: 1 }}>{emoji1}</span>
+          {emoji2 && <span style={{ fontSize: "28px", zIndex: 1, lineHeight: 1 }}>{emoji2}</span>}
+          <div style={dialStyle(spinning)}>
+            <div style={notchStyle} />
+          </div>
+          <span style={{ ...labelStyle, zIndex: 1 }}>{subtitle}</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 9999,
+      background: "radial-gradient(ellipse at 50% 40%, #0f1a2e 0%, #020408 100%)",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      justifyContent: "center", overflow: "hidden",
+      opacity: phase >= 4 ? 0 : 1,
+      transition: "opacity 0.7s ease-out",
+      pointerEvents: phase >= 4 ? "none" : "auto",
+    }}>
+      <style>{`
+        @keyframes vaultSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes vaultFadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes vaultPulse { 0%,100% { text-shadow: 0 0 20px #fbbf24; } 50% { text-shadow: 0 0 60px #fbbf24, 0 0 100px #f59e0b; } }
+        @keyframes vaultGranted { 0% { opacity:0; transform:scale(0.8); } 60% { opacity:1; transform:scale(1.05); } 100% { opacity:1; transform:scale(1); } }
+      `}</style>
+
+      {/* Subtle grid overlay */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 55px, rgba(251,191,36,0.025) 55px, rgba(251,191,36,0.025) 56px), repeating-linear-gradient(90deg, transparent, transparent 55px, rgba(251,191,36,0.025) 55px, rgba(251,191,36,0.025) 56px)",
+      }} />
+
+      {/* Header */}
+      <div style={{ textAlign: "center", marginBottom: "2.5rem", animation: "vaultFadeUp 0.6s ease-out", zIndex: 2 }}>
+        <p style={{ fontSize: "10px", letterSpacing: "8px", color: "#d97706", textTransform: "uppercase", marginBottom: "8px" }}>
+          SORS MAXIMA
+        </p>
+        <h1 style={{
+          fontSize: "clamp(18px, 3vw, 26px)", fontWeight: 900, letterSpacing: "5px",
+          textTransform: "uppercase", color: "#fbbf24", margin: 0,
+          animation: "vaultPulse 2.5s ease-in-out infinite",
+        }}>
+          Intelligence Vault
+        </h1>
+        <p style={{ fontSize: "10px", letterSpacing: "3px", color: phase >= 4 ? "#10b981" : "#6b7280", marginTop: "8px", transition: "color 0.4s" }}>
+          {phase >= 4 ? "✓ ACCESS GRANTED" : "VERIFYING ADMIN CREDENTIALS…"}
+        </p>
+      </div>
+
+      {/* Three sports safe doors */}
+      <div style={{ display: "flex", gap: "18px", alignItems: "flex-end", zIndex: 2 }}>
+        <SafeDoor
+          emoji1="🏀" emoji2="⚾"
+          subtitle="NBA · MLB · NCAAB"
+          bg="linear-gradient(160deg, #7c2d12 0%, #c2410c 45%, #ea580c 100%)"
+          border="rgba(249,115,22,0.55)"
+          glowColor="rgba(249,115,22,0.25)"
+          height={230}
+          isOpen={phase >= 1}
+          spinning={phase === 0}
+        />
+        <SafeDoor
+          emoji1="🏒" emoji2="⚽"
+          subtitle="NHL · MLS · INTL"
+          bg="linear-gradient(160deg, #0c1a3d 0%, #1e3a8a 50%, #2563eb 100%)"
+          border="rgba(59,130,246,0.55)"
+          glowColor="rgba(59,130,246,0.25)"
+          height={210}
+          isOpen={phase >= 2}
+          spinning={phase <= 1}
+        />
+        <SafeDoor
+          emoji1="🏈" emoji2="🥊"
+          subtitle="NFL · NCAAF · MMA"
+          bg="linear-gradient(160deg, #14532d 0%, #15803d 50%, #16a34a 100%)"
+          border="rgba(34,197,94,0.55)"
+          glowColor="rgba(34,197,94,0.25)"
+          height={250}
+          isOpen={phase >= 3}
+          spinning={phase <= 2}
+        />
+      </div>
+
+      {/* Progress bar */}
+      <div style={{
+        marginTop: "2.5rem", width: "220px", height: "2px",
+        background: "rgba(255,255,255,0.08)", borderRadius: "2px", zIndex: 2,
+      }}>
+        <div style={{
+          height: "100%",
+          width: `${Math.min(100, (phase / 3) * 100)}%`,
+          background: "linear-gradient(90deg, #f59e0b, #fbbf24)",
+          borderRadius: "2px", transition: "width 0.9s ease-out",
+        }} />
+      </div>
+      <p style={{ fontSize: "9px", color: "#374151", marginTop: "6px", letterSpacing: "2px", zIndex: 2 }}>
+        {phase === 0 && "INITIALIZING SECURITY LAYER…"}
+        {phase === 1 && "UNLOCKING SPORTS DATA VAULT…"}
+        {phase === 2 && "CLEARING SECONDARY CLEARANCE…"}
+        {phase === 3 && "OPENING MASTER VAULT…"}
+      </p>
+
+      {/* ACCESS GRANTED flash */}
+      {phase >= 4 && (
+        <div style={{
+          position: "absolute", inset: 0, display: "flex",
+          flexDirection: "column", alignItems: "center", justifyContent: "center",
+          animation: "vaultGranted 0.4s ease-out forwards",
+          background: "radial-gradient(ellipse at center, rgba(251,191,36,0.12) 0%, transparent 70%)",
+          zIndex: 3,
+        }}>
+          <div style={{ fontSize: "60px", marginBottom: "16px" }}>🔓</div>
+          <div style={{ fontSize: "clamp(16px, 3vw, 22px)", fontWeight: 900, color: "#fbbf24", letterSpacing: "6px", textTransform: "uppercase" }}>
+            ACCESS GRANTED
+          </div>
+          <div style={{ fontSize: "11px", color: "#10b981", marginTop: "8px", letterSpacing: "2px" }}>
+            Welcome, Administrator
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function AdminCardsVault() {
   useSEO({ title: "Cards Vault — Admin", description: "Advanced Sors Intelligence Cards Vault" });
+  const [vaultOpen, setVaultOpen] = useState(false);
   const { toast } = useToast();
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
@@ -284,30 +485,102 @@ export default function AdminCardsVault() {
   const t = analytics?.totals;
   const ct = analytics?.collTotals;
 
+  // LCT manager data + settle mutation
+  const { data: lctData, isLoading: lctLoading, refetch: refetchLct } = useQuery<{
+    history: Array<{
+      id: number; date: string; ticketId: string; legs: any[];
+      totalLegs: number; outcome: string; wonLegs: number;
+      settledAt: string | null; mintedCardId: string | null;
+      totalDecimalOdds: number; americanOdds: string;
+      potentialPayouts: { stake: number; payout: number; formatted: string }[];
+    }>;
+    stats: { total: number; wins: number; losses: number; pending: number; winRate: number; streak: number; streakType: string };
+  }>({
+    queryKey: ["/api/lct-track-record"],
+    enabled: vaultOpen,
+  });
+
+  const [settleId, setSettleId] = useState<number | null>(null);
+  const [settleOutcome, setSettleOutcome] = useState<"won" | "lost">("lost");
+  const [settleWonLegs, setSettleWonLegs] = useState("");
+  const [expandedLctId, setExpandedLctId] = useState<number | null>(null);
+
+  const settleMutation = useMutation({
+    mutationFn: async ({ id, outcome, wonLegs }: { id: number; outcome: string; wonLegs: number }) => {
+      const res = await apiRequest("POST", `/api/admin/lct/${id}/settle`, { outcome, wonLegs });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "LCT ticket settled" });
+      setSettleId(null);
+      refetchLct();
+    },
+    onError: () => toast({ title: "Failed to settle", variant: "destructive" }),
+  });
+
+  if (!vaultOpen) {
+    return <VaultDoorAnimation onComplete={() => setVaultOpen(true)} />;
+  }
+
   return (
     <div className="space-y-6 p-4 md:p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Trophy className="w-6 h-6 text-amber-400" />
-            Sors Cards Vault
-            <Badge variant="outline" className="text-xs ml-1 border-amber-400/30 text-amber-400 bg-amber-400/5">Admin</Badge>
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            Full visibility and control over every Intelligence Card on the platform.
-          </p>
+      {/* Header — upgraded with gradient banner */}
+      <div
+        className="rounded-2xl border overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, rgba(120,53,15,0.35) 0%, rgba(15,20,40,0.95) 40%, rgba(12,10,20,0.98) 100%)",
+          borderColor: "rgba(251,191,36,0.25)",
+          boxShadow: "0 0 60px rgba(251,191,36,0.06)",
+        }}
+      >
+        <div className="px-5 py-4 flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30">
+              <Trophy className="w-6 h-6 text-amber-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-black text-amber-300 leading-none tracking-wide">SORS Intelligence Vault</h1>
+                <Badge className="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-black">ADMIN</Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Full visibility and control over every card, ticket, and transaction on the platform
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Button size="sm" variant="outline" className="border-amber-500/30 text-amber-300 hover:bg-amber-500/10"
+              onClick={() => { refetchRegistry(); refetchAnalytics(); refetchSecurity(); refetchCommunity(); refetchLct(); }}
+              data-testid="button-refresh-vault">
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh All
+            </Button>
+            <Button size="sm" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
+              className="bg-amber-500 text-black font-semibold" data-testid="button-seed-cards">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              {seedMutation.isPending ? "Seeding…" : "Seed Demo Cards"}
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button size="sm" variant="outline" onClick={() => { refetchRegistry(); refetchAnalytics(); refetchSecurity(); refetchCommunity(); }} data-testid="button-refresh-vault">
-            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh All
-          </Button>
-          <Button size="sm" onClick={() => seedMutation.mutate()} disabled={seedMutation.isPending}
-            className="bg-amber-500 text-black font-semibold" data-testid="button-seed-cards">
-            <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-            {seedMutation.isPending ? "Seeding…" : "Seed Demo Cards"}
-          </Button>
-        </div>
+        {/* Quick stat bar */}
+        {analytics && (
+          <div className="grid grid-cols-4 sm:grid-cols-8 divide-x divide-amber-500/10 border-t border-amber-500/10">
+            {[
+              { label: "Cards", value: t?.total_cards ?? 0, color: "text-amber-300" },
+              { label: "Copies", value: ct?.total_copies ?? 0, color: "text-blue-300" },
+              { label: "Won", value: t?.won_cards ?? 0, color: "text-emerald-400" },
+              { label: "Pending", value: t?.pending_cards ?? 0, color: "text-amber-400" },
+              { label: "Frozen", value: t?.frozen_cards ?? 0, color: "text-blue-400" },
+              { label: "Revoked", value: ct?.revoked_copies ?? 0, color: "text-red-400" },
+              { label: "Pack Opens", value: ct?.pack_opens ?? 0, color: "text-purple-400" },
+              { label: "Showcased", value: ct?.showcased_copies ?? 0, color: "text-emerald-300" },
+            ].map(({ label, value, color }) => (
+              <div key={label} className="py-2 px-3 text-center">
+                <p className={`text-sm font-black tabular-nums ${color}`}>{value.toLocaleString()}</p>
+                <p className="text-[9px] text-muted-foreground uppercase tracking-wide">{label}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -315,6 +588,12 @@ export default function AdminCardsVault() {
           <TabsTrigger value="overview" data-testid="tab-overview"><BarChart2 className="w-3.5 h-3.5 mr-1.5" />Overview</TabsTrigger>
           <TabsTrigger value="registry" data-testid="tab-registry"><Layers className="w-3.5 h-3.5 mr-1.5" />Card Registry</TabsTrigger>
           <TabsTrigger value="mint" data-testid="tab-mint"><PlusCircle className="w-3.5 h-3.5 mr-1.5" />Mint Control</TabsTrigger>
+          <TabsTrigger value="lct" data-testid="tab-lct">
+            <Ticket className="w-3.5 h-3.5 mr-1.5" />LCT Manager
+            {lctData && lctData.stats.pending > 0 && (
+              <span className="ml-1.5 text-[9px] bg-amber-500 text-black font-black rounded-full px-1.5 py-0.5">{lctData.stats.pending}</span>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="community" data-testid="tab-community"><Users className="w-3.5 h-3.5 mr-1.5" />Community</TabsTrigger>
           <TabsTrigger value="security" data-testid="tab-security"><Shield className="w-3.5 h-3.5 mr-1.5" />Security</TabsTrigger>
           <TabsTrigger value="audit" data-testid="tab-audit"><FileText className="w-3.5 h-3.5 mr-1.5" />Audit Log</TabsTrigger>
@@ -697,6 +976,184 @@ export default function AdminCardsVault() {
               </div>
             )}
           </div>
+        </TabsContent>
+
+        {/* ─── LCT MANAGER ───────────────────────────────────────────────── */}
+        <TabsContent value="lct" className="space-y-4 mt-0">
+          {/* LCT Stats Banner */}
+          <div
+            className="rounded-xl border overflow-hidden"
+            style={{ background: "linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(0,0,0,0.5) 100%)", borderColor: "rgba(16,185,129,0.25)" }}
+          >
+            <div className="px-4 py-3 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <Ticket className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-black text-emerald-400">Life Changer™ Ticket Manager</h3>
+                <p className="text-[10px] text-muted-foreground">Settle outcomes, mint legendary cards, and track the full history</p>
+              </div>
+              {lctData && (
+                <div className="flex gap-4 shrink-0">
+                  {[
+                    { label: "Wins", val: lctData.stats.wins, cls: "text-emerald-400" },
+                    { label: "Losses", val: lctData.stats.losses, cls: "text-red-400" },
+                    { label: "Pending", val: lctData.stats.pending, cls: "text-amber-400" },
+                    { label: "Win Rate", val: `${lctData.stats.winRate}%`, cls: "text-amber-300" },
+                  ].map(({ label, val, cls }) => (
+                    <div key={label} className="text-center">
+                      <p className={`text-lg font-black ${cls}`}>{val}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase">{label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {lctLoading && <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>}
+
+          {!lctLoading && lctData && (
+            <div className="space-y-3" data-testid="admin-lct-list">
+              {lctData.history.map((entry) => {
+                const isExpanded = expandedLctId === entry.id;
+                const isSettling = settleId === entry.id;
+                const legs: any[] = Array.isArray(entry.legs) ? entry.legs : [];
+
+                return (
+                  <div
+                    key={entry.id}
+                    className="rounded-xl border overflow-hidden"
+                    style={{
+                      borderColor: entry.outcome === "won" ? "rgba(16,185,129,0.3)" : entry.outcome === "lost" ? "rgba(239,68,68,0.3)" : "rgba(251,191,36,0.2)",
+                      background: entry.outcome === "won" ? "rgba(16,185,129,0.04)" : entry.outcome === "lost" ? "rgba(239,68,68,0.03)" : "rgba(251,191,36,0.03)",
+                    }}
+                    data-testid={`admin-lct-${entry.id}`}
+                  >
+                    {/* Header row */}
+                    <div className="flex items-center gap-3 px-4 pt-3 pb-2">
+                      <div className="shrink-0">
+                        {entry.outcome === "won" ? (
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center"><Award className="w-4 h-4 text-emerald-400" /></div>
+                        ) : entry.outcome === "lost" ? (
+                          <div className="w-8 h-8 rounded-full bg-red-500/15 flex items-center justify-center"><XCircle className="w-4 h-4 text-red-400" /></div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center"><Clock className="w-4 h-4 text-amber-400" /></div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold">{new Date(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}</span>
+                          <Badge className={`text-[9px] font-black border ${entry.outcome === "won" ? "bg-emerald-500/10 text-emerald-400 border-emerald-400/30" : entry.outcome === "lost" ? "bg-red-500/10 text-red-400 border-red-400/30" : "bg-amber-500/10 text-amber-400 border-amber-400/30"}`}>
+                            {entry.outcome === "won" ? "🏆 WIN" : entry.outcome === "lost" ? "LOSS" : "⏳ PENDING"}
+                          </Badge>
+                          {entry.mintedCardId && <Badge className="text-[9px] bg-purple-500/10 text-purple-400 border border-purple-400/30"><Sparkles className="w-2.5 h-2.5 mr-0.5" />Card Minted</Badge>}
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {entry.totalLegs}-leg parlay · {entry.americanOdds || "odds N/A"}
+                          {entry.outcome !== "pending" && entry.wonLegs > 0 && ` · ${entry.wonLegs}/${entry.totalLegs} legs won`}
+                        </p>
+                      </div>
+                      {/* Payout at $100 */}
+                      {entry.potentialPayouts?.[2] && (
+                        <div className="text-right shrink-0">
+                          <p className={`text-base font-black tabular-nums ${entry.outcome === "won" ? "text-emerald-400" : "text-amber-300"}`}>
+                            {entry.potentialPayouts[2].formatted}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground">on $100</p>
+                        </div>
+                      )}
+                      <div className="flex gap-1 shrink-0">
+                        <button
+                          onClick={() => setExpandedLctId(isExpanded ? null : entry.id)}
+                          className="px-2 py-1 rounded text-[10px] text-muted-foreground border border-border/40 hover:bg-muted/50 flex items-center gap-0.5"
+                        >
+                          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                          Legs
+                        </button>
+                        {entry.outcome === "pending" && (
+                          <button
+                            onClick={() => { setSettleId(isSettling ? null : entry.id); setSettleWonLegs(""); setSettleOutcome("lost"); }}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold border flex items-center gap-0.5 ${isSettling ? "bg-amber-500 text-black border-amber-500" : "bg-amber-500/15 text-amber-400 border-amber-500/30 hover:bg-amber-500/25"}`}
+                            data-testid={`button-settle-${entry.id}`}
+                          >
+                            <CheckCircle2 className="w-3 h-3" />Settle
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Settle form */}
+                    {isSettling && entry.outcome === "pending" && (
+                      <div className="mx-3 mb-3 p-3 rounded-lg bg-amber-500/8 border border-amber-500/20 space-y-2">
+                        <p className="text-[10px] font-semibold text-amber-300 uppercase tracking-wide">Settle This Ticket</p>
+                        <div className="flex items-end gap-2 flex-wrap">
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground mb-1 block">Outcome</Label>
+                            <Select value={settleOutcome} onValueChange={(v) => setSettleOutcome(v as "won" | "lost")}>
+                              <SelectTrigger className="h-8 w-24 text-xs" data-testid={`select-outcome-${entry.id}`}><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="won">🏆 Won</SelectItem>
+                                <SelectItem value="lost">❌ Lost</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label className="text-[10px] text-muted-foreground mb-1 block">Legs Won</Label>
+                            <Input
+                              value={settleWonLegs} onChange={e => setSettleWonLegs(e.target.value)}
+                              placeholder={`0–${entry.totalLegs}`}
+                              className="h-8 w-20 text-xs" type="number"
+                              data-testid={`input-won-legs-${entry.id}`}
+                            />
+                          </div>
+                          <Button
+                            size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white text-xs"
+                            onClick={() => settleMutation.mutate({ id: entry.id, outcome: settleOutcome, wonLegs: parseInt(settleWonLegs) || (settleOutcome === "won" ? entry.totalLegs : 0) })}
+                            disabled={settleMutation.isPending}
+                            data-testid={`button-settle-confirm-${entry.id}`}
+                          >
+                            {settleMutation.isPending ? "Saving…" : "Confirm Settlement"}
+                          </Button>
+                          <button onClick={() => setSettleId(null)} className="text-[10px] text-muted-foreground hover:text-foreground">Cancel</button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Expanded legs */}
+                    {isExpanded && legs.length > 0 && (
+                      <div className="border-t border-border/20 px-3 pb-3 pt-2 space-y-1.5">
+                        <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest mb-1.5">All {legs.length} Legs</p>
+                        {legs.map((leg: any, i: number) => (
+                          <div key={i} className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-background/60 border border-border/30">
+                            <span className="text-sm shrink-0">{leg.sport === "NBA" ? "🏀" : leg.sport === "NHL" ? "🏒" : leg.sport === "NFL" ? "🏈" : leg.sport === "MLB" ? "⚾" : leg.sport === "MMA" ? "🥊" : leg.sport?.startsWith("Soccer") ? "⚽" : "🎯"}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] font-semibold truncate">{leg.pick}</p>
+                              <p className="text-[9px] text-muted-foreground truncate">{leg.game}</p>
+                            </div>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {leg.grade && <span className={`text-[9px] font-bold px-1 rounded border ${GRADE_COLOR[leg.grade] || ""}`}>{leg.grade}</span>}
+                              <span className="text-[10px] font-black text-amber-300 tabular-nums">
+                                {leg.americanOdds > 0 ? `+${leg.americanOdds}` : leg.americanOdds}
+                              </span>
+                              {entry.outcome === "won" && <span className="text-[9px] text-emerald-400 font-black">✓</span>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {!lctLoading && (!lctData || lctData.history.length === 0) && (
+            <div className="text-center py-16 text-muted-foreground text-sm">
+              <Ticket className="w-8 h-8 mx-auto mb-3 opacity-30" />
+              No Life Changer™ tickets logged yet.
+            </div>
+          )}
         </TabsContent>
 
         {/* ─── COMMUNITY MODERATION ──────────────────────────────────────── */}

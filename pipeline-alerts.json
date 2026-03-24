@@ -1,5 +1,37 @@
 [
   {
+    "id": "alert-intl-sports-1774391160389",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-24T22:26:00.389Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached likely due to network latency or resource optimization, meaning it may not reflect the most current sports data for users.",
+    "recommendations": [
+      "Verify the network connection to ensure it is stable.",
+      "Check the status of dependent nodes for any issues that might cause caching.",
+      "Restart the 'Intl Sports Engine' node to refresh its data."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-api-football-1774391159176",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-24T22:25:59.176Z",
+    "diagnosis": "The 'API-Football' node is cached likely due to a temporary unavailability of real-time data, which means users may not receive the latest soccer information until the cache is refreshed.",
+    "recommendations": [
+      "Check the API-Football service status and logs for any reported outages or issues.",
+      "Implement a manual refresh of the cache to attempt to retrieve real-time data from the API.",
+      "Monitor the node's status and set up alerts for future caching issues to ensure timely updates."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
     "id": "alert-odds-center-1774389406287",
     "nodeId": "odds-center",
     "nodeLabel": "Odds Center",
@@ -61,7 +93,8 @@
       "Review the caching settings and logs to identify any specific errors or issues that may have triggered the caching status."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-24T22:05:55.771Z"
   },
   {
     "id": "alert-api-football-1774387843993",
@@ -77,7 +110,8 @@
       "Review the API usage limits and logs for any errors that may indicate why data retrieval was interrupted."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-24T22:05:55.770Z"
   },
   {
     "id": "alert-odds-center-1774387425970",

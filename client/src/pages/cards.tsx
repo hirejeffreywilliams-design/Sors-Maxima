@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -87,6 +87,7 @@ export default function CardsPage() {
   const [gradeFilter, setGradeFilter] = useState<string>("All");
   const [sportFilter, setSportFilter] = useState<string>("All");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [expandedLctId, setExpandedLctId] = useState<number | null>(null);
 
   const { data: authData } = useQuery<{ isAdmin?: boolean; username?: string }>({
     queryKey: ["/api/auth/check"],
@@ -791,7 +792,7 @@ export default function CardsPage() {
                     {/* Payout scenarios: $10 / $50 / $100 */}
                     {entry.potentialPayouts && entry.potentialPayouts.length > 0 && (
                       <div
-                        className="mx-3 mb-3 grid grid-cols-3 gap-1.5 rounded-lg p-2"
+                        className="mx-3 grid grid-cols-3 gap-1.5 rounded-lg p-2"
                         style={{
                           background: entry.outcome === "won"
                             ? "rgba(16,185,129,0.08)"
@@ -819,6 +820,118 @@ export default function CardsPage() {
                         ))}
                       </div>
                     )}
+
+                    {/* See Full Breakdown toggle */}
+                    {(() => {
+                      const legs: any[] = Array.isArray(entry.legs) ? entry.legs : [];
+                      const isExpanded = expandedLctId === entry.id;
+                      const totalLegs = entry.totalLegs || legs.length;
+                      const wonLegs = entry.wonLegs ?? (entry.outcome === "won" ? totalLegs : 0);
+
+                      const sportEmoji = (sport: string) =>
+                        sport === "NBA" ? "🏀" : sport === "NHL" ? "🏒" : sport === "NFL" ? "🏈" : sport === "MLB" ? "⚾" : sport === "MMA" ? "🥊" : sport?.startsWith("Soccer") ? "⚽" : "🎯";
+
+                      const categoryColor = (cat: string) => {
+                        if (!cat) return "text-muted-foreground border-border/40";
+                        const c = cat.toLowerCase();
+                        if (c.includes("value") || c.includes("sharp")) return "text-amber-400 border-amber-400/40 bg-amber-400/8";
+                        if (c.includes("fade") || c.includes("public")) return "text-red-400 border-red-400/40 bg-red-400/8";
+                        if (c.includes("line") || c.includes("movement")) return "text-blue-400 border-blue-400/40 bg-blue-400/8";
+                        if (c.includes("under") || c.includes("dog")) return "text-purple-400 border-purple-400/40 bg-purple-400/8";
+                        return "text-muted-foreground border-border/40 bg-background/50";
+                      };
+
+                      return (
+                        <div className="mx-3 mt-2 mb-3">
+                          <button
+                            className="w-full flex items-center justify-center gap-1.5 py-1.5 text-[10px] font-semibold text-muted-foreground border border-border/30 rounded-lg hover:bg-muted/40 transition-colors"
+                            onClick={() => setExpandedLctId(isExpanded ? null : entry.id)}
+                            data-testid={`button-lct-expand-${entry.id}`}
+                          >
+                            {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                            {isExpanded ? "Hide" : "See Full"} Breakdown
+                            {entry.outcome === "lost" && totalLegs > 0 && (
+                              <span className="ml-1 text-red-400 font-black">{wonLegs}/{totalLegs} legs hit</span>
+                            )}
+                            {entry.outcome === "won" && <span className="ml-1 text-emerald-400 font-black">All {totalLegs} legs ✓</span>}
+                          </button>
+
+                          {isExpanded && legs.length > 0 && (
+                            <div className="mt-2 space-y-1.5">
+                              {/* Winning ticket — progress bar */}
+                              {entry.outcome === "won" && (
+                                <div className="flex items-center gap-2 px-2 py-1">
+                                  <div className="flex-1 h-1.5 rounded-full bg-emerald-900/30 overflow-hidden">
+                                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: "100%" }} />
+                                  </div>
+                                  <span className="text-[9px] text-emerald-400 font-black">{totalLegs}/{totalLegs} HIT</span>
+                                </div>
+                              )}
+                              {/* Losing ticket — N/total bar */}
+                              {entry.outcome === "lost" && totalLegs > 0 && (
+                                <div className="flex items-center gap-2 px-2 py-1">
+                                  <div className="flex-1 h-1.5 rounded-full bg-red-900/30 overflow-hidden">
+                                    <div className="h-full bg-red-500 rounded-full" style={{ width: `${(wonLegs / totalLegs) * 100}%` }} />
+                                  </div>
+                                  <span className="text-[9px] text-red-400 font-black">{wonLegs}/{totalLegs} HIT</span>
+                                </div>
+                              )}
+
+                              {/* Per-leg rows */}
+                              {legs.map((leg: any, idx: number) => (
+                                <div
+                                  key={idx}
+                                  className="rounded-lg border overflow-hidden"
+                                  style={{
+                                    borderColor: entry.outcome === "won" ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.07)",
+                                    background: entry.outcome === "won" ? "rgba(16,185,129,0.04)" : "rgba(255,255,255,0.02)",
+                                  }}
+                                  data-testid={`lct-leg-${entry.id}-${idx}`}
+                                >
+                                  <div className="flex items-center gap-2 px-2.5 py-2">
+                                    <span className="text-base shrink-0">{sportEmoji(leg.sport)}</span>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        <span className="text-[11px] font-black truncate">{leg.pick}</span>
+                                        {leg.selectionCategory && (
+                                          <span className={`text-[8px] font-bold px-1 py-0.5 rounded border ${categoryColor(leg.selectionCategory)}`}>
+                                            {leg.selectionCategory}
+                                          </span>
+                                        )}
+                                        {leg.grade && (
+                                          <span className="text-[8px] font-black px-1 py-0.5 rounded border border-amber-400/30 text-amber-400 bg-amber-400/8">
+                                            {leg.grade}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[9px] text-muted-foreground mt-0.5 truncate">{leg.game}</p>
+                                    </div>
+                                    <div className="flex flex-col items-end shrink-0 gap-0.5">
+                                      <span className="text-[11px] font-black text-amber-300 tabular-nums">
+                                        {leg.americanOdds > 0 ? `+${leg.americanOdds}` : leg.americanOdds || "N/A"}
+                                      </span>
+                                      {entry.outcome === "won" && (
+                                        <span className="text-[9px] text-emerald-400 font-black">✓ HIT</span>
+                                      )}
+                                    </div>
+                                  </div>
+
+                                  {/* Strategy/reasoning row */}
+                                  {(leg.selectionReason || leg.reasoning) && (
+                                    <div className="px-2.5 pb-2 border-t border-border/10">
+                                      <p className="text-[9px] text-muted-foreground mt-1 leading-relaxed">
+                                        <span className="font-semibold text-foreground/60 uppercase tracking-wide text-[8px]">Strategy: </span>
+                                        {leg.selectionReason || leg.reasoning}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 ))}
               </div>
