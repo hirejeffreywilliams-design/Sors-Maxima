@@ -6,7 +6,7 @@
       "type": "page",
       "path": "client/src/pages/admin-ab-tests.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-acquisition": {
@@ -15,7 +15,7 @@
       "type": "page",
       "path": "client/src/pages/admin-acquisition.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-analytics": {
@@ -24,7 +24,7 @@
       "type": "page",
       "path": "client/src/pages/admin-analytics.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-api-budget": {
@@ -33,7 +33,7 @@
       "type": "page",
       "path": "client/src/pages/admin-api-budget.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-app-intelligence": {
@@ -42,7 +42,7 @@
       "type": "page",
       "path": "client/src/pages/admin-app-intelligence.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-applications": {
@@ -51,7 +51,7 @@
       "type": "page",
       "path": "client/src/pages/admin-applications.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-assistant": {
@@ -60,7 +60,7 @@
       "type": "page",
       "path": "client/src/pages/admin-assistant.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-autonomous": {
@@ -69,7 +69,7 @@
       "type": "page",
       "path": "client/src/pages/admin-autonomous.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-data-provenance": {
@@ -78,7 +78,7 @@
       "type": "page",
       "path": "client/src/pages/admin-data-provenance.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-diagnostics": {
@@ -87,7 +87,7 @@
       "type": "page",
       "path": "client/src/pages/admin-diagnostics.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-feature-flags": {
@@ -96,7 +96,7 @@
       "type": "page",
       "path": "client/src/pages/admin-feature-flags.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-financial-projections": {
@@ -105,7 +105,7 @@
       "type": "page",
       "path": "client/src/pages/admin-financial-projections.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-fraud": {
@@ -114,7 +114,7 @@
       "type": "page",
       "path": "client/src/pages/admin-fraud.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-growth": {
@@ -123,7 +123,7 @@
       "type": "page",
       "path": "client/src/pages/admin-growth.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-guardian": {
@@ -132,7 +132,7 @@
       "type": "page",
       "path": "client/src/pages/admin-guardian.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-ip-registry": {
@@ -141,7 +141,7 @@
       "type": "page",
       "path": "client/src/pages/admin-ip-registry.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-launch-control": {
@@ -150,7 +150,7 @@
       "type": "page",
       "path": "client/src/pages/admin-launch-control.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-lifecycle-campaigns": {
@@ -159,7 +159,7 @@
       "type": "page",
       "path": "client/src/pages/admin-lifecycle-campaigns.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-marketing": {
@@ -168,7 +168,7 @@
       "type": "page",
       "path": "client/src/pages/admin-marketing.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-model-integrity": {
@@ -177,7 +177,7 @@
       "type": "page",
       "path": "client/src/pages/admin-model-integrity.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-model-performance": {
@@ -186,7 +186,7 @@
       "type": "page",
       "path": "client/src/pages/admin-model-performance.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-orchestration": {
@@ -195,7 +195,7 @@
       "type": "page",
       "path": "client/src/pages/admin-orchestration.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-owner-playbook": {
@@ -204,7 +204,7 @@
       "type": "page",
       "path": "client/src/pages/admin-owner-playbook.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-pricing-intelligence": {
@@ -213,7 +213,7 @@
       "type": "page",
       "path": "client/src/pages/admin-pricing-intelligence.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-promos": {
@@ -222,7 +222,7 @@
       "type": "page",
       "path": "client/src/pages/admin-promos.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-quality-watchdog": {
@@ -231,7 +231,7 @@
       "type": "page",
       "path": "client/src/pages/admin-quality-watchdog.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-risk-register": {
@@ -240,7 +240,7 @@
       "type": "page",
       "path": "client/src/pages/admin-risk-register.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-security": {
@@ -249,7 +249,7 @@
       "type": "page",
       "path": "client/src/pages/admin-security.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-segmentation": {
@@ -258,7 +258,7 @@
       "type": "page",
       "path": "client/src/pages/admin-segmentation.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-support": {
@@ -267,7 +267,7 @@
       "type": "page",
       "path": "client/src/pages/admin-support.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-update-planner": {
@@ -276,7 +276,7 @@
       "type": "page",
       "path": "client/src/pages/admin-update-planner.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-user-health": {
@@ -285,7 +285,7 @@
       "type": "page",
       "path": "client/src/pages/admin-user-health.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin": {
@@ -294,7 +294,7 @@
       "type": "page",
       "path": "client/src/pages/admin.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:apply": {
@@ -303,7 +303,7 @@
       "type": "page",
       "path": "client/src/pages/apply.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:auto-generator": {
@@ -312,7 +312,7 @@
       "type": "page",
       "path": "client/src/pages/auto-generator.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:bankroll": {
@@ -321,7 +321,7 @@
       "type": "page",
       "path": "client/src/pages/bankroll.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:cards": {
@@ -330,7 +330,7 @@
       "type": "page",
       "path": "client/src/pages/cards.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:changelog": {
@@ -339,7 +339,7 @@
       "type": "page",
       "path": "client/src/pages/changelog.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:command-center": {
@@ -348,7 +348,7 @@
       "type": "page",
       "path": "client/src/pages/command-center.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:community": {
@@ -357,7 +357,7 @@
       "type": "page",
       "path": "client/src/pages/community.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:correlation-matrix": {
@@ -366,7 +366,7 @@
       "type": "page",
       "path": "client/src/pages/correlation-matrix.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:daily-parlays": {
@@ -375,7 +375,7 @@
       "type": "page",
       "path": "client/src/pages/daily-parlays.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:dashboard": {
@@ -384,7 +384,7 @@
       "type": "page",
       "path": "client/src/pages/dashboard.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:help": {
@@ -393,7 +393,7 @@
       "type": "page",
       "path": "client/src/pages/help.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:international": {
@@ -402,7 +402,7 @@
       "type": "page",
       "path": "client/src/pages/international.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:landing": {
@@ -411,7 +411,7 @@
       "type": "page",
       "path": "client/src/pages/landing.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:legal": {
@@ -420,7 +420,7 @@
       "type": "page",
       "path": "client/src/pages/legal.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:live": {
@@ -429,7 +429,7 @@
       "type": "page",
       "path": "client/src/pages/live.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:login": {
@@ -438,7 +438,7 @@
       "type": "page",
       "path": "client/src/pages/login.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:mma": {
@@ -447,7 +447,7 @@
       "type": "page",
       "path": "client/src/pages/mma.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:not-found": {
@@ -456,7 +456,7 @@
       "type": "page",
       "path": "client/src/pages/not-found.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:odds-center": {
@@ -465,7 +465,7 @@
       "type": "page",
       "path": "client/src/pages/odds-center.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:onboarding": {
@@ -474,7 +474,7 @@
       "type": "page",
       "path": "client/src/pages/onboarding.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:personalized-insights": {
@@ -483,7 +483,7 @@
       "type": "page",
       "path": "client/src/pages/personalized-insights.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:pick-review": {
@@ -492,7 +492,7 @@
       "type": "page",
       "path": "client/src/pages/pick-review.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:pipeline": {
@@ -501,7 +501,7 @@
       "type": "page",
       "path": "client/src/pages/pipeline.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:platform-intelligence": {
@@ -510,7 +510,7 @@
       "type": "page",
       "path": "client/src/pages/platform-intelligence.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:player-props": {
@@ -519,7 +519,7 @@
       "type": "page",
       "path": "client/src/pages/player-props.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:pricing": {
@@ -528,7 +528,7 @@
       "type": "page",
       "path": "client/src/pages/pricing.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:profile": {
@@ -537,7 +537,7 @@
       "type": "page",
       "path": "client/src/pages/profile.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:prop-parlay-builder": {
@@ -546,7 +546,7 @@
       "type": "page",
       "path": "client/src/pages/prop-parlay-builder.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:reset-password": {
@@ -555,7 +555,7 @@
       "type": "page",
       "path": "client/src/pages/reset-password.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:rewards": {
@@ -564,7 +564,7 @@
       "type": "page",
       "path": "client/src/pages/rewards.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:roadmap": {
@@ -573,7 +573,7 @@
       "type": "page",
       "path": "client/src/pages/roadmap.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:rosters": {
@@ -582,7 +582,7 @@
       "type": "page",
       "path": "client/src/pages/rosters.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:settings": {
@@ -591,7 +591,7 @@
       "type": "page",
       "path": "client/src/pages/settings.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:sorsbooks": {
@@ -600,7 +600,7 @@
       "type": "page",
       "path": "client/src/pages/sorsbooks.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:sport-factor-analysis": {
@@ -609,7 +609,7 @@
       "type": "page",
       "path": "client/src/pages/sport-factor-analysis.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:strategy-advisor": {
@@ -618,7 +618,7 @@
       "type": "page",
       "path": "client/src/pages/strategy-advisor.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:ticket-variations": {
@@ -627,7 +627,7 @@
       "type": "page",
       "path": "client/src/pages/ticket-variations.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:tools": {
@@ -636,7 +636,7 @@
       "type": "page",
       "path": "client/src/pages/tools.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:track-record": {
@@ -645,7 +645,7 @@
       "type": "page",
       "path": "client/src/pages/track-record.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:training-center": {
@@ -654,7 +654,7 @@
       "type": "page",
       "path": "client/src/pages/training-center.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:verify-email": {
@@ -663,7 +663,7 @@
       "type": "page",
       "path": "client/src/pages/verify-email.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:watchlist": {
@@ -672,7 +672,7 @@
       "type": "page",
       "path": "client/src/pages/watchlist.tsx",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:abTestEngine": {
@@ -681,7 +681,7 @@
       "type": "engine",
       "path": "server/abTestEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:acquisitionAnalyticsEngine": {
@@ -690,7 +690,7 @@
       "type": "engine",
       "path": "server/acquisitionAnalyticsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:adminAssistantEngine": {
@@ -699,7 +699,7 @@
       "type": "engine",
       "path": "server/adminAssistantEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:aiErrorTracker": {
@@ -708,7 +708,7 @@
       "type": "engine",
       "path": "server/aiErrorTracker.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:analyticsAgentEngine": {
@@ -717,7 +717,7 @@
       "type": "engine",
       "path": "server/analyticsAgentEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:analyticsDashboardEngine": {
@@ -726,7 +726,7 @@
       "type": "engine",
       "path": "server/analyticsDashboardEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:apiBudgetOptimizer": {
@@ -735,7 +735,7 @@
       "type": "engine",
       "path": "server/apiBudgetOptimizer.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:appGuardianEngine": {
@@ -744,7 +744,7 @@
       "type": "engine",
       "path": "server/appGuardianEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:appIntelligenceEngine": {
@@ -753,7 +753,7 @@
       "type": "engine",
       "path": "server/appIntelligenceEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:autonomousLearningEngine": {
@@ -762,7 +762,7 @@
       "type": "engine",
       "path": "server/autonomousLearningEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:backtestEngine": {
@@ -771,7 +771,7 @@
       "type": "engine",
       "path": "server/backtestEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:calibrationEngine": {
@@ -780,7 +780,7 @@
       "type": "engine",
       "path": "server/calibrationEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:communityLossPatternEngine": {
@@ -789,7 +789,7 @@
       "type": "engine",
       "path": "server/communityLossPatternEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:confidenceEngine": {
@@ -798,7 +798,7 @@
       "type": "engine",
       "path": "server/confidenceEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:continuousLearningOrchestrator": {
@@ -807,7 +807,7 @@
       "type": "engine",
       "path": "server/continuousLearningOrchestrator.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:correlationEngine": {
@@ -816,7 +816,7 @@
       "type": "engine",
       "path": "server/correlationEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:earlySettlementEngine": {
@@ -825,7 +825,7 @@
       "type": "engine",
       "path": "server/earlySettlementEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:featureRegistryEngine": {
@@ -834,7 +834,7 @@
       "type": "engine",
       "path": "server/featureRegistryEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:historicalLearningEngine": {
@@ -843,7 +843,7 @@
       "type": "engine",
       "path": "server/historicalLearningEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:internationalSportsEngine": {
@@ -852,7 +852,7 @@
       "type": "engine",
       "path": "server/internationalSportsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:learningEngine": {
@@ -861,7 +861,7 @@
       "type": "engine",
       "path": "server/learningEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:lifecycleCampaignEngine": {
@@ -870,7 +870,7 @@
       "type": "engine",
       "path": "server/lifecycleCampaignEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:liveAnalyticsEngine": {
@@ -879,7 +879,7 @@
       "type": "engine",
       "path": "server/liveAnalyticsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:marketSnapshotEngine": {
@@ -888,7 +888,7 @@
       "type": "engine",
       "path": "server/marketSnapshotEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:mcStackedLearner": {
@@ -897,7 +897,7 @@
       "type": "engine",
       "path": "server/mcStackedLearner.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:monteCarloEngine": {
@@ -906,7 +906,7 @@
       "type": "engine",
       "path": "server/monteCarloEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:notificationEngine": {
@@ -915,7 +915,7 @@
       "type": "engine",
       "path": "server/notificationEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:personalizedInsightsEngine": {
@@ -924,7 +924,7 @@
       "type": "engine",
       "path": "server/personalizedInsightsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:pickOutcomeTracker": {
@@ -933,7 +933,7 @@
       "type": "engine",
       "path": "server/pickOutcomeTracker.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:pickProtectionEngine": {
@@ -942,7 +942,7 @@
       "type": "engine",
       "path": "server/pickProtectionEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:platformIntelligenceEngine": {
@@ -951,7 +951,7 @@
       "type": "engine",
       "path": "server/platformIntelligenceEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:precomputedPredictionsEngine": {
@@ -960,7 +960,7 @@
       "type": "engine",
       "path": "server/precomputedPredictionsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:predictionPipelineEngine": {
@@ -969,7 +969,7 @@
       "type": "engine",
       "path": "server/predictionPipelineEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:pricingIntelligenceEngine": {
@@ -978,7 +978,7 @@
       "type": "engine",
       "path": "server/pricingIntelligenceEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:proToolsEngine": {
@@ -987,7 +987,7 @@
       "type": "engine",
       "path": "server/proToolsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:promoOffersEngine": {
@@ -996,7 +996,7 @@
       "type": "engine",
       "path": "server/promoOffersEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:propParlayEngine": {
@@ -1005,7 +1005,7 @@
       "type": "engine",
       "path": "server/propParlayEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:quantumFusionEngine": {
@@ -1014,7 +1014,7 @@
       "type": "engine",
       "path": "server/quantumFusionEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:schemeRecognitionEngine": {
@@ -1023,7 +1023,7 @@
       "type": "engine",
       "path": "server/schemeRecognitionEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:segmentationEngine": {
@@ -1032,7 +1032,7 @@
       "type": "engine",
       "path": "server/segmentationEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:settlementEngine": {
@@ -1041,7 +1041,7 @@
       "type": "engine",
       "path": "server/settlementEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:sharpSignalDetector": {
@@ -1050,7 +1050,7 @@
       "type": "engine",
       "path": "server/sharpSignalDetector.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:situationalEngine": {
@@ -1059,7 +1059,7 @@
       "type": "engine",
       "path": "server/situationalEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:socialDataEngine": {
@@ -1068,7 +1068,7 @@
       "type": "engine",
       "path": "server/socialDataEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:sportFactorsEngine": {
@@ -1077,7 +1077,7 @@
       "type": "engine",
       "path": "server/sportFactorsEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:strategyAdvisorEngine": {
@@ -1086,7 +1086,7 @@
       "type": "engine",
       "path": "server/strategyAdvisorEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:teamHistoricalFormEngine": {
@@ -1095,7 +1095,7 @@
       "type": "engine",
       "path": "server/teamHistoricalFormEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:ticketOrchestrator": {
@@ -1104,7 +1104,7 @@
       "type": "engine",
       "path": "server/ticketOrchestrator.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:ticketingEngine": {
@@ -1113,7 +1113,7 @@
       "type": "engine",
       "path": "server/ticketingEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:trialFraudEngine": {
@@ -1122,7 +1122,7 @@
       "type": "engine",
       "path": "server/trialFraudEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:unifiedStackingMetaLearner": {
@@ -1131,7 +1131,7 @@
       "type": "engine",
       "path": "server/unifiedStackingMetaLearner.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:userDataEngine": {
@@ -1140,7 +1140,7 @@
       "type": "engine",
       "path": "server/userDataEngine.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:account": {
@@ -1149,7 +1149,7 @@
       "type": "route-group",
       "path": "server/routes/account.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:admin": {
@@ -1158,7 +1158,7 @@
       "type": "route-group",
       "path": "server/routes/admin.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:ai": {
@@ -1167,7 +1167,7 @@
       "type": "route-group",
       "path": "server/routes/ai.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:apply": {
@@ -1176,7 +1176,7 @@
       "type": "route-group",
       "path": "server/routes/apply.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:auth": {
@@ -1185,7 +1185,7 @@
       "type": "route-group",
       "path": "server/routes/auth.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:betting": {
@@ -1194,7 +1194,7 @@
       "type": "route-group",
       "path": "server/routes/betting.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:cards": {
@@ -1203,7 +1203,7 @@
       "type": "route-group",
       "path": "server/routes/cards.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:community": {
@@ -1212,7 +1212,7 @@
       "type": "route-group",
       "path": "server/routes/community.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:helpers": {
@@ -1221,7 +1221,7 @@
       "type": "route-group",
       "path": "server/routes/helpers.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:intelligence": {
@@ -1230,7 +1230,7 @@
       "type": "route-group",
       "path": "server/routes/intelligence.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:notifications": {
@@ -1239,7 +1239,7 @@
       "type": "route-group",
       "path": "server/routes/notifications.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:sorsbooks": {
@@ -1248,7 +1248,7 @@
       "type": "route-group",
       "path": "server/routes/sorsbooks.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:tickets": {
@@ -1257,7 +1257,7 @@
       "type": "route-group",
       "path": "server/routes/tickets.ts",
       "firstSeen": "2026-03-08T10:25:01.962Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:card-verify": {
@@ -1266,7 +1266,7 @@
       "type": "page",
       "path": "client/src/pages/card-verify.tsx",
       "firstSeen": "2026-03-08T13:19:57.934Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-monetization": {
@@ -1275,7 +1275,7 @@
       "type": "page",
       "path": "client/src/pages/admin-monetization.tsx",
       "firstSeen": "2026-03-08T13:27:26.028Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-community-integrity": {
@@ -1284,7 +1284,7 @@
       "type": "page",
       "path": "client/src/pages/admin-community-integrity.tsx",
       "firstSeen": "2026-03-08T13:50:25.608Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:research-notes": {
@@ -1293,7 +1293,7 @@
       "type": "page",
       "path": "client/src/pages/research-notes.tsx",
       "firstSeen": "2026-03-08T13:50:25.608Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:communityIntegrityEngine": {
@@ -1302,7 +1302,7 @@
       "type": "engine",
       "path": "server/communityIntegrityEngine.ts",
       "firstSeen": "2026-03-08T13:50:25.608Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:research": {
@@ -1311,7 +1311,7 @@
       "type": "route-group",
       "path": "server/routes/research.ts",
       "firstSeen": "2026-03-08T13:50:25.608Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-cards": {
@@ -1320,7 +1320,7 @@
       "type": "page",
       "path": "client/src/pages/admin-cards.tsx",
       "firstSeen": "2026-03-08T15:46:02.045Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-guidelines": {
@@ -1329,7 +1329,7 @@
       "type": "page",
       "path": "client/src/pages/admin-guidelines.tsx",
       "firstSeen": "2026-03-08T17:36:07.960Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:guidelines": {
@@ -1338,7 +1338,7 @@
       "type": "page",
       "path": "client/src/pages/guidelines.tsx",
       "firstSeen": "2026-03-08T17:36:07.960Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:guidelines": {
@@ -1347,7 +1347,7 @@
       "type": "route-group",
       "path": "server/routes/guidelines.ts",
       "firstSeen": "2026-03-08T17:36:07.960Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-policy-standards": {
@@ -1356,7 +1356,7 @@
       "type": "page",
       "path": "client/src/pages/admin-policy-standards.tsx",
       "firstSeen": "2026-03-09T12:32:20.771Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-system-health": {
@@ -1365,7 +1365,7 @@
       "type": "page",
       "path": "client/src/pages/admin-system-health.tsx",
       "firstSeen": "2026-03-09T13:55:04.372Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:results": {
@@ -1374,7 +1374,7 @@
       "type": "page",
       "path": "client/src/pages/results.tsx",
       "firstSeen": "2026-03-10T11:34:09.902Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:acceleratedPatternEngine": {
@@ -1383,7 +1383,7 @@
       "type": "engine",
       "path": "server/acceleratedPatternEngine.ts",
       "firstSeen": "2026-03-10T11:34:09.902Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "engine:retentionSequenceEngine": {
@@ -1392,7 +1392,7 @@
       "type": "engine",
       "path": "server/retentionSequenceEngine.ts",
       "firstSeen": "2026-03-10T11:34:09.902Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-feedback": {
@@ -1401,7 +1401,7 @@
       "type": "page",
       "path": "client/src/pages/admin-feedback.tsx",
       "firstSeen": "2026-03-11T03:04:01.255Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:feedback": {
@@ -1410,7 +1410,7 @@
       "type": "page",
       "path": "client/src/pages/feedback.tsx",
       "firstSeen": "2026-03-11T03:04:01.255Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:feedback": {
@@ -1419,7 +1419,7 @@
       "type": "route-group",
       "path": "server/routes/feedback.ts",
       "firstSeen": "2026-03-11T03:04:01.255Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:my-bets": {
@@ -1428,7 +1428,7 @@
       "type": "page",
       "path": "client/src/pages/my-bets.tsx",
       "firstSeen": "2026-03-11T22:05:36.610Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "page:admin-learning": {
@@ -1437,7 +1437,7 @@
       "type": "page",
       "path": "client/src/pages/admin-learning.tsx",
       "firstSeen": "2026-03-16T13:47:54.169Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     },
     "route:pickFeedback": {
@@ -1446,11 +1446,194 @@
       "type": "route-group",
       "path": "server/routes/pickFeedback.ts",
       "firstSeen": "2026-03-16T13:47:54.169Z",
-      "lastSeen": "2026-03-16T15:05:36.109Z",
+      "lastSeen": "2026-03-24T21:20:07.369Z",
       "isNew": false
     }
   },
   "insights": [
+    {
+      "id": "ai-1774387209478-54yz",
+      "timestamp": "2026-03-24T21:20:07.371Z",
+      "category": "growth",
+      "title": "Enhance Feature Promotion",
+      "summary": "With a total of 161 features, increased marketing efforts are needed to highlight underutilized functionalities to improve member engagement and retention.",
+      "priority": "high",
+      "actionItems": [
+        "Create targeted email campaigns showcasing unique features",
+        "Implement in-app tutorials and walkthroughs for new/existing members"
+      ]
+    },
+    {
+      "id": "ai-1774387209478-1vpu",
+      "timestamp": "2026-03-24T21:20:07.371Z",
+      "category": "health",
+      "title": "Review Cycle Efficiency",
+      "summary": "The absence of new outputs this cycle indicates potential inefficiencies in data processing or analysis capabilities that need immediate attention.",
+      "priority": "high",
+      "actionItems": [
+        "Audit the current pipeline for bottlenecks",
+        "Increase review frequency on feature performance metrics"
+      ]
+    },
+    {
+      "id": "ai-1774387209478-1cca",
+      "timestamp": "2026-03-24T21:20:07.371Z",
+      "category": "performance",
+      "title": "Reassess Prediction Engine Output",
+      "summary": "The lack of generated picks and analyzed games may signal a need to reevaluate the effectiveness or algorithms behind the prediction engine.",
+      "priority": "medium",
+      "actionItems": [
+        "Conduct a performance review of the prediction engine",
+        "Gather feedback from members on the quality of predictions"
+      ]
+    },
+    {
+      "id": "ai-1774108777265-jeio",
+      "timestamp": "2026-03-21T15:59:34.608Z",
+      "category": "growth",
+      "title": "Enhance Feature Visibility",
+      "summary": "With a total of 161 features, many members may not be fully aware of what's available. Improving visibility through tutorials, highlight reels, or onboarding sessions could boost user engagement significantly.",
+      "priority": "medium",
+      "actionItems": [
+        "Create a series of feature tutorial videos",
+        "Implement a weekly highlight of underutilized features"
+      ]
+    },
+    {
+      "id": "ai-1774108777265-kw5o",
+      "timestamp": "2026-03-21T15:59:34.608Z",
+      "category": "performance",
+      "title": "Analyze Picks Generation Metrics",
+      "summary": "Currently, no picks have been generated this cycle, which raises concerns about engagement and feature effectiveness. Monitoring and optimizing the picks generation process should be prioritized.",
+      "priority": "high",
+      "actionItems": [
+        "Review picks generation algorithms",
+        "Conduct surveys to gather member feedback on the picks utility"
+      ]
+    },
+    {
+      "id": "ai-1774108777265-vkif",
+      "timestamp": "2026-03-21T15:59:34.608Z",
+      "category": "recommendation",
+      "title": "Implement Regular Content Updates",
+      "summary": "The absence of new features this cycle indicates a need for regular updates to keep member interest and engagement high. Establishing a consistent schedule for feature releases will help in maintaining platform health.",
+      "priority": "medium",
+      "actionItems": [
+        "Set a quarterly roadmap for feature releases",
+        "Engage members for suggestions on desired features"
+      ]
+    },
+    {
+      "id": "ai-1773866788292-j00f",
+      "timestamp": "2026-03-18T20:46:25.030Z",
+      "category": "growth",
+      "title": "Enhance Engagement with New Features",
+      "summary": "Since there are no new features introduced this cycle, consider developing engaging new features targeted to existing and new members to stimulate interest and usage.",
+      "priority": "high",
+      "actionItems": [
+        "Conduct surveys to identify member demands",
+        "Prioritize feature development based on survey feedback",
+        "Launch a marketing campaign for any new feature releases"
+      ]
+    },
+    {
+      "id": "ai-1773866788292-stdd",
+      "timestamp": "2026-03-18T20:46:25.030Z",
+      "category": "performance",
+      "title": "Analyze User Engagement Data",
+      "summary": "Currently, there are no picks generated or games analyzed, indicating potential underuse of existing features. Perform a thorough analysis of user engagement data to identify bottlenecks.",
+      "priority": "medium",
+      "actionItems": [
+        "Implement tracking for feature usage",
+        "Review engagement metrics to locate underperforming areas",
+        "Provide tutorials or onboarding sessions to improve utilization"
+      ]
+    },
+    {
+      "id": "ai-1773866788292-zxxv",
+      "timestamp": "2026-03-18T20:46:25.030Z",
+      "category": "recommendation",
+      "title": "Revitalize Marketing Strategy",
+      "summary": "With a stable but stagnant feature set, revamping the marketing strategy may attract new users and re-engage current members to utilize existing offerings more effectively.",
+      "priority": "medium",
+      "actionItems": [
+        "Develop promotional campaigns highlighting unique features",
+        "Host webinars or live sessions showcasing platform benefits",
+        "Collaborate with influencers in the sports betting community"
+      ]
+    },
+    {
+      "id": "ai-1773726265993-4qrw",
+      "timestamp": "2026-03-17T05:44:23.491Z",
+      "category": "health",
+      "title": "Boost Feature Utilization",
+      "summary": "With 161 features, it's crucial to promote underutilized ones to enhance member engagement and satisfaction. Identify and highlight these features in communications to members.",
+      "priority": "high",
+      "actionItems": [
+        "Conduct an audit of feature usage",
+        "Create targeted marketing campaigns for underutilized features"
+      ]
+    },
+    {
+      "id": "ai-1773726265993-iwfi",
+      "timestamp": "2026-03-17T05:44:23.491Z",
+      "category": "growth",
+      "title": "Enhance Picks Generation",
+      "summary": "Current metrics show no picks generated despite an established cycle count. Focus on improving the predictive capabilities to actively provide daily picks, thus increasing user activity.",
+      "priority": "high",
+      "actionItems": [
+        "Refine the predictive model",
+        "Run targeted promotions around new picks generation"
+      ]
+    },
+    {
+      "id": "ai-1773726265993-xs80",
+      "timestamp": "2026-03-17T05:44:23.491Z",
+      "category": "recommendation",
+      "title": "Initiate Member Feedback Loop",
+      "summary": "Implement a feedback system to gather member insights about platform features and performance. This will help in ideating enhancements based on actual user needs.",
+      "priority": "medium",
+      "actionItems": [
+        "Create a member feedback survey",
+        "Set up regular focus groups for deeper insights"
+      ]
+    },
+    {
+      "id": "ai-1773707591414-uwp6",
+      "timestamp": "2026-03-17T00:33:08.176Z",
+      "category": "growth",
+      "title": "Feature Utilization Review",
+      "summary": "With 161 features available and no recent additions, it's vital to analyze user engagement with existing features to identify underutilized ones. This can inform future updates or retirements.",
+      "priority": "medium",
+      "actionItems": [
+        "Conduct a survey to assess which features are most valuable to users.",
+        "Analyze usage data to determine which features have low engagement."
+      ]
+    },
+    {
+      "id": "ai-1773707591414-qv9a",
+      "timestamp": "2026-03-17T00:33:08.176Z",
+      "category": "performance",
+      "title": "Increase Picks Generation Frequency",
+      "summary": "Currently, no picks have been generated, which could indicate an issue with the predictive models or engagement. Focusing on the 46-Factor Model can correct this and restore user trust.",
+      "priority": "high",
+      "actionItems": [
+        "Investigate and troubleshoot the predictive model performance.",
+        "Implement a strategy for generating and sharing regular picks with users."
+      ]
+    },
+    {
+      "id": "ai-1773707591414-w6t2",
+      "timestamp": "2026-03-17T00:33:08.176Z",
+      "category": "recommendation",
+      "title": "Enhance Communication of New Features",
+      "summary": "As there are no new features introduced this cycle, it's crucial to communicate existing features and their benefits effectively to retain member interest.",
+      "priority": "low",
+      "actionItems": [
+        "Create a marketing campaign highlighting existing features and their successes.",
+        "Offer webinars or tutorials to guide users through the current offerings."
+      ]
+    },
     {
       "id": "ai-1773673540254-tb6m",
       "timestamp": "2026-03-16T15:05:36.111Z",
@@ -1988,181 +2171,9 @@
         "Develop user prompts for game analysis",
         "Implement gamification elements to boost engagement"
       ]
-    },
-    {
-      "id": "ai-1773433602245-ugnl",
-      "timestamp": "2026-03-13T20:26:37.528Z",
-      "category": "recommendation",
-      "title": "Pipeline Optimization",
-      "summary": "With 92 pipeline runs and no picks generated, assessing the pipeline workflows for errors or inefficiencies is critical to ensure feature outputs align with user expectations. This may include refining data inputs or enhancing prediction accuracy.",
-      "priority": "high",
-      "actionItems": [
-        "Audit pipeline processes for efficiency",
-        "Incorporate user feedback into feature improvement plans"
-      ]
-    },
-    {
-      "id": "ai-1773355690524-q0gl",
-      "timestamp": "2026-03-12T22:48:04.927Z",
-      "category": "growth",
-      "title": "Leverage Existing Features",
-      "summary": "With a total of 159 features already available, prioritize promoting underutilized features to increase member engagement and retention. Highlight key features through targeted communication to educate members on available resources.",
-      "priority": "high",
-      "actionItems": [
-        "Create a marketing plan to showcase underused features in member newsletters.",
-        "Host educational webinars that highlight specific features and their benefits."
-      ]
-    },
-    {
-      "id": "ai-1773355690524-6q9d",
-      "timestamp": "2026-03-12T22:48:04.927Z",
-      "category": "performance",
-      "title": "Improve Picks Generation",
-      "summary": "Currently, no picks have been generated, which may impact member satisfaction. Focus on optimizing the features related to picks generation to activate content that members expect.",
-      "priority": "high",
-      "actionItems": [
-        "Investigate bottlenecks in the picks generation process and implement necessary improvements.",
-        "Engage with members to gather feedback on their expectations for picks quality and frequency."
-      ]
-    },
-    {
-      "id": "ai-1773355690524-0i0d",
-      "timestamp": "2026-03-12T22:48:04.927Z",
-      "category": "health",
-      "title": "Analyze Member Engagement Metrics",
-      "summary": "It's crucial to monitor and analyze member engagement metrics to ensure the platform remains healthy. Set benchmarks for engagement rates across different features and adjust offerings based on findings.",
-      "priority": "medium",
-      "actionItems": [
-        "Conduct a member survey to understand feature usage and satisfaction.",
-        "Regularly analyze engagement data to identify trends and adjust content delivery."
-      ]
-    },
-    {
-      "id": "ai-1773349311508-pun6",
-      "timestamp": "2026-03-12T21:01:46.362Z",
-      "category": "growth",
-      "title": "Enhance Feature Engagement",
-      "summary": "With 159 total features and no new additions this cycle, focus on promoting underutilized features to boost member engagement and satisfaction.",
-      "priority": "medium",
-      "actionItems": [
-        "Conduct a survey to identify underused features and gather member feedback on desired improvements."
-      ]
-    },
-    {
-      "id": "ai-1773349311508-tfd7",
-      "timestamp": "2026-03-12T21:01:46.362Z",
-      "category": "health",
-      "title": "Boost Picks Generation",
-      "summary": "Currently, no picks have been generated or games analyzed this cycle; prioritize addressing this gap to maintain member trust and platform credibility.",
-      "priority": "high",
-      "actionItems": [
-        "Optimize the existing prediction engine and set up regular monitoring to ensure consistent picks generation."
-      ]
-    },
-    {
-      "id": "ai-1773349311508-s1ow",
-      "timestamp": "2026-03-12T21:01:46.362Z",
-      "category": "recommendation",
-      "title": "Pipeline Optimization",
-      "summary": "With 86 pipeline runs, an analysis of the efficiency and output of these runs is essential to identify any bottlenecks or areas for enhancement.",
-      "priority": "medium",
-      "actionItems": [
-        "Review and adjust the pipeline processes to ensure they meet the demand for timely and accurate betting intelligence."
-      ]
-    },
-    {
-      "id": "ai-1773276989624-s57p",
-      "timestamp": "2026-03-12T00:56:24.336Z",
-      "category": "growth",
-      "title": "Enhance Feature Updates",
-      "summary": "With no new features introduced this cycle, focus on revitalizing the pipeline by prioritizing user-requested enhancements and regularly scheduled updates to maintain member engagement.",
-      "priority": "high",
-      "actionItems": [
-        "Survey members for feature requests",
-        "Plan and implement at least two new features in the next cycle"
-      ]
-    },
-    {
-      "id": "ai-1773276989624-u8t2",
-      "timestamp": "2026-03-12T00:56:24.336Z",
-      "category": "health",
-      "title": "Improve Analysis Metrics",
-      "summary": "Currently, no picks or games have been analyzed, which could lead to member dissatisfaction. Increase the frequency and breadth of analysis to provide timely insights to users.",
-      "priority": "medium",
-      "actionItems": [
-        "Allocate resources to ensure at least X games are analyzed weekly",
-        "Track and report the number of picks generated per cycle"
-      ]
-    },
-    {
-      "id": "ai-1773276989624-40q3",
-      "timestamp": "2026-03-12T00:56:24.336Z",
-      "category": "recommendation",
-      "title": "Leverage Member Feedback",
-      "summary": "Utilize feedback from members on the current features and services to identify potential areas for improvement and to foster community engagement.",
-      "priority": "medium",
-      "actionItems": [
-        "Create a dedicated feedback channel in the platform",
-        "Compile feedback into actionable insights for product teams"
-      ]
-    },
-    {
-      "id": "ai-1773273356358-udyn",
-      "timestamp": "2026-03-11T23:55:52.771Z",
-      "category": "performance",
-      "title": "Enhance Feature Utilization",
-      "summary": "With 159 total features and no picks generated this cycle, a review of feature usage is crucial to identify underperforming areas. Focus on integrating popular features more actively to drive engagement.",
-      "priority": "high",
-      "actionItems": [
-        "Conduct a feature utilization audit to identify and promote underused features; create a marketing campaign around top features to boost member engagement."
-      ]
-    },
-    {
-      "id": "ai-1773273356358-wdn6",
-      "timestamp": "2026-03-11T23:55:52.771Z",
-      "category": "growth",
-      "title": "Increase Member Engagement Strategies",
-      "summary": "The lack of newly introduced features this cycle could lead to diminished member interest. Implement strategic initiatives to increase engagement, such as exclusive members-only challenges.",
-      "priority": "medium",
-      "actionItems": [
-        "Develop and launch member engagement challenges or contests; leverage Sors Books Hub for educational content and community building."
-      ]
-    },
-    {
-      "id": "ai-1773273356358-hpzi",
-      "timestamp": "2026-03-11T23:55:52.771Z",
-      "category": "health",
-      "title": "Data Refresh and Quality Check",
-      "summary": "The current cycle has seen no games analyzed. This could signify data quality or relevance issues that need urgent attention. Regular data updates and quality checks should be established.",
-      "priority": "high",
-      "actionItems": [
-        "Implement a regular data review process to ensure data quality; consider integrating external data sources to enhance analysis capabilities."
-      ]
-    },
-    {
-      "id": "ai-1773269801984-71np",
-      "timestamp": "2026-03-11T22:56:37.773Z",
-      "category": "health",
-      "title": "Feature Utilization Assessment",
-      "summary": "With 159 total features but no picks generated or games analyzed this cycle, it's crucial to assess which features are actively being utilized and which are underperforming.",
-      "priority": "high",
-      "actionItems": [
-        "Conduct a thorough audit of feature usage to identify underperforming areas and optimize or redevelop as necessary."
-      ]
-    },
-    {
-      "id": "ai-1773269801984-rk0f",
-      "timestamp": "2026-03-11T22:56:37.773Z",
-      "category": "growth",
-      "title": "Enhance User Engagement",
-      "summary": "The lack of new features this cycle suggests a need to boost user engagement through new and exciting additions or enhancements to existing features.",
-      "priority": "medium",
-      "actionItems": [
-        "Collect user feedback for potential new features or improvements, focusing on enhancing the Collectible Intelligence Cards and the SSE Live Feed."
-      ]
     }
   ],
-  "cycleCount": 101,
-  "lastCycle": "2026-03-16T15:05:40.254Z",
+  "cycleCount": 106,
+  "lastCycle": "2026-03-24T21:20:09.478Z",
   "bootstrapped": true
 }

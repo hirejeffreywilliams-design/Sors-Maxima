@@ -125,6 +125,8 @@ export default function CardsPage() {
       id: number; date: string; ticketId: string; legs: any[];
       totalLegs: number; outcome: string; wonLegs: number;
       settledAt: string | null; mintedCardId: string | null; createdAt: string;
+      totalDecimalOdds: number; americanOdds: string;
+      potentialPayouts: { stake: number; payout: number; formatted: string }[];
     }>;
     stats: { total: number; wins: number; losses: number; pending: number; winRate: number; streak: number; streakType: string };
   }>({
@@ -709,11 +711,11 @@ export default function CardsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="space-y-2" data-testid="lct-history-list">
+              <div className="space-y-3" data-testid="lct-history-list">
                 {lctData.history.slice(0, 30).map((entry) => (
                   <div
                     key={entry.id}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors"
+                    className="rounded-xl border overflow-hidden transition-colors"
                     style={{
                       borderColor: entry.outcome === "won"
                         ? "rgba(16,185,129,0.3)"
@@ -721,55 +723,101 @@ export default function CardsPage() {
                           ? "rgba(239,68,68,0.3)"
                           : "rgba(255,255,255,0.08)",
                       background: entry.outcome === "won"
-                        ? "rgba(16,185,129,0.05)"
+                        ? "rgba(16,185,129,0.04)"
                         : entry.outcome === "lost"
-                          ? "rgba(239,68,68,0.04)"
-                          : "rgba(255,255,255,0.02)",
+                          ? "rgba(239,68,68,0.03)"
+                          : "rgba(255,255,255,0.015)",
                     }}
                     data-testid={`lct-entry-${entry.id}`}
                   >
-                    <div className="shrink-0">
-                      {entry.outcome === "won" ? (
-                        <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    {/* Top row: date + status + odds */}
+                    <div className="flex items-center gap-3 px-4 pt-3 pb-2">
+                      <div className="shrink-0">
+                        {entry.outcome === "won" ? (
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                          </div>
+                        ) : entry.outcome === "lost" ? (
+                          <div className="w-8 h-8 rounded-full bg-red-500/15 flex items-center justify-center">
+                            <XCircle className="w-4 h-4 text-red-400" />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center">
+                            <Clock className="w-4 h-4 text-amber-400" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-bold">{new Date(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
+                          <Badge
+                            className={`text-[10px] font-black ${
+                              entry.outcome === "won"
+                                ? "bg-emerald-500/10 text-emerald-400 border-emerald-400/30"
+                                : entry.outcome === "lost"
+                                  ? "bg-red-500/10 text-red-400 border-red-400/30"
+                                  : "bg-amber-500/10 text-amber-400 border-amber-400/30"
+                            } border`}
+                          >
+                            {entry.outcome === "won" ? "🏆 HIT" : entry.outcome === "lost" ? "MISS" : "PENDING"}
+                          </Badge>
+                          {entry.mintedCardId && (
+                            <Badge className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-400/30">
+                              <Award className="w-2.5 h-2.5 mr-1" />Card Minted
+                            </Badge>
+                          )}
                         </div>
-                      ) : entry.outcome === "lost" ? (
-                        <div className="w-8 h-8 rounded-full bg-red-500/15 flex items-center justify-center">
-                          <XCircle className="w-4 h-4 text-red-400" />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-amber-500/15 flex items-center justify-center">
-                          <Clock className="w-4 h-4 text-amber-400" />
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {entry.totalLegs}-leg parlay
+                          {entry.outcome !== "pending" && entry.wonLegs > 0 && ` · ${entry.wonLegs}/${entry.totalLegs} legs won`}
+                        </p>
+                      </div>
+                      {/* Parlay odds badge — prominent */}
+                      {entry.americanOdds && (
+                        <div className="shrink-0 text-right">
+                          <p
+                            className={`text-xl font-black tabular-nums leading-none ${
+                              entry.outcome === "won" ? "text-emerald-400" : entry.outcome === "lost" ? "text-red-400" : "text-amber-300"
+                            }`}
+                            data-testid={`lct-odds-${entry.id}`}
+                          >
+                            {entry.americanOdds}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground mt-0.5">parlay odds</p>
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold">{new Date(entry.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
-                        <Badge
-                          className={`text-[10px] font-black ${
-                            entry.outcome === "won"
-                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-400/30"
-                              : entry.outcome === "lost"
-                                ? "bg-red-500/10 text-red-400 border-red-400/30"
-                                : "bg-amber-500/10 text-amber-400 border-amber-400/30"
-                          } border`}
-                        >
-                          {entry.outcome === "won" ? "🏆 HIT" : entry.outcome === "lost" ? "MISS" : "PENDING"}
-                        </Badge>
-                        {entry.mintedCardId && (
-                          <Badge className="text-[10px] bg-purple-500/10 text-purple-400 border border-purple-400/30">
-                            <Award className="w-2.5 h-2.5 mr-1" />Card Minted
-                          </Badge>
-                        )}
+
+                    {/* Payout scenarios: $10 / $50 / $100 */}
+                    {entry.potentialPayouts && entry.potentialPayouts.length > 0 && (
+                      <div
+                        className="mx-3 mb-3 grid grid-cols-3 gap-1.5 rounded-lg p-2"
+                        style={{
+                          background: entry.outcome === "won"
+                            ? "rgba(16,185,129,0.08)"
+                            : entry.outcome === "lost"
+                              ? "rgba(239,68,68,0.06)"
+                              : "rgba(251,191,36,0.06)",
+                          border: entry.outcome === "won"
+                            ? "1px solid rgba(16,185,129,0.2)"
+                            : entry.outcome === "lost"
+                              ? "1px solid rgba(239,68,68,0.2)"
+                              : "1px solid rgba(251,191,36,0.15)",
+                        }}
+                      >
+                        {entry.potentialPayouts.map(({ stake, formatted }) => (
+                          <div key={stake} className="text-center py-1" data-testid={`lct-payout-${entry.id}-${stake}`}>
+                            <p className="text-[9px] text-muted-foreground uppercase tracking-wide font-semibold">${stake} bet</p>
+                            <p
+                              className={`text-sm font-black tabular-nums leading-tight mt-0.5 ${
+                                entry.outcome === "won" ? "text-emerald-400" : entry.outcome === "lost" ? "text-red-400/70" : "text-amber-300"
+                              }`}
+                            >
+                              {formatted}
+                            </p>
+                          </div>
+                        ))}
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {entry.totalLegs}-leg parlay
-                        {entry.outcome !== "pending" && entry.wonLegs > 0 && ` · ${entry.wonLegs}/${entry.totalLegs} legs won`}
-                      </p>
-                    </div>
-                    {entry.outcome === "pending" && (
-                      <Badge className="shrink-0 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-400/20">Awaiting Results</Badge>
                     )}
                   </div>
                 ))}

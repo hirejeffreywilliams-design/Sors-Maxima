@@ -1,3396 +1,12 @@
 {
   "predictions": [
     {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157488,
-      "odds": 2.02
-    },
-    {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157491,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810805",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706157493,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706157495,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803374",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706157499,
-      "odds": 1.5555555555555556
-    },
-    {
-      "gameId": "401803374",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706157501,
-      "odds": 2.2800000000000002
-    },
-    {
-      "gameId": "401803374",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706157504,
-      "odds": 2.2199999999999998
-    },
-    {
-      "gameId": "401803377",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157507,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706157509,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803375",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706157512,
-      "odds": 1.819672131147541
-    },
-    {
-      "gameId": "401803375",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706157514,
-      "odds": 2.9
-    },
-    {
-      "gameId": "401803375",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157517,
-      "odds": 1.7575757575757576
-    },
-    {
-      "gameId": "401851172",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.79,
-      "actualOutcome": 1,
-      "timestamp": 1773706157520,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "401851172",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706157523,
-      "odds": 1.7092198581560285
-    },
-    {
-      "gameId": "401851172",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.72,
-      "actualOutcome": 1,
-      "timestamp": 1773706157525,
-      "odds": 1.8928571428571428
-    },
-    {
-      "gameId": "401810804",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706157528,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803377",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157530,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401803376",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706157533,
-      "odds": 1.8928571428571428
-    },
-    {
-      "gameId": "401803376",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157536,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851762",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706157539,
-      "odds": 1.364963503649635
-    },
-    {
-      "gameId": "401851762",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.68,
-      "actualOutcome": 1,
-      "timestamp": 1773706157541,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851762",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706157544,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851179",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157547,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851179",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157549,
-      "odds": 1.53475935828877
-    },
-    {
-      "gameId": "401851179",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706157552,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851299",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157555,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851299",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157557,
-      "odds": 1.53475935828877
-    },
-    {
-      "gameId": "401851299",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157560,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851313",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157563,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851313",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157565,
-      "odds": 1.5747126436781609
-    },
-    {
-      "gameId": "401851313",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706157567,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851289",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157570,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851289",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157572,
-      "odds": 1.62111801242236
-    },
-    {
-      "gameId": "401851289",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157575,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851300",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157578,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851300",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157580,
-      "odds": 1.5952380952380953
-    },
-    {
-      "gameId": "401851300",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157583,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851296",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157586,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851296",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157590,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401851296",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157593,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851177",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157595,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851177",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157597,
-      "odds": 1.5747126436781609
-    },
-    {
-      "gameId": "401851177",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157601,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851302",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706157603,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851302",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706157606,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401851302",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157608,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851376",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157611,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851377",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157614,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851376",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157617,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401851377",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157619,
-      "odds": 1.6756756756756757
-    },
-    {
-      "gameId": "401851376",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157621,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851377",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157624,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851174",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157626,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851174",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157629,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401851174",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157632,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851562",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157720,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851562",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157723,
-      "odds": 1.7407407407407407
-    },
-    {
-      "gameId": "401851562",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157725,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851311",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.84,
-      "actualOutcome": 0,
-      "timestamp": 1773706157728,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851311",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.78,
-      "actualOutcome": 0,
-      "timestamp": 1773706157731,
-      "odds": 1.62111801242236
-    },
-    {
-      "gameId": "401851311",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706157734,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401858186",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706157736,
-      "odds": 1.5154639175257731
-    },
-    {
-      "gameId": "401858186",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157739,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803377",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157741,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803376",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157745,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851174",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.78,
-      "actualOutcome": 0,
-      "timestamp": 1773706157748,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851174",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.67,
-      "actualOutcome": 0,
-      "timestamp": 1773706157750,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810808",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157753,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810808",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157755,
-      "odds": 2.34
-    },
-    {
-      "gameId": "401810811",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 1,
-      "timestamp": 1773706157758,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706157760,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810811",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157763,
-      "odds": 1.5154639175257731
-    },
-    {
-      "gameId": "401810966",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157766,
-      "odds": 2.1100000000000003
-    },
-    {
-      "gameId": "401810966",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706157768,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810966",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157771,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810814",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706157774,
-      "odds": 2.15
-    },
-    {
-      "gameId": "401810814",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157776,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810813",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773706157779,
-      "odds": 2.2199999999999998
-    },
-    {
-      "gameId": "401810813",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157782,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810814",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157784,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810813",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157786,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810807",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 1,
-      "timestamp": 1773706157789,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "401810807",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157792,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401803382",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706157794,
-      "odds": 1.8547008547008548
-    },
-    {
-      "gameId": "401803386",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706157797,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803386",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706157800,
-      "odds": 1.8
-    },
-    {
-      "gameId": "401803387",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706157802,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803379",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157804,
-      "odds": 1.819672131147541
-    },
-    {
-      "gameId": "401803383",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157807,
-      "odds": 1.8620689655172413
-    },
-    {
-      "gameId": "401803388",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157810,
-      "odds": 1.7874015748031495
-    },
-    {
-      "gameId": "401810815",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157812,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810815",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157816,
-      "odds": 2.5
-    },
-    {
-      "gameId": "401810812",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706157819,
-      "odds": 2.29
-    },
-    {
-      "gameId": "401810812",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157831,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810812",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157834,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157837,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157839,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810809",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 1,
-      "timestamp": 1773706157842,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810809",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706157846,
-      "odds": 3.47
-    },
-    {
-      "gameId": "401810809",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157849,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157851,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803390",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157854,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803378",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157856,
-      "odds": 1.8849557522123894
-    },
-    {
-      "gameId": "401803390",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773706157868,
-      "odds": 1.8849557522123894
-    },
-    {
-      "gameId": "401803381",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157871,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "401803385",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.64,
-      "actualOutcome": 1,
-      "timestamp": 1773706157873,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803385",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157876,
-      "odds": 1.7518796992481203
-    },
-    {
-      "gameId": "401803384",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773706157879,
-      "odds": 1.6578947368421053
-    },
-    {
-      "gameId": "401803384",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706157882,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810808",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706157885,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810807",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706157887,
-      "odds": 2
-    },
-    {
-      "gameId": "401803389",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157890,
-      "odds": 1.6666666666666665
-    },
-    {
-      "gameId": "401810815",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706157892,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810806",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.64,
-      "actualOutcome": 1,
-      "timestamp": 1773706157895,
-      "odds": 3.13
-    },
-    {
-      "gameId": "401803378",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706157897,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803380",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157899,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401803383",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706157902,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803379",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157905,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803388",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706157907,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803378",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157910,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803390",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706157913,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851180",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.84,
-      "actualOutcome": 1,
-      "timestamp": 1773706157915,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851180",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706157918,
-      "odds": 1.6451612903225805
-    },
-    {
-      "gameId": "401851180",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706157920,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803384",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706157923,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803381",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706157926,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803386",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157929,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803380",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706157931,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803382",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706157933,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803383",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706157936,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803379",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773706157937,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803380",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157940,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803381",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773706157943,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803382",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706157945,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803385",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157947,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803388",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706157950,
-      "odds": 1.704225352112676
-    },
-    {
-      "gameId": "401803389",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773706157953,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803389",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706157955,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851296",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.85,
-      "actualOutcome": 1,
-      "timestamp": 1773706157958,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851380",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.84,
-      "actualOutcome": 1,
-      "timestamp": 1773706157961,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851380",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.78,
-      "actualOutcome": 1,
-      "timestamp": 1773706157963,
-      "odds": 1.53475935828877
-    },
-    {
-      "gameId": "401851380",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706157966,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851177",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706157969,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851177",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.81,
-      "actualOutcome": 0,
-      "timestamp": 1773706157972,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851296",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157974,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706157976,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.67,
-      "actualOutcome": 0,
-      "timestamp": 1773706157979,
-      "odds": 1.62111801242236
-    },
-    {
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.64,
-      "actualOutcome": 1,
-      "timestamp": 1773706157982,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851376",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706157985,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851376",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.74,
-      "actualOutcome": 0,
-      "timestamp": 1773706157987,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851562",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706157989,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851299",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.73,
-      "actualOutcome": 1,
-      "timestamp": 1773706157992,
-      "odds": 1.925925925925926
-    },
-    {
-      "gameId": "401851299",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706157995,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851562",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706157998,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851311",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.73,
-      "actualOutcome": 0,
-      "timestamp": 1773706158001,
-      "odds": 1.925925925925926
-    },
-    {
-      "gameId": "401851311",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.71,
-      "actualOutcome": 1,
-      "timestamp": 1773706158003,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401810816",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.63,
-      "actualOutcome": 1,
-      "timestamp": 1773706158006,
-      "odds": 1.5
-    },
-    {
-      "gameId": "401810816",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158008,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158012,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810820",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158015,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810820",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158027,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810820",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158029,
-      "odds": 2.9
-    },
-    {
-      "gameId": "401810819",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158032,
-      "odds": 1.510204081632653
-    },
-    {
-      "gameId": "401810818",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158035,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810818",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158038,
-      "odds": 2.04
-    },
-    {
-      "gameId": "401810818",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 0,
-      "timestamp": 1773706158040,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810821",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158042,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810821",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158045,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810821",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773706158048,
-      "odds": 2.25
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158051,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810817",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158054,
-      "odds": 3.69
-    },
-    {
-      "gameId": "401810817",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158056,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810817",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158059,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803392",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.67,
-      "actualOutcome": 1,
-      "timestamp": 1773706158060,
-      "odds": 1.8620689655172413
-    },
-    {
-      "gameId": "401803392",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706158062,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706158065,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706158067,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803391",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158070,
-      "odds": 1.5050505050505052
-    },
-    {
-      "gameId": "401803391",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158073,
-      "odds": 1.6289308176100628
-    },
-    {
-      "gameId": "401803392",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158075,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851380",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.79,
-      "actualOutcome": 0,
-      "timestamp": 1773706158077,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851380",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.75,
-      "actualOutcome": 0,
-      "timestamp": 1773706158080,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851381",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706158083,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851381",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706158086,
-      "odds": 1.6451612903225805
-    },
-    {
-      "gameId": "401851381",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158088,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851179",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.75,
-      "actualOutcome": 0,
-      "timestamp": 1773706158091,
-      "odds": 1.8333333333333335
-    },
-    {
-      "gameId": "401851179",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.72,
-      "actualOutcome": 1,
-      "timestamp": 1773706158093,
-      "odds": 1.8928571428571428
-    },
-    {
-      "gameId": "401851313",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.73,
-      "actualOutcome": 0,
-      "timestamp": 1773706158096,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851313",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.69,
-      "actualOutcome": 1,
-      "timestamp": 1773706158098,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.8,
-      "actualOutcome": 0,
-      "timestamp": 1773706158100,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851565",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 0,
-      "timestamp": 1773706158102,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851300",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 0,
-      "timestamp": 1773706158105,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851300",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158108,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851302",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706158110,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851302",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706158112,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851377",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.74,
-      "actualOutcome": 0,
-      "timestamp": 1773706158114,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851377",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.7,
-      "actualOutcome": 1,
-      "timestamp": 1773706158117,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851566",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706158119,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851566",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706158122,
-      "odds": 1.6451612903225805
-    },
-    {
-      "gameId": "401851566",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158124,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803391",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158126,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851315",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706158128,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851315",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706158130,
-      "odds": 1.617283950617284
-    },
-    {
-      "gameId": "401851315",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158133,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851382",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.81,
-      "actualOutcome": 1,
-      "timestamp": 1773706158136,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851382",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706158138,
-      "odds": 1.5952380952380953
-    },
-    {
-      "gameId": "401851382",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.67,
-      "actualOutcome": 1,
-      "timestamp": 1773706158140,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851381",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706158142,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851304",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.75,
-      "actualOutcome": 1,
-      "timestamp": 1773706158144,
-      "odds": 1.5128205128205128
-    },
-    {
-      "gameId": "401851304",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.68,
-      "actualOutcome": 1,
-      "timestamp": 1773706158146,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851304",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158149,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851181",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706158152,
-      "odds": 1.5494505494505495
-    },
-    {
-      "gameId": "401851181",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.67,
-      "actualOutcome": 1,
-      "timestamp": 1773706158154,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851181",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158157,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851381",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158159,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851566",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706158162,
-      "odds": 1.8333333333333335
-    },
-    {
-      "gameId": "401851566",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.69,
-      "actualOutcome": 1,
-      "timestamp": 1773706158165,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851567",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 1,
-      "timestamp": 1773706158168,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851567",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706158170,
-      "odds": 1.6756756756756757
-    },
-    {
-      "gameId": "401851567",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158173,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810824",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158176,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810824",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158178,
-      "odds": 1.4854368932038835
-    },
-    {
-      "gameId": "401810824",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158180,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810826",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.64,
-      "actualOutcome": 1,
-      "timestamp": 1773706158183,
-      "odds": 1.3717472118959106
-    },
-    {
-      "gameId": "401810826",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.64,
-      "actualOutcome": 1,
-      "timestamp": 1773706158186,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810826",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158188,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810827",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158191,
-      "odds": 2
-    },
-    {
-      "gameId": "401810827",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158194,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810827",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158196,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810825",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158199,
-      "odds": 1.78125
-    },
-    {
-      "gameId": "401810825",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158202,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810825",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158204,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803399",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773706158207,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803399",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158209,
-      "odds": 1.8130081300813008
-    },
-    {
-      "gameId": "401803395",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158211,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803398",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158213,
-      "odds": 1.7633587786259541
-    },
-    {
-      "gameId": "401803398",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158216,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803394",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158218,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803394",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158221,
-      "odds": 2
-    },
-    {
-      "gameId": "401803404",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158223,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803404",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706158226,
-      "odds": 1.819672131147541
-    },
-    {
-      "gameId": "401803404",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158228,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803401",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158231,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803402",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158234,
-      "odds": 1.7246376811594204
-    },
-    {
-      "gameId": "401803401",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 0,
-      "timestamp": 1773706158237,
-      "odds": 2.04
-    },
-    {
-      "gameId": "401803393",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 0,
-      "timestamp": 1773706158239,
-      "odds": 1.5208333333333335
-    },
-    {
-      "gameId": "401803393",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773706158241,
-      "odds": 2.2800000000000002
-    },
-    {
-      "gameId": "401803393",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158244,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 0,
-      "timestamp": 1773706158246,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803397",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158249,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803397",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158251,
-      "odds": 1.6711409395973154
-    },
-    {
-      "gameId": "401803397",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158254,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158256,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851382",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.85,
-      "actualOutcome": 1,
-      "timestamp": 1773706158259,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851382",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706158262,
-      "odds": 2
-    },
-    {
-      "gameId": "401810822",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.65,
-      "actualOutcome": 0,
-      "timestamp": 1773706158264,
-      "odds": 1.10752688172043
-    },
-    {
-      "gameId": "401810822",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.65,
-      "actualOutcome": 0,
-      "timestamp": 1773706158267,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810822",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158269,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810829",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158272,
-      "odds": 1.9803921568627452
-    },
-    {
-      "gameId": "401810829",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158274,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810829",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706158277,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810830",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773706158279,
-      "odds": 1.4694835680751175
-    },
-    {
-      "gameId": "401810830",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773706158282,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810828",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158285,
-      "odds": 1.6849315068493151
-    },
-    {
-      "gameId": "401810828",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158288,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810830",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158290,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810823",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706158292,
-      "odds": 1.1904761904761905
-    },
-    {
-      "gameId": "401810823",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706158295,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810823",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158297,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "401803405",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158299,
-      "odds": 2.15
-    },
-    {
-      "gameId": "401803405",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158302,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851383",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.81,
-      "actualOutcome": 1,
-      "timestamp": 1773706158305,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851383",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706158307,
-      "odds": 1.8547008547008548
-    },
-    {
-      "gameId": "401851383",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158311,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851567",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.78,
-      "actualOutcome": 0,
-      "timestamp": 1773706158313,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851567",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706158315,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851568",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.83,
-      "actualOutcome": 0,
-      "timestamp": 1773706158318,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851568",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 0,
-      "timestamp": 1773706158320,
-      "odds": 1.6756756756756757
-    },
-    {
-      "gameId": "401851568",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158323,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803395",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706158325,
-      "odds": 1.900900900900901
-    },
-    {
-      "gameId": "401803400",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158328,
-      "odds": 2.04
-    },
-    {
-      "gameId": "401803403",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706158331,
-      "odds": 2.06
-    },
-    {
-      "gameId": "401803396",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158334,
-      "odds": 1.606060606060606
-    },
-    {
-      "gameId": "401803406",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158336,
-      "odds": 1.6329113924050633
-    },
-    {
-      "gameId": "401803405",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158339,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803395",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706158342,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803394",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158344,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803400",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158347,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803400",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 1,
-      "timestamp": 1773706158348,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803403",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158351,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803401",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158353,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803402",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158356,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803406",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158358,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851182",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706158361,
-      "odds": 1.165837479270315
-    },
-    {
-      "gameId": "401851182",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706158364,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851182",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.64,
-      "actualOutcome": 0,
-      "timestamp": 1773706158366,
-      "odds": 1.9615384615384617
-    },
-    {
-      "gameId": "401851305",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706158368,
-      "odds": 1.403225806451613
-    },
-    {
-      "gameId": "401851305",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.69,
-      "actualOutcome": 1,
-      "timestamp": 1773706158371,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851305",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 1,
-      "timestamp": 1773706158374,
-      "odds": 1.8695652173913042
-    },
-    {
-      "gameId": "401851316",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.79,
-      "actualOutcome": 1,
-      "timestamp": 1773706158376,
-      "odds": 1.0595238095238095
-    },
-    {
-      "gameId": "401851316",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706158379,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851316",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.7,
-      "actualOutcome": 1,
-      "timestamp": 1773706158382,
-      "odds": 1.8333333333333335
-    },
-    {
-      "gameId": "401851568",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.8,
-      "actualOutcome": 0,
-      "timestamp": 1773706158384,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851568",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.7,
-      "actualOutcome": 0,
-      "timestamp": 1773706158387,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401803403",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158389,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851384",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.78,
-      "actualOutcome": 1,
-      "timestamp": 1773706158392,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851384",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.77,
-      "actualOutcome": 1,
-      "timestamp": 1773706158393,
-      "odds": 1.1818181818181819
-    },
-    {
-      "gameId": "401851384",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706158396,
-      "odds": 1.8333333333333335
-    },
-    {
-      "gameId": "401810833",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158399,
-      "odds": 2.3
-    },
-    {
-      "gameId": "401810833",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158401,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810833",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158403,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706158406,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810836",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158409,
-      "odds": 1.7692307692307692
-    },
-    {
-      "gameId": "401810836",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158412,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810834",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706158414,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810834",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773706158417,
-      "odds": 1.5376344086021505
-    },
-    {
-      "gameId": "401810836",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773706158419,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810834",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158422,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810832",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 0,
-      "timestamp": 1773706158424,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810832",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 0,
-      "timestamp": 1773706158426,
-      "odds": 1.5376344086021505
-    },
-    {
-      "gameId": "401810831",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773706158429,
-      "odds": 1.7874015748031495
-    },
-    {
-      "gameId": "401810831",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 0,
-      "timestamp": 1773706158431,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810831",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158434,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "NBA",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.63,
-      "actualOutcome": 1,
-      "timestamp": 1773706158436,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810837",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158439,
-      "odds": 2.25
-    },
-    {
-      "gameId": "401810835",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158441,
-      "odds": 1.900900900900901
-    },
-    {
-      "gameId": "401810835",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158444,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810835",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 1,
-      "timestamp": 1773706158447,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851306",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.76,
-      "actualOutcome": 1,
-      "timestamp": 1773706158449,
-      "odds": 1.6802721088435373
-    },
-    {
-      "gameId": "401851306",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.7,
-      "actualOutcome": 0,
-      "timestamp": 1773706158452,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851306",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.68,
-      "actualOutcome": 1,
-      "timestamp": 1773706158454,
-      "odds": 1.8928571428571428
-    },
-    {
-      "gameId": "401851317",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.75,
-      "actualOutcome": 0,
-      "timestamp": 1773706158457,
-      "odds": 1.6711409395973154
-    },
-    {
-      "gameId": "401851317",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.66,
-      "actualOutcome": 0,
-      "timestamp": 1773706158460,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851317",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 0,
-      "timestamp": 1773706158462,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851386",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.74,
-      "actualOutcome": 1,
-      "timestamp": 1773706158465,
-      "odds": 1.3546099290780143
-    },
-    {
-      "gameId": "401851386",
-      "sport": "NCAAB",
-      "market": "spread",
-      "predictedProb": 0.72,
-      "actualOutcome": 0,
-      "timestamp": 1773706158467,
-      "odds": 1.9523809523809523
-    },
-    {
-      "gameId": "401851386",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.6,
-      "actualOutcome": 0,
-      "timestamp": 1773706158470,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851569",
-      "sport": "NCAAB",
-      "market": "total",
-      "predictedProb": 0.8,
-      "actualOutcome": 1,
-      "timestamp": 1773706158472,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401851569",
-      "sport": "NCAAB",
-      "market": "moneyline",
-      "predictedProb": 0.79,
-      "actualOutcome": 1,
-      "timestamp": 1773706158474,
-      "odds": 1.2816901408450705
-    },
-    {
-      "gameId": "401810838",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158476,
-      "odds": 2.0700000000000003
-    },
-    {
-      "gameId": "401810838",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158479,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810838",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158481,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803407",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 0,
-      "timestamp": 1773706158484,
-      "odds": 1.423728813559322
-    },
-    {
-      "gameId": "401803407",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706158486,
-      "odds": 1.9615384615384617
-    },
-    {
-      "gameId": "401803407",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158489,
-      "odds": 1.8849557522123894
-    },
-    {
-      "gameId": "401803408",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158491,
-      "odds": 2
-    },
-    {
-      "gameId": "401810840",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706158493,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810840",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158496,
-      "odds": 2.88
-    },
-    {
-      "gameId": "401810840",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158497,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810845",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158500,
-      "odds": 2.44
-    },
-    {
-      "gameId": "401810845",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158503,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810845",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 0,
-      "timestamp": 1773706158506,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810841",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706158508,
-      "odds": 1.8849557522123894
-    },
-    {
-      "gameId": "401810841",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.62,
-      "actualOutcome": 1,
-      "timestamp": 1773706158510,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810839",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158513,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810839",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.57,
-      "actualOutcome": 1,
-      "timestamp": 1773706158516,
-      "odds": 3
-    },
-    {
-      "gameId": "401810841",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.57,
-      "actualOutcome": 0,
-      "timestamp": 1773706158519,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810839",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158521,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810844",
-      "sport": "NBA",
-      "market": "moneyline",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158524,
-      "odds": 2.01
-    },
-    {
-      "gameId": "401810844",
-      "sport": "NBA",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158527,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401810844",
-      "sport": "NBA",
-      "market": "total",
-      "predictedProb": 0.55,
-      "actualOutcome": 1,
-      "timestamp": 1773706158530,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803409",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.65,
-      "actualOutcome": 1,
-      "timestamp": 1773706158532,
-      "odds": 1.8
-    },
-    {
-      "gameId": "401803410",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.63,
-      "actualOutcome": 1,
-      "timestamp": 1773706158535,
-      "odds": 1.6711409395973154
-    },
-    {
-      "gameId": "401803409",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.61,
-      "actualOutcome": 1,
-      "timestamp": 1773706158538,
-      "odds": 1.5
-    },
-    {
-      "gameId": "401803410",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158540,
-      "odds": 2.6399999999999997
-    },
-    {
-      "gameId": "401803409",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.59,
-      "actualOutcome": 1,
-      "timestamp": 1773706158543,
-      "odds": 2.35
-    },
-    {
-      "gameId": "401803410",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158546,
-      "odds": 2.1399999999999997
-    },
-    {
-      "gameId": "401803415",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158549,
-      "odds": 1.3900000000000001
-    },
-    {
-      "gameId": "401803420",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.53,
-      "actualOutcome": 0,
-      "timestamp": 1773706158551,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803420",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.52,
-      "actualOutcome": 0,
-      "timestamp": 1773706158554,
-      "odds": 1.9433962264150944
-    },
-    {
-      "gameId": "NHL",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.6,
-      "actualOutcome": 1,
-      "timestamp": 1773706158557,
-      "odds": 1.9090909090909092
-    },
-    {
-      "gameId": "401803418",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.58,
-      "actualOutcome": 1,
-      "timestamp": 1773706158560,
-      "odds": 1.434782608695652
-    },
-    {
-      "gameId": "401803418",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.56,
-      "actualOutcome": 1,
-      "timestamp": 1773706158562,
-      "odds": 1.970873786407767
-    },
-    {
-      "gameId": "401803418",
-      "sport": "NHL",
-      "market": "total",
-      "predictedProb": 0.54,
-      "actualOutcome": 1,
-      "timestamp": 1773706158565,
-      "odds": 1.9345794392523366
-    },
-    {
-      "gameId": "401803411",
-      "sport": "NHL",
-      "market": "moneyline",
-      "predictedProb": 0.67,
-      "actualOutcome": 0,
-      "timestamp": 1773706158568,
-      "odds": 1.392156862745098
-    },
-    {
-      "gameId": "401803411",
-      "sport": "NHL",
-      "market": "spread",
-      "predictedProb": 0.63,
-      "actualOutcome": 0,
-      "timestamp": 1773706158570,
-      "odds": 2
-    },
-    {
       "gameId": "401803416",
       "sport": "NHL",
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773706158573,
+      "timestamp": 1774387046381,
       "odds": 1.3773584905660377
     },
     {
@@ -3399,7 +15,7 @@
       "market": "total",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158575,
+      "timestamp": 1774387046384,
       "odds": 1.8333333333333335
     },
     {
@@ -3408,7 +24,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773706158579,
+      "timestamp": 1774387046386,
       "odds": 1.8399999999999999
     },
     {
@@ -3417,7 +33,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158581,
+      "timestamp": 1774387046389,
       "odds": 1.8
     },
     {
@@ -3426,7 +42,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773706158584,
+      "timestamp": 1774387046392,
       "odds": 1.9090909090909092
     },
     {
@@ -3435,7 +51,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158587,
+      "timestamp": 1774387046394,
       "odds": 2.52
     },
     {
@@ -3444,7 +60,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158590,
+      "timestamp": 1774387046397,
       "odds": 1.8264462809917354
     },
     {
@@ -3453,7 +69,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773706158591,
+      "timestamp": 1774387046399,
       "odds": 1.617283950617284
     },
     {
@@ -3462,7 +78,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158594,
+      "timestamp": 1774387046401,
       "odds": 2.4299999999999997
     },
     {
@@ -3471,7 +87,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158596,
+      "timestamp": 1774387046404,
       "odds": 1.9615384615384617
     },
     {
@@ -3480,7 +96,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773706158599,
+      "timestamp": 1774387046406,
       "odds": 1.434782608695652
     },
     {
@@ -3489,7 +105,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773706158602,
+      "timestamp": 1774387046409,
       "odds": 2.1399999999999997
     },
     {
@@ -3498,7 +114,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158604,
+      "timestamp": 1774387046411,
       "odds": 2.1
     },
     {
@@ -3507,7 +123,7 @@
       "market": "spread",
       "predictedProb": 0.82,
       "actualOutcome": 1,
-      "timestamp": 1773706158607,
+      "timestamp": 1774387046413,
       "odds": 1.8695652173913042
     },
     {
@@ -3516,7 +132,7 @@
       "market": "total",
       "predictedProb": 0.77,
       "actualOutcome": 0,
-      "timestamp": 1773706158609,
+      "timestamp": 1774387046425,
       "odds": 1.9090909090909092
     },
     {
@@ -3525,7 +141,7 @@
       "market": "moneyline",
       "predictedProb": 0.76,
       "actualOutcome": 1,
-      "timestamp": 1773706158612,
+      "timestamp": 1774387046427,
       "odds": 22.5
     },
     {
@@ -3534,7 +150,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158615,
+      "timestamp": 1774387046433,
       "odds": 1.8620689655172413
     },
     {
@@ -3543,7 +159,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158617,
+      "timestamp": 1774387046436,
       "odds": 1.9090909090909092
     },
     {
@@ -3552,7 +168,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773706158619,
+      "timestamp": 1774387046438,
       "odds": 1.9090909090909092
     },
     {
@@ -3561,7 +177,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158622,
+      "timestamp": 1774387046443,
       "odds": 2.01
     },
     {
@@ -3570,7 +186,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158625,
+      "timestamp": 1774387046446,
       "odds": 1.9090909090909092
     },
     {
@@ -3579,7 +195,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773706158627,
+      "timestamp": 1774387046448,
       "odds": 1.9090909090909092
     },
     {
@@ -3588,7 +204,7 @@
       "market": "moneyline",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158629,
+      "timestamp": 1774387046451,
       "odds": 2.5
     },
     {
@@ -3597,7 +213,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773706158630,
+      "timestamp": 1774387046454,
       "odds": 2.05
     },
     {
@@ -3606,7 +222,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158633,
+      "timestamp": 1774387046456,
       "odds": 1.819672131147541
     },
     {
@@ -3615,7 +231,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158635,
+      "timestamp": 1774387046458,
       "odds": 1.9090909090909092
     },
     {
@@ -3624,7 +240,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158637,
+      "timestamp": 1774387046460,
       "odds": 1.6578947368421053
     },
     {
@@ -3633,7 +249,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 0,
-      "timestamp": 1773706158640,
+      "timestamp": 1774387046463,
       "odds": 1.8333333333333335
     },
     {
@@ -3642,7 +258,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 1,
-      "timestamp": 1773706158642,
+      "timestamp": 1774387046465,
       "odds": 1.8849557522123894
     },
     {
@@ -3651,7 +267,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158645,
+      "timestamp": 1774387046468,
       "odds": 1.606060606060606
     },
     {
@@ -3660,7 +276,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158648,
+      "timestamp": 1774387046470,
       "odds": 2.2
     },
     {
@@ -3669,7 +285,7 @@
       "market": "moneyline",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773706158650,
+      "timestamp": 1774387046473,
       "odds": 2.35
     },
     {
@@ -3678,7 +294,7 @@
       "market": "spread",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773706158653,
+      "timestamp": 1774387046475,
       "odds": 1.9090909090909092
     },
     {
@@ -3687,7 +303,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158656,
+      "timestamp": 1774387046478,
       "odds": 1.9090909090909092
     },
     {
@@ -3696,7 +312,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773706158660,
+      "timestamp": 1774387046481,
       "odds": 4
     },
     {
@@ -3705,7 +321,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158663,
+      "timestamp": 1774387046483,
       "odds": 1.9090909090909092
     },
     {
@@ -3714,7 +330,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158666,
+      "timestamp": 1774387046485,
       "odds": 1.9090909090909092
     },
     {
@@ -3723,7 +339,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158668,
+      "timestamp": 1774387046488,
       "odds": 1.6024096385542168
     },
     {
@@ -3732,7 +348,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158671,
+      "timestamp": 1774387046491,
       "odds": 1.9090909090909092
     },
     {
@@ -3741,7 +357,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 0,
-      "timestamp": 1773706158674,
+      "timestamp": 1774387046493,
       "odds": 1.9090909090909092
     },
     {
@@ -3750,7 +366,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773706158676,
+      "timestamp": 1774387046496,
       "odds": 1.3546099290780143
     },
     {
@@ -3759,7 +375,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158679,
+      "timestamp": 1774387046499,
       "odds": 1.9090909090909092
     },
     {
@@ -3768,7 +384,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 1,
-      "timestamp": 1773706158681,
+      "timestamp": 1774387046501,
       "odds": 1.9090909090909092
     },
     {
@@ -3777,7 +393,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158684,
+      "timestamp": 1774387046503,
       "odds": 1.9090909090909092
     },
     {
@@ -3786,7 +402,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773706158687,
+      "timestamp": 1774387046506,
       "odds": 1.9090909090909092
     },
     {
@@ -3795,7 +411,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158689,
+      "timestamp": 1774387046508,
       "odds": 2.7857142857142856
     },
     {
@@ -3804,7 +420,7 @@
       "market": "moneyline",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158691,
+      "timestamp": 1774387046511,
       "odds": 1.9615384615384617
     },
     {
@@ -3813,7 +429,7 @@
       "market": "spread",
       "predictedProb": 0.61,
       "actualOutcome": 1,
-      "timestamp": 1773706158693,
+      "timestamp": 1774387046523,
       "odds": 1.9090909090909092
     },
     {
@@ -3822,7 +438,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158696,
+      "timestamp": 1774387046525,
       "odds": 1.9090909090909092
     },
     {
@@ -3831,7 +447,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773706158698,
+      "timestamp": 1774387046527,
       "odds": 2.44
     },
     {
@@ -3840,7 +456,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 0,
-      "timestamp": 1773706158701,
+      "timestamp": 1774387046528,
       "odds": 1.9090909090909092
     },
     {
@@ -3849,7 +465,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773706158704,
+      "timestamp": 1774387046531,
       "odds": 1.9090909090909092
     },
     {
@@ -3858,7 +474,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158707,
+      "timestamp": 1774387046533,
       "odds": 1.900900900900901
     },
     {
@@ -3867,7 +483,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158710,
+      "timestamp": 1774387046535,
       "odds": 1.9090909090909092
     },
     {
@@ -3876,7 +492,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158713,
+      "timestamp": 1774387046538,
       "odds": 1.9090909090909092
     },
     {
@@ -3885,7 +501,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773706158716,
+      "timestamp": 1774387046549,
       "odds": 1.9090909090909092
     },
     {
@@ -3894,7 +510,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158719,
+      "timestamp": 1774387046551,
       "odds": 1.9803921568627452
     },
     {
@@ -3903,7 +519,7 @@
       "market": "total",
       "predictedProb": 0.62,
       "actualOutcome": 0,
-      "timestamp": 1773706158721,
+      "timestamp": 1774387046554,
       "odds": 1.9523809523809523
     },
     {
@@ -3912,7 +528,7 @@
       "market": "spread",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773706158724,
+      "timestamp": 1774387046556,
       "odds": 1.9090909090909092
     },
     {
@@ -3921,7 +537,7 @@
       "market": "moneyline",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158727,
+      "timestamp": 1774387046559,
       "odds": 2.0700000000000003
     },
     {
@@ -3930,7 +546,7 @@
       "market": "spread",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158730,
+      "timestamp": 1774387046561,
       "odds": 1.9090909090909092
     },
     {
@@ -3939,7 +555,7 @@
       "market": "total",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773706158732,
+      "timestamp": 1774387046563,
       "odds": 1.9090909090909092
     },
     {
@@ -3948,7 +564,7 @@
       "market": "total",
       "predictedProb": 0.71,
       "actualOutcome": 1,
-      "timestamp": 1773706158735,
+      "timestamp": 1774387046565,
       "odds": 1.925925925925926
     },
     {
@@ -3957,7 +573,7 @@
       "market": "total",
       "predictedProb": 0.55,
       "actualOutcome": 1,
-      "timestamp": 1773706158738,
+      "timestamp": 1774387046567,
       "odds": 1.8695652173913042
     },
     {
@@ -3966,7 +582,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158740,
+      "timestamp": 1774387046569,
       "odds": 1.9090909090909092
     },
     {
@@ -3975,7 +591,7 @@
       "market": "total",
       "predictedProb": 0.64,
       "actualOutcome": 0,
-      "timestamp": 1773706158743,
+      "timestamp": 1774387046572,
       "odds": 1.9523809523809523
     },
     {
@@ -3984,7 +600,7 @@
       "market": "total",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773706158746,
+      "timestamp": 1774387046574,
       "odds": 1.9090909090909092
     },
     {
@@ -3993,7 +609,7 @@
       "market": "spread",
       "predictedProb": 0.54,
       "actualOutcome": 1,
-      "timestamp": 1773706158748,
+      "timestamp": 1774387046577,
       "odds": 1.9090909090909092
     },
     {
@@ -4002,7 +618,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 0,
-      "timestamp": 1773706158751,
+      "timestamp": 1774387046579,
       "odds": 1.9090909090909092
     },
     {
@@ -4011,7 +627,7 @@
       "market": "total",
       "predictedProb": 0.68,
       "actualOutcome": 0,
-      "timestamp": 1773706158754,
+      "timestamp": 1774387046582,
       "odds": 1.9523809523809523
     },
     {
@@ -4020,7 +636,7 @@
       "market": "total",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773706158757,
+      "timestamp": 1774387046584,
       "odds": 1.925925925925926
     },
     {
@@ -4029,7 +645,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773706158760,
+      "timestamp": 1774387046586,
       "odds": 1.6578947368421053
     },
     {
@@ -4038,7 +654,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 0,
-      "timestamp": 1773706158762,
+      "timestamp": 1774387046589,
       "odds": 1.8264462809917354
     },
     {
@@ -4047,7 +663,7 @@
       "market": "moneyline",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158765,
+      "timestamp": 1774387046591,
       "odds": 1.8695652173913042
     },
     {
@@ -4056,7 +672,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158768,
+      "timestamp": 1774387046593,
       "odds": 2.88
     },
     {
@@ -4065,7 +681,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 0,
-      "timestamp": 1773706158771,
+      "timestamp": 1774387046595,
       "odds": 1.9615384615384617
     },
     {
@@ -4074,7 +690,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158773,
+      "timestamp": 1774387046597,
       "odds": 2.1
     },
     {
@@ -4083,7 +699,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158775,
+      "timestamp": 1774387046608,
       "odds": 1.425531914893617
     },
     {
@@ -4092,7 +708,7 @@
       "market": "spread",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158777,
+      "timestamp": 1774387046611,
       "odds": 1.617283950617284
     },
     {
@@ -4101,7 +717,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158780,
+      "timestamp": 1774387046613,
       "odds": 1.4166666666666667
     },
     {
@@ -4110,7 +726,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158783,
+      "timestamp": 1774387046615,
       "odds": 1.5649717514124295
     },
     {
@@ -4119,7 +735,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158786,
+      "timestamp": 1774387046618,
       "odds": 1.8849557522123894
     },
     {
@@ -4128,7 +744,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773706158789,
+      "timestamp": 1774387046620,
       "odds": 1.8547008547008548
     },
     {
@@ -4137,7 +753,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158791,
+      "timestamp": 1774387046623,
       "odds": 1.8849557522123894
     },
     {
@@ -4146,7 +762,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158794,
+      "timestamp": 1774387046625,
       "odds": 1.8547008547008548
     },
     {
@@ -4155,7 +771,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158796,
+      "timestamp": 1774387046628,
       "odds": 1.8695652173913042
     },
     {
@@ -4164,7 +780,7 @@
       "market": "spread",
       "predictedProb": 0.69,
       "actualOutcome": 0,
-      "timestamp": 1773706158799,
+      "timestamp": 1774387046630,
       "odds": 1.9090909090909092
     },
     {
@@ -4173,7 +789,7 @@
       "market": "moneyline",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773706158802,
+      "timestamp": 1774387046632,
       "odds": 1.617283950617284
     },
     {
@@ -4182,7 +798,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158804,
+      "timestamp": 1774387046635,
       "odds": 1.9090909090909092
     },
     {
@@ -4191,7 +807,7 @@
       "market": "moneyline",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158807,
+      "timestamp": 1774387046637,
       "odds": 2.63
     },
     {
@@ -4200,7 +816,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158809,
+      "timestamp": 1774387046640,
       "odds": 2.08
     },
     {
@@ -4209,7 +825,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158812,
+      "timestamp": 1774387046642,
       "odds": 1.9090909090909092
     },
     {
@@ -4218,7 +834,7 @@
       "market": "spread",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158814,
+      "timestamp": 1774387046644,
       "odds": 1.9090909090909092
     },
     {
@@ -4227,7 +843,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773706158817,
+      "timestamp": 1774387046646,
       "odds": 1.9523809523809523
     },
     {
@@ -4236,7 +852,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158820,
+      "timestamp": 1774387046649,
       "odds": 1.9090909090909092
     },
     {
@@ -4245,7 +861,7 @@
       "market": "total",
       "predictedProb": 0.52,
       "actualOutcome": 1,
-      "timestamp": 1773706158822,
+      "timestamp": 1774387046651,
       "odds": 1.9090909090909092
     },
     {
@@ -4254,7 +870,7 @@
       "market": "spread",
       "predictedProb": 0.7,
       "actualOutcome": 1,
-      "timestamp": 1773706158825,
+      "timestamp": 1774387046653,
       "odds": 1.9090909090909092
     },
     {
@@ -4263,7 +879,7 @@
       "market": "moneyline",
       "predictedProb": 0.67,
       "actualOutcome": 1,
-      "timestamp": 1773706158828,
+      "timestamp": 1774387046656,
       "odds": 1.7246376811594204
     },
     {
@@ -4272,7 +888,7 @@
       "market": "total",
       "predictedProb": 0.6,
       "actualOutcome": 0,
-      "timestamp": 1773706158831,
+      "timestamp": 1774387046658,
       "odds": 1.9090909090909092
     },
     {
@@ -4281,7 +897,7 @@
       "market": "moneyline",
       "predictedProb": 0.55,
       "actualOutcome": 0,
-      "timestamp": 1773706158833,
+      "timestamp": 1774387046661,
       "odds": 2.45
     },
     {
@@ -4290,7 +906,7 @@
       "market": "spread",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158836,
+      "timestamp": 1774387046664,
       "odds": 1.9090909090909092
     },
     {
@@ -4299,7 +915,7 @@
       "market": "spread",
       "predictedProb": 0.6,
       "actualOutcome": 1,
-      "timestamp": 1773706158839,
+      "timestamp": 1774387046667,
       "odds": 1.9090909090909092
     },
     {
@@ -4308,7 +924,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158842,
+      "timestamp": 1774387046669,
       "odds": 2.17
     },
     {
@@ -4317,7 +933,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158844,
+      "timestamp": 1774387046671,
       "odds": 1.9090909090909092
     },
     {
@@ -4326,7 +942,7 @@
       "market": "moneyline",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773706158847,
+      "timestamp": 1774387046674,
       "odds": 1.847457627118644
     },
     {
@@ -4335,7 +951,7 @@
       "market": "total",
       "predictedProb": 0.54,
       "actualOutcome": 0,
-      "timestamp": 1773706158849,
+      "timestamp": 1774387046676,
       "odds": 1.9090909090909092
     },
     {
@@ -4344,7 +960,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 0,
-      "timestamp": 1773706158851,
+      "timestamp": 1774387046678,
       "odds": 1.9090909090909092
     },
     {
@@ -4353,7 +969,7 @@
       "market": "moneyline",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158854,
+      "timestamp": 1774387046681,
       "odds": 2.91
     },
     {
@@ -4362,7 +978,7 @@
       "market": "total",
       "predictedProb": 0.56,
       "actualOutcome": 0,
-      "timestamp": 1773706158857,
+      "timestamp": 1774387046683,
       "odds": 1.9090909090909092
     },
     {
@@ -4371,7 +987,7 @@
       "market": "spread",
       "predictedProb": 0.63,
       "actualOutcome": 1,
-      "timestamp": 1773706158859,
+      "timestamp": 1774387046686,
       "odds": 1.9090909090909092
     },
     {
@@ -4380,7 +996,7 @@
       "market": "moneyline",
       "predictedProb": 0.62,
       "actualOutcome": 1,
-      "timestamp": 1773706158862,
+      "timestamp": 1774387046688,
       "odds": 1.9803921568627452
     },
     {
@@ -4389,7 +1005,7 @@
       "market": "spread",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158864,
+      "timestamp": 1774387046691,
       "odds": 1.9090909090909092
     },
     {
@@ -4398,7 +1014,7 @@
       "market": "moneyline",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158866,
+      "timestamp": 1774387046693,
       "odds": 2.06
     },
     {
@@ -4407,7 +1023,7 @@
       "market": "total",
       "predictedProb": 0.57,
       "actualOutcome": 1,
-      "timestamp": 1773706158870,
+      "timestamp": 1774387046695,
       "odds": 1.9090909090909092
     },
     {
@@ -4416,7 +1032,7 @@
       "market": "total",
       "predictedProb": 0.53,
       "actualOutcome": 1,
-      "timestamp": 1773706158872,
+      "timestamp": 1774387046698,
       "odds": 1.9090909090909092
     },
     {
@@ -4425,7 +1041,7 @@
       "market": "spread",
       "predictedProb": 0.67,
       "actualOutcome": 0,
-      "timestamp": 1773706158875,
+      "timestamp": 1774387046700,
       "odds": 1.9090909090909092
     },
     {
@@ -4434,7 +1050,7 @@
       "market": "moneyline",
       "predictedProb": 0.66,
       "actualOutcome": 0,
-      "timestamp": 1773706158877,
+      "timestamp": 1774387046703,
       "odds": 1.819672131147541
     },
     {
@@ -4443,7 +1059,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158880,
+      "timestamp": 1774387046705,
       "odds": 1.9090909090909092
     },
     {
@@ -4452,7 +1068,7 @@
       "market": "spread",
       "predictedProb": 0.66,
       "actualOutcome": 1,
-      "timestamp": 1773706158882,
+      "timestamp": 1774387046707,
       "odds": 1.9090909090909092
     },
     {
@@ -4461,7 +1077,7 @@
       "market": "moneyline",
       "predictedProb": 0.65,
       "actualOutcome": 1,
-      "timestamp": 1773706158885,
+      "timestamp": 1774387046710,
       "odds": 2
     },
     {
@@ -4470,7 +1086,7 @@
       "market": "total",
       "predictedProb": 0.59,
       "actualOutcome": 1,
-      "timestamp": 1773706158887,
+      "timestamp": 1774387046712,
       "odds": 1.9090909090909092
     },
     {
@@ -4479,7 +1095,7 @@
       "market": "spread",
       "predictedProb": 0.69,
       "actualOutcome": 1,
-      "timestamp": 1773706158890,
+      "timestamp": 1774387046714,
       "odds": 1.9090909090909092
     },
     {
@@ -4488,7 +1104,7 @@
       "market": "moneyline",
       "predictedProb": 0.64,
       "actualOutcome": 1,
-      "timestamp": 1773706158893,
+      "timestamp": 1774387046717,
       "odds": 1.5464480874316942
     },
     {
@@ -4497,111 +1113,3495 @@
       "market": "total",
       "predictedProb": 0.58,
       "actualOutcome": 1,
-      "timestamp": 1773706158895,
+      "timestamp": 1774387046720,
       "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810859",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.7,
+      "actualOutcome": 1,
+      "timestamp": 1774387046722,
+      "odds": 1.4878048780487805
+    },
+    {
+      "gameId": "401810855",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.68,
+      "actualOutcome": 1,
+      "timestamp": 1774387046725,
+      "odds": 4.07
+    },
+    {
+      "gameId": "401810855",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387046727,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810859",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387046730,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810855",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046732,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810861",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.61,
+      "actualOutcome": 0,
+      "timestamp": 1774387046734,
+      "odds": 2.59
+    },
+    {
+      "gameId": "401810861",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387046737,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810861",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387046739,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810857",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.68,
+      "actualOutcome": 1,
+      "timestamp": 1774387046742,
+      "odds": 2.41
+    },
+    {
+      "gameId": "401810857",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046744,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810857",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387046746,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810856",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387046749,
+      "odds": 3.13
+    },
+    {
+      "gameId": "401810856",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387046752,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810856",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387046754,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810854",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 0,
+      "timestamp": 1774387046757,
+      "odds": 2.38
+    },
+    {
+      "gameId": "401810854",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046758,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810854",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387046760,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810853",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.68,
+      "actualOutcome": 1,
+      "timestamp": 1774387046763,
+      "odds": 3.8
+    },
+    {
+      "gameId": "401810853",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387046766,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810853",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387046768,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803432",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046771,
+      "odds": 2.0700000000000003
+    },
+    {
+      "gameId": "401803430",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046773,
+      "odds": 2.08
+    },
+    {
+      "gameId": "401803433",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387046775,
+      "odds": 1.99009900990099
+    },
+    {
+      "gameId": "401810860",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 0,
+      "timestamp": 1774387046778,
+      "odds": 2.5700000000000003
+    },
+    {
+      "gameId": "401810860",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387046780,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810860",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387046782,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803431",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046785,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401803433",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1774387046788,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810863",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387046790,
+      "odds": 2.1
+    },
+    {
+      "gameId": "401810863",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387046792,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810865",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046795,
+      "odds": 2.15
+    },
+    {
+      "gameId": "401810865",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046797,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810863",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387046799,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810865",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387046802,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387046804,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810866",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387046807,
+      "odds": 2.48
+    },
+    {
+      "gameId": "401810866",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387046810,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810868",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387046820,
+      "odds": 1.7633587786259541
+    },
+    {
+      "gameId": "401810868",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387046823,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810868",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387046825,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401858693",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387046827,
+      "odds": 6.41
+    },
+    {
+      "gameId": "401858693",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387046830,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401858693",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387046833,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401803435",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387046835,
+      "odds": 1.6944444444444444
+    },
+    {
+      "gameId": "401803435",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1774387046838,
+      "odds": 2.7
+    },
+    {
+      "gameId": "401803434",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046840,
+      "odds": 1.6802721088435373
+    },
+    {
+      "gameId": "401803436",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046843,
+      "odds": 1.9174311926605505
+    },
+    {
+      "gameId": "401803434",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387046845,
+      "odds": 2.6
+    },
+    {
+      "gameId": "401803436",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046847,
+      "odds": 2.1399999999999997
+    },
+    {
+      "gameId": "401803434",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387046850,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401803437",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046853,
+      "odds": 1.4464285714285714
+    },
+    {
+      "gameId": "401803437",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1774387046855,
+      "odds": 2.2
+    },
+    {
+      "gameId": "401803437",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387046858,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401803439",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387046860,
+      "odds": 1.4016064257028114
+    },
+    {
+      "gameId": "401803439",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387046862,
+      "odds": 2.05
+    },
+    {
+      "gameId": "401803439",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046865,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401803438",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387046867,
+      "odds": 1.7462686567164178
+    },
+    {
+      "gameId": "401803438",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046870,
+      "odds": 2.8
+    },
+    {
+      "gameId": "401803438",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387046872,
+      "odds": 1.7692307692307692
+    },
+    {
+      "gameId": "401803440",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046874,
+      "odds": 1.6578947368421053
+    },
+    {
+      "gameId": "401803440",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387046876,
+      "odds": 2.5
+    },
+    {
+      "gameId": "401803440",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046879,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401803441",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387046881,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401803441",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046884,
+      "odds": 1.3546099290780143
+    },
+    {
+      "gameId": "401803442",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387046886,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401803442",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046889,
+      "odds": 2.8
+    },
+    {
+      "gameId": "401803442",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387046899,
+      "odds": 1.704225352112676
+    },
+    {
+      "gameId": "401856484",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.77,
+      "actualOutcome": 1,
+      "timestamp": 1774387046901,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856484",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 0,
+      "timestamp": 1774387046904,
+      "odds": 1.7092198581560285
+    },
+    {
+      "gameId": "401856484",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.68,
+      "actualOutcome": 0,
+      "timestamp": 1774387046906,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387046909,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387046911,
+      "odds": 1.6802721088435373
+    },
+    {
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387046913,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387046916,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851202",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.77,
+      "actualOutcome": 0,
+      "timestamp": 1774387046918,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856435",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387046921,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856435",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387046923,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856435",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387046925,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856435",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387046928,
+      "odds": 1.4
+    },
+    {
+      "gameId": "401856486",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387046930,
+      "odds": 1.0013636425620116
+    },
+    {
+      "gameId": "401856486",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.75,
+      "actualOutcome": 0,
+      "timestamp": 1774387046933,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856486",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387046935,
+      "odds": 1.8333333333333335
+    },
+    {
+      "gameId": "401803432",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387046937,
+      "odds": 3.05
+    },
+    {
+      "gameId": "401803431",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046939,
+      "odds": 1.78125
+    },
+    {
+      "gameId": "401803430",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387046942,
+      "odds": 1.425531914893617
+    },
+    {
+      "gameId": "401803430",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387046944,
+      "odds": 2.12
+    },
+    {
+      "gameId": "401803433",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046947,
+      "odds": 1.847457627118644
+    },
+    {
+      "gameId": "401856488",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.71,
+      "actualOutcome": 0,
+      "timestamp": 1774387046950,
+      "odds": 6.02
+    },
+    {
+      "gameId": "401856478",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387046952,
+      "odds": 1.002857142857143
+    },
+    {
+      "gameId": "401856478",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387046954,
+      "odds": 1.8333333333333335
+    },
+    {
+      "gameId": "401856480",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.75,
+      "actualOutcome": 0,
+      "timestamp": 1774387046956,
+      "odds": 4.83
+    },
+    {
+      "gameId": "401856479",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.72,
+      "actualOutcome": 0,
+      "timestamp": 1774387046959,
+      "odds": 2.2
+    },
+    {
+      "gameId": "401856491",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 0,
+      "timestamp": 1774387046961,
+      "odds": 1.0093958470356104
+    },
+    {
+      "gameId": "401856491",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.72,
+      "actualOutcome": 0,
+      "timestamp": 1774387046963,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856491",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387046965,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856489",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 0,
+      "timestamp": 1774387046968,
+      "odds": 1.095602294455067
+    },
+    {
+      "gameId": "401856489",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387046970,
+      "odds": 1.847457627118644
+    },
+    {
+      "gameId": "401856490",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.72,
+      "actualOutcome": 1,
+      "timestamp": 1774387046972,
+      "odds": 2.26
+    },
+    {
+      "gameId": "401856490",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387046975,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856436",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.71,
+      "actualOutcome": 1,
+      "timestamp": 1774387046978,
+      "odds": 3.59
+    },
+    {
+      "gameId": "401856436",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1774387046980,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856482",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.7,
+      "actualOutcome": 0,
+      "timestamp": 1774387046982,
+      "odds": 2.6399999999999997
+    },
+    {
+      "gameId": "401856492",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 0,
+      "timestamp": 1774387046985,
+      "odds": 1.606060606060606
+    },
+    {
+      "gameId": "401856492",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.79,
+      "actualOutcome": 0,
+      "timestamp": 1774387046988,
+      "odds": 1.9803921568627452
+    },
+    {
+      "gameId": "401810866",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387046990,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803435",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387046992,
+      "odds": 1.7692307692307692
+    },
+    {
+      "gameId": "401803441",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1774387046995,
+      "odds": 1.7575757575757576
+    },
+    {
+      "gameId": "401810889",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387046997,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810889",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047000,
+      "odds": 1.3584229390681004
+    },
+    {
+      "gameId": "401810889",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047002,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810888",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047005,
+      "odds": 1.9615384615384617
+    },
+    {
+      "gameId": "401810888",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047007,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810888",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387047010,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810881",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047012,
+      "odds": 1.2159827213822894
+    },
+    {
+      "gameId": "401810881",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047014,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810881",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047017,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401810882",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047019,
+      "odds": 1.7633587786259541
+    },
+    {
+      "gameId": "401810882",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047021,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810882",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047023,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810878",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047025,
+      "odds": 1.0605693519079347
+    },
+    {
+      "gameId": "401810878",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047028,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810890",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.61,
+      "actualOutcome": 0,
+      "timestamp": 1774387047030,
+      "odds": 1.900900900900901
+    },
+    {
+      "gameId": "401810890",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.61,
+      "actualOutcome": 0,
+      "timestamp": 1774387047032,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810878",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047034,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401810890",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1774387047036,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810887",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047039,
+      "odds": 1.8130081300813008
+    },
+    {
+      "gameId": "401810887",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047041,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810887",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047044,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810891",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387047046,
+      "odds": 2.01
+    },
+    {
+      "gameId": "401810891",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 1,
+      "timestamp": 1774387047048,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810891",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047051,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833300",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.67,
+      "actualOutcome": 0,
+      "timestamp": 1774387047053,
+      "odds": 1.7751937984496124
+    },
+    {
+      "gameId": "401833304",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387047056,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833304",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047058,
+      "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401833300",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047061,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833304",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387047063,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833292",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387047066,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833305",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 0,
+      "timestamp": 1774387047068,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833299",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 0,
+      "timestamp": 1774387047071,
+      "odds": 1.8
+    },
+    {
+      "gameId": "401833305",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387047073,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401833303",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047076,
+      "odds": 1.7246376811594204
+    },
+    {
+      "gameId": "401833299",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047078,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833305",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047080,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833303",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047082,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833294",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.69,
+      "actualOutcome": 1,
+      "timestamp": 1774387047085,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833294",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047087,
+      "odds": 2.33
+    },
+    {
+      "gameId": "401833294",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387047089,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833301",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1774387047092,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833301",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387047095,
+      "odds": 1.7518796992481203
+    },
+    {
+      "gameId": "401833296",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047097,
+      "odds": 2.69
+    },
+    {
+      "gameId": "401833301",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047100,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833296",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1774387047102,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833296",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387047104,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833302",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047107,
+      "odds": 2.1
+    },
+    {
+      "gameId": "401833302",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047109,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833302",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047112,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833297",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047114,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833297",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047116,
+      "odds": 1.6578947368421053
+    },
+    {
+      "gameId": "401833298",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1774387047118,
+      "odds": 2.23
+    },
+    {
+      "gameId": "401833298",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1774387047120,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833297",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387047123,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833298",
+      "sport": "MLB",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047126,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401833291",
+      "sport": "MLB",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047128,
+      "odds": 2.19
+    },
+    {
+      "gameId": "401833291",
+      "sport": "MLB",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047131,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803457",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1774387047133,
+      "odds": 3.29
+    },
+    {
+      "gameId": "401803463",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047135,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803457",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387047138,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401803462",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047141,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047143,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047145,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401851521",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047148,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856565",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.8,
+      "actualOutcome": 1,
+      "timestamp": 1774387047150,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856565",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047153,
+      "odds": 1.1157407407407407
+    },
+    {
+      "gameId": "401856565",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047155,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387047165,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387047168,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047170,
+      "odds": 2.1100000000000003
+    },
+    {
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047180,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851716",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047183,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856437",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047185,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856437",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047188,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856437",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047190,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856437",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047193,
+      "odds": 1.9803921568627452
+    },
+    {
+      "gameId": "401856437",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047195,
+      "odds": 1.617283950617284
+    },
+    {
+      "gameId": "401856563",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047198,
+      "odds": 1.1594896331738438
+    },
+    {
+      "gameId": "401856563",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047200,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856563",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047202,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856561",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047205,
+      "odds": 1.4651162790697674
+    },
+    {
+      "gameId": "401856561",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387047207,
+      "odds": 1.8333333333333335
+    },
+    {
+      "gameId": "401856561",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047210,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401856564",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047212,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856559",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047214,
+      "odds": 1.5076142131979695
+    },
+    {
+      "gameId": "401856559",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387047217,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856559",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387047219,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.83,
+      "actualOutcome": 1,
+      "timestamp": 1774387047222,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.77,
+      "actualOutcome": 1,
+      "timestamp": 1774387047224,
+      "odds": 1.7518796992481203
+    },
+    {
+      "gameId": "401851434",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047227,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856562",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.85,
+      "actualOutcome": 1,
+      "timestamp": 1774387047229,
+      "odds": 1.819672131147541
+    },
+    {
+      "gameId": "401856562",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047231,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856562",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.74,
+      "actualOutcome": 1,
+      "timestamp": 1774387047234,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856558",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.71,
+      "actualOutcome": 0,
+      "timestamp": 1774387047236,
+      "odds": 1.6024096385542168
+    },
+    {
+      "gameId": "401856558",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.69,
+      "actualOutcome": 0,
+      "timestamp": 1774387047238,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856558",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047241,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810879",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047243,
+      "odds": 2.31
+    },
+    {
+      "gameId": "401810879",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047245,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047248,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810879",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387047250,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810877",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.66,
+      "actualOutcome": 0,
+      "timestamp": 1774387047253,
+      "odds": 14.26
+    },
+    {
+      "gameId": "401810877",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 0,
+      "timestamp": 1774387047256,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401810877",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 0,
+      "timestamp": 1774387047258,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401810880",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047261,
+      "odds": 2.63
+    },
+    {
+      "gameId": "401810880",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047263,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401810880",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047265,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810884",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047268,
+      "odds": 3.25
+    },
+    {
+      "gameId": "401810884",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047270,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810884",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047272,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401810883",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047274,
+      "odds": 1.0404694455685957
+    },
+    {
+      "gameId": "401810883",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 0,
+      "timestamp": 1774387047277,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401810886",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047279,
+      "odds": 1.161812297734628
+    },
+    {
+      "gameId": "401810886",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047281,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401810883",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047284,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810886",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047286,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401810885",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047288,
+      "odds": 2.96
+    },
+    {
+      "gameId": "401810885",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047290,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810885",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047293,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401803450",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047295,
+      "odds": 2.3200000000000003
+    },
+    {
+      "gameId": "401803450",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387047297,
+      "odds": 1.970873786407767
+    },
+    {
+      "gameId": "401803459",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047300,
+      "odds": 1.8
+    },
+    {
+      "gameId": "401803459",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047302,
+      "odds": 2.85
+    },
+    {
+      "gameId": "401803456",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1774387047305,
+      "odds": 2.1
+    },
+    {
+      "gameId": "401803455",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.68,
+      "actualOutcome": 1,
+      "timestamp": 1774387047307,
+      "odds": 1.558659217877095
+    },
+    {
+      "gameId": "401803455",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387047310,
+      "odds": 2.38
+    },
+    {
+      "gameId": "401803455",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047313,
+      "odds": 1.7874015748031495
+    },
+    {
+      "gameId": "401803452",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.56,
+      "actualOutcome": 1,
+      "timestamp": 1774387047315,
+      "odds": 1.7692307692307692
+    },
+    {
+      "gameId": "401803452",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047318,
+      "odds": 1.425531914893617
+    },
+    {
+      "gameId": "401803451",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047321,
+      "odds": 1.4166666666666667
+    },
+    {
+      "gameId": "401803451",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047323,
+      "odds": 1.72992700729927
+    },
+    {
+      "gameId": "401803460",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047326,
+      "odds": 1.4444444444444444
+    },
+    {
+      "gameId": "401803460",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047328,
+      "odds": 2.1799999999999997
+    },
+    {
+      "gameId": "401803460",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047331,
+      "odds": 2.06
+    },
+    {
+      "gameId": "401803458",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047333,
+      "odds": 1.7092198581560285
+    },
+    {
+      "gameId": "401803458",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047336,
+      "odds": 2.65
+    },
+    {
+      "gameId": "401803453",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047339,
+      "odds": 1.4081632653061225
+    },
+    {
+      "gameId": "401803454",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1774387047341,
+      "odds": 3.0833333333333335
+    },
+    {
+      "gameId": "401803453",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387047343,
+      "odds": 2.04
+    },
+    {
+      "gameId": "401803454",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047346,
+      "odds": 1.9174311926605505
+    },
+    {
+      "gameId": "401803453",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047348,
+      "odds": 1.9174311926605505
+    },
+    {
+      "gameId": "401856530",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.8,
+      "actualOutcome": 0,
+      "timestamp": 1774387047351,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856530",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047353,
+      "odds": 1.1222493887530562
+    },
+    {
+      "gameId": "401856530",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047356,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856532",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.8,
+      "actualOutcome": 0,
+      "timestamp": 1774387047358,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856532",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047361,
+      "odds": 1.1291989664082687
+    },
+    {
+      "gameId": "401856532",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047363,
+      "odds": 1.9803921568627452
+    },
+    {
+      "gameId": "401856535",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.77,
+      "actualOutcome": 0,
+      "timestamp": 1774387047466,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856535",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047468,
+      "odds": 1.1831501831501832
+    },
+    {
+      "gameId": "401856535",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047471,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856531",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047473,
+      "odds": 1.45662100456621
+    },
+    {
+      "gameId": "401856531",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.74,
+      "actualOutcome": 1,
+      "timestamp": 1774387047476,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856531",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047479,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856533",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.75,
+      "actualOutcome": 0,
+      "timestamp": 1774387047481,
+      "odds": 5.42
+    },
+    {
+      "gameId": "401856533",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.7,
+      "actualOutcome": 1,
+      "timestamp": 1774387047484,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401856537",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.77,
+      "actualOutcome": 0,
+      "timestamp": 1774387047486,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856537",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047488,
+      "odds": 1.3690036900369003
+    },
+    {
+      "gameId": "401856537",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.71,
+      "actualOutcome": 1,
+      "timestamp": 1774387047491,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856534",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047493,
+      "odds": 2.0700000000000003
+    },
+    {
+      "gameId": "401856534",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.73,
+      "actualOutcome": 1,
+      "timestamp": 1774387047495,
+      "odds": 1.9803921568627452
+    },
+    {
+      "gameId": "401856534",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387047497,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856536",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.72,
+      "actualOutcome": 0,
+      "timestamp": 1774387047500,
+      "odds": 6.29
+    },
+    {
+      "gameId": "401856536",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.68,
+      "actualOutcome": 0,
+      "timestamp": 1774387047502,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856479",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047505,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047507,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810906",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047510,
+      "odds": 1.6802721088435373
+    },
+    {
+      "gameId": "401810906",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047512,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401810906",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387047515,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810907",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387047517,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810907",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047520,
+      "odds": 3.88
+    },
+    {
+      "gameId": "401810904",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047522,
+      "odds": 1.2123142250530785
+    },
+    {
+      "gameId": "401810904",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047524,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401810904",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047527,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401810909",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047529,
+      "odds": 2.35
+    },
+    {
+      "gameId": "401810909",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047532,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401810908",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047534,
+      "odds": 1.7518796992481203
+    },
+    {
+      "gameId": "401810908",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047537,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810909",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047539,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810908",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047541,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810910",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047543,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810911",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047546,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810910",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047548,
+      "odds": 1.6024096385542168
+    },
+    {
+      "gameId": "401810911",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047551,
+      "odds": 3.22
+    },
+    {
+      "gameId": "401810910",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047553,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810911",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047555,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810913",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047558,
+      "odds": 3.6315789473684212
+    },
+    {
+      "gameId": "401810913",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047560,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401810913",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047562,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047565,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047567,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810912",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047569,
+      "odds": 1.7751937984496124
+    },
+    {
+      "gameId": "401810912",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047572,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810912",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047575,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047577,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047580,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810915",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.61,
+      "actualOutcome": 0,
+      "timestamp": 1774387047582,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810915",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047585,
+      "odds": 1.5
+    },
+    {
+      "gameId": "401810914",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047587,
+      "odds": 1.1219512195121952
+    },
+    {
+      "gameId": "401810914",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047589,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810916",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047592,
+      "odds": 1.8264462809917354
+    },
+    {
+      "gameId": "401810916",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047594,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810916",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047597,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803473",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.67,
+      "actualOutcome": 0,
+      "timestamp": 1774387047599,
+      "odds": 1.7692307692307692
+    },
+    {
+      "gameId": "401803473",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047601,
+      "odds": 2.75
+    },
+    {
+      "gameId": "401803473",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.61,
+      "actualOutcome": 1,
+      "timestamp": 1774387047604,
+      "odds": 1.9615384615384617
+    },
+    {
+      "gameId": "401810905",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047606,
+      "odds": 2.94
+    },
+    {
+      "gameId": "401810905",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.65,
+      "actualOutcome": 1,
+      "timestamp": 1774387047609,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810905",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387047612,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401810902",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047613,
+      "odds": 1.0547645125958378
+    },
+    {
+      "gameId": "401810902",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047615,
+      "odds": 1.8771929824561404
+    },
+    {
+      "gameId": "401810902",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 1,
+      "timestamp": 1774387047617,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "NBA",
+      "sport": "NBA",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047620,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401810903",
+      "sport": "NBA",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047622,
+      "odds": 1.267379679144385
+    },
+    {
+      "gameId": "401810903",
+      "sport": "NBA",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047624,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401803482",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.6,
+      "actualOutcome": 1,
+      "timestamp": 1774387047627,
+      "odds": 1.7692307692307692
+    },
+    {
+      "gameId": "401803482",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047630,
+      "odds": 2.8
+    },
+    {
+      "gameId": "401803479",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.7,
+      "actualOutcome": 0,
+      "timestamp": 1774387047632,
+      "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401803479",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 0,
+      "timestamp": 1774387047634,
+      "odds": 1.3496503496503496
+    },
+    {
+      "gameId": "401803479",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387047636,
+      "odds": 1.8333333333333335
+    },
+    {
+      "gameId": "401803477",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047638,
+      "odds": 1.5882352941176472
+    },
+    {
+      "gameId": "401803477",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.56,
+      "actualOutcome": 0,
+      "timestamp": 1774387047641,
+      "odds": 2.35
+    },
+    {
+      "gameId": "401803477",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 1,
+      "timestamp": 1774387047643,
+      "odds": 2.02
+    },
+    {
+      "gameId": "401803472",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047645,
+      "odds": 1.4081632653061225
+    },
+    {
+      "gameId": "401803472",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047648,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401803472",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047650,
+      "odds": 1.7407407407407407
+    },
+    {
+      "gameId": "401803480",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.69,
+      "actualOutcome": 0,
+      "timestamp": 1774387047652,
+      "odds": 1.7142857142857144
+    },
+    {
+      "gameId": "401803480",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387047655,
+      "odds": 2.75
+    },
+    {
+      "gameId": "401803475",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047657,
+      "odds": 1.606060606060606
+    },
+    {
+      "gameId": "401803475",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 1,
+      "timestamp": 1774387047659,
+      "odds": 1.7874015748031495
+    },
+    {
+      "gameId": "401803480",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047661,
+      "odds": 1.819672131147541
+    },
+    {
+      "gameId": "401803475",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047663,
+      "odds": 2.33
+    },
+    {
+      "gameId": "401803481",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047665,
+      "odds": 1.5952380952380953
+    },
+    {
+      "gameId": "401803481",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.54,
+      "actualOutcome": 1,
+      "timestamp": 1774387047667,
+      "odds": 1.8064516129032258
+    },
+    {
+      "gameId": "401803481",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387047670,
+      "odds": 2.4299999999999997
+    },
+    {
+      "gameId": "401803484",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 1,
+      "timestamp": 1774387047673,
+      "odds": 1.4444444444444444
+    },
+    {
+      "gameId": "401803484",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.57,
+      "actualOutcome": 0,
+      "timestamp": 1774387047675,
+      "odds": 1.8
+    },
+    {
+      "gameId": "401803478",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.54,
+      "actualOutcome": 0,
+      "timestamp": 1774387047677,
+      "odds": 2.3899999999999997
+    },
+    {
+      "gameId": "401803484",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.53,
+      "actualOutcome": 1,
+      "timestamp": 1774387047680,
+      "odds": 2.21
+    },
+    {
+      "gameId": "401803478",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.52,
+      "actualOutcome": 0,
+      "timestamp": 1774387047682,
+      "odds": 1.8264462809917354
+    },
+    {
+      "gameId": "401803485",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.55,
+      "actualOutcome": 0,
+      "timestamp": 1774387047684,
+      "odds": 1.5464480874316942
+    },
+    {
+      "gameId": "401803485",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.55,
+      "actualOutcome": 1,
+      "timestamp": 1774387047687,
+      "odds": 1.617283950617284
+    },
+    {
+      "gameId": "401803485",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.53,
+      "actualOutcome": 0,
+      "timestamp": 1774387047689,
+      "odds": 2
+    },
+    {
+      "gameId": "401803483",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1774387047691,
+      "odds": 1.7575757575757576
+    },
+    {
+      "gameId": "401803483",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 0,
+      "timestamp": 1774387047693,
+      "odds": 2.85
+    },
+    {
+      "gameId": "401803483",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.6,
+      "actualOutcome": 0,
+      "timestamp": 1774387047695,
+      "odds": 1.9433962264150944
+    },
+    {
+      "gameId": "401856569",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.77,
+      "actualOutcome": 1,
+      "timestamp": 1774387047698,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856569",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047700,
+      "odds": 1.2865329512893982
+    },
+    {
+      "gameId": "401856569",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1774387047703,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856568",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047705,
+      "odds": 1.3021148036253776
+    },
+    {
+      "gameId": "401856568",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.71,
+      "actualOutcome": 1,
+      "timestamp": 1774387047708,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856568",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.7,
+      "actualOutcome": 1,
+      "timestamp": 1774387047710,
+      "odds": 1.819672131147541
+    },
+    {
+      "gameId": "401856573",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047713,
+      "odds": 1.5181347150259068
+    },
+    {
+      "gameId": "401856573",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.69,
+      "actualOutcome": 1,
+      "timestamp": 1774387047715,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856573",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.68,
+      "actualOutcome": 1,
+      "timestamp": 1774387047717,
+      "odds": 1.925925925925926
+    },
+    {
+      "gameId": "401856571",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 1,
+      "timestamp": 1774387047720,
+      "odds": 1.7751937984496124
+    },
+    {
+      "gameId": "401856571",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.73,
+      "actualOutcome": 0,
+      "timestamp": 1774387047722,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401856571",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1774387047725,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856570",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.76,
+      "actualOutcome": 0,
+      "timestamp": 1774387047727,
+      "odds": 1.3472222222222223
+    },
+    {
+      "gameId": "401856570",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.63,
+      "actualOutcome": 0,
+      "timestamp": 1774387047730,
+      "odds": 1.9090909090909092
+    },
+    {
+      "gameId": "401856570",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.59,
+      "actualOutcome": 0,
+      "timestamp": 1774387047732,
+      "odds": 1.8928571428571428
+    },
+    {
+      "gameId": "401856572",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.8,
+      "actualOutcome": 1,
+      "timestamp": 1774387047734,
+      "odds": 1.8695652173913042
+    },
+    {
+      "gameId": "401856572",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047737,
+      "odds": 1.1798561151079137
+    },
+    {
+      "gameId": "401856572",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.64,
+      "actualOutcome": 1,
+      "timestamp": 1774387047740,
+      "odds": 1.847457627118644
+    },
+    {
+      "gameId": "401803474",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.58,
+      "actualOutcome": 0,
+      "timestamp": 1774387047742,
+      "odds": 1.8849557522123894
+    },
+    {
+      "gameId": "401803471",
+      "sport": "NHL",
+      "market": "moneyline",
+      "predictedProb": 0.67,
+      "actualOutcome": 1,
+      "timestamp": 1774387047744,
+      "odds": 1.5128205128205128
+    },
+    {
+      "gameId": "401803471",
+      "sport": "NHL",
+      "market": "total",
+      "predictedProb": 0.64,
+      "actualOutcome": 0,
+      "timestamp": 1774387047747,
+      "odds": 1.8
+    },
+    {
+      "gameId": "401803471",
+      "sport": "NHL",
+      "market": "spread",
+      "predictedProb": 0.62,
+      "actualOutcome": 1,
+      "timestamp": 1774387047749,
+      "odds": 2.17
+    },
+    {
+      "gameId": "401856566",
+      "sport": "NCAAB",
+      "market": "moneyline",
+      "predictedProb": 0.79,
+      "actualOutcome": 1,
+      "timestamp": 1774387047751,
+      "odds": 1.6289308176100628
+    },
+    {
+      "gameId": "401856566",
+      "sport": "NCAAB",
+      "market": "total",
+      "predictedProb": 0.7,
+      "actualOutcome": 1,
+      "timestamp": 1774387047754,
+      "odds": 1.9523809523809523
+    },
+    {
+      "gameId": "401856566",
+      "sport": "NCAAB",
+      "market": "spread",
+      "predictedProb": 0.66,
+      "actualOutcome": 1,
+      "timestamp": 1774387047756,
+      "odds": 1.9523809523809523
     }
   ],
   "bayesianParams": {
     "NBA-moneyline": {
-      "alpha": 115.53558820166485,
-      "beta": 84.46441179833516
+      "alpha": 116.54023772559508,
+      "beta": 83.45976227440494
     },
     "NBA": {
-      "alpha": 118.92155501994682,
-      "beta": 81.07844498005319
+      "alpha": 116.8773532140004,
+      "beta": 83.12264678599962
     },
     "NBA-spread": {
-      "alpha": 120.38268574622019,
-      "beta": 79.61731425377984
+      "alpha": 118.89624331831703,
+      "beta": 81.10375668168298
     },
     "NBA-total": {
-      "alpha": 110.92924190659431,
-      "beta": 89.0707580934057
+      "alpha": 112.3079600498978,
+      "beta": 87.6920399501022
     },
     "NBA-team_total": {
-      "alpha": 85.96335048390468,
-      "beta": 114.03664951609534
+      "alpha": 85.95754830916478,
+      "beta": 114.04245169083524
     },
     "NHL-team_total": {
-      "alpha": 95.77388052367462,
-      "beta": 104.2261194763254
+      "alpha": 95.77840777914777,
+      "beta": 104.22159222085223
     },
     "NHL": {
-      "alpha": 110.4138903432834,
-      "beta": 89.58610965671662
+      "alpha": 102.58258604271875,
+      "beta": 97.41741395728127
     },
     "NHL-moneyline": {
-      "alpha": 113.54225028717774,
-      "beta": 86.45774971282228
+      "alpha": 110.12710785936243,
+      "beta": 89.87289214063759
     },
     "NHL-spread": {
-      "alpha": 113.47523945363709,
-      "beta": 86.52476054636291
+      "alpha": 108.36628665278288,
+      "beta": 91.63371334721715
     },
     "NHL-total": {
-      "alpha": 106.66094050186938,
-      "beta": 93.33905949813065
+      "alpha": 101.21132307718473,
+      "beta": 98.7886769228153
     },
     "NCAAB-moneyline": {
-      "alpha": 119.13842851218394,
-      "beta": 80.86157148781608
+      "alpha": 124.52398824743933,
+      "beta": 75.4760117525607
     },
     "NCAAB": {
-      "alpha": 117.41939724528791,
-      "beta": 82.5806027547121
+      "alpha": 127.31052419590759,
+      "beta": 72.68947580409244
     },
     "NCAAB-spread": {
-      "alpha": 101.02093274201329,
-      "beta": 98.97906725798673
+      "alpha": 111.61662667402577,
+      "beta": 88.38337332597425
     },
     "NCAAB-total": {
-      "alpha": 120.13203175189192,
-      "beta": 79.8679682481081
+      "alpha": 121.40221515143504,
+      "beta": 78.59778484856497
     },
     "NCAAB-team_total": {
-      "alpha": 144.03172721460803,
-      "beta": 55.968272785391996
+      "alpha": 144.13215426483893,
+      "beta": 55.86784573516108
     },
     "MLB-spread": {
-      "alpha": 11,
-      "beta": 5
+      "alpha": 59,
+      "beta": 23
     },
     "MLB": {
-      "alpha": 30,
-      "beta": 12
+      "alpha": 129.98897715997674,
+      "beta": 70.01102284002329
     },
     "MLB-moneyline": {
-      "alpha": 13,
-      "beta": 5
+      "alpha": 69,
+      "beta": 29
     },
     "MLB-total": {
-      "alpha": 10,
-      "beta": 6
+      "alpha": 46,
+      "beta": 42
     }
   },
   "sportAdjustments": {
     "NBA": {
-      "homeAdvantage": 2.1219497206690646e-16,
+      "homeAdvantage": 7.829473195306106e-21,
       "scoreMean": 112,
-      "scoreStdDev": 47528575901.029915,
+      "scoreStdDev": 18610892757.99336,
       "totalMean": 224
     },
     "NHL": {
-      "homeAdvantage": 1.922939681884232e-8,
+      "homeAdvantage": 1.313045726839747e-12,
       "scoreMean": 3,
-      "scoreStdDev": 9.80496345597965,
+      "scoreStdDev": 289.7679858766447,
       "totalMean": 6
     },
     "NCAAB": {
-      "homeAdvantage": 0.0004422816996694233,
+      "homeAdvantage": 0.00000896794573851418,
       "scoreMean": 72,
-      "scoreStdDev": 7.449093858506206e-8,
+      "scoreStdDev": 9.97211971463147e-12,
       "totalMean": 145
     },
     "MLB": {
       "homeAdvantage": 0.3,
       "scoreMean": 4.5,
-      "scoreStdDev": 1.9074513478716975,
+      "scoreStdDev": 0.29733938115684183,
       "totalMean": 8.5
     }
   },
@@ -4744,6 +4744,27 @@
       "accuracy": 59.4,
       "brierScore": 0.2516,
       "driftScore": 0.0614,
+      "predictions": 500
+    },
+    {
+      "date": "2026-03-18",
+      "accuracy": 62.4,
+      "brierScore": 0.2451,
+      "driftScore": 0.0817,
+      "predictions": 500
+    },
+    {
+      "date": "2026-03-21",
+      "accuracy": 60,
+      "brierScore": 0.2454,
+      "driftScore": 0.0554,
+      "predictions": 500
+    },
+    {
+      "date": "2026-03-24",
+      "accuracy": 58.6,
+      "brierScore": 0.2439,
+      "driftScore": 0.0414,
       "predictions": 500
     }
   ],

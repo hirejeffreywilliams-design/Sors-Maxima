@@ -1592,7 +1592,7 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                 </div>
               </div>
 
-              {/* Payout display */}
+              {/* Live payout display for selected stake */}
               <div className="rounded-lg bg-amber-500/10 border border-amber-500/25 p-3 flex items-center justify-between">
                 <div>
                   <p className="text-[10px] text-amber-300/70 uppercase tracking-wide">If all {effectiveLegs.length} legs hit</p>
@@ -1605,6 +1605,26 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                     {payoutFormatted}
                   </p>
                   <p className="text-[9px] text-amber-300/60 mt-0.5">potential win</p>
+                </div>
+              </div>
+
+              {/* Win Scenarios — always-visible $10 / $50 / $100 grid */}
+              <div className="rounded-lg border border-amber-500/20 overflow-hidden">
+                <div className="px-3 py-1.5 bg-amber-500/8 border-b border-amber-500/15 flex items-center gap-1.5">
+                  <TrendingUp className="w-3 h-3 text-amber-400" />
+                  <p className="text-[10px] font-semibold text-amber-300 uppercase tracking-wide">Win Scenarios — If Every Leg Hits</p>
+                </div>
+                <div className="grid grid-cols-3 divide-x divide-amber-500/15">
+                  {[10, 50, 100].map(s => {
+                    const p = s * effectiveDecimalOdds;
+                    const fmt = p >= 1_000_000 ? `$${(p / 1_000_000).toFixed(2)}M` : p >= 1_000 ? `$${(p / 1_000).toFixed(1)}K` : `$${p.toFixed(2)}`;
+                    return (
+                      <div key={s} className="py-2.5 px-2 text-center" data-testid={`lc-scenario-${s}`}>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide font-semibold">${s} bet</p>
+                        <p className="text-base font-black text-amber-300 tabular-nums leading-tight mt-0.5">{fmt}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1679,8 +1699,8 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                             compact
                           />
                         </div>
-                        <div className="flex flex-col items-end gap-1 shrink-0 w-[68px]">
-                          <p className="text-sm font-bold text-amber-400 tabular-nums">{formatOddsLC(leg.americanOdds)}</p>
+                        <div className="flex flex-col items-end gap-1 shrink-0 w-[80px]">
+                          <p className="text-lg font-black text-amber-300 tabular-nums leading-none" data-testid={`lc-leg-odds-${i}`}>{formatOddsLC(leg.americanOdds)}</p>
                           <p className="text-[9px] text-muted-foreground text-right leading-tight">{leg.betType.replace(/_/g, " ")}</p>
                           <button
                             onClick={() => { addLeg(buildLcLeg(leg) as any); }}

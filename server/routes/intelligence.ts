@@ -1381,18 +1381,50 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
         LIMIT 90
       `);
 
-      const history = (rows.rows as any[]).map(r => ({
-        id: r.id,
-        date: r.date,
-        ticketId: r.ticket_id,
-        legs: r.legs,
-        totalLegs: r.total_legs,
-        outcome: r.outcome,
-        wonLegs: r.won_legs,
-        settledAt: r.settled_at,
-        mintedCardId: r.minted_card_id,
-        createdAt: r.created_at,
-      }));
+      const history = (rows.rows as any[]).map(r => {
+        // Compute total decimal odds from stored legs
+        const legs: any[] = Array.isArray(r.legs) ? r.legs : [];
+        const totalDecimalOdds = legs.length > 0
+          ? legs.reduce((acc: number, l: any) => acc * (parseFloat(l.decimalOdds) || 1), 1)
+          : 0;
+        // Convert to American odds string
+        let americanOdds = "";
+        if (totalDecimalOdds > 1) {
+          if (totalDecimalOdds >= 2) {
+            const val = Math.round((totalDecimalOdds - 1) * 100);
+            americanOdds = `+${val.toLocaleString()}`;
+          } else {
+            const val = Math.round(100 / (totalDecimalOdds - 1));
+            americanOdds = `-${val.toLocaleString()}`;
+          }
+        }
+        // Payout scenarios
+        const potentialPayouts = [10, 50, 100].map(stake => ({
+          stake,
+          payout: totalDecimalOdds > 0 ? +(stake * totalDecimalOdds).toFixed(2) : 0,
+          formatted: (() => {
+            const p = stake * totalDecimalOdds;
+            if (p >= 1_000_000) return `$${(p / 1_000_000).toFixed(2)}M`;
+            if (p >= 1_000) return `$${(p / 1_000).toFixed(1)}K`;
+            return `$${p.toFixed(2)}`;
+          })(),
+        }));
+        return {
+          id: r.id,
+          date: r.date,
+          ticketId: r.ticket_id,
+          legs: r.legs,
+          totalLegs: r.total_legs,
+          outcome: r.outcome,
+          wonLegs: r.won_legs,
+          settledAt: r.settled_at,
+          mintedCardId: r.minted_card_id,
+          createdAt: r.created_at,
+          totalDecimalOdds,
+          americanOdds,
+          potentialPayouts,
+        };
+      });
 
       const settled = history.filter(h => h.outcome !== "pending");
       const wins = history.filter(h => h.outcome === "won").length;
