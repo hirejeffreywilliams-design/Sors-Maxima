@@ -126,6 +126,7 @@ export default function CardsPage() {
       id: number; date: string; ticketId: string; legs: any[];
       totalLegs: number; outcome: string; wonLegs: number;
       settledAt: string | null; mintedCardId: string | null; createdAt: string;
+      narrative: string | null;
       totalDecimalOdds: number; americanOdds: string;
       potentialPayouts: { stake: number; payout: number; formatted: string }[];
     }>;
@@ -696,10 +697,10 @@ export default function CardsPage() {
               )}
             </div>
 
-            {/* LCT History */}
+            {/* LCT Almanac */}
             {isLctLoading ? (
               <div className="space-y-2">
-                {[1, 2, 3].map(i => <Skeleton key={i} className="w-full h-14 rounded-xl" />)}
+                {[1, 2, 3].map(i => <Skeleton key={i} className="w-full h-20 rounded-xl" />)}
               </div>
             ) : !lctData || lctData.history.length === 0 ? (
               <Card className="border-dashed border-2 bg-emerald-400/5 border-emerald-400/20">
@@ -712,6 +713,44 @@ export default function CardsPage() {
                 </CardContent>
               </Card>
             ) : (
+              <>
+                {/* Almanac Timeline — visual dot strip of last 20 results */}
+                <div
+                  className="rounded-xl p-3 border"
+                  style={{ background: "rgba(255,255,255,0.02)", borderColor: "rgba(255,255,255,0.06)" }}
+                >
+                  <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-widest mb-2">Results Timeline — Most Recent →</p>
+                  <div className="flex flex-wrap gap-1.5 items-center">
+                    {[...lctData.history].reverse().slice(-30).map((entry, i) => {
+                      const wonLegs = entry.wonLegs ?? 0;
+                      const totalLegs = entry.totalLegs || 1;
+                      const closeness = wonLegs / totalLegs;
+                      return (
+                        <button
+                          key={entry.id}
+                          onClick={() => setExpandedLctId(expandedLctId === entry.id ? null : entry.id)}
+                          title={`${new Date(entry.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} — ${entry.outcome === "won" ? "WIN 🏆" : entry.outcome === "lost" ? `LOSS (${wonLegs}/${totalLegs} legs)` : "PENDING"}`}
+                          className="w-5 h-5 rounded-full transition-all hover:scale-125 flex items-center justify-center"
+                          style={{
+                            background: entry.outcome === "won"
+                              ? "rgba(16,185,129,0.8)"
+                              : entry.outcome === "lost"
+                                ? closeness >= 0.8 ? "rgba(251,191,36,0.7)" : closeness >= 0.6 ? "rgba(239,68,68,0.6)" : "rgba(239,68,68,0.35)"
+                                : "rgba(255,255,255,0.15)",
+                            boxShadow: entry.outcome === "won" ? "0 0 8px rgba(16,185,129,0.5)" : closeness >= 0.8 && entry.outcome === "lost" ? "0 0 8px rgba(251,191,36,0.4)" : "none",
+                          }}
+                          data-testid={`almanac-dot-${entry.id}`}
+                        />
+                      );
+                    })}
+                    <div className="ml-2 flex items-center gap-3 text-[9px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "rgba(16,185,129,0.8)" }} />Win</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "rgba(251,191,36,0.7)" }} />Near-Miss</span>
+                      <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "rgba(239,68,68,0.5)" }} />Loss</span>
+                    </div>
+                  </div>
+                </div>
+
               <div className="space-y-3" data-testid="lct-history-list">
                 {lctData.history.slice(0, 30).map((entry) => (
                   <div
@@ -788,6 +827,93 @@ export default function CardsPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Closeness score for losses */}
+                    {entry.outcome === "lost" && entry.totalLegs > 0 && (() => {
+                      const wonLegs = entry.wonLegs ?? 0;
+                      const pct = (wonLegs / entry.totalLegs) * 100;
+                      const isHeartbreaker = pct >= 80;
+                      return (
+                        <div className="mx-3 mb-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wide">Closeness</span>
+                              {isHeartbreaker && (
+                                <span className="text-[8px] font-black px-1.5 py-0.5 rounded-full"
+                                  style={{ background: "rgba(251,191,36,0.15)", color: "rgba(251,191,36,0.9)", border: "1px solid rgba(251,191,36,0.35)" }}>
+                                  💔 HEARTBREAKER
+                                </span>
+                              )}
+                            </div>
+                            <span className={`text-[10px] font-black ${isHeartbreaker ? "text-amber-400" : "text-red-400"}`}>
+                              {wonLegs}/{entry.totalLegs} legs hit — {Math.round(pct)}% there
+                            </span>
+                          </div>
+                          <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${pct}%`,
+                                background: isHeartbreaker ? "linear-gradient(90deg, rgba(251,191,36,0.8), rgba(251,191,36,0.5))" : "rgba(239,68,68,0.6)",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Leg heat map — visual dot row for every leg */}
+                    {(() => {
+                      const legs: any[] = Array.isArray(entry.legs) ? entry.legs : [];
+                      if (legs.length === 0) return null;
+                      const sportEmoji = (s: string) =>
+                        s === "NBA" ? "🏀" : s === "NHL" ? "🏒" : s === "NFL" ? "🏈" : s === "MLB" ? "⚾" : s === "MMA" ? "🥊" : s?.startsWith("Soccer") ? "⚽" : "🎯";
+                      return (
+                        <div className="mx-3 mb-2">
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wide font-semibold mb-1">Leg Results</p>
+                          <div className="flex flex-wrap gap-1">
+                            {legs.map((leg: any, i: number) => {
+                              const legHit = entry.outcome === "won" ? true : leg.legResult === "hit" ? true : leg.legResult === "miss" ? false : null;
+                              return (
+                                <div
+                                  key={i}
+                                  className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-semibold"
+                                  title={`${leg.pick} — ${legHit === true ? "HIT ✓" : legHit === false ? "MISS ✗" : "?"}`}
+                                  style={{
+                                    background: legHit === true ? "rgba(16,185,129,0.12)" : legHit === false ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.06)",
+                                    border: `1px solid ${legHit === true ? "rgba(16,185,129,0.3)" : legHit === false ? "rgba(239,68,68,0.3)" : "rgba(255,255,255,0.1)"}`,
+                                    color: legHit === true ? "rgba(16,185,129,0.9)" : legHit === false ? "rgba(239,68,68,0.8)" : "rgba(255,255,255,0.4)",
+                                  }}
+                                  data-testid={`heatmap-leg-${entry.id}-${i}`}
+                                >
+                                  <span>{sportEmoji(leg.sport)}</span>
+                                  <span>{legHit === true ? "✓" : legHit === false ? "✗" : "·"}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          {/* Miss note for losing legs */}
+                          {entry.outcome === "lost" && legs.some((l: any) => l.missNote) && (
+                            <div className="mt-1.5 space-y-1">
+                              {legs.filter((l: any) => l.missNote).map((leg: any, i: number) => (
+                                <div key={i} className="flex items-start gap-1.5 text-[9px]" style={{ color: "rgba(239,68,68,0.7)" }}>
+                                  <span className="shrink-0 mt-0.5">✗</span>
+                                  <span><span className="font-semibold">{leg.pick}:</span> {leg.missNote}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Narrative text */}
+                    {entry.narrative && (
+                      <div className="mx-3 mb-2 px-2.5 py-2 rounded-lg" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        <p className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground mb-0.5">Recap</p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed italic">"{entry.narrative}"</p>
+                      </div>
+                    )}
 
                     {/* Payout scenarios: $10 / $50 / $100 */}
                     {entry.potentialPayouts && entry.potentialPayouts.length > 0 && (
@@ -935,6 +1061,7 @@ export default function CardsPage() {
                   </div>
                 ))}
               </div>
+              </>
             )}
           </div>
         </TabsContent>

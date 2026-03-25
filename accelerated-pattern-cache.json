@@ -6,9 +6,9 @@
       "winRate": 57.5
     },
     "NHL": {
-      "wins": 255,
-      "total": 488,
-      "winRate": 52.3
+      "wins": 268,
+      "total": 507,
+      "winRate": 52.9
     },
     "NCAAB": {
       "wins": 266,
@@ -16,26 +16,26 @@
       "winRate": 60.6
     },
     "MLB": {
-      "wins": 75,
-      "total": 117,
-      "winRate": 64.1
+      "wins": 77,
+      "total": 123,
+      "winRate": 62.6
     }
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 287,
-      "total": 488,
-      "winRate": 58.8
+      "wins": 290,
+      "total": 495,
+      "winRate": 58.6
     },
     "spread": {
-      "wins": 286,
-      "total": 500,
-      "winRate": 57.2
+      "wins": 289,
+      "total": 506,
+      "winRate": 57.1
     },
     "total": {
-      "wins": 276,
-      "total": 493,
-      "winRate": 56
+      "wins": 285,
+      "total": 505,
+      "winRate": 56.4
     },
     "team_total": {
       "wins": 38,
@@ -46,12 +46,6 @@
   "topWinPatterns": [
     {
       "key": "NCAAB:moneyline:neutral",
-      "winRate": 88.9,
-      "total": 9,
-      "boost": 5
-    },
-    {
-      "key": "MLB:spread:neutral:50s:low",
       "winRate": 88.9,
       "total": 9,
       "boost": 5
@@ -115,21 +109,15 @@
       "winRate": 78.6,
       "total": 14,
       "boost": 5
+    },
+    {
+      "key": "MLB:moneyline:fav:60s:low",
+      "winRate": 77.8,
+      "total": 9,
+      "boost": 3
     }
   ],
   "topLosePatterns": [
-    {
-      "key": "NHL:moneyline:slight_dog",
-      "winRate": 32,
-      "total": 25,
-      "penalty": 8
-    },
-    {
-      "key": "NHL:total:neutral:50s:medium",
-      "winRate": 33.3,
-      "total": 21,
-      "penalty": 7
-    },
     {
       "key": "NCAAB:total:neutral:60s:low",
       "winRate": 33.3,
@@ -149,6 +137,12 @@
       "penalty": 10
     },
     {
+      "key": "NHL:moneyline:slight_dog",
+      "winRate": 34.6,
+      "total": 26,
+      "penalty": 8
+    },
+    {
       "key": "NHL:spread:slight_dog:50s:very_high",
       "winRate": 37.5,
       "total": 8,
@@ -165,10 +159,16 @@
       "winRate": 40,
       "total": 15,
       "penalty": 3
+    },
+    {
+      "key": "NHL:spread:heavy_fav",
+      "winRate": 40.9,
+      "total": 22,
+      "penalty": 4
     }
   ],
-  "totalSettled": 1550,
-  "lastMined": "2026-03-25T02:44:28.697Z",
+  "totalSettled": 1575,
+  "lastMined": "2026-03-25T19:55:34.881Z",
   "cycleCount": 1,
   "patternCount": 266
 }

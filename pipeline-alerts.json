@@ -1,5 +1,121 @@
 [
   {
+    "id": "alert-intl-sports-1774468090520",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T19:48:10.520Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached due to potential issues with data freshness or connectivity, which may result in outdated information for users relying on real-time sports data.",
+    "recommendations": [
+      "Check for any outstanding API key issues or expiration for the linked services.",
+      "Test connectivity and response times for the services that the Intl Sports Engine relies on.",
+      "Clear the cache and attempt to refresh the node to fetch the latest data."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T19:57:24.895Z"
+  },
+  {
+    "id": "alert-api-football-1774468088966",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T19:48:08.966Z",
+    "diagnosis": "The 'API-Football' node is cached due to potential connectivity issues or data retrieval delays, which may affect the availability of real-time soccer data for users.",
+    "recommendations": [
+      "Check the API usage and connection to ensure it is functioning properly.",
+      "Review error logs for any signs of failure or issues that caused the caching.",
+      "Consider increasing API request limits or adjusting the caching mechanism to improve responsiveness."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T19:57:24.894Z"
+  },
+  {
+    "id": "alert-intl-sports-1774464826240",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T18:53:46.240Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached due to possible timeout or data retrieval issues, which may result in stale data for users relying on international sports intelligence.",
+    "recommendations": [
+      "Check the connection to the data sources integrated with the 'Intl Sports Engine' for any disruptions.",
+      "Review the cache settings and limits to ensure timely updates from external APIs.",
+      "Monitor the system logs for any errors or warnings that could indicate the underlying cause of the caching status."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T19:09:20.951Z"
+  },
+  {
+    "id": "alert-api-football-1774464824912",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T18:53:44.912Z",
+    "diagnosis": "The 'API-Football' node is cached, likely due to a lack of recent data updates, which may limit the availability of current soccer data for users relying on real-time information.",
+    "recommendations": [
+      "Check the API-Football key for any issues or expiration.",
+      "Monitor the API-Football node for data update frequency and adjust settings if necessary.",
+      "Contact the API-Football support team to ensure the service is operational and inquire about any recent changes to data accessibility."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T19:09:20.950Z"
+  },
+  {
+    "id": "alert-odds-center-1774447744140",
+    "nodeId": "odds-center",
+    "nodeLabel": "Odds Center",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T14:09:04.140Z",
+    "diagnosis": "The 'Odds Center' node is cached due to potentially outdated data and may not provide the most current betting lines to users.",
+    "recommendations": [
+      "Check the connection to the Odds API to ensure it is responding effectively.",
+      "Clear the cache of the 'Odds Center' node to refresh the data.",
+      "Monitor the Odds API for any connectivity issues or scheduled maintenance periods."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-mma-engine-1774447742752",
+    "nodeId": "mma-engine",
+    "nodeLabel": "MMA/UFC Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T14:09:02.752Z",
+    "diagnosis": "The 'MMA/UFC Engine' node is cached due to a temporary lack of new data, which means users may not receive the most current fight analysis or betting insights during this period.",
+    "recommendations": [
+      "Verify the data sources connected to the MMA/UFC Engine to ensure they are operational.",
+      "Check for any API rate limits or restrictions that may have caused the data retrieval to halt.",
+      "Consider clearing the cache or forcing a refresh to retrieve fresh data once the sources are confirmed to be functioning."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-api-1774447741361",
+    "nodeId": "odds-api",
+    "nodeLabel": "The Odds API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-25T14:09:01.361Z",
+    "diagnosis": "The Odds API is cached due to a temporary disruption in real-time data fetching, which means users may not receive the most current betting lines.",
+    "recommendations": [
+      "Verify THE_ODDS_API_KEY is valid and up to date.",
+      "Check the system logs for any errors or warnings from the Odds API node.",
+      "If issues persist, consider re-initializing the Odds API node to refresh the connection."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
     "id": "alert-intl-sports-1774397418172",
     "nodeId": "intl-sports",
     "nodeLabel": "Intl Sports Engine",
@@ -13,7 +129,8 @@
       "Reinitialize the node to attempt fetching fresh data and clear the cached state."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T02:46:18.716Z"
   },
   {
     "id": "alert-api-football-1774397417036",
@@ -29,7 +146,8 @@
       "Consider implementing a fallback mechanism to provide users with the most recent cached data until the live data issue is resolved."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T02:46:18.715Z"
   },
   {
     "id": "alert-pick-insight-1774397116974",
@@ -96,7 +214,8 @@
       "If the issue persists, clear the cache for the 'Odds Center' node to force a refresh with the latest data."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T14:03:59.730Z"
   },
   {
     "id": "alert-mma-engine-1774389404924",
@@ -112,7 +231,8 @@
       "Monitor the node's status and verify if a manual refresh or restart is necessary to clear the cached state."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T14:03:59.720Z"
   },
   {
     "id": "alert-odds-api-1774389403757",
@@ -128,7 +248,8 @@
       "Implement caching strategies to make use of stored data while the Odds API is recovering."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-25T14:03:59.720Z"
   },
   {
     "id": "alert-intl-sports-1774387845639",

@@ -518,6 +518,37 @@ export default function AdminCardsVault() {
     onError: () => toast({ title: "Failed to settle", variant: "destructive" }),
   });
 
+  const { data: lctAnalytics, isLoading: lctAnalyticsLoading, refetch: refetchAnalytics2 } = useQuery<{
+    overall: { wins: number; losses: number; total: number; winRate: number };
+    bySport: { name: string; wins: number; total: number; winRate: number }[];
+    byBetType: { name: string; wins: number; total: number; winRate: number }[];
+    byGrade: { name: string; wins: number; total: number; winRate: number }[];
+  }>({
+    queryKey: ["/api/admin/lct/analytics"],
+    enabled: vaultOpen,
+  });
+
+  const { data: optimalTicket, refetch: refetchOptimal } = useQuery<{
+    strategy: { preferSports: string[]; preferBetTypes: string[]; preferGrades: string[]; targetLegs: number; targetOdds: string; rationale: string };
+    generatedAt: string;
+  }>({
+    queryKey: ["/api/admin/lct/daily-optimal"],
+    enabled: vaultOpen,
+  });
+
+  const seedFounderMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", `/api/admin/lct/seed-founder-tickets`, {});
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({ title: `Seeded ${data.inserted} founder tickets (${data.skipped} skipped — date conflicts)` });
+      refetchLct();
+      refetchAnalytics2();
+    },
+    onError: () => toast({ title: "Failed to seed tickets", variant: "destructive" }),
+  });
+
   if (!vaultOpen) {
     return <VaultDoorAnimation onComplete={() => setVaultOpen(true)} />;
   }
@@ -1009,6 +1040,121 @@ export default function AdminCardsVault() {
                 </div>
               )}
             </div>
+          </div>
+
+          {/* Seed + Refresh controls */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button size="sm" variant="outline" className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10"
+              onClick={() => { refetchLct(); refetchAnalytics2(); refetchOptimal(); }}
+              data-testid="button-refresh-lct">
+              <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh Data
+            </Button>
+            <Button size="sm" className="bg-emerald-700 hover:bg-emerald-600 text-white font-semibold"
+              onClick={() => seedFounderMutation.mutate()} disabled={seedFounderMutation.isPending}
+              data-testid="button-seed-founder-tickets">
+              <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+              {seedFounderMutation.isPending ? "Seeding…" : "Seed Founder Ticket History"}
+            </Button>
+          </div>
+
+          {/* Daily Optimal Strategy */}
+          {optimalTicket && (
+            <div className="rounded-xl border overflow-hidden"
+              style={{ borderColor: "rgba(251,191,36,0.25)", background: "rgba(251,191,36,0.04)" }}>
+              <div className="px-4 py-3 border-b" style={{ borderColor: "rgba(251,191,36,0.12)" }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                    <h4 className="text-sm font-black text-amber-300">Daily Optimal Ticket Strategy</h4>
+                  </div>
+                  <button onClick={() => refetchOptimal()} className="text-[9px] text-muted-foreground hover:text-amber-400 flex items-center gap-0.5">
+                    <RefreshCw className="w-2.5 h-2.5" />Recalculate
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Based on historical leg performance across all settled tickets</p>
+              </div>
+              <div className="p-4 space-y-3">
+                <p className="text-[10px] text-muted-foreground leading-relaxed">{optimalTicket.strategy.rationale}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)" }}>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-1">Best Sports</p>
+                    <p className="text-xs font-black text-emerald-400">{optimalTicket.strategy.preferSports.slice(0, 2).join(", ")}</p>
+                  </div>
+                  <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)" }}>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-1">Best Bet Types</p>
+                    <p className="text-xs font-black text-blue-400">{optimalTicket.strategy.preferBetTypes.slice(0, 2).join(", ")}</p>
+                  </div>
+                  <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.2)" }}>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-1">Target Grades</p>
+                    <p className="text-xs font-black text-amber-400">{optimalTicket.strategy.preferGrades.join(", ")}</p>
+                  </div>
+                  <div className="rounded-lg p-2.5 text-center" style={{ background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-1">Target Odds</p>
+                    <p className="text-xs font-black text-purple-400">{optimalTicket.strategy.targetOdds}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Analytics breakdown panels */}
+          {lctAnalytics && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* By Sport */}
+              <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Win Rate by Sport</p>
+                {lctAnalytics.bySport.slice(0, 6).map(s => (
+                  <div key={s.name} className="space-y-0.5">
+                    <div className="flex justify-between text-[9px]">
+                      <span className="font-semibold">{s.name === "NBA" ? "🏀" : s.name === "NHL" ? "🏒" : s.name === "NFL" ? "🏈" : s.name === "MLB" ? "⚾" : s.name === "MMA" ? "🥊" : "🎯"} {s.name}</span>
+                      <span className={`font-black ${s.winRate >= 70 ? "text-emerald-400" : s.winRate >= 50 ? "text-amber-400" : "text-red-400"}`}>{s.winRate}% ({s.wins}/{s.total})</span>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div className="h-full rounded-full"
+                        style={{ width: `${s.winRate}%`, background: s.winRate >= 70 ? "rgba(16,185,129,0.7)" : s.winRate >= 50 ? "rgba(251,191,36,0.6)" : "rgba(239,68,68,0.5)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* By Bet Type */}
+              <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Win Rate by Bet Type</p>
+                {lctAnalytics.byBetType.slice(0, 6).map(bt => (
+                  <div key={bt.name} className="space-y-0.5">
+                    <div className="flex justify-between text-[9px]">
+                      <span className="font-semibold capitalize">{bt.name}</span>
+                      <span className={`font-black ${bt.winRate >= 70 ? "text-emerald-400" : bt.winRate >= 50 ? "text-amber-400" : "text-red-400"}`}>{bt.winRate}% ({bt.wins}/{bt.total})</span>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div className="h-full rounded-full"
+                        style={{ width: `${bt.winRate}%`, background: bt.winRate >= 70 ? "rgba(16,185,129,0.7)" : bt.winRate >= 50 ? "rgba(251,191,36,0.6)" : "rgba(239,68,68,0.5)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* By Grade */}
+              <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Win Rate by Grade</p>
+                {lctAnalytics.byGrade.slice(0, 6).map(g => (
+                  <div key={g.name} className="space-y-0.5">
+                    <div className="flex justify-between text-[9px]">
+                      <span className="font-bold">{g.name}</span>
+                      <span className={`font-black ${g.winRate >= 70 ? "text-emerald-400" : g.winRate >= 50 ? "text-amber-400" : "text-red-400"}`}>{g.winRate}% ({g.wins}/{g.total})</span>
+                    </div>
+                    <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                      <div className="h-full rounded-full"
+                        style={{ width: `${g.winRate}%`, background: g.winRate >= 70 ? "rgba(16,185,129,0.7)" : g.winRate >= 50 ? "rgba(251,191,36,0.6)" : "rgba(239,68,68,0.5)" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="border-t border-border/20 pt-1">
+            <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-semibold mb-3">Ticket History</p>
           </div>
 
           {lctLoading && <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>}
