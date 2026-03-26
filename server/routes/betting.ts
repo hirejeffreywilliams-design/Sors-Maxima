@@ -1091,7 +1091,20 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         "San Francisco 49ers": "SF", "Seattle Seahawks": "SEA", "Tampa Bay Buccaneers": "TB",
         "Tennessee Titans": "TEN", "Washington Commanders": "WSH",
       };
-      const ALL_TEAM_ABBR = { ...NBA_ABBR, ...NHL_ABBR, ...NFL_ABBR };
+      const MLB_ABBR: Record<string, string> = {
+        "Arizona Diamondbacks": "ARI", "Atlanta Braves": "ATL", "Baltimore Orioles": "BAL",
+        "Boston Red Sox": "BOS", "Chicago Cubs": "CHC", "Chicago White Sox": "CWS",
+        "Cincinnati Reds": "CIN", "Cleveland Guardians": "CLE", "Colorado Rockies": "COL",
+        "Detroit Tigers": "DET", "Houston Astros": "HOU", "Kansas City Royals": "KC",
+        "Los Angeles Angels": "LAA", "Los Angeles Dodgers": "LAD", "Miami Marlins": "MIA",
+        "Milwaukee Brewers": "MIL", "Minnesota Twins": "MIN", "New York Mets": "NYM",
+        "New York Yankees": "NYY", "Oakland Athletics": "OAK", "Philadelphia Phillies": "PHI",
+        "Pittsburgh Pirates": "PIT", "San Diego Padres": "SD", "San Francisco Giants": "SF",
+        "Seattle Mariners": "SEA", "St. Louis Cardinals": "STL", "Tampa Bay Rays": "TB",
+        "Texas Rangers": "TEX", "Toronto Blue Jays": "TOR", "Washington Nationals": "WSH",
+        "Athletics": "ATH",
+      };
+      const ALL_TEAM_ABBR = { ...NBA_ABBR, ...NHL_ABBR, ...NFL_ABBR, ...MLB_ABBR };
 
       // ── Helper: format injury text ─────────────────────────────────
       function formatInjury(teamDisplayName: string, shortComment: string, rawStatus: string): string {
@@ -1314,13 +1327,23 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       }
 
       // ── Top precomputed picks (A-grade) ───────────────────────────
-      const pickSports = ["NBA", "NHL", "NCAAB"];
+      const pickSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
       for (const sport of pickSports) {
         try {
           const cache = getPrecomputedCache(sport);
           if (!cache?.picks) continue;
+          // Grade threshold varies by sport — baseball/hockey are harder to predict at high confidence
+          // MLB: accept B+ or better; NHL: accept A- or better; others: A or A+
+          const GRADE_ORDER = ["D","C-","C","C+","B-","B","B+","A-","A","A+"];
+          const minGrade = sport === "MLB" ? "B-" : sport === "NHL" ? "A-" : "A-";
+          const minGradeIdx = GRADE_ORDER.indexOf(minGrade);
+          const evThreshold = sport === "MLB" ? 3 : 4;
           const topPicks = cache.picks
-            .filter((p: any) => p.grade?.startsWith("A") && (p.ev || 0) > 5)
+            .filter((p: any) => {
+              const gradeIdx = GRADE_ORDER.indexOf(p.grade || "D");
+              return gradeIdx >= minGradeIdx && (p.ev || 0) > evThreshold;
+            })
+            .sort((a: any, b: any) => (b.ev || 0) - (a.ev || 0))
             .slice(0, 2);
           for (const pick of topPicks) {
             // Use abbreviations for team names in the game matchup
