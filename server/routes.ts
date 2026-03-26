@@ -16,6 +16,7 @@ import { registerResearchRoutes } from "./routes/research";
 import { registerGuidelinesRoutes } from "./routes/guidelines";
 import { registerFeedbackRoutes } from "./routes/feedback";
 import { registerPickFeedbackRoutes } from "./routes/pickFeedback";
+import { registerStrategyIntelligenceRoutes } from "./routes/strategy-intelligence";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -38,6 +39,7 @@ export async function registerRoutes(
   registerGuidelinesRoutes(app);
   registerFeedbackRoutes(app);
   registerPickFeedbackRoutes(app);
+  registerStrategyIntelligenceRoutes(app);
 
   return httpServer;
 }

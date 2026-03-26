@@ -15287,6 +15287,150 @@
       "mcBoostApplied": -3,
       "pickConfidence": 52,
       "recordedAt": 1774477273092
+    },
+    {
+      "id": "401803501_moneyline",
+      "gameId": "401803501",
+      "sport": "NHL",
+      "betType": "moneyline",
+      "mcWinProb": 0.4,
+      "mcVariance": 5.95,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -4,
+      "pickConfidence": 56,
+      "recordedAt": 1774484431589
+    },
+    {
+      "id": "401803501_spread",
+      "gameId": "401803501",
+      "sport": "NHL",
+      "betType": "spread",
+      "mcWinProb": 0.43,
+      "mcVariance": 5.95,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -1,
+      "pickConfidence": 60,
+      "recordedAt": 1774484431591
+    },
+    {
+      "id": "401803501_total",
+      "gameId": "401803501",
+      "sport": "NHL",
+      "betType": "total",
+      "mcWinProb": 0.43,
+      "mcVariance": 5.95,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -2,
+      "pickConfidence": 59,
+      "recordedAt": 1774484431592
+    },
+    {
+      "id": "401803502_moneyline",
+      "gameId": "401803502",
+      "sport": "NHL",
+      "betType": "moneyline",
+      "mcWinProb": 0.411,
+      "mcVariance": 5.59,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -4,
+      "pickConfidence": 52,
+      "recordedAt": 1774484431602
+    },
+    {
+      "id": "401803502_spread",
+      "gameId": "401803502",
+      "sport": "NHL",
+      "betType": "spread",
+      "mcWinProb": 0.42,
+      "mcVariance": 5.59,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -2,
+      "pickConfidence": 54,
+      "recordedAt": 1774484431603
+    },
+    {
+      "id": "401803502_total",
+      "gameId": "401803502",
+      "sport": "NHL",
+      "betType": "total",
+      "mcWinProb": 0.42,
+      "mcVariance": 5.59,
+      "mcConvergence": 0.941,
+      "mcBoostApplied": -2,
+      "pickConfidence": 54,
+      "recordedAt": 1774484431605
+    },
+    {
+      "id": "401856577_moneyline",
+      "gameId": "401856577",
+      "sport": "NCAAB",
+      "betType": "moneyline",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -13,
+      "pickConfidence": 42,
+      "recordedAt": 1774484431721
+    },
+    {
+      "id": "401856577_spread",
+      "gameId": "401856577",
+      "sport": "NCAAB",
+      "betType": "spread",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -2,
+      "pickConfidence": 53,
+      "recordedAt": 1774484431722
+    },
+    {
+      "id": "401856577_total",
+      "gameId": "401856577",
+      "sport": "NCAAB",
+      "betType": "total",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -2,
+      "pickConfidence": 53,
+      "recordedAt": 1774484431723
+    },
+    {
+      "id": "401856576_moneyline",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "betType": "moneyline",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -13,
+      "pickConfidence": 42,
+      "recordedAt": 1774484431727
+    },
+    {
+      "id": "401856576_spread",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "betType": "spread",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -2,
+      "pickConfidence": 53,
+      "recordedAt": 1774484431728
+    },
+    {
+      "id": "401856576_total",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "betType": "total",
+      "mcWinProb": 0,
+      "mcVariance": 0,
+      "mcConvergence": 1,
+      "mcBoostApplied": -2,
+      "pickConfidence": 53,
+      "recordedAt": 1774484431728
     }
   ],
   "sportCalibration": {
@@ -15337,8 +15481,8 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0558499971896134,
-  "totalPredictions": 1539,
+  "mcStackedWeight": 1.0558500002451265,
+  "totalPredictions": 1551,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
   "varianceAccuracy": {
@@ -15361,8 +15505,8 @@
       "total": 186
     }
   },
-  "learningCycles": 95,
-  "lastCycleAt": "2026-03-25T23:25:58.860Z",
-  "lastUpdated": "2026-03-25T23:25:58.860Z",
+  "learningCycles": 97,
+  "lastCycleAt": "2026-03-26T00:26:02.677Z",
+  "lastUpdated": "2026-03-26T00:26:02.677Z",
   "version": 2
 }

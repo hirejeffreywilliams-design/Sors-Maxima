@@ -30,6 +30,19 @@ import {
   Plus,
   ArrowUpRight,
   ArrowLeftRight,
+  Brain,
+  BarChart3,
+  Calendar,
+  Flame,
+  TrendingDown,
+  Activity,
+  ChevronRight,
+  Award,
+  User,
+  Clock,
+  Sparkles,
+  Radio,
+  TriangleAlert,
 } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -109,6 +122,65 @@ interface TicketAnalysis {
   correlationWarnings: string[];
   diversificationScore: number;
   bestReplacementPicks: ReplacementPick[];
+}
+
+// ─── New Intelligence Interfaces ──────────────────────────────────────────
+
+interface PatternBadge {
+  label: string;
+  type: "sharp" | "value" | "fade" | "trend" | "caution" | "hot";
+  detail: string;
+}
+
+interface GameStrategyCard {
+  gameId: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  gameTime?: string;
+  mcData: {
+    homeWinProb: number;
+    awayWinProb: number;
+    predictedTotal: number;
+    homeSpreadCoverProb: number;
+    overProb: number;
+    predictedHomeScore: number;
+    predictedAwayScore: number;
+  };
+  homeForm: { formScore: number; streakType: "W" | "L"; streakLength: number; last10Wins: number; last10Losses: number; avgMargin: number } | null;
+  awayForm: { formScore: number; streakType: "W" | "L"; streakLength: number; last10Wins: number; last10Losses: number; avgMargin: number } | null;
+  marketSignals: { hasSharpAction: boolean; sharpSide?: string; lineMovementVelocity?: string; valueSide?: string; homeEV: number; awayEV: number; spread?: number; total?: number; homeML?: number; awayML?: number };
+  patterns: PatternBadge[];
+  topRecommendation: { market: string; side: string; rationale: string; confidenceLevel: "high" | "medium" | "low" };
+  riskRating: "low" | "medium" | "high";
+  edgeScore: number;
+}
+
+interface SessionPlan {
+  date: string;
+  edgeScore: number;
+  bestSport: string;
+  bestSportReason: string;
+  parlayConditions: "excellent" | "good" | "fair" | "poor";
+  parlayConditionsReason: string;
+  stakeRecommendation: "aggressive" | "standard" | "conservative" | "minimal";
+  stakeReason: string;
+  activeSports: Array<{ sport: string; gameCount: number; avgEdge: number; topPick?: string }>;
+  sessionInsights: string[];
+  cautions: string[];
+  optimalBetTypes: string[];
+}
+
+interface MyPatterns {
+  totalPicks: number;
+  totalWins: number;
+  winRate: number;
+  byBetType: Array<{ type: string; wins: number; total: number; winRate: number }>;
+  bySport: Array<{ sport: string; wins: number; total: number; winRate: number }>;
+  byDayOfWeek: Array<{ day: string; wins: number; total: number; winRate: number }>;
+  bestPattern: string | null;
+  weakestPattern: string | null;
+  insights: string[];
 }
 
 const RISK_COLORS: Record<string, string> = {
@@ -364,16 +436,533 @@ function ReplacementPickCard({ pick, onAdd }: { pick: ReplacementPick; onAdd: (p
   );
 }
 
+// ─── Pattern Badge ───────────────────────────────────────────────────────
+
+const PATTERN_COLORS: Record<string, string> = {
+  sharp: "bg-purple-500/15 text-purple-700 dark:text-purple-400 border-purple-500/30",
+  value: "bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30",
+  fade: "bg-orange-500/15 text-orange-700 dark:text-orange-400 border-orange-500/30",
+  trend: "bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/30",
+  caution: "bg-yellow-500/15 text-yellow-700 dark:text-yellow-400 border-yellow-500/30",
+  hot: "bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30",
+};
+const PATTERN_ICONS: Record<string, typeof Flame> = {
+  sharp: Zap,
+  value: TrendingUp,
+  fade: TrendingDown,
+  trend: Activity,
+  caution: TriangleAlert,
+  hot: Flame,
+};
+
+// ─── Session Banner ──────────────────────────────────────────────────────
+
+function SessionBanner({ session }: { session: SessionPlan }) {
+  const [expanded, setExpanded] = useState(false);
+
+  const edgeColor = session.edgeScore >= 75 ? "text-green-600 dark:text-green-400" :
+    session.edgeScore >= 60 ? "text-blue-600 dark:text-blue-400" :
+    session.edgeScore >= 50 ? "text-yellow-600 dark:text-yellow-400" : "text-red-500";
+
+  const parlayColor = session.parlayConditions === "excellent" ? "text-green-600 dark:text-green-400" :
+    session.parlayConditions === "good" ? "text-blue-600 dark:text-blue-400" :
+    session.parlayConditions === "fair" ? "text-yellow-600 dark:text-yellow-400" : "text-red-500";
+
+  const stakeColor = session.stakeRecommendation === "aggressive" ? "text-green-600 dark:text-green-400" :
+    session.stakeRecommendation === "standard" ? "text-blue-600 dark:text-blue-400" :
+    session.stakeRecommendation === "conservative" ? "text-yellow-600 dark:text-yellow-400" : "text-red-500";
+
+  return (
+    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background" data-testid="session-banner">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Calendar className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold">Today's Session Plan</h2>
+              <p className="text-[11px] text-muted-foreground">{new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className={`text-xl font-bold ${edgeColor}`}>{session.edgeScore}</div>
+            <div className="text-[10px] text-muted-foreground">Edge Score</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-2.5 rounded-lg bg-background border text-center">
+            <div className="text-[10px] text-muted-foreground mb-0.5">Best Sport</div>
+            <div className="text-sm font-bold text-primary">{session.bestSport}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{session.activeSports[0]?.gameCount ?? 0} games</div>
+          </div>
+          <div className="p-2.5 rounded-lg bg-background border text-center">
+            <div className="text-[10px] text-muted-foreground mb-0.5">Parlay Conditions</div>
+            <div className={`text-sm font-bold capitalize ${parlayColor}`}>{session.parlayConditions}</div>
+            <div className="text-[10px] text-muted-foreground">{session.parlayConditionsReason.split("—")[0]?.trim()}</div>
+          </div>
+          <div className="p-2.5 rounded-lg bg-background border text-center">
+            <div className="text-[10px] text-muted-foreground mb-0.5">Stake Mode</div>
+            <div className={`text-sm font-bold capitalize ${stakeColor}`}>{session.stakeRecommendation}</div>
+            <div className="text-[10px] text-muted-foreground">sizing</div>
+          </div>
+        </div>
+
+        {session.optimalBetTypes.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {session.optimalBetTypes.map((bt, i) => (
+              <Badge key={i} variant="outline" className="text-[10px] px-1.5 py-0.5 gap-1">
+                <ChevronRight className="w-2.5 h-2.5 text-primary" />
+                {bt}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        <Collapsible open={expanded} onOpenChange={setExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="w-full h-7 text-[11px] gap-1 text-muted-foreground" data-testid="btn-expand-session">
+              {expanded ? "Less" : "Session Insights"}
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 mt-1">
+            {session.sessionInsights.map((insight, i) => (
+              <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                <Lightbulb className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary" />
+                <span>{insight}</span>
+              </div>
+            ))}
+            {session.cautions.length > 0 && (
+              <div className="pt-1 space-y-1.5 border-t">
+                {session.cautions.map((c, i) => (
+                  <div key={i} className="flex items-start gap-2 text-[11px] text-yellow-700 dark:text-yellow-400">
+                    <TriangleAlert className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    <span>{c}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {session.activeSports.length > 1 && (
+              <div className="pt-1 border-t">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Active Sports Today</div>
+                <div className="flex flex-wrap gap-2">
+                  {session.activeSports.map(s => (
+                    <div key={s.sport} className="flex items-center gap-1.5 text-[11px]">
+                      <span className="font-medium">{s.sport}</span>
+                      <span className="text-muted-foreground">{s.gameCount}g</span>
+                      <span className={s.avgEdge >= 65 ? "text-green-600 dark:text-green-400" : s.avgEdge >= 55 ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground"}>
+                        {s.avgEdge}pts
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Game Strategy Card View ─────────────────────────────────────────────
+
+function GameStrategyCardView({ card, onAiBrief, aiBrief, aiBriefLoading }: {
+  card: GameStrategyCard;
+  onAiBrief: (card: GameStrategyCard) => void;
+  aiBrief?: { brief: string; keyPoints: string[] } | null;
+  aiBriefLoading?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [showAiBrief, setShowAiBrief] = useState(false);
+
+  const confColor = card.topRecommendation.confidenceLevel === "high" ? "text-green-600 dark:text-green-400 border-green-500/40 bg-green-500/5" :
+    card.topRecommendation.confidenceLevel === "medium" ? "text-blue-600 dark:text-blue-400 border-blue-500/40 bg-blue-500/5" :
+    "text-muted-foreground border-border bg-muted/30";
+
+  const edgeBg = card.edgeScore >= 72 ? "border-green-500/20" :
+    card.edgeScore >= 58 ? "border-blue-500/20" : "border-border";
+
+  function WinBar({ prob, label, teamName }: { prob: number; label?: string; teamName: string }) {
+    return (
+      <div className="space-y-0.5">
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="text-muted-foreground truncate max-w-[80px]">{label ?? teamName}</span>
+          <span className="font-medium">{(prob * 100).toFixed(0)}%</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+          <div className="h-full rounded-full bg-primary/60 transition-all" style={{ width: `${prob * 100}%` }} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <Card className={`shrink-0 w-[280px] sm:w-[300px] ${edgeBg}`} data-testid={`game-strategy-card-${card.gameId}`}>
+      <CardContent className="p-3.5 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Badge variant="outline" className="text-[9px] px-1.5 py-0">{card.sport}</Badge>
+              <Badge variant="outline" className={`text-[9px] px-1.5 py-0 ${RISK_COLORS[card.riskRating]}`}>
+                {card.riskRating} risk
+              </Badge>
+            </div>
+            <div className="text-[11px] font-semibold leading-tight">{card.awayTeam}</div>
+            <div className="text-[10px] text-muted-foreground">@ {card.homeTeam}</div>
+          </div>
+          <div className="text-right shrink-0">
+            <div className={`text-lg font-bold ${card.edgeScore >= 70 ? "text-green-600 dark:text-green-400" : card.edgeScore >= 58 ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground"}`}>
+              {card.edgeScore}
+            </div>
+            <div className="text-[9px] text-muted-foreground">edge</div>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <WinBar prob={card.mcData.homeWinProb} label="Home Win" teamName={card.homeTeam} />
+          <WinBar prob={card.mcData.overProb} label="Over" teamName="Over" />
+          <WinBar prob={card.mcData.homeSpreadCoverProb} label="ATS Cover" teamName={card.homeTeam} />
+        </div>
+
+        <div className="p-2 rounded-lg border text-[10px] space-y-0.5 bg-muted/20">
+          <div className="text-muted-foreground">Predicted: <span className="font-medium text-foreground">{card.mcData.predictedHomeScore.toFixed(0)} – {card.mcData.predictedAwayScore.toFixed(0)}</span> ({card.mcData.predictedTotal.toFixed(1)} total)</div>
+          {card.marketSignals.spread !== undefined && <div className="text-muted-foreground">Spread: <span className="font-medium text-foreground">{card.marketSignals.spread > 0 ? "+" : ""}{card.marketSignals.spread}</span></div>}
+          {card.marketSignals.total !== undefined && <div className="text-muted-foreground">Total: <span className="font-medium text-foreground">{card.marketSignals.total}</span></div>}
+        </div>
+
+        {card.patterns.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {card.patterns.map((p, i) => {
+              const PIcon = PATTERN_ICONS[p.type] ?? Activity;
+              return (
+                <Badge key={i} variant="outline" className={`text-[9px] px-1.5 py-0.5 gap-0.5 ${PATTERN_COLORS[p.type]}`} title={p.detail}>
+                  <PIcon className="w-2.5 h-2.5" />
+                  {p.label}
+                </Badge>
+              );
+            })}
+          </div>
+        )}
+
+        <div className={`p-2 rounded-lg border text-[11px] ${confColor}`} data-testid={`top-rec-${card.gameId}`}>
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Target className="w-3 h-3 shrink-0" />
+            <span className="font-semibold">{card.topRecommendation.market}: {card.topRecommendation.side}</span>
+            <Badge variant="outline" className={`text-[9px] px-1 py-0 ml-auto capitalize ${confColor}`}>{card.topRecommendation.confidenceLevel}</Badge>
+          </div>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">{card.topRecommendation.rationale}</p>
+        </div>
+
+        <Collapsible open={expanded} onOpenChange={setExpanded}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="w-full h-6 text-[10px] gap-1 text-muted-foreground" data-testid={`btn-expand-game-card-${card.gameId}`}>
+              {expanded ? "Less" : "Form & Market"}
+              {expanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 mt-1">
+            {(card.homeForm || card.awayForm) && (
+              <div className="space-y-1.5">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Team Form</div>
+                {[{ label: card.homeTeam, form: card.homeForm }, { label: card.awayTeam, form: card.awayForm }].map(({ label, form }) => (
+                  form ? (
+                    <div key={label} className="flex items-center justify-between text-[10px]">
+                      <span className="truncate max-w-[90px] text-muted-foreground">{label}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span>{form.last10Wins}-{form.last10Losses}</span>
+                        <span className={form.streakType === "W" ? "text-green-600 dark:text-green-400" : "text-red-500"}>
+                          {form.streakType}{form.streakLength}
+                        </span>
+                        <span className={form.formScore >= 3 ? "text-green-600 dark:text-green-400" : form.formScore <= -3 ? "text-red-500" : "text-muted-foreground"}>
+                          {form.formScore >= 0 ? "+" : ""}{form.formScore.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null
+                ))}
+              </div>
+            )}
+            {card.marketSignals.hasSharpAction && (
+              <div className="flex items-center gap-1.5 text-[10px] text-purple-700 dark:text-purple-400 border border-purple-500/30 rounded-lg p-1.5 bg-purple-500/5">
+                <Zap className="w-3 h-3 shrink-0" />
+                <span>Sharp action on {card.marketSignals.sharpSide} ({card.marketSignals.lineMovementVelocity ?? "detected"})</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+              <div className="p-1.5 rounded bg-muted/30 text-center">
+                <div className="text-muted-foreground">Home EV</div>
+                <div className={`font-medium ${card.marketSignals.homeEV >= 0 ? "text-green-600 dark:text-green-400" : "text-red-500"}`}>
+                  {card.marketSignals.homeEV >= 0 ? "+" : ""}{card.marketSignals.homeEV.toFixed(1)}%
+                </div>
+              </div>
+              <div className="p-1.5 rounded bg-muted/30 text-center">
+                <div className="text-muted-foreground">Away EV</div>
+                <div className={`font-medium ${card.marketSignals.awayEV >= 0 ? "text-green-600 dark:text-green-400" : "text-red-500"}`}>
+                  {card.marketSignals.awayEV >= 0 ? "+" : ""}{card.marketSignals.awayEV.toFixed(1)}%
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
+        <div className="pt-1 border-t">
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full h-7 text-[10px] gap-1.5"
+            onClick={() => { setShowAiBrief(true); onAiBrief(card); }}
+            disabled={aiBriefLoading}
+            data-testid={`btn-ai-brief-${card.gameId}`}
+          >
+            {aiBriefLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Brain className="w-3 h-3" />}
+            {aiBrief ? "AI Brief Ready" : "Get AI Strategy Brief"}
+          </Button>
+
+          {showAiBrief && aiBrief && (
+            <div className="mt-2 p-2.5 rounded-lg border border-primary/20 bg-primary/5 space-y-2" data-testid={`ai-brief-${card.gameId}`}>
+              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-primary">
+                <Sparkles className="w-3 h-3" />
+                SORS AI Strategy Brief
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">{aiBrief.brief}</p>
+              {aiBrief.keyPoints.length > 1 && (
+                <div className="space-y-1">
+                  {aiBrief.keyPoints.map((pt, i) => (
+                    <div key={i} className="flex items-start gap-1.5 text-[10px] text-muted-foreground">
+                      <ArrowRight className="w-2.5 h-2.5 mt-0.5 shrink-0 text-primary" />
+                      <span>{pt}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {showAiBrief && aiBriefLoading && (
+            <div className="mt-2 p-3 rounded-lg border bg-muted/20 flex items-center gap-2 text-[11px] text-muted-foreground" data-testid={`ai-brief-loading-${card.gameId}`}>
+              <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 text-primary" />
+              Analyzing with GPT-4o...
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── My Patterns Section ─────────────────────────────────────────────────
+
+function MyPatternsSection({ patterns }: { patterns: MyPatterns }) {
+  if (patterns.totalPicks === 0) {
+    return (
+      <Card data-testid="my-patterns-empty">
+        <CardContent className="p-6 text-center space-y-3">
+          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mx-auto">
+            <BarChart3 className="w-6 h-6 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-medium text-sm">No Pattern Data Yet</p>
+            <p className="text-xs text-muted-foreground mt-1">Track and settle bets to see your personal win patterns emerge.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const wrColor = (wr: number) => wr >= 0.55 ? "text-green-600 dark:text-green-400" : wr >= 0.45 ? "text-yellow-600 dark:text-yellow-400" : "text-red-500";
+  const wrBg = (wr: number) => wr >= 0.55 ? "bg-green-500" : wr >= 0.45 ? "bg-yellow-500" : "bg-red-500";
+
+  return (
+    <div className="space-y-3" data-testid="my-patterns-section">
+      <div className="grid grid-cols-3 gap-2">
+        <Card>
+          <CardContent className="p-3 text-center">
+            <div className="text-xs text-muted-foreground">Total Picks</div>
+            <div className="text-xl font-bold mt-0.5">{patterns.totalPicks}</div>
+            <div className="text-[10px] text-muted-foreground">{patterns.totalWins}W – {patterns.totalPicks - patterns.totalWins}L</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <div className="text-xs text-muted-foreground">Win Rate</div>
+            <div className={`text-xl font-bold mt-0.5 ${wrColor(patterns.winRate)}`}>{(patterns.winRate * 100).toFixed(0)}%</div>
+            <div className="text-[10px] text-muted-foreground">{patterns.winRate >= 0.525 ? "Above break-even" : "Below break-even"}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3 text-center">
+            <div className="text-xs text-muted-foreground">Best Pattern</div>
+            <div className="text-sm font-bold mt-0.5 leading-tight truncate">{patterns.bestPattern ?? "—"}</div>
+            <div className="text-[10px] text-muted-foreground">top category</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {patterns.insights.length > 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-3 space-y-2">
+            <h3 className="text-[11px] font-semibold flex items-center gap-1.5 text-primary">
+              <Lightbulb className="w-3.5 h-3.5" /> Pattern Insights
+            </h3>
+            {patterns.insights.map((insight, i) => (
+              <div key={i} className="flex items-start gap-2 text-[11px] text-muted-foreground">
+                <ArrowRight className="w-3 h-3 mt-0.5 shrink-0 text-primary" />
+                <span>{insight}</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {patterns.bySport.length > 0 && (
+          <Card>
+            <CardContent className="p-3 space-y-2">
+              <h3 className="text-[11px] font-semibold flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-primary" /> By Sport
+              </h3>
+              <div className="space-y-2">
+                {patterns.bySport.slice(0, 5).map(s => (
+                  <div key={s.sport} className="space-y-0.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-medium">{s.sport}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground text-[10px]">{s.wins}/{s.total}</span>
+                        <span className={`font-semibold ${wrColor(s.winRate)}`}>{(s.winRate * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className={`h-full rounded-full ${wrBg(s.winRate)}`} style={{ width: `${s.winRate * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {patterns.byBetType.length > 0 && (
+          <Card>
+            <CardContent className="p-3 space-y-2">
+              <h3 className="text-[11px] font-semibold flex items-center gap-1.5">
+                <BarChart3 className="w-3.5 h-3.5 text-primary" /> By Bet Type
+              </h3>
+              <div className="space-y-2">
+                {patterns.byBetType.slice(0, 5).map(bt => (
+                  <div key={bt.type} className="space-y-0.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-medium capitalize">{bt.type}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-muted-foreground text-[10px]">{bt.wins}/{bt.total}</span>
+                        <span className={`font-semibold ${wrColor(bt.winRate)}`}>{(bt.winRate * 100).toFixed(0)}%</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+                      <div className={`h-full rounded-full ${wrBg(bt.winRate)}`} style={{ width: `${bt.winRate * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      {patterns.byDayOfWeek.length > 0 && (
+        <Card>
+          <CardContent className="p-3 space-y-2">
+            <h3 className="text-[11px] font-semibold flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-primary" /> By Day of Week
+            </h3>
+            <div className="flex gap-2 flex-wrap">
+              {patterns.byDayOfWeek.map(d => (
+                <div key={d.day} className={`p-2 rounded-lg border text-center min-w-[60px] ${d.winRate >= 0.55 ? "border-green-500/30 bg-green-500/5" : d.winRate < 0.45 ? "border-red-500/20 bg-red-500/5" : "border-border"}`}>
+                  <div className="text-[10px] text-muted-foreground">{d.day.slice(0, 3)}</div>
+                  <div className={`text-sm font-bold ${wrColor(d.winRate)}`}>{(d.winRate * 100).toFixed(0)}%</div>
+                  <div className="text-[9px] text-muted-foreground">{d.total} picks</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {patterns.weakestPattern && (
+        <div className="flex items-start gap-2 p-2.5 rounded-lg border border-yellow-500/30 bg-yellow-500/5 text-[11px]">
+          <TriangleAlert className="w-3.5 h-3.5 mt-0.5 shrink-0 text-yellow-600 dark:text-yellow-400" />
+          <span className="text-muted-foreground">Weakest area: <span className="font-medium text-foreground">{patterns.weakestPattern}</span> — consider reducing volume in this category</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function StrategyAdvisorPage() {
   useSEO({ title: "Strategy Advisor - Sors Maxima", description: "Get expert betting strategy guidance and real-time ticket analysis" });
   const { legs, addLeg, removeLeg } = useParlaySlip();
   const { toast } = useToast();
   const [selectedStrategy, setSelectedStrategy] = useState<string>("");
   const [analysisResult, setAnalysisResult] = useState<TicketAnalysis | null>(null);
+  const [sportFilter, setSportFilter] = useState<string>("ALL");
+  const [aiBriefs, setAiBriefs] = useState<Record<string, { brief: string; keyPoints: string[] }>>({});
+  const [aiBriefLoadingId, setAiBriefLoadingId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"advisor" | "patterns">("advisor");
 
   const templatesQuery = useQuery<{ templates: StrategyTemplate[]; count: number }>({
     queryKey: ["/api/strategy/templates"],
   });
+
+  const sessionQuery = useQuery<SessionPlan>({
+    queryKey: ["/api/strategy/session"],
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const gameCardsQuery = useQuery<{ cards: GameStrategyCard[]; count: number }>({
+    queryKey: ["/api/strategy/game-cards", sportFilter],
+    queryFn: async () => {
+      const url = sportFilter !== "ALL" ? `/api/strategy/game-cards?sport=${sportFilter}` : "/api/strategy/game-cards";
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load game cards");
+      return res.json();
+    },
+    staleTime: 3 * 60 * 1000,
+  });
+
+  const myPatternsQuery = useQuery<MyPatterns>({
+    queryKey: ["/api/strategy/my-patterns"],
+    enabled: activeTab === "patterns",
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const handleAiBrief = async (card: GameStrategyCard) => {
+    if (aiBriefs[card.gameId] || aiBriefLoadingId === card.gameId) return;
+    setAiBriefLoadingId(card.gameId);
+    try {
+      const res = await apiRequest("POST", "/api/strategy/ai-brief", {
+        gameId: card.gameId,
+        homeTeam: card.homeTeam,
+        awayTeam: card.awayTeam,
+        sport: card.sport,
+        mcData: card.mcData,
+        homeForm: card.homeForm,
+        awayForm: card.awayForm,
+        marketSignals: card.marketSignals,
+        patterns: card.patterns,
+        topRecommendation: card.topRecommendation,
+      });
+      const data = await res.json();
+      setAiBriefs(prev => ({ ...prev, [card.gameId]: data }));
+    } catch {
+      toast({ title: "AI Brief Failed", description: "Unable to generate strategy brief right now", variant: "destructive" });
+    } finally {
+      setAiBriefLoadingId(null);
+    }
+  };
+
+  const availableSports = ["ALL", ...new Set((gameCardsQuery.data?.cards ?? []).map(c => c.sport))];
 
   const analyzeMutation = useMutation({
     mutationFn: async (slipLegs: ParlaySlipLeg[]) => {
@@ -471,10 +1060,158 @@ export default function StrategyAdvisorPage() {
       <PageHero
         icon={<Compass className="w-6 h-6" />}
         title="Strategy Advisor"
-        subtitle="Choose a strategy, build your ticket, and we'll tell you exactly how good it is"
-        description="Select a betting template that matches your risk tolerance and bankroll goals — from conservative single-game plays to high-variance 5-leg parlays. Each strategy shows its recommended odds range, expected win rate, and ideal stake size. Once you select a strategy, build your ticket within that framework and get an instant graded verdict with EV analysis."
+        subtitle="Session intelligence, game-by-game strategy, and your personal betting patterns"
+        description="SORS synthesizes Monte Carlo simulations, team form, sharp money signals, and market data to give you a complete daily strategy plan. Get a session overview, per-game recommendations, AI strategy briefs, and personal win pattern analysis — all in one place."
       />
 
+      {/* Tab Toggle */}
+      <div className="flex gap-2">
+        <Button
+          size="sm"
+          variant={activeTab === "advisor" ? "default" : "outline"}
+          className="h-8 text-xs gap-1.5"
+          onClick={() => setActiveTab("advisor")}
+          data-testid="tab-advisor"
+        >
+          <Brain className="w-3.5 h-3.5" />
+          Strategy Advisor
+        </Button>
+        <Button
+          size="sm"
+          variant={activeTab === "patterns" ? "default" : "outline"}
+          className="h-8 text-xs gap-1.5"
+          onClick={() => setActiveTab("patterns")}
+          data-testid="tab-patterns"
+        >
+          <User className="w-3.5 h-3.5" />
+          My Patterns
+        </Button>
+      </div>
+
+      {activeTab === "patterns" && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-primary" />
+              My Betting Patterns
+            </h2>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs gap-1"
+              onClick={() => myPatternsQuery.refetch()}
+              disabled={myPatternsQuery.isFetching}
+              data-testid="btn-refresh-patterns"
+            >
+              {myPatternsQuery.isFetching ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              Refresh
+            </Button>
+          </div>
+          {myPatternsQuery.isLoading ? (
+            <Card>
+              <CardContent className="p-8 flex flex-col items-center gap-3">
+                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Analyzing your betting history...</p>
+              </CardContent>
+            </Card>
+          ) : myPatternsQuery.data ? (
+            <MyPatternsSection patterns={myPatternsQuery.data} />
+          ) : myPatternsQuery.isError ? (
+            <Card>
+              <CardContent className="p-4 text-center">
+                <p className="text-xs text-muted-foreground">Unable to load patterns. Make sure you're logged in and have tracked bets.</p>
+              </CardContent>
+            </Card>
+          ) : null}
+        </div>
+      )}
+
+      {activeTab === "advisor" && (
+        <>
+          {/* Session Plan */}
+          <div className="space-y-2">
+            {sessionQuery.isLoading ? (
+              <div className="h-[120px] rounded-lg border bg-muted/20 flex items-center justify-center">
+                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              </div>
+            ) : sessionQuery.data ? (
+              <SessionBanner session={sessionQuery.data} />
+            ) : null}
+          </div>
+
+          {/* Live Game Strategy Cards */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <Radio className="w-4 h-4 text-primary" />
+                Game Strategy Cards
+                {gameCardsQuery.data?.count != null && (
+                  <Badge variant="secondary" className="text-[10px]">{gameCardsQuery.data.count}</Badge>
+                )}
+              </h2>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 w-7 p-0"
+                onClick={() => gameCardsQuery.refetch()}
+                disabled={gameCardsQuery.isFetching}
+                data-testid="btn-refresh-cards"
+              >
+                {gameCardsQuery.isFetching ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+              </Button>
+            </div>
+
+            {/* Sport filter chips */}
+            {availableSports.length > 2 && (
+              <div className="flex gap-1.5 flex-wrap">
+                {availableSports.map(s => (
+                  <Button
+                    key={s}
+                    size="sm"
+                    variant={sportFilter === s ? "default" : "outline"}
+                    className="h-7 text-xs px-2.5"
+                    onClick={() => setSportFilter(s)}
+                    data-testid={`filter-sport-${s}`}
+                  >
+                    {s}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {gameCardsQuery.isLoading ? (
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="shrink-0 w-[280px] h-[320px] rounded-xl border bg-muted/20 animate-pulse" />
+                ))}
+              </div>
+            ) : gameCardsQuery.data && gameCardsQuery.data.cards.length > 0 ? (
+              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4" data-testid="game-cards-scroll">
+                {gameCardsQuery.data.cards.map(card => (
+                  <GameStrategyCardView
+                    key={card.gameId}
+                    card={card}
+                    onAiBrief={handleAiBrief}
+                    aiBrief={aiBriefs[card.gameId]}
+                    aiBriefLoading={aiBriefLoadingId === card.gameId}
+                  />
+                ))}
+              </div>
+            ) : gameCardsQuery.data ? (
+              <Card>
+                <CardContent className="p-6 text-center space-y-2">
+                  <Clock className="w-8 h-8 text-muted-foreground mx-auto" />
+                  <p className="text-sm font-medium">No games in the strategy engine yet</p>
+                  <p className="text-xs text-muted-foreground">Game cards populate as Monte Carlo simulations run for today's slate. Check back shortly.</p>
+                </CardContent>
+              </Card>
+            ) : null}
+          </div>
+        </>
+      )}
+
+      {activeTab === "advisor" && (
+      <>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold flex items-center gap-2">
@@ -746,6 +1483,8 @@ export default function StrategyAdvisorPage() {
             </Card>
           ) : null}
         </div>
+      )}
+      </>
       )}
     </div>
   );
