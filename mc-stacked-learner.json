@@ -15431,6 +15431,42 @@
       "mcBoostApplied": -2,
       "pickConfidence": 53,
       "recordedAt": 1774484431728
+    },
+    {
+      "id": "401814691_moneyline",
+      "gameId": "401814691",
+      "sport": "MLB",
+      "betType": "moneyline",
+      "mcWinProb": 0.514,
+      "mcVariance": 9.07,
+      "mcConvergence": 0.94,
+      "mcBoostApplied": 0,
+      "pickConfidence": 64,
+      "recordedAt": 1774485850610
+    },
+    {
+      "id": "401814691_spread",
+      "gameId": "401814691",
+      "sport": "MLB",
+      "betType": "spread",
+      "mcWinProb": 0.514,
+      "mcVariance": 9.07,
+      "mcConvergence": 0.94,
+      "mcBoostApplied": -2,
+      "pickConfidence": 62,
+      "recordedAt": 1774485850612
+    },
+    {
+      "id": "401814691_total",
+      "gameId": "401814691",
+      "sport": "MLB",
+      "betType": "total",
+      "mcWinProb": 0.514,
+      "mcVariance": 9.07,
+      "mcConvergence": 0.94,
+      "mcBoostApplied": 3,
+      "pickConfidence": 67,
+      "recordedAt": 1774485850613
     }
   ],
   "sportCalibration": {
@@ -15481,8 +15517,8 @@
       "wins": 38
     }
   },
-  "mcStackedWeight": 1.0558500002451265,
-  "totalPredictions": 1551,
+  "mcStackedWeight": 1.0558500014384284,
+  "totalPredictions": 1554,
   "totalSettled": 465,
   "mcBullishAccuracy": 51.82795698924731,
   "varianceAccuracy": {
@@ -15505,8 +15541,8 @@
       "total": 186
     }
   },
-  "learningCycles": 97,
-  "lastCycleAt": "2026-03-26T00:26:02.677Z",
-  "lastUpdated": "2026-03-26T00:26:02.677Z",
+  "learningCycles": 98,
+  "lastCycleAt": "2026-03-26T00:54:57.909Z",
+  "lastUpdated": "2026-03-26T00:54:57.909Z",
   "version": 2
 }

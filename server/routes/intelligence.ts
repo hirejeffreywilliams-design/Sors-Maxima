@@ -1366,12 +1366,12 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
   // GET /api/lct-track-record — public LCT performance history
   app.get("/api/lct-track-record", async (_req: Request, res: Response) => {
     try {
-      // Auto-expire LCTs that are still pending after 3 days — results should be known by then
+      // Auto-expire LCTs whose game date has passed — results are known once the day is over
       await db.execute(drizzleSql`
         UPDATE life_changer_log
         SET outcome = 'expired', settled_at = NOW()
         WHERE outcome = 'pending'
-          AND date < (CURRENT_DATE - INTERVAL '3 days')
+          AND date < CURRENT_DATE
       `);
 
       // Ensure narrative column exists (safe no-op if already there)

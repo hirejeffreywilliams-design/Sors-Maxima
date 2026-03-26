@@ -1,5 +1,85 @@
 [
   {
+    "id": "alert-intl-sports-1774487000383",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-26T01:03:20.383Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached due to a temporary limitation in data retrieval, which may delay real-time updates for users relying on international sports data.",
+    "recommendations": [
+      "Check the data source API for any outages or rate limits that could affect data retrieval.",
+      "Clear the cache manually to attempt a fresh data fetch from the international sports API.",
+      "Implement a monitoring system for the node to receive alerts for future caching issues."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-api-football-1774486999192",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-26T01:03:19.192Z",
+    "diagnosis": "The 'API-Football' node is cached due to a delay in data retrieval, meaning users may not receive the most current match data or updates.",
+    "recommendations": [
+      "Check the connection to the API-Football service to ensure it is operational.",
+      "Review the API limit status and usage to confirm that the request quotas have not been exceeded.",
+      "Consider implementing a fallback mechanism to use cached data more effectively until the live data is restored."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-center-1774486161559",
+    "nodeId": "odds-center",
+    "nodeLabel": "Odds Center",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-26T00:49:21.559Z",
+    "diagnosis": "The 'Odds Center' node is cached due to either a temporary disruption in real-time data updates or a successful retrieval of previously stored data, which ensures minimal downtime for users but may delay access to the most current betting lines.",
+    "recommendations": [
+      "Check the connectivity and API status for the odds-api",
+      "Clear the cache in the Odds Center if the issue persists",
+      "Monitor for updates and re-enable real-time data fetching once the underlying issue is resolved"
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-mma-engine-1774486160460",
+    "nodeId": "mma-engine",
+    "nodeLabel": "MMA/UFC Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-26T00:49:20.460Z",
+    "diagnosis": "The 'MMA/UFC Engine' node is cached, indicating it is currently not pulling fresh data, which may result in outdated information for users relying on real-time updates.",
+    "recommendations": [
+      "Check the data source connection for the MMA/UFC Engine to ensure it is active and configured correctly.",
+      "Review any recent changes to the node setup that may have affected its ability to fetch live data.",
+      "Restart the node to refresh its connection and clear the cached state."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-api-1774486159232",
+    "nodeId": "odds-api",
+    "nodeLabel": "The Odds API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-26T00:49:19.232Z",
+    "diagnosis": "The Odds API is cached due to a temporary lapse in real-time data requests, indicating users may not receive the latest betting lines during this period.",
+    "recommendations": [
+      "Check API key validity and ensure it is correctly configured in the system.",
+      "Monitor the API response rate and server status to identify potential outages.",
+      "Set up automated alerts to notify users when the Odds API status changes from cached to active."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
     "id": "alert-nhl-stats-1774480640402",
     "nodeId": "nhl-stats",
     "nodeLabel": "NHL Stats API",

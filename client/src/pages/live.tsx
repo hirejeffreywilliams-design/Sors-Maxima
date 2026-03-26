@@ -36,34 +36,180 @@ interface LiveGame {
   gameDate?: string;
 }
 
-// ─── Live games horizontal scroll strip ───────────────────────────────────────
+// ─── Sport accent colors ───────────────────────────────────────────────────────
 
-function LiveGamesStrip({ games }: { games: LiveGame[] }) {
+const SPORT_ACCENT: Record<string, string> = {
+  NBA: "#F0532B",
+  NFL: "#4a8fd4",
+  NHL: "#63b3ed",
+  MLB: "#38bdf8",
+  NCAAB: "#F97316",
+  NCAAF: "#22c55e",
+  MLS: "#34d399",
+  UFC: "#f43f5e",
+  PGA: "#a3e635",
+  WNBA: "#f59e0b",
+  default: "#a78bfa",
+};
+
+function sportAccent(sport: string): string {
+  return SPORT_ACCENT[(sport || "").toUpperCase()] ?? SPORT_ACCENT.default;
+}
+
+// ─── Live Jumbotron ────────────────────────────────────────────────────────────
+
+function LiveJumbotron({ games }: { games: LiveGame[] }) {
   const live = games.filter(g => g.status === "live" || g.status === "halftime");
   if (live.length === 0) return null;
+
   return (
-    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div className="flex gap-2 pb-1" style={{ minWidth: "max-content" }}>
-        {live.map(g => (
-          <div
-            key={g.id}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg shrink-0 border"
-            style={{ background: "rgba(239,68,68,0.08)", borderColor: "rgba(239,68,68,0.22)" }}
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-red-400">{g.sport}</span>
-            <span className="text-[11px] font-bold text-white/85">
-              {g.awayTeam.split(" ").pop()} <span className="tabular-nums">{g.awayScore}</span>
-              <span className="text-white/30 mx-1.5">–</span>
-              {g.homeTeam.split(" ").pop()} <span className="tabular-nums">{g.homeScore}</span>
-            </span>
-            {g.period && (
-              <span className="text-[8px] text-white/35">
-                {g.period}{g.clock ? ` ${g.clock}` : ""}
-              </span>
-            )}
-          </div>
-        ))}
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          <span className="text-[10px] font-black tracking-widest uppercase text-red-400">Live Now</span>
+        </div>
+        <span className="text-[10px] text-white/30">{live.length} game{live.length !== 1 ? "s" : ""} in progress</span>
+      </div>
+      <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
+          {live.map(g => {
+            const color = sportAccent(g.sport);
+            const awayAbbr = (g.awayTeam.split(" ").pop() ?? g.awayTeam).toUpperCase().slice(0, 4);
+            const homeAbbr = (g.homeTeam.split(" ").pop() ?? g.homeTeam).toUpperCase().slice(0, 4);
+            const awayLeading = g.awayScore > g.homeScore;
+            const homeLeading = g.homeScore > g.awayScore;
+            const isHalftime = g.status === "halftime";
+
+            return (
+              <div
+                key={g.id}
+                data-testid={`jumbotron-game-${g.id}`}
+                className="relative shrink-0 rounded-2xl overflow-hidden"
+                style={{
+                  width: 196,
+                  background: "linear-gradient(160deg, rgba(8,8,14,0.97) 0%, rgba(14,14,22,0.99) 100%)",
+                  border: `1px solid ${color}28`,
+                  boxShadow: `0 0 24px ${color}12, 0 4px 16px rgba(0,0,0,0.5)`,
+                }}
+              >
+                {/* Accent bar left */}
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl"
+                  style={{ background: `linear-gradient(180deg, ${color} 0%, ${color}55 100%)` }}
+                />
+
+                {/* Header strip */}
+                <div
+                  className="flex items-center justify-between px-3 pt-2 pb-1.5 pl-4"
+                  style={{ borderBottom: `1px solid ${color}16` }}
+                >
+                  <span
+                    className="text-[9px] font-black tracking-widest uppercase"
+                    style={{ color }}
+                  >
+                    {g.sport}
+                  </span>
+                  {isHalftime ? (
+                    <span className="text-[8px] font-black tracking-widest text-yellow-400 uppercase animate-pulse">
+                      HALF
+                    </span>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500" />
+                      </span>
+                      <span className="text-[8px] font-black tracking-widest text-red-400">LIVE</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Scoreboard rows */}
+                <div className="pl-4 pr-3 py-2.5 space-y-1.5">
+                  {/* Away */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {awayLeading && (
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
+                      )}
+                      {!awayLeading && <div className="w-1.5 h-1.5 shrink-0" />}
+                      <span
+                        className="text-[10px] font-black font-mono tracking-wider truncate"
+                        style={{ color: awayLeading ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.38)" }}
+                      >
+                        {awayAbbr}
+                      </span>
+                      <span className="text-[7px] font-medium text-white/20 uppercase tracking-wide shrink-0">Away</span>
+                    </div>
+                    <span
+                      className="text-[26px] font-black tabular-nums leading-none font-mono"
+                      style={{ color: awayLeading ? "#ffffff" : "rgba(255,255,255,0.28)" }}
+                    >
+                      {g.awayScore}
+                    </span>
+                  </div>
+
+                  {/* Separator */}
+                  <div className="flex items-center gap-2 pl-3">
+                    <div className="flex-1 h-px" style={{ background: `${color}18` }} />
+                    <span className="text-[7px] text-white/15 font-mono">vs</span>
+                    <div className="flex-1 h-px" style={{ background: `${color}18` }} />
+                  </div>
+
+                  {/* Home */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {homeLeading && (
+                        <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: color }} />
+                      )}
+                      {!homeLeading && <div className="w-1.5 h-1.5 shrink-0" />}
+                      <span
+                        className="text-[10px] font-black font-mono tracking-wider truncate"
+                        style={{ color: homeLeading ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.38)" }}
+                      >
+                        {homeAbbr}
+                      </span>
+                      <span className="text-[7px] font-medium text-white/20 uppercase tracking-wide shrink-0">Home</span>
+                    </div>
+                    <span
+                      className="text-[26px] font-black tabular-nums leading-none font-mono"
+                      style={{ color: homeLeading ? "#ffffff" : "rgba(255,255,255,0.28)" }}
+                    >
+                      {g.homeScore}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Footer: period + clock */}
+                {(g.period || g.clock) && (
+                  <div
+                    className="flex items-center justify-between px-4 py-1.5"
+                    style={{
+                      borderTop: `1px solid ${color}16`,
+                      background: `${color}0a`,
+                    }}
+                  >
+                    <span className="text-[8px] font-bold tracking-widest uppercase text-white/35">
+                      {g.period}
+                    </span>
+                    {g.clock && (
+                      <span
+                        className="text-[9px] font-mono font-black tabular-nums"
+                        style={{ color: `${color}bb` }}
+                      >
+                        {g.clock}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -243,7 +389,7 @@ export default function Live() {
 
         {/* Live games horizontal strip — visible to all */}
         {liveGamesForStrip.length > 0 && (
-          <LiveGamesStrip games={momentumGames ?? []} />
+          <LiveJumbotron games={momentumGames ?? []} />
         )}
 
         {/* Quick Actions — jump to any section instantly */}
