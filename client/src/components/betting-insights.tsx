@@ -150,7 +150,7 @@ function deriveHighGradedBets(games: MarketGame[], sport: string): DerivedHighGr
     .sort((a, b) => b.ev - a.ev);
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 
 const getCategoryColor = (category: string) => {
   switch (category) {

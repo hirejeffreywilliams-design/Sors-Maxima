@@ -242,7 +242,7 @@ export function SchemeRecognition({ mode = "pre-game", selectedSports = [] }: Sc
 
   const availableSports = selectedSports.length > 0
     ? selectedSports
-    : ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+    : ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
   return (
     <Card className="w-full" data-testid="scheme-recognition-card">

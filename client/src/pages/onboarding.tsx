@@ -38,7 +38,7 @@ const sportOptions = [
   { id: "NFL", label: "NFL Football" },
   { id: "MLB", label: "MLB Baseball" },
   { id: "NHL", label: "NHL Hockey" },
-  { id: "NCAAB", label: "College Basketball" },
+  { id: "NCAAB", label: "March Madness" },
   { id: "NCAAF", label: "College Football" },
   { id: "soccer", label: "Soccer / Football" },
   { id: "MMA", label: "MMA / UFC" },

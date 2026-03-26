@@ -32,7 +32,7 @@ interface PlayerData {
   props: PlayerProp[];
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
 function StatBars({ values, label }: { values: number[] | null | undefined; label: string }) {
   if (!values || values.length === 0) {

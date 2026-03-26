@@ -42,7 +42,7 @@ const NOTE_TYPES = [
   { value: "line",        label: "Line Movement",     icon: Zap,         color: "text-red-400" },
 ];
 
-const SPORTS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF", "MMA/UFC", "Soccer", "Other"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF", "MMA/UFC", "Soccer", "Other"];
 
 const SPORT_COLORS: Record<string, string> = {
   NBA: "bg-orange-500/20 text-orange-300 border-orange-500/30",

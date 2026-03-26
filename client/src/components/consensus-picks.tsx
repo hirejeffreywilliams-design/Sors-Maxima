@@ -102,7 +102,7 @@ function deriveConsensus(games: MarketGame[], sport: string): DerivedPick[] {
     });
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 
 const getGradeColor = (grade: string) => {
   switch (grade) {

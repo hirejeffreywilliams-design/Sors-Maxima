@@ -25,14 +25,21 @@ import { useToast } from "@/hooks/use-toast";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 
+const _month = new Date().getMonth() + 1;
+const ncaabLabel = (_month === 3 || _month === 4) ? "March Madness" : "College Hoops";
+
+const SPORT_OPTIONS = [
+  { value: "NBA",   label: "NBA" },
+  { value: "NFL",   label: "NFL" },
+  { value: "MLB",   label: "MLB" },
+  { value: "NHL",   label: "NHL" },
+  { value: "NCAAB", label: ncaabLabel },
+  { value: "NCAAF", label: "NCAAF" },
+];
+
 const straightBetSportOptions = [
   { value: "all", label: "All Sports" },
-  { value: "NBA", label: "Basketball" },
-  { value: "NFL", label: "Football" },
-  { value: "MLB", label: "Baseball" },
-  { value: "NHL", label: "Hockey" },
-  { value: "NCAAB", label: "College Hoops" },
-  { value: "NCAAF", label: "College Football" },
+  ...SPORT_OPTIONS,
 ];
 
 const betTypeOptions = [
@@ -42,14 +49,7 @@ const betTypeOptions = [
   { value: "total", label: "Over/Under" },
 ];
 
-const sgpSportOptions = [
-  { value: "NBA", label: "Basketball" },
-  { value: "NFL", label: "Football" },
-  { value: "MLB", label: "Baseball" },
-  { value: "NHL", label: "Hockey" },
-  { value: "NCAAB", label: "College Hoops" },
-  { value: "NCAAF", label: "College Football" },
-];
+const sgpSportOptions = [...SPORT_OPTIONS];
 
 function formatOdds(odds: number) {
   return odds > 0 ? `+${odds}` : `${odds}`;

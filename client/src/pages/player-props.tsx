@@ -150,7 +150,7 @@ interface TopPropsResponse {
   mcSimulated?: boolean;
 }
 
-const SPORT_TABS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF"];
+const SPORT_TABS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
 const MARKET_GROUPS: Record<string, { label: string; markets: string[] }[]> = {
   NBA: [

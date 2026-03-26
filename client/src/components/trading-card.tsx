@@ -142,7 +142,7 @@ function getEventLabel(sport: string, gameTime: string): string | null {
 
   if (sportUpper === "NCAAB") {
     if (month === 3 || month === 4) return "🏆 March Madness";
-    return "🏀 College Hoops";
+    return "🏀 March Madness";
   }
   if (sportUpper === "NCAAF") {
     if (month === 12 || month === 1) return "🏈 Bowl Season";

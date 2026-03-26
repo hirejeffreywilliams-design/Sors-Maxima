@@ -97,7 +97,7 @@ function deriveStreaks(games: MarketGame[], sport: string): DerivedStreak[] {
   return streaks;
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
 interface HotStreakDetectorProps {
   sport?: string;

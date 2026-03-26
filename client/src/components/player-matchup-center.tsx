@@ -76,7 +76,7 @@ interface MatchupAnalysis {
   injuryStatus: "healthy" | "questionable" | "probable" | "doubtful" | "out";
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
 function getRecommendationStyle(rec: string) {
   switch (rec) {

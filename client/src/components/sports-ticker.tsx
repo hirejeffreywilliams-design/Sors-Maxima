@@ -39,7 +39,7 @@ const FALLBACK_ITEMS: TickerItem[] = [
   { id: "f3", type: "pick",     badge: "PICK",     badgeColor: "green",  text: "Sors Maxima  |  Real-time picks, scores, and sharp money alerts", sport: "ALL", priority: 3 },
 ];
 
-const ALL_SPORTS = ["NBA", "NHL", "NFL", "MLB", "NCAAB", "SOCCER", "MMA"];
+const ALL_SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "SOCCER", "MMA"];
 
 const CONTENT_TYPES = [
   { id: "live",     label: "Live Games",    color: "text-red-400" },

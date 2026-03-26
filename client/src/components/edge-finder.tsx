@@ -78,7 +78,7 @@ interface MarketSnapshot {
   };
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 
 const KEY_NUMBERS: Record<string, number[]> = {
   NFL: [3, 7, 10, 14],

@@ -144,7 +144,7 @@ function getSpotIcon(spotType: string) {
   }
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"];
 
 export function SituationalSpots() {
   const [sport, setSport] = useState("NBA");

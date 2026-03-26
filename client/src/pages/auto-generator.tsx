@@ -62,7 +62,7 @@ const sportConfig: { id: string; name: string; color: string }[] = [
   { id: "NFL", name: "Football", color: "bg-green-600" },
   { id: "MLB", name: "Baseball", color: "bg-red-500" },
   { id: "NHL", name: "Hockey", color: "bg-blue-500" },
-  { id: "NCAAB", name: "College Hoops", color: "bg-purple-500" },
+  { id: "NCAAB", name: "March Madness", color: "bg-purple-500" },
   { id: "NCAAF", name: "College Football", color: "bg-amber-600" },
 ];
 

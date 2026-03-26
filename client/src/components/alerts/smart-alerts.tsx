@@ -58,7 +58,7 @@ const ALERT_TYPES = [
   { value: "custom",        label: "Custom Alert",        icon: Bell,          description: "Set your own conditions and message" },
 ] as const;
 
-const SPORTS = ["NBA", "NFL", "NHL", "MLB", "NCAAB", "SOCCER", "MMA", "ALL"];
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF", "SOCCER", "MMA", "ALL"];
 
 function getAlertIcon(type: string) {
   const found = ALERT_TYPES.find(t => t.value === type);

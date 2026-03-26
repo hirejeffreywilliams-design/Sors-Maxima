@@ -60,7 +60,7 @@ interface MarketSnapshot {
   };
 }
 
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAF", "NCAAB"] as const;
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB", "NCAAF"] as const;
 
 function getVelocityColor(velocity: string) {
   switch (velocity) {

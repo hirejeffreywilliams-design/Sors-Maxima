@@ -13,7 +13,8 @@
       "Implement a monitoring system for the node to receive alerts for future caching issues."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-26T01:07:29.095Z"
   },
   {
     "id": "alert-api-football-1774486999192",
@@ -29,7 +30,8 @@
       "Consider implementing a fallback mechanism to use cached data more effectively until the live data is restored."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-26T01:07:29.094Z"
   },
   {
     "id": "alert-odds-center-1774486161559",
