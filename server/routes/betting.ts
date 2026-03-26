@@ -4142,6 +4142,27 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         else if (pred.confidenceTier === "LEAN") unitRecommendation = 1;
         else unitRecommendation = 0.5;
 
+        // ── Synthesize reasoning from all available signals ────────────────
+        const reasoningParts: string[] = [];
+        if (pred.steamMove) reasoningParts.push("Steam move detected — coordinated sharp action across multiple books.");
+        else if (pred.reverseLineMove) reasoningParts.push("Reverse line movement — line moved opposite to public betting, signaling sharp money.");
+        if (pred.sharpMoney >= 65) reasoningParts.push(`${pred.sharpMoney}% of sharp (professional) money on this side.`);
+        else if (pred.sharpMoney >= 55) reasoningParts.push(`Sharp money leaning ${pred.sharpMoney}% — above-average professional interest.`);
+        if (pred.modelAgreement >= 4) reasoningParts.push(`${pred.modelAgreement}/5 independent prediction models in agreement.`);
+        if (pred.edge >= 5) reasoningParts.push(`+${pred.edge}% positive expected value — strong long-term edge over market.`);
+        else if (pred.edge >= 3) reasoningParts.push(`+${pred.edge}% edge detected vs implied market line.`);
+        const topFactor = pred.factors?.[0];
+        if (topFactor?.description) reasoningParts.push(`Key driver: ${topFactor.description}.`);
+        else if (topFactor?.name) reasoningParts.push(`Top factor: ${topFactor.name} (${topFactor.direction}).`);
+        const fusionInsight = (fusionResult.insights || [])[0];
+        if (fusionInsight && !reasoningParts.some(r => r.includes(fusionInsight.slice(0, 20)))) {
+          reasoningParts.push(fusionInsight);
+        }
+        if (reasoningParts.length === 0) {
+          reasoningParts.push(`${pred.trueProbability}% true probability vs ${pred.impliedProbability}% implied — model sees value.`);
+        }
+        const reasoning = reasoningParts.join(" ");
+
         return {
           id: pred.id,
           rank: idx + 1,
@@ -4169,6 +4190,10 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           factors: pred.factors,
           fusionGrade: fusionResult.grade,
           fusionConfidence: fusionResult.confidence,
+          fusionInsights: (fusionResult.insights || []).slice(0, 3),
+          fusionWinProbability: fusionResult.winProbability,
+          fusionRecommendation: fusionResult.recommendation,
+          reasoning,
           unitRecommendation,
         };
       });

@@ -266,6 +266,12 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
           </div>
         </div>
 
+        {ticket.rationale?.length > 0 && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed border-l-2 border-primary/30 pl-2" data-testid={`text-rationale-${ticket.id}`}>
+            {ticket.rationale[0]}
+          </p>
+        )}
+
         <div className="flex items-center justify-between gap-2 p-3 bg-primary/5 rounded-lg border border-primary/20">
           <div>
             <p className="text-[10px] sm:text-xs text-muted-foreground">Suggested Bet</p>
@@ -331,6 +337,11 @@ function SimpleTicketCard({ ticket, index, onPlaceBet }: { ticket: GeneratedTick
                         {split.verdict === "sharp_agree" ? "Sharp" : split.verdict === "sharp_fade" ? "Faded" : `${split.sharpPercent}% Sharp`}
                       </span>
                     </div>
+                  )}
+                  {(leg as any).reasoning && (
+                    <p className="text-[10px] text-muted-foreground leading-relaxed border-l-2 border-primary/20 pl-2" data-testid={`text-leg-reasoning-${leg.id}`}>
+                      {(leg as any).reasoning}
+                    </p>
                   )}
                 </div>
               );

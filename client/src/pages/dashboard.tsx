@@ -214,6 +214,12 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
           </div>
         </TooltipProvider>
 
+        {pick.reasoning && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed border-l-2 border-primary/30 pl-2" data-testid={`text-reasoning-${pick.id}`}>
+            {pick.reasoning}
+          </p>
+        )}
+
         {expanded && (
           <div className="space-y-2 pt-2 border-t">
             <div className="grid grid-cols-2 gap-2 text-xs">
@@ -221,6 +227,12 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
               <div><span className="text-muted-foreground">Fair Line:</span> <span className="font-medium">{pick.fairLine}</span></div>
               <div><span className="text-muted-foreground">Implied Prob:</span> <span className="font-medium">{pick.impliedProbability}%</span></div>
               <div><span className="text-muted-foreground">EV:</span> <span className="font-medium">{pick.expectedValue > 0 ? "+" : ""}{pick.expectedValue}</span></div>
+              {pick.fusionWinProbability && (
+                <div><span className="text-muted-foreground">Fusion Win%:</span> <span className="font-medium text-primary">{pick.fusionWinProbability}%</span></div>
+              )}
+              {pick.fusionRecommendation && (
+                <div><span className="text-muted-foreground">QF Signal:</span> <span className="font-medium capitalize">{pick.fusionRecommendation}</span></div>
+              )}
             </div>
             {pick.factors && pick.factors.length > 0 && (
               <div className="space-y-1">
@@ -229,6 +241,17 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <div className={`w-1.5 h-1.5 rounded-full ${f.direction === "positive" ? "bg-green-500" : f.direction === "negative" ? "bg-red-500" : "bg-gray-400"}`} />
                     <span>{f.name}: {f.description}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {pick.fusionInsights && pick.fusionInsights.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold text-muted-foreground">Quantum Fusion Insights</p>
+                {pick.fusionInsights.map((insight: string, i: number) => (
+                  <div key={i} className="flex items-start gap-2 text-xs">
+                    <Sparkles className="w-3 h-3 mt-0.5 text-primary shrink-0" />
+                    <span className="text-muted-foreground">{insight}</span>
                   </div>
                 ))}
               </div>
@@ -433,9 +456,14 @@ function SGPCard({ sgp }: { sgp: any }) {
           ))}
         </div>
 
+        {sgp.rationale && (
+          <p className="text-[11px] text-muted-foreground leading-relaxed border-l-2 border-primary/30 pl-2" data-testid={`text-sgp-rationale-${sgp.id}`}>
+            {sgp.rationale}
+          </p>
+        )}
+
         {expanded && (
           <div className="pt-2 border-t space-y-2">
-            <p className="text-xs text-muted-foreground">{sgp.rationale}</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div><span className="text-muted-foreground">Home:</span> {sgp.homeTeam} ({sgp.homeRecord})</div>
               <div><span className="text-muted-foreground">Away:</span> {sgp.awayTeam} ({sgp.awayRecord})</div>
