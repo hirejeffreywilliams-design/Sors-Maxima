@@ -1,14 +1,14 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 291,
-      "total": 506,
+      "wins": 306,
+      "total": 532,
       "winRate": 57.5
     },
     "NHL": {
       "wins": 268,
-      "total": 507,
-      "winRate": 52.9
+      "total": 509,
+      "winRate": 52.7
     },
     "NCAAB": {
       "wins": 266,
@@ -23,19 +23,19 @@
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 290,
-      "total": 495,
-      "winRate": 58.6
+      "wins": 296,
+      "total": 507,
+      "winRate": 58.4
     },
     "spread": {
-      "wins": 289,
-      "total": 506,
-      "winRate": 57.1
+      "wins": 292,
+      "total": 514,
+      "winRate": 56.8
     },
     "total": {
-      "wins": 285,
-      "total": 505,
-      "winRate": 56.4
+      "wins": 291,
+      "total": 513,
+      "winRate": 56.7
     },
     "team_total": {
       "wins": 38,
@@ -75,12 +75,6 @@
       "boost": 6
     },
     {
-      "key": "NBA:moneyline:slight_dog:60s:very_high",
-      "winRate": 83.3,
-      "total": 12,
-      "boost": 5
-    },
-    {
       "key": "NCAAB:spread:neutral:50s:low",
       "winRate": 81.8,
       "total": 11,
@@ -115,6 +109,12 @@
       "winRate": 77.8,
       "total": 9,
       "boost": 3
+    },
+    {
+      "key": "NBA:moneyline:slight_dog:60s:very_high",
+      "winRate": 75,
+      "total": 16,
+      "boost": 5
     }
   ],
   "topLosePatterns": [
@@ -149,12 +149,6 @@
       "penalty": 2
     },
     {
-      "key": "NBA:total:neutral:60s:low",
-      "winRate": 38.5,
-      "total": 13,
-      "penalty": 3
-    },
-    {
       "key": "NHL:spread:slight_dog:60s:very_high",
       "winRate": 40,
       "total": 15,
@@ -165,10 +159,16 @@
       "winRate": 40.9,
       "total": 22,
       "penalty": 4
+    },
+    {
+      "key": "MLB:total:neutral:50s:low",
+      "winRate": 41.7,
+      "total": 24,
+      "penalty": 4
     }
   ],
-  "totalSettled": 1575,
-  "lastMined": "2026-03-25T22:17:28.853Z",
+  "totalSettled": 1603,
+  "lastMined": "2026-03-26T00:12:26.616Z",
   "cycleCount": 1,
   "patternCount": 266
 }

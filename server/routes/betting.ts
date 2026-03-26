@@ -3675,6 +3675,53 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         return new Date(a.gameTime).getTime() - new Date(b.gameTime).getTime();
       });
 
+      // Auto-save high-confidence prop picks to track record for learning + history
+      try {
+        const { savePropToTrackRecord } = await import("../propParlayEngine");
+        const savedKeys = new Set<string>();
+        for (const game of gameResults) {
+          for (const player of game.players || []) {
+            for (const mkt of player.markets || []) {
+              if ((mkt.confidence || 0) < 60) continue;
+              const sel = mkt.recommendation || "over";
+              if (sel === "push") continue;
+              const key = `${player.playerName}|${mkt.market}|${sel}`;
+              if (savedKeys.has(key)) continue;
+              savedKeys.add(key);
+              const odds = sel === "over" ? (mkt.overOdds || -110) : (mkt.underOdds || -110);
+              const impliedProb = sel === "over"
+                ? (mkt.overImpliedProb ? mkt.overImpliedProb / 100 : 0.5)
+                : (mkt.underImpliedProb ? mkt.underImpliedProb / 100 : 0.5);
+              savePropToTrackRecord({
+                id: key,
+                type: "player_prop",
+                sport,
+                eventId: game.gameId || "",
+                homeTeam: game.homeTeam?.name || "",
+                awayTeam: game.awayTeam?.name || "",
+                commenceTime: game.gameTime || new Date().toISOString(),
+                description: `${player.playerName} ${mkt.marketLabel || mkt.market} ${sel.toUpperCase()} ${mkt.line}`,
+                playerName: player.playerName,
+                market: mkt.market,
+                marketLabel: mkt.marketLabel || mkt.market,
+                selection: sel,
+                line: mkt.line,
+                americanOdds: odds,
+                decimalOdds: odds > 0 ? (odds / 100) + 1 : 1 + (100 / Math.abs(odds)),
+                impliedProbability: impliedProb,
+                modelProbability: impliedProb + ((mkt.edge || 0) / 100),
+                confidenceScore: mkt.confidence || 60,
+                confidenceGrade: mkt.quantumGrade || "B",
+                edge: mkt.edge || 0,
+                factors: mkt.quantumInsights || [],
+                bookmaker: mkt.bookmaker || null,
+                dataSource: mkt.dataSource || "ESPN + Model",
+              } as any).catch(() => {});
+            }
+          }
+        }
+      } catch (_e) {}
+
       return res.json({
         games: gameResults,
         sport,

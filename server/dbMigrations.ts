@@ -488,6 +488,39 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_username_settled ON user_picks(username, settled)`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_up_username_placed  ON user_picks(username, placed_at DESC)`);
 
+    // ── prop_track_records ─────────────────────────────────────────────────────
+    // Stores every model-recommended player prop pick for track record + learning.
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS prop_track_records (
+        id              SERIAL PRIMARY KEY,
+        player_name     TEXT NOT NULL,
+        sport           TEXT NOT NULL,
+        market          TEXT NOT NULL,
+        market_label    TEXT NOT NULL,
+        line            REAL NOT NULL,
+        selection       TEXT NOT NULL,
+        american_odds   INTEGER NOT NULL,
+        home_team       TEXT NOT NULL DEFAULT '',
+        away_team       TEXT NOT NULL DEFAULT '',
+        confidence_score INTEGER NOT NULL DEFAULT 0,
+        confidence_grade TEXT NOT NULL DEFAULT 'B',
+        edge            REAL NOT NULL DEFAULT 0,
+        model_probability REAL NOT NULL DEFAULT 0.5,
+        implied_probability REAL NOT NULL DEFAULT 0.5,
+        factors         JSONB NOT NULL DEFAULT '[]',
+        bookmaker       TEXT,
+        data_source     TEXT NOT NULL DEFAULT 'model',
+        outcome         TEXT NOT NULL DEFAULT 'pending',
+        actual_result   REAL,
+        generated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        settled_at      TIMESTAMPTZ
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ptr_sport    ON prop_track_records(sport)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ptr_outcome  ON prop_track_records(outcome)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ptr_gen_at   ON prop_track_records(generated_at DESC)`);
+    await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_ptr_dedup ON prop_track_records(player_name, market, selection, DATE(generated_at))`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

@@ -344,6 +344,13 @@ export default function AdminCardsVault() {
   // Audit log state
   const [auditPage, setAuditPage] = useState(1);
 
+  // Prop Lab state
+  const [propFilter, setPropFilter] = useState<"all" | "pending" | "won" | "lost" | "push">("pending");
+  const [propSport, setPropSport] = useState("all");
+  const [propSettlingId, setPropSettlingId] = useState<number | null>(null);
+  const [propSettleOutcome, setPropSettleOutcome] = useState<"won" | "lost" | "push">("won");
+  const [propSettleActual, setPropSettleActual] = useState("");
+
   // Queries
   const { data: analytics, isLoading: analyticsLoading, refetch: refetchAnalytics } = useQuery<Analytics>({
     queryKey: ["/api/cards/admin/analytics"],
@@ -549,6 +556,40 @@ export default function AdminCardsVault() {
     onError: () => toast({ title: "Failed to seed tickets", variant: "destructive" }),
   });
 
+  // Prop Lab queries + mutation
+  const { data: propPicks, isLoading: propPicksLoading, refetch: refetchPropPicks } = useQuery<{ picks: any[]; total: number }>({
+    queryKey: ["/api/prop-track-record", propFilter, propSport],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: "100" });
+      if (propFilter !== "all") params.set("outcome", propFilter);
+      if (propSport !== "all") params.set("sport", propSport);
+      return fetch(`/api/prop-track-record?${params}`, { credentials: "include" }).then(r => r.json());
+    },
+    enabled: vaultOpen,
+  });
+  const { data: propStats, isLoading: propStatsLoading, refetch: refetchPropStats } = useQuery<{
+    overall: { total: number; wins: number; losses: number; pushes: number; pending: number; settled: number; winRate: number | null; avgEdge: number; avgConfidence: number };
+    byMarket: { market: string; market_label: string; total: string; wins: string; losses: string }[];
+    bySport: { sport: string; total: string; wins: string; losses: string }[];
+  }>({
+    queryKey: ["/api/prop-track-record/stats"],
+    enabled: vaultOpen,
+  });
+  const propSettleMutation = useMutation({
+    mutationFn: async ({ id, outcome, actualResult }: { id: number; outcome: string; actualResult: number }) => {
+      const res = await apiRequest("PATCH", `/api/prop-track-record/${id}/settle`, { outcome, actualResult });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Prop settled" });
+      setPropSettlingId(null);
+      setPropSettleActual("");
+      refetchPropPicks();
+      refetchPropStats();
+    },
+    onError: () => toast({ title: "Failed to settle", variant: "destructive" }),
+  });
+
   if (!vaultOpen) {
     return <VaultDoorAnimation onComplete={() => setVaultOpen(true)} />;
   }
@@ -628,6 +669,12 @@ export default function AdminCardsVault() {
           <TabsTrigger value="community" data-testid="tab-community"><Users className="w-3.5 h-3.5 mr-1.5" />Community</TabsTrigger>
           <TabsTrigger value="security" data-testid="tab-security"><Shield className="w-3.5 h-3.5 mr-1.5" />Security</TabsTrigger>
           <TabsTrigger value="audit" data-testid="tab-audit"><FileText className="w-3.5 h-3.5 mr-1.5" />Audit Log</TabsTrigger>
+          <TabsTrigger value="prop-lab" data-testid="tab-prop-lab">
+            <Activity className="w-3.5 h-3.5 mr-1.5" />Prop Lab
+            {propStats?.overall?.pending != null && propStats.overall.pending > 0 && (
+              <span className="ml-1.5 text-[9px] bg-blue-500 text-white font-black rounded-full px-1.5 py-0.5">{propStats.overall.pending}</span>
+            )}
+          </TabsTrigger>
         </TabsList>
 
         {/* ─── OVERVIEW ──────────────────────────────────────────────────── */}
@@ -1478,6 +1525,219 @@ export default function AdminCardsVault() {
               <span className="text-xs text-muted-foreground">Page {auditPage} / {Math.ceil(auditData.total / 25)}</span>
               <Button size="sm" variant="outline" className="h-8 text-xs" disabled={auditPage >= Math.ceil(auditData.total / 25)} onClick={() => setAuditPage(p => p + 1)} data-testid="button-audit-next">Next →</Button>
             </div>
+          )}
+        </TabsContent>
+
+        {/* ─── PROP LAB ──────────────────────────────────────────────────── */}
+        <TabsContent value="prop-lab" className="space-y-5 mt-0">
+          {/* Header */}
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-400" />
+                Player Prop Track Record
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Every model-recommended prop pick — settle outcomes to improve the model's accuracy over time.
+              </p>
+            </div>
+            <Button size="sm" variant="outline" className="h-8 text-xs gap-1.5" onClick={() => { refetchPropPicks(); refetchPropStats(); }} data-testid="button-refresh-props">
+              <RefreshCw className="w-3.5 h-3.5" />Refresh
+            </Button>
+          </div>
+
+          {/* Stats bar */}
+          {propStatsLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
+          ) : propStats ? (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="prop-stats-bar">
+              {[
+                { label: "Win Rate", value: propStats.overall.winRate != null ? `${(propStats.overall.winRate * 100).toFixed(1)}%` : "—", sub: `${propStats.overall.settled} settled` },
+                { label: "Record", value: `${propStats.overall.wins}–${propStats.overall.losses}`, sub: `${propStats.overall.pushes} push` },
+                { label: "Pending", value: propStats.overall.pending.toString(), sub: "awaiting result" },
+                { label: "Avg Edge", value: propStats.overall.avgEdge > 0 ? `+${propStats.overall.avgEdge.toFixed(1)}%` : "—", sub: "model edge" },
+              ].map(({ label, value, sub }) => (
+                <div key={label} className="rounded-xl border bg-card p-3 text-center">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-xl font-bold">{value}</p>
+                  <p className="text-[10px] text-muted-foreground">{sub}</p>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {/* Performance by market */}
+          {propStats && propStats.byMarket.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Win Rate by Market</p>
+              <div className="space-y-1.5">
+                {propStats.byMarket.slice(0, 10).map(m => {
+                  const w = Number(m.wins); const l = Number(m.losses); const tot = w + l;
+                  const rate = tot > 0 ? w / tot : 0;
+                  return (
+                    <div key={m.market} className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium truncate">{m.market_label || m.market}</p>
+                        <p className="text-[10px] text-muted-foreground">{tot} settled</p>
+                      </div>
+                      <div className="text-xs font-bold text-muted-foreground">{w}–{l}</div>
+                      <div className={`text-xs font-bold w-12 text-right ${rate >= 0.55 ? "text-green-400" : rate >= 0.50 ? "text-amber-400" : "text-red-400"}`}>
+                        {tot > 0 ? `${(rate * 100).toFixed(0)}%` : "—"}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Filters */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex rounded-lg border overflow-hidden">
+              {(["pending", "all", "won", "lost", "push"] as const).map(f => (
+                <button
+                  key={f}
+                  className={`px-3 py-1 text-xs font-medium transition-colors ${propFilter === f ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground"}`}
+                  onClick={() => setPropFilter(f)}
+                  data-testid={`prop-filter-${f}`}
+                >
+                  {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+                  {f === "pending" && propStats?.overall?.pending ? ` (${propStats.overall.pending})` : ""}
+                </button>
+              ))}
+            </div>
+            <Select value={propSport} onValueChange={setPropSport}>
+              <SelectTrigger className="h-8 text-xs w-28" data-testid="select-prop-sport">
+                <SelectValue placeholder="Sport" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sports</SelectItem>
+                {propStats?.bySport?.map(s => (
+                  <SelectItem key={s.sport} value={s.sport}>{s.sport}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Picks list */}
+          {propPicksLoading && (
+            <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
+          )}
+
+          {!propPicksLoading && (propPicks?.picks || []).length === 0 && (
+            <div className="text-center py-12 text-muted-foreground">
+              <Activity className="w-8 h-8 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">No prop picks recorded yet.</p>
+              <p className="text-xs mt-1">Picks are automatically saved when users load Player Props.</p>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {(propPicks?.picks || []).map((pick: any) => {
+              const isSettling = propSettlingId === pick.id;
+              const isMiss = pick.outcome === "lost";
+              const isWin = pick.outcome === "won";
+              const isPending = pick.outcome === "pending";
+              const odds = pick.american_odds;
+              const oddsStr = odds > 0 ? `+${odds}` : `${odds}`;
+              return (
+                <div
+                  key={pick.id}
+                  className={`rounded-xl border bg-card p-3 space-y-2.5 transition-colors ${isWin ? "border-green-500/25" : isMiss ? "border-red-500/20" : isPending ? "border-amber-500/20" : "border-border/40"}`}
+                  data-testid={`prop-row-${pick.id}`}
+                >
+                  {/* Top row */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="text-sm font-bold truncate">{pick.player_name}</p>
+                        <Badge variant="outline" className="text-[9px] px-1 py-0">{pick.sport}</Badge>
+                        <Badge variant="outline" className="text-[9px] px-1 py-0 text-muted-foreground">{pick.confidence_grade}</Badge>
+                      </div>
+                      <p className="text-xs text-primary font-medium">
+                        {pick.selection === "over" ? "Over" : "Under"} {pick.line} {pick.market_label}
+                        <span className="ml-1.5 text-muted-foreground font-normal">({oddsStr})</span>
+                      </p>
+                      {(pick.home_team || pick.away_team) && (
+                        <p className="text-[10px] text-muted-foreground">{pick.away_team} @ {pick.home_team}</p>
+                      )}
+                    </div>
+                    <div className="shrink-0 flex items-center gap-1.5">
+                      {pick.actual_result != null && (
+                        <span className="text-xs text-muted-foreground">→ {pick.actual_result}</span>
+                      )}
+                      {isWin && <Badge className="text-[9px] px-1.5 border bg-green-500/10 text-green-400 border-green-400/30">✓ HIT</Badge>}
+                      {isMiss && <Badge className="text-[9px] px-1.5 border bg-red-500/10 text-red-400 border-red-400/30">✗ MISS</Badge>}
+                      {pick.outcome === "push" && <Badge className="text-[9px] px-1.5 border bg-amber-500/10 text-amber-400 border-amber-400/30">PUSH</Badge>}
+                      {isPending && <Badge className="text-[9px] px-1.5 border bg-muted text-muted-foreground">PENDING</Badge>}
+                    </div>
+                  </div>
+
+                  {/* Confidence bar */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${(pick.confidence_score || 0) >= 70 ? "bg-green-500" : (pick.confidence_score || 0) >= 60 ? "bg-amber-500" : "bg-muted-foreground"}`}
+                        style={{ width: `${pick.confidence_score || 0}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground w-8 text-right">{pick.confidence_score}%</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(pick.generated_at).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Settle form — shown for pending picks */}
+                  {isPending && (
+                    isSettling ? (
+                      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/30">
+                        <Select value={propSettleOutcome} onValueChange={(v) => setPropSettleOutcome(v as any)}>
+                          <SelectTrigger className="h-7 text-xs w-24" data-testid={`select-settle-outcome-${pick.id}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="won">Won</SelectItem>
+                            <SelectItem value="lost">Lost</SelectItem>
+                            <SelectItem value="push">Push</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Input
+                          type="number"
+                          step="0.1"
+                          placeholder={`Actual (line: ${pick.line})`}
+                          value={propSettleActual}
+                          onChange={e => setPropSettleActual(e.target.value)}
+                          className="h-7 text-xs w-36"
+                          data-testid={`input-settle-actual-${pick.id}`}
+                        />
+                        <Button
+                          size="sm"
+                          className="h-7 text-xs"
+                          disabled={propSettleMutation.isPending || !propSettleActual}
+                          onClick={() => propSettleMutation.mutate({ id: pick.id, outcome: propSettleOutcome, actualResult: parseFloat(propSettleActual) })}
+                          data-testid={`button-confirm-settle-${pick.id}`}
+                        >
+                          Confirm
+                        </Button>
+                        <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setPropSettlingId(null); setPropSettleActual(""); }}>
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <button
+                        className="text-[10px] text-primary/70 hover:text-primary transition-colors font-medium"
+                        onClick={() => { setPropSettlingId(pick.id); setPropSettleOutcome("won"); setPropSettleActual(""); }}
+                        data-testid={`button-settle-${pick.id}`}
+                      >
+                        + Settle result
+                      </button>
+                    )
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {propPicks && propPicks.total > 100 && (
+            <p className="text-center text-xs text-muted-foreground">Showing 100 of {propPicks.total} — use filters to narrow down</p>
           )}
         </TabsContent>
       </Tabs>

@@ -1922,29 +1922,39 @@ interface PropTrackStats {
 
 function PropTrackRecord() {
   const [open, setOpen] = useState(false);
+  const [sportFilter, setSportFilter] = useState("all");
+  const [outcomeFilter, setOutcomeFilter] = useState<"all" | "won" | "lost" | "pending">("all");
 
   const { data: stats, isLoading } = useQuery<PropTrackStats>({
     queryKey: ["/api/prop-track-record/stats"],
     enabled: open,
-    refetchInterval: open ? 60000 : false,
+    refetchInterval: open ? 90000 : false,
   });
 
   const { data: recentData } = useQuery<{ picks: any[]; total: number }>({
-    queryKey: ["/api/prop-track-record"],
+    queryKey: ["/api/prop-track-record", outcomeFilter, sportFilter],
+    queryFn: () => {
+      const params = new URLSearchParams({ limit: "30" });
+      if (outcomeFilter !== "all") params.set("outcome", outcomeFilter);
+      if (sportFilter !== "all") params.set("sport", sportFilter);
+      return fetch(`/api/prop-track-record?${params}`, { credentials: "include" }).then(r => r.json());
+    },
     enabled: open,
-    refetchInterval: open ? 60000 : false,
+    refetchInterval: open ? 90000 : false,
   });
-
-  const outcomeColor = (outcome: string) => {
-    if (outcome === "won") return "text-green-500 bg-green-500/10 border-green-500/30";
-    if (outcome === "lost") return "text-red-500 bg-red-500/10 border-red-500/30";
-    if (outcome === "push") return "text-amber-500 bg-amber-500/10 border-amber-500/30";
-    return "text-muted-foreground bg-muted/40";
-  };
 
   const winRatePct = stats?.overall?.winRate != null
     ? `${(stats.overall.winRate * 100).toFixed(1)}%`
     : "—";
+
+  const outcomeChip = (outcome: string) => {
+    if (outcome === "won") return <Badge className="text-[9px] px-1.5 border bg-green-500/10 text-green-500 border-green-500/30">✓ HIT</Badge>;
+    if (outcome === "lost") return <Badge className="text-[9px] px-1.5 border bg-red-500/10 text-red-500 border-red-500/30">✗ MISS</Badge>;
+    if (outcome === "push") return <Badge className="text-[9px] px-1.5 border bg-amber-500/10 text-amber-500 border-amber-500/30">PUSH</Badge>;
+    return <Badge className="text-[9px] px-1.5 border bg-muted text-muted-foreground">PENDING</Badge>;
+  };
+
+  const allSports = stats?.bySport?.map(s => s.sport) || [];
 
   return (
     <div data-testid="section-prop-track-record">
@@ -1986,14 +1996,14 @@ function PropTrackRecord() {
               {/* Overall Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="track-record-overall">
                 {[
-                  { label: "Win Rate", value: winRatePct, sub: `${stats.overall.settled} settled` },
-                  { label: "Record", value: `${stats.overall.wins}–${stats.overall.losses}`, sub: `${stats.overall.pushes} push` },
-                  { label: "Avg Confidence", value: stats.overall.avgConfidence > 0 ? `${Math.round(stats.overall.avgConfidence)}%` : "—", sub: "model score" },
-                  { label: "Pending", value: stats.overall.pending.toString(), sub: "awaiting results" },
-                ].map(({ label, value, sub }) => (
+                  { label: "Win Rate", value: winRatePct, sub: `${stats.overall.settled} settled`, color: stats.overall.winRate != null && stats.overall.winRate >= 0.55 ? "text-green-500" : "" },
+                  { label: "Record", value: `${stats.overall.wins}–${stats.overall.losses}`, sub: `${stats.overall.pushes} push`, color: "" },
+                  { label: "Avg Confidence", value: stats.overall.avgConfidence > 0 ? `${Math.round(stats.overall.avgConfidence)}%` : "—", sub: "model score", color: "" },
+                  { label: "Pending", value: stats.overall.pending.toString(), sub: "awaiting results", color: stats.overall.pending > 0 ? "text-amber-500" : "" },
+                ].map(({ label, value, sub, color }) => (
                   <div key={label} className="rounded-xl border bg-card p-3 text-center" data-testid={`track-stat-${label.toLowerCase().replace(/\s+/g, "-")}`}>
                     <p className="text-xs text-muted-foreground">{label}</p>
-                    <p className="text-lg font-bold">{value}</p>
+                    <p className={`text-lg font-bold ${color}`}>{value}</p>
                     <p className="text-[10px] text-muted-foreground">{sub}</p>
                   </div>
                 ))}
@@ -2003,14 +2013,14 @@ function PropTrackRecord() {
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 flex items-start gap-2.5">
                 <BookOpen className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  <span className="text-foreground font-medium">Self-improving system:</span> As picks are settled, the model automatically adjusts its confidence for each market type. Markets where it's historically accurate receive higher confidence boosts. Markets where it underperforms are down-weighted — so every settled pick makes future recommendations smarter.
+                  <span className="text-foreground font-medium">Self-improving system:</span> As picks are settled, the model automatically adjusts its confidence for each market type. Markets where it's historically accurate receive higher boosts. Markets where it underperforms are down-weighted — so every settled pick makes future recommendations smarter.
                 </p>
               </div>
 
               {/* Per-market breakdown */}
               {stats.byMarket.length > 0 && (
                 <div className="space-y-2" data-testid="track-record-by-market">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Performance by Market</p>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Win Rate by Market</p>
                   <div className="space-y-1.5">
                     {stats.byMarket.map(m => {
                       const wins = Number(m.wins);
@@ -2019,14 +2029,17 @@ function PropTrackRecord() {
                       const rate = total > 0 ? wins / total : 0;
                       return (
                         <div key={m.market} className="flex items-center gap-3 rounded-lg border bg-card px-3 py-2" data-testid={`market-row-${m.market}`}>
-                          <div className="flex-1 min-w-0">
+                          <div className="flex-1 min-w-0 space-y-1">
                             <p className="text-xs font-medium truncate">{m.market_label || m.market}</p>
-                            <p className="text-[10px] text-muted-foreground">{total} settled</p>
+                            <div className="h-1 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${rate >= 0.55 ? "bg-green-500" : rate >= 0.50 ? "bg-amber-500" : "bg-red-500"}`}
+                                style={{ width: `${rate * 100}%` }}
+                              />
+                            </div>
                           </div>
-                          <div className="text-xs font-bold">
-                            {wins}–{losses}
-                          </div>
-                          <div className={`text-xs font-bold w-14 text-right ${rate >= 0.55 ? "text-green-500" : rate >= 0.50 ? "text-amber-500" : "text-red-500"}`}>
+                          <div className="text-xs text-muted-foreground">{total} settled</div>
+                          <div className={`text-xs font-bold w-10 text-right ${rate >= 0.55 ? "text-green-500" : rate >= 0.50 ? "text-amber-500" : "text-red-500"}`}>
                             {total > 0 ? `${(rate * 100).toFixed(0)}%` : "—"}
                           </div>
                         </div>
@@ -2036,35 +2049,110 @@ function PropTrackRecord() {
                 </div>
               )}
 
-              {/* Recent picks */}
-              {recentData && recentData.picks.length > 0 && (
-                <div className="space-y-2" data-testid="track-record-recent">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Recent Picks ({recentData.total} total)</p>
-                  <div className="space-y-1.5">
-                    {recentData.picks.slice(0, 10).map((pick: any) => (
-                      <div key={pick.id} className="flex items-start gap-2.5 rounded-lg border bg-card px-3 py-2" data-testid={`pick-row-${pick.id}`}>
-                        <div className="flex-1 min-w-0 space-y-0.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <p className="text-xs font-semibold truncate">{pick.player_name}</p>
-                            <Badge variant="outline" className="text-[9px] px-1 py-0">{pick.sport}</Badge>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground">
-                            {pick.selection === "under" ? "Under" : "Over"} {pick.line} {pick.market_label}
-                            {pick.actual_result != null && (
-                              <span className="ml-1 font-medium">→ Actual: {pick.actual_result}</span>
-                            )}
-                          </p>
-                        </div>
-                        <div className="shrink-0 flex items-center gap-1.5">
-                          <span className="text-xs text-muted-foreground">{pick.confidence_grade}</span>
-                          <Badge className={`text-[9px] px-1.5 py-0 border ${outcomeColor(pick.outcome)}`}>
-                            {pick.outcome}
-                          </Badge>
-                        </div>
-                      </div>
+              {/* Filters */}
+              <div className="flex flex-wrap gap-2 items-center pt-1">
+                <div className="flex rounded-lg border overflow-hidden">
+                  {(["all", "won", "lost", "pending"] as const).map(f => (
+                    <button
+                      key={f}
+                      className={`px-3 py-1 text-xs font-medium transition-colors ${outcomeFilter === f ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground"}`}
+                      onClick={() => setOutcomeFilter(f)}
+                      data-testid={`prop-outcome-filter-${f}`}
+                    >
+                      {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                {allSports.length > 1 && (
+                  <div className="flex gap-1 flex-wrap">
+                    <button
+                      className={`px-2 py-1 text-[10px] rounded-md font-medium border transition-colors ${sportFilter === "all" ? "bg-primary/10 border-primary/30 text-primary" : "border-border/40 text-muted-foreground hover:bg-muted"}`}
+                      onClick={() => setSportFilter("all")}
+                    >
+                      All
+                    </button>
+                    {allSports.map(s => (
+                      <button
+                        key={s}
+                        className={`px-2 py-1 text-[10px] rounded-md font-medium border transition-colors ${sportFilter === s ? "bg-primary/10 border-primary/30 text-primary" : "border-border/40 text-muted-foreground hover:bg-muted"}`}
+                        onClick={() => setSportFilter(s)}
+                        data-testid={`prop-sport-filter-${s}`}
+                      >
+                        {s}
+                      </button>
                     ))}
                   </div>
+                )}
+              </div>
+
+              {/* Recent picks — rich cards */}
+              {recentData && recentData.picks.length > 0 && (
+                <div className="space-y-2" data-testid="track-record-recent">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Recent Picks
+                    {recentData.total > 0 && <span className="ml-1 font-normal normal-case">({recentData.total} total)</span>}
+                  </p>
+                  <div className="space-y-2">
+                    {recentData.picks.map((pick: any) => {
+                      const odds = pick.american_odds;
+                      const oddsStr = odds > 0 ? `+${odds}` : `${odds}`;
+                      const isWin = pick.outcome === "won";
+                      const isMiss = pick.outcome === "lost";
+                      return (
+                        <div
+                          key={pick.id}
+                          className={`rounded-xl border bg-card px-3 py-2.5 space-y-1.5 ${isWin ? "border-green-500/20" : isMiss ? "border-red-500/15" : "border-border/40"}`}
+                          data-testid={`pick-row-${pick.id}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <p className="text-xs font-bold">{pick.player_name}</p>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0">{pick.sport}</Badge>
+                                <Badge variant="outline" className={`text-[9px] px-1 py-0 ${pick.confidence_grade?.startsWith("A") ? "text-green-500 border-green-500/30" : pick.confidence_grade?.startsWith("B") ? "text-amber-500 border-amber-500/30" : "text-muted-foreground"}`}>
+                                  {pick.confidence_grade}
+                                </Badge>
+                              </div>
+                              <p className="text-[11px] text-primary font-medium mt-0.5">
+                                {pick.selection === "over" ? "Over" : "Under"} {pick.line} {pick.market_label}
+                                <span className="ml-1.5 text-muted-foreground font-normal">({oddsStr})</span>
+                              </p>
+                              {(pick.away_team || pick.home_team) && (
+                                <p className="text-[9px] text-muted-foreground/70">{pick.away_team} @ {pick.home_team}</p>
+                              )}
+                              {pick.actual_result != null && (
+                                <p className={`text-[10px] font-medium mt-0.5 ${isWin ? "text-green-500" : isMiss ? "text-red-500" : "text-muted-foreground"}`}>
+                                  Actual: {pick.actual_result} {pick.selection === "over" ? (pick.actual_result > pick.line ? "✓" : "✗") : (pick.actual_result < pick.line ? "✓" : "✗")}
+                                </p>
+                              )}
+                            </div>
+                            <div className="shrink-0 flex flex-col items-end gap-1">
+                              {outcomeChip(pick.outcome)}
+                              <span className="text-[9px] text-muted-foreground/60">{new Date(pick.generated_at).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                          {/* Confidence bar */}
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${(pick.confidence_score || 0) >= 70 ? "bg-green-500" : (pick.confidence_score || 0) >= 60 ? "bg-amber-500" : "bg-muted-foreground/50"}`}
+                                style={{ width: `${pick.confidence_score || 0}%` }}
+                              />
+                            </div>
+                            <span className="text-[9px] text-muted-foreground">{pick.confidence_score}% conf</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {recentData.total > 30 && (
+                    <p className="text-center text-[10px] text-muted-foreground">Showing 30 most recent — admin view shows full history</p>
+                  )}
                 </div>
+              )}
+
+              {recentData && recentData.picks.length === 0 && stats.overall.total > 0 && (
+                <div className="text-center py-4 text-muted-foreground text-xs">No picks match the selected filters.</div>
               )}
 
               {stats.overall.total === 0 && (
