@@ -613,6 +613,31 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
             {rec && (
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 ${rec.color}`}>{rec.label}</Badge>
             )}
+            {(pick as any).wasUpgraded && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-green-500 text-white gap-0.5 shrink-0" title={(pick as any).upgradeReason || "Upgraded today"}>
+                <TrendingUp className="w-2.5 h-2.5" />Upgraded
+              </Badge>
+            )}
+            {(pick as any).wasDowngraded && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-500 border-amber-500 gap-0.5 shrink-0" title={(pick as any).downgradeReason || "Revised today"}>
+                ↓ Revised
+              </Badge>
+            )}
+            {!(pick as any).wasUpgraded && !(pick as any).wasDowngraded && (pick as any).signalStrengthened && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-blue-500 text-white gap-0.5 shrink-0" title={(pick as any).upgradeReason || "Signal strengthened"}>
+                Signal ↑
+              </Badge>
+            )}
+            {(pick as any).signalLabel && (
+              <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 ${
+                (pick as any).signalStrength === "elite" ? "border-purple-500 text-purple-400" :
+                (pick as any).signalStrength === "strong" ? "border-emerald-500 text-emerald-400" :
+                (pick as any).signalStrength === "moderate" ? "border-blue-400 text-blue-400" :
+                "border-muted text-muted-foreground"
+              }`} data-testid={`signal-badge-${pick.id}`}>
+                {(pick as any).signalLabel}
+              </Badge>
+            )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className={`text-base font-black font-mono tabular-nums ${gradeTextColor(pick.grade)}`}>
@@ -632,13 +657,27 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
         <div className="grid grid-cols-3 gap-2 mb-3">
           <div className="text-center bg-muted/40 rounded-lg p-1.5">
             <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">Confidence</p>
-            <p className="text-xs font-bold">{pick.confidence}%</p>
+            <div className="flex items-center justify-center gap-0.5">
+              <p className="text-xs font-bold">{pick.confidence}%</p>
+              {(pick as any).confidenceDelta !== null && (pick as any).confidenceDelta !== 0 && (
+                <span className={`text-[9px] font-semibold ${(pick as any).confidenceDelta > 0 ? "text-green-400" : "text-red-400"}`}>
+                  {(pick as any).confidenceDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).confidenceDelta)}
+                </span>
+              )}
+            </div>
           </div>
           <div className="text-center bg-muted/40 rounded-lg p-1.5">
             <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">Edge</p>
-            <p className={`text-xs font-bold ${pick.edge > 0 ? "text-emerald-400" : "text-red-400"}`}>
-              {pick.edge > 0 ? "+" : ""}{pick.edge.toFixed(1)}%
-            </p>
+            <div className="flex items-center justify-center gap-0.5">
+              <p className={`text-xs font-bold ${pick.edge > 0 ? "text-emerald-400" : "text-red-400"}`}>
+                {pick.edge > 0 ? "+" : ""}{pick.edge.toFixed(1)}%
+              </p>
+              {(pick as any).edgeDelta !== null && (pick as any).edgeDelta !== 0 && (
+                <span className={`text-[9px] font-semibold ${(pick as any).edgeDelta > 0 ? "text-green-400" : "text-red-400"}`}>
+                  {(pick as any).edgeDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).edgeDelta)}
+                </span>
+              )}
+            </div>
           </div>
           <div className="text-center bg-muted/40 rounded-lg p-1.5">
             <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">EV</p>

@@ -34,6 +34,8 @@ import { getEnsembleConfidence, recordEnsemblePrediction, type SourceSignal } fr
 import { getPatternBoost } from "./acceleratedPatternEngine";
 import { getTeamFormData } from "./teamHistoricalFormEngine";
 import { getTrackRecord } from "./calibrationEngine";
+import { buildReasoning, buildTicketReasoningFromSignals } from "./signalTranslationLayer";
+import { trackAndDiff } from "./pickSnapshotStore";
 import type { Sport } from "@shared/schema";
 
 const DIVISION_GROUPS: Record<string, string[][]> = {
@@ -192,6 +194,7 @@ const REC_LABELS: Record<string, string> = {
 };
 
 interface ReasoningContext {
+  sport?: string;
   homeRecord?: string;
   awayRecord?: string;
   mcSim?: { predictedHomeScore: number; predictedAwayScore: number; homeWinProb: number; simulations?: number };
@@ -217,87 +220,52 @@ function buildPickReasoning(
   awayTeam: string,
   ctx?: ReasoningContext,
 ): string {
-  const parts: string[] = [];
+  // Derive sharp money and model agreement from factors + confidence
+  const sharpFactor = factors.find(f => f.name?.toLowerCase().includes("sharp") || f.name?.toLowerCase().includes("money"));
+  const sharpMoney = sharpFactor ? Math.round(50 + sharpFactor.impact * 0.3) : Math.round(50 + (confidence - 50) * 0.4);
+  const modelAgreement = Math.min(5, Math.max(1, Math.round(confidence / 20)));
 
-  if (ctx?.homeRecord && ctx?.awayRecord) {
-    parts.push(`${awayTeam} (${ctx.awayRecord}) @ ${homeTeam} (${ctx.homeRecord})`);
-  }
-
-  if (ctx?.mcSim) {
-    const sims = ctx.mcSim.simulations || 10000;
-    parts.push(`${(sims / 1000).toFixed(0)}K simulations project ${Math.round(ctx.mcSim.predictedHomeScore)}-${Math.round(ctx.mcSim.predictedAwayScore)} final`);
-  }
-
-  if (ctx?.sitFactors) {
-    const sf = ctx.sitFactors;
-    const restParts: string[] = [];
-    if (sf.homeB2B) restParts.push(`${homeTeam} on back-to-back`);
-    if (sf.awayB2B) restParts.push(`${awayTeam} on back-to-back`);
-    if (!sf.homeB2B && !sf.awayB2B && Math.abs(sf.homeRestDays - sf.awayRestDays) >= 2) {
-      const rested = sf.homeRestDays > sf.awayRestDays ? homeTeam : awayTeam;
-      const tired = sf.homeRestDays > sf.awayRestDays ? awayTeam : homeTeam;
-      const restedDays = Math.max(sf.homeRestDays, sf.awayRestDays);
-      const tiredDays = Math.min(sf.homeRestDays, sf.awayRestDays);
-      restParts.push(`${rested} with ${restedDays} days rest vs ${tired} with ${tiredDays}`);
-    }
-    if (sf.spotType !== "normal") {
-      restParts.push(sf.spotDescription);
-    }
-    if (restParts.length > 0) parts.push(restParts.join("; "));
-  }
-
-  if (ctx && (ctx.homeStartersOut || 0) + (ctx.awayStartersOut || 0) > 0) {
-    const homeOut = ctx.homeStartersOut || 0;
-    const awayOut = ctx.awayStartersOut || 0;
-    if (awayOut > homeOut && awayOut >= 2) {
-      parts.push(`${awayOut} starters out for ${awayTeam} shifts matchup`);
-    } else if (homeOut > awayOut && homeOut >= 2) {
-      parts.push(`${homeOut} starters out for ${homeTeam} shifts matchup`);
-    }
-  }
-
-  if (betType === "moneyline") {
-    const impliedProb = ctx?.odds ? (ctx.odds < 0 ? Math.abs(ctx.odds) / (Math.abs(ctx.odds) + 100) * 100 : 100 / (ctx.odds + 100) * 100) : 0;
-    if (impliedProb > 0 && ev > 2) {
-      const modelProb = Math.round(Math.min(impliedProb * 1.25, impliedProb * (1 + ev / 100)));
-      const evDisplay = ev >= 35 ? "35%+" : `+${ev.toFixed(1)}%`;
-      parts.push(`46-Factor model projects ${modelProb}% vs ${Math.round(impliedProb)}% implied by odds — ${evDisplay} edge detected`);
-    } else if (impliedProb > 0) {
-      parts.push(`${Math.round(impliedProb)}% implied probability — signal alignment favorable at current price`);
-    } else {
-      parts.push(`Multi-factor signal alignment detected at current odds`);
-    }
-  } else if (betType === "spread") {
-    if (ev > 3) {
-      const evStr = ev >= 35 ? "35%+" : `+${ev.toFixed(1)}%`;
-      parts.push(`Spread shows model edge — ${evStr} EV detected at current line`);
-    } else {
-      parts.push(`Spread line is favorable based on projected scoring`);
-    }
-  } else if (betType === "total") {
-    const isOver = pick.toLowerCase().includes("over");
-    if (isOver) {
-      parts.push(`Pace and scoring trends suggest this game goes over the total`);
-    } else {
-      parts.push(`Defensive matchup and tempo point to this game staying under`);
-    }
-  }
-
-  const bullishFactors = factors
-    .filter(f => f.direction === "bullish" && f.impact >= 50)
-    .sort((a, b) => b.impact - a.impact)
-    .slice(0, 2);
-  if (bullishFactors.length > 0) {
-    const primary = humanizeFactorName(bullishFactors[0].name);
-    const secondary = bullishFactors.length > 1 ? ` + ${humanizeFactorName(bullishFactors[1].name).toLowerCase()}` : "";
-    parts.push(`PRIMARY EDGE: ${primary}${secondary}`);
-  }
-
-  if (ctx?.twoWayRiskNote) {
-    parts.push(ctx.twoWayRiskNote);
-  }
-
-  return parts.join(" — ");
+  return buildReasoning({
+    sport: ctx?.sport || "NBA",
+    betType,
+    pick,
+    confidenceTier: confidence >= 75 ? "LOCK" : confidence >= 65 ? "STRONG" : confidence >= 55 ? "LEAN" : "VALUE",
+    confidence,
+    sharpMoney,
+    modelAgreement,
+    edge: ev,
+    steamMove: factors.some(f => f.name?.toLowerCase().includes("steam")),
+    reverseLineMove: factors.some(f => f.name?.toLowerCase().includes("reverse") || f.name?.toLowerCase().includes("rlm")),
+    trueProbability: winProbability ? Math.round(winProbability * 100) : undefined,
+    factors: factors.map(f => ({
+      name: f.name,
+      impact: f.impact,
+      direction: f.direction === "bullish" ? "positive" : f.direction === "bearish" ? "negative" : f.direction,
+    })),
+    homeTeam,
+    awayTeam,
+    homeRecord: ctx?.homeRecord,
+    awayRecord: ctx?.awayRecord,
+    mcSim: ctx?.mcSim ? {
+      simulations: ctx.mcSim.simulations,
+      predictedHomeScore: ctx.mcSim.predictedHomeScore,
+      predictedAwayScore: ctx.mcSim.predictedAwayScore,
+      homeWinProb: ctx.mcSim.homeWinProb ? ctx.mcSim.homeWinProb * 100 : undefined,
+    } : undefined,
+    sitFactors: ctx?.sitFactors ? {
+      homeRestDays: ctx.sitFactors.homeRestDays,
+      awayRestDays: ctx.sitFactors.awayRestDays,
+      homeB2B: ctx.sitFactors.homeB2B,
+      awayB2B: ctx.sitFactors.awayB2B,
+      spotType: ctx.sitFactors.spotType,
+      spotDescription: ctx.sitFactors.spotDescription,
+    } : undefined,
+    injuryContext: {
+      homeStartersOut: ctx?.homeStartersOut,
+      awayStartersOut: ctx?.awayStartersOut,
+    },
+    twoWayRiskNote: ctx?.twoWayRiskNote,
+  });
 }
 
 export interface PrecomputedSnapshot {
@@ -1504,7 +1472,7 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         dataSource,
         gameTime: game.date,
         reasoning: buildPickReasoning(bet.pick, bet.betType, confidence, evRounded, mappedFactors, rec, winProb, homeName, awayName, {
-          homeRecord, awayRecord, mcSim, sitFactors, homeInjuryCount, awayInjuryCount, homeStartersOut, awayStartersOut, venue: game.venue, odds: bet.odds, twoWayRiskNote: gameTwoWayNote,
+          sport, homeRecord, awayRecord, mcSim, sitFactors, homeInjuryCount, awayInjuryCount, homeStartersOut, awayStartersOut, venue: game.venue, odds: bet.odds, twoWayRiskNote: gameTwoWayNote,
         }),
         recommendation: rec,
         winProbability: winProb,
@@ -2244,37 +2212,20 @@ function hasConflict(a: PrecomputedPick, b: PrecomputedPick): boolean {
 }
 
 function buildTicketReasoning(legs: OptimalTicketLeg[]): string {
-  const parts: string[] = [];
-
-  const avgConf = legs.reduce((s, l) => s + l.confidence, 0) / legs.length;
-  const avgEV = legs.reduce((s, l) => s + l.ev, 0) / legs.length;
-  const mcLegs = legs.filter(l => l.monteCarloData);
-  const sitLegs = legs.filter(l => l.situationalData);
-  const injLegs = legs.filter(l => l.injuryData);
-
-  if (avgConf > 70) parts.push(`High confidence ticket averaging ${Math.round(avgConf)}% across ${legs.length} legs`);
-  else parts.push(`${legs.length}-leg parlay with ${Math.round(avgConf)}% avg confidence`);
-
-  if (avgEV > 3) parts.push(`Strong combined edge at +${avgEV.toFixed(1)}% EV`);
-  else if (avgEV > 0) parts.push(`Positive expected value at +${avgEV.toFixed(1)}% EV`);
-
-  if (mcLegs.length > 0) parts.push(`${mcLegs.length}/${legs.length} legs backed by Monte Carlo simulations`);
-  if (sitLegs.length > 0) parts.push(`situational advantages identified in ${sitLegs.length} matchups`);
-  if (injLegs.length > 0) parts.push(`injury analysis factored into ${injLegs.length} games`);
-
-  const topFactors = new Map<string, number>();
-  for (const leg of legs) {
-    for (const f of leg.factors.slice(0, 2)) {
-      topFactors.set(f.name, (topFactors.get(f.name) || 0) + Math.abs(f.impact));
-    }
-  }
-  const sortedFactors = Array.from(topFactors.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3);
-  if (sortedFactors.length > 0) {
-    const factorNames = sortedFactors.map(([name]) => humanizeFactorName(name)).join(", ");
-    parts.push(`Key drivers: ${factorNames}`);
-  }
-
-  return parts.join(". ") + ".";
+  return buildTicketReasoningFromSignals({
+    legs: legs.map(l => ({
+      pick: l.outcome || l.id,
+      betType: l.market,
+      sport: l.sport || "NBA",
+      confidence: l.confidence,
+      edge: l.edge,
+      ev: l.ev,
+      factors: l.factors,
+      monteCarloData: l.monteCarloData,
+      situationalData: l.situationalData,
+      injuryData: l.injuryData,
+    })),
+  });
 }
 
 export function buildOptimalTickets(options: {

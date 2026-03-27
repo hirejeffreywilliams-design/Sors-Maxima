@@ -1,6 +1,16 @@
 {
   "alerts": [
     {
+      "id": "alert_1774596761417_6jkmy",
+      "timestamp": "2026-03-27T07:32:41.417Z",
+      "resolved": false,
+      "severity": "critical",
+      "category": "api_budget",
+      "title": "Odds API Critical — Under 10K Requests",
+      "detail": "Only 4,324 requests remain. Live odds will stop if exhausted.",
+      "checkType": "quick"
+    },
+    {
       "id": "alert_1774530210963_flt8x",
       "timestamp": "2026-03-26T13:03:30.963Z",
       "resolved": false,
@@ -213,12 +223,13 @@
     {
       "id": "alert_1773672613185_bljq9",
       "timestamp": "2026-03-16T14:50:13.185Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "warning",
       "category": "api_budget",
       "title": "Odds API Below 50K Requests",
       "detail": "15,197 requests remaining. Consider reducing polling frequency via API Budget settings.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-03-27T07:32:41.417Z"
     },
     {
       "id": "alert_1773671807545_tahkm",
@@ -1023,17 +1034,6 @@
       "detail": "Win rate 51.8% over 477 picks. Break-even for -110 bets is 52.4%.",
       "checkType": "quick",
       "resolvedAt": "2026-03-08T02:33:18.803Z"
-    },
-    {
-      "id": "alert_1772922976170_rartt",
-      "timestamp": "2026-03-07T22:36:16.170Z",
-      "resolved": true,
-      "severity": "warning",
-      "category": "model_performance",
-      "title": "Win Rate Below Break-Even",
-      "detail": "Win rate 52% over 468 picks. Break-even for -110 bets is 52.4%.",
-      "checkType": "quick",
-      "resolvedAt": "2026-03-08T02:51:54.366Z"
     }
   ],
   "reports": [
@@ -2147,8 +2147,8 @@
       "raw": "{\n  \"summary\": [\n    \"Win rate is 54.5%, above the break-even threshold of 52.4%.\",\n    \"API budget usage for Odds API is concerning with 30,733 requests remaining, warranting a warning.\",\n    \"The overall pick accuracy rate is at 53.5%, indicating stable performance.\",\n    \"All other API budgets are healthy, with sufficient remaining allocations.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust Odds API Polling Frequency\",\n      \"description\": \"Implement a reduction in polling frequency for the Odds API to manage budget and avoid reaching critical levels.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Odds API Below 50K Requests\",\n      \"description\": \"30,733 requests remaining. Consider reducing polling frequency via API Budget settings.\",\n      \"severity\": \"warning\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Review and implement necessary adjustments for Odds API polling settings.\",\n      \"Monitor pick accuracy metrics to ensure continued performance.\",\n      \"Ensure compliance with budget management for all APIs.\"\n    ],\n    \"this_week\": [\n      \"Analyze user engagement metrics and optimize user acquisition strategies.\",\n      \"Evaluate pick performance by market to identify areas for improvement.\",\n      \"Prepare a financial report assessing monthly burn and cash positions.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-03-26T13:03:30.963Z",
+  "lastQuickCheck": "2026-03-27T07:32:41.417Z",
   "lastDeepCheck": "2026-03-26T00:59:57.895Z",
-  "totalQuickChecks": 190,
+  "totalQuickChecks": 191,
   "totalDeepChecks": 50
 }

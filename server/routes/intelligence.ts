@@ -35,6 +35,8 @@ import type { MatchupSimulationInput } from "../monteCarloEngine";
 import { getInSeasonSports } from "../sportSeasons";
 import { getClientIp, requireAuth, requireAdmin, requireTier, requireSubscription, rateLimitByTier } from "./helpers";
 import { getTwoWayMatchupImpact } from "../two-way-contracts";
+import { trackAndDiff } from "../pickSnapshotStore";
+import { translateSignalStrength } from "../signalTranslationLayer";
 import { db } from "../db";
 import { sql as drizzleSql } from "drizzle-orm";
 import { users, tradingCards, userCardCollections, cardAuditLog } from "../dbSchema";
@@ -75,11 +77,49 @@ export function registerIntelligenceRoutes(app: Express): void {
     try {
       const feed = await generateIntelligenceFeed();
       if (feed.topPicks) {
+        const GRADE_TO_TIER: Record<string, string> = {
+          "A+": "LOCK", "A": "LOCK", "A-": "STRONG", "B+": "STRONG",
+          "B": "LEAN", "B-": "LEAN", "C+": "VALUE", "C": "VALUE",
+        };
         feed.topPicks = feed.topPicks
           .filter((p: any) => GOOD_GRADES.includes(p.grade))
           .filter((p: any) => p.homeTeam !== "TBD" && p.awayTeam !== "TBD" && !String(p.game || "").includes(" TBD") && !String(p.game || "").startsWith("TBD "))
           .slice(0, 40)
-          .map((p: any) => trimPick(p));
+          .map((p: any) => {
+            const trimmed = trimPick(p);
+            // Phase 2+3: snapshot tracking + delta computation
+            const tier = GRADE_TO_TIER[p.grade] || "VALUE";
+            const sharpMoney = Math.round(50 + (p.confidence - 50) * 0.5);
+            const currentMetrics = {
+              confidence: p.confidence || 0,
+              confidenceTier: tier,
+              sharpMoney,
+              edge: p.edge || 0,
+              modelAgreement: Math.min(5, Math.max(1, Math.round((p.confidence || 50) / 20))),
+              timestamp: Date.now(),
+            };
+            const deltas = trackAndDiff(p.id, currentMetrics);
+            const signalStrength = translateSignalStrength({
+              steamMove: false,
+              reverseLineMove: false,
+              sharpMoney,
+              modelAgreement: currentMetrics.modelAgreement,
+              edge: p.edge || 0,
+              confidenceTier: tier,
+            });
+            return {
+              ...trimmed,
+              signalStrength: signalStrength.overall,
+              signalLabel: signalStrength.label,
+              signalKeyDriver: signalStrength.keySignal,
+              confidenceDelta: deltas?.confidenceDelta ?? null,
+              edgeDelta: deltas?.edgeDelta ?? null,
+              wasUpgraded: deltas?.wasUpgraded ?? false,
+              wasDowngraded: deltas?.wasDowngraded ?? false,
+              upgradeReason: deltas?.upgradeReason ?? null,
+              signalStrengthened: deltas?.signalStrengthened ?? false,
+            };
+          });
       }
       if (feed.edgeAlerts) {
         feed.edgeAlerts = (feed.edgeAlerts as any[]).slice(0, 15);

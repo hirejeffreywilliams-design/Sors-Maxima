@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical, Target, Layers, ArrowUpDown, Shuffle, Loader2, Lock, Zap, BarChart3, Eye, DollarSign, Star, Shield, Link2, ArrowDown, Plus, Trash2, Calculator, AlertTriangle, BookOpen, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical, Target, Layers, ArrowUpDown, Shuffle, Loader2, Lock, Zap, BarChart3, Eye, DollarSign, Star, Shield, Link2, ArrowDown, ArrowUp, TrendingUp, Plus, Trash2, Calculator, AlertTriangle, BookOpen, X } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -110,6 +110,36 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
               </Badge>
               <Badge variant="outline" className="text-xs capitalize">{pick.betType}</Badge>
               <Badge variant="secondary" className="text-xs">{pick.sport}</Badge>
+              {pick.wasUpgraded && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="bg-green-500 text-white text-xs gap-1 cursor-help" data-testid={`badge-upgraded-${pick.id}`}>
+                      <TrendingUp className="w-3 h-3" />Upgraded
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[250px] text-xs">{pick.upgradeReason || "Pick tier upgraded since first seen today"}</TooltipContent>
+                </Tooltip>
+              )}
+              {pick.wasDowngraded && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="outline" className="text-xs text-amber-500 border-amber-500 gap-1 cursor-help" data-testid={`badge-downgraded-${pick.id}`}>
+                      <ArrowDown className="w-3 h-3" />Revised
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[250px] text-xs">{pick.downgradeReason || "Pick tier revised since first seen today"}</TooltipContent>
+                </Tooltip>
+              )}
+              {!pick.wasUpgraded && !pick.wasDowngraded && pick.signalStrengthened && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge className="bg-blue-500 text-white text-xs gap-1 cursor-help" data-testid={`badge-signal-${pick.id}`}>
+                      <Zap className="w-3 h-3" />Signal ↑
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[250px] text-xs">{pick.upgradeReason || "Signal has strengthened since first posted"}</TooltipContent>
+                </Tooltip>
+              )}
             </div>
             <p className="font-semibold text-sm">{pick.pick}</p>
             <p className="text-xs text-muted-foreground">{pick.game}</p>
@@ -126,22 +156,38 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
               <TooltipTrigger asChild>
                 <div className="bg-muted/50 rounded-lg p-2 cursor-help">
                   <p className="text-xs text-muted-foreground">Confidence</p>
-                  <p className="text-sm font-bold">{pick.confidence}%</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <p className="text-sm font-bold">{pick.confidence}%</p>
+                    {pick.confidenceDelta !== null && pick.confidenceDelta !== 0 && (
+                      <span className={`text-[10px] font-semibold flex items-center ${pick.confidenceDelta > 0 ? "text-green-500" : "text-red-400"}`} data-testid={`delta-conf-${pick.id}`}>
+                        {pick.confidenceDelta > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}{Math.abs(pick.confidenceDelta)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[220px] text-xs">
                 How confident the 46-Factor Model is in this pick. Above 65% is considered strong; above 75% is exceptional.
+                {pick.confidenceDelta !== null && pick.confidenceDelta !== 0 && ` Delta: ${pick.confidenceDelta > 0 ? "+" : ""}${pick.confidenceDelta}% since first posted today.`}
               </TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="bg-muted/50 rounded-lg p-2 cursor-help">
                   <p className="text-xs text-muted-foreground">Edge</p>
-                  <p className={`text-sm font-bold ${pick.edge > 3 ? "text-green-500" : pick.edge > 0 ? "text-blue-500" : "text-red-500"}`}>{pick.edge}%</p>
+                  <div className="flex items-center justify-center gap-1">
+                    <p className={`text-sm font-bold ${pick.edge > 3 ? "text-green-500" : pick.edge > 0 ? "text-blue-500" : "text-red-500"}`}>{pick.edge}%</p>
+                    {pick.edgeDelta !== null && pick.edgeDelta !== 0 && (
+                      <span className={`text-[10px] font-semibold flex items-center ${pick.edgeDelta > 0 ? "text-green-500" : "text-red-400"}`} data-testid={`delta-edge-${pick.id}`}>
+                        {pick.edgeDelta > 0 ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />}{Math.abs(pick.edgeDelta)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[220px] text-xs">
                 Expected value edge over the sportsbook's line. Positive means this bet has long-term value. Above +3% is excellent.
+                {pick.edgeDelta !== null && pick.edgeDelta !== 0 && ` Delta: ${pick.edgeDelta > 0 ? "+" : ""}${pick.edgeDelta}% since first posted today.`}
               </TooltipContent>
             </Tooltip>
             <Tooltip>

@@ -451,6 +451,21 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
                     {REC_CONFIG[pick.recommendation].label}
                   </Badge>
                 )}
+                {(pick as any).wasUpgraded && (
+                  <Badge className="text-[10px] px-2 py-0.5 bg-green-500 text-white gap-0.5" title={(pick as any).upgradeReason || "Upgraded today"} data-testid={`badge-upgraded-${pick.id}`}>
+                    <TrendingUp className="w-2.5 h-2.5" />Upgraded
+                  </Badge>
+                )}
+                {(pick as any).wasDowngraded && (
+                  <Badge variant="outline" className="text-[10px] px-2 py-0.5 text-amber-500 border-amber-500 gap-0.5" title={(pick as any).downgradeReason || "Revised today"} data-testid={`badge-downgraded-${pick.id}`}>
+                    ↓ Revised
+                  </Badge>
+                )}
+                {!(pick as any).wasUpgraded && !(pick as any).wasDowngraded && (pick as any).signalStrengthened && (
+                  <Badge className="text-[10px] px-2 py-0.5 bg-blue-500 text-white gap-0.5" title={(pick as any).upgradeReason || "Signal strengthened"}>
+                    Signal ↑
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -487,22 +502,38 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="p-2 rounded-lg bg-muted/30 text-center cursor-default">
-                <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
-                  {pick.confidence}%
-                </p>
+                <div className="flex items-center justify-center gap-1">
+                  <p className={`text-lg font-bold font-mono ${confidenceColor(pick.confidence)}`} data-testid={`text-pick-confidence-${pick.id}`}>
+                    {pick.confidence}%
+                  </p>
+                  {(pick as any).confidenceDelta !== null && (pick as any).confidenceDelta !== 0 && (
+                    <span className={`text-xs font-semibold ${(pick as any).confidenceDelta > 0 ? "text-green-400" : "text-red-400"}`} data-testid={`delta-conf-${pick.id}`}>
+                      {(pick as any).confidenceDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).confidenceDelta)}
+                    </span>
+                  )}
+                </div>
                 <p className="text-[10px] text-muted-foreground font-medium">Confidence</p>
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="max-w-[200px] text-center">
-              <p className="text-xs">How confident our 46-factor model is in this pick. Gaps vs. the implied odds indicate edge.</p>
+              <p className="text-xs">How confident our 46-factor model is in this pick. Gaps vs. the implied odds indicate edge.
+                {(pick as any).confidenceDelta !== null && (pick as any).confidenceDelta !== 0 && ` Delta: ${(pick as any).confidenceDelta > 0 ? "+" : ""}${(pick as any).confidenceDelta}% since first posted today.`}
+              </p>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="p-2 rounded-lg bg-muted/30 text-center cursor-default">
-                <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-pick-ev-${pick.id}`}>
-                  {displayEv(pick.ev)}
-                </p>
+                <div className="flex items-center justify-center gap-1">
+                  <p className={`text-lg font-bold font-mono ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`} data-testid={`text-pick-ev-${pick.id}`}>
+                    {displayEv(pick.ev)}
+                  </p>
+                  {(pick as any).edgeDelta !== null && (pick as any).edgeDelta !== 0 && (
+                    <span className={`text-xs font-semibold ${(pick as any).edgeDelta > 0 ? "text-green-400" : "text-red-400"}`} data-testid={`delta-edge-${pick.id}`}>
+                      {(pick as any).edgeDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).edgeDelta)}
+                    </span>
+                  )}
+                </div>
                 <p className="text-[10px] text-muted-foreground font-medium">Edge</p>
               </div>
             </TooltipTrigger>

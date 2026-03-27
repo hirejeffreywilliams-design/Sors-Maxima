@@ -17,6 +17,8 @@ import { generateVegasPredictions, getVegasInsights } from "../vegas-engine";
 import { generateTickets as generateSmartTickets, regenerateTicketsWithLatestData, getActiveSports, type TicketRequest, type GeneratedTicket } from "../ticketOrchestrator";
 import { analyzeCorrelations, gradeTicket, calculateSharpPublicSplit, generateHedgeAdvice, buildCorrelationMatrix } from "../ticketIntelligence";
 import { getEngineStats as getQuantumEngineStats, getFactorCategories as getQuantumFactorCategories, getSportFactors, getSportFactorCategories, getAllSupportedSports, getSportFactorCount, analyzeSportSpecificFactors, analyzeLeg } from "../quantumFusionEngine";
+import { buildReasoning } from "../signalTranslationLayer";
+import { trackAndDiff } from "../pickSnapshotStore";
 import { getPreSimulated, simulateMatchup } from "../monteCarloEngine";
 import { getGameSituationalFactors } from "../situationalEngine";
 import { getLearningStats, getAllFactorWeights } from "../learningEngine";
@@ -4142,26 +4144,37 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
         else if (pred.confidenceTier === "LEAN") unitRecommendation = 1;
         else unitRecommendation = 0.5;
 
-        // ── Synthesize reasoning from all available signals ────────────────
-        const reasoningParts: string[] = [];
-        if (pred.steamMove) reasoningParts.push("Steam move detected — coordinated sharp action across multiple books.");
-        else if (pred.reverseLineMove) reasoningParts.push("Reverse line movement — line moved opposite to public betting, signaling sharp money.");
-        if (pred.sharpMoney >= 65) reasoningParts.push(`${pred.sharpMoney}% of sharp (professional) money on this side.`);
-        else if (pred.sharpMoney >= 55) reasoningParts.push(`Sharp money leaning ${pred.sharpMoney}% — above-average professional interest.`);
-        if (pred.modelAgreement >= 4) reasoningParts.push(`${pred.modelAgreement}/5 independent prediction models in agreement.`);
-        if (pred.edge >= 5) reasoningParts.push(`+${pred.edge}% positive expected value — strong long-term edge over market.`);
-        else if (pred.edge >= 3) reasoningParts.push(`+${pred.edge}% edge detected vs implied market line.`);
-        const topFactor = pred.factors?.[0];
-        if (topFactor?.description) reasoningParts.push(`Key driver: ${topFactor.description}.`);
-        else if (topFactor?.name) reasoningParts.push(`Top factor: ${topFactor.name} (${topFactor.direction}).`);
-        const fusionInsight = (fusionResult.insights || [])[0];
-        if (fusionInsight && !reasoningParts.some(r => r.includes(fusionInsight.slice(0, 20)))) {
-          reasoningParts.push(fusionInsight);
-        }
-        if (reasoningParts.length === 0) {
-          reasoningParts.push(`${pred.trueProbability}% true probability vs ${pred.impliedProbability}% implied — model sees value.`);
-        }
-        const reasoning = reasoningParts.join(" ");
+        // ── Phase 1: Signal Translation Layer reasoning ────────────────────
+        const reasoning = buildReasoning({
+          sport: pred.sport,
+          betType: pred.betType,
+          pick: pred.prediction,
+          confidenceTier: pred.confidenceTier,
+          confidence: pred.confidence,
+          sharpMoney: pred.sharpMoney,
+          publicMoney: pred.publicMoney,
+          modelAgreement: pred.modelAgreement,
+          edge: pred.edge,
+          steamMove: pred.steamMove,
+          reverseLineMove: pred.reverseLineMove,
+          trueProbability: pred.trueProbability,
+          impliedProbability: pred.impliedProbability,
+          factors: pred.factors,
+          fusionInsights: fusionResult.insights || [],
+          homeTeam: pred.homeTeam,
+          awayTeam: pred.awayTeam,
+        });
+
+        // ── Phase 2+3: Snapshot tracking + delta computation ───────────────
+        const currentMetrics = {
+          confidence: pred.confidence,
+          confidenceTier: pred.confidenceTier,
+          sharpMoney: pred.sharpMoney,
+          edge: pred.edge,
+          modelAgreement: pred.modelAgreement,
+          timestamp: Date.now(),
+        };
+        const deltas = trackAndDiff(pred.id, currentMetrics);
 
         return {
           id: pred.id,
@@ -4195,6 +4208,17 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           fusionRecommendation: fusionResult.recommendation,
           reasoning,
           unitRecommendation,
+          // Phase 2: deltas (null on first view — no comparison yet)
+          confidenceDelta: deltas?.confidenceDelta ?? null,
+          edgeDelta: deltas?.edgeDelta ?? null,
+          sharpMoneyDelta: deltas?.sharpMoneyDelta ?? null,
+          // Phase 3: upgrade/downgrade
+          wasUpgraded: deltas?.wasUpgraded ?? false,
+          wasDowngraded: deltas?.wasDowngraded ?? false,
+          upgradeReason: deltas?.upgradeReason ?? null,
+          downgradeReason: deltas?.downgradeReason ?? null,
+          signalStrengthened: deltas?.signalStrengthened ?? false,
+          minutesSinceFirstSeen: deltas?.minutesSinceFirstSeen ?? 0,
         };
       });
 

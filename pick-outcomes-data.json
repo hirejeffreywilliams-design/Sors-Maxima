@@ -1103,6 +1103,22 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
+    },
+    {
+      "id": "precomp-NHL-401803509-total-9441bc04e3",
+      "gameId": "401803509",
+      "sport": "NHL",
+      "game": "San Jose Sharks @ Columbus Blue Jackets",
+      "homeTeam": "Columbus Blue Jackets",
+      "awayTeam": "San Jose Sharks",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 52,
+      "ev": 20.27,
+      "gameTime": "2026-03-28T21:00Z",
+      "savedAt": "2026-03-27T07:37:15.393Z"
     }
   ],
   "settled": [
@@ -35076,7 +35092,7 @@
       "lost": 709,
       "push": 36,
       "rate": 55.7,
-      "pending": 69
+      "pending": 70
     },
     "bySport": {
       "NBA": {
@@ -35189,7 +35205,7 @@
       "push": 3,
       "rate": 42
     },
-    "lastUpdated": "2026-03-27T07:23:14.090Z",
+    "lastUpdated": "2026-03-27T07:37:19.436Z",
     "roi": 11.7,
     "brierScore": 0.2512,
     "maxDrawdown": 15.4,
