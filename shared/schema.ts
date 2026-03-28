@@ -1330,6 +1330,8 @@ export const foundersProgram = pgTable("founders_program", {
   memberSpotsClaimed: integer("member_spots_claimed").default(0).notNull(),
   enterpriseSpotsTotal: integer("enterprise_spots_total").default(5).notNull(),
   enterpriseSpotsClaimed: integer("enterprise_spots_claimed").default(0).notNull(),
+  nextMemberNumber: integer("next_member_number").default(1).notNull(),
+  nextEnterpriseNumber: integer("next_enterprise_number").default(1).notNull(),
   announcementEmailSentAt: timestamp("announcement_email_sent_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),

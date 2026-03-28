@@ -301,15 +301,15 @@ export async function manualGrant(
 
     await client.query("COMMIT");
 
-    console.log(`[FOUNDERS] Manual grant — Founder #${nextNumber} (${founderType}) to userId ${userId} by admin ${adminUserId}`);
+    console.log(`[FOUNDERS] Manual grant — Founder #${founderNumber} (${founderType}) to userId ${userId} by admin ${adminUserId}`);
 
     if (founderType === "enterprise") {
-      sendEnterpriseFounderWelcomeEmail(email, username, nextNumber, referralCode).catch(() => {});
+      sendEnterpriseFounderWelcomeEmail(email, username, founderNumber, referralCode).catch(() => {});
     } else {
-      sendFounderWelcomeEmail(email, username, nextNumber, tier, referralCode).catch(() => {});
+      sendFounderWelcomeEmail(email, username, founderNumber, tier, referralCode).catch(() => {});
     }
 
-    return { success: true, founderNumber: nextNumber, referralCode };
+    return { success: true, founderNumber, referralCode };
   } catch (err) {
     await client.query("ROLLBACK").catch(() => {});
     console.error("[FOUNDERS] manualGrant error:", err);
@@ -429,6 +429,13 @@ export async function getFounderData(username: string): Promise<{
   }
 }
 
+/**
+ * Returns the effective tier a founder should receive based on their founder status.
+ * Member founder boost: Sharp→Edge, Edge→Max, Max→Max+ (reserved for future tier above Max)
+ * Enterprise founders receive Max + all enterprise co-founder privileges.
+ * "max+" is not a billing tier — it flags that the user auto-qualifies for any future tier
+ * created above Max, per the Founding 500 benefit spec.
+ */
 export function getTierBoost(
   tier: string,
   isFounder: boolean,
@@ -439,7 +446,7 @@ export function getTierBoost(
   const boostMap: Record<string, string> = {
     pro: "elite",
     elite: "whale",
-    whale: "whale",
+    whale: "max+",
     free: "pro",
   };
   return boostMap[tier] || tier;
