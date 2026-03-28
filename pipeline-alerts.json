@@ -1,5 +1,73 @@
 [
   {
+    "id": "alert-player-props-1774715621510",
+    "nodeId": "player-props",
+    "nodeLabel": "Player Props Lab",
+    "previousStatus": "live",
+    "currentStatus": "degraded",
+    "triggeredAt": "2026-03-28T16:33:41.510Z",
+    "diagnosis": "The 'Player Props Lab' node is degraded due to a malfunction in data integration, causing delays in player prop insights that affects the accuracy of betting recommendations for users.",
+    "recommendations": [
+      "Check the API connections for the components linked to 'Player Props Lab' for any errors or timeouts.",
+      "Restart the affected node and monitor for any recovery in performance.",
+      "If the issue persists, review the system logs for detailed error messages and escalate to the engineering team for a deeper investigation."
+    ],
+    "priority": "medium",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T16:34:36.313Z"
+  },
+  {
+    "id": "alert-situational-1774715620278",
+    "nodeId": "situational",
+    "nodeLabel": "Situational Analysis",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-28T16:33:40.278Z",
+    "diagnosis": "The 'Situational Analysis' node is cached, indicating that it currently holds a temporary snapshot of processed data and may not reflect the most recent updates, which could affect the accuracy of insights for users.",
+    "recommendations": [
+      "Check the data refresh settings to ensure real-time updates are enabled for the Situational Analysis node.",
+      "Manually clear the cache for the Situational Analysis node to force an immediate refresh of the data.",
+      "Verify the connection and status of upstream data sources to ensure they are providing the latest information."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T16:34:36.304Z"
+  },
+  {
+    "id": "alert-intel-hub-1774715618801",
+    "nodeId": "intel-hub",
+    "nodeLabel": "Intelligence Hub",
+    "previousStatus": "live",
+    "currentStatus": "degraded",
+    "triggeredAt": "2026-03-28T16:33:38.801Z",
+    "diagnosis": "The Intelligence Hub node is degraded due to an issue in the unified data aggregation cycle, leading to potential delays in data updates for users.",
+    "recommendations": [
+      "Check the logs for any errors during the last aggregation cycle.",
+      "Restart the Intelligence Hub node to attempt to reset the aggregation process.",
+      "Monitor the performance of all dependent nodes to ensure they are functioning correctly."
+    ],
+    "priority": "medium",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T16:34:36.293Z"
+  },
+  {
+    "id": "alert-espn-1774715617496",
+    "nodeId": "espn",
+    "nodeLabel": "ESPN Live",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-28T16:33:37.496Z",
+    "diagnosis": "The 'ESPN Live' node is cached due to a temporary disruption in real-time data retrieval, which means users may not receive the latest live scores or updates.",
+    "recommendations": [
+      "Check the API connectivity and ensure the ESPN service is operational.",
+      "Review logs for any error messages related to data retrieval from the ESPN API.",
+      "If issues persist, consider implementing a fallback option to alert users of outdated information until normal service resumes."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T16:34:36.292Z"
+  },
+  {
     "id": "alert-odds-center-1774714657160",
     "nodeId": "odds-center",
     "nodeLabel": "Odds Center",

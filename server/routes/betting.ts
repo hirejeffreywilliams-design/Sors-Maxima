@@ -4933,4 +4933,46 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
       return res.status(500).json({ error: "Failed to fetch prop track record stats" });
     }
   });
+
+  // GET /api/admin/prop-settlement/status — current auto-settlement engine state
+  app.get("/api/admin/prop-settlement/status", requireAdmin, async (_req, res) => {
+    try {
+      const { getPropSettlementStatus } = await import("../propAutoSettlementEngine");
+      const engineStatus = getPropSettlementStatus();
+
+      const { db } = await import("../db");
+      const { sql } = await import("drizzle-orm");
+      const counts = await db.execute(sql`
+        SELECT
+          outcome,
+          COUNT(*) AS total
+        FROM prop_track_records
+        GROUP BY outcome
+      `);
+
+      const breakdown: Record<string, number> = {};
+      for (const row of counts.rows as any[]) {
+        breakdown[row.outcome] = Number(row.total);
+      }
+
+      return res.json({
+        engine: engineStatus,
+        database: breakdown,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
+  // POST /api/admin/prop-settlement/trigger — manually trigger prop auto-settlement
+  app.post("/api/admin/prop-settlement/trigger", requireAdmin, async (req, res) => {
+    try {
+      const lookbackDays = Number(req.body?.lookbackDays ?? 3);
+      const { autoSettlePropTrackRecords } = await import("../propAutoSettlementEngine");
+      const result = await autoSettlePropTrackRecords(Math.min(lookbackDays, 14));
+      return res.json({ success: true, settled: result.settled });
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  });
 }

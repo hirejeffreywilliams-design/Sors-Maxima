@@ -262,6 +262,23 @@ export default function AdminDashboard() {
     refetchInterval: 30000,
   });
 
+  const { data: propSettlementStatus, refetch: refetchPropSettlement } = useQuery<any>({
+    queryKey: ['/api/admin/prop-settlement/status'],
+    refetchInterval: 60000,
+  });
+
+  const triggerPropSettlementMutation = useMutation({
+    mutationFn: async (lookbackDays = 3) => {
+      const response = await apiRequest('POST', '/api/admin/prop-settlement/trigger', { lookbackDays });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      refetchPropSettlement();
+      toast({ title: `Prop settlement complete — ${data.settled ?? 0} props settled` });
+    },
+    onError: () => toast({ title: "Prop settlement failed", variant: "destructive" }),
+  });
+
   const runSettlementMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest('POST', '/api/admin/settlement/run', {});
@@ -1141,6 +1158,82 @@ export default function AdminDashboard() {
                       compact
                     />
                   )}
+                </CardContent>
+              </Card>
+
+              {/* Player Props Auto-Settlement */}
+              <Card data-testid="card-prop-auto-settlement">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    Player Props Auto-Settlement
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    Runs every 5 min alongside main settlement — zero manual work required
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {/* DB snapshot */}
+                  {propSettlementStatus?.database && (
+                    <div className="flex flex-wrap gap-2 text-[10px]">
+                      {Object.entries(propSettlementStatus.database as Record<string, number>).map(([outcome, count]) => (
+                        <span
+                          key={outcome}
+                          className={`px-2 py-0.5 rounded-full font-semibold border ${
+                            outcome === "won" ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                            : outcome === "lost" ? "bg-red-500/15 text-red-400 border-red-500/30"
+                            : outcome === "push" ? "bg-amber-500/15 text-amber-400 border-amber-500/30"
+                            : "bg-muted/40 text-muted-foreground border-border/40"
+                          }`}
+                          data-testid={`prop-settlement-outcome-${outcome}`}
+                        >
+                          {count} {outcome}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {/* Engine stats */}
+                  {propSettlementStatus?.engine && (
+                    <div className="text-[10px] text-muted-foreground space-y-0.5">
+                      <p>Total settled by engine: <span className="text-foreground font-semibold">{propSettlementStatus.engine.totalSettled}</span></p>
+                      <p>Last run: <span className="text-foreground">{propSettlementStatus.engine.lastRunAt ? new Date(propSettlementStatus.engine.lastRunAt).toLocaleString() : "Not yet run"}</span></p>
+                      {propSettlementStatus.engine.totalNoMatch > 0 && (
+                        <p className="text-amber-400/80">No-match skips: {propSettlementStatus.engine.totalNoMatch} (player names or games not yet in ESPN data)</p>
+                      )}
+                    </div>
+                  )}
+                  {/* Recent settlements */}
+                  {propSettlementStatus?.engine?.recentLog?.length > 0 && (
+                    <div className="space-y-1 max-h-28 overflow-y-auto pr-1">
+                      {(propSettlementStatus.engine.recentLog as any[]).map((entry: any, i: number) => (
+                        <div key={i} className="flex items-center justify-between text-[10px] text-muted-foreground border-b border-border/30 pb-0.5">
+                          <span className="truncate max-w-[55%]">{entry.playerName} — {entry.market} {entry.line}</span>
+                          <span className={`font-semibold shrink-0 ${entry.outcome === "won" ? "text-emerald-400" : entry.outcome === "lost" ? "text-red-400" : "text-amber-400"}`}>
+                            {entry.actual} → {entry.outcome.toUpperCase()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex gap-2 flex-wrap">
+                    <Button
+                      size="sm"
+                      onClick={() => triggerPropSettlementMutation.mutate(3)}
+                      disabled={triggerPropSettlementMutation.isPending}
+                      data-testid="button-prop-settlement-3d"
+                    >
+                      {triggerPropSettlementMutation.isPending ? "Settling..." : "Run Now (3 days)"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => triggerPropSettlementMutation.mutate(14)}
+                      disabled={triggerPropSettlementMutation.isPending}
+                      data-testid="button-prop-settlement-14d"
+                    >
+                      {triggerPropSettlementMutation.isPending ? "Running..." : "Backfill 14 Days"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 

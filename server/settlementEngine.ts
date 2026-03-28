@@ -4,6 +4,7 @@ import { settlePicksForGame, getPickTrackerStatus, cleanupPickTracker } from "./
 import { triggerManualSettlement } from "./continuousLearningOrchestrator";
 import { logInfo, logWarn } from "./errorLogger";
 import { broadcastEvent } from "./sseManager";
+import { settlePropsFromGames } from "./propAutoSettlementEngine";
 
 const ESPN_BASE = "https://site.api.espn.com/apis/site/v2/sports";
 const SPORT_PATHS: Record<string, string> = {
@@ -256,6 +257,17 @@ async function runSettlementCycle(lookbackDays = 3): Promise<number> {
     const userSettled = await settleUserPicksFromGames(games);
     totalSettled += userSettled;
 
+    // Auto-settle prop_track_records (player props) — zero admin work
+    try {
+      const propSettled = await settlePropsFromGames(games);
+      if (propSettled > 0) {
+        logInfo(`[Settlement] Auto-settled ${propSettled} player prop track records`);
+        totalSettled += propSettled;
+      }
+    } catch (e: any) {
+      logWarn(`[Settlement] Prop auto-settlement error: ${e.message}`);
+    }
+
     try {
       const dbResult = await triggerManualSettlement();
       totalSettled += dbResult.settled;
@@ -304,6 +316,17 @@ export async function runHistoricalBackfill(days = 14): Promise<{ gamesFound: nu
     }
 
     picksSettled += await settleUserPicksFromGames(games);
+
+    // Backfill prop_track_records auto-settlement
+    try {
+      const propSettled = await settlePropsFromGames(games);
+      if (propSettled > 0) {
+        logInfo(`[Settlement] Backfill: auto-settled ${propSettled} player prop track records`);
+        picksSettled += propSettled;
+      }
+    } catch (e: any) {
+      logWarn(`[Settlement] Prop backfill error: ${e.message}`);
+    }
 
     try {
       const dbResult = await triggerManualSettlement();
