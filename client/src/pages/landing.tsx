@@ -202,9 +202,13 @@ const pricingTiers = [
 
 interface FoundersStatus {
   isActive: boolean;
+  launchedAt: string | null;
   memberSpotsTotal: number;
   memberSpotsClaimed: number;
   memberSpotsRemaining: number;
+  enterpriseSpotsTotal: number;
+  enterpriseSpotsClaimed: number;
+  enterpriseSpotsRemaining: number;
 }
 
 export default function LandingPage() {

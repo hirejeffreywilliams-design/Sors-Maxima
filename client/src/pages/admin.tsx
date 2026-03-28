@@ -843,21 +843,21 @@ export default function AdminDashboard() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {foundersAdminStatus?.isActive
                         ? `${foundersAdminStatus.memberSpotsClaimed ?? 0} / ${foundersAdminStatus.memberSpotsTotal ?? 500} member spots claimed · ${foundersAdminStatus.enterpriseSpotsClaimed ?? 0} / ${foundersAdminStatus.enterpriseSpotsTotal ?? 5} enterprise`
-                        : "Launch the Founding 500 to begin accepting founders"}
+                        : "500 member spots · 5 enterprise spots — not yet open to the public"}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {!foundersAdminStatus?.isActive && (
                     <Button
-                      size="sm"
-                      className="bg-amber-500 hover:bg-amber-600 text-black font-semibold gap-1.5 text-xs"
+                      size="default"
+                      className="bg-amber-500 hover:bg-amber-600 text-black font-bold gap-2"
                       onClick={() => launchFoundersMutation.mutate()}
                       disabled={launchFoundersMutation.isPending}
                       data-testid="button-launch-founders"
                     >
-                      <Rocket className="w-3.5 h-3.5" />
-                      {launchFoundersMutation.isPending ? "Launching…" : "Launch Program"}
+                      <Rocket className="w-4 h-4" />
+                      {launchFoundersMutation.isPending ? "Activating…" : "Activate Founders Program"}
                     </Button>
                   )}
                   <Link href="/admin/founders">

@@ -1704,7 +1704,7 @@ function FounderSection() {
             )}
             {referralCode && (
               <p className="text-[10px] text-muted-foreground">
-                Share your code — earn credits when referred members subscribe.
+                Share your code — referred friends get their <span className="text-amber-400/80 font-semibold">first month 30% off</span>, and you earn referral credits toward your subscription.
               </p>
             )}
           </div>
