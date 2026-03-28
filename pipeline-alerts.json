@@ -1,5 +1,53 @@
 [
   {
+    "id": "alert-odds-center-1774714657160",
+    "nodeId": "odds-center",
+    "nodeLabel": "Odds Center",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-28T16:17:37.160Z",
+    "diagnosis": "The 'Odds Center' node is cached due to a temporary disruption in real-time data fetching, indicating that users may receive outdated betting line information.",
+    "recommendations": [
+      "Check the configuration of the odds-api to ensure the API key is valid and active.",
+      "Monitor the network connectivity to the odds-api for any interruptions or downtime.",
+      "Review the logs for the Odds Center to identify any errors or warnings that may indicate why real-time updates are not being processed."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-mma-engine-1774714656113",
+    "nodeId": "mma-engine",
+    "nodeLabel": "MMA/UFC Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-28T16:17:36.113Z",
+    "diagnosis": "The 'MMA/UFC Engine' node is cached due to a temporary fall in data freshness, which may result in users receiving outdated information about MMA/UFC events.",
+    "recommendations": [
+      "Check the data source connections to ensure they are operational and returning live data.",
+      "Clear the cache for the 'MMA/UFC Engine' node to refresh the data immediately.",
+      "Monitor the node’s status regularly to prevent future caching issues."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-api-1774714654709",
+    "nodeId": "odds-api",
+    "nodeLabel": "The Odds API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-28T16:17:34.709Z",
+    "diagnosis": "The Odds API is cached, indicating that it is currently using stored data instead of fetching real-time betting lines, which may result in outdated information for users.",
+    "recommendations": [
+      "Check if the THE_ODDS_API_KEY is valid and has not expired.",
+      "Investigate the connectivity to The Odds API to ensure there are no network issues.",
+      "Schedule regular updates or set triggers to refresh the cache more frequently to provide users with the latest data."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
     "id": "alert-intl-sports-1774487000383",
     "nodeId": "intl-sports",
     "nodeLabel": "Intl Sports Engine",

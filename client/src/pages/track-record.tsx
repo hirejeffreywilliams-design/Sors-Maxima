@@ -228,6 +228,23 @@ function GradeColor(grade: string) {
   return "text-amber-400";
 }
 
+interface PropStats {
+  overall: {
+    total: number;
+    wins: number;
+    losses: number;
+    pushes: number;
+    pending: number;
+    settled: number;
+    winRate: number | null;
+    avgEdge: number;
+    avgConfidence: number;
+  };
+  byMarket: { market: string; market_label: string; total: number; wins: number; losses: number; avg_confidence: number; avg_edge: number }[];
+  bySport: { sport: string; total: number; wins: number; losses: number }[];
+  byGrade: { grade: string; total: number; wins: number; losses: number }[];
+}
+
 export default function TrackRecordPage() {
   useSEO({
     title: "Sors Maxima — Real Track Record & Accuracy Data",
@@ -259,6 +276,11 @@ export default function TrackRecordPage() {
 
   const { data: lctData } = useQuery<LctTrackRecord>({
     queryKey: ["/api/lct-track-record"],
+    refetchInterval: 10 * 60 * 1000,
+  });
+
+  const { data: propStats } = useQuery<PropStats>({
+    queryKey: ["/api/prop-track-record/stats"],
     refetchInterval: 10 * 60 * 1000,
   });
 
@@ -648,6 +670,108 @@ export default function TrackRecordPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ── Player Props Track Record ────────────────────────────────────── */}
+      {propStats && propStats.overall.total > 0 && (
+        <Card data-testid="props-track-record-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Target className="h-4 w-4 text-primary" />
+                  Player Props Track Record
+                </CardTitle>
+                <CardDescription className="text-xs mt-0.5">
+                  {propStats.overall.settled > 0
+                    ? `${propStats.overall.wins}W / ${propStats.overall.losses}L across ${propStats.overall.settled} settled props`
+                    : `${propStats.overall.total} props tracked — awaiting settlement`}
+                </CardDescription>
+              </div>
+              {propStats.overall.winRate !== null && (
+                <WinRatePill rate={propStats.overall.winRate} />
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Quick stat row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Total Picks</p>
+                <p className="text-xl font-bold tabular-nums" data-testid="props-total">{propStats.overall.total}</p>
+                <p className="text-[10px] text-muted-foreground">{propStats.overall.pending} pending</p>
+              </div>
+              <div className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Win Rate</p>
+                <p className={`text-xl font-bold tabular-nums ${propStats.overall.winRate !== null ? (propStats.overall.winRate >= 0.52 ? "text-emerald-400" : propStats.overall.winRate >= 0.47 ? "text-amber-400" : "text-red-400") : "text-muted-foreground"}`} data-testid="props-win-rate">
+                  {propStats.overall.winRate !== null ? `${(propStats.overall.winRate * 100).toFixed(1)}%` : "—"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">{propStats.overall.settled} settled</p>
+              </div>
+              <div className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Avg Edge</p>
+                <p className={`text-xl font-bold tabular-nums ${propStats.overall.avgEdge > 0 ? "text-emerald-400" : "text-muted-foreground"}`} data-testid="props-avg-edge">
+                  {propStats.overall.avgEdge > 0 ? `+${propStats.overall.avgEdge.toFixed(1)}%` : "—"}
+                </p>
+                <p className="text-[10px] text-muted-foreground">avg confidence {propStats.overall.avgConfidence > 0 ? `${propStats.overall.avgConfidence.toFixed(0)}%` : "—"}</p>
+              </div>
+            </div>
+
+            {/* By Market */}
+            {propStats.byMarket.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">By Market</p>
+                <div className="space-y-2">
+                  {propStats.byMarket.map((m) => {
+                    const total = Number(m.wins) + Number(m.losses);
+                    const rate = total > 0 ? Number(m.wins) / total : null;
+                    return (
+                      <div key={m.market} className="flex items-center gap-3 text-xs" data-testid={`props-market-${m.market}`}>
+                        <span className="w-28 truncate font-medium text-foreground/80">{m.market_label || m.market}</span>
+                        <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${rate !== null && rate >= 0.52 ? "bg-emerald-500/70" : rate !== null && rate >= 0.47 ? "bg-amber-500/60" : "bg-red-500/50"}`}
+                            style={{ width: `${rate !== null ? Math.round(rate * 100) : 0}%` }}
+                          />
+                        </div>
+                        <span className="w-10 text-right tabular-nums font-mono text-[10px]">
+                          {rate !== null ? `${(rate * 100).toFixed(0)}%` : "—"}
+                        </span>
+                        <span className="w-14 text-right text-muted-foreground text-[10px]">{Number(m.wins)}W {Number(m.losses)}L</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* By Sport */}
+            {propStats.bySport.length > 0 && (
+              <div>
+                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">By Sport</p>
+                <div className="flex flex-wrap gap-2">
+                  {propStats.bySport.map((s) => {
+                    const total = Number(s.wins) + Number(s.losses);
+                    const rate = total > 0 ? Number(s.wins) / total : null;
+                    return (
+                      <div key={s.sport} className="flex items-center gap-1.5 rounded-md bg-muted/40 border border-border/50 px-2 py-1 text-[10px]" data-testid={`props-sport-${s.sport}`}>
+                        <span className="font-semibold">{s.sport}</span>
+                        <span className={`font-mono ${rate !== null && rate >= 0.52 ? "text-emerald-400" : rate !== null && rate >= 0.47 ? "text-amber-400" : "text-muted-foreground"}`}>
+                          {rate !== null ? `${(rate * 100).toFixed(0)}%` : "—"}
+                        </span>
+                        <span className="text-muted-foreground">({Number(s.total)})</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <p className="text-[10px] text-muted-foreground/60 pt-2 border-t border-border/40 leading-relaxed">
+              Player prop picks are tracked separately. Win rate is calculated on settled outcomes only — pending picks are excluded.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* ── Life Changer Ticket History ────────────────────────────────────── */}
       {lctHistory.length > 0 && (
