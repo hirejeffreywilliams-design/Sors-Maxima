@@ -64,6 +64,7 @@ import {
   ExternalLink,
   Crown,
   ChevronRight,
+  Copy,
 } from "lucide-react";
 import type { GeneratedTicket, TicketLeg } from "@/lib/ticket-orchestrator";
 import { Link } from "wouter";
@@ -347,7 +348,7 @@ function PerformanceRing({ winRate, ringColor, hasData }: { winRate: number; rin
 }
 
 function ProfileHero() {
-  const { data: authData } = useQuery<{ authenticated: boolean; username?: string; isAdmin?: boolean; tier?: string }>({
+  const { data: authData } = useQuery<{ authenticated: boolean; username?: string; isAdmin?: boolean; tier?: string; isFounder?: boolean; founderNumber?: number | null; founderType?: string | null }>({
     queryKey: ["/api/auth/check"],
   });
   const { data: tickets = [] } = useQuery<SavedTicket[]>({ queryKey: TICKET_HISTORY_KEY });
@@ -436,6 +437,17 @@ function ProfileHero() {
                 {authData?.isAdmin && (
                   <Badge variant="outline" className="text-xs bg-rose-500/10 text-rose-400 border-rose-500/25">
                     Admin
+                  </Badge>
+                )}
+                {authData?.isFounder && (
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-amber-500/15 text-amber-400 border-amber-500/40 gap-1 font-semibold"
+                    data-testid="badge-founder"
+                  >
+                    <Trophy className="w-3 h-3" />
+                    Founder #{authData.founderNumber}
+                    {authData.founderType === "enterprise" && <Crown className="w-3 h-3 ml-0.5" />}
                   </Badge>
                 )}
               </div>
@@ -1591,6 +1603,138 @@ function BetHistoryTab() {
   );
 }
 
+function FounderSection() {
+  const { toast } = useToast();
+  const { data: authData } = useQuery<{
+    authenticated: boolean;
+    isFounder?: boolean;
+    founderNumber?: number | null;
+    founderType?: string | null;
+    founderReferralCode?: string | null;
+    founderCreditsEarned?: number;
+    tier?: string;
+  }>({ queryKey: ["/api/auth/check"] });
+
+  if (!authData?.isFounder) return null;
+
+  const isEnterprise = authData.founderType === "enterprise";
+  const referralCode = authData.founderReferralCode || "";
+  const priceLockTier: Record<string, string> = { pro: "Sharp", elite: "Edge", whale: "Max", free: "Free" };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(referralCode).then(() => {
+      toast({ title: "Referral code copied!", description: referralCode });
+    });
+  };
+
+  const FOUNDER_BENEFITS = isEnterprise ? [
+    "Max access — all features, zero limits",
+    "Enterprise co-founder privileges",
+    "Price locked at $0 enterprise arrangement",
+    "Early access to every pick (instant, no delay)",
+    "Priority support — direct team access",
+    "Permanent Founder badge on your profile",
+  ] : [
+    `One tier upgrade — ${priceLockTier[authData.tier || "pro"] || "Sharp"} features unlocked`,
+    "Price locked forever at your join rate",
+    "Early access to every pick (15 min before members)",
+    "Referral credits toward your subscription",
+    "Priority support — no queue, no bots",
+    "Permanent Founder badge on your profile",
+  ];
+
+  return (
+    <Card
+      className="border-amber-500/30 bg-gradient-to-br from-amber-500/5 via-background to-background"
+      data-testid="card-founder-section"
+    >
+      <CardContent className="p-5 sm:p-6 space-y-5">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg border ${isEnterprise ? "bg-amber-500/20 border-amber-500/40 text-amber-300" : "bg-amber-500/15 border-amber-500/30 text-amber-400"}`} data-testid="badge-founder-number">
+              #{authData.founderNumber}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base text-amber-400" data-testid="text-founder-title">
+                  {isEnterprise ? "Enterprise Founder" : "Founding Member"}
+                </span>
+                <Trophy className="w-4 h-4 text-amber-400" />
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {isEnterprise
+                  ? "Co-founder partner with enterprise privileges"
+                  : "Part of the original Founding 500 — permanently"}
+              </p>
+            </div>
+          </div>
+          <Badge
+            variant="outline"
+            className="text-xs bg-amber-500/10 text-amber-400 border-amber-500/30 px-2.5 py-1"
+          >
+            {isEnterprise ? "Enterprise Partner" : "Founding 500"}
+          </Badge>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Your Referral Code</p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 font-mono text-sm bg-muted/50 border border-border/50 rounded-lg px-3 py-2 text-amber-400 font-bold tracking-widest" data-testid="text-referral-code">
+                {referralCode || "—"}
+              </div>
+              {referralCode && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shrink-0 border-amber-500/30 hover:bg-amber-500/10"
+                  onClick={copyCode}
+                  data-testid="button-copy-referral"
+                >
+                  <Copy className="w-3.5 h-3.5 mr-1.5" />
+                  Copy
+                </Button>
+              )}
+            </div>
+            {authData.founderCreditsEarned !== undefined && authData.founderCreditsEarned > 0 && (
+              <p className="text-xs text-emerald-400 flex items-center gap-1" data-testid="text-credits-earned">
+                <DollarSign className="w-3 h-3" />
+                ${(authData.founderCreditsEarned / 100).toFixed(2)} referral credits earned
+              </p>
+            )}
+            {referralCode && (
+              <p className="text-[10px] text-muted-foreground">
+                Share your code — earn credits when referred members subscribe.
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Your Founder Benefits</p>
+            <ul className="space-y-1.5">
+              {FOUNDER_BENEFITS.map(b => (
+                <li key={b} className="flex items-start gap-2 text-xs text-foreground/80">
+                  <Check className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+                  <span>{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 pt-1 border-t border-border/40">
+          <Link href="/founders">
+            <Button variant="ghost" size="sm" className="text-xs gap-1 text-amber-400 hover:text-amber-300 hover:bg-amber-500/10" data-testid="link-founders-wall">
+              <Trophy className="w-3.5 h-3.5" />
+              View Founders Wall
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ProfilePage() {
   useSEO({ title: "Profile", description: "Manage your account, betting profile, and bet history" });
   const { data: cards } = useQuery<any[]>({ 
@@ -1602,6 +1746,7 @@ export default function ProfilePage() {
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <ProfileHero />
+        <FounderSection />
 
         {cards && cards.length > 0 && (
           <section className="space-y-4">

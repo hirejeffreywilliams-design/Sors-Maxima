@@ -83,6 +83,8 @@ function humanFactor(name: string): string {
 function CompactPickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const legId = `cmd-strat-${pick.id}`;
   const inSlip = legs.some(l => l.id === legId);
+  const { data: authCheck } = useQuery<{ isFounder?: boolean }>({ queryKey: ["/api/auth/check"], staleTime: 60 * 1000 });
+  const isFounder = authCheck?.isFounder;
 
   const handleAdd = () => {
     if (inSlip) return;
@@ -113,7 +115,12 @@ function CompactPickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: st
       <CardContent className="p-3 space-y-2">
         <div className="flex items-center justify-between gap-1">
           <Badge variant="outline" className={`text-[9px] px-1 h-3.5 ${sportColor(pick.sport)}`}>{pick.sport}</Badge>
-          <Badge variant="outline" className={`text-[9px] font-bold h-3.5 px-1 ${gradeBg(pick.grade)}`}>{pick.grade}</Badge>
+          <div className="flex items-center gap-1">
+            {isFounder && (
+              <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm bg-amber-500/20 border border-amber-500/40 text-[8px] font-bold text-amber-400" title="Founder Early Access" data-testid="badge-founder-early">F</span>
+            )}
+            <Badge variant="outline" className={`text-[9px] font-bold h-3.5 px-1 ${gradeBg(pick.grade)}`}>{pick.grade}</Badge>
+          </div>
         </div>
         <div className="space-y-0.5">
           <p className="text-[11px] font-semibold truncate leading-tight">{pick.pick}</p>

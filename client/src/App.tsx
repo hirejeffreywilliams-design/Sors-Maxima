@@ -118,6 +118,8 @@ import { useOfflineStatus } from "@/hooks/use-offline-cache";
 import { OfflineBanner } from "@/components/offline-banner";
 
 const ApplyPage = lazy(() => import("@/pages/apply"));
+const FoundersPage = lazy(() => import("@/pages/founders"));
+const AdminFounders = lazy(() => import("@/pages/admin-founders"));
 
 function SSEStatusDot() {
   const sse = useSSEContext();
@@ -267,6 +269,7 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/sport-analysis">{() => <AdminGuard component={SportFactorAnalysis} authState={authState} />}</Route>
               <Route path="/admin/correlation-matrix">{() => <AdminGuard component={CorrelationMatrix} authState={authState} />}</Route>
               <Route path="/admin/platform-intelligence">{() => <AdminGuard component={PlatformIntelligencePage} authState={authState} />}</Route>
+              <Route path="/admin/founders">{() => <AdminGuard component={AdminFounders} authState={authState} />}</Route>
               <Route component={NotFound} />
             </Switch>
           </Suspense>
@@ -287,7 +290,7 @@ function OnboardingGuard({ children, isAdmin }: { children: React.ReactNode; isA
 
   useEffect(() => {
     if (isAdmin) return;
-    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record', '/my-bets'];
+    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record', '/my-bets', '/founders'];
     if (onboardingData && !onboardingData.onboardingCompleted && !skipPaths.includes(location)) {
       setLocation('/onboarding');
     }
@@ -352,6 +355,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/watchlist" component={WatchlistPage} />
         <Route path="/research" component={ResearchNotesPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
+        <Route path="/founders" component={FoundersPage} />
         <Route path="/shared-tickets"><Redirect to="/community" /></Route>
         <Route path="/cards" component={CardsPage} />
         <Route path="/verify-email" component={VerifyEmail} />
@@ -368,6 +372,11 @@ interface AuthState {
   username?: string;
   emailVerified?: boolean;
   tier?: string;
+  isFounder?: boolean;
+  founderNumber?: number | null;
+  founderType?: string | null;
+  founderReferralCode?: string | null;
+  founderCreditsEarned?: number;
 }
 
 interface NavItem {
@@ -391,6 +400,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/settings":             { label: "Settings",             parent: "/" },
   "/help":                 { label: "Help Center",          parent: "/" },
   "/feedback":             { label: "My Feedback",          parent: "/" },
+  "/founders":             { label: "Founders Wall",          parent: "/" },
   "/changelog":            { label: "What's New",           parent: "/" },
   "/roadmap":              { label: "Roadmap",              parent: "/" },
   "/legal":                { label: "Legal",                parent: "/" },
@@ -1148,7 +1158,7 @@ function AppContent() {
   const [authState, setAuthState] = useState<AuthState>({});
   const [location, setLocation] = useLocation();
 
-  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string; tier?: string; emailVerified?: boolean }>({
+  const { data: authData, isLoading, refetch } = useQuery<{ authenticated: boolean; isAdmin?: boolean; username?: string; tier?: string; emailVerified?: boolean; isFounder?: boolean; founderNumber?: number | null; founderType?: string | null; founderReferralCode?: string | null; founderCreditsEarned?: number }>({
     queryKey: ["/api/auth/check"],
     retry: false,
     staleTime: 1000 * 60,
@@ -1166,6 +1176,11 @@ function AppContent() {
           username: authData.username,
           emailVerified: authData.emailVerified,
           tier: authData.tier,
+          isFounder: authData.isFounder,
+          founderNumber: authData.founderNumber,
+          founderType: authData.founderType,
+          founderReferralCode: authData.founderReferralCode,
+          founderCreditsEarned: authData.founderCreditsEarned,
         });
       }
     }
@@ -1232,6 +1247,14 @@ function AppContent() {
     return (
       <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
         <ApplyPage />
+      </Suspense>
+    );
+  }
+
+  if (location === '/founders') {
+    return (
+      <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+        <FoundersPage />
       </Suspense>
     );
   }

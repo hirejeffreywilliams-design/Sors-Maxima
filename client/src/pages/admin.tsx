@@ -519,6 +519,7 @@ export default function AdminDashboard() {
     { href: "/admin/feature-flags",      label: "Feature Flags",          desc: "Toggle features per tier",              icon: Flag },
     { href: "/admin/policy-standards",   label: "Policy & Standards",     desc: "Company policies, procedures, grade standards & AI compliance", icon: ShieldCheck },
     { href: "/admin/feedback",           label: "Member Feedback",         desc: "All user submissions, ratings & NPS scores", icon: MessageSquare },
+    { href: "/admin/founders",           label: "Founders Program",        desc: "Manage the Founding 500 — launch, grant, revoke, and monitor slots", icon: Trophy },
   ];
 
   const allToolSections = [
@@ -538,6 +539,7 @@ export default function AdminDashboard() {
     {
       label: "Members & Support",
       tools: [
+        { href: "/admin/founders",       label: "Founders Program",  icon: Trophy },
         { href: "/admin/user-health",    label: "User Health",       icon: Activity },
         { href: "/admin/applications",   label: "Applications",      icon: UserCheck },
         { href: "/admin/support",        label: "Support Dashboard", icon: MessageSquare },

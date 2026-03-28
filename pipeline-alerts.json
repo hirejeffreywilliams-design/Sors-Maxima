@@ -47,7 +47,8 @@
       "Monitor for updates and re-enable real-time data fetching once the underlying issue is resolved"
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T13:30:35.501Z"
   },
   {
     "id": "alert-mma-engine-1774486160460",
@@ -63,7 +64,8 @@
       "Restart the node to refresh its connection and clear the cached state."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T13:30:35.500Z"
   },
   {
     "id": "alert-odds-api-1774486159232",
@@ -79,7 +81,8 @@
       "Set up automated alerts to notify users when the Odds API status changes from cached to active."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-03-28T13:30:35.423Z"
   },
   {
     "id": "alert-nhl-stats-1774480640402",

@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
 import {
   Zap,
   Brain,
@@ -19,6 +20,8 @@ import {
   Lock,
   Database,
   CheckCircle,
+  Trophy,
+  Flame,
 } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { useSEO } from "@/hooks/use-seo";
@@ -197,12 +200,25 @@ const pricingTiers = [
   },
 ];
 
+interface FoundersStatus {
+  isActive: boolean;
+  memberSpotsTotal: number;
+  memberSpotsClaimed: number;
+  memberSpotsRemaining: number;
+}
+
 export default function LandingPage() {
   useSEO({ title: "Sors Maxima — Private Betting Intelligence", description: "Exclusive sports betting intelligence platform. 46 analysis factors, real-time data, advanced simulations. Members only." });
 
   const { data: trackStats } = useQuery<{ settledPicks: number }>({
     queryKey: ["/api/track-record"],
     staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
+  const { data: foundersStatus } = useQuery<FoundersStatus>({
+    queryKey: ["/api/founders/status"],
+    staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 
@@ -432,6 +448,33 @@ export default function LandingPage() {
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Select the level of intelligence that matches your strategy.
             </p>
+            {foundersStatus?.isActive && foundersStatus.memberSpotsRemaining > 0 && (
+              <div className="max-w-sm mx-auto space-y-2 pt-2" data-testid="founders-scarcity-counter">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-400 text-xs font-semibold">
+                  <Trophy className="w-3.5 h-3.5" />
+                  Founding 500 — Active Now
+                  {foundersStatus.memberSpotsRemaining <= 100 && (
+                    <span className="flex items-center gap-1 text-red-400">
+                      <Flame className="w-3 h-3" />
+                      Almost Full
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center justify-between text-xs px-1">
+                  <span className="text-muted-foreground">{foundersStatus.memberSpotsClaimed} claimed</span>
+                  <span className={`font-bold ${foundersStatus.memberSpotsRemaining <= 50 ? "text-red-400" : foundersStatus.memberSpotsRemaining <= 150 ? "text-amber-400" : "text-primary"}`}>
+                    {foundersStatus.memberSpotsRemaining} spots left
+                  </span>
+                </div>
+                <Progress value={Math.round((foundersStatus.memberSpotsClaimed / foundersStatus.memberSpotsTotal) * 100)} className="h-1.5" />
+                <p className="text-[10px] text-muted-foreground">
+                  Join now to lock your price forever.{" "}
+                  <Link href="/founders" className="text-amber-400 underline underline-offset-2 hover:text-amber-300" data-testid="link-founders-wall">
+                    See the Founders Wall →
+                  </Link>
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
