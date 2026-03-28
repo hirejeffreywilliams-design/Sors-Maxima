@@ -37,18 +37,18 @@ function generateReferralCode(founderNumber: number, type: "member" | "enterpris
 async function ensureProgramRow(): Promise<void> {
   await pool.query(`
     INSERT INTO founders_program (
-      is_active, member_spots_total, member_spots_claimed,
+      id, is_active, member_spots_total, member_spots_claimed,
       enterprise_spots_total, enterprise_spots_claimed,
       next_member_number, next_enterprise_number
     )
-    SELECT false, 500, 0, 5, 0, 1, 1
-    WHERE NOT EXISTS (SELECT 1 FROM founders_program)
+    VALUES (1, false, 500, 0, 5, 0, 1, 1)
+    ON CONFLICT (id) DO NOTHING
   `);
 }
 
 export async function getProgramStatus(): Promise<FounderProgramStatus> {
   await ensureProgramRow();
-  const result = await pool.query(`SELECT * FROM founders_program LIMIT 1`);
+  const result = await pool.query(`SELECT * FROM founders_program WHERE id = 1`);
   const row = result.rows[0];
   if (!row) {
     return {
@@ -77,7 +77,7 @@ export async function getProgramStatus(): Promise<FounderProgramStatus> {
 export async function launchProgram(adminUserId: number): Promise<FounderProgramStatus> {
   await ensureProgramRow();
 
-  const existing = await pool.query(`SELECT is_active FROM founders_program LIMIT 1`);
+  const existing = await pool.query(`SELECT is_active FROM founders_program WHERE id = 1`);
   if (existing.rows[0]?.is_active) {
     throw new Error("Founders Program is already active");
   }
@@ -142,7 +142,7 @@ export async function autoGrantOnSubscription(
 
     const fpRow = await client.query(
       `SELECT is_active, member_spots_total, member_spots_claimed, next_member_number
-       FROM founders_program LIMIT 1 FOR UPDATE`
+       FROM founders_program WHERE id = 1 FOR UPDATE`
     );
     if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
       await client.query("ROLLBACK");
@@ -219,7 +219,7 @@ export async function manualGrant(
       `SELECT is_active,
               member_spots_total, member_spots_claimed, next_member_number,
               enterprise_spots_total, enterprise_spots_claimed, next_enterprise_number
-       FROM founders_program LIMIT 1 FOR UPDATE`
+       FROM founders_program WHERE id = 1 FOR UPDATE`
     );
     if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
       await client.query("ROLLBACK");
