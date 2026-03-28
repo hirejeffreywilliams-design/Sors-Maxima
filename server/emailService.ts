@@ -614,7 +614,7 @@ export async function sendEnterpriseFounderWelcomeEmail(
   referralCode: string
 ): Promise<boolean> {
   if (!resend) return false;
-  const paddedNum = String(founderNumber).padStart(1, "");
+  const paddedNum = String(founderNumber).padStart(3, "0");
   try {
     const { error } = await resend.emails.send({
       from: FROM_EMAIL,

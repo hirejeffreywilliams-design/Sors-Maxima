@@ -405,7 +405,13 @@ export function registerAuthRoutes(app: Express): void {
       const userId = req.session.userId;
       let tier = 'free';
       let emailVerified = true;
-      let founderFields: Record<string, any> = {};
+      let founderFields: {
+        isFounder?: boolean;
+        founderNumber?: number | null;
+        founderType?: string | null;
+        founderReferralCode?: string | null;
+        founderCreditsEarned?: number;
+      } = {};
 
       if (isAdmin) {
         tier = 'whale';
