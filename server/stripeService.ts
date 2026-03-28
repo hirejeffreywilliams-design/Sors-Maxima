@@ -1,5 +1,6 @@
 import { getUncachableStripeClient, getStripePublishableKey, isStripeAvailable } from './stripeClient';
 import { pool } from './db';
+import { autoGrantOnSubscription } from './foundersEngine';
 
 const ALLOWED_PRICE_IDS = new Set([
   'price_1T9g5NCsa9MEIxma4ubid3pw', // Sharp monthly
@@ -267,6 +268,25 @@ export class StripeService {
           SET stripe_subscription_id = $1, subscription_tier = $2, subscription_status = $3, updated_at = NOW()
           WHERE stripe_customer_id = $4
         `, [subscription.id, tier, status, customerId]);
+
+        if (status === 'active' && tier !== 'free') {
+          try {
+            const userRow = await pool.query(`
+              SELECT us.username, u.id AS user_id, u.email
+              FROM user_subscriptions us
+              JOIN users u ON u.username = us.username
+              WHERE us.stripe_customer_id = $1
+            `, [customerId]);
+            if (userRow.rows[0]) {
+              const { username, user_id, email } = userRow.rows[0];
+              autoGrantOnSubscription(Number(user_id), username, email, tier as 'pro' | 'elite' | 'whale').catch(err =>
+                console.error('[FOUNDERS] autoGrantOnSubscription error in webhook:', err)
+              );
+            }
+          } catch (err) {
+            console.error('[FOUNDERS] Failed to lookup user for auto-grant:', err);
+          }
+        }
         break;
       }
 

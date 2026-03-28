@@ -6388,4 +6388,60 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
     }
   });
 
+  // ── Founders Program Admin Routes ─────────────────────────────────────────
+
+  app.get("/api/admin/founders/status", requireAdmin, async (_req, res) => {
+    try {
+      const { getProgramStatus, getFoundersForWall } = await import("../foundersEngine");
+      const [status, founders] = await Promise.all([getProgramStatus(), getFoundersForWall()]);
+      res.json({ ...status, founders });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/founders/launch", requireAdmin, async (req, res) => {
+    try {
+      const adminUserId = Number(req.session?.userId);
+      if (!adminUserId) return res.status(401).json({ error: "Admin user ID required" });
+      const { launchProgram } = await import("../foundersEngine");
+      const status = await launchProgram(adminUserId);
+      res.json({ success: true, status });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/admin/founders/grant", requireAdmin, async (req, res) => {
+    try {
+      const { userId, founderType } = req.body;
+      if (!userId || !founderType) {
+        return res.status(400).json({ error: "userId and founderType are required" });
+      }
+      if (!["member", "enterprise"].includes(founderType)) {
+        return res.status(400).json({ error: "founderType must be 'member' or 'enterprise'" });
+      }
+      const adminUserId = Number(req.session?.userId);
+      const { manualGrant } = await import("../foundersEngine");
+      const result = await manualGrant(Number(userId), founderType as "member" | "enterprise", adminUserId);
+      if (!result.success) return res.status(400).json({ error: result.error });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.delete("/api/admin/founders/revoke/:userId", requireAdmin, async (req, res) => {
+    try {
+      const userId = Number(req.params.userId);
+      const adminUserId = Number(req.session?.userId);
+      const { revokeFounder } = await import("../foundersEngine");
+      const result = await revokeFounder(userId, adminUserId);
+      if (!result.success) return res.status(400).json({ error: result.error });
+      res.json(result);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
 }

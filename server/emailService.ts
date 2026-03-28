@@ -537,6 +537,184 @@ export async function sendWinBackEmail(to: string, username: string, promoCode: 
   } catch { return false; }
 }
 
+// ── Founders Program Emails ────────────────────────────────────────────────────
+
+export async function sendFounderWelcomeEmail(
+  to: string,
+  username: string,
+  founderNumber: number,
+  tier: string,
+  referralCode: string
+): Promise<boolean> {
+  if (!resend) return false;
+  const tierDisplayMap: Record<string, string> = { pro: "Sharp", elite: "Edge", whale: "Max" };
+  const tierBoostMap: Record<string, string> = { pro: "Edge", elite: "Max", whale: "Max (+ future tiers)" };
+  const tierDisplay = tierDisplayMap[tier] || tier;
+  const boostedTier = tierBoostMap[tier] || tierDisplay;
+  const paddedNum = String(founderNumber).padStart(3, "0");
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `🏆 Welcome, Founder #${paddedNum} — You're Part of Sors Maxima History`,
+      html: `
+        <div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:580px;margin:0 auto;">
+          <div style="background:linear-gradient(135deg,#b45309,#f59e0b);padding:3px;border-radius:12px;margin-bottom:28px;">
+            <div style="background:#0f172a;border-radius:10px;padding:24px;text-align:center;">
+              <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+              <div style="font-size:28px;font-weight:900;color:#f59e0b;letter-spacing:2px;">FOUNDER #${paddedNum}</div>
+              <div style="color:#94a3b8;font-size:14px;margin-top:4px;">of 500 · Sors Maxima</div>
+            </div>
+          </div>
+
+          <h1 style="font-size:22px;margin:0 0 8px;">Welcome, ${username}.</h1>
+          <p style="color:#94a3b8;margin:0 0 28px;">You are one of the first 500 members of Sors Maxima. Your number is permanent, your benefits are locked in for life, and your name will appear on the Founders Wall forever.</p>
+
+          <h2 style="color:#f59e0b;font-size:14px;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;">Your Permanent Benefits</h2>
+
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #f59e0b;">
+            <strong style="display:block;margin-bottom:4px;">💰 Lifetime Price Lock</strong>
+            <span style="color:#94a3b8;font-size:14px;">Your ${tierDisplay} rate is frozen forever — even if we raise prices to 3× what you pay. Other members will pay more. You never will.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #22c55e;">
+            <strong style="display:block;margin-bottom:4px;">⚡ Permanent Tier Boost</strong>
+            <span style="color:#94a3b8;font-size:14px;">You joined as ${tierDisplay}. You now get ${boostedTier}-level features — permanently. No extra charge.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #6366f1;">
+            <strong style="display:block;margin-bottom:4px;">⏰ 15-Min Early Signal Access</strong>
+            <span style="color:#94a3b8;font-size:14px;">You see top picks 15 minutes before they release to regular members. When sharp money moves, timing is everything.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #8b5cf6;">
+            <strong style="display:block;margin-bottom:4px;">🎯 Founders-Only Daily Ticket</strong>
+            <span style="color:#94a3b8;font-size:14px;">Every day, you receive an exclusive parlay built from the highest-conviction signals — A-grade, 72%+ confidence, 6%+ edge. Never shown to regular members.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:24px;border-left:3px solid #f59e0b;">
+            <strong style="display:block;margin-bottom:4px;">🔑 Your Referral Code: ${referralCode}</strong>
+            <span style="color:#94a3b8;font-size:14px;">Share this code. New members get 50% off their first month. You earn 1 free month credit for every 3 paying referrals — forever.</span>
+          </div>
+
+          <a href="${APP_URL}/founders" style="display:inline-block;background:linear-gradient(135deg,#b45309,#f59e0b);color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;margin-bottom:24px;">View Your Place on the Founders Wall →</a>
+
+          <p style="color:#475569;font-size:12px;border-top:1px solid #1e293b;padding-top:16px;margin:0;">This is history, ${username}. Welcome to the founding team.</p>
+        </div>
+      `,
+    });
+    if (error) { console.error("Founder welcome email error:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send founder welcome email:", err);
+    return false;
+  }
+}
+
+export async function sendEnterpriseFounderWelcomeEmail(
+  to: string,
+  username: string,
+  founderNumber: number,
+  referralCode: string
+): Promise<boolean> {
+  if (!resend) return false;
+  const paddedNum = String(founderNumber).padStart(1, "");
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `🤝 Welcome, Enterprise Founder #${paddedNum} — Co-Founder Status Confirmed`,
+      html: `
+        <div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:580px;margin:0 auto;">
+          <div style="background:linear-gradient(135deg,#1d4ed8,#6366f1);padding:3px;border-radius:12px;margin-bottom:28px;">
+            <div style="background:#0f172a;border-radius:10px;padding:24px;text-align:center;">
+              <div style="font-size:40px;margin-bottom:8px;">🤝</div>
+              <div style="font-size:24px;font-weight:900;color:#6366f1;">ENTERPRISE FOUNDER #${paddedNum}</div>
+              <div style="color:#94a3b8;font-size:14px;margin-top:4px;">of 5 · Sors Maxima Co-Founder</div>
+            </div>
+          </div>
+
+          <h1 style="font-size:22px;margin:0 0 8px;">Welcome to the inner circle, ${username}.</h1>
+          <p style="color:#94a3b8;margin:0 0 28px;">You are one of 5 Enterprise Founding Partners. Your organization will be permanently featured on the Founders Wall and on our about page. Here's everything that comes with your status:</p>
+
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #6366f1;">
+            <strong style="display:block;margin-bottom:4px;">💸 20% Revenue Share — For Life</strong>
+            <span style="color:#94a3b8;font-size:14px;">Every paying member your community generates earns you 20% of their monthly subscription — permanently. No caps, no expiration.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #22c55e;">
+            <strong style="display:block;margin-bottom:4px;">👥 Max Tier for 5 Team Members</strong>
+            <span style="color:#94a3b8;font-size:14px;">Designate up to 5 team members for full Max-tier access, bundled at no extra cost.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #f59e0b;">
+            <strong style="display:block;margin-bottom:4px;">🏷 White-Label Verification Portal</strong>
+            <span style="color:#94a3b8;font-size:14px;">Your community gets a branded verification portal — custom URL, your logo, your colors. We'll set this up with you directly.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:10px;border-left:3px solid #8b5cf6;">
+            <strong style="display:block;margin-bottom:4px;">📊 Custom Community Analytics Dashboard</strong>
+            <span style="color:#94a3b8;font-size:14px;">A private analytics view showing your community's aggregate betting performance, ROI trends, and engagement data — visible only to you.</span>
+          </div>
+          <div style="background:#1e293b;border-radius:8px;padding:16px 20px;margin-bottom:24px;border-left:3px solid #6366f1;">
+            <strong style="display:block;margin-bottom:4px;">🔑 Enterprise Referral Code: ${referralCode}</strong>
+            <span style="color:#94a3b8;font-size:14px;">Share this with your community. New subscribers using this code count toward your 20% revenue share tracking.</span>
+          </div>
+
+          <p style="color:#cbd5e1;margin-bottom:24px;">Your dedicated account manager will reach out within 24 hours to begin onboarding. Reply to this email if you have immediate questions.</p>
+
+          <a href="${APP_URL}/founders" style="display:inline-block;background:linear-gradient(135deg,#1d4ed8,#6366f1);color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;margin-bottom:24px;">View the Founders Wall →</a>
+
+          <p style="color:#475569;font-size:12px;border-top:1px solid #1e293b;padding-top:16px;margin:0;">This partnership is the foundation of something significant. Thank you for being here from the start.</p>
+        </div>
+      `,
+    });
+    if (error) { console.error("Enterprise founder welcome email error:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send enterprise founder welcome email:", err);
+    return false;
+  }
+}
+
+export async function sendFounderAnnouncementEmail(to: string, username: string): Promise<boolean> {
+  if (!resend) return false;
+  try {
+    const { error } = await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `🚀 The Founding 500 is now open — lock in your benefits before spots are gone`,
+      html: `
+        <div style="background:#0f172a;color:white;padding:40px;font-family:sans-serif;border-radius:8px;max-width:580px;margin:0 auto;">
+          <div style="background:linear-gradient(135deg,#b45309,#f59e0b);border-radius:8px;padding:2px;margin-bottom:28px;">
+            <div style="background:#0f172a;border-radius:7px;padding:20px;text-align:center;">
+              <div style="font-size:36px;margin-bottom:8px;">🏆</div>
+              <div style="font-size:22px;font-weight:900;color:#f59e0b;">THE FOUNDING 500 IS OPEN</div>
+              <div style="color:#94a3b8;font-size:13px;margin-top:4px;">500 lifetime spots. Once they're gone, they're gone.</div>
+            </div>
+          </div>
+
+          <h1 style="font-size:22px;margin:0 0 12px;">Hi ${username},</h1>
+          <p style="color:#94a3b8;margin:0 0 24px;">As an existing Sors Maxima member, you have first access to Founding 500 status before we open it to the general public. Here's what Founder status gives you, permanently:</p>
+
+          <ul style="color:#cbd5e1;line-height:2;padding-left:20px;margin-bottom:24px;">
+            <li><strong style="color:white;">Lifetime Price Lock</strong> — your current rate, frozen forever</li>
+            <li><strong style="color:white;">Permanent Tier Boost</strong> — one tier above what you pay for</li>
+            <li><strong style="color:white;">15-Minute Early Signal Access</strong></li>
+            <li><strong style="color:white;">Founders-Only Daily Ticket</strong> (A-grade only)</li>
+            <li><strong style="color:white;">Personal Referral Code</strong> — earn free months forever</li>
+            <li><strong style="color:white;">Founders Wall</strong> — your name on a permanent public page</li>
+          </ul>
+
+          <p style="color:#f59e0b;font-weight:700;margin-bottom:24px;">There are 500 total spots. As an existing member, your next payment automatically enrolls you. No action required.</p>
+
+          <a href="${APP_URL}/founders" style="display:inline-block;background:linear-gradient(135deg,#b45309,#f59e0b);color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">View the Founders Wall →</a>
+
+          <p style="color:#475569;font-size:12px;margin-top:24px;">This is a one-time program. Founding status cannot be purchased after all spots are claimed.</p>
+        </div>
+      `,
+    });
+    if (error) { console.error("Founder announcement email error:", error); return false; }
+    return true;
+  } catch (err) {
+    console.error("Failed to send founder announcement email:", err);
+    return false;
+  }
+}
+
 export async function sendUpgradeNudgeEmail(to: string, username: string): Promise<boolean> {
   if (!resend) return false;
   try {

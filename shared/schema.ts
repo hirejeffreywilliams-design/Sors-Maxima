@@ -1310,6 +1310,29 @@ export const users = pgTable("users", {
   lastLoginAt: timestamp("last_login_at"),
   loginAttempts: integer("login_attempts").default(0).notNull(),
   lockedUntil: timestamp("locked_until"),
+  isFounder: boolean("is_founder").default(false).notNull(),
+  founderNumber: integer("founder_number"),
+  founderType: varchar("founder_type", { length: 20 }),
+  founderJoinedAt: timestamp("founder_joined_at"),
+  founderPriceLockedTier: varchar("founder_price_locked_tier", { length: 20 }),
+  founderPriceLockedAmount: integer("founder_price_locked_amount"),
+  founderReferralCode: varchar("founder_referral_code", { length: 20 }).unique(),
+  founderReferralCount: integer("founder_referral_count").default(0),
+  founderCreditsEarned: integer("founder_credits_earned").default(0),
+});
+
+export const foundersProgram = pgTable("founders_program", {
+  id: serial("id").primaryKey(),
+  isActive: boolean("is_active").default(false).notNull(),
+  launchedAt: timestamp("launched_at"),
+  launchedByUserId: integer("launched_by_user_id"),
+  memberSpotsTotal: integer("member_spots_total").default(500).notNull(),
+  memberSpotsClaimed: integer("member_spots_claimed").default(0).notNull(),
+  enterpriseSpotsTotal: integer("enterprise_spots_total").default(5).notNull(),
+  enterpriseSpotsClaimed: integer("enterprise_spots_claimed").default(0).notNull(),
+  announcementEmailSentAt: timestamp("announcement_email_sent_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const subscriptions = pgTable("subscriptions", {

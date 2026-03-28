@@ -521,6 +521,34 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ptr_gen_at   ON prop_track_records(generated_at DESC)`);
     await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_ptr_dedup ON prop_track_records(player_name, market, selection, DATE(generated_at))`);
 
+    // ── Founders Program ───────────────────────────────────────────────────────
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_founder BOOLEAN NOT NULL DEFAULT FALSE`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_number INTEGER`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_type VARCHAR(20)`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_joined_at TIMESTAMP`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_price_locked_tier VARCHAR(20)`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_price_locked_amount INTEGER`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_referral_code VARCHAR(20)`);
+    await db.execute(sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_founder_ref_code ON users(founder_referral_code) WHERE founder_referral_code IS NOT NULL`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_referral_count INTEGER NOT NULL DEFAULT 0`);
+    await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS founder_credits_earned INTEGER NOT NULL DEFAULT 0`);
+
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS founders_program (
+        id SERIAL PRIMARY KEY,
+        is_active BOOLEAN NOT NULL DEFAULT FALSE,
+        launched_at TIMESTAMP,
+        launched_by_user_id INTEGER,
+        member_spots_total INTEGER NOT NULL DEFAULT 500,
+        member_spots_claimed INTEGER NOT NULL DEFAULT 0,
+        enterprise_spots_total INTEGER NOT NULL DEFAULT 5,
+        enterprise_spots_claimed INTEGER NOT NULL DEFAULT 0,
+        announcement_email_sent_at TIMESTAMP,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

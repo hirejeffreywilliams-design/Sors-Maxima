@@ -17,6 +17,7 @@ import { registerGuidelinesRoutes } from "./routes/guidelines";
 import { registerFeedbackRoutes } from "./routes/feedback";
 import { registerPickFeedbackRoutes } from "./routes/pickFeedback";
 import { registerStrategyIntelligenceRoutes } from "./routes/strategy-intelligence";
+import { getProgramStatus, getFoundersForWall } from "./foundersEngine";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -40,6 +41,15 @@ export async function registerRoutes(
   registerFeedbackRoutes(app);
   registerPickFeedbackRoutes(app);
   registerStrategyIntelligenceRoutes(app);
+
+  app.get("/api/founders/status", async (_req, res) => {
+    try {
+      const [status, founders] = await Promise.all([getProgramStatus(), getFoundersForWall()]);
+      res.json({ ...status, founders });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
   return httpServer;
 }

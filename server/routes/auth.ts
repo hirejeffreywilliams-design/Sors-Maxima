@@ -6,6 +6,7 @@ import { getClientIp, requireAdmin } from "./helpers";
 import { stripeService } from "../stripeService";
 import { generateAndStoreCode, validateCode, markEmailVerified, getEmailVerifiedStatus, generateResetToken, consumeResetToken, isValidResetToken } from "../emailVerification";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../emailService";
+import { getFounderData } from "../foundersEngine";
 
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
@@ -393,13 +394,26 @@ export function registerAuthRoutes(app: Express): void {
       const userId = req.session.userId;
       let tier = 'free';
       let emailVerified = true;
+      let founderFields: Record<string, any> = {};
 
       if (isAdmin) {
         tier = 'whale';
       } else if (req.session.username && userId) {
-        const sub = await stripeService.getUserSubscription(req.session.username).catch(() => null);
+        const [sub, founderData] = await Promise.all([
+          stripeService.getUserSubscription(req.session.username).catch(() => null),
+          getFounderData(req.session.username).catch(() => null),
+        ]);
         tier = sub?.subscriptionTier || 'free';
         emailVerified = await getEmailVerifiedStatus(Number(userId)).catch(() => false);
+        if (founderData) {
+          founderFields = {
+            isFounder: founderData.isFounder,
+            founderNumber: founderData.founderNumber,
+            founderType: founderData.founderType,
+            founderReferralCode: founderData.founderReferralCode,
+            founderCreditsEarned: founderData.founderCreditsEarned,
+          };
+        }
       }
       return res.json({ 
         authenticated: true, 
@@ -408,6 +422,7 @@ export function registerAuthRoutes(app: Express): void {
         role: req.session.role || 'user',
         tier,
         emailVerified,
+        ...founderFields,
       });
     }
 
@@ -449,9 +464,19 @@ export function registerAuthRoutes(app: Express): void {
               });
             }
 
-            const sub = await stripeService.getUserSubscription(user.username).catch(() => null);
+            const [sub, founderData2] = await Promise.all([
+              stripeService.getUserSubscription(user.username).catch(() => null),
+              getFounderData(user.username).catch(() => null),
+            ]);
             const tier = user.isAdmin ? 'whale' : (sub?.subscriptionTier || 'free');
             const emailVerified = (user as any).emailVerified ?? false;
+            const founderFields2 = founderData2 ? {
+              isFounder: founderData2.isFounder,
+              founderNumber: founderData2.founderNumber,
+              founderType: founderData2.founderType,
+              founderReferralCode: founderData2.founderReferralCode,
+              founderCreditsEarned: founderData2.founderCreditsEarned,
+            } : {};
 
             return res.json({
               authenticated: true,
@@ -460,6 +485,7 @@ export function registerAuthRoutes(app: Express): void {
               role: user.isAdmin ? 'admin' : 'user',
               tier,
               emailVerified,
+              ...founderFields2,
             });
           }
         } catch (err) {
