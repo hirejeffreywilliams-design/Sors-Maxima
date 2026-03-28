@@ -1,13 +1,13 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 334,
-      "total": 568,
-      "winRate": 58.8
+      "wins": 336,
+      "total": 570,
+      "winRate": 58.9
     },
     "NHL": {
       "wins": 285,
-      "total": 554,
+      "total": 555,
       "winRate": 51.4
     },
     "NCAAB": {
@@ -33,9 +33,9 @@
       "winRate": 56.6
     },
     "total": {
-      "wins": 308,
-      "total": 542,
-      "winRate": 56.8
+      "wins": 310,
+      "total": 545,
+      "winRate": 56.9
     },
     "team_total": {
       "wins": 38,
@@ -167,8 +167,8 @@
       "penalty": 3
     }
   ],
-  "totalSettled": 1698,
-  "lastMined": "2026-03-28T13:04:12.493Z",
+  "totalSettled": 1701,
+  "lastMined": "2026-03-28T13:10:25.967Z",
   "cycleCount": 1,
   "patternCount": 268
 }

@@ -543,10 +543,18 @@ export async function runMigrations(): Promise<void> {
         member_spots_claimed INTEGER NOT NULL DEFAULT 0,
         enterprise_spots_total INTEGER NOT NULL DEFAULT 5,
         enterprise_spots_claimed INTEGER NOT NULL DEFAULT 0,
+        next_member_number INTEGER NOT NULL DEFAULT 1,
+        next_enterprise_number INTEGER NOT NULL DEFAULT 1,
         announcement_email_sent_at TIMESTAMP,
         created_at TIMESTAMP NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMP NOT NULL DEFAULT NOW()
       )
+    `);
+
+    await db.execute(sql`
+      ALTER TABLE founders_program
+        ADD COLUMN IF NOT EXISTS next_member_number INTEGER NOT NULL DEFAULT 1,
+        ADD COLUMN IF NOT EXISTS next_enterprise_number INTEGER NOT NULL DEFAULT 1
     `);
 
     console.log("[Migrations] All startup migrations applied successfully");

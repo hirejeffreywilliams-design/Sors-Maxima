@@ -36,8 +36,12 @@ function generateReferralCode(founderNumber: number, type: "member" | "enterpris
 
 async function ensureProgramRow(): Promise<void> {
   await pool.query(`
-    INSERT INTO founders_program (is_active, member_spots_total, member_spots_claimed, enterprise_spots_total, enterprise_spots_claimed)
-    SELECT 'false', 500, 0, 5, 0
+    INSERT INTO founders_program (
+      is_active, member_spots_total, member_spots_claimed,
+      enterprise_spots_total, enterprise_spots_claimed,
+      next_member_number, next_enterprise_number
+    )
+    SELECT false, 500, 0, 5, 0, 1, 1
     WHERE NOT EXISTS (SELECT 1 FROM founders_program)
   `);
 }
@@ -121,6 +125,11 @@ async function sendAnnouncementEmails(): Promise<void> {
   }
 }
 
+/**
+ * Auto-grant triggered by Stripe webhook on new active subscription.
+ * ALWAYS grants "member" founder type — enterprise is an admin-only manual arrangement
+ * (co-founder deal, revenue share, white-label) and is never auto-granted.
+ */
 export async function autoGrantOnSubscription(
   userId: number,
   username: string,
@@ -132,13 +141,14 @@ export async function autoGrantOnSubscription(
     await client.query("BEGIN");
 
     const fpRow = await client.query(
-      `SELECT is_active, member_spots_total, member_spots_claimed FROM founders_program LIMIT 1 FOR UPDATE`
+      `SELECT is_active, member_spots_total, member_spots_claimed, next_member_number
+       FROM founders_program LIMIT 1 FOR UPDATE`
     );
     if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
       await client.query("ROLLBACK");
       return false;
     }
-    const { member_spots_total, member_spots_claimed } = fpRow.rows[0];
+    const { member_spots_total, member_spots_claimed, next_member_number } = fpRow.rows[0];
     if (member_spots_claimed >= member_spots_total) {
       await client.query("ROLLBACK");
       return false;
@@ -153,8 +163,8 @@ export async function autoGrantOnSubscription(
       return false;
     }
 
-    const nextNumber = member_spots_claimed + 1;
-    const referralCode = generateReferralCode(nextNumber, "member");
+    const founderNumber = next_member_number;
+    const referralCode = generateReferralCode(founderNumber, "member");
     const priceLockAmount = TIER_PRICE_CENTS[tier] || 4900;
 
     await client.query(`
@@ -169,18 +179,20 @@ export async function autoGrantOnSubscription(
           founder_referral_count = 0,
           founder_credits_earned = 0
       WHERE id = $5
-    `, [nextNumber, tier, priceLockAmount, referralCode, userId]);
+    `, [founderNumber, tier, priceLockAmount, referralCode, userId]);
 
     await client.query(`
       UPDATE founders_program
-      SET member_spots_claimed = member_spots_claimed + 1, updated_at = NOW()
+      SET member_spots_claimed = member_spots_claimed + 1,
+          next_member_number = next_member_number + 1,
+          updated_at = NOW()
     `);
 
     await client.query("COMMIT");
 
-    console.log(`[FOUNDERS] Auto-granted Founder #${nextNumber} to ${username} (${tier})`);
+    console.log(`[FOUNDERS] Auto-granted Founder #${founderNumber} to ${username} (${tier})`);
 
-    sendFounderWelcomeEmail(email, username, nextNumber, tier, referralCode).catch(err =>
+    sendFounderWelcomeEmail(email, username, founderNumber, tier, referralCode).catch(err =>
       console.error("[FOUNDERS] Welcome email failed:", err)
     );
 
@@ -204,8 +216,9 @@ export async function manualGrant(
     await client.query("BEGIN");
 
     const fpRow = await client.query(
-      `SELECT is_active, member_spots_total, member_spots_claimed,
-              enterprise_spots_total, enterprise_spots_claimed
+      `SELECT is_active,
+              member_spots_total, member_spots_claimed, next_member_number,
+              enterprise_spots_total, enterprise_spots_claimed, next_enterprise_number
        FROM founders_program LIMIT 1 FOR UPDATE`
     );
     if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
@@ -214,8 +227,8 @@ export async function manualGrant(
     }
 
     const {
-      member_spots_total, member_spots_claimed,
-      enterprise_spots_total, enterprise_spots_claimed,
+      member_spots_total, member_spots_claimed, next_member_number,
+      enterprise_spots_total, enterprise_spots_claimed, next_enterprise_number,
     } = fpRow.rows[0];
 
     const userRow = await client.query(
@@ -233,19 +246,19 @@ export async function manualGrant(
 
     const { username, email } = userRow.rows[0];
 
-    let nextNumber: number;
+    let founderNumber: number;
     if (founderType === "enterprise") {
       if (enterprise_spots_claimed >= enterprise_spots_total) {
         await client.query("ROLLBACK");
         return { success: false, error: "All Enterprise Founder spots are claimed" };
       }
-      nextNumber = enterprise_spots_claimed + 1;
+      founderNumber = next_enterprise_number;
     } else {
       if (member_spots_claimed >= member_spots_total) {
         await client.query("ROLLBACK");
         return { success: false, error: "All Member Founder spots are claimed" };
       }
-      nextNumber = member_spots_claimed + 1;
+      founderNumber = next_member_number;
     }
 
     const tierRow = await client.query(
@@ -253,7 +266,7 @@ export async function manualGrant(
       [username]
     );
     const tier = tierRow.rows[0]?.subscription_tier || "pro";
-    const referralCode = generateReferralCode(nextNumber, founderType);
+    const referralCode = generateReferralCode(founderNumber, founderType);
     const priceLockAmount = founderType === "enterprise" ? 0 : (TIER_PRICE_CENTS[tier] || 4900);
 
     await client.query(`
@@ -268,17 +281,21 @@ export async function manualGrant(
           founder_referral_count = 0,
           founder_credits_earned = 0
       WHERE id = $6
-    `, [nextNumber, founderType, tier, priceLockAmount, referralCode, userId]);
+    `, [founderNumber, founderType, tier, priceLockAmount, referralCode, userId]);
 
     if (founderType === "enterprise") {
       await client.query(`
         UPDATE founders_program
-        SET enterprise_spots_claimed = enterprise_spots_claimed + 1, updated_at = NOW()
+        SET enterprise_spots_claimed = enterprise_spots_claimed + 1,
+            next_enterprise_number = next_enterprise_number + 1,
+            updated_at = NOW()
       `);
     } else {
       await client.query(`
         UPDATE founders_program
-        SET member_spots_claimed = member_spots_claimed + 1, updated_at = NOW()
+        SET member_spots_claimed = member_spots_claimed + 1,
+            next_member_number = next_member_number + 1,
+            updated_at = NOW()
       `);
     }
 
