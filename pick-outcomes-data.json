@@ -36107,15 +36107,75 @@
       "homeScore": 2,
       "awayScore": 3,
       "settledAt": "2026-03-28T04:49:35.844Z"
+    },
+    {
+      "id": "precomp-NCAAB-401856576-spread-1feb3df10d",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "Michigan Wolverines +2",
+      "betType": "spread",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 83,
+      "ev": 26,
+      "gameTime": "2026-03-29T18:15Z",
+      "savedAt": "2026-03-28T04:58:34.304Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 77,
+      "settledAt": "2026-03-28T04:58:51.812Z"
+    },
+    {
+      "id": "precomp-NCAAB-401856576-moneyline-d5594aa18f",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "Michigan Wolverines ML",
+      "betType": "moneyline",
+      "odds": -184,
+      "grade": "B+",
+      "confidence": 76,
+      "ev": 0.33,
+      "gameTime": "2026-03-29T18:15Z",
+      "savedAt": "2026-03-28T04:58:34.304Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 77,
+      "settledAt": "2026-03-28T04:58:51.812Z"
+    },
+    {
+      "id": "precomp-NCAAB-401856576-total-dfe089ed9c",
+      "gameId": "401856576",
+      "sport": "NCAAB",
+      "game": "Tennessee Volunteers @ Michigan Wolverines",
+      "homeTeam": "Michigan Wolverines",
+      "awayTeam": "Tennessee Volunteers",
+      "pick": "Over 144",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B+",
+      "confidence": 61,
+      "ev": 26,
+      "gameTime": "2026-03-29T18:15Z",
+      "savedAt": "2026-03-28T04:58:34.304Z",
+      "result": "won",
+      "homeScore": 90,
+      "awayScore": 77,
+      "settledAt": "2026-03-28T04:58:51.812Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 1732,
-      "won": 967,
+      "total": 1735,
+      "won": 970,
       "lost": 728,
       "push": 37,
-      "rate": 55.8,
+      "rate": 55.9,
       "pending": 69
     },
     "bySport": {
@@ -36130,9 +36190,9 @@
         "rate": 49.5
       },
       "NCAAB": {
-        "total": 452,
-        "won": 270,
-        "rate": 59.7
+        "total": 455,
+        "won": 273,
+        "rate": 60
       },
       "MLB": {
         "total": 135,
@@ -36142,9 +36202,9 @@
     },
     "byGrade": {
       "B+": {
-        "total": 153,
-        "won": 93,
-        "rate": 60.8
+        "total": 156,
+        "won": 96,
+        "rate": 61.5
       },
       "B": {
         "total": 192,
@@ -36199,22 +36259,22 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 544,
-        "won": 314,
-        "rate": 57.7,
-        "roi": 19.7
+        "total": 545,
+        "won": 315,
+        "rate": 57.8,
+        "roi": 19.8
       },
       "Spread": {
-        "total": 562,
-        "won": 308,
-        "rate": 54.8,
-        "roi": 8.2
+        "total": 563,
+        "won": 309,
+        "rate": 54.9,
+        "roi": 8.4
       },
       "Total": {
-        "total": 555,
-        "won": 307,
-        "rate": 55.3,
-        "roi": 8.2
+        "total": 556,
+        "won": 308,
+        "rate": 55.4,
+        "roi": 8.3
       },
       "Team Total": {
         "total": 71,
@@ -36224,20 +36284,20 @@
       }
     },
     "recentForm": {
-      "won": 32,
-      "lost": 17,
+      "won": 35,
+      "lost": 14,
       "push": 1,
-      "rate": 64
+      "rate": 70
     },
-    "lastUpdated": "2026-03-28T04:52:53.719Z",
-    "roi": 11.7,
-    "brierScore": 0.2502,
+    "lastUpdated": "2026-03-28T12:45:45.883Z",
+    "roi": 11.9,
+    "brierScore": 0.2499,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.102,
+    "sharpeRatio": 0.103,
     "homeAwayBias": {
       "homeWinRate": 58.9,
       "awayWinRate": 48.4,
-      "homeTotal": 926,
+      "homeTotal": 928,
       "awayTotal": 159
     },
     "calibrationBuckets": [
@@ -36257,7 +36317,7 @@
         "range": "60-65",
         "predicted": 61.9,
         "actual": 59.3,
-        "total": 486
+        "total": 487
       },
       {
         "range": "65-70",
@@ -36274,14 +36334,14 @@
       {
         "range": "75-80",
         "predicted": 77.1,
-        "actual": 63.2,
-        "total": 106
+        "actual": 63.6,
+        "total": 107
       },
       {
         "range": "80+",
-        "predicted": 82.3,
-        "actual": 56.8,
-        "total": 44
+        "predicted": 82.4,
+        "actual": 57.8,
+        "total": 45
       }
     ]
   },
