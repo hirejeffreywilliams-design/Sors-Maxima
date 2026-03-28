@@ -6414,9 +6414,9 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
 
   app.post("/api/admin/founders/grant", requireAdmin, async (req, res) => {
     try {
-      const { userId, founderType } = req.body;
-      if (!userId || !founderType) {
-        return res.status(400).json({ error: "userId and founderType are required" });
+      const { userId, founderType = "member" } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
       }
       if (!["member", "enterprise"].includes(founderType)) {
         return res.status(400).json({ error: "founderType must be 'member' or 'enterprise'" });

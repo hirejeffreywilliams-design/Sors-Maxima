@@ -220,10 +220,21 @@ export function registerAuthRoutes(app: Express): void {
       }
 
       await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+
+      const loginFounderData = await getFounderData(result.user!.username).catch(() => null);
+      const loginFounderFields = loginFounderData ? {
+        isFounder: loginFounderData.isFounder,
+        founderNumber: loginFounderData.founderNumber,
+        founderType: loginFounderData.founderType,
+        founderReferralCode: loginFounderData.founderReferralCode,
+        founderCreditsEarned: loginFounderData.founderCreditsEarned,
+      } : {};
+
       return res.json({ 
         success: true, 
         username: result.user!.username,
-        isAdmin: result.user!.isAdmin
+        isAdmin: result.user!.isAdmin,
+        ...loginFounderFields,
       });
     } catch (err) {
       console.error("Login error:", err);

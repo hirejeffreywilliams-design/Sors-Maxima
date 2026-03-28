@@ -127,22 +127,37 @@ export async function autoGrantOnSubscription(
   email: string,
   tier: "pro" | "elite" | "whale"
 ): Promise<boolean> {
+  const client = await pool.connect();
   try {
-    const status = await getProgramStatus();
-    if (!status.isActive) return false;
-    if (status.memberSpotsRemaining <= 0) return false;
+    await client.query("BEGIN");
 
-    const alreadyFounder = await pool.query(
-      `SELECT is_founder FROM users WHERE id = $1`,
+    const fpRow = await client.query(
+      `SELECT is_active, member_spots_total, member_spots_claimed FROM founders_program LIMIT 1 FOR UPDATE`
+    );
+    if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+    const { member_spots_total, member_spots_claimed } = fpRow.rows[0];
+    if (member_spots_claimed >= member_spots_total) {
+      await client.query("ROLLBACK");
+      return false;
+    }
+
+    const userRow = await client.query(
+      `SELECT is_founder FROM users WHERE id = $1 FOR UPDATE`,
       [userId]
     );
-    if (alreadyFounder.rows[0]?.is_founder) return false;
+    if (userRow.rows[0]?.is_founder) {
+      await client.query("ROLLBACK");
+      return false;
+    }
 
-    const nextNumber = status.memberSpotsClaimed + 1;
+    const nextNumber = member_spots_claimed + 1;
     const referralCode = generateReferralCode(nextNumber, "member");
     const priceLockAmount = TIER_PRICE_CENTS[tier] || 4900;
 
-    await pool.query(`
+    await client.query(`
       UPDATE users
       SET is_founder = true,
           founder_number = $1,
@@ -156,10 +171,12 @@ export async function autoGrantOnSubscription(
       WHERE id = $5
     `, [nextNumber, tier, priceLockAmount, referralCode, userId]);
 
-    await pool.query(`
+    await client.query(`
       UPDATE founders_program
       SET member_spots_claimed = member_spots_claimed + 1, updated_at = NOW()
     `);
+
+    await client.query("COMMIT");
 
     console.log(`[FOUNDERS] Auto-granted Founder #${nextNumber} to ${username} (${tier})`);
 
@@ -169,8 +186,11 @@ export async function autoGrantOnSubscription(
 
     return true;
   } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
     console.error("[FOUNDERS] autoGrantOnSubscription error:", err);
     return false;
+  } finally {
+    client.release();
   }
 }
 
@@ -179,39 +199,56 @@ export async function manualGrant(
   founderType: "member" | "enterprise",
   adminUserId: number
 ): Promise<{ success: boolean; founderNumber?: number; referralCode?: string; error?: string }> {
+  const client = await pool.connect();
   try {
-    const status = await getProgramStatus();
-    if (!status.isActive) {
+    await client.query("BEGIN");
+
+    const fpRow = await client.query(
+      `SELECT is_active, member_spots_total, member_spots_claimed,
+              enterprise_spots_total, enterprise_spots_claimed
+       FROM founders_program LIMIT 1 FOR UPDATE`
+    );
+    if (!fpRow.rows[0] || !fpRow.rows[0].is_active) {
+      await client.query("ROLLBACK");
       return { success: false, error: "Founders Program is not active yet" };
     }
 
-    const alreadyFounder = await pool.query(
-      `SELECT is_founder, username, email FROM users WHERE id = $1`,
+    const {
+      member_spots_total, member_spots_claimed,
+      enterprise_spots_total, enterprise_spots_claimed,
+    } = fpRow.rows[0];
+
+    const userRow = await client.query(
+      `SELECT is_founder, username, email FROM users WHERE id = $1 FOR UPDATE`,
       [userId]
     );
-    if (!alreadyFounder.rows[0]) {
+    if (!userRow.rows[0]) {
+      await client.query("ROLLBACK");
       return { success: false, error: "User not found" };
     }
-    if (alreadyFounder.rows[0].is_founder) {
+    if (userRow.rows[0].is_founder) {
+      await client.query("ROLLBACK");
       return { success: false, error: "User is already a Founder" };
     }
 
-    const { username, email } = alreadyFounder.rows[0];
+    const { username, email } = userRow.rows[0];
 
     let nextNumber: number;
     if (founderType === "enterprise") {
-      if (status.enterpriseSpotsRemaining <= 0) {
+      if (enterprise_spots_claimed >= enterprise_spots_total) {
+        await client.query("ROLLBACK");
         return { success: false, error: "All Enterprise Founder spots are claimed" };
       }
-      nextNumber = status.enterpriseSpotsClaimed + 1;
+      nextNumber = enterprise_spots_claimed + 1;
     } else {
-      if (status.memberSpotsRemaining <= 0) {
+      if (member_spots_claimed >= member_spots_total) {
+        await client.query("ROLLBACK");
         return { success: false, error: "All Member Founder spots are claimed" };
       }
-      nextNumber = status.memberSpotsClaimed + 1;
+      nextNumber = member_spots_claimed + 1;
     }
 
-    const tierRow = await pool.query(
+    const tierRow = await client.query(
       `SELECT subscription_tier FROM user_subscriptions WHERE username = $1`,
       [username]
     );
@@ -219,7 +256,7 @@ export async function manualGrant(
     const referralCode = generateReferralCode(nextNumber, founderType);
     const priceLockAmount = founderType === "enterprise" ? 0 : (TIER_PRICE_CENTS[tier] || 4900);
 
-    await pool.query(`
+    await client.query(`
       UPDATE users
       SET is_founder = true,
           founder_number = $1,
@@ -234,24 +271,34 @@ export async function manualGrant(
     `, [nextNumber, founderType, tier, priceLockAmount, referralCode, userId]);
 
     if (founderType === "enterprise") {
-      await pool.query(`
+      await client.query(`
         UPDATE founders_program
         SET enterprise_spots_claimed = enterprise_spots_claimed + 1, updated_at = NOW()
       `);
-      sendEnterpriseFounderWelcomeEmail(email, username, nextNumber, referralCode).catch(() => {});
     } else {
-      await pool.query(`
+      await client.query(`
         UPDATE founders_program
         SET member_spots_claimed = member_spots_claimed + 1, updated_at = NOW()
       `);
+    }
+
+    await client.query("COMMIT");
+
+    console.log(`[FOUNDERS] Manual grant — Founder #${nextNumber} (${founderType}) to userId ${userId} by admin ${adminUserId}`);
+
+    if (founderType === "enterprise") {
+      sendEnterpriseFounderWelcomeEmail(email, username, nextNumber, referralCode).catch(() => {});
+    } else {
       sendFounderWelcomeEmail(email, username, nextNumber, tier, referralCode).catch(() => {});
     }
 
-    console.log(`[FOUNDERS] Manual grant — Founder #${nextNumber} (${founderType}) to userId ${userId} by admin ${adminUserId}`);
     return { success: true, founderNumber: nextNumber, referralCode };
   } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
     console.error("[FOUNDERS] manualGrant error:", err);
     return { success: false, error: "Internal error during grant" };
+  } finally {
+    client.release();
   }
 }
 
