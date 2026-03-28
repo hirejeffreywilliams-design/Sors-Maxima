@@ -112,14 +112,23 @@ export function useTier() {
     authenticated: boolean;
     tier?: string;
     isAdmin?: boolean;
+    isFounder?: boolean;
+    founderType?: string | null;
+    founderNumber?: number | null;
   }>({ queryKey: ["/api/auth/check"], staleTime: 1000 * 60 });
 
   const rawTier = authData?.tier || "free";
   const isAdmin = authData?.isAdmin || false;
+  const isFounder = authData?.isFounder || false;
+  const founderType = authData?.founderType || null;
+  const founderNumber = authData?.founderNumber || null;
 
   return {
     tier: rawTier,
     isAdmin,
+    isFounder,
+    founderType,
+    founderNumber,
     canAccess: (required: RequiredTier) => {
       if (isAdmin) return true;
       return (TIER_ORDER[rawTier] || 0) >= TIER_ORDER[required];

@@ -869,17 +869,53 @@ export default function AdminDashboard() {
                 </div>
               </div>
               {foundersAdminStatus?.isActive && (
-                <div className="mt-3 pt-3 border-t border-border/40">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="text-muted-foreground">Member spots</span>
-                    <span className="font-semibold">{foundersAdminStatus.memberSpotsRemaining ?? 500} remaining</span>
+                <div className="mt-3 pt-3 border-t border-border/40 space-y-3">
+                  {foundersAdminStatus.launchedAt && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Launched {new Date(foundersAdminStatus.launchedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Member spots</span>
+                      <span className="font-semibold text-foreground/80">{foundersAdminStatus.memberSpotsClaimed ?? 0} / {foundersAdminStatus.memberSpotsTotal ?? 500}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-500 rounded-full transition-all"
+                        style={{ width: `${Math.round(((foundersAdminStatus.memberSpotsClaimed ?? 0) / (foundersAdminStatus.memberSpotsTotal ?? 500)) * 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500 rounded-full transition-all"
-                      style={{ width: `${Math.round(((foundersAdminStatus.memberSpotsClaimed ?? 0) / (foundersAdminStatus.memberSpotsTotal ?? 500)) * 100)}%` }}
-                    />
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Enterprise spots</span>
+                      <span className="font-semibold text-foreground/80">{foundersAdminStatus.enterpriseSpotsClaimed ?? 0} / {foundersAdminStatus.enterpriseSpotsTotal ?? 5}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-amber-400 rounded-full transition-all"
+                        style={{ width: `${Math.round(((foundersAdminStatus.enterpriseSpotsClaimed ?? 0) / (foundersAdminStatus.enterpriseSpotsTotal ?? 5)) * 100)}%` }}
+                      />
+                    </div>
                   </div>
+                  {foundersAdminStatus.founders && foundersAdminStatus.founders.length > 0 && (
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Recent Founders</p>
+                      <div className="max-h-36 overflow-y-auto space-y-1 pr-1">
+                        {[...foundersAdminStatus.founders].reverse().slice(0, 20).map((f: any) => (
+                          <div key={f.founderNumber} className="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-muted/30 hover:bg-muted/50">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-[10px] text-amber-400/80">#{String(f.founderNumber).padStart(3, "0")}</span>
+                              <span className="font-medium truncate max-w-[120px]">{f.displayName || f.username}</span>
+                              {f.founderType === "enterprise" && <Crown className="w-3 h-3 text-amber-400 shrink-0" />}
+                            </div>
+                            <span className="text-[10px] text-muted-foreground shrink-0">{new Date(f.joinedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

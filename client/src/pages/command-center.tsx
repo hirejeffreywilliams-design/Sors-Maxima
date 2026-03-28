@@ -552,7 +552,7 @@ function formatOdds(odds: number): string {
 
 const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
 
-function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean; isFounder?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const legId = `cmd-${pick.id}`;
   const inSlip = legs.some(l => l.id === legId);
@@ -642,6 +642,9 @@ function PickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[
               }`} data-testid={`signal-badge-${pick.id}`}>
                 {(pick as any).signalLabel}
               </Badge>
+            )}
+            {isFounder && (
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-sm bg-amber-500/20 border border-amber-500/40 text-[9px] font-bold text-amber-400 shrink-0" title="Founder Early Access" data-testid={`badge-founder-early-${pick.id}`}>F</span>
             )}
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -2570,13 +2573,13 @@ export default function CommandCenter() {
             <>
               <MobileTicketDeck
                 items={sortedTopPicks}
-                renderCard={(pick) => <PickCard pick={pick} legs={legs} addLeg={addLeg} />}
+                renderCard={(pick) => <PickCard pick={pick} legs={legs} addLeg={addLeg} isFounder={authData?.isFounder} />}
                 getGrade={(p) => p.grade}
                 label="Intelligence Picks™"
               />
               <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {sortedTopPicks.map(pick => (
-                  <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />
+                  <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} isFounder={authData?.isFounder} />
                 ))}
               </div>
             </>
