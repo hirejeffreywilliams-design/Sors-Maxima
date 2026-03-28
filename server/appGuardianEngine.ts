@@ -99,6 +99,9 @@ class AppGuardianEngine {
   private lastAIDiagnosticAt = 0;
   private errorCounts: Map<string, number[]> = new Map();
   private responseTimeSamples: number[] = [];
+  private stalePicksFirstDetectedAt: number | null = null;
+  private lastHealthSummaryAt = 0;
+  private lastPredictionEngineCycleAt: number | null = null;
 
   start() {
     if (this.running) return;
@@ -112,6 +115,8 @@ class AppGuardianEngine {
     this.intervals.push(setInterval(() => this.runAIDiagnostics(), 300_000));
     this.intervals.push(setInterval(() => this.runAutoHeal(), 60_000));
     this.intervals.push(setInterval(() => this.checkStalePicks(), 300_000));
+    this.intervals.push(setInterval(() => this.checkPredictionEngineHealth(), 10 * 60_000));
+    this.intervals.push(setInterval(() => this.logHealthSummary(), 30 * 60_000));
     this.intervals.push(setInterval(() => this.pruneOldData(), 3600_000));
 
     setTimeout(() => {
@@ -502,6 +507,10 @@ class AppGuardianEngine {
       }
 
       if (stalePicks.length > 5) {
+        if (!this.stalePicksFirstDetectedAt) {
+          this.stalePicksFirstDetectedAt = Date.now();
+        }
+
         this.addAlert(
           "high",
           "stale_picks",
@@ -509,15 +518,37 @@ class AppGuardianEngine {
           `${stalePicks.length} picks are for games that have already started. Precomputed engine may need a refresh cycle. Games: ${stalePicks.slice(0, 3).map(p => p.game).join(", ")}${stalePicks.length > 3 ? ` +${stalePicks.length - 3} more` : ""}`,
           "stale_check"
         );
-        this.addDiagnostic(
-          "data_freshness",
-          "medium",
-          `${stalePicks.length} precomputed picks are for games that have already started`,
-          "The precomputed predictions engine runs every 5 minutes. If stale picks persist beyond 15 minutes after game start, check that the engine scheduler is running and ESPN game data is updating correctly.",
-          false,
-          false
-        );
+
+        const staleDurationMs = Date.now() - this.stalePicksFirstDetectedAt;
+        if (staleDurationMs > 10 * 60_000) {
+          logWarn(`[Guardian] Stale picks persisting ${Math.round(staleDurationMs / 60000)}m — forcing prediction cycle`);
+          try {
+            const { forceRunPredictionCycleNow } = await import("./precomputedPredictionsEngine");
+            const result = await forceRunPredictionCycleNow();
+            if (result.ok) {
+              this.autoHealActions++;
+              this.stalePicksFirstDetectedAt = null;
+              this.resolveAlertsByCategory("stale_picks", true, "Auto-triggered prediction cycle to clear stale picks");
+              this.addDiagnostic("data_freshness", "medium",
+                `Forced prediction cycle after ${Math.round(staleDurationMs / 60000)}m of stale picks`,
+                "Prediction engine was forced to refresh. Stale pick alert cleared. Monitor for recurrence.", true, true);
+              logInfo("[Guardian] Auto-heal: forced prediction cycle completed, stale picks cleared");
+            }
+          } catch (e: any) {
+            logError(e, { context: "guardian_force_prediction_cycle" });
+          }
+        } else {
+          this.addDiagnostic(
+            "data_freshness",
+            "medium",
+            `${stalePicks.length} precomputed picks are for games that have already started`,
+            "The precomputed predictions engine runs every 5 minutes. If stale picks persist beyond 15 minutes after game start, check that the engine scheduler is running and ESPN game data is updating correctly.",
+            false,
+            false
+          );
+        }
       } else {
+        this.stalePicksFirstDetectedAt = null;
         this.resolveAlertsByCategory("stale_picks", true, "All picks are for future games");
       }
     } catch (err: any) {
@@ -534,7 +565,8 @@ class AppGuardianEngine {
       const downServices = Array.from(this.services.values()).filter(s => s.status === "down" || s.status === "degraded");
       const healthScore = this.calculateHealthScore();
       const hasCriticalIssue = activeAlerts.some(a => a.severity === "critical" || a.severity === "high") || downServices.length > 0 || healthScore < 80;
-      const cooldownMs = 30 * 60 * 1000;
+      const hasCriticalSeverity = activeAlerts.some(a => a.severity === "critical") || healthScore < 60;
+      const cooldownMs = hasCriticalSeverity ? 10 * 60_000 : 30 * 60_000;
       const cooldownElapsed = Date.now() - this.lastAIDiagnosticAt > cooldownMs;
 
       if (!hasCriticalIssue || !cooldownElapsed) {
@@ -612,6 +644,80 @@ Prioritize the most impactful issues for the platform's paying users. Be direct 
         logWarn(`[Guardian] AI diagnostics skipped: ${err.message}`);
       }
     }
+  }
+
+  private async checkPredictionEngineHealth() {
+    if (!this.running) return;
+    try {
+      const { getEngineStatus, forceRunPredictionCycleNow } = await import("./precomputedPredictionsEngine");
+      const engineStatus = getEngineStatus();
+
+      if (engineStatus.lastRunTime) {
+        const lastRunMs = new Date(engineStatus.lastRunTime).getTime();
+        const msSinceRun = Date.now() - lastRunMs;
+        this.lastPredictionEngineCycleAt = lastRunMs;
+
+        if (msSinceRun > 15 * 60_000) {
+          logWarn(`[Guardian] Prediction engine hasn't cycled in ${Math.round(msSinceRun / 60000)}m — forcing refresh`);
+          this.addAlert("high", "predictions_engine", "Prediction Engine Stalled",
+            `No prediction cycle in ${Math.round(msSinceRun / 60000)} minutes. Auto-forcing refresh now.`,
+            "engine_watchdog");
+          try {
+            const result = await forceRunPredictionCycleNow();
+            if (result.ok) {
+              this.autoHealActions++;
+              this.resolveAlertsByCategory("predictions_engine", true, "Engine restarted via watchdog");
+              this.addDiagnostic("predictions_engine", "high",
+                `Prediction engine stalled ${Math.round(msSinceRun / 60000)}m — auto-recovered via forced cycle`,
+                "Engine forced a fresh prediction cycle. All sports picks are now refreshed.", true, true);
+              logInfo("[Guardian] Auto-heal: forced prediction cycle completed successfully");
+            }
+          } catch (e: any) {
+            logError(e, { context: "guardian_prediction_engine_heal" });
+          }
+        } else {
+          this.resolveAlertsByCategory("predictions_engine", true, `Engine healthy — ran ${Math.round(msSinceRun / 60000)}m ago`);
+        }
+      }
+    } catch (e: any) {
+      logError(e, { context: "guardian_prediction_engine_watchdog" });
+    }
+  }
+
+  private logHealthSummary() {
+    if (!this.running) return;
+    const now = Date.now();
+    if (now - this.lastHealthSummaryAt < 25 * 60_000) return;
+    this.lastHealthSummaryAt = now;
+
+    try {
+      const score = this.calculateHealthScore();
+      const activeAlerts = this.alerts.filter(a => !a.resolved);
+      const critAlerts = activeAlerts.filter(a => a.severity === "critical").length;
+      const highAlerts = activeAlerts.filter(a => a.severity === "high").length;
+      const allSvcs = Array.from(this.services.values());
+      const healthySvcs = allSvcs.filter(s => s.status === "healthy").length;
+      const downSvcs = allSvcs.filter(s => s.status === "down" || s.status === "degraded").length;
+      const mem = process.memoryUsage();
+      const heapPct = Math.round((mem.heapUsed / v8.getHeapStatistics().heap_size_limit) * 100);
+      const engineMin = this.lastPredictionEngineCycleAt
+        ? Math.round((Date.now() - this.lastPredictionEngineCycleAt) / 60000)
+        : null;
+
+      const label = score >= 90 ? "HEALTHY" : score >= 75 ? "DEGRADED" : "CRITICAL";
+      logInfo(
+        `[Guardian:Summary] score=${score}/100 status=${label} ` +
+        `alerts(crit=${critAlerts} high=${highAlerts}) ` +
+        `services(ok=${healthySvcs} down=${downSvcs}) ` +
+        `heap=${heapPct}%${engineMin !== null ? ` engine-last=${engineMin}m` : ""} ` +
+        `heals=${this.autoHealActions} checks=${this.checksPerformed}`
+      );
+    } catch {}
+  }
+
+  reportQualityIssue(severity: "critical" | "high" | "medium" | "low", title: string, detail: string) {
+    this.addAlert(severity, "quality", `QW: ${title}`, detail, "quality_watchdog");
+    this.addDiagnostic("quality", severity, `Quality Watchdog: ${title}`, detail, false, false);
   }
 
   private addDiagnostic(category: string, severity: string, finding: string, recommendation: string, autoFixable: boolean, fixApplied: boolean) {

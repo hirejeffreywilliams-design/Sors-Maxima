@@ -363,13 +363,24 @@ export function getLatestQualityReport(): QualityReport | null {
 export function runAndStoreQualityCheck(): QualityReport {
   try {
     latestReport = runQualityCheck();
-    const criticalCount = latestReport.issues.filter(i => i.severity === "critical").length;
-    const highCount = latestReport.issues.filter(i => i.severity === "high").length;
-    if (criticalCount > 0) {
-      console.warn(`[QualityWatchdog] Score ${latestReport.score}/100 — ${criticalCount} CRITICAL, ${highCount} high issues`);
+    const criticalIssues = latestReport.issues.filter(i => i.severity === "critical");
+    const highIssues = latestReport.issues.filter(i => i.severity === "high");
+
+    if (criticalIssues.length > 0) {
+      console.warn(`[QualityWatchdog] Score ${latestReport.score}/100 — ${criticalIssues.length} CRITICAL, ${highIssues.length} high issues`);
     } else {
       console.log(`[QualityWatchdog] Score ${latestReport.score}/100 — ${latestReport.issues.length} issues, ${latestReport.passed.length} passed`);
     }
+
+    import("./appGuardianEngine").then(({ appGuardian }) => {
+      for (const issue of criticalIssues) {
+        appGuardian.reportQualityIssue("critical", issue.title, issue.detail);
+      }
+      for (const issue of highIssues) {
+        appGuardian.reportQualityIssue("high", issue.title, issue.detail);
+      }
+    }).catch(() => {});
+
     return latestReport;
   } catch (err) {
     console.error("[QualityWatchdog] Check failed:", err);

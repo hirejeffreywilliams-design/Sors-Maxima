@@ -1,19 +1,19 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 306,
-      "total": 532,
-      "winRate": 57.5
+      "wins": 314,
+      "total": 541,
+      "winRate": 58
     },
     "NHL": {
-      "wins": 268,
-      "total": 512,
-      "winRate": 52.3
+      "wins": 275,
+      "total": 533,
+      "winRate": 51.6
     },
     "NCAAB": {
-      "wins": 266,
-      "total": 439,
-      "winRate": 60.6
+      "wins": 268,
+      "total": 445,
+      "winRate": 60.2
     },
     "MLB": {
       "wins": 78,
@@ -23,19 +23,19 @@
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 297,
-      "total": 509,
-      "winRate": 58.3
+      "wins": 303,
+      "total": 522,
+      "winRate": 58
     },
     "spread": {
-      "wins": 292,
-      "total": 517,
+      "wins": 299,
+      "total": 529,
       "winRate": 56.5
     },
     "total": {
-      "wins": 291,
-      "total": 514,
-      "winRate": 56.6
+      "wins": 295,
+      "total": 525,
+      "winRate": 56.2
     },
     "team_total": {
       "wins": 38,
@@ -93,12 +93,6 @@
       "boost": 7
     },
     {
-      "key": "NHL:spread:neutral:50s:medium",
-      "winRate": 80,
-      "total": 10,
-      "boost": 4
-    },
-    {
       "key": "NBA:moneyline:heavy_dog:60s:very_high",
       "winRate": 78.6,
       "total": 14,
@@ -115,6 +109,12 @@
       "winRate": 75,
       "total": 16,
       "boost": 5
+    },
+    {
+      "key": "MLB:moneyline:neutral",
+      "winRate": 75,
+      "total": 12,
+      "boost": 4
     }
   ],
   "topLosePatterns": [
@@ -143,6 +143,12 @@
       "penalty": 8
     },
     {
+      "key": "NBA:moneyline:slight_dog:50s:low",
+      "winRate": 37.5,
+      "total": 8,
+      "penalty": 2
+    },
+    {
       "key": "NHL:spread:slight_dog:50s:very_high",
       "winRate": 37.5,
       "total": 8,
@@ -159,16 +165,10 @@
       "winRate": 40.9,
       "total": 22,
       "penalty": 4
-    },
-    {
-      "key": "MLB:total:neutral:50s:low",
-      "winRate": 41.7,
-      "total": 24,
-      "penalty": 4
     }
   ],
-  "totalSettled": 1609,
-  "lastMined": "2026-03-27T07:23:11.421Z",
+  "totalSettled": 1645,
+  "lastMined": "2026-03-28T04:49:34.380Z",
   "cycleCount": 1,
   "patternCount": 268
 }
