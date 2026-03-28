@@ -80,11 +80,9 @@ function humanFactor(name: string): string {
   return FACTOR_LABELS[name] || name.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 
-function CompactPickCard({ pick, legs, addLeg }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
+function CompactPickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean; isFounder?: boolean }) {
   const legId = `cmd-strat-${pick.id}`;
   const inSlip = legs.some(l => l.id === legId);
-  const { data: authCheck } = useQuery<{ isFounder?: boolean }>({ queryKey: ["/api/auth/check"], staleTime: 60 * 1000 });
-  const isFounder = authCheck?.isFounder;
 
   const handleAdd = () => {
     if (inSlip) return;
@@ -1990,7 +1988,7 @@ export default function CommandCenter() {
     }
   }, [sse.connected, sseEverConnected]);
 
-  const { data: authData } = useQuery<{ isAdmin?: boolean; authenticated?: boolean }>({
+  const { data: authData } = useQuery<{ isAdmin?: boolean; authenticated?: boolean; isFounder?: boolean }>({
     queryKey: ["/api/auth/check"],
     staleTime: 60000,
   });
@@ -2285,7 +2283,7 @@ export default function CommandCenter() {
                 {isStratLoading
                   ? Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[140px] w-[200px] rounded-lg shrink-0" />)
                   : stratPicks?.picks?.length
-                  ? stratPicks.picks.slice(0, 6).map(pick => <CompactPickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} />)
+                  ? stratPicks.picks.slice(0, 6).map(pick => <CompactPickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} isFounder={authData?.isFounder} />)
                   : (
                     <div className="w-full flex items-center justify-center p-8 bg-muted/20 rounded-lg border border-dashed">
                       <p className="text-xs text-muted-foreground">No picks found for your strategy right now — check back soon</p>

@@ -70,7 +70,7 @@ function getCorrelationBadge(correlation: string) {
   return { color: "bg-gray-500 text-white", label: "Low Correlation" };
 }
 
-function PickCard({ pick, rank }: { pick: any; rank: number }) {
+function PickCard({ pick, rank, isFounder }: { pick: any; rank: number; isFounder?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const { addLeg, isInSlip } = useParlaySlip();
   const { toast } = useToast();
@@ -110,6 +110,9 @@ function PickCard({ pick, rank }: { pick: any; rank: number }) {
               </Badge>
               <Badge variant="outline" className="text-xs capitalize">{pick.betType}</Badge>
               <Badge variant="secondary" className="text-xs">{pick.sport}</Badge>
+              {isFounder && (
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-sm bg-amber-500/20 border border-amber-500/40 text-[9px] font-bold text-amber-400" title="Founder Early Access" data-testid={`badge-founder-early-${pick.id}`}>F</span>
+              )}
               {pick.wasUpgraded && (
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -324,6 +327,8 @@ function StraightBetsContent() {
   const [sport, setSport] = useState("all");
   const [betType, setBetType] = useState("all");
   const [minConfidence, setMinConfidence] = useState([0]);
+  const { data: authData } = useQuery<{ isFounder?: boolean }>({ queryKey: ["/api/auth/check"], staleTime: 60 * 1000 });
+  const isFounder = authData?.isFounder;
 
   const { data, isLoading, error } = useQuery<any>({
     queryKey: ["/api/predictions/straight-bets", sport, betType, minConfidence[0]],
@@ -401,7 +406,7 @@ function StraightBetsContent() {
       {data?.picks && (
         <div className="space-y-3">
           {data.picks.map((pick: any, idx: number) => (
-            <PickCard key={pick.id} pick={pick} rank={idx + 1} />
+            <PickCard key={pick.id} pick={pick} rank={idx + 1} isFounder={isFounder} />
           ))}
           {data.picks.length === 0 && (
             <Card><CardContent className="p-6 text-center text-muted-foreground">No picks found matching your filters. Try adjusting sport or confidence level.</CardContent></Card>

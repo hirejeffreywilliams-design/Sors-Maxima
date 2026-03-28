@@ -58,6 +58,10 @@ const FOUNDER_BENEFITS = [
   { icon: Shield, title: "Priority Support", description: "Founders receive direct priority support access — no queue, no bots, direct to the team." },
 ];
 
+function fmtNum(n: number): string {
+  return `#${String(n).padStart(3, "0")}`;
+}
+
 function FounderCard({ founder }: { founder: PublicFounder }) {
   const isEnterprise = founder.founderType === "enterprise";
   return (
@@ -66,12 +70,12 @@ function FounderCard({ founder }: { founder: PublicFounder }) {
       data-testid={`card-founder-${founder.founderNumber}`}
     >
       <CardContent className="p-4 flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-[11px] shrink-0 font-mono ${
           isEnterprise
             ? "bg-amber-500/20 text-amber-400 border border-amber-500/40"
             : "bg-primary/10 text-primary border border-primary/20"
         }`} data-testid={`badge-founder-num-${founder.founderNumber}`}>
-          #{founder.founderNumber}
+          {fmtNum(founder.founderNumber)}
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -99,6 +103,20 @@ function FounderCard({ founder }: { founder: PublicFounder }) {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function ReservedSlot({ num }: { num: number }) {
+  return (
+    <div
+      className="border border-dashed border-border/30 rounded-lg p-3 flex items-center gap-2.5 opacity-40"
+      data-testid={`slot-reserved-${num}`}
+    >
+      <div className="w-8 h-8 rounded-full border border-dashed border-border/50 flex items-center justify-center font-mono text-[10px] text-muted-foreground/60 shrink-0">
+        {fmtNum(num)}
+      </div>
+      <span className="text-xs text-muted-foreground/50 italic">Reserved</span>
+    </div>
   );
 }
 
@@ -258,27 +276,25 @@ export default function FoundersPage() {
                   </div>
                 )}
 
-                {members.length > 0 && (
-                  <div data-testid="section-member-founders">
-                    <div className="flex items-center gap-2 mb-4">
+                <div data-testid="section-member-founders">
+                  <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+                    <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-primary" />
                       <h3 className="text-sm font-semibold text-primary uppercase tracking-wide">
-                        Member Founders ({members.length})
+                        Member Founders — The 500
                       </h3>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                      {members.map(f => <FounderCard key={f.founderNumber} founder={f} />)}
-                    </div>
+                    <span className="text-xs text-muted-foreground">{members.length} of 500 claimed</span>
                   </div>
-                )}
-
-                {status.founders.length === 0 && (
-                  <div className="text-center py-16 text-muted-foreground" data-testid="text-no-founders">
-                    <Trophy className="w-10 h-10 mx-auto mb-3 opacity-20" />
-                    <p className="font-medium">No founders yet.</p>
-                    <p className="text-sm mt-1">Be the first to claim your founder spot.</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                    {Array.from({ length: status?.memberSpotsTotal ?? 500 }, (_, i) => i + 1).map(num => {
+                      const founder = members.find(f => f.founderNumber === num);
+                      return founder
+                        ? <FounderCard key={num} founder={founder} />
+                        : <ReservedSlot key={num} num={num} />;
+                    })}
                   </div>
-                )}
+                </div>
               </>
             )}
           </div>

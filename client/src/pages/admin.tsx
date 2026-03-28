@@ -66,6 +66,7 @@ import {
   GitBranch,
   UserPlus,
   Trophy,
+  Crown,
   Zap,
   Send,
   UserCog,
@@ -218,6 +219,15 @@ export default function AdminDashboard() {
 
   const { data: subscriptionStats } = useQuery<SubscriptionStats>({
     queryKey: ['/api/admin/subscription-stats'],
+  });
+
+  const { data: foundersAdminStatus } = useQuery<any>({
+    queryKey: ["/api/admin/founders/status"],
+    staleTime: 30 * 1000,
+  });
+  const launchFoundersMutation = useMutation({
+    mutationFn: () => fetch("/api/admin/founders/launch", { method: "POST" }).then(r => r.json()),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/admin/founders/status"] }),
   });
 
   const { data: bdlStats, isLoading: bdlLoading } = useQuery<any>({
@@ -812,6 +822,68 @@ export default function AdminDashboard() {
             )
           )}
 
+
+          {/* Founders Program Launch Control */}
+          <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-background to-background" data-testid="card-founders-launch-control">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+                    <Trophy className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm">Founders Program</span>
+                      {foundersAdminStatus?.isActive ? (
+                        <Badge className="bg-green-500/15 text-green-400 border-green-500/30 text-[10px]" variant="outline">Live</Badge>
+                      ) : (
+                        <Badge className="bg-muted text-muted-foreground text-[10px]" variant="outline">Not Launched</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {foundersAdminStatus?.isActive
+                        ? `${foundersAdminStatus.memberSpotsClaimed ?? 0} / ${foundersAdminStatus.memberSpotsTotal ?? 500} member spots claimed · ${foundersAdminStatus.enterpriseSpotsClaimed ?? 0} / ${foundersAdminStatus.enterpriseSpotsTotal ?? 5} enterprise`
+                        : "Launch the Founding 500 to begin accepting founders"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {!foundersAdminStatus?.isActive && (
+                    <Button
+                      size="sm"
+                      className="bg-amber-500 hover:bg-amber-600 text-black font-semibold gap-1.5 text-xs"
+                      onClick={() => launchFoundersMutation.mutate()}
+                      disabled={launchFoundersMutation.isPending}
+                      data-testid="button-launch-founders"
+                    >
+                      <Rocket className="w-3.5 h-3.5" />
+                      {launchFoundersMutation.isPending ? "Launching…" : "Launch Program"}
+                    </Button>
+                  )}
+                  <Link href="/admin/founders">
+                    <Button variant="outline" size="sm" className="text-xs gap-1.5 border-amber-500/30 hover:bg-amber-500/10" data-testid="button-manage-founders">
+                      <Crown className="w-3.5 h-3.5 text-amber-400" />
+                      Manage
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+              {foundersAdminStatus?.isActive && (
+                <div className="mt-3 pt-3 border-t border-border/40">
+                  <div className="flex items-center justify-between text-xs mb-1.5">
+                    <span className="text-muted-foreground">Member spots</span>
+                    <span className="font-semibold">{foundersAdminStatus.memberSpotsRemaining ?? 500} remaining</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-amber-500 rounded-full transition-all"
+                      style={{ width: `${Math.round(((foundersAdminStatus.memberSpotsClaimed ?? 0) / (foundersAdminStatus.memberSpotsTotal ?? 500)) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Quick links */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">

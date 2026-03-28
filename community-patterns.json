@@ -3,8 +3,8 @@
   "toxicPatterns": 13,
   "goldenPatterns": 19,
   "totalSettledPicks": 2043,
-  "lastRunAt": "2026-03-28T13:31:15.405Z",
-  "nextRunAt": "2026-03-28T13:51:15.405Z",
+  "lastRunAt": "2026-03-28T13:40:20.699Z",
+  "nextRunAt": "2026-03-28T14:00:20.699Z",
   "patterns": [
     {
       "id": "learned-NBA-moneyline-heavy_underdog",
@@ -21,7 +21,7 @@
       "adjustmentAmount": 7,
       "description": "NBA ML (heavy underdog) outperforms market expectations by 56%",
       "positiveCue": "NBA ML (heavy underdog) tracking at 78% (expected 22%) across 27 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -40,7 +40,7 @@
       "adjustmentAmount": 7,
       "description": "All sports ML (heavy underdog) outperforms market expectations by 49%",
       "positiveCue": "All sports ML (heavy underdog) tracking at 69% (expected 20%) across 35 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -59,7 +59,7 @@
       "adjustmentAmount": -14,
       "description": "NBA totals (pick em) underperforms market expectations by 18%",
       "warningText": "NBA totals (pick em) tracking at 33% (expected 52%) across 12 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -78,7 +78,7 @@
       "adjustmentAmount": 5,
       "description": "NBA totals (favorite) outperforms market expectations by 10%",
       "positiveCue": "NBA totals (favorite) tracking at 63% (expected 52%) across 169 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -97,7 +97,7 @@
       "adjustmentAmount": -14,
       "description": "NBA ML (heavy favorite) underperforms market expectations by 21%",
       "warningText": "NBA ML (heavy favorite) tracking at 61% (expected 83%) across 36 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -116,7 +116,7 @@
       "adjustmentAmount": -14,
       "description": "All sports ML (heavy favorite) underperforms market expectations by 31%",
       "warningText": "All sports ML (heavy favorite) tracking at 63% (expected 94%) across 105 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -135,7 +135,7 @@
       "adjustmentAmount": 7,
       "description": "NHL spreads (B tier) outperforms market expectations by 25%",
       "positiveCue": "NHL spreads (B tier) tracking at 51% (expected 26%) across 51 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.85
     },
@@ -154,7 +154,7 @@
       "adjustmentAmount": -14,
       "description": "NHL spreads (heavy favorite) underperforms market expectations by 22%",
       "warningText": "NHL spreads (heavy favorite) tracking at 48% (expected 71%) across 27 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -173,7 +173,7 @@
       "adjustmentAmount": -14,
       "description": "All sports spreads (heavy favorite) underperforms market expectations by 22%",
       "warningText": "All sports spreads (heavy favorite) tracking at 48% (expected 71%) across 27 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -192,7 +192,7 @@
       "adjustmentAmount": -12,
       "description": "NHL totals (C tier) underperforms market expectations by 15%",
       "warningText": "NHL totals (C tier) tracking at 38% (expected 52%) across 16 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -211,7 +211,7 @@
       "adjustmentAmount": -12,
       "description": "NHL ML (underdog) underperforms market expectations by 15%",
       "warningText": "NHL ML (underdog) tracking at 30% (expected 44%) across 27 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -230,7 +230,7 @@
       "adjustmentAmount": 7,
       "description": "NHL ML (C tier) outperforms market expectations by 15%",
       "positiveCue": "NHL ML (C tier) tracking at 51% (expected 36%) across 139 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -249,7 +249,7 @@
       "adjustmentAmount": 5,
       "description": "NBA ML (underdog) outperforms market expectations by 11%",
       "positiveCue": "NBA ML (underdog) tracking at 51% (expected 40%) across 49 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.85
     },
@@ -268,7 +268,7 @@
       "adjustmentAmount": -14,
       "description": "NHL ML (pick em) underperforms market expectations by 40%",
       "warningText": "NHL ML (pick em) tracking at 59% (expected 98%) across 41 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.85
     },
@@ -287,7 +287,7 @@
       "adjustmentAmount": 7,
       "description": "All sports ML (pick em) outperforms market expectations by 63%",
       "positiveCue": "All sports ML (pick em) tracking at 66% (expected 3%) across 85 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -306,7 +306,7 @@
       "adjustmentAmount": -14,
       "description": "NCAAB ML (heavy favorite) underperforms market expectations by 29%",
       "warningText": "NCAAB ML (heavy favorite) tracking at 68% (expected 97%) across 56 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.85
     },
@@ -325,7 +325,7 @@
       "adjustmentAmount": -14,
       "description": "NCAAB ML (B tier) underperforms market expectations by 20%",
       "warningText": "NCAAB ML (B tier) tracking at 75% (expected 95%) across 81 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -344,7 +344,7 @@
       "adjustmentAmount": 6,
       "description": "NCAAB totals (B tier) outperforms market expectations by 13%",
       "positiveCue": "NCAAB totals (B tier) tracking at 65% (expected 52%) across 91 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -363,7 +363,7 @@
       "adjustmentAmount": 7,
       "description": "NCAAB totals (favorite) outperforms market expectations by 20%",
       "positiveCue": "NCAAB totals (favorite) tracking at 72% (expected 52%) across 25 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -381,7 +381,7 @@
       "adjustmentAmount": 7,
       "description": "NCAAB totals outperforms market expectations by 20%",
       "positiveCue": "NCAAB totals tracking at 72% (expected 52%) across 25 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -400,7 +400,7 @@
       "adjustmentAmount": 7,
       "description": "NCAAB totals (C tier) outperforms market expectations by 31%",
       "positiveCue": "NCAAB totals (C tier) tracking at 83% (expected 52%) across 12 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -419,7 +419,7 @@
       "adjustmentAmount": 7,
       "description": "NBA ML (pick em) outperforms market expectations by 66%",
       "positiveCue": "NBA ML (pick em) tracking at 68% (expected 2%) across 25 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -438,7 +438,7 @@
       "adjustmentAmount": -14,
       "description": "NHL ML (heavy favorite) underperforms market expectations by 24%",
       "warningText": "NHL ML (heavy favorite) tracking at 45% (expected 69%) across 11 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -456,7 +456,7 @@
       "adjustmentAmount": 7,
       "description": "MLB spreads outperforms market expectations by 15%",
       "positiveCue": "MLB spreads tracking at 57% (expected 41%) across 46 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.85
     },
@@ -474,7 +474,7 @@
       "adjustmentAmount": 7,
       "description": "MLB ML outperforms market expectations by 17%",
       "positiveCue": "MLB ML tracking at 55% (expected 38%) across 87 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.95
     },
@@ -493,7 +493,7 @@
       "adjustmentAmount": 7,
       "description": "MLB ML (underdog) outperforms market expectations by 32%",
       "positiveCue": "MLB ML (underdog) tracking at 73% (expected 41%) across 15 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -512,7 +512,7 @@
       "adjustmentAmount": -14,
       "description": "MLB ML (C tier) underperforms market expectations by 17%",
       "warningText": "MLB ML (C tier) tracking at 78% (expected 95%) across 32 picks — pattern shows below-market performance",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -531,7 +531,7 @@
       "adjustmentAmount": 7,
       "description": "MLB ML (pick em) outperforms market expectations by 64%",
       "positiveCue": "MLB ML (pick em) tracking at 75% (expected 11%) across 12 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.55
     },
@@ -550,7 +550,7 @@
       "adjustmentAmount": 7,
       "description": "MLB spreads (C tier) outperforms market expectations by 28%",
       "positiveCue": "MLB spreads (C tier) tracking at 61% (expected 33%) across 31 picks — model generating edge here",
-      "lastUpdated": "2026-03-28T13:31:15.404Z",
+      "lastUpdated": "2026-03-28T13:40:20.698Z",
       "dataSource": "combined",
       "statisticalConfidence": 0.72
     },
@@ -569,7 +569,7 @@
       "adjustmentAmount": -5,
       "description": "NCAAB heavy favorites vs. spread underperform expectations",
       "warningText": "NCAAB blowout lines historically push or miss — sharps fade heavy chalk in college basketball",
-      "lastUpdated": "2026-03-28T13:31:15.405Z",
+      "lastUpdated": "2026-03-28T13:40:20.699Z",
       "dataSource": "prior",
       "statisticalConfidence": 0.3
     },
@@ -587,7 +587,7 @@
       "adjustmentAmount": 4,
       "description": "NBA totals show consistent edge when model identifies mis-priced lines",
       "positiveCue": "NBA total market has historically rewarded analytical edge — model tracks well here",
-      "lastUpdated": "2026-03-28T13:31:15.405Z",
+      "lastUpdated": "2026-03-28T13:40:20.699Z",
       "dataSource": "prior",
       "statisticalConfidence": 0.35
     },
@@ -606,7 +606,7 @@
       "adjustmentAmount": 3,
       "description": "NFL road underdogs cover more than favorites expect — public money overweights home teams",
       "positiveCue": "Road underdog value historically strong in the NFL — public bias creates edge",
-      "lastUpdated": "2026-03-28T13:31:15.405Z",
+      "lastUpdated": "2026-03-28T13:40:20.699Z",
       "dataSource": "prior",
       "statisticalConfidence": 0.3
     },
@@ -623,7 +623,7 @@
       "edge": -0.024,
       "adjustmentAmount": 0,
       "description": "NHL totals near market equilibrium — neither systematic edge nor drag detected",
-      "lastUpdated": "2026-03-28T13:31:15.405Z",
+      "lastUpdated": "2026-03-28T13:40:20.699Z",
       "dataSource": "prior",
       "statisticalConfidence": 0.25
     }

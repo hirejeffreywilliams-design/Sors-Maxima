@@ -463,16 +463,37 @@ export default function LandingPage() {
                 <div className="flex items-center justify-between text-xs px-1">
                   <span className="text-muted-foreground">{foundersStatus.memberSpotsClaimed} claimed</span>
                   <span className={`font-bold ${foundersStatus.memberSpotsRemaining <= 50 ? "text-red-400" : foundersStatus.memberSpotsRemaining <= 150 ? "text-amber-400" : "text-primary"}`}>
-                    {foundersStatus.memberSpotsRemaining} spots left
+                    {foundersStatus.memberSpotsRemaining} of {foundersStatus.memberSpotsTotal} member spots left
                   </span>
                 </div>
                 <Progress value={Math.round((foundersStatus.memberSpotsClaimed / foundersStatus.memberSpotsTotal) * 100)} className="h-1.5" />
-                <p className="text-[10px] text-muted-foreground">
-                  Join now to lock your price forever.{" "}
-                  <Link href="/founders" className="text-amber-400 underline underline-offset-2 hover:text-amber-300" data-testid="link-founders-wall">
-                    See the Founders Wall →
-                  </Link>
-                </p>
+                <div className="flex items-center justify-between text-[10px] px-1 text-muted-foreground">
+                  <span>
+                    Join now to lock your price forever.{" "}
+                    <Link href="/founders" className="text-amber-400 underline underline-offset-2 hover:text-amber-300" data-testid="link-founders-wall">
+                      See the Founders Wall →
+                    </Link>
+                  </span>
+                  <span className="shrink-0 ml-2 text-amber-400/70">
+                    {foundersStatus.enterpriseSpotsRemaining} of {foundersStatus.enterpriseSpotsTotal} Enterprise spots open
+                  </span>
+                </div>
+              </div>
+            )}
+            {foundersStatus?.isActive && foundersStatus.memberSpotsRemaining === 0 && (
+              <div className="max-w-sm mx-auto pt-2" data-testid="founders-closed-banner">
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-3 text-center space-y-1">
+                  <div className="inline-flex items-center gap-2 text-amber-400 text-xs font-bold">
+                    <Trophy className="w-3.5 h-3.5" />
+                    Founding 500 — Closed
+                  </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    All 500 member spots have been claimed.{" "}
+                    <Link href="/founders" className="text-amber-400 underline underline-offset-2 hover:text-amber-300" data-testid="link-founders-wall-closed">
+                      View the Founders Wall →
+                    </Link>
+                  </p>
+                </div>
               </div>
             )}
           </div>
