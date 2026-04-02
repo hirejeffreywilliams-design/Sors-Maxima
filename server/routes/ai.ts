@@ -90,12 +90,32 @@ Core rules you ALWAYS follow:
 
   // ── GET /api/ai/analyst/context ────────────────────────────────────────────
   // Returns current platform context for the AI Analyst page sidebar.
-  // Includes: active picks (grade, EV, Kelly), calibration summary.
+  // Includes: active picks (grade, EV, Kelly, modelAgreement), calibration summary.
   app.get("/api/ai/analyst/context", requireAuth, async (req, res) => {
     try {
       const picks = getActivePicks(8);
       const { getTrackRecord } = await import("../calibrationEngine");
+      const { getPrecomputedCache } = await import("../precomputedPredictionsEngine");
       const tr = getTrackRecord();
+
+      // Compute average model agreement across all active picks
+      const SPORTS_CTX = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
+      let totalAgreement = 0;
+      let agreementCount = 0;
+      for (const s of SPORTS_CTX) {
+        const cache = getPrecomputedCache(s);
+        if (!cache?.picks) continue;
+        for (const p of cache.picks) {
+          if (p.grade === "A" || p.grade === "B") {
+            const ma = (p as Record<string, unknown>).modelAgreement;
+            if (typeof ma === "number") {
+              totalAgreement += ma;
+              agreementCount++;
+            }
+          }
+        }
+      }
+      const avgModelAgreement = agreementCount > 0 ? totalAgreement / agreementCount : null;
 
       const calibration = {
         hasData: tr.hasMinimumData,
@@ -104,6 +124,7 @@ Core rules you ALWAYS follow:
         trend: tr.recentTrend.trend,
         last20WinRate: tr.recentTrend.last20WinRate,
         calibrationScore: tr.calibrationScore,
+        avgModelAgreement,
         bySport: tr.bySport
           .filter(s => s.actualWinRate != null && s.settled >= 5)
           .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))

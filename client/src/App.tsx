@@ -742,6 +742,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
       <NavBtn href="/sorsbooks" icon={Landmark} label="Books" testId="nav-sorsbooks" tooltip="Sors Books — sportsbook intelligence hub" />
       <NavBtn href="/tools" icon={BarChart2} label="Analysis" testId="nav-pro-tools" tooltip="Analytics, calculators & factor tools" />
       <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
+      <NavBtn href="/ai-analyst" icon={Zap} label="AI Analyst" testId="nav-ai-analyst" tooltip="SORS Intelligence — AI betting analyst with live data" />
       {authState.isAdmin && (
         <Link href="/admin">
           <Button variant={location === "/admin" ? "secondary" : "ghost"} size="sm" className="gap-1.5 text-purple-500" data-testid="nav-admin">

@@ -267,6 +267,22 @@ export async function buildAnalystContext(
     }
   } catch { /* use default */ }
 
+  // 6. Token budget enforcement
+  // GPT-4o: ~4 chars per token. Hard cap at 6000 chars for the dynamic blocks
+  // (excludes standardsContext which is always included).
+  const DYNAMIC_CHAR_BUDGET = 6000;
+  const charCount = calibrationBlock.length + activePicsBlock.length + bankrollBlock.length;
+  if (charCount > DYNAMIC_CHAR_BUDGET) {
+    // Truncate activePicsBlock first (most verbose), then calibration
+    const overrun = charCount - DYNAMIC_CHAR_BUDGET;
+    if (activePicsBlock.length > overrun + 200) {
+      activePicsBlock = activePicsBlock.slice(0, activePicsBlock.length - overrun) + "\n[...context truncated for token budget]";
+    } else {
+      activePicsBlock = activePicsBlock.slice(0, Math.max(200, activePicsBlock.length - overrun));
+      calibrationBlock = calibrationBlock.slice(0, Math.max(200, calibrationBlock.length - 200));
+    }
+  }
+
   const totalChars = standardsContext.length + calibrationBlock.length +
     activePicsBlock.length + bankrollBlock.length;
 

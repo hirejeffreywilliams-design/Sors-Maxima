@@ -42,6 +42,7 @@ interface CalibrationContext {
   calibrationScore: number | null;
   bySport: { sport: string; actualWinRate: number | null; settled: number; won: number; lost: number }[];
   byGrade: { grade: string; actualWinRate: number | null; settled: number; roi: number | null; breakEvenRate: number | null }[];
+  avgModelAgreement: number | null;
 }
 
 interface AnalystContext {
@@ -126,6 +127,20 @@ function TrendIcon({ trend }: { trend: string }) {
   return <Minus className="w-3.5 h-3.5 text-white/40" />;
 }
 
+function ModelAgreementDots({ score }: { score: number }) {
+  const rounded = Math.round(score);
+  return (
+    <div className="flex items-center gap-0.5">
+      {[1, 2, 3, 4, 5].map(i => (
+        <div
+          key={i}
+          className={`w-2 h-2 rounded-full ${i <= rounded ? "bg-orange-400" : "bg-white/12"}`}
+        />
+      ))}
+    </div>
+  );
+}
+
 function LiveContextPanel({ context }: { context: AnalystContext | undefined }) {
   const cal = context?.calibration;
   const picks = context?.picks ?? [];
@@ -165,6 +180,15 @@ function LiveContextPanel({ context }: { context: AnalystContext | undefined }) 
                 >
                   {cal.calibrationScore}/100
                 </span>
+              </div>
+            )}
+            {cal.avgModelAgreement != null && (
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-white/50">Model Agreement</span>
+                <div className="flex items-center gap-2">
+                  <ModelAgreementDots score={cal.avgModelAgreement} />
+                  <span className="text-[10px] text-white/40">{cal.avgModelAgreement.toFixed(1)}/5</span>
+                </div>
               </div>
             )}
           </div>
