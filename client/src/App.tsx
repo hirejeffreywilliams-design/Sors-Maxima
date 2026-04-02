@@ -1302,7 +1302,7 @@ function AppContent() {
       );
     }
     if (tier === 'free') {
-      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record', '/my-bets'];
+      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record', '/my-bets', '/ai-analyst'];
       if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
         return (
           <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>

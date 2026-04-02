@@ -2,16 +2,17 @@
 // SORS MAXIMA — AI ANALYST CONTEXT BUILDER
 // Assembles a token-budgeted context object for the /api/ai/analyst endpoint.
 // Includes: calibration by sport + confidence tier, today's top picks with
-// edge/EV/Kelly/confidence, track record, bankroll profile, and platform standards.
+// edge/EV/computed-Kelly/confidence, track record, bankroll profile, and platform standards.
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { getTrackRecord } from "./calibrationEngine";
-import { getPrecomputedCache } from "./precomputedPredictionsEngine";
+import { getPrecomputedCache, type PrecomputedPick } from "./precomputedPredictionsEngine";
 import { getAIStandardsContext } from "./companyStandards";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
+type Sport = typeof SPORTS[number];
 
 export interface AnalystContextResult {
   standardsContext: string;
@@ -27,19 +28,34 @@ export interface ActivePick {
   grade: string;
   odds: number;
   confidence: number;
-  ev: number | null;
-  kellyFraction: number | null;
-  edge: number | null;
+  ev: number;
+  kellyFraction: number;
+  edge: number;
   betType: string;
-  impliedProbability: number | null;
+  impliedProbability: number;
+}
+
+// Drizzle execute() rows shape
+interface BankrollRow {
+  bankroll: string | number | null;
+  kelly_fraction: string | number | null;
+}
+
+// ── Kelly criterion helper ────────────────────────────────────────────────
+
+function americanOddsToDecimal(americanOdds: number): number {
+  return americanOdds > 0 ? 1 + americanOdds / 100 : 1 + 100 / Math.abs(americanOdds);
+}
+
+function computeKellyFromPick(p: PrecomputedPick): number {
+  const b = americanOddsToDecimal(p.odds) - 1;
+  const q = 1 - p.winProbability;
+  const kelly = (b * p.winProbability - q) / b;
+  return Math.max(0, kelly);
 }
 
 // ── Joint Probability ───────────────────────────────────────────────────────
 
-/**
- * Given N leg win probabilities (0–1), returns joint probability (assuming independence)
- * and a formatted warning string.
- */
 export function computeJointProbability(winProbabilities: number[]): {
   joint: number;
   formattedWarning: string;
@@ -53,9 +69,6 @@ export function computeJointProbability(winProbabilities: number[]): {
   return { joint, formattedWarning };
 }
 
-/**
- * Detect if a user message is asking about a parlay and extract any numeric leg count.
- */
 export function detectParlayQuery(messages: { role: string; content: string }[]): {
   isParlay: boolean;
   legCount: number | null;
@@ -64,10 +77,10 @@ export function detectParlayQuery(messages: { role: string; content: string }[])
   if (!lastUser) return { isParlay: false, legCount: null };
 
   const lc = lastUser.content.toLowerCase();
-  const isParlay = /parlay|teaser|accumulator|multi-leg|multi leg|same game|sgp/.test(lc);
+  const isParlay = /parlay|teaser|accumulator|multi.?leg|same.?game|sgp/.test(lc);
   if (!isParlay) return { isParlay: false, legCount: null };
 
-  const legMatch = lc.match(/(\d+)[- ]leg/);
+  const legMatch = lc.match(/(\d+).{0,5}leg/);
   const legCount = legMatch ? parseInt(legMatch[1]) : null;
   return { isParlay: true, legCount };
 }
@@ -77,25 +90,24 @@ export function detectParlayQuery(messages: { role: string; content: string }[])
 export async function fetchUserBankroll(userId: string | undefined): Promise<{
   bankroll: number | null;
   kellyFraction: number | null;
-  riskProfile: string;
 }> {
-  if (!userId) return { bankroll: null, kellyFraction: null, riskProfile: "balanced" };
+  if (!userId) return { bankroll: null, kellyFraction: null };
   try {
-    const rows = await db.execute(sql`
+    const result = await db.execute(sql`
       SELECT bankroll, kelly_fraction
       FROM user_betting_profile
       WHERE user_id = ${userId}
       LIMIT 1
     `);
-    const row = (rows as any[])[0];
-    if (!row) return { bankroll: null, kellyFraction: null, riskProfile: "balanced" };
+    const rows = (result.rows ?? result) as BankrollRow[];
+    const row = rows[0];
+    if (!row) return { bankroll: null, kellyFraction: null };
     return {
-      bankroll: row.bankroll ? Number(row.bankroll) : null,
-      kellyFraction: row.kelly_fraction ? Number(row.kelly_fraction) : null,
-      riskProfile: "balanced",
+      bankroll: row.bankroll != null ? Number(row.bankroll) : null,
+      kellyFraction: row.kelly_fraction != null ? Number(row.kelly_fraction) : null,
     };
   } catch {
-    return { bankroll: null, kellyFraction: null, riskProfile: "balanced" };
+    return { bankroll: null, kellyFraction: null };
   }
 }
 
@@ -105,43 +117,43 @@ export function getActivePicks(maxPicks = 10): ActivePick[] {
   const allPicks: ActivePick[] = [];
   for (const sport of SPORTS) {
     try {
-      const cache = getPrecomputedCache(sport as any);
+      const cache = getPrecomputedCache(sport as Sport);
       if (!cache?.picks) continue;
-      const topForSport = cache.picks
-        .filter((p: any) => p.grade === "A" || p.grade === "B")
+      const topForSport = (cache.picks as PrecomputedPick[])
+        .filter(p => p.grade === "A" || p.grade === "B")
         .slice(0, 3)
-        .map((p: any) => ({
-          pick: p.pick ?? "Unknown",
-          sport: p.sport ?? sport,
-          grade: p.grade ?? "C",
-          odds: Number(p.odds ?? 0),
-          confidence: Number(p.confidence ?? 0),
-          ev: p.ev != null ? Number(p.ev) : null,
-          kellyFraction: p.kellyFraction != null ? Number(p.kellyFraction) : null,
-          edge: p.edge != null ? Number(p.edge) : null,
-          betType: p.betType ?? "moneyline",
-          impliedProbability: p.odds ? (
-            p.odds > 0
-              ? 100 / (Number(p.odds) + 100)
-              : Math.abs(Number(p.odds)) / (Math.abs(Number(p.odds)) + 100)
-          ) : null,
-        }));
+        .map(p => {
+          const impliedProbability = p.odds > 0
+            ? 100 / (p.odds + 100)
+            : Math.abs(p.odds) / (Math.abs(p.odds) + 100);
+          const kellyFraction = computeKellyFromPick(p);
+          return {
+            pick: p.pick,
+            sport: p.sport,
+            grade: p.grade,
+            odds: p.odds,
+            confidence: p.confidence,
+            ev: p.ev,
+            kellyFraction,
+            edge: p.edge,
+            betType: p.betType,
+            impliedProbability,
+          };
+        });
       allPicks.push(...topForSport);
-    } catch { /* skip sport */ }
+    } catch { /* skip sport on error */ }
   }
   return allPicks.slice(0, maxPicks);
 }
 
 // ── Main context builder ──────────────────────────────────────────────────────
 
-const MAX_CONTEXT_CHARS = 8000;
-
 export async function buildAnalystContext(
   userId: string | undefined,
   messages: { role: string; content: string }[],
 ): Promise<AnalystContextResult> {
 
-  // 1. Standards context (platform rules and terminology)
+  // 1. Standards context
   const standardsContext = getAIStandardsContext();
 
   // 2. Calibration block (sport accuracy + confidence tiers + trend)
@@ -151,9 +163,14 @@ export async function buildAnalystContext(
     const lines: string[] = [];
 
     if (tr.hasMinimumData && tr.overallWinRate != null) {
-      lines.push(`Overall win rate: ${tr.overallWinRate.toFixed(1)}% (${tr.wonPicks}W / ${tr.lostPicks}L / ${tr.pushPicks}P across ${tr.settledPicks} settled picks)`);
-      lines.push(`Trend (last 20): ${tr.recentTrend.last20WinRate != null ? tr.recentTrend.last20WinRate.toFixed(1) + "%" : "N/A"} — ${tr.recentTrend.trend}`);
-      lines.push(`Calibration score: ${tr.calibrationScore ?? "N/A"}/100`);
+      lines.push(
+        `Overall win rate: ${tr.overallWinRate.toFixed(1)}% ` +
+        `(${tr.wonPicks}W / ${tr.lostPicks}L / ${tr.pushPicks}P across ${tr.settledPicks} settled picks)`
+      );
+      const last20 = tr.recentTrend.last20WinRate != null
+        ? `${tr.recentTrend.last20WinRate.toFixed(1)}%` : "N/A";
+      lines.push(`Trend (last 20): ${last20} — ${tr.recentTrend.trend}`);
+      if (tr.calibrationScore != null) lines.push(`Calibration score: ${tr.calibrationScore}/100`);
 
       const sportLines = tr.bySport
         .filter(s => s.actualWinRate != null && s.settled >= 5)
@@ -167,8 +184,8 @@ export async function buildAnalystContext(
         .sort((a, b) => a.grade.localeCompare(b.grade))
         .map(g => {
           const roi = g.roi != null ? ` | ROI: ${g.roi > 0 ? "+" : ""}${g.roi.toFixed(1)}%` : "";
-          const beRate = g.breakEvenRate != null ? ` | Break-even: ${g.breakEvenRate.toFixed(1)}%` : "";
-          return `  Grade ${g.grade}: ${(g.actualWinRate ?? 0).toFixed(1)}% win rate (${g.settled} settled${roi}${beRate})`;
+          const be = g.breakEvenRate != null ? ` | Break-even: ${g.breakEvenRate.toFixed(1)}%` : "";
+          return `  Grade ${g.grade}: ${(g.actualWinRate ?? 0).toFixed(1)}% win rate (${g.settled} settled${roi}${be})`;
         })
         .join("\n");
       if (gradeLines) lines.push("Win rate by grade:\n" + gradeLines);
@@ -176,71 +193,82 @@ export async function buildAnalystContext(
       const tierLines = tr.calibrationTiers
         .filter(t => t.settled >= 5 && t.actualWinRate != null)
         .map(t => {
-          const gap = t.calibrationGap != null ? ` | Gap: ${t.calibrationGap > 0 ? "+" : ""}${t.calibrationGap.toFixed(1)}pp` : "";
-          return `  Confidence ${t.label}: Model avg ${t.modelAvgConfidence.toFixed(0)}% → Actual ${(t.actualWinRate ?? 0).toFixed(1)}%${gap}`;
+          const gap = t.calibrationGap != null
+            ? ` | Gap: ${t.calibrationGap > 0 ? "+" : ""}${t.calibrationGap.toFixed(1)}pp` : "";
+          return (
+            `  Confidence ${t.label}: Model avg ${t.modelAvgConfidence.toFixed(0)}% ` +
+            `→ Actual ${(t.actualWinRate ?? 0).toFixed(1)}%${gap}`
+          );
         })
         .join("\n");
       if (tierLines) lines.push("Confidence tier calibration:\n" + tierLines);
-    } else {
-      lines.push(`Track record building: ${tr.settledPicks} of ${tr.minimumPicksRequired} minimum settled picks required for validation.`);
-    }
 
+    } else {
+      lines.push(
+        `Track record building: ${tr.settledPicks} of ${tr.minimumPicksRequired} ` +
+        `minimum settled picks required for validation.`
+      );
+    }
     calibrationBlock = lines.join("\n");
   } catch { /* use default */ }
 
-  // 3. Active picks block (top graded picks with EV / Kelly / confidence)
+  // 3. Active picks block
   let activePicsBlock = "No picks loaded in current prediction cycle.";
   try {
     const picks = getActivePicks(10);
     if (picks.length > 0) {
       const lines = picks.map(p => {
-        const ev = p.ev != null ? ` | EV: ${p.ev > 0 ? "+" : ""}${p.ev.toFixed(1)}%` : "";
-        const kelly = p.kellyFraction != null ? ` | Quarter-Kelly stake: ${(p.kellyFraction * 0.25 * 100).toFixed(2)}%` : "";
-        const edge = p.edge != null ? ` | Edge: ${p.edge > 0 ? "+" : ""}${p.edge.toFixed(1)}%` : "";
-        const impliedProb = p.impliedProbability != null ? ` | Implied: ${(p.impliedProbability * 100).toFixed(1)}%` : "";
-        const conf = ` | Conf: ${p.confidence}%`;
-        const odds = `${p.odds > 0 ? "+" : ""}${p.odds}`;
-        return `• [${p.grade}] ${p.pick} (${p.sport}, ${p.betType}, ${odds}${conf}${ev}${edge}${kelly}${impliedProb})`;
+        const oddsStr = `${p.odds > 0 ? "+" : ""}${p.odds}`;
+        const ev = `EV: ${p.ev > 0 ? "+" : ""}${p.ev.toFixed(1)}%`;
+        const kelly = `Quarter-Kelly stake: ${(p.kellyFraction * 0.25 * 100).toFixed(2)}%`;
+        const edge = `Edge: ${p.edge > 0 ? "+" : ""}${p.edge.toFixed(1)}%`;
+        const impliedProb = `Implied: ${(p.impliedProbability * 100).toFixed(1)}%`;
+        const conf = `Conf: ${p.confidence}%`;
+        return `• [${p.grade}] ${p.pick} (${p.sport}, ${p.betType}, ${oddsStr} | ${conf} | ${ev} | ${edge} | ${kelly} | ${impliedProb})`;
       });
       activePicsBlock = "Today's top-graded active picks (A/B grade only):\n" + lines.join("\n");
     }
   } catch { /* use default */ }
 
-  // 4. Bankroll block
-  let bankrollBlock = "Bankroll profile: Not set. Recommend using Quarter-Kelly (≤2.5% of bankroll per bet) as default sizing.";
+  // 4. Parlay joint probability injection — triggered for ANY parlay query
+  const { isParlay, legCount } = detectParlayQuery(messages);
+  if (isParlay) {
+    const picks = getActivePicks(legCount ?? 3);
+    const resolvedLegCount = legCount ?? 3;
+    const usablePicks = picks.slice(0, resolvedLegCount);
+
+    if (usablePicks.length >= resolvedLegCount) {
+      const probs = usablePicks.map(p => p.impliedProbability);
+      const { formattedWarning } = computeJointProbability(probs);
+      activePicsBlock += `\n\nParlay joint probability warning:\n${formattedWarning}`;
+    } else {
+      // Generic warning when picks are fewer than requested legs
+      const defaultProb = 0.63;
+      const probs = Array(resolvedLegCount).fill(defaultProb);
+      const { formattedWarning } = computeJointProbability(probs);
+      activePicsBlock += `\n\nParlay joint probability warning (using ~63% per leg as default):\n${formattedWarning}`;
+    }
+  }
+
+  // 5. Bankroll block
+  let bankrollBlock =
+    "Bankroll profile: Not set. Default sizing: Quarter-Kelly (≤2.5% of bankroll per bet).";
   try {
     const { bankroll, kellyFraction } = await fetchUserBankroll(userId);
     if (bankroll != null) {
-      const qKellyPct = kellyFraction != null ? (kellyFraction * 0.25 * 100).toFixed(2) : "≤2.5";
-      const quarterKellyDollar = bankroll * (kellyFraction != null ? kellyFraction * 0.25 : 0.025);
+      const kf = kellyFraction ?? 0.1;
+      const qKellyPct = (kf * 0.25 * 100).toFixed(2);
+      const qKellyDollar = (bankroll * kf * 0.25).toFixed(2);
       bankrollBlock =
         `User bankroll: $${bankroll.toFixed(0)}. ` +
-        `Kelly fraction: ${kellyFraction != null ? (kellyFraction * 100).toFixed(2) : "default"}%. ` +
-        `Quarter-Kelly stake recommendation: ${qKellyPct}% = $${quarterKellyDollar.toFixed(2)} per bet. ` +
+        `Kelly fraction setting: ${(kf * 100).toFixed(2)}%. ` +
+        `Quarter-Kelly recommendation: ${qKellyPct}% = $${qKellyDollar} per bet. ` +
         `Never exceed 2–3% of bankroll on any single bet.`;
     }
   } catch { /* use default */ }
 
-  // 5. Parlay joint probability injection
-  const { isParlay, legCount } = detectParlayQuery(messages);
-  if (isParlay && legCount && legCount >= 2) {
-    const picks = getActivePicks(legCount);
-    if (picks.length >= legCount) {
-      const probs = picks.slice(0, legCount).map(p =>
-        p.impliedProbability ?? (p.confidence / 100)
-      );
-      const { formattedWarning } = computeJointProbability(probs);
-      activePicsBlock += `\n\nParlay joint probability warning:\n${formattedWarning}`;
-    } else {
-      // Generic parlay warning when we can't compute from specific picks
-      const defaultProb = 0.65; // typical model confidence for A/B picks
-      const probs = Array(legCount).fill(defaultProb);
-      const { formattedWarning } = computeJointProbability(probs);
-      activePicsBlock += `\n\nParlay joint probability warning (assuming ~65% per leg):\n${formattedWarning}`;
-    }
-  }
-
-  const totalChars = standardsContext.length + calibrationBlock.length + activePicsBlock.length + bankrollBlock.length;
+  const totalChars = standardsContext.length + calibrationBlock.length +
+    activePicsBlock.length + bankrollBlock.length;
 
   return { standardsContext, calibrationBlock, activePicsBlock, bankrollBlock, totalChars };
 }

@@ -1,14 +1,14 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 386,
-      "total": 672,
-      "winRate": 57.4
+      "wins": 388,
+      "total": 674,
+      "winRate": 57.6
     },
     "NHL": {
-      "wins": 336,
-      "total": 643,
-      "winRate": 52.3
+      "wins": 340,
+      "total": 648,
+      "winRate": 52.5
     },
     "NCAAB": {
       "wins": 278,
@@ -28,14 +28,14 @@
       "winRate": 57.2
     },
     "spread": {
-      "wins": 360,
-      "total": 644,
-      "winRate": 55.9
+      "wins": 361,
+      "total": 645,
+      "winRate": 56
     },
     "total": {
-      "wins": 361,
-      "total": 623,
-      "winRate": 57.9
+      "wins": 366,
+      "total": 629,
+      "winRate": 58.2
     },
     "team_total": {
       "wins": 38,
@@ -167,8 +167,8 @@
       "penalty": 2
     }
   ],
-  "totalSettled": 1974,
-  "lastMined": "2026-04-02T23:00:21.531Z",
+  "totalSettled": 1981,
+  "lastMined": "2026-04-02T23:12:29.126Z",
   "cycleCount": 1,
   "patternCount": 290
 }
