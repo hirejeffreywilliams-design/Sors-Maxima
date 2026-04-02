@@ -25,12 +25,13 @@
     {
       "id": "alert_1774907655004_sl3me",
       "timestamp": "2026-03-30T21:54:15.004Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "api_budget",
       "title": "Odds API Critical — Under 10K Requests",
       "detail": "Only 0 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-02T23:36:27.443Z"
     },
     {
       "id": "alert_1774906035006_qwidm",
@@ -552,12 +553,13 @@
     {
       "id": "alert_1773435609500_54q3n",
       "timestamp": "2026-03-13T21:00:09.500Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "warning",
       "category": "api_budget",
       "title": "Odds API Below 50K Requests",
       "detail": "20,584 requests remaining. Consider reducing polling frequency via API Budget settings.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-02T23:36:27.443Z"
     },
     {
       "id": "alert_1773434663293_sux9b",
@@ -2191,8 +2193,8 @@
       "raw": "{\n  \"summary\": [\n    \"Win rate at 55.7% is above the break-even threshold of 52.4%.\",\n    \"Odds API usage is at 79,833 with 20,167 requests remaining, marked as warning; needs monitoring.\",\n    \"Cache hit rate is at 0%, indicating potential issues with data retrieval efficiency.\",\n    \"Total active users stand at 1,247 with a churn rate of 4.2%, which is manageable.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review API Request Frequency\",\n      \"description\": \"Adjust API polling frequency to ensure requests remain above 10K to avoid hitting critical status.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Investigate Cache Utilization\",\n      \"description\": \"Analyze reasons for zero cache hit rate and implement changes to improve data retrieval performance.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Monitor User Churn Rate\",\n      \"description\": \"Track user engagement and churn rates to implement strategies for retention improvement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust the API polling settings to avoid critical thresholds.\",\n      \"Monitor upcoming game schedules and adjust betting strategies accordingly.\"\n    ],\n    \"this_week\": [\n      \"Conduct a thorough analysis of cache efficiency and performance.\",\n      \"Review and strategize on user engagement techniques.\",\n      \"Evaluate overall performance metrics and adjust models if necessary.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-04-02T23:09:51.524Z",
+  "lastQuickCheck": "2026-04-02T23:36:27.443Z",
   "lastDeepCheck": "2026-03-30T23:12:30.262Z",
-  "totalQuickChecks": 207,
+  "totalQuickChecks": 208,
   "totalDeepChecks": 56
 }
