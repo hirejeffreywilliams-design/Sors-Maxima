@@ -522,6 +522,46 @@ export default function TrackRecordPage() {
                 </p>
               </div>
             )}
+
+            {data.calibrationTiers.filter(t => t.settled >= 10).length > 0 && (() => {
+              const tiersWithData = data.calibrationTiers.filter(t => t.settled >= 10 && t.calibrationGap !== null);
+              const wellCalibrated = tiersWithData.filter(t => Math.abs(t.calibrationGap!) <= 5);
+              const avgAbsGap = tiersWithData.length > 0
+                ? tiersWithData.reduce((s, t) => s + Math.abs(t.calibrationGap!), 0) / tiersWithData.length
+                : null;
+              const brierEquiv = avgAbsGap !== null ? Math.max(0, 100 - avgAbsGap * 3).toFixed(0) : null;
+              const agreementPct = tiersWithData.length > 0
+                ? Math.round((wellCalibrated.length / tiersWithData.length) * 100)
+                : null;
+              return (
+                <div className="mt-4 pt-3 border-t border-border/40 space-y-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ensemble Model Agreement</p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="p-2 rounded-lg bg-muted/40">
+                      <p className={`text-base font-black tabular-nums ${agreementPct !== null && agreementPct >= 60 ? "text-emerald-400" : "text-amber-400"}`} data-testid="stat-ensemble-agreement">
+                        {agreementPct !== null ? `${agreementPct}%` : "—"}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Tier Agreement</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-muted/40">
+                      <p className={`text-base font-black tabular-nums ${brierEquiv !== null && Number(brierEquiv) >= 70 ? "text-emerald-400" : "text-amber-400"}`} data-testid="stat-brier-equiv">
+                        {brierEquiv !== null ? brierEquiv : "—"}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Brier Equiv.</p>
+                    </div>
+                    <div className="p-2 rounded-lg bg-muted/40">
+                      <p className="text-base font-black tabular-nums text-sky-400" data-testid="stat-well-calibrated-tiers">
+                        {tiersWithData.length > 0 ? `${wellCalibrated.length}/${tiersWithData.length}` : "—"}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Tiers Aligned</p>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-muted-foreground leading-relaxed">
+                    Tier agreement measures what % of confidence buckets are within ±5% of their actual win rate. Brier equivalent is a 0–100 score penalizing overconfidence. A well-calibrated model scores above 70.
+                  </p>
+                </div>
+              );
+            })()}
           </CardContent>
         </Card>
 

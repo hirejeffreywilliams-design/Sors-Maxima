@@ -970,6 +970,120 @@ function ModelHealthChip() {
   );
 }
 
+function ModelHealthDashboardCard() {
+  const [open, setOpen] = useState(false);
+
+  const { data, isLoading } = useQuery<{
+    status: string;
+    settledCount: number;
+    winRate: number;
+    recentTrend: number;
+    lastUpdated: string;
+    backtestCount: number;
+    liveCount: number;
+    factorCount: number;
+  }>({
+    queryKey: ["/api/model-health"],
+    queryFn: async () => {
+      const res = await fetch("/api/model-health");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    refetchInterval: 300_000,
+  });
+
+  const { data: trackData } = useQuery<{
+    calibrationScore: number | null;
+    overallWinRate: number | null;
+    calibrationTiers: { label: string; settled: number; modelAvgConfidence: number; actualWinRate: number | null; calibrationGap: number | null }[];
+  }>({
+    queryKey: ["/api/track-record"],
+    staleTime: 5 * 60_000,
+  });
+
+  const isCalibrated = data?.status === "calibrated";
+  const winRate = data?.winRate ?? trackData?.overallWinRate ?? null;
+  const calScore = trackData?.calibrationScore ?? null;
+  const wellCalibrated = trackData?.calibrationTiers?.filter(t => t.settled >= 10 && t.calibrationGap !== null && Math.abs(t.calibrationGap) <= 5).length ?? 0;
+  const totalTiers = trackData?.calibrationTiers?.filter(t => t.settled >= 10).length ?? 0;
+  const brierEquivalent = calScore !== null ? (calScore / 100 * 0.4 + (winRate !== null ? winRate / 100 * 0.6 : 0)) : null;
+
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-border/40 p-3 space-y-2 animate-pulse">
+        <Skeleton className="h-4 w-48" />
+        <div className="grid grid-cols-4 gap-2">
+          {[1,2,3,4].map(i => <Skeleton key={i} className="h-10 rounded-lg" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border/40 bg-card overflow-hidden" data-testid="section-model-health">
+      <button
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/30 transition-colors text-left"
+        onClick={() => setOpen(o => !o)}
+        data-testid="button-toggle-model-health"
+      >
+        <div className="flex items-center gap-2.5">
+          <div className={`w-2 h-2 rounded-full ${isCalibrated ? "bg-emerald-400 animate-pulse" : "bg-amber-400"}`} />
+          <span className="text-sm font-semibold">Model Health</span>
+          <Badge variant="outline" className={`text-[9px] h-4 px-1.5 border ${isCalibrated ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-amber-500/10 border-amber-500/30 text-amber-400"}`}>
+            {isCalibrated ? "Calibrated" : "Warming"}
+          </Badge>
+          <span className="text-[10px] text-muted-foreground hidden sm:block">{data?.factorCount ?? 46}-factor model · {data?.settledCount ?? 0} picks settled</span>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          {winRate !== null && (
+            <span className={`text-sm font-bold tabular-nums ${winRate >= 55 ? "text-emerald-400" : winRate >= 52.4 ? "text-amber-400" : "text-red-400"}`}>
+              {winRate.toFixed(1)}% win
+            </span>
+          )}
+          {open ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {open && (
+        <div className="border-t border-border/40 px-4 py-3 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+            <div className="p-2.5 rounded-lg bg-muted/40">
+              <p className={`text-lg font-black tabular-nums ${winRate !== null && winRate >= 55 ? "text-emerald-400" : winRate !== null && winRate >= 52.4 ? "text-amber-400" : "text-red-400"}`} data-testid="mh-win-rate">
+                {winRate !== null ? `${winRate.toFixed(1)}%` : "—"}
+              </p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Strike Rate</p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40">
+              <p className={`text-lg font-black tabular-nums ${calScore !== null && calScore >= 80 ? "text-emerald-400" : calScore !== null && calScore >= 65 ? "text-sky-400" : calScore !== null && calScore >= 50 ? "text-amber-400" : "text-muted-foreground"}`} data-testid="mh-cal-score">
+                {calScore !== null ? calScore : "—"}
+              </p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Cal. Score</p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40">
+              <p className="text-lg font-black tabular-nums text-sky-400" data-testid="mh-brier">
+                {brierEquivalent !== null ? `${(brierEquivalent * 100).toFixed(0)}%` : "—"}
+              </p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Accuracy Index</p>
+            </div>
+            <div className="p-2.5 rounded-lg bg-muted/40">
+              <p className={`text-lg font-black tabular-nums ${totalTiers > 0 && wellCalibrated / totalTiers >= 0.6 ? "text-emerald-400" : "text-amber-400"}`} data-testid="mh-tier-agreement">
+                {totalTiers > 0 ? `${wellCalibrated}/${totalTiers}` : "—"}
+              </p>
+              <p className="text-[9px] text-muted-foreground mt-0.5">Tiers Aligned</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+            <span>{data?.liveCount ?? 0} live tracked · {data?.backtestCount ?? 0} backtested</span>
+            <Link href="/track-record" className="text-primary hover:underline flex items-center gap-0.5">
+              Full report <BarChart2 className="w-3 h-3" />
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MatchupTicketCard({ ticket, legs, addLeg }: { ticket: MatchupTicket; legs: { id: string }[]; addLeg: (leg: any) => boolean }) {
   const [expanded, setExpanded] = useState(false);
   const [selectedLegIds, setSelectedLegIds] = useState<Set<string>>(() => new Set(getTopLegIds(ticket.legs, 3)));
@@ -2260,6 +2374,9 @@ export default function CommandCenter() {
             )}
           </div>
         </div>
+
+        {/* ─── MODEL HEALTH CARD ──────────────────────────────────────── */}
+        <ModelHealthDashboardCard />
 
         {/* ─── STRATEGY MODE BANNER ───────────────────────────────────── */}
         {activeStrategy && activeMode && (

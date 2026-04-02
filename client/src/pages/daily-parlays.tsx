@@ -309,6 +309,42 @@ function formatGameTime(iso?: string): string {
 
 const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
 
+function getCalibrationTier(confidence: number, ev: number): { label: string; cls: string; tooltip: string } {
+  if (confidence >= 78 && ev < 4) {
+    return {
+      label: "Over-confident",
+      cls: "bg-amber-500/12 text-amber-400 border-amber-500/30",
+      tooltip: "Model confidence is high relative to the observed edge. This tier historically over-estimates win probability.",
+    };
+  }
+  if (confidence >= 65 && ev >= 4) {
+    return {
+      label: "Well-calibrated",
+      cls: "bg-emerald-500/12 text-emerald-400 border-emerald-500/30",
+      tooltip: "Confidence aligns well with edge. Picks in this tier have historically delivered close to predicted win rates.",
+    };
+  }
+  if (confidence < 65 && ev >= 8) {
+    return {
+      label: "Undervalued",
+      cls: "bg-sky-500/12 text-sky-400 border-sky-500/30",
+      tooltip: "Model is conservative but sees strong edge. These picks often outperform their confidence rating.",
+    };
+  }
+  if (ev < 0) {
+    return {
+      label: "Risky",
+      cls: "bg-red-500/12 text-red-400 border-red-500/30",
+      tooltip: "Negative expected value — the market has priced this bet against a positive outcome. Treat with caution.",
+    };
+  }
+  return {
+    label: "Developing",
+    cls: "bg-muted/50 text-muted-foreground border-border/40",
+    tooltip: "Insufficient signal history in this confidence bucket. Treat with standard caution.",
+  };
+}
+
 function formatCacheAge(generatedAt?: string): string | null {
   if (!generatedAt) return null;
   const ageMs = Date.now() - new Date(generatedAt).getTime();
@@ -556,6 +592,25 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
           </Tooltip>
         </div>
 
+        {(() => {
+          const calTier = getCalibrationTier(pick.confidence, pick.ev);
+          return (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-1.5 cursor-default" data-testid={`calibration-tier-${pick.id}`}>
+                  <Badge variant="outline" className={`text-[9px] h-4 px-1.5 py-0 border font-medium ${calTier.cls}`}>
+                    {calTier.label}
+                  </Badge>
+                  <span className="text-[9px] text-muted-foreground/70">Calibration</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-[220px] text-center">
+                <p className="text-xs">{calTier.tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })()}
+
         {pick.insights && pick.insights.length > 0 && (
           <div className="space-y-1">
             {pick.insights.map((insight, i) => (
@@ -722,6 +777,18 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
             <p className="text-[9px] text-muted-foreground">Payout</p>
           </div>
         </div>
+
+        {parlay.legs.length >= 4 && parlay.winProbability < 0.20 && (
+          <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/8 border border-amber-500/25" data-testid={`parlay-lottery-warning-${index}`}>
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-[10px] font-semibold text-amber-400 leading-tight">Lottery Paradox Warning</p>
+              <p className="text-[9px] text-muted-foreground mt-0.5 leading-relaxed">
+                Joint win probability is just {(parlay.winProbability * 100).toFixed(1)}% — statistically rare. Each individual leg may be sound, but combining {parlay.legs.length}+ legs creates near-lottery odds. Kelly recommends a small fraction of your bankroll.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-1.5">
           {visibleLegs.map((leg) => (
