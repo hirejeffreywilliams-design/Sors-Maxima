@@ -1,5 +1,289 @@
 [
   {
+    "id": "alert-odds-center-1775169797991",
+    "nodeId": "odds-center",
+    "nodeLabel": "Odds Center",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-02T22:43:17.991Z",
+    "diagnosis": "The Odds Center node is cached likely due to insufficient live data updates, meaning users may receive outdated betting lines and insights.",
+    "recommendations": [
+      "Verify the connection to the Odds API and ensure that THE_ODDS_API_KEY is valid and not expired.",
+      "Check for any recent outages or issues with the Odds API service that may be causing the caching.",
+      "Implement a monitoring alert for real-time data updates to quickly identify and resolve future caching issues."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-mma-engine-1775169795622",
+    "nodeId": "mma-engine",
+    "nodeLabel": "MMA/UFC Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-02T22:43:15.622Z",
+    "diagnosis": "The 'MMA/UFC Engine' node is cached due to inactivity or a lack of recent updates, indicating users may not receive the latest insights or betting information for these events.",
+    "recommendations": [
+      "Check the data source connections to ensure they are active and returning valid data.",
+      "Increase the frequency of refresh cycles or set up alerts for when new data becomes available.",
+      "Review the logic that marks the node as cached to prevent premature caching during normal operation."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-api-1775169794347",
+    "nodeId": "odds-api",
+    "nodeLabel": "The Odds API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-02T22:43:14.347Z",
+    "diagnosis": "The Odds API has been cached, indicating that it is currently serving previously stored data rather than fetching new real-time betting lines, which may lead to outdated information for users.",
+    "recommendations": [
+      "Check the API key configuration to ensure it is valid and up to date.",
+      "Monitor the status of the Odds API for any connection issues or downtime.",
+      "Consider implementing a failover mechanism to alert users when real-time data is unavailable."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-intl-sports-1774912552907",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-30T23:15:52.907Z",
+    "diagnosis": "The 'Intl Sports Engine' node has been cached due to an issue with data fetching, which may result in users receiving outdated information for international sports data.",
+    "recommendations": [
+      "Check the API keys for the 'api-football' node to ensure they are valid and not expired.",
+      "Review the recent logs for the 'Intl Sports Engine' node to identify any errors or issues during data fetching.",
+      "Restart the 'Intl Sports Engine' node to attempt re-establishing the connection and retrieving fresh data."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T22:41:13.127Z"
+  },
+  {
+    "id": "alert-api-football-1774912551772",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-30T23:15:51.772Z",
+    "diagnosis": "The 'API-Football' node is cached due to potentially reaching its data retrieval limit or temporary unavailability, which may lead to delayed or outdated information for users relying on real-time soccer data.",
+    "recommendations": [
+      "Check the API-Football usage limits to confirm if the rate limit has been exceeded.",
+      "Investigate the API health status to ensure there are no outages or issues with the service.",
+      "If the issue persists, consider implementing a fallback mechanism to provide users with alternative soccer data sources."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T22:41:13.122Z"
+  },
+  {
+    "id": "alert-intl-sports-1774906777524",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-30T21:39:37.524Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached, indicating a potential delay in fetching the latest international sports data, which may affect the freshness of betting insights for users.",
+    "recommendations": [
+      "Monitor the data refresh intervals to ensure timely updates.",
+      "Check for any connectivity issues with external data sources and resolve them promptly.",
+      "Consider implementing a fallback mechanism to pull data from alternative sources if delays persist."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-30T22:55:50.292Z"
+  },
+  {
+    "id": "alert-api-football-1774906776442",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-30T21:39:36.442Z",
+    "diagnosis": "The 'API-Football' node is cached due to a temporary disruption in real-time data fetching, meaning users will receive stale data until the issue is resolved.",
+    "recommendations": [
+      "Check the API_FOOTBALL_KEY for validity and ensure it's being used correctly.",
+      "Verify the network connectivity to the API-Football service to rule out issues.",
+      "Review the API-Football service's operational status for any ongoing outages or maintenance."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-30T22:55:50.289Z"
+  },
+  {
+    "id": "alert-mlb-stats-1774808376392",
+    "nodeId": "mlb-stats",
+    "nodeLabel": "MLB Stats API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T18:19:36.392Z",
+    "diagnosis": "The 'MLB Stats API' node is cached likely due to its recent data retrievals, meaning users may experience a temporary delay in receiving the latest statistics for Major League Baseball.",
+    "recommendations": [
+      "Monitor the MLB Stats API node for any further status changes to ensure timely updates.",
+      "Consider refreshing the cache manually if immediate access to updated MLB stats is required.",
+      "Investigate the caching frequency settings to optimize real-time data access for users."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-nhl-stats-1774808375143",
+    "nodeId": "nhl-stats",
+    "nodeLabel": "NHL Stats API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T18:19:35.143Z",
+    "diagnosis": "The 'NHL Stats API' node is cached because it has temporarily stored data to improve response time and reduce load on the API, which may affect the availability of real-time stats for users.",
+    "recommendations": [
+      "Monitor the API's performance to determine if frequent caching is necessary.",
+      "Check for any recent changes to the NHL Stats API that may have triggered the caching.",
+      "Consider implementing a cache invalidation strategy to ensure users receive the most up-to-date data when available."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-intl-sports-1774806096706",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T17:41:36.706Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached likely due to a temporary disruption in real-time data fetching, meaning users may experience delays in receiving the latest international sports data.",
+    "recommendations": [
+      "Check the connection to the data sources that feed into the 'Intl Sports Engine' for any disruptions.",
+      "Clear the cache for the 'Intl Sports Engine' to force a fresh data pull from the sources.",
+      "Monitor the node status and set up alerts for when it reverts back to live status or if further issues arise."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-30T21:19:35.239Z"
+  },
+  {
+    "id": "alert-api-football-1774806095107",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T17:41:35.107Z",
+    "diagnosis": "The 'API-Football' node is cached, indicating that it is currently utilizing stored data rather than fetching fresh information, which may result in outdated soccer data for users.",
+    "recommendations": [
+      "Verify the API-Football connection to ensure it is functioning properly.",
+      "Check for any issues with the API_FOOTBALL_KEY and regenerate if necessary.",
+      "Increase the frequency of data refresh or review the caching policy to maintain up-to-date data availability."
+    ],
+    "priority": "low",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T18:05:13.302Z"
+  },
+  {
+    "id": "alert-intl-sports-1774751592150",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T02:33:12.150Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached, indicating that it is currently not providing real-time updates but may still serve previously stored data.",
+    "recommendations": [
+      "Monitor the node for any further status changes that may indicate a return to normal operation.",
+      "Check the connectivity and performance metrics for the 'Intl Sports Engine' to identify potential issues.",
+      "If cache status persists, consider clearing the cache or restarting the node to refresh its data retrieval capabilities."
+    ],
+    "priority": "low",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:20.479Z"
+  },
+  {
+    "id": "alert-api-football-1774751590714",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T02:33:10.714Z",
+    "diagnosis": "The 'API-Football' node has been cached, indicating that it is currently not fetching live data but is instead serving previously retrieved data, which may delay the availability of the most recent soccer statistics and insights for users.",
+    "recommendations": [
+      "Check the API-Football connection settings to ensure the API key is valid and active.",
+      "Review any rate limits or usage quotas associated with the API-Football to determine if they have been exceeded.",
+      "If issues persist, consider reinitializing the node or reaching out to the API provider for further support."
+    ],
+    "priority": "low",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:21.268Z"
+  },
+  {
+    "id": "alert-mlb-stats-1774747876542",
+    "nodeId": "mlb-stats",
+    "nodeLabel": "MLB Stats API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T01:31:16.542Z",
+    "diagnosis": "The 'MLB Stats API' node is cached due to a recent data update or connectivity issue, which means users may not be receiving the latest real-time MLB statistics and insights.",
+    "recommendations": [
+      "Check the API connection to ensure it is functioning correctly.",
+      "Verify if the API key for the MLB Stats API is valid and has not expired.",
+      "Monitor the API response for any errors and refresh the cache to obtain updated data."
+    ],
+    "priority": "low",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:21.987Z"
+  },
+  {
+    "id": "alert-nhl-stats-1774747874072",
+    "nodeId": "nhl-stats",
+    "nodeLabel": "NHL Stats API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T01:31:14.072Z",
+    "diagnosis": "The 'NHL Stats API' node is cached, indicating that data retrieval is currently relying on previously stored data rather than fetching fresh updates, which may limit accuracy for users seeking real-time information.",
+    "recommendations": [
+      "Check the connection settings for the NHL Stats API to ensure it is online and accessible.",
+      "Review the API's fetching error logs for any issues that may have caused the caching behavior.",
+      "Implement periodic checks to refresh the cached data or set up alerts for when the API returns to active status."
+    ],
+    "priority": "low",
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:22.507Z"
+  },
+  {
+    "id": "alert-intl-sports-1774745607518",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T00:53:27.518Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached due to a temporary issue with its data sourcing, which may lead to outdated or incomplete information for users accessing international sports data.",
+    "recommendations": [
+      "Check the data source connections for the 'Intl Sports Engine' to ensure they are active and responding.",
+      "Clear the cache manually and attempt to refresh the node to retrieve current data.",
+      "Monitor the node's performance for any reoccurring issues and consider implementing automated alerts for status changes."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-29T02:13:09.066Z"
+  },
+  {
+    "id": "alert-api-football-1774745605977",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-03-29T00:53:25.977Z",
+    "diagnosis": "The 'API-Football' node is cached due to recent inactivity or no new data being fetched, which might result in users receiving outdated football data.",
+    "recommendations": [
+      "Check the connection to the API-Football service to ensure it's functioning properly.",
+      "Verify the API_FOOTBALL_KEY for any potential issues or expiration.",
+      "Consider setting up a scheduled task to refresh the data more frequently if the current interval is too long."
+    ],
+    "priority": "low",
+    "acknowledged": false,
+    "resolvedAt": "2026-03-29T02:13:09.065Z"
+  },
+  {
     "id": "alert-player-props-1774715621510",
     "nodeId": "player-props",
     "nodeLabel": "Player Props Lab",
@@ -81,7 +365,8 @@
       "Review the logs for the Odds Center to identify any errors or warnings that may indicate why real-time updates are not being processed."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:22.967Z"
   },
   {
     "id": "alert-mma-engine-1774714656113",
@@ -97,7 +382,8 @@
       "Monitor the node’s status regularly to prevent future caching issues."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:23.331Z"
   },
   {
     "id": "alert-odds-api-1774714654709",
@@ -113,7 +399,8 @@
       "Schedule regular updates or set triggers to refresh the cache more frequently to provide users with the latest data."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:23.762Z"
   },
   {
     "id": "alert-intl-sports-1774487000383",
@@ -231,7 +518,8 @@
       "Consider setting up alerts for when the node switches from 'cached' back to 'active' for timely updates."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:24.157Z"
   },
   {
     "id": "alert-bdl-1774480580126",
@@ -247,7 +535,8 @@
       "Consider setting up alerts for when the 'BallDontLie' node switches from cached to active to manage user expectations."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": true,
+    "acknowledgedAt": "2026-03-29T17:21:24.573Z"
   },
   {
     "id": "alert-odds-center-1774480042358",
