@@ -13,7 +13,8 @@
       "Implement a monitoring alert for real-time data updates to quickly identify and resolve future caching issues."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T23:23:08.981Z"
   },
   {
     "id": "alert-mma-engine-1775169795622",
@@ -29,7 +30,8 @@
       "Review the logic that marks the node as cached to prevent premature caching during normal operation."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T23:23:08.929Z"
   },
   {
     "id": "alert-odds-api-1775169794347",
@@ -45,7 +47,8 @@
       "Consider implementing a failover mechanism to alert users when real-time data is unavailable."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T23:23:08.928Z"
   },
   {
     "id": "alert-intl-sports-1774912552907",

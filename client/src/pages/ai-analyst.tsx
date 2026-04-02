@@ -107,6 +107,68 @@ function TypingIndicator() {
   );
 }
 
+function PickCard({ pick }: { pick: ActivePick }) {
+  const oddsStr = `${pick.odds > 0 ? "+" : ""}${pick.odds}`;
+  const gradeColors: Record<string, string> = {
+    A: "from-emerald-500/20 to-emerald-500/5 border-emerald-500/30",
+    B: "from-blue-500/20 to-blue-500/5 border-blue-500/30",
+  };
+  const gradeTextColors: Record<string, string> = {
+    A: "text-emerald-400",
+    B: "text-blue-400",
+  };
+
+  return (
+    <div
+      className={`rounded-xl p-3 bg-gradient-to-br ${gradeColors[pick.grade] ?? "from-white/8 to-white/3 border-white/10"} border`}
+      data-testid={`pick-card-${pick.pick.slice(0, 20).replace(/\s+/g, "-").toLowerCase()}`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${
+          gradeColors[pick.grade] ?? "border-white/10"} ${gradeTextColors[pick.grade] ?? "text-white/60"}`}>
+          {pick.grade}
+        </span>
+        <span className="text-[10px] font-bold text-white/60">{pick.sport}</span>
+        <span className="text-[10px] text-white/40 uppercase tracking-wide">{pick.betType}</span>
+        <span className="ml-auto text-[11px] font-black text-white/70">{oddsStr}</span>
+      </div>
+      <p className="text-[12px] font-bold text-white/85 leading-snug mb-2">{pick.pick}</p>
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        <span className="text-[10px] text-white/45">
+          Conf <span className="font-bold text-white/70">{pick.confidence}%</span>
+        </span>
+        {pick.ev !== null && (
+          <span className={`text-[10px] font-bold ${pick.ev > 0 ? "text-emerald-400" : "text-red-400"}`}>
+            EV {pick.ev > 0 ? "+" : ""}{pick.ev.toFixed(1)}%
+          </span>
+        )}
+        {pick.edge !== null && (
+          <span className="text-[10px] text-white/45">
+            Edge <span className={`font-bold ${pick.edge > 0 ? "text-orange-400" : "text-white/50"}`}>
+              {pick.edge > 0 ? "+" : ""}{pick.edge.toFixed(1)}%
+            </span>
+          </span>
+        )}
+        {pick.kellyFraction !== null && (
+          <span className="text-[10px] text-amber-400/70 font-bold">
+            K×¼: {(pick.kellyFraction * 0.25 * 100).toFixed(2)}%
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Detect if an assistant message references a pick from the active picks list
+function findReferencedPicks(content: string, activePicks: ActivePick[]): ActivePick[] {
+  const contentLower = content.toLowerCase();
+  return activePicks.filter(p => {
+    const pickWords = p.pick.toLowerCase().split(/\s+/).filter(w => w.length > 3);
+    const matchCount = pickWords.filter(w => contentLower.includes(w)).length;
+    return matchCount >= Math.min(2, pickWords.length);
+  }).slice(0, 2);
+}
+
 function GradeChip({ grade }: { grade: string }) {
   const colors: Record<string, string> = {
     A: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
@@ -503,33 +565,49 @@ export default function AIAnalystPage() {
 
         <ScrollArea className="flex-1 min-h-0">
           <div className="p-5 space-y-5 max-w-3xl mx-auto">
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex items-start gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-                {msg.role === "assistant" && (
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}
-                  >
-                    <Zap className="w-4 h-4 text-white" />
+            {messages.map(msg => {
+              const referencedPicks = msg.role === "assistant" && picks.length > 0
+                ? findReferencedPicks(msg.content, picks)
+                : [];
+              return (
+                <div key={msg.id} className="space-y-2">
+                  <div className={`flex items-start gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                    {msg.role === "assistant" && (
+                      <div
+                        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
+                        style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}
+                      >
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                    <div
+                      className={`px-4 py-3.5 rounded-2xl max-w-[80%] ${msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
+                      style={msg.role === "user"
+                        ? { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }
+                        : { background: "rgba(240,83,43,0.09)", border: "1px solid rgba(240,83,43,0.16)" }
+                      }
+                      data-testid={`message-${msg.role}-${msg.id}`}
+                    >
+                      <p className="text-[13px] leading-relaxed text-white/85 whitespace-pre-wrap">
+                        {formatMessage(msg.content)}
+                      </p>
+                      <p className="text-[9px] text-white/25 mt-1.5">
+                        {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    </div>
                   </div>
-                )}
-                <div
-                  className={`px-4 py-3.5 rounded-2xl max-w-[80%] ${msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
-                  style={msg.role === "user"
-                    ? { background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)" }
-                    : { background: "rgba(240,83,43,0.09)", border: "1px solid rgba(240,83,43,0.16)" }
-                  }
-                  data-testid={`message-${msg.role}-${msg.id}`}
-                >
-                  <p className="text-[13px] leading-relaxed text-white/85 whitespace-pre-wrap">
-                    {formatMessage(msg.content)}
-                  </p>
-                  <p className="text-[9px] text-white/25 mt-1.5">
-                    {msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
+                  {/* Inline pick cards when AI references specific picks */}
+                  {referencedPicks.length > 0 && (
+                    <div className="ml-12 space-y-2">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-orange-400/60">Referenced picks</p>
+                      {referencedPicks.map((p, i) => (
+                        <PickCard key={i} pick={p} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {chatMutation.isPending && <TypingIndicator />}
 

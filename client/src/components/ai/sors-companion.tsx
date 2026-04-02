@@ -221,14 +221,16 @@ export function SorsCompanion() {
             background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 60%, #F0532B 100%)",
             boxShadow: open
               ? "0 0 0 3px rgba(240,83,43,0.5), 0 8px 32px rgba(240,83,43,0.4)"
-              : "0 4px 20px rgba(240,83,43,0.35), 0 2px 8px rgba(0,0,0,0.4)",
-            animation: open ? "none" : "companionFloat 3s ease-in-out infinite",
+              : hasPlatformAlert
+                ? "0 0 0 3px rgba(240,83,43,0.6), 0 0 24px rgba(240,83,43,0.6), 0 8px 32px rgba(0,0,0,0.4)"
+                : "0 4px 20px rgba(240,83,43,0.35), 0 2px 8px rgba(0,0,0,0.4)",
+            animation: open ? "none" : hasPlatformAlert ? "alertPulse 2s ease-in-out infinite" : "companionFloat 3s ease-in-out infinite",
           }}
         >
           <div className="w-full h-full rounded-2xl flex items-center justify-center relative">
             <Zap className="w-6 h-6 text-white drop-shadow-sm" />
             {!open && showBadge && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-background flex items-center justify-center text-[9px] font-black text-white">
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-background flex items-center justify-center text-[9px] font-black text-white animate-bounce">
                 !
               </span>
             )}
@@ -417,6 +419,10 @@ export function SorsCompanion() {
         @keyframes companionFloat {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-6px); }
+        }
+        @keyframes alertPulse {
+          0%, 100% { transform: translateY(0px) scale(1); box-shadow: 0 0 0 3px rgba(240,83,43,0.6), 0 0 24px rgba(240,83,43,0.6), 0 8px 32px rgba(0,0,0,0.4); }
+          50% { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 0 5px rgba(240,83,43,0.8), 0 0 40px rgba(240,83,43,0.8), 0 12px 40px rgba(0,0,0,0.5); }
         }
         @keyframes fadeInUp {
           from { opacity: 0; transform: translateY(6px); }

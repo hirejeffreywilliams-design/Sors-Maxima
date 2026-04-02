@@ -6,6 +6,8 @@ import { getPrecomputedCache } from "../precomputedPredictionsEngine";
 import { generateIntelligenceFeed } from "../unifiedIntelligenceHub";
 import { buildAnalystContext, getActivePicks } from "../analystContextBuilder";
 
+const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
+
 // Internal AI routes — admin and system use only.
 // These endpoints power backend intelligence, admin analysis, and system diagnostics.
 // /api/ai/analyst is open to ALL authenticated users (no tier gate).

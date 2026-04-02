@@ -39,6 +39,10 @@ export interface ActivePick {
 interface BankrollRow {
   bankroll: string | number | null;
   kelly_fraction: string | number | null;
+  risk_tolerance: string | null;
+  bankroll_strategy: string | null;
+  bet_frequency: string | null;
+  preferred_bet_types: string[] | null;
 }
 
 // ── Kelly criterion helper ────────────────────────────────────────────────
@@ -90,24 +94,36 @@ export function detectParlayQuery(messages: { role: string; content: string }[])
 export async function fetchUserBankroll(userId: string | undefined): Promise<{
   bankroll: number | null;
   kellyFraction: number | null;
+  riskTolerance: string | null;
+  bankrollStrategy: string | null;
+  betFrequency: string | null;
+  preferredBetTypes: string[] | null;
 }> {
-  if (!userId) return { bankroll: null, kellyFraction: null };
+  const defaults = {
+    bankroll: null, kellyFraction: null, riskTolerance: null,
+    bankrollStrategy: null, betFrequency: null, preferredBetTypes: null,
+  };
+  if (!userId) return defaults;
   try {
     const result = await db.execute(sql`
-      SELECT bankroll, kelly_fraction
+      SELECT bankroll, kelly_fraction, risk_tolerance, bankroll_strategy, bet_frequency, preferred_bet_types
       FROM user_betting_profile
       WHERE user_id = ${userId}
       LIMIT 1
     `);
     const rows = (result.rows ?? result) as BankrollRow[];
     const row = rows[0];
-    if (!row) return { bankroll: null, kellyFraction: null };
+    if (!row) return defaults;
     return {
       bankroll: row.bankroll != null ? Number(row.bankroll) : null,
       kellyFraction: row.kelly_fraction != null ? Number(row.kelly_fraction) : null,
+      riskTolerance: row.risk_tolerance ?? null,
+      bankrollStrategy: row.bankroll_strategy ?? null,
+      betFrequency: row.bet_frequency ?? null,
+      preferredBetTypes: Array.isArray(row.preferred_bet_types) ? row.preferred_bet_types : null,
     };
   } catch {
-    return { bankroll: null, kellyFraction: null };
+    return defaults;
   }
 }
 
@@ -250,20 +266,30 @@ export async function buildAnalystContext(
     }
   }
 
-  // 5. Bankroll block
+  // 5. Bankroll + risk profile block
   let bankrollBlock =
-    "Bankroll profile: Not set. Default sizing: Quarter-Kelly (≤2.5% of bankroll per bet).";
+    "Bankroll profile: Not configured. Risk profile: moderate (default). " +
+    "Default sizing: Quarter-Kelly (≤2.5% of bankroll per bet).";
   try {
-    const { bankroll, kellyFraction } = await fetchUserBankroll(userId);
+    const { bankroll, kellyFraction, riskTolerance, bankrollStrategy, betFrequency, preferredBetTypes } =
+      await fetchUserBankroll(userId);
+    const parts: string[] = [];
     if (bankroll != null) {
       const kf = kellyFraction ?? 0.1;
       const qKellyPct = (kf * 0.25 * 100).toFixed(2);
       const qKellyDollar = (bankroll * kf * 0.25).toFixed(2);
-      bankrollBlock =
-        `User bankroll: $${bankroll.toFixed(0)}. ` +
-        `Kelly fraction setting: ${(kf * 100).toFixed(2)}%. ` +
-        `Quarter-Kelly recommendation: ${qKellyPct}% = $${qKellyDollar} per bet. ` +
-        `Never exceed 2–3% of bankroll on any single bet.`;
+      parts.push(`Bankroll: $${bankroll.toFixed(0)}`);
+      parts.push(`Kelly fraction: ${(kf * 100).toFixed(2)}%`);
+      parts.push(`Quarter-Kelly stake: ${qKellyPct}% = $${qKellyDollar} per bet`);
+    }
+    if (riskTolerance) parts.push(`Risk tolerance: ${riskTolerance}`);
+    if (bankrollStrategy) parts.push(`Staking strategy: ${bankrollStrategy}`);
+    if (betFrequency) parts.push(`Bet frequency: ${betFrequency} bets/day`);
+    if (preferredBetTypes && preferredBetTypes.length > 0) {
+      parts.push(`Preferred bet types: ${preferredBetTypes.join(", ")}`);
+    }
+    if (parts.length > 0) {
+      bankrollBlock = parts.join(". ") + ". Never exceed 2–3% of bankroll on any single bet.";
     }
   } catch { /* use default */ }
 
