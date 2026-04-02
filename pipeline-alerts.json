@@ -129,7 +129,8 @@
       "Investigate the caching frequency settings to optimize real-time data access for users."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T23:01:11.541Z"
   },
   {
     "id": "alert-nhl-stats-1774808375143",
@@ -145,7 +146,8 @@
       "Consider implementing a cache invalidation strategy to ensure users receive the most up-to-date data when available."
     ],
     "priority": "low",
-    "acknowledged": false
+    "acknowledged": false,
+    "resolvedAt": "2026-04-02T23:01:11.540Z"
   },
   {
     "id": "alert-intl-sports-1774806096706",

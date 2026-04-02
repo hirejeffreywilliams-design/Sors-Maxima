@@ -1,17 +1,127 @@
 import type { Express } from "express";
-import { requireAdmin } from "./helpers";
+import { requireAdmin, requireAuth } from "./helpers";
 import { createOpenAIClient } from "../openaiClient";
 import { generatePickExplanation, getPickExplanation, getCacheStats } from "../aiPickExplainer";
 import { getPrecomputedCache } from "../precomputedPredictionsEngine";
 import { generateIntelligenceFeed } from "../unifiedIntelligenceHub";
+import { getTrackRecord } from "../calibrationEngine";
+import { getAIStandardsContext } from "../companyStandards";
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
 
 // Internal AI routes — admin and system use only.
 // These endpoints power backend intelligence, admin analysis, and system diagnostics.
-// They are NOT exposed to end users.
+// /api/ai/analyst is open to ALL authenticated users (no tier gate).
 
 export function registerAiRoutes(app: Express): void {
+
+  // ── POST /api/ai/analyst ───────────────────────────────────────────────────
+  // Sports betting AI companion for ALL authenticated users.
+  // Accepts a conversation history and returns an AI response grounded in
+  // platform data (calibration, recent picks, EV, Kelly, joint probability).
+  app.post("/api/ai/analyst", requireAuth, async (req, res) => {
+    const { messages } = req.body as {
+      messages: { role: "user" | "assistant"; content: string }[];
+    };
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "messages array required" });
+    }
+
+    const openai = createOpenAIClient();
+    if (!openai) return res.status(503).json({ error: "AI service unavailable" });
+
+    // ── Platform context ────────────────────────────────────────────────────
+    let calibrationSummary = "Track record: initializing (not enough settled picks yet).";
+    let recentPicksSummary = "No picks loaded in the current cycle.";
+    try {
+      const tr = getTrackRecord();
+      if (tr.hasMinimumData && tr.overallWinRate != null) {
+        const bySport = tr.bySport
+          .filter(s => s.actualWinRate != null && s.settled >= 5)
+          .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))
+          .slice(0, 5)
+          .map(s => `${s.sport}: ${(s.actualWinRate ?? 0).toFixed(1)}% (${s.settled} settled)`)
+          .join(", ");
+        calibrationSummary =
+          `Overall win rate: ${tr.overallWinRate.toFixed(1)}% across ${tr.settledPicks} settled picks. ` +
+          `Recent trend (last 20): ${tr.recentTrend.last20WinRate != null ? tr.recentTrend.last20WinRate.toFixed(1) + "%" : "N/A"} (${tr.recentTrend.trend}). ` +
+          (bySport ? `By sport: ${bySport}.` : "");
+      } else {
+        calibrationSummary = `Model calibration: ${tr.settledPicks} settled picks — needs ${tr.minimumPicksRequired} for full validation.`;
+      }
+    } catch { /* silently fall through */ }
+
+    try {
+      const allPicks: any[] = [];
+      for (const sport of SPORTS) {
+        const cache = getPrecomputedCache(sport as any);
+        if (cache?.picks) {
+          allPicks.push(...cache.picks.filter((p: any) => p.grade && (p.grade === "A" || p.grade === "B")).slice(0, 3));
+        }
+      }
+      if (allPicks.length > 0) {
+        recentPicksSummary = "Today's top-graded picks (Grades A/B):\n" +
+          allPicks.slice(0, 8).map((p: any) => {
+            const ev = p.ev != null ? ` | EV: ${p.ev > 0 ? "+" : ""}${Number(p.ev).toFixed(1)}%` : "";
+            const kelly = p.kellyFraction != null ? ` | Kelly: ${(Number(p.kellyFraction) * 100).toFixed(1)}%` : "";
+            const conf = p.confidence != null ? ` | Conf: ${p.confidence}%` : "";
+            return `• ${p.pick} (${p.sport}, Grade ${p.grade}, ${p.odds > 0 ? "+" : ""}${p.odds}${conf}${ev}${kelly})`;
+          }).join("\n");
+      }
+    } catch { /* silently fall through */ }
+
+    const standardsCtx = getAIStandardsContext();
+
+    const systemPrompt = `${standardsCtx}
+
+You are SORS Intelligence — the official AI analyst of Sors Maxima, a members-only sports betting intelligence platform. You speak directly to a member.
+
+Your expertise:
+- Sports betting: moneylines, spreads, totals, props, parlays (NBA, NFL, MLB, NHL, NCAAB, NCAAF, MMA, Soccer)
+- Kelly criterion & fractional Kelly for bankroll sizing
+- Expected Value (EV) calculation and interpretation
+- Joint probability and parlay correlation risks
+- Line movement, closing line value (CLV), sharp money signals
+- Platform's 46-Factor Model: 46 risk/edge dimensions scored per pick
+- Calibration: comparing model confidence to actual outcomes
+- Cashout engineering strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™)
+
+Live Platform Data:
+${calibrationSummary}
+
+${recentPicksSummary}
+
+Core rules you ALWAYS follow:
+1. JOINT PROBABILITY: When a user asks about parlays, clearly explain that joint probability for N legs reduces the win probability significantly. Example: 3 legs at 65% each = 0.65³ = 27.5%. Flag correlated legs (same game, same team) as problematic.
+2. KELLY SIZING: When advising on stake size, always recommend quarter-Kelly (Kelly × 0.25) as the maximum. Never suggest betting more than 2–3% of bankroll on any single bet.
+3. RESPONSIBLE GAMBLING: When discussing stakes, always include: "Remember: bet only what you can afford to lose. For help, call 1-800-522-4700 (NCPG)."
+4. DATA GROUNDED: Reference actual platform calibration stats and today's graded picks when relevant. Never fabricate win rates.
+5. SCOPE: Focus on sports betting analytics. If asked about other topics, politely redirect.
+6. HONEST ABOUT UNCERTAINTY: Never guarantee outcomes. Say "the model suggests" or "the edge indicates", not "this will win."
+7. CONCISE: Be precise and data-rich. Avoid filler phrases. Members are sophisticated bettors.`;
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...messages.map(m => ({ role: m.role, content: m.content })),
+        ],
+        max_tokens: 600,
+        temperature: 0.65,
+      });
+
+      const response = completion.choices[0]?.message?.content ?? "I couldn't generate a response. Please try again.";
+      res.json({ response });
+    } catch (err: any) {
+      console.error("[AI Analyst] Error:", err.message);
+      if (err.status === 429 || err.status === 503) {
+        return res.status(503).json({ error: "AI service temporarily at capacity. Please try again shortly." });
+      }
+      res.status(500).json({ error: "Analysis failed. Please try again." });
+    }
+  });
 
   // ── GET /api/ai/pick-explanation/:pickId ─────────────────────────────────
   // Admin: retrieve or generate a model explanation for a pick (for QA and admin review).

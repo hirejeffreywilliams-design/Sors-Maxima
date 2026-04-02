@@ -1103,6 +1103,70 @@
       "ev": 31.73,
       "gameTime": "2026-03-14T15:00Z",
       "savedAt": "2026-03-13T03:17:02.801Z"
+    },
+    {
+      "id": "precomp-NBA-401810980-total-e4d337815d",
+      "gameId": "401810980",
+      "sport": "NBA",
+      "game": "Toronto Raptors @ Memphis Grizzlies",
+      "homeTeam": "Memphis Grizzlies",
+      "awayTeam": "Toronto Raptors",
+      "pick": "Over 218",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D",
+      "confidence": 62,
+      "ev": -38.91,
+      "gameTime": "2026-04-04T00:00Z",
+      "savedAt": "2026-04-02T23:01:08.882Z"
+    },
+    {
+      "id": "precomp-NBA-401810981-total-e5f964d8b0",
+      "gameId": "401810981",
+      "sport": "NBA",
+      "game": "Boston Celtics @ Milwaukee Bucks",
+      "homeTeam": "Milwaukee Bucks",
+      "awayTeam": "Boston Celtics",
+      "pick": "Over 221",
+      "betType": "total",
+      "odds": -110,
+      "grade": "D+",
+      "confidence": 61,
+      "ev": -38.91,
+      "gameTime": "2026-04-04T00:00Z",
+      "savedAt": "2026-04-02T23:01:08.882Z"
+    },
+    {
+      "id": "precomp-NHL-401803542-total-063b296ca0",
+      "gameId": "401803542",
+      "sport": "NHL",
+      "game": "Buffalo Sabres @ Ottawa Senators",
+      "homeTeam": "Ottawa Senators",
+      "awayTeam": "Buffalo Sabres",
+      "pick": "Over 6.5",
+      "betType": "total",
+      "odds": -109,
+      "grade": "D+",
+      "confidence": 54,
+      "ev": -23.3,
+      "gameTime": "2026-04-02T23:00Z",
+      "savedAt": "2026-04-02T23:01:10.150Z"
+    },
+    {
+      "id": "precomp-NHL-401803555-total-00f229032d",
+      "gameId": "401803555",
+      "sport": "NHL",
+      "game": "Nashville Predators @ Los Angeles Kings",
+      "homeTeam": "Los Angeles Kings",
+      "awayTeam": "Nashville Predators",
+      "pick": "Under 5.5",
+      "betType": "total",
+      "odds": -104,
+      "grade": "D+",
+      "confidence": 54,
+      "ev": -21.54,
+      "gameTime": "2026-04-03T02:30Z",
+      "savedAt": "2026-04-02T23:01:10.150Z"
     }
   ],
   "settled": [
@@ -41843,7 +41907,7 @@
       "lost": 850,
       "push": 43,
       "rate": 55.7,
-      "pending": 69
+      "pending": 73
     },
     "bySport": {
       "NBA": {
@@ -41956,7 +42020,7 @@
       "push": 2,
       "rate": 58
     },
-    "lastUpdated": "2026-04-02T22:39:26.937Z",
+    "lastUpdated": "2026-04-02T22:59:19.526Z",
     "roi": 11.5,
     "brierScore": 0.2494,
     "maxDrawdown": 15.4,

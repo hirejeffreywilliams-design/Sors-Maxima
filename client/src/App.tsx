@@ -116,10 +116,12 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { SSEProvider, useSSEContext } from "@/context/sse-provider";
 import { useOfflineStatus } from "@/hooks/use-offline-cache";
 import { OfflineBanner } from "@/components/offline-banner";
+import { SorsCompanion } from "@/components/ai/sors-companion";
 
 const ApplyPage = lazy(() => import("@/pages/apply"));
 const FoundersPage = lazy(() => import("@/pages/founders"));
 const AdminFounders = lazy(() => import("@/pages/admin-founders"));
+const AIAnalystPage = lazy(() => import("@/pages/ai-analyst"));
 
 function SSEStatusDot() {
   const sse = useSSEContext();
@@ -359,6 +361,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/shared-tickets"><Redirect to="/community" /></Route>
         <Route path="/cards" component={CardsPage} />
         <Route path="/verify-email" component={VerifyEmail} />
+        <Route path="/ai-analyst" component={AIAnalystPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -422,6 +425,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/strategy":             { label: "Strategy Advisor",     parent: "/" },
   "/cards":                { label: "Sors Cards",           parent: "/" },
   "/dashboard":            { label: "Dashboard",            parent: "/" },
+  "/ai-analyst":           { label: "AI Analyst",           parent: "/" },
 };
 
 const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools", "/sorsbooks"]);
@@ -615,6 +619,7 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
         {navSection("Discover", [
           { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
+          { href: "/ai-analyst", icon: Zap, label: "AI Analyst", testId: "mobile-nav-ai-analyst" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
           { href: "/research", icon: BookOpen, label: "Research Notes", testId: "mobile-nav-research" },
           { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
@@ -939,6 +944,7 @@ function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () 
         <DropdownMenuSeparator />
         <Link href="/profile"><DropdownMenuItem className="gap-2 cursor-pointer"><User className="w-4 h-4" />My Profile</DropdownMenuItem></Link>
         <Link href="/track-record"><DropdownMenuItem className="gap-2 cursor-pointer"><BarChart2 className="w-4 h-4" />Track Record</DropdownMenuItem></Link>
+        <Link href="/ai-analyst"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-ai-analyst"><Zap className="w-4 h-4 text-orange-400" />AI Analyst</DropdownMenuItem></Link>
         <Link href="/cards"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-cards"><Trophy className="w-4 h-4 text-amber-400" />Sors Cards</DropdownMenuItem></Link>
         <Link href="/watchlist"><DropdownMenuItem className="gap-2 cursor-pointer"><Eye className="w-4 h-4" />Watchlist</DropdownMenuItem></Link>
         <Link href="/research"><DropdownMenuItem className="gap-2 cursor-pointer" data-testid="menu-item-research"><BookOpen className="w-4 h-4" />Research Notes</DropdownMenuItem></Link>
@@ -1124,6 +1130,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <FeedbackWidget />
       <ErrorRecoveryInterceptor />
       <SupportChat />
+      <SorsCompanion />
     </div>
     </SSEProvider>
   );
