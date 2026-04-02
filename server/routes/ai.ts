@@ -4,10 +4,7 @@ import { createOpenAIClient } from "../openaiClient";
 import { generatePickExplanation, getPickExplanation, getCacheStats } from "../aiPickExplainer";
 import { getPrecomputedCache } from "../precomputedPredictionsEngine";
 import { generateIntelligenceFeed } from "../unifiedIntelligenceHub";
-import { getTrackRecord } from "../calibrationEngine";
-import { getAIStandardsContext } from "../companyStandards";
-
-const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
+import { buildAnalystContext, getActivePicks } from "../analystContextBuilder";
 
 // Internal AI routes — admin and system use only.
 // These endpoints power backend intelligence, admin analysis, and system diagnostics.
@@ -16,9 +13,10 @@ const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
 export function registerAiRoutes(app: Express): void {
 
   // ── POST /api/ai/analyst ───────────────────────────────────────────────────
-  // Sports betting AI companion for ALL authenticated users.
-  // Accepts a conversation history and returns an AI response grounded in
-  // platform data (calibration, recent picks, EV, Kelly, joint probability).
+  // Sports betting AI companion for ALL authenticated users (no tier gate).
+  // Accepts a conversation history, assembles rich platform context via
+  // buildAnalystContext(), injects joint probability for parlay queries,
+  // and returns a GPT-4o response.
   app.post("/api/ai/analyst", requireAuth, async (req, res) => {
     const { messages } = req.body as {
       messages: { role: "user" | "assistant"; content: string }[];
@@ -31,49 +29,12 @@ export function registerAiRoutes(app: Express): void {
     const openai = createOpenAIClient();
     if (!openai) return res.status(503).json({ error: "AI service unavailable" });
 
-    // ── Platform context ────────────────────────────────────────────────────
-    let calibrationSummary = "Track record: initializing (not enough settled picks yet).";
-    let recentPicksSummary = "No picks loaded in the current cycle.";
-    try {
-      const tr = getTrackRecord();
-      if (tr.hasMinimumData && tr.overallWinRate != null) {
-        const bySport = tr.bySport
-          .filter(s => s.actualWinRate != null && s.settled >= 5)
-          .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))
-          .slice(0, 5)
-          .map(s => `${s.sport}: ${(s.actualWinRate ?? 0).toFixed(1)}% (${s.settled} settled)`)
-          .join(", ");
-        calibrationSummary =
-          `Overall win rate: ${tr.overallWinRate.toFixed(1)}% across ${tr.settledPicks} settled picks. ` +
-          `Recent trend (last 20): ${tr.recentTrend.last20WinRate != null ? tr.recentTrend.last20WinRate.toFixed(1) + "%" : "N/A"} (${tr.recentTrend.trend}). ` +
-          (bySport ? `By sport: ${bySport}.` : "");
-      } else {
-        calibrationSummary = `Model calibration: ${tr.settledPicks} settled picks — needs ${tr.minimumPicksRequired} for full validation.`;
-      }
-    } catch { /* silently fall through */ }
+    const userId = req.session?.userId;
 
-    try {
-      const allPicks: any[] = [];
-      for (const sport of SPORTS) {
-        const cache = getPrecomputedCache(sport as any);
-        if (cache?.picks) {
-          allPicks.push(...cache.picks.filter((p: any) => p.grade && (p.grade === "A" || p.grade === "B")).slice(0, 3));
-        }
-      }
-      if (allPicks.length > 0) {
-        recentPicksSummary = "Today's top-graded picks (Grades A/B):\n" +
-          allPicks.slice(0, 8).map((p: any) => {
-            const ev = p.ev != null ? ` | EV: ${p.ev > 0 ? "+" : ""}${Number(p.ev).toFixed(1)}%` : "";
-            const kelly = p.kellyFraction != null ? ` | Kelly: ${(Number(p.kellyFraction) * 100).toFixed(1)}%` : "";
-            const conf = p.confidence != null ? ` | Conf: ${p.confidence}%` : "";
-            return `• ${p.pick} (${p.sport}, Grade ${p.grade}, ${p.odds > 0 ? "+" : ""}${p.odds}${conf}${ev}${kelly})`;
-          }).join("\n");
-      }
-    } catch { /* silently fall through */ }
+    // ── Build token-budgeted platform context ───────────────────────────────
+    const ctx = await buildAnalystContext(userId, messages);
 
-    const standardsCtx = getAIStandardsContext();
-
-    const systemPrompt = `${standardsCtx}
+    const systemPrompt = `${ctx.standardsContext}
 
 You are SORS Intelligence — the official AI analyst of Sors Maxima, a members-only sports betting intelligence platform. You speak directly to a member.
 
@@ -81,25 +42,29 @@ Your expertise:
 - Sports betting: moneylines, spreads, totals, props, parlays (NBA, NFL, MLB, NHL, NCAAB, NCAAF, MMA, Soccer)
 - Kelly criterion & fractional Kelly for bankroll sizing
 - Expected Value (EV) calculation and interpretation
-- Joint probability and parlay correlation risks
+- Joint probability and parlay correlation risks (ALWAYS compute and warn)
 - Line movement, closing line value (CLV), sharp money signals
 - Platform's 46-Factor Model: 46 risk/edge dimensions scored per pick
-- Calibration: comparing model confidence to actual outcomes
+- Calibration: comparing model confidence to actual outcomes by sport and confidence tier
 - Cashout engineering strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™)
 
-Live Platform Data:
-${calibrationSummary}
+=== LIVE PLATFORM CALIBRATION ===
+${ctx.calibrationBlock}
 
-${recentPicksSummary}
+=== ACTIVE PICKS (TODAY) ===
+${ctx.activePicsBlock}
+
+=== USER BANKROLL PROFILE ===
+${ctx.bankrollBlock}
 
 Core rules you ALWAYS follow:
-1. JOINT PROBABILITY: When a user asks about parlays, clearly explain that joint probability for N legs reduces the win probability significantly. Example: 3 legs at 65% each = 0.65³ = 27.5%. Flag correlated legs (same game, same team) as problematic.
-2. KELLY SIZING: When advising on stake size, always recommend quarter-Kelly (Kelly × 0.25) as the maximum. Never suggest betting more than 2–3% of bankroll on any single bet.
-3. RESPONSIBLE GAMBLING: When discussing stakes, always include: "Remember: bet only what you can afford to lose. For help, call 1-800-522-4700 (NCPG)."
-4. DATA GROUNDED: Reference actual platform calibration stats and today's graded picks when relevant. Never fabricate win rates.
-5. SCOPE: Focus on sports betting analytics. If asked about other topics, politely redirect.
-6. HONEST ABOUT UNCERTAINTY: Never guarantee outcomes. Say "the model suggests" or "the edge indicates", not "this will win."
-7. CONCISE: Be precise and data-rich. Avoid filler phrases. Members are sophisticated bettors.`;
+1. JOINT PROBABILITY: When a user asks about parlays, ALWAYS show the math. Example: 3 legs at 65% each = 0.65³ = 27.5%. Flag correlated legs (same game, same team) as problematic. The picks above include implied probabilities to use in calculations.
+2. KELLY SIZING: Always recommend quarter-Kelly (Kelly × 0.25) as the maximum. Reference the user's bankroll profile if set. Never suggest more than 2–3% of bankroll.
+3. RESPONSIBLE GAMBLING: When discussing stakes or losses, always include: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
+4. DATA GROUNDED: Cite the actual calibration numbers and grade-specific win rates from the context above. Never fabricate stats.
+5. SCOPE: Focus on sports betting analytics only.
+6. HONEST ABOUT UNCERTAINTY: Say "the model suggests" or "the edge indicates" — never "this will win."
+7. CONCISE: Be precise and data-rich. Members are sophisticated bettors. No filler phrases.`;
 
     try {
       const completion = await openai.chat.completions.create({
@@ -108,7 +73,7 @@ Core rules you ALWAYS follow:
           { role: "system", content: systemPrompt },
           ...messages.map(m => ({ role: m.role, content: m.content })),
         ],
-        max_tokens: 600,
+        max_tokens: 650,
         temperature: 0.65,
       });
 
@@ -120,6 +85,38 @@ Core rules you ALWAYS follow:
         return res.status(503).json({ error: "AI service temporarily at capacity. Please try again shortly." });
       }
       res.status(500).json({ error: "Analysis failed. Please try again." });
+    }
+  });
+
+  // ── GET /api/ai/analyst/context ────────────────────────────────────────────
+  // Returns current platform context for the AI Analyst page sidebar.
+  // Includes: active picks (grade, EV, Kelly), calibration summary.
+  app.get("/api/ai/analyst/context", requireAuth, async (req, res) => {
+    try {
+      const picks = getActivePicks(8);
+      const { getTrackRecord } = await import("../calibrationEngine");
+      const tr = getTrackRecord();
+
+      const calibration = {
+        hasData: tr.hasMinimumData,
+        overallWinRate: tr.overallWinRate,
+        settledPicks: tr.settledPicks,
+        trend: tr.recentTrend.trend,
+        last20WinRate: tr.recentTrend.last20WinRate,
+        calibrationScore: tr.calibrationScore,
+        bySport: tr.bySport
+          .filter(s => s.actualWinRate != null && s.settled >= 5)
+          .sort((a, b) => (b.actualWinRate ?? 0) - (a.actualWinRate ?? 0))
+          .slice(0, 6),
+        byGrade: tr.byGrade
+          .filter(g => g.actualWinRate != null && g.settled >= 3)
+          .sort((a, b) => a.grade.localeCompare(b.grade)),
+      };
+
+      res.json({ picks, calibration });
+    } catch (err: any) {
+      console.error("[AI Context] Error:", err.message);
+      res.status(500).json({ error: "Context unavailable" });
     }
   });
 

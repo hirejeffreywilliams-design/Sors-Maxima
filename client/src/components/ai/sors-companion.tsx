@@ -5,10 +5,10 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
-  X, Send, Maximize2, ChevronDown, Zap, Bot,
-  TrendingUp, BarChart3, Target, Brain, AlertTriangle, Sparkles,
+  X, Send, Maximize2, ChevronDown, Zap,
+  TrendingUp, BarChart3, Target, Brain, AlertTriangle,
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -75,20 +75,35 @@ export function SorsCompanion() {
   const [input, setInput] = useState("");
   const [hasUnread, setHasUnread] = useState(false);
   const [showPulse, setShowPulse] = useState(true);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Detect new picks for alert badge
+  const { data: contextData } = useQuery<{ picks: any[] }>({
+    queryKey: ["/api/ai/analyst/context"],
+    staleTime: 5 * 60 * 1000,
+    refetchInterval: 5 * 60 * 1000,
+  });
+  const newPickCount = contextData?.picks?.length ?? 0;
+  const [lastSeenPickCount, setLastSeenPickCount] = useState<number | null>(null);
+  const hasPlatformAlert = lastSeenPickCount !== null && newPickCount > lastSeenPickCount && !open;
 
   useEffect(() => {
     if (open) {
       setHasUnread(false);
+      setLastSeenPickCount(newPickCount);
       setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [open]);
+  }, [open, newPickCount]);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    if (lastSeenPickCount === null && newPickCount > 0) {
+      setLastSeenPickCount(newPickCount);
     }
+  }, [newPickCount, lastSeenPickCount]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
@@ -159,6 +174,8 @@ export function SorsCompanion() {
     }
   };
 
+  const showBadge = hasUnread || hasPlatformAlert;
+
   return (
     <>
       {/* ── Floating Avatar Button ─────────────────────────────────── */}
@@ -205,7 +222,7 @@ export function SorsCompanion() {
             ) : (
               <>
                 <Zap className="w-6 h-6 text-white drop-shadow-sm" />
-                {hasUnread && (
+                {showBadge && (
                   <span
                     className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-red-500 border-2 border-background flex items-center justify-center text-[9px] font-black text-white animate-bounce"
                   >
@@ -287,7 +304,7 @@ export function SorsCompanion() {
 
           {/* Messages */}
           <ScrollArea className="flex-1 min-h-0">
-            <div ref={scrollRef as any} className="p-3 space-y-3">
+            <div className="p-3 space-y-3">
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex items-start gap-2.5 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                   {msg.role === "assistant" && (
@@ -300,9 +317,7 @@ export function SorsCompanion() {
                   )}
                   <div
                     className={`px-3 py-2.5 rounded-2xl max-w-[85%] ${
-                      msg.role === "user"
-                        ? "rounded-tr-sm"
-                        : "rounded-tl-sm"
+                      msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm"
                     }`}
                     style={msg.role === "user"
                       ? { background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.1)" }
@@ -346,6 +361,8 @@ export function SorsCompanion() {
                   </div>
                 </div>
               )}
+              {/* Bottom anchor for scroll-into-view */}
+              <div ref={bottomRef} />
             </div>
           </ScrollArea>
 
