@@ -26,3 +26,11 @@ platform-intelligence-data.json
 precomputed-picks-cache.json
 pick-outcomes-data.json
 team-form-cache.json
+
+# Runtime state files (transient, not source-controlled)
+autonomous-admin-state.json
+community-patterns.json
+monte-carlo-learning-data.json
+pick-outcomes-data.json
+pipeline-alerts.json
+team-form-cache.json
