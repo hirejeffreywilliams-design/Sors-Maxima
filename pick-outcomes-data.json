@@ -42894,15 +42894,35 @@
       "homeScore": 3,
       "awayScore": 0,
       "settledAt": "2026-04-03T00:19:40.398Z"
+    },
+    {
+      "id": "precomp-NHL-401803559-total-8fa81da9b2",
+      "gameId": "401803559",
+      "sport": "NHL",
+      "game": "Minnesota Wild @ Ottawa Senators",
+      "homeTeam": "Ottawa Senators",
+      "awayTeam": "Minnesota Wild",
+      "pick": "Over 5.5",
+      "betType": "total",
+      "odds": -110,
+      "grade": "C+",
+      "confidence": 52,
+      "ev": -16,
+      "gameTime": "2026-04-04T17:00Z",
+      "savedAt": "2026-04-03T00:27:08.023Z",
+      "result": "won",
+      "homeScore": 6,
+      "awayScore": 3,
+      "settledAt": "2026-04-03T00:28:41.480Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2070,
-      "won": 1156,
+      "total": 2071,
+      "won": 1157,
       "lost": 871,
       "push": 43,
-      "rate": 55.8,
+      "rate": 55.9,
       "pending": 69
     },
     "bySport": {
@@ -42912,9 +42932,9 @@
         "rate": 56.7
       },
       "NHL": {
-        "total": 699,
-        "won": 360,
-        "rate": 51.5
+        "total": 700,
+        "won": 361,
+        "rate": 51.6
       },
       "NCAAB": {
         "total": 461,
@@ -42944,9 +42964,9 @@
         "rate": 54.8
       },
       "C+": {
-        "total": 395,
-        "won": 239,
-        "rate": 60.5
+        "total": 396,
+        "won": 240,
+        "rate": 60.6
       },
       "D+": {
         "total": 146,
@@ -42998,10 +43018,10 @@
         "roi": 7.2
       },
       "Total": {
-        "total": 664,
-        "won": 377,
+        "total": 665,
+        "won": 378,
         "rate": 56.8,
-        "roi": 11.5
+        "roi": 11.6
       },
       "Team Total": {
         "total": 71,
@@ -43016,9 +43036,9 @@
       "push": 0,
       "rate": 58
     },
-    "lastUpdated": "2026-04-03T00:19:40.403Z",
-    "roi": 11.5,
-    "brierScore": 0.2492,
+    "lastUpdated": "2026-04-03T00:30:58.232Z",
+    "roi": 11.6,
+    "brierScore": 0.2491,
     "maxDrawdown": 15.4,
     "sharpeRatio": 0.1,
     "homeAwayBias": {
@@ -43031,8 +43051,8 @@
       {
         "range": "50-55",
         "predicted": 53,
-        "actual": 58.1,
-        "total": 360
+        "actual": 58.2,
+        "total": 361
       },
       {
         "range": "55-60",

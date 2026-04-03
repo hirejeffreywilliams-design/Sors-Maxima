@@ -109,6 +109,7 @@ export function registerIntelligenceRoutes(app: Express): void {
             });
             return {
               ...trimmed,
+              modelAgreement: currentMetrics.modelAgreement,
               signalStrength: signalStrength.overall,
               signalLabel: signalStrength.label,
               signalKeyDriver: signalStrength.keySignal,

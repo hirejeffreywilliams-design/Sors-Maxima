@@ -129,7 +129,7 @@ function CompactPickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; leg
           <span className="font-mono font-bold text-foreground">{formatOdds(pick.odds)}</span>
           <span className={pick.ev > 0 ? "text-green-500 font-medium" : "text-red-500"}>EV: {displayEv(pick.ev)}</span>
         </div>
-        <PickAnalyticsRow confidence={pick.confidence} ev={pick.ev} pickId={pick.id} size="xs" />
+        <PickAnalyticsRow confidence={pick.confidence} ev={pick.ev} pickId={pick.id} modelAgreement={(pick as any).modelAgreement} size="xs" />
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground">
             <span>Sors Conviction Score™</span>

@@ -2,9 +2,9 @@
   "totalPatterns": 36,
   "toxicPatterns": 10,
   "goldenPatterns": 25,
-  "totalSettledPicks": 2375,
+  "totalSettledPicks": 2376,
   "lastRunAt": "2026-04-03T00:24:08.791Z",
-  "nextRunAt": "2026-04-03T00:44:08.791Z",
+  "nextRunAt": "2026-04-03T00:48:41.481Z",
   "patterns": [
     {
       "id": "learned-NBA-moneyline-heavy_underdog",

@@ -825,52 +825,43 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const { legCount, setMobileOpen } = useParlaySlip();
 
   return (
-    <>
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
-        <div className="flex items-center justify-around gap-0 h-16">
-          {FIXED_BOTTOM_TABS.map(({ href, icon: Icon, label, testId }) => {
-            const isActive = location === href;
-            return (
-              <Link key={href} href={href}>
-                <div className={`relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={testId}>
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
+      <div className="flex items-center justify-around h-16">
+        {FIXED_BOTTOM_TABS.map(({ href, icon: Icon, label, testId }) => {
+          const isActive = location === href;
+          const isPicks = href === "/daily";
+          return (
+            <Link key={href} href={href}>
+              <div
+                className={`relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] ${isActive ? "text-primary" : "text-muted-foreground"}`}
+                data-testid={testId}
+              >
+                <div className="relative">
                   <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-medium">{label}</span>
-                  {isActive && <span className="absolute bottom-1 w-3.5 h-0.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />}
+                  {isPicks && legCount > 0 && (
+                    <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-3.5 w-3.5 rounded-full gold-slip-badge text-[9px] leading-none font-bold" data-testid="badge-slip-count">
+                      {legCount > 9 ? "9+" : legCount}
+                    </span>
+                  )}
                 </div>
-              </Link>
-            );
-          })}
+                <span className="text-[10px] font-medium">{label}</span>
+                {isActive && <span className="absolute bottom-1 w-3.5 h-0.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />}
+              </div>
+            </Link>
+          );
+        })}
 
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] text-primary"
-            data-testid="bottom-nav-slip"
-            aria-label="Open bet slip"
-          >
-            <div className="relative">
-              <Ticket className="w-5 h-5 gold-ticket-icon-animated" />
-              {legCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-4 w-4 rounded-full gold-slip-badge text-[10px] leading-none">
-                  {legCount > 9 ? "9+" : legCount}
-                </span>
-              )}
-            </div>
-            <span className="text-[10px] font-bold text-yellow-500">Slip</span>
-          </button>
-
-          <button
-            onClick={onOpenMenu}
-            className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] text-muted-foreground"
-            data-testid="bottom-nav-more"
-            aria-label="More navigation"
-          >
-            <MoreHorizontal className="w-5 h-5" />
-            <span className="text-[10px] font-medium">More</span>
-          </button>
-        </div>
-      </nav>
-
-    </>
+        <button
+          onClick={onOpenMenu}
+          className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] text-muted-foreground"
+          data-testid="bottom-nav-more"
+          aria-label="More navigation"
+        >
+          <MoreHorizontal className="w-5 h-5" />
+          <span className="text-[10px] font-medium">More</span>
+        </button>
+      </div>
+    </nav>
   );
 }
 
