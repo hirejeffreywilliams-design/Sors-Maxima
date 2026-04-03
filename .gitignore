@@ -12,3 +12,17 @@ odds-api-disk-cache.json
 platform-intelligence-data.json
 .usml-state.json
 precomputed-picks-cache.json
+
+# Runtime state & cache files (auto-generated, should not be tracked)
+.usml-state.json
+accelerated-pattern-cache.json
+api-budget-state.json
+community-patterns.json
+market-snapshot-disk-cache.json
+monte-carlo-learning-data.json
+odds-api-disk-cache.json
+pipeline-alerts.json
+platform-intelligence-data.json
+precomputed-picks-cache.json
+pick-outcomes-data.json
+team-form-cache.json

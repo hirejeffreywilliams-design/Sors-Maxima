@@ -58,12 +58,13 @@
     {
       "id": "alert_1774808773562_0xfaz",
       "timestamp": "2026-03-29T18:26:13.562Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "api_budget",
       "title": "Odds API Critical — Under 10K Requests",
       "detail": "Only 0 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-03T01:22:19.991Z"
     },
     {
       "id": "alert_1774806973562_e5qo0",
@@ -588,12 +589,13 @@
     {
       "id": "alert_1773374232818_gjyxq",
       "timestamp": "2026-03-13T03:57:12.818Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "warning",
       "category": "api_budget",
       "title": "Odds API Below 50K Requests",
       "detail": "21,818 requests remaining. Consider reducing polling frequency via API Budget settings.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-03T01:22:19.991Z"
     },
     {
       "id": "alert_1773355579909_9ejyp",
@@ -2201,8 +2203,8 @@
       "raw": "{\n  \"summary\": [\n    \"API budget warning for Odds API with 20,059 requests remaining; recommends reducing polling frequency.\",\n    \"Win rate remains above break-even at 55.7%, with sufficient settled picks (957).\",\n    \"Healthy cash balance with $100,000 available.\",\n    \"Active user churn rate at 4.2%, remains stable.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust API Request Frequency\",\n      \"description\": \"Reduce the polling frequency for Odds API to prevent hitting budget limit; maintain optimal interval of 1-minute.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling settings for Odds API.\",\n      \"Monitor user activity trends and churn rate.\",\n      \"Review API budgets for potential adjustments.\"\n    ],\n    \"this_week\": [\n      \"Prepare a financial overview and monitor cash flow.\",\n      \"Evaluate and optimize predictive model performance.\",\n      \"Assess user acquisition and engagement strategies.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-04-03T00:55:19.992Z",
+  "lastQuickCheck": "2026-04-03T01:22:19.991Z",
   "lastDeepCheck": "2026-04-03T01:04:19.990Z",
-  "totalQuickChecks": 210,
+  "totalQuickChecks": 211,
   "totalDeepChecks": 57
 }
