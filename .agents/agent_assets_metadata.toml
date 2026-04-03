@@ -1,0 +1,50 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ibOpR4w8MKX3Eo5z9n114"
+uri = "file://investor-dataroom/00_INDEX.md"
+type = "text"
+title = "Data Room Index"
+
+[[outputs]]
+id = "LPQQ7xKMuLAkedw1B3U6j"
+uri = "file://investor-dataroom/01_EXECUTIVE_SUMMARY.md"
+type = "text"
+title = "Executive Summary (Buyer Teaser)"
+
+[[outputs]]
+id = "hYAVrawC23P_zRYnzKGrm"
+uri = "file://investor-dataroom/02_CIM_FULL.md"
+type = "text"
+title = "Full CIM — Confidential Information Memorandum"
+
+[[outputs]]
+id = "GT4CLZ9H_7QwiZ2q2AOMX"
+uri = "file://investor-dataroom/03_FINANCIAL_PROJECTIONS.md"
+type = "text"
+title = "Financial Projections (5-Year Bear/Base/Bull)"
+
+[[outputs]]
+id = "kfTPeppWKi51dYd1VWIfV"
+uri = "file://investor-dataroom/04_TECH_AND_IP.md"
+type = "text"
+title = "Technical Architecture & IP Catalog"
+
+[[outputs]]
+id = "vWGNT9AXl-wHI60HBzw71"
+uri = "file://investor-dataroom/05_COMPETITIVE_ANALYSIS.md"
+type = "text"
+title = "Competitive Analysis & Market Positioning"
+
+[[outputs]]
+id = "vGSMSJolJtVtHIxi-UX-c"
+uri = "file://investor-dataroom/06_MA_PLAYBOOK.md"
+type = "text"
+title = "M&A Playbook — Step-by-Step Sale Guide"
+
+[[outputs]]
+id = "od_r7VGDjvXKzbdQyn9-n"
+uri = "file://investor-dataroom/07_DEFENSIVE_MECHANISMS.md"
+type = "text"
+title = "Defensive Mechanisms, Moats & Risk Register"
