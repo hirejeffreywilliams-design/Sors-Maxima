@@ -4,3 +4,11 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+# Runtime cache/state files
+accelerated-pattern-cache.json
+api-budget-state.json
+market-snapshot-disk-cache.json
+odds-api-disk-cache.json
+platform-intelligence-data.json
+.usml-state.json
+precomputed-picks-cache.json
