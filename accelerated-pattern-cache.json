@@ -6,9 +6,9 @@
       "winRate": 57
     },
     "NHL": {
-      "wins": 361,
-      "total": 677,
-      "winRate": 53.3
+      "wins": 363,
+      "total": 679,
+      "winRate": 53.5
     },
     "NCAAB": {
       "wins": 278,
@@ -23,9 +23,9 @@
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 370,
-      "total": 651,
-      "winRate": 56.8
+      "wins": 371,
+      "total": 652,
+      "winRate": 56.9
     },
     "spread": {
       "wins": 371,
@@ -33,9 +33,9 @@
       "winRate": 56
     },
     "total": {
-      "wins": 378,
-      "total": 646,
-      "winRate": 58.5
+      "wins": 379,
+      "total": 647,
+      "winRate": 58.6
     },
     "team_total": {
       "wins": 38,
@@ -167,8 +167,8 @@
       "penalty": 3
     }
   ],
-  "totalSettled": 2028,
-  "lastMined": "2026-04-03T00:39:10.593Z",
+  "totalSettled": 2030,
+  "lastMined": "2026-04-03T00:45:50.000Z",
   "cycleCount": 1,
   "patternCount": 290
 }

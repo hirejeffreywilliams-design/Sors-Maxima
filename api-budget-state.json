@@ -2,9 +2,9 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 6314,
-      "manualRemaining": 93686,
-      "lastReported": "2026-04-03T00:38:08.211Z",
+      "currentUsage": 6563,
+      "manualRemaining": 93437,
+      "lastReported": "2026-04-03T00:44:47.677Z",
       "monthReset": "2026-04-01T00:00:00.000Z",
       "callLog": [
         {
@@ -180,7 +180,7 @@
     }
   },
   "activeUsers": 5,
-  "lastSaved": "2026-04-03T00:44:19.460Z",
+  "lastSaved": "2026-04-03T00:44:47.677Z",
   "alerts": [
     {
       "id": "yka31tz9",
