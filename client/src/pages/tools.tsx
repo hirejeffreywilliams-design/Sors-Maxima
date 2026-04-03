@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { PageHero } from "@/components/page-hero";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import {
   DollarSign, Brain, Link2,
   BarChart3, Sparkles, Zap,
@@ -156,6 +158,12 @@ export default function Tools() {
               </SelectContent>
             </Select>
           }
+        />
+
+        <AIRecommendationPanel
+          context={{ page: "tools" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+          compact
         />
 
         {currentGroup.subcategories.length > 1 && (

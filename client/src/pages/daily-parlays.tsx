@@ -25,6 +25,8 @@ import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { PickAnalyticsRow } from "@/components/pick-analytics-row";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { Link } from "wouter";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 
 interface ChampionshipContender {
@@ -1088,6 +1090,11 @@ export default function DailyParlays() {
         </div>
 
         <PickDisclaimer variant="banner" />
+
+        <AIRecommendationPanel
+          context={{ page: "daily-picks" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+        />
 
         <MarchMadnessFutures />
 

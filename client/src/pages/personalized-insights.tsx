@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import { PageHero } from "@/components/page-hero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -245,6 +247,11 @@ export default function PersonalizedInsightsPage() {
         variant="violet"
         icon={<Brain className="w-6 h-6" />}
         data-testid="heading-insights"
+      />
+
+      <AIRecommendationPanel
+        context={{ page: "personalized-insights" }}
+        onOpenCompanion={openSorsCompanionWithContext}
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3" data-testid="section-stats-overview">

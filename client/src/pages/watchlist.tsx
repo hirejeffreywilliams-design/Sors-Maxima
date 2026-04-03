@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import {
   Star,
   StarOff,
@@ -129,6 +131,12 @@ export default function WatchlistPage() {
           </Badge>
         }
         data-testid="text-watchlist-title"
+      />
+
+      <AIRecommendationPanel
+        context={{ page: "watchlist" }}
+        onOpenCompanion={openSorsCompanionWithContext}
+        compact
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>

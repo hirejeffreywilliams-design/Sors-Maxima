@@ -22,6 +22,8 @@ import { useParlaySlip } from "@/hooks/use-parlay-slip";
 import { useSEO } from "@/hooks/use-seo";
 import { Link } from "wouter";
 import { Lock, Crown } from "lucide-react";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import {
   ArrowDown, ArrowUp, ChevronDown, ChevronUp, Clock,
   AlertTriangle, Check, TrendingUp, Activity, Heart,
@@ -2334,6 +2336,10 @@ export default function PlayerPropsPage() {
 
         {!tierGated && !needsAuth && (
           <>
+            <AIRecommendationPanel
+              context={{ page: "player-props", sport: selectedSport }}
+              onOpenCompanion={openSorsCompanionWithContext}
+            />
             <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
             <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
           </>

@@ -17,6 +17,8 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/use-seo";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 const SPORTS = [
   { id: "NBA", name: "NBA", color: "bg-orange-500" },
@@ -401,6 +403,11 @@ export default function PropParlayBuilder() {
       />
 
       <ResponsibleGamblingNotice variant="compact" storageKey="rg-parlay-builder" />
+
+      <AIRecommendationPanel
+        context={{ page: "prop-parlay-builder" }}
+        onOpenCompanion={openSorsCompanionWithContext}
+      />
 
       <Card data-testid="builder-config">
         <CardHeader>

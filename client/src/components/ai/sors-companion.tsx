@@ -8,7 +8,7 @@ import {
   X, Send, Maximize2, Zap,
   TrendingUp, BarChart3, Target, Brain, AlertTriangle, Radio,
 } from "lucide-react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -78,6 +78,18 @@ function TypingIndicator() {
   );
 }
 
+// Singleton ref so AIRecommendationPanel can open companion with context
+let _companionSendRef: ((text: string) => void) | null = null;
+let _companionOpenRef: (() => void) | null = null;
+
+export function openSorsCompanionWithContext(message: string): void {
+  if (_companionOpenRef) _companionOpenRef();
+  // Small delay to allow drawer to render before sending
+  setTimeout(() => {
+    if (_companionSendRef) _companionSendRef(message);
+  }, 200);
+}
+
 export function SorsCompanion() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
@@ -89,6 +101,39 @@ export function SorsCompanion() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+
+  // Turbo mode proactive check-in: poll status every 30s, alert if newly active
+  const { data: turboStatus } = useQuery<{ active: boolean; activeGameCount: number }>({
+    queryKey: ["/api/ai/turbo-status"],
+    refetchInterval: 30_000,
+    staleTime: 25_000,
+  });
+  const lastTurboAlertRef = useRef<number>(0);
+  const wasTurboActive = useRef(false);
+
+  useEffect(() => {
+    if (!turboStatus) return;
+    const now = Date.now();
+    const MIN_INTERVAL = 3 * 60 * 1000;
+    if (
+      turboStatus.active &&
+      !wasTurboActive.current &&
+      now - lastTurboAlertRef.current > MIN_INTERVAL
+    ) {
+      lastTurboAlertRef.current = now;
+      setHasUnread(true);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: `turbo-${now}`,
+          role: "assistant",
+          content: `🔴 **Turbo Mode Active** — ${turboStatus.activeGameCount} live game${turboStatus.activeGameCount !== 1 ? "s" : ""} detected. I'm now refreshing faster. Want live picks or hedge recommendations?`,
+          timestamp: new Date(),
+        },
+      ]);
+    }
+    wasTurboActive.current = turboStatus.active;
+  }, [turboStatus]);
 
   // Subscribe to SSE stream for companion_alert events (orchestrator proactive alerts)
   useEffect(() => {
@@ -206,6 +251,16 @@ export function SorsCompanion() {
 
     chatMutation.mutate(payload);
   }, [messages, chatMutation]);
+
+  // Register singleton refs so openSorsCompanionWithContext() can drive this instance
+  useEffect(() => {
+    _companionSendRef = sendMessage;
+    _companionOpenRef = () => setOpen(true);
+    return () => {
+      _companionSendRef = null;
+      _companionOpenRef = null;
+    };
+  }, [sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {

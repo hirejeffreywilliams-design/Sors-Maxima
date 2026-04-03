@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useSSE } from "@/hooks/use-sse";
@@ -220,6 +222,14 @@ export default function Results() {
           </p>
         </div>
       </section>
+
+      <div className="max-w-6xl mx-auto px-4 py-4">
+        <AIRecommendationPanel
+          context={{ page: "results" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+          compact
+        />
+      </div>
 
       {/* ── Headline Stats ── */}
       <section className="max-w-6xl mx-auto px-4 pb-16">

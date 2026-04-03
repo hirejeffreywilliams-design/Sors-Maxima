@@ -26,6 +26,8 @@ import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, Evalu
 import { useSEO } from "@/hooks/use-seo";
 import { Link } from "wouter";
 import { PickAnalyticsRow } from "@/components/pick-analytics-row";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 const _month = new Date().getMonth() + 1;
 const ncaabLabel = (_month === 3 || _month === 4) ? "March Madness" : "College Hoops";
@@ -1273,6 +1275,11 @@ export default function Dashboard() {
         </header>
 
         <StartHereBanner />
+
+        <AIRecommendationPanel
+          context={{ page: "dashboard" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+        />
 
         <DashboardModelHealthWidget />
 

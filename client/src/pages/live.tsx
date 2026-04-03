@@ -24,6 +24,8 @@ import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { TierGate, useTier } from "@/components/tier-gate";
 import { useLiveGameCards, LiveGameCard as RichLiveGameCard } from "@/components/live/live-game-card";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 interface LiveGame {
   id: string;
@@ -428,6 +430,12 @@ export default function Live() {
               )}
             </div>
           }
+        />
+
+        <AIRecommendationPanel
+          context={{ page: "live" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+          compact
         />
 
         {/* Sport filter bar (multi-select) */}

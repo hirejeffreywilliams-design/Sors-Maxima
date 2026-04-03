@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 import { PageHero } from "@/components/page-hero";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1212,6 +1214,10 @@ export default function StrategyAdvisorPage() {
 
       {activeTab === "advisor" && (
       <>
+      <AIRecommendationPanel
+        context={{ page: "strategy-advisor" }}
+        onOpenCompanion={openSorsCompanionWithContext}
+      />
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold flex items-center gap-2">

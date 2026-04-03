@@ -321,4 +321,180 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
       explanationCache: getCacheStats(),
     });
   });
+
+  // ── GET /api/ai/recommendation ────────────────────────────────────────────
+  // Contextual AI recommendation panel for user-facing pages.
+  // Queries cached Intelligence Hub + Precomputed Predictions first (no new API calls).
+  // Falls back to GPT-4o-mini only when cache is stale. Rate limited: 10 req/min/user.
+  const recommendationCache = new Map<string, { data: any; cachedAt: number }>();
+  const recommendationRateLimit = new Map<string, { count: number; windowStart: number }>();
+  const RECOMMENDATION_CACHE_TTL = 3 * 60 * 1000;
+  const RATE_LIMIT_WINDOW = 60 * 1000;
+  const RATE_LIMIT_MAX = 10;
+
+  const PAGE_CONTEXTS: Record<string, string> = {
+    "dashboard": "Overall platform performance, top picks across all sports today",
+    "daily-picks": "Daily parlay recommendations and top straight bets",
+    "live": "Live games in progress, cashout opportunities, momentum plays",
+    "player-props": "Player prop bets with sharpest edge today",
+    "prop-parlay-builder": "Correlated prop parlay combinations, risk assessment",
+    "odds-center": "Best odds across books, arbitrage and EV opportunities",
+    "strategy-advisor": "Betting strategy optimization, Kelly sizing, bankroll allocation",
+    "bankroll": "Stake sizing recommendations based on current confidence tiers",
+    "my-bets": "Active bet performance, cashout timing, hedge opportunities",
+    "watchlist": "Tracked games and picks requiring attention",
+    "personalized-insights": "Personalized edge based on betting history",
+    "results": "Recent performance trends, model calibration insights",
+    "tools": "Analytical tool recommendations for current market conditions",
+  };
+
+  app.get("/api/ai/recommendation", requireAuth, async (req, res) => {
+    const userId = req.session?.userId ?? "anonymous";
+    const page = (req.query.page as string) || "dashboard";
+    const sport = (req.query.sport as string) || "";
+    const gameId = (req.query.gameId as string) || "";
+
+    // Rate limiting
+    const rlKey = userId;
+    const now = Date.now();
+    const rl = recommendationRateLimit.get(rlKey) || { count: 0, windowStart: now };
+    if (now - rl.windowStart > RATE_LIMIT_WINDOW) {
+      rl.count = 0;
+      rl.windowStart = now;
+    }
+    rl.count++;
+    recommendationRateLimit.set(rlKey, rl);
+    if (rl.count > RATE_LIMIT_MAX) {
+      return res.status(429).json({ error: "Rate limit exceeded — please wait before refreshing" });
+    }
+
+    const cacheKey = `${page}-${sport}-${gameId}`;
+    const cached = recommendationCache.get(cacheKey);
+    if (cached && now - cached.cachedAt < RECOMMENDATION_CACHE_TTL) {
+      return res.json({ ...cached.data, fromCache: true });
+    }
+
+    try {
+      // Pull from in-memory caches first
+      const allSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
+      const allPicks: any[] = [];
+      for (const s of allSports) {
+        if (sport && s !== sport.toUpperCase()) continue;
+        const cache = getPrecomputedCache(s);
+        if (cache?.picks?.length) {
+          allPicks.push(...cache.picks.slice(0, 5));
+        }
+      }
+
+      let feed: any = null;
+      try {
+        feed = await generateIntelligenceFeed();
+      } catch { /* best-effort */ }
+
+      const topPick = allPicks.sort((a, b) => (b.confidence || 0) - (a.confidence || 0))[0];
+      const liveGames = feed?.liveGames?.length || 0;
+      const edgeAlerts = feed?.edgeAlerts?.slice(0, 3) || [];
+      const topEdgeAlert = edgeAlerts[0];
+
+      const pageContext = PAGE_CONTEXTS[page] || `${page} page`;
+
+      let recommendation: any;
+
+      // Build recommendation from cached data when possible
+      if (topPick) {
+        const confidence = topPick.confidence || 60;
+        const tier =
+          confidence >= 75 ? "LOCK" :
+          confidence >= 65 ? "STRONG" :
+          confidence >= 55 ? "LEAN" : "VALUE";
+
+        const headline = page === "live" && liveGames > 0
+          ? `${liveGames} game${liveGames !== 1 ? "s" : ""} live now — sharp signals active`
+          : page === "player-props"
+            ? `Sharpest prop edge today: ${topPick.game || "Top game"}`
+            : page === "bankroll"
+              ? `Stake sizing signal: ${tier} tier active (${confidence}% confidence)`
+              : page === "prop-parlay-builder"
+                ? topEdgeAlert ? `Correlated risk alert on ${topEdgeAlert.game || "top game"}` : `${allPicks.length} props available for parlay building`
+                : `Top edge: ${topPick.game || "Today's top pick"} — ${confidence}% confidence`;
+
+        const action = page === "bankroll"
+          ? `Use ${tier === "LOCK" ? "1.5–2u" : tier === "STRONG" ? "1u" : "0.5u"} stake on ${tier} picks (quarter-Kelly)`
+          : page === "live" && liveGames > 0
+            ? "Check live momentum tracker for cashout opportunities"
+            : page === "player-props"
+              ? `Focus on ${topPick.sport || "top sport"} props with +EV edge today`
+              : page === "prop-parlay-builder"
+                ? "Avoid same-game props on high-correlation legs"
+                : `Review ${topPick.pick || "top pick"} at ${topPick.odds > 0 ? "+" : ""}${topPick.odds || "-110"}`;
+
+        recommendation = {
+          headline,
+          confidence,
+          tier,
+          action,
+          deepLinkContext: {
+            page,
+            sport: topPick.sport || sport,
+            pick: topPick.pick,
+            game: topPick.game,
+            context: pageContext,
+          },
+        };
+      } else {
+        // Fallback: use GPT-4o-mini for page-specific insight if no cached picks
+        const openai = createOpenAIClient();
+        if (!openai) {
+          return res.status(503).json({ error: "AI unavailable" });
+        }
+
+        const prompt = `You are SORS Intelligence. Generate a contextual betting insight for the ${pageContext}.
+Return ONLY JSON: {"headline":"<concise insight>","confidence":<50-75>,"tier":"<LOCK|STRONG|LEAN|VALUE>","action":"<one-line action prompt>"}`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 150,
+          temperature: 0.6,
+          response_format: { type: "json_object" },
+        });
+
+        const content = completion.choices[0]?.message?.content || "{}";
+        try {
+          const parsed = JSON.parse(content);
+          recommendation = {
+            ...parsed,
+            deepLinkContext: { page, sport, context: pageContext },
+          };
+        } catch {
+          recommendation = {
+            headline: "Analyzing current market conditions",
+            confidence: 58,
+            tier: "LEAN",
+            action: "Check today's top picks for the best available edges",
+            deepLinkContext: { page, sport, context: pageContext },
+          };
+        }
+      }
+
+      recommendationCache.set(cacheKey, { data: recommendation, cachedAt: now });
+      res.json({ ...recommendation, fromCache: false });
+    } catch (err: any) {
+      console.error("[AI Recommendation] Error:", err.message);
+      res.status(500).json({ error: "Recommendation unavailable" });
+    }
+  });
+
+  // ── GET /api/ai/turbo-status ──────────────────────────────────────────────
+  // Returns current Live Turbo Mode status for admin panel.
+  app.get("/api/ai/turbo-status", requireAuth, async (_req, res) => {
+    try {
+      const { getTurboModeStatus } = await import("../liveTurboScheduler");
+      const { getSSEBroadcastIntervalMs } = await import("../sseManager");
+      const status = getTurboModeStatus();
+      res.json({ ...status, sseBroadcastIntervalMs: getSSEBroadcastIntervalMs() });
+    } catch (err: any) {
+      res.status(500).json({ error: "Turbo status unavailable" });
+    }
+  });
 }

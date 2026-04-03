@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 interface SavedBetLeg {
   pick: string;
@@ -349,6 +351,12 @@ export default function MyBetsPage() {
             </p>
           </div>
         </div>
+
+        <AIRecommendationPanel
+          context={{ page: "my-bets" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+          compact
+        />
 
         {bets.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

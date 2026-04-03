@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { PerformanceAnalytics } from "@/components/financial/performance-analytics";
 import { BetTracker } from "@/components/bet-tracker";
 import { useSEO } from "@/hooks/use-seo";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 export default function Bankroll() {
   useSEO({ title: "Bankroll Manager", description: "Track and manage your betting bankroll" });
@@ -20,6 +22,12 @@ export default function Bankroll() {
           badge="Tracking"
           subtitle="Track bets, balances, and performance"
           description="Log every wager — sport, stake, odds, and result — then watch your profit/loss update in real time. The Kelly Criterion tab calculates optimal stake sizes based on your current balance and edge. Set daily loss limits and session caps under Settings to protect your capital."
+        />
+
+        <AIRecommendationPanel
+          context={{ page: "bankroll" }}
+          onOpenCompanion={openSorsCompanionWithContext}
+          compact
         />
 
         <Tabs defaultValue="history" className="space-y-6">

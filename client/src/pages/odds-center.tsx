@@ -16,6 +16,8 @@ import {
   Trophy, Play, ArrowDown, ArrowUp, Info,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
+import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
+import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
 
 const SPORTS = [
   { id: "NBA", label: "NBA", emoji: "🏀" },
@@ -1842,6 +1844,12 @@ export default function OddsCenter() {
         icon={<DollarSign className="w-6 h-6" />}
         actions={isFetching ? <RefreshCw className="w-4 h-4 text-muted-foreground animate-spin" /> : undefined}
         data-testid="page-title"
+      />
+
+      <AIRecommendationPanel
+        context={{ page: "odds-center", sport }}
+        onOpenCompanion={openSorsCompanionWithContext}
+        compact
       />
 
       <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">

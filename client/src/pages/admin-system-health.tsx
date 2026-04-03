@@ -153,6 +153,87 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
+interface TurboStatus {
+  active: boolean;
+  activeGameCount: number;
+  livePollingIntervalMs: number;
+  hubRefreshIntervalMs: number;
+  sseBroadcastIntervalMs: number;
+  activatedAt: string | null;
+  deactivatedAt: string | null;
+  lastCheckedAt: string;
+}
+
+function TurboModeCard() {
+  const { data, isLoading } = useQuery<TurboStatus>({
+    queryKey: ["/api/ai/turbo-status"],
+    refetchInterval: 15_000,
+    staleTime: 0,
+  });
+
+  return (
+    <Card data-testid="card-turbo-mode">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Zap className={`w-4 h-4 ${data?.active ? "text-orange-400 animate-pulse" : "text-muted-foreground"}`} />
+          Live Turbo Mode
+          {!isLoading && data && (
+            <Badge
+              variant="outline"
+              className={data.active
+                ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
+                : "bg-muted text-muted-foreground border-border"}
+              data-testid="badge-turbo-status"
+            >
+              {data.active ? "ACTIVE" : "Standby"}
+            </Badge>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : data ? (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground" data-testid="text-turbo-message">
+              {data.active
+                ? `Turbo mode active — ${data.activeGameCount} live game${data.activeGameCount !== 1 ? "s" : ""} detected. Polling at ${data.livePollingIntervalMs / 1000}s, hub refresh at ${data.hubRefreshIntervalMs / 1000}s, SSE at ${data.sseBroadcastIntervalMs / 1000}s.`
+                : `Standby — no live games detected. Using default polling intervals. Last checked: ${timeAgo(data.lastCheckedAt)}.`}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-muted/40">
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                  <Activity className="w-3 h-3" />Live Games
+                </div>
+                <div className="font-semibold" data-testid="value-turbo-game-count">{data.activeGameCount}</div>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40">
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                  <Timer className="w-3 h-3" />SSE Interval
+                </div>
+                <div className="font-semibold" data-testid="value-turbo-sse-interval">
+                  {data.sseBroadcastIntervalMs / 1000}s
+                  {data.active && <span className="ml-1.5 text-[10px] text-orange-400">▼ turbo</span>}
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40">
+                <div className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />Activated
+                </div>
+                <div className="font-semibold text-xs" data-testid="value-turbo-activated-at">
+                  {data.active && data.activatedAt ? timeAgo(data.activatedAt) : "—"}
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Turbo status unavailable</p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminSystemHealth() {
   useSEO({ title: "System Health — Admin | Sors Maxima", description: "Live memory, engine, and cache health dashboard" });
 
@@ -419,6 +500,9 @@ export default function AdminSystemHealth() {
             />
           </div>
         )}
+
+        {/* Turbo Mode Status */}
+        <TurboModeCard />
 
         {/* Engine Status */}
         <Card data-testid="card-engine">

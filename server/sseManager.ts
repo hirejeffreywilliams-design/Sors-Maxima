@@ -295,10 +295,12 @@ async function pushIntelligenceUpdate(): Promise<void> {
   }
 }
 
+let currentBroadcastIntervalMs = 30_000;
+
 export function startSSEBroadcaster(): void {
   if (broadcastInterval) return;
   console.log("[SSE] Starting SSE broadcaster (30s interval)...");
-  broadcastInterval = setInterval(pushIntelligenceUpdate, 30_000);
+  broadcastInterval = setInterval(pushIntelligenceUpdate, currentBroadcastIntervalMs);
 
   setTimeout(pushIntelligenceUpdate, 5_000);
 }
@@ -309,6 +311,20 @@ export function stopSSEBroadcaster(): void {
     broadcastInterval = null;
   }
   console.log("[SSE] SSE broadcaster stopped.");
+}
+
+export function setSSEBroadcastInterval(ms: number): void {
+  if (ms === currentBroadcastIntervalMs) return;
+  currentBroadcastIntervalMs = ms;
+  if (broadcastInterval) {
+    clearInterval(broadcastInterval);
+    broadcastInterval = setInterval(pushIntelligenceUpdate, ms);
+    console.log(`[SSE] Broadcast interval updated to ${ms / 1000}s`);
+  }
+}
+
+export function getSSEBroadcastIntervalMs(): number {
+  return currentBroadcastIntervalMs;
 }
 
 export function getSSEStatus() {

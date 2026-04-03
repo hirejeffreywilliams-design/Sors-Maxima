@@ -117,6 +117,10 @@ export function SSEProvider({ enabled, children }: SSEProviderProps) {
       case "guardian-alert":
         queryClient.invalidateQueries({ queryKey: ["/api/admin/guardian"] });
         break;
+
+      case "turbo-mode":
+        queryClient.invalidateQueries({ queryKey: ["/api/ai/turbo-status"] });
+        break;
     }
   }, [toast]);
 
