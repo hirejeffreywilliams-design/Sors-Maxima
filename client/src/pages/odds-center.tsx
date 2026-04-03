@@ -1,6 +1,10 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, lazy, Suspense, useEffect } from "react";
+import { useSportFocus } from "@/context/sport-focus-context";
+import { SportFocusFilter } from "@/components/sport-focus-filter";
 import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
+
+const SorsBooksInline = lazy(() => import("./sorsbooks"));
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +17,7 @@ import {
   Flame, TrendingUp, TrendingDown, Activity, Zap, Target,
   ArrowRight, Clock, BarChart3, Search, RefreshCw, Plus,
   ArrowUpDown, AlertTriangle, Minus, DollarSign, Eye,
-  Trophy, Play, ArrowDown, ArrowUp, Info,
+  Trophy, Play, ArrowDown, ArrowUp, Info, Landmark,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
@@ -1054,14 +1058,15 @@ function OddsComparisonTab({ games, meta, isLoading, isFetching, sport, dataUpda
       ) : (
         <div className="space-y-2" data-testid="games-list">
           {sortedGames.map(game => (
-            <GameRow
-              key={game.id}
-              game={game}
-              expanded={expandedId === game.id}
-              onToggle={() => setExpandedId(expandedId === game.id ? null : game.id)}
-              gamePicks={getPicksForGame(game)}
-              inlineProps={getPropsForGame(game)}
-            />
+            <SportFocusFilter key={game.id} sport={game.sport}>
+              <GameRow
+                game={game}
+                expanded={expandedId === game.id}
+                onToggle={() => setExpandedId(expandedId === game.id ? null : game.id)}
+                gamePicks={getPicksForGame(game)}
+                inlineProps={getPropsForGame(game)}
+              />
+            </SportFocusFilter>
           ))}
         </div>
       )}
@@ -2201,8 +2206,23 @@ function PowerRankingsTab({ games, isLoading }: { games: MarketGame[]; isLoading
 
 export default function OddsCenter() {
   useSEO({ title: "Odds Center", description: "Compare odds across sportsbooks and markets" });
-  const [sport, setSport] = useState("NBA");
+  const { focusedSport } = useSportFocus();
+  const getInitialSport = () => {
+    if (focusedSport) {
+      const match = SPORTS.find(s => s.id.toUpperCase() === focusedSport.toUpperCase());
+      if (match) return match.id;
+    }
+    return "NBA";
+  };
+  const [sport, setSport] = useState(getInitialSport);
   const [activeTab, setActiveTab] = useState("odds");
+
+  useEffect(() => {
+    if (focusedSport) {
+      const match = SPORTS.find(s => s.id.toUpperCase() === focusedSport.toUpperCase());
+      if (match) setSport(match.id);
+    }
+  }, [focusedSport]);
 
   const { data, isLoading, isFetching, dataUpdatedAt } = useQuery<MarketSnapshot>({
     queryKey: ["/api/market-snapshot", sport],
@@ -2269,8 +2289,19 @@ export default function OddsCenter() {
               <Trophy className="w-3.5 h-3.5 shrink-0" />
               Rankings
             </TabsTrigger>
+            <TabsTrigger value="books" className="gap-1 text-xs sm:text-sm px-2 sm:px-3 shrink-0" data-testid="tab-books">
+              <Landmark className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Sors Books</span>
+              <span className="sm:hidden">Books</span>
+            </TabsTrigger>
           </TabsList>
         </div>
+
+        <TabsContent value="books" className="mt-4">
+          <Suspense fallback={<div className="flex items-center justify-center py-16"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <SorsBooksInline />
+          </Suspense>
+        </TabsContent>
 
         <TabsContent value="odds" className="mt-4">
           <OddsComparisonTab

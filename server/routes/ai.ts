@@ -78,8 +78,15 @@ async function buildTieredSystemPrompt(
   tier: string,
   userId: number | null,
   messages: { role: string; content: string }[],
+  sportFocus?: string,
 ): Promise<string> {
   const ctx = await buildAnalystContext(userId?.toString(), messages);
+
+  const VALID_SPORTS = ["NFL", "NBA", "MLB", "NHL", "NCAAB", "NCAAF", "Soccer", "MMA"];
+  const validatedSportFocus = sportFocus && VALID_SPORTS.find(s => s.toUpperCase() === sportFocus.toUpperCase());
+  const sportFocusNote = validatedSportFocus
+    ? `\n=== ACTIVE SPORT FOCUS ===\nThe user is currently focused on ${validatedSportFocus}. Prioritize ${validatedSportFocus}-related picks, analysis, and recommendations in your response unless the user asks about something else.\n`
+    : "";
 
   const baseIdentity = `You are SORS Intelligence — the official AI analyst of Sors Maxima, a members-only sports betting intelligence platform. You speak directly to a member.
 
@@ -91,7 +98,7 @@ Your expertise:
 - Line movement, closing line value (CLV), sharp money signals`;
 
   if (tier === "free") {
-    return `${ctx.standardsContext}
+    return `${ctx.standardsContext}${sportFocusNote}
 
 ${baseIdentity}
 
@@ -105,7 +112,7 @@ Core rules you ALWAYS follow:
   }
 
   if (tier === "pro") {
-    return `${ctx.standardsContext}
+    return `${ctx.standardsContext}${sportFocusNote}
 
 ${baseIdentity}
 - Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick
@@ -125,7 +132,7 @@ Core rules you ALWAYS follow:
   }
 
   if (tier === "elite") {
-    return `${ctx.standardsContext}
+    return `${ctx.standardsContext}${sportFocusNote}
 
 ${baseIdentity}
 - Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick (46 original + 5 new: referee crew bias, micro-matchups, coach tendencies, sentiment, travel quality)
@@ -176,7 +183,7 @@ Core rules you ALWAYS follow:
     }
   } catch { /* best-effort */ }
 
-  return `${ctx.standardsContext}
+  return `${ctx.standardsContext}${sportFocusNote}
 
 ${baseIdentity}
 - Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick (46 original + 5 new: referee crew bias, micro-matchups, coach tendencies, sentiment, travel quality)
@@ -238,9 +245,10 @@ export function registerAiRoutes(app: Express): void {
   // Sports betting AI companion for ALL authenticated users.
   // Enforces per-tier daily limits and injects tier-differentiated context.
   app.post("/api/ai/analyst", requireAuth, async (req, res) => {
-    const { messages, isOnboarding } = req.body as {
+    const { messages, isOnboarding, sportFocus } = req.body as {
       messages: { role: "user" | "assistant"; content: string }[];
       isOnboarding?: boolean;
+      sportFocus?: string;
     };
 
     if (!Array.isArray(messages) || messages.length === 0) {
@@ -288,7 +296,7 @@ export function registerAiRoutes(app: Express): void {
     }
 
     // ── Build tier-differentiated system prompt ──────────────────────────────
-    const systemPrompt = await buildTieredSystemPrompt(tier, userId, messages);
+    const systemPrompt = await buildTieredSystemPrompt(tier, userId, messages, sportFocus);
 
     try {
       const maxTokens = tier === "whale" ? 900 : tier === "elite" ? 750 : tier === "pro" ? 650 : 500;

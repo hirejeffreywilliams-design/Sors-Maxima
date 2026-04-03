@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { useSportFocus } from "@/context/sport-focus-context";
 import { PageHero } from "@/components/page-hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -327,9 +328,18 @@ export default function Live() {
   useSEO({ title: "Live Center", description: "Real-time live betting tools: scores, cashout engineering, hedge calculator, and AI advice" });
   const { canAccess } = useTier();
   const sse = useSSEContext();
+  const { focusedSport } = useSportFocus();
   const [activeTab, setActiveTab] = useState("scores");
-  const [selectedSports, setSelectedSports] = useState<Set<string>>(new Set());
+  const [selectedSports, setSelectedSports] = useState<Set<string>>(() =>
+    focusedSport ? new Set([focusedSport.toUpperCase()]) : new Set()
+  );
   const [pendingGameOpen, setPendingGameOpen] = useState<{ id: string; token: number } | null>(null);
+
+  useEffect(() => {
+    if (focusedSport) {
+      setSelectedSports(new Set([focusedSport.toUpperCase()]));
+    }
+  }, [focusedSport]);
 
   const isMax = canAccess("whale");
 

@@ -17,6 +17,7 @@ const LoginPage = lazy(() => import("@/pages/login"));
 const LandingPage = lazy(() => import("@/pages/landing"));
 const CommandCenter = lazy(() => import("@/pages/command-center"));
 const AutoGenerator = lazy(() => import("@/pages/auto-generator"));
+const GeneratePage = lazy(() => import("@/pages/generate"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const DailyParlays = lazy(() => import("@/pages/daily-parlays"));
 const Tools = lazy(() => import("@/pages/tools"));
@@ -100,6 +101,9 @@ const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
+const HistoryPage = lazy(() => import("@/pages/history"));
+const AdvisorPage = lazy(() => import("@/pages/advisor"));
+const RewardsHub = lazy(() => import("@/pages/rewards-hub"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck, ReceiptText, DollarSign } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
@@ -115,6 +119,8 @@ import { ErrorRecoveryInterceptor } from "@/components/error-recovery-intercepto
 import { SupportChat } from "@/components/support-chat";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { SSEProvider, useSSEContext } from "@/context/sse-provider";
+import { SportFocusProvider, useSportFocus } from "@/context/sport-focus-context";
+import { SportFocusBar } from "@/components/sport-focus-bar";
 import { useOfflineStatus } from "@/hooks/use-offline-cache";
 import { OfflineBanner } from "@/components/offline-banner";
 import { SorsCompanion } from "@/components/ai/sors-companion";
@@ -299,7 +305,7 @@ function OnboardingGuard({ children, isAdmin }: { children: React.ReactNode; isA
 
   useEffect(() => {
     if (isAdmin) return;
-    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record', '/my-bets', '/founders'];
+    const skipPaths = ['/onboarding', '/pricing', '/settings', '/profile', '/legal', '/help', '/verify-email', '/changelog', '/track-record', '/history', '/my-bets', '/founders'];
     if (onboardingData && !onboardingData.onboardingCompleted && !skipPaths.includes(location)) {
       setLocation('/onboarding');
     }
@@ -316,20 +322,20 @@ function Router({ authState }: { authState: AuthState }) {
       <Switch>
         <Route path="/" component={CommandCenter} />
         <Route path="/command-center"><Redirect to="/" /></Route>
-        <Route path="/generate" component={AutoGenerator} />
-        <Route path="/strategy" component={StrategyAdvisor} />
-        <Route path="/sorsbooks" component={SorsBooksPage} />
+        <Route path="/generate" component={GeneratePage} />
+        <Route path="/strategy"><Redirect to="/advisor" /></Route>
+        <Route path="/sorsbooks"><Redirect to="/odds-center" /></Route>
         <Route path="/builder" component={Dashboard} />
-        <Route path="/daily" component={DailyParlays} />
+        <Route path="/daily"><Redirect to="/generate" /></Route>
         <Route path="/tools" component={Tools} />
         <Route path="/community" component={Community} />
-        <Route path="/rewards" component={Rewards} />
+        <Route path="/rewards" component={RewardsHub} />
         <Route path="/bankroll" component={Bankroll} />
         <Route path="/live" component={Live} />
         <Route path="/international" component={InternationalPage} />
         <Route path="/mma" component={MMAPage} />
         <Route path="/pricing" component={Pricing} />
-        <Route path="/results" component={Results} />
+        <Route path="/results"><Redirect to="/history" /></Route>
         <Route path="/apply" component={ApplyPage} />
         <Route path="/legal" component={LegalPage} />
         <Route path="/guidelines" component={GuidelinesPage} />
@@ -347,11 +353,12 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/ticket-history"><Redirect to="/profile" /></Route>
         <Route path="/betting-profile"><Redirect to="/profile" /></Route>
         <Route path="/bet-history"><Redirect to="/profile" /></Route>
-        <Route path="/insights" component={PersonalizedInsights} />
+        <Route path="/insights"><Redirect to="/advisor" /></Route>
+        <Route path="/research"><Redirect to="/advisor" /></Route>
         <Route path="/pro-tools"><Redirect to="/tools" /></Route>
         <Route path="/player-props" component={PlayerPropsPage} />
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
-        <Route path="/track-record" component={TrackRecordPage} />
+        <Route path="/track-record"><Redirect to="/history" /></Route>
         <Route path="/my-bets" component={MyBetsPage} />
         <Route path="/cashout" component={CashoutPage} />
         <Route path="/ticket-variations" component={TicketVariations} />
@@ -363,13 +370,19 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/onboarding" component={OnboardingPage} />
         <Route path="/feedback" component={FeedbackPage} />
         <Route path="/watchlist" component={WatchlistPage} />
-        <Route path="/research" component={ResearchNotesPage} />
         <Route path="/platform-intelligence">{() => authState.isAdmin ? <PlatformIntelligencePage /> : <NotFound />}</Route>
         <Route path="/founders" component={FoundersPage} />
         <Route path="/shared-tickets"><Redirect to="/community" /></Route>
-        <Route path="/cards" component={CardsPage} />
+        <Route path="/cards"><Redirect to="/rewards" /></Route>
         <Route path="/verify-email" component={VerifyEmail} />
         <Route path="/ai-analyst" component={AIAnalystPage} />
+        {/* Consolidated pages */}
+        <Route path="/history" component={HistoryPage} />
+        <Route path="/advisor" component={AdvisorPage} />
+        <Route path="/rewards-hub"><Redirect to="/rewards" /></Route>
+        {/* Additional backward-compat redirects */}
+        <Route path="/daily-parlays"><Redirect to="/generate" /></Route>
+        <Route path="/auto-generator"><Redirect to="/generate" /></Route>
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -402,16 +415,19 @@ interface NavItem {
 // Map every secondary route → { label, parent }
 const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/watchlist":            { label: "Watchlist",            parent: "/" },
-  "/research":             { label: "Research Notes",       parent: "/" },
-  "/insights":             { label: "My Insights",          parent: "/" },
-  "/track-record":         { label: "Track Record",         parent: "/" },
+  "/research":             { label: "Research Notes",       parent: "/advisor" },
+  "/insights":             { label: "My Insights",          parent: "/advisor" },
+  "/track-record":         { label: "Track Record",         parent: "/history" },
+  "/history":              { label: "History",              parent: "/" },
+  "/advisor":              { label: "Advisor",              parent: "/" },
   "/bankroll":             { label: "Bankroll Manager",     parent: "/" },
-  "/rewards":              { label: "Rewards",              parent: "/" },
+  "/rewards":              { label: "Rewards & Cards",      parent: "/" },
+  "/rewards-hub":          { label: "Rewards & Cards",      parent: "/" },
   "/profile":              { label: "My Profile",           parent: "/" },
   "/settings":             { label: "Settings",             parent: "/" },
   "/help":                 { label: "Help Center",          parent: "/" },
   "/feedback":             { label: "My Feedback",          parent: "/" },
-  "/founders":             { label: "Founders Wall",          parent: "/" },
+  "/founders":             { label: "Founders Wall",        parent: "/" },
   "/changelog":            { label: "What's New",           parent: "/" },
   "/roadmap":              { label: "Roadmap",              parent: "/" },
   "/legal":                { label: "Legal",                parent: "/" },
@@ -431,13 +447,14 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/correlation-matrix":   { label: "Correlation Matrix",  parent: "/tools" },
   "/training":             { label: "Model Lab",             parent: "/tools" },
   "/prop-parlay-builder":  { label: "Prop Parlay Builder",  parent: "/builder" },
-  "/strategy":             { label: "Strategy Advisor",     parent: "/" },
-  "/cards":                { label: "Sors Cards",           parent: "/" },
+  "/strategy":             { label: "Strategy Advisor",     parent: "/advisor" },
+  "/cards":                { label: "Sors Cards",           parent: "/rewards" },
   "/dashboard":            { label: "Dashboard",            parent: "/" },
   "/ai-analyst":           { label: "AI Analyst",           parent: "/" },
+  "/my-bets":              { label: "My Bets",              parent: "/" },
 };
 
-const PRIMARY_NAV_HREFS = new Set(["/", "/daily", "/generate", "/strategy", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools", "/sorsbooks"]);
+const PRIMARY_NAV_HREFS = new Set(["/", "/generate", "/player-props", "/builder", "/odds-center", "/live", "/international", "/mma", "/community", "/tools", "/advisor", "/history"]);
 
 // Static parent labels (can't reference navItems since it's defined below)
 const PARENT_LABELS: Record<string, string> = {
@@ -446,6 +463,9 @@ const PARENT_LABELS: Record<string, string> = {
   "/builder": "Builder",
   "/daily":   "Daily Picks",
   "/community": "Community",
+  "/advisor": "Advisor",
+  "/history": "History",
+  "/rewards": "Rewards & Cards",
 };
 
 function ContextualNavBar() {
@@ -515,10 +535,8 @@ function ContextualNavBar() {
 
 const navItems: NavItem[] = [
   { href: "/", icon: Zap, label: "Picks", testId: "nav-command-center", tooltip: "Command Center — all engines live" },
-  { href: "/daily", icon: Calendar, label: "Daily", testId: "nav-daily", tooltip: "Today's optimized parlay picks" },
-  { href: "/generate", icon: Ticket, label: "Tickets", testId: "nav-generate", tooltip: "Smart Ticket Generator & Parlay Builder" },
+  { href: "/generate", icon: Ticket, label: "Picks & Parlays", testId: "nav-generate", tooltip: "Smart picks generator and ready-made parlays" },
   { href: "/odds-center", icon: TrendingUp, label: "Markets", testId: "nav-odds-center", tooltip: "Odds, EV & line movement" },
-  { href: "/sorsbooks", icon: Landmark, label: "Books", testId: "nav-sorsbooks", tooltip: "Sors Books — sportsbook intelligence hub" },
   { href: "/tools", icon: BarChart2, label: "Analysis", testId: "nav-pro-tools", tooltip: "Analytics, calculators & factor tools" },
   { href: "/community", icon: Users, label: "Community", testId: "nav-community", tooltip: "Leaderboards, social feed & tipsters" },
   { href: "/admin", icon: Shield, label: "Admin", testId: "nav-admin", tooltip: "Admin Command Center", adminOnly: true },
@@ -528,7 +546,7 @@ const BUILD_SUBITEMS = [
   { href: "/generate", icon: Brain, label: "Smart Generator", desc: "AI builds the optimal parlay for you" },
   { href: "/pick-review", icon: ClipboardList, label: "Pick Review", desc: "Risk-scored picks with Kelly stake guidance" },
   { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", desc: "Manually drag & drop your own ticket" },
-  { href: "/strategy", icon: Compass, label: "Strategy Advisor", desc: "Expert guidance for your betting style" },
+  { href: "/advisor", icon: Compass, label: "Advisor", desc: "Strategy, insights & research notes" },
   { href: "/my-bets", icon: ReceiptText, label: "My Bet Tracker", desc: "Track results, edit stakes & mark outcomes" },
 ];
 
@@ -604,40 +622,39 @@ function MobileNav({ authState, onLogout, onClose }: { authState: AuthState; onL
 
         {navSection("Picks", [
           { href: "/", icon: Zap, label: "Command Center", testId: "mobile-nav-picks" },
-          { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "mobile-nav-daily" },
-          { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "mobile-nav-cards" },
+          { href: "/generate", icon: Ticket, label: "Picks & Parlays", testId: "mobile-nav-generate" },
         ])}
 
-        {navSection("Tickets", [
-          { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "mobile-nav-generate" },
+        {navSection("Build", [
           { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "mobile-nav-pick-review" },
           { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "mobile-nav-builder" },
-          { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "mobile-nav-strategy" },
-          { href: "/my-bets", icon: ReceiptText, label: "My Bet Tracker", testId: "mobile-nav-my-bets" },
+          { href: "/advisor", icon: Compass, label: "Advisor", testId: "mobile-nav-advisor" },
         ])}
 
         {navSection("Markets", [
           { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "mobile-nav-odds" },
-          { href: "/sorsbooks", icon: Landmark, label: "Sors Books", testId: "mobile-nav-books" },
           { href: "/player-props", icon: Star, label: "Player Props", testId: "mobile-nav-props" },
           { href: "/mma", icon: Sword, label: "MMA / UFC", testId: "mobile-nav-mma" },
           { href: "/international", icon: Globe, label: "International", testId: "mobile-nav-international" },
           { href: "/live", icon: Activity, label: "Live Scores", testId: "mobile-nav-live" },
         ])}
 
+        {navSection("Track", [
+          { href: "/history", icon: History, label: "History", testId: "mobile-nav-history" },
+          { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "mobile-nav-my-bets" },
+          { href: "/bankroll", icon: Wallet, label: "Bankroll Manager", testId: "mobile-nav-bankroll" },
+        ])}
+
         {navSection("Discover", [
           { href: "/tools", icon: BarChart2, label: "Analysis & Tools", testId: "mobile-nav-tools" },
           { href: "/community", icon: Users, label: "Community", testId: "mobile-nav-community" },
-          { href: "/ai-analyst", icon: Zap, label: "AI Analyst", testId: "mobile-nav-ai-analyst" },
+          { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "mobile-nav-ai-analyst" },
+          { href: "/rewards", icon: Flame, label: "Rewards & Cards", testId: "mobile-nav-rewards" },
           { href: "/watchlist", icon: Eye, label: "My Watchlist", testId: "mobile-nav-watchlist" },
-          { href: "/research", icon: BookOpen, label: "Research Notes", testId: "mobile-nav-research" },
-          { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "mobile-nav-track-record" },
         ])}
 
         {navSection("Account", [
           { href: "/profile", icon: User, label: "My Profile", testId: "mobile-nav-profile" },
-          { href: "/bankroll", icon: Wallet, label: "Bankroll Manager", testId: "mobile-nav-bankroll" },
-          { href: "/insights", icon: LineChart, label: "My Insights", testId: "mobile-nav-insights" },
           { href: "/pricing", icon: CreditCard, label: "Plans & Pricing", testId: "mobile-nav-pricing" },
           { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "mobile-nav-settings" },
           { href: "/help", icon: HelpCircle, label: "Help Center", testId: "mobile-nav-help" },
@@ -724,7 +741,7 @@ function NavDropdown({ label, icon: Icon, testId, subitems, isActive }: {
 function DesktopNav({ authState }: { authState: AuthState }) {
   const [location] = useLocation();
 
-  const isBuildActive = ["/generate", "/builder", "/strategy"].includes(location);
+  const isBuildActive = ["/generate", "/builder", "/advisor"].includes(location);
   const isMarketsActive = ["/odds-center", "/player-props", "/international", "/mma", "/live"].includes(location);
 
   const NavBtn = ({ href, icon: Icon, label, testId, tooltip }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; tooltip: string }) => (
@@ -744,11 +761,10 @@ function DesktopNav({ authState }: { authState: AuthState }) {
   return (
     <nav className="hidden items-center gap-0.5">
       <NavBtn href="/" icon={Zap} label="Picks" testId="nav-command-center" tooltip="Command Center — all engines live" />
-      <NavBtn href="/daily" icon={Calendar} label="Daily" testId="nav-daily" tooltip="Today's top picks" />
-      <NavBtn href="/cards" icon={Trophy} label="Cards" testId="nav-cards" tooltip="Sors Intelligence Cards — collect, trade & showcase" />
-      <NavDropdown label="Tickets" icon={Ticket} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
+      <NavBtn href="/generate" icon={Ticket} label="Picks & Parlays" testId="nav-generate" tooltip="Smart picks and ready-made parlays" />
+      <NavDropdown label="Build" icon={Ticket} testId="nav-build-dropdown" subitems={BUILD_SUBITEMS} isActive={isBuildActive} />
       <NavDropdown label="Markets" icon={TrendingUp} testId="nav-markets-dropdown" subitems={MARKETS_SUBITEMS} isActive={isMarketsActive} />
-      <NavBtn href="/sorsbooks" icon={Landmark} label="Books" testId="nav-sorsbooks" tooltip="Sors Books — sportsbook intelligence hub" />
+      <NavBtn href="/history" icon={History} label="History" testId="nav-history" tooltip="Track record and bet history" />
       <NavBtn href="/tools" icon={BarChart2} label="Analysis" testId="nav-pro-tools" tooltip="Analytics, calculators & factor tools" />
       <NavBtn href="/community" icon={Users} label="Community" testId="nav-community" tooltip="Leaderboards, social feed & tipsters" />
       <NavBtn href="/ai-analyst" icon={Zap} label="AI Analyst" testId="nav-ai-analyst" tooltip="SORS Intelligence — AI betting analyst with live data" />
@@ -840,7 +856,7 @@ function FloatingSlipButton() {
 
 const FIXED_BOTTOM_TABS = [
   { href: "/", icon: Zap, label: "Home", testId: "bottom-nav-home" },
-  { href: "/daily", icon: Calendar, label: "Picks", testId: "bottom-nav-picks" },
+  { href: "/generate", icon: Ticket, label: "Picks", testId: "bottom-nav-picks" },
   { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "bottom-nav-analyst" },
   { href: "/tools", icon: Wrench, label: "Tools", testId: "bottom-nav-tools" },
 ] as const;
@@ -848,13 +864,15 @@ const FIXED_BOTTOM_TABS = [
 function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [location] = useLocation();
   const { legCount, setMobileOpen } = useParlaySlip();
+  const { focusedSport, clearFocus } = useSportFocus();
 
   return (
     <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
       <div className="flex items-center justify-around h-16">
         {FIXED_BOTTOM_TABS.map(({ href, icon: Icon, label, testId }) => {
           const isActive = location === href;
-          const isPicks = href === "/daily";
+          const isPicks = href === "/generate";
+          const isMySport = isPicks && !!focusedSport;
           return (
             <Link key={href} href={href}>
               <div
@@ -863,13 +881,18 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
               >
                 <div className="relative">
                   <Icon className="w-5 h-5" />
-                  {isPicks && legCount > 0 && (
+                  {isPicks && legCount > 0 && !isMySport && (
                     <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-3.5 w-3.5 rounded-full gold-slip-badge text-[9px] leading-none font-bold" data-testid="badge-slip-count">
                       {legCount > 9 ? "9+" : legCount}
                     </span>
                   )}
+                  {isMySport && (
+                    <span className="absolute -top-1.5 -right-2 flex items-center justify-center h-3 min-w-3 rounded-full bg-primary text-primary-foreground text-[8px] leading-none font-bold px-0.5" data-testid="badge-sport-focus">
+                      {focusedSport.toUpperCase().slice(0, 3)}
+                    </span>
+                  )}
                 </div>
-                <span className="text-[10px] font-medium">{label}</span>
+                <span className="text-[10px] font-medium">{isMySport ? focusedSport : label}</span>
                 {isActive && <span className="absolute bottom-1 w-3.5 h-0.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />}
               </div>
             </Link>
@@ -1048,22 +1071,20 @@ type NavDef = { href: string; icon: React.ComponentType<{className?:string}>; la
 
 const APP_NAV_ITEMS: NavDef[] = [
   { href: "/", icon: Zap, label: "Command Center", testId: "sidebar-nav-command", section: "Picks" },
-  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "sidebar-nav-daily", section: "Picks" },
-  { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "sidebar-nav-cards", section: "Picks" },
-  { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "sidebar-nav-generate", section: "Tickets" },
-  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "sidebar-nav-builder", section: "Tickets" },
-  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "sidebar-nav-review", section: "Tickets" },
-  { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "sidebar-nav-bets", section: "Tickets" },
-  { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "sidebar-nav-strategy", section: "Tickets" },
+  { href: "/generate", icon: Ticket, label: "Picks & Parlays", testId: "sidebar-nav-generate", section: "Picks" },
+  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "sidebar-nav-builder", section: "Build" },
+  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "sidebar-nav-review", section: "Build" },
+  { href: "/advisor", icon: Compass, label: "Advisor", testId: "sidebar-nav-advisor", section: "Build" },
   { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "sidebar-nav-odds", section: "Markets" },
   { href: "/player-props", icon: Star, label: "Player Props", testId: "sidebar-nav-props", section: "Markets" },
   { href: "/live", icon: Activity, label: "Live Scores", testId: "sidebar-nav-live", section: "Markets" },
+  { href: "/history", icon: History, label: "History", testId: "sidebar-nav-history", section: "Track" },
+  { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "sidebar-nav-bets", section: "Track" },
+  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "sidebar-nav-bankroll", section: "Track" },
   { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "sidebar-nav-ai", section: "Discover" },
-  { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "sidebar-nav-track", section: "Discover" },
   { href: "/tools", icon: Wrench, label: "Analysis & Tools", testId: "sidebar-nav-tools", section: "Discover" },
-  { href: "/cashout", icon: DollarSign, label: "Cashout Engineering", testId: "sidebar-nav-cashout", section: "Discover" },
   { href: "/community", icon: Users, label: "Community", testId: "sidebar-nav-community", section: "Discover" },
-  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "sidebar-nav-bankroll", section: "Account" },
+  { href: "/rewards", icon: Flame, label: "Rewards & Cards", testId: "sidebar-nav-rewards", section: "Discover" },
   { href: "/profile", icon: User, label: "My Profile", testId: "sidebar-nav-profile", section: "Account" },
   { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "sidebar-nav-settings", section: "Account" },
 ];
@@ -1075,6 +1096,7 @@ const ADMIN_NAV_ITEMS: NavDef[] = [
 
 function AppSidebar({ authState, collapsed, onToggle }: { authState: AuthState; collapsed: boolean; onToggle: () => void }) {
   const [location] = useLocation();
+  const { focusedSport } = useSportFocus();
   const sections = Array.from(new Set(APP_NAV_ITEMS.map(i => i.section)));
 
   return (
@@ -1095,6 +1117,29 @@ function AppSidebar({ authState, collapsed, onToggle }: { authState: AuthState; 
         {authState.isAdmin && collapsed && ADMIN_NAV_ITEMS.map(item => (
           <SidebarNavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={true} testId={item.testId} color={item.color} />
         ))}
+        {!collapsed && focusedSport && (
+          <div>
+            <div className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-primary/80">My Sport</div>
+            <SidebarNavItem
+              href="/"
+              icon={Zap}
+              label={`${focusedSport} Picks`}
+              isActive={location === "/"}
+              collapsed={false}
+              testId="sidebar-nav-my-sport"
+              color="text-primary"
+            />
+            <SidebarNavItem
+              href="/live"
+              icon={Activity}
+              label={`${focusedSport} Live`}
+              isActive={location === "/live"}
+              collapsed={false}
+              testId="sidebar-nav-my-sport-live"
+              color="text-primary"
+            />
+          </div>
+        )}
         {!collapsed && sections.map(section => (
           <div key={section}>
             <div className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section}</div>
@@ -1108,13 +1153,20 @@ function AppSidebar({ authState, collapsed, onToggle }: { authState: AuthState; 
         ))}
       </div>
       <div className="border-t border-border/40 p-2">
-        {!collapsed && authState.username && (
+        {!collapsed && (
           <div className="flex items-center gap-2 px-2 py-1.5 mb-1">
-            <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
-              {authState.username.charAt(0).toUpperCase()}
-            </div>
-            <span className="truncate text-xs text-muted-foreground">{authState.username}</span>
-            {authState.isAdmin && <Badge variant="secondary" className="text-[10px] py-0 px-1 ml-auto shrink-0">Admin</Badge>}
+            {authState.username && (
+              <>
+                <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+                  {authState.username.charAt(0).toUpperCase()}
+                </div>
+                <span className="truncate text-xs text-muted-foreground">{authState.username}</span>
+              </>
+            )}
+            {focusedSport && (
+              <span className="ml-auto shrink-0 text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full" data-testid="sidebar-sport-focus-badge">{focusedSport}</span>
+            )}
+            {authState.isAdmin && !focusedSport && <Badge variant="secondary" className="text-[10px] py-0 px-1 ml-auto shrink-0">Admin</Badge>}
           </div>
         )}
         <button
@@ -1150,6 +1202,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
 
   return (
     <SSEProvider enabled={true}>
+    <SportFocusProvider>
     <div className="min-h-screen bg-background overflow-x-hidden">
       <header className="sticky top-0 z-50 w-full border-b border-border/40 glass-nav shadow-[0_1px_0_0_hsl(var(--primary)/0.06)]">
         <div className="max-w-screen-2xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
@@ -1206,6 +1259,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         <div className="sticky top-14 z-40 w-full">
           <OfflineBanner />
           <SportsTicker />
+          <SportFocusBar />
         </div>
 
         <ContextualNavBar />
@@ -1261,6 +1315,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
       <SupportChat />
       <SorsCompanion />
     </div>
+    </SportFocusProvider>
     </SSEProvider>
   );
 }
@@ -1431,7 +1486,7 @@ function AppContent() {
       );
     }
     if (tier === 'free') {
-      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record', '/my-bets', '/ai-analyst'];
+      const exemptPaths = ['/pricing', '/settings', '/legal', '/help', '/changelog', '/track-record', '/history', '/my-bets', '/ai-analyst', '/rewards'];
       if (!exemptPaths.some(p => location === p || location.startsWith(p + '/'))) {
         return (
           <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>

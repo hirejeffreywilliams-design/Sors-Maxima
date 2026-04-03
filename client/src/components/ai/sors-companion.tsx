@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useSportFocus } from "@/context/sport-focus-context";
 
 interface Message {
   id: string;
@@ -220,6 +221,12 @@ export function SorsCompanion() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+  const { focusedSport } = useSportFocus();
+
+  const sportContextPrefix = useMemo(() => {
+    if (!focusedSport) return "";
+    return `[User is focused on ${focusedSport}] `;
+  }, [focusedSport]);
 
   // ── Fetch usage data ───────────────────────────────────────────────────────
   const { data: usageData, refetch: refetchUsage } = useQuery<AiUsageData>({
@@ -348,7 +355,7 @@ export function SorsCompanion() {
 
   const chatMutation = useMutation({
     mutationFn: async (payload: { role: "user" | "assistant"; content: string }[]) => {
-      const res = await apiRequest("POST", "/api/ai/analyst", { messages: payload });
+      const res = await apiRequest("POST", "/api/ai/analyst", { messages: payload, sportFocus: focusedSport ?? undefined });
       if (!res.ok) {
         const err = await res.json() as { error?: string; limit?: number; current?: number; tier?: string; nextTier?: any };
         if (err.error === "daily_limit_reached") {
@@ -414,10 +421,15 @@ export function SorsCompanion() {
     const payload = updated
       .filter(m => m.id !== "welcome")
       .filter(m => !m.isLiveUpdate)
-      .map(m => ({ role: m.role, content: m.content }));
+      .map((m, idx, arr) => ({
+        role: m.role,
+        content: m.role === "user" && idx === arr.length - 1 && sportContextPrefix
+          ? sportContextPrefix + m.content
+          : m.content,
+      }));
 
     chatMutation.mutate(payload);
-  }, [messages, chatMutation, limitReached]);
+  }, [messages, chatMutation, limitReached, sportContextPrefix]);
 
   useEffect(() => {
     _companionSendRef = sendMessage;
@@ -562,7 +574,12 @@ export function SorsCompanion() {
                   LIVE DATA
                 </Badge>
               </div>
-              <p className="text-[10px] text-white/35">46-Factor Model · Real picks · Kelly sizing</p>
+              <p className="text-[10px] text-white/35">
+                46-Factor Model · Real picks · Kelly sizing
+                {focusedSport && (
+                  <span className="ml-1.5 text-orange-400 font-semibold">[{focusedSport} focus]</span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-1">

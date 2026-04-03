@@ -633,6 +633,8 @@ export async function runMigrations(): Promise<void> {
         ADD COLUMN IF NOT EXISTS p90_away_score REAL
     `);
 
+    await db.execute(sql`ALTER TABLE user_betting_profile ADD COLUMN IF NOT EXISTS sport_focus TEXT DEFAULT NULL`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSportFocus } from "@/context/sport-focus-context";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -832,6 +833,7 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
 export default function DailyParlays() {
   useSEO({ title: "Daily Parlays", description: "Today's AI-generated parlay recommendations" });
   const [, navigate] = useLocation();
+  const { focusedSport } = useSportFocus();
   const [activeSport, setActiveSport] = useState<string>("");
   const [sortBy, setSortBy] = useState<SortMode>("confidence");
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
@@ -853,10 +855,14 @@ export default function DailyParlays() {
   const sportTabs = inSeasonSports && inSeasonSports.length > 0 ? inSeasonSports : [...fallbackSports];
 
   useEffect(() => {
+    if (focusedSport) {
+      const match = sportTabs.find(s => s.toUpperCase() === focusedSport.toUpperCase());
+      if (match) { setActiveSport(match); return; }
+    }
     if (sportTabs.length > 0 && (activeSport === "" || !sportTabs.includes(activeSport))) {
       setActiveSport(sportTabs[0]);
     }
-  }, [sportTabs, activeSport]);
+  }, [sportTabs, activeSport, focusedSport]);
 
   const { data: engineStatus } = useQuery<EngineStatus>({
     queryKey: ["/api/precomputed-engine/status"],

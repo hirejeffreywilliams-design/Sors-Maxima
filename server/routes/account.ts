@@ -1098,6 +1098,37 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
     } catch (e: any) { res.status(500).json({ error: e.message }); }
   });
 
+  app.get("/api/user/sport-focus", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const uid = (req as any).user.id;
+      const rows = await db.execute(sql`SELECT sport_focus FROM user_betting_profile WHERE user_id = ${uid} LIMIT 1`);
+      const sportFocus = (rows.rows[0] as any)?.sport_focus ?? null;
+      res.json({ sportFocus });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
+  app.patch("/api/user/sport-focus", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const VALID_SPORTS = ["NFL", "NBA", "MLB", "NHL", "NCAAB", "NCAAF", "Soccer", "MMA"];
+      const uid = (req as any).user.id;
+      const { sportFocus } = req.body;
+      let focusValue: string | null = null;
+      if (sportFocus && typeof sportFocus === "string") {
+        const matched = VALID_SPORTS.find(s => s.toUpperCase() === sportFocus.toUpperCase());
+        if (!matched && sportFocus !== null) {
+          return res.status(400).json({ error: "Invalid sport" });
+        }
+        focusValue = matched ?? null;
+      }
+      await db.execute(sql`
+        INSERT INTO user_betting_profile (user_id, sport_focus)
+        VALUES (${uid}, ${focusValue})
+        ON CONFLICT (user_id) DO UPDATE SET sport_focus = ${focusValue}
+      `);
+      res.json({ sportFocus: focusValue });
+    } catch (e: any) { res.status(500).json({ error: e.message }); }
+  });
+
   app.get("/api/user/sportsbooks", (_req, res) => {
     res.json(userDataEngine.getSportsbooks());
   });

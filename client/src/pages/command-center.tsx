@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useSportFocus } from "@/context/sport-focus-context";
+import { SportFocusFilter, SportFocusBanner } from "@/components/sport-focus-filter";
 import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
@@ -2066,7 +2068,8 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
 
 export default function CommandCenter() {
   useSEO({ title: "Your Picks", description: "All engines converging to find your edge" });
-  const [activeSportTab, setActiveSportTab] = useState("all");
+  const { focusedSport } = useSportFocus();
+  const [activeSportTab, setActiveSportTab] = useState(() => focusedSport ?? "all");
   const [ticketDateFilter, setTicketDateFilter] = useState<"today" | "future" | "all">("all");
   const [swipeMode, setSwipeMode] = useState(false);
   const [showShowcase, setShowShowcase] = useState(false);
@@ -2076,6 +2079,10 @@ export default function CommandCenter() {
   const { canAccess } = useTier();
   const { activeStrategy, isActiveMode } = useUserStrategy();
   const activeMode = isActiveMode();
+
+  useEffect(() => {
+    if (focusedSport) setActiveSportTab(focusedSport);
+  }, [focusedSport]);
   const { toast } = useToast();
   const [parlayModalOpen, setParlayModalOpen] = useState(false);
   const [sseEverConnected, setSseEverConnected] = useState(false);
@@ -2751,6 +2758,12 @@ export default function CommandCenter() {
             </div>
           </div>
 
+          {/* Sport focus banner — show when a sport is focused */}
+          <SportFocusBanner
+            activeCount={focusedSport && activeSportTab === "all" ? sortedTopPicks.filter(p => (p.sport ?? "").toUpperCase() === focusedSport.toUpperCase()).length : sortedTopPicks.length}
+            totalCount={feed?.topPicks?.length ?? 0}
+          />
+
           {/* Picks grid */}
           {activeSportTab === "NFL" && filteredUpcoming.length === 0 ? (
             <OffseasonPanel />
@@ -2764,7 +2777,9 @@ export default function CommandCenter() {
               />
               <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {sortedTopPicks.map(pick => (
-                  <PickCard key={pick.id} pick={pick} legs={legs} addLeg={addLeg} isFounder={authData?.isFounder} />
+                  <SportFocusFilter key={pick.id} sport={pick.sport}>
+                    <PickCard pick={pick} legs={legs} addLeg={addLeg} isFounder={authData?.isFounder} />
+                  </SportFocusFilter>
                 ))}
               </div>
             </>
