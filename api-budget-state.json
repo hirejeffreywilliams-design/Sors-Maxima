@@ -2,9 +2,9 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 6563,
-      "manualRemaining": 93437,
-      "lastReported": "2026-04-03T00:44:47.677Z",
+      "currentUsage": 7905,
+      "manualRemaining": 92095,
+      "lastReported": "2026-04-03T01:03:05.771Z",
       "monthReset": "2026-04-01T00:00:00.000Z",
       "callLog": [
         {
@@ -128,7 +128,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:44:19.460Z"
+      "lastSeasonCheck": "2026-04-03T01:13:04.875Z"
     },
     "apifootball": {
       "currentUsage": 0,
@@ -136,11 +136,11 @@
       "lastReported": null,
       "monthReset": "2026-04-01T00:00:00.000Z",
       "callLog": [],
-      "suspended": true,
-      "suspendedAt": "2026-03-25T02:48:28.202Z",
-      "suspendedReason": "Manually suspended by admin",
+      "suspended": false,
+      "suspendedAt": null,
+      "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:44:19.460Z"
+      "lastSeasonCheck": "2026-04-03T01:13:04.875Z"
     },
     "balldontlie": {
       "currentUsage": 0,
@@ -152,7 +152,7 @@
       "suspendedAt": "2026-03-25T02:47:54.505Z",
       "suspendedReason": "Manually suspended by admin",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:44:19.460Z"
+      "lastSeasonCheck": "2026-04-03T01:13:04.875Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -164,7 +164,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:44:19.460Z"
+      "lastSeasonCheck": "2026-04-03T01:13:04.875Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -176,11 +176,11 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:44:19.460Z"
+      "lastSeasonCheck": "2026-04-03T01:13:04.875Z"
     }
   },
   "activeUsers": 5,
-  "lastSaved": "2026-04-03T00:44:47.677Z",
+  "lastSaved": "2026-04-03T01:13:04.875Z",
   "alerts": [
     {
       "id": "yka31tz9",
@@ -196,6 +196,14 @@
       "type": "auto_suspended",
       "message": "API-Football manually suspended: Manually suspended by admin",
       "createdAt": "2026-03-25T02:48:28.202Z",
+      "dismissed": false
+    },
+    {
+      "id": "3vsb0yk9",
+      "service": "apifootball",
+      "type": "restart_needed",
+      "message": "API-Football manually resumed by admin.",
+      "createdAt": "2026-04-03T01:12:01.748Z",
       "dismissed": false
     }
   ]

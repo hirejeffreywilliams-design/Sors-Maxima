@@ -47,12 +47,13 @@
     {
       "id": "alert_1774810573679_cnbwl",
       "timestamp": "2026-03-29T18:56:13.679Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "critical",
       "category": "api_budget",
       "title": "Odds API Critical — Under 10K Requests",
       "detail": "Only 0 requests remain. Live odds will stop if exhausted.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-03T00:55:19.992Z"
     },
     {
       "id": "alert_1774808773562_0xfaz",
@@ -576,12 +577,13 @@
     {
       "id": "alert_1773433492506_71t4c",
       "timestamp": "2026-03-13T20:24:52.506Z",
-      "resolved": false,
+      "resolved": true,
       "severity": "warning",
       "category": "api_budget",
       "title": "Odds API Below 50K Requests",
       "detail": "21,161 requests remaining. Consider reducing polling frequency via API Budget settings.",
-      "checkType": "quick"
+      "checkType": "quick",
+      "resolvedAt": "2026-04-03T00:55:19.992Z"
     },
     {
       "id": "alert_1773374232818_gjyxq",
@@ -1045,6 +1047,69 @@
     }
   ],
   "reports": [
+    {
+      "id": "report_1775178259989_xr39t",
+      "timestamp": "2026-04-03T01:04:19.990Z",
+      "durationMs": 3833,
+      "summary": [
+        "Odds API is critically depleted with 0 requests remaining, risking a halt in live odds service.",
+        "The overall win rate is 57.1%, indicating strong performance, but monitoring is required for shifts.",
+        "Active users are at 1247 with a churn rate of 4.2% which warrants continued engagement efforts."
+      ],
+      "priority_tasks": [
+        {
+          "title": "Restore Odds API Access",
+          "description": "Replenish or negotiate a new budget for the Odds API to resume live odds functionality.",
+          "priority": "P1",
+          "due_by": "today",
+          "effort_hours": 2
+        },
+        {
+          "title": "Monitor API Utilization",
+          "description": "Adjust polling frequency for the Odds API to prevent hitting critical levels in the future.",
+          "priority": "P2",
+          "due_by": "this_week",
+          "effort_hours": 1
+        },
+        {
+          "title": "Engagement Strategy Review",
+          "description": "Review user engagement strategies to lower churn rates and increase liquidity.",
+          "priority": "P3",
+          "due_by": "this_week",
+          "effort_hours": 4
+        }
+      ],
+      "risk_alerts": [
+        {
+          "title": "Critical API Budget Depletion",
+          "description": "Odds API has 0 requests left, which may halt live odds.",
+          "severity": "critical"
+        }
+      ],
+      "ops_checklist": {
+        "today": [
+          "Contact Odds API provider to replenish request budget.",
+          "Check for any upcoming sports events that may impact API usage."
+        ],
+        "this_week": [
+          "Analyze and adjust request frequency to optimize API budget.",
+          "Develop a retention plan to address ongoing user engagement."
+        ]
+      },
+      "health_snapshot": {
+        "winRate": 57.1,
+        "settledPicks": 2073,
+        "oddsApiRemaining": 92721,
+        "oddsApiStatus": "healthy",
+        "guardianHealth": 100,
+        "cacheHitRate": 0,
+        "heapUsedMb": 77,
+        "heapTotalMb": 90,
+        "hubLastCycleMs": 2,
+        "aiCircuitOpen": false
+      },
+      "raw": "{\n  \"summary\": [\n    \"Odds API is critically depleted with 0 requests remaining, risking a halt in live odds service.\",\n    \"The overall win rate is 57.1%, indicating strong performance, but monitoring is required for shifts.\",\n    \"Active users are at 1247 with a churn rate of 4.2% which warrants continued engagement efforts.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Restore Odds API Access\",\n      \"description\": \"Replenish or negotiate a new budget for the Odds API to resume live odds functionality.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 2\n    },\n    {\n      \"title\": \"Monitor API Utilization\",\n      \"description\": \"Adjust polling frequency for the Odds API to prevent hitting critical levels in the future.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Engagement Strategy Review\",\n      \"description\": \"Review user engagement strategies to lower churn rates and increase liquidity.\",\n      \"priority\": \"P3\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 4\n    }\n  ],\n  \"risk_alerts\": [\n    {\n      \"title\": \"Critical API Budget Depletion\",\n      \"description\": \"Odds API has 0 requests left, which may halt live odds.\",\n      \"severity\": \"critical\"\n    }\n  ],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Contact Odds API provider to replenish request budget.\",\n      \"Check for any upcoming sports events that may impact API usage.\"\n    ],\n    \"this_week\": [\n      \"Analyze and adjust request frequency to optimize API budget.\",\n      \"Develop a retention plan to address ongoing user engagement.\"\n    ]\n  }\n}"
+    },
     {
       "id": "report_1774912350262_6sh8l",
       "timestamp": "2026-03-30T23:12:30.262Z",
@@ -2134,69 +2199,10 @@
         "aiCircuitOpen": false
       },
       "raw": "{\n  \"summary\": [\n    \"API budget warning for Odds API with 20,059 requests remaining; recommends reducing polling frequency.\",\n    \"Win rate remains above break-even at 55.7%, with sufficient settled picks (957).\",\n    \"Healthy cash balance with $100,000 available.\",\n    \"Active user churn rate at 4.2%, remains stable.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Adjust API Request Frequency\",\n      \"description\": \"Reduce the polling frequency for Odds API to prevent hitting budget limit; maintain optimal interval of 1-minute.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Implement throttling settings for Odds API.\",\n      \"Monitor user activity trends and churn rate.\",\n      \"Review API budgets for potential adjustments.\"\n    ],\n    \"this_week\": [\n      \"Prepare a financial overview and monitor cash flow.\",\n      \"Evaluate and optimize predictive model performance.\",\n      \"Assess user acquisition and engagement strategies.\"\n    ]\n  }\n}"
-    },
-    {
-      "id": "report_1773490530997_ru800",
-      "timestamp": "2026-03-14T12:15:30.997Z",
-      "durationMs": 7379,
-      "summary": [
-        "Win rate at 55.7% is above the break-even threshold of 52.4%.",
-        "Odds API usage is at 79,833 with 20,167 requests remaining, marked as warning; needs monitoring.",
-        "Cache hit rate is at 0%, indicating potential issues with data retrieval efficiency.",
-        "Total active users stand at 1,247 with a churn rate of 4.2%, which is manageable."
-      ],
-      "priority_tasks": [
-        {
-          "title": "Review API Request Frequency",
-          "description": "Adjust API polling frequency to ensure requests remain above 10K to avoid hitting critical status.",
-          "priority": "P1",
-          "due_by": "today",
-          "effort_hours": 1
-        },
-        {
-          "title": "Investigate Cache Utilization",
-          "description": "Analyze reasons for zero cache hit rate and implement changes to improve data retrieval performance.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 3
-        },
-        {
-          "title": "Monitor User Churn Rate",
-          "description": "Track user engagement and churn rates to implement strategies for retention improvement.",
-          "priority": "P2",
-          "due_by": "this_week",
-          "effort_hours": 2
-        }
-      ],
-      "risk_alerts": [],
-      "ops_checklist": {
-        "today": [
-          "Adjust the API polling settings to avoid critical thresholds.",
-          "Monitor upcoming game schedules and adjust betting strategies accordingly."
-        ],
-        "this_week": [
-          "Conduct a thorough analysis of cache efficiency and performance.",
-          "Review and strategize on user engagement techniques.",
-          "Evaluate overall performance metrics and adjust models if necessary."
-        ]
-      },
-      "health_snapshot": {
-        "winRate": 55.7,
-        "settledPicks": 957,
-        "oddsApiRemaining": 20167,
-        "oddsApiStatus": "warning",
-        "guardianHealth": 100,
-        "cacheHitRate": 0,
-        "heapUsedMb": 65,
-        "heapTotalMb": 74,
-        "hubLastCycleMs": 392,
-        "aiCircuitOpen": false
-      },
-      "raw": "{\n  \"summary\": [\n    \"Win rate at 55.7% is above the break-even threshold of 52.4%.\",\n    \"Odds API usage is at 79,833 with 20,167 requests remaining, marked as warning; needs monitoring.\",\n    \"Cache hit rate is at 0%, indicating potential issues with data retrieval efficiency.\",\n    \"Total active users stand at 1,247 with a churn rate of 4.2%, which is manageable.\"\n  ],\n  \"priority_tasks\": [\n    {\n      \"title\": \"Review API Request Frequency\",\n      \"description\": \"Adjust API polling frequency to ensure requests remain above 10K to avoid hitting critical status.\",\n      \"priority\": \"P1\",\n      \"due_by\": \"today\",\n      \"effort_hours\": 1\n    },\n    {\n      \"title\": \"Investigate Cache Utilization\",\n      \"description\": \"Analyze reasons for zero cache hit rate and implement changes to improve data retrieval performance.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 3\n    },\n    {\n      \"title\": \"Monitor User Churn Rate\",\n      \"description\": \"Track user engagement and churn rates to implement strategies for retention improvement.\",\n      \"priority\": \"P2\",\n      \"due_by\": \"this_week\",\n      \"effort_hours\": 2\n    }\n  ],\n  \"risk_alerts\": [],\n  \"ops_checklist\": {\n    \"today\": [\n      \"Adjust the API polling settings to avoid critical thresholds.\",\n      \"Monitor upcoming game schedules and adjust betting strategies accordingly.\"\n    ],\n    \"this_week\": [\n      \"Conduct a thorough analysis of cache efficiency and performance.\",\n      \"Review and strategize on user engagement techniques.\",\n      \"Evaluate overall performance metrics and adjust models if necessary.\"\n    ]\n  }\n}"
     }
   ],
-  "lastQuickCheck": "2026-04-03T00:29:08.776Z",
-  "lastDeepCheck": "2026-03-30T23:12:30.262Z",
-  "totalQuickChecks": 209,
-  "totalDeepChecks": 56
+  "lastQuickCheck": "2026-04-03T00:55:19.992Z",
+  "lastDeepCheck": "2026-04-03T01:04:19.990Z",
+  "totalQuickChecks": 210,
+  "totalDeepChecks": 57
 }

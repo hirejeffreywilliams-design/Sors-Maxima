@@ -1,5 +1,85 @@
 [
   {
+    "id": "alert-intl-sports-1775178462922",
+    "nodeId": "intl-sports",
+    "nodeLabel": "Intl Sports Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-03T01:07:42.922Z",
+    "diagnosis": "The 'Intl Sports Engine' node is cached likely due to a temporary loss of connectivity or data staleness, which means users may experience outdated information for international sports data.",
+    "recommendations": [
+      "Check the network connectivity to the data source for the Intl Sports Engine.",
+      "Verify API keys for any required external services to ensure they are valid and working.",
+      "Clear the cache manually and re-initialize the node to fetch fresh data."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-api-football-1775178461647",
+    "nodeId": "api-football",
+    "nodeLabel": "API-Football",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-03T01:07:41.647Z",
+    "diagnosis": "The 'API-Football' node is cached due to a temporary unavailability of real-time data, meaning users may experience delayed updates or stale data until the node returns to an active state.",
+    "recommendations": [
+      "Monitor the status of the 'API-Football' node for any changes to active.",
+      "Check the API connection settings and ensure that the API_FOOTBALL_KEY is valid and has not expired.",
+      "Review the recent API usage logs to identify any potential issues with data requests."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-center-1775177863636",
+    "nodeId": "odds-center",
+    "nodeLabel": "Odds Center",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-03T00:57:43.636Z",
+    "diagnosis": "The 'Odds Center' node is cached due to a temporary unavailability of real-time data, which means users may experience delays in accessing the latest betting odds.",
+    "recommendations": [
+      "Check the connection to the Odds API and verify that THE_ODDS_API_KEY is valid.",
+      "Review the API usage limits to ensure they're not exceeded, causing the cache status.",
+      "Consider implementing a fallback mechanism to provide users with the most recent cached odds while resolving the issue."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-mma-engine-1775177862288",
+    "nodeId": "mma-engine",
+    "nodeLabel": "MMA/UFC Engine",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-03T00:57:42.288Z",
+    "diagnosis": "The 'MMA/UFC Engine' node has changed status to 'cached' due to a temporary hold on real-time data updates, impacting the availability of live MMA/UFC data for users.",
+    "recommendations": [
+      "Check the connectivity with the data source for the MMA/UFC Engine.",
+      "Review the configuration settings and ensure all required APIs are properly authenticated.",
+      "Restart the MMA/UFC Engine node to attempt a refresh of the live data."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
+    "id": "alert-odds-api-1775177861180",
+    "nodeId": "odds-api",
+    "nodeLabel": "The Odds API",
+    "previousStatus": "live",
+    "currentStatus": "cached",
+    "triggeredAt": "2026-04-03T00:57:41.180Z",
+    "diagnosis": "The Odds API has been cached to improve response times and reduce load on the server, meaning users may experience slightly delayed updates to live betting lines until the cache is refreshed.",
+    "recommendations": [
+      "Monitor the cache validity and set appropriate expiration times to ensure timely updates.",
+      "Consider implementing a cache invalidation strategy based on events such as significant odds changes.",
+      "Regularly clear the cache during peak usage times to maintain accuracy in real-time betting information."
+    ],
+    "priority": "low",
+    "acknowledged": false
+  },
+  {
     "id": "alert-odds-center-1775169797991",
     "nodeId": "odds-center",
     "nodeLabel": "Odds Center",
