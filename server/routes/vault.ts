@@ -709,7 +709,7 @@ The collectible card system creates a unique retention mechanism that competitor
 
 | Scenario | ARR | Recommended Acquisition Price | Strategic Premium |
 |----------|-----|-------------------------------|------------------|
-| Pre-track-record (current) | $0 | $500K–$1.5M | Platform acquisition; technology asset |
+| Pre-track-record (current) | $0 | $2M–$15M | Technology/IP floor — 50+ engines, 8 trademarks, self-healing architecture |
 | 90-day track record, 100 members | $100K | $1M–$3M | Proven model with initial traction |
 | 1-year track record, 500 members | $500K | $3M–$8M | Demonstrated growth and model accuracy |
 | 2-year track record, 1,500 members | $1.5M | $10M–$20M | Scaling subscription business |
@@ -728,7 +728,7 @@ The collectible card system creates a unique retention mechanism that competitor
 
 In order of impact:
 
-1. **90-day verified pick track record** — The single most important variable. Unverified technology is worth $500K–$1.5M. Technology with a 90-day verified record showing >52.4% accuracy is worth $3M–$8M at equivalent scale.
+1. **90-day verified pick track record** — The single most important variable. Unverified technology floor is $2M–$15M. Technology with a 90-day verified record showing >52.4% accuracy is worth $3M–$8M at equivalent scale, compounding with scale.
 2. **First 100 paying members** — Proves product-market fit; eliminates the largest single risk flag for any acquirer
 3. **Monthly churn below 8%** — Shows retention mechanics (LCT, Intelligence Cards) are working
 4. **$50K+ MRR for 3+ months** — Demonstrates repeatable revenue, not a spike

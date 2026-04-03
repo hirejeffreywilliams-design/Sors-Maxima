@@ -124,6 +124,8 @@ const FoundersPage = lazy(() => import("@/pages/founders"));
 const AdminFounders = lazy(() => import("@/pages/admin-founders"));
 const AIAnalystPage = lazy(() => import("@/pages/ai-analyst"));
 const OwnerVault = lazy(() => import("@/pages/owner-vault"));
+const AdminEvaluation = lazy(() => import("@/pages/admin-evaluation"));
+const AdminInvestorPackage = lazy(() => import("@/pages/admin-investor-package"));
 
 function SSEStatusDot() {
   const sse = useSSEContext();
@@ -275,6 +277,8 @@ function AdminApp({ onLogout, authState }: { onLogout: () => void; authState: Au
               <Route path="/admin/platform-intelligence">{() => <AdminGuard component={PlatformIntelligencePage} authState={authState} />}</Route>
               <Route path="/admin/founders">{() => <AdminGuard component={AdminFounders} authState={authState} />}</Route>
               <Route path="/admin/owner-vault">{() => <AdminGuard component={OwnerVault} authState={authState} />}</Route>
+              <Route path="/admin/evaluation">{() => <AdminGuard component={AdminEvaluation} authState={authState} />}</Route>
+              <Route path="/admin/investor-package">{() => <AdminGuard component={AdminInvestorPackage} authState={authState} />}</Route>
               <Route component={NotFound} />
             </Switch>
           </Suspense>

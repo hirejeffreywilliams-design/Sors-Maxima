@@ -1,7 +1,7 @@
 # SORS MAXIMA — INVESTOR PITCH DECK
 
 **Confidential — For Qualified Investors and Strategic Acquirers Only**
-**March 2026**
+**April 2026**
 
 > *This document is the content layer of a pitch deck. Each section corresponds to one slide. Headlines, bullet points, and speaker notes are included for each slide. Designed for presentation to strategic acquirers (sportsbooks, media companies, entertainment companies) as the primary audience, with a secondary track for angel investors and VCs.*
 
@@ -71,7 +71,7 @@ Sors Maxima — Confidential
 - **50+ backend engines** running autonomously across prediction, learning, calibration, retention, fraud detection, analytics, and system health — with self-healing architecture and degraded-mode fallbacks
 - **8 common law trademarks** including 46-Factor Model Analysis™, Intelligence Cards™, Smart Retention Sequence Engine™, and Cashout Engineering™
 - **Data flywheel** — Every settled pick calibrates the model; more members generate more data, improving accuracy and strengthening the track record
-- **Replacement cost: $200K–$400K** (12–18 months of senior full-stack engineering to rebuild from scratch)
+- **Replacement cost: $500K–$800K** (18–24 months of senior full-stack engineering with ML expertise to rebuild from scratch)
 - **Composite maturity: 6.5/10** — Technology scores 9.0/10, but the business is at Day Zero with no revenue or track record. That gap is the opportunity.
 
 > **Speaker Note:** "This platform was built entirely by one founder. 50+ engines that schedule themselves, heal themselves, and monitor themselves. The maturity score is 6.5 out of 10 — the technology scores a 9, but the business is at Day Zero with no revenue and no track record yet. That gap is why this is an opportunity: you're buying the technology at pre-revenue pricing."
@@ -139,7 +139,7 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 **Deep technology where competitors have broad reach.**
 
-- **Action Network** (acquired ~$240M, ~$40M ARR): Built a media brand, not a technology platform — limited AI, no gamification
+- **Action Network → Better Collective (2021, ~$240M, ~6x ARR):** Built a media brand, not a technology platform — limited AI, no gamification, no self-calibrating model
 - **OddsJam** ($10M+ ARR est.): Strong +EV and arbitrage tools, but narrow focus limits TAM
 - **Unabated** ($5M+ ARR est.): CLV tools beloved by sharps, but high price limits casual adoption
 - Based on current market research, no competitor offers AI-graded picks with confidence %, Monte Carlo simulations, collectible gamification, daily AI-curated parlays, and a self-calibrating prediction model in a single platform
@@ -167,7 +167,7 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 **Pre-revenue, but the product is built.**
 
-- **Technology complete:** 50+ engines, 88 pages, Stripe billing, automated email lifecycle, Intelligence Cards™, LCT generation, 40+ admin dashboards, fraud detection, and responsible gambling compliance — all built and functional
+- **Technology complete:** 50+ engines, 88 pages, Stripe billing, automated email lifecycle, Intelligence Cards™, LCT generation, 40+ admin dashboards, fraud detection, responsible gambling compliance, Owner Identity system, 8-section acquisition brief, and print-ready investor package — all built and functional
 - **Test coverage:** 6 server test suites covering Monte Carlo, Quantum Fusion, settlement flow, tier gating, Stripe service, and sport seasons
 - **Pending — first paying member:** Product is ready to accept subscribers; Stripe needs to be switched from test to live mode
 - **Pending — 90-day verified track record:** Pick logging infrastructure is built and ready to record from Day 1 of operation
@@ -211,9 +211,8 @@ Sors Maxima operates in Layer 3 with the architecture to expand into Layer 2 (da
 
 **We are open to two paths: strategic acquisition or growth investment.**
 
-- **Path A — Strategic Acquisition ($500K–$1.5M):** A production-ready sports intelligence platform with 50+ engines, 8 trademarks, and complete subscriber infrastructure — ready to deploy against an existing audience
+- **Path A — Strategic Acquisition ($2M–$15M technology/IP floor, negotiable):** A production-ready sports intelligence platform with 50+ engines, 8 trademarks, and complete subscriber infrastructure — ready to deploy against an existing audience. Pre-revenue pricing reflects absence of track record; a 12-month performance history would meaningfully increase valuation.
 - **Ideal acquirer:** Sports media company, sportsbook, or data platform that wants premium AI intelligence as a subscriber product or B2B feed
-- **Why now:** Pre-revenue pricing reflects the absence of a proven track record; a 12-month verified performance history would meaningfully increase valuation
 - **Path B — Seed Investment ($250K–$500K):** 40% go-to-market, 25% native mobile app, 15% legal/trademark, 10% infrastructure scaling, 10% operating reserve
 - **What the investor gets:** Early equity in a technology-complete platform entering a market growing 20–25% annually, with a clear path to $1M+ ARR within 3 years
 

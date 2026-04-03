@@ -549,6 +549,14 @@ export default function AdminDashboard() {
     { href: "/admin/founders",           label: "Founders Program",        desc: "Manage the Founding 500 — launch, grant, revoke, and monitor slots", icon: Trophy },
   ];
 
+  const ownershipLinks = [
+    { href: "/admin#owner",          label: "Owner Panel",       desc: "Identity, ownership metrics, and exit quick-links", icon: UserCog },
+    { href: "/admin/owner-playbook", label: "Owner's Playbook",  desc: "Launch plan, operations, legal, and growth strategy", icon: BookOpen },
+    { href: "/admin/evaluation",     label: "Evaluation Report", desc: "Professional acquisition brief with 3 valuation methodologies", icon: BarChart2 },
+    { href: "/admin/investor-package", label: "Investor Package", desc: "Print-ready leave-behind for buyer and investor meetings", icon: Crown },
+    { href: "/admin/owner-vault",    label: "Owner Vault",       desc: "IP registry, technical architecture, valuation projections", icon: Lock },
+  ];
+
   const allToolSections = [
     {
       label: "Marketing & Growth",
@@ -954,6 +962,24 @@ export default function AdminDashboard() {
             ))}
           </div>
 
+          {/* Ownership & Exit */}
+          <div className="space-y-3" data-testid="section-ownership-exit">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-0.5">Ownership & Exit</p>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {ownershipLinks.map((link) => (
+                <Link key={link.href} href={link.href}>
+                  <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full border-primary/20 bg-primary/5" data-testid={`card-ownership-${link.label.replace(/\s+/g, '-').toLowerCase()}`}>
+                    <CardContent className="p-3 flex flex-col gap-1">
+                      <link.icon className="h-4 w-4 text-primary mb-1" />
+                      <p className="text-xs font-semibold leading-tight">{link.label}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{link.desc}</p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {/* All Admin Tools — organized by category */}
           <div className="space-y-4" data-testid="section-all-tools">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-0.5">All Admin Tools</p>
@@ -999,6 +1025,9 @@ export default function AdminDashboard() {
               </TabsTrigger>
               <TabsTrigger value="control-room" data-testid="tab-control-room">
                 <Gauge className="h-3.5 w-3.5 mr-1" />Control Room
+              </TabsTrigger>
+              <TabsTrigger value="owner" data-testid="tab-owner">
+                <Crown className="h-3.5 w-3.5 mr-1" />Owner
               </TabsTrigger>
             </TabsList>
 
@@ -1771,6 +1800,136 @@ export default function AdminDashboard() {
 
             <TabsContent value="control-room" className="space-y-4">
               <ControlRoomTab />
+            </TabsContent>
+
+            {/* ── Owner ── */}
+            <TabsContent value="owner" className="space-y-4" data-testid="tab-content-owner">
+
+              {/* Owner Identity Card */}
+              <Card className="border-primary/20 bg-gradient-to-r from-primary/5 via-background to-background">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-5 flex-wrap">
+                    <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
+                      <Crown className="w-7 h-7 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-lg font-bold text-foreground" data-testid="owner-name">Jeffrey</h2>
+                        <Badge className="bg-primary/15 text-primary border-primary/30 text-xs" variant="outline">Platform Owner</Badge>
+                        <Badge className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-xs" variant="outline">100% Ownership</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground" data-testid="owner-role">Founder & Sole Owner — Sors Maxima Sports Intelligence Platform</p>
+                      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground mt-2">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-3 w-3" />
+                          <span data-testid="owner-founding-date">Founded 2025</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <UserCog className="h-3 w-3" />
+                          <span>Role: Founder / Engineer / Operator</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Lock className="h-3 w-3" />
+                          <span>Admin access: Full</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 flex-wrap text-xs text-muted-foreground mt-1">
+                        <div className="flex items-center gap-1.5" data-testid="owner-contact">
+                          <Mail className="h-3 w-3" />
+                          <span>Contact: Via Sors Maxima platform contact form (sorsmaxima.com)</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Globe className="h-3 w-3" />
+                          <span>All investor inquiries handled directly by founder</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Ownership Snapshot */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="ownership-snapshot">
+                {[
+                  { label: "IP Assets", value: "8+", sub: "Common law trademarks", icon: Shield, color: "text-blue-400" },
+                  { label: "Engine Count", value: "50+", sub: "Autonomous backend engines", icon: Cpu, color: "text-primary" },
+                  { label: "Subscription Tiers", value: "5", sub: "Sharp / Edge / Max / Operator / Enterprise", icon: DollarSign, color: "text-emerald-400" },
+                  { label: "Est. Valuation Range", value: "$2M–$15M", sub: "Pre-revenue technology floor", icon: TrendingUp, color: "text-amber-400" },
+                ].map(({ label, value, sub, icon: Icon, color }) => (
+                  <Card key={label} className="bg-muted/20" data-testid={`card-ownership-metric-${label.replace(/\s+/g, '-').toLowerCase()}`}>
+                    <CardContent className="p-4 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Icon className={`h-3.5 w-3.5 ${color} shrink-0`} />
+                        <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+                      </div>
+                      <p className="text-lg font-bold text-foreground">{value}</p>
+                      <p className="text-[10px] text-muted-foreground leading-tight">{sub}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Quick Links */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {ownershipLinks.map((link) => (
+                  <Link key={link.href} href={link.href}>
+                    <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full border-primary/20" data-testid={`card-owner-link-${link.label.replace(/\s+/g, '-').toLowerCase()}`}>
+                      <CardContent className="p-3 flex flex-col gap-1.5">
+                        <link.icon className="h-4 w-4 text-primary" />
+                        <p className="text-xs font-semibold leading-tight">{link.label}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{link.desc}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Platform Status for Owner */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Activity className="h-4 w-4 text-primary" />
+                    Platform Ownership Status
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-muted-foreground">
+                    <div className="space-y-2">
+                      <p className="font-semibold text-foreground text-sm">What You Own</p>
+                      {[
+                        "100% equity in Sors Maxima platform and codebase",
+                        "All 8 common law trademarks (recommend formal USPTO filing)",
+                        "The proprietary 46-Factor Model architecture and weights (trade secrets)",
+                        "Intelligence Cards™ system design and gamification mechanics",
+                        "All subscriber data and pick history records",
+                        "Full-stack codebase — copyright by default under U.S. law",
+                      ].map((item) => (
+                        <div key={item} className="flex items-start gap-1.5">
+                          <CheckCircle className="h-3 w-3 text-primary shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-semibold text-foreground text-sm">Next Steps to Protect Value</p>
+                      {[
+                        "File USPTO trademark for 'Sors Maxima' (priority)",
+                        "File USPTO trademark for 'Life Changer Ticket' (priority)",
+                        "Form LLC — establishes legal entity for all IP ownership",
+                        "Copyright registration for the codebase (strengthens enforcement)",
+                        "Document 46-factor weights as trade secrets in any NDA",
+                        "Switch Stripe to Live Mode before first paying member",
+                      ].map((item) => (
+                        <div key={item} className="flex items-start gap-1.5">
+                          <ChevronRight className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
             </TabsContent>
 
           </Tabs>
