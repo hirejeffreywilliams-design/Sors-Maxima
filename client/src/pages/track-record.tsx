@@ -99,6 +99,58 @@ function WinRatePill({ rate }: { rate: number | null }) {
   return <span className={`font-bold tabular-nums ${color}`}>{rate.toFixed(1)}%</span>;
 }
 
+function ReliabilityDiagram({ tiers }: { tiers: CalibrationTier[] }) {
+  const points = tiers.filter(t => t.settled >= 5 && t.actualWinRate !== null);
+  if (points.length === 0) return null;
+  const W = 200, H = 160, PAD = 28;
+  const inner = { w: W - PAD * 2, h: H - PAD * 2 };
+  const toX = (v: number) => PAD + (v / 100) * inner.w;
+  const toY = (v: number) => PAD + ((100 - v) / 100) * inner.h;
+  const ticks = [50, 60, 70, 80, 90, 100];
+  return (
+    <div className="mt-4 pt-3 border-t border-border/40" data-testid="reliability-diagram">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Reliability Diagram</p>
+      <div className="flex items-start gap-4">
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-44 shrink-0" aria-label="Calibration reliability diagram">
+          {ticks.map(t => (
+            <React.Fragment key={t}>
+              <line x1={toX(t)} y1={PAD} x2={toX(t)} y2={H - PAD} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
+              <line x1={PAD} y1={toY(t)} x2={W - PAD} y2={toY(t)} stroke="currentColor" strokeOpacity={0.08} strokeWidth={1} />
+              <text x={toX(t)} y={H - 6} textAnchor="middle" fontSize={7} fill="currentColor" fillOpacity={0.4}>{t}</text>
+              <text x={8} y={toY(t) + 2.5} textAnchor="middle" fontSize={7} fill="currentColor" fillOpacity={0.4}>{t}</text>
+            </React.Fragment>
+          ))}
+          <line x1={toX(50)} y1={toY(50)} x2={toX(100)} y2={toY(100)} stroke="hsl(var(--primary))" strokeOpacity={0.25} strokeWidth={1} strokeDasharray="3 2" />
+          {points.map((tier, i) => {
+            const x = toX(tier.modelAvgConfidence);
+            const y = toY(tier.actualWinRate!);
+            const isCalibrated = Math.abs(tier.calibrationGap ?? 0) <= 5;
+            return (
+              <React.Fragment key={i}>
+                <circle cx={x} cy={y} r={5} fill={isCalibrated ? "hsl(var(--chart-2))" : "hsl(var(--destructive))"} fillOpacity={0.8} />
+                <text x={x} y={y - 7} textAnchor="middle" fontSize={7} fill="currentColor" fillOpacity={0.6}>{tier.label}</text>
+              </React.Fragment>
+            );
+          })}
+        </svg>
+        <div className="space-y-1.5 text-[10px] text-muted-foreground pt-1">
+          <p className="font-semibold text-foreground text-xs">Predicted vs Actual</p>
+          <p>Each dot = one confidence tier</p>
+          <p>Dots on the dashed line = perfect calibration</p>
+          <div className="flex items-center gap-1.5 mt-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 shrink-0" />
+            <span>Within ±5% (calibrated)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-destructive/80 shrink-0" />
+            <span>Outside ±5% (drift)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function CalibrationBar({ tier }: { tier: CalibrationTier }) {
   const modelPct = tier.modelAvgConfidence;
   const actualPct = tier.actualWinRate ?? 0;
@@ -498,6 +550,7 @@ export default function TrackRecordPage() {
               {data.calibrationTiers.filter(t => t.total > 0).map((tier) => (
                 <CalibrationBar key={tier.label} tier={tier} />
               ))}
+              <ReliabilityDiagram tiers={data.calibrationTiers} />
             </div>
             <div className="mt-4 pt-3 border-t border-border/40 flex items-center gap-4 text-[10px] text-muted-foreground">
               <div className="flex items-center gap-1.5">

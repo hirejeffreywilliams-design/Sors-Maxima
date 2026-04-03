@@ -813,6 +813,22 @@ function NavCustomizerSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
+function FloatingSlipButton() {
+  const { legCount, setMobileOpen } = useParlaySlip();
+  if (legCount === 0) return null;
+  return (
+    <button
+      onClick={() => setMobileOpen(true)}
+      className="sm:hidden fixed bottom-[72px] right-4 z-50 flex items-center gap-1.5 px-3 py-2 rounded-full shadow-lg bg-primary text-primary-foreground text-xs font-bold"
+      data-testid="button-floating-slip"
+      aria-label={`Open bet slip (${legCount} legs)`}
+    >
+      <Ticket className="w-3.5 h-3.5" />
+      <span>Slip ({legCount})</span>
+    </button>
+  );
+}
+
 const FIXED_BOTTOM_TABS = [
   { href: "/", icon: Zap, label: "Home", testId: "bottom-nav-home" },
   { href: "/daily", icon: Calendar, label: "Picks", testId: "bottom-nav-picks" },
@@ -1224,6 +1240,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
 
         <ParlaySlipDrawer />
+        <FloatingSlipButton />
         <BottomNav onOpenMenu={() => setMobileMenuOpen(true)} />
       </ParlaySlipProvider>
 

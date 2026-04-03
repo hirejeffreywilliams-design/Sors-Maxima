@@ -42914,12 +42914,52 @@
       "homeScore": 6,
       "awayScore": 3,
       "settledAt": "2026-04-03T00:28:41.480Z"
+    },
+    {
+      "id": "precomp-NHL-401803564-moneyline-c9855facdf",
+      "gameId": "401803564",
+      "sport": "NHL",
+      "game": "Buffalo Sabres @ Washington Capitals",
+      "homeTeam": "Washington Capitals",
+      "awayTeam": "Buffalo Sabres",
+      "pick": "Washington Capitals ML",
+      "betType": "moneyline",
+      "odds": 119,
+      "grade": "C+",
+      "confidence": 52,
+      "ev": 22.64,
+      "gameTime": "2026-04-04T23:00Z",
+      "savedAt": "2026-04-03T00:38:05.705Z",
+      "result": "won",
+      "homeScore": 4,
+      "awayScore": 3,
+      "settledAt": "2026-04-03T00:39:12.334Z"
+    },
+    {
+      "id": "precomp-NHL-401803565-total-fafcbef4cd",
+      "gameId": "401803565",
+      "sport": "NHL",
+      "game": "New York Islanders @ Carolina Hurricanes",
+      "homeTeam": "Carolina Hurricanes",
+      "awayTeam": "New York Islanders",
+      "pick": "Over 6",
+      "betType": "total",
+      "odds": -110,
+      "grade": "B-",
+      "confidence": 52,
+      "ev": 16.45,
+      "gameTime": "2026-04-04T23:00Z",
+      "savedAt": "2026-04-03T00:38:05.705Z",
+      "result": "won",
+      "homeScore": 4,
+      "awayScore": 3,
+      "settledAt": "2026-04-03T00:39:12.334Z"
     }
   ],
   "stats": {
     "overall": {
-      "total": 2071,
-      "won": 1157,
+      "total": 2073,
+      "won": 1159,
       "lost": 871,
       "push": 43,
       "rate": 55.9,
@@ -42932,9 +42972,9 @@
         "rate": 56.7
       },
       "NHL": {
-        "total": 700,
-        "won": 361,
-        "rate": 51.6
+        "total": 702,
+        "won": 363,
+        "rate": 51.7
       },
       "NCAAB": {
         "total": 461,
@@ -42959,14 +42999,14 @@
         "rate": 62.9
       },
       "B-": {
-        "total": 427,
-        "won": 234,
-        "rate": 54.8
+        "total": 428,
+        "won": 235,
+        "rate": 54.9
       },
       "C+": {
-        "total": 396,
-        "won": 240,
-        "rate": 60.6
+        "total": 397,
+        "won": 241,
+        "rate": 60.7
       },
       "D+": {
         "total": 146,
@@ -43006,10 +43046,10 @@
     },
     "byMarket": {
       "Moneyline": {
-        "total": 655,
-        "won": 370,
-        "rate": 56.5,
-        "roi": 16.6
+        "total": 656,
+        "won": 371,
+        "rate": 56.6,
+        "roi": 16.8
       },
       "Spread": {
         "total": 680,
@@ -43018,10 +43058,10 @@
         "roi": 7.2
       },
       "Total": {
-        "total": 665,
-        "won": 378,
-        "rate": 56.8,
-        "roi": 11.6
+        "total": 666,
+        "won": 379,
+        "rate": 56.9,
+        "roi": 11.7
       },
       "Team Total": {
         "total": 71,
@@ -43031,28 +43071,28 @@
       }
     },
     "recentForm": {
-      "won": 29,
-      "lost": 21,
+      "won": 30,
+      "lost": 20,
       "push": 0,
-      "rate": 58
+      "rate": 60
     },
-    "lastUpdated": "2026-04-03T00:30:58.232Z",
-    "roi": 11.6,
+    "lastUpdated": "2026-04-03T00:39:12.339Z",
+    "roi": 11.7,
     "brierScore": 0.2491,
     "maxDrawdown": 15.4,
-    "sharpeRatio": 0.1,
+    "sharpeRatio": 0.101,
     "homeAwayBias": {
       "homeWinRate": 58.1,
       "awayWinRate": 46.1,
-      "homeTotal": 1135,
+      "homeTotal": 1136,
       "awayTotal": 178
     },
     "calibrationBuckets": [
       {
         "range": "50-55",
         "predicted": 53,
-        "actual": 58.2,
-        "total": 361
+        "actual": 58.4,
+        "total": 363
       },
       {
         "range": "55-60",
