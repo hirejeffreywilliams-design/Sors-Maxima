@@ -1668,3 +1668,31 @@ export type OddsSnapshot = typeof oddsSnapshots.$inferSelect;
 export const insertTaxRecordSchema = createInsertSchema(taxRecords).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertTaxRecord = z.infer<typeof insertTaxRecordSchema>;
 export type TaxRecord = typeof taxRecords.$inferSelect;
+
+// ─── AI Usage Tracking ──────────────────────────────────────────────────────
+export const aiUsage = pgTable("ai_usage", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  date: varchar("date", { length: 10 }).notNull(),
+  messageCount: integer("message_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAiUsageSchema = createInsertSchema(aiUsage).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertAiUsage = z.infer<typeof insertAiUsageSchema>;
+export type AiUsage = typeof aiUsage.$inferSelect;
+
+// ─── AI Session Context (tracks recommendations + game refs for live monitoring) ─
+export const aiSessionContext = pgTable("ai_session_context", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  sessionDate: varchar("session_date", { length: 10 }).notNull(),
+  recommendations: jsonb("recommendations").default([]).notNull(),
+  gameIds: text("game_ids").array().default([]).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+});
+
+export const insertAiSessionContextSchema = createInsertSchema(aiSessionContext).omit({ id: true, lastUpdated: true });
+export type InsertAiSessionContext = z.infer<typeof insertAiSessionContextSchema>;
+export type AiSessionContext = typeof aiSessionContext.$inferSelect;

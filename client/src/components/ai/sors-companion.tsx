@@ -4,9 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   X, Send, Maximize2, Zap,
   TrendingUp, BarChart3, Target, Brain, AlertTriangle, Radio,
+  Crown, Lock, ArrowRight, Activity, Sparkles,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,6 +18,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  isLiveUpdate?: boolean;
 }
 
 interface OrchestratorAlert {
@@ -26,6 +29,37 @@ interface OrchestratorAlert {
   previewLine: string;
   timestamp: string;
 }
+
+interface AiUsageData {
+  current: number;
+  limit: number | null;
+  tier: string;
+}
+
+const TIER_DISPLAY: Record<string, string> = {
+  free: "Free",
+  pro: "Sharp",
+  elite: "Edge",
+  whale: "Max",
+};
+
+const NEXT_TIER_INFO: Record<string, { display: string; price: string; benefits: string[] }> = {
+  free: {
+    display: "Sharp",
+    price: "$49/mo",
+    benefits: ["15 messages/day", "Pick context injected", "Live data summaries"],
+  },
+  pro: {
+    display: "Edge",
+    price: "$99/mo",
+    benefits: ["50 messages/day", "Full analyst context", "Strategy tools & parlay math"],
+  },
+  elite: {
+    display: "Max",
+    price: "$249/mo",
+    benefits: ["Unlimited messages", "Monte Carlo output", "Sharp money signals & live monitoring"],
+  },
+};
 
 const WELCOME_MESSAGE: Message = {
   id: "welcome",
@@ -78,13 +112,97 @@ function TypingIndicator() {
   );
 }
 
+function UsageMeter({ usage }: { usage: AiUsageData }) {
+  if (!usage || usage.limit === null) {
+    return (
+      <div className="flex items-center gap-2 px-1">
+        <Crown className="w-3 h-3 text-amber-400 shrink-0" />
+        <span className="text-[10px] text-amber-400 font-semibold">Max — Unlimited messages</span>
+      </div>
+    );
+  }
+
+  const pct = Math.min(100, (usage.current / usage.limit) * 100);
+  const remaining = usage.limit - usage.current;
+  const tierDisplay = TIER_DISPLAY[usage.tier] || usage.tier;
+  const isNearLimit = remaining <= 1;
+  const isAtLimit = remaining <= 0;
+
+  return (
+    <div className="space-y-1 px-1" data-testid="ai-usage-meter">
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] text-white/35 font-semibold uppercase tracking-wider">
+          {tierDisplay} Plan
+        </span>
+        <span className={`text-[9px] font-bold ${isAtLimit ? "text-red-400" : isNearLimit ? "text-orange-400" : "text-white/40"}`}>
+          {isAtLimit ? "Limit reached" : `${usage.current} of ${usage.limit} today`}
+        </span>
+      </div>
+      <Progress
+        value={pct}
+        className="h-1"
+        style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
+      />
+    </div>
+  );
+}
+
+function UpgradeCard({ tier }: { tier: string }) {
+  const nextTier = NEXT_TIER_INFO[tier];
+  if (!nextTier) return null;
+
+  return (
+    <div
+      className="mx-1 p-3 rounded-xl"
+      style={{
+        background: "linear-gradient(135deg, rgba(240,83,43,0.12) 0%, rgba(245,158,11,0.08) 100%)",
+        border: "1px solid rgba(240,83,43,0.3)",
+      }}
+      data-testid="ai-upgrade-card"
+    >
+      <div className="flex items-start gap-2.5">
+        <div className="w-8 h-8 rounded-lg bg-orange-500/15 flex items-center justify-center shrink-0">
+          <Lock className="w-3.5 h-3.5 text-orange-400" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-bold text-white/90 mb-0.5">
+            Daily limit reached
+          </p>
+          <p className="text-[10px] text-white/50 mb-2">
+            Upgrade to {nextTier.display} for more messages and deeper analysis.
+          </p>
+          <div className="space-y-1 mb-2.5">
+            {nextTier.benefits.map((b, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <span className="w-1 h-1 rounded-full bg-orange-400 shrink-0" />
+                <span className="text-[9px] text-white/60">{b}</span>
+              </div>
+            ))}
+          </div>
+          <Link href="/pricing">
+            <Button
+              size="sm"
+              className="h-7 text-[10px] font-bold gap-1 w-full"
+              style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)", border: "none" }}
+              data-testid="button-ai-upgrade"
+            >
+              <Sparkles className="w-3 h-3" />
+              Upgrade to {nextTier.display} — {nextTier.price}
+              <ArrowRight className="w-3 h-3" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Singleton ref so AIRecommendationPanel can open companion with context
 let _companionSendRef: ((text: string) => void) | null = null;
 let _companionOpenRef: (() => void) | null = null;
 
 export function openSorsCompanionWithContext(message: string): void {
   if (_companionOpenRef) _companionOpenRef();
-  // Small delay to allow drawer to render before sending
   setTimeout(() => {
     if (_companionSendRef) _companionSendRef(message);
   }, 200);
@@ -98,11 +216,28 @@ export function SorsCompanion() {
   const [showTooltip, setShowTooltip] = useState(true);
   const [orchestratorAlert, setOrchestratorAlert] = useState<OrchestratorAlert | null>(null);
   const [seenAlertIds, setSeenAlertIds] = useState<Set<string>>(new Set());
+  const [limitReached, setLimitReached] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
-  // Turbo mode proactive check-in: poll status every 30s, alert if newly active
+  // ── Fetch usage data ───────────────────────────────────────────────────────
+  const { data: usageData, refetch: refetchUsage } = useQuery<AiUsageData>({
+    queryKey: ["/api/ai/usage"],
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+
+  // Detect limit from usage data
+  useEffect(() => {
+    if (usageData && usageData.limit !== null) {
+      setLimitReached(usageData.current >= usageData.limit);
+    } else {
+      setLimitReached(false);
+    }
+  }, [usageData]);
+
+  // ── Turbo mode proactive check-in ──────────────────────────────────────────
   const { data: turboStatus } = useQuery<{ active: boolean; activeGameCount: number }>({
     queryKey: ["/api/ai/turbo-status"],
     refetchInterval: 30_000,
@@ -135,7 +270,7 @@ export function SorsCompanion() {
     wasTurboActive.current = turboStatus.active;
   }, [turboStatus]);
 
-  // Subscribe to SSE stream for companion_alert events (orchestrator proactive alerts)
+  // ── Subscribe to SSE for companion_alert events ────────────────────────────
   useEffect(() => {
     let es: EventSource | null = null;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -152,9 +287,27 @@ export function SorsCompanion() {
             setSeenAlertIds(prev => new Set([...prev, data.id]));
             setOrchestratorAlert(data);
             if (!open) setHasUnread(true);
-            // Also invalidate context data so companion has fresh picks
             queryClient.invalidateQueries({ queryKey: ["/api/ai/analyst/context"] });
           }
+        } catch { /* ignore parse errors */ }
+      });
+
+      // ── Max-tier live update events ────────────────────────────────────────
+      es.addEventListener("ai_live_update", (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data) as { message: string; gameRef?: string };
+          const now = Date.now();
+          setMessages(prev => [
+            ...prev,
+            {
+              id: `live-${now}`,
+              role: "assistant",
+              content: data.message,
+              timestamp: new Date(),
+              isLiveUpdate: true,
+            },
+          ]);
+          if (!open) setHasUnread(true);
         } catch { /* ignore parse errors */ }
       });
 
@@ -176,7 +329,6 @@ export function SorsCompanion() {
 
   const hasPlatformAlert = orchestratorAlert !== null && !open;
 
-  // On open: clear unread and dismiss orchestrator alert
   useEffect(() => {
     if (open) {
       setHasUnread(false);
@@ -185,12 +337,10 @@ export function SorsCompanion() {
     }
   }, [open]);
 
-  // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Dismiss tooltip after 8s
   useEffect(() => {
     const timer = setTimeout(() => setShowTooltip(false), 8000);
     return () => clearTimeout(timer);
@@ -200,10 +350,13 @@ export function SorsCompanion() {
     mutationFn: async (payload: { role: "user" | "assistant"; content: string }[]) => {
       const res = await apiRequest("POST", "/api/ai/analyst", { messages: payload });
       if (!res.ok) {
-        const err = await res.json() as { error?: string };
+        const err = await res.json() as { error?: string; limit?: number; current?: number; tier?: string; nextTier?: any };
+        if (err.error === "daily_limit_reached") {
+          throw Object.assign(new Error(err.error), { isLimitError: true, tier: err.tier });
+        }
         throw new Error(err.error ?? "Request failed");
       }
-      return res.json() as Promise<{ response: string }>;
+      return res.json() as Promise<{ response: string; usage?: AiUsageData }>;
     },
     onSuccess: (data) => {
       const assistantMsg: Message = {
@@ -214,8 +367,21 @@ export function SorsCompanion() {
       };
       setMessages(prev => [...prev, assistantMsg]);
       if (!open) setHasUnread(true);
+
+      // Update usage state from response
+      if (data.usage) {
+        queryClient.setQueryData(["/api/ai/usage"], data.usage);
+        if (data.usage.limit !== null && data.usage.current >= data.usage.limit) {
+          setLimitReached(true);
+        }
+      }
     },
-    onError: (err: Error) => {
+    onError: (err: any) => {
+      if (err.isLimitError) {
+        setLimitReached(true);
+        refetchUsage();
+        return;
+      }
       const isCapacity = err.message.includes("capacity") || err.message.includes("503") || err.message.includes("429");
       setMessages(prev => [
         ...prev,
@@ -233,7 +399,7 @@ export function SorsCompanion() {
 
   const sendMessage = useCallback((text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || chatMutation.isPending) return;
+    if (!trimmed || chatMutation.isPending || limitReached) return;
 
     const userMsg: Message = {
       id: Date.now().toString(),
@@ -247,12 +413,12 @@ export function SorsCompanion() {
 
     const payload = updated
       .filter(m => m.id !== "welcome")
+      .filter(m => !m.isLiveUpdate)
       .map(m => ({ role: m.role, content: m.content }));
 
     chatMutation.mutate(payload);
-  }, [messages, chatMutation]);
+  }, [messages, chatMutation, limitReached]);
 
-  // Register singleton refs so openSorsCompanionWithContext() can drive this instance
   useEffect(() => {
     _companionSendRef = sendMessage;
     _companionOpenRef = () => setOpen(true);
@@ -355,7 +521,6 @@ export function SorsCompanion() {
       </div>
 
       {/* ── Right-side Slide-in Drawer ─────────────────────────────────── */}
-      {/* Backdrop */}
       {open && (
         <div
           className="fixed inset-0 z-[58] bg-black/30 backdrop-blur-[2px]"
@@ -364,7 +529,6 @@ export function SorsCompanion() {
         />
       )}
 
-      {/* Drawer panel */}
       <div
         className="fixed top-0 right-0 bottom-0 z-[59] flex flex-col transition-transform duration-300 ease-out"
         style={{
@@ -378,7 +542,7 @@ export function SorsCompanion() {
       >
         {/* Drawer header */}
         <div
-          className="flex items-center justify-between px-5 py-4 shrink-0"
+          className="flex items-center justify-between px-5 py-3 shrink-0"
           style={{ borderBottom: "1px solid rgba(240,83,43,0.15)" }}
         >
           <div className="flex items-center gap-3">
@@ -422,6 +586,16 @@ export function SorsCompanion() {
           </div>
         </div>
 
+        {/* Usage meter */}
+        {usageData && (
+          <div
+            className="px-4 py-2 shrink-0"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+          >
+            <UsageMeter usage={usageData} />
+          </div>
+        )}
+
         {/* Messages */}
         <ScrollArea className="flex-1 min-h-0">
           <div className="p-4 space-y-3">
@@ -430,19 +604,37 @@ export function SorsCompanion() {
                 {msg.role === "assistant" && (
                   <div
                     className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}
+                    style={{
+                      background: msg.isLiveUpdate
+                        ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                        : "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)",
+                    }}
                   >
-                    <Zap className="w-3.5 h-3.5 text-white" />
+                    {msg.isLiveUpdate ? (
+                      <Activity className="w-3.5 h-3.5 text-white" />
+                    ) : (
+                      <Zap className="w-3.5 h-3.5 text-white" />
+                    )}
                   </div>
                 )}
                 <div
                   className={`px-3.5 py-2.5 rounded-2xl max-w-[85%] ${msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
                   style={msg.role === "user"
                     ? { background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.1)" }
-                    : { background: "rgba(240,83,43,0.1)", border: "1px solid rgba(240,83,43,0.16)" }
+                    : msg.isLiveUpdate
+                      ? { background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.25)" }
+                      : { background: "rgba(240,83,43,0.1)", border: "1px solid rgba(240,83,43,0.16)" }
                   }
                   data-testid={`companion-msg-${msg.role}-${msg.id}`}
                 >
+                  {msg.isLiveUpdate && (
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"
+                      />
+                      <span className="text-[9px] font-black uppercase tracking-wider text-green-400">Live Update</span>
+                    </div>
+                  )}
                   <p className="text-[12px] leading-relaxed text-white/90 whitespace-pre-wrap">
                     {formatMessage(msg.content)}
                   </p>
@@ -465,7 +657,8 @@ export function SorsCompanion() {
                       <button
                         key={qp.label}
                         onClick={() => sendMessage(qp.prompt)}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        disabled={limitReached}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
                         data-testid={`companion-quick-${qp.label.replace(/\s+/g, "-").toLowerCase()}`}
                       >
@@ -478,7 +671,11 @@ export function SorsCompanion() {
               </div>
             )}
 
-            {/* Bottom scroll anchor */}
+            {/* Upgrade card when limit is reached */}
+            {limitReached && usageData && (
+              <UpgradeCard tier={usageData.tier} />
+            )}
+
             <div ref={bottomRef} />
           </div>
         </ScrollArea>
@@ -499,35 +696,45 @@ export function SorsCompanion() {
           className="px-4 pb-4 pt-2.5 shrink-0"
           style={{ borderTop: "1px solid rgba(240,83,43,0.1)" }}
         >
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about picks, EV, Kelly sizing…"
-              disabled={chatMutation.isPending}
-              className="flex-1 h-10 text-[12px] bg-white/5 border-white/10 focus:border-orange-500/40 placeholder:text-white/25 text-white/90 rounded-xl"
-              data-testid="input-companion-message"
-            />
-            <Button
-              size="sm"
-              onClick={() => sendMessage(input)}
-              disabled={chatMutation.isPending || !input.trim()}
-              className="h-10 w-10 p-0 rounded-xl shrink-0"
-              style={{
-                background: input.trim() ? "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" : "rgba(255,255,255,0.07)",
-                border: "none",
-              }}
-              data-testid="button-companion-send"
+          {limitReached ? (
+            <div
+              className="flex items-center gap-2 h-10 px-3 rounded-xl text-[11px] text-white/35"
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
             >
-              {chatMutation.isPending ? (
-                <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-              ) : (
-                <Send className="w-3.5 h-3.5 text-white" />
-              )}
-            </Button>
-          </div>
+              <Lock className="w-3 h-3 shrink-0" />
+              <span>Daily limit reached — upgrade for more messages</span>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Input
+                ref={inputRef}
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask about picks, EV, Kelly sizing…"
+                disabled={chatMutation.isPending || limitReached}
+                className="flex-1 h-10 text-[12px] bg-white/5 border-white/10 focus:border-orange-500/40 placeholder:text-white/25 text-white/90 rounded-xl"
+                data-testid="input-companion-message"
+              />
+              <Button
+                size="sm"
+                onClick={() => sendMessage(input)}
+                disabled={chatMutation.isPending || !input.trim() || limitReached}
+                className="h-10 w-10 p-0 rounded-xl shrink-0"
+                style={{
+                  background: input.trim() && !limitReached ? "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" : "rgba(255,255,255,0.07)",
+                  border: "none",
+                }}
+                data-testid="button-companion-send"
+              >
+                {chatMutation.isPending ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-3.5 h-3.5 text-white" />
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

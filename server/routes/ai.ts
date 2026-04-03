@@ -7,59 +7,128 @@ import { generateIntelligenceFeed } from "../unifiedIntelligenceHub";
 import { buildAnalystContext, getActivePicks } from "../analystContextBuilder";
 import { querySimulationAgent, isSimulationQuery, getNewSimulationFactors } from "../monteCarloVerticalAgent";
 import { getOverdriveStatus, getSimulationDepthForGame, getSimulationTier, formatSimCount } from "../overdriveEngine";
+import { stripeService } from "../stripeService";
+import {
+  checkAiUsageLimit,
+  incrementAiUsage,
+  upsertSessionContext,
+  getSessionContext,
+  TIER_DAILY_LIMITS,
+} from "../aiUsageService";
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
 
-// Internal AI routes — admin and system use only.
-// These endpoints power backend intelligence, admin analysis, and system diagnostics.
-// /api/ai/analyst is open to ALL authenticated users (no tier gate).
+// ─── Tier capability descriptions for upgrade prompts ─────────────────────────
+const NEXT_TIER_BENEFITS: Record<string, { tier: string; display: string; price: string; benefits: string[] }> = {
+  free: {
+    tier: "pro",
+    display: "Sharp",
+    price: "$49/mo",
+    benefits: ["15 messages/day", "Pick context injected", "Live data summaries", "Kelly sizing advice"],
+  },
+  pro: {
+    tier: "elite",
+    display: "Edge",
+    price: "$99/mo",
+    benefits: ["50 messages/day", "Full analyst context", "Strategy tools", "Parlay math engine"],
+  },
+  elite: {
+    tier: "whale",
+    display: "Max",
+    price: "$249/mo",
+    benefits: ["Unlimited messages", "Monte Carlo output", "Sharp money signals", "Live game monitoring", "Proactive alerts"],
+  },
+};
 
-export function registerAiRoutes(app: Express): void {
+// ─── Helper: get user tier from session ──────────────────────────────────────
+async function getUserTier(req: any): Promise<{ tier: string; userId: number | null }> {
+  if (req.session?.isAdmin) return { tier: "whale", userId: null };
 
-  // ── POST /api/ai/analyst ───────────────────────────────────────────────────
-  // Sports betting AI companion for ALL authenticated users (no tier gate).
-  // Accepts a conversation history, assembles rich platform context via
-  // buildAnalystContext(), injects joint probability for parlay queries,
-  // and returns a GPT-4o response.
-  app.post("/api/ai/analyst", requireAuth, async (req, res) => {
-    const { messages } = req.body as {
-      messages: { role: "user" | "assistant"; content: string }[];
-    };
+  const username = req.session?.username;
+  const userId = req.session?.userId ? parseInt(req.session.userId as string) : null;
 
-    if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({ error: "messages array required" });
+  if (!username) return { tier: "free", userId: null };
+
+  try {
+    const sub = await stripeService.getUserSubscription(username);
+    return { tier: sub?.subscriptionTier || "free", userId };
+  } catch {
+    return { tier: "free", userId };
+  }
+}
+
+// ─── Helper: extract game IDs mentioned in a message ─────────────────────────
+function extractGameRefs(text: string): string[] {
+  const patterns = [
+    /\b([A-Z][a-z]+ vs\.? [A-Z][a-z]+)\b/g,
+    /game[_\s-]?id[:\s=]+([a-zA-Z0-9_-]+)/gi,
+  ];
+  const refs: string[] = [];
+  for (const pat of patterns) {
+    let m;
+    while ((m = pat.exec(text)) !== null) {
+      refs.push(m[1]);
     }
+  }
+  return refs;
+}
 
-    const openai = createOpenAIClient();
-    if (!openai) return res.status(503).json({ error: "AI service unavailable" });
+// ─── Build tier-differentiated system prompt ──────────────────────────────────
+async function buildTieredSystemPrompt(
+  tier: string,
+  userId: number | null,
+  messages: { role: string; content: string }[],
+): Promise<string> {
+  const ctx = await buildAnalystContext(userId?.toString(), messages);
 
-    const userId = req.session?.userId;
-
-    // ── Route to Simulation Specialist if query is simulation-related ────────
-    if (isSimulationQuery(messages[messages.length - 1]?.content || "")) {
-      const simResponse = await querySimulationAgent(messages, userId);
-      if (simResponse) {
-        return res.json({ response: simResponse.response, handledBy: simResponse.handledBy });
-      }
-      // Fall through to main analyst if simulation agent is unavailable
-    }
-
-    // ── Build token-budgeted platform context ───────────────────────────────
-    const ctx = await buildAnalystContext(userId, messages);
-
-    const systemPrompt = `${ctx.standardsContext}
-
-You are SORS Intelligence — the official AI analyst of Sors Maxima, a members-only sports betting intelligence platform. You speak directly to a member.
+  const baseIdentity = `You are SORS Intelligence — the official AI analyst of Sors Maxima, a members-only sports betting intelligence platform. You speak directly to a member.
 
 Your expertise:
 - Sports betting: moneylines, spreads, totals, props, parlays (NBA, NFL, MLB, NHL, NCAAB, NCAAF, MMA, Soccer)
 - Kelly criterion & fractional Kelly for bankroll sizing
 - Expected Value (EV) calculation and interpretation
 - Joint probability and parlay correlation risks (ALWAYS compute and warn)
-- Line movement, closing line value (CLV), sharp money signals
+- Line movement, closing line value (CLV), sharp money signals`;
+
+  if (tier === "free") {
+    return `${ctx.standardsContext}
+
+${baseIdentity}
+
+You are operating in FREE tier mode. Provide general betting education only — no specific pick recommendations, no live data, no platform pick context. Focus on concepts, rules, and educational content.
+
+Core rules you ALWAYS follow:
+1. RESPONSIBLE GAMBLING: Always include: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
+2. SCOPE: Sports betting education only — explain concepts but do not reference live picks.
+3. UPGRADE NUDGE: When relevant, mention that Sharp tier unlocks pick context and live data.
+4. CONCISE: Be helpful and educational.`;
+  }
+
+  if (tier === "pro") {
+    return `${ctx.standardsContext}
+
+${baseIdentity}
+- Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick
+
+=== ACTIVE PICKS (TODAY) ===
+${ctx.activePicsBlock}
+
+=== USER BANKROLL PROFILE ===
+${ctx.bankrollBlock}
+
+Core rules you ALWAYS follow:
+1. JOINT PROBABILITY: When a user asks about parlays, ALWAYS show the math.
+2. KELLY SIZING: Always recommend quarter-Kelly (Kelly × 0.25) as the maximum.
+3. RESPONSIBLE GAMBLING: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
+4. DATA GROUNDED: Reference actual picks from context above.
+5. CONCISE: Be precise and data-rich.`;
+  }
+
+  if (tier === "elite") {
+    return `${ctx.standardsContext}
+
+${baseIdentity}
 - Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick (46 original + 5 new: referee crew bias, micro-matchups, coach tendencies, sentiment, travel quality)
-- For simulation questions, defer to the Simulation Specialist agent
-- Simulation depth tiers: Good (10K+), Strong (100K+), Elite (500K+), Overdrive Elite (1M+)
 - Calibration: comparing model confidence to actual outcomes by sport and confidence tier
 - Cashout engineering strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™)
 
@@ -73,27 +142,196 @@ ${ctx.activePicsBlock}
 ${ctx.bankrollBlock}
 
 Core rules you ALWAYS follow:
-1. JOINT PROBABILITY: When a user asks about parlays, ALWAYS show the math. Example: 3 legs at 65% each = 0.65³ = 27.5%. Flag correlated legs (same game, same team) as problematic. The picks above include implied probabilities to use in calculations.
-2. KELLY SIZING: Always recommend quarter-Kelly (Kelly × 0.25) as the maximum. Reference the user's bankroll profile if set. Never suggest more than 2–3% of bankroll.
-3. RESPONSIBLE GAMBLING: When discussing stakes or losses, always include: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
+1. JOINT PROBABILITY: When a user asks about parlays, ALWAYS show the math. Example: 3 legs at 65% each = 0.65³ = 27.5%. Flag correlated legs as problematic.
+2. KELLY SIZING: Always recommend quarter-Kelly (Kelly × 0.25) as the maximum. Reference the user's bankroll profile if set.
+3. RESPONSIBLE GAMBLING: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
 4. DATA GROUNDED: Cite the actual calibration numbers and grade-specific win rates from the context above. Never fabricate stats.
 5. SCOPE: Focus on sports betting analytics only.
-6. HONEST ABOUT UNCERTAINTY: Say "the model suggests" or "the edge indicates" — never "this will win."
-7. CONCISE: Be precise and data-rich. Members are sophisticated bettors. No filler phrases.`;
+6. CONCISE: Be precise and data-rich. Members are sophisticated bettors.`;
+  }
+
+  // whale (Max) tier — full vertical specialist
+  let maxEngineData = "";
+  try {
+    const picks = getActivePicks(10);
+    const sharpSignals = picks
+      .filter(p => p.ev > 3)
+      .map(p => `• ${p.pick} (${p.sport}) — EV: +${p.ev.toFixed(1)}%, Conf: ${p.confidence}%, Edge: +${p.edge.toFixed(1)}%`)
+      .join("\n");
+    if (sharpSignals) {
+      maxEngineData += `\n=== SHARP MONEY SIGNALS (HIGH EV PICKS) ===\n${sharpSignals}`;
+    }
+
+    // Monte Carlo context (from precomputed picks)
+    const mcData = picks
+      .slice(0, 5)
+      .map(p => {
+        const decimal = p.odds > 0 ? 1 + p.odds / 100 : 1 + 100 / Math.abs(p.odds);
+        const kelly = Math.max(0, (decimal * p.impliedProbability - (1 - p.impliedProbability)) / decimal);
+        return `• ${p.pick}: Win prob ${(p.impliedProbability * 100).toFixed(1)}%, Kelly ${(kelly * 100).toFixed(2)}%, Grade ${p.grade}`;
+      })
+      .join("\n");
+    if (mcData) {
+      maxEngineData += `\n\n=== MONTE CARLO / MODEL OUTPUTS ===\n${mcData}`;
+    }
+  } catch { /* best-effort */ }
+
+  return `${ctx.standardsContext}
+
+${baseIdentity}
+- Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick (46 original + 5 new: referee crew bias, micro-matchups, coach tendencies, sentiment, travel quality)
+- Calibration: comparing model confidence to actual outcomes by sport and confidence tier
+- Cashout engineering strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™)
+- Monte Carlo simulation outputs and custom model weights
+- Simulation depth tiers: Good (10K+), Strong (100K+), Elite (500K+), Overdrive Elite (1M+)
+- Sharp money flow tracking and line reversal signals
+- Kelly Criterion calculation with fractional sizing
+
+You are operating in MAX tier mode. You are a VERTICAL SPECIALIST. Before answering, identify the specific subject of the question:
+- SPREAD BET → apply line movement analysis, sharp money, model lean
+- PARLAY MATH → compute joint probability, correlation risks, Kelly sizing
+- PLAYER PROP → check player trend data, model projections, market efficiency
+- LIVE GAME → reference real-time scores/lines, momentum signals, cashout advice
+- BANKROLL → apply Kelly criterion, risk-adjusted sizing, drawdown protection
+- CASHOUT → use Sportsbook Sweat™ / Lock & Roll™ / Steam Exit™ frameworks
+Then route your answer through the relevant engine(s) and reference actual platform data.
+
+=== LIVE PLATFORM CALIBRATION ===
+${ctx.calibrationBlock}
+
+=== ACTIVE PICKS (TODAY) ===
+${ctx.activePicsBlock}
+
+=== USER BANKROLL PROFILE ===
+${ctx.bankrollBlock}
+${maxEngineData}
+
+Core rules you ALWAYS follow:
+1. VERTICAL ROUTING: Identify question type first, then answer as a domain specialist for that type.
+2. JOINT PROBABILITY: For parlays, ALWAYS show the math. Example: 3 legs at 65% = 0.65³ = 27.5%.
+3. KELLY SIZING: Quarter-Kelly (Kelly × 0.25) maximum. Reference user's bankroll profile.
+4. RESPONSIBLE GAMBLING: "Bet only what you can afford to lose. Help: 1-800-522-4700 (NCPG)."
+5. DATA GROUNDED: Cite actual calibration numbers and pick data. Never fabricate stats.
+6. CONCISE: Be precise and data-rich. Max members are professional-level bettors.`;
+}
+
+// Internal AI routes — admin and system use only.
+// These endpoints power backend intelligence, admin analysis, and system diagnostics.
+
+export function registerAiRoutes(app: Express): void {
+
+  // ── GET /api/ai/usage ──────────────────────────────────────────────────────
+  // Returns the user's current daily AI usage and their tier limit.
+  app.get("/api/ai/usage", requireAuth, async (req, res) => {
+    const { tier, userId } = await getUserTier(req);
+
+    if (!userId) {
+      const limit = TIER_DAILY_LIMITS[tier] ?? 3;
+      return res.json({ current: 0, limit, tier });
+    }
+
+    const { current, limit } = await checkAiUsageLimit(userId, tier);
+    res.json({ current, limit, tier });
+  });
+
+  // ── POST /api/ai/analyst ───────────────────────────────────────────────────
+  // Sports betting AI companion for ALL authenticated users.
+  // Enforces per-tier daily limits and injects tier-differentiated context.
+  app.post("/api/ai/analyst", requireAuth, async (req, res) => {
+    const { messages, isOnboarding } = req.body as {
+      messages: { role: "user" | "assistant"; content: string }[];
+      isOnboarding?: boolean;
+    };
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ error: "messages array required" });
+    }
+
+    const openai = createOpenAIClient();
+    if (!openai) return res.status(503).json({ error: "AI service unavailable" });
+
+    const { tier, userId } = await getUserTier(req);
+
+    // ── Enforce daily usage limits (admins + whale are exempt) ──────────────
+    if (userId && !req.session?.isAdmin && tier !== "whale") {
+      const usageCheck = await checkAiUsageLimit(userId, tier);
+      if (!usageCheck.allowed) {
+        const nextTier = NEXT_TIER_BENEFITS[tier];
+        return res.status(429).json({
+          error: "daily_limit_reached",
+          message: `You've used all ${usageCheck.limit} messages for today on the ${tier === "free" ? "Free" : tier === "pro" ? "Sharp" : "Edge"} plan.`,
+          current: usageCheck.current,
+          limit: usageCheck.limit,
+          tier,
+          nextTier: nextTier || null,
+          upgradeUrl: "/pricing",
+        });
+      }
+    }
+
+    // ── Route simulation queries to Simulation Specialist ────────────────────
+    if (isSimulationQuery(messages[messages.length - 1]?.content || "")) {
+      const simResponse = await querySimulationAgent(messages, userId?.toString());
+      if (simResponse) {
+        let newCount = 0;
+        if (userId && !req.session?.isAdmin && tier !== "whale") {
+          newCount = await incrementAiUsage(userId);
+        }
+        const limit = TIER_DAILY_LIMITS[tier];
+        return res.json({
+          response: simResponse.response,
+          handledBy: simResponse.handledBy,
+          usage: { current: newCount, limit, tier },
+        });
+      }
+      // Fall through to main analyst if simulation agent unavailable
+    }
+
+    // ── Build tier-differentiated system prompt ──────────────────────────────
+    const systemPrompt = await buildTieredSystemPrompt(tier, userId, messages);
 
     try {
+      const maxTokens = tier === "whale" ? 900 : tier === "elite" ? 750 : tier === "pro" ? 650 : 500;
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           { role: "system", content: systemPrompt },
           ...messages.map(m => ({ role: m.role, content: m.content })),
         ],
-        max_tokens: 650,
+        max_tokens: maxTokens,
         temperature: 0.65,
       });
 
       const response = completion.choices[0]?.message?.content ?? "I couldn't generate a response. Please try again.";
-      res.json({ response });
+
+      // ── Increment usage (skip for whale/admin) ────────────────────────────
+      let newCount = 0;
+      if (userId && !req.session?.isAdmin && tier !== "whale") {
+        newCount = await incrementAiUsage(userId);
+      }
+
+      // ── Track session context for live monitoring (Max tier) ─────────────
+      if (tier === "whale" && userId) {
+        const lastUserMsg = [...messages].reverse().find(m => m.role === "user");
+        const gameRefs = extractGameRefs(lastUserMsg?.content ?? "");
+        if (gameRefs.length > 0 || response.length > 100) {
+          await upsertSessionContext(userId, gameRefs, {
+            text: response.slice(0, 500),
+            gameId: gameRefs[0],
+            timestamp: new Date().toISOString(),
+          });
+        }
+      }
+
+      const limit = TIER_DAILY_LIMITS[tier];
+      res.json({
+        response,
+        usage: {
+          current: newCount,
+          limit,
+          tier,
+        },
+      });
     } catch (err: any) {
       console.error("[AI Analyst] Error:", err.message);
       if (err.status === 429 || err.status === 503) {
@@ -137,9 +375,66 @@ Core rules you ALWAYS follow:
     }
   });
 
+  // ── POST /api/ai/onboarding-greeting ──────────────────────────────────────
+  // Generates a personalized AI greeting for the onboarding "Meet Your AI" step.
+  app.post("/api/ai/onboarding-greeting", requireAuth, async (req, res) => {
+    const { sports, experience } = req.body as { sports?: string[]; experience?: string };
+
+    const openai = createOpenAIClient();
+    if (!openai) return res.status(503).json({ error: "AI service unavailable" });
+
+    const { userId, tier } = await getUserTier(req);
+
+    // Check daily usage limit
+    if (userId && !req.session?.isAdmin && tier !== "whale") {
+      const usageCheck = await checkAiUsageLimit(userId, tier);
+      if (!usageCheck.allowed) {
+        return res.status(429).json({
+          error: "daily_limit_reached",
+          message: "Daily message limit reached.",
+          tier,
+        });
+      }
+    }
+
+    const sportsStr = sports && sports.length > 0 ? sports.join(", ") : "sports betting";
+    const expMap: Record<string, string> = {
+      beginner: "you're new to betting",
+      intermediate: "you bet recreationally",
+      advanced: "you're an experienced sharp bettor",
+      professional: "you're a professional-level bettor",
+    };
+    const expStr = expMap[experience || ""] || "you're interested in sports betting";
+
+    const prompt = `You are SORS Intelligence, the official AI analyst of Sors Maxima. A new member just joined. Generate a warm, personalized greeting (2-3 sentences max) that:
+1. Welcomes them by name (just say "Welcome")
+2. References that they follow ${sportsStr} and that ${expStr}
+3. Briefly mentions you can help them find edges, size bets correctly, and navigate the platform
+Keep it conversational, data-focused, and under 60 words. Do not use emojis.`;
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 120,
+        temperature: 0.7,
+      });
+
+      const greeting = completion.choices[0]?.message?.content ?? "Welcome to Sors Maxima. I'm SORS Intelligence — here to help you find edges, size your bets with Kelly criterion, and get the most from the platform. Ask me anything.";
+
+      if (userId && !req.session?.isAdmin && tier !== "whale") {
+        await incrementAiUsage(userId);
+      }
+
+      res.json({ greeting });
+    } catch (err: any) {
+      console.error("[AI Onboarding] Error:", err.message);
+      res.json({ greeting: "Welcome to Sors Maxima. I'm SORS Intelligence — your AI analyst powered by live data, real calibration stats, and the 51-factor model. Ask me anything about today's picks, parlay math, or bankroll sizing." });
+    }
+  });
+
   // ── GET /api/ai/analyst/context ────────────────────────────────────────────
   // Returns current platform context for the AI Analyst page sidebar.
-  // Includes: active picks (grade, EV, Kelly, modelAgreement), calibration summary.
   app.get("/api/ai/analyst/context", requireAuth, async (req, res) => {
     try {
       const picks = getActivePicks(8);
@@ -147,7 +442,6 @@ Core rules you ALWAYS follow:
       const { getPrecomputedCache } = await import("../precomputedPredictionsEngine");
       const tr = getTrackRecord();
 
-      // Compute average model agreement across all active picks
       const SPORTS_CTX = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
       let totalAgreement = 0;
       let agreementCount = 0;
@@ -191,7 +485,6 @@ Core rules you ALWAYS follow:
   });
 
   // ── GET /api/ai/pick-explanation/:pickId ─────────────────────────────────
-  // Admin: retrieve or generate a model explanation for a pick (for QA and admin review).
   app.get("/api/ai/pick-explanation/:pickId", requireAdmin, async (req, res) => {
     const { pickId } = req.params;
 
@@ -219,7 +512,6 @@ Core rules you ALWAYS follow:
   });
 
   // ── POST /api/ai/analyze-parlay ───────────────────────────────────────────
-  // Admin: structured parlay analysis using GPT-4o (for admin testing and QA).
   const previewCache = new Map<string, { data: any; cachedAt: number }>();
   const PREVIEW_CACHE_TTL = 30 * 60 * 1000;
 
@@ -298,7 +590,6 @@ Return this exact JSON structure:
   });
 
   // ── GET /api/ai/game-preview/:gameId ──────────────────────────────────────
-  // Admin: deep-dive game preview using live intelligence feed (for admin QA and reporting).
   app.get("/api/ai/game-preview/:gameId", requireAdmin, async (req, res) => {
     const { gameId } = req.params;
 
@@ -359,7 +650,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
   });
 
   // ── GET /api/ai/status ────────────────────────────────────────────────────
-  // Public AI status check — reads from global error tracker.
   app.get("/api/ai/status", async (_req, res) => {
     const { getAiAvailability } = await import("../aiErrorTracker");
     const status = getAiAvailability();
@@ -370,9 +660,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
   });
 
   // ── GET /api/ai/recommendation ────────────────────────────────────────────
-  // Contextual AI recommendation panel for user-facing pages.
-  // Queries cached Intelligence Hub + Precomputed Predictions first (no new API calls).
-  // Falls back to GPT-4o-mini only when cache is stale. Rate limited: 10 req/min/user.
   const recommendationCache = new Map<string, { data: any; cachedAt: number }>();
   const recommendationRateLimit = new Map<string, { count: number; windowStart: number }>();
   const RECOMMENDATION_CACHE_TTL = 3 * 60 * 1000;
@@ -401,7 +688,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
     const sport = (req.query.sport as string) || "";
     const gameId = (req.query.gameId as string) || "";
 
-    // Rate limiting
     const rlKey = userId;
     const now = Date.now();
     const rl = recommendationRateLimit.get(rlKey) || { count: 0, windowStart: now };
@@ -422,7 +708,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
     }
 
     try {
-      // Pull from in-memory caches first
       const allSports = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
       const allPicks: any[] = [];
       for (const s of allSports) {
@@ -447,7 +732,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
 
       let recommendation: any;
 
-      // Build recommendation from cached data when possible
       if (topPick) {
         const confidence = topPick.confidence || 60;
         const tier =
@@ -489,7 +773,6 @@ Return: {"headline":"","keyFactors":[],"spreadAngle":"","totalAngle":"","modelLe
           },
         };
       } else {
-        // Fallback: use GPT-4o-mini for page-specific insight if no cached picks
         const openai = createOpenAIClient();
         if (!openai) {
           return res.status(503).json({ error: "AI unavailable" });
@@ -533,7 +816,6 @@ Return ONLY JSON: {"headline":"<concise insight>","confidence":<50-75>,"tier":"<
   });
 
   // ── GET /api/ai/turbo-status ──────────────────────────────────────────────
-  // Returns current Live Turbo Mode status for admin panel.
   app.get("/api/ai/turbo-status", requireAuth, async (_req, res) => {
     try {
       const { getTurboModeStatus } = await import("../liveTurboScheduler");

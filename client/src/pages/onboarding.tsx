@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ChevronRight,
   ChevronLeft,
@@ -25,13 +27,14 @@ import {
   Flame,
   MessageSquare,
   Wifi,
+  Send,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSEO } from "@/hooks/use-seo";
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 const sportOptions = [
   { id: "NBA", label: "NBA Basketball" },
@@ -88,6 +91,194 @@ const sportsbookOptions = [
   { id: "Other", label: "Other / Multiple" },
 ];
 
+// ── Meet Your AI Analyst step ─────────────────────────────────────────────────
+
+interface AiMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+}
+
+function MeetAiStep({
+  sports,
+  experience,
+  canProceedToNext,
+  onProceedReady,
+}: {
+  sports: string[];
+  experience: string;
+  canProceedToNext: boolean;
+  onProceedReady: () => void;
+}) {
+  const [messages, setMessages] = useState<AiMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [greetingLoaded, setGreetingLoaded] = useState(false);
+  const [hasAskedQuestion, setHasAskedQuestion] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Auto-load greeting on mount
+  useEffect(() => {
+    if (greetingLoaded) return;
+    setGreetingLoaded(true);
+    setIsLoading(true);
+
+    apiRequest("POST", "/api/ai/onboarding-greeting", { sports, experience })
+      .then(r => r.json())
+      .then((data: { greeting?: string }) => {
+        setMessages([{ id: "greeting", role: "assistant", content: data.greeting ?? "Welcome to Sors Maxima. I'm SORS Intelligence — ask me anything about today's picks, parlay math, or bankroll sizing." }]);
+      })
+      .catch(() => {
+        setMessages([{ id: "greeting", role: "assistant", content: "Welcome to Sors Maxima. I'm SORS Intelligence — powered by live picks, real calibration stats, and Kelly sizing. What would you like to know?" }]);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const sendQuestion = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || isLoading || hasAskedQuestion) return;
+
+    const userMsg: AiMessage = { id: Date.now().toString(), role: "user", content: trimmed };
+    setMessages(prev => [...prev, userMsg]);
+    setInput("");
+    setIsLoading(true);
+    setHasAskedQuestion(true);
+
+    try {
+      const payload = [...messages, userMsg]
+        .filter(m => m.id !== "greeting")
+        .map(m => ({ role: m.role, content: m.content }));
+
+      const res = await apiRequest("POST", "/api/ai/analyst", {
+        messages: payload.length > 0 ? payload : [{ role: "user", content: trimmed }],
+        isOnboarding: true,
+      });
+      const data = await res.json();
+      const response = data.response ?? "Great question. The platform has live picks and analytics waiting for you — explore them in your dashboard.";
+      setMessages(prev => [...prev, { id: `resp-${Date.now()}`, role: "assistant", content: response }]);
+      onProceedReady();
+    } catch {
+      setMessages(prev => [...prev, { id: `err-${Date.now()}`, role: "assistant", content: "I had trouble connecting just now, but I'm ready to help you once you're in the dashboard. Let's keep going!" }]);
+      onProceedReady();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card className="border-primary/20" data-testid="onboarding-step-ai">
+      <CardHeader className="text-center pb-2">
+        <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4" style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}>
+          <Zap className="w-8 h-8 text-white" />
+        </div>
+        <CardTitle className="text-2xl">Meet Your AI Analyst</CardTitle>
+        <CardDescription className="text-base max-w-lg mx-auto">
+          SORS Intelligence is your data-driven betting companion. Say hi, ask one question, and see what it can do before you enter your dashboard.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Chat area */}
+        <div
+          className="rounded-xl p-4 space-y-3 min-h-[140px]"
+          style={{ background: "linear-gradient(160deg, rgba(8,8,14,0.97) 0%, rgba(14,10,6,0.97) 100%)", border: "1px solid rgba(240,83,43,0.2)" }}
+        >
+          <ScrollArea className="max-h-48">
+            <div className="space-y-3 pr-2">
+              {isLoading && messages.length === 0 && (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 flex-shrink-0" style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}>
+                    <Zap className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <div className="px-3 py-2 rounded-2xl rounded-tl-sm" style={{ background: "rgba(240,83,43,0.12)", border: "1px solid rgba(240,83,43,0.18)" }}>
+                    <div className="flex gap-1 items-center h-4">
+                      {[0, 1, 2].map(i => (
+                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {messages.map(msg => (
+                <div key={msg.id} className={`flex items-start gap-2.5 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+                  {msg.role === "assistant" && (
+                    <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 flex-shrink-0" style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}>
+                      <Zap className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  )}
+                  <div
+                    className={`px-3 py-2 rounded-2xl max-w-[85%] ${msg.role === "user" ? "rounded-tr-sm" : "rounded-tl-sm"}`}
+                    style={msg.role === "user"
+                      ? { background: "rgba(255,255,255,0.09)", border: "1px solid rgba(255,255,255,0.1)" }
+                      : { background: "rgba(240,83,43,0.1)", border: "1px solid rgba(240,83,43,0.16)" }
+                    }
+                    data-testid={`onboarding-ai-msg-${msg.role}`}
+                  >
+                    <p className="text-[12px] leading-relaxed text-white/90 whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                </div>
+              ))}
+              {isLoading && messages.length > 0 && (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-xl flex items-center justify-center shrink-0 flex-shrink-0" style={{ background: "linear-gradient(135deg, #F0532B 0%, #f59e0b 100%)" }}>
+                    <Zap className="w-3.5 h-3.5 text-white" />
+                  </div>
+                  <div className="px-3 py-2 rounded-2xl rounded-tl-sm" style={{ background: "rgba(240,83,43,0.12)", border: "1px solid rgba(240,83,43,0.18)" }}>
+                    <div className="flex gap-1 items-center h-4">
+                      {[0, 1, 2].map(i => (
+                        <span key={i} className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={bottomRef} />
+            </div>
+          </ScrollArea>
+        </div>
+
+        {/* Input row — only allow one question */}
+        {!hasAskedQuestion ? (
+          <div className="flex gap-2">
+            <Input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendQuestion(); } }}
+              placeholder="Ask anything — best picks today, how Kelly works, parlay math…"
+              disabled={isLoading || messages.length === 0}
+              className="flex-1 h-10 text-sm"
+              data-testid="input-onboarding-ai-question"
+            />
+            <Button
+              size="sm"
+              onClick={sendQuestion}
+              disabled={isLoading || !input.trim() || messages.length === 0}
+              className="h-10 px-4"
+              data-testid="button-onboarding-ai-send"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" />
+            <p className="text-sm text-green-600 dark:text-green-400">
+              SORS Intelligence is ready. Click Continue to enter your dashboard.
+            </p>
+          </div>
+        )}
+
+        <p className="text-[10px] text-muted-foreground text-center">
+          This counts toward your daily message quota · Not gambling advice · Statistical analysis only
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function OnboardingPage() {
   useSEO({ title: "Get Started", description: "Set up your Sors Maxima experience" });
   const [step, setStep] = useState(1);
@@ -99,6 +290,7 @@ export default function OnboardingPage() {
   const [selectedBetTypes, setSelectedBetTypes] = useState<string[]>([]);
   const [bankrollSize, setBankrollSize] = useState("");
   const [selectedSportsbooks, setSelectedSportsbooks] = useState<string[]>([]);
+  const [aiStepReady, setAiStepReady] = useState(false);
 
   const savePreferences = useMutation({
     mutationFn: async () => {
@@ -142,7 +334,8 @@ export default function OnboardingPage() {
       case 2: return selectedSports.length > 0 && experience !== "";
       case 3: return selectedBetTypes.length > 0;
       case 4: return true;
-      case 5: return true;
+      case 5: return true; // AI step — can always proceed (even without asking)
+      case 6: return true;
       default: return true;
     }
   };
@@ -351,6 +544,15 @@ export default function OnboardingPage() {
         )}
 
         {step === 5 && (
+          <MeetAiStep
+            sports={selectedSports}
+            experience={experience}
+            canProceedToNext={aiStepReady}
+            onProceedReady={() => setAiStepReady(true)}
+          />
+        )}
+
+        {step === 6 && (
           <Card className="border-primary/20" data-testid="onboarding-step-ready">
             <CardHeader className="text-center pb-2">
               <div className="mx-auto w-16 h-16 rounded-2xl bg-green-500/10 flex items-center justify-center mb-4">
