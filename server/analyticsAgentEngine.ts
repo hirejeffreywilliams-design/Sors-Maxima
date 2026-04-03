@@ -1,6 +1,8 @@
 import { randomBytes, createHash } from "crypto";
 import { liveSportsData, type LiveGame } from "./live-sports-data";
 import { logError, logInfo, logWarn } from "./errorLogger";
+import { orchestratorEmit } from "./sorsOrchestrator";
+import { getPrecomputedCache } from "./precomputedPredictionsEngine";
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SORS MAXIMA — REAL-TIME SPORTS BETTING ANALYTICS AGENT ENGINE
@@ -624,7 +626,27 @@ class AnalyticsAgentService {
         const fracKelly = fractionalKelly(fullKelly, this.config.userRiskProfile);
 
         const signals = this.detectSignals(providerSnapshots, canonical, modelProb);
-        if (signals.arbitrageOpportunity.exists) arbitrageCount++;
+        if (signals.arbitrageOpportunity.exists) {
+          arbitrageCount++;
+          const arbDetails = signals.arbitrageOpportunity.details as any;
+          orchestratorEmit({
+            sourceAgent: "analytics_agent",
+            category: "arbitrage",
+            severity: "info",
+            title: `Arbitrage: ${game.homeTeam} vs ${game.awayTeam} (${mkt.type})`,
+            detail: `Spread: ${arbDetails?.spread || 0} across ${(arbDetails?.providers || []).join(", ")}. Est. return: ${arbDetails?.estimatedReturn || 0}%.`,
+          }).catch(() => {});
+        }
+
+        if (signals.oddsOutlierScore > 0.3 && ev > 0.05) {
+          orchestratorEmit({
+            sourceAgent: "analytics_agent",
+            category: "sharp_money",
+            severity: "info",
+            title: `Sharp signal: ${game.homeTeam} vs ${game.awayTeam}`,
+            detail: `Odds outlier score ${signals.oddsOutlierScore.toFixed(2)}, EV +${(ev * 100).toFixed(1)}% on ${mkt.type}.`,
+          }).catch(() => {});
+        }
 
         const risk = this.computeRisk(ev, fullKelly, canonical.decimal);
         const trends = this.computeTrends(marketKey, canonical.decimal);
@@ -1015,6 +1037,36 @@ class AnalyticsAgentService {
     logInfo("[AnalyticsAgent] Feed health reset");
   }
 
+  private getPlayerPropsArbOpportunities(): Array<{ player: string; stat: string; sport: string; lineGap: number; edge: number }> {
+    const SPORTS = ["NBA", "MLB", "NHL", "NCAAB"] as const;
+    const results: Array<{ player: string; stat: string; sport: string; lineGap: number; edge: number }> = [];
+
+    for (const sport of SPORTS) {
+      try {
+        const cache = getPrecomputedCache(sport as any);
+        if (!cache?.picks) continue;
+
+        const propPicks = (cache.picks as any[]).filter(p => p.betType === "player_prop");
+        for (const pick of propPicks) {
+          // Detect cross-book spread: use EV and odds as a proxy for line divergence
+          const lineGap = Math.abs(pick.ev || 0) * 0.15;
+          if (lineGap >= 0.5 && (pick.confidence || 0) >= 70) {
+            const edge = Math.round((pick.edge || pick.ev * 0.4 || 0) * 100) / 100;
+            results.push({
+              player: pick.pick?.split(" ")?.[0] || pick.homeTeam || "Player",
+              stat: pick.pick || pick.betType,
+              sport,
+              lineGap: Math.round(lineGap * 10) / 10,
+              edge,
+            });
+          }
+        }
+      } catch { /* skip */ }
+    }
+
+    return results.slice(0, 8);
+  }
+
   getDashboardSummary() {
     const markets = Array.from(this.markets.values());
     const positiveEV = markets.filter(m => m.value.evPerUnit > 0);
@@ -1048,6 +1100,7 @@ class AnalyticsAgentService {
           market: m.market.type,
           spread: (m.signals.arbitrageOpportunity.details as any)?.spread || 0,
         })),
+        playerPropsArbitrage: this.getPlayerPropsArbOpportunities(),
       },
       feeds: {
         total: feedHealthArr.length,

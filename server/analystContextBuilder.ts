@@ -89,6 +89,49 @@ export function detectParlayQuery(messages: { role: string; content: string }[])
   return { isParlay: true, legCount };
 }
 
+// ── User PnL fetcher ─────────────────────────────────────────────────────────
+
+interface UserPnLRow {
+  total_bets: string | number;
+  total_wins: string | number;
+  total_losses: string | number;
+  total_staked: string | number;
+  total_profit: string | number;
+  roi: string | number;
+}
+
+export async function fetchUserPnL(userId: string | undefined): Promise<{
+  totalBets: number;
+  wins: number;
+  losses: number;
+  totalStaked: number;
+  totalProfit: number;
+  roi: number;
+} | null> {
+  if (!userId) return null;
+  try {
+    const result = await db.execute(sql`
+      SELECT total_bets, total_wins, total_losses, total_staked, total_profit, roi
+      FROM user_analytics
+      WHERE user_id = ${userId}
+      LIMIT 1
+    `);
+    const rows = (result.rows ?? result) as UserPnLRow[];
+    const row = rows[0];
+    if (!row) return null;
+    return {
+      totalBets: Number(row.total_bets ?? 0),
+      wins: Number(row.total_wins ?? 0),
+      losses: Number(row.total_losses ?? 0),
+      totalStaked: Number(row.total_staked ?? 0),
+      totalProfit: Number(row.total_profit ?? 0),
+      roi: Number(row.roi ?? 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
 // ── Bankroll fetcher ────────────────────────────────────────────────────────
 
 export async function fetchUserBankroll(userId: string | undefined): Promise<{
@@ -266,13 +309,16 @@ export async function buildAnalystContext(
     }
   }
 
-  // 5. Bankroll + risk profile block
+  // 5. Bankroll + risk profile + user PnL block
   let bankrollBlock =
     "Bankroll profile: Not configured. Risk profile: moderate (default). " +
     "Default sizing: Quarter-Kelly (≤2.5% of bankroll per bet).";
   try {
-    const { bankroll, kellyFraction, riskTolerance, bankrollStrategy, betFrequency, preferredBetTypes } =
-      await fetchUserBankroll(userId);
+    const [bankrollData, pnlData] = await Promise.all([
+      fetchUserBankroll(userId),
+      fetchUserPnL(userId),
+    ]);
+    const { bankroll, kellyFraction, riskTolerance, bankrollStrategy, betFrequency, preferredBetTypes } = bankrollData;
     const parts: string[] = [];
     if (bankroll != null) {
       const kf = kellyFraction ?? 0.1;
@@ -287,6 +333,21 @@ export async function buildAnalystContext(
     if (betFrequency) parts.push(`Bet frequency: ${betFrequency} bets/day`);
     if (preferredBetTypes && preferredBetTypes.length > 0) {
       parts.push(`Preferred bet types: ${preferredBetTypes.join(", ")}`);
+    }
+    // Inject user PnL into context
+    if (pnlData && pnlData.totalBets > 0) {
+      const winRate = pnlData.totalBets > 0
+        ? ((pnlData.wins / pnlData.totalBets) * 100).toFixed(1)
+        : "N/A";
+      const profitStr = pnlData.totalProfit >= 0
+        ? `+$${pnlData.totalProfit.toFixed(2)}`
+        : `-$${Math.abs(pnlData.totalProfit).toFixed(2)}`;
+      const roiStr = `${pnlData.roi >= 0 ? "+" : ""}${pnlData.roi.toFixed(1)}%`;
+      parts.push(
+        `User betting record: ${pnlData.wins}W-${pnlData.losses}L from ${pnlData.totalBets} bets ` +
+        `(${winRate}% win rate). Net P&L: ${profitStr}. ROI: ${roiStr}. ` +
+        `Total staked: $${pnlData.totalStaked.toFixed(2)}.`
+      );
     }
     if (parts.length > 0) {
       bankrollBlock = parts.join(". ") + ". Never exceed 2–3% of bankroll on any single bet.";

@@ -95,11 +95,12 @@ const PlayerPropsPage = lazy(() => import("@/pages/player-props"));
 const StrategyAdvisor = lazy(() => import("@/pages/strategy-advisor"));
 const TrackRecordPage = lazy(() => import("@/pages/track-record"));
 const MyBetsPage = lazy(() => import("@/pages/my-bets"));
+const CashoutPage = lazy(() => import("@/pages/cashout"));
 const VerifyEmail = lazy(() => import("@/pages/verify-email"));
 const CardVerifyPage = lazy(() => import("@/pages/card-verify"));
 const ResetPasswordPage = lazy(() => import("@/pages/reset-password"));
 const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
-import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck, ReceiptText } from "lucide-react";
+import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck, ReceiptText, DollarSign } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
 import { GeoComplianceBanner } from "@/components/geo-compliance-banner";
@@ -348,6 +349,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/prop-parlay-builder" component={PropParlayBuilder} />
         <Route path="/track-record" component={TrackRecordPage} />
         <Route path="/my-bets" component={MyBetsPage} />
+        <Route path="/cashout" component={CashoutPage} />
         <Route path="/ticket-variations" component={TicketVariations} />
         <Route path="/pick-review" component={PickReview} />
         <Route path="/straight-bets"><Redirect to="/builder" /></Route>
@@ -417,6 +419,7 @@ const SECONDARY_ROUTES: Record<string, { label: string; parent: string }> = {
   "/straight-bets":        { label: "Straight Bets",        parent: "/builder" },
   "/verify-email":         { label: "Verify Email",         parent: "/" },
   "/onboarding":           { label: "Onboarding",           parent: "/" },
+  "/cashout":              { label: "Cashout Engineering",  parent: "/tools" },
   "/rosters":              { label: "Rosters & Injuries",   parent: "/tools" },
   "/sport-factor-analysis":{ label: "Factor Analysis",      parent: "/tools" },
   "/pipeline":             { label: "Intelligence Pipeline",parent: "/tools" },
@@ -1054,6 +1057,7 @@ const APP_NAV_ITEMS: NavDef[] = [
   { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "sidebar-nav-ai", section: "Discover" },
   { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "sidebar-nav-track", section: "Discover" },
   { href: "/tools", icon: Wrench, label: "Analysis & Tools", testId: "sidebar-nav-tools", section: "Discover" },
+  { href: "/cashout", icon: DollarSign, label: "Cashout Engineering", testId: "sidebar-nav-cashout", section: "Discover" },
   { href: "/community", icon: Users, label: "Community", testId: "sidebar-nav-community", section: "Discover" },
   { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "sidebar-nav-bankroll", section: "Account" },
   { href: "/profile", icon: User, label: "My Profile", testId: "sidebar-nav-profile", section: "Account" },

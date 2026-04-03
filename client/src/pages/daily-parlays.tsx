@@ -23,6 +23,7 @@ import { sports } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { PickAnalyticsRow } from "@/components/pick-analytics-row";
+import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { Link } from "wouter";
 
 
@@ -829,6 +830,7 @@ export default function DailyParlays() {
   const [gradeFilter, setGradeFilter] = useState<GradeFilter>("all");
   const [showCount, setShowCount] = useState(12);
   const [activeTab, setActiveTab] = useState<"picks" | "parlays">("picks");
+  const [swipeMode, setSwipeMode] = useState(false);
   const [generatingParlays, setGeneratingParlays] = useState(false);
   const [generatedParlays, setGeneratedParlays] = useState<GeneratedParlay[]>([]);
   const [parlayMeta, setParlayMeta] = useState<{ eventsAnalyzed: number } | null>(null);
@@ -1237,6 +1239,15 @@ export default function DailyParlays() {
                     <span>Avg EV: <span className={avgEv > 0 ? "text-emerald-400" : "text-red-400"}>{avgEv > 0 ? displayEv(avgEv) : avgEv.toFixed(1) + "%"}</span></span>
                   </div>
                   <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs h-7"
+                      onClick={() => setSwipeMode(true)}
+                      data-testid="button-swipe-mode-daily"
+                    >
+                      <Zap className="w-3 h-3" /> Swipe Mode
+                    </Button>
                     <span>Showing {visiblePicks.length} of {sortedPicks.length}</span>
                     {(() => {
                       const topPicks = sortedPicks.filter(p => p.grade.startsWith("A") && !isInSlip(p.id)).slice(0, 4);
@@ -1414,6 +1425,46 @@ export default function DailyParlays() {
           {engineStatus?.running && " · Auto-refreshing every 5 min"}
         </div>
       </div>
+
+      {swipeMode && sortedPicks.length > 0 && (
+        <SwipePickCards
+          picks={sortedPicks.map(p => ({
+            id: p.id,
+            sport: p.sport,
+            game: `${p.homeTeam} vs ${p.awayTeam}`,
+            pick: p.pick,
+            betType: p.betType,
+            odds: p.odds,
+            confidence: p.confidence,
+            grade: p.grade,
+            edge: p.edge,
+            ev: p.ev,
+            reasoning: p.reasoning || "",
+            gameTime: p.gameTime,
+            homeTeam: p.homeTeam,
+            awayTeam: p.awayTeam,
+          }))}
+          onAdd={(pick) => {
+            const decimalOdds = pick.odds > 0 ? (pick.odds / 100) + 1 : (-100 / pick.odds) + 1;
+            const slipLeg: ParlaySlipLeg = {
+              id: pick.id,
+              team: pick.homeTeam,
+              opponent: pick.awayTeam,
+              market: (["moneyline", "spread", "total", "player_prop"].includes(pick.betType) ? pick.betType : "moneyline") as any,
+              outcome: pick.pick || `${pick.homeTeam} vs ${pick.awayTeam}`,
+              decimalOdds,
+              americanOdds: pick.odds,
+              addedFrom: "Daily Picks",
+              addedAt: new Date().toISOString(),
+              sport: pick.sport as any,
+              confidence: pick.confidence,
+            };
+            addLeg(slipLeg);
+            toast({ title: "Added to slip", description: pick.pick });
+          }}
+          onClose={() => setSwipeMode(false)}
+        />
+      )}
     </div>
   );
 }

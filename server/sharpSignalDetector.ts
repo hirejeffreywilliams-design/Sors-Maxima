@@ -16,6 +16,7 @@ import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { broadcastEvent } from "./sseManager";
 import { logInfo, logWarn } from "./errorLogger";
+import { orchestratorEmit } from "./sorsOrchestrator";
 import { isGameWindowActive, getGameWindowInfo } from "./gameWindowScheduler";
 
 const THE_ODDS_BASE = "https://api.the-odds-api.com/v4";
@@ -275,6 +276,18 @@ async function runDetectionCycle(): Promise<void> {
       direction: signal.direction,
       detectedAt: signal.detectedAt,
     });
+
+    // Route through Sors Orchestrator for companion_alert routing
+    const isSteam = Math.abs(signal.movement || 0) >= 3;
+    orchestratorEmit({
+      sourceAgent: "sharp_detector",
+      category: isSteam ? "steam_move" : "sharp_money",
+      severity: "info",
+      title: isSteam
+        ? `Steam move on ${signal.homeTeam} vs ${signal.awayTeam} — ${signal.market} moved ${signal.movement > 0 ? "+" : ""}${signal.movement}`
+        : `Sharp money on ${signal.homeTeam} vs ${signal.awayTeam} — ${signal.market} ${signal.direction}`,
+      detail: `${signal.sport}: ${signal.homeTeam} vs ${signal.awayTeam}. ${signal.market} moved ${signal.movement > 0 ? "+" : ""}${signal.movement} pts ${signal.direction}.`,
+    }).catch(() => {});
 
     await flagPicksAsSharpSignal(signal);
   }

@@ -6,7 +6,21 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Percent, Calculator, CircleDot, AlertCircle, Database } from "lucide-react";
+import { Percent, Calculator, CircleDot, AlertCircle, Database, User, TrendingUp } from "lucide-react";
+
+interface PlayerPropArb {
+  player: string;
+  stat: string;
+  sport: string;
+  lineGap: number;
+  edge: number;
+}
+
+interface AnalyticsDashboard {
+  arbitrage?: {
+    playerPropsArbitrage?: PlayerPropArb[];
+  };
+}
 
 interface BookmakerOdds {
   book: string;
@@ -136,6 +150,14 @@ export function ArbitrageFinder() {
   const { data, isLoading, error } = useQuery<MarketSnapshot>({
     queryKey: [`/api/market-snapshot?sport=${sport}`],
   });
+
+  const { data: analyticsDash } = useQuery<AnalyticsDashboard>({
+    queryKey: ["/api/admin/analytics-agent/dashboard"],
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+  });
+
+  const propArbs = analyticsDash?.arbitrage?.playerPropsArbitrage ?? [];
 
   const arbs = useMemo(() => {
     if (!data?.games) return [];
@@ -340,6 +362,36 @@ export function ArbitrageFinder() {
         <div className="flex items-center gap-2 text-xs text-muted-foreground" data-testid="text-data-source">
           <Database className="w-3 h-3" />
           <span>Data: {data.meta.dataSources.join(", ")} | {data.meta.gamesWithOdds} games with odds | Updated {new Date(data.meta.generatedAt).toLocaleTimeString()}</span>
+        </div>
+      )}
+
+      {/* Player Props Arbitrage Section */}
+      {propArbs.length > 0 && (
+        <div className="mt-6 space-y-3" data-testid="section-prop-arbs">
+          <div className="flex items-center gap-2">
+            <User className="w-4 h-4 text-blue-500" />
+            <span className="font-medium text-sm">Player Props Cross-Book Lines</span>
+            <Badge variant="secondary" className="text-[10px]" data-testid="badge-prop-arb-count">{propArbs.length} signals</Badge>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {propArbs.map((pa, i) => (
+              <Card key={i} data-testid={`card-prop-arb-${i}`} className="border-border/50">
+                <CardContent className="p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold truncate">{pa.stat}</p>
+                      <p className="text-[10px] text-muted-foreground">{pa.sport} · Line gap: {pa.lineGap}</p>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] shrink-0 text-green-500 border-green-500/30">
+                      <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
+                      {pa.edge > 0 ? "+" : ""}{pa.edge.toFixed(1)}%
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground">Player prop lines are derived from model edge analysis across multiple books.</p>
         </div>
       )}
     </div>

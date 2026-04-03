@@ -19,7 +19,8 @@ import {
 import {
   ArrowLeft, LayoutDashboard, Ticket, Brain, Lightbulb, BarChart3,
   Layers, Network, ShieldCheck, Activity, AlertTriangle, CheckCircle,
-  Clock, Target, Cpu, ChevronDown, ChevronUp, Eye,
+  Clock, Target, Cpu, ChevronDown, ChevronUp, Eye, Zap, Radio,
+  TrendingUp, Shield, Users,
 } from "lucide-react";
 import { useSEO } from "@/hooks/use-seo";
 
@@ -911,9 +912,169 @@ function PoliciesTab() {
   );
 }
 
+interface OrchestratorLogEntry {
+  id: string;
+  timestamp: string;
+  sourceAgent: string;
+  signalSummary: string;
+  classification: "user_alert" | "admin_alert" | "both";
+  previewLine: string;
+  severity: string;
+  category: string;
+  broadcastedAt: string | null;
+}
+
+interface OrchestratorStats {
+  total: number;
+  userAlerts: number;
+  adminAlerts: number;
+  bothAlerts: number;
+  broadcasted: number;
+  lastSignal: string | null;
+}
+
+function SorsOrchestratorTab() {
+  const { data, isLoading } = useQuery<{ log: OrchestratorLogEntry[]; stats: OrchestratorStats }>({
+    queryKey: ["/api/admin/sors-orchestrator/log"],
+    refetchInterval: 30_000,
+    staleTime: 15_000,
+  });
+
+  const log = data?.log || [];
+  const stats = data?.stats;
+
+  const routingColor = (r: string) => {
+    if (r === "user_alert") return "bg-blue-500/10 text-blue-500 border-blue-500/20";
+    if (r === "both") return "bg-purple-500/10 text-purple-500 border-purple-500/20";
+    return "bg-gray-500/10 text-gray-500 border-gray-500/20";
+  };
+
+  const severityColor = (s: string) => {
+    if (s === "critical") return "bg-red-500/10 text-red-500 border-red-500/20";
+    if (s === "warning") return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
+    return "bg-green-500/10 text-green-500 border-green-500/20";
+  };
+
+  const agentIcon = (agent: string) => {
+    if (agent === "sharp_detector") return <TrendingUp className="h-3.5 w-3.5 text-orange-400" />;
+    if (agent === "analytics_agent") return <Activity className="h-3.5 w-3.5 text-blue-400" />;
+    if (agent === "autonomous_admin") return <Shield className="h-3.5 w-3.5 text-purple-400" />;
+    return <Zap className="h-3.5 w-3.5 text-muted-foreground" />;
+  };
+
+  if (isLoading) return <div className="py-20 text-center text-muted-foreground">Loading signal log...</div>;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-1 flex items-center gap-2">
+          <Radio className="h-5 w-5 text-orange-500" /> Sors Intelligence Orchestrator
+        </h3>
+        <p className="text-sm text-muted-foreground mb-4">Mother AI routing log — all signals from all agents, classified and routed in real time.</p>
+
+        {stats && (
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <Card data-testid="card-orch-total">
+              <CardContent className="p-3">
+                <div className="text-2xl font-bold">{stats.total}</div>
+                <div className="text-xs text-muted-foreground">Total Signals</div>
+              </CardContent>
+            </Card>
+            <Card data-testid="card-orch-user">
+              <CardContent className="p-3">
+                <div className="text-2xl font-bold text-blue-500">{stats.userAlerts}</div>
+                <div className="text-xs text-muted-foreground">User Alerts</div>
+              </CardContent>
+            </Card>
+            <Card data-testid="card-orch-admin">
+              <CardContent className="p-3">
+                <div className="text-2xl font-bold text-gray-400">{stats.adminAlerts}</div>
+                <div className="text-xs text-muted-foreground">Admin Only</div>
+              </CardContent>
+            </Card>
+            <Card data-testid="card-orch-both">
+              <CardContent className="p-3">
+                <div className="text-2xl font-bold text-purple-500">{stats.bothAlerts}</div>
+                <div className="text-xs text-muted-foreground">Both</div>
+              </CardContent>
+            </Card>
+            <Card data-testid="card-orch-broadcast">
+              <CardContent className="p-3">
+                <div className="text-2xl font-bold text-green-500">{stats.broadcasted}</div>
+                <div className="text-xs text-muted-foreground">SSE Broadcast</div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </div>
+
+      {log.length === 0 ? (
+        <div className="text-center py-16 text-muted-foreground" data-testid="text-no-signals">
+          <Radio className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">No signals yet. Agents will emit through the orchestrator once running.</p>
+        </div>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">Time</TableHead>
+                  <TableHead className="text-xs">Agent</TableHead>
+                  <TableHead className="text-xs">Signal</TableHead>
+                  <TableHead className="text-xs">Category</TableHead>
+                  <TableHead className="text-xs">Severity</TableHead>
+                  <TableHead className="text-xs">Routing</TableHead>
+                  <TableHead className="text-xs">Preview Line</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {log.map((entry) => (
+                  <TableRow key={entry.id} data-testid={`row-signal-${entry.id}`}>
+                    <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                      {new Date(entry.timestamp).toLocaleTimeString()}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1.5 text-xs">
+                        {agentIcon(entry.sourceAgent)}
+                        <span className="text-muted-foreground">{entry.sourceAgent.replace(/_/g, " ")}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs max-w-[180px] truncate" title={entry.signalSummary}>
+                      {entry.signalSummary}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                        {entry.category.replace(/_/g, " ")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${severityColor(entry.severity)}`}>
+                        {entry.severity}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${routingColor(entry.classification)}`}>
+                        {entry.classification.replace(/_/g, " ")}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate" title={entry.previewLine}>
+                      {entry.previewLine || "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 export default function AdminOrchestration() {
   useSEO({ title: "Orchestration", description: "Ticket management, feature registry, and recommendations" });
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("mother-ai");
 
   return (
     <div className="min-h-screen bg-background">
@@ -929,7 +1090,7 @@ export default function AdminOrchestration() {
               <h1 className="text-xl font-bold flex items-center gap-2" data-testid="text-page-title">
                 <Cpu className="h-5 w-5 text-primary" /> Orchestration Dashboard
               </h1>
-              <p className="text-sm text-muted-foreground">Ticket management, feature registry, coordination & policies</p>
+              <p className="text-sm text-muted-foreground">Mother AI signal routing, ticket management, feature registry & coordination</p>
             </div>
           </div>
         </div>
@@ -938,6 +1099,7 @@ export default function AdminOrchestration() {
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 flex-wrap" data-testid="tabs-orchestration">
+            <TabsTrigger value="mother-ai" data-testid="tab-mother-ai"><Zap className="h-4 w-4 mr-1" /> Mother AI</TabsTrigger>
             <TabsTrigger value="overview" data-testid="tab-overview"><LayoutDashboard className="h-4 w-4 mr-1" /> Overview</TabsTrigger>
             <TabsTrigger value="tickets" data-testid="tab-tickets"><Ticket className="h-4 w-4 mr-1" /> Tickets</TabsTrigger>
             <TabsTrigger value="confidence" data-testid="tab-confidence"><Brain className="h-4 w-4 mr-1" /> Confidence</TabsTrigger>
@@ -948,6 +1110,7 @@ export default function AdminOrchestration() {
             <TabsTrigger value="policies" data-testid="tab-policies"><ShieldCheck className="h-4 w-4 mr-1" /> Policies</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="mother-ai"><SorsOrchestratorTab /></TabsContent>
           <TabsContent value="overview"><OverviewTab /></TabsContent>
           <TabsContent value="tickets"><TicketsTab /></TabsContent>
           <TabsContent value="confidence"><ConfidenceTicketsTab /></TabsContent>

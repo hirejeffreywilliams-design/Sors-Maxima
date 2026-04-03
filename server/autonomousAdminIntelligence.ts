@@ -10,6 +10,7 @@ import { getCacheStats } from "./responseCache";
 import { apiBudgetOptimizer } from "./apiBudgetOptimizer";
 import { getHubStatus } from "./unifiedIntelligenceHub";
 import { collectRunContext } from "./adminAssistantEngine";
+import { orchestratorEmit } from "./sorsOrchestrator";
 
 const STATE_FILE = path.join(process.cwd(), "autonomous-admin-state.json");
 const MAX_ALERTS = 100;
@@ -149,6 +150,25 @@ class AutonomousAdminIntelligence {
     };
     this.alerts.unshift(newAlert);
     if (this.alerts.length > MAX_ALERTS) this.alerts.length = MAX_ALERTS;
+
+    // Route critical/warning alerts through the Orchestrator
+    const categoryMap: Record<string, any> = {
+      model_performance: "model_performance",
+      api_budget: "api_budget",
+      system_health: "system_health",
+      memory: "memory",
+      ai_status: "ai_status",
+      data_freshness: "data_freshness",
+    };
+    const orchCategory = categoryMap[alert.category] || "system_health";
+    orchestratorEmit({
+      sourceAgent: "autonomous_admin",
+      category: orchCategory,
+      severity: alert.severity === "critical" ? "critical" : alert.severity === "warning" ? "warning" : "info",
+      title: alert.title,
+      detail: alert.detail,
+    }).catch(() => {});
+
     return newAlert;
   }
 

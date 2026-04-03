@@ -4390,6 +4390,19 @@ Follow these rules:
     }
   });
 
+  // ── Sors Intelligence Orchestrator (Mother AI) log ───────────────────────
+  app.get("/api/admin/sors-orchestrator/log", requireAdmin, async (_req, res) => {
+    try {
+      const { getOrchestratorLog, getOrchestratorStats } = await import("../sorsOrchestrator");
+      const limit = 100;
+      const log = getOrchestratorLog().slice(0, limit);
+      const stats = getOrchestratorStats();
+      res.json({ log, stats });
+    } catch (e: any) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   app.post("/api/admin/orchestrator/settle", requireAdmin, async (_req, res) => {
     try {
       const { triggerManualSettlement } = await import("../continuousLearningOrchestrator");

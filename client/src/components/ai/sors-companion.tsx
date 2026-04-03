@@ -6,9 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
   X, Send, Maximize2, Zap,
-  TrendingUp, BarChart3, Target, Brain, AlertTriangle,
+  TrendingUp, BarChart3, Target, Brain, AlertTriangle, Radio,
 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 
 interface Message {
@@ -18,8 +18,13 @@ interface Message {
   timestamp: Date;
 }
 
-interface ContextData {
-  picks: { grade: string }[];
+interface OrchestratorAlert {
+  id: string;
+  category: string;
+  severity: string;
+  title: string;
+  previewLine: string;
+  timestamp: string;
 }
 
 const WELCOME_MESSAGE: Message = {
@@ -79,34 +84,61 @@ export function SorsCompanion() {
   const [input, setInput] = useState("");
   const [hasUnread, setHasUnread] = useState(false);
   const [showTooltip, setShowTooltip] = useState(true);
+  const [orchestratorAlert, setOrchestratorAlert] = useState<OrchestratorAlert | null>(null);
+  const [seenAlertIds, setSeenAlertIds] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
-  // Query live platform context to detect new picks for alert badge
-  const { data: contextData } = useQuery<ContextData>({
-    queryKey: ["/api/ai/analyst/context"],
-    staleTime: 5 * 60 * 1000,
-    refetchInterval: 5 * 60 * 1000,
-  });
-  const newPickCount = contextData?.picks?.length ?? 0;
-  const [lastSeenPickCount, setLastSeenPickCount] = useState<number | null>(null);
-  const hasPlatformAlert = lastSeenPickCount !== null && newPickCount > lastSeenPickCount && !open;
-
-  // On mount: seed lastSeenPickCount once picks load
+  // Subscribe to SSE stream for companion_alert events (orchestrator proactive alerts)
   useEffect(() => {
-    if (lastSeenPickCount === null && newPickCount > 0) {
-      setLastSeenPickCount(newPickCount);
-    }
-  }, [newPickCount, lastSeenPickCount]);
+    let es: EventSource | null = null;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    let active = true;
 
-  // On open: clear unread and mark current picks as seen
+    const connect = () => {
+      if (!active) return;
+      es = new EventSource("/api/sse/stream");
+
+      es.addEventListener("companion_alert", (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data) as OrchestratorAlert;
+          if (!seenAlertIds.has(data.id)) {
+            setSeenAlertIds(prev => new Set([...prev, data.id]));
+            setOrchestratorAlert(data);
+            if (!open) setHasUnread(true);
+            // Also invalidate context data so companion has fresh picks
+            queryClient.invalidateQueries({ queryKey: ["/api/ai/analyst/context"] });
+          }
+        } catch { /* ignore parse errors */ }
+      });
+
+      es.onerror = () => {
+        es?.close();
+        if (active) {
+          reconnectTimer = setTimeout(connect, 15_000);
+        }
+      };
+    };
+
+    connect();
+    return () => {
+      active = false;
+      es?.close();
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+    };
+  }, [open, queryClient]);
+
+  const hasPlatformAlert = orchestratorAlert !== null && !open;
+
+  // On open: clear unread and dismiss orchestrator alert
   useEffect(() => {
     if (open) {
       setHasUnread(false);
-      setLastSeenPickCount(newPickCount);
+      setOrchestratorAlert(null);
       setTimeout(() => inputRef.current?.focus(), 150);
     }
-  }, [open, newPickCount]);
+  }, [open]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -188,8 +220,37 @@ export function SorsCompanion() {
     <>
       {/* ── Floating Avatar Button (bottom-right) ─────────────────────── */}
       <div className="fixed z-[60] select-none" style={{ bottom: "5.5rem", right: "1rem" }}>
-        {/* Tooltip */}
-        {showTooltip && !open && (
+        {/* Orchestrator alert preview bubble */}
+        {hasPlatformAlert && orchestratorAlert && (
+          <div
+            className="absolute bottom-full right-0 mb-3 max-w-[260px] px-3 py-2.5 rounded-xl pointer-events-none"
+            style={{
+              background: "linear-gradient(135deg, rgba(8,8,14,0.98) 0%, rgba(20,12,8,0.99) 100%)",
+              border: "1px solid rgba(240,83,43,0.5)",
+              boxShadow: "0 4px 24px rgba(240,83,43,0.3)",
+              animation: "fadeInUp 0.4s ease-out",
+            }}
+            data-testid="companion-alert-preview"
+          >
+            <div className="flex items-start gap-1.5">
+              <Radio className="w-3 h-3 text-orange-400 shrink-0 mt-0.5" />
+              <p className="text-[11px] font-semibold text-white/90 leading-snug">
+                {orchestratorAlert.previewLine || orchestratorAlert.title}
+              </p>
+            </div>
+            <div
+              className="absolute bottom-0 right-4 translate-y-1/2 w-2 h-2 rotate-45"
+              style={{
+                background: "rgba(20,12,8,0.99)",
+                borderRight: "1px solid rgba(240,83,43,0.5)",
+                borderBottom: "1px solid rgba(240,83,43,0.5)",
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tooltip (only if no orchestrator alert) */}
+        {showTooltip && !open && !hasPlatformAlert && (
           <div
             className="absolute bottom-full right-0 mb-3 whitespace-nowrap px-3 py-1.5 rounded-xl text-[11px] font-bold text-white/90 pointer-events-none"
             style={{
