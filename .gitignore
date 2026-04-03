@@ -34,3 +34,8 @@ monte-carlo-learning-data.json
 pick-outcomes-data.json
 pipeline-alerts.json
 team-form-cache.json
+
+# Transient runtime state
+app-intelligence-state.json
+autonomous-learning-log.json
+mc-stacked-learner.json
