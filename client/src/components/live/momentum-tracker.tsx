@@ -108,7 +108,7 @@ function LiveGameCard({ game, isInSlip, handleAddTeamToSlip }: {
             <span className="text-white font-bold">{game.momentumScore}</span>
           </div>
           <span className="text-xs text-muted-foreground mt-1">
-            {game.momentum === "home" ? game.homeTeam.split(" ").pop() : game.momentum === "away" ? game.awayTeam.split(" ").pop() : "Even"}
+            {game.momentum === "home" ? game.homeTeam : game.momentum === "away" ? game.awayTeam : "Even"}
           </span>
         </div>
 
@@ -135,9 +135,9 @@ function LiveGameCard({ game, isInSlip, handleAddTeamToSlip }: {
 
       <div className="mb-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-          <span>{game.awayTeam.split(" ").pop()}</span>
+          <span>{game.awayTeam}</span>
           <span>Momentum Flow</span>
-          <span>{game.homeTeam.split(" ").pop()}</span>
+          <span>{game.homeTeam}</span>
         </div>
         <div className="h-2 bg-muted rounded-full overflow-hidden">
           <div
@@ -183,8 +183,8 @@ function PreGameCard({ game, isInSlip, handleAddTeamToSlip }: {
       </div>
 
       <div className="flex items-center gap-3 mt-2 flex-wrap">
-        {game.awayRecord && <span className="text-xs text-muted-foreground">{game.awayTeam.split(" ").pop()}: {game.awayRecord}</span>}
-        {game.homeRecord && <span className="text-xs text-muted-foreground">{game.homeTeam.split(" ").pop()}: {game.homeRecord}</span>}
+        {game.awayRecord && <span className="text-xs text-muted-foreground">{game.awayTeam}: {game.awayRecord}</span>}
+        {game.homeRecord && <span className="text-xs text-muted-foreground">{game.homeTeam}: {game.homeRecord}</span>}
         {game.spreadLine && <Badge variant="secondary" className="text-xs">Spread: {game.spreadLine}</Badge>}
         {game.totalLine && <Badge variant="secondary" className="text-xs">O/U: {game.totalLine}</Badge>}
         {game.broadcast && (
@@ -204,7 +204,7 @@ function PreGameCard({ game, isInSlip, handleAddTeamToSlip }: {
           data-testid={`button-add-pre-away-${game.id}`}
         >
           {isInSlip(`live_${game.id}_away`) ? <Check className="w-3 h-3 mr-1" /> : <Star className="w-3 h-3 mr-1" />}
-          {game.awayTeam.split(" ").pop()}
+          {game.awayTeam}
         </Button>
         <Button
           size="sm"
@@ -215,7 +215,7 @@ function PreGameCard({ game, isInSlip, handleAddTeamToSlip }: {
           data-testid={`button-add-pre-home-${game.id}`}
         >
           {isInSlip(`live_${game.id}_home`) ? <Check className="w-3 h-3 mr-1" /> : <Star className="w-3 h-3 mr-1" />}
-          {game.homeTeam.split(" ").pop()}
+          {game.homeTeam}
         </Button>
       </div>
     </div>

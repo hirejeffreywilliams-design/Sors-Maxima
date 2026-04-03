@@ -133,8 +133,6 @@ function LiveJumbotron({
         <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
           {live.map(g => {
             const color = sportAccent(g.sport);
-            const awayAbbr = (g.awayTeam.split(" ").pop() ?? g.awayTeam).toUpperCase().slice(0, 4);
-            const homeAbbr = (g.homeTeam.split(" ").pop() ?? g.homeTeam).toUpperCase().slice(0, 4);
             const awayLeading = g.awayScore > g.homeScore;
             const homeLeading = g.homeScore > g.awayScore;
             const isHalftime = g.status === "halftime";
@@ -198,7 +196,7 @@ function LiveJumbotron({
                         className="text-[10px] font-black font-mono tracking-wider truncate"
                         style={{ color: awayLeading ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.38)" }}
                       >
-                        {awayAbbr}
+                        {g.awayTeam}
                       </span>
                       <span className="text-[7px] font-medium text-white/20 uppercase tracking-wide shrink-0">Away</span>
                     </div>
@@ -228,7 +226,7 @@ function LiveJumbotron({
                         className="text-[10px] font-black font-mono tracking-wider truncate"
                         style={{ color: homeLeading ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.38)" }}
                       >
-                        {homeAbbr}
+                        {g.homeTeam}
                       </span>
                       <span className="text-[7px] font-medium text-white/20 uppercase tracking-wide shrink-0">Home</span>
                     </div>

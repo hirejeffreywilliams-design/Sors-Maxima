@@ -401,8 +401,8 @@ function BestLinesPanel({ games }: { games: BestLinesGame[] }) {
                     <thead>
                       <tr className="text-muted-foreground border-b border-border/50">
                         <th className="text-left py-1 pr-2 font-medium">Book</th>
-                        <th className="text-right pr-2 font-medium">{game.awayTeam.split(" ").pop()} ML</th>
-                        <th className="text-right pr-2 font-medium">{game.homeTeam.split(" ").pop()} ML</th>
+                        <th className="text-right pr-2 font-medium">{game.awayTeam} ML</th>
+                        <th className="text-right pr-2 font-medium">{game.homeTeam} ML</th>
                         <th className="text-right font-medium">Spread</th>
                       </tr>
                     </thead>

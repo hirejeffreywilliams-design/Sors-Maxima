@@ -491,8 +491,8 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
               Injury Report
             </div>
             {[
-              ...(pick.injuryData.homePlayers || []).map(p => ({ ...p, teamShort: pick.homeTeam.split(" ").pop() || pick.homeTeam })),
-              ...(pick.injuryData.awayPlayers || []).map(p => ({ ...p, teamShort: pick.awayTeam.split(" ").pop() || pick.awayTeam })),
+              ...(pick.injuryData.homePlayers || []).map(p => ({ ...p, teamShort: pick.homeTeam })),
+              ...(pick.injuryData.awayPlayers || []).map(p => ({ ...p, teamShort: pick.awayTeam })),
             ].slice(0, 6).map((p, i) => (
               <div key={i} className="flex items-center justify-between gap-2 text-[11px]">
                 <div className="flex items-center gap-1.5 min-w-0">

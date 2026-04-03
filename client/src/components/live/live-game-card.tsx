@@ -361,11 +361,12 @@ export function LiveGameCard({
               <span
                 className="text-[10px] font-black font-mono tracking-wider truncate block"
                 style={{ color: awayLeading ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.38)" }}
+                title={awayTeam.name}
               >
-                {awayTeam.abbr}
+                {awayTeam.name || awayTeam.abbr}
               </span>
               {awayTeam.record && (
-                <span className="text-[6px] text-white/20 font-medium">{awayTeam.record}</span>
+                <span className="text-[6px] text-white/20 font-medium">{awayTeam.abbr} · {awayTeam.record}</span>
               )}
             </div>
             <span className="text-[6px] text-white/18 uppercase font-bold shrink-0">Away</span>
@@ -392,11 +393,12 @@ export function LiveGameCard({
               <span
                 className="text-[10px] font-black font-mono tracking-wider truncate block"
                 style={{ color: homeLeading ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.38)" }}
+                title={homeTeam.name}
               >
-                {homeTeam.abbr}
+                {homeTeam.name || homeTeam.abbr}
               </span>
               {homeTeam.record && (
-                <span className="text-[6px] text-white/20 font-medium">{homeTeam.record}</span>
+                <span className="text-[6px] text-white/20 font-medium">{homeTeam.abbr} · {homeTeam.record}</span>
               )}
             </div>
             <span className="text-[6px] text-white/18 uppercase font-bold shrink-0">Home</span>

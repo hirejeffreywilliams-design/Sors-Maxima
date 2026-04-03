@@ -165,8 +165,8 @@ export function PublicVsSharp() {
                 <div className="space-y-2">
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Public: {game.awayTeam.split(" ").pop()} {game.publicAway}%</span>
-                      <span>{game.homeTeam.split(" ").pop()} {game.publicHome}%</span>
+                      <span>Public: {game.awayTeam} {game.publicAway}%</span>
+                      <span>{game.homeTeam} {game.publicHome}%</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden flex">
                       <div className="h-full bg-blue-400/60" style={{ width: `${game.publicAway}%` }} />
@@ -175,8 +175,8 @@ export function PublicVsSharp() {
                   </div>
                   <div>
                     <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                      <span>Sharp: {game.awayTeam.split(" ").pop()} {game.sharpAway}%</span>
-                      <span>{game.homeTeam.split(" ").pop()} {game.sharpHome}%</span>
+                      <span>Sharp: {game.awayTeam} {game.sharpAway}%</span>
+                      <span>{game.homeTeam} {game.sharpHome}%</span>
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden flex">
                       <div className="h-full bg-green-400/60" style={{ width: `${game.sharpAway}%` }} />
@@ -191,12 +191,12 @@ export function PublicVsSharp() {
                       {game.consensus === "sharp" ? (
                         <>
                           <Zap className="w-3.5 h-3.5 text-green-500 shrink-0" />
-                          <span className="text-green-600 dark:text-green-400">Sors Signal™ lean: {game.sharpHome > game.sharpAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()}</span>
+                          <span className="text-green-600 dark:text-green-400">Sors Signal™ lean: {game.sharpHome > game.sharpAway ? game.homeTeam : game.awayTeam}</span>
                         </>
                       ) : (
                         <>
                           <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-                          <span className="text-yellow-600 dark:text-yellow-400">Public Consensus™: {game.publicHome > game.publicAway ? game.homeTeam.split(" ").pop() : game.awayTeam.split(" ").pop()} — consider fade</span>
+                          <span className="text-yellow-600 dark:text-yellow-400">Public Consensus™: {game.publicHome > game.publicAway ? game.homeTeam : game.awayTeam} — consider fade</span>
                         </>
                       )}
                     </div>

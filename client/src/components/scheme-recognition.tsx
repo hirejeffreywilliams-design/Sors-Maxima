@@ -619,9 +619,9 @@ function MatchupCard({ analysis, index }: { analysis: MatchupSchemeAnalysis; ind
               : "bg-muted text-muted-foreground"
           }>
             {analysis.schemeAdvantage === "home"
-              ? `${analysis.homeTeam.split(" ").pop()} Edge`
+              ? `${analysis.homeTeam} Edge`
               : analysis.schemeAdvantage === "away"
-              ? `${analysis.awayTeam.split(" ").pop()} Edge`
+              ? `${analysis.awayTeam} Edge`
               : "Even"}
           </Badge>
           <Badge variant="outline" className="text-xs">+{analysis.predictionImpact}%</Badge>
@@ -650,12 +650,12 @@ function MatchupCard({ analysis, index }: { analysis: MatchupSchemeAnalysis; ind
           {analysis.odds.overUnder && <Badge variant="outline">O/U: {analysis.odds.overUnder}</Badge>}
           {analysis.odds.homeMoneyline && (
             <Badge variant="outline">
-              {analysis.homeTeam.split(" ").pop()} ML: {analysis.odds.homeMoneyline > 0 ? "+" : ""}{analysis.odds.homeMoneyline}
+              {analysis.homeTeam} ML: {analysis.odds.homeMoneyline > 0 ? "+" : ""}{analysis.odds.homeMoneyline}
             </Badge>
           )}
           {analysis.odds.awayMoneyline && (
             <Badge variant="outline">
-              {analysis.awayTeam.split(" ").pop()} ML: {analysis.odds.awayMoneyline > 0 ? "+" : ""}{analysis.odds.awayMoneyline}
+              {analysis.awayTeam} ML: {analysis.odds.awayMoneyline > 0 ? "+" : ""}{analysis.odds.awayMoneyline}
             </Badge>
           )}
         </div>

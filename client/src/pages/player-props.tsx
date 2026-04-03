@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
+import { AIPickBadge, deriveAIBadge } from "@/components/ai-pick-badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -508,6 +509,17 @@ function PropCard({ prop, playerName, sport, addLeg, removeLeg, overInSlip, unde
             <span className={`text-lg font-mono font-bold mt-0.5 ${overInSlip ? "text-emerald-500" : "text-foreground"}`}>
               {formatOdds(prop.overOdds)}
             </span>
+            <div className="mt-0.5">
+              <AIPickBadge
+                badge={deriveAIBadge(
+                  adjustedRec === "over" ? adjustedConf : Math.max(30, 100 - adjustedConf),
+                  adjustedRec === "over" ? adjustedEdge : -adjustedEdge,
+                  adjustedRec === "over" ? prop.reasoning : undefined,
+                )}
+                compact
+                testId={`ai-badge-over-${playerName}-${prop.market}`}
+              />
+            </div>
             {overInSlip ? (
               <span className="text-[10px] font-medium text-emerald-500 mt-0.5 flex items-center gap-0.5">
                 <Check className="w-2.5 h-2.5" /> In Slip · tap to remove
@@ -539,6 +551,17 @@ function PropCard({ prop, playerName, sport, addLeg, removeLeg, overInSlip, unde
             <span className={`text-lg font-mono font-bold mt-0.5 ${underInSlip ? "text-red-500" : "text-foreground"}`}>
               {formatOdds(prop.underOdds)}
             </span>
+            <div className="mt-0.5">
+              <AIPickBadge
+                badge={deriveAIBadge(
+                  adjustedRec === "under" ? adjustedConf : Math.max(30, 100 - adjustedConf),
+                  adjustedRec === "under" ? adjustedEdge : -adjustedEdge,
+                  adjustedRec === "under" ? prop.reasoning : undefined,
+                )}
+                compact
+                testId={`ai-badge-under-${playerName}-${prop.market}`}
+              />
+            </div>
             {underInSlip ? (
               <span className="text-[10px] font-medium text-red-500 mt-0.5 flex items-center gap-0.5">
                 <Check className="w-2.5 h-2.5" /> In Slip · tap to remove

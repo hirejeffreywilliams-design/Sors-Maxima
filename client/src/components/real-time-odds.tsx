@@ -189,13 +189,17 @@ export function RealTimeOdds() {
           const bestOverBook = game.bestLines.bestOver?.book;
           const bestUnderBook = game.bestLines.bestUnder?.book;
 
+          const homeFullName = game.homeTeam.name;
+          const awayFullName = game.awayTeam.name;
+          const matchupTitle = `${awayFullName} @ ${homeFullName}`;
+
           return (
             <Card key={game.id} data-testid={`card-game-${game.id}`}>
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center gap-2 flex-wrap">
                     <CardTitle className="text-base" data-testid={`text-matchup-${game.id}`}>
-                      {game.shortName}
+                      {matchupTitle}
                     </CardTitle>
                     <Badge variant="outline" className="text-xs">
                       {game.homeTeam.record}
@@ -209,7 +213,7 @@ export function RealTimeOdds() {
                     {game.edgeAnalysis.valueSide && game.edgeAnalysis.valueSide !== "none" && (
                       <Badge className="bg-green-500/15 text-green-600 dark:text-green-400 border-green-500/30" variant="outline">
                         <TrendingUp className="w-3 h-3 mr-1" />
-                        Value: {game.edgeAnalysis.valueSide === "home" ? game.homeTeam.abbreviation : game.awayTeam.abbreviation}
+                        Value: {game.edgeAnalysis.valueSide === "home" ? homeFullName : awayFullName}
                       </Badge>
                     )}
                     {game.edgeAnalysis.hasArbitrage && (
@@ -238,11 +242,11 @@ export function RealTimeOdds() {
                   </div>
                   <div className="p-3 bg-muted/50 rounded-md">
                     <p className="text-xs text-muted-foreground mb-1">Moneyline</p>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{game.homeTeam.abbreviation}</span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-medium" title={homeFullName}>{homeFullName}</span>
                       <span className="font-bold">{formatOdds(game.consensus.homeMoneyline)}</span>
                       <span className="text-muted-foreground mx-1">/</span>
-                      <span className="text-sm">{game.awayTeam.abbreviation}</span>
+                      <span className="text-sm font-medium" title={awayFullName}>{awayFullName}</span>
                       <span className="font-bold">{formatOdds(game.consensus.awayMoneyline)}</span>
                     </div>
                   </div>
@@ -252,19 +256,19 @@ export function RealTimeOdds() {
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
                     {game.bestLines.bestHomeML && (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                        <TrendingUp className="w-3 h-3" />
-                        Best {game.homeTeam.abbreviation} ML: {formatOdds(game.bestLines.bestHomeML.odds)} @ {game.bestLines.bestHomeML.book}
+                        <TrendingUp className="w-3 h-3 shrink-0" />
+                        <span>Best <span title={homeFullName}>{homeFullName}</span> ML: {formatOdds(game.bestLines.bestHomeML.odds)} @ {game.bestLines.bestHomeML.book}</span>
                       </div>
                     )}
                     {game.bestLines.bestAwayML && (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                        <TrendingUp className="w-3 h-3" />
-                        Best {game.awayTeam.abbreviation} ML: {formatOdds(game.bestLines.bestAwayML.odds)} @ {game.bestLines.bestAwayML.book}
+                        <TrendingUp className="w-3 h-3 shrink-0" />
+                        <span>Best <span title={awayFullName}>{awayFullName}</span> ML: {formatOdds(game.bestLines.bestAwayML.odds)} @ {game.bestLines.bestAwayML.book}</span>
                       </div>
                     )}
                     {game.bestLines.bestOver && (
                       <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                        <TrendingUp className="w-3 h-3" />
+                        <TrendingUp className="w-3 h-3 shrink-0" />
                         Best Over: {formatOdds(game.bestLines.bestOver.odds)} @ {game.bestLines.bestOver.book}
                       </div>
                     )}
@@ -277,8 +281,8 @@ export function RealTimeOdds() {
                       <TableHeader>
                         <TableRow>
                           <TableHead className="w-[120px]">Book</TableHead>
-                          <TableHead className="text-center">{game.homeTeam.abbreviation} ML</TableHead>
-                          <TableHead className="text-center">{game.awayTeam.abbreviation} ML</TableHead>
+                          <TableHead className="text-center" title={homeFullName}>{homeFullName} ML</TableHead>
+                          <TableHead className="text-center" title={awayFullName}>{awayFullName} ML</TableHead>
                           <TableHead className="text-center">Spread</TableHead>
                           <TableHead className="text-center">Total</TableHead>
                           <TableHead className="text-center">Over</TableHead>
@@ -325,10 +329,10 @@ export function RealTimeOdds() {
                   {(game.edgeAnalysis.homeEV !== 0 || game.edgeAnalysis.awayEV !== 0) && (
                     <div className="flex items-center gap-3">
                       <span className={game.edgeAnalysis.homeEV > 0 ? "text-green-600 dark:text-green-400" : ""}>
-                        {game.homeTeam.abbreviation} EV: {game.edgeAnalysis.homeEV > 0 ? "+" : ""}{game.edgeAnalysis.homeEV}
+                        <span title={homeFullName}>{homeFullName}</span> EV: {game.edgeAnalysis.homeEV > 0 ? "+" : ""}{game.edgeAnalysis.homeEV}
                       </span>
                       <span className={game.edgeAnalysis.awayEV > 0 ? "text-green-600 dark:text-green-400" : ""}>
-                        {game.awayTeam.abbreviation} EV: {game.edgeAnalysis.awayEV > 0 ? "+" : ""}{game.edgeAnalysis.awayEV}
+                        <span title={awayFullName}>{awayFullName}</span> EV: {game.edgeAnalysis.awayEV > 0 ? "+" : ""}{game.edgeAnalysis.awayEV}
                       </span>
                     </div>
                   )}

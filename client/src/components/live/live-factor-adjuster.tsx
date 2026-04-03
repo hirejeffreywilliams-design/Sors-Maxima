@@ -234,9 +234,9 @@ function GameCard({ game, slipLegs }: { game: LiveFactorAdjustment; slipLegs: { 
       >
         <div className="flex flex-col gap-0.5 min-w-0">
           <div className="flex items-center gap-2 font-semibold text-sm min-w-0">
-            <span className="truncate max-w-[70px] sm:max-w-none">{game.awayTeam.split(" ").pop()}</span>
+            <span className="truncate max-w-[120px] sm:max-w-none">{game.awayTeam}</span>
             <span className="text-muted-foreground font-bold shrink-0">{game.awayScore} – {game.homeScore}</span>
-            <span className="truncate max-w-[70px] sm:max-w-none">{game.homeTeam.split(" ").pop()}</span>
+            <span className="truncate max-w-[120px] sm:max-w-none">{game.homeTeam}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Badge variant="outline" className="text-[10px] px-1.5 py-0">{game.sport}</Badge>
@@ -319,7 +319,7 @@ function GameCard({ game, slipLegs }: { game: LiveFactorAdjustment; slipLegs: { 
               data-testid={`button-live-bet-away-${game.gameId}`}
             >
               <Plus className="w-3 h-3 mr-1" />
-              {game.awayTeam.split(" ").pop()} ML
+              {game.awayTeam} ML
             </Button>
             <Button
               size="sm"
@@ -330,7 +330,7 @@ function GameCard({ game, slipLegs }: { game: LiveFactorAdjustment; slipLegs: { 
               data-testid={`button-live-bet-home-${game.gameId}`}
             >
               <Plus className="w-3 h-3 mr-1" />
-              {game.homeTeam.split(" ").pop()} ML
+              {game.homeTeam} ML
             </Button>
           </div>
         </div>

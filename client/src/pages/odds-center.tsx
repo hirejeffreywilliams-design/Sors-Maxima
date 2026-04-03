@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { PageHero } from "@/components/page-hero";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,8 @@ import {
 import { useSEO } from "@/hooks/use-seo";
 import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
 import { openSorsCompanionWithContext } from "@/components/ai/sors-companion";
+import { AIPickBadge, deriveAIBadge, evToConfidence } from "@/components/ai-pick-badge";
+import { teamFullName, formatMatchupCompact } from "@/lib/matchup-utils";
 
 const SPORTS = [
   { id: "NBA", label: "NBA", emoji: "🏀" },
@@ -124,6 +126,37 @@ interface MarketSnapshot {
   };
 }
 
+interface PrecomputedPick {
+  id: string;
+  sport: string;
+  homeTeam: string;
+  awayTeam: string;
+  betType: string;
+  pick: string;
+  confidence: number;
+  edge: number;
+  ev: number;
+  recommendation: string;
+  reasoning: string;
+  grade: string;
+  odds?: number;
+}
+
+interface InlinePropItem {
+  playerName: string;
+  market: string;
+  marketLabel: string;
+  line: number;
+  confidence: number;
+  edge: number;
+  recommendation: "over" | "under" | "push";
+  reasoning: string;
+  overOdds: number;
+  underOdds: number;
+  bestOver?: { bookmaker: string; odds: number };
+  bestUnder?: { bookmaker: string; odds: number };
+}
+
 function fmt(odds: number | undefined): string {
   if (odds === undefined) return "—";
   return odds > 0 ? `+${odds}` : `${odds}`;
@@ -156,13 +189,36 @@ function velLabel(v: string) {
   return "Slow";
 }
 
-function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boolean; onToggle: () => void }) {
+function GameRow({
+  game,
+  expanded,
+  onToggle,
+  gamePicks = [],
+  inlineProps = [],
+}: {
+  game: MarketGame;
+  expanded: boolean;
+  onToggle: () => void;
+  gamePicks?: PrecomputedPick[];
+  inlineProps?: InlinePropItem[];
+}) {
   const { addLeg } = useParlaySlip();
   const { toast } = useToast();
   const maxEV = Math.max(game.edgeAnalysis?.homeEV ?? 0, game.edgeAnalysis?.awayEV ?? 0);
   const hasSharp = game.lineMovement?.some(m => m.sharpAction);
   const hasSteam = game.lineMovement?.some(m => m.velocity === "steam");
   const isLive = game.status.state === "in";
+
+  const mlPick = gamePicks.find(p => p.betType === "moneyline");
+  const spreadPick = gamePicks.find(p => p.betType === "spread");
+  const totalPick = gamePicks.find(p => p.betType === "total");
+
+  const getBadgeFromPick = useCallback((pick: PrecomputedPick | undefined, fallbackEv: number) => {
+    if (pick) {
+      return deriveAIBadge(pick.confidence, pick.edge, pick.reasoning, pick.recommendation);
+    }
+    return deriveAIBadge(evToConfidence(fallbackEv), fallbackEv * 100);
+  }, []);
 
   const handleAddToSlip = (team: string, outcome: string, odds: number) => {
     const decimalOdds = odds > 0 ? (odds / 100) + 1 : (100 / Math.abs(odds)) + 1;
@@ -214,17 +270,19 @@ function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boo
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                     {game.awayTeam.logo && <img src={game.awayTeam.logo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />}
                     <span className="font-semibold text-xs sm:text-sm truncate" data-testid={`text-away-${game.id}`}>
-                      {game.awayTeam.abbreviation}
+                      {game.awayTeam.name}
                     </span>
-                    <span className="text-[10px] sm:text-xs text-muted-foreground">{game.awayTeam.record}</span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">{game.awayTeam.abbreviation} · {game.awayTeam.record}</span>
+                    <span className="text-[10px] text-muted-foreground sm:hidden">{game.awayTeam.record}</span>
                     {isLive && <span className="text-xs sm:text-sm font-bold ml-auto">{game.awayTeam.score}</span>}
                   </div>
                   <div className="flex items-center gap-1.5 sm:gap-2">
                     {game.homeTeam.logo && <img src={game.homeTeam.logo} alt="" className="w-4 h-4 sm:w-5 sm:h-5" />}
                     <span className="font-semibold text-xs sm:text-sm truncate" data-testid={`text-home-${game.id}`}>
-                      {game.homeTeam.abbreviation}
+                      {game.homeTeam.name}
                     </span>
-                    <span className="text-[10px] sm:text-xs text-muted-foreground">{game.homeTeam.record}</span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">{game.homeTeam.abbreviation} · {game.homeTeam.record}</span>
+                    <span className="text-[10px] text-muted-foreground sm:hidden">{game.homeTeam.record}</span>
                     {isLive && <span className="text-xs sm:text-sm font-bold ml-auto">{game.homeTeam.score}</span>}
                   </div>
                 </div>
@@ -411,13 +469,17 @@ function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boo
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="p-2 bg-muted/30 rounded-lg text-center">
-                      <p className="text-[10px] text-muted-foreground">{game.awayTeam.abbreviation}</p>
+                      <p className="text-[10px] text-muted-foreground truncate" title={game.awayTeam.name}>
+                        {teamFullName({ name: game.awayTeam.name, abbreviation: game.awayTeam.abbreviation })}
+                      </p>
                       <p className={`text-sm font-bold ${evColor(game.edgeAnalysis?.awayEV ?? 0)}`}>
                         {(game.edgeAnalysis?.awayEV ?? 0) > 0 ? "+" : ""}{((game.edgeAnalysis?.awayEV ?? 0) * 100).toFixed(1)}%
                       </p>
                     </div>
                     <div className="p-2 bg-muted/30 rounded-lg text-center">
-                      <p className="text-[10px] text-muted-foreground">{game.homeTeam.abbreviation}</p>
+                      <p className="text-[10px] text-muted-foreground truncate" title={game.homeTeam.name}>
+                        {teamFullName({ name: game.homeTeam.name, abbreviation: game.homeTeam.abbreviation })}
+                      </p>
                       <p className={`text-sm font-bold ${evColor(game.edgeAnalysis?.homeEV ?? 0)}`}>
                         {(game.edgeAnalysis?.homeEV ?? 0) > 0 ? "+" : ""}{((game.edgeAnalysis?.homeEV ?? 0) * 100).toFixed(1)}%
                       </p>
@@ -434,71 +496,296 @@ function GameRow({ game, expanded, onToggle }: { game: MarketGame; expanded: boo
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-2 pt-1 border-t">
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider w-full mb-1 flex items-center gap-1">
+            {/* All Markets Panel — shows every bet type with AI badges, per bookmaker */}
+            {game.bookmakers && game.bookmakers.length > 0 && (
+              <div className="pt-1 border-t space-y-2">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <BarChart3 className="w-3 h-3" /> All Markets by Sportsbook
+                </p>
+                <div className="space-y-2">
+                  {/* Market headers row — uses formatMatchupCompact for abbr context in column labels */}
+                  <div className="grid grid-cols-[80px_1fr_1fr_1fr_1fr] gap-1 text-[9px] text-muted-foreground font-semibold uppercase tracking-wider px-1">
+                    <span>Book</span>
+                    <span className="text-center" title={game.awayTeam.name}>
+                      {formatMatchupCompact({ homeTeam: { name: game.homeTeam.name, abbreviation: game.homeTeam.abbreviation }, awayTeam: { name: game.awayTeam.name, abbreviation: game.awayTeam.abbreviation } }).split(" @ ")[0]} ML
+                    </span>
+                    <span className="text-center" title={game.homeTeam.name}>
+                      {formatMatchupCompact({ homeTeam: { name: game.homeTeam.name, abbreviation: game.homeTeam.abbreviation }, awayTeam: { name: game.awayTeam.name, abbreviation: game.awayTeam.abbreviation } }).split(" @ ")[1]} ML
+                    </span>
+                    <span className="text-center">Spread</span>
+                    <span className="text-center">O/U</span>
+                  </div>
+                  {game.bookmakers.map((b, i) => {
+                    const isBestAway = game.bestLines?.bestAwayML?.book === b.book;
+                    const isBestHome = game.bestLines?.bestHomeML?.book === b.book;
+                    return (
+                      <div key={i} className="grid grid-cols-[80px_1fr_1fr_1fr_1fr] gap-1 items-center px-1 py-1 rounded-md bg-muted/20 text-xs">
+                        <span className="font-medium text-[10px] truncate">{b.book}</span>
+                        <div className="text-center flex flex-col items-center gap-0.5">
+                          <span className={isBestAway ? "text-green-500 font-bold text-[11px]" : "text-[11px]"}>{fmt(b.awayMoneyline)}</span>
+                          {isBestAway && (
+                            <AIPickBadge
+                              badge={getBadgeFromPick(mlPick, game.edgeAnalysis?.awayEV ?? 0)}
+                              compact
+                              testId={`ai-badge-book-away-ml-${game.id}-${i}`}
+                            />
+                          )}
+                        </div>
+                        <div className="text-center flex flex-col items-center gap-0.5">
+                          <span className={isBestHome ? "text-green-500 font-bold text-[11px]" : "text-[11px]"}>{fmt(b.homeMoneyline)}</span>
+                          {isBestHome && (
+                            <AIPickBadge
+                              badge={getBadgeFromPick(mlPick, game.edgeAnalysis?.homeEV ?? 0)}
+                              compact
+                              testId={`ai-badge-book-home-ml-${game.id}-${i}`}
+                            />
+                          )}
+                        </div>
+                        <span className="text-center text-[11px]">
+                          {b.spread !== undefined ? (b.spread > 0 ? `+${b.spread}` : b.spread) : "—"}
+                          {b.spreadAway !== undefined && b.spreadHome !== undefined && (
+                            <span className="text-muted-foreground ml-1 text-[9px]">({fmt(b.spreadAway)}/{fmt(b.spreadHome)})</span>
+                          )}
+                        </span>
+                        <span className="text-center text-[11px]">
+                          {b.total !== undefined ? b.total : "—"}
+                          {b.overPrice !== undefined && b.underPrice !== undefined && (
+                            <span className="text-muted-foreground ml-1 text-[9px]">({fmt(b.overPrice)}/{fmt(b.underPrice)})</span>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {/* Inline Player Props */}
+                {inlineProps.length > 0 ? (
+                  <div className="pt-2 border-t space-y-1.5">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                      <Target className="w-3 h-3" /> Top Player Props
+                    </p>
+                    {inlineProps.map((prop, pi) => (
+                      <div key={pi} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center px-2 py-1.5 rounded-md bg-muted/20 text-xs">
+                        <div className="min-w-0">
+                          <span className="font-medium truncate block">{prop.playerName}</span>
+                          <span className="text-[10px] text-muted-foreground">{prop.marketLabel} {prop.recommendation === "over" ? "Over" : prop.recommendation === "under" ? "Under" : ""} {prop.line}</span>
+                        </div>
+                        <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                          {prop.recommendation === "over" ? fmt(prop.overOdds) : fmt(prop.underOdds)}
+                        </span>
+                        <AIPickBadge
+                          badge={deriveAIBadge(prop.confidence, prop.edge, prop.reasoning, prop.recommendation === "over" ? "bet_over" : prop.recommendation === "under" ? "bet_under" : undefined)}
+                          compact
+                          testId={`ai-badge-prop-${game.id}-${pi}`}
+                        />
+                        <Button
+                          size="sm" variant="ghost" className="h-6 px-1.5 text-xs"
+                          onClick={() => handleAddToSlip(prop.playerName, `${prop.playerName} ${prop.marketLabel} ${prop.recommendation === "over" ? "Over" : "Under"} ${prop.line}`, prop.recommendation === "over" ? prop.overOdds : prop.underOdds)}
+                          data-testid={`btn-add-prop-${game.id}-${pi}`}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <a href="/player-props" className="text-[10px] text-primary underline-offset-2 underline hover:opacity-80">
+                      View all player props →
+                    </a>
+                  </div>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground pt-1">
+                    Player prop markets available —{" "}
+                    <a href="/player-props" className="text-primary underline-offset-2 underline hover:opacity-80">
+                      view in Player Props tab
+                    </a>{" "}
+                    for over/under lines with AI pick analysis.
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="pt-1 border-t space-y-2">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
                 <Plus className="w-3 h-3" /> Quick Add to Slip
               </p>
-              {game.consensus.awayMoneyline !== undefined && (
-                <Button
-                  size="sm" variant="outline" className="text-xs gap-1 h-7"
-                  onClick={() => handleAddToSlip(game.awayTeam.name, `${game.awayTeam.name} ML`, game.consensus.awayMoneyline!)}
-                  data-testid={`btn-add-away-ml-${game.id}`}
-                >
-                  <Plus className="w-3 h-3" />
-                  {game.awayTeam.abbreviation} ML {fmt(game.consensus.awayMoneyline)}
-                </Button>
-              )}
-              {game.consensus.homeMoneyline !== undefined && (
-                <Button
-                  size="sm" variant="outline" className="text-xs gap-1 h-7"
-                  onClick={() => handleAddToSlip(game.homeTeam.name, `${game.homeTeam.name} ML`, game.consensus.homeMoneyline!)}
-                  data-testid={`btn-add-home-ml-${game.id}`}
-                >
-                  <Plus className="w-3 h-3" />
-                  {game.homeTeam.abbreviation} ML {fmt(game.consensus.homeMoneyline)}
-                </Button>
-              )}
-              {game.consensus.spread !== undefined && (
-                <>
-                  <Button
-                    size="sm" variant="outline" className="text-xs gap-1 h-7"
-                    onClick={() => handleAddToSlip(game.awayTeam.name, `${game.awayTeam.name} ${game.consensus.spread! > 0 ? "+" : ""}${game.consensus.spread}`, -110)}
-                    data-testid={`btn-add-away-spread-${game.id}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    {game.awayTeam.abbreviation} {game.consensus.spread > 0 ? "+" : ""}{game.consensus.spread}
-                  </Button>
-                  <Button
-                    size="sm" variant="outline" className="text-xs gap-1 h-7"
-                    onClick={() => handleAddToSlip(game.homeTeam.name, `${game.homeTeam.name} ${-game.consensus.spread! > 0 ? "+" : ""}${-game.consensus.spread!}`, -110)}
-                    data-testid={`btn-add-home-spread-${game.id}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    {game.homeTeam.abbreviation} {-game.consensus.spread! > 0 ? "+" : ""}{-game.consensus.spread!}
-                  </Button>
-                </>
-              )}
-              {game.consensus.total !== undefined && (
-                <>
-                  <Button
-                    size="sm" variant="outline" className="text-xs gap-1 h-7"
-                    onClick={() => handleAddToSlip(game.homeTeam.name, `${game.shortName} Over ${game.consensus.total}`, -110)}
-                    data-testid={`btn-add-over-${game.id}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    O {game.consensus.total}
-                  </Button>
-                  <Button
-                    size="sm" variant="outline" className="text-xs gap-1 h-7"
-                    onClick={() => handleAddToSlip(game.homeTeam.name, `${game.shortName} Under ${game.consensus.total}`, -110)}
-                    data-testid={`btn-add-under-${game.id}`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    U {game.consensus.total}
-                  </Button>
-                </>
-              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {game.consensus.awayMoneyline !== undefined && (
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-medium truncate">{game.awayTeam.name} ML</span>
+                        <span className="text-xs font-mono text-muted-foreground">{fmt(game.consensus.awayMoneyline)}</span>
+                        <AIPickBadge
+                          badge={getBadgeFromPick(mlPick, game.edgeAnalysis?.awayEV ?? 0)}
+                          compact
+                          testId={`ai-badge-away-ml-${game.id}`}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                      onClick={() => handleAddToSlip(game.awayTeam.name, `${game.awayTeam.name} ML`, game.consensus.awayMoneyline!)}
+                      data-testid={`btn-add-away-ml-${game.id}`}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                {game.consensus.homeMoneyline !== undefined && (
+                  <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-medium truncate">{game.homeTeam.name} ML</span>
+                        <span className="text-xs font-mono text-muted-foreground">{fmt(game.consensus.homeMoneyline)}</span>
+                        <AIPickBadge
+                          badge={getBadgeFromPick(mlPick, game.edgeAnalysis?.homeEV ?? 0)}
+                          compact
+                          testId={`ai-badge-home-ml-${game.id}`}
+                        />
+                      </div>
+                    </div>
+                    <Button
+                      size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                      onClick={() => handleAddToSlip(game.homeTeam.name, `${game.homeTeam.name} ML`, game.consensus.homeMoneyline!)}
+                      data-testid={`btn-add-home-ml-${game.id}`}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                {game.consensus.spread !== undefined && (
+                  <>
+                    <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-medium truncate">{game.awayTeam.name} {game.consensus.spread > 0 ? "+" : ""}{game.consensus.spread}</span>
+                          <span className="text-xs font-mono text-muted-foreground">-110</span>
+                          <AIPickBadge
+                            badge={getBadgeFromPick(spreadPick, game.edgeAnalysis?.awayEV ?? 0)}
+                            compact
+                            testId={`ai-badge-away-spread-${game.id}`}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                        onClick={() => handleAddToSlip(game.awayTeam.name, `${game.awayTeam.name} ${game.consensus.spread! > 0 ? "+" : ""}${game.consensus.spread}`, -110)}
+                        data-testid={`btn-add-away-spread-${game.id}`}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-medium truncate">{game.homeTeam.name} {-game.consensus.spread! > 0 ? "+" : ""}{-game.consensus.spread!}</span>
+                          <span className="text-xs font-mono text-muted-foreground">-110</span>
+                          <AIPickBadge
+                            badge={getBadgeFromPick(spreadPick, game.edgeAnalysis?.homeEV ?? 0)}
+                            compact
+                            testId={`ai-badge-home-spread-${game.id}`}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                        onClick={() => handleAddToSlip(game.homeTeam.name, `${game.homeTeam.name} ${-game.consensus.spread! > 0 ? "+" : ""}${-game.consensus.spread!}`, -110)}
+                        data-testid={`btn-add-home-spread-${game.id}`}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+                {game.consensus.total !== undefined && (
+                  <>
+                    <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-medium">{game.awayTeam.name} vs {game.homeTeam.name} Over {game.consensus.total}</span>
+                          <span className="text-xs font-mono text-muted-foreground">-110</span>
+                          <AIPickBadge
+                            badge={getBadgeFromPick(totalPick, Math.max(game.edgeAnalysis?.homeEV ?? 0, game.edgeAnalysis?.awayEV ?? 0))}
+                            compact
+                            testId={`ai-badge-over-${game.id}`}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                        onClick={() => handleAddToSlip(game.homeTeam.name, `${game.awayTeam.name} vs ${game.homeTeam.name} Over ${game.consensus.total}`, -110)}
+                        data-testid={`btn-add-over-${game.id}`}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <div className="flex items-center gap-1.5 p-2 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs font-medium">{game.awayTeam.name} vs {game.homeTeam.name} Under {game.consensus.total}</span>
+                          <span className="text-xs font-mono text-muted-foreground">-110</span>
+                          <AIPickBadge
+                            badge={getBadgeFromPick(totalPick, -(Math.max(game.edgeAnalysis?.homeEV ?? 0, game.edgeAnalysis?.awayEV ?? 0)))}
+                            compact
+                            testId={`ai-badge-under-${game.id}`}
+                          />
+                        </div>
+                      </div>
+                      <Button
+                        size="sm" variant="ghost" className="text-xs gap-0.5 h-6 px-2 shrink-0"
+                        onClick={() => handleAddToSlip(game.homeTeam.name, `${game.awayTeam.name} vs ${game.homeTeam.name} Under ${game.consensus.total}`, -110)}
+                        data-testid={`btn-add-under-${game.id}`}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
+
+            {/* Inline Player Props */}
+            {inlineProps.length > 0 ? (
+              <div className="pt-1 border-t space-y-1.5">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                  <Target className="w-3 h-3" /> Top Player Props
+                </p>
+                {inlineProps.map((prop, pi) => (
+                  <div key={pi} className="grid grid-cols-[1fr_auto_auto_auto] gap-2 items-center px-2 py-1.5 rounded-md bg-muted/20 text-xs">
+                    <div className="min-w-0">
+                      <span className="font-medium truncate block">{prop.playerName}</span>
+                      <span className="text-[10px] text-muted-foreground">{prop.marketLabel} {prop.recommendation === "over" ? "Over" : prop.recommendation === "under" ? "Under" : ""} {prop.line}</span>
+                    </div>
+                    <span className="text-[10px] font-mono text-muted-foreground whitespace-nowrap">
+                      {prop.recommendation === "over" ? fmt(prop.overOdds) : fmt(prop.underOdds)}
+                    </span>
+                    <AIPickBadge
+                      badge={deriveAIBadge(prop.confidence, prop.edge, prop.reasoning, prop.recommendation === "over" ? "bet_over" : prop.recommendation === "under" ? "bet_under" : undefined)}
+                      compact
+                      testId={`ai-badge-prop-${game.id}-${pi}`}
+                    />
+                    <Button
+                      size="sm" variant="ghost" className="h-6 px-1.5 text-xs"
+                      onClick={() => handleAddToSlip(prop.playerName, `${prop.playerName} ${prop.marketLabel} ${prop.recommendation === "over" ? "Over" : "Under"} ${prop.line}`, prop.recommendation === "over" ? prop.overOdds : prop.underOdds)}
+                      data-testid={`btn-add-prop-${game.id}-${pi}`}
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+                <a href="/player-props" className="text-[10px] text-primary underline-offset-2 underline hover:opacity-80">
+                  View all player props →
+                </a>
+              </div>
+            ) : (
+              <div className="pt-1 border-t">
+                <p className="text-[10px] text-muted-foreground">
+                  Player prop markets available —{" "}
+                  <a href="/player-props" className="text-primary underline-offset-2 underline hover:opacity-80">
+                    view in Player Props tab
+                  </a>{" "}
+                  for over/under lines with AI pick analysis.
+                </p>
+              </div>
+            )}
 
             {game.edgeAnalysis?.hasArbitrage && (
               <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg space-y-2">
@@ -575,6 +862,97 @@ function OddsComparisonTab({ games, meta, isLoading, isFetching, sport, dataUpda
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortMode>("ev");
   const [filter, setFilter] = useState<FilterMode>("all");
+
+  const { data: picksData } = useQuery<{ picks: PrecomputedPick[] }>({
+    queryKey: ["/api/precomputed-predictions", sport],
+    enabled: !!sport,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: propsData } = useQuery<{ games: Array<{
+    gameId: string;
+    homeTeam: { name: string; abbreviation: string };
+    awayTeam: { name: string; abbreviation: string };
+    players: Array<{
+      playerName: string;
+      team?: string;
+      markets: Array<{
+        market: string;
+        marketLabel: string;
+        line: number;
+        overOdds: number;
+        underOdds: number;
+        confidence: number;
+        edge: number;
+        recommendation: "over" | "under" | "push";
+        reasoning: string;
+        bestOver?: { bookmaker: string; odds: number };
+        bestUnder?: { bookmaker: string; odds: number };
+      }>;
+    }>;
+  }> }>({
+    queryKey: ["/api/game-player-props", sport],
+    enabled: !!sport && expandedId !== null,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const picksMap = useMemo(() => {
+    const map = new Map<string, PrecomputedPick[]>();
+    for (const pick of picksData?.picks ?? []) {
+      const key = [pick.homeTeam, pick.awayTeam].sort().join("|");
+      const existing = map.get(key) ?? [];
+      existing.push(pick);
+      map.set(key, existing);
+    }
+    return map;
+  }, [picksData]);
+
+  const propsMap = useMemo(() => {
+    const map = new Map<string, InlinePropItem[]>();
+    for (const g of propsData?.games ?? []) {
+      const key = [g.homeTeam.name, g.awayTeam.name].sort().join("|");
+      const keyNorm = [g.homeTeam.name.toLowerCase(), g.awayTeam.name.toLowerCase()].sort().join("|");
+      const topProps: InlinePropItem[] = [];
+      for (const player of g.players) {
+        for (const m of player.markets) {
+          if (m.recommendation !== "push" && m.edge > 0.02) {
+            topProps.push({
+              playerName: player.playerName,
+              market: m.market,
+              marketLabel: m.marketLabel,
+              line: m.line,
+              confidence: m.confidence,
+              edge: m.edge,
+              recommendation: m.recommendation,
+              reasoning: m.reasoning,
+              overOdds: m.overOdds,
+              underOdds: m.underOdds,
+              bestOver: m.bestOver,
+              bestUnder: m.bestUnder,
+            });
+          }
+        }
+      }
+      topProps.sort((a, b) => b.edge - a.edge);
+      const topFive = topProps.slice(0, 5);
+      map.set(key, topFive);
+      map.set(keyNorm, topFive);
+    }
+    return map;
+  }, [propsData]);
+
+  const getPicksForGame = useCallback((game: MarketGame): PrecomputedPick[] => {
+    const key = [game.homeTeam.name, game.awayTeam.name].sort().join("|");
+    return picksMap.get(key) ?? [];
+  }, [picksMap]);
+
+  const getPropsForGame = useCallback((game: MarketGame): InlinePropItem[] => {
+    const key = [game.homeTeam.name, game.awayTeam.name].sort().join("|");
+    const direct = propsMap.get(key);
+    if (direct) return direct;
+    const normKey = [game.homeTeam.name.toLowerCase(), game.awayTeam.name.toLowerCase()].sort().join("|");
+    return propsMap.get(normKey) ?? [];
+  }, [propsMap]);
 
   const filteredGames = games.filter(g => {
     if (filter === "live") return g.status.state === "in";
@@ -681,6 +1059,8 @@ function OddsComparisonTab({ games, meta, isLoading, isFetching, sport, dataUpda
               game={game}
               expanded={expandedId === game.id}
               onToggle={() => setExpandedId(expandedId === game.id ? null : game.id)}
+              gamePicks={getPicksForGame(game)}
+              inlineProps={getPropsForGame(game)}
             />
           ))}
         </div>
@@ -732,9 +1112,9 @@ function HeatmapGameCard({ game }: { game: MarketGame }) {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate" data-testid={`text-away-team-${game.id}`}>
-                {game.awayTeam.abbreviation} {game.awayTeam.name.split(" ").pop()}
+                {game.awayTeam.name}
               </p>
-              <p className="text-[10px] text-muted-foreground">{game.awayTeam.record}</p>
+              <p className="text-[10px] text-muted-foreground">{game.awayTeam.abbreviation} · {game.awayTeam.record}</p>
             </div>
             <div className="text-right shrink-0">
               <span className={`text-sm font-bold ${getEvTextColor(game.edgeAnalysis.awayEV)}`} data-testid={`text-away-ev-${game.id}`}>
@@ -745,9 +1125,9 @@ function HeatmapGameCard({ game }: { game: MarketGame }) {
           <div className="flex items-center justify-between gap-2">
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate" data-testid={`text-home-team-${game.id}`}>
-                {game.homeTeam.abbreviation} {game.homeTeam.name.split(" ").pop()}
+                {game.homeTeam.name}
               </p>
-              <p className="text-[10px] text-muted-foreground">{game.homeTeam.record}</p>
+              <p className="text-[10px] text-muted-foreground">{game.homeTeam.abbreviation} · {game.homeTeam.record}</p>
             </div>
             <div className="text-right shrink-0">
               <span className={`text-sm font-bold ${getEvTextColor(game.edgeAnalysis.homeEV)}`} data-testid={`text-home-ev-${game.id}`}>
@@ -825,7 +1205,7 @@ function HeatmapArbitrageCard({ game }: { game: MarketGame }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4 text-yellow-500" />
-            <span className="font-semibold text-sm">{game.shortName}</span>
+            <span className="font-semibold text-sm">{game.awayTeam.name} vs {game.homeTeam.name}</span>
           </div>
           <Badge className="bg-green-500 text-white text-xs">
             +{game.edgeAnalysis.arbProfit?.toFixed(2)}% profit

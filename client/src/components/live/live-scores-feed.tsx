@@ -109,12 +109,12 @@ function normalizeApiGame(g: any): any {
     date: g.startTime,
     homeTeam: {
       name: g.homeTeam,
-      abbreviation: (g.homeTeam || "").split(" ").pop() || g.homeTeam,
+      abbreviation: g.homeTeamAbbr || g.homeTeam,
       score: g.homeScore ?? 0,
     },
     awayTeam: {
       name: g.awayTeam,
-      abbreviation: (g.awayTeam || "").split(" ").pop() || g.awayTeam,
+      abbreviation: g.awayTeamAbbr || g.awayTeam,
       score: g.awayScore ?? 0,
     },
     status: {
@@ -621,11 +621,11 @@ function LegacyGameCard({
             const otherScore = isHome ? awayScore : homeScore;
             const winning = score > otherScore;
             return (
-              <div key={team.abbreviation ?? (isHome ? "home" : "away")} className="flex items-center justify-between gap-2">
+              <div key={team.name ?? (isHome ? "home" : "away")} className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <span className="text-[8px] font-bold text-white/30 w-3 shrink-0">{isHome ? "H" : "A"}</span>
-                  <span className="text-[11px] font-bold text-white/85 truncate">
-                    {team.abbreviation ?? team.name ?? (isHome ? "Home" : "Away")}
+                  <span className="text-[11px] font-bold text-white/85 truncate" title={team.name}>
+                    {team.name ?? team.abbreviation ?? (isHome ? "Home" : "Away")}
                   </span>
                   {winning && <TrendingUp className="w-2.5 h-2.5 text-emerald-400 shrink-0" />}
                 </div>
@@ -645,14 +645,14 @@ function LegacyGameCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
-              <span className="text-[10px] font-bold text-white/70 truncate block">
-                {game.awayTeam?.abbreviation ?? game.awayTeam?.name ?? "Away"}
+              <span className="text-[10px] font-bold text-white/70 truncate block" title={game.awayTeam?.name}>
+                {game.awayTeam?.name ?? game.awayTeam?.abbreviation ?? "Away"}
               </span>
             </div>
             <span className="text-[9px] font-bold text-white/25">vs</span>
             <div className="flex-1 min-w-0 text-right">
-              <span className="text-[10px] font-bold text-white/70 truncate block">
-                {game.homeTeam?.abbreviation ?? game.homeTeam?.name ?? "Home"}
+              <span className="text-[10px] font-bold text-white/70 truncate block" title={game.homeTeam?.name}>
+                {game.homeTeam?.name ?? game.homeTeam?.abbreviation ?? "Home"}
               </span>
             </div>
           </div>
