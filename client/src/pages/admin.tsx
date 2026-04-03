@@ -962,21 +962,129 @@ export default function AdminDashboard() {
             ))}
           </div>
 
-          {/* Ownership & Exit */}
-          <div className="space-y-3" data-testid="section-ownership-exit">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-0.5">Ownership & Exit</p>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-              {ownershipLinks.map((link) => (
-                <Link key={link.href} href={link.href}>
-                  <Card className="cursor-pointer hover:border-primary/50 transition-colors h-full border-primary/20 bg-primary/5" data-testid={`card-ownership-${link.label.replace(/\s+/g, '-').toLowerCase()}`}>
-                    <CardContent className="p-3 flex flex-col gap-1">
-                      <link.icon className="h-4 w-4 text-primary mb-1" />
-                      <p className="text-xs font-semibold leading-tight">{link.label}</p>
-                      <p className="text-[10px] text-muted-foreground leading-tight">{link.desc}</p>
+          {/* ── Owner Command Center ── */}
+          <div className="space-y-3" data-testid="section-owner-command-center">
+            <div className="flex items-center gap-2 px-0.5">
+              <Crown className="h-4 w-4 text-amber-400" />
+              <p className="text-sm font-bold text-foreground uppercase tracking-wider">Owner Command Center</p>
+              <span className="text-[10px] text-muted-foreground font-normal normal-case tracking-normal">— Your IP, valuation & investor tools</span>
+            </div>
+
+            {/* Owner identity + metrics */}
+            <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/5 via-background to-background overflow-hidden" data-testid="card-owner-identity-banner">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  {/* Identity */}
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center shrink-0">
+                      <Crown className="w-6 h-6 text-amber-400" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-foreground" data-testid="owner-banner-name">Jeffrey</span>
+                        <Badge className="bg-amber-500/15 text-amber-400 border-amber-500/30 text-[10px]" variant="outline">Founder · 100% Owner</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Sors Maxima Sports Intelligence · Founded 2025</p>
+                      <p className="text-[10px] text-muted-foreground/70 mt-0.5">Pre-revenue technology floor: <span className="text-amber-400 font-semibold">$2M–$15M</span> · Full IP ownership · Members-only SaaS</p>
+                    </div>
+                  </div>
+                  {/* Snapshot metrics */}
+                  <div className="flex items-center gap-4 sm:gap-6 shrink-0 flex-wrap">
+                    {[
+                      { v: "8+",  l: "IP Assets" },
+                      { v: "131", l: "Backend Modules" },
+                      { v: "94",  l: "Frontend Pages" },
+                      { v: "$2M–15M", l: "Est. Valuation" },
+                    ].map(({ v, l }) => (
+                      <div key={l} className="text-center">
+                        <p className="text-base font-black text-foreground leading-none">{v}</p>
+                        <p className="text-[9px] text-muted-foreground mt-0.5 leading-none">{l}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Investor Tools grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" data-testid="investor-tools-grid">
+              {[
+                {
+                  href: "/admin/investor-package",
+                  icon: Crown,
+                  label: "Investor Package",
+                  desc: "Print-ready one-pager for buyer and investor meetings",
+                  highlight: true,
+                },
+                {
+                  href: "/admin/evaluation",
+                  icon: BarChart2,
+                  label: "Evaluation Report",
+                  desc: "3-methodology valuation: Revenue, Replacement Cost, Comparables",
+                  highlight: false,
+                },
+                {
+                  href: "/admin/owner-vault",
+                  icon: Lock,
+                  label: "Owner Vault",
+                  desc: "Full IP registry, architecture specs, and valuation projections",
+                  highlight: false,
+                },
+                {
+                  href: "/admin/owner-playbook",
+                  icon: BookOpen,
+                  label: "Owner's Playbook",
+                  desc: "Step-by-step launch, operations, legal, and growth guide",
+                  highlight: false,
+                },
+                {
+                  href: "/admin/financial-projections",
+                  icon: TrendingUp,
+                  label: "Financial Projections",
+                  desc: "5-year Bear/Base/Bull model, unit economics, and ARR targets",
+                  highlight: false,
+                },
+                {
+                  href: "/admin#owner",
+                  icon: UserCog,
+                  label: "Owner Identity Panel",
+                  desc: "Identity card, IP ownership checklist, and next steps",
+                  highlight: false,
+                },
+              ].map(({ href, icon: Icon, label, desc, highlight }) => (
+                <Link key={href} href={href}>
+                  <Card
+                    className={`cursor-pointer hover:border-amber-500/50 transition-all h-full ${highlight ? "border-amber-500/40 bg-amber-500/8 shadow-sm shadow-amber-500/10" : "border-border/60 bg-muted/20"}`}
+                    data-testid={`card-investor-tool-${label.replace(/\s+/g, '-').toLowerCase()}`}
+                  >
+                    <CardContent className="p-3.5 flex items-start gap-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${highlight ? "bg-amber-500/20" : "bg-primary/10"}`}>
+                        <Icon className={`h-4 w-4 ${highlight ? "text-amber-400" : "text-primary"}`} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold leading-tight text-foreground">{label}</p>
+                        <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{desc}</p>
+                      </div>
                     </CardContent>
                   </Card>
                 </Link>
               ))}
+            </div>
+
+            {/* Data room notice */}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 flex items-start gap-3" data-testid="dataroom-notice">
+              <Shield className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-foreground">Full Investor Data Room — 7 documents in your project files</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5 leading-relaxed">
+                  Located at <span className="font-mono text-primary/80">investor-dataroom/</span> in your project root: Executive Summary · Full CIM · Financial Projections · Tech & IP Catalog · Competitive Analysis · M&A Playbook · Defensive Mechanisms. Share these under NDA with prospective buyers.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {["00_INDEX", "01_EXECUTIVE_SUMMARY", "02_CIM_FULL", "03_FINANCIAL_PROJECTIONS", "04_TECH_AND_IP", "05_COMPETITIVE_ANALYSIS", "06_MA_PLAYBOOK", "07_DEFENSIVE_MECHANISMS"].map((doc) => (
+                    <span key={doc} className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono bg-background border border-border/60 text-muted-foreground">{doc}.md</span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1026,8 +1134,8 @@ export default function AdminDashboard() {
               <TabsTrigger value="control-room" data-testid="tab-control-room">
                 <Gauge className="h-3.5 w-3.5 mr-1" />Control Room
               </TabsTrigger>
-              <TabsTrigger value="owner" data-testid="tab-owner">
-                <Crown className="h-3.5 w-3.5 mr-1" />Owner
+              <TabsTrigger value="owner" data-testid="tab-owner" className="data-[state=active]:bg-amber-500/15 data-[state=active]:text-amber-400 text-amber-500/70 hover:text-amber-400">
+                <Crown className="h-3.5 w-3.5 mr-1 text-amber-400" />Owner
               </TabsTrigger>
             </TabsList>
 

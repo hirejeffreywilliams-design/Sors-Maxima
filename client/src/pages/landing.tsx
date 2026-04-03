@@ -9,23 +9,22 @@ import {
   Zap,
   Brain,
   Activity,
-  Wrench,
-  Users,
   Shield,
   Target,
   ChevronRight,
   Star,
   Check,
-  Atom,
   Lock,
   Database,
   CheckCircle,
   Trophy,
   Flame,
+  ArrowRight,
+  Cpu,
+  BarChart3,
 } from "lucide-react";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo.png";
 import { useSEO } from "@/hooks/use-seo";
-import { GoldenTicketHero } from "@/components/golden-ticket-hero";
 
 const features = [
   {
@@ -73,10 +72,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "46", label: "Analysis Factors", icon: Target },
-  { value: "14+", label: "Sports & Leagues", icon: Activity },
-  { value: "1M+", label: "Simulations Daily", icon: Brain },
-  { value: "99.9%", label: "Uptime", icon: Zap },
+  { value: "51", label: "Analysis Factors", icon: Target },
+  { value: "7", label: "Sports & Leagues", icon: Activity },
+  { value: "1M+", label: "Simulations/Game", icon: Brain },
+  { value: "10+", label: "Sportsbooks Tracked", icon: Zap },
 ];
 
 const testimonials = [
@@ -259,7 +258,88 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      <GoldenTicketHero />
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden" data-testid="section-hero">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/5" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,hsl(var(--primary)/0.12),transparent)]" />
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+        <div className="relative z-10 max-w-screen-xl mx-auto px-4 sm:px-6 pt-16 pb-20 sm:pt-24 sm:pb-28">
+          <div className="max-w-3xl mx-auto text-center space-y-6">
+
+            {/* Eyebrow */}
+            <div className="flex items-center justify-center gap-2">
+              <Badge variant="outline" className="gap-1.5 text-xs border-primary/40 bg-primary/8 text-primary px-3 py-1" data-testid="badge-members-only">
+                <Lock className="w-3 h-3" />
+                Members Only · Limited Access
+              </Badge>
+            </div>
+
+            {/* Headline */}
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-foreground leading-[1.05]" data-testid="hero-headline">
+                Sports Intelligence,
+                <br />
+                <span className="text-primary">Engineered.</span>
+              </h1>
+              <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed pt-1" data-testid="hero-subheadline">
+                A 51-factor Monte Carlo engine runs up to 1,000,000 simulations per game so every pick, parlay, and player prop you see is backed by real math — not gut feel.
+              </p>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex items-center justify-center gap-3 flex-wrap pt-2" data-testid="hero-cta-group">
+              <Link href="/register">
+                <Button size="lg" className="gap-2 font-bold px-8 h-12 text-base" data-testid="button-hero-get-started">
+                  Get Started
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="h-12 px-8 text-base font-semibold" data-testid="button-hero-member-login">
+                  Member Login
+                </Button>
+              </Link>
+            </div>
+
+            {/* Stats bar */}
+            <div className="pt-6 border-t border-border/40">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8" data-testid="hero-stats">
+                {[
+                  { value: "51", label: "Analysis Factors", icon: Cpu },
+                  { value: "1M+", label: "Simulations/Game", icon: Brain },
+                  { value: "7", label: "Sports Covered", icon: Target },
+                  { value: "10+", label: "Books Tracked", icon: BarChart3 },
+                ].map(({ value, label, icon: Icon }) => (
+                  <div key={label} className="text-center space-y-1">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <Icon className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-2xl font-black text-foreground">{value}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Grade badges preview */}
+            <div className="flex items-center justify-center gap-2 flex-wrap" data-testid="hero-grade-preview">
+              <span className="text-xs text-muted-foreground">Today's engine grades:</span>
+              {["S", "A+", "A", "B+"].map((g) => (
+                <span key={g} className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-black border ${
+                  g === "S" ? "bg-violet-500/15 border-violet-500/40 text-violet-300" :
+                  g === "A+" ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-300" :
+                  g === "A" ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
+                  "bg-teal-500/10 border-teal-500/30 text-teal-400"
+                }`}>{g}</span>
+              ))}
+              <span className="text-xs text-muted-foreground">— only high-confidence picks reach members</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
 
       <section className="border-y bg-muted/30" data-testid="section-trust-signals">
         <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-8">
