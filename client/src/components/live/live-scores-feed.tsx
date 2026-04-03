@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useTier } from "@/components/tier-gate";
 import { useToast } from "@/hooks/use-toast";
+import { LiveGameCard as RichLiveGameCard, useLiveGameCards } from "./live-game-card";
 
 const SPORT_EMOJI: Record<string, string> = {
   NBA: "🏀", NFL: "🏈", NHL: "🏒", MLB: "⚾", soccer: "⚽", SOCCER: "⚽",
@@ -556,9 +557,9 @@ function GameDetailPanel({
   );
 }
 
-// ─── Live Game Card ─────────────────────────────────────────────────────────
+// ─── Legacy game-card adapter (used as fallback when new rich card lacks data) ─
 
-function LiveGameCard({
+function LegacyGameCard({
   game,
   onSelect,
 }: {
@@ -609,7 +610,6 @@ function LiveGameCard({
         </div>
       </div>
 
-      {/* Live game: show scores */}
       {isLive && (
         <div className="space-y-1.5">
           {[
@@ -641,10 +641,8 @@ function LiveGameCard({
         </div>
       )}
 
-      {/* Upcoming game: team matchup + pre-game info */}
       {!isLive && (
         <div className="space-y-2">
-          {/* Matchup */}
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <span className="text-[10px] font-bold text-white/70 truncate block">
@@ -658,66 +656,29 @@ function LiveGameCard({
               </span>
             </div>
           </div>
-
-          {/* Pre-game odds */}
           {odds && (odds.spread || odds.overUnder) && (
             <div className="flex gap-3">
-              {odds.spread && (
-                <div>
-                  <span className="text-[7px] text-white/25 font-bold uppercase">Spread</span>
-                  <p className="text-[9px] font-bold text-white/55">{odds.spread}</p>
-                </div>
-              )}
-              {odds.overUnder && (
-                <div>
-                  <span className="text-[7px] text-white/25 font-bold uppercase">O/U</span>
-                  <p className="text-[9px] font-bold text-white/55">{odds.overUnder}</p>
-                </div>
-              )}
+              {odds.spread && <div><span className="text-[7px] text-white/25 font-bold uppercase">Spread</span><p className="text-[9px] font-bold text-white/55">{odds.spread}</p></div>}
+              {odds.overUnder && <div><span className="text-[7px] text-white/25 font-bold uppercase">O/U</span><p className="text-[9px] font-bold text-white/55">{odds.overUnder}</p></div>}
             </div>
           )}
-
-          {/* Venue + Broadcast */}
           <div className="flex gap-2 flex-wrap">
-            {venue && (
-              <div className="flex items-center gap-1">
-                <MapPin className="w-2.5 h-2.5 text-white/15" />
-                <span className="text-[7px] text-white/25 truncate max-w-[70px]">{venue}</span>
-              </div>
-            )}
-            {broadcast && (
-              <div className="flex items-center gap-1">
-                <Tv2 className="w-2.5 h-2.5 text-white/15" />
-                <span className="text-[7px] text-white/25 truncate max-w-[70px]">{broadcast}</span>
-              </div>
-            )}
+            {venue && <div className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5 text-white/15" /><span className="text-[7px] text-white/25 truncate max-w-[70px]">{venue}</span></div>}
+            {broadcast && <div className="flex items-center gap-1"><Tv2 className="w-2.5 h-2.5 text-white/15" /><span className="text-[7px] text-white/25 truncate max-w-[70px]">{broadcast}</span></div>}
           </div>
         </div>
       )}
 
-      {/* Live: compact odds strip */}
       {isLive && odds && (odds.spread || odds.overUnder) && (
         <div className="mt-2 pt-2 border-t border-white/8 flex gap-3">
-          {odds.spread && (
-            <div>
-              <span className="text-[7px] text-white/25 font-bold uppercase">Spread</span>
-              <p className="text-[9px] font-bold text-white/55">{odds.spread}</p>
-            </div>
-          )}
-          {odds.overUnder && (
-            <div>
-              <span className="text-[7px] text-white/25 font-bold uppercase">O/U</span>
-              <p className="text-[9px] font-bold text-white/55">{odds.overUnder}</p>
-            </div>
-          )}
+          {odds.spread && <div><span className="text-[7px] text-white/25 font-bold uppercase">Spread</span><p className="text-[9px] font-bold text-white/55">{odds.spread}</p></div>}
+          {odds.overUnder && <div><span className="text-[7px] text-white/25 font-bold uppercase">O/U</span><p className="text-[9px] font-bold text-white/55">{odds.overUnder}</p></div>}
         </div>
       )}
 
       {momentum != null && (
         <div className="mt-2 pt-2 border-t border-white/8">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[7px] font-bold uppercase tracking-widest text-white/25">Momentum</span>
-          </div>
+          <span className="text-[7px] font-bold uppercase tracking-widest text-white/25 mb-1 block">Momentum</span>
           <MomentumBar value={momentum} />
         </div>
       )}
@@ -788,6 +749,9 @@ export function LiveScoresFeed({
   const [timeSince, setTimeSince] = useState("—");
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
 
+  // Rich game cards from dedicated endpoint
+  const { cards: richCards, isLoading: richLoading } = useLiveGameCards();
+
   // Open game when jumbotron fires (token changes force re-open even for same game)
   useEffect(() => {
     if (pendingGameOpen?.id) setSelectedGameId(pendingGameOpen.id);
@@ -813,12 +777,15 @@ export function LiveScoresFeed({
     return () => clearInterval(interval);
   }, [sse.lastUpdate]);
 
-  // Refresh selected game detail on SSE live-scores
+  // Refresh selected game detail on SSE live-scores or live_scores
   useEffect(() => {
-    if (selectedGameId && sse.lastEvent?.type === "live-scores") {
+    if (selectedGameId && (sse.lastEvent?.type === "live-scores" || sse.lastEvent?.type === "live_scores")) {
       queryClient.invalidateQueries({ queryKey: ["/api/live-games", selectedGameId] });
     }
   }, [sse.lastEvent, selectedGameId]);
+
+  // Use rich cards if available, otherwise fall back to legacy SSE/API games
+  const useRichCards = richCards.length > 0;
 
   const sseFired = sse.allGames.length > 0 || sse.liveGames.length > 0;
   let allGames: any[] = [];
@@ -829,7 +796,17 @@ export function LiveScoresFeed({
     allGames = apiGames.map(normalizeApiGame);
   }
 
-  // Apply sport filter (multi-select)
+  // Apply sport filter to rich cards
+  const filteredRichCards = useRichCards
+    ? (selectedSports && selectedSports.size > 0
+      ? richCards.filter(c => selectedSports.has((c.sport || "").toUpperCase()))
+      : richCards)
+    : [];
+
+  const richLiveCards = filteredRichCards.filter(c => c.status === "live" || c.status === "halftime");
+  const richUpcomingCards = filteredRichCards.filter(c => c.status === "pre");
+
+  // Apply sport filter (multi-select) to legacy games
   const filteredGames = selectedSports && selectedSports.size > 0
     ? allGames.filter((g: any) => selectedSports.has((g.sport || "").toUpperCase()))
     : allGames;
@@ -838,19 +815,25 @@ export function LiveScoresFeed({
   const upcomingGames = filteredGames.filter((g: any) => !detectIsLive(g.status) && g.status?.state !== "post" && g.status !== "final");
   const alerts = sse.edgeAlerts ?? [];
 
-  const dataSource = sseFired ? "SSE Live" : apiGames ? "ESPN API" : null;
+  const dataSource = useRichCards ? "ESPN Live" : sseFired ? "SSE Live" : apiGames ? "ESPN API" : null;
 
   const sportLabel = selectedSports && selectedSports.size > 0
     ? Array.from(selectedSports).join("/")
     : null;
 
+  const activeLiveCount = useRichCards ? richLiveCards.length : liveGames.length;
+  const activeUpcomingCount = useRichCards ? richUpcomingCards.length : upcomingGames.length;
+  const totalTracked = useRichCards ? filteredRichCards.length : allGames.length;
+
   const liveSportLabel = sportLabel
-    ? `${liveGames.length} ${sportLabel} game${liveGames.length !== 1 ? "s" : ""}`
-    : `${liveGames.length} in progress`;
+    ? `${activeLiveCount} ${sportLabel} game${activeLiveCount !== 1 ? "s" : ""}`
+    : `${activeLiveCount} in progress`;
 
   const upcomingSportLabel = sportLabel
-    ? `${upcomingGames.length} ${sportLabel} upcoming`
-    : `${upcomingGames.length} upcoming`;
+    ? `${activeUpcomingCount} ${sportLabel} upcoming`
+    : `${activeUpcomingCount} upcoming`;
+
+  const isLoading = richLoading && apiLoading;
 
   return (
     <div className="space-y-5">
@@ -904,7 +887,7 @@ export function LiveScoresFeed({
               {timeSince}
             </p>
             <p className="text-[8px] text-white/25 mt-0.5">
-              {allGames.length} games tracked
+              {totalTracked} games tracked
             </p>
           </div>
         </div>
@@ -964,36 +947,42 @@ export function LiveScoresFeed({
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             Live Now
           </h3>
-          {liveGames.length > 0 && (
+          {activeLiveCount > 0 && (
             <Badge variant="outline" className="text-[8px] bg-red-500/10 border-red-500/25 text-red-400">
               {liveSportLabel}
             </Badge>
           )}
         </div>
 
-        {apiLoading && allGames.length === 0 ? (
+        {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="rounded-xl px-3 py-3 border border-white/07 animate-pulse" style={{ background: "rgba(255,255,255,0.03)", height: 110 }} />
+              <div key={i} className="rounded-2xl border border-white/07 animate-pulse" style={{ background: "rgba(255,255,255,0.03)", height: 140 }} />
             ))}
           </div>
-        ) : liveGames.length === 0 ? (
+        ) : activeLiveCount === 0 ? (
           <div className="px-4 py-6 rounded-xl border border-white/06 text-center" style={{ background: "rgba(255,255,255,0.02)" }}>
             <Activity className="w-6 h-6 text-white/15 mx-auto mb-2" />
             <p className="text-[10px] text-white/25 font-medium">No games in progress right now</p>
-            <p className="text-[8px] text-white/15 mt-1">SSE will push scores the moment games go live · {upcomingGames.length} games scheduled below</p>
+            <p className="text-[8px] text-white/15 mt-1">Scores stream live the moment games tip off · {activeUpcomingCount} games scheduled below</p>
+          </div>
+        ) : useRichCards ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+            {richLiveCards.map(card => (
+              <RichLiveGameCard key={card.id} card={card} onSelect={setSelectedGameId} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
             {liveGames.map((game: any) => (
-              <LiveGameCard key={game.id} game={game} onSelect={setSelectedGameId} />
+              <LegacyGameCard key={game.id} game={game} onSelect={setSelectedGameId} />
             ))}
           </div>
         )}
       </div>
 
       {/* Upcoming / Scheduled */}
-      {upcomingGames.length > 0 && (
+      {activeUpcomingCount > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-[11px] font-black uppercase tracking-wider text-white/50">
@@ -1003,13 +992,28 @@ export function LiveScoresFeed({
               {upcomingSportLabel}
             </Badge>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
-            {upcomingGames.slice(0, 12).map((game: any) => (
-              <LiveGameCard key={game.id} game={game} onSelect={setSelectedGameId} />
-            ))}
-          </div>
-          {upcomingGames.length > 12 && (
-            <p className="text-[8px] text-white/25 text-center">+{upcomingGames.length - 12} more games scheduled</p>
+          {useRichCards ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                {richUpcomingCards.slice(0, 12).map(card => (
+                  <RichLiveGameCard key={card.id} card={card} onSelect={setSelectedGameId} />
+                ))}
+              </div>
+              {richUpcomingCards.length > 12 && (
+                <p className="text-[8px] text-white/25 text-center">+{richUpcomingCards.length - 12} more games scheduled</p>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                {upcomingGames.slice(0, 12).map((game: any) => (
+                  <LegacyGameCard key={game.id} game={game} onSelect={setSelectedGameId} />
+                ))}
+              </div>
+              {upcomingGames.length > 12 && (
+                <p className="text-[8px] text-white/25 text-center">+{upcomingGames.length - 12} more games scheduled</p>
+              )}
+            </>
           )}
         </div>
       )}

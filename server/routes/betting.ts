@@ -1546,6 +1546,16 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
     }
   });
 
+  app.get("/api/live/game-cards", async (_req, res) => {
+    try {
+      const { fetchLiveGameCards } = await import("../liveGameCardsService");
+      const cards = await fetchLiveGameCards();
+      return res.json(cards);
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message });
+    }
+  });
+
   app.get("/api/live-games/:id", async (req, res) => {
     try {
       const { getAllSportsScoreboard } = await import("../espn-scoreboard-provider");

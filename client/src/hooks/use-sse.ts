@@ -151,6 +151,17 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     });
 
+    es.addEventListener("live_scores", (event: MessageEvent) => {
+      if (!mountedRef.current) return;
+      try {
+        if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
+        const data = JSON.parse(event.data);
+        const sseEvent: SSEEvent = { type: "live_scores", data, timestamp: data.timestamp };
+        setState(prev => ({ ...prev, lastEvent: sseEvent, lastUpdate: data.timestamp }));
+        dispatchEvent(sseEvent);
+      } catch {}
+    });
+
     es.addEventListener("edge-alerts", (event: MessageEvent) => {
       if (!mountedRef.current) return;
       try {

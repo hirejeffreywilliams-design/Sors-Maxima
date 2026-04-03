@@ -42,8 +42,10 @@ export function SSEProvider({ enabled, children }: SSEProviderProps) {
         break;
 
       case "live-scores":
+      case "live_scores":
         queryClient.invalidateQueries({ queryKey: ["/api/live/momentum"] });
         queryClient.invalidateQueries({ queryKey: ["/api/live-games"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/live/game-cards"] });
         queryClient.invalidateQueries({ queryKey: ["/api/cashout-advisor"] });
         queryClient.invalidateQueries({ queryKey: ["/api/live/hedge-bets"] });
         break;

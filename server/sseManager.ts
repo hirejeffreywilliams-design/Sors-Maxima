@@ -224,20 +224,32 @@ async function pushIntelligenceUpdate(): Promise<void> {
 
     broadcastEvent("intelligence-update", liveUpdate);
 
-    if (feed.liveGames.length > 0) {
-      broadcastEvent("live-scores", {
-        type: "live-scores",
+    // Always push live_scores event (includes live + upcoming for card rendering)
+    try {
+      const { fetchLiveGameCards } = await import("./liveGameCardsService");
+      const gameCards = await fetchLiveGameCards();
+      broadcastEvent("live_scores", {
+        type: "live_scores",
         timestamp: new Date().toISOString(),
-        games: feed.liveGames.map(g => ({
-          id: g.id,
-          sport: g.sport,
-          shortName: g.shortName,
-          home: { abbreviation: g.homeTeam.abbreviation, score: g.homeTeam.score },
-          away: { abbreviation: g.awayTeam.abbreviation, score: g.awayTeam.score },
-          status: g.status.detail,
-          period: g.status.period,
-        })),
-      }, "scores");
+        cards: gameCards,
+      });
+    } catch (cardErr) {
+      // Fall back to simple scores payload if card fetch fails
+      if (feed.liveGames.length > 0) {
+        broadcastEvent("live-scores", {
+          type: "live-scores",
+          timestamp: new Date().toISOString(),
+          games: feed.liveGames.map(g => ({
+            id: g.id,
+            sport: g.sport,
+            shortName: g.shortName,
+            home: { abbreviation: g.homeTeam.abbreviation, score: g.homeTeam.score },
+            away: { abbreviation: g.awayTeam.abbreviation, score: g.awayTeam.score },
+            status: g.status.detail,
+            period: g.status.period,
+          })),
+        }, "scores");
+      }
     }
 
     if (feed.edgeAlerts.length > 0) {

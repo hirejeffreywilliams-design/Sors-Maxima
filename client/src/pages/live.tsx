@@ -23,6 +23,7 @@ import { useSSEContext } from "@/context/sse-provider";
 import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { TierGate, useTier } from "@/components/tier-gate";
+import { useLiveGameCards, LiveGameCard as RichLiveGameCard } from "@/components/live/live-game-card";
 
 interface LiveGame {
   id: string;
@@ -350,10 +351,15 @@ export default function Live() {
     refetchInterval: 30000,
   });
 
-  // Derive available sports from all live games
-  const availableSports = momentumGames
-    ? Array.from(new Set(momentumGames.map(g => (g.sport || "").toUpperCase()).filter(Boolean)))
-    : [];
+  // Rich game cards for jumbotron (no tier gating — all users see live scores)
+  const { cards: richCards } = useLiveGameCards();
+
+  // Derive available sports from rich cards first, fall back to momentum games
+  const availableSports = richCards.length > 0
+    ? Array.from(new Set(richCards.map(c => (c.sport || "").toUpperCase()).filter(Boolean)))
+    : momentumGames
+      ? Array.from(new Set(momentumGames.map(g => (g.sport || "").toUpperCase()).filter(Boolean)))
+      : [];
 
   // Toggle sport in the multi-select filter
   const handleSportToggle = useCallback((sport: string) => {
@@ -373,10 +379,14 @@ export default function Live() {
     });
   }, []);
 
-  // Filter jumbotron games by selected sports
+  // Filter jumbotron games by selected sports — prefer rich cards (with logos)
+  const jumbotronSource = richCards.length > 0 ? richCards : (momentumGames ?? []);
   const filteredJumbotronGames = selectedSports.size === 0
-    ? (momentumGames ?? [])
-    : (momentumGames ?? []).filter(g => selectedSports.has((g.sport || "").toUpperCase()));
+    ? jumbotronSource
+    : jumbotronSource.filter((g: any) => selectedSports.has((g.sport || "").toUpperCase()));
+
+  // Determine if we're using rich cards or legacy games for jumbotron
+  const jumbotronIsRich = richCards.length > 0;
 
   // When a jumbotron card is clicked — switch to scores tab and open detail
   // Use a token counter so clicking same game twice still reopens the panel
@@ -428,11 +438,40 @@ export default function Live() {
         />
 
         {/* Live games horizontal strip — filtered & clickable */}
-        {filteredJumbotronGames.some(g => g.status === "live" || g.status === "halftime") && (
-          <LiveJumbotron
-            games={filteredJumbotronGames}
-            onSelectGame={handleJumbotronSelect}
-          />
+        {filteredJumbotronGames.some((g: any) => g.status === "live" || g.status === "halftime") && (
+          jumbotronIsRich ? (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+                  </span>
+                  <span className="text-[10px] font-black tracking-widest uppercase text-red-400">Live Now</span>
+                </div>
+                <span className="text-[10px] text-white/30">
+                  {filteredJumbotronGames.filter((g: any) => g.status === "live" || g.status === "halftime").length} game{filteredJumbotronGames.filter((g: any) => g.status === "live" || g.status === "halftime").length !== 1 ? "s" : ""} in progress
+                </span>
+              </div>
+              <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div className="flex gap-3 pb-2" style={{ minWidth: "max-content" }}>
+                  {(filteredJumbotronGames as any[])
+                    .filter(g => g.status === "live" || g.status === "halftime")
+                    .map(card => (
+                      <div key={card.id} style={{ width: 196, flexShrink: 0 }}>
+                        <RichLiveGameCard card={card} onSelect={handleJumbotronSelect} />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+          ) : (
+            <LiveJumbotron
+              games={filteredJumbotronGames as LiveGame[]}
+              onSelectGame={handleJumbotronSelect}
+            />
+          )
         )}
 
         {/* New alert pulse when SSE fires edge-alerts */}
