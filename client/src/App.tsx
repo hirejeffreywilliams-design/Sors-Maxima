@@ -816,8 +816,8 @@ function NavCustomizerSheet({ onClose }: { onClose: () => void }) {
 const FIXED_BOTTOM_TABS = [
   { href: "/", icon: Zap, label: "Home", testId: "bottom-nav-home" },
   { href: "/daily", icon: Calendar, label: "Picks", testId: "bottom-nav-picks" },
-  { href: "/my-bets", icon: History, label: "My Bets", testId: "bottom-nav-mybets" },
-  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "bottom-nav-bankroll" },
+  { href: "/strategy", icon: Brain, label: "AI Analyst", testId: "bottom-nav-analyst" },
+  { href: "/bankroll", icon: Wallet, label: "Tools", testId: "bottom-nav-tools" },
 ] as const;
 
 function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {

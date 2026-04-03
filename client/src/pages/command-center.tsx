@@ -42,6 +42,7 @@ import { TicketShowcase } from "@/components/ticket-showcase";
 import { MobileTicketDeck } from "@/components/mobile-ticket-deck";
 import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 import { OddsAttribution } from "@/components/ui/odds-attribution";
+import { PickAnalyticsRow } from "@/components/pick-analytics-row";
 
 interface TopPick {
   id: string;
@@ -128,16 +129,7 @@ function CompactPickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; leg
           <span className="font-mono font-bold text-foreground">{formatOdds(pick.odds)}</span>
           <span className={pick.ev > 0 ? "text-green-500 font-medium" : "text-red-500"}>EV: {displayEv(pick.ev)}</span>
         </div>
-        {(() => {
-          const calTier = getCalibrationTier(pick.confidence, pick.ev);
-          const kellyPct = Math.max(0, (pick.ev / 100) * (pick.confidence / 100) * 100).toFixed(1);
-          return (
-            <div className="flex items-center justify-between gap-1">
-              <Badge variant="outline" className={`text-[8px] h-3.5 px-1 ${calTier.cls}`} title={calTier.tooltip} data-testid={`badge-cal-tier-${pick.id}`}>{calTier.label}</Badge>
-              <span className="text-[9px] text-sky-400 font-mono" title="Fractional Kelly recommended stake as % of bankroll" data-testid={`stat-kelly-pct-${pick.id}`}>Kelly {kellyPct}%</span>
-            </div>
-          );
-        })()}
+        <PickAnalyticsRow confidence={pick.confidence} ev={pick.ev} pickId={pick.id} size="xs" />
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground">
             <span>Sors Conviction Score™</span>

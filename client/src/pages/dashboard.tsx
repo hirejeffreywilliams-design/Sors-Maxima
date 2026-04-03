@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 import { Link } from "wouter";
+import { PickAnalyticsRow } from "@/components/pick-analytics-row";
 
 const _month = new Date().getMonth() + 1;
 const ncaabLabel = (_month === 3 || _month === 4) ? "March Madness" : "College Hoops";
@@ -79,15 +80,22 @@ function DashboardModelHealthWidget() {
     queryFn: async () => { const r = await fetch("/api/model-health"); if (!r.ok) throw new Error("Failed"); return r.json(); },
     staleTime: 5 * 60_000,
   });
-  const { data: trackData } = useQuery<{ calibrationScore: number | null }>({ queryKey: ["/api/track-record"], staleTime: 5 * 60_000 });
+  const { data: trackData } = useQuery<{ calibrationScore: number | null; calibrationTiers?: { settled: number; calibrationGap: number | null }[] }>({ queryKey: ["/api/track-record"], staleTime: 5 * 60_000 });
 
   if (isLoading || !data) return null;
 
+  const tiers = trackData?.calibrationTiers ?? [];
+  const tiersWithData = tiers.filter(t => t.settled >= 10 && t.calibrationGap !== null);
+  const avgAbsGap = tiersWithData.length > 0
+    ? tiersWithData.reduce((s, t) => s + Math.abs(t.calibrationGap!), 0) / tiersWithData.length
+    : null;
+  const brierEquiv = avgAbsGap !== null ? Math.max(0, 100 - avgAbsGap * 3) : null;
+
   const stats = [
-    { label: "Win Rate", value: `${data.winRate ?? "—"}%`, sub: `${data.settledCount?.toLocaleString() ?? "—"} picks`, color: (data.winRate ?? 0) >= 55 ? "text-emerald-400" : "text-foreground" },
-    { label: "Calibration", value: trackData?.calibrationScore != null ? `${trackData.calibrationScore}/100` : "—", sub: "score", color: (trackData?.calibrationScore ?? 0) >= 75 ? "text-emerald-400" : "text-foreground" },
-    { label: "7-Day Trend", value: data.recentTrend != null ? `${data.recentTrend.toFixed(1)}%` : "—", sub: "win rate", color: (data.recentTrend ?? 0) >= 55 ? "text-emerald-400" : "text-amber-400" },
-    { label: "Factors", value: data.factorCount ?? "—", sub: "active signals", color: "text-foreground" },
+    { label: "Strike Rate", value: `${data.winRate ?? "—"}%`, sub: `${data.settledCount?.toLocaleString() ?? "—"} picks`, color: (data.winRate ?? 0) >= 55 ? "text-emerald-400" : "text-foreground" },
+    { label: "Cal. Score", value: trackData?.calibrationScore != null ? `${trackData.calibrationScore}/100` : "—", sub: "calibration", color: (trackData?.calibrationScore ?? 0) >= 75 ? "text-emerald-400" : "text-foreground" },
+    { label: "Brier Equiv.", value: brierEquiv !== null ? `${brierEquiv.toFixed(0)}/100` : "—", sub: "accuracy score", color: (brierEquiv ?? 0) >= 70 ? "text-emerald-400" : "text-amber-400" },
+    { label: "7-Day Trend", value: data.recentTrend != null ? `${data.recentTrend.toFixed(1)}%` : "—", sub: "recent win rate", color: (data.recentTrend ?? 0) >= 55 ? "text-emerald-400" : "text-amber-400" },
   ];
 
   return (
