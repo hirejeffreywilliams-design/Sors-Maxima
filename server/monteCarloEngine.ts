@@ -1467,6 +1467,66 @@ async function buildEnrichedInput(
     }
   } catch {}
 
+  // === 5 New Simulation Factors (47–51) integrated into core path ===
+  try {
+    const { buildEnrichedSimulationInput } = await import("./overdriveInputBuilder");
+    // Delegate to overdriveInputBuilder which applies all 5 new factors
+    // We merge its output on top of what we've already built
+    const enrichedInput = await buildEnrichedSimulationInput(game, bdlTeams, new Map());
+    // === Factor 47: Referee Crew Bias — adjust total line ===
+    if (enrichedInput.totalLine !== undefined) {
+      if (input.totalLine === undefined) {
+        // No base total — use the factor-enriched value directly
+        input.totalLine = enrichedInput.totalLine;
+      } else {
+        // Referee bias shifts the enriched total relative to a neutral baseline.
+        // The enrichedInput builds its own base total from homeWinPct, so we take the
+        // proportional shift that the new factors applied and apply it to our base.
+        const basePredictedTotal = (input.homeAvgPts || 0) + (input.awayAvgPts || 0);
+        const enrichedPredictedTotal = (enrichedInput.homeAvgPts || 0) + (enrichedInput.awayAvgPts || 0);
+        const scoringDeltaFraction = basePredictedTotal > 0
+          ? (enrichedPredictedTotal - basePredictedTotal) / basePredictedTotal
+          : 0;
+        // Apply the scoring-model delta as a percentage shift to our existing total
+        const totalAdjust = input.totalLine * scoringDeltaFraction;
+        if (Math.abs(totalAdjust) > 0.1) {
+          input.totalLine = Math.max(0, input.totalLine + totalAdjust);
+        }
+      }
+    }
+    // === Factor 48 & 49: Micro-matchups + Coach Tendencies — blend win% ===
+    const homeWinBlend = (input.homeWinPct + enrichedInput.homeWinPct) / 2;
+    const awayWinBlend = (input.awayWinPct + enrichedInput.awayWinPct) / 2;
+    input.homeWinPct = Math.min(85, Math.max(15, homeWinBlend));
+    input.awayWinPct = Math.min(85, Math.max(15, awayWinBlend));
+    // === Factor 48: Micro-matchup scoring impact ===
+    if (enrichedInput.homeAvgPts !== undefined && input.homeAvgPts !== undefined) {
+      // enrichedInput computes homeAvgPts from the same base but with micro-matchup factor applied
+      // Apply the marginal adjustment only (delta between enriched and unadjusted base)
+      const rawBase = game.homeTeam?.avgPointsFor || input.homeAvgPts;
+      const microDelta = enrichedInput.homeAvgPts - rawBase;
+      if (Math.abs(microDelta) > 0.1) input.homeAvgPts = input.homeAvgPts + microDelta;
+    }
+    if (enrichedInput.awayAvgPts !== undefined && input.awayAvgPts !== undefined) {
+      const rawBase = game.awayTeam?.avgPointsFor || input.awayAvgPts;
+      const microDelta = enrichedInput.awayAvgPts - rawBase;
+      if (Math.abs(microDelta) > 0.1) input.awayAvgPts = input.awayAvgPts + microDelta;
+    }
+    // === Factor 51: Travel Quality — additional fatigue-based injury impact ===
+    if (enrichedInput.injuryImpact) {
+      const base = input.injuryImpact || { home: 0, away: 0 };
+      // Take only positive increments (travel quality can add fatigue but not heal injuries)
+      const travelHome = Math.max(0, enrichedInput.injuryImpact.home - base.home);
+      const travelAway = Math.max(0, enrichedInput.injuryImpact.away - base.away);
+      if (travelHome > 0 || travelAway > 0) {
+        input.injuryImpact = {
+          home: base.home + travelHome,
+          away: base.away + travelAway,
+        };
+      }
+    }
+  } catch { /* non-critical: new factors fail silently */ }
+
   return input;
 }
 

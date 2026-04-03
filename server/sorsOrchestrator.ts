@@ -15,7 +15,7 @@ export type SignalRouting = "user_alert" | "admin_alert" | "both";
 export interface OrchestratorSignal {
   id: string;
   timestamp: string;
-  sourceAgent: "autonomous_admin" | "analytics_agent" | "pick_insight" | "sharp_detector" | "system";
+  sourceAgent: "autonomous_admin" | "analytics_agent" | "pick_insight" | "sharp_detector" | "system" | "simulation_specialist";
   category: "sharp_money" | "steam_move" | "arbitrage" | "system_health" | "model_performance" | "api_budget" | "memory" | "ai_status" | "data_freshness" | "odds_alert" | "pick_grade";
   severity: "critical" | "warning" | "info";
   title: string;

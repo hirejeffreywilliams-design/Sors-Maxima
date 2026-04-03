@@ -29,6 +29,7 @@ import { startPrecomputedEngine } from "./precomputedPredictionsEngine";
 import { startMemoryMonitor } from "./sseManager";
 import { startPlatformIntelligenceEngine } from "./platformIntelligenceEngine";
 import { startMonteCarloEngine } from "./monteCarloEngine";
+import { startOverdriveEngine } from "./overdriveEngine";
 import { startNotificationEngine } from "./notificationEngine";
 import { initBacktestOnStartup } from "./backtestEngine";
 import { generateInternationalFeed } from "./internationalSportsEngine";
@@ -314,6 +315,12 @@ function startEnginesPhased(): void {
   // Advanced simulation engine. Pre-simulates matchups for fast user responses.
   // Moved from 50s → 8s: loads disk cache immediately, fires first warmup at 23s total.
   safeStart("Monte Carlo Engine", startMonteCarloEngine, 8_000);
+
+  // ── Phase 2.15 (18s): Pre-Game Overdrive Engine ───────────────────────────
+  // 3-wave pre-game simulation scheduler: 250K → 500K → 1M+ simulations.
+  // Fires waves at 24h, 12h, and 2-3h before game start. Accumulates using
+  // Welford's online algorithm (progressive refinement, not reset).
+  safeStart("Pre-Game Overdrive Engine", startOverdriveEngine, 18_000);
 
   // ── Phase 2.2 (9s): Team Historical Form Engine ─────────────────────────
   // Pulls 60 days of ESPN historical scores to compute real team form metrics.

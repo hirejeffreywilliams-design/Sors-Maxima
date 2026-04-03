@@ -11,7 +11,7 @@ import {
   Zap, Target, BarChart3, Clock, Shield, Flame,
   ArrowUpRight, ArrowDownRight, Minus, RefreshCw, Star,
   Check, Info, Activity, Lock, Crown, Users, AlertTriangle,
-  Timer, Sparkles, ThumbsUp, ThumbsDown
+  Timer, Sparkles, ThumbsUp, ThumbsDown, Cpu
 } from "lucide-react";
 import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
@@ -149,6 +149,9 @@ const FACTOR_LABELS: Record<string, string> = {
   pace_tempo: "Pace & Tempo", clutch_index: "Clutch Factor",
   point_differential: "Point Differential", strength_schedule: "Schedule Strength",
   historical_h2h: "Head-to-Head", predictive_model: "Sors Intelligence",
+  referee_crew_bias: "Ref Crew Bias", player_micro_matchups: "Micro-Matchups",
+  coach_tactical_tendencies: "Coach Tendencies", sentiment_insider_signal: "Sentiment Signal",
+  travel_quality_scoring: "Travel Quality",
 };
 
 function formatFactorName(name: string): string {
@@ -159,6 +162,64 @@ function directionIcon(dir: string) {
   if (dir === "bullish") return <ArrowUpRight className="w-3 h-3 text-green-500" />;
   if (dir === "bearish") return <ArrowDownRight className="w-3 h-3 text-red-500" />;
   return <Minus className="w-3 h-3 text-muted-foreground" />;
+}
+
+function SimulationDepthIndicator({ simulations }: { simulations: number }) {
+  let tier: string;
+  let color: string;
+  let bgColor: string;
+  let borderColor: string;
+
+  if (simulations >= 1_000_000) {
+    tier = "Overdrive Elite";
+    color = "text-purple-500 dark:text-purple-400";
+    bgColor = "bg-purple-500/10";
+    borderColor = "border-purple-500/30";
+  } else if (simulations >= 500_000) {
+    tier = "Elite";
+    color = "text-cyan-500 dark:text-cyan-400";
+    bgColor = "bg-cyan-500/10";
+    borderColor = "border-cyan-500/30";
+  } else if (simulations >= 100_000) {
+    tier = "Strong";
+    color = "text-blue-500 dark:text-blue-400";
+    bgColor = "bg-blue-500/10";
+    borderColor = "border-blue-500/30";
+  } else if (simulations >= 10_000) {
+    tier = "Good";
+    color = "text-green-500 dark:text-green-400";
+    bgColor = "bg-green-500/10";
+    borderColor = "border-green-500/30";
+  } else {
+    tier = "Standard";
+    color = "text-muted-foreground";
+    bgColor = "bg-muted/40";
+    borderColor = "border-border";
+  }
+
+  const formatted = simulations >= 1_000_000
+    ? `${(simulations / 1_000_000).toFixed(1)}M`
+    : simulations >= 1_000
+    ? `${Math.round(simulations / 1_000)}K`
+    : String(simulations);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border ${bgColor} ${borderColor} cursor-default`} data-testid="sim-depth-indicator">
+          <Cpu className={`w-3 h-3 ${color}`} />
+          <span className={`text-[10px] font-mono font-semibold ${color}`}>{formatted} sims</span>
+          <span className={`text-[9px] ${color} opacity-80`}>· {tier}</span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top">
+        <p className="text-xs font-medium">Simulation Depth: {tier}</p>
+        <p className="text-xs text-muted-foreground">{simulations.toLocaleString()} Monte Carlo simulations</p>
+        <p className="text-xs text-muted-foreground mt-0.5">51-factor model including referee bias,</p>
+        <p className="text-xs text-muted-foreground">micro-matchups, coach tendencies, sentiment & travel quality</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 function CapacityBar({ capacity }: { capacity: CapacityInfo }) {
@@ -508,6 +569,10 @@ function PickCard({ pick, rank, userTier, activeSport }: { pick: PrecomputedPick
               </div>
             ))}
           </div>
+        )}
+
+        {pick.monteCarloData && pick.monteCarloData.simulations > 0 && (
+          <SimulationDepthIndicator simulations={pick.monteCarloData.simulations} />
         )}
 
         <PickFeedbackRow pickId={pick.id} sport={pick.sport} betType={pick.betType} grade={pick.grade} />

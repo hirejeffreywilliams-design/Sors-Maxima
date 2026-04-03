@@ -1484,14 +1484,38 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
         communitySignal: patternResult.communitySignal !== "neutral" ? patternResult.communitySignal : undefined,
         communityPatternWarning: patternResult.warningText,
         communityPatternCue: patternResult.positiveCue,
-        monteCarloData: mcSim ? {
-          simulations: mcSim.simulations || 10000,
-          predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
-          predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
-          homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
-          awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
-          convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
-        } : undefined,
+        monteCarloData: mcSim ? (() => {
+          // Use overdrive results (win probs, scores, convergence) if available — they're more accurate
+          let simTotal = mcSim.simulations || 10000;
+          let predictedHomeScore = mcSim.predictedHomeScore;
+          let predictedAwayScore = mcSim.predictedAwayScore;
+          let homeWinProb = mcSim.homeWinProb;
+          let awayWinProb = mcSim.awayWinProb;
+          let convergenceScore = mcSim.convergenceScore || 1;
+          try {
+            const { getOverdriveResult } = require("./overdriveEngine") as typeof import("./overdriveEngine");
+            const overdriveResult = getOverdriveResult(game.id);
+            if (overdriveResult && overdriveResult.totalSimulations > simTotal) {
+              simTotal = overdriveResult.totalSimulations;
+              // Use overdrive-computed merged statistics — represent all accumulated waves
+              if (overdriveResult.latestResult) {
+                predictedHomeScore = overdriveResult.latestResult.predictedHomeScore;
+                predictedAwayScore = overdriveResult.latestResult.predictedAwayScore;
+                homeWinProb = overdriveResult.latestResult.homeWinProb;
+                awayWinProb = overdriveResult.latestResult.awayWinProb;
+                convergenceScore = overdriveResult.latestResult.convergenceScore;
+              }
+            }
+          } catch {}
+          return {
+            simulations: simTotal,
+            predictedHomeScore: Math.round(predictedHomeScore * 10) / 10,
+            predictedAwayScore: Math.round(predictedAwayScore * 10) / 10,
+            homeWinProb: Math.round(homeWinProb * 1000) / 10,
+            awayWinProb: Math.round(awayWinProb * 1000) / 10,
+            convergenceScore: Math.round(convergenceScore * 100) / 100,
+          };
+        })() : undefined,
         situationalData: sitFactors ? {
           homeRestDays: sitFactors.homeRestDays,
           awayRestDays: sitFactors.awayRestDays,
@@ -1672,14 +1696,22 @@ async function generatePredictionsForSport(sport: Sport): Promise<PrecomputedSna
               : propTiming.timingAdvice,
             releaseSchedule: buildReleaseSchedule(now),
             isExclusive: false,
-            monteCarloData: mcSim ? {
-              simulations: mcSim.simulations || 10000,
-              predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
-              predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
-              homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
-              awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
-              convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
-            } : undefined,
+            monteCarloData: mcSim ? (() => {
+              let simTotal = mcSim.simulations || 10000;
+              try {
+                const { getSimulationDepthForGame } = require("./overdriveEngine") as typeof import("./overdriveEngine");
+                const od = getSimulationDepthForGame(game.id);
+                if (od.totalSimulations > simTotal) simTotal = od.totalSimulations;
+              } catch {}
+              return {
+                simulations: simTotal,
+                predictedHomeScore: Math.round(mcSim.predictedHomeScore * 10) / 10,
+                predictedAwayScore: Math.round(mcSim.predictedAwayScore * 10) / 10,
+                homeWinProb: Math.round(mcSim.homeWinProb * 1000) / 10,
+                awayWinProb: Math.round(mcSim.awayWinProb * 1000) / 10,
+                convergenceScore: Math.round((mcSim.convergenceScore || 1) * 100) / 100,
+              };
+            })() : undefined,
             situationalData: sitFactors ? {
               homeRestDays: sitFactors.homeRestDays,
               awayRestDays: sitFactors.awayRestDays,

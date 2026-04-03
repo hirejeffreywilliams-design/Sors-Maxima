@@ -5,6 +5,8 @@ import { generatePickExplanation, getPickExplanation, getCacheStats } from "../a
 import { getPrecomputedCache } from "../precomputedPredictionsEngine";
 import { generateIntelligenceFeed } from "../unifiedIntelligenceHub";
 import { buildAnalystContext, getActivePicks } from "../analystContextBuilder";
+import { querySimulationAgent, isSimulationQuery, getNewSimulationFactors } from "../monteCarloVerticalAgent";
+import { getOverdriveStatus, getSimulationDepthForGame, getSimulationTier, formatSimCount } from "../overdriveEngine";
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
 
@@ -33,6 +35,15 @@ export function registerAiRoutes(app: Express): void {
 
     const userId = req.session?.userId;
 
+    // ── Route to Simulation Specialist if query is simulation-related ────────
+    if (isSimulationQuery(messages[messages.length - 1]?.content || "")) {
+      const simResponse = await querySimulationAgent(messages, userId);
+      if (simResponse) {
+        return res.json({ response: simResponse.response, handledBy: simResponse.handledBy });
+      }
+      // Fall through to main analyst if simulation agent is unavailable
+    }
+
     // ── Build token-budgeted platform context ───────────────────────────────
     const ctx = await buildAnalystContext(userId, messages);
 
@@ -46,7 +57,9 @@ Your expertise:
 - Expected Value (EV) calculation and interpretation
 - Joint probability and parlay correlation risks (ALWAYS compute and warn)
 - Line movement, closing line value (CLV), sharp money signals
-- Platform's 46-Factor Model: 46 risk/edge dimensions scored per pick
+- Platform's 51-Factor Model: 51 risk/edge dimensions scored per pick (46 original + 5 new: referee crew bias, micro-matchups, coach tendencies, sentiment, travel quality)
+- For simulation questions, defer to the Simulation Specialist agent
+- Simulation depth tiers: Good (10K+), Strong (100K+), Elite (500K+), Overdrive Elite (1M+)
 - Calibration: comparing model confidence to actual outcomes by sport and confidence tier
 - Cashout engineering strategies (Sportsbook Sweat™, Lock & Roll™, Steam Exit™)
 
@@ -87,6 +100,40 @@ Core rules you ALWAYS follow:
         return res.status(503).json({ error: "AI service temporarily at capacity. Please try again shortly." });
       }
       res.status(500).json({ error: "Analysis failed. Please try again." });
+    }
+  });
+
+  // ── GET /api/simulation/depth/:gameId ─────────────────────────────────────
+  // Returns simulation depth info for a specific game (for recommendation cards).
+  app.get("/api/simulation/depth/:gameId", requireAuth, (req, res) => {
+    try {
+      const { gameId } = req.params;
+      const depth = getSimulationDepthForGame(gameId);
+      res.json(depth);
+    } catch (err: any) {
+      res.status(500).json({ error: "Failed to get simulation depth" });
+    }
+  });
+
+  // ── GET /api/simulation/overdrive-status ──────────────────────────────────
+  // Returns current overdrive engine status (admin + users).
+  app.get("/api/simulation/overdrive-status", requireAuth, (req, res) => {
+    try {
+      const status = getOverdriveStatus();
+      res.json(status);
+    } catch (err: any) {
+      res.status(500).json({ error: "Overdrive status unavailable" });
+    }
+  });
+
+  // ── GET /api/simulation/factors ───────────────────────────────────────────
+  // Returns the 5 new simulation factors (for display in UI).
+  app.get("/api/simulation/factors", requireAuth, (req, res) => {
+    try {
+      const factors = getNewSimulationFactors();
+      res.json({ factors, totalFactors: 51 });
+    } catch (err: any) {
+      res.status(500).json({ error: "Factor registry unavailable" });
     }
   });
 

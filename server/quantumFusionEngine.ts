@@ -193,6 +193,12 @@ export const FACTOR_CATEGORIES = {
     icon: "DollarSign",
     description: "Contract incentives and roster continuity",
     factors: ["contract_motivation", "roster_stability"]
+  },
+  simulation_specialist: {
+    name: "Simulation Specialist Factors",
+    icon: "Cpu",
+    description: "5 new factors from the 51-factor Overdrive model expansion",
+    factors: ["referee_crew_bias", "player_micro_matchups", "coach_tactical_tendencies", "sentiment_insider_signal", "travel_quality_scoring"]
   }
 };
 
@@ -265,6 +271,13 @@ const FUSION_WEIGHTS: FusionWeight[] = [
   { factor: "travel_distance_burden", weight: 0.02, confidence: 68, historicalAccuracy: 0.54, recentTrend: "improving", learningRate: 0.03 },
   { factor: "venue_atmosphere", weight: 0.02, confidence: 62, historicalAccuracy: 0.52, recentTrend: "stable", learningRate: 0.02 },
   { factor: "rolling_5game_form", weight: 0.04, confidence: 74, historicalAccuracy: 0.60, recentTrend: "improving", learningRate: 0.04 },
+
+  // NEW SIMULATION FACTORS (5 factors) — Overdrive 51-factor expansion
+  { factor: "referee_crew_bias", weight: 0.02, confidence: 65, historicalAccuracy: 0.54, recentTrend: "stable", learningRate: 0.03 },
+  { factor: "player_micro_matchups", weight: 0.025, confidence: 74, historicalAccuracy: 0.60, recentTrend: "improving", learningRate: 0.04 },
+  { factor: "coach_tactical_tendencies", weight: 0.02, confidence: 70, historicalAccuracy: 0.57, recentTrend: "improving", learningRate: 0.03 },
+  { factor: "sentiment_insider_signal", weight: 0.02, confidence: 62, historicalAccuracy: 0.55, recentTrend: "improving", learningRate: 0.04 },
+  { factor: "travel_quality_scoring", weight: 0.015, confidence: 68, historicalAccuracy: 0.56, recentTrend: "stable", learningRate: 0.03 },
 ];
 
 const totalWeight = FUSION_WEIGHTS.reduce((sum, w) => sum + w.weight, 0);

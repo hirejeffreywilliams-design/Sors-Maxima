@@ -567,6 +567,72 @@ export async function runMigrations(): Promise<void> {
       )
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS overdrive_cache (
+        game_id VARCHAR(64) PRIMARY KEY,
+        sport VARCHAR(10) NOT NULL,
+        home_team VARCHAR(100) NOT NULL,
+        away_team VARCHAR(100) NOT NULL,
+        game_start_time_sec INTEGER NOT NULL,
+        total_simulations INTEGER NOT NULL,
+        wave INTEGER NOT NULL,
+        home_win_prob REAL,
+        away_win_prob REAL,
+        predicted_home_score REAL,
+        predicted_away_score REAL,
+        convergence_score REAL,
+        ci_home_win_low REAL,
+        ci_home_win_high REAL,
+        ci_total_low REAL,
+        ci_total_high REAL,
+        variance REAL,
+        tier VARCHAR(20) NOT NULL,
+        updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+        acc_total_sims INTEGER DEFAULT 0,
+        acc_home_wins INTEGER DEFAULT 0,
+        acc_home_score_n INTEGER DEFAULT 0,
+        acc_home_score_mean REAL DEFAULT 0,
+        acc_home_score_m2 REAL DEFAULT 0,
+        acc_away_score_n INTEGER DEFAULT 0,
+        acc_away_score_mean REAL DEFAULT 0,
+        acc_away_score_m2 REAL DEFAULT 0,
+        acc_total_score_n INTEGER DEFAULT 0,
+        acc_total_score_mean REAL DEFAULT 0,
+        acc_total_score_m2 REAL DEFAULT 0,
+        acc_spread_covers INTEGER DEFAULT 0,
+        acc_overs INTEGER DEFAULT 0,
+        p10_home_score REAL,
+        p50_home_score REAL,
+        p90_home_score REAL,
+        p10_away_score REAL,
+        p50_away_score REAL,
+        p90_away_score REAL
+      )
+    `);
+
+    await db.execute(sql`
+      ALTER TABLE overdrive_cache
+        ADD COLUMN IF NOT EXISTS acc_total_sims INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_home_wins INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_home_score_n INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_home_score_mean REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_home_score_m2 REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_away_score_n INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_away_score_mean REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_away_score_m2 REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_total_score_n INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_total_score_mean REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_total_score_m2 REAL DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_spread_covers INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS acc_overs INTEGER DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS p10_home_score REAL,
+        ADD COLUMN IF NOT EXISTS p50_home_score REAL,
+        ADD COLUMN IF NOT EXISTS p90_home_score REAL,
+        ADD COLUMN IF NOT EXISTS p10_away_score REAL,
+        ADD COLUMN IF NOT EXISTS p50_away_score REAL,
+        ADD COLUMN IF NOT EXISTS p90_away_score REAL
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);
