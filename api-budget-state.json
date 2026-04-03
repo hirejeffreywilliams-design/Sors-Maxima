@@ -2,16 +2,133 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 3877,
-      "manualRemaining": 96123,
-      "lastReported": "2026-04-02T23:49:15.828Z",
+      "currentUsage": 4215,
+      "manualRemaining": 95797,
+      "lastReported": "2026-04-03T00:00:04.196Z",
       "monthReset": "2026-04-01T00:00:00.000Z",
-      "callLog": [],
+      "callLog": [
+        {
+          "ts": 1775174402976,
+          "count": 1
+        },
+        {
+          "ts": 1775174403094,
+          "count": 1
+        },
+        {
+          "ts": 1775174403096,
+          "count": 1
+        },
+        {
+          "ts": 1775174403097,
+          "count": 1
+        },
+        {
+          "ts": 1775174403098,
+          "count": 1
+        },
+        {
+          "ts": 1775174403099,
+          "count": 1
+        },
+        {
+          "ts": 1775174403100,
+          "count": 1
+        },
+        {
+          "ts": 1775174403100,
+          "count": 1
+        },
+        {
+          "ts": 1775174403111,
+          "count": 1
+        },
+        {
+          "ts": 1775174403112,
+          "count": 1
+        },
+        {
+          "ts": 1775174403123,
+          "count": 1
+        },
+        {
+          "ts": 1775174403124,
+          "count": 1
+        },
+        {
+          "ts": 1775174403125,
+          "count": 1
+        },
+        {
+          "ts": 1775174403125,
+          "count": 1
+        },
+        {
+          "ts": 1775174403126,
+          "count": 1
+        },
+        {
+          "ts": 1775174403127,
+          "count": 1
+        },
+        {
+          "ts": 1775174403128,
+          "count": 1
+        },
+        {
+          "ts": 1775174403129,
+          "count": 1
+        },
+        {
+          "ts": 1775174403130,
+          "count": 1
+        },
+        {
+          "ts": 1775174403131,
+          "count": 1
+        },
+        {
+          "ts": 1775174403131,
+          "count": 1
+        },
+        {
+          "ts": 1775174403132,
+          "count": 1
+        },
+        {
+          "ts": 1775174403133,
+          "count": 1
+        },
+        {
+          "ts": 1775174403134,
+          "count": 1
+        },
+        {
+          "ts": 1775174403135,
+          "count": 1
+        },
+        {
+          "ts": 1775174403136,
+          "count": 1
+        },
+        {
+          "ts": 1775174403137,
+          "count": 1
+        },
+        {
+          "ts": 1775174403138,
+          "count": 1
+        },
+        {
+          "ts": 1775174413099,
+          "count": 1
+        }
+      ],
       "suspended": false,
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-02T23:48:47.720Z"
+      "lastSeasonCheck": "2026-04-02T23:59:37.489Z"
     },
     "apifootball": {
       "currentUsage": 0,
@@ -23,7 +140,7 @@
       "suspendedAt": "2026-03-25T02:48:28.202Z",
       "suspendedReason": "Manually suspended by admin",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-02T23:48:47.720Z"
+      "lastSeasonCheck": "2026-04-02T23:59:37.489Z"
     },
     "balldontlie": {
       "currentUsage": 0,
@@ -35,7 +152,7 @@
       "suspendedAt": "2026-03-25T02:47:54.505Z",
       "suspendedReason": "Manually suspended by admin",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-02T23:48:47.720Z"
+      "lastSeasonCheck": "2026-04-02T23:59:37.489Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -47,7 +164,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-02T23:48:47.720Z"
+      "lastSeasonCheck": "2026-04-02T23:59:37.489Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -59,11 +176,11 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-02T23:48:47.720Z"
+      "lastSeasonCheck": "2026-04-02T23:59:37.489Z"
     }
   },
   "activeUsers": 5,
-  "lastSaved": "2026-04-02T23:49:15.828Z",
+  "lastSaved": "2026-04-03T00:00:13.099Z",
   "alerts": [
     {
       "id": "yka31tz9",

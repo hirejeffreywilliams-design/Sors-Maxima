@@ -821,7 +821,7 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <>
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
         <div className="flex items-center justify-around gap-0 h-16">
           {selectedItems.map((item) => {
             const Icon = NAV_ICON_MAP[item.iconName] || Zap;
@@ -1018,8 +1018,87 @@ function EmailVerificationBanner({ authState }: { authState: AuthState }) {
   );
 }
 
+function TabletSidebarItem({ href, icon: Icon, label, isActive, collapsed, testId }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; isActive: boolean; collapsed: boolean; testId: string }) {
+  return (
+    <Link href={href}>
+      <div
+        className={`flex items-center gap-3 mx-2 px-2 py-2 rounded-lg transition-colors text-sm ${isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+        data-testid={testId}
+        title={collapsed ? label : undefined}
+      >
+        <Icon className="w-4 h-4 shrink-0" />
+        {!collapsed && <span className="truncate text-[13px]">{label}</span>}
+      </div>
+    </Link>
+  );
+}
+
+const TABLET_NAV_ITEMS: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; section: string }[] = [
+  { href: "/", icon: Zap, label: "Command Center", testId: "tablet-nav-command", section: "Picks" },
+  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "tablet-nav-daily", section: "Picks" },
+  { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "tablet-nav-cards", section: "Picks" },
+  { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "tablet-nav-generate", section: "Tickets" },
+  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "tablet-nav-builder", section: "Tickets" },
+  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "tablet-nav-review", section: "Tickets" },
+  { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "tablet-nav-bets", section: "Tickets" },
+  { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "tablet-nav-odds", section: "Markets" },
+  { href: "/player-props", icon: Star, label: "Player Props", testId: "tablet-nav-props", section: "Markets" },
+  { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "tablet-nav-ai", section: "Discover" },
+  { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "tablet-nav-track", section: "Discover" },
+  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "tablet-nav-bankroll", section: "Account" },
+  { href: "/profile", icon: User, label: "My Profile", testId: "tablet-nav-profile", section: "Account" },
+];
+
+function TabletSidebar({ authState, collapsed, onToggle, onLogout }: { authState: AuthState; collapsed: boolean; onToggle: () => void; onLogout: () => void }) {
+  const [location] = useLocation();
+
+  const sections = Array.from(new Set(TABLET_NAV_ITEMS.map(i => i.section)));
+
+  return (
+    <aside
+      className={`hidden md:flex lg:hidden flex-col fixed left-0 top-14 bottom-0 z-40 border-r border-border/60 bg-background/95 backdrop-blur-sm transition-all duration-200 ${collapsed ? "w-14" : "w-52"}`}
+      data-testid="tablet-sidebar"
+    >
+      <div className="flex-1 overflow-y-auto py-2 space-y-3">
+        {!collapsed && sections.map(section => (
+          <div key={section}>
+            <div className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section}</div>
+            {TABLET_NAV_ITEMS.filter(i => i.section === section).map(item => (
+              <TabletSidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={false} testId={item.testId} />
+            ))}
+          </div>
+        ))}
+        {collapsed && TABLET_NAV_ITEMS.map(item => (
+          <TabletSidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={true} testId={item.testId} />
+        ))}
+      </div>
+      <div className="border-t border-border/40 p-2">
+        {!collapsed && authState.username && (
+          <div className="flex items-center gap-2 px-2 py-1.5 mb-1 text-xs text-muted-foreground">
+            <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
+              {authState.username.charAt(0).toUpperCase()}
+            </div>
+            <span className="truncate">{authState.username}</span>
+          </div>
+        )}
+        <button
+          onClick={onToggle}
+          className="w-full flex items-center justify-center gap-2 px-2 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-xs"
+          data-testid="button-tablet-sidebar-toggle"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <ChevronRight className="w-4 h-4" /> : <><ChevronLeft className="w-4 h-4" /><span>Collapse</span></>}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
 function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authState: AuthState }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [tabletSidebarCollapsed, setTabletSidebarCollapsed] = useState(
+    () => localStorage.getItem("tablet-sidebar-collapsed") === "true"
+  );
   
   const handleLogout = async () => {
     try {
@@ -1054,7 +1133,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
             
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden" data-testid="button-mobile-menu">
+                <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-mobile-menu">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
@@ -1076,7 +1155,19 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </header>
 
+      <TabletSidebar
+        authState={authState}
+        collapsed={tabletSidebarCollapsed}
+        onToggle={() => {
+          const next = !tabletSidebarCollapsed;
+          setTabletSidebarCollapsed(next);
+          localStorage.setItem("tablet-sidebar-collapsed", String(next));
+        }}
+        onLogout={handleLogout}
+      />
+
       <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authState.tier ?? "")}>
+        <div className={`transition-all duration-200 ${tabletSidebarCollapsed ? "md:pl-14 lg:pl-0" : "md:pl-52 lg:pl-0"}`}>
         <div className="sticky top-14 z-40 w-full">
           <OfflineBanner />
           <SportsTicker />
@@ -1089,11 +1180,11 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           <EmailVerificationBanner authState={authState} />
         </div>
 
-        <main className="min-h-[calc(100vh-3.5rem)] pb-20 lg:pb-0">
+        <main className="min-h-[calc(100vh-3.5rem)] pb-20 md:pb-0">
           <Router authState={authState} />
         </main>
 
-        <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 lg:mb-0">
+        <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 md:mb-0">
           <div className="max-w-screen-2xl mx-auto">
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
               <div className="text-center max-w-2xl space-y-1">
@@ -1121,6 +1212,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
             </div>
           </div>
         </footer>
+        </div>
 
         <ParlaySlipDrawer />
         <BottomNav onOpenMenu={() => setMobileMenuOpen(true)} />

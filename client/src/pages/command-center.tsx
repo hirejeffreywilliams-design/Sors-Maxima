@@ -552,6 +552,14 @@ function formatOdds(odds: number): string {
 
 const displayEv = (ev: number) => ev > 35 ? "35%+" : `+${ev.toFixed(1)}%`;
 
+function getCalibrationTier(confidence: number, ev: number): { label: string; cls: string; tooltip: string } {
+  if (confidence >= 78 && ev < 4) return { label: "Over-confident", cls: "border-amber-500/50 text-amber-400", tooltip: "High confidence relative to edge. Historically over-estimates win probability." };
+  if (confidence >= 65 && ev >= 4) return { label: "Well-calibrated", cls: "border-emerald-500/50 text-emerald-400", tooltip: "Confidence aligns well with edge. Historically delivers close to predicted win rates." };
+  if (confidence < 65 && ev >= 8) return { label: "Undervalued", cls: "border-sky-500/50 text-sky-400", tooltip: "Conservative model but sees strong edge. Often outperforms confidence rating." };
+  if (ev < 0) return { label: "Risky", cls: "border-red-500/50 text-red-400", tooltip: "Negative expected value — market has priced this bet against a positive outcome." };
+  return { label: "Developing", cls: "border-border/40 text-muted-foreground", tooltip: "Insufficient signal history in this confidence bucket." };
+}
+
 function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id: string }[]; addLeg: (leg: any) => boolean; isFounder?: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const legId = `cmd-${pick.id}`;
@@ -646,6 +654,19 @@ function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id
             {isFounder && (
               <span className="inline-flex items-center justify-center w-4 h-4 rounded-sm bg-amber-500/20 border border-amber-500/40 text-[9px] font-bold text-amber-400 shrink-0" title="Founder Early Access" data-testid={`badge-founder-early-${pick.id}`}>F</span>
             )}
+            {(() => {
+              const cal = getCalibrationTier(pick.confidence, pick.ev);
+              return (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="outline" className={`text-[10px] px-1.5 py-0 cursor-help shrink-0 ${cal.cls}`} data-testid={`calibration-tier-${pick.id}`}>
+                      {cal.label}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[200px] text-xs">{cal.tooltip}</TooltipContent>
+                </Tooltip>
+              );
+            })()}
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <span className={`text-base font-black font-mono tabular-nums ${gradeTextColor(pick.grade)}`}>

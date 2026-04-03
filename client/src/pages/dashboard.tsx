@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, Sparkles, Wrench, Flame, Settings, GripVertical
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,7 @@ import { useParlaySlip, type ParlaySlipLeg } from "@/hooks/use-parlay-slip";
 import { useToast } from "@/hooks/use-toast";
 import type { ParlayLeg, SportEvent, BankrollSettings, BettingEnvironment, EvaluationResult } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
+import { Link } from "wouter";
 
 const _month = new Date().getMonth() + 1;
 const ncaabLabel = (_month === 3 || _month === 4) ? "March Madness" : "College Hoops";
@@ -62,6 +63,56 @@ function getTierStyle(tier: string) {
     case "LEAN": return { bg: "bg-yellow-500", text: "text-white", border: "" };
     default: return { bg: "bg-gray-500", text: "text-white", border: "" };
   }
+}
+
+function getCalibrationTier(confidence: number, ev: number): { label: string; cls: string; tooltip: string } {
+  if (confidence >= 78 && ev < 4) return { label: "Over-confident", cls: "bg-amber-500/10 text-amber-400 border-amber-500/30", tooltip: "High confidence relative to edge. Historically over-estimates win probability." };
+  if (confidence >= 65 && ev >= 4) return { label: "Well-calibrated", cls: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30", tooltip: "Confidence aligns well with edge. Historically delivers close to predicted win rates." };
+  if (confidence < 65 && ev >= 8) return { label: "Undervalued", cls: "bg-sky-500/10 text-sky-400 border-sky-500/30", tooltip: "Conservative model but sees strong edge. Often outperforms confidence rating." };
+  if (ev < 0) return { label: "Risky", cls: "bg-red-500/10 text-red-400 border-red-500/30", tooltip: "Negative expected value — the market has priced this bet against a positive outcome." };
+  return { label: "Developing", cls: "bg-muted/50 text-muted-foreground border-border/40", tooltip: "Insufficient signal history in this confidence bucket." };
+}
+
+function DashboardModelHealthWidget() {
+  const { data, isLoading } = useQuery<{ status: string; winRate: number; recentTrend: number; factorCount: number; settledCount: number }>({
+    queryKey: ["/api/model-health"],
+    queryFn: async () => { const r = await fetch("/api/model-health"); if (!r.ok) throw new Error("Failed"); return r.json(); },
+    staleTime: 5 * 60_000,
+  });
+  const { data: trackData } = useQuery<{ calibrationScore: number | null }>({ queryKey: ["/api/track-record"], staleTime: 5 * 60_000 });
+
+  if (isLoading || !data) return null;
+
+  const stats = [
+    { label: "Win Rate", value: `${data.winRate ?? "—"}%`, sub: `${data.settledCount?.toLocaleString() ?? "—"} picks`, color: (data.winRate ?? 0) >= 55 ? "text-emerald-400" : "text-foreground" },
+    { label: "Calibration", value: trackData?.calibrationScore != null ? `${trackData.calibrationScore}/100` : "—", sub: "score", color: (trackData?.calibrationScore ?? 0) >= 75 ? "text-emerald-400" : "text-foreground" },
+    { label: "7-Day Trend", value: data.recentTrend != null ? `${data.recentTrend.toFixed(1)}%` : "—", sub: "win rate", color: (data.recentTrend ?? 0) >= 55 ? "text-emerald-400" : "text-amber-400" },
+    { label: "Factors", value: data.factorCount ?? "—", sub: "active signals", color: "text-foreground" },
+  ];
+
+  return (
+    <Card className="border-primary/20" data-testid="section-model-health-dashboard">
+      <CardContent className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${data.status === "calibrated" ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+            <CardTitle className="text-sm font-semibold">Model Health</CardTitle>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 capitalize">{data.status}</Badge>
+          </div>
+          <Link href="/track-record" className="text-xs text-primary hover:underline" data-testid="link-model-health-full-report">Full Report →</Link>
+        </div>
+        <div className="grid grid-cols-4 gap-2 text-center">
+          {stats.map(s => (
+            <div key={s.label} className="bg-muted/40 rounded-lg p-2">
+              <p className="text-[10px] text-muted-foreground mb-0.5">{s.label}</p>
+              <p className={`text-sm font-bold ${s.color}`}>{s.value}</p>
+              <p className="text-[10px] text-muted-foreground">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 function getCorrelationBadge(correlation: string) {
@@ -143,6 +194,19 @@ function PickCard({ pick, rank, isFounder }: { pick: any; rank: number; isFounde
                   <TooltipContent side="top" className="max-w-[250px] text-xs">{pick.upgradeReason || "Signal has strengthened since first posted"}</TooltipContent>
                 </Tooltip>
               )}
+              {(() => {
+                const cal = getCalibrationTier(pick.confidence, pick.edge);
+                return (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 cursor-help border ${cal.cls}`} data-testid={`calibration-tier-${pick.id}`}>
+                        {cal.label}
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[220px] text-xs">{cal.tooltip}</TooltipContent>
+                  </Tooltip>
+                );
+              })()}
             </div>
             <p className="font-semibold text-sm">{pick.pick}</p>
             <p className="text-xs text-muted-foreground">{pick.game}</p>
@@ -1198,6 +1262,8 @@ export default function Dashboard() {
         </header>
 
         <StartHereBanner />
+
+        <DashboardModelHealthWidget />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">

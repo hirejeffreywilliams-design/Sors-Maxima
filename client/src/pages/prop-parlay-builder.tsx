@@ -283,6 +283,13 @@ function ParlayCard({ parlay, stake }: { parlay: ParlayRecommendation; stake: nu
           </div>
         </div>
 
+        {parlay.legs.length >= 4 && parlay.modelProbability < 0.20 && (
+          <div className="flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-700 dark:text-amber-400" data-testid={`parlay-lottery-warning-${parlay.id}`}>
+            <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            <span><strong>Lottery Paradox Warning:</strong> This {parlay.legs.length}-leg parlay has a win probability below 20%. Each added leg multiplies the joint probability, making this a high-variance longshot. Consider fractional Kelly staking (≤ 0.5u) and treat it as entertainment, not a primary strategy.</span>
+          </div>
+        )}
+
         {parlay.correlations.length > 0 && (
           <div className="space-y-1">
             <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
