@@ -63,6 +63,16 @@ interface TopPick {
   recommendation?: string;
   winProbability?: number;
   insights?: string[];
+  modelAgreement?: number;
+  confidenceDelta?: number | null;
+  edgeDelta?: number | null;
+  wasUpgraded?: boolean;
+  wasDowngraded?: boolean;
+  upgradeReason?: string;
+  downgradeReason?: string;
+  signalStrengthened?: boolean;
+  signalLabel?: string;
+  signalStrength?: string;
 }
 
 const FACTOR_LABELS: Record<string, string> = {
@@ -129,13 +139,22 @@ function CompactPickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; leg
           <span className="font-mono font-bold text-foreground">{formatOdds(pick.odds)}</span>
           <span className={pick.ev > 0 ? "text-green-500 font-medium" : "text-red-500"}>EV: {displayEv(pick.ev)}</span>
         </div>
-        <PickAnalyticsRow confidence={pick.confidence} ev={pick.ev} pickId={pick.id} modelAgreement={(pick as any).modelAgreement} size="xs" />
+        <PickAnalyticsRow confidence={pick.confidence} ev={pick.ev} pickId={pick.id} modelAgreement={pick.modelAgreement} size="xs" />
         <div className="space-y-1">
           <div className="flex items-center justify-between text-[9px] text-muted-foreground">
-            <span>Sors Conviction Score™</span>
-            <span>{pick.confidence}%</span>
+            <span>Confidence Band</span>
+            <span className="font-medium text-foreground">{pick.confidence}%</span>
           </div>
-          <Progress value={pick.confidence} className="h-1" />
+          {(() => {
+            const lo = Math.max(0, pick.confidence - 8);
+            const hi = Math.min(100, pick.confidence + 4);
+            return (
+              <div className="relative h-1.5 w-full rounded-full bg-muted overflow-hidden" data-testid={`confidence-band-${pick.id}`} title={`CI: ${lo}–${hi}%`}>
+                <div className="absolute h-full rounded-full bg-primary/25" style={{ left: `${lo}%`, width: `${hi - lo}%` }} />
+                <div className="absolute h-full w-0.5 rounded-full bg-primary" style={{ left: `${pick.confidence}%` }} />
+              </div>
+            );
+          })()}
         </div>
         <Button 
           variant={inSlip ? "secondary" : "default"} 
@@ -628,29 +647,29 @@ function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id
             {rec && (
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 ${rec.color}`}>{rec.label}</Badge>
             )}
-            {(pick as any).wasUpgraded && (
-              <Badge className="text-[10px] px-1.5 py-0 bg-green-500 text-white gap-0.5 shrink-0" title={(pick as any).upgradeReason || "Upgraded today"}>
+            {pick.wasUpgraded && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-green-500 text-white gap-0.5 shrink-0" title={pick.upgradeReason || "Upgraded today"}>
                 <TrendingUp className="w-2.5 h-2.5" />Upgraded
               </Badge>
             )}
-            {(pick as any).wasDowngraded && (
-              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-500 border-amber-500 gap-0.5 shrink-0" title={(pick as any).downgradeReason || "Revised today"}>
+            {pick.wasDowngraded && (
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-amber-500 border-amber-500 gap-0.5 shrink-0" title={pick.downgradeReason || "Revised today"}>
                 ↓ Revised
               </Badge>
             )}
-            {!(pick as any).wasUpgraded && !(pick as any).wasDowngraded && (pick as any).signalStrengthened && (
-              <Badge className="text-[10px] px-1.5 py-0 bg-blue-500 text-white gap-0.5 shrink-0" title={(pick as any).upgradeReason || "Signal strengthened"}>
+            {!pick.wasUpgraded && !pick.wasDowngraded && pick.signalStrengthened && (
+              <Badge className="text-[10px] px-1.5 py-0 bg-blue-500 text-white gap-0.5 shrink-0" title={pick.upgradeReason || "Signal strengthened"}>
                 Signal ↑
               </Badge>
             )}
-            {(pick as any).signalLabel && (
+            {pick.signalLabel && (
               <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 ${
-                (pick as any).signalStrength === "elite" ? "border-purple-500 text-purple-400" :
-                (pick as any).signalStrength === "strong" ? "border-emerald-500 text-emerald-400" :
-                (pick as any).signalStrength === "moderate" ? "border-blue-400 text-blue-400" :
+                pick.signalStrength === "elite" ? "border-purple-500 text-purple-400" :
+                pick.signalStrength === "strong" ? "border-emerald-500 text-emerald-400" :
+                pick.signalStrength === "moderate" ? "border-blue-400 text-blue-400" :
                 "border-muted text-muted-foreground"
               }`} data-testid={`signal-badge-${pick.id}`}>
-                {(pick as any).signalLabel}
+                {pick.signalLabel}
               </Badge>
             )}
             {isFounder && (
@@ -690,9 +709,9 @@ function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id
             <p className="text-[9px] text-muted-foreground uppercase tracking-wide mb-0.5">Confidence</p>
             <div className="flex items-center justify-center gap-0.5">
               <p className="text-xs font-bold">{pick.confidence}%</p>
-              {(pick as any).confidenceDelta !== null && (pick as any).confidenceDelta !== 0 && (
-                <span className={`text-[9px] font-semibold ${(pick as any).confidenceDelta > 0 ? "text-green-400" : "text-red-400"}`}>
-                  {(pick as any).confidenceDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).confidenceDelta)}
+              {pick.confidenceDelta != null && pick.confidenceDelta !== 0 && (
+                <span className={`text-[9px] font-semibold ${pick.confidenceDelta > 0 ? "text-green-400" : "text-red-400"}`}>
+                  {pick.confidenceDelta > 0 ? "↑" : "↓"}{Math.abs(pick.confidenceDelta)}
                 </span>
               )}
             </div>
@@ -703,9 +722,9 @@ function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id
               <p className={`text-xs font-bold ${pick.edge > 0 ? "text-emerald-400" : "text-red-400"}`}>
                 {pick.edge > 0 ? "+" : ""}{pick.edge.toFixed(1)}%
               </p>
-              {(pick as any).edgeDelta !== null && (pick as any).edgeDelta !== 0 && (
-                <span className={`text-[9px] font-semibold ${(pick as any).edgeDelta > 0 ? "text-green-400" : "text-red-400"}`}>
-                  {(pick as any).edgeDelta > 0 ? "↑" : "↓"}{Math.abs((pick as any).edgeDelta)}
+              {pick.edgeDelta != null && pick.edgeDelta !== 0 && (
+                <span className={`text-[9px] font-semibold ${pick.edgeDelta > 0 ? "text-green-400" : "text-red-400"}`}>
+                  {pick.edgeDelta > 0 ? "↑" : "↓"}{Math.abs(pick.edgeDelta)}
                 </span>
               )}
             </div>
