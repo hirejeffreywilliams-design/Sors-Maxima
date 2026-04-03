@@ -15,6 +15,8 @@ import {
   getSessionContext,
   TIER_DAILY_LIMITS,
 } from "../aiUsageService";
+import { isPropQuestion, extractPlayerAndMarket, analyzeProp, formatPropsBrief } from "../propIntelligenceEngine";
+import { fetchRealPlayerProps, isOddsApiAvailable } from "../odds-provider";
 
 const SPORTS = ["NBA", "NFL", "MLB", "NHL", "NCAAB"] as const;
 
@@ -293,6 +295,94 @@ export function registerAiRoutes(app: Express): void {
         });
       }
       // Fall through to main analyst if simulation agent unavailable
+    }
+
+    // ── AI Prop Specialist — route prop questions through PIE ─────────────────
+    const lastMessage = messages[messages.length - 1]?.content || "";
+    if (isPropQuestion(lastMessage)) {
+      try {
+        const { playerName, market } = extractPlayerAndMarket(lastMessage);
+        if (playerName && market) {
+          const sportGuess = /nba|basketball|points|rebounds|assists|threes/i.test(lastMessage) ? "NBA"
+            : /nfl|football|yards|touchdown|passing|rushing/i.test(lastMessage) ? "NFL"
+            : /nhl|hockey|goals|shots/i.test(lastMessage) ? "NHL"
+            : /mlb|baseball|strikeouts|hits/i.test(lastMessage) ? "MLB"
+            : "NBA";
+
+          let propIntelBrief = "";
+          try {
+            const props = isOddsApiAvailable() ? await fetchRealPlayerProps(sportGuess as any, [], [], []) : [];
+            const matchedProp = props.find(p =>
+              p.playerName.toLowerCase().includes(playerName.toLowerCase().split(" ").pop()?.toLowerCase() || "")
+            );
+            if (matchedProp) {
+              const intel = await analyzeProp(
+                matchedProp.playerName,
+                matchedProp.market,
+                matchedProp.marketLabel,
+                sportGuess,
+                matchedProp.eventId,
+                matchedProp.homeTeam,
+                matchedProp.awayTeam,
+                matchedProp.homeTeam,
+                matchedProp.overImpliedProb > matchedProp.underImpliedProb ? "under" : "over",
+                matchedProp.line,
+                60,
+              );
+              propIntelBrief = "\n\n=== PROP INTELLIGENCE BRIEF ===\n" + formatPropsBrief(intel);
+            }
+          } catch { /* best effort */ }
+
+          if (propIntelBrief) {
+            const propCtx = await buildAnalystContext(userId?.toString(), messages);
+            const propSystemPrompt = `${propCtx.standardsContext}
+
+You are SORS Intelligence — AI Prop Specialist mode. When a user asks about player props, you respond with a structured Props Brief, not a general answer.
+
+=== LIVE PLATFORM CALIBRATION ===
+${propCtx.calibrationBlock}
+
+=== ACTIVE PICKS ===
+${propCtx.activePicsBlock}
+
+=== USER PROFILE ===
+${propCtx.bankrollBlock}
+${propIntelBrief}
+
+PROP SPECIALIST RULES:
+1. Structure every prop response as: Grade → Game Script → Defender Matchup → Usage Context → Sharp Signal → Correlated Plays → Final Recommendation
+2. Use the Props Intelligence Brief data above as your factual foundation — do not deviate from those grades/signals
+3. Be concise and analytical — members are sophisticated bettors
+4. If the brief shows an Opportunity Play flag, lead with it prominently
+5. If Sharp Signal is detected, call it out as a key factor
+6. End with a single clear Final Recommendation: Over or Under with confidence level
+7. Always include responsible gambling reminder for stake recommendations`;
+
+            try {
+              const propCompletion = await openai.chat.completions.create({
+                model: "gpt-4o",
+                messages: [
+                  { role: "system", content: propSystemPrompt },
+                  ...messages.map(m => ({ role: m.role, content: m.content })),
+                ],
+                max_tokens: 800,
+                temperature: 0.6,
+              });
+              const propResponse = propCompletion.choices[0]?.message?.content ?? "Unable to generate prop analysis.";
+              let newCount = 0;
+              if (userId && !req.session?.isAdmin && tier !== "whale") {
+                newCount = await incrementAiUsage(userId);
+              }
+              const limit = TIER_DAILY_LIMITS[tier];
+              return res.json({
+                response: propResponse,
+                handledBy: "prop-specialist",
+                usage: { current: newCount, limit, tier },
+              });
+            } catch { /* fall through to main analyst */ }
+          }
+        }
+      } catch { /* fall through to main analyst */ }
     }
 
     // ── Build tier-differentiated system prompt ──────────────────────────────

@@ -30,6 +30,7 @@ import {
   AlertTriangle, Check, TrendingUp, Activity, Heart,
   Zap, Star, Target, Shield, Search, X, SlidersHorizontal,
   Minus, Plus, RotateCcw, BarChart3, Trophy, BookOpen, Shuffle, ArrowLeftRight,
+  Flame, Users, Layers, Swords, Radar, RefreshCw,
 } from "lucide-react";
 
 interface MarketProp {
@@ -971,7 +972,7 @@ const MARKET_SHORT: Record<string, string> = {
 };
 
 function CompactPropRow({
-  player, prop, sport, addLeg, removeLeg, overInSlip, underInSlip,
+  player, prop, sport, addLeg, removeLeg, overInSlip, underInSlip, gameId, homeTeam, awayTeam,
 }: {
   player: GamePlayer;
   prop: MarketProp;
@@ -980,7 +981,40 @@ function CompactPropRow({
   removeLeg: (legId: string) => void;
   overInSlip: boolean;
   underInSlip: boolean;
+  gameId?: string;
+  homeTeam?: string;
+  awayTeam?: string;
 }) {
+  const [showPIE, setShowPIE] = useState(false);
+  const [pieIntel, setPieIntel] = useState<PropIntelligence | null>(null);
+  const [pieLoading, setPieLoading] = useState(false);
+
+  const handleTogglePIE = async () => {
+    if (showPIE) { setShowPIE(false); return; }
+    setShowPIE(true);
+    if (pieIntel) return;
+    if (!gameId) return;
+    setPieLoading(true);
+    try {
+      const params = new URLSearchParams({
+        side: prop.recommendation === "push" ? "over" : prop.recommendation,
+        line: String(prop.line),
+        homeTeam: homeTeam || "",
+        awayTeam: awayTeam || "",
+        playerTeam: homeTeam || "",
+        confidence: String(prop.confidence),
+      });
+      if (prop.isLiveStat && prop.currentStat != null) params.set("currentStat", String(prop.currentStat));
+      if (prop.gameProgress != null) params.set("gameProgress", String(prop.gameProgress * 100));
+      const res = await fetch(
+        `/api/prop-intelligence/${sport}/${gameId}/${encodeURIComponent(player.playerName)}/${prop.market}?${params}`,
+        { credentials: "include" }
+      );
+      if (res.ok) setPieIntel(await res.json());
+    } catch { /* fail silently */ }
+    setPieLoading(false);
+  };
+
   const isRec = prop.recommendation !== "push";
   const recOver = prop.recommendation === "over";
   const recUnder = prop.recommendation === "under";
@@ -1084,73 +1118,112 @@ function CompactPropRow({
 
   // ── Standard Pre-Game Prop Row ────────────────────────────────────────────
   return (
-    <div className="flex items-center gap-2 px-3 py-2.5" data-testid={`row-compact-${player.playerName}-${prop.market}`}>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <span className="text-sm font-semibold leading-tight" style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {player.playerName}
-          </span>
-          {player.injury && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
-          {isRec && (
-            <span className={`text-[8px] font-bold px-1 py-0.5 rounded shrink-0 ${
-              recOver ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-600 dark:text-red-400"
-            }`}>
-              {recOver ? "↑" : "↓"} REC
+    <div data-testid={`row-compact-${player.playerName}-${prop.market}`}>
+      <div className="flex items-center gap-2 px-3 py-2.5">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="text-sm font-semibold leading-tight" style={{ maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {player.playerName}
             </span>
-          )}
+            {player.injury && <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0" />}
+            {isRec && (
+              <span className={`text-[8px] font-bold px-1 py-0.5 rounded shrink-0 ${
+                recOver ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-600 dark:text-red-400"
+              }`}>
+                {recOver ? "↑" : "↓"} REC
+              </span>
+            )}
+            {pieIntel && (
+              <span className={`text-[8px] font-bold px-1 py-0.5 rounded border shrink-0 ${pieGradeBg(pieIntel.compositeGrade)}`}
+                data-testid={`badge-pie-inline-${player.playerName}`}>
+                PIE {pieIntel.compositeGrade}
+              </span>
+            )}
+            {pieIntel?.usageContext.isOpportunityPlay && (
+              <span className="text-[8px] font-bold px-1 py-0.5 rounded border bg-violet-500/12 border-violet-500/35 text-violet-600 dark:text-violet-400 shrink-0"
+                data-testid={`badge-opportunity-inline-${player.playerName}`}>
+                OPP
+              </span>
+            )}
+            {pieIntel?.propSharpSignal.detected && (
+              <span className="text-[8px] font-bold px-1 py-0.5 rounded border bg-yellow-500/12 border-yellow-500/35 text-yellow-700 dark:text-yellow-400 shrink-0"
+                data-testid={`badge-sharp-inline-${player.playerName}`}>
+                ⚡
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
+            {player.team && <span style={{ maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{player.team}</span>}
+            {player.position && <><span className="opacity-40">·</span><span>{player.position}</span></>}
+            {prop.seasonAvg !== null && prop.seasonAvg !== undefined && (
+              <><span className="opacity-40">·</span><span className="font-mono">avg {prop.seasonAvg}</span></>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-1 mt-0.5 text-[10px] text-muted-foreground">
-          {player.team && <span style={{ maxWidth: 80, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{player.team}</span>}
-          {player.position && <><span className="opacity-40">·</span><span>{player.position}</span></>}
-          {prop.seasonAvg !== null && prop.seasonAvg !== undefined && (
-            <><span className="opacity-40">·</span><span className="font-mono">avg {prop.seasonAvg}</span></>
-          )}
+
+        <div className="text-center shrink-0 w-11">
+          <div className="text-base font-bold font-mono leading-tight">{prop.line}</div>
+          <div className="text-[9px] text-muted-foreground leading-tight">{prop.confidence}%</div>
+        </div>
+
+        <div className="flex gap-1 shrink-0">
+          <button
+            onClick={() => overInSlip ? removeLeg(overId) : addLeg(buildLeg("over"))}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
+              overInSlip
+                ? "border-emerald-500 bg-emerald-500/15 text-emerald-500"
+                : recOver
+                ? "border-emerald-500/50 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15"
+                : "border-border text-muted-foreground hover:border-emerald-500/30 hover:text-emerald-600 hover:bg-emerald-500/5"
+            }`}
+            style={{ minWidth: 52 }}
+            data-testid={`button-compact-over-${player.playerName}-${prop.market}`}
+            aria-label={overInSlip ? `Remove ${player.playerName} Over from slip` : `Add ${player.playerName} Over ${prop.line}`}
+          >
+            <ArrowUp className="w-3 h-3" />
+            <span className="text-[9px] font-bold leading-tight">OVR</span>
+            <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.overOdds)}</span>
+            {overInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
+          </button>
+          <button
+            onClick={() => underInSlip ? removeLeg(underId) : addLeg(buildLeg("under"))}
+            className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
+              underInSlip
+                ? "border-red-500 bg-red-500/15 text-red-500"
+                : recUnder
+                ? "border-red-500/50 bg-red-500/8 text-red-600 dark:text-red-400 hover:bg-red-500/15"
+                : "border-border text-muted-foreground hover:border-red-500/30 hover:text-red-600 hover:bg-red-500/5"
+            }`}
+            style={{ minWidth: 52 }}
+            data-testid={`button-compact-under-${player.playerName}-${prop.market}`}
+            aria-label={underInSlip ? `Remove ${player.playerName} Under from slip` : `Add ${player.playerName} Under ${prop.line}`}
+          >
+            <ArrowDown className="w-3 h-3" />
+            <span className="text-[9px] font-bold leading-tight">UND</span>
+            <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.underOdds)}</span>
+            {underInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
+          </button>
         </div>
       </div>
 
-      <div className="text-center shrink-0 w-11">
-        <div className="text-base font-bold font-mono leading-tight">{prop.line}</div>
-        <div className="text-[9px] text-muted-foreground leading-tight">{prop.confidence}%</div>
-      </div>
+      {gameId && (
+        <div className="px-3 pb-1">
+          <button
+            onClick={handleTogglePIE}
+            className={`text-[9px] font-semibold flex items-center gap-1 px-2 py-0.5 rounded transition-colors ${
+              showPIE ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            }`}
+            data-testid={`button-pie-analyze-${player.playerName}-${prop.market}`}
+          >
+            <Radar className="w-2.5 h-2.5" />
+            {showPIE ? "Hide Intelligence" : "Analyze"}
+          </button>
+        </div>
+      )}
 
-      <div className="flex gap-1 shrink-0">
-        <button
-          onClick={() => overInSlip ? removeLeg(overId) : addLeg(buildLeg("over"))}
-          className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
-            overInSlip
-              ? "border-emerald-500 bg-emerald-500/15 text-emerald-500"
-              : recOver
-              ? "border-emerald-500/50 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/15"
-              : "border-border text-muted-foreground hover:border-emerald-500/30 hover:text-emerald-600 hover:bg-emerald-500/5"
-          }`}
-          style={{ minWidth: 52 }}
-          data-testid={`button-compact-over-${player.playerName}-${prop.market}`}
-          aria-label={overInSlip ? `Remove ${player.playerName} Over from slip` : `Add ${player.playerName} Over ${prop.line}`}
-        >
-          <ArrowUp className="w-3 h-3" />
-          <span className="text-[9px] font-bold leading-tight">OVR</span>
-          <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.overOdds)}</span>
-          {overInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
-        </button>
-        <button
-          onClick={() => underInSlip ? removeLeg(underId) : addLeg(buildLeg("under"))}
-          className={`flex flex-col items-center justify-center rounded-lg border-2 py-1.5 transition-all active:scale-95 ${
-            underInSlip
-              ? "border-red-500 bg-red-500/15 text-red-500"
-              : recUnder
-              ? "border-red-500/50 bg-red-500/8 text-red-600 dark:text-red-400 hover:bg-red-500/15"
-              : "border-border text-muted-foreground hover:border-red-500/30 hover:text-red-600 hover:bg-red-500/5"
-          }`}
-          style={{ minWidth: 52 }}
-          data-testid={`button-compact-under-${player.playerName}-${prop.market}`}
-          aria-label={underInSlip ? `Remove ${player.playerName} Under from slip` : `Add ${player.playerName} Under ${prop.line}`}
-        >
-          <ArrowDown className="w-3 h-3" />
-          <span className="text-[9px] font-bold leading-tight">UND</span>
-          <span className="text-[10px] font-mono leading-tight">{formatOdds(prop.underOdds)}</span>
-          {underInSlip && <Check className="w-2.5 h-2.5 mt-0.5" />}
-        </button>
-      </div>
+      {showPIE && (
+        <PropIntelligenceBanner intel={pieIntel} loading={pieLoading} />
+      )}
     </div>
   );
 }
@@ -1304,6 +1377,9 @@ function GamePropGrid({ game, sport, addLeg, removeLeg, slipLegIds }: {
                 removeLeg={removeLeg}
                 overInSlip={slipLegIds.has(overId)}
                 underInSlip={slipLegIds.has(underId)}
+                gameId={game.gameId}
+                homeTeam={game.homeTeam.abbreviation}
+                awayTeam={game.awayTeam.abbreviation}
               />
             );
           })
@@ -1325,6 +1401,244 @@ function GamePropGrid({ game, sport, addLeg, removeLeg, slipLegIds }: {
         )}
       </div>
     </Card>
+  );
+}
+
+// ── PIE Types ─────────────────────────────────────────────────────────────────
+
+interface PIEDefenderMatchup { grade: string; summary: string; defenderRank: number | null }
+interface PIEGameScript { dominantScript: string; propImpact: number; impactSummary: string; closeGameProb: number }
+interface PIEUsage { isOpportunityPlay: boolean; usageBumpPct: number; injuredTeammate: string | null; reasoning: string }
+interface PIESharp { detected: boolean; type: string; direction: string | null; summary: string }
+interface PIELive { isLive: boolean; currentStat: number | null; projectedFullGame: number | null; gameProgress: number | null; liveProbability: number | null; liveGrade: string | null }
+interface PropIntelligence {
+  compositeGrade: string; compositeScore: number; finalRecommendation: string;
+  defenderMatchup: PIEDefenderMatchup; gameScriptImpact: PIEGameScript;
+  usageContext: PIEUsage; propSharpSignal: PIESharp; liveRating: PIELive;
+}
+
+interface CorrelationCluster {
+  packageId: string; scenario: string; edgeScore: number; gameScript: string;
+  props: { playerName: string; market: string; marketLabel: string; side: string; line: number }[];
+}
+
+// ── PIE Badge Components ──────────────────────────────────────────────────────
+
+function pieGradeColor(grade: string): string {
+  if (grade === "A") return "text-emerald-500";
+  if (grade === "B") return "text-amber-500";
+  if (grade === "C") return "text-yellow-500";
+  if (grade === "D") return "text-orange-500";
+  return "text-red-500";
+}
+
+function pieGradeBg(grade: string): string {
+  if (grade === "A") return "bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400";
+  if (grade === "B") return "bg-amber-500/15 border-amber-500/40 text-amber-600 dark:text-amber-400";
+  if (grade === "C") return "bg-yellow-500/15 border-yellow-500/30 text-yellow-600 dark:text-yellow-400";
+  if (grade === "D") return "bg-orange-500/15 border-orange-500/30 text-orange-600 dark:text-orange-400";
+  return "bg-red-500/15 border-red-500/30 text-red-500";
+}
+
+function DefenderMatchupBadge({ grade, rank }: { grade: string; rank: number | null }) {
+  const colorClass = grade === "D" || grade === "F"
+    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+    : grade === "A" || grade === "B"
+      ? "bg-red-500/10 border-red-500/30 text-red-500"
+      : "bg-muted/60 border-border text-muted-foreground";
+  const label = grade === "D" || grade === "F" ? "Good Matchup" : grade === "A" ? "Tough Matchup" : `Matchup`;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.5 rounded border ${colorClass}`}
+      data-testid={`badge-defender-grade-${grade}`}>
+      <Swords className="w-2.5 h-2.5" />
+      {grade}{rank ? ` #${rank}` : ""} {label}
+    </span>
+  );
+}
+
+function GameScriptChip({ script, impact }: { script: string; impact: number }) {
+  const label = script === "blowout_home" ? "Home Blowout" : script === "blowout_away" ? "Away Blowout" : script === "overtime" ? "OT Risk" : "Close Game";
+  const color = Math.abs(impact) < 1 ? "text-muted-foreground bg-muted/40 border-border" : impact > 0 ? "text-emerald-600 dark:text-emerald-400 bg-emerald-500/8 border-emerald-500/25" : "text-red-500 bg-red-500/8 border-red-500/25";
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[8px] font-semibold px-1 py-0.5 rounded border ${color}`}
+      data-testid="badge-game-script">
+      <Radar className="w-2.5 h-2.5" />
+      {label} {impact !== 0 && <>{impact > 0 ? "+" : ""}{impact}%</>}
+    </span>
+  );
+}
+
+function OpportunityPlayFlag({ bump, teammate }: { bump: number; teammate: string | null }) {
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.5 rounded border bg-violet-500/12 border-violet-500/35 text-violet-600 dark:text-violet-400"
+      data-testid="badge-opportunity-play">
+      <Users className="w-2.5 h-2.5" />
+      OPP +{bump}%{teammate ? ` (${teammate.split(" ").pop()} OUT)` : ""}
+    </span>
+  );
+}
+
+function SharpSignalBadge({ type, direction }: { type: string; direction: string | null }) {
+  const label = type === "steam" ? `STEAM ${(direction || "").toUpperCase()}` : `RLM ${(direction || "").toUpperCase()}`;
+  return (
+    <span className="inline-flex items-center gap-0.5 text-[8px] font-bold px-1 py-0.5 rounded border bg-yellow-500/12 border-yellow-500/35 text-yellow-700 dark:text-yellow-400 animate-pulse"
+      data-testid="badge-sharp-signal">
+      <Flame className="w-2.5 h-2.5" />
+      {label}
+    </span>
+  );
+}
+
+// ── PIE Inline Banner (inside expanded prop card) ─────────────────────────────
+
+function PropIntelligenceBanner({ intel, loading }: { intel: PropIntelligence | null; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="px-3 pb-2 pt-1 flex items-center gap-1.5">
+        <RefreshCw className="w-3 h-3 animate-spin text-muted-foreground" />
+        <span className="text-[10px] text-muted-foreground">Analyzing prop...</span>
+      </div>
+    );
+  }
+  if (!intel) return null;
+
+  return (
+    <div className="px-3 pb-2 pt-1 space-y-1.5" data-testid="prop-intelligence-banner">
+      <div className="flex items-center flex-wrap gap-1">
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${pieGradeBg(intel.compositeGrade)}`}
+          data-testid="badge-pie-grade">
+          PIE {intel.compositeGrade} · {intel.compositeScore}/100
+        </span>
+        <DefenderMatchupBadge grade={intel.defenderMatchup.grade} rank={intel.defenderMatchup.defenderRank} />
+        <GameScriptChip script={intel.gameScriptImpact.dominantScript} impact={intel.gameScriptImpact.propImpact} />
+        {intel.usageContext.isOpportunityPlay && (
+          <OpportunityPlayFlag bump={intel.usageContext.usageBumpPct} teammate={intel.usageContext.injuredTeammate} />
+        )}
+        {intel.propSharpSignal.detected && (
+          <SharpSignalBadge type={intel.propSharpSignal.type} direction={intel.propSharpSignal.direction} />
+        )}
+      </div>
+      {intel.liveRating.isLive && intel.liveRating.liveProbability !== null && (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1.5 bg-muted/50 rounded-full overflow-hidden">
+            <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${intel.liveRating.gameProgress || 0}%` }} />
+          </div>
+          <span className="text-[9px] text-amber-600 dark:text-amber-400 font-mono shrink-0">
+            Live {intel.liveRating.liveProbability}%
+          </span>
+        </div>
+      )}
+      <p className="text-[10px] text-muted-foreground leading-tight">{intel.finalRecommendation}</p>
+    </div>
+  );
+}
+
+// ── Prop Stacks (Correlation Packages) Section ────────────────────────────────
+
+function PropStacksSection({ sport, addLeg }: { sport: string; addLeg: (leg: any) => boolean }) {
+  const { data, isLoading } = useQuery<{ packages: CorrelationCluster[]; sport: string }>({
+    queryKey: ["/api/prop-intelligence/packages", sport],
+    queryFn: async () => {
+      const res = await fetch(`/api/prop-intelligence/packages/${sport}`, { credentials: "include" });
+      if (!res.ok) return { packages: [], sport };
+      return res.json();
+    },
+    refetchInterval: 300000,
+    staleTime: 240000,
+  });
+
+  const [open, setOpen] = useState(false);
+
+  if (isLoading) return null;
+  if (!data?.packages?.length) return null;
+
+  return (
+    <div data-testid="section-prop-stacks">
+      <Separator />
+      <Collapsible open={open} onOpenChange={setOpen}>
+        <CollapsibleTrigger asChild>
+          <button className="w-full flex items-center gap-3 py-4 text-left" data-testid="button-toggle-prop-stacks">
+            <div className="p-1.5 rounded-lg bg-violet-500/10">
+              <Layers className="w-4 h-4 text-violet-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold">Prop Stacks — Correlated Packages</p>
+              <p className="text-xs text-muted-foreground">
+                AI-assembled correlation clusters — props that win or lose together by game script
+              </p>
+            </div>
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-violet-500/10 border-violet-500/30 text-violet-500 shrink-0">
+              {data.packages.length} stacks
+            </Badge>
+            {open ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+          </button>
+        </CollapsibleTrigger>
+
+        <CollapsibleContent className="pb-4">
+          <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory -mx-1 px-1">
+            {data.packages.map(pkg => (
+              <div
+                key={pkg.packageId}
+                className="shrink-0 snap-start min-w-[280px] sm:min-w-[320px] rounded-xl border-2 border-violet-500/25 bg-violet-500/5 p-3 space-y-2"
+                data-testid={`card-prop-stack-${pkg.packageId}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-xs font-bold">{pkg.scenario}</p>
+                    <p className="text-[10px] text-muted-foreground capitalize">{pkg.gameScript.replace("_", " ")} script</p>
+                  </div>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 ${pieGradeBg(pkg.edgeScore >= 15 ? "A" : pkg.edgeScore >= 10 ? "B" : "C")}`}>
+                    Edge {pkg.edgeScore}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {pkg.props.map((p, i) => (
+                    <div key={i} className="flex items-center gap-2 text-[10px]">
+                      <span className={`font-bold ${p.side === "over" ? "text-emerald-500" : "text-red-500"}`}>
+                        {p.side === "over" ? "↑" : "↓"}
+                      </span>
+                      <span className="font-medium truncate flex-1">{p.playerName}</span>
+                      <span className="text-muted-foreground shrink-0">{p.marketLabel} {p.line}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    pkg.props.forEach(p => {
+                      const legId = `prop-${p.playerName}-${p.market}-${p.side}`.replace(/\s+/g, "-").toLowerCase();
+                      addLeg({
+                        id: legId,
+                        team: p.playerName,
+                        opponent: `${p.marketLabel} ${p.line}`,
+                        market: "player_prop" as any,
+                        outcome: `${p.playerName} ${p.side === "over" ? "Over" : "Under"} ${p.line} ${p.marketLabel}`,
+                        decimalOdds: 1.91,
+                        americanOdds: -110,
+                        addedFrom: "Prop Stacks",
+                        addedAt: new Date().toISOString(),
+                        sport,
+                        confidence: 60,
+                        evPercent: pkg.edgeScore,
+                        reasoning: `${pkg.scenario} correlation package`,
+                      });
+                    });
+                  }}
+                  className="w-full text-[10px] font-semibold border border-violet-500/40 rounded-lg py-1.5 text-violet-600 dark:text-violet-400 hover:bg-violet-500/10 transition-colors"
+                  data-testid={`button-add-stack-${pkg.packageId}`}
+                >
+                  <Layers className="w-3 h-3 inline mr-1" />
+                  Add {pkg.props.length} legs to slip
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            Correlated props win and lose together — these packages are most powerful when the projected game script occurs.
+            Always verify lines at your sportsbook before placing.
+          </p>
+        </CollapsibleContent>
+      </Collapsible>
+    </div>
   );
 }
 
@@ -2366,6 +2680,28 @@ export default function PlayerPropsPage() {
             <TopPicksHero sport={selectedSport} addLeg={addLeg} removeLeg={removeLeg} slipLegIds={slipLegIds} />
             <PropVarianceCalculator sport={selectedSport} addLeg={addLeg} slipLegIds={slipLegIds} />
           </>
+        )}
+        {!tierGated && !needsAuth && data && (
+          <Card className="border-primary/10" data-testid="section-pie-intelligence">
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Radar className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold">Prop Intelligence Engine (PIE)</h3>
+                  <p className="text-[10px] text-muted-foreground">Tap "Analyze" on any prop row to see defender matchup grade, game script impact, sharp signal, and live re-rating</p>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-2 text-[10px] text-muted-foreground">
+                <span className="flex items-center gap-1"><Swords className="w-3 h-3 text-emerald-500" /> Defender Matchup Grade A–F</span>
+                <span className="flex items-center gap-1"><Radar className="w-3 h-3 text-blue-500" /> Game Script Projection</span>
+                <span className="flex items-center gap-1"><Users className="w-3 h-3 text-violet-500" /> Usage Opportunity Flags</span>
+                <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-yellow-500" /> Sharp Money Signals</span>
+              </div>
+              <PropStacksSection sport={selectedSport} addLeg={addLeg} />
+            </CardContent>
+          </Card>
         )}
 
         {isLoading && (
