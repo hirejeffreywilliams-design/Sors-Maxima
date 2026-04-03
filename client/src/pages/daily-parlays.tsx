@@ -594,20 +594,31 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
 
         {(() => {
           const calTier = getCalibrationTier(pick.confidence, pick.ev);
+          const kellyPct = Math.max(0, (pick.ev / 100) * (pick.confidence / 100) * 100).toFixed(1);
           return (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 cursor-default" data-testid={`calibration-tier-${pick.id}`}>
-                  <Badge variant="outline" className={`text-[9px] h-4 px-1.5 py-0 border font-medium ${calTier.cls}`}>
-                    {calTier.label}
-                  </Badge>
-                  <span className="text-[9px] text-muted-foreground/70">Calibration</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[220px] text-center">
-                <p className="text-xs">{calTier.tooltip}</p>
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center justify-between gap-1.5">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-1.5 cursor-default" data-testid={`calibration-tier-${pick.id}`}>
+                    <Badge variant="outline" className={`text-[9px] h-4 px-1.5 py-0 border font-medium ${calTier.cls}`}>
+                      {calTier.label}
+                    </Badge>
+                    <span className="text-[9px] text-muted-foreground/70">Calibration</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[220px] text-center">
+                  <p className="text-xs">{calTier.tooltip}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-[9px] font-mono text-sky-400 cursor-default" data-testid={`stat-kelly-pct-${pick.id}`}>Kelly {kellyPct}%</span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[200px] text-center">
+                  <p className="text-xs">Fractional Kelly stake — recommended % of bankroll based on edge and confidence.</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
           );
         })()}
 

@@ -194,7 +194,7 @@ function BetCard({ bet, onUpdate, onRemove }: {
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-2 border-t pt-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 border-t pt-3">
             <div className="space-y-1">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Stake</p>
               {editingStake ? (
@@ -244,7 +244,7 @@ function BetCard({ bet, onUpdate, onRemove }: {
                   <button
                     key={s}
                     onClick={() => handleStatus(s)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all ${
+                    className={`flex items-center gap-1 px-3 py-2 min-h-[36px] rounded-lg text-[11px] font-bold border transition-all ${
                       active ? `${c.bg} ${c.color} border-current` : "border-border text-muted-foreground hover:bg-muted/60"
                     }`}
                     data-testid={`button-status-${s}-${bet.id}`}

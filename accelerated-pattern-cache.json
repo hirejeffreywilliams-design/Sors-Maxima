@@ -1,14 +1,14 @@
 {
   "sportAccuracy": {
     "NBA": {
-      "wins": 388,
-      "total": 674,
-      "winRate": 57.6
+      "wins": 393,
+      "total": 689,
+      "winRate": 57
     },
     "NHL": {
-      "wins": 340,
-      "total": 648,
-      "winRate": 52.5
+      "wins": 360,
+      "total": 674,
+      "winRate": 53.4
     },
     "NCAAB": {
       "wins": 278,
@@ -16,26 +16,26 @@
       "winRate": 61
     },
     "MLB": {
-      "wins": 124,
-      "total": 203,
-      "winRate": 61.1
+      "wins": 125,
+      "total": 206,
+      "winRate": 60.7
     }
   },
   "marketAccuracy": {
     "moneyline": {
-      "wins": 365,
-      "total": 638,
-      "winRate": 57.2
+      "wins": 370,
+      "total": 651,
+      "winRate": 56.8
     },
     "spread": {
-      "wins": 361,
-      "total": 645,
+      "wins": 371,
+      "total": 662,
       "winRate": 56
     },
     "total": {
-      "wins": 366,
-      "total": 629,
-      "winRate": 58.2
+      "wins": 377,
+      "total": 643,
+      "winRate": 58.6
     },
     "team_total": {
       "wins": 38,
@@ -51,13 +51,13 @@
       "boost": 5
     },
     {
-      "key": "NCAAB:team_total:neutral:60s:low",
-      "winRate": 87.5,
-      "total": 8,
-      "boost": 4
+      "key": "MLB:spread:fav",
+      "winRate": 88.9,
+      "total": 9,
+      "boost": 5
     },
     {
-      "key": "MLB:spread:fav",
+      "key": "NCAAB:team_total:neutral:60s:low",
       "winRate": 87.5,
       "total": 8,
       "boost": 4
@@ -155,20 +155,20 @@
       "penalty": 10
     },
     {
+      "key": "NBA:moneyline:slight_dog:50s:high",
+      "winRate": 35.7,
+      "total": 14,
+      "penalty": 4
+    },
+    {
       "key": "NHL:moneyline:heavy_fav",
       "winRate": 36.4,
       "total": 11,
       "penalty": 3
-    },
-    {
-      "key": "NHL:moneyline:heavy_fav:50s:low",
-      "winRate": 37.5,
-      "total": 8,
-      "penalty": 2
     }
   ],
-  "totalSettled": 1981,
-  "lastMined": "2026-04-03T00:01:07.942Z",
+  "totalSettled": 2025,
+  "lastMined": "2026-04-03T00:19:38.782Z",
   "cycleCount": 1,
   "patternCount": 290
 }

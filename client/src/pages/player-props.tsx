@@ -489,7 +489,7 @@ function PropCard({ prop, playerName, sport, addLeg, removeLeg, overInSlip, unde
           <button
             onClick={() => handleAdd("over")}
             aria-label={overInSlip ? `Remove ${playerName} Over from slip` : `${playerName} Over ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.overOdds)}`}
-            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all cursor-pointer active:scale-[0.98] ${
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 min-h-[56px] transition-all cursor-pointer active:scale-[0.98] ${
               overInSlip
                 ? "border-emerald-500 bg-emerald-500/15 ring-2 ring-emerald-500/30"
                 : "border-border hover:border-emerald-500/40 hover:bg-emerald-500/5"
@@ -520,7 +520,7 @@ function PropCard({ prop, playerName, sport, addLeg, removeLeg, overInSlip, unde
           <button
             onClick={() => handleAdd("under")}
             aria-label={underInSlip ? `Remove ${playerName} Under from slip` : `${playerName} Under ${effectiveLine} ${prop.marketLabel} at ${formatOdds(prop.underOdds)}`}
-            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 transition-all cursor-pointer active:scale-[0.98] ${
+            className={`flex flex-col items-center justify-center rounded-lg border-2 p-2.5 min-h-[56px] transition-all cursor-pointer active:scale-[0.98] ${
               underInSlip
                 ? "border-red-500 bg-red-500/15 ring-2 ring-red-500/30"
                 : "border-border hover:border-red-500/40 hover:bg-red-500/5"

@@ -2,9 +2,9 @@
   "configs": {},
   "states": {
     "odds": {
-      "currentUsage": 5240,
-      "manualRemaining": 94760,
-      "lastReported": "2026-04-03T00:09:47.520Z",
+      "currentUsage": 5597,
+      "manualRemaining": 94403,
+      "lastReported": "2026-04-03T00:18:36.475Z",
       "monthReset": "2026-04-01T00:00:00.000Z",
       "callLog": [
         {
@@ -128,7 +128,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:09:19.237Z"
+      "lastSeasonCheck": "2026-04-03T00:18:08.210Z"
     },
     "apifootball": {
       "currentUsage": 0,
@@ -140,7 +140,7 @@
       "suspendedAt": "2026-03-25T02:48:28.202Z",
       "suspendedReason": "Manually suspended by admin",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:09:19.237Z"
+      "lastSeasonCheck": "2026-04-03T00:18:08.210Z"
     },
     "balldontlie": {
       "currentUsage": 0,
@@ -152,7 +152,7 @@
       "suspendedAt": "2026-03-25T02:47:54.505Z",
       "suspendedReason": "Manually suspended by admin",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:09:19.237Z"
+      "lastSeasonCheck": "2026-04-03T00:18:08.210Z"
     },
     "openai": {
       "currentUsage": 0,
@@ -164,7 +164,7 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:09:19.237Z"
+      "lastSeasonCheck": "2026-04-03T00:18:08.210Z"
     },
     "espn": {
       "currentUsage": 0,
@@ -176,11 +176,11 @@
       "suspendedAt": null,
       "suspendedReason": "",
       "autoSuspend": false,
-      "lastSeasonCheck": "2026-04-03T00:09:19.237Z"
+      "lastSeasonCheck": "2026-04-03T00:18:08.210Z"
     }
   },
   "activeUsers": 5,
-  "lastSaved": "2026-04-03T00:09:47.520Z",
+  "lastSaved": "2026-04-03T00:18:36.475Z",
   "alerts": [
     {
       "id": "yka31tz9",

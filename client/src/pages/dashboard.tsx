@@ -271,12 +271,15 @@ function PickCard({ pick, rank, isFounder }: { pick: any; rank: number; isFounde
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="bg-muted/50 rounded-lg p-2 cursor-help">
-                  <p className="text-xs text-muted-foreground">Units</p>
-                  <p className="text-sm font-bold">{pick.unitRecommendation}u</p>
+                  <p className="text-xs text-muted-foreground">Kelly</p>
+                  <p className="text-sm font-bold text-sky-400" data-testid={`stat-kelly-pct-${pick.id}`}>
+                    {Math.max(0, (pick.edge / 100) * (pick.confidence / 100) * 100).toFixed(1)}%
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{pick.unitRecommendation}u</p>
                 </div>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-[220px] text-xs">
-                Kelly Criterion-derived stake recommendation. 1u typically equals 1–2% of your bankroll. Higher units = higher edge.
+                Fractional Kelly stake as % of bankroll. Computed from edge × confidence. {pick.unitRecommendation}u = Kelly Criterion unit recommendation; 1u ≈ 1–2% of bankroll.
               </TooltipContent>
             </Tooltip>
           </div>

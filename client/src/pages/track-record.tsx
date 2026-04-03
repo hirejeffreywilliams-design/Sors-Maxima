@@ -533,10 +533,13 @@ export default function TrackRecordPage() {
               const agreementPct = tiersWithData.length > 0
                 ? Math.round((wellCalibrated.length / tiersWithData.length) * 100)
                 : null;
+              const ensembleConfidence = wellCalibrated.length > 0
+                ? Math.round(wellCalibrated.reduce((s, t) => s + (t.minConfidence + t.maxConfidence) / 2, 0) / wellCalibrated.length)
+                : null;
               return (
                 <div className="mt-4 pt-3 border-t border-border/40 space-y-3">
                   <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Ensemble Model Agreement</p>
-                  <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                     <div className="p-2 rounded-lg bg-muted/40">
                       <p className={`text-base font-black tabular-nums ${agreementPct !== null && agreementPct >= 60 ? "text-emerald-400" : "text-amber-400"}`} data-testid="stat-ensemble-agreement">
                         {agreementPct !== null ? `${agreementPct}%` : "—"}
@@ -555,9 +558,15 @@ export default function TrackRecordPage() {
                       </p>
                       <p className="text-[9px] text-muted-foreground mt-0.5">Tiers Aligned</p>
                     </div>
+                    <div className="p-2 rounded-lg bg-muted/40">
+                      <p className={`text-base font-black tabular-nums ${ensembleConfidence !== null && ensembleConfidence >= 65 ? "text-emerald-400" : "text-amber-400"}`} data-testid="stat-ensemble-confidence">
+                        {ensembleConfidence !== null ? `${ensembleConfidence}%` : "—"}
+                      </p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">Ensemble Conf.</p>
+                    </div>
                   </div>
                   <p className="text-[9px] text-muted-foreground leading-relaxed">
-                    Tier agreement measures what % of confidence buckets are within ±5% of their actual win rate. Brier equivalent is a 0–100 score penalizing overconfidence. A well-calibrated model scores above 70.
+                    Tier agreement: % of confidence buckets within ±5% of actual win rate. Brier equivalent: 0–100 score (above 70 = well-calibrated). Ensemble confidence: average predicted confidence across aligned tiers.
                   </p>
                 </div>
               );

@@ -813,24 +813,28 @@ function NavCustomizerSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
+const FIXED_BOTTOM_TABS = [
+  { href: "/", icon: Zap, label: "Home", testId: "bottom-nav-home" },
+  { href: "/daily", icon: Calendar, label: "Picks", testId: "bottom-nav-picks" },
+  { href: "/my-bets", icon: History, label: "My Bets", testId: "bottom-nav-mybets" },
+  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "bottom-nav-bankroll" },
+] as const;
+
 function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const [location] = useLocation();
   const { legCount, setMobileOpen } = useParlaySlip();
-  const { selectedItems } = useBottomNavPrefs();
-  const [showCustomizer, setShowCustomizer] = useState(false);
 
   return (
     <>
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
         <div className="flex items-center justify-around gap-0 h-16">
-          {selectedItems.map((item) => {
-            const Icon = NAV_ICON_MAP[item.iconName] || Zap;
-            const isActive = location === item.href;
+          {FIXED_BOTTOM_TABS.map(({ href, icon: Icon, label, testId }) => {
+            const isActive = location === href;
             return (
-              <Link key={item.href} href={item.href}>
-                <div className={`relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={`bottom-nav-${item.id}`}>
+              <Link key={href} href={href}>
+                <div className={`relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] ${isActive ? 'text-primary' : 'text-muted-foreground'}`} data-testid={testId}>
                   <Icon className="w-5 h-5" />
-                  <span className="text-[10px] font-medium">{item.label}</span>
+                  <span className="text-[10px] font-medium">{label}</span>
                   {isActive && <span className="absolute bottom-1 w-3.5 h-0.5 rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.7)]" />}
                 </div>
               </Link>
@@ -839,7 +843,7 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
           <button
             onClick={() => setMobileOpen(true)}
-            className="relative flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-primary"
+            className="relative flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] text-primary"
             data-testid="bottom-nav-slip"
             aria-label="Open bet slip"
           >
@@ -856,7 +860,7 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
           <button
             onClick={onOpenMenu}
-            className="flex flex-col items-center justify-center gap-0.5 px-2 py-2 min-w-[52px] touch-target text-muted-foreground"
+            className="flex flex-col items-center justify-center gap-0.5 px-3 py-2 min-w-[52px] min-h-[44px] text-muted-foreground"
             data-testid="bottom-nav-more"
             aria-label="More navigation"
           >
@@ -866,15 +870,6 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
         </div>
       </nav>
 
-      {/* Customizer Sheet */}
-      <Sheet open={showCustomizer} onOpenChange={setShowCustomizer}>
-        <SheetContent side="bottom" className="rounded-t-2xl max-h-[85vh] overflow-y-auto">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Customize Bottom Navigation</SheetTitle>
-          </SheetHeader>
-          <NavCustomizerSheet onClose={() => setShowCustomizer(false)} />
-        </SheetContent>
-      </Sheet>
     </>
   );
 }
