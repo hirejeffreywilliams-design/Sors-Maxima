@@ -200,13 +200,24 @@ async function pushIntelligenceUpdate(): Promise<void> {
         confidence: p.confidence,
         ev: p.ev,
       })),
-      edgeAlerts: feed.edgeAlerts.slice(0, 10).map(a => ({
-        id: a.id,
-        type: a.type,
-        title: a.title,
-        severity: a.severity,
-        sport: a.sport,
-      })),
+      edgeAlerts: feed.edgeAlerts.slice(0, 10).map(a => {
+        const allFeedGames = [...feed.liveGames, ...feed.upcomingGames];
+        const matched = allFeedGames.find(g =>
+          g.shortName === a.game ||
+          (g.homeTeam?.displayName && a.game?.includes(g.homeTeam.displayName)) ||
+          (g.awayTeam?.displayName && a.game?.includes(g.awayTeam.displayName))
+        );
+        return {
+          id: a.id,
+          type: a.type,
+          title: a.title,
+          description: a.description,
+          severity: a.severity,
+          sport: a.sport,
+          game: a.game,
+          gameId: matched?.id || null,
+        };
+      }),
       sportSummaries: feed.sportSummaries,
       dataSourceHealth: feed.dataSourceHealth,
     };
@@ -230,10 +241,18 @@ async function pushIntelligenceUpdate(): Promise<void> {
     }
 
     if (feed.edgeAlerts.length > 0) {
+      const allFeedGamesForAlerts = [...feed.liveGames, ...feed.upcomingGames];
       broadcastEvent("edge-alerts", {
         type: "edge-alerts",
         timestamp: new Date().toISOString(),
-        alerts: feed.edgeAlerts.slice(0, 5),
+        alerts: feed.edgeAlerts.slice(0, 5).map(a => {
+          const matched = allFeedGamesForAlerts.find(g =>
+            g.shortName === a.game ||
+            (g.homeTeam?.displayName && a.game?.includes(g.homeTeam.displayName)) ||
+            (g.awayTeam?.displayName && a.game?.includes(g.awayTeam.displayName))
+          );
+          return { ...a, gameId: matched?.id || null };
+        }),
       }, "alerts");
     }
 

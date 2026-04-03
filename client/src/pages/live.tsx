@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { PageHero } from "@/components/page-hero";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Activity, Shield, Bot, LineChart, Users, Brain, DollarSign,
   Wifi, WifiOff, Sliders, Lock, Zap, TrendingUp, BarChart3,
+  ChevronRight,
 } from "lucide-react";
 import { LiveScoresFeed } from "@/components/live/live-scores-feed";
 import { CashoutStrategiesEngine } from "@/components/live/cashout-strategies-engine";
@@ -56,9 +57,60 @@ function sportAccent(sport: string): string {
   return SPORT_ACCENT[(sport || "").toUpperCase()] ?? SPORT_ACCENT.default;
 }
 
+// ─── Sport Filter Chips (multi-select) ────────────────────────────────────────
+
+const SPORT_CHIPS = ["All", "NBA", "NFL", "NHL", "MLB", "NCAAB", "NCAAF", "MLS", "Soccer", "UFC"];
+
+function SportFilterBar({
+  selected,
+  onToggle,
+  availableSports,
+}: {
+  selected: Set<string>;
+  onToggle: (sport: string) => void;
+  availableSports?: string[];
+}) {
+  const chips = availableSports && availableSports.length > 0
+    ? ["All", ...Array.from(new Set(availableSports.map(s => s.toUpperCase())))]
+    : SPORT_CHIPS;
+
+  return (
+    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex gap-1.5 pb-1" style={{ minWidth: "max-content" }}>
+        {chips.map((sport) => {
+          const isActive = sport === "All" ? selected.size === 0 : selected.has(sport.toUpperCase());
+          const color = sport === "All" ? "#a78bfa" : sportAccent(sport);
+          return (
+            <button
+              key={sport}
+              onClick={() => onToggle(sport)}
+              className="px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-wider shrink-0 transition-all duration-200 border"
+              style={{
+                background: isActive ? `${color}18` : "rgba(255,255,255,0.04)",
+                borderColor: isActive ? `${color}40` : "rgba(255,255,255,0.08)",
+                color: isActive ? color : "rgba(255,255,255,0.35)",
+                boxShadow: isActive ? `0 0 10px ${color}20` : "none",
+              }}
+              data-testid={`sport-chip-${sport.toLowerCase()}`}
+            >
+              {sport}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Live Jumbotron ────────────────────────────────────────────────────────────
 
-function LiveJumbotron({ games }: { games: LiveGame[] }) {
+function LiveJumbotron({
+  games,
+  onSelectGame,
+}: {
+  games: LiveGame[];
+  onSelectGame?: (id: string) => void;
+}) {
   const live = games.filter(g => g.status === "live" || g.status === "halftime");
   if (live.length === 0) return null;
 
@@ -85,16 +137,18 @@ function LiveJumbotron({ games }: { games: LiveGame[] }) {
             const isHalftime = g.status === "halftime";
 
             return (
-              <div
+              <button
                 key={g.id}
+                type="button"
                 data-testid={`jumbotron-game-${g.id}`}
-                className="relative shrink-0 rounded-2xl overflow-hidden"
+                className="relative shrink-0 rounded-2xl overflow-hidden text-left group transition-transform hover:scale-[1.02] cursor-pointer"
                 style={{
                   width: 196,
                   background: "linear-gradient(160deg, rgba(8,8,14,0.97) 0%, rgba(14,14,22,0.99) 100%)",
                   border: `1px solid ${color}28`,
                   boxShadow: `0 0 24px ${color}12, 0 4px 16px rgba(0,0,0,0.5)`,
                 }}
+                onClick={() => onSelectGame?.(String(g.id))}
               >
                 {/* Accent bar left */}
                 <div
@@ -206,73 +260,15 @@ function LiveJumbotron({ games }: { games: LiveGame[] }) {
                     )}
                   </div>
                 )}
-              </div>
+
+                {/* Tap indicator */}
+                <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-3 h-3 text-white/25" />
+                </div>
+              </button>
             );
           })}
         </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Quick Actions bar ─────────────────────────────────────────────────────────
-
-const QUICK_ACTIONS = [
-  { id: "scores",    icon: Activity,    label: "Live Now",      color: "#ef4444", description: "Scores & alerts" },
-  { id: "cashout",   icon: DollarSign,  label: "Cashout",       color: "#f97316", description: "Engineering + live advice" },
-  { id: "hedge",     icon: Shield,      label: "Hedge",         color: "#34d399", description: "Real-time hedge sizing" },
-  { id: "momentum",  icon: TrendingUp,  label: "Momentum",      color: "#a78bfa", description: "Live game momentum" },
-  { id: "analytics", icon: BarChart3,   label: "Analytics",     color: "#60a5fa", description: "CLV, sharp, factors" },
-  { id: "assistant", icon: Bot,         label: "Ask AI",        color: "#fbbf24", description: "Betting assistant" },
-];
-
-function QuickActions({
-  activeTab,
-  onSelect,
-  isMax,
-}: {
-  activeTab: string;
-  onSelect: (tab: string) => void;
-  isMax: boolean;
-}) {
-  return (
-    <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-      <div className="flex gap-2 pb-1" style={{ minWidth: "max-content" }}>
-        {QUICK_ACTIONS.map(action => {
-          const isActive = activeTab === action.id;
-          const needsMax = ["hedge", "momentum"].includes(action.id) && !isMax;
-          const Icon = action.icon;
-          return (
-            <button
-              key={action.id}
-              onClick={() => onSelect(action.id)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-200 shrink-0 group"
-              style={{
-                background: isActive ? `${action.color}18` : "rgba(255,255,255,0.03)",
-                borderColor: isActive ? `${action.color}40` : "rgba(255,255,255,0.07)",
-                boxShadow: isActive ? `0 0 12px ${action.color}20` : "none",
-              }}
-              data-testid={`quickaction-${action.id}`}
-            >
-              <Icon
-                className="w-3.5 h-3.5 shrink-0 transition-colors"
-                style={{ color: isActive ? action.color : "rgba(255,255,255,0.35)" }}
-              />
-              <div className="text-left">
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className="text-[10px] font-black leading-none"
-                    style={{ color: isActive ? action.color : "rgba(255,255,255,0.55)" }}
-                  >
-                    {action.label}
-                  </span>
-                  {needsMax && <Lock className="w-2.5 h-2.5 text-white/20" />}
-                </div>
-                <p className="text-[8px] text-white/25 mt-0.5 hidden sm:block">{action.description}</p>
-              </div>
-            </button>
-          );
-        })}
       </div>
     </div>
   );
@@ -331,6 +327,8 @@ export default function Live() {
   const { canAccess } = useTier();
   const sse = useSSEContext();
   const [activeTab, setActiveTab] = useState("scores");
+  const [selectedSports, setSelectedSports] = useState<Set<string>>(new Set());
+  const [pendingGameOpen, setPendingGameOpen] = useState<{ id: string; token: number } | null>(null);
 
   const isMax = canAccess("whale");
 
@@ -352,19 +350,54 @@ export default function Live() {
     refetchInterval: 30000,
   });
 
-  const liveGamesForStrip = momentumGames?.filter(g => g.status === "live" || g.status === "halftime") ?? [];
+  // Derive available sports from all live games
+  const availableSports = momentumGames
+    ? Array.from(new Set(momentumGames.map(g => (g.sport || "").toUpperCase()).filter(Boolean)))
+    : [];
+
+  // Toggle sport in the multi-select filter
+  const handleSportToggle = useCallback((sport: string) => {
+    if (sport === "All") {
+      setSelectedSports(new Set());
+      return;
+    }
+    const upper = sport.toUpperCase();
+    setSelectedSports(prev => {
+      const next = new Set(prev);
+      if (next.has(upper)) {
+        next.delete(upper);
+      } else {
+        next.add(upper);
+      }
+      return next;
+    });
+  }, []);
+
+  // Filter jumbotron games by selected sports
+  const filteredJumbotronGames = selectedSports.size === 0
+    ? (momentumGames ?? [])
+    : (momentumGames ?? []).filter(g => selectedSports.has((g.sport || "").toUpperCase()));
+
+  // When a jumbotron card is clicked — switch to scores tab and open detail
+  // Use a token counter so clicking same game twice still reopens the panel
+  const handleJumbotronSelect = useCallback((id: string) => {
+    setActiveTab("scores");
+    setPendingGameOpen(prev => ({ id, token: (prev?.token ?? 0) + 1 }));
+  }, []);
+
+  const handleHedge = useCallback(() => setActiveTab("hedge"), []);
+  const handleAskAI = useCallback(() => setActiveTab("assistant"), []);
 
   return (
     <div className="min-h-full">
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-6 space-y-4">
 
-        {/* Hero */}
+        {/* Hero — concise subtitle only, verbose description removed */}
         <PageHero
           icon={<Activity className="w-6 h-6" />}
           title="Live Center"
           badge="LIVE"
           subtitle="Real-time scores, cashout engineering, hedge tools & AI analysis"
-          description="Switch between six tabs: Live Scores (game updates), Cashout Advisor (when to exit an active bet), Hedge Calculator (lock in profit on parlays), Momentum Tracker (which team is surging), Analytics (sharp money signals and CLV), and AI Assistant (ask anything about your active bets). All data refreshes every 30 seconds automatically."
           actions={
             <div className="flex items-center gap-2" data-testid="sse-live-status">
               {sse.connected ? (
@@ -387,16 +420,20 @@ export default function Live() {
           }
         />
 
-        {/* Live games horizontal strip — visible to all */}
-        {liveGamesForStrip.length > 0 && (
-          <LiveJumbotron games={momentumGames ?? []} />
-        )}
+        {/* Sport filter bar (multi-select) */}
+        <SportFilterBar
+          selected={selectedSports}
+          onToggle={handleSportToggle}
+          availableSports={availableSports}
+        />
 
-        {/* Quick Actions — jump to any section instantly */}
-        <div className="space-y-1">
-          <p className="text-[8px] font-bold uppercase tracking-widest text-white/20 px-0.5">Quick Access</p>
-          <QuickActions activeTab={activeTab} onSelect={setActiveTab} isMax={isMax} />
-        </div>
+        {/* Live games horizontal strip — filtered & clickable */}
+        {filteredJumbotronGames.some(g => g.status === "live" || g.status === "halftime") && (
+          <LiveJumbotron
+            games={filteredJumbotronGames}
+            onSelectGame={handleJumbotronSelect}
+          />
+        )}
 
         {/* New alert pulse when SSE fires edge-alerts */}
         {sse.lastEvent?.type === "edge-alerts" && (
@@ -462,7 +499,12 @@ export default function Live() {
 
           {/* Scores — live now + edge alerts, always visible */}
           <TabsContent value="scores" className="space-y-4">
-            <LiveScoresFeed />
+            <LiveScoresFeed
+              selectedSports={selectedSports}
+              pendingGameOpen={pendingGameOpen}
+              onHedge={handleHedge}
+              onAskAI={handleAskAI}
+            />
           </TabsContent>
 
           {/* Cashout — Engineering strategies + live game advice */}
