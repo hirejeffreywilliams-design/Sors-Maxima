@@ -65,6 +65,7 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { AffiliateDisclosure } from "@/components/affiliate-disclosure";
 import { SlipShareCard } from "@/components/slip-share-card";
+import { TeamLogo, MatchupLogos } from "@/components/ui/team-logo";
 
 interface LiveLegOdds {
   legId: string;
@@ -209,12 +210,23 @@ function MyBetsTab() {
                 <div className="px-3 pb-3 pt-0 border-t bg-muted/10 space-y-3">
                   <div className="space-y-2 pt-3">
                     {bet.legs.map((leg, i) => (
-                      <div key={i} className="flex flex-col gap-0.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[11px] font-bold">{leg.team} · {leg.pick}</span>
-                          <span className="text-[10px] text-muted-foreground">{leg.odds > 0 ? `+${leg.odds}` : leg.odds}</span>
+                      <div key={i} className="flex items-start gap-2">
+                        {leg.sport && (
+                          <div className="shrink-0 mt-0.5">
+                            {leg.opponent ? (
+                              <MatchupLogos homeTeam={leg.opponent} awayTeam={leg.team} sport={leg.sport} size={18} />
+                            ) : (
+                              <TeamLogo team={leg.team} sport={leg.sport} size={18} />
+                            )}
+                          </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-[11px] font-bold truncate">{leg.team} · {leg.pick}</span>
+                            <span className="text-[10px] text-muted-foreground shrink-0">{leg.odds > 0 ? `+${leg.odds}` : leg.odds}</span>
+                          </div>
+                          <span className="text-[9px] text-muted-foreground">{leg.game}</span>
                         </div>
-                        <span className="text-[9px] text-muted-foreground">{leg.game}</span>
                       </div>
                     ))}
                   </div>
@@ -727,6 +739,15 @@ function LegItem({ leg, onRemove, compact, liveOdds }: { leg: ParlaySlipLeg; onR
       className={`flex items-start gap-2 py-3 px-3 group border-l-2 ${legGradeBorder(leg.grade)} bg-gradient-to-r from-muted/20 to-transparent transition-colors duration-300 ${flashing ? (oddsImproved ? "bg-emerald-500/10" : "bg-red-500/10") : ""}`}
       data-testid={`slip-leg-${leg.id}`}
     >
+      {leg.sport && (
+        <div className="shrink-0 mt-0.5">
+          {leg.opponent ? (
+            <MatchupLogos homeTeam={leg.opponent} awayTeam={leg.team} sport={leg.sport} size={20} />
+          ) : (
+            <TeamLogo team={leg.team} sport={leg.sport} size={20} />
+          )}
+        </div>
+      )}
       <div className="flex-1 min-w-0 space-y-1.5">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">

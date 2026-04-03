@@ -23,6 +23,7 @@ import { sports } from "@shared/schema";
 import { useSEO } from "@/hooks/use-seo";
 import { PickDisclaimer } from "@/components/pick-disclaimer";
 import { PickAnalyticsRow } from "@/components/pick-analytics-row";
+import { MatchupLogos } from "@/components/ui/team-logo";
 import { SwipePickCards } from "@/components/swipe-pick-cards";
 import { Link } from "wouter";
 import { AIRecommendationPanel } from "@/components/ai/ai-recommendation-panel";
@@ -398,16 +399,17 @@ function PickCard({ pick, rank, onAdd, inSlip }: {
       <div className="p-4 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
-            <div className={`shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${
-              rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg shadow-yellow-500/20" :
-              rank === 2 ? "bg-gradient-to-br from-slate-300 to-slate-400 text-white" :
-              rank === 3 ? "bg-gradient-to-br from-orange-600 to-orange-700 text-white" :
-              "bg-muted text-muted-foreground"
-            }`}>
-              {rank <= 3 ? (
-                <Trophy className="w-4 h-4" />
-              ) : (
-                rank
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold ${
+                rank === 1 ? "bg-gradient-to-br from-yellow-400 to-amber-500 text-white shadow-lg shadow-yellow-500/20" :
+                rank === 2 ? "bg-gradient-to-br from-slate-300 to-slate-400 text-white" :
+                rank === 3 ? "bg-gradient-to-br from-orange-600 to-orange-700 text-white" :
+                "bg-muted text-muted-foreground"
+              }`}>
+                {rank <= 3 ? <Trophy className="w-3.5 h-3.5" /> : rank}
+              </div>
+              {(pick.homeTeam || pick.awayTeam) && (
+                <MatchupLogos homeTeam={pick.homeTeam} awayTeam={pick.awayTeam} sport={pick.sport} size={22} />
               )}
             </div>
             <div className="min-w-0">
@@ -779,7 +781,10 @@ function ParlayCard({ parlay, index, sport, onAddParlay, onAddLeg, isInSlip }: {
 
         <div className="space-y-1.5">
           {visibleLegs.map((leg) => (
-            <div key={leg.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/30 border border-border/30 text-xs">
+            <div key={leg.id} className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/30 text-xs">
+              {sport && (
+                <MatchupLogos homeTeam={leg.opponent || leg.team} awayTeam={leg.team} sport={sport} size={18} />
+              )}
               <div className="min-w-0 flex-1">
                 <p className="font-medium truncate">{leg.outcome}</p>
                 <p className="text-[10px] text-muted-foreground truncate">{leg.team}</p>

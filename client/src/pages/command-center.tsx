@@ -43,6 +43,7 @@ import { MobileTicketDeck } from "@/components/mobile-ticket-deck";
 import { gradeAmbientGlow, getGradeShimmerClass } from "@/lib/grade-utils";
 import { OddsAttribution } from "@/components/ui/odds-attribution";
 import { PickAnalyticsRow } from "@/components/pick-analytics-row";
+import { MatchupLogos } from "@/components/ui/team-logo";
 
 interface TopPick {
   id: string;
@@ -131,6 +132,14 @@ function CompactPickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; leg
             <Badge variant="outline" className={`text-[9px] font-bold h-3.5 px-1 ${gradeBg(pick.grade)}`}>{pick.grade}</Badge>
           </div>
         </div>
+        {(pick.homeTeam || pick.awayTeam) && (
+          <div className="flex items-center gap-1.5">
+            <MatchupLogos homeTeam={pick.homeTeam} awayTeam={pick.awayTeam} sport={pick.sport} size={18} />
+            <span className="text-[9px] text-muted-foreground truncate leading-tight">
+              {pick.awayTeam || "Away"} @ {pick.homeTeam || "Home"}
+            </span>
+          </div>
+        )}
         <div className="space-y-0.5">
           <p className="text-[11px] font-semibold truncate leading-tight">{pick.pick}</p>
           <p className="text-[9px] text-muted-foreground truncate">{pick.game}</p>
@@ -638,6 +647,9 @@ function PickCard({ pick, legs, addLeg, isFounder }: { pick: TopPick; legs: { id
       <div className="p-3 sm:p-4">
         <div className="flex items-start justify-between gap-3 mb-2.5">
           <div className="flex items-center gap-1.5 flex-wrap flex-1 min-w-0">
+            {(pick.homeTeam || pick.awayTeam) && (
+              <MatchupLogos homeTeam={pick.homeTeam} awayTeam={pick.awayTeam} sport={pick.sport} size={22} />
+            )}
             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 shrink-0 ${sportColor(pick.sport)}`}>
               {pick.sport}
             </Badge>
@@ -1450,6 +1462,8 @@ interface LifeChangerLeg {
   oddsBookCount?: number;
   oddsApiSource?: string;
   allBookOdds?: { book: string; odds: number }[];
+  team?: string;
+  opponent?: string;
 }
 
 interface LifeChangerTicket {
@@ -1490,6 +1504,8 @@ interface AlternativePick {
   gameTime?: string;
   reasoning: string;
   isUnderdog: boolean;
+  team?: string;
+  opponent?: string;
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -1867,7 +1883,12 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                       data-testid={`row-lc-leg-${i}`}
                     >
                       <div className="flex items-start gap-2">
-                        <span className="text-base leading-none mt-0.5 shrink-0">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
+                        <div className="shrink-0 mt-0.5">
+                          {leg.team || leg.opponent
+                            ? <MatchupLogos homeTeam={leg.opponent || leg.team} awayTeam={leg.team} sport={leg.sport} size={20} />
+                            : <span className="text-base leading-none">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
+                          }
+                        </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
                           <div className="flex items-center gap-1 flex-wrap">
                             <span className="text-xs font-semibold leading-tight">{leg.pick}</span>
@@ -1952,7 +1973,12 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                                 <div className="divide-y divide-border/30 max-h-[280px] overflow-y-auto">
                                   {alternatives.map((alt, ai) => (
                                     <div key={ai} className="px-3 py-2 hover:bg-muted/30 transition-colors flex items-start gap-2">
-                                      <span className="text-sm shrink-0 mt-0.5">{SPORT_EMOJI[alt.sport] || "🎯"}</span>
+                                      <div className="shrink-0 mt-0.5">
+                                        {(alt.team || alt.opponent)
+                                          ? <MatchupLogos homeTeam={alt.opponent || alt.team} awayTeam={alt.team} sport={alt.sport} size={18} />
+                                          : <span className="text-sm">{SPORT_EMOJI[alt.sport] || "🎯"}</span>
+                                        }
+                                      </div>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-1 flex-wrap">
                                           <span className="text-[11px] font-semibold leading-tight truncate">{alt.pick}</span>
