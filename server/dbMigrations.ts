@@ -557,6 +557,16 @@ export async function runMigrations(): Promise<void> {
         ADD COLUMN IF NOT EXISTS next_enterprise_number INTEGER NOT NULL DEFAULT 1
     `);
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS vault_documents (
+        id SERIAL PRIMARY KEY,
+        section_key VARCHAR(100) NOT NULL UNIQUE,
+        title VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+      )
+    `);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

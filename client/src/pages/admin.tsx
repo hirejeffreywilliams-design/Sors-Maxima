@@ -611,6 +611,7 @@ export default function AdminDashboard() {
       tools: [
         { href: "/admin/monetization",     label: "Revenue Intelligence", icon: DollarSign },
         { href: "/admin/launch-control",   label: "Launch Control",  icon: Rocket },
+        { href: "/admin/owner-vault",      label: "Owner Vault",     icon: Lock },
         { href: "/admin/owner-playbook",   label: "Owner's Playbook",icon: BookOpen },
         { href: "/admin/update-planner",   label: "Update Planner",  icon: ListTodo },
         { href: "/admin/ip-registry",      label: "IP Registry",     icon: Shield },

@@ -17,6 +17,7 @@ import { registerGuidelinesRoutes } from "./routes/guidelines";
 import { registerFeedbackRoutes } from "./routes/feedback";
 import { registerPickFeedbackRoutes } from "./routes/pickFeedback";
 import { registerStrategyIntelligenceRoutes } from "./routes/strategy-intelligence";
+import { registerVaultRoutes } from "./routes/vault";
 import { getProgramStatus, getFoundersForWall } from "./foundersEngine";
 
 export async function registerRoutes(
@@ -41,6 +42,7 @@ export async function registerRoutes(
   registerFeedbackRoutes(app);
   registerPickFeedbackRoutes(app);
   registerStrategyIntelligenceRoutes(app);
+  registerVaultRoutes(app);
 
   app.get("/api/founders/status", async (_req, res) => {
     try {

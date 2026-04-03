@@ -1528,6 +1528,19 @@ export const taxRecords = pgTable("tax_records", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Owner Vault Documents — editable sections visible only to the admin
+export const vaultDocuments = pgTable("vault_documents", {
+  id: serial("id").primaryKey(),
+  sectionKey: varchar("section_key", { length: 100 }).notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertVaultDocumentSchema = createInsertSchema(vaultDocuments).omit({ id: true, updatedAt: true });
+export type InsertVaultDocument = z.infer<typeof insertVaultDocumentSchema>;
+export type VaultDocument = typeof vaultDocuments.$inferSelect;
+
 // Token store for password reset and email verification (survives server restarts)
 export const tokenStore = pgTable("token_store", {
   token: varchar("token", { length: 128 }).primaryKey(),
